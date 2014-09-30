@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -60,6 +61,7 @@ import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignCompositeFactory.PanelType;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Survey Design Summary Editor Page
@@ -76,6 +78,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	private Text txtKey;
 	private Text txtDescription;
 	private Text txtConfigurableModel;
+	private Button btnDistance;
 	private TableViewer missionPropertiesList;
 	private TableViewer propertiesList;
 	
@@ -175,6 +178,14 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
+		toolkit.createLabel(content, SmartUtils.formatStringForLabel(Messages.SurveyDesignSummaryEditorPage_DistanceDirectionLabel));
+		btnDistance = toolkit.createButton(content, "", SWT.CHECK); //$NON-NLS-1$
+		btnDistance.setEnabled(false);
+		btnDistance .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		createEditLink(content, PanelType.DISTANCE);
+		
+		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
+		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
 		Label l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Description);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
@@ -296,6 +307,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		} else {
 			txtConfigurableModel.setText(Messages.ConfigurableModelComposite_DataModel);
 		}
+		btnDistance.setSelection(design.getTrackDistanceDirection());
 		
 		missionPropertiesList.setInput(design.getMissionProperties().toArray());
 		propertiesList.setInput(design.getProperties().toArray());

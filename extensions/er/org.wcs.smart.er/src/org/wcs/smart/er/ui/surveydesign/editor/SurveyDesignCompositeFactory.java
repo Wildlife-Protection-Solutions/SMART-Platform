@@ -30,6 +30,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
 import org.wcs.smart.er.ui.surveydesign.DateComposites;
 import org.wcs.smart.er.ui.surveydesign.DescriptionComposite;
+import org.wcs.smart.er.ui.surveydesign.DistanceDirectionComposite;
 import org.wcs.smart.er.ui.surveydesign.MissionPropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.NameIdComposite;
 import org.wcs.smart.er.ui.surveydesign.PropertiesComposite;
@@ -65,6 +66,7 @@ public class SurveyDesignCompositeFactory {
 		case MISSION_PROPERTIES:	return new MissionPropertiesComposite();
 		case PROPERTIES:			return new PropertiesComposite();
 		case DESCRIPTION:			return new DescriptionComposite();
+		case DISTANCE:				return new DistanceDirectionComposite();
 		default: throw new UnsupportedOperationException(type + " is not supported"); //$NON-NLS-1$
 		}
 	}
@@ -93,6 +95,7 @@ public class SurveyDesignCompositeFactory {
 		STATUS,
 		MISSION_PROPERTIES,
 		PROPERTIES,
+		DISTANCE,
 		DESCRIPTION;
 	}
 

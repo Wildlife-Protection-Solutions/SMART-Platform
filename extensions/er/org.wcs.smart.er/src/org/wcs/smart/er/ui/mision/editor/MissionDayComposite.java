@@ -441,10 +441,10 @@ public class MissionDayComposite {
 		observationTable.setComparator(waypointSorter);
 		for (int i = 0; i < OtColumn.values().length; i++) {
 			final OtColumn columntype = OtColumn.values()[i];
-//			if (!editor.getPatrolEditor().getOptions().getTrackDistanceDirection() && 
-//					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE)){
-//				continue;
-//			}
+			if (!editor.getMissionEditor().trackDistanceDirection() &&  
+					(columntype == OtColumn.DIRECTION || columntype == OtColumn.DISTANCE)){
+				continue;
+			}
 			
 			final TableViewerColumn column = new TableViewerColumn(observationTable,SWT.NONE);
 			column.setLabelProvider(new ObsrvationTableLabelProvider(columntype));

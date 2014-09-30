@@ -66,6 +66,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	
 	private Projection[] projections;
 	
+	private Boolean trackDistanceDirection = null;
+	
 //	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 //	private ISurveyEventListener saveListener = new ISurveyEventListener() {
@@ -223,21 +225,37 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			byte[] muuid = ((MissionEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
-			
-			this.mission = (Mission) session.load(Mission.class, muuid);
-			//load mission items so don't have lazy loading issues later.
-			this.mission.getWaypoints().size();
-			this.mission.getTracks().size();
+			try{
+				this.mission = (Mission) session.load(Mission.class, muuid);
+				//load mission items so don't have lazy loading issues later.
+				this.mission.getWaypoints().size();
+				this.mission.getTracks().size();
 
-			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-			this.projections = tmp.toArray(new Projection[tmp.size()]);
+				this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();
+				
+				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
+				this.projections = tmp.toArray(new Projection[tmp.size()]);
 			
-			session.getTransaction().commit();
-			session.close();
+				session.getTransaction().commit();
+			}finally{
+				session.close();
+			}
 		}
 		return this.mission;
 	}
 
+	/**
+	 * 
+	 * @return if the mission should record distance and direction
+	 * properties of a waypoint.
+	 */
+	public boolean trackDistanceDirection(){
+		if (this.trackDistanceDirection == null){
+			getMission();
+		}
+		return this.trackDistanceDirection;
+	}
+	
 	public void updatePartName(){
 		MissionEditorInput input = ((MissionEditorInput) getEditorInput());
 		super.setPartName("Mission: " + input.getName());

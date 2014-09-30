@@ -107,6 +107,12 @@ public class Messages extends NLS {
 	public static String DescriptionComposite_Description;
 	public static String DescriptionComposite_Label_Description;
 	public static String DescriptionComposite_Title;
+	public static String DistanceDirectionComposite_Description;
+
+	public static String DistanceDirectionComposite_Label;
+
+	public static String DistanceDirectionComposite_Title;
+
 	public static String EditMissionAttributeDialog_DeleteButton;
 	public static String EditMissionAttributeDialog_DeleteDialotTitle;
 	public static String EditMissionAttributeDialog_DeleteError;
@@ -500,6 +506,8 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_ConfigurableModel;
 	public static String SurveyDesignSummaryEditorPage_Description;
 	public static String SurveyDesignSummaryEditorPage_DesignSectionLabel;
+
+	public static String SurveyDesignSummaryEditorPage_DistanceDirectionLabel;
 	public static String SurveyDesignSummaryEditorPage_EndDate;
 	public static String SurveyDesignSummaryEditorPage_Key;
 	public static String SurveyDesignSummaryEditorPage_Name;
