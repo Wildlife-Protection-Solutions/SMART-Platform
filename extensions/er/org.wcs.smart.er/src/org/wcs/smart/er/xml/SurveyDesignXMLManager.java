@@ -14,7 +14,7 @@ import org.wcs.smart.er.xml.model.surveyDesign.ObjectFactory;
 
 public class SurveyDesignXMLManager {
 	
-	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model"; //$NON-NLS-1$
+	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.surveyDesign"; //$NON-NLS-1$
 		
 	/**
 	 * Reads surverydesign data from an xml file.
