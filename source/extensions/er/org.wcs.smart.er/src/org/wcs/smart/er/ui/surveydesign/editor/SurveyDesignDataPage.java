@@ -74,6 +74,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.hibernate.SurveyFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
@@ -87,7 +88,6 @@ import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.handlers.NewMissionHandler;
 import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Survey design editor page that displays all the 
@@ -151,54 +151,56 @@ public class SurveyDesignDataPage extends EditorPart {
 		main.setLayout(gl);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		ToolBar tools = new ToolBar(main, SWT.FLAT);
-		toolkit.adapt(tools);
+		if (SurveyPermissionManager.INSTANCE.canEditMissionSurvery()){
+			ToolBar tools = new ToolBar(main, SWT.FLAT);
+			toolkit.adapt(tools);
 		
-		ToolItem newSurvey = new ToolItem(tools, SWT.PUSH);
-		newSurvey.setToolTipText(Messages.SurveyDesignDataPage_newSurveyTooltip);
-		newSurvey.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.NEW_SURVEY_ICON));
-		newSurvey.addSelectionListener(new SelectionAdapter() {
+			ToolItem newSurvey = new ToolItem(tools, SWT.PUSH);
+			newSurvey.setToolTipText(Messages.SurveyDesignDataPage_newSurveyTooltip);
+			newSurvey.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.NEW_SURVEY_ICON));
+			newSurvey.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					newSurvey();
+				}
+			});
+		
+			ToolItem newMission = new ToolItem(tools, SWT.PUSH);
+			newMission.setToolTipText(Messages.SurveyDesignDataPage_newMissionTooltip);
+			newMission.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.NEW_MISSION_ICON));
+			newMission.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					newMission();
+				}
+			});
 			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				newSurvey();
-			}
-		});
-		
-		ToolItem newMission = new ToolItem(tools, SWT.PUSH);
-		newMission.setToolTipText(Messages.SurveyDesignDataPage_newMissionTooltip);
-		newMission.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.NEW_MISSION_ICON));
-		newMission.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				newMission();
-			}
-		});
-		
-		ToolItem deleteItem = new ToolItem(tools, SWT.PUSH);
-		deleteItem.setToolTipText(Messages.SurveyDesignDataPage_DeleteTooltip);
-		deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
-		deleteItem.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteSelection();
-			}
-		});
+			ToolItem deleteItem = new ToolItem(tools, SWT.PUSH);
+			deleteItem.setToolTipText(Messages.SurveyDesignDataPage_DeleteTooltip);
+			deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
+			deleteItem.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteSelection();
+				}
+			});
+		}
 		
 		Tree dataTree = new Tree(main, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
 		dataTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataTree.setHeaderVisible(true);
-//		dataTree.setLinesVisible(true);
+
 		
 		dataViewer = new TreeViewer(dataTree);
-		dataViewer.addDoubleClickListener(new IDoubleClickListener() {
-		
-			@Override
-			public void doubleClick(DoubleClickEvent event) {
-				editSelection();
-			}
-		});
+		if (parentEditor.canEdit()){
+			dataViewer.addDoubleClickListener(new IDoubleClickListener() {
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					editSelection();
+				}
+			});
+		}
 		
 		dataViewer.setContentProvider(new ITreeContentProvider(){
 			private List<TreeNode> elements;
@@ -308,38 +310,39 @@ public class SurveyDesignDataPage extends EditorPart {
 			}
 		});
 		
-		MenuManager mgr = new MenuManager();
-		Menu menu = mgr.createContextMenu(dataViewer.getTree());
-		dataViewer.getTree().setMenu(menu);
-		
-		mgr.add(new Action(Messages.SurveyDesignDataPage_EditMenuLabel){
-			@Override
-			public void run(){
-				editSelection();
-			}
-		});
-		mgr.add(new Separator());
-		mgr.add(new Action(Messages.SurveyDesignDataPage_NewMissionMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.NEW_MISSION_ICON)) {
-			@Override
-			public void run(){
-				newMission();
-			}
-		});
-		
-		mgr.add(new Action(Messages.SurveyDesignDataPage_NewSurveyMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.NEW_SURVEY_ICON)) {
-			@Override
-			public void run(){
-				newSurvey();
-			}
-		});
-		
-		mgr.add(new Action(Messages.SurveyDesignDataPage_DeleteMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.DELETE_ICON)) {
-			@Override
-			public void run(){
-				deleteSelection();
-			}
-		});
-		
+		if (parentEditor.canEdit()){
+			MenuManager mgr = new MenuManager();
+			Menu menu = mgr.createContextMenu(dataViewer.getTree());
+			dataViewer.getTree().setMenu(menu);
+			
+			mgr.add(new Action(Messages.SurveyDesignDataPage_EditMenuLabel){
+				@Override
+				public void run(){
+					editSelection();
+				}
+			});
+			mgr.add(new Separator());
+			mgr.add(new Action(Messages.SurveyDesignDataPage_NewMissionMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.NEW_MISSION_ICON)) {
+				@Override
+				public void run(){
+					newMission();
+				}
+			});
+			
+			mgr.add(new Action(Messages.SurveyDesignDataPage_NewSurveyMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.NEW_SURVEY_ICON)) {
+				@Override
+				public void run(){
+					newSurvey();
+				}
+			});
+			
+			mgr.add(new Action(Messages.SurveyDesignDataPage_DeleteMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.DELETE_ICON)) {
+				@Override
+				public void run(){
+					deleteSelection();
+				}
+			});
+		}
 		initValues();
 	}
 
@@ -388,7 +391,7 @@ public class SurveyDesignDataPage extends EditorPart {
 	 */
 	private void deleteSelection(){
 		final TreeNode node = getSelectedItem();
-		
+		if (node == null) return;
 		if (!MessageDialog.openConfirm(getSite().getShell(), Messages.SurveyDesignDataPage_DeleteDialogTitle, 
 				MessageFormat.format(Messages.SurveyDesignDataPage_DeleteMessage1 + "\n\n" + Messages.SurveyDesignDataPage_DeleteMessage2, new Object[]{node.getType() == TreeNode.Type.MISSION? Messages.SurveyDesignDataPage_missionLabel : Messages.SurveyDesignDataPage_surveyLabel, node.getId()}))){ //$NON-NLS-1$
 			return;

@@ -143,6 +143,8 @@ public class Messages extends NLS {
 	public static String EditSamplingUnitDialog_Title;
 	public static String EditSamplingUnitDialog_TypeLabel;
 	public static String EditSurveyDesignItemDialog_ErrorMsg;
+	public static String EditSurveyDialog_CannotEdit;
+
 	public static String EditSurveyDialog_DesignLabel;
 	public static String EditSurveyDialog_EndLabel;
 	public static String EditSurveyDialog_Error;
@@ -315,6 +317,18 @@ public class Messages extends NLS {
 	public static String NewSurveyDesignWizard_WindowTitle;
 	public static String NewSurveyWizard_Error;
 	public static String NewSurveyWizard_WizardTitle;
+	public static String PropertiesComposite_DefaultName;
+
+	public static String PropertiesComposite_DefaultValue;
+
+	public static String PropertiesComposite_Description;
+
+	public static String PropertiesComposite_NameColumn;
+
+	public static String PropertiesComposite_Title;
+
+	public static String PropertiesComposite_ValueColumn;
+
 	public static String RemoveERJob_Title;
 	public static String SamplingUnitAttributeDeleteAdvisor_CannotDeleteAttribute;
 
@@ -537,6 +551,14 @@ public class Messages extends NLS {
 	public static String SurveyIdPage_IdLabel;
 	public static String SurveyIdPage_Message;
 	public static String SurveyIdPage_Title;
+
+	public static String SurveyPermissionManager_InsufficientPrivileges;
+
+	public static String SurveyPermissionManager_InvalidUserType;
+
+	public static String SurveyPermissionManager_MissionToOld;
+
+	public static String SurveyPermissionManager_SurveyToOld;
 	public static String TemplateWizardPage_BlankDesign;
 	public static String TemplateWizardPage_CopySuLabels;
 	public static String TemplateWizardPage_Description;

@@ -25,6 +25,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -39,11 +40,15 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
@@ -194,6 +199,8 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 
 		
 		getSite().setSelectionProvider(new ISelectionProvider() {
+			
+			private HashMap<ISelectionChangedListener, SelectionListener> barListeners = new HashMap<ISelectionChangedListener, SelectionListener>();
 			@Override
 			public void setSelection(ISelection selection) {
 				getActiveViewer().setSelection(selection);		
@@ -204,6 +211,7 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 					ISelectionChangedListener listener) {
 				lstViewer.removeSelectionChangedListener(listener);
 				designViewer.removeSelectionChangedListener(listener);
+				bar.removeSelectionListener(barListeners.get(listener));
 			}
 			
 			@Override
@@ -212,9 +220,18 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 			}
 			
 			@Override
-			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			public void addSelectionChangedListener(final ISelectionChangedListener listener) {
 				lstViewer.addSelectionChangedListener(listener);
 				designViewer.addSelectionChangedListener(listener);
+
+				SelectionAdapter newAdapter = new SelectionAdapter() {
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						listener.selectionChanged(new SelectionChangedEvent(getActiveViewer(), getActiveViewer().getSelection()));
+					}
+				};
+				bar.addSelectionListener(newAdapter);
+				barListeners.put(listener, newAdapter);
 			}
 		});
 		
@@ -290,7 +307,6 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 
 	@Override
 	public void doubleClick(DoubleClickEvent event) {
-		
 		Object selection = ((IStructuredSelection)event.getSelection()).getFirstElement();
 		if (selection != null) {
 			if (selection instanceof SurveyListTreeNode){

@@ -35,6 +35,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -43,15 +44,20 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -71,7 +77,7 @@ public class EditSurveyDialog extends TitleAreaDialog{
 	private ControlDecoration cdStart;
 	private DateTime endDate;
 	private ControlDecoration cdEnd;
-	
+	private String canEdit;
 	private Session session;
 	
 	private Survey toEdit;
@@ -81,7 +87,8 @@ public class EditSurveyDialog extends TitleAreaDialog{
 		super(parentShell);
 		this.session = HibernateManager.openSession();
 		this.toEdit = (Survey) session.load(Survey.class, toEdit);
-
+		this.canEdit = SurveyPermissionManager.INSTANCE.canEditSurvey(this.toEdit,
+				ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session));
 	}
 	
 	@Override
@@ -99,15 +106,22 @@ public class EditSurveyDialog extends TitleAreaDialog{
 	 */
 	@Override
 	protected void okPressed() {
-		if (save()){
+		if (canEdit == null){
+			if (save()){
+				super.okPressed();
+			}
+		}else{
 			super.okPressed();
 		}
 	}
 	
 	protected void createButtonsForButtonBar(Composite parent){
-		super.createButtonsForButtonBar(parent);
-		getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);
-		
+		if (canEdit == null){
+			super.createButtonsForButtonBar(parent);
+			getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);	
+		}else{
+			super.createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
+		}
 		validate();
 	}
 	
@@ -118,20 +132,31 @@ public class EditSurveyDialog extends TitleAreaDialog{
 		part.setLayout(new GridLayout(2, false));
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		if (canEdit != null){
+			Composite warning = new Composite(part, SWT.NONE);
+			warning.setLayout(new GridLayout(2, false));
+			warning.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			Label lblImage = new Label(warning, SWT.NONE);
+			Image x = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+			lblImage.setImage(x);
+			Label lblWarning = new Label(warning, SWT.NONE);
+			lblWarning.setText(MessageFormat.format(Messages.EditSurveyDialog_CannotEdit, new Object[]{canEdit})) ;
+		}
+		
 		Label l = new Label(part, SWT.NONE);
 		l.setText(Messages.EditSurveyDialog_DesignLabel);
 		
 		txtDesign = new Text(part, SWT.BORDER);
-		txtDesign.setEditable(false);
+		txtDesign.setEnabled(false);
 		txtDesign.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
+
 		l = new Label(part, SWT.NONE);
 		l.setText(Messages.EditSurveyDialog_IdLabel);
 		
 		txtId = new Text(part, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		txtId.setEditable(canEdit == null);
 		txtId.addModifyListener(new ModifyListener() {
-			
 			@Override
 			public void modifyText(ModifyEvent e) {
 				validate();
@@ -151,6 +176,7 @@ public class EditSurveyDialog extends TitleAreaDialog{
 		};
 		startDate = new DateTime(part, SWT.DATE | SWT.MEDIUM | SWT.DROP_DOWN);
 		startDate.addSelectionListener(listener);
+		startDate.setEnabled(canEdit == null);
 		cdStart = createDecoration(startDate);
 		
 		l = new Label(part, SWT.NONE);
@@ -158,6 +184,7 @@ public class EditSurveyDialog extends TitleAreaDialog{
 		
 		endDate = new DateTime(part, SWT.DATE | SWT.MEDIUM | SWT.DROP_DOWN);
 		endDate.addSelectionListener(listener);
+		endDate.setEnabled(canEdit == null);
 		cdEnd = createDecoration(endDate);
 		
 		setTitle(toEdit.getId());

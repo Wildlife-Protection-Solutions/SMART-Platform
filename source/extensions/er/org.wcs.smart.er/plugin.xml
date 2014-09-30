@@ -138,15 +138,62 @@
                   commandId="org.wcs.smart.er.mission.new"
                   style="push"
                   tooltip="creates a new mission">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.er.survey.new"
                   style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.er.surveydesign.new"
                   style="push"
                   tooltip="creates a new survey design">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.er.separator2"
@@ -156,16 +203,59 @@
                   commandId="org.wcs.smart.er.surveydesignexport"
                   label="Export Survey Designs"
                   style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.er.surveydesignimport"
                   label="Import Survey Designs"
                   style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.er.missionExportHandler"
                   label="Export Missions"
                   style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.er.separator3"
@@ -174,10 +264,36 @@
             <command
                   commandId="org.wcs.smart.er.missionattributes.show"
                   style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.er.su.show"
                   style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <separator
                   name="org.wcs.smart.er.separator1"
@@ -191,6 +307,12 @@
                   style="push"
                   tooltip="displays list of surveys">
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
@@ -200,20 +322,84 @@
                commandId="org.wcs.smart.er.delete"
                style="push"
                tooltip="deletes the selected survey items">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.er.surveydesign.new"
                style="push"
                tooltip="creates a new survey design">
+            <visibleWhen
+                  checkEnabled="true">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.er.survey.new"
                style="push">
+            <visibleWhen
+                  checkEnabled="true">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.er.mission.new"
                style="push"
                tooltip="creates a new mission">
+            <visibleWhen
+                  checkEnabled="true">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.er.filter"
@@ -230,6 +416,12 @@
                label="View Surveys"
                style="push"
                tooltip="displays list of surveys">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </command>
       </menuContribution>
       <menuContribution
@@ -239,6 +431,23 @@
                commandId="org.wcs.smart.er.editItem"
                style="push"
                tooltip="edits the selected item">
+            <visibleWhen
+                  checkEnabled="true">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <separator
                name="org.wcs.smart.er.list.seperator.1"
@@ -248,10 +457,44 @@
                commandId="org.wcs.smart.er.mission.new"
                style="push"
                tooltip="creates a new mission">
+            <visibleWhen
+                  checkEnabled="true">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.er.survey.new"
                style="push">
+            <visibleWhen
+                  checkEnabled="true">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
          <separator
                name="org.wcs.smart.er.list.seperator.2"
@@ -261,6 +504,23 @@
                commandId="org.wcs.smart.er.delete"
                style="push"
                tooltip="deletes the selected survey items">
+            <visibleWhen
+                  checkEnabled="true">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -273,26 +533,162 @@
       <handler
             class="org.wcs.smart.er.ui.handlers.DeleteSurveyElementHandler"
             commandId="org.wcs.smart.er.delete">
+         <activeWhen>
+            <and>
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <with
+                           variable="selection">
+                        <iterate
+                              ifEmpty="false"
+                              operator="or">
+                           <or>
+                              <instanceof
+                                    value="org.wcs.smart.er.ui.SurveyListTreeNode">
+                              </instanceof>
+                           </or>
+                        </iterate>
+                     </with>
+                  </and>
+               </or>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler"
             commandId="org.wcs.smart.er.surveydesign.new">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.NewSurveyHandler"
             commandId="org.wcs.smart.er.survey.new">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.NewMissionHandler"
             commandId="org.wcs.smart.er.mission.new">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.ShowMissionAttributesHandler"
             commandId="org.wcs.smart.er.missionattributes.show">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.ShowSamplingUnitAttributesHandler"
             commandId="org.wcs.smart.er.su.show">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.FilterSurveyListItemsHandler"
@@ -301,18 +697,133 @@
       <handler
             class="org.wcs.smart.er.ui.handlers.EditSurveyElementHandler"
             commandId="org.wcs.smart.er.editItem">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
+         <activeWhen>
+            <and>
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <and>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                     <with
+                           variable="selection">
+                        <iterate
+                              ifEmpty="false"
+                              operator="or">
+                           <or>
+                              <instanceof
+                                    value="org.wcs.smart.er.ui.SurveyListTreeNode">
+                              </instanceof>
+                           </or>
+                        </iterate>
+                     </with>
+                  </and>
+               </or>
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </activeWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.SurveyDesignExportHandler"
             commandId="org.wcs.smart.er.surveydesignexport">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.SurveyDesignImportHandler"
             commandId="org.wcs.smart.er.surveydesignimport">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.er.ui.handlers.MissionExportHandler"
             commandId="org.wcs.smart.er.missionExportHandler">
+         <enabledWhen>
+            <and>
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </and>
+         </enabledWhen>
       </handler>
    </extension>
    <extension

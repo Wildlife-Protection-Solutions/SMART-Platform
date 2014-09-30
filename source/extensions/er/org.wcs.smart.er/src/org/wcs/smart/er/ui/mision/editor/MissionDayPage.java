@@ -37,11 +37,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
-import org.hibernate.Session;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 
 /**
@@ -66,13 +62,10 @@ public class MissionDayPage extends EditorPart {
 	
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void doSaveAs() {
-		//not supported
 	}
 
 	@Override
@@ -95,20 +88,14 @@ public class MissionDayPage extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		ObservationOptions observationOptions = null;
-		try {
-			observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-			if (observationOptions.getViewProjection() != null) {
-				observationOptions.getViewProjection().getDefinition(); //load lazy items
-			}
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
-		}
-
+		ObservationOptions observationOptions = editor.getOptions();
 		frmSummary = toolkit.createScrolledForm(parent);
+
+		String errorMsg = editor.canEdit();
+		boolean canEdit = errorMsg == null;
+		if (!canEdit){
+			editor.createEditWarning(errorMsg, frmSummary.getBody(), toolkit);
+		}
 		
 		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		

@@ -85,6 +85,7 @@ import org.opengis.filter.FilterFactory;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
@@ -331,97 +332,117 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		suComp.setLayout(new GridLayout());
 		suComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		
 		ToolBar tb = new ToolBar(suComp, SWT.HORIZONTAL );
-		
-		editItem = new ToolItem(tb, SWT.PUSH );
-		editItem.setToolTipText(Messages.SamplingUnitEditorPage_editTooltip);
-		editItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.EDIT_SU_ICON));
-		editItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				editSuItem();
-			}
-		});
-		
-		stateItem = new ToolItem(tb, SWT.PUSH );
-		stateItem.setToolTipText(Messages.SamplingUnitEditorPage_editStateTooltip);
-		stateItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.CHANGE_STATE_ICON));
-		stateItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				editSuState();
-			}
-		});
-		
-		deleteItem = new ToolItem(tb, SWT.PUSH );
-		deleteItem.setToolTipText(Messages.SamplingUnitEditorPage_deleteTooltip);
-		deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
-		deleteItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				deleteSuItems();
-			}
-		});
-		
-		new ToolItem(tb, SWT.SEPARATOR);
-		
-		zoomItem = new ToolItem(tb, SWT.PUSH );
-		zoomItem.setToolTipText(Messages.SamplingUnitEditorPage_zoomTooltip);
-		zoomItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.ZOOM_SU_ICON));
-		zoomItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				zoomToItems();
-			}
-		});
-		
-		clearItem = new ToolItem(tb, SWT.PUSH );
-		clearItem.setToolTipText(Messages.SamplingUnitEditorPage_clearTooltip);
-		clearItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.CLEAR_SELECTION_ICON));
-		clearItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				suTable.setSelection(null);
-			}
-		});
-		
-		new ToolItem(tb, SWT.SEPARATOR);
-		
-		importItem = new ToolItem(tb, SWT.PUSH );
-		importItem.setToolTipText(Messages.SamplingUnitEditorPage_importTooltip);
-		importItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SUIMPORT_ICON));
-		importItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				importSu();
-			}
-		});
-		
-		exportItem = new ToolItem(tb, SWT.PUSH );
-		exportItem.setToolTipText(Messages.SamplingUnitEditorPage_exportTooltip);
-		exportItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SUEXPORT_ICON));
-		exportItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				exportSu();
-			}
-		});
-		
-		new ToolItem(tb, SWT.SEPARATOR);
-		
-		attributesItem = new ToolItem(tb, SWT.PUSH );
-		attributesItem.setToolTipText(Messages.SamplingUnitEditorPage_attributesTooltip);
-		attributesItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ATTRIBUTE_ICON));
-		attributesItem.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				configureAttributes();
-			}
-		});
-		
+		if (editor.canEdit()){
+			editItem = new ToolItem(tb, SWT.PUSH );
+			editItem.setToolTipText(Messages.SamplingUnitEditorPage_editTooltip);
+			editItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.EDIT_SU_ICON));
+			editItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					editSuItem();
+				}
+			});
+			
+			stateItem = new ToolItem(tb, SWT.PUSH );
+			stateItem.setToolTipText(Messages.SamplingUnitEditorPage_editStateTooltip);
+			stateItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.CHANGE_STATE_ICON));
+			stateItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					editSuState();
+				}
+			});
+			
+			deleteItem = new ToolItem(tb, SWT.PUSH );
+			deleteItem.setToolTipText(Messages.SamplingUnitEditorPage_deleteTooltip);
+			deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
+			deleteItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					deleteSuItems();
+				}
+			});
+			
+			new ToolItem(tb, SWT.SEPARATOR);
+			
+			zoomItem = new ToolItem(tb, SWT.PUSH );
+			zoomItem.setToolTipText(Messages.SamplingUnitEditorPage_zoomTooltip);
+			zoomItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.ZOOM_SU_ICON));
+			zoomItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					zoomToItems();
+				}
+			});
+			
+			clearItem = new ToolItem(tb, SWT.PUSH );
+			clearItem.setToolTipText(Messages.SamplingUnitEditorPage_clearTooltip);
+			clearItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.CLEAR_SELECTION_ICON));
+			clearItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					suTable.setSelection(null);
+				}
+			});
+			
+			new ToolItem(tb, SWT.SEPARATOR);
+			
+			importItem = new ToolItem(tb, SWT.PUSH );
+			importItem.setToolTipText(Messages.SamplingUnitEditorPage_importTooltip);
+			importItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SUIMPORT_ICON));
+			importItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					importSu();
+				}
+			});
+			
+			exportItem = new ToolItem(tb, SWT.PUSH );
+			exportItem.setToolTipText(Messages.SamplingUnitEditorPage_exportTooltip);
+			exportItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SUEXPORT_ICON));
+			exportItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					exportSu();
+				}
+			});
+			
+			new ToolItem(tb, SWT.SEPARATOR);
+			
+			attributesItem = new ToolItem(tb, SWT.PUSH );
+			attributesItem.setToolTipText(Messages.SamplingUnitEditorPage_attributesTooltip);
+			attributesItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ATTRIBUTE_ICON));
+			attributesItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					configureAttributes();
+				}
+			});
+			
+			
+		}else{
+			zoomItem = new ToolItem(tb, SWT.PUSH );
+			zoomItem.setToolTipText(Messages.SamplingUnitEditorPage_zoomTooltip);
+			zoomItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.ZOOM_SU_ICON));
+			zoomItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					zoomToItems();
+				}
+			});
+			
+			clearItem = new ToolItem(tb, SWT.PUSH );
+			clearItem.setToolTipText(Messages.SamplingUnitEditorPage_clearTooltip);
+			clearItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.CLEAR_SELECTION_ICON));
+			clearItem.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					suTable.setSelection(null);
+				}
+			});
+		}
 		toolkit.adapt(tb);
-		
 		createSuTable(suComp);
 		
 		Composite buttonComp = toolkit.createComposite(suComp);
@@ -663,12 +684,14 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		MenuManager mgr = new MenuManager();
 		Menu menu = mgr.createContextMenu(suTable.getTable());
 		suTable.getTable().setMenu(menu);
-		mgr.add(new Action(Messages.SamplingUnitEditorPage_EditMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.EDIT_SU_ICON)) {
-			@Override
-			public void run(){
-				editSuItem();
-			}
-		});
+		if (editor.canEdit()){
+			mgr.add(new Action(Messages.SamplingUnitEditorPage_EditMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.EDIT_SU_ICON)) {
+				@Override
+				public void run(){
+					editSuItem();
+				}
+			});
+		}
 		
 		mgr.add(new Action(Messages.SamplingUnitEditorPage_ZoomToMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.ZOOM_SU_ICON)) {
 			@Override
@@ -677,12 +700,14 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			}
 		});
 		
-		mgr.add(new Action(Messages.SamplingUnitEditorPage_DeleteMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.DELETE_ICON)) {
-			@Override
-			public void run(){
-				deleteSuItems();
-			}
-		});
+		if (editor.canEdit()){
+			mgr.add(new Action(Messages.SamplingUnitEditorPage_DeleteMenuLabel, EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.DELETE_ICON)) {
+				@Override
+				public void run(){
+					deleteSuItems();
+				}
+			});
+		}
 	}
 
 
@@ -760,11 +785,15 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 	private void updateSelection(){
 		boolean isEmpty = suTable.getSelection().isEmpty();
 		
-		editItem.setEnabled(!isEmpty);
-		stateItem.setEnabled(!isEmpty);
-		deleteItem.setEnabled(!isEmpty);
-		clearItem.setEnabled(!isEmpty);
-		zoomItem.setEnabled(!isEmpty);
+		if (editItem != null){
+			editItem.setEnabled(!isEmpty);
+			stateItem.setEnabled(!isEmpty);
+			deleteItem.setEnabled(!isEmpty);
+		}
+		if (zoomItem != null){
+			clearItem.setEnabled(!isEmpty);
+			zoomItem.setEnabled(!isEmpty);
+		}
 		
 		if (suLayers == null) return;
 		
