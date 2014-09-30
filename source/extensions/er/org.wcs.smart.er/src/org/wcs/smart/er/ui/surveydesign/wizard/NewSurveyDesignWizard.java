@@ -41,6 +41,7 @@ import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.surveydesign.ConfigurableModelComposite;
 import org.wcs.smart.er.ui.surveydesign.DateComposites;
 import org.wcs.smart.er.ui.surveydesign.DescriptionComposite;
+import org.wcs.smart.er.ui.surveydesign.DistanceDirectionComposite;
 import org.wcs.smart.er.ui.surveydesign.MissionPropertiesComposite;
 import org.wcs.smart.er.ui.surveydesign.NameIdComposite;
 import org.wcs.smart.er.ui.surveydesign.PropertiesComposite;
@@ -183,6 +184,7 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
     	comps = new SurveyDesignComposite[]{
     			new NameIdComposite(others),
     			new DateComposites(),
+    			new DistanceDirectionComposite(),
     			new ConfigurableModelComposite(models),
     			new MissionPropertiesComposite(),
     			new PropertiesComposite(),
