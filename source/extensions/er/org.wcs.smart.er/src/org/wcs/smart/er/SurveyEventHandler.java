@@ -80,11 +80,11 @@ public class SurveyEventHandler {
 	}
 
 	public void fireEvent(EventType type, Object object){
-		List<ISurveyEventListener> l = events.get(type);
-		if (l != null){
-			for (ISurveyEventListener listener: l){
-				listener.event(object);
-			}
+		List<ISurveyEventListener> l = new ArrayList<ISurveyEventListener>();
+		if (events.get(type) == null) return;
+		l.addAll(events.get(type));
+		for (ISurveyEventListener listener: l){
+			listener.event(object);
 		}
 	}
 

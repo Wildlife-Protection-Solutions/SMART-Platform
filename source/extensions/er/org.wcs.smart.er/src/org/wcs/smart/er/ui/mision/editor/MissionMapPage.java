@@ -106,13 +106,6 @@ public class MissionMapPage extends SmartMapEditorPart {
 		}
     };
 	
-	private ISurveyEventListener missionUpdatedListeners = new ISurveyEventListener() {
-		@Override
-		public void event(Object o) {
-			refreshJob.cancel();
-			refreshJob.schedule();
-		}
-	};
 	
 	public MissionMapPage(MissionEditor parent) {
 		this.parentEditor = parent;
@@ -121,12 +114,16 @@ public class MissionMapPage extends SmartMapEditorPart {
 	public MultiPageEditorPart getParentEditor() {
 		return this.parentEditor;
 	}
+	
+	public void refresh(){
+		refreshJob.cancel();
+		refreshJob.schedule();
+	}
 
 	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
         addLayers();
-        SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionUpdatedListeners );
 	}
 
 	private void addLayers() {

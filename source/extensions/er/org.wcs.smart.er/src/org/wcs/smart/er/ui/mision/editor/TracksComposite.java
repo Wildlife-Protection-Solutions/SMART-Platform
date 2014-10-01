@@ -26,12 +26,20 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.ui.ApplicationGIS;
+import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
@@ -39,13 +47,14 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.events.IHyperlinkListener;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
@@ -72,7 +81,8 @@ public class TracksComposite extends Composite {
 	
 	private TableViewer trackViewer;
 	private MissionTrackEditDialog dialog;
-
+	private MapComposite mapComposite;
+	
 	public TracksComposite(Composite parent, MissionTrackEditDialog dialog) {
 		super(parent, SWT.NONE);
 		this.dialog = dialog;
@@ -96,13 +106,21 @@ public class TracksComposite extends Composite {
 	}
 
 	private void createControls() {
-		setLayout(new GridLayout(3, false));
+		setLayout(new GridLayout());
 		setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		trackViewer = new TableViewer(this, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		trackViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		SashForm sash = new SashForm(this, SWT.HORIZONTAL);
+		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Composite tableComp = new Composite(sash, SWT.NONE);
+		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TableColumnLayout layout = new TableColumnLayout();
+		tableComp.setLayout(layout);
+		
+		trackViewer = new TableViewer(tableComp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+//		trackViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		trackViewer.setContentProvider(ArrayContentProvider.getInstance());
-		((GridData)trackViewer.getTable().getLayoutData()).heightHint = 150;
 		trackViewer.getTable().setHeaderVisible(true);
 		trackViewer.getTable().setLinesVisible(true);
 
@@ -120,8 +138,9 @@ public class TracksComposite extends Composite {
 		columnId.getColumn().setText(Messages.TracksComposite_TrackId);
 		columnId.getColumn().setResizable(true);
 		columnId.getColumn().setMoveable(false);
-		columnId.getColumn().setWidth(120);
+//		columnId.getColumn().setWidth(120);
 		columnId.setEditingSupport(new IdTableEditor(trackViewer));
+		layout.setColumnData(columnId.getColumn(), new ColumnWeightData(50));
 		
 		final TableViewerColumn columnAssoc = new TableViewerColumn(trackViewer, SWT.NONE);
 		columnAssoc.setLabelProvider(new ColumnLabelProvider() {
@@ -137,40 +156,28 @@ public class TracksComposite extends Composite {
 		columnAssoc.getColumn().setText(Messages.TracksComposite_Association);
 		columnAssoc.getColumn().setResizable(true);
 		columnAssoc.getColumn().setMoveable(false);
-		columnAssoc.getColumn().setWidth(120);
+		layout.setColumnData(columnAssoc.getColumn(), new ColumnWeightData(50));
+//		columnAssoc.getColumn().setWidth(120);
+		
+		
 		
 		//========map part========
-		ScrolledComposite mapScrollCmp = new ScrolledComposite(this, SWT.H_SCROLL);
-		MapComposite mapComposite = new MapComposite(mapScrollCmp, SWT.NONE);
+		Composite mapPart = new Composite(sash, SWT.NONE);
+		mapPart.setLayout(new GridLayout(2, false));
+
+		mapComposite = new MapComposite(mapPart, SWT.NONE);
 		mapComposite.setDataProvider(null);
-//		if (layerStyle != null){
-//			mapComposite.setStyleSld(this.layerStyle);
-//		}
-		
-		mapScrollCmp.setContent(mapComposite);
-		mapScrollCmp.setExpandVertical(true);
-		mapScrollCmp.setExpandHorizontal(true);
-		mapScrollCmp.setMinWidth(MAP_MIN_WIDTH);
-		
+		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
 		//========links========
-		Composite linksCmp = new Composite(this, SWT.NONE);
+		Composite linksCmp = new Composite(mapPart, SWT.NONE);
 		linksCmp.setLayout(new GridLayout(1, false));
 		linksCmp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		Hyperlink lnk = new Hyperlink(linksCmp, SWT.NONE);
 		lnk.setUnderlined(true);
 		lnk.setText(Messages.TracksComposite_Import);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnk.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-				//nothing
-			}
-
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-				//nothing
-			}
-
+		lnk.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				importTracks();
@@ -181,17 +188,7 @@ public class TracksComposite extends Composite {
 		lnk.setUnderlined(true);
 		lnk.setText(Messages.TracksComposite_Split);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnk.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-				//nothing
-			}
-
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-				//nothing
-			}
-
+		lnk.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				splitTrack();
@@ -202,22 +199,14 @@ public class TracksComposite extends Composite {
 		lnk.setUnderlined(true);
 		lnk.setText(Messages.TracksComposite_Edit);
 		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnk.addHyperlinkListener(new IHyperlinkListener() {
-			@Override
-			public void linkEntered(HyperlinkEvent e) {
-				//nothing
-			}
-
-			@Override
-			public void linkExited(HyperlinkEvent e) {
-				//nothing
-			}
-
+		lnk.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				editTrack();
 			}
 		});
+		
+		sash.setWeights(new int[]{30,70});
 	}
 
 	public void addChangeListener(ISurveyListener listener){
@@ -264,7 +253,8 @@ public class TracksComposite extends Composite {
 			MissionTrack track = (MissionTrack) sel.getFirstElement();
 			MissionTrackPointDialog tpd = new MissionTrackPointDialog(Display.getCurrent().getActiveShell(), track);
 			tpd.open();
-//			ApplicationGIS.getToolManager().setCurrentEditor(dialog.getMissionEditor());
+			
+			ApplicationGIS.getToolManager().setCurrentEditor(mapComposite);
 		}
 	}
 
@@ -311,5 +301,6 @@ public class TracksComposite extends Composite {
 			return true;
 		}
 	}
+
 	
 }

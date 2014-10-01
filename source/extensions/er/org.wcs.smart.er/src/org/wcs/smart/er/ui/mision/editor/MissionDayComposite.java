@@ -34,8 +34,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
-
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -93,7 +91,6 @@ import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
@@ -131,7 +128,7 @@ public class MissionDayComposite {
 	private DateTime dtStartTime;
 	private DateTime dtEndTime;
 	private Text restMinutes;
-	private Text txtDistance;
+	private Label txtDistance;
 	private Label lblTotalHours;
 
 	private TableViewer observationTable;
@@ -158,16 +155,6 @@ public class MissionDayComposite {
 	private SamplingUnitCellEditor samplingUnitEditor;
 	
 	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
-	
-	private ISurveyEventListener missionChangeListener = new ISurveyEventListener() {
-		@Override
-		public void event(Object o) {
-//			input.clear();
-//			input.addAll(buildWaypointInput(mission));
-//			refreshTable();
-			initData();
-		}
-	};
 	
 	protected enum OtColumn {
 		ID(Messages.MissionDayComposite_WaypointID, 1),
@@ -322,33 +309,46 @@ public class MissionDayComposite {
 		gd.widthHint = 30;
 		lblTotalHours.setLayoutData(gd);
 
-		Composite trackComp = toolkit.createComposite(mainComposite);
-		trackComp.setLayout(new GridLayout(4, false));
 		
+		Composite half = toolkit.createComposite(mainComposite);
+		half.setLayout(new GridLayout(2, true));
+		half.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		toolkit.createLabel(trackComp, Messages.MissionDayComposite_DistanceTraveled);
-		txtDistance = toolkit.createText(trackComp, "0", SWT.NONE); //$NON-NLS-1$
-		txtDistance.setEditable(false);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
-		gd.widthHint = 50;
-		txtDistance.setLayoutData(gd);
-		toolkit.createLabel(trackComp, "").setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 2, 1)); //$NON-NLS-1$
+		Composite trackComp = toolkit.createComposite(half);
+		trackComp.setLayout(new GridLayout(2, false));
+		trackComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
+		
+		toolkit.createLabel(trackComp, Messages.MissionDayComposite_Tracks).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 
-		toolkit.createLabel(trackComp, Messages.MissionDayComposite_Tracks);
 		Table trTable = toolkit.createTable(trackComp, SWT.V_SCROLL | SWT.H_SCROLL);
 		trackTable = new TableViewer(trTable);
 		trackTable.setContentProvider(ArrayContentProvider.getInstance());
 		trackTable.setLabelProvider(new MissionTrackLabelProvider());
-		trTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		trTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)trTable.getLayoutData()).minimumHeight = 40;
 		((GridData)trTable.getLayoutData()).heightHint = 40;
-		((GridData)trTable.getLayoutData()).widthHint = 120;
+		((GridData)trTable.getLayoutData()).widthHint = 250;
 		lnkEditTrack = toolkit.createHyperlink(trackComp, Messages.MissionDayComposite_Link_Edit, SWT.NONE);
+		lnkEditTrack.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 		lnkEditTrack.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				showEditTrackDialog();
 			}
 		});
+		
+//		toolkit.createLabel(half, "");
+		
+		Composite distComp = toolkit.createComposite(half);
+		distComp.setLayout(new GridLayout(2, false));
+		distComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
+		
+		toolkit.createLabel(distComp, Messages.MissionDayComposite_DistanceTraveled);
+		txtDistance = toolkit.createLabel(distComp, "0", SWT.NONE); //$NON-NLS-1$
+//		txtDistance.setEditable(false);
+		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		gd.widthHint = 50;
+		txtDistance.setLayoutData(gd);
+		
 		
 		Composite observationHcomp = toolkit.createComposite(mainComposite);
 		observationHcomp.setLayout(new GridLayout(2, false));
@@ -399,7 +399,6 @@ public class MissionDayComposite {
 			}
 		});
 		
-		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionChangeListener);
 		updateTotalHours();
 		
 		return mainComposite;
@@ -473,15 +472,13 @@ public class MissionDayComposite {
 		
 		}
 	}
-
-	public void dispose() {
-		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionChangeListener);
-	}
 	
 	public void initData() {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
+			Mission m2 = (Mission) session.load(Mission.class, editor.getMissionEditor().getMission().getUuid());
+			System.out.println(m2.getId());
 			this.mission = (Mission) session.merge(editor.getMissionEditor().getMission());
 		
 			Date date = editor.getDay();
@@ -565,6 +562,8 @@ public class MissionDayComposite {
 				emps.add(mm.getMember());
 			}
 			observationEditor.setObservers(emps);
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		} finally {
 			session.getTransaction().rollback();
 			session.close();
@@ -644,7 +643,7 @@ public class MissionDayComposite {
 			final MissionTrackEditDialog editDialog = new MissionTrackEditDialog(editor.getSite().getShell(), mission, editor.getDay());
 			editDialog.open();
 		} finally {
-			ApplicationGIS.getToolManager().setCurrentEditor(editor.getMissionEditor());
+//			ApplicationGIS.getToolManager().setCurrentEditor(editor.getMissionEditor());
 		}
 	}
 	

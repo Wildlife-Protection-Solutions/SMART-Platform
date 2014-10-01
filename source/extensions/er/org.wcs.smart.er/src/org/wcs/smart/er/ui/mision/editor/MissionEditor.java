@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import net.refractions.udig.project.internal.Map;
@@ -51,13 +52,16 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.SurveyDeleteCaHandler;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -81,54 +85,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private Boolean trackDistanceDirection = null;
 	private ObservationOptions options;
 	
-//	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
-	
-//	private ISurveyEventListener saveListener = new ISurveyEventListener() {
-//		@Override
-//		public void event(Object o) {
-//			Patrol p = null;
-//			if (source instanceof PatrolLegDay){
-//				p = ((PatrolLegDay)source).getPatrolLeg().getPatrol();
-//			}else if (source instanceof Patrol){
-//				p = (Patrol)source;
-//			}
-//			if (p != null && p.equals(patrol)){
-//				if (attributeChanged == PatrolEventManager.PATROL_DATES_LEG){
-//					//reload patrol & update summary and day pages
-//					Job j = new Job("load patrol"){ //$NON-NLS-1$
-//						@Override
-//						protected IStatus run(IProgressMonitor monitor) {
-//							patrol = null;
-//							getPatrol();
-//							Session s = HibernateManager.openSession();
-//							s.beginTransaction();
-//							try{
-//								s.update(patrol);
-//								updateSummaryPage();
-//							}finally{
-//								s.close();
-//							}
-//							Display.getDefault().syncExec(new Runnable(){
-//								@Override
-//								public void run() {
-//									createDayPages();
-//									mapPage.refresh();
-//								}});
-//							return Status.OK_STATUS;
-//						}					
-//					};
-//					j.setSystem(true);
-//					j.schedule();
-//				
-//				}else{
-//					updateSummaryPage();
-//				}
-//
-//			}
-//		}
-//	};
-	
-	
 	private ISurveyEventListener missionDeleteListener = new ISurveyEventListener() {
 		@Override
 		public void event(Object o) {
@@ -148,20 +104,38 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private ISurveyEventListener missionModifiedListener = new ISurveyEventListener() {
 		
 		@Override
-		public void event(Object o) {
+		public void event(final Object o) {
 			if (o instanceof Mission) {
 				if ( Arrays.equals(((Mission)o).getUuid(), mission.getUuid())) {
 					try {
 						Job j = new Job("Reloading mission") {
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
+								Date cstart = mission.getStartDate();
+								Date cend = mission.getEndDate();
+								
 								mission = null;
 								getMission(); //to avoid nested transactions exception
+								
+								final boolean datesChanged = !cstart.equals(mission.getStartDate()) || !cend.equals(mission.getEndDate());
+								mapPage.refresh();
 								Display.getDefault().syncExec(new Runnable(){
 									@Override
 									public void run() {
+										setPartName(getMission().getId());
 										summaryEditor.initControls();
+										
+										if (datesChanged){
+											createDayPages();
+										}else{
+											for (int i = 0; i < getPageCount(); i ++){
+												if (getEditor(i) instanceof MissionDayPage) {
+													((MissionDayPage)getEditor(i)).refresh();
+												}
+											}								
+										}
 									}});
+								
 								return Status.OK_STATUS;
 							}					
 						};
@@ -176,6 +150,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			}
 		}
 	};
+	
+	public void fireEventtest(final Mission lmission){
+		missionModifiedListener.event(lmission);
+	}
 	/**
 	 * Converts a double that represents a time range into
 	 * and hours and minutes string.  For example: 20.5 is 
@@ -292,7 +270,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			int mapIndex = addPage(mapPage, getEditorInput());
 			setPageText(mapIndex, "Map");
 			
-//			getSite().setSelectionProvider(selectionProvider);
 		} catch (final Throwable t) {
 			getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
@@ -316,16 +293,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			showBusy(false);
 		}
 	}
-	
-//	public CombinedSelectionProvider getSelectionProvider(){
-//		return this.selectionProvider;
-//	}
-	
-	public void updateSummaryPage(){
-//		summaryEditor.refreshPatrolSummaryTable();
-	}
-	
-	
+
 	public void createDayPages() {
 		try {
 			int i = 0;
@@ -385,83 +353,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		lblWarning.setText(MessageFormat.format("This mission cannot be modified: {0}. Please contact administrator if editing is required.", new Object[]{editError})) ;
 	}
 	
-//	public void save(Mission mission){
-//		savePatrolPart(patrol);
-//	}
-//	
-//	public void save(PatrolLegDay patrolLegDay){
-//		patrolLegDay.getTrack();
-//		savePatrolPart(patrolLegDay);
-//	}
-	
-	
-//	public Job moveWaypoints(final Collection<SurveyWaypoint> toSave, final Collection<SurveyWaypoint> toDelete){
-//		Job moveJob = new Job("Moving waypoints job") {
-//			@Override
-//			protected IStatus run(IProgressMonitor monitor) {
-//				Session saveSession = HibernateManager
-//						.openSession(new WaypointAttachmentInterceptor());
-//				try{
-//					saveSession.beginTransaction();
-//					
-//					/* delete waypoints */
-//					for (SurveyWaypoint wp : toDelete) {
-//						saveSession.delete(wp);
-//						saveSession.delete(wp.getWaypoint());					
-//					}
-//					/* save waypoints */
-//					for (SurveyWaypoint wp : toSave) {
-//						wp.getWaypoint().setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-//						wp.getWaypoint().setConservationArea(SmartDB.getCurrentConservationArea());
-//						saveSession.saveOrUpdate(wp.getWaypoint());
-//						saveSession.saveOrUpdate(wp);
-//						
-//						// remove observations with no data
-//						if (wp.getWaypoint().getObservations() != null) {
-//							for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
-//								List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-//								for (WaypointObservationAttribute att : wo.getAttributes()) {
-//									if (!att.hasValue()) {
-//										toDelete.add(att);
-//									}
-//								}
-//								wo.getAttributes().removeAll(toDelete);
-//							}
-//						}
-//					}
-//					
-//					saveSession.getTransaction().commit();
-//				}catch (Exception ex){
-//					if (saveSession.getTransaction().isActive()){
-//						saveSession.getTransaction().rollback();
-//					}
-//					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_DeleteWaypointsError + ex.getLocalizedMessage(), ex);
-//				}finally{
-//					saveSession.close();
-//				}
-//				
-//				/* fire events */
-//				for (PatrolWaypoint wp : toDelete){
-//					try{
-//						PatrolEventManager.getInstance().waypointDeleted(wp);
-//					}catch (Exception ex){
-//						SmartPatrolPlugIn.log("Error firing event after waypoint delete.", ex); //$NON-NLS-1$
-//					}
-//				}
-//				for (PatrolWaypoint wp : toSave){
-//					try{
-//						PatrolEventManager.getInstance().waypointModified(wp);
-//					}catch (Exception ex){
-//						SmartPatrolPlugIn.log("Error firing event after waypoint save.", ex); //$NON-NLS-1$
-//					}
-//				}
-//				return Status.OK_STATUS;
-//			}
-//		};
-//		moveJob.schedule();
-//		return moveJob;
-//		
-//	}
 	/**
 	 * Saves the collection of waypoints.
 	 * 

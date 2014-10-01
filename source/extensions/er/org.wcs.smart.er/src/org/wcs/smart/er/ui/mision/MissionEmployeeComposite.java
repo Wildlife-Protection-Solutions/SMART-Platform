@@ -126,7 +126,8 @@ public class MissionEmployeeComposite extends MissionComposite {
 
 
 	@Override
-	public void init(Mission mission, Session session) {List<Employee> all = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
+	public void init(Mission mission, Session session) {
+		List<Employee> all = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
 		List<Employee> selected = new ArrayList<Employee>();
 		Employee leader = null;
 		

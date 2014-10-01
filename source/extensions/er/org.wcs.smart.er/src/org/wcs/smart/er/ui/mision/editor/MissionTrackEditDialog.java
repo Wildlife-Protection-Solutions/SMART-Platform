@@ -28,6 +28,7 @@ import java.util.Date;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -173,4 +174,13 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 		return true;
 	}
 	
+	@Override
+	public boolean isResizable(){
+		return true;
+	}
+	
+	@Override
+	public Point getInitialSize(){
+		return new Point(800, 600);
+	}
 }

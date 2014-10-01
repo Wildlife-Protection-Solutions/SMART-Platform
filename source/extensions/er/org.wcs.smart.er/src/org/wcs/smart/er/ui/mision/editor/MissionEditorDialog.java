@@ -21,22 +21,36 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog for editing mission properties. 
@@ -48,10 +62,11 @@ public class MissionEditorDialog extends TitleAreaDialog {
 
 	private MissionComposite composite;
 	private Mission toUpdate;
-	private Session session;
+//	private Session session;
 	
 	private boolean isChanged = false;
 	
+	private MissionEditor me = null;
 	/**
 	 * 
 	 * @param parentShell
@@ -60,16 +75,17 @@ public class MissionEditorDialog extends TitleAreaDialog {
 	 */
 	public MissionEditorDialog(Shell parentShell, 
 			MissionComposite composite, 
-			Mission toUpdate) {
+			Mission toUpdate, MissionEditor me) {
 		super(parentShell);
-	
+		this.me = me;
 		this.composite = composite;
 		
+//		session = HibernateManager.openSession(new AttachmentInterceptor());
+//		session = HibernateManager.openSession();
+//		session.beginTransaction();
+//		this.toUpdate = (Mission) session.load(Mission.class, toUpdate.getUuid());
 		
-		session = HibernateManager.openSession();
-		session.beginTransaction();
-		this.toUpdate = (Mission) session.load(Mission.class, toUpdate.getUuid());
-		
+		this.toUpdate = toUpdate;
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
@@ -97,10 +113,12 @@ public class MissionEditorDialog extends TitleAreaDialog {
 				}
 			}
 		}
-		if (session.getTransaction().isActive()){
-			session.getTransaction().rollback();
-		}
-		session.close();
+//		if (session.isOpen()){
+//			if (session.getTransaction().isActive()){
+//				session.getTransaction().rollback();
+//			}
+//			session.close();
+//		}
 		
 		return super.close();
 	}
@@ -109,23 +127,71 @@ public class MissionEditorDialog extends TitleAreaDialog {
 		if (!composite.isValid()){
 			return false;
 		}
-		composite.updateDesign(toUpdate);
 		
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
 		try{
+			session.saveOrUpdate(toUpdate);
+		
+			Date currentStart = toUpdate.getStartDate();
+			Date currentEnd = toUpdate.getEndDate();
+			
+			composite.updateDesign(toUpdate);
+			
+			if (!currentStart.equals(toUpdate.getStartDate()) ||
+				!currentEnd.equals(toUpdate.getEndDate())){
+				//dates have changed;
+				//we need to:
+				//1. remove any waypoints & attachments that are not associated with a day
+				//2. remove any tracks that are not associated with a day
+				
+				//waypoints
+				List<SurveyWaypoint> wpDelete = new ArrayList<SurveyWaypoint>();
+				for (SurveyWaypoint sw : toUpdate.getWaypoints()){
+					if (!isBetweenMissionDates(SmartUtils.getDatePart(sw.getWaypoint().getDateTime(), false))){
+						wpDelete.add(sw);
+					}
+				}
+				for (SurveyWaypoint sw : wpDelete){
+					Waypoint delete = sw.getWaypoint();
+					session.delete(sw);
+					session.delete(delete);
+				}
+				
+				//tracks
+				List<MissionTrack> toDelete = new ArrayList<MissionTrack>();
+				for (MissionTrack mt : toUpdate.getTracks()){
+					if (!isBetweenMissionDates(mt.getDate())){
+						mt.setMission(null);
+						toDelete.add(mt);
+					}
+				}
+				toUpdate.getTracks().removeAll(toDelete);
+				
+			}
+			
+		
+		
 			session.getTransaction().commit();
 			isChanged = false;
-			
-			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, toUpdate);
-			
-			//start a new transaction
-			session.beginTransaction();
-			return true;
+			getButton(IDialogConstants.OK_ID).setEnabled(false);
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog("Error saving changes.  Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
 			return false;
+		}finally{
+			session.close();
 		}
+		
+		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, toUpdate);
+		return true;
 	}
 	
+	private boolean isBetweenMissionDates(Date date){
+		return date.equals(toUpdate.getStartDate()) ||
+			   date.equals(toUpdate.getEndDate()) ||
+			   (date.before(toUpdate.getEndDate()) &&
+				date.after(toUpdate.getStartDate()));		
+	}
 	protected void okPressed() {
 		if (!saveChanges()){
 			return ;
@@ -137,8 +203,16 @@ public class MissionEditorDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite c = (Composite)super.createDialogArea(parent);
 		
+		
 		composite.createControl(c);
-		composite.init(toUpdate, session);
+		Session session = HibernateManager.openSession();
+		try{
+			session.update(toUpdate);
+			session.update(toUpdate.getSurvey().getSurveyDesign());
+			composite.init(toUpdate, session);
+		}finally{
+			session.close();
+		}
 		
 		composite.addChangeListener(new ISurveyListener() {
 			@Override
