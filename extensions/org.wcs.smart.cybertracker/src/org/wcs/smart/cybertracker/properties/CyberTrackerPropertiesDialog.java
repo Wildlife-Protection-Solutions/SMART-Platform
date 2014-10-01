@@ -23,6 +23,8 @@ package org.wcs.smart.cybertracker.properties;
 
 import java.io.File;
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -56,6 +58,7 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.CyberTrackerProperties.ProjectionFormat;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
@@ -107,6 +110,9 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
     private Text txtFileName;
     private Button btnLock100;
     private Button btnUseMapOnSkip;
+    
+    private ComboViewer cbProjection;
+    private Text txtUtmZome;
 	
     private ControlDecoration exitPinDecoration;
     
@@ -119,6 +125,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
     private ControlDecoration storageTimeDecoration;
     
     private ControlDecoration FileNameDecoration;
+
+    private ControlDecoration utmZoneDecoration;
 	
 	public CyberTrackerPropertiesDialog() {
 		super(Display.getCurrent().getActiveShell(), Messages.CyberTrackerPropertiesDialog_Title);
@@ -659,6 +667,58 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 				setChangesMade(true);
 			}
 		});
+		
+		
+		
+		
+		Label lblProjection = new Label(gpsContainer, SWT.NONE);
+		lblProjection.setText(Messages.CyberTrackerPropertiesDialog_Projection);
+		lblProjection.setToolTipText(Messages.CyberTrackerPropertiesDialog_Projection_Tooltip);
+
+		cbProjection = new ComboViewer(gpsContainer, SWT.READ_ONLY);
+		cbProjection.getControl().setToolTipText(Messages.CyberTrackerPropertiesDialog_Projection_Tooltip);
+		cbProjection.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		cbProjection.setContentProvider(ArrayContentProvider.getInstance());
+		cbProjection.setLabelProvider(new CyberTrackerProjectionProvider());
+ 		cbProjection.setInput(ProjectionFormat.getIds());
+		cbProjection.setSelection(new StructuredSelection(ctProperties.getProjection()));
+		cbProjection.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				setChangesMade(true);
+			}
+		});
+		
+		
+		
+		Label lblUtmZome = new Label(gpsContainer, SWT.NONE);
+		lblUtmZome.setText(Messages.CyberTrackerPropertiesDialog_UtmZone);
+		lblUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
+
+		txtUtmZome = new Text(gpsContainer, SWT.BORDER);
+		txtUtmZome.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtUtmZome.setToolTipText(Messages.CyberTrackerPropertiesDialog_UtmZone_Tooltip);
+		txtUtmZome.setText(String.valueOf(ctProperties.getUtmZone()));
+		txtUtmZome.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isUtmZoneValid()) {
+					utmZoneDecoration.hide();
+				} else {
+					utmZoneDecoration.show();
+				}
+				setChangesMade(true);
+			}
+		});
+
+		utmZoneDecoration = new ControlDecoration(txtUtmZome, SWT.LEFT);
+		utmZoneDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		utmZoneDecoration.setShowHover(true);
+		utmZoneDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_UtmZoneInvalid, CyberTrackerProperties.UTM_ZONE_MIN_VALUE, CyberTrackerProperties.UTM_ZONE_MAX_VALUE));
+		utmZoneDecoration.hide();
+
+		
 
 
 		Label lblSkipButtonTimeout = new Label(gpsContainer, SWT.NONE);
@@ -901,6 +961,17 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			return false;
 		}
 	}
+
+	private boolean isUtmZoneValid() {
+		if (txtUtmZome == null || txtUtmZome.getText() == null || txtUtmZome.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtUtmZome.getText());
+			return result >= CyberTrackerProperties.UTM_ZONE_MIN_VALUE && result <= CyberTrackerProperties.UTM_ZONE_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
 	
 	private boolean isFileNameDecorationValid() {
 		return new File(txtFileName.getText()).isFile();
@@ -909,7 +980,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 	private boolean validate() {
 		return isStorageTimeValid() && isExitPinValid() &&
 				isSigtingAccuracyValid() && isSigtingFixCountValid() && 
-				isTrackTimerValid() && isSkipButtonTimeoutValid() && isTrackAccuracyValid();
+				isTrackTimerValid() && isSkipButtonTimeoutValid() && isTrackAccuracyValid() && isUtmZoneValid();
 	}
 	
 	
@@ -934,6 +1005,9 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		ctProperties.setWaypointTimer(Integer.valueOf(txtTrackTimer.getText()));
 		StructuredSelection selection = (StructuredSelection) timeOffset.getSelection();
 		ctProperties.setGpsTimeZone((Integer)selection.getFirstElement());
+		selection = (StructuredSelection) cbProjection.getSelection();
+		ctProperties.setProjection((Integer)selection.getFirstElement());
+		ctProperties.setUtmZone(Integer.valueOf(txtUtmZome.getText()));
 		ctProperties.setSkipButtonTimeout(Integer.valueOf(txtSkipButtonTimeout.getText()));
 		
 		ctProperties.setShowEdit(btnShowEdit.getSelection());
@@ -1003,4 +1077,28 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			return super.getText(element);
 		}
 	}
+
+	
+	private class CyberTrackerProjectionProvider extends LabelProvider {
+		
+		Map<Integer, String> id2Name;
+		
+		public CyberTrackerProjectionProvider() {
+			id2Name = new HashMap<Integer, String>();
+			for (ProjectionFormat p : ProjectionFormat.values()) {
+				id2Name.put(p.getId(), p.getGuiName());
+			}
+		}
+		
+		@Override
+		public String getText(Object element) {
+			if (element instanceof Integer) {
+				String name = id2Name.get((Integer) element);
+				if (name != null)
+					return name;
+			}
+			return super.getText(element);
+		}
+	}
+	
 }
