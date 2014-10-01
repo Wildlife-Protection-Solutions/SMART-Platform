@@ -113,6 +113,10 @@ public class MissionDayPage extends EditorPart {
 		dayComposite.initData();
 	}
 
+	public void refresh(){
+		dayComposite.initData();
+	}
+	
 	@Override
 	public void setFocus() {
 		frmSummary.setFocus();
@@ -120,7 +124,6 @@ public class MissionDayPage extends EditorPart {
 
 	@Override
 	public void dispose() {
-		dayComposite.dispose();
 		super.dispose();
 	}
 	

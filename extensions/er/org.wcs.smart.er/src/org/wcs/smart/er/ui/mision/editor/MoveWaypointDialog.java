@@ -92,12 +92,11 @@ public class MoveWaypointDialog extends TitleAreaDialog {
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
 		
-		parent.setLayout(new GridLayout(1, false));
-		
-		final Composite legtype = new Composite(parent, SWT.NONE);
+		Composite legtype = new Composite(parent, SWT.NONE);
 		legtype.setLayout(new GridLayout(2, false));
-		legtype.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		legtype.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(legtype, SWT.NONE);
 		lbl.setText("Move To:");
@@ -117,6 +116,7 @@ public class MoveWaypointDialog extends TitleAreaDialog {
 			}
 		});
 		
+		setTitle("Move Waypoints");
 		setMessage("Select day to move selected waypoints to.");
 		
 		getShell().setText("Move Waypoints");
