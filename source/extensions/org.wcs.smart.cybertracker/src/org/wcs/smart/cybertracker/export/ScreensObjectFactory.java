@@ -121,6 +121,8 @@ public class ScreensObjectFactory {
 			a1Data.setWaypointTimer(properties.getWaypointTimer());
 			a1Data.setGpsTimeSync(ctBooleanValue(properties.isUseGpsTime()));
 			a1Data.setGpsTimeZone(properties.getGpsTimeZone());
+			a1Data.setProjection(properties.getProjection());
+			a1Data.setUTMZone(properties.getUtmZone());
 			a1Data.setGpsSkipTimeout(properties.getSkipButtonTimeout());
 			a1Data.setManualOnSkip(ctBooleanValue(properties.isManualGps()));
 			a1Data.setManualAllowSkip(ctBooleanValue(properties.isAllowSkipManualGps()));

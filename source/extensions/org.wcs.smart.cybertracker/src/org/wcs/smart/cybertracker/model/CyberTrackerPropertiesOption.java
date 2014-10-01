@@ -56,6 +56,9 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 		WAYPOINT_TIMER,
 		GPS_TIME_ZONE,
 		SKIP_BUTTON_TIMEOUT,
+
+		PROJECTION,
+		UTM_ZONE,
 		
 		USE_TITLE_BAR,
 		USE_LARGE_TITLES,

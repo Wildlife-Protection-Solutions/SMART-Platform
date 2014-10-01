@@ -155,6 +155,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerPatrol_Warn_Station;
 	public static String CyberTrackerPatrol_Warn_Team;
 	public static String CyberTrackerPlugIn_InitJob_Title;
+	public static String CyberTrackerProperties_ProjectonFormat_DecemalDegree;
+	public static String CyberTrackerProperties_ProjectonFormat_DegreeMinSec;
+	public static String CyberTrackerProperties_ProjectonFormat_UTM;
 	public static String CyberTrackerPropertiesDialog_0;
 	public static String CyberTrackerPropertiesDialog_1;
 	public static String CyberTrackerPropertiesDialog_10;
@@ -207,6 +210,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars;
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Message;
+	public static String CyberTrackerPropertiesDialog_Projection;
+	public static String CyberTrackerPropertiesDialog_Projection_Tooltip;
 	public static String CyberTrackerPropertiesDialog_Save_Error;
 	public static String CyberTrackerPropertiesDialog_ShowEdit;
 	public static String CyberTrackerPropertiesDialog_ShowEdit_Tooltip;
@@ -232,6 +237,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_TrackTimer;
 	public static String CyberTrackerPropertiesDialog_TrackTimer_Tooltip;
 	public static String CyberTrackerPropertiesDialog_TrackTimerInvalid;
+	public static String CyberTrackerPropertiesDialog_UtmZone;
+	public static String CyberTrackerPropertiesDialog_UtmZone_Tooltip;
+	public static String CyberTrackerPropertiesDialog_UtmZoneInvalid;
 	public static String DataModelWrapper_Dropdown_Label;
 	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;

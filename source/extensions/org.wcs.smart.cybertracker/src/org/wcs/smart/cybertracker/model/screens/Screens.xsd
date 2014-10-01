@@ -47,6 +47,8 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="MovingMapLock100" />
 						<xs:element type="xs:string" name="MovingMapOnSkip" />
 						<xs:element type="xs:string" name="SimpleCamera" />
+						<xs:element type="xs:int" name="Projection" minOccurs="0" />
+						<xs:element type="xs:int" name="UTMZone" minOccurs="0" />
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>

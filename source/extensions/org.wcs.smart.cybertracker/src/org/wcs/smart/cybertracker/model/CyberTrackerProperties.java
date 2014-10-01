@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 
 /**
@@ -54,6 +55,9 @@ public class CyberTrackerProperties extends UuidItem {
 	public static final int TIME_TRACK_MIN_VALUE = 0;
 	public static final int TIME_TRACK_MAX_VALUE = 1000;
 
+	public static final int UTM_ZONE_MIN_VALUE = 0;
+	public static final int UTM_ZONE_MAX_VALUE = 60;
+	
 	public static final Integer[] GMT_VALUES = {
 		-1200,
 		-1100,
@@ -94,7 +98,33 @@ public class CyberTrackerProperties extends UuidItem {
 	
 	public static final int SKIP_BUTTON_TIMEOUT_MIN_VALUE = 0;
 	public static final int SKIP_BUTTON_TIMEOUT_MAX_VALUE = Integer.MAX_VALUE;
-	
+
+	public enum ProjectionFormat {
+		DEGREE_MIN_SEC(Messages.CyberTrackerProperties_ProjectonFormat_DegreeMinSec, 0),
+		DECEMAL_DEGREE(Messages.CyberTrackerProperties_ProjectonFormat_DecemalDegree, 1),
+		UTM(Messages.CyberTrackerProperties_ProjectonFormat_UTM, 2);
+		private String guiName;
+		private int id;
+		ProjectionFormat(String guiName, int id) {
+			this.guiName = guiName;
+			this.id = id;
+		}
+		public String getGuiName() {
+			return this.guiName;
+		}
+		public int getId() {
+			return id;
+		}
+		public static Integer[] getIds() {
+			ProjectionFormat[] values = ProjectionFormat.values();
+			Integer[] ids = new Integer[values.length];
+			for (int i = 0; i < values.length; i++) {
+				ids[i] = values[i].getId();
+			}
+			return ids;
+		}
+	}
+
 	//default properties
 	private static final boolean largeScrollBars = false;
 	private static final boolean kioskMode = true;
@@ -132,6 +162,8 @@ public class CyberTrackerProperties extends UuidItem {
 	private static final boolean showEdit = true;
 	private static final boolean showGPS = true;
 	
+	private static final int projection = 0;
+    private static final int utmZone = 0;
 
 	private Map<OptionID, CyberTrackerPropertiesOption> options;
 	
@@ -411,5 +443,18 @@ public class CyberTrackerProperties extends UuidItem {
 	public void setShowGPS(boolean showGPS) {
 		getOption(OptionID.SHOW_GPS).setBooleanValue(showGPS);
 	}
-	
+
+	public int getProjection() {
+		return getIntValue(OptionID.PROJECTION, projection);
+	}
+	public void setProjection(int prj) {
+		getOption(OptionID.PROJECTION).setIntegerValue(prj);
+	}
+
+	public int getUtmZone() {
+		return getIntValue(OptionID.UTM_ZONE, utmZone);
+	}
+	public void setUtmZone(int zone) {
+		getOption(OptionID.UTM_ZONE).setIntegerValue(zone);
+	}
 }
