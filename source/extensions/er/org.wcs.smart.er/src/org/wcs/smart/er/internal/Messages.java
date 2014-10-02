@@ -511,7 +511,7 @@ public class Messages extends NLS {
 	public static String SurveyDesignPage_Message;
 	public static String SurveyDesignPage_NewDesignItem;
 	public static String SurveyDesignPage_Title;
-	public static String SurveyDesignSamplingUnitAttributeDialog_3;
+
 	public static String SurveyDesignSamplingUnitAttributeDialog_AllSuLAbel;
 	public static String SurveyDesignSamplingUnitAttributeDialog_ConfirmMsg;
 	public static String SurveyDesignSamplingUnitAttributeDialog_CreateAttributeLabel;
