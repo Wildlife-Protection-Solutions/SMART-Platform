@@ -3,14 +3,15 @@
       id="org.wcs.smart.er.core.feature"
       label="SMART Ecological Records Module"
       version="1.0.0"
-      provider-name="org.wcs.smart">
+      provider-name="org.wcs.smart"
+      license-feature="org.wcs.smart.smart_feature">
 
-   <description url="http://www.example.com/description">
-      [Enter Feature Description here.]
+   <description>
+      This plugin allows for creating, modifying and querying surveys.
    </description>
 
-   <copyright url="http://www.example.com/copyright">
-      [Enter Copyright Description here.]
+   <copyright>
+      Copyright (c): 2012, 2013 Wildlife Conservation Society
    </copyright>
 
    <license url="http://www.example.com/license">

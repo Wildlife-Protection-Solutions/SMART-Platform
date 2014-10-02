@@ -31,11 +31,13 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -59,18 +61,17 @@ public class RemoveERJob extends Job {
 			"MISSION_PROPERTY_VALUE", //$NON-NLS-1$
 			"SURVEY_WAYPOINT", //$NON-NLS-1$
 			"MISSION_TRACK", //$NON-NLS-1$
-			"MISSION_MEMBER", //$NON-NLS-1$
-			"MISSION", //$NON-NLS-1$
-			"MISSION_ATTRIBUTE_LIST", //$NON-NLS-1$
 			"MISSION_PROPERTY", //$NON-NLS-1$
-			"MISSION_ATTRIBUTE", //$NON-NLS-1$
+			"SAMPLING_UNIT_ATTRIBUTE_VALUE", //$NON-NLS-1$
+			"SURVEY_DESIGN_SAMPLING_UNIT", //$NON-NLS-1$
 			"SAMPLING_UNIT", //$NON-NLS-1$
+			"MISSION", //$NON-NLS-1$
 			"SURVEY", //$NON-NLS-1$
 			"SURVEY_DESIGN_PROPERTY", //$NON-NLS-1$
 			"SURVEY_DESIGN", //$NON-NLS-1$
-			"SURVEY_DESING_SAMPLING_UNIT", //$NON-NLS-1$
-			"SAMPLING_UNIT_ATTRIBUTE_VALUE", //$NON-NLS-1$
-			"SAMPLING_UNIT_ATTRIBUTE" //$NON-NLS-1$
+			"SAMPLING_UNIT_ATTRIBUTE", //$NON-NLS-1$
+			"MISSION_ATTRIBUTE_LIST", //$NON-NLS-1$
+			"MISSION_ATTRIBUTE", //$NON-NLS-1$
 	};
 	
 	public RemoveERJob() {
@@ -83,6 +84,13 @@ public class RemoveERJob extends Job {
 		final Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
+			
+			//delete all waypoints associated with type SURVEY
+			Query q = session.createQuery("DELETE Waypoint WHERE source = :src"); //$NON-NLS-1$
+			q.setParameter("src", SurveyWaypointSource.KEY);
+			q.executeUpdate();
+			
+			
 			for (String table : LABELTABLES){
 				if (DerbyHibernateExtensions.tableExists(session, table)){
 					session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
