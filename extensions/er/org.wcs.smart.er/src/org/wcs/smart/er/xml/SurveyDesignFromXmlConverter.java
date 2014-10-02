@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.xml;
 
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -137,16 +138,20 @@ public class SurveyDesignFromXmlConverter {
 		
 		//configurable model
 		String cmName = xml.getConfigurableModelName();
-		boolean success = false;
-		for(ConfigurableModel currentCM : DataentryHibernateManager.getConfigurableModels(SmartDB.getCurrentConservationArea(), session)){
-			if(currentCM.getName().equals(cmName) ){
-				surveyDesign.setConfigurableModel(currentCM);
-				success = true;
+		if (cmName != null && cmName.length() > 0){
+			boolean success = false;
+			for(ConfigurableModel currentCM : DataentryHibernateManager.getConfigurableModels(SmartDB.getCurrentConservationArea(), session)){
+				if(currentCM.getName().equals(cmName) ){
+					surveyDesign.setConfigurableModel(currentCM);
+					success = true;
+				}
 			}
-		}
-		if(success == false){
-			//no config model found
-			throw new ParseException(Messages.SurveyDesignFromXmlConverter_0, 0);
+		
+			if(success == false){
+				//no config model found
+				throw new ParseException(
+						MessageFormat.format(Messages.SurveyDesignFromXmlConverter_0, new Object[]{cmName}), 0);
+			}
 		}
 		
 		
