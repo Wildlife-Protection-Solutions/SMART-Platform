@@ -123,7 +123,7 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 		}finally{
 			session.close(); 
 		}
-		return new MissionDataSource(mission);
+		return new MissionDataSource(new MissionService(mission));
 	}
 
 	/* (non-Javadoc)

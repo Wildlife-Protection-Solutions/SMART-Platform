@@ -95,7 +95,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			if (missionService != null){
 				try {
-					missionService.refresh(null);
+					missionService.refresh(parentEditor.getMission(), monitor);
 				} catch (IOException e) {
 					EcologicalRecordsPlugIn.log(Messages.MissionMapPage_RefreshLayersJob_Error, e);
 				}

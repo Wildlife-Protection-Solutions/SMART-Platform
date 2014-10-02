@@ -101,7 +101,7 @@ public class MissionTrack extends UuidItem{
 	@Transient
 	public Float getDistance() {
 		if (distance == null){
-			distance = (float)(GeometryUtils.distanceInMeters(ls) / 1000.0);
+			distance = (float)(GeometryUtils.distanceInMeters(getLineString()) / 1000.0);
 		}
 		return distance;
 	}

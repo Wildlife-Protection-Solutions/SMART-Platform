@@ -192,7 +192,7 @@ public class MissionDayComposite {
 		((GridLayout) timeInfo.getLayout()).horizontalSpacing = 15;
 		 ((GridLayout)timeInfo.getLayout()).marginWidth = 0;
 		 ((GridLayout)timeInfo.getLayout()).marginLeft = 5;
-		 ((GridLayout)timeInfo.getLayout()).marginHeight = 5;
+		 ((GridLayout)timeInfo.getLayout()).marginHeight = 0;
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Composite c = toolkit.createComposite(timeInfo);
@@ -311,11 +311,15 @@ public class MissionDayComposite {
 
 		
 		Composite half = toolkit.createComposite(mainComposite);
-		half.setLayout(new GridLayout(2, true));
+		GridLayout gl = new GridLayout(2, true);
+		gl.marginWidth = gl.marginHeight = 0;
+		half.setLayout(gl);
 		half.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Composite trackComp = toolkit.createComposite(half);
-		trackComp.setLayout(new GridLayout(2, false));
+		gl = new GridLayout(2, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		trackComp.setLayout(gl);
 		trackComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		
 		toolkit.createLabel(trackComp, Messages.MissionDayComposite_Tracks).setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -335,25 +339,31 @@ public class MissionDayComposite {
 				showEditTrackDialog();
 			}
 		});
-		
-//		toolkit.createLabel(half, "");
-		
+				
 		Composite distComp = toolkit.createComposite(half);
-		distComp.setLayout(new GridLayout(2, false));
+		gl = new GridLayout(2, false);
+		gl.marginHeight = 0;
+		gl.marginWidth = 10;
+		distComp.setLayout(gl);
 		distComp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		
 		toolkit.createLabel(distComp, Messages.MissionDayComposite_DistanceTraveled);
 		txtDistance = toolkit.createLabel(distComp, "0", SWT.NONE); //$NON-NLS-1$
 //		txtDistance.setEditable(false);
-		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1);
+		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1);
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
 		
 		
 		Composite observationHcomp = toolkit.createComposite(mainComposite);
-		observationHcomp.setLayout(new GridLayout(2, false));
-		toolkit.createLabel(observationHcomp, Messages.MissionDayComposite_ObservationsWaypoints);
+		gl = new GridLayout(2, false);
+		gl.marginHeight=gl.marginWidth = 0;
+		gl.marginTop = 5;
+		observationHcomp.setLayout(gl);
+		Label l = toolkit.createLabel(observationHcomp, Messages.MissionDayComposite_ObservationsWaypoints);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, Messages.MissionDayComposite_ImportWaypoints, SWT.NONE);
+		lnkImportWaypoints.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		lnkImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				showImportWaypointWizard();
@@ -478,7 +488,6 @@ public class MissionDayComposite {
 		session.beginTransaction();
 		try {
 			Mission m2 = (Mission) session.load(Mission.class, editor.getMissionEditor().getMission().getUuid());
-			System.out.println(m2.getId());
 			this.mission = (Mission) session.merge(editor.getMissionEditor().getMission());
 		
 			Date date = editor.getDay();
@@ -507,7 +516,13 @@ public class MissionDayComposite {
 	//
 //			this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
 
-			trackTable.setInput(buildTrackInput(mission).toArray());
+			List<MissionTrack> tracks = buildTrackInput(mission);
+			trackTable.setInput(tracks);
+			double distance = 0;
+			for (MissionTrack mt : tracks){
+				distance += mt.getDistance();
+			}
+			txtDistance.setText(String.valueOf(distance));
 			
 			if (mission.getWaypoints() == null) {
 				mission.setWaypoints(new ArrayList<SurveyWaypoint>());

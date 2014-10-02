@@ -85,7 +85,6 @@ import org.opengis.filter.FilterFactory;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
-import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;

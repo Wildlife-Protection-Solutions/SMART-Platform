@@ -84,7 +84,8 @@ public class MissionService extends IService {
 	 * @param monitor
 	 * @throws IOException
 	 */
-	public void refresh(IProgressMonitor monitor) throws IOException{
+	public void refresh(Mission newMission, IProgressMonitor monitor) throws IOException{
+		this.mission = newMission;
 		for (IGeoResource member : resources(monitor)){
 			((MissionGeoResourceInfo)member.getInfo(monitor)).computeBounds((MissionGeoResource)member, monitor);
 		}
@@ -131,6 +132,7 @@ public class MissionService extends IService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<MissionGeoResource>();
+					
 					members.add(new MissionGeoResource(this, MissionDataSource.MISSIONWAYPOINT_TYPE));
 					members.add(new MissionGeoResource(this, MissionDataSource.MISSIONTRACK_TYPE));
 				}
@@ -185,7 +187,7 @@ public class MissionService extends IService {
             try {
                 if (ds == null) {
                 	if (mission != null){
-                		ds = new MissionDataSource(mission);
+                		ds = new MissionDataSource(this);
                 	}else{
                 		//use factory
                 		MissionDataSourceFactory dsf = new MissionDataSourceFactory();
