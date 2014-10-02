@@ -23,7 +23,6 @@ package org.wcs.smart.er.updatesite;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -33,7 +32,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.SmartProperties;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -80,14 +79,15 @@ public class RemoveERJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		List<ConservationArea> cas = null;
 		//drop tables
 		final Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			
+			cas = HibernateManager.getConservationAreas(session);
 			//delete all waypoints associated with type SURVEY
 			Query q = session.createQuery("DELETE Waypoint WHERE source = :src"); //$NON-NLS-1$
-			q.setParameter("src", SurveyWaypointSource.KEY);
+			q.setParameter("src", SurveyWaypointSource.KEY); //$NON-NLS-1$
 			q.executeUpdate();
 			
 			
@@ -121,26 +121,19 @@ public class RemoveERJob extends Job {
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 			}
 		}
-		
-		//delete filestore items
-		List<File> toDelete = new ArrayList<File>();
-		File filestoreDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
-		for (File caFolder : filestoreDir.listFiles()){
-			for (File caItemFolder : caFolder.listFiles()){
-				if (caItemFolder.isDirectory() && caItemFolder.getName().equals(SurveyDesign.SURVEY_FILESTORE_LOC)){
-					//delete this folder
-					toDelete.add(caItemFolder);
+		if (cas != null){
+			for (ConservationArea ca : cas){
+				try {
+					File deleteMe = new File(ca.getFileDataStoreLocation(), SurveyDesign.SURVEY_FILESTORE_LOC);
+					EcologicalRecordsPlugIn.log("DELETING: " + deleteMe.getAbsolutePath(), null);
+					FileUtils.deleteDirectory(deleteMe);
+				} catch (IOException ex) {
+					//some errors deleting filestore
+					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 				}
 			}
 		}
-		for (File deleteMe : toDelete){
-			try {
-				FileUtils.deleteDirectory(deleteMe);
-			} catch (IOException ex) {
-				//some errors deleting filestore
-				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-			}
-		}
+		
 		return Status.OK_STATUS;
 	}
 
