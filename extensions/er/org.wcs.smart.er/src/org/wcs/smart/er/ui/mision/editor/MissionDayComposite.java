@@ -183,6 +183,8 @@ public class MissionDayComposite {
 	}
 	
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
+		boolean canEdit = editor.getMissionEditor().canEdit() == null;
+		
 		mainComposite = toolkit.createComposite(parent);
 		mainComposite.setLayout(new GridLayout(1, false));
 		mainComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -209,6 +211,7 @@ public class MissionDayComposite {
 			}
 			
 		});
+		dtStartTime.setEnabled(canEdit);
 //		dtStartTime.addFocusListener(new FocusAdapter() {			
 //			@Override
 //			public void focusLost(FocusEvent e) {
@@ -233,8 +236,8 @@ public class MissionDayComposite {
 			public void widgetSelected(SelectionEvent e) {
 				updateTotalHours();
 			}
-			
 		});
+		dtEndTime.setEnabled(canEdit);
 //		dtEndTime.addFocusListener(new FocusAdapter() {			
 //			@Override
 //			public void focusLost(FocusEvent e) {
@@ -257,6 +260,7 @@ public class MissionDayComposite {
 		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gd.widthHint = 30;
 		restMinutes.setLayoutData(gd);
+		restMinutes.setEnabled(canEdit);
 //		restMinutes.addFocusListener(new FocusListener() {
 //			private int oldValue; 
 //			
@@ -332,13 +336,17 @@ public class MissionDayComposite {
 		((GridData)trTable.getLayoutData()).minimumHeight = 40;
 		((GridData)trTable.getLayoutData()).heightHint = 40;
 		((GridData)trTable.getLayoutData()).widthHint = 250;
-		lnkEditTrack = toolkit.createHyperlink(trackComp, Messages.MissionDayComposite_Link_Edit, SWT.NONE);
-		lnkEditTrack.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
-		lnkEditTrack.addHyperlinkListener(new HyperlinkAdapter(){
-			public void linkActivated(HyperlinkEvent e) {
-				showEditTrackDialog();
-			}
-		});
+		if (canEdit){
+			lnkEditTrack = toolkit.createHyperlink(trackComp, Messages.MissionDayComposite_Link_Edit, SWT.NONE);
+			lnkEditTrack.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+			lnkEditTrack.addHyperlinkListener(new HyperlinkAdapter(){
+				public void linkActivated(HyperlinkEvent e) {
+					showEditTrackDialog();
+				}
+			});
+		}else{
+			toolkit.createLabel(trackComp, "");
+		}
 				
 		Composite distComp = toolkit.createComposite(half);
 		gl = new GridLayout(2, false);
@@ -362,13 +370,17 @@ public class MissionDayComposite {
 		observationHcomp.setLayout(gl);
 		Label l = toolkit.createLabel(observationHcomp, Messages.MissionDayComposite_ObservationsWaypoints);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, Messages.MissionDayComposite_ImportWaypoints, SWT.NONE);
-		lnkImportWaypoints.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnkImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
-			public void linkActivated(HyperlinkEvent e) {
-				showImportWaypointWizard();
-			}
-		});
+		if (canEdit){
+			lnkImportWaypoints = toolkit.createHyperlink(observationHcomp, Messages.MissionDayComposite_ImportWaypoints, SWT.NONE);
+			lnkImportWaypoints.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+			lnkImportWaypoints.addHyperlinkListener(new HyperlinkAdapter(){
+				public void linkActivated(HyperlinkEvent e) {
+					showImportWaypointWizard();
+				}
+			});
+		}else{
+			toolkit.createLabel(observationHcomp, "");
+		}
 
 		
 		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
@@ -384,31 +396,32 @@ public class MissionDayComposite {
 			}
 		});
 		
-		Composite buttonComp = toolkit.createComposite(mainComposite);
-		buttonComp.setLayout(new GridLayout(3, false));
-		btnAddWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_AddWaypoint, SWT.PUSH);
-		btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addWaypoint();
-			}
-		});
-		
-		
-		btnDeleteWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_DeleteWaypoint, SWT.PUSH);
-		btnDeleteWaypoint.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e){
-				deleteSelectedWaypoints();
-			}
-		});
-		
-		btnMoveWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_MoveWaypoint, SWT.PUSH);
-		btnMoveWaypoint.addSelectionListener(new SelectionAdapter(){
-			public void widgetSelected(SelectionEvent e){
-				moveSelectedWaypoints();
-			}
-		});
-		
+		if (canEdit){
+			Composite buttonComp = toolkit.createComposite(mainComposite);
+			buttonComp.setLayout(new GridLayout(3, false));
+			btnAddWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_AddWaypoint, SWT.PUSH);
+			btnAddWaypoint.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					addWaypoint();
+				}
+			});
+			
+			
+			btnDeleteWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_DeleteWaypoint, SWT.PUSH);
+			btnDeleteWaypoint.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e){
+					deleteSelectedWaypoints();
+				}
+			});
+			
+			btnMoveWaypoint = toolkit.createButton(buttonComp, Messages.MissionDayComposite_MoveWaypoint, SWT.PUSH);
+			btnMoveWaypoint.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e){
+					moveSelectedWaypoints();
+				}
+			});
+		}
 		updateTotalHours();
 		
 		return mainComposite;
@@ -554,8 +567,12 @@ public class MissionDayComposite {
 			updateTotalHours();
 //			updateDistance();
 			
-			btnMoveWaypoint.setEnabled(false);
-			btnDeleteWaypoint.setEnabled(false);
+			if (btnMoveWaypoint != null){
+				btnMoveWaypoint.setEnabled(false);
+			}
+			if (btnDeleteWaypoint != null){
+				btnDeleteWaypoint.setEnabled(false);
+			}
 			
 //			if (editor.getPatrolEditor().canEdit() != null){
 //				dtEndTime.setEnabled(false);
