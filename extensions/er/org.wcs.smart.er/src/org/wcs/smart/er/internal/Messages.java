@@ -5,6 +5,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.internal.messages"; //$NON-NLS-1$
 
+	public static String AddERJob_InstallError;
+
 	public static String AddERJob_Title;
 	public static String AddWaypointDialog_EmptyProjectionError;
 	public static String AddWaypointDialog_EmptyWaypointIDError;
@@ -330,6 +332,8 @@ public class Messages extends NLS {
 	public static String PropertiesComposite_ValueColumn;
 
 	public static String RemoveERJob_Title;
+
+	public static String RemoveERJob_UninstallError;
 	public static String SamplingUnitAttributeDeleteAdvisor_CannotDeleteAttribute;
 
 	public static String SamplingUnitAttributeDialog_CloseDialogTitle;
@@ -559,6 +563,10 @@ public class Messages extends NLS {
 	public static String SurveyPermissionManager_MissionToOld;
 
 	public static String SurveyPermissionManager_SurveyToOld;
+
+	public static String SurveyWaypointSource_Name;
+
+	public static String SurveyWaypointSource_WaypointNotFound;
 	public static String TemplateWizardPage_BlankDesign;
 	public static String TemplateWizardPage_CopySuLabels;
 	public static String TemplateWizardPage_Description;

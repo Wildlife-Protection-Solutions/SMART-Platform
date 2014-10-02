@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
@@ -53,7 +54,7 @@ public class SurveyWaypointSource implements IWaypointSource{
 
 	@Override
 	public String getName() {
-		return "Survey";
+		return Messages.SurveyWaypointSource_Name;
 	}
 
 	@Override
@@ -75,7 +76,7 @@ public class SurveyWaypointSource implements IWaypointSource{
 					if (pws.size() > 0){
 						surveyDir[0] = SmartUtils.getDirectoryPath(((SurveyWaypoint)pws.get(0)).getMission().getUuid());
 					}else{
-						EcologicalRecordsPlugIn.log("Survey waypoint could not be found for waypoint: " + SmartUtils.encodeHex(wp.getUuid()), null);
+						EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + SmartUtils.encodeHex(wp.getUuid()), null);
 					}
 				}finally{
 					s.close();
@@ -88,7 +89,7 @@ public class SurveyWaypointSource implements IWaypointSource{
 		try {
 			j.join();
 		} catch (InterruptedException e) {
-			EcologicalRecordsPlugIn.log("Survey waypoint could not be found for waypoint: " + SmartUtils.encodeHex(wp.getUuid()), null);
+			EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + SmartUtils.encodeHex(wp.getUuid()), null);
 			return null;
 		}
 			
