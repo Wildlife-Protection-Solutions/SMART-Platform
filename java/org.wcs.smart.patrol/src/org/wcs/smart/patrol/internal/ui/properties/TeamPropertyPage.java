@@ -421,6 +421,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			setChangesMade(false);
 			return true;
 		} catch (Exception ex) {
+			s.getTransaction().rollback();
 			SmartPatrolPlugIn.displayLog(
 					Messages.TeamPropertyPage_Error_SavingUpdates  + "\n" + ex.getLocalizedMessage(), //$NON-NLS-1$
 					ex);
