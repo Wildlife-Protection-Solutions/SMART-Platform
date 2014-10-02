@@ -592,6 +592,7 @@ public class MissionDayComposite {
 			List<Employee> emps = new ArrayList<Employee>();
 			for (MissionMember mm : mission.getMembers()){
 				emps.add(mm.getMember());
+				mm.getMember().getFullLabel();
 			}
 			observationEditor.setObservers(emps);
 		}catch (Exception ex){
