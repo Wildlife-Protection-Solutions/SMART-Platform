@@ -126,6 +126,12 @@
    <feature url="features/org.wcs.smart.cybertracker.feature_3.0.5.jar" id="org.wcs.smart.cybertracker.feature" version="3.0.5">
       <category name="cybertracker"/>
    </feature>
+   <feature url="features/org.wcs.smart.er.feature_1.0.0.jar" id="org.wcs.smart.er.feature" version="1.0.0">
+      <category name="ecologicalrecords"/>
+   </feature>
+   <feature url="features/org.wcs.smart.entity.feature_1.1.0.jar" id="org.wcs.smart.entity.feature" version="1.1.0">
+      <category name="entity"/>
+   </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
@@ -150,6 +156,11 @@
    <category-def name="entity" label="SMART Entity Tracking Plug-in">
       <description>
          The entity tracking plugin provides the ability to track individual entities (animals or fixed), their attributes, and record observations associated with the entities.
+      </description>
+   </category-def>
+   <category-def name="ecologicalrecords" label="SMART Ecological Records Plug-in">
+      <description>
+         The ecological records plugin provides the ability to create, manage and query surveys.
       </description>
    </category-def>
 </site>
