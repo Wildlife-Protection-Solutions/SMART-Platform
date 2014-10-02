@@ -79,9 +79,18 @@ public class Upgrader302To400 {
 		sql = "update smart.observation_options set observer = false"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
 		
+		sql = "alter table smart.cm_attribute_list add column list_order integer"; //$NON-NLS-1$
+		c.createStatement().execute(sql);
+		
+		/* configurable model */
+		sql = "grant select on smart.configurable_model to analyst"; //$NON-NLS-1$
+		c.createStatement().execute(sql);
+		
 		/* VERSION UDATE */ 
 		sql = "update smart.db_version set version = '4.0.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
+		
+		
 		
 		c.commit();
 	}

@@ -138,7 +138,9 @@ public class LayerListComposite extends Composite implements IDropTargetProvider
 	}
 
 	private void createContents() {
-		setLayout(new GridLayout());
+		GridLayout gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		setLayout(gl);
 		viewer = new CheckboxTreeViewer(this, SWT.MULTI);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
