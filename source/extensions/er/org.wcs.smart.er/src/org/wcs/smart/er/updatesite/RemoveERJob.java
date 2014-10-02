@@ -21,11 +21,23 @@
  */
 package org.wcs.smart.er.updatesite;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Session;
+import org.wcs.smart.SmartProperties;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Job removes all Ecological Records plug-in related tabled from the database
@@ -35,6 +47,31 @@ import org.wcs.smart.er.internal.Messages;
  */
 public class RemoveERJob extends Job {
 
+	private String[] LABELTABLES = new String[]{
+			"SURVEY_DESIGN", //$NON-NLS-1$
+			"SAMPLING_UNIT_ATTRIBUTE", //$NON-NLS-1$
+			"MISSION_ATTRIBUTE", //$NON-NLS-1$
+			"MISSION_ATTRIBUTE_LIST", //$NON-NLS-1$
+	};
+	
+	private String[] TABLES = new String[]{
+			"MISSION_MEMBER", //$NON-NLS-1$
+			"MISSION_PROPERTY_VALUE", //$NON-NLS-1$
+			"SURVEY_WAYPOINT", //$NON-NLS-1$
+			"MISSION_TRACK", //$NON-NLS-1$
+			"MISSION_MEMBER", //$NON-NLS-1$
+			"MISSION", //$NON-NLS-1$
+			"MISSION_ATTRIBUTE_LIST", //$NON-NLS-1$
+			"MISSION_PROPERTY", //$NON-NLS-1$
+			"MISSION_ATTRIBUTE", //$NON-NLS-1$
+			"SAMPLING_UNIT", //$NON-NLS-1$
+			"SURVEY", //$NON-NLS-1$
+			"SURVEY_DESIGN_PROPERTY", //$NON-NLS-1$
+			"SURVEY_DESIGN", //$NON-NLS-1$
+			"SURVEY_DESING_SAMPLING_UNIT", //$NON-NLS-1$
+			"SAMPLING_UNIT_ATTRIBUTE_VALUE", //$NON-NLS-1$
+			"SAMPLING_UNIT_ATTRIBUTE" //$NON-NLS-1$
+	};
 	
 	public RemoveERJob() {
 		super(Messages.RemoveERJob_Title);
@@ -42,7 +79,60 @@ public class RemoveERJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		//TODO: implement
+		//drop tables
+		final Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try {
+			for (String table : LABELTABLES){
+				if (DerbyHibernateExtensions.tableExists(session, table)){
+					session.createSQLQuery("delete FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart." + table + ")").executeUpdate(); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+			}
+			
+			for (String table : TABLES){
+				if (DerbyHibernateExtensions.tableExists(session, table)){
+					session.createSQLQuery("DROP TABLE SMART." + table).executeUpdate(); //$NON-NLS-1$
+				}
+			}		
+			
+			HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, null, session);
+			session.getTransaction().commit();
+
+		} catch (Exception e) {
+			try{
+				session.getTransaction().rollback();
+			}catch (Exception ex){
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);	
+			}
+			EcologicalRecordsPlugIn.displayLog(Messages.RemoveERJob_UninstallError, e);
+			return new Status(Status.ERROR,EcologicalRecordsPlugIn.PLUGIN_ID,e.getMessage());
+		} finally {
+			try {
+				session.close();
+			} catch (Exception ex) {
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+			}
+		}
+		
+		//delete filestore items
+		List<File> toDelete = new ArrayList<File>();
+		File filestoreDir = new File(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
+		for (File caFolder : filestoreDir.listFiles()){
+			for (File caItemFolder : caFolder.listFiles()){
+				if (caItemFolder.isDirectory() && caItemFolder.getName().equals(SurveyDesign.SURVEY_FILESTORE_LOC)){
+					//delete this folder
+					toDelete.add(caItemFolder);
+				}
+			}
+		}
+		for (File deleteMe : toDelete){
+			try {
+				FileUtils.deleteDirectory(deleteMe);
+			} catch (IOException ex) {
+				//some errors deleting filestore
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+			}
+		}
 		return Status.OK_STATUS;
 	}
 
