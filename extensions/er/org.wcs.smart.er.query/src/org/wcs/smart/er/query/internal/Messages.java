@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
+	public static String AddERQueryJob_InstallError;
+	public static String AddERQueryJob_JobName;
 	public static String DerbyGridEngine_CalcValueProgresss;
 	public static String DerbyGridEngine_CreateObsTableProgress;
 	public static String DerbyGridEngine_ProgressFilters;
@@ -108,6 +110,8 @@ public class Messages extends NLS {
 	public static String QueryServiceInfo_Keyword3;
 	public static String QueryServiceInfo_Keyword4;
 	public static String QueryServiceInfo_Title;
+	public static String RemoveERQueryJob_UninstallError;
+	public static String RemoveERQueryJob_UninstallJobName;
 	public static String SamplingUnitAttributeFilter_AttributeNotFound;
 	public static String SamplingUnitAttributeQueryColumn_SuLabel;
 	public static String SamplingUnitDropItem_Label;

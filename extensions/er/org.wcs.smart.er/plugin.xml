@@ -850,7 +850,7 @@
       </command>
       <command
             id="org.wcs.smart.er.missionattributes.show"
-            name="Mission Attributes ...">
+            name="Mission Properties ...">
       </command>
       <command
             id="org.wcs.smart.er.su.show"
