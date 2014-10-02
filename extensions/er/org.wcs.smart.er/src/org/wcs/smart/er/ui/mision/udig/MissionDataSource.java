@@ -45,11 +45,12 @@ public class MissionDataSource extends AbstractDataStore{
 	public static final String MISSIONWAYPOINT_TYPE = "MissionPoint"; //$NON-NLS-1$
 	public static final String MISSIONTRACK_TYPE = "MissionTrack"; //$NON-NLS-1$
 	
-	private Mission mission;
 	private HashMap<String, SimpleFeatureType> schemas = new HashMap<String, SimpleFeatureType>();
 	
-	public MissionDataSource(Mission mission){
-		this.mission = mission;
+	private MissionService service;
+	
+	public MissionDataSource(MissionService service){
+		this.service = service;
 	}
 
 	@Override
@@ -70,9 +71,9 @@ public class MissionDataSource extends AbstractDataStore{
 	@Override
 	protected FeatureReader<SimpleFeatureType, SimpleFeature> getFeatureReader(String typeName) throws IOException {
 		if (typeName.equals(MISSIONWAYPOINT_TYPE)) {
-			return new MissionFeatureReader(this.mission, getSchema(typeName));
+			return new MissionFeatureReader(this.service.getMissionRecord(), getSchema(typeName));
 		}else if (typeName.equals(MISSIONTRACK_TYPE)){
-			return new MissionTrackFeatureReader(this.mission, getSchema(typeName));
+			return new MissionTrackFeatureReader(this.service.getMissionRecord(), getSchema(typeName));
 		}
 		return null;
 	}

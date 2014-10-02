@@ -26,6 +26,9 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.util.SmartUtils;
+
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.catalog.ServiceExtension;
 import net.refractions.udig.core.internal.CorePlugin;
@@ -89,6 +92,12 @@ public class MissionServiceExtension implements ServiceExtension {
 		return params;
 	}
 
+	
+	public static URL createURUL(Mission mission){
+		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(MISSION_UUID_KEY, SmartUtils.encodeHex(mission.getUuid()));
+		return createURL(params);
+	}
 	/**
 	 * Converts parameters into smart service url.
 	 * 

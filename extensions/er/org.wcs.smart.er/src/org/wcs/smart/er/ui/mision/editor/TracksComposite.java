@@ -24,14 +24,27 @@ package org.wcs.smart.er.ui.mision.editor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.catalog.IResolve;
+import net.refractions.udig.catalog.IService;
+import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import net.refractions.udig.project.internal.commands.selection.SelectCommand;
+import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+import net.refractions.udig.project.ui.viewers.MapViewer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -41,7 +54,9 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
@@ -53,18 +68,33 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.geotools.factory.CommonFactoryFinder;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
+import org.wcs.smart.er.ui.mision.udig.MissionDataSource;
+import org.wcs.smart.er.ui.mision.udig.MissionGeoResource;
+import org.wcs.smart.er.ui.mision.udig.MissionService;
+import org.wcs.smart.er.ui.mision.udig.MissionServiceExtension;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
-import org.wcs.smart.ui.map.location.MapComposite;
+import org.wcs.smart.udig.SetBasemapTool;
+import org.wcs.smart.ui.map.LayerListComposite;
+import org.wcs.smart.ui.map.LoadDefaultLayersJob;
+import org.wcs.smart.ui.map.MapInfoAreaComposite;
+import org.wcs.smart.ui.map.MapToolComposite;
+import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -73,15 +103,16 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 3.0.0
  */
-public class TracksComposite extends Composite {
+public class TracksComposite extends Composite implements MapPart{
 
 	private List<ISurveyListener> changeListeners = new ArrayList<ISurveyListener>();
-	
-	private static final int MAP_MIN_WIDTH = 280;
+	private FilterFactory ff = CommonFactoryFinder.getFilterFactory();
 	
 	private TableViewer trackViewer;
 	private MissionTrackEditDialog dialog;
-	private MapComposite mapComposite;
+	private MapViewer mapViewer;
+	private List<Layer> trackLayers = null;
+	private MissionService missionService = null;
 	
 	public TracksComposite(Composite parent, MissionTrackEditDialog dialog) {
 		super(parent, SWT.NONE);
@@ -112,18 +143,35 @@ public class TracksComposite extends Composite {
 		SashForm sash = new SashForm(this, SWT.HORIZONTAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Composite tableComp = new Composite(sash, SWT.NONE);
+		Composite leftArea = new Composite(sash, SWT.NONE);
+		leftArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		GridLayout gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		leftArea.setLayout(gl);
+		
+		TabFolder tabFolder = new TabFolder(leftArea, SWT.TOP);
+		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+		TabItem  tracksTabItem = new TabItem(tabFolder, SWT.NONE);
+		tracksTabItem.setText("Tracks");
+		Composite tableComp = new Composite(tabFolder, SWT.NONE);
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		tracksTabItem.setControl(tableComp);
 		
 		TableColumnLayout layout = new TableColumnLayout();
 		tableComp.setLayout(layout);
 		
-		trackViewer = new TableViewer(tableComp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		trackViewer = new TableViewer(tableComp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION );
 //		trackViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		trackViewer.setContentProvider(ArrayContentProvider.getInstance());
 		trackViewer.getTable().setHeaderVisible(true);
 		trackViewer.getTable().setLinesVisible(true);
-
+		trackViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateMapSelection();	
+			}
+		});
 		final TableViewerColumn columnId = new TableViewerColumn(trackViewer, SWT.NONE);
 		columnId.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -138,7 +186,6 @@ public class TracksComposite extends Composite {
 		columnId.getColumn().setText(Messages.TracksComposite_TrackId);
 		columnId.getColumn().setResizable(true);
 		columnId.getColumn().setMoveable(false);
-//		columnId.getColumn().setWidth(120);
 		columnId.setEditingSupport(new IdTableEditor(trackViewer));
 		layout.setColumnData(columnId.getColumn(), new ColumnWeightData(50));
 		
@@ -156,19 +203,30 @@ public class TracksComposite extends Composite {
 		columnAssoc.getColumn().setText(Messages.TracksComposite_Association);
 		columnAssoc.getColumn().setResizable(true);
 		columnAssoc.getColumn().setMoveable(false);
-		layout.setColumnData(columnAssoc.getColumn(), new ColumnWeightData(50));
-//		columnAssoc.getColumn().setWidth(120);
+		layout.setColumnData(columnAssoc.getColumn(), new ColumnWeightData(50));	
 		
 		
+		TabItem  layerListTabItem = new TabItem(tabFolder, SWT.NONE);
+		layerListTabItem.setText("Map Layers");
+		
+		Composite layersTab = new Composite(tabFolder, SWT.NONE);
+		gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		layersTab.setLayout(gl);
+		LayerListComposite lv = new LayerListComposite(layersTab);
+		lv.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		layerListTabItem.setControl(layersTab);
 		
 		//========map part========
 		Composite mapPart = new Composite(sash, SWT.NONE);
-		mapPart.setLayout(new GridLayout(2, false));
+		gl = new GridLayout(2, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		mapPart.setLayout(gl);
 
-		mapComposite = new MapComposite(mapPart, SWT.NONE);
-		mapComposite.setDataProvider(null);
-		mapComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		setupMap(mapPart);
+		
+		sash.setWeights(new int[]{30,70});
+		
 		//========links========
 		Composite linksCmp = new Composite(mapPart, SWT.NONE);
 		linksCmp.setLayout(new GridLayout(1, false));
@@ -206,9 +264,113 @@ public class TracksComposite extends Composite {
 			}
 		});
 		
-		sash.setWeights(new int[]{30,70});
+		lv.setMap(mapViewer.getMap());
+		
+		//add track layer
+		try{
+			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(MissionServiceExtension.createURUL(dialog.getMission()), null);
+			for (IResolve r : resolves){
+				IService service = r.resolve(IService.class, null);
+				if (service != null && service instanceof MissionService){
+					missionService = (MissionService) service;		
+					break;
+				}
+			}
+
+			if (missionService != null){
+				List<IGeoResource> newLayers = new ArrayList<IGeoResource>();
+				List<IGeoResource> layers = (List<IGeoResource>) missionService.resources(null);
+				for (IGeoResource layer : layers) {
+					if (((MissionGeoResource) layer).getType() == MissionDataSource.MISSIONTRACK_TYPE) {
+						newLayers.add(layer);
+					}
+				}
+				missionService.refresh(dialog.getMission(), null);
+				AddLayersCommand command = new AddLayersCommand(newLayers, 0);
+				mapViewer.getMap().sendCommandSync(command);
+				trackLayers = command.getLayers();
+			}
+			
+		}catch (Exception ex){
+			ex.printStackTrace();
+			//TODO:
+		}
+		
+		
 	}
 
+	
+	private void setupMap(Composite parent){
+		Composite mapComp = new Composite(parent, SWT.NONE);
+		mapComp.setLayout(new GridLayout(2, false));
+		mapComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		mapViewer = new MapViewer(mapComp, SWT.NONE);
+		mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+		Map map = (Map) ProjectFactory.eINSTANCE.createMap();
+		map.setName("Mission Tracks");
+		mapViewer.setMap(map);
+		
+		//set default crs
+		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
+		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
+		
+		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap(),
+				true, null);
+		// we need to do this because this map is in a dialog box and
+		// events does work correctly
+		defaultLayer.addJobChangeListener(new JobChangeAdapter() {
+			@Override
+			public void done(IJobChangeEvent event) {
+				if (mapViewer == null || TracksComposite.this.isDisposed()){
+					return;
+				}
+				mapViewer.getMap().getRenderManager().refresh(null);
+				
+			}
+		});
+		defaultLayer.schedule();
+			
+			
+		ApplicationGIS.getToolManager().setCurrentEditor(this);
+		String[] thisTools = new String[] {
+				SetBasemapTool.ID,
+				MapToolComposite.UDIG_ZOOM_EXTENT_ID,
+				MapToolComposite.UDIG_PAN_ID,
+				MapToolComposite.UDIG_ZOOM_ID,
+				MapToolComposite.UDIG_ZOOM_IN_ID,
+				MapToolComposite.UDIG_ZOOM_OUT_ID,
+				ClearSelectionTool.ID};
+
+		MapToolComposite tools = new MapToolComposite(thisTools);
+		tools.createComposite(mapComp);
+		MapInfoAreaComposite infoComp = new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
+		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));	
+	}
+	
+	private void updateMapSelection(){
+		//update map language
+		IStructuredSelection selection = (IStructuredSelection) trackViewer.getSelection();
+		List<Filter> allFilters = new ArrayList<Filter>();
+		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+			Object su = (Object) iterator.next();
+			if (su instanceof MissionTrack){
+				MissionTrack mt = (MissionTrack)su;
+				allFilters.add(ff.equals(ff.property("fid"),  //$NON-NLS-1$
+					ff.literal(SmartUtils.encodeHex(mt.getUuid())))); 
+			}
+		}
+		for (Layer l : trackLayers){
+			if (allFilters.size() == 0){
+				SelectCommand sc = new SelectCommand(l, Filter.EXCLUDE);
+				getMap().sendCommandASync(sc);
+			}else{
+				SelectCommand sc = new SelectCommand(l, ff.or(allFilters));
+				getMap().sendCommandASync(sc);
+			}
+		}
+	}
 	public void addChangeListener(ISurveyListener listener){
 		changeListeners.add(listener);
 	}
@@ -254,7 +416,7 @@ public class TracksComposite extends Composite {
 			MissionTrackPointDialog tpd = new MissionTrackPointDialog(Display.getCurrent().getActiveShell(), track);
 			tpd.open();
 			
-			ApplicationGIS.getToolManager().setCurrentEditor(mapComposite);
+			ApplicationGIS.getToolManager().setCurrentEditor(this);
 		}
 	}
 
@@ -300,6 +462,32 @@ public class TracksComposite extends Composite {
 		protected boolean canEdit(Object element) {
 			return true;
 		}
+	}
+
+	@Override
+	public Map getMap() {
+		return mapViewer.getMap();
+	}
+
+	@Override
+	public void openContextMenu() {
+		mapViewer.openContextMenu();
+	}
+
+	@Override
+	public void setFont(Control textArea) {
+		mapViewer.setFont(textArea);
+	}
+
+	@Override
+	public void setSelectionProvider(
+			IMapEditorSelectionProvider selectionProvider) {
+		mapViewer.setSelectionProvider(selectionProvider);
+	}
+
+	@Override
+	public IStatusLineManager getStatusLineManager() {
+		return null;
 	}
 
 	
