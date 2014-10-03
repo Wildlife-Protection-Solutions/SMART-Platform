@@ -856,5 +856,11 @@
             upgrader="org.wcs.smart.intelligence.upgrade.IntelligenceDatabaseUpgrader">
       </dbUpgrader>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.create">
+      <handler
+            class="org.wcs.smart.intelligence.CaCreateHandler">
+      </handler>
+   </extension>
 
 </plugin>

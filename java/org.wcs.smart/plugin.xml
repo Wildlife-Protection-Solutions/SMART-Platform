@@ -8,6 +8,7 @@
  <extension-point id="org.wcs.smart.ca.import" name="Conservation Area Data Importer" schema="schema/org.wcs.smart.ca.import.exsd"/>
  <extension-point id="org.wcs.smart.ca.datamodel.editAdvisor" name="DataModel Edit Advisor" schema="schema/org.wcs.smart.ca.datamodel.editAdvisor.exsd"/>
  <extension-point id="org.wcs.smart.dbUpgrage" name="Database Upgrade Extension Point" schema="schema/org.wcs.smart.dbUpgrage.exsd"/>
+ <extension-point id="org.wcs.smart.ca.create" name="Conservation Area Create Handler" schema="schema/org.wcs.smart.ca.create.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"
