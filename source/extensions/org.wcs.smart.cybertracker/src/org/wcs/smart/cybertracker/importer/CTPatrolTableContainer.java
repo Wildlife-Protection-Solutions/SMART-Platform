@@ -75,6 +75,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -358,9 +359,12 @@ public class CTPatrolTableContainer extends Composite {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 1);
 					List<CyberTrackerPatrol> data;
+					int code = 0;
 					try {
-						if (fromPda){
-							data = importer.importPdaData(monitor);
+						if (fromPda) {
+							CyberTrackerImportResult result = importer.importPdaData(monitor);
+							data = result.getData();
+							code = result.getReturnCode();
 						}else{
 							monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, files.length);
 							data = new ArrayList<CyberTrackerPatrol>();
@@ -389,7 +393,7 @@ public class CTPatrolTableContainer extends Composite {
 					if (count > 0) {
 						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportCompleted, count));
 					} else {
-						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, Messages.CTPatrolTableContainer_NoDataImported);
+						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, getEmptyDownloadMessage(code));
 					}
 				}
 
@@ -398,6 +402,19 @@ public class CTPatrolTableContainer extends Composite {
 			CyberTrackerPlugIn.displayError(Messages.CTPatrolTableContainer_Error_Title, Messages.CTPatrolTableContainer_Error_ImportAborted, e);
 		}
 
+	}
+
+	private String getEmptyDownloadMessage(int code) {
+		switch (code) {
+		case ICyberTrackerConstants.DOWNLOAD_CODE_NO_CONNECTION:
+			return Messages.CTPatrolTableContainer_DownloadCode_300;
+		case ICyberTrackerConstants.DOWNLOAD_CODE_NO_DATA:
+			return Messages.CTPatrolTableContainer_DownloadCode_301;
+		case ICyberTrackerConstants.DOWNLOAD_CODE_SUCCESS:
+			return Messages.CTPatrolTableContainer_DownloadCode_302;
+		default:
+			return Messages.CTPatrolTableContainer_NoDataImported;
+		}
 	}
 	
 	protected void handleAddAsPatrol() {
