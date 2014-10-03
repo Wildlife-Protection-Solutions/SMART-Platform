@@ -455,7 +455,7 @@ public class MissionDayComposite {
 		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
 		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
 		observationEditor = new ObservationCellEditor(observationTable.getTable());
-		samplingUnitEditor = new SamplingUnitCellEditor(observationTable.getTable());
+		samplingUnitEditor = new SamplingUnitCellEditor(observationTable.getTable(), false);
 		
 		observationTableColumns = new HashMap<OtColumn, TableViewerColumn>();
 		
@@ -560,7 +560,7 @@ public class MissionDayComposite {
 					}
 				}
 			});
-			samplingUnitEditor.setInput(mission);
+			samplingUnitEditor.setInput(mission, editor.getDay());
 			
 //			this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
 					
@@ -856,7 +856,13 @@ public class MissionDayComposite {
 			}
 		} else if (column == OtColumn.SAMPLING_UNIT) {
 			SamplingUnit su = element.getSamplingUnit();
-			return su != null ? su.getId() : Messages.MissionDayComposite_None;
+			if (su != null){
+				return su.getId();
+			}
+			if (element.getMissionTrack() != null){
+				return element.getMissionTrack().getId();
+			}
+			return Messages.MissionDayComposite_None;
 		}
 
 		return ""; //$NON-NLS-1$
@@ -886,7 +892,12 @@ public class MissionDayComposite {
 		} else if (column == OtColumn.ATTACHMENTS) {
 			return wp;
 		} else if (column == OtColumn.SAMPLING_UNIT) {
-			return samplingUnitEditor.getIndex(element.getSamplingUnit());
+			if (element.getSamplingUnit() != null){
+				return samplingUnitEditor.getIndex(element.getSamplingUnit());
+			}else if (element.getMissionTrack() != null){
+				return samplingUnitEditor.getIndex(element.getMissionTrack());
+			}
+			return samplingUnitEditor.getIndex(null);
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -936,7 +947,17 @@ public class MissionDayComposite {
 			//updated in cell editor
 		} else if (column == OtColumn.SAMPLING_UNIT) {
 			if (value instanceof Integer) {
-				element.setSamplingUnit(samplingUnitEditor.getSamplingUnit((Integer)value));
+				Object x = samplingUnitEditor.getSamplingUnit((Integer)value);
+				if (x == null){
+					element.setSamplingUnit(null);
+					element.setMissionTrack(null);
+				}else if (x instanceof SamplingUnit){
+					element.setSamplingUnit((SamplingUnit) x);
+					element.setMissionTrack(null);
+				}else if (x instanceof MissionTrack){
+					element.setSamplingUnit(null);
+					element.setMissionTrack((MissionTrack) x);
+				}
 				needSave = true;
 			}
 		}
