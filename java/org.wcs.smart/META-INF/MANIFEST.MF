@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART
 Bundle-SymbolicName: org.wcs.smart;singleton:=true
-Bundle-Version: 3.0.2
+Bundle-Version: 4.0.0
 Bundle-Localization: plugin
 Bundle-Activator: org.wcs.smart.SmartPlugIn
 Require-Bundle: org.eclipse.core.databinding,
  org.eclipse.jface.databinding,
  com.ibm.icu,
- org.wcs.smart.hibernate.libs;bundle-version="3.0.0";visibility:=reexport,
+ org.wcs.smart.hibernate.libs;visibility:=reexport,
  net.refractions.udig.project.ui;bundle-version="1.3.1";visibility:=reexport,
  net.refractions.udig.catalog.ui;bundle-version="1.3.0",
  net.refractions.udig.tool.default;bundle-version="1.3.0";visibility:=reexport,

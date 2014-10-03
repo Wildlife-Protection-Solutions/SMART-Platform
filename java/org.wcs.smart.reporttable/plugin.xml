@@ -4,7 +4,6 @@
    <extension
          point="org.wcs.smart.data.oda.smart.table">
       <TableCategory
-            category="org.wcs.smart."
             icon="images/icons/obj16/smart16.gif"
             id="org.wcs.smart.ca.tables"
             name="Conservation Area Tables">
