@@ -79,19 +79,21 @@ import com.vividsolutions.jts.geom.Coordinate;
  */
 public class CyberTrackerImporter {
 	
-	public List<CyberTrackerPatrol> importPdaData(IProgressMonitor monitor) throws Exception {
+	public CyberTrackerImportResult importPdaData(IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerImporter_Task_Download);
+		CyberTrackerImportResult result = new CyberTrackerImportResult();
 		List<CyberTrackerPatrol> patrols = new ArrayList<CyberTrackerPatrol>();
 		String appPath = PdaUtil.getCTAppPath();
 		if (appPath == null) {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.DISPLAY_MIN_VERSION), null);
-			return patrols;
+			return result;
 		}
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		PdaUtil.updateRegistryKey(ca);
 		String[] downloadCommand = {appPath, ICyberTrackerConstants.COMMAND_DOWNLOAD};
 		Process proc = Runtime.getRuntime().exec(downloadCommand);
-		proc.waitFor();
+		int code = proc.waitFor();
+		result.setReturnCode(code);
 
 		File cxtDataFolder = PdaUtil.getDowloadFolder(ca);
 		File xmlTempDir = PdaUtil.createTempDirectory();
@@ -120,7 +122,8 @@ public class CyberTrackerImporter {
 				}
 			}
 			
-			return patrols;
+			result.setData(patrols);
+			return result;
 			
 		} finally {
 			PdaUtil.deleteTempDirectory(xmlTempDir);

@@ -82,6 +82,10 @@ public interface ICyberTrackerConstants {
 	public static final int UPLOAD_CODE_SYNC_FAIL = 120; //Failed to Sync
 	public static final int UPLOAD_CODE_CT_NOT_INSTALLED = 201; //CyberTracker was not installed on the device, so an install was triggered
 	public static final int UPLOAD_CODE_SUCCESS = 200; //The application was successfully installed on the device
+
+	public static final int DOWNLOAD_CODE_NO_CONNECTION = 300; //No connections made
+	public static final int DOWNLOAD_CODE_NO_DATA = 301; //Connections, but no data
+	public static final int DOWNLOAD_CODE_SUCCESS = 302; //Connections and data downloaded
 	
 	public static final String CT_DATE_FORMAT = "MM/dd/yy"; //$NON-NLS-1$
 

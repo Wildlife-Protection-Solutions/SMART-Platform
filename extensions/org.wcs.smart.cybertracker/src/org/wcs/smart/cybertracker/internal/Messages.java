@@ -34,6 +34,9 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_CyberTrackerFiles;
 	public static String CTPatrolTableContainer_DeleteWarn_Message;
 	public static String CTPatrolTableContainer_DeleteWarn_Title;
+	public static String CTPatrolTableContainer_DownloadCode_300;
+	public static String CTPatrolTableContainer_DownloadCode_301;
+	public static String CTPatrolTableContainer_DownloadCode_302;
 	public static String CTPatrolTableContainer_EndDateLabel;
 	public static String CTPatrolTableContainer_Error_ImportAborted;
 	public static String CTPatrolTableContainer_Error_Title;
