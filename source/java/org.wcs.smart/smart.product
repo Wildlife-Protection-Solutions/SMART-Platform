@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?pde version="3.5"?>
 
-<product name="SMART" uid="smartapp" id="org.wcs.smart.smartapp" application="org.wcs.smart" version="3.0.2" useFeatures="true" includeLaunchers="true">
+<product name="SMART" uid="smartapp" id="org.wcs.smart.smartapp" application="org.wcs.smart" version="4.0.0" useFeatures="true" includeLaunchers="true">
 
    <aboutInfo>
       <image path="/org.wcs.smart/images/nl/en/about.png"/>
@@ -114,8 +114,8 @@ limitations under the License.
    </plugins>
 
    <features>
-      <feature id="org.wcs.smart.smart_feature"/>
       <feature id="org.eclipse.rcp"/>
+      <feature id="org.wcs.smart.smart_feature"/>
    </features>
 
    <configurations>

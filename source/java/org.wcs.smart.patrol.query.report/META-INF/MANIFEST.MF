@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Patrol Query Report PlugIn
 Bundle-SymbolicName: org.wcs.smart.patrol.query.report;singleton:=true
-Bundle-Version: 3.0.0
+Bundle-Version: 4.0.0
 Bundle-Activator: org.wcs.smart.report.query.PatrolQueryReportPlugIn
-Require-Bundle: org.wcs.smart.report.birt.map;bundle-version="3.0.0",
- org.wcs.smart.patrol.query;bundle-version="3.0.2",
- org.wcs.smart.query;bundle-version="3.0.2",
- org.wcs.smart.report;bundle-version="3.0.2",
- org.wcs.smart.report.birt.query;bundle-version="3.0.0"
+Require-Bundle: org.wcs.smart.report.birt.map,
+ org.wcs.smart.patrol.query,
+ org.wcs.smart.query,
+ org.wcs.smart.report,
+ org.wcs.smart.report.birt.query
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: org.wcs.smart
 Bundle-ClassPath: .

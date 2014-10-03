@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Query PlugIn
 Bundle-SymbolicName: org.wcs.smart.query;singleton:=true
-Bundle-Version: 3.0.2
+Bundle-Version: 4.0.0
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
-Require-Bundle: org.wcs.smart;bundle-version="3.0.2",
+Require-Bundle: org.wcs.smart,
  org.eclipse.ui.forms,
  net.refractions.udig.catalog.rasterings;visibility:=reexport,
- org.wcs.smart.observation;bundle-version="3.0.2",
+ org.wcs.smart.observation,
  net.refractions.udig.style.sld,
  net.refractions.udig.render.gridcoverage.basic;bundle-version="1.2.0",
  net.refractions.udig.style;bundle-version="1.2.0",

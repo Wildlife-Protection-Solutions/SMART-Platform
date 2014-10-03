@@ -2,18 +2,18 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Intelligence PlugIn
 Bundle-SymbolicName: org.wcs.smart.intelligence;singleton:=true
-Bundle-Version: 3.0.1
+Bundle-Version: 4.0.0
 Bundle-Activator: org.wcs.smart.intelligence.IntelligencePlugIn
 Require-Bundle: org.eclipse.ui.forms,
  net.refractions.udig.style.sld,
  org.eclipse.birt.report.designer.ui.editors,
  org.eclipse.datatools.connectivity.oda.design.ui,
- org.wcs.smart.patrol;bundle-version="3.0.2",
- org.wcs.smart.query;bundle-version="3.0.2",
- org.wcs.smart.patrol.query;bundle-version="3.0.2",
- org.wcs.smart.birt;bundle-version="3.0.0",
- org.wcs.smart.report.birt.map;bundle-version="3.0.0",
- org.wcs.smart.p2;bundle-version="3.0.0"
+ org.wcs.smart.patrol,
+ org.wcs.smart.query,
+ org.wcs.smart.patrol.query,
+ org.wcs.smart.birt,
+ org.wcs.smart.report.birt.map,
+ org.wcs.smart.p2
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.intelligence.model,
