@@ -80,6 +80,8 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
 import org.wcs.smart.er.ui.mision.udig.MissionDataSource;
@@ -188,6 +190,27 @@ public class TracksComposite extends Composite implements MapPart{
 		columnId.getColumn().setMoveable(false);
 		columnId.setEditingSupport(new IdTableEditor(trackViewer));
 		layout.setColumnData(columnId.getColumn(), new ColumnWeightData(50));
+		
+		final TableViewerColumn colSu = new TableViewerColumn(trackViewer, SWT.NONE);
+		colSu.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof MissionTrack) {
+					MissionTrack track = (MissionTrack)element;
+					if (track.getSamplingUnit() == null){
+						return "None";
+					}else{
+						return track.getSamplingUnit().getId();
+					}
+				}
+				return super.getText(element);
+			}
+		});
+		colSu.getColumn().setText("Sampling Unit");
+		colSu.getColumn().setResizable(true);
+		colSu.getColumn().setMoveable(false);
+		layout.setColumnData(colSu.getColumn(), new ColumnWeightData(50));	
+		colSu.setEditingSupport(new SuTableEditor(trackViewer));
 		
 		final TableViewerColumn columnAssoc = new TableViewerColumn(trackViewer, SWT.NONE);
 		columnAssoc.setLabelProvider(new ColumnLabelProvider() {
@@ -464,6 +487,66 @@ public class TracksComposite extends Composite implements MapPart{
 		}
 	}
 
+	/**
+	 * Cell editor for track id
+	 */
+	private class SuTableEditor extends EditingSupport {
+		private TableViewer viewer;
+
+		private SamplingUnitCellEditor editor;
+		
+		SuTableEditor(TableViewer viewer) {
+			super(viewer);
+			this.viewer = viewer;
+			this.editor = new SamplingUnitCellEditor(trackViewer.getTable(), true);	
+			editor.setInput(dialog.getMission(), dialog.getDate());
+		}
+
+		@Override
+		protected void setValue(Object element, Object value) {
+			if (element instanceof MissionTrack) {
+				MissionTrack t = (MissionTrack) element;
+				if (value == null){
+					t.setSamplingUnit(null);
+					t.setType(TrackType.TRACK);
+				}else{
+					Object value2 = editor.getSamplingUnit((Integer)value);
+					if (value2 != null && value2 instanceof SamplingUnit){
+						t.setSamplingUnit((SamplingUnit) value2);
+						t.setType(TrackType.RECON);
+					}else{
+						t.setSamplingUnit(null);
+						t.setType(TrackType.TRACK);
+					}
+				}
+				viewer.refresh();
+				fireChangeListeners();
+			}
+		}
+
+		@Override
+		protected Object getValue(Object element) {
+			if (element instanceof MissionTrack) {
+				MissionTrack t = (MissionTrack) element;
+				if (t.getSamplingUnit() != null){
+					return editor.getIndex(t.getSamplingUnit());
+				}
+				return 0;
+			}
+			return 0; 
+		}
+
+		@Override
+		protected CellEditor getCellEditor(final Object element) {
+			return editor;
+		}
+
+		@Override
+		protected boolean canEdit(Object element) {
+			return true;
+		}
+	}
+	
 	@Override
 	public Map getMap() {
 		return mapViewer.getMap();
