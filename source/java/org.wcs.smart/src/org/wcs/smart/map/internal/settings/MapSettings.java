@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -254,12 +255,14 @@ public class MapSettings {
 							uri = importFile(uri);
 						}
 					}
-					LayerRegister layerRegister = new LayerRegister (
+					if (uri != null){
+						LayerRegister layerRegister = new LayerRegister (
 									name, colourSchema, uri, crs, cql ,defaultColor, 
 								maxScaleDenominator, minScaleDenominator, 
 								envelop, styleRegisterList, layer.isVisible());
 						
-					layerRegisterList.add(layerRegister);
+						layerRegisterList.add(layerRegister);
+					}
 				}
 			}
 		}
@@ -689,6 +692,7 @@ public class MapSettings {
 			fileStoreDirectory.mkdir();
 		}
 		java.net.URI trgUri = null;
+		List<File> localImportFiles = new ArrayList<File>();
 		try {
 			String srcPath = srcUri.getPath();
 			String fileName = new File(srcPath).getName();
@@ -720,7 +724,6 @@ public class MapSettings {
 				}
 
 				for (int i = 0; i < srcFileList.length; i++) {
-					
 					String targetName = srcFileList[i].getName();
 					File trgFile = null;
 					if (index >= 0){
@@ -734,6 +737,7 @@ public class MapSettings {
 					if (!srcFileList[i].getCanonicalFile().equals(trgFile.getCanonicalFile())){
 						FileUtils.copyFile(srcFileList[i], trgFile);
 						tmpImportedFiles.add(trgFile);
+						localImportFiles.add(trgFile);
 					}
 				}
 				if (index >=0 ){
@@ -752,7 +756,18 @@ public class MapSettings {
 			java.net.URI uri = new java.net.URI( SMARTBM_FILE_PROTOCOL, "//" + fileName, srcUri.getFragment()); //$NON-NLS-1$
 			trgUri = uri;
 		} catch (Exception e) {
-			SmartPlugIn.log(Status.ERROR, e.getMessage(), e);
+			SmartPlugIn.displayLog(MessageFormat.format("The file ''{0}'' could not be imported into SMART and will not be added to the basemap." + "\n\n" + e.getMessage(), new Object[]{srcUri.getPath()}), e);
+			
+			for (File f : localImportFiles){
+				try{
+					f.delete();
+					tmpImportedFiles.remove(f);
+				}catch (Exception ex2){
+					SmartPlugIn.log(ex2.getMessage(), ex2);
+				}
+			}
+			
+
 		}
 		return trgUri;
 	}
