@@ -26,11 +26,14 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
@@ -55,6 +58,7 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.ca.ICaCreateHandler;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Rank;
@@ -62,6 +66,7 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.TableInfo;
 import org.wcs.smart.util.SmartUtils;
@@ -459,6 +464,11 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @throws Exception
 	 */
 	public static void saveNewConservationArea(ConservationArea newCa) throws Exception{
+		
+		/* need to login as admin user to create CA */
+		HibernateManager.endSessionFactory(true);
+		SmartHibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+		
 		Session s = HibernateManager.openSession();
 		Transaction tx = s.beginTransaction();
 		try {
@@ -484,6 +494,11 @@ public class HibernateManager extends SmartHibernateManager{
 			prj.setIsDefault(true);
 			s.save(prj);
 			
+			//fire extension points
+			List<ICaCreateHandler> extensions = getCreateExtensions();
+			for (ICaCreateHandler handler : extensions) {
+				handler.afterCreate(newCa, s);
+			}
 			
 			tx.commit();
 		} catch (Exception ex) {
@@ -491,7 +506,26 @@ public class HibernateManager extends SmartHibernateManager{
 			throw ex;
 		} finally {
 			s.close();
+			HibernateManager.endSessionFactory(true);	
+			SmartHibernateManager.setUserName(DbUser.LOGIN.getUserName(), DbUser.LOGIN.getPassword());
 		}
+	}
+
+	/**
+	 * @return list of {@link ICaCreateHandler} extension points
+	 */
+	private static List<ICaCreateHandler> getCreateExtensions() {
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<ICaCreateHandler> items = new ArrayList<ICaCreateHandler>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(ICaCreateHandler.EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				items.add((ICaCreateHandler)e.createExecutableExtension("class")); //$NON-NLS-1$
+			}
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return items;
 	}
 	
 	
