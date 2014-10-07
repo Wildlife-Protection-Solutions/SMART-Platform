@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import net.refractions.udig.project.ui.ApplicationGIS;
+
 import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -676,7 +678,7 @@ public class MissionDayComposite {
 			final MissionTrackEditDialog editDialog = new MissionTrackEditDialog(editor.getSite().getShell(), mission, editor.getDay());
 			editDialog.open();
 		} finally {
-//			ApplicationGIS.getToolManager().setCurrentEditor(editor.getMissionEditor());
+			ApplicationGIS.getToolManager().setCurrentEditor(editor.getMissionEditor());
 		}
 	}
 	

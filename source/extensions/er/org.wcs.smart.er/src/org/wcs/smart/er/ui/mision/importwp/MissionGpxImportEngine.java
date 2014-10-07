@@ -73,8 +73,15 @@ public class MissionGpxImportEngine extends GpxImportEngine {
 			if (option == ImportOption.ALL) {
 				tracks = MissionDataImport.convertTracks(waypoints, mission);
 				message = MessageFormat.format(Messages.MissionImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
+			}else if (option == ImportOption.DATE){
+				List<MissionTrack> track = MissionDataImport.convertToTrack(waypoints, true);
+				for (MissionTrack t : track){
+					t.setDate(date);
+					tracks.add(t);
+				}
+				message = MessageFormat.format(Messages.MissionImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
 			} else {
-				MissionTrack track = MissionDataImport.convertToTrack(waypoints);
+				MissionTrack track = MissionDataImport.convertToTrack(waypoints, false).get(0);
 				track.setDate(date);
 				tracks.add(track);
 				message = Messages.MissionImportEngine_ImportSingleTrack;

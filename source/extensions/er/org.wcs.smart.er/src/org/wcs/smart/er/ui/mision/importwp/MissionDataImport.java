@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.mision.importwp;
 import java.sql.Time;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -107,7 +108,7 @@ public class MissionDataImport {
 		Date start = SmartUtils.getDatePart(mission.getStartDate(), false);
 		Date end = SmartUtils.getDatePart(mission.getEndDate(), false);
 
-		Map<Date, List<Waypoint>> tracks = new HashMap<Date, List<Waypoint>>();
+		Map<String, Item> tracks = new HashMap<String, Item>();
 		
 		for (Waypoint point : waypoints) {
 			if (point.getDateTime() == null) {
@@ -116,21 +117,33 @@ public class MissionDataImport {
 			Date wpdt = point.getDateTime();
 			wpdt = SmartUtils.getDatePart(wpdt, false);
 			if (betweenDates(wpdt, start, end)) {
-				List<Waypoint> trackpnts = tracks.get(wpdt);
+				String key = wpdt.toString() + "_" + point.getSourceId();
+				Item trackpnts = tracks.get(key);
 				if (trackpnts == null) {
-					trackpnts = new ArrayList<Waypoint>();
-					tracks.put(wpdt, trackpnts);
+					trackpnts = new Item();
+					trackpnts.date = wpdt;
+					trackpnts.waypoints = new ArrayList<Waypoint>();
+					
+					tracks.put(key, trackpnts);
 				}
-				trackpnts.add(point);
+				trackpnts.waypoints.add(point);
 			}
 		}
 		
 		List<MissionTrack> output = new ArrayList<MissionTrack>();
 		//convert to tracks
-		for (Iterator<Entry<Date, List<Waypoint>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
-			Entry<Date, List<Waypoint>> value = (Entry<Date, List<Waypoint>>) iterator.next();
-			MissionTrack newTrack = convertToTrack(value.getValue());
-			newTrack.setDate(value.getKey());
+		int cnt = 0;
+		for (Iterator<Item> iterator = tracks.values().iterator(); iterator.hasNext();) {
+			Item value = iterator.next(); 
+			MissionTrack newTrack = convertToTrack(value.waypoints, false).get(0);
+			String id = value.waypoints.get(0).getSourceId();
+			cnt++;
+			if (id == null || id.length() == 0){
+				id = "Track " + cnt; 
+			}
+			newTrack.setId(id);
+			newTrack.setDate(value.date);
+			newTrack.setType(TrackType.RECON);
 			if (newTrack != null){
 				output.add(newTrack);
 			}
@@ -142,18 +155,48 @@ public class MissionDataImport {
 	private static boolean betweenDates(Date date, Date start, Date end) {
 		return ( date.equals(start) || date.after(start) ) &&  (date.equals(end) || date.before(end));
 	}
-	
+		
 	/**
 	 * Converts a set of waypoints to a track.  Coordinates are first sorted
-	 * by date/time.
+	 * by date/time.  If useSource is specified then multiple tracks are generated based on the 
+	 * value of the waypoint source field.
+	 * 
 	 * @param coordinates set of coordinates
 	 * @return track
 	 */
-	public static MissionTrack convertToTrack(List<Waypoint> coordinates){
-		LineString track = GPSDataImport.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
-		MissionTrack t = new MissionTrack();
-		t.setLineString(track);
-		return t;
+	public static List<MissionTrack> convertToTrack(List<Waypoint> coordinates, boolean useSource){
+		if (!useSource){
+			LineString track = GPSDataImport.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
+			MissionTrack t = new MissionTrack();
+			t.setLineString(track);
+			t.setId("Track");
+			return Collections.singletonList(t);
+		}else{
+			HashMap<String, List<Waypoint>> wps = new HashMap<String, List<Waypoint>>();
+			for (Waypoint wp : coordinates){
+				List<Waypoint> ws = wps.get(wp.getSourceId());
+				if (ws == null){
+					ws = new ArrayList<Waypoint>();
+					wps.put(wp.getSourceId(), ws);
+				}
+				ws.add(wp);
+			}
+			List<MissionTrack> tracks = new ArrayList<MissionTrack>();
+			int cnt = 0;
+			for (List<Waypoint> ws : wps.values()){
+				MissionTrack mt = convertToTrack(ws, false).get(0);
+				cnt++;
+				String id = ws.get(0).getSourceId();
+				if (id == null){
+					id = "Track " + cnt;
+				}
+				mt.setId(id);
+				
+				tracks.add(mt);
+			}
+			return tracks;
+			
+		}
 	}
 
 	public static void saveTracks(final Mission mission, List<MissionTrack> tracks) throws InterruptedException {
@@ -178,5 +221,10 @@ public class MissionDataImport {
 		});
 	}
 
-	
+	static class Item{
+		public Date date;
+		public String id;
+		List<Waypoint> waypoints;
+		
+	}
 }
