@@ -117,9 +117,9 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="Translate__TargetScreenId1" />
 						<xs:element type="xs:string" name="ResultGlobalValue" />
 						<xs:element type="xs:string" name="Translate__ResultElementId" />
-						<xs:element type="xs:int" name="SightingAccuracy" minOccurs="0"/>
+						<xs:element type="xs:double" name="SightingAccuracy" minOccurs="0"/>
 						<xs:element type="xs:int" name="SightingFixCount" minOccurs="0"/>
-						<xs:element type="xs:int" name="WaypointAccuracy" minOccurs="0"/>
+						<xs:element type="xs:double" name="WaypointAccuracy" minOccurs="0"/>
 						<xs:element type="xs:int" name="WaypointTimer" minOccurs="0"/>
 						<xs:element type="xs:string" name="UseRangeFinderForAltitude" />
 						<xs:element type="xs:string" name="Translate__ElementId" />

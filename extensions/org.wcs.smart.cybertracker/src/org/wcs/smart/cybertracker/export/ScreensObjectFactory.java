@@ -892,40 +892,28 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
-//	/**
-//	<Control>
-//		...
-// 		<Translate__ResultElementId>...</Translate__ResultElementId>
-//		<ResultGlobalValue>...</ResultGlobalValue>
-//	 </Control>
-//	 */
-//	public Controls.Control createCounterFormulaControl12(String counterName, String resultElementId) {
-//		String formula = counterName+"="+counterName+"+1"; //x=x+1  //$NON-NLS-1$ //$NON-NLS-2$
-//		Controls.Control control = createFormulaControl12(formula);
-//		control.setResultGlobalValue(counterName);
-//		control.setTranslateResultElementId(resultElementId);
-//		return control;
-//	}
-
 	/**
 	<Control>
     	<Type>{440B2C86-D385-4EFC-8ACE-5D3C0A4A016B}</Type>
     	<Id>13</Id>
-    	<SightingAccuracy>49</SightingAccuracy> <!-- will be added as default by CyberTracker -->
-    	<SightingFixCount>1</SightingFixCount>  <!-- will be added as default by CyberTracker -->
-    	<WaypointAccuracy>49</WaypointAccuracy> <!-- will be added as default by CyberTracker -->
-    	<WaypointTimer>...</WaypointTimer>
+    	<SightingAccuracy>...</SightingAccuracy> <!-- will be populated from properties -->
+    	<SightingFixCount>...</SightingFixCount>  <!-- will be populated from properties -->
+    	<WaypointAccuracy>...</WaypointAccuracy> <!-- will be populated from properties -->
+    	<WaypointTimer>...</WaypointTimer> <!-- will be populated from properties -->
     	<UseRangeFinderForAltitude>False</UseRangeFinderForAltitude> <!-- will be added as default by CyberTracker -->
 	</Control>
 	 */
-	public Controls.Control createConfigureGPSControl13(Integer timer) {
+	public Controls.Control createConfigureGPSControl13(CyberTrackerProperties props) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{440B2C86-D385-4EFC-8ACE-5D3C0A4A016B}"); //$NON-NLS-1$
 		control.setId(13);
-		control.setWaypointTimer(timer);
+		control.setSightingAccuracy(props.getSightingAccuracy());
+		control.setSightingFixCount(props.getSightingFixCount());
+		control.setWaypointAccuracy(props.getTrackAccuracy());
+		control.setWaypointTimer(props.getWaypointTimer());
 		return control;
 	}
-	
+
 	/**
 	 * see "Actions" -> "Add Attribute" in CyberTracker
     <Control>

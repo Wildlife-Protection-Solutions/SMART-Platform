@@ -137,7 +137,8 @@ public class PatrolScreensUtil {
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Map<ScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
-		CyberTrackerId id = addStartScreen(startId, result, elements);
+		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
+		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps);
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
 		String errorMsg = validatePatrolTypes(patrolTypes);
@@ -297,7 +298,6 @@ public class PatrolScreensUtil {
 			
 		}
 		
-		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
 		StringBuilder defaults = new StringBuilder();
 		for (Iterator<String> i = result.defaultValues.iterator(); i.hasNext();) {
 			defaults.append(i.next());
@@ -406,12 +406,12 @@ public class PatrolScreensUtil {
 		return toNextScreen(node);
 	}
 
-	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerProperties ctProps) {
 		String resultId = createResultElement(RESULT_PATROL_ID, elements);
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_ExitCyberTracker);
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		addUniqueAttrubute(node, resultId);
-		addGpsConfiguration(node, 0);
+		addGpsConfiguration(node, ctProps, 0);
 		String resultDateId = createResultElement(RESULT_PATROL_START_DATE, elements);
 		String resultTimeId = createResultElement(RESULT_PATROL_START_TIME, elements);
 		addStartTimeAttrubute(node, resultDateId, resultTimeId);
@@ -551,7 +551,7 @@ public class PatrolScreensUtil {
 		// "Resume Patrol" leads to "Next Task" screen
 		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(id.getNodeTranslatedId());
 		Node resumeNode = screensFactory.createNodeRadio(resumeId.getNodeId(), Messages.PatrolScreens_Paused, resScrValues, resScrTrElements, resScrLinks.toString(), null);
-		addGpsConfiguration(resumeNode, 0);
+		addGpsConfiguration(resumeNode, ctProps, 0);
 		
 		CyberTrackerId confId = new CyberTrackerId();
 		Node confirmNode = screensFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
@@ -600,7 +600,7 @@ public class PatrolScreensUtil {
 			control2.setShowGPS("True"); //$NON-NLS-1$
 		}
 		
-		addGpsConfiguration(node, ctProps.getWaypointTimer());
+		addGpsConfiguration(node, ctProps);
 		container.screenNodes.add(node);
 		if (canPause) {
 			container.screenNodes.add(resumeNode);
@@ -687,11 +687,18 @@ public class PatrolScreensUtil {
 		node.getData().getControls().getControl().add(formulaControl);
 	}
 
-	private void addGpsConfiguration(Node node, Integer timer) {
-		Control gpsConf = screensFactory.createConfigureGPSControl13(timer);
+	private void addGpsConfiguration(Node node, CyberTrackerProperties props) {
+		addGpsConfiguration(node, props, null);
+	}
+	
+	private void addGpsConfiguration(Node node, CyberTrackerProperties props, Integer timerOverride) {
+		Control gpsConf = screensFactory.createConfigureGPSControl13(props);
+		if (timerOverride != null) {
+			gpsConf.setWaypointTimer(timerOverride);
+		}
 		node.getData().getControls().getControl().add(gpsConf);
 	}
-
+	
 	private void addUniqueAttrubute(Node node, String resultElementId) {
 		Control uniqueAttr = screensFactory.createAttrubuteControl14(resultElementId, true, null);
 		ScreensObjectFactory.addControlToNode(node, uniqueAttr);
