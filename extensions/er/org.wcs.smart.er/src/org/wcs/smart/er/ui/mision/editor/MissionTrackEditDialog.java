@@ -81,11 +81,11 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 		}
 	}
 
-	Mission getMission() {
+	public Mission getMission() {
 		return mission;
 	}
 	
-	Date getDate() {
+	public Date getDate() {
 		return date;
 	}
 	
