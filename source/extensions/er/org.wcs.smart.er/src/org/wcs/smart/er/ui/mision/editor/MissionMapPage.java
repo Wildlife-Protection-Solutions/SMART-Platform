@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import net.refractions.udig.catalog.IGeoResource;
@@ -37,19 +38,27 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.ISurveyEventListener;
-import org.wcs.smart.er.SurveyEventHandler;
-import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 
+/**
+ * Mission editor map page displaying tracks
+ * and sampling units.
+ * 
+ * @author Emily
+ *
+ */
 public class MissionMapPage extends SmartMapEditorPart {
 
 	private MissionEditor parentEditor;
 	
 	private MissionService missionService;
+	private SamplingUnitService suService;
 
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
@@ -60,11 +69,26 @@ public class MissionMapPage extends SmartMapEditorPart {
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			/* mission track and waypoint layers */
 			missionService = new MissionService(parentEditor.getMission());
-	    	try {
-	    		List<IGeoResource> layers = (List<IGeoResource>) missionService.resources(monitor);
-	    		
-	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
+			suService = new SamplingUnitService(parentEditor.getMission().getSurvey().getSurveyDesign());
+			
+			try {
+				List<IGeoResource> allLayers = new ArrayList<IGeoResource>();
+				List<IGeoResource> tmp = (List<IGeoResource>) suService.resources(monitor);
+				for (IGeoResource r : tmp){
+					if (r instanceof SamplingUnitGeoResource){
+						String type = ((SamplingUnitGeoResource)r).getDataType();
+						if (type.equals(SamplingUnit.SamplingUnitType.PLOT.name()) ||
+								type.equals(SamplingUnit.SamplingUnitType.TRANSECT.name())){
+							allLayers.add(r);
+						}
+					}		
+				}
+				
+				allLayers.addAll((List<IGeoResource>) missionService.resources(monitor));
+				
+	    		AddLayersCommand command = new AddLayersCommand(allLayers, 0);
 	    		getMap().sendCommandASync(command);
     		
 	    		initListener = new IViewportModelListener() {
@@ -82,7 +106,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, Messages.MissionMapPage_AddLayersJob_Error, e); //$NON-NLS-1$
 			}
-			return Status.OK_STATUS;
+	    	return Status.OK_STATUS;
 		}
 	};
 	
@@ -97,6 +121,13 @@ public class MissionMapPage extends SmartMapEditorPart {
 				try {
 					missionService.refresh(parentEditor.getMission(), monitor);
 				} catch (IOException e) {
+					EcologicalRecordsPlugIn.log(Messages.MissionMapPage_RefreshLayersJob_Error, e);
+				}
+			}
+			if (suService != null){
+				try{
+					suService.refresh(monitor);
+				}catch (IOException e){
 					EcologicalRecordsPlugIn.log(Messages.MissionMapPage_RefreshLayersJob_Error, e);
 				}
 			}

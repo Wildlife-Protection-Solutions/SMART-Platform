@@ -116,6 +116,18 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	}
 	
 	/**
+	 * Create service url from survey design uuid
+	 * @param surveyDesignUuid
+	 * @return
+	 */
+	public static URL createURL(byte[] surveyDesignUuid) {
+		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(SamplingUnitSourceFactory.SD_UUID.key, surveyDesignUuid);
+		return createURL(params);
+
+	}
+	
+	/**
 	 * Determine if the url is a valid SMART sampling unit service
 	 * 
 	 * @param url url to test

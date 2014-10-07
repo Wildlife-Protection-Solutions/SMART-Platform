@@ -63,6 +63,9 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -70,6 +73,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
+import org.eclipse.swt.widgets.ToolBar;
+import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Hyperlink;
@@ -77,7 +82,11 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
@@ -114,7 +123,9 @@ public class TracksComposite extends Composite implements MapPart{
 	private MissionTrackEditDialog dialog;
 	private MapViewer mapViewer;
 	private List<Layer> trackLayers = null;
+	
 	private MissionService missionService = null;
+	private SamplingUnitService suService = null;
 	
 	public TracksComposite(Composite parent, MissionTrackEditDialog dialog) {
 		super(parent, SWT.NONE);
@@ -156,9 +167,52 @@ public class TracksComposite extends Composite implements MapPart{
 
 		TabItem  tracksTabItem = new TabItem(tabFolder, SWT.NONE);
 		tracksTabItem.setText("Tracks");
-		Composite tableComp = new Composite(tabFolder, SWT.NONE);
+		
+		Composite tableCompOuter = new Composite(tabFolder, SWT.NONE);
+		gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		tableCompOuter.setLayout(gl);
+		tableCompOuter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		//========links========
+		ToolBar bar = new ToolBar(tableCompOuter, SWT.HORIZONTAL);
+		
+		ToolItem importItem = new ToolItem(bar, SWT.PUSH);
+		importItem.setText(Messages.TracksComposite_Import);
+		importItem.setToolTipText("import tracks");
+		importItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.IMPORT_TRACK_ICON));
+		importItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				importTracks();	
+			}
+		});
+		
+		ToolItem editItem = new ToolItem(bar, SWT.PUSH);
+		editItem.setText(Messages.TracksComposite_Edit);
+		editItem.setToolTipText("edit track points");
+		editItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.EDIT_TRACK_ICON));
+		editItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				editTrack();	
+			}
+		});
+		
+		ToolItem splitItem = new ToolItem(bar, SWT.PUSH);
+		splitItem.setText(Messages.TracksComposite_Split);
+		splitItem.setToolTipText("split track into multiple segments");
+		splitItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SPLIT_TRACK_ICON));
+		splitItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				splitTrack();
+			}
+		});
+		
+		Composite tableComp = new Composite(tableCompOuter, SWT.BORDER);
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		tracksTabItem.setControl(tableComp);
+		tracksTabItem.setControl(tableCompOuter);
 		
 		TableColumnLayout layout = new TableColumnLayout();
 		tableComp.setLayout(layout);
@@ -212,23 +266,6 @@ public class TracksComposite extends Composite implements MapPart{
 		layout.setColumnData(colSu.getColumn(), new ColumnWeightData(50));	
 		colSu.setEditingSupport(new SuTableEditor(trackViewer));
 		
-		final TableViewerColumn columnAssoc = new TableViewerColumn(trackViewer, SWT.NONE);
-		columnAssoc.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof MissionTrack) {
-					MissionTrack track = (MissionTrack)element;
-					return track.getType().toString();
-				}
-				return super.getText(element);
-			}
-		});
-		columnAssoc.getColumn().setText(Messages.TracksComposite_Association);
-		columnAssoc.getColumn().setResizable(true);
-		columnAssoc.getColumn().setMoveable(false);
-		layout.setColumnData(columnAssoc.getColumn(), new ColumnWeightData(50));	
-		
-		
 		TabItem  layerListTabItem = new TabItem(tabFolder, SWT.NONE);
 		layerListTabItem.setText("Map Layers");
 		
@@ -249,43 +286,6 @@ public class TracksComposite extends Composite implements MapPart{
 		setupMap(mapPart);
 		
 		sash.setWeights(new int[]{30,70});
-		
-		//========links========
-		Composite linksCmp = new Composite(mapPart, SWT.NONE);
-		linksCmp.setLayout(new GridLayout(1, false));
-		linksCmp.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		Hyperlink lnk = new Hyperlink(linksCmp, SWT.NONE);
-		lnk.setUnderlined(true);
-		lnk.setText(Messages.TracksComposite_Import);
-		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnk.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				importTracks();
-			}
-		});
-		
-		lnk = new Hyperlink(linksCmp, SWT.NONE);
-		lnk.setUnderlined(true);
-		lnk.setText(Messages.TracksComposite_Split);
-		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnk.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				splitTrack();
-			}
-		});
-
-		lnk = new Hyperlink(linksCmp, SWT.NONE);
-		lnk.setUnderlined(true);
-		lnk.setText(Messages.TracksComposite_Edit);
-		lnk.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		lnk.addHyperlinkListener(new HyperlinkAdapter() {
-			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				editTrack();
-			}
-		});
 		
 		lv.setMap(mapViewer.getMap());
 		
@@ -319,13 +319,44 @@ public class TracksComposite extends Composite implements MapPart{
 			//TODO:
 		}
 		
-		
+		//add sampling unit layers
+		try{
+			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(SamplingUnitServiceExtension.createURL(dialog.getMission().getSurvey().getSurveyDesign().getUuid()), null);
+			for (IResolve r : resolves){
+				IService service = r.resolve(IService.class, null);
+				if (service != null && service instanceof SamplingUnitService){
+					suService = (SamplingUnitService) service;		
+					break;
+				}
+			}
+
+			if (suService != null){
+				List<IGeoResource> layers = (List<IGeoResource>) suService.resources(null);	
+				List<IGeoResource> tmp = new ArrayList<IGeoResource>();
+				for (IGeoResource r : layers){
+					if (r instanceof SamplingUnitGeoResource){
+						String type = ((SamplingUnitGeoResource)r).getDataType();
+						if (type.equals(SamplingUnit.SamplingUnitType.PLOT.name()) ||
+								type.equals(SamplingUnit.SamplingUnitType.TRANSECT.name())){
+							tmp.add(r);
+						}
+					}		
+				}
+				AddLayersCommand command = new AddLayersCommand(tmp, 0);
+				mapViewer.getMap().sendCommandASync(command);
+			}
+		}catch (Exception ex){
+			ex.printStackTrace();
+			//TODO:
+		}
 	}
 
 	
 	private void setupMap(Composite parent){
 		Composite mapComp = new Composite(parent, SWT.NONE);
-		mapComp.setLayout(new GridLayout(2, false));
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		mapComp.setLayout(gl);
 		mapComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		mapViewer = new MapViewer(mapComp, SWT.NONE);
