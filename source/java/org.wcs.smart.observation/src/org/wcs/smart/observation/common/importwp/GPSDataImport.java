@@ -447,6 +447,7 @@ public class GPSDataImport {
 							c.setY(y);
 							c.setDateTime(datetime);
 							c.setComment((trk.getName() == null ? "" : trk.getName()) + (pnt.getName() == null ? "" :  " - " + pnt.getName())); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+							c.setSourceId(trk.getName());
 							if (plddt == null) {
 								// include all
 								trackCoords.add(c);
