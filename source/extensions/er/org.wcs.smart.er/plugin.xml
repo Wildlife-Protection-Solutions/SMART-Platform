@@ -989,5 +989,23 @@
             directory="survey">
       </FilestoreDirectory>
    </extension>
+   <extension
+         point="net.refractions.udig.project.ui.tool">
+      <modalTool
+            categoryId="org.wcs.smart.udig.maptools"
+            class="org.wcs.smart.er.ui.mision.udig.SplitTool"
+            icon="images/icons/obj16/split_track.png"
+            id="org.wcs.smart.er.track.split"
+            name="Split Track"
+            onToolbar="true"
+            tooltip="splits mission track">
+         <cursor
+               hotspotX="10"
+               hotspotY="10"
+               id="org.wcs.smart.er.track.split.pointer"
+               image="images/pointers/split_pointer.png">
+         </cursor>
+      </modalTool>
+   </extension>
 
 </plugin>

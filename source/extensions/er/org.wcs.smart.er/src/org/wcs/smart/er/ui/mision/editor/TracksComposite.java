@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IService;
+import net.refractions.udig.project.command.Command;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
@@ -40,7 +42,10 @@ import net.refractions.udig.project.internal.commands.selection.SelectCommand;
 import net.refractions.udig.project.internal.render.ViewportModel;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
+import net.refractions.udig.project.ui.internal.tool.display.ToolProxy;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
+import net.refractions.udig.project.ui.tool.ToolLifecycleEvent;
+import net.refractions.udig.project.ui.tool.ToolLifecycleListener;
 import net.refractions.udig.project.ui.viewers.MapViewer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,6 +57,8 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -95,6 +102,7 @@ import org.wcs.smart.er.ui.mision.udig.MissionDataSource;
 import org.wcs.smart.er.ui.mision.udig.MissionGeoResource;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.er.ui.mision.udig.MissionServiceExtension;
+import org.wcs.smart.er.ui.mision.udig.SplitTool;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
@@ -105,7 +113,15 @@ import org.wcs.smart.ui.map.MapInfoAreaComposite;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SmartUtils;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Composite to display list of tracks.
@@ -121,12 +137,18 @@ public class TracksComposite extends Composite implements MapPart{
 	private TableViewer trackViewer;
 	private MissionTrackEditDialog dialog;
 	private MapViewer mapViewer;
+	private MapToolComposite toolComp;
+	
 	private List<Layer> trackLayers = null;
 	
 	private MissionService missionService = null;
 	private SamplingUnitService suService = null;
 	
 	private List<MissionTrack> toDelete = new ArrayList<MissionTrack>();
+
+	private ToolItem editItem;
+	private ToolItem deleteItem;
+	private ToolItem splitItem;
 	
 	public TracksComposite(Composite parent, MissionTrackEditDialog dialog) {
 		super(parent, SWT.NONE);
@@ -189,7 +211,7 @@ public class TracksComposite extends Composite implements MapPart{
 			}
 		});
 		
-		ToolItem editItem = new ToolItem(bar, SWT.PUSH);
+		editItem = new ToolItem(bar, SWT.PUSH);
 		editItem.setText(Messages.TracksComposite_Edit);
 		editItem.setToolTipText("edit track points");
 		editItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.EDIT_TRACK_ICON));
@@ -199,8 +221,9 @@ public class TracksComposite extends Composite implements MapPart{
 				editTrack();	
 			}
 		});
+		editItem.setEnabled(false);
 		
-		ToolItem splitItem = new ToolItem(bar, SWT.PUSH);
+		splitItem = new ToolItem(bar, SWT.RADIO);
 		splitItem.setText(Messages.TracksComposite_Split);
 		splitItem.setToolTipText("split track into multiple segments");
 		splitItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SPLIT_TRACK_ICON));
@@ -210,8 +233,9 @@ public class TracksComposite extends Composite implements MapPart{
 				splitTrack();
 			}
 		});
+		splitItem.setEnabled(false);
 		
-		ToolItem deleteItem = new ToolItem(bar, SWT.PUSH);
+		deleteItem = new ToolItem(bar, SWT.PUSH);
 		deleteItem.setText("delete");
 		deleteItem.setToolTipText("delete track");
 		deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
@@ -221,6 +245,7 @@ public class TracksComposite extends Composite implements MapPart{
 				deleteTrack();
 			}
 		});
+		deleteItem.setEnabled(false);
 		
 		Composite tableComp = new Composite(tableCompOuter, SWT.BORDER);
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -408,15 +433,17 @@ public class TracksComposite extends Composite implements MapPart{
 				MapToolComposite.UDIG_ZOOM_OUT_ID,
 				ClearSelectionTool.ID};
 
-		MapToolComposite tools = new MapToolComposite(thisTools);
-		tools.createComposite(mapComp);
+		toolComp = new MapToolComposite(thisTools);
+		toolComp.createComposite(mapComp);
 		MapInfoAreaComposite infoComp = new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
 		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));	
 	}
 	
 	private void updateMapSelection(){
+		 
 		//update map language
 		IStructuredSelection selection = (IStructuredSelection) trackViewer.getSelection();
+		
 		List<Filter> allFilters = new ArrayList<Filter>();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object su = (Object) iterator.next();
@@ -435,6 +462,11 @@ public class TracksComposite extends Composite implements MapPart{
 				getMap().sendCommandASync(sc);
 			}
 		}
+		
+		boolean isSelected = !selection.isEmpty();
+		editItem.setEnabled(isSelected);
+		splitItem.setEnabled(isSelected);
+		deleteItem.setEnabled(isSelected);
 	}
 	public void addChangeListener(ISurveyListener listener){
 		changeListeners.add(listener);
@@ -478,8 +510,7 @@ public class TracksComposite extends Composite implements MapPart{
 						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
 						dialog.open();
 						
-						updateInput();
-						mapViewer.getMap().getRenderManager().refresh(null);
+						refresh(false);
 					}
 				}
 			});
@@ -492,6 +523,98 @@ public class TracksComposite extends Composite implements MapPart{
 		if (!confirmChanges()) return;
 		// TODO Auto-generated method stub
 		
+//		splitTool.setContext(ApplicationGIS.getToolManager().)
+//		splitTool.setActive(true);
+		
+//		ToolProxy mi = ((ToolProxy)item.getData());
+//		if (mi.getType() == 1){	//modal tool proxy
+//			for (ToolItem it : items){
+//				if (!item.equals(it)){
+//					it.setSelection(false);
+//				}else{
+//					it.setSelection(true);
+//				}
+//			}
+//			currentToolId = mi.getId();	
+//		}
+		
+		
+		
+		final SplitTool spTool = (SplitTool) ApplicationGIS.getToolManager().findTool(SplitTool.ID);
+		if (spTool != null){
+			spTool.setFinishCommand(new SplitTool.FinishCommand() {
+				
+				@Override
+				public void onFinish(List<Coordinate> points) {
+					toolComp.selectLastTool();
+					splitItem.setSelection(false);
+					
+					IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
+					MissionTrack trackToSplit = null;
+					for (Iterator<Object> iterator = sel.iterator(); iterator.hasNext();) {
+						Object item = (Object) iterator.next();
+						if (item instanceof MissionTrack){
+							trackToSplit = (MissionTrack) item;
+						}
+					}
+					
+					if (trackToSplit != null){
+						LineString ls1 = trackToSplit.getLineString();
+						
+						
+						GeometryFactory gf = new GeometryFactory();
+						LineString ls2 = gf.createLineString(new Coordinate[]{points.get(0), points.get(1)});
+						
+						Point intersection = null;
+						Geometry g = ls1.intersection(ls2);
+						if (g == null){
+							//TODO:
+							//display error intersection not found
+							return;
+						}else if (g instanceof Point){
+							intersection = (Point)g;
+						}else if (g instanceof MultiPoint){
+							intersection = (Point)((MultiPoint)g).getGeometryN(0);
+						}
+						if (intersection == null){
+							//TODO:
+							//display error intersection not found
+							return;
+						}
+						LineString[] newLs = GeometryUtils.splitSimple(ls1, new Coordinate(intersection.getX(), intersection.getY()));
+
+						if (newLs == null || newLs.length != 2 || !(newLs[0] instanceof LineString) || !(newLs[0] instanceof LineString)){
+							//TODO: 
+							//split error
+						}
+						trackToSplit.setLineString(newLs[0]);
+						MissionTrack newTrack = new MissionTrack();
+						newTrack.setDate(trackToSplit.getDate());
+						newTrack.setId(trackToSplit.getId());
+						newTrack.setLineString(newLs[1]);
+						newTrack.setMission(trackToSplit.getMission());
+						newTrack.setSamplingUnit(trackToSplit.getSamplingUnit());
+						newTrack.setType(trackToSplit.getType());
+						
+						trackToSplit.getMission().getTracks().add(newTrack);
+						
+						refresh(true);
+					}
+					
+					
+				}
+			});
+
+			ApplicationGIS.getToolManager().getToolAction(SplitTool.ID, SplitTool.CATEGORY_ID).run();	
+		}
+	}
+	
+	private void refresh(boolean fire){
+		updateInput();
+		if (fire){
+			fireChangeListeners();
+		}
+		mapViewer.getMap().getRenderManager().refresh(null);
 	}
 	
 	protected void deleteTrack(){
@@ -518,11 +641,7 @@ public class TracksComposite extends Composite implements MapPart{
 			dialog.getMission().getTracks().remove(mt);
 		}
 		this.toDelete.addAll(toDelete);
-		updateInput();
-		fireChangeListeners();
-		mapViewer.getMap().getRenderManager().refresh(null);
-		
-		
+		refresh(true);
 	}
 	
 	public List<MissionTrack> getTracksToDelete(){
@@ -539,6 +658,8 @@ public class TracksComposite extends Composite implements MapPart{
 			tpd.open();
 			
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
+			
+			refresh(false);
 		}
 	}
 
@@ -562,8 +683,7 @@ public class TracksComposite extends Composite implements MapPart{
 				MissionTrack t = (MissionTrack) element;
 				if (!t.getId().equals(value)){
 					t.setId((String)value);
-					viewer.refresh();
-					fireChangeListeners();
+					refresh(true);
 				}
 			}
 		}
@@ -634,8 +754,7 @@ public class TracksComposite extends Composite implements MapPart{
 					}
 				}
 				if (changed){
-					viewer.refresh();
-					fireChangeListeners();
+					refresh(true);
 				}
 			}
 		}
