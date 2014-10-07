@@ -33,13 +33,14 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -50,7 +51,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author elitvin
  * @since 3.0.0
  */
-public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEventListener {
+public class MissionTrackEditDialog extends TitleAreaDialog {
 
 	private boolean isChanged = false;
 	
@@ -62,24 +63,9 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 	public MissionTrackEditDialog(Shell shell, Mission mission, Date date) {
 		super(shell);
 		this.date = date;
-		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, this);
-
 		this.mission = mission;
 	}
 
-	@Override
-	//ISurveyEventListener handler
-	public void event(Object o) {
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			this.mission = (Mission) session.load(Mission.class, mission.getUuid());
-			cmp.updateInput();
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
-		}
-	}
 
 	public Mission getMission() {
 		return mission;
@@ -130,6 +116,10 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 		saveChanges();
 	}
 	
+	public boolean isChanged(){
+		return this.isChanged;
+	}
+	
 	public boolean close() {
 		if (isChanged) {
 			MessageDialog md = new MessageDialog(getShell(), 
@@ -149,16 +139,24 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 				}
 			}
 		}
-
-		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, this);
 		
 		return super.close();
 	}
 
-	private boolean saveChanges() {
+	public boolean saveChanges() {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
+			for (MissionTrack mt : cmp.getTracksToDelete()){
+				if (mt.getUuid() != null){
+					Query q = session.createQuery("UPDATE SurveyWaypoint SET missionTrack = null WHERE missionTrack = :mt");
+					q.setParameter("mt", mt);
+					q.executeUpdate();
+				
+					mt.setMission(null);
+				}
+			}
+			
 			session.saveOrUpdate(mission);
 			session.getTransaction().commit();
 		} catch (Exception ex) {
@@ -169,7 +167,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog implements ISurveyEv
 		}
 
 		isChanged = false;
-		
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
 		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
 		return true;
 	}

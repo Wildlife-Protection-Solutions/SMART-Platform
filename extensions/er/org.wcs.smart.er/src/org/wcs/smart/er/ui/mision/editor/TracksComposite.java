@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -46,6 +47,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -65,7 +68,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -75,14 +77,10 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.ui.forms.events.HyperlinkAdapter;
-import org.eclipse.ui.forms.events.HyperlinkEvent;
-import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.factory.CommonFactoryFinder;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
@@ -106,6 +104,7 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.MapInfoAreaComposite;
 import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -126,6 +125,8 @@ public class TracksComposite extends Composite implements MapPart{
 	
 	private MissionService missionService = null;
 	private SamplingUnitService suService = null;
+	
+	private List<MissionTrack> toDelete = new ArrayList<MissionTrack>();
 	
 	public TracksComposite(Composite parent, MissionTrackEditDialog dialog) {
 		super(parent, SWT.NONE);
@@ -210,6 +211,17 @@ public class TracksComposite extends Composite implements MapPart{
 			}
 		});
 		
+		ToolItem deleteItem = new ToolItem(bar, SWT.PUSH);
+		deleteItem.setText("delete");
+		deleteItem.setToolTipText("delete track");
+		deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
+		deleteItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				deleteTrack();
+			}
+		});
+		
 		Composite tableComp = new Composite(tableCompOuter, SWT.BORDER);
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		tracksTabItem.setControl(tableCompOuter);
@@ -217,8 +229,7 @@ public class TracksComposite extends Composite implements MapPart{
 		TableColumnLayout layout = new TableColumnLayout();
 		tableComp.setLayout(layout);
 		
-		trackViewer = new TableViewer(tableComp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION );
-//		trackViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		trackViewer = new TableViewer(tableComp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION | SWT.MULTI);
 		trackViewer.setContentProvider(ArrayContentProvider.getInstance());
 		trackViewer.getTable().setHeaderVisible(true);
 		trackViewer.getTable().setLinesVisible(true);
@@ -435,7 +446,23 @@ public class TracksComposite extends Composite implements MapPart{
 		}
 	}
 	
+	private boolean confirmChanges(){
+		if (dialog.isChanged()){
+			if (!MessageDialog.openQuestion(getShell(),
+					"Import",
+					"Before importing new tracks you must first save the changes you made to the existing tracks.  Do you want to save now?")){
+				return false;
+			}
+			if (!dialog.saveChanges()){
+				return false;
+			}
+			
+		}
+		return true;
+	}
+	
 	protected void importTracks() {
+		if (!confirmChanges()) return;
 		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(dialog.getMission(), GPSDataImport.ImportType.TRACK);
 		wizard.setDateOption(dialog.getDate());
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
@@ -450,6 +477,9 @@ public class TracksComposite extends Composite implements MapPart{
 					if (dialog != null) {
 						monitor.setTaskName(Messages.MissionDayComposite_DisplayingWizard);
 						dialog.open();
+						
+						updateInput();
+						mapViewer.getMap().getRenderManager().refresh(null);
 					}
 				}
 			});
@@ -459,11 +489,49 @@ public class TracksComposite extends Composite implements MapPart{
 	}
 	
 	protected void splitTrack() {
+		if (!confirmChanges()) return;
 		// TODO Auto-generated method stub
 		
 	}
+	
+	protected void deleteTrack(){
+		IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
+		List<MissionTrack> toDelete = new ArrayList<MissionTrack>();
+		for (Iterator<Object> iterator = sel.iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			if (item instanceof MissionTrack){
+				toDelete.add((MissionTrack)item);
+			}
+		}
+		
+		if (toDelete.size() == 0){
+			return ;
+		}
+		
+		
+		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected tracks?  This cannot be undone.", new Object[]{toDelete.size()}))){
+			return;
+		}
+		
+		//delete the track and remove any waypoint references to it.
+		for (MissionTrack mt : toDelete){
+			dialog.getMission().getTracks().remove(mt);
+		}
+		this.toDelete.addAll(toDelete);
+		updateInput();
+		fireChangeListeners();
+		mapViewer.getMap().getRenderManager().refresh(null);
+		
+		
+	}
+	
+	public List<MissionTrack> getTracksToDelete(){
+		return this.toDelete;
+	}
 
 	protected void editTrack() {
+		if (!confirmChanges()) return;
+		
 		IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
 		if (sel != null && !sel.isEmpty()) {
 			MissionTrack track = (MissionTrack) sel.getFirstElement();
@@ -492,9 +560,11 @@ public class TracksComposite extends Composite implements MapPart{
 		protected void setValue(Object element, Object value) {
 			if (element instanceof MissionTrack) {
 				MissionTrack t = (MissionTrack) element;
-				t.setId((String)value);
-				viewer.refresh();
-				fireChangeListeners();
+				if (!t.getId().equals(value)){
+					t.setId((String)value);
+					viewer.refresh();
+					fireChangeListeners();
+				}
 			}
 		}
 
@@ -535,23 +605,38 @@ public class TracksComposite extends Composite implements MapPart{
 
 		@Override
 		protected void setValue(Object element, Object value) {
+			
 			if (element instanceof MissionTrack) {
+				boolean changed = false;
 				MissionTrack t = (MissionTrack) element;
 				if (value == null){
-					t.setSamplingUnit(null);
+					if (t.getSamplingUnit() != null){
+						changed = true;
+						t.setSamplingUnit(null);
+					}
+					
 					t.setType(TrackType.TRACK);
 				}else{
 					Object value2 = editor.getSamplingUnit((Integer)value);
 					if (value2 != null && value2 instanceof SamplingUnit){
-						t.setSamplingUnit((SamplingUnit) value2);
-						t.setType(TrackType.RECON);
+						if ((t.getSamplingUnit() != null && !t.getSamplingUnit().equals(value2)) || 
+								t.getSamplingUnit() == null){
+							t.setSamplingUnit((SamplingUnit) value2);
+							t.setType(TrackType.RECON);
+							changed = true;
+						}
 					}else{
-						t.setSamplingUnit(null);
+						if (t.getSamplingUnit() != null){
+							t.setSamplingUnit(null);
+							changed = true;
+						}
 						t.setType(TrackType.TRACK);
 					}
 				}
-				viewer.refresh();
-				fireChangeListeners();
+				if (changed){
+					viewer.refresh();
+					fireChangeListeners();
+				}
 			}
 		}
 
