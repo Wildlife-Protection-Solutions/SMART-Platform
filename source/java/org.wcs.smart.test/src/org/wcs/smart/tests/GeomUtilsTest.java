@@ -28,6 +28,8 @@ import junit.framework.Assert;
 import org.junit.Test;
 import org.wcs.smart.util.GeometryUtils;
 
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBWriter;
 import com.vividsolutions.jts.io.WKTReader;
 
@@ -50,5 +52,22 @@ public class GeomUtilsTest {
 		
 		double hours = GeometryUtils.computeHours(polyBlob, lineBlob);
 		Assert.assertEquals(7.585078394186732 / 3600000.0, hours, 0.00000000000001);
+	}
+	
+	@Test
+	public void testLineStringSplit() throws Exception{
+		WKTReader reader = new WKTReader();
+		LineString ls = (LineString) reader.read("LINESTRING(0 0, 5 5)");
+		
+		LineString[] results = GeometryUtils.splitSimple(ls, new Coordinate(2,2));
+		System.out.println(results[0].toText());
+		Assert.assertEquals(results[0].toText(), "LINESTRING (0 0, 2 2)");
+		Assert.assertEquals(results[1].toText(), "LINESTRING (2 2, 5 5)");
+		
+		
+		ls = (LineString) reader.read("LINESTRING(0 0, 0 5)");
+		results = GeometryUtils.splitSimple(ls, new Coordinate(2,2));
+		Assert.assertEquals(results[0].toText(), "LINESTRING (0 0, 0 2)");
+		Assert.assertEquals(results[1].toText(), "LINESTRING (0 2, 0 5)");
 	}
 }
