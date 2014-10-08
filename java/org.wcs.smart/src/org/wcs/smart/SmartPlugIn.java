@@ -126,6 +126,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 * Image descriptor for warning icon
 	 */
 	public static final String WARN_ICON= "org.wsc.smart.WARN_ICON"; //$NON-NLS-1$
+	public static final String INFO_ICON= "org.wsc.smart.INFO_ICON"; //$NON-NLS-1$
+	public static final String ERROR_ICON= "org.wsc.smart.ERROR_ICON"; //$NON-NLS-1$
 		
 	/**
 	 * Image descriptor for warning icon
@@ -316,6 +318,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(STATION_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/station.png")); //$NON-NLS-1$
 	     
 	     reg.put(WARN_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/warn.png")); //$NON-NLS-1$
+	     reg.put(ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/error_icon.png")); //$NON-NLS-1$
+	     reg.put(INFO_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/information_icon.png")); //$NON-NLS-1$
 	     reg.put(BULLET_BLACK, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/bullet_black.png")); //$NON-NLS-1$
 	     reg.put(MAP_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/map.png")); //$NON-NLS-1$
 	     
