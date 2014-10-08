@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.engine;
 
 import java.util.HashSet;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
@@ -67,15 +68,14 @@ public class AreaFilterVisitor implements IFilterVisitor{
 			if (!addedTableNames.contains(areaTableName)) {
 				addedTableNames.add(areaTableName);
 				
-				// TODO: escape special characters from the key
 				sql.append(" left join "); //$NON-NLS-1$
 				sql.append(engine.tableName(Area.class));
 				sql.append(" as "); //$NON-NLS-1$
 				sql.append( areaTableName);
 				sql.append(" on "); //$NON-NLS-1$
-//				sql.append( areaTableName +".ca_uuid = " + engine.tablePrefix(Patrol.class) + ".ca_uuid and "); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append( areaTableName +".area_type = '" + ff.getType().name() + "' and "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(areaTableName + ".keyid = '" + ff.getKey() + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+				String key = StringEscapeUtils.escapeSql(ff.getKey());
+				sql.append(areaTableName + ".keyid = '" + key + "' "); //$NON-NLS-1$ //$NON-NLS-2$
 				if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && 
 						!usedTables.contains(MissionTrack.class)){
 

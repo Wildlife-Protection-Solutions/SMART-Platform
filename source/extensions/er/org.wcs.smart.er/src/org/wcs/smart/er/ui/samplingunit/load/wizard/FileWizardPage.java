@@ -198,8 +198,8 @@ public class FileWizardPage extends WizardPage {
 				}
 			});
 		} catch (Exception e) {
-			//TODO
-			e.printStackTrace();
+			MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, 
+					MessageFormat.format(Messages.FileWizardPage_ErrorReadingFile + "\n\n" + e.getMessage(), new Object[]{f.getAbsolutePath()})); //$NON-NLS-1$
 		}
 		return fieldsNames;
 	}

@@ -26,7 +26,10 @@ import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.ui.model.DropItem;
 
-//TODO: remove me if not used
+/**
+ * Filter for survey design objects.
+ * 
+ */
 public class SurveyDesignFilter implements IFilter {
 
 	
