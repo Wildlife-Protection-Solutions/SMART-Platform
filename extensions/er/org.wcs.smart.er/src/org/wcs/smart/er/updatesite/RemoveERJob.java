@@ -125,7 +125,6 @@ public class RemoveERJob extends Job {
 			for (ConservationArea ca : cas){
 				try {
 					File deleteMe = new File(ca.getFileDataStoreLocation(), SurveyDesign.SURVEY_FILESTORE_LOC);
-					EcologicalRecordsPlugIn.log("DELETING: " + deleteMe.getAbsolutePath(), null);
 					FileUtils.deleteDirectory(deleteMe);
 				} catch (IOException ex) {
 					//some errors deleting filestore

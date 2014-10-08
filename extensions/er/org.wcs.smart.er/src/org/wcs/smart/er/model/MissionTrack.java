@@ -40,7 +40,6 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.util.GeometryUtils;
 
-import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;

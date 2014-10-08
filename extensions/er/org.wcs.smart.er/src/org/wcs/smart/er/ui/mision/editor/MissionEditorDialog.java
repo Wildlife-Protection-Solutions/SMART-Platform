@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -56,11 +57,9 @@ public class MissionEditorDialog extends TitleAreaDialog {
 
 	private MissionComposite composite;
 	private Mission toUpdate;
-//	private Session session;
-	
+
 	private boolean isChanged = false;
 	
-	private MissionEditor me = null;
 	/**
 	 * 
 	 * @param parentShell
@@ -69,16 +68,10 @@ public class MissionEditorDialog extends TitleAreaDialog {
 	 */
 	public MissionEditorDialog(Shell parentShell, 
 			MissionComposite composite, 
-			Mission toUpdate, MissionEditor me) {
+			Mission toUpdate) {
 		super(parentShell);
-		this.me = me;
+	
 		this.composite = composite;
-		
-//		session = HibernateManager.openSession(new AttachmentInterceptor());
-//		session = HibernateManager.openSession();
-//		session.beginTransaction();
-//		this.toUpdate = (Mission) session.load(Mission.class, toUpdate.getUuid());
-		
 		this.toUpdate = toUpdate;
 	}
 
@@ -91,9 +84,9 @@ public class MissionEditorDialog extends TitleAreaDialog {
 	public boolean close() {
 		if (isChanged){
 			MessageDialog md = new MessageDialog(getShell(), 
-					"Edit Mission", 
+					Messages.MissionEditorDialog_SaveDialogTitle, 
 					null, 
-					"There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+					Messages.MissionEditorDialog_SaveWarning, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();
 			if (ret == 2){
 				//cancel
@@ -106,14 +99,7 @@ public class MissionEditorDialog extends TitleAreaDialog {
 					setReturnCode(IDialogConstants.OK_ID);
 				}
 			}
-		}
-//		if (session.isOpen()){
-//			if (session.getTransaction().isActive()){
-//				session.getTransaction().rollback();
-//			}
-//			session.close();
-//		}
-		
+		}	
 		return super.close();
 	}
 	
@@ -170,7 +156,7 @@ public class MissionEditorDialog extends TitleAreaDialog {
 			isChanged = false;
 			getButton(IDialogConstants.OK_ID).setEnabled(false);
 		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog("Error saving changes.  Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionEditorDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return false;
 		}finally{
 			session.close();
@@ -219,7 +205,7 @@ public class MissionEditorDialog extends TitleAreaDialog {
 		
 		setTitle(composite.getTitle());
 		setMessage(composite.getDescription());
-		getShell().setText("Edit Mission");
+		getShell().setText(Messages.MissionEditorDialog_Title);
 		return c;
 	}
 	

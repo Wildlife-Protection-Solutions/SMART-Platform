@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -69,7 +70,7 @@ public class DatesComponent implements SelectionListener{
 		}
 		
 		Label l = new Label(part, SWT.NONE);
-		l.setText("Start Date:");
+		l.setText(Messages.DatesComponent_StartDateLabel);
 		if (optional){
 			btnCheckStart = new Button(part, SWT.CHECK);
 		}
@@ -77,7 +78,7 @@ public class DatesComponent implements SelectionListener{
 		
 		
 		l = new Label(part, SWT.NONE);
-		l.setText("End Date:");
+		l.setText(Messages.DatesComponent_EndDateLabel);
 		if (optional){
 			btnCheckEnd = new Button(part, SWT.CHECK);
 		}
@@ -154,12 +155,12 @@ public class DatesComponent implements SelectionListener{
 		if (optional){
 			if (btnCheckEnd.getSelection() && btnCheckStart.getSelection()){
 				if (getEndDate().before(getStartDate())){
-					error = "End date cannot be before start date.";
+					error = Messages.DatesComponent_InvalidDate;
 				}
 			}
 		}else{
 			if (getEndDate().before(getStartDate())){
-				error = "End date cannot be before start date.";
+				error = Messages.DatesComponent_InvalidDate;
 			}
 		}
 		

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -28,6 +29,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 
 /**
  * Editor input for surveys
@@ -84,7 +86,7 @@ public class SurveyEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
-		return this.id + " [" + designName + "]"; 
+		return MessageFormat.format(Messages.SurveyEditorInput_0ID_1Name, new Object[]{this.id, designName}); 
 	}
 
 	@Override

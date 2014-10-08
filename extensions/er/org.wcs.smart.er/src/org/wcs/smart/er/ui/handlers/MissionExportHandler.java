@@ -1,4 +1,3 @@
-
 /*
 * Copyright (C) 2012 Wildlife Conservation Society
 *
@@ -21,9 +20,6 @@
 * SOFTWARE.
 */
 package org.wcs.smart.er.ui.handlers;
-
-
-
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;

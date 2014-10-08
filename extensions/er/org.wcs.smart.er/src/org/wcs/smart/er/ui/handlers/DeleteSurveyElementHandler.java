@@ -188,6 +188,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	public static boolean deleteSurveyDesign(byte[] uuid, Session session) {
 		String id = SmartUtils.encodeHex(uuid);
 		session.beginTransaction();

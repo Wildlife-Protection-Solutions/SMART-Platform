@@ -48,6 +48,7 @@ public class MissionAttributeListItemDeleteAdvisor implements IDeleteAdvisor {
 		MissionAttributeListItem ma = (MissionAttributeListItem)object;
 		
 		//find missions which use this attribute
+		@SuppressWarnings("unchecked")
 		List<MissionPropertyValue> designs = session.createCriteria(MissionPropertyValue.class)
 				.add(Restrictions.eq("attributeListItem", ma)).list(); //$NON-NLS-1$
 		if (designs.size() == 0){

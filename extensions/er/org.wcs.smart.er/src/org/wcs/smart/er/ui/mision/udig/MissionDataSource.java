@@ -31,7 +31,6 @@ import org.geotools.feature.SchemaException;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
 
 /**
  * Data source for mission observations and tracks.

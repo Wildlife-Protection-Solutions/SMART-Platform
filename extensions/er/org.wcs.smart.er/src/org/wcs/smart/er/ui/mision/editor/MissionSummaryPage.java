@@ -53,6 +53,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
@@ -63,6 +64,7 @@ import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Mission editor summary page.
@@ -128,7 +130,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		}
 		
 		Section section = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
-		section.setText("Summary");
+		section.setText(Messages.MissionSummaryPage_SummaryLabel);
 		section.setLayout(new GridLayout());
 		section.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -149,12 +151,12 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		//mission id
-		toolkit.createLabel(left, "Mission ID:");
-		txtId = toolkit.createText(left, "");
+		toolkit.createLabel(left, Messages.MissionSummaryPage_MissionIdLabel);
+		txtId = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtId.setEditable(false);
 		if (canEdit){
-			Hyperlink edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
+			Hyperlink edit = toolkit.createHyperlink(left, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 			edit.setData(IdComposite.class);
 			edit.addHyperlinkListener(this);
@@ -163,15 +165,15 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		}
 		
 		//survey id
-		toolkit.createLabel(left, "Survey ID:");
-		txtSurveyId = toolkit.createText(left, "");
+		toolkit.createLabel(left, "Survey ID:"); //$NON-NLS-1$
+		txtSurveyId = toolkit.createText(left, ""); //$NON-NLS-1$
 		txtSurveyId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtSurveyId.setEditable(false);
 		new Label(left, SWT.NONE);
 		
 		
 		//members id
-		Label l = toolkit.createLabel(left, "Members:");
+		Label l = toolkit.createLabel(left, Messages.MissionSummaryPage_MembersLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		lstMembers = new TableViewer(left, SWT.BORDER);
@@ -192,7 +194,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			public String getText(Object element){
 				if (element instanceof MissionMember){
 					if (((MissionMember) element).getIsLeader()){
-						return MessageFormat.format("[Leader] {0}", new Object[]{((MissionMember)element).getMember().getFullLabel()});
+						return MessageFormat.format(Messages.MissionSummaryPage_LeaderLabel, new Object[]{((MissionMember)element).getMember().getFullLabel()});
 					}
 					return ((MissionMember)element).getMember().getFullLabel();
 				}
@@ -202,7 +204,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		lstMembers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		if (canEdit){
-			Hyperlink edit = toolkit.createHyperlink(left, "edit...", SWT.NONE);
+			Hyperlink edit = toolkit.createHyperlink(left, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 			edit.setData(MissionEmployeeComposite.class);
 			edit.addHyperlinkListener(this);
@@ -215,13 +217,13 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		//comments
-		l = toolkit.createLabel(right, "Comments:");
+		l = toolkit.createLabel(right, Messages.MissionSummaryPage_CommentsLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		txtComment = toolkit.createText(right, "", SWT.MULTI);
+		txtComment = toolkit.createText(right, "", SWT.MULTI); //$NON-NLS-1$
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtComment.setEditable(false);
 		if (canEdit){
-			Hyperlink edit = toolkit.createHyperlink(right, "edit...", SWT.NONE);
+			Hyperlink edit = toolkit.createHyperlink(right, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 			edit.setData(CommentComposite.class);
 			edit.addHyperlinkListener(this);
@@ -233,7 +235,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		prop.setLayout(new GridLayout(3, false));
 		prop.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
-		Label mpl = toolkit.createLabel(prop, "Mission Properties:");
+		Label mpl = toolkit.createLabel(prop, Messages.MissionSummaryPage_Properties);
 		mpl.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		Composite tableComp = new Composite(prop, SWT.NONE);
@@ -249,7 +251,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		
 		TableViewerColumn nameColumn = new TableViewerColumn(tblProperties, SWT.NONE);
 		nameColumn.getColumn().setResizable(true);
-		nameColumn.getColumn().setText("Property");
+		nameColumn.getColumn().setText(Messages.MissionSummaryPage_PropertyLabel);
 		nameColumn.getColumn().setWidth(100);
 		nameColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -264,7 +266,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		
 		TableViewerColumn valueColumn = new TableViewerColumn(tblProperties, SWT.NONE);
 		valueColumn.getColumn().setResizable(true);
-		valueColumn.getColumn().setText("Value");
+		valueColumn.getColumn().setText(Messages.MissionSummaryPage_ValueLabel);
 		valueColumn.getColumn().setWidth(100);
 		valueColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -278,7 +280,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		tLayout.setColumnData(valueColumn.getColumn(), new ColumnWeightData(75));
 		
 		if (canEdit){
-			Hyperlink edit = toolkit.createHyperlink(prop, "edit...", SWT.NONE);
+			Hyperlink edit = toolkit.createHyperlink(prop, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 			edit.setData(MissionPropertyValuesComposite.class);
 			edit.addHyperlinkListener(this);
@@ -288,7 +290,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 	
 		//data section
 		Section dataSection = toolkit.createSection(form.getBody(), Section.TITLE_BAR);
-		dataSection.setText("Mission Data");
+		dataSection.setText(Messages.MissionSummaryPage_MissionDataLabel);
 		dataSection.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 				
 		Composite dataProp = toolkit.createComposite(dataSection);
@@ -296,18 +298,18 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		dataProp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		dataSection.setClient(dataProp);
 				
-		toolkit.createLabel(dataProp,  "Start Date:");
-		txtStart = toolkit.createText(dataProp, "");
+		toolkit.createLabel(dataProp,  Messages.MissionSummaryPage_StartDate);
+		txtStart = toolkit.createText(dataProp, ""); //$NON-NLS-1$
 		txtStart.setEditable(false);
 		txtStart.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
-		toolkit.createLabel(dataProp,  "End Date:");
-		txtEnd = toolkit.createText(dataProp, "");
+		toolkit.createLabel(dataProp,  Messages.MissionSummaryPage_EndDate);
+		txtEnd = toolkit.createText(dataProp, ""); //$NON-NLS-1$
 		txtEnd.setEditable(false);
 		txtEnd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		if (canEdit){
-			Hyperlink edit = toolkit.createHyperlink(dataProp, "edit...", SWT.NONE);
+			Hyperlink edit = toolkit.createHyperlink(dataProp, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 			edit.setData(DateComposite.class);
 			edit.addHyperlinkListener(this);
@@ -330,7 +332,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			Mission mission = missionEditor.getMission();
 			session.update(mission);
 
-			form.setText("Mission: " + mission.getId());
+			form.setText(Messages.MissionSummaryPage_MissionLabel + mission.getId());
 			txtSurveyId.setText(mission.getSurvey().getId());
 			txtComment.setText(mission.getComment() == null ? "" : mission.getComment()); //$NON-NLS-1$
 			txtId.setText(mission.getId());
@@ -353,8 +355,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 	}
 	
 	private void editComponent(MissionComposite component){
-//		missionEditor.fireEventtest();
-		MissionEditorDialog dialog = new MissionEditorDialog(getSite().getShell(), component, missionEditor.getMission(), missionEditor);
+		MissionEditorDialog dialog = new MissionEditorDialog(getSite().getShell(), component, missionEditor.getMission());
 		dialog.open();
 	}
 
@@ -376,7 +377,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		
 		Object component = null;
 		try {
-			component = ((Class)x).newInstance();
+			component = ((Class<?>)x).newInstance();
 		} catch (Exception ex) {
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		}

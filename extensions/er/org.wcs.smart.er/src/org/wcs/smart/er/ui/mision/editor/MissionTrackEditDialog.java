@@ -123,9 +123,9 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 	public boolean close() {
 		if (isChanged) {
 			MessageDialog md = new MessageDialog(getShell(), 
-					"Edit Mission Tracks", 
+					Messages.MissionTrackEditDialog_DialogTitle, 
 					null, 
-					"There are unsaved changes.  Would you like to save your changes before closing?", MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
+					Messages.MissionTrackEditDialog_SaveWarning, MessageDialog.QUESTION_WITH_CANCEL, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL},0);
 			int ret = md.open();
 			if (ret == 2) {
 				//cancel
@@ -149,8 +149,8 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		try {
 			for (MissionTrack mt : cmp.getTracksToDelete()){
 				if (mt.getUuid() != null){
-					Query q = session.createQuery("UPDATE SurveyWaypoint SET missionTrack = null WHERE missionTrack = :mt");
-					q.setParameter("mt", mt);
+					Query q = session.createQuery("UPDATE SurveyWaypoint SET missionTrack = null WHERE missionTrack = :mt"); //$NON-NLS-1$
+					q.setParameter("mt", mt); //$NON-NLS-1$
 					q.executeUpdate();
 				
 					mt.setMission(null);
@@ -160,7 +160,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 			session.saveOrUpdate(mission);
 			session.getTransaction().commit();
 		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.displayLog("Error saving changes.  Please close dialog and try again." + "\n\n" + ex.getMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackEditDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return false;
 		} finally {
 			session.close();

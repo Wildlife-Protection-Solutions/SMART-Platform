@@ -26,7 +26,6 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -69,19 +68,15 @@ import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -127,17 +122,19 @@ public class MissionDayComposite {
 	
 	private Composite mainComposite;
 
-	private DateTime dtStartTime;
-	private DateTime dtEndTime;
-	private Text restMinutes;
+//	private DateTime dtStartTime;
+//	private DateTime dtEndTime;
+//	private Text restMinutes;
+//	private Label lblTotalHours;
+//	private Font okayFont;
+	
 	private Label txtDistance;
-	private Label lblTotalHours;
-
+	
 	private TableViewer observationTable;
 	private ObservationOptions observationOptions;
 	private List<SurveyWaypoint> input;
 	
-	private Font okayFont;
+	
 	private Hyperlink lnkImportWaypoints;
 	
 	private TableViewer trackTable;
@@ -199,21 +196,21 @@ public class MissionDayComposite {
 		 ((GridLayout)timeInfo.getLayout()).marginHeight = 0;
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		Composite c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, Messages.MissionDayComposite_StartTime);
-		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
-		toolkit.adapt(dtStartTime);
-		dtStartTime.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateTotalHours();
-			}
-			
-		});
-		dtStartTime.setEnabled(canEdit);
+//		Composite c = toolkit.createComposite(timeInfo);
+//		c.setLayout(new GridLayout(2, false));
+//		((GridLayout)c.getLayout()).marginWidth = 0;
+//		((GridLayout)c.getLayout()).marginHeight = 0;
+//		toolkit.createLabel(c, Messages.MissionDayComposite_StartTime);
+//		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
+//		toolkit.adapt(dtStartTime);
+//		dtStartTime.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				updateTotalHours();
+//			}
+//			
+//		});
+//		dtStartTime.setEnabled(canEdit);
 //		dtStartTime.addFocusListener(new FocusAdapter() {			
 //			@Override
 //			public void focusLost(FocusEvent e) {
@@ -225,21 +222,21 @@ public class MissionDayComposite {
 //				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 //			}
 //		});
-
-		c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, Messages.MissionDayComposite_EndTime);
-		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
-		toolkit.adapt(dtEndTime);
-		dtEndTime.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				updateTotalHours();
-			}
-		});
-		dtEndTime.setEnabled(canEdit);
+//
+//		c = toolkit.createComposite(timeInfo);
+//		c.setLayout(new GridLayout(2, false));
+//		((GridLayout)c.getLayout()).marginWidth = 0;
+//		((GridLayout)c.getLayout()).marginHeight = 0;
+//		toolkit.createLabel(c, Messages.MissionDayComposite_EndTime);
+//		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
+//		toolkit.adapt(dtEndTime);
+//		dtEndTime.addSelectionListener(new SelectionAdapter() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				updateTotalHours();
+//			}
+//		});
+//		dtEndTime.setEnabled(canEdit);
 //		dtEndTime.addFocusListener(new FocusAdapter() {			
 //			@Override
 //			public void focusLost(FocusEvent e) {
@@ -251,18 +248,18 @@ public class MissionDayComposite {
 //				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
 //			}
 //		});
-
-		
-		c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, Messages.MissionDayComposite_RestMinutes);
-		restMinutes = toolkit.createText(c, "0", SWT.BORDER); //$NON-NLS-1$
-		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
-		gd.widthHint = 30;
-		restMinutes.setLayoutData(gd);
-		restMinutes.setEnabled(canEdit);
+//
+//		
+//		c = toolkit.createComposite(timeInfo);
+//		c.setLayout(new GridLayout(2, false));
+//		((GridLayout)c.getLayout()).marginWidth = 0;
+//		((GridLayout)c.getLayout()).marginHeight = 0;
+//		toolkit.createLabel(c, Messages.MissionDayComposite_RestMinutes);
+//		restMinutes = toolkit.createText(c, "0", SWT.BORDER); //$NON-NLS-1$
+//		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
+//		gd.widthHint = 30;
+//		restMinutes.setLayoutData(gd);
+//		restMinutes.setEnabled(canEdit);
 //		restMinutes.addFocusListener(new FocusListener() {
 //			private int oldValue; 
 //			
@@ -297,23 +294,23 @@ public class MissionDayComposite {
 //				oldValue = Integer.parseInt(restMinutes.getText());
 //			}
 //		});
-		
-		
-		c = toolkit.createComposite(timeInfo);
-		c.setLayout(new GridLayout(2, false));
-		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, "Total Hours:");
-		lblTotalHours = toolkit.createLabel(c, "Invalid Total Hours");
-		okayFont = lblTotalHours.getFont();
-		
-		FontData fd = okayFont.getFontData()[0];
-		fd.setStyle(SWT.BOLD);
-		
-		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
-		gd.widthHint = 30;
-		lblTotalHours.setLayoutData(gd);
+//		
+//		
+//		c = toolkit.createComposite(timeInfo);
+//		c.setLayout(new GridLayout(2, false));
+//		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+//		((GridLayout)c.getLayout()).marginWidth = 0;
+//		((GridLayout)c.getLayout()).marginHeight = 0;
+//		toolkit.createLabel(c, "Total Hours:");
+//		lblTotalHours = toolkit.createLabel(c, "Invalid Total Hours");
+//		okayFont = lblTotalHours.getFont();
+//		
+//		FontData fd = okayFont.getFontData()[0];
+//		fd.setStyle(SWT.BOLD);
+//		
+//		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+//		gd.widthHint = 30;
+//		lblTotalHours.setLayoutData(gd);
 
 		
 		Composite half = toolkit.createComposite(mainComposite);
@@ -347,7 +344,7 @@ public class MissionDayComposite {
 				}
 			});
 		}else{
-			toolkit.createLabel(trackComp, "");
+			toolkit.createLabel(trackComp, ""); //$NON-NLS-1$
 		}
 				
 		Composite distComp = toolkit.createComposite(half);
@@ -360,7 +357,7 @@ public class MissionDayComposite {
 		toolkit.createLabel(distComp, Messages.MissionDayComposite_DistanceTraveled);
 		txtDistance = toolkit.createLabel(distComp, "0", SWT.NONE); //$NON-NLS-1$
 //		txtDistance.setEditable(false);
-		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1);
+		GridData gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1);
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
 		
@@ -381,7 +378,7 @@ public class MissionDayComposite {
 				}
 			});
 		}else{
-			toolkit.createLabel(observationHcomp, "");
+			toolkit.createLabel(observationHcomp, ""); //$NON-NLS-1$
 		}
 
 		
@@ -502,26 +499,24 @@ public class MissionDayComposite {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			Mission m2 = (Mission) session.load(Mission.class, editor.getMissionEditor().getMission().getUuid());
 			this.mission = (Mission) session.merge(editor.getMissionEditor().getMission());
-		
-			Date date = editor.getDay();
-			
-			Calendar cal = Calendar.getInstance();
-			if (mission.getStartDate() != date) {
-				cal.setTime(mission.getStartDate());
-				dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
-						cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-			}else{
-				dtStartTime.setTime(0,0,0);
-			}
-			if (mission.getEndDate() != date) {
-				cal.setTime(mission.getEndDate());
-				dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
-						cal.get(Calendar.SECOND));
-			}else{
-				dtEndTime.setTime(23,59,59);
-			}
+//			Date date = editor.getDay();
+//			
+//			Calendar cal = Calendar.getInstance();
+//			if (mission.getStartDate() != date) {
+//				cal.setTime(mission.getStartDate());
+//				dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
+//						cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+//			}else{
+//				dtStartTime.setTime(0,0,0);
+//			}
+//			if (mission.getEndDate() != date) {
+//				cal.setTime(mission.getEndDate());
+//				dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
+//						cal.get(Calendar.SECOND));
+//			}else{
+//				dtEndTime.setTime(23,59,59);
+//			}
 			//TODO:
 //			if (data.getRestMinutes() == null) {
 //				restMinutes.setText("0"); //$NON-NLS-1$
