@@ -154,6 +154,8 @@ public class SplitTool extends SimpleTool implements KeyListener {
 		} else {
 			Control control = getContext().getViewportPane().getControl();
 			control.removeKeyListener(this);
+			
+			finishCommand.onFinish(null);
 		}
 
 	}
@@ -193,6 +195,12 @@ public class SplitTool extends SimpleTool implements KeyListener {
 	}
 	
 	public interface FinishCommand{
+		/**
+		 * Set of two points the user selected, or null if tool is being
+		 * de-activated.
+		 * 
+		 * @param points
+		 */
 		public void onFinish(List<Coordinate> points);
 	}
 }

@@ -641,10 +641,56 @@ public class Messages extends NLS {
 	public static String TemplateWizardPage_TemplateDesign;
 	public static String TemplateWizardPage_Title;
 	public static String TracksComposite_Association;
+
+	public static String TracksComposite_CouldNotSplit;
+
+	public static String TracksComposite_CurrentDayRule;
+
+	public static String TracksComposite_deleteLabel;
+	public static String TracksComposite_DeleteMessage;
+
+	public static String TracksComposite_DeleteTitle;
+
+	public static String TracksComposite_deleteTooltip;
+
 	public static String TracksComposite_Edit;
+
+	public static String TracksComposite_editTooltip;
 	public static String TracksComposite_Import;
+
+	public static String TracksComposite_ImportTitle;
+
+	public static String TracksComposite_importTooltip;
+
+	public static String TracksComposite_LayersLabel;
+	public static String TracksComposite_MapError;
+
+	public static String TracksComposite_MapName;
+
+	public static String TracksComposite_MergeLabel;
+
+	public static String TracksComposite_mergeTooltip;
+
+	public static String TracksComposite_NoIntersection1;
+
+	public static String TracksComposite_NoIntersection2;
+
+	public static String TracksComposite_NoneOption;
+
+	public static String TracksComposite_OtherDayRule;
+
+	public static String TracksComposite_SaveChangesMessage;
+
 	public static String TracksComposite_Split;
+
+	public static String TracksComposite_SplitInformation;
+
+	public static String TracksComposite_SuLabel;
+
+	public static String TracksComposite_splitTooltip;
 	public static String TracksComposite_TrackId;
+
+	public static String TracksComposite_TracksTab;
 	public static String TypePage_linesLabel;
 	public static String TypePage_Message;
 	public static String TypePage1_Message;

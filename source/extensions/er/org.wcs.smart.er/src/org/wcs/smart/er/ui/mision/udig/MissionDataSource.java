@@ -106,7 +106,7 @@ public class MissionDataSource extends AbstractDataStore{
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		String spec = "fid:String,id:String,tracktype:String,geom:LineString:srid=4326"; //$NON-NLS-1$
+		String spec = "fid:String,id:String,date:Date,sampling_unit_id:String,mission_id:String,distance:Double,geom:LineString:srid=4326"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType("smart." + MISSIONTRACK_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}
