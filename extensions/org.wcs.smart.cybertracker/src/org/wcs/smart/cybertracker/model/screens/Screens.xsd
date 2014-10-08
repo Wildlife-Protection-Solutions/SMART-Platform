@@ -4,6 +4,34 @@ elementFormDefault="qualified"
 targetNamespace="http://www.smartconservationsoftware.org/xml/1.0/cybertracker" 
 xmlns:cts="http://www.smartconservationsoftware.org/xml/1.0/cybertracker"
 xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:complexType name="Map">
+		<xs:sequence>
+			<xs:element type="xs:string" name="Name" />
+			<xs:element type="xs:string" name="FileName" />
+			<xs:element type="xs:string" name="Lock100" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="MovingMaps">
+		<xs:sequence>
+			<xs:element name="Items" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Item" maxOccurs="unbounded" minOccurs="0">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element type="xs:string" name="Id" />
+									<xs:element type="cts:Map" name="Map" minOccurs="1" maxOccurs="1"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
 	<xs:complexType name="Node">
 		<xs:sequence>
 			<xs:element name="Items" minOccurs="0">
@@ -44,11 +72,10 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema">
 						<xs:element type="xs:string" name="ManualOnSkip" />
 						<xs:element type="xs:string" name="ManualMapOnSkip" />
 						<xs:element type="xs:string" name="ManualAllowSkip" />
-						<xs:element type="xs:string" name="MovingMapFileName" />
-						<xs:element type="xs:string" name="MovingMapLock100" />
 						<xs:element type="xs:string" name="SimpleCamera" />
 						<xs:element type="xs:int" name="Projection" minOccurs="0" />
 						<xs:element type="xs:int" name="UTMZone" minOccurs="0" />
+						<xs:element type="cts:MovingMaps" name="MovingMaps" minOccurs="0"/>
 					</xs:sequence>
 				</xs:complexType>
 			</xs:element>

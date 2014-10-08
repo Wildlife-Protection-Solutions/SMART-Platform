@@ -27,6 +27,8 @@ import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.screens.Controls;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
+import org.wcs.smart.cybertracker.model.screens.Map;
+import org.wcs.smart.cybertracker.model.screens.MovingMaps;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.PdaUtil;
@@ -128,8 +130,7 @@ public class ScreensObjectFactory {
 			a1Data.setManualMapOnSkip(ctBooleanValue(properties.isUseMapOnSkip()));
 			a1Data.setManualAllowSkip(ctBooleanValue(properties.isAllowSkipManualGps()));
 
-			a1Data.setMovingMapFileName(properties.getFieldMapFilename());
-			a1Data.setMovingMapLock100(ctBooleanValue(properties.isLock100()));
+			a1Data.setMovingMaps(createMovingMaps(properties));
 		}
 		if (screenNodes != null) {
 			a1Node.getNode().addAll(screenNodes);
@@ -139,6 +140,25 @@ public class ScreensObjectFactory {
 		return screens;
 	}
 	
+	private MovingMaps createMovingMaps(CyberTrackerProperties properties) {
+		MovingMaps movingMaps = new MovingMaps();
+		
+		MovingMaps.Items items = new MovingMaps.Items();
+		movingMaps.setItems(items);
+		
+		MovingMaps.Items.Item item = new MovingMaps.Items.Item();
+		items.getItem().add(item);
+
+		Map map = new Map();
+		item.setMap(map);
+		item.setId((new CyberTrackerUtil.CyberTrackerId()).getItemId());
+
+		map.setFileName(properties.getFieldMapFilename());
+		map.setLock100(ctBooleanValue(properties.isLock100()));
+		
+		return movingMaps;
+	}
+
 	private String ctBooleanValue(boolean value) {
 		return value ? ICyberTrackerConstants.STR_TRUE : ICyberTrackerConstants.STR_FALSE;
 	}
