@@ -125,11 +125,11 @@ public class ScreensObjectFactory {
 			a1Data.setUTMZone(properties.getUtmZone());
 			a1Data.setGpsSkipTimeout(properties.getSkipButtonTimeout());
 			a1Data.setManualOnSkip(ctBooleanValue(properties.isManualGps()));
+			a1Data.setManualMapOnSkip(ctBooleanValue(properties.isUseMapOnSkip()));
 			a1Data.setManualAllowSkip(ctBooleanValue(properties.isAllowSkipManualGps()));
 
 			a1Data.setMovingMapFileName(properties.getFieldMapFilename());
 			a1Data.setMovingMapLock100(ctBooleanValue(properties.isLock100()));
-			a1Data.setMovingMapOnSkip(ctBooleanValue(properties.isUseMapOnSkip()));
 		}
 		if (screenNodes != null) {
 			a1Node.getNode().addAll(screenNodes);

@@ -748,6 +748,25 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		skipButtonTimeoutDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_SkipButtonTimeoutInvalid, CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MIN_VALUE, CyberTrackerProperties.SKIP_BUTTON_TIMEOUT_MAX_VALUE));
 		skipButtonTimeoutDecoration.hide();
 		
+
+		Label lblUseMapOnSkip= new Label(gpsContainer, SWT.NONE);
+		lblUseMapOnSkip.setText(Messages.CyberTrackerPropertiesDialog_48);
+		lblUseMapOnSkip.setToolTipText(Messages.CyberTrackerPropertiesDialog_49);
+
+		btnUseMapOnSkip = new Button(gpsContainer, SWT.CHECK);
+		btnUseMapOnSkip.setToolTipText(Messages.CyberTrackerPropertiesDialog_49);
+		btnUseMapOnSkip.setSelection(ctProperties.isUseMapOnSkip());
+		btnUseMapOnSkip.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setChangesMade(true);
+			}
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// nothing
+			}
+		});
+
 		
 		Label lblManualGPS = new Label(gpsContainer, SWT.NONE);
 		lblManualGPS.setText(Messages.CyberTrackerPropertiesDialog_34);
@@ -767,7 +786,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			}
 		});
 		
-		
+
 		Label lblAllowSkipManual= new Label(gpsContainer, SWT.NONE);
 		lblAllowSkipManual.setText(Messages.CyberTrackerPropertiesDialog_37);
 		lblAllowSkipManual.setToolTipText(Messages.CyberTrackerPropertiesDialog_38);
@@ -860,24 +879,6 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			}
 		});	
 		
-		
-		Label lblUseMapOnSkip= new Label(fieldmapContainer, SWT.NONE);
-		lblUseMapOnSkip.setText(Messages.CyberTrackerPropertiesDialog_48);
-		lblUseMapOnSkip.setToolTipText(Messages.CyberTrackerPropertiesDialog_49);
-
-		btnUseMapOnSkip = new Button(fieldmapContainer, SWT.CHECK);
-		btnUseMapOnSkip.setToolTipText(Messages.CyberTrackerPropertiesDialog_49);
-		btnUseMapOnSkip.setSelection(ctProperties.isUseMapOnSkip());
-		btnUseMapOnSkip.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setChangesMade(true);
-			}
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-				// nothing
-			}
-		});				
 		setTitle(Messages.CyberTrackerPropertiesDialog_Title);
 		setMessage(Messages.CyberTrackerPropertiesDialog_Message);
 		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
