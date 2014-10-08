@@ -36,6 +36,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.widgets.Control;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.ReprojectUtils;
 
@@ -138,8 +140,7 @@ public class SplitTool extends SimpleTool implements KeyListener {
 				
 				finishCommand.onFinish(cs);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				EcologicalRecordsPlugIn.displayLog(Messages.SplitTool_ToolError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			}
 		}
 	}

@@ -28,9 +28,7 @@ public class MissionMemberFilter implements IFilter {
 		try {
 			uuid = SmartUtils.decodeHex(bits[2]);
 		} catch (Exception e) {
-			//TODO:
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new IllegalStateException(e);
 		}
 		boolean isLeader = bits[1].equals("missionleader"); //$NON-NLS-1$
 		

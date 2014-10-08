@@ -405,8 +405,7 @@ public class TracksComposite extends Composite implements MapPart{
 			}
 			
 		}catch (Exception ex){
-			ex.printStackTrace();
-			//TODO:
+			EcologicalRecordsPlugIn.displayLog(Messages.TracksComposite_MapConfigurationError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 		//add sampling unit layers
@@ -452,8 +451,7 @@ public class TracksComposite extends Composite implements MapPart{
 				mapViewer.getMap().sendCommandASync(command);
 			}
 		}catch (Exception ex){
-			ex.printStackTrace();
-			//TODO:
+			EcologicalRecordsPlugIn.displayLog(Messages.TracksComposite_MapConfigurationError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	}
 

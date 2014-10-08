@@ -421,7 +421,7 @@ public class MissionDayComposite {
 				}
 			});
 		}
-		updateTotalHours();
+//		updateTotalHours();
 		
 		return mainComposite;
 	}
@@ -561,7 +561,7 @@ public class MissionDayComposite {
 			
 //			this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
 					
-			updateTotalHours();
+//			updateTotalHours();
 //			updateDistance();
 			
 			if (btnMoveWaypoint != null){
@@ -700,10 +700,8 @@ public class MissionDayComposite {
 		}
 	}
 
-	protected void updateTotalHours() {
-		// TODO Auto-generated method stub
-		
-	}
+//	protected void updateTotalHours() {
+//	}
 
 	public void refreshTable() {
 		observationTable.refresh();
@@ -913,7 +911,6 @@ public class MissionDayComposite {
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){
-				//TODO:
 				waypoint.setDateTime(SmartUtils.combineDateTime(editor.getDay(), new Time(((Date)value).getTime())));
 				needSave = true;
 			}
@@ -1018,10 +1015,9 @@ public class MissionDayComposite {
 
 		@Override
 		protected boolean canEdit(Object element) {
-			//TODO:
-//			if (MissionDayComposite.this.editor.getPatrolEditor().canEdit() != null){
-//				return false;
-//			}
+			if (MissionDayComposite.this.editor.getMissionEditor().canEdit() != null){
+				return false;
+			}
 			return true;
 		}
 
