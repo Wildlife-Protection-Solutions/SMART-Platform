@@ -48,6 +48,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
+@SuppressWarnings("unchecked")
 public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	
@@ -69,24 +70,24 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		
 		//get fixed sampling units
 		StringBuilder sb = new StringBuilder();
-		sb.append("FROM SamplingUnit a ");
-		sb.append(" WHERE a.surveyDesign = :survey ");
+		sb.append("FROM SamplingUnit a "); //$NON-NLS-1$
+		sb.append(" WHERE a.surveyDesign = :survey "); //$NON-NLS-1$
 		
 		Query q = s.createQuery(sb.toString());
-		q.setParameter("survey", survey);
+		q.setParameter("survey", survey); //$NON-NLS-1$
 		
 		List<SamplingUnit> unit = q.list();
 		units.addAll(unit);
 
 		//get reconnaissance tracks
 		sb = new StringBuilder();
-		sb.append("FROM MissionTrack ");
-		sb.append(" WHERE mission.survey.surveyDesign = :survey ");
-		sb.append(" AND type = :type  ");
+		sb.append("FROM MissionTrack "); //$NON-NLS-1$
+		sb.append(" WHERE mission.survey.surveyDesign = :survey "); //$NON-NLS-1$
+		sb.append(" AND type = :type  "); //$NON-NLS-1$
 		
 		q = s.createQuery(sb.toString());
-		q.setParameter("survey", survey);
-		q.setParameter("type", MissionTrack.TrackType.RECON);
+		q.setParameter("survey", survey); //$NON-NLS-1$
+		q.setParameter("type", MissionTrack.TrackType.RECON); //$NON-NLS-1$
 		
 		List<MissionTrack> tracks = q.list();
 		units.addAll(tracks);
@@ -116,7 +117,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		sb.append(" WHERE a.surveyDesign = :survey "); //$NON-NLS-1$
 		
 		Query q = s.createQuery(sb.toString());
-		q.setParameter("survey", mission.getSurvey().getSurveyDesign());
+		q.setParameter("survey", mission.getSurvey().getSurveyDesign()); //$NON-NLS-1$
 		
 		List<SamplingUnit> unit = q.list();
 		units.addAll(unit);
@@ -137,12 +138,13 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 * If the filter
 	 * is null with return all survey designs.
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public List<SurveyDesignEditorInput> getSurveyDesignEditorInputs(Session s, SurveyDesignFilter filter) {
 		if (filter == null){
 			//get all
-			List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list();
+			List<SurveyDesign> ds = s.createCriteria(SurveyDesign.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+					.list(); 
 			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			
 			for (SurveyDesign d : ds){
@@ -173,7 +175,6 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 * @param filter filter or null if not filter should be applied
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public List<SurveyEditorInput> getSurveys(Session s, SurveyFilter filter){
 		if (filter == null){
 			//get all
@@ -206,7 +207,6 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	@Override
 	public List<Survey> getActiveSurveys(Session s) {
 		//get all
-		@SuppressWarnings("unchecked")
 		List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
 				.createAlias("s.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
 				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
@@ -220,7 +220,6 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 */
 	@Override
 	public List<Survey> getActiveSurveys(SurveyDesign sd, Session s){
-		@SuppressWarnings("unchecked")
 		List<Survey> ds = s.createCriteria(Survey.class, "s") //$NON-NLS-1$
 				.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
 				.list();
@@ -265,7 +264,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	public SurveyDesign getSurveyDesign(String key, Session session){
 		List<SurveyDesign> designs = session.createCriteria(SurveyDesign.class)
 				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		if (designs.size() > 0){
 			return designs.get(0);

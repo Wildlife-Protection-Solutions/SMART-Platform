@@ -21,13 +21,11 @@
  */
 package org.wcs.smart.er.hibernate;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;

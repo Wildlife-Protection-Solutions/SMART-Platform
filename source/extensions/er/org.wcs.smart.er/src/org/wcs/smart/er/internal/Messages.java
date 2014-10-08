@@ -84,6 +84,12 @@ public class Messages extends NLS {
 	public static String DateComposite_Title;
 	public static String DateComposites_Description;
 	public static String DateComposites_Title;
+	public static String DatesComponent_EndDateLabel;
+
+	public static String DatesComponent_InvalidDate;
+
+	public static String DatesComponent_StartDateLabel;
+
 	public static String DeleteMissionTracksJob_Error;
 
 	public static String DeleteMissionTracksJob_Title;
@@ -271,6 +277,30 @@ public class Messages extends NLS {
 	public static String MissionDayPage_Mission;
 	public static String MissionDayPageEditorInput_Name;
 	public static String MissionDayPageEditorInput_Tooltip;
+	public static String MissionEditor_EditorError;
+
+	public static String MissionEditor_EditorError2;
+
+	public static String MissionEditor_EditorError3;
+
+	public static String MissionEditor_EditorError4;
+
+	public static String MissionEditor_MapPage;
+
+	public static String MissionEditor_MissionLabel;
+
+	public static String MissionEditor_reloadJobName;
+
+	public static String MissionEditor_SummaryPage;
+
+	public static String MissionEditorDialog_SaveDialogTitle;
+
+	public static String MissionEditorDialog_SaveError;
+
+	public static String MissionEditorDialog_SaveWarning;
+
+	public static String MissionEditorDialog_Title;
+
 	public static String MissionEmployeeComposite_AllEmployeesLabel;
 	public static String MissionEmployeeComposite_Description;
 	public static String MissionEmployeeComposite_MissionLeader;
@@ -301,8 +331,44 @@ public class Messages extends NLS {
 	public static String MissionServiceInfo_Keyword2;
 	public static String MissionServiceInfo_Keyword3;
 	public static String MissionServiceInfo_Keyword4;
+	public static String MissionSummaryPage_CommentsLabel;
+
+	public static String MissionSummaryPage_EndDate;
+
+	public static String MissionSummaryPage_LeaderLabel;
+
+	public static String MissionSummaryPage_MembersLabel;
+
+	public static String MissionSummaryPage_MissionDataLabel;
+
+	public static String MissionSummaryPage_MissionIdLabel;
+
+	public static String MissionSummaryPage_MissionLabel;
+
+	public static String MissionSummaryPage_Properties;
+
+	public static String MissionSummaryPage_PropertyLabel;
+
+	public static String MissionSummaryPage_StartDate;
+
+	public static String MissionSummaryPage_SummaryLabel;
+
+	public static String MissionSummaryPage_ValueLabel;
+
+	public static String MissionTrackEditDialog_DialogTitle;
+
 	public static String MissionTrackEditDialog_Message;
+	public static String MissionTrackEditDialog_SaveError;
+
+	public static String MissionTrackEditDialog_SaveWarning;
+
 	public static String MissionTrackEditDialog_Title;
+	public static String MoveWaypointDialog_Description;
+
+	public static String MoveWaypointDialog_MoveToLabel;
+
+	public static String MoveWaypointDialog_Title;
+
 	public static String NameIdComposite_Button_Change;
 	public static String NameIdComposite_Description;
 	public static String NameIdComposite_EditKey_Message;
@@ -540,6 +606,8 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_ValueColumn;
 
 	public static String SurveyDesignToXmlConverter_TaskName;
+
+	public static String SurveyEditorInput_0ID_1Name;
 	public static String SurveyFilterDialog_AllDesignsLabel;
 	public static String SurveyFilterDialog_DatesGroup;
 	public static String SurveyFilterDialog_DesignGroup;

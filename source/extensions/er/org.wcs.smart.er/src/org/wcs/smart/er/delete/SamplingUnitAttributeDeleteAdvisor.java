@@ -39,6 +39,7 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
  */
 public class SamplingUnitAttributeDeleteAdvisor implements IDeleteAdvisor {
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof SamplingUnitAttribute)){

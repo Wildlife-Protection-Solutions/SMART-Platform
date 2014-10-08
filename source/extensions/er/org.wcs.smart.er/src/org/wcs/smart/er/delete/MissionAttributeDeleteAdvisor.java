@@ -44,6 +44,7 @@ public class MissionAttributeDeleteAdvisor implements IDeleteAdvisor {
 	public MissionAttributeDeleteAdvisor() {
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public String canDelete(Object object, Session session) {
 		if (!(object instanceof MissionAttribute)){

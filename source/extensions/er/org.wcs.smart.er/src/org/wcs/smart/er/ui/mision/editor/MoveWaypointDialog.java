@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.util.SmartUtils;
 
@@ -99,7 +100,7 @@ public class MoveWaypointDialog extends TitleAreaDialog {
 		legtype.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(legtype, SWT.NONE);
-		lbl.setText("Move To:");
+		lbl.setText(Messages.MoveWaypointDialog_MoveToLabel);
 		
 		final Combo dtCombo = new Combo(legtype, SWT.DROP_DOWN | SWT.READ_ONLY);
 
@@ -116,10 +117,10 @@ public class MoveWaypointDialog extends TitleAreaDialog {
 			}
 		});
 		
-		setTitle("Move Waypoints");
-		setMessage("Select day to move selected waypoints to.");
+		setTitle(Messages.MoveWaypointDialog_Title);
+		setMessage(Messages.MoveWaypointDialog_Description);
 		
-		getShell().setText("Move Waypoints");
+		getShell().setText(Messages.MoveWaypointDialog_Title);
 		return parent;
 	}
 	

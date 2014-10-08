@@ -52,12 +52,14 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.SurveyPermissionManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -66,6 +68,12 @@ import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.util.SmartUtils;
 
+/**
+ * Mission editor
+ * 
+ * @author Emily
+ *
+ */
 public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
 
 	public static final String ID = "org.wcs.smart.er.ui.mission.MissionEditor"; //$NON-NLS-1$
@@ -78,7 +86,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private MissionMapPage mapPage;
 	
 	private Projection[] projections;
-	
 	private Boolean trackDistanceDirection = null;
 	private ObservationOptions options;
 	
@@ -105,7 +112,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			if (o instanceof Mission) {
 				if ( Arrays.equals(((Mission)o).getUuid(), mission.getUuid())) {
 					try {
-						Job j = new Job("Reloading mission") {
+						Job j = new Job(Messages.MissionEditor_reloadJobName) {
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
 								Date cstart = mission.getStartDate();
@@ -140,7 +147,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 						j.schedule();
 						j.join();
 					} catch (InterruptedException e) {
-						EcologicalRecordsPlugIn.log("Reload mission job interrupted", e);
+						EcologicalRecordsPlugIn.log("Reload mission job interrupted", e); //$NON-NLS-1$
 					}
 
 				}
@@ -148,37 +155,37 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}
 	};
 	
-	public void fireEventtest(final Mission lmission){
-		missionModifiedListener.event(lmission);
-	}
-	/**
-	 * Converts a double that represents a time range into
-	 * and hours and minutes string.  For example: 20.5 is 
-	 * converted into "20h 30m"
-	 * 
-	 * @param hrs time range in hours
-	 * @return formatted string
-	 */
-	public static String formatTimeRange(Double hrs){
-		boolean minus = false;
-		if (hrs < 0){
-			minus = true;
-			hrs = -hrs;
-		}
-		int lhrs = (int)Math.floor(hrs);
-		int lmin = (int)Math.round((hrs - lhrs) * 60.0);
-		
-		if (lmin == 60){
-			lmin = 0;
-			lhrs++;
-		}
-		if (minus){
-			return "-" + lhrs + " hour " + " " + lmin + " min"; //$NON-NLS-1$ //$NON-NLS-2$
-		}else{
-			return lhrs + " hour "  + " " + lmin + " min"; //$NON-NLS-1$
-		}
-	}
+//	/**
+//	 * Converts a double that represents a time range into
+//	 * and hours and minutes string.  For example: 20.5 is 
+//	 * converted into "20h 30m"
+//	 * 
+//	 * @param hrs time range in hours
+//	 * @return formatted string
+//	 */
+//	public static String formatTimeRange(Double hrs){
+//		boolean minus = false;
+//		if (hrs < 0){
+//			minus = true;
+//			hrs = -hrs;
+//		}
+//		int lhrs = (int)Math.floor(hrs);
+//		int lmin = (int)Math.round((hrs - lhrs) * 60.0);
+//		
+//		if (lmin == 60){
+//			lmin = 0;
+//			lhrs++;
+//		}
+//		if (minus){
+//			return "-" + lhrs + " hour " + " " + lmin + " min"; //$NON-NLS-1$ //$NON-NLS-2$
+//		}else{
+//			return lhrs + " hour "  + " " + lmin + " min"; //$NON-NLS-1$
+//		}
+//	}
 	
+	/**
+	 * New mission editor; registers events
+	 */
 	public MissionEditor() {
 		super();
 
@@ -186,6 +193,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionModifiedListener);
 	}
 
+	/**
+	 * 
+	 * @return list of projections for current conservation area
+	 */
 	public Projection[] getAvailableProjections(){
 		return this.projections;
 	}
@@ -198,6 +209,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionModifiedListener);
 	}
 	
+	/**
+	 * Gets the mission from the database; reloading if necessary
+	 * @return
+	 */
 	public Mission getMission(){
 		if (this.mission == null){
 			
@@ -227,6 +242,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return this.mission;
 	}
 
+	/**
+	 * 
+	 * @return current observation options
+	 */
 	public ObservationOptions getOptions(){
 		return this.options;
 	}
@@ -243,9 +262,12 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return this.trackDistanceDirection;
 	}
 	
+	/**
+	 * Updates the part name
+	 */
 	public void updatePartName(){
 		MissionEditorInput input = ((MissionEditorInput) getEditorInput());
-		super.setPartName("Mission: " + input.getName());
+		super.setPartName(Messages.MissionEditor_MissionLabel + input.getName());
 	}
 	
 	
@@ -260,12 +282,15 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 
 			summaryEditor = new MissionSummaryPage(this);
 			int i = addPage(summaryEditor, getEditorInput());
-			setPageText(i, "Summary");
+			setPageText(i, Messages.MissionEditor_SummaryPage);
+			setPageImage(i, EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_ICON));
+			
 			createDayPages();
 			
 			mapPage = new MissionMapPage(this);
 			int mapIndex = addPage(mapPage, getEditorInput());
-			setPageText(mapIndex, "Map");
+			setPageText(mapIndex, Messages.MissionEditor_MapPage);
+			setPageImage(mapIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 			
 		} catch (final Throwable t) {
 			getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
@@ -275,9 +300,9 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 								MissionEditor.this.dispose();
 								MissionEditor.this.getSite().getPage().closeEditor(MissionEditor.this, false);
 								if (t instanceof SWTError&& t.getMessage().contains("No more handles")) { //$NON-NLS-1$
-									EcologicalRecordsPlugIn.displayLog("Mission editor could not be created.  Please try closing existing open editors and try again." + t.getLocalizedMessage(), t);
+									EcologicalRecordsPlugIn.displayLog(Messages.MissionEditor_EditorError + t.getLocalizedMessage(), t);
 								} else {
-									EcologicalRecordsPlugIn.displayLog("Error occurred while loading editor." + t.getLocalizedMessage(), t);
+									EcologicalRecordsPlugIn.displayLog(Messages.MissionEditor_EditorError2 + t.getLocalizedMessage(), t);
 								}
 							} catch (Exception ex) {
 								EcologicalRecordsPlugIn.log("Failure", ex); //$NON-NLS-1$
@@ -291,7 +316,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}
 	}
 
-	public void createDayPages() {
+	private void createDayPages() {
 		try {
 			int i = 0;
 			while( i < getPageCount()) {
@@ -320,7 +345,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			}
 
 		} catch (Exception ex) {
-			EcologicalRecordsPlugIn.displayLog("Error loading editor", ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionEditor_EditorError3, ex);
 		}
 		
 	}
@@ -340,6 +365,13 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return SurveyPermissionManager.INSTANCE.canEditMission(mission, this.options);
 	}
 	
+	/**
+	 * Creates a edit warning label.
+	 * 
+	 * @param editError
+	 * @param parent
+	 * @param toolkit
+	 */
 	public void createEditWarning(String editError, Composite parent, FormToolkit toolkit){
 		Composite warning = toolkit.createComposite(parent);
 		warning.setLayout(new GridLayout(2, false));
@@ -347,7 +379,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		Image x = getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
 		lblImage.setImage(x);
 		Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-		lblWarning.setText(MessageFormat.format("This mission cannot be modified: {0}. Please contact administrator if editing is required.", new Object[]{editError})) ;
+		lblWarning.setText(MessageFormat.format(Messages.MissionEditor_EditorError4, new Object[]{editError})) ;
 	}
 	
 	/**
@@ -362,7 +394,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		try {
 			saveWaypointJob.join();
 		} catch (InterruptedException e) {
-			EcologicalRecordsPlugIn.log("InterruptedException while saving waypoints", e);
+			EcologicalRecordsPlugIn.log("InterruptedException while saving waypoints", e); //$NON-NLS-1$
 		}
 		return saveWaypointJob;
 	}
