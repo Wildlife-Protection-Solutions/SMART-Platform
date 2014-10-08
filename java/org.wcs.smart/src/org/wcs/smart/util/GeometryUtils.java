@@ -445,5 +445,20 @@ public class GeometryUtils {
 		return cal.getOrthodromicDistance();
 		
 	}
-
+	
+	/**
+	 * Splits the specified lineString at the nearest point to
+	 * the linestring specific by the coordinate.
+	 *  
+	 * @param lineString
+	 * @param points
+	 * 
+	 */
+	public static LineString[] splitSimple(LineString lineString, Coordinate point) {
+		LocationIndexedLine ll = new LocationIndexedLine(lineString);
+		LinearLocation loc = ll.indexOf(point);
+		LineString l1 = (LineString) ll.extractLine(ll.getStartIndex(), loc);
+		LineString l2 = (LineString) ll.extractLine(loc, ll.getEndIndex());
+		return new LineString[]{l1, l2};
+	}
 }
