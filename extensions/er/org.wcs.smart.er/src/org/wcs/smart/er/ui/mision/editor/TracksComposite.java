@@ -22,9 +22,12 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +46,7 @@ import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.internal.MapPart;
 import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
 import net.refractions.udig.project.ui.viewers.MapViewer;
+import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -73,13 +77,22 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Stroke;
+import org.geotools.styling.Style;
+import org.geotools.styling.StyleFactory;
+import org.geotools.styling.TextSymbolizer;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
@@ -121,6 +134,7 @@ import com.vividsolutions.jts.geom.Point;
  * @author elitvin
  * @since 3.0.0
  */
+@SuppressWarnings("unchecked")
 public class TracksComposite extends Composite implements MapPart{
 
 	private List<ISurveyListener> changeListeners = new ArrayList<ISurveyListener>();
@@ -141,6 +155,10 @@ public class TracksComposite extends Composite implements MapPart{
 	private ToolItem editItem;
 	private ToolItem deleteItem;
 	private ToolItem splitItem;
+	private ToolItem mergeItem;
+	
+	private Label infoLabel;
+	private Label infoImage;
 	
 	public TracksComposite(Composite parent, MissionTrackEditDialog dialog) {
 		super(parent, SWT.NONE);
@@ -157,6 +175,16 @@ public class TracksComposite extends Composite implements MapPart{
 				tblInput.add(t);
 			}
 		}
+		
+		//sort tracks based on start time
+		Collections.sort(tblInput, new Comparator<MissionTrack>() {
+			@Override
+			public int compare(MissionTrack o1, MissionTrack o2) {
+				double z1 = o1.getLineString().getCoordinateN(0).z;
+				double z2 = o2.getLineString().getCoordinateN(0).z;
+				return Double.compare(z1, z2);
+			}
+		});
 		return tblInput;
 	}
 	
@@ -181,7 +209,7 @@ public class TracksComposite extends Composite implements MapPart{
 		tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		TabItem  tracksTabItem = new TabItem(tabFolder, SWT.NONE);
-		tracksTabItem.setText("Tracks");
+		tracksTabItem.setText(Messages.TracksComposite_TracksTab);
 		
 		Composite tableCompOuter = new Composite(tabFolder, SWT.NONE);
 		gl = new GridLayout();
@@ -194,7 +222,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		ToolItem importItem = new ToolItem(bar, SWT.PUSH);
 		importItem.setText(Messages.TracksComposite_Import);
-		importItem.setToolTipText("import tracks");
+		importItem.setToolTipText(Messages.TracksComposite_importTooltip);
 		importItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.IMPORT_TRACK_ICON));
 		importItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -205,7 +233,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		editItem = new ToolItem(bar, SWT.PUSH);
 		editItem.setText(Messages.TracksComposite_Edit);
-		editItem.setToolTipText("edit track points");
+		editItem.setToolTipText(Messages.TracksComposite_editTooltip);
 		editItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.EDIT_TRACK_ICON));
 		editItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -217,7 +245,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		splitItem = new ToolItem(bar, SWT.RADIO);
 		splitItem.setText(Messages.TracksComposite_Split);
-		splitItem.setToolTipText("split track into multiple segments");
+		splitItem.setToolTipText(Messages.TracksComposite_splitTooltip);
 		splitItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SPLIT_TRACK_ICON));
 		splitItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -227,9 +255,21 @@ public class TracksComposite extends Composite implements MapPart{
 		});
 		splitItem.setEnabled(false);
 		
+		mergeItem = new ToolItem(bar, SWT.PUSH);
+		mergeItem.setText(Messages.TracksComposite_MergeLabel);
+		mergeItem.setToolTipText(Messages.TracksComposite_mergeTooltip);
+		mergeItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MERGE_TRACK_ICON));
+		mergeItem.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				mergeTrack();
+			}
+		});
+		mergeItem.setEnabled(false);
+		
 		deleteItem = new ToolItem(bar, SWT.PUSH);
-		deleteItem.setText("delete");
-		deleteItem.setToolTipText("delete track");
+		deleteItem.setText(Messages.TracksComposite_deleteLabel);
+		deleteItem.setToolTipText(Messages.TracksComposite_deleteTooltip);
 		deleteItem.setImage(EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.DELETE_ICON));
 		deleteItem.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -280,7 +320,7 @@ public class TracksComposite extends Composite implements MapPart{
 				if (element instanceof MissionTrack) {
 					MissionTrack track = (MissionTrack)element;
 					if (track.getSamplingUnit() == null){
-						return "None";
+						return Messages.TracksComposite_NoneOption;
 					}else{
 						return track.getSamplingUnit().getId();
 					}
@@ -288,14 +328,14 @@ public class TracksComposite extends Composite implements MapPart{
 				return super.getText(element);
 			}
 		});
-		colSu.getColumn().setText("Sampling Unit");
+		colSu.getColumn().setText(Messages.TracksComposite_SuLabel);
 		colSu.getColumn().setResizable(true);
 		colSu.getColumn().setMoveable(false);
 		layout.setColumnData(colSu.getColumn(), new ColumnWeightData(50));	
 		colSu.setEditingSupport(new SuTableEditor(trackViewer));
 		
 		TabItem  layerListTabItem = new TabItem(tabFolder, SWT.NONE);
-		layerListTabItem.setText("Map Layers");
+		layerListTabItem.setText(Messages.TracksComposite_LayersLabel);
 		
 		Composite layersTab = new Composite(tabFolder, SWT.NONE);
 		gl = new GridLayout();
@@ -306,11 +346,22 @@ public class TracksComposite extends Composite implements MapPart{
 		layerListTabItem.setControl(layersTab);
 		
 		//========map part========
-		Composite mapPart = new Composite(sash, SWT.NONE);
+		final Composite mapPart = new Composite(sash, SWT.NONE);
 		gl = new GridLayout(2, false);
 		gl.marginWidth = gl.marginHeight = 0;
 		mapPart.setLayout(gl);
 
+		Composite infoArea = new Composite(mapPart, SWT.NONE);
+		infoArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		gl = new GridLayout(2, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		infoArea.setLayout(gl);
+		
+		infoImage = new Label(infoArea, SWT.NONE);
+		infoImage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		infoLabel = new Label(infoArea, SWT.NONE);
+		infoLabel.setText(""); //$NON-NLS-1$
+		infoLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		setupMap(mapPart);
 		
 		sash.setWeights(new int[]{30,70});
@@ -330,6 +381,7 @@ public class TracksComposite extends Composite implements MapPart{
 
 			if (missionService != null){
 				List<IGeoResource> newLayers = new ArrayList<IGeoResource>();
+
 				List<IGeoResource> layers = (List<IGeoResource>) missionService.resources(null);
 				for (IGeoResource layer : layers) {
 					if (((MissionGeoResource) layer).getType() == MissionDataSource.MISSIONTRACK_TYPE) {
@@ -337,9 +389,19 @@ public class TracksComposite extends Composite implements MapPart{
 					}
 				}
 				missionService.refresh(dialog.getMission(), null);
-				AddLayersCommand command = new AddLayersCommand(newLayers, 0);
-				mapViewer.getMap().sendCommandSync(command);
-				trackLayers = command.getLayers();
+				AddLayersCommand command = new AddLayersCommand(newLayers, 0){
+					@Override
+					public void run( IProgressMonitor monitor ) throws Exception {
+						super.run(monitor);
+						TracksComposite.this.trackLayers = getLayers();
+						
+						//add track style
+						for (Layer trackLayer : TracksComposite.this.trackLayers){
+							trackLayer.getStyleBlackboard().put(SLDContent.ID, TracksComposite.this.buildTrackStyle());
+						}
+					}
+				};
+				mapViewer.getMap().sendCommandASync(command);
 			}
 			
 		}catch (Exception ex){
@@ -370,7 +432,23 @@ public class TracksComposite extends Composite implements MapPart{
 						}
 					}		
 				}
-				AddLayersCommand command = new AddLayersCommand(tmp, 0);
+				AddLayersCommand command = new AddLayersCommand(tmp, 0){
+					@Override
+					public void run( IProgressMonitor monitor ) throws Exception {
+						super.run(monitor);
+						
+						//add track style
+						for (Layer trackLayer : getLayers()){
+							Style sd = (Style) trackLayer.getStyleBlackboard().get(SLDContent.ID);
+							if (sd == null) continue;
+							try{
+								sd.featureTypeStyles().get(0).rules().get(0).symbolizers().add(createTextSymbolizer());
+							}catch (Exception ex){
+								
+							}
+						}
+					}
+				};
 				mapViewer.getMap().sendCommandASync(command);
 			}
 		}catch (Exception ex){
@@ -391,7 +469,7 @@ public class TracksComposite extends Composite implements MapPart{
 		mapViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 		Map map = (Map) ProjectFactory.eINSTANCE.createMap();
-		map.setName("Mission Tracks");
+		map.setName(Messages.TracksComposite_MapName);
 		mapViewer.setMap(map);
 		
 		//set default crs
@@ -428,7 +506,10 @@ public class TracksComposite extends Composite implements MapPart{
 		toolComp = new MapToolComposite(thisTools);
 		toolComp.createComposite(mapComp);
 		MapInfoAreaComposite infoComp = new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
-		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));	
+		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		
+//		mapViewer.getMap().get
+//		layer.getStyleBlackboard().get(SLDContent.ID);
 	}
 	
 	private void updateMapSelection(){
@@ -459,6 +540,7 @@ public class TracksComposite extends Composite implements MapPart{
 		editItem.setEnabled(isSelected);
 		splitItem.setEnabled(isSelected);
 		deleteItem.setEnabled(isSelected);
+		mergeItem.setEnabled(isSelected);
 	}
 	public void addChangeListener(ISurveyListener listener){
 		changeListeners.add(listener);
@@ -473,8 +555,8 @@ public class TracksComposite extends Composite implements MapPart{
 	private boolean confirmChanges(){
 		if (dialog.isChanged()){
 			if (!MessageDialog.openQuestion(getShell(),
-					"Import",
-					"Before importing new tracks you must first save the changes you made to the existing tracks.  Do you want to save now?")){
+					Messages.TracksComposite_ImportTitle,
+					Messages.TracksComposite_SaveChangesMessage)){
 				return false;
 			}
 			if (!dialog.saveChanges()){
@@ -511,36 +593,73 @@ public class TracksComposite extends Composite implements MapPart{
 		}
 	}
 	
+	protected void mergeTrack() {
+		IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
+		List<MissionTrack> tracksToMerge = new ArrayList<MissionTrack>();
+		for (Iterator<Object> iterator = sel.iterator(); iterator.hasNext();) {
+			Object item = (Object) iterator.next();
+			if (item instanceof MissionTrack){
+				tracksToMerge.add((MissionTrack) item);
+			}
+		}
+		if (tracksToMerge.size() < 2){
+			return ;
+		}
+		
+		//sort tracks based on start time
+		Collections.sort(tracksToMerge, new Comparator<MissionTrack>() {
+			@Override
+			public int compare(MissionTrack o1, MissionTrack o2) {
+				double z1 = o1.getLineString().getCoordinateN(0).z;
+				double z2 = o2.getLineString().getCoordinateN(0).z;
+				return Double.compare(z1, z2);
+			}
+		});
+		
+		//get all coordinates; if start and end coordinates match
+		//then only add once
+		MissionTrack main = tracksToMerge.get(0);
+		List<Coordinate> ls = new ArrayList<Coordinate>();
+		for (Coordinate c : main.getLineString().getCoordinates()){
+			ls.add(c);
+		}
+		for (int i = 1; i < tracksToMerge.size(); i ++){
+			toDelete.add(tracksToMerge.get(i));
+			dialog.getMission().getTracks().remove(tracksToMerge.get(i));
+			Coordinate[] cs = tracksToMerge.get(i).getLineString().getCoordinates();
+			if (!ls.get(ls.size()-1).equals2D(cs[0])){
+				ls.add(cs[0]);
+			}
+			for (int j = 1; j < cs.length;j ++){
+				ls.add(cs[j]);
+			}
+		}
+		
+		GeometryFactory gf = new GeometryFactory();
+		LineString newLs = gf.createLineString(ls.toArray(new Coordinate[ls.size()]));
+		main.setLineString(newLs);
+		
+		refresh(true);
+	}
+	
 	protected void splitTrack() {
 		if (!confirmChanges()) return;
-		// TODO Auto-generated method stub
-		
-//		splitTool.setContext(ApplicationGIS.getToolManager().)
-//		splitTool.setActive(true);
-		
-//		ToolProxy mi = ((ToolProxy)item.getData());
-//		if (mi.getType() == 1){	//modal tool proxy
-//			for (ToolItem it : items){
-//				if (!item.equals(it)){
-//					it.setSelection(false);
-//				}else{
-//					it.setSelection(true);
-//				}
-//			}
-//			currentToolId = mi.getId();	
-//		}
-		
-		
-		
+
 		final SplitTool spTool = (SplitTool) ApplicationGIS.getToolManager().findTool(SplitTool.ID);
 		if (spTool != null){
+
 			spTool.setFinishCommand(new SplitTool.FinishCommand() {
 				
 				@Override
 				public void onFinish(List<Coordinate> points) {
 					toolComp.selectLastTool();
 					splitItem.setSelection(false);
-					
+
+					if (points == null){
+						//tool has been de-activated
+						clearMessage();
+						return;
+					}
 					IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
 					MissionTrack trackToSplit = null;
 					for (Iterator<Object> iterator = sel.iterator(); iterator.hasNext();) {
@@ -560,8 +679,7 @@ public class TracksComposite extends Composite implements MapPart{
 						Point intersection = null;
 						Geometry g = ls1.intersection(ls2);
 						if (g == null){
-							//TODO:
-							//display error intersection not found
+							setError(Messages.TracksComposite_NoIntersection1);
 							return;
 						}else if (g instanceof Point){
 							intersection = (Point)g;
@@ -569,15 +687,13 @@ public class TracksComposite extends Composite implements MapPart{
 							intersection = (Point)((MultiPoint)g).getGeometryN(0);
 						}
 						if (intersection == null){
-							//TODO:
-							//display error intersection not found
+							setError(Messages.TracksComposite_NoIntersection2);
 							return;
 						}
 						LineString[] newLs = GeometryUtils.splitSimple(ls1, new Coordinate(intersection.getX(), intersection.getY()));
 
 						if (newLs == null || newLs.length != 2 || !(newLs[0] instanceof LineString) || !(newLs[0] instanceof LineString)){
-							//TODO: 
-							//split error
+							setError(Messages.TracksComposite_CouldNotSplit);
 						}
 						trackToSplit.setLineString(newLs[0]);
 						MissionTrack newTrack = new MissionTrack();
@@ -590,23 +706,49 @@ public class TracksComposite extends Composite implements MapPart{
 						
 						trackToSplit.getMission().getTracks().add(newTrack);
 						
+						infoLabel.setText(""); //$NON-NLS-1$
 						refresh(true);
 					}
 					
 					
 				}
 			});
-
+			setInfo(Messages.TracksComposite_SplitInformation);
 			ApplicationGIS.getToolManager().getToolAction(SplitTool.ID, SplitTool.CATEGORY_ID).run();	
 		}
 	}
 	
-	private void refresh(boolean fire){
+	private void clearMessage(){
+		infoImage.setImage(null);
+		infoLabel.setText(""); //$NON-NLS-1$
+	}
+	private void setError(String message){
+		infoLabel.setText(message);
+		infoImage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
+		infoImage.getParent().layout();
+	}
+	
+	private void setInfo(String message){
+		infoLabel.setText(message);
+		infoImage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.INFO_ICON));
+		infoImage.getParent().layout();
+	}
+	
+	private void refresh(boolean fire) {
+		clearMessage();
 		updateInput();
 		if (fire){
 			fireChangeListeners();
 		}
 		mapViewer.getMap().getRenderManager().refresh(null);
+		if (missionService != null){
+			try {
+				missionService.refresh(dialog.getMission(), null);
+			} catch (IOException e) {
+				setError(Messages.TracksComposite_MapError + e.getMessage());
+				EcologicalRecordsPlugIn.log(e.getMessage(), e);
+			}
+		}
 	}
 	
 	protected void deleteTrack(){
@@ -624,7 +766,7 @@ public class TracksComposite extends Composite implements MapPart{
 		}
 		
 		
-		if (!MessageDialog.openQuestion(getShell(), "Delete", MessageFormat.format("Are you sure you want to delete the {0} selected tracks?  This cannot be undone.", new Object[]{toDelete.size()}))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.TracksComposite_DeleteTitle, MessageFormat.format(Messages.TracksComposite_DeleteMessage, new Object[]{toDelete.size()}))){
 			return;
 		}
 		
@@ -659,13 +801,10 @@ public class TracksComposite extends Composite implements MapPart{
 	 * Cell editor for track id
 	 */
 	private class IdTableEditor extends EditingSupport {
-		private TableViewer viewer;
-
 		private CellEditor editor;
 		
 		IdTableEditor(TableViewer viewer) {
 			super(viewer);
-			this.viewer = viewer;
 			this.editor = new TextCellEditor(viewer.getTable());	
 		}
 
@@ -704,13 +843,10 @@ public class TracksComposite extends Composite implements MapPart{
 	 * Cell editor for track id
 	 */
 	private class SuTableEditor extends EditingSupport {
-		private TableViewer viewer;
-
 		private SamplingUnitCellEditor editor;
 		
 		SuTableEditor(TableViewer viewer) {
 			super(viewer);
-			this.viewer = viewer;
 			this.editor = new SamplingUnitCellEditor(trackViewer.getTable(), true);	
 			editor.setInput(dialog.getMission(), dialog.getDate());
 		}
@@ -800,5 +936,54 @@ public class TracksComposite extends Composite implements MapPart{
 		return null;
 	}
 
+	private Style buildTrackStyle(){
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		
+		Stroke otherDays = sf.createStroke(ff.literal("#0080FF"),  //$NON-NLS-1$
+				ff.literal(1.0), 
+				null, null, null, 
+				new float[]{15,1},
+				null, null, null);
+		
+		Stroke toDay = sf.createStroke(ff.literal("#0080FF"), ff.literal(2.0)); //$NON-NLS-1$
+
+		Filter dateFilter = ff.equals(ff.property("date"), ff.literal(dialog.getDate())); //$NON-NLS-1$
+		LineSymbolizer otherSym = sf.createLineSymbolizer();
+		otherSym.setStroke(otherDays);
+		
+		LineSymbolizer todaySym = sf.createLineSymbolizer();
+		todaySym.setStroke(toDay);
+		
+		Rule otherRule = sf.createRule();
+		otherRule.symbolizers().add(otherSym);
+		otherRule.setIsElseFilter(true);
+		otherRule.setFilter(dateFilter);
+		otherRule.setName(Messages.TracksComposite_OtherDayRule);
+		
+		Rule todayRule = sf.createRule();
+		todayRule.symbolizers().add(todaySym);
+		todayRule.setIsElseFilter(false);
+		todayRule.setFilter(dateFilter);
+		todayRule.setName(Messages.TracksComposite_CurrentDayRule);
+
+		FeatureTypeStyle fts = sf.createFeatureTypeStyle();
+		fts.rules().add(todayRule);
+		fts.rules().add(otherRule);
+		
+		Style style = sf.createStyle();
+		style.featureTypeStyles().add(fts);
+
+		return style;
+	}
 	
+	private TextSymbolizer createTextSymbolizer(){
+		StyleFactory sf = CommonFactoryFinder.getStyleFactory();
+		FilterFactory ff = CommonFactoryFinder.getFilterFactory();
+		
+		TextSymbolizer sym = sf.createTextSymbolizer();
+		sym.setLabel(ff.property("id")); //$NON-NLS-1$
+		
+		return sym;
+	}
 }
