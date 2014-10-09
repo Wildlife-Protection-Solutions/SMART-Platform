@@ -241,7 +241,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.er.missionExportHandler"
-                  label="Export Missions"
+                  label="Export Missions and Surveys"
                   style="push">
                <visibleWhen
                      checkEnabled="true">
@@ -260,6 +260,11 @@
                      </test>
                   </or>
                </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.er.missionImportHandler"
+                  label="Import Missions and Surveys"
+                  style="push">
             </command>
             <separator
                   name="org.wcs.smart.er.separator3"
@@ -829,6 +834,10 @@
             </and>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.MissionImportHandler"
+            commandId="org.wcs.smart.er.missionImportHandler">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -879,6 +888,10 @@
       <command
             id="org.wcs.smart.er.missionExportHandler"
             name="Export Missions">
+      </command>
+      <command
+            id="org.wcs.smart.er.missionImportHandler"
+            name="Import Missions">
       </command>
    </extension>
    <extension

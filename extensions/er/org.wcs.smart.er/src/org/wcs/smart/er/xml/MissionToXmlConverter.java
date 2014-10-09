@@ -34,10 +34,14 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.xml.model.missions.MembersType;
+import org.wcs.smart.er.xml.model.missions.MissionPropertyValuesType;
 import org.wcs.smart.er.xml.model.missions.MissionType;
+import org.wcs.smart.er.xml.model.missions.SurveyType;
 import org.wcs.smart.er.xml.model.missions.SurveyWaypointsType;
 import org.wcs.smart.er.xml.model.missions.TracksType;
 import org.wcs.smart.er.xml.model.missions.WaypointObservationAttributeType;
@@ -76,6 +80,9 @@ public class MissionToXmlConverter {
 		/* survey id */
 		xml.setSurveyId(m.getSurvey().getId());
 		
+		// Survey Object
+		xml.setSurvey(convertSurvey(m.getSurvey()));
+		
 		// members
 		for(MissionMember member : m.getMembers()){
 			xml.getMembers().add( convertMissionMember(member) );
@@ -91,11 +98,43 @@ public class MissionToXmlConverter {
 			xml.getTracks().add(convertMissionTrack(mt));
 		}
 		
+		//mission property values
+		for(MissionPropertyValue mpv : m.getMissionPropertyValues()){
+			xml.getMissionPropertyValues().add(convertMissionPropertyValues(mpv));
+		}
+		
 		return xml;
 		
 	}
 	
 	
+	private static SurveyType convertSurvey(Survey survey) throws DatatypeConfigurationException {
+		SurveyType xmlSurvey = new SurveyType();
+		
+		xmlSurvey.setEndDate(SmartUtils.toXmlDate(survey.getEndDate()));
+		xmlSurvey.setStartDate(SmartUtils.toXmlDate(survey.getStartDate()) );
+		xmlSurvey.setId(survey.getId());
+		
+		xmlSurvey.setSurveyDesignKeyId(survey.getSurveyDesign().getKeyId());
+
+		
+		return xmlSurvey;
+	}
+
+
+	private static MissionPropertyValuesType convertMissionPropertyValues(MissionPropertyValue mpv) {
+		MissionPropertyValuesType xmlmpv = new MissionPropertyValuesType ();
+		
+		if(mpv.getAttributeListItem() != null){
+			xmlmpv.setListElementKeyId(mpv.getAttributeListItem().getKeyId());
+		}
+		xmlmpv.setMissionAttributeKeyId(mpv.getMissionAttribute().getKeyId());
+		xmlmpv.setNumberValue(mpv.getNumberValue());
+		xmlmpv.setStringValue(mpv.getStringValue());
+		return xmlmpv;
+	}
+
+
 	private static TracksType convertMissionTrack(MissionTrack mt) throws DatatypeConfigurationException{
 		TracksType track = new TracksType();
 		track.setDate(toXmlTime(mt.getDate()));
@@ -103,24 +142,30 @@ public class MissionToXmlConverter {
 		track.setId(mt.getId());
 		track.setSamplingUnitId(mt.getSamplingUnit().getId());
 		track.setTrackType(mt.getType().toString());
-		return null;
+		return track;
 	}
 
 
 	private static SurveyWaypointsType convertSurveyWaypoint(SurveyWaypoint swp)throws DatatypeConfigurationException {
 		SurveyWaypointsType xml = new SurveyWaypointsType();
-		xml.setMissionTrackId(swp.getMissionTrack().getId());
-		xml.setSamplingUnitId(swp.getSamplingUnit().getId());
+		if(swp.getMissionTrack() != null){
+			xml.setMissionTrackId(swp.getMissionTrack().getId());
+		}
+		if(swp.getSamplingUnit() != null){
+			xml.setSamplingUnitId(swp.getSamplingUnit().getId());
+		}
 		xml.setWaypoints(convertWaypoint(swp));
 		
-		return null;
+		return xml;
 	}
 
 
 	private static MembersType convertMissionMember(MissionMember member){
 		MembersType xml = new MembersType();
 		xml.setEmployeeId(member.getMember().getId());
-		xml.setIsLeader(member.getIsLeader());
+		xml.setLeader(member.getIsLeader());
+		xml.setFamilyName(member.getMember().getFamilyName());
+		xml.setGivenName(member.getMember().getGivenName());
 		return xml;
 	}
 	
@@ -131,7 +176,8 @@ public class MissionToXmlConverter {
 		xml.setDirection(wp.getWaypoint().getDirection());
 		xml.setDistance(wp.getWaypoint().getDistance());
 		xml.setId(wp.getWaypoint().getId());
-		xml.setTime( toXmlTime(wp.getWaypoint().getDateTime()));
+		xml.setDateTime( toXmlDateTime(wp.getWaypoint().getDateTime()));
+		
 		xml.setX(wp.getWaypoint().getX());
 		xml.setY(wp.getWaypoint().getY());
 		
@@ -146,6 +192,7 @@ public class MissionToXmlConverter {
 	}
 	
 	
+
 	private static WaypointObservationType convertObservation (WaypointObservation observation){
 		WaypointObservationType xml = new WaypointObservationType();
 		xml.setCategoryKey(observation.getCategory().getHkey());
@@ -214,7 +261,15 @@ public class MissionToXmlConverter {
 		
 		return xgc;
 	}
-	
+	private static XMLGregorianCalendar toXmlDateTime(Date dateTime) throws DatatypeConfigurationException {
+		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
+		cal.setTime(dateTime);
+		
+		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
+		
+		return xgc;
+	}	
 }
 
 

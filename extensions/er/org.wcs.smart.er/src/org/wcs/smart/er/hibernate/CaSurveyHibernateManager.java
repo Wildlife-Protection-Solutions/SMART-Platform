@@ -32,6 +32,8 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
@@ -268,6 +270,58 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 				.list();
 		if (designs.size() > 0){
 			return designs.get(0);
+		}
+		return null;
+	}
+
+	@Override
+	public MissionAttribute getMissionAttributeByKey(String missionAttributeKeyId, Session session) {
+		List<MissionAttribute> list = session.createCriteria(MissionAttribute.class)
+				.add(Restrictions.eq("keyId", missionAttributeKeyId)) //$NON-NLS-1$
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
+		if (list.size() > 0){
+			return list.get(0);
+		}
+		return null;
+	}
+
+	@Override
+	public MissionAttributeListItem getMissionAttributeListItenByKey(String key, Session session) {
+		List<MissionAttributeListItem> list = session.createCriteria(MissionAttributeListItem.class)
+				.createAlias("attribute", "a")
+				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
+				.add(Restrictions.eq("a.conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
+		if (list.size() > 0){
+			return list.get(0);
+		}
+		return null;
+	}
+
+	@Override
+	public SamplingUnit getSamplingUnitById(String key, Session session) {
+		List<SamplingUnit> list = session.createCriteria(SamplingUnit.class)
+				.createAlias("surveyDesign","sd")
+				.add(Restrictions.eq("id", key)) //$NON-NLS-1$
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
+		if (list.size() > 0){
+			return list.get(0);
+		}
+		return null;	}
+
+	
+	
+	@Override
+	public Survey getSurveyById(Session session, String id) {
+		List<Survey> surveys = session.createCriteria(Survey.class)
+				.createAlias("surveyDesign", "sd")
+				.add(Restrictions.eq("id", id)) //$NON-NLS-1$
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+				.list();
+		if (surveys.size() > 0){
+			return surveys.get(0);
 		}
 		return null;
 	}

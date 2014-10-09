@@ -238,7 +238,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		chReports.setLabelProvider(new CheckBoxTreeLabelProvider());
 		chReports.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		chReports.setContentProvider(new CheckBoxTreeContentProvider());
-		
+		chReports.setAutoExpandLevel(CheckboxTreeViewer.ALL_LEVELS);
 		
 		
 		chReports.setCheckStateProvider(new ICheckStateProvider() {

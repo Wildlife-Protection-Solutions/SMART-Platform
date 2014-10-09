@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -100,4 +102,41 @@ public interface ISurveyHibernateManager {
 	 * @return the associated survey design or null
 	 */
 	public SurveyDesign getSurveyDesign(String key, Session session);
+
+
+	/**
+	 * Finds the mission attribute with the given key.
+	 * @param key mission attribute key
+	 * @param session
+	 * @return the associated mission attribute or null
+	 */
+	public MissionAttribute getMissionAttributeByKey(String missionAttributeKeyId, Session session);
+
+
+	/**
+	 * Finds the mission attribute list item with the given key.
+	 * @param key mission attribute list item key
+	 * @param session
+	 * @return the associated mission attribute list item or null
+	 */
+	public MissionAttributeListItem getMissionAttributeListItenByKey(String key, Session session);
+
+
+	/**
+	 * Finds the sampling unit with the given key.
+	 * @param key sampling unit key
+	 * @param session
+	 * @return the associated sampling unit or null
+	 */
+	public SamplingUnit getSamplingUnitById(String missionTrackId,
+			Session session);
+
+
+	/**
+	 * Finds the survey with the given key.
+	 * @param key survey key
+	 * @param session
+	 * @return the associated survey or null
+	 */
+	public Survey getSurveyById(Session session, String id);
 }
