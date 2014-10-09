@@ -129,7 +129,6 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="geom" type="hexBinary"></attribute>
     	<attribute name="Id" type="string"></attribute>
-    	<attribute name="buffer" type="double"></attribute>
     	<attribute name="type" type="string"></attribute>
     	<attribute name="state" type="string"></attribute>
     </complexType>

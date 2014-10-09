@@ -228,7 +228,6 @@ public class SurveyDesignToXmlConverter {
 		List<SamplingUnit> units = s.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", surveyDesign )).list(); //$NON-NLS-1$
 		for(SamplingUnit su :  units) {
 			org.wcs.smart.er.xml.model.surveyDesign.SamplingUnit xmlsu = new org.wcs.smart.er.xml.model.surveyDesign.SamplingUnit();
-			xmlsu.setBuffer(su.getBuffer());
 			xmlsu.setGeom(su.getGeom());
 			xmlsu.setId(su.getId());
 			xmlsu.setState(su.getState().toString());

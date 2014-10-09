@@ -206,7 +206,6 @@ public class SurveyDesignFromXmlConverter {
 		for (org.wcs.smart.er.xml.model.surveyDesign.SamplingUnit xmlunit : xml.getSamplingUnit()){
 			
 			SamplingUnit unit = new SamplingUnit();
-			unit.setBuffer(xmlunit.getBuffer());
 			unit.setGeom(xmlunit.getGeom());
 			unit.setId(xmlunit.getId());
 			unit.setState(SamplingUnit.State.valueOf(xmlunit.getState()));
