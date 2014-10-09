@@ -129,20 +129,19 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 			Session s = HibernateManager.openSession();
 			try {
 				//load units
-				List<Object> items = SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, s);
-				units = new ArrayList<Object>();
-				for (Object i : items){
-					if (i instanceof SamplingUnit){
-						units.add(i);
-					}else if (i instanceof MissionTrack){
-						if (!samplingUnitsOnly){
-							if (((MissionTrack) i).getDate().compareTo(missionDate) == 0){
-								units.add(i);
-							}
+				List<Object> items = new ArrayList<Object>();
+				items.addAll(SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, s));
+				
+				if (!samplingUnitsOnly){
+					List<MissionTrack> mt = SurveyHibernateManager.getInstance().getAdHocMissionTracks(surveyDesign, s);
+					for (MissionTrack t : mt){
+						if (t.getDate().compareTo(missionDate) == 0){
+							items.add(t);
 						}
 					}
 				}
-				units.add(0, null);
+				items.add(0, null);
+				units = items;
 			} finally {
 				s.close();
 			}

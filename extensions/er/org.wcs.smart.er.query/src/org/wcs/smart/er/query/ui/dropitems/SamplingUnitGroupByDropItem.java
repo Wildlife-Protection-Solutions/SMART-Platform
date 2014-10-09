@@ -41,10 +41,10 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ToolTip;
 import org.hibernate.Session;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
-import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -93,16 +93,12 @@ public class SamplingUnitGroupByDropItem extends DropItem
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			List<Object> objects = SurveyHibernateManager.getInstance().getSamplingUnits(currentDesign, s);
-			for (Object o : objects){
-				if (o instanceof SamplingUnit){
-					SamplingUnit su = (SamplingUnit) o;
-					items.add(new ListItem(su.getUuid(), su.getId(), null));
-				}else if (o instanceof MissionTrack){
-					MissionTrack su = (MissionTrack)o;
-					items.add(new ListItem(su.getUuid(), su.getId(), null));
-				}
+			List<SamplingUnit> objects = SurveyHibernateManager.getInstance().getSamplingUnits(currentDesign, s);
+			for (SamplingUnit su : objects){
+				items.add(new ListItem(su.getUuid(), su.getId(), null));
 			}
+			items.add(new ListItem(null, SamplingUnitFilter.NONE.getId(), SamplingUnitFilter.NONE_KEY));
+			
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){
@@ -136,8 +132,13 @@ public class SamplingUnitGroupByDropItem extends DropItem
 		sb.append("sgb:samplingunit:"); //$NON-NLS-1$
 		if (filteredValues != null && filteredValues.size() > 0){
 			for (ListItem id: filteredValues){
-				sb.append(SmartUtils.encodeHex(id.getUuid()));
-				sb.append(":"); //$NON-NLS-1$
+				if (id.getUuid() == null){
+					sb.append(SamplingUnitFilter.NONE_KEY);
+					sb.append(":"); //$NON-NLS-1$
+				}else{
+					sb.append(SmartUtils.encodeHex(id.getUuid()));
+					sb.append(":"); //$NON-NLS-1$
+				}
 			}
 			sb.deleteCharAt(sb.length() - 1);
 		}

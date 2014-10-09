@@ -30,7 +30,7 @@ import org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -56,8 +56,8 @@ public class SurveySamplingUnitTables implements IDynamicSmartTables {
 			SurveyDesign sd = (SurveyDesign)s.load(SurveyDesign.class, sdi.getUuid());
 			
 			//only add valid types
-			Set<SamplingUnit.SamplingUnitType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, s);
-			for (SamplingUnitType t : types){
+			Set<SamplingUnit.GeometryType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, s);
+			for (GeometryType t : types){
 				SurveySamplingUnitTable table1 = new SurveySamplingUnitTable(sd, t);
 				tables.add(table1);
 			}

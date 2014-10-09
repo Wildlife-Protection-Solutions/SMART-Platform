@@ -156,7 +156,7 @@ public class SamplingUnitAttributeValue {
 				return getAttributeListItem().getName();
 			}
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	@Embeddable

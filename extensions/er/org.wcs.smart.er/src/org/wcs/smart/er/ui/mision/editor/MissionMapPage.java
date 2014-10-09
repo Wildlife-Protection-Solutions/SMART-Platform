@@ -79,8 +79,8 @@ public class MissionMapPage extends SmartMapEditorPart {
 				for (IGeoResource r : tmp){
 					if (r instanceof SamplingUnitGeoResource){
 						String type = ((SamplingUnitGeoResource)r).getDataType();
-						if (type.equals(SamplingUnit.SamplingUnitType.PLOT.name()) ||
-								type.equals(SamplingUnit.SamplingUnitType.TRANSECT.name())){
+						if (type.equals(SamplingUnit.GeometryType.PLOT.name()) ||
+								type.equals(SamplingUnit.GeometryType.TRANSECT.name())){
 							allLayers.add(r);
 						}
 					}		

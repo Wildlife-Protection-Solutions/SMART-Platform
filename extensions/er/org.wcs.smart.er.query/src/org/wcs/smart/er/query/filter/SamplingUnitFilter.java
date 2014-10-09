@@ -42,6 +42,13 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SamplingUnitFilter implements IFilter {
 
+	public static final String NONE_KEY = "none"; //$NON-NLS-1$
+	
+	public static SamplingUnit NONE = new SamplingUnit();
+	static{
+		NONE.setId(Messages.SamplingUnitFilter_NoneFilterName);
+	}
+	
 	public static SamplingUnitFilter createSamplingUnitFilter(String key){
 		return new SamplingUnitFilter(key.split(":")[2], Type.SAMPLINGUNIT); //$NON-NLS-1$
 	}
@@ -56,10 +63,13 @@ public class SamplingUnitFilter implements IFilter {
 	public enum Type {SAMPLINGUNIT, TRACK};
 	
 	public SamplingUnitFilter(String uuid, Type type){
-		this.uuid = uuid;
 		this.unitType = type;
+		this.uuid = uuid;
 	}
 	
+	public boolean isNone(){
+		return this.uuid.equals(NONE_KEY);
+	}
 	public Type getType(){
 		return this.unitType;
 	}
@@ -86,6 +96,10 @@ public class SamplingUnitFilter implements IFilter {
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
 		if (unitType == Type.SAMPLINGUNIT){
+			if (uuid.equals(NONE_KEY)){
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(NONE)};
+			}
+			
 			SamplingUnit su = (SamplingUnit) session.load(SamplingUnit.class, SmartUtils.decodeHex(uuid));
 			if (su != null){
 				su.getId();

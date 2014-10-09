@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
@@ -43,11 +45,16 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	@Override
-	public List<Object> getSamplingUnits(SurveyDesign survey, Session s) {
+	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	@Override
+	public List<MissionTrack> getAdHocMissionTracks(SurveyDesign survey, Session s){
+		return null;		
+	}
+	
 	@Override
 	public List<SurveyDesignEditorInput> getSurveyDesignEditorInputs(Session s,
 			SurveyDesignFilter filter) {
@@ -74,7 +81,7 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 	}
 
 	@Override
-	public Set<SamplingUnitType> getSamplingUnitTypes(SurveyDesign sd, Session s) {
+	public Set<GeometryType> getSamplingUnitTypes(SurveyDesign sd, Session s) {
 		// TODO Auto-generated method stub
 		return null;
 	}

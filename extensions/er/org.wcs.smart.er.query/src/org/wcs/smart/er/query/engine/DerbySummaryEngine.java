@@ -844,19 +844,22 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
 				IGroupBy gb = groupBy.getGroupBys().get(i);
 				
-				String key = gb.getKeyPart() + ":"; //$NON-NLS-1$
+				String key = gb.getKeyPart() ;
 				switch (gb.getType()) {
 					case STRING:
-						key += rs.getString(rsindex++);
+						key += ":" + rs.getString(rsindex++); //$NON-NLS-1$
 						break;
 					case BYTE:
-						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
+						byte[] info = rs.getBytes(rsindex++);
+						if (info != null){
+							key += ":" + SmartUtils.encodeHex(info); //$NON-NLS-1$
+						}
 						break;
 					case DATE:
-						key += rs.getDate(rsindex++).toString();
+						key += ":" + rs.getDate(rsindex++).toString(); //$NON-NLS-1$
 						break;
 					case KEY:
-						key += rs.getString(rsindex++);
+						key += ":" + rs.getString(rsindex++); //$NON-NLS-1$
 						break;
 				}
 				groupby[i] = key;
@@ -1194,7 +1197,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						//sampling unit link must come from track 
 						groupByInnerSql.append( " case when "); //$NON-NLS-1$
 						groupByInnerSql.append(tablePrefix(MissionTrack.class));
-						groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.RECON + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+						groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.SAMPLING_UNIT + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 						groupByInnerSql.append( " then "); //$NON-NLS-1$
 						groupByInnerSql.append(tablePrefix(MissionTrack.class));
 						groupByInnerSql.append( ".uuid else "); //$NON-NLS-1$
@@ -1216,7 +1219,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 							groupByInnerSql.append(" else "); //$NON-NLS-1$
 								groupByInnerSql.append( " case when "); //$NON-NLS-1$
 								groupByInnerSql.append(tablePrefix(MissionTrack.class));
-								groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.RECON + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+								groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.SAMPLING_UNIT + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 								groupByInnerSql.append( " then "); //$NON-NLS-1$
 								groupByInnerSql.append(tablePrefix(MissionTrack.class));
 								groupByInnerSql.append( ".uuid else "); //$NON-NLS-1$

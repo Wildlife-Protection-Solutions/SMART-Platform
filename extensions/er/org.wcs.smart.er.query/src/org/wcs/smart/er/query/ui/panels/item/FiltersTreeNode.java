@@ -35,10 +35,10 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider.Node;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -120,11 +120,14 @@ public class FiltersTreeNode implements IItemTreeNode{
 					}
 				}
 				if (element instanceof SamplingUnit){
+					if (element.equals(SamplingUnitFilter.NONE)){
+						return null;
+					}
 					return ((SamplingUnit) element).getType().getImage();
 				}
-				if (element instanceof MissionTrack){
-					return SamplingUnit.SamplingUnitType.RECON.getImage();
-				}
+//				if (element instanceof MissionTrack){
+//					return SamplingUnit.GeometryType.RECON.getImage();
+//				}
 				if (element instanceof MissionProperty){
 					element = ((MissionProperty) element).getAttribute();
 				}
@@ -141,10 +144,10 @@ public class FiltersTreeNode implements IItemTreeNode{
 					return ((SamplingUnitAttribute) element).getType().getImage();
 				}
 				if (element instanceof MissionTrack.TrackType){
-					if (element == MissionTrack.TrackType.TRACK){
-						return SamplingUnitType.TRANSECT.getImage();
-					}else{
-						return SamplingUnitType.RECON.getImage();
+					if (element == MissionTrack.TrackType.SAMPLING_UNIT){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON);
+					}else if (element == MissionTrack.TrackType.TRACK){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_RECON_ICON);
 					}
 				}
 				return null;

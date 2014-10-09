@@ -29,7 +29,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 
 /**
  * Import sampling unit wizard, sampling unit type page.
@@ -76,11 +76,11 @@ public class TypePage extends WizardPage {
 		setControl(main);
 	}
 	
-	public SamplingUnitType getType(){
+	public GeometryType getType(){
 		if (btnTransect.getSelection()){
-			return SamplingUnitType.TRANSECT;
+			return GeometryType.TRANSECT;
 		}else if (btnPlots.getSelection() ){
-			return SamplingUnitType.PLOT;
+			return GeometryType.PLOT;
 		}
 		return null;
 	}

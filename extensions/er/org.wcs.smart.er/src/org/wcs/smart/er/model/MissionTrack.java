@@ -38,6 +38,7 @@ import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.LineString;
@@ -58,8 +59,8 @@ public class MissionTrack extends UuidItem{
 	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
 	public enum TrackType {
-		RECON ("Reconnisance"), 
-		TRACK ("Track");
+		SAMPLING_UNIT (Messages.MissionTrack_SuTrackGuiName), 
+		TRACK (Messages.MissionTrack_TrackGuiName);
 	
 		private String guiName;
 		

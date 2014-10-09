@@ -67,10 +67,10 @@ public abstract class AddSamplingUnitLayersJob extends Job {
 					List<IGeoResource> layers = (List<IGeoResource>) service
 							.resources(null);
 					List<IGeoResource> layersToAdd = new ArrayList<IGeoResource>();
-					Set<SamplingUnit.SamplingUnitType> types = SurveyHibernateManager
+					Set<SamplingUnit.GeometryType> types = SurveyHibernateManager
 							.getInstance().getSamplingUnitTypes(sd, s);
 					for (IGeoResource layer : layers) {
-						if (types.contains(SamplingUnit.SamplingUnitType
+						if (types.contains(SamplingUnit.GeometryType
 								.valueOf(((SamplingUnitGeoResource) layer)
 										.getDataType()))) {
 							layersToAdd.add(layer);

@@ -425,8 +425,8 @@ public class TracksComposite extends Composite implements MapPart{
 				for (IGeoResource r : layers){
 					if (r instanceof SamplingUnitGeoResource){
 						String type = ((SamplingUnitGeoResource)r).getDataType();
-						if (type.equals(SamplingUnit.SamplingUnitType.PLOT.name()) ||
-								type.equals(SamplingUnit.SamplingUnitType.TRANSECT.name())){
+						if (type.equals(SamplingUnit.GeometryType.PLOT.name()) ||
+								type.equals(SamplingUnit.GeometryType.TRANSECT.name())){
 							tmp.add(r);
 						}
 					}		
@@ -868,7 +868,7 @@ public class TracksComposite extends Composite implements MapPart{
 						if ((t.getSamplingUnit() != null && !t.getSamplingUnit().equals(value2)) || 
 								t.getSamplingUnit() == null){
 							t.setSamplingUnit((SamplingUnit) value2);
-							t.setType(TrackType.RECON);
+							t.setType(TrackType.SAMPLING_UNIT);
 							changed = true;
 						}
 					}else{

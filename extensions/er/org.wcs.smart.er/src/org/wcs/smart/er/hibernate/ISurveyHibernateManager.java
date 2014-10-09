@@ -25,8 +25,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -47,8 +49,17 @@ public interface ISurveyHibernateManager {
 	 *  
 	 * @return all sampling units for the given conservation area
 	 */
-	public List<Object> getSamplingUnits(SurveyDesign survey, Session s);
+	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s);
 	
+	/**
+	 * Returns all mission tracks that are not associated with a sampling
+	 * unit.
+	 * 
+	 * @param mission
+	 * @param s
+	 * @return
+	 */
+	public List<MissionTrack> getAdHocMissionTracks(SurveyDesign survey, Session s);
 
 	/**
 	 * Returns all surveys design that match the given filter.  If the filter
@@ -93,7 +104,7 @@ public interface ISurveyHibernateManager {
 	 * Returns a set of sampling unit types applicable
 	 * for the given survey design 
 	 */
-	public Set<SamplingUnit.SamplingUnitType> getSamplingUnitTypes(SurveyDesign sd, Session s);
+	public Set<SamplingUnit.GeometryType> getSamplingUnitTypes(SurveyDesign sd, Session s);
 	
 	/**
 	 * Finds the survey design with the given key.

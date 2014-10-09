@@ -36,7 +36,7 @@ import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
@@ -97,7 +97,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		
 		//get required options
-		SamplingUnit.SamplingUnitType type = (SamplingUnitType) options.get(TYPE_KEY);
+		SamplingUnit.GeometryType type = (GeometryType) options.get(TYPE_KEY);
 		if (type == null){
 			throw new Exception(Messages.CsvSamplingUnitImporter_InvalidType);
 		}
@@ -169,7 +169,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 				SamplingUnit su = new SamplingUnit();
 				su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
 				
-				if (type == SamplingUnitType.PLOT){
+				if (type == GeometryType.PLOT){
 					//point
 					Double x = Double.parseDouble(headers[x1]);
 					Double y = Double.parseDouble(headers[y1]);

@@ -85,7 +85,7 @@ public class SurveySamplingUnitMapLayer implements IBirtMapLayerManager {
 		}
 		
 		String surveyDesignKey =  odaHandle.getQueryText().split(":")[2]; //$NON-NLS-1$
-		SamplingUnit.SamplingUnitType suType = SamplingUnit.SamplingUnitType.valueOf(odaHandle.getQueryText().split(":")[1]); //$NON-NLS-1$
+		SamplingUnit.GeometryType suType = SamplingUnit.GeometryType.valueOf(odaHandle.getQueryText().split(":")[1]); //$NON-NLS-1$
 		SurveyDesign sd = null;
 		
 		//session is managed by running report
@@ -119,14 +119,11 @@ public class SurveySamplingUnitMapLayer implements IBirtMapLayerManager {
 		List<IGeoResource> resources = new ArrayList<IGeoResource>();
 		List<? extends IGeoResource> items = service.resources(null);
 		for (IGeoResource i : items){
-			if (suType == SamplingUnit.SamplingUnitType.PLOT && 
-					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.SamplingUnitType.PLOT.name()))){
+			if (suType == SamplingUnit.GeometryType.PLOT && 
+					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.GeometryType.PLOT.name()))){
 				resources.add(i);
-			}else if (suType == SamplingUnit.SamplingUnitType.TRANSECT && 
-					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.SamplingUnitType.TRANSECT.name()))){
-				resources.add(i);
-			}else if (suType == SamplingUnit.SamplingUnitType.RECON && 
-					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.SamplingUnitType.RECON.name()))){
+			}else if (suType == SamplingUnit.GeometryType.TRANSECT && 
+					(((SamplingUnitGeoResource)i).getDataType().equals(SamplingUnit.GeometryType.TRANSECT.name()))){
 				resources.add(i);
 			}
 		}

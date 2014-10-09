@@ -357,6 +357,10 @@ public class Messages extends NLS {
 
 	public static String MissionSummaryPage_ValueLabel;
 
+	public static String MissionTrack_SuTrackGuiName;
+
+	public static String MissionTrack_TrackGuiName;
+
 	public static String MissionTrackEditDialog_DialogTitle;
 
 	public static String MissionTrackEditDialog_Message;
@@ -402,6 +406,16 @@ public class Messages extends NLS {
 	public static String RemoveERJob_Title;
 
 	public static String RemoveERJob_UninstallError;
+	public static String SamplingUnit_ActiveState;
+
+	public static String SamplingUnit_GeometryTypeNotSupported;
+
+	public static String SamplingUnit_InActiveState;
+
+	public static String SamplingUnit_LinearGeomType;
+
+	public static String SamplingUnit_PointGeomType;
+
 	public static String SamplingUnitAttributeDeleteAdvisor_CannotDeleteAttribute;
 
 	public static String SamplingUnitAttributeDialog_CloseDialogTitle;

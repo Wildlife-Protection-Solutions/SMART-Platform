@@ -60,7 +60,7 @@ TOKEN :
  | < MISSION_MEMBER : "s:missionleader:" <  UUID > >
  | < MISSION_LEADER : "s:missionmember:" <  UUID > >
  | < MISSION_PROPERTY_LIST_KEY : "s:missionproperty:l:" <  DM_KEY > >
- | < MISSION_TRACK_TYPE: "s:mission:tracktype:" ("RECON" | "TRACK" ) >
+ | < MISSION_TRACK_TYPE: "s:mission:tracktype:" ("SAMPLING_UNIT" | "TRACK" ) >
  | < SAMPLING_UNIT_KEY : "s:samplingunit:" < UUID > >
  | < SAMPLING_UNIT_ATTRIBUTE_STR_KEY : "s:suattribute:s:" < DM_KEY > >
  | < SAMPLING_UNIT_ATTRIBUTE_VALUE_KEY : "s:suattribute:n:" < DM_KEY > >

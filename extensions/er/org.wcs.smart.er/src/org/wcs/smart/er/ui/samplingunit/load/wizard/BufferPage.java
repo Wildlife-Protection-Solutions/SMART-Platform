@@ -42,7 +42,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 
 /**
  * Import sampling unit buffer size wizard page.
@@ -81,7 +81,7 @@ public class BufferPage extends WizardPage {
 	 * Sets the sampling unit time.
 	 * @param type
 	 */
-	public void setType(SamplingUnitType type){
+	public void setType(GeometryType type){
 		String initValue = null;
 		ISelection initSelection = null;
 		if (txtArea != null){
@@ -100,7 +100,7 @@ public class BufferPage extends WizardPage {
 		Composite t = new Composite(main, SWT.NONE);
 		t.setLayout(new GridLayout(2, false));
 		
-		if (type == SamplingUnitType.TRANSECT){
+		if (type == GeometryType.TRANSECT){
 			Label l = new Label(t, SWT.NONE);
 			l.setText(Messages.BufferPage_TtLabel);
 			
@@ -108,8 +108,8 @@ public class BufferPage extends WizardPage {
 			cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 			cmbViewer.setLabelProvider(new LabelProvider(){
 				public String getText(Object element){
-					if (element instanceof SamplingUnitType){
-						return ((SamplingUnitType) element).getGuiName();
+					if (element instanceof GeometryType){
+						return ((GeometryType) element).getGuiName();
 					}
 					return super.getText(element);
 				}
@@ -138,7 +138,7 @@ public class BufferPage extends WizardPage {
 			}
 			
 			
-		}else if (type == SamplingUnitType.PLOT){
+		}else if (type == GeometryType.PLOT){
 			Label l = new Label(t, SWT.NONE);
 			l.setText(Messages.BufferPage_PlotLabel);
 			
@@ -197,11 +197,11 @@ public class BufferPage extends WizardPage {
 	 * 
 	 * @return the sampling unit type
 	 */
-	public SamplingUnitType getType(){
+	public GeometryType getType(){
 		if (cmbViewer == null){
-			return SamplingUnitType.PLOT;
+			return GeometryType.PLOT;
 		}else{
-			return SamplingUnitType.TRANSECT;
+			return GeometryType.TRANSECT;
 		}
 	}
 	

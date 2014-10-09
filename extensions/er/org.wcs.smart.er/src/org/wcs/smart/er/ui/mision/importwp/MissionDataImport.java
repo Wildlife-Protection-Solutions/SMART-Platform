@@ -142,7 +142,7 @@ public class MissionDataImport {
 			}
 			newTrack.setId(id);
 			newTrack.setDate(value.date);
-			newTrack.setType(TrackType.RECON);
+			newTrack.setType(TrackType.SAMPLING_UNIT);
 			if (newTrack != null){
 				output.add(newTrack);
 			}
@@ -201,7 +201,7 @@ public class MissionDataImport {
 	public static void saveTracks(final Mission mission, List<MissionTrack> tracks) throws InterruptedException {
 		for (MissionTrack track : tracks) {
 			if (track.getType() == null) {
-				track.setType(TrackType.RECON);
+				track.setType(TrackType.SAMPLING_UNIT);
 			}
 			track.setMission(mission);
 			mission.getTracks().add(track);
