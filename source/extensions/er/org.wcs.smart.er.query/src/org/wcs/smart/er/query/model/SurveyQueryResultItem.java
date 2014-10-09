@@ -63,7 +63,6 @@ public class SurveyQueryResultItem implements IResultItem{
 	
 	private byte[] samplingUnitUuid;
 	private String samplingUnitId;
-	private Double smaplingUnitBuffer;
 	
 	private Date wpDateTime;
 	private Date waypointTime;
@@ -500,19 +499,6 @@ public class SurveyQueryResultItem implements IResultItem{
 	public void setSamplingUnitId(String samplingUnitId) {
 		this.samplingUnitId = samplingUnitId;
 	}
-
-	/**
-	 * sampling unit buffer
-	 * @return
-	 */
-	public Double getSmaplingUnitBuffer() {
-		return smaplingUnitBuffer;
-	}
-
-	public void setSamplingUnitBuffer(Double smaplingUnitBuffer) {
-		this.smaplingUnitBuffer = smaplingUnitBuffer;
-	}
-	
 	
 	/**
 	 * the waypoint observer

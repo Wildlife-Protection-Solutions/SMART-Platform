@@ -647,7 +647,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		
 		sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnit.class) + ".buffer, "); //$NON-NLS-1$
 
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".id, "); //$NON-NLS-1$
@@ -687,7 +686,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		
 		sql.append("samplingunit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("samplingunit_id varchar(128),"); //$NON-NLS-1$
-		sql.append("samplingunit_buffer double,"); //$NON-NLS-1$
 		
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_id integer,"); //$NON-NLS-1$
@@ -727,9 +725,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
 		
 		it.setSamplingUnitUuid(rs.getBytes("samplingunit_uuid")); //$NON-NLS-1$
-		if (rs.getObject("samplingunit_buffer") != null){ //$NON-NLS-1$
-			it.setSamplingUnitBuffer(rs.getDouble("samplingunit_buffer")); //$NON-NLS-1$
-		}
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		
 		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
