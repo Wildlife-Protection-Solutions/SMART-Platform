@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -78,6 +81,33 @@ public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	@Override
 	public SurveyDesign getSurveyDesign(String key, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MissionAttribute getMissionAttributeByKey(
+			String missionAttributeKeyId, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MissionAttributeListItem getMissionAttributeListItenByKey(
+			String key, Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SamplingUnit getSamplingUnitById(String missionTrackId,
+			Session session) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Survey getSurveyById(Session session, String id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -14,6 +14,8 @@
     			type="tns:SurveyWaypointsType" maxOccurs="unbounded"
     			minOccurs="0">
     		</element>
+    		<element name="Survey" type="tns:SurveyType"></element>
+    		<element name="MissionPropertyValues" type="tns:MissionPropertyValuesType" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="id" type="string"></attribute>
     	<attribute name="startDate" type="date"></attribute>
@@ -23,8 +25,10 @@
     </complexType>
 
     <complexType name="MembersType">
-    	<attribute name="isLeader" type="boolean"></attribute>
+    	<attribute name="Leader" type="boolean"></attribute>
     	<attribute name="EmployeeId" type="string"></attribute>
+    	<attribute name="givenName" type="string"></attribute>
+    	<attribute name="familyName" type="string"></attribute>
     </complexType>
 
     <complexType name="TracksType">
@@ -65,7 +69,7 @@
     	<attribute name="id" type="int"></attribute>
     	<attribute name="x" type="double"></attribute>
     	<attribute name="y" type="double"></attribute>
-    	<attribute name="time" type="time"></attribute>
+    	<attribute name="dateTime" type="dateTime"></attribute>
     </complexType>
     <complexType name="WaypointObservationType">
     	<sequence>
@@ -85,5 +89,19 @@
     		<element name="bValue" type="boolean" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="SurveyType">
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="startDate" type="date"></attribute>
+    	<attribute name="endDate" type="date"></attribute>
+    	<attribute name="surveyDesignKeyId" type="string"></attribute>
+    </complexType>
+
+    <complexType name="MissionPropertyValuesType">
+    	<attribute name="missionAttributeKeyId" type="string"></attribute>
+    	<attribute name="numberValue" type="double"></attribute>
+    	<attribute name="stringValue" type="string"></attribute>
+    	<attribute name="listElementKeyId" type="string"></attribute>
     </complexType>
 </schema>

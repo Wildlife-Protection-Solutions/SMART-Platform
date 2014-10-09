@@ -21,11 +21,32 @@
  */
 package org.wcs.smart.er.hibernate;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Iterator;
+import java.util.List;
+
+import org.hibernate.Criteria;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.WaypointAttachment;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 public class SurveyHibernateManager {
 
 	private static ISurveyHibernateManager instance;
+	private static NumberFormat MISSION_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
+	
 	
 	public static ISurveyHibernateManager getInstance(){
 		if (instance == null){
@@ -37,4 +58,103 @@ public class SurveyHibernateManager {
 		}
 		return instance;
 	}
+	
+	/**
+	 * Determines if a mission id already exists in the database
+	 * for the given conservation area.
+	 * 
+	 * @param newId mission id to validate
+	 * @param ca conservation area
+	 * @param session session
+	 * @return <code>true</code> if id already exists; <code>false</code> otherwise
+	 */
+	public static boolean isDuplicateId(String newId, ConservationArea ca, Session session){
+		Criteria c = session.createCriteria(Mission.class)
+				.createAlias("survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+				.createAlias("s.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
+				.add(Restrictions.eq("sd.conservationArea", ca)) //$NON-NLS-1$ 
+				.add(Restrictions.eq("id", newId)) //$NON-NLS-1$ 
+				.setProjection(Projections.rowCount()); 
+		Long cnt = (Long)c.uniqueResult();
+		if (cnt > 0){
+			return true;
+		}
+		return false;
+	}
+
+	
+	
+	public static void saveMission(Mission mission, Session session, boolean saveWaypoints) throws Exception{
+		if (mission.getId() == null ){
+			String id = SurveyHibernateManager.generateMissionId(mission, session);
+			mission.setId(id);
+		}
+		
+		session.saveOrUpdate(mission);
+		
+		if (saveWaypoints){
+			session.flush();
+		
+			//save all the waypoints as well
+			if (mission.getWaypoints() != null) {
+				for (SurveyWaypoint wp: mission.getWaypoints()){
+					if (wp.getWaypoint().getAttachments() != null){
+						//update all the waypoint attachments directory
+						for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+							wa.setDatastoreFolderExtension(
+								((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(wp.getWaypoint()));
+						}
+					}
+					if (wp.getWaypoint().getObservations() != null){
+						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+							if (wo.getAttachments() != null){
+								for (ObservationAttachment wa : wo.getAttachments()){
+									wa.setDatastoreFolderExtension(
+											((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(wp.getWaypoint()));
+								}
+							}
+						}
+					}
+					
+					session.saveOrUpdate(wp.getWaypoint());
+					session.saveOrUpdate(wp);
+				}
+			}
+		}
+	}
+	
+	public static String generateMissionId(Mission m, Session s) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append(m.getSurvey().getSurveyDesign().getConservationArea().getId());
+
+		Query q = s
+				.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
+		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+		q.setParameter("ca", m.getSurvey().getSurveyDesign().getConservationArea().getId()); //$NON-NLS-1$
+
+		long idNumber = 0;
+		List<?> results = q.list();
+		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
+			String localId = (String) iterator.next();
+			try {
+				idNumber = Integer.parseInt(localId.substring(localId
+						.lastIndexOf('_') + 1));
+				break;
+			} catch (Exception ex) {
+				// not of the form CAID_# skip this one
+			}
+		}
+		sb.append("_"); //$NON-NLS-1$
+		sb.append("M"); //$NON-NLS-1$
+		idNumber = (idNumber + 1) % 1000000;
+		if (idNumber <= 0) {
+			idNumber = 1;
+		}
+		sb.append(MISSION_ID_FORMATTER.format(idNumber));
+
+		return sb.toString();
+	}
+
+
 }
