@@ -72,8 +72,6 @@ elementFormDefault="qualified">
     		<element name="missionAttributeListItem" type="tns:missionAttributeListItem" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="attributeType" type="string"></attribute>
-    	<attribute name="defaultName" type="string"></attribute>
-    	<attribute name="name" type="string"></attribute>
     	<attribute name="keyId" type="string"></attribute>
     </complexType>
 
@@ -93,9 +91,7 @@ elementFormDefault="qualified">
     			minOccurs="0">
     		</element>
     	</sequence>
-    	<attribute name="name" type="string"></attribute>
     	<attribute name="keyid" type="string"></attribute>
-    	<attribute name="defaultName" type="string"></attribute>
     	<attribute name="listOrder" type="int"></attribute>
     </complexType>
     
@@ -109,23 +105,21 @@ elementFormDefault="qualified">
 
     <complexType name="samplingUnitAttribute">
     	<sequence>
-    		<element name="samplingUnitAttributeValues"
-    			type="tns:samplingUnitAttributeValue" maxOccurs="unbounded"
-    			minOccurs="0">
+    		<element name="names" type="tns:namesType"
+    			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element name="names" type="tns:namesType" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="listItems" type="tns:samplingUnitAttributeListItem" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="attributeType" type="string"></attribute>
     	<attribute name="defaultName" type="string"></attribute>
-    	<attribute name="name" type="string"></attribute>
     	<attribute name="keyId" type="string"></attribute>
     </complexType>
 
     <complexType name="samplingUnitAttributeValue">
     	<attribute name="stringValue" type="string"></attribute>
     	<attribute name="doubleValue" type="double"></attribute>
-    	<attribute name="samplingUnitId" type="string"></attribute>
-    	<attribute name="SamplingUnitAttributeId" type="string"></attribute>
+    	<attribute name="listItemValue" type="string"></attribute>
+    	<attribute name="samplingUnitAttributeId" type="string"></attribute>
     </complexType>
 
 
@@ -138,5 +132,13 @@ elementFormDefault="qualified">
     	<attribute name="buffer" type="double"></attribute>
     	<attribute name="type" type="string"></attribute>
     	<attribute name="state" type="string"></attribute>
+    </complexType>
+
+    <complexType name="samplingUnitAttributeListItem">
+    	<sequence>
+    		<element name="names" type="tns:namesType" maxOccurs="unbounded" minOccurs="1"></element>
+    	</sequence>
+    	<attribute name="keyId" type="string"></attribute>
+    	<attribute name="listorder" type="int"></attribute>
     </complexType>
 </schema>

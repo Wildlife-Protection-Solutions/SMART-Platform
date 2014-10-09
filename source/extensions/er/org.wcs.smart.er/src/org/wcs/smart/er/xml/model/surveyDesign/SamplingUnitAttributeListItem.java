@@ -18,20 +18,19 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for missionAttribute complex type.
+ * <p>Java class for samplingUnitAttributeListItem complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="missionAttribute">
+ * &lt;complexType name="samplingUnitAttributeListItem">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="Names" type="{http://www.smartconservationsoftware.org/xml/1.0/entitytype}namesType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="missionAttributeListItem" type="{http://www.smartconservationsoftware.org/xml/1.0/entitytype}missionAttributeListItem" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="names" type="{http://www.smartconservationsoftware.org/xml/1.0/entitytype}namesType" maxOccurs="unbounded"/>
  *       &lt;/sequence>
- *       &lt;attribute name="attributeType" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="keyId" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="listorder" type="{http://www.w3.org/2001/XMLSchema}int" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -40,19 +39,17 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "missionAttribute", propOrder = {
-    "names",
-    "missionAttributeListItem"
+@XmlType(name = "samplingUnitAttributeListItem", propOrder = {
+    "names"
 })
-public class MissionAttribute {
+public class SamplingUnitAttributeListItem {
 
-    @XmlElement(name = "Names")
+    @XmlElement(required = true)
     protected List<NamesType> names;
-    protected List<MissionAttributeListItem> missionAttributeListItem;
-    @XmlAttribute
-    protected String attributeType;
     @XmlAttribute
     protected String keyId;
+    @XmlAttribute
+    protected Integer listorder;
 
     /**
      * Gets the value of the names property.
@@ -84,59 +81,6 @@ public class MissionAttribute {
     }
 
     /**
-     * Gets the value of the missionAttributeListItem property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the missionAttributeListItem property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getMissionAttributeListItem().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link MissionAttributeListItem }
-     * 
-     * 
-     */
-    public List<MissionAttributeListItem> getMissionAttributeListItem() {
-        if (missionAttributeListItem == null) {
-            missionAttributeListItem = new ArrayList<MissionAttributeListItem>();
-        }
-        return this.missionAttributeListItem;
-    }
-
-    /**
-     * Gets the value of the attributeType property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getAttributeType() {
-        return attributeType;
-    }
-
-    /**
-     * Sets the value of the attributeType property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setAttributeType(String value) {
-        this.attributeType = value;
-    }
-
-    /**
      * Gets the value of the keyId property.
      * 
      * @return
@@ -158,6 +102,30 @@ public class MissionAttribute {
      */
     public void setKeyId(String value) {
         this.keyId = value;
+    }
+
+    /**
+     * Gets the value of the listorder property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *     
+     */
+    public Integer getListorder() {
+        return listorder;
+    }
+
+    /**
+     * Sets the value of the listorder property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *     
+     */
+    public void setListorder(Integer value) {
+        this.listorder = value;
     }
 
 }

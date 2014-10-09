@@ -39,6 +39,7 @@ import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
@@ -52,7 +53,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Jeff
  *
  */
-
+@SuppressWarnings("unchecked")
 public class SurveyDesignToXmlConverter {
 
 	/**
@@ -139,9 +140,7 @@ public class SurveyDesignToXmlConverter {
 			org.wcs.smart.er.xml.model.surveyDesign.MissionAttribute xmlma = new org.wcs.smart.er.xml.model.surveyDesign.MissionAttribute();
 
 			xmlma.setAttributeType(attr.getType().toString());
-			xmlma.setDefaultName(attr.getDefaultName());
 			xmlma.setKeyId(attr.getKeyId());
-			xmlma.setName(attr.getName());
 			 
 			//all the names for a mission_Attribute
 			for (org.wcs.smart.ca.Label label : attr.getNames() ){ 
@@ -157,12 +156,9 @@ public class SurveyDesignToXmlConverter {
 			for(MissionAttributeListItem mali : attr.getAttributeList()){
 				org.wcs.smart.er.xml.model.surveyDesign.MissionAttributeListItem xmlmali = new org.wcs.smart.er.xml.model.surveyDesign.MissionAttributeListItem();
 				
-				xmlmali.setDefaultName(mali.getDefaultName());
 				xmlmali.setKeyid(mali.getKeyId());
-				xmlmali.setName(mali.getName());
 				xmlmali.setListOrder(mali.getListOrder());
 
-				
 				//all the names for a single mission_Attribute list item
 				for (org.wcs.smart.ca.Label label : mali.getNames() ){ 
 					org.wcs.smart.er.xml.model.surveyDesign.NamesType xmlpair = new org.wcs.smart.er.xml.model.surveyDesign.NamesType();
@@ -192,7 +188,7 @@ public class SurveyDesignToXmlConverter {
 			xmlsua.setAttributeType(sua.getType().toString());
 			xmlsua.setDefaultName(sua.getDefaultName());
 			xmlsua.setKeyId(sua.getKeyId());
-			xmlsua.setName(sua.getName());
+
 			//all the names for the Attribute
 			for (org.wcs.smart.ca.Label label : sua.getNames() ){ 
 				org.wcs.smart.er.xml.model.surveyDesign.NamesType xmlpair = new org.wcs.smart.er.xml.model.surveyDesign.NamesType();
@@ -202,6 +198,27 @@ public class SurveyDesignToXmlConverter {
 				xmlpair.setIsDefault(label.getLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
 				xmlsua.getNames().add(xmlpair);
 			}
+			
+			//All the list items
+			for(SamplingUnitAttributeListItem mali : sua.getAttributeList()){
+				org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeListItem xmlmali = new org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeListItem();
+				
+				xmlmali.setKeyId(mali.getKeyId());
+				xmlmali.setListorder(mali.getListOrder());
+
+				//all the names for a single mission_Attribute list item
+				for (org.wcs.smart.ca.Label label : mali.getNames() ){ 
+					org.wcs.smart.er.xml.model.surveyDesign.NamesType xmlpair = new org.wcs.smart.er.xml.model.surveyDesign.NamesType();
+					
+					xmlpair.setLanguage(label.getId().getLanguage().getCode());
+					xmlpair.setValue(label.getValue());
+					xmlpair.setIsDefault(label.getLanguage().equals(SmartDB.getCurrentConservationArea().getDefaultLanguage()));
+					xmlmali.getNames().add(xmlpair);
+				}
+				
+				xmlsua.getListItems().add(xmlmali);
+			}
+			
 			xmlSDsua.getSamplingUnitAttributes().add(xmlsua);
 			xml.getSurveyDesignSamplingUnitAttribute().add(xmlSDsua);
 					
@@ -222,7 +239,7 @@ public class SurveyDesignToXmlConverter {
 				org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue xmlsuav = new org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue();
 				
 				
-				xmlsuav.setSamplingUnitId(suav.getSamplingUnit().getId());
+				xmlsuav.setSamplingUnitAttributeId(suav.getSamplingUnit().getId());
 				if (suav.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
 					xmlsuav.setStringValue(suav.getStringValue());	
 				}else if (suav.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){

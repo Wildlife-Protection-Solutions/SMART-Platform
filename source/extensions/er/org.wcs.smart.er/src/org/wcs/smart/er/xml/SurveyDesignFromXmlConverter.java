@@ -58,7 +58,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Jeff
  *
  */
-
+@SuppressWarnings("unchecked")
 public class SurveyDesignFromXmlConverter {
 
 	public static SurveyDesign fromXml(org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign xml, Session session) throws ParseException{
@@ -115,7 +115,6 @@ public class SurveyDesignFromXmlConverter {
 				MissionAttribute attr = new MissionAttribute();
 				attr.setConservationArea(SmartDB.getCurrentConservationArea());
 				attr.setKeyId(xmlattr.getKeyId());
-				attr.setName(xmlattr.getName());
 				importNames(xmlattr.getNames(), attr, session, false);
 				attr.setType(AttributeType.valueOf(xmlattr.getAttributeType()));
 				
@@ -125,7 +124,6 @@ public class SurveyDesignFromXmlConverter {
 					mali.setAttribute(attr);
 					mali.setKeyId(xmlmali.getKeyid());
 					mali.setListOrder(xmlmali.getListOrder());
-					mali.setName(xmlmali.getName());
 					mali.setUuid(null);
 					importNames(xmlmali.getNames(), mali, session, false);
 					attr.getAttributeList().add(mali);
@@ -174,21 +172,28 @@ public class SurveyDesignFromXmlConverter {
 			org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttribute xmlsua = xmlsdsua.getSamplingUnitAttributes().get(0);
 			SamplingUnitAttribute existingSua = getSamplingUnitAttribute(xmlsua, session);
 			
-			sdsua.setSamplingUnitAttribute(existingSua);
 			if(existingSua == null){
 				SamplingUnitAttribute sua = new SamplingUnitAttribute();
 				sdsua.setSamplingUnitAttribute(sua);
-				
 				sua.setType(AttributeType.valueOf(xmlsua.getAttributeType()));
 				sua.setConservationArea(SmartDB.getCurrentConservationArea());
 				sua.setKeyId(xmlsua.getKeyId());
-				sua.setName(xmlsua.getName());
+				importNames(xmlsua.getNames(), sua, session, false);
 				sua.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
+				for (org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeListItem xmlsuli : xmlsua.getListItems()){
+					SamplingUnitAttributeListItem suli = new SamplingUnitAttributeListItem();
+					suli.setAttribute(sua);
+					suli.setKeyId(xmlsuli.getKeyId());
+					suli.setListOrder(xmlsuli.getListorder());
+					importNames(xmlsuli.getNames(), suli, session, false);
+					sua.getAttributeList().add(suli);
+				}
 				
-				SurveyDesignFromXmlConverter.importNames(xmlsua.getNames(), sua, session, false);
 			
 				session.save(sua);
 				sdsua.setSamplingUnitAttribute(sua);
+			}else{
+				sdsua.setSamplingUnitAttribute(existingSua);
 			}
 		}
 		
@@ -213,10 +218,8 @@ public class SurveyDesignFromXmlConverter {
 			//sampling unit attribute values
 			for(org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue xmlsuav : xmlunit.getSamplingUnitAttributeValue()){
 				SamplingUnitAttributeValue suav = new SamplingUnitAttributeValue();
-				
 				boolean found = false;
-				for(SurveyDesignSamplingUnitAttribute sua : convertedDesign.getSamplingUnitAttributes()){
-					
+				for(SurveyDesignSamplingUnitAttribute sua : convertedDesign.getSamplingUnitAttributes()){					
 					if(xmlsuav.getSamplingUnitAttributeId().equals(sua.getSamplingUnitAttribute().getKeyId())){
 						suav.setSamplingUnitAttribute(sua.getSamplingUnitAttribute());
 						found = true;
@@ -264,10 +267,7 @@ public class SurveyDesignFromXmlConverter {
 					newmali.setAttribute(attr);
 					newmali.setKeyId(xmlMali.getKeyid());
 					newmali.setListOrder(xmlMali.getListOrder());
-					newmali.setName(xmlMali.getName());
-				
 					importNames(xmlMali.getNames(), newmali, s, false);
-				
 					attr.getAttributeList().add(newmali);
 				}
 
@@ -284,6 +284,26 @@ public class SurveyDesignFromXmlConverter {
 				.add(Restrictions.eq("keyId", xmlsua.getKeyId())).list(); //$NON-NLS-1$ 
 		if (values.size() > 0){
 			SamplingUnitAttribute attr = values.get(0);
+			
+			for(org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeListItem xmlMali :xmlsua.getListItems()){
+				boolean match = false;
+				for(SamplingUnitAttributeListItem mali : attr.getAttributeList()){
+					if(xmlMali.getKeyId().equals(mali.getKeyId())){
+						match = true;
+						break;
+					}
+				}
+				if (match == false){
+					//missing list item, add it
+					SamplingUnitAttributeListItem newmali = new SamplingUnitAttributeListItem();
+					newmali.setAttribute(attr);
+					newmali.setKeyId(xmlMali.getKeyId());
+					newmali.setListOrder(xmlMali.getListorder());
+					importNames(xmlMali.getNames(), newmali, s, false);
+					attr.getAttributeList().add(newmali);
+				}
+
+			}
 			return attr;
 		}
 		return null;
