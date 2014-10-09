@@ -28,14 +28,17 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.util.SmartUtils;
 
@@ -120,6 +123,8 @@ public class SamplingUnitAttributeFilter implements IFilter {
 			return key + " " + ((Double)value).toString();  //$NON-NLS-1$  
 		}else if (type == AttributeType.TEXT){
 			return key + " \"" + ((String)value) + "\"";  //$NON-NLS-1$  //$NON-NLS-2$  
+		}else if (type == AttributeType.LIST){
+			return key + " " + ((String)value); //$NON-NLS-1$
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -140,6 +145,23 @@ public class SamplingUnitAttributeFilter implements IFilter {
 			if (type.equals(AttributeType.NUMERIC) ||
 					type.equals(AttributeType.TEXT)){
 				di.initializeData(new String[]{op.asSmartValue(), value.toString()}); 
+			}else if (type.equals(AttributeType.LIST)){
+				
+				boolean ok = false;
+				if (value.equals(AttributeFilter.ANY_OPTION.getKey())){
+					di.initializeData(AttributeFilter.ANY_OPTION);
+					ok = true;
+				}else{
+					for (SamplingUnitAttributeListItem item : sa.getAttributeList()){
+						if (item.getKeyId().equals(value)){
+							ok = true;
+							di.initializeData(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+						}
+					}
+				}
+				if (!ok){
+					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SamplingUnitAttributeFilter_ListItemNotFound, new Object[]{samplingUnitAttributeKey}))};		
+				}
 			}
 			return new DropItem[]{di};
 		}catch (Exception ex){

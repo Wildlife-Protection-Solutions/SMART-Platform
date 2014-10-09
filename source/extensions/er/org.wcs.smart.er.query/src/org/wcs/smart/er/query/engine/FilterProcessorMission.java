@@ -35,6 +35,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -302,6 +303,14 @@ public class FilterProcessorMission implements IFilterProcessor {
 		sql.append(".uuid "); //$NON-NLS-1$
 		usedTables.add(MissionTrack.class);
 		
+		if (this.suAttributeTable != null){
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(suAttributeTable + " sua"); //$NON-NLS-1$
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(MissionTrack.class));
+			sql.append(".sampling_unit_uuid = sua.sampling_unit_uuid"); //$NON-NLS-1$
+		}
+		
 		// area filters
 		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables);
 		queryFilter.accept(areaVisitor);
@@ -523,7 +532,12 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 				sql.append(prefix(SamplingUnit.class));
 				sql.append(".uuid, "); //$NON-NLS-1$
-				sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getColumn()); //$NON-NLS-1$						
+				if (key.getType() == AttributeType.LIST) {
+					sql.append("l.keyid "); //$NON-NLS-1$
+				} else {
+					sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getColumn()); //$NON-NLS-1$						
+				}
+				
 				sql.append(" as "); //$NON-NLS-1$
 				sql.append(key.getKey());
 				sql.append(" "); //$NON-NLS-1$
@@ -564,6 +578,12 @@ public class FilterProcessorMission implements IFilterProcessor {
 						sql.append(cfilter);
 					}
 				}
+				if (key.getType() == AttributeType.LIST) {
+					sql.append(" JOIN "); //$NON-NLS-1$
+					sql.append(name(SamplingUnitAttributeListItem.class));
+					sql.append(" l on l.uuid = " + prefix(SamplingUnitAttributeValue.class) + ".list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				
 				sql.append("WHERE "); //$NON-NLS-1$
 				sql.append(" " + prefix(SamplingUnitAttribute.class) + ".keyid = '"); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(key.getKey());

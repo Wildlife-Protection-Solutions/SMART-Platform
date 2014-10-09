@@ -39,6 +39,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
@@ -392,32 +393,67 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 				}
 			}else if (sortColumn instanceof SamplingUnitAttributeQueryColumn){
-				sql = new StringBuilder();
-				sql.append("UPDATE "); //$NON-NLS-1$
-				sql.append(queryTempTable);
-				sql.append(" SET "); //$NON-NLS-1$
-				sql.append(getSortColumn(type));
-				sql.append( " = "); //$NON-NLS-1$
-				sql.append(" (SELECT "); //$NON-NLS-1$
-				sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
-				sql.append("." + getSortValueField(type)); //$NON-NLS-1$
-				sql.append(" FROM "); //$NON-NLS-1$
-				sql.append(engine.tableNamePrefix(SamplingUnitAttributeValue.class));
-				sql.append(" JOIN "); //$NON-NLS-1$
-				sql.append(engine.tableNamePrefix(SamplingUnitAttribute.class));
-				sql.append(" ON "); //$NON-NLS-1$
-				sql.append(engine.tablePrefix(SamplingUnitAttribute.class));
-				sql.append(".uuid = "); //$NON-NLS-1$
-				sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
-				sql.append(".su_attribute_uuid AND "); //$NON-NLS-1$
-				sql.append(engine.tablePrefix(SamplingUnitAttribute.class));
-				sql.append(".keyid = '" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(" WHERE "); //$NON-NLS-1$
-				sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
-				sql.append(".su_uuid = "); //$NON-NLS-1$
-				sql.append( queryTempTable );
-				sql.append(".samplingunit_uuid)"); //$NON-NLS-1$
-				c.createStatement().execute(sql.toString());
+				switch (type) {
+				case NUMERIC:
+				case TEXT:
+					sql = new StringBuilder();
+					sql.append("UPDATE "); //$NON-NLS-1$
+					sql.append(queryTempTable);
+					sql.append(" SET "); //$NON-NLS-1$
+					sql.append(getSortColumn(type));
+					sql.append( " = "); //$NON-NLS-1$
+					sql.append(" (SELECT "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append("." + getSortValueField(type)); //$NON-NLS-1$
+					sql.append(" FROM "); //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(SamplingUnitAttributeValue.class));
+					sql.append(" JOIN "); //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(SamplingUnitAttribute.class));
+					sql.append(" ON "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttribute.class));
+					sql.append(".uuid = "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append(".su_attribute_uuid AND "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttribute.class));
+					sql.append(".keyid = '" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(" WHERE "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append(".su_uuid = "); //$NON-NLS-1$
+					sql.append( queryTempTable );
+					sql.append(".samplingunit_uuid)"); //$NON-NLS-1$
+					c.createStatement().execute(sql.toString());
+				case LIST:
+					sql = new StringBuilder();
+					sql.append("UPDATE "); //$NON-NLS-1$
+					sql.append(queryTempTable);
+					sql.append(" SET "); //$NON-NLS-1$
+					sql.append(getSortColumn(type));
+					sql.append( " = "); //$NON-NLS-1$
+					sql.append("(SELECT rl.value FROM "); //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(SamplingUnitAttributeValue.class));
+					sql.append(" JOIN "); //$NON-NLS-1$
+					sql.append( queryTempTable + "_suLIST rl on rl.uuid = "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append(".list_element_uuid "); //$NON-NLS-1$
+					sql.append(" JOIN "); //$NON-NLS-1$
+					sql.append(engine.tableNamePrefix(SamplingUnitAttributeValue.class));
+					sql.append(" ON "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append(".uuid =  "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append(".sampling_unit_attribute_uuid "); //$NON-NLS-1$
+					sql.append("and "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttribute.class));
+					sql.append(".keyid = '" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(" WHERE "); //$NON-NLS-1$
+					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append(".sampling_unit_uuid = "); //$NON-NLS-1$
+					sql.append( queryTempTable); 
+					sql.append(".sampling_unit_uuid)"); //$NON-NLS-1$
+					c.createStatement().execute(sql.toString());
+					
+					break;
+				}
 			} //end mission attributes
 		}//end sort column
 		c.commit();
@@ -567,7 +603,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 	protected void attachSamplingUnitAttributes(List<IResultItem> result, Connection c, Session session) throws SQLException {
 		
 		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT suav.su_uuid, sua.keyid, suav.number_value, suav.string_value FROM "); //$NON-NLS-1$
+		attrSql.append("SELECT suav.su_uuid, sua.keyid, suav.number_value, suav.string_value, suav.list_element_uuid FROM "); //$NON-NLS-1$
 		attrSql.append("smart.sampling_unit_attribute sua join smart.sampling_unit_attribute_value suav"); //$NON-NLS-1$
 		attrSql.append(" on suav.su_attribute_uuid = sua.uuid "); //$NON-NLS-1$
 		attrSql.append(" WHERE suav.su_uuid IN ("); //$NON-NLS-1$
@@ -598,12 +634,16 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 				String svalue = rs.getString(4);
 				
 				for (IResultItem irt : result) {
+				
 					SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
 					if (Arrays.equals(muuid,it.getSamplingUnitUuid())){
 						if (rs.getObject(3) != null){
 							it.addSamplingUnitAttributeValue(key, dvalue);
-						}else if (rs.getObject(4) != null && svalue != null){
-							it.addSamplingUnitAttributeValue(key, svalue);
+						}else if (svalue != null){
+							it.addSamplingUnitAttributeValue(key,  svalue);
+						}else if (rs.getObject(5) != null){
+							String value = ((SamplingUnitAttributeListItem)session.load(SamplingUnitAttributeListItem.class, rs.getBytes(5))).getName();
+							it.addSamplingUnitAttributeValue(key, value);
 						}
 					}
 				}				

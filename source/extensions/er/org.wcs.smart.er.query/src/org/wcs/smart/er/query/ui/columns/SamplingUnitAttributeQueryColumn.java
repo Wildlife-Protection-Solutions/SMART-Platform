@@ -50,6 +50,8 @@ public class SamplingUnitAttributeQueryColumn  extends QueryColumn {
 			super.setType(ColumnType.NUMBER);
 		}else if (sua.getType() == AttributeType.TEXT){
 			super.setType(ColumnType.STRING);
+		}else if (sua.getType() == AttributeType.LIST){
+			super.setType(ColumnType.STRING);
 		}
 	}
 	

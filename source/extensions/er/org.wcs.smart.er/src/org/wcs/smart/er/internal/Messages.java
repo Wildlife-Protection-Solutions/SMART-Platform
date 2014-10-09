@@ -201,6 +201,8 @@ public class Messages extends NLS {
 	public static String ImportAttributes_ErrorList;
 	public static String ImportAttributes_ErrorUpdating;
 	public static String ImportAttributes_IdFieldNotFound;
+
+	public static String ImportAttributes_ListAttributeNotFound;
 	public static String ImportAttributes_Progress1;
 	public static String ImportAttributes_Progress2;
 	public static String ImportAttributes_SuNotFound;
@@ -410,9 +412,17 @@ public class Messages extends NLS {
 	public static String SamplingUnitAttributeDialog_Message;
 	public static String SamplingUnitAttributeDialog_SaveError;
 	public static String SamplingUnitAttributeDialog_Title;
+	public static String SamplingUnitAttributeListItemDeleteAdvisor_CannotDelete;
+
+	public static String SamplingUnitAttributeListItemDeleteAdvisor_InvalidObjectError;
+
 	public static String SamplingUnitCellEditor_LoadJobTitle;
 	public static String SamplingUnitCellEditor_None;
 	public static String SamplingUnitDataSource_TypeNotSupported;
+	public static String SamplingUnitDeleteAdvisor_TrackError;
+
+	public static String SamplingUnitDeleteAdvisor_WaypointError;
+
 	public static String SamplingUnitEditorPage_addLayerJobName;
 	public static String SamplingUnitEditorPage_attributesTooltip;
 	public static String SamplingUnitEditorPage_BufferColumnName;

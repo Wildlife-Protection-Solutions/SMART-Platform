@@ -29,6 +29,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 
 /**
@@ -57,6 +58,8 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 			return ((SamplingUnitAttribute) element).getName();
 		}else if (element instanceof SurveyDesignSamplingUnitAttribute){
 			return ((SurveyDesignSamplingUnitAttribute) element).getSamplingUnitAttribute().getName();
+		}else if (element instanceof SamplingUnitAttributeListItem){
+			return ((SamplingUnitAttributeListItem) element).getName();
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
 	}

@@ -37,6 +37,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -72,6 +73,7 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		tablePrefix.put(SamplingUnit.class, "su"); //$NON-NLS-1$
 		tablePrefix.put(SamplingUnitAttribute.class, "sua"); //$NON-NLS-1$
 		tablePrefix.put(SamplingUnitAttributeValue.class, "suav"); //$NON-NLS-1$
+		tablePrefix.put(SamplingUnitAttributeListItem.class, "suli"); //$NON-NLS-1$
 	}
 
 	
@@ -92,6 +94,7 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		tableNames.put(SamplingUnit.class, "smart.sampling_unit"); //$NON-NLS-1$
 		tableNames.put(SamplingUnitAttribute.class, "smart.sampling_unit_attribute"); //$NON-NLS-1$
 		tableNames.put(SamplingUnitAttributeValue.class, "smart.sampling_unit_attribute_value"); //$NON-NLS-1$
+		tableNames.put(SamplingUnitAttributeListItem.class, "smart.sampling_unit_attribute_list"); //$NON-NLS-1$
 	}
 
 	/**

@@ -39,6 +39,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -47,6 +48,7 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -158,6 +160,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 					
 						String newValue = headers[index.getValue()];
 						Double dValue = null;
+						SamplingUnitAttributeListItem listValue = null;
 						if (index.getKey().getType() == Attribute.AttributeType.NUMERIC){
 							//parse value from string
 							try{
@@ -166,6 +169,15 @@ public class ImportAttributes implements IRunnableWithProgress {
 								//cannot compute value so skip
 								warnings.add(MessageFormat.format(Messages.ImportAttributes_ConversionError, new Object[]{newValue, index.getKey().getName(), lineCnt})); 
 								break;
+							}
+						}else if (index.getKey().getType() == Attribute.AttributeType.LIST){
+							if (!newValue.trim().isEmpty()){
+								
+								listValue = findMatch(index.getKey(), newValue);
+								if (listValue == null){
+									warnings.add(MessageFormat.format(Messages.ImportAttributes_ListAttributeNotFound, new Object[]{newValue, index.getKey().getName(), lineCnt}));
+									break;
+								}
 							}
 						}
 					
@@ -187,8 +199,16 @@ public class ImportAttributes implements IRunnableWithProgress {
 						
 							if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.NUMERIC){
 								toUpdate.setNumberValue(dValue);
-							}else{
+							}else if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.TEXT){
 								toUpdate.setStringValue(newValue);
+							}else if (toUpdate.getSamplingUnitAttribute().getType() == Attribute.AttributeType.LIST){
+								if (listValue != null){
+									toUpdate.setAttributeListItem(listValue);
+								}else{
+									//remove me
+									unit.getAttributes().remove(toUpdate);
+									session.delete(toUpdate);
+								}
 							}
 							changes = true;
 						}
@@ -254,5 +274,33 @@ public class ImportAttributes implements IRunnableWithProgress {
 		return session.createCriteria(SamplingUnit.class)
 		.add(Restrictions.eq("surveyDesign", survey)) //$NON-NLS-1$
 		.add(Restrictions.eq("id", id)).list(); //$NON-NLS-1$
+	}
+	
+	public static SamplingUnitAttributeListItem findMatch(SamplingUnitAttribute su, String value){
+		if (value == null) return null;
+		value = value.trim();
+	
+		//search keys; likely won't match
+		for (SamplingUnitAttributeListItem item : su.getAttributeList()){
+			if (item.getKeyId().equals(value)){
+				return item;
+			}
+		}
+		//search current language name
+		for (SamplingUnitAttributeListItem item : su.getAttributeList()){
+			if (item.getName().equals(value)){
+				return item;
+			}
+		}
+			
+		//search all names; case insensitive
+		for (SamplingUnitAttributeListItem item : su.getAttributeList()){
+			for (Label l : item.getNames()){
+				if (l.getValue().toUpperCase().equals(value.toUpperCase())){
+					return item;
+				}
+			}
+		}
+		return null;
 	}
 }

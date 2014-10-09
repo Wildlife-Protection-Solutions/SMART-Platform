@@ -223,7 +223,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.list(); 
 				EditSamplingUnitAttributeDialog d = new EditSamplingUnitAttributeDialog(
-						getShell(), sua, siblings);
+						getShell(), sua, siblings, session);
 				
 				if (d.open() == EditSamplingUnitAttributeDialog.OK){
 				

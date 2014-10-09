@@ -183,7 +183,7 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 		ma.setConservationArea(SmartDB.getCurrentConservationArea());
 		
 		EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(
-				getShell(), ma, attributes);
+				getShell(), ma, attributes, session);
 		if (dialog.open() == OK){
 			attributes.add(ma);
 			session.save(ma);
@@ -229,7 +229,7 @@ public class SamplingUnitAttributeDialog extends TitleAreaDialog implements Sele
 	private void editAttribute(){
 		SamplingUnitAttribute ma = (SamplingUnitAttribute) ((IStructuredSelection)lstAttributes.getSelection()).getFirstElement();
 		if (ma != null){
-			EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(getShell(), ma, attributes);
+			EditSamplingUnitAttributeDialog dialog = new EditSamplingUnitAttributeDialog(getShell(), ma, attributes, session);
 			dialog.open();
 			lstAttributes.refresh();
 			getButton(IDialogConstants.OK_ID).setEnabled(true);

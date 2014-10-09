@@ -84,6 +84,10 @@
             ca_property=".id.samplingUnitAttribute.conservationArea"
             class="org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute">
       </class>
+      <class
+            ca_property=".attribute.conservationArea"
+            class="org.wcs.smart.er.model.SamplingUnitAttributeListItem">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.observation.ObservationSource">
@@ -960,6 +964,14 @@
       <DeleteAdvisor
             advisor="org.wcs.smart.er.delete.SamplingUnitAttributeDeleteAdvisor"
             class="org.wcs.smart.er.model.SamplingUnitAttribute">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.er.delete.SamplingUnitDeleteAdvisor"
+            class="org.wcs.smart.er.model.SamplingUnit">
+      </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.er.delete.SamplingUnitAttributeListItemDeleteAdvisor"
+            class="org.wcs.smart.er.model.SamplingUnitAttributeListItem">
       </DeleteAdvisor>
    </extension>
    <extension

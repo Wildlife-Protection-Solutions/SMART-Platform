@@ -33,6 +33,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
@@ -122,9 +123,20 @@ public class CaTemplateCloner implements IConservationAreaTemplateCloner {
 			clone.setConservationArea(engine.getNewCa());
 			clone.setKeyId(attribute.getKeyId());
 			clone.setType(attribute.getType());
+			clone.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
 			engine.copyLabels(attribute, clone);
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(attribute, clone);
+			
+			for (SamplingUnitAttributeListItem item : attribute.getAttributeList()){
+				SamplingUnitAttributeListItem citem = new SamplingUnitAttributeListItem();
+				citem.setAttribute(clone);
+				citem.setKeyId(item.getKeyId());
+				citem.setListOrder(item.getListOrder());
+				engine.copyLabels(item, citem);
+				clone.getAttributeList().add(citem);
+			}
+			engine.getSession().flush();
 		}
 	}
 	

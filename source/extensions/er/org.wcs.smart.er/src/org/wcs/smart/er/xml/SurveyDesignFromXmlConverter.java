@@ -41,12 +41,14 @@ import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.model.SurveyDesignProperty;
+import org.wcs.smart.er.ui.samplingunit.load.ImportAttributes;
 import org.wcs.smart.er.xml.model.surveyDesign.NamesType;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -181,6 +183,8 @@ public class SurveyDesignFromXmlConverter {
 				sua.setConservationArea(SmartDB.getCurrentConservationArea());
 				sua.setKeyId(xmlsua.getKeyId());
 				sua.setName(xmlsua.getName());
+				sua.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
+				
 				SurveyDesignFromXmlConverter.importNames(xmlsua.getNames(), sua, session, false);
 			
 				session.save(sua);
@@ -209,10 +213,6 @@ public class SurveyDesignFromXmlConverter {
 			//sampling unit attribute values
 			for(org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue xmlsuav : xmlunit.getSamplingUnitAttributeValue()){
 				SamplingUnitAttributeValue suav = new SamplingUnitAttributeValue();
-				suav.setNumberValue(xmlsuav.getDoubleValue());
-				suav.setStringValue(xmlsuav.getStringValue());
-				suav.setSamplingUnit(unit);
-				unit.getAttributes().add(suav);
 				
 				boolean found = false;
 				for(SurveyDesignSamplingUnitAttribute sua : convertedDesign.getSamplingUnitAttributes()){
@@ -226,6 +226,17 @@ public class SurveyDesignFromXmlConverter {
 				if(!found){
 					throw new ParseException(Messages.SurveyDesignImportHandler_5 + xmlsuav.getSamplingUnitAttributeId() + Messages.SurveyDesignImportHandler_6, 0);
 				}
+				if (suav.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+					suav.setStringValue(xmlsuav.getStringValue());	
+				}else if (suav.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+					suav.setNumberValue(xmlsuav.getDoubleValue());
+				}else if (suav.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+					SamplingUnitAttributeListItem item = ImportAttributes.findMatch(suav.getSamplingUnitAttribute(), xmlsuav.getStringValue());
+					suav.setAttributeListItem(item);
+				}
+				
+				suav.setSamplingUnit(unit);
+				unit.getAttributes().add(suav);
 			}
 		}
 		return newUnits;

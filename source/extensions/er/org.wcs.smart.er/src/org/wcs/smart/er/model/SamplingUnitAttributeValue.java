@@ -36,6 +36,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+
 
 /**
  * Link between a sampling unit attribute, sampling unit and
@@ -56,9 +58,9 @@ public class SamplingUnitAttributeValue {
 	private SamplingUnitAttributeValuePk id = new SamplingUnitAttributeValuePk();
 	
 	private String stringValue = null;
-	
 	private Double doubleValue = null;
-
+	private SamplingUnitAttributeListItem listItem;
+	
 	public SamplingUnitAttributeValue(){
 		
 	}
@@ -115,6 +117,46 @@ public class SamplingUnitAttributeValue {
 	
 	public void setNumberValue(Double value){
 		this.doubleValue = value;
+	}
+	
+	/**
+	 * value for list attributes
+	 * 
+	 * @return
+	 */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "list_element_uuid", referencedColumnName = "uuid")
+	public SamplingUnitAttributeListItem getAttributeListItem() {
+		return this.listItem;
+	}
+
+	public void setAttributeListItem(SamplingUnitAttributeListItem listItem) {
+		this.listItem = listItem;
+	}
+	
+	
+	@Transient
+	public String getValueAsString(){
+		if (getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+			if (getStringValue() == null){
+				return ""; //$NON-NLS-1$
+			}else{
+				return getStringValue();
+			}
+		}else if (getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+			if (getNumberValue() == null){
+				return ""; //$NON-NLS-1$
+			}else{
+				return getNumberValue().toString();
+			}
+		}else if (getSamplingUnitAttribute().getType() == AttributeType.LIST){
+			if (getAttributeListItem() == null){
+				return ""; //$NON-NLS-1$
+			}else{
+				return getAttributeListItem().getName();
+			}
+		}
+		return "";
 	}
 	
 	@Embeddable

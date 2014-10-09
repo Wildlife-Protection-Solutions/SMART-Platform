@@ -246,7 +246,7 @@ public class SurveySummaryQueryType implements IQueryType {
 				def.getValuePart().visit(ivv);
 				
 				if (isTrack[0] && gbDm && gbSu[0]){
-					return "Cannot compute track length when grouping by both sampling units and data model elements";
+					return Messages.SurveySummaryQueryType_QueryError;
 				}
 			}
 

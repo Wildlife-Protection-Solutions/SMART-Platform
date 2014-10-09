@@ -147,6 +147,12 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 							value = v.getStringValue();
 						}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
 							value = v.getNumberValue().toString();
+						}else if (v.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+							if (v.getAttributeListItem() == null){
+								value = null;
+							}else{
+								value = v.getAttributeListItem().getName();
+							}
 						}
 					}
 				}
