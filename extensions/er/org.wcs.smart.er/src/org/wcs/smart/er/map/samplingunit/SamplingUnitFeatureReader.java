@@ -143,12 +143,10 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 	}
 	
 	public static SimpleFeature createFeature(SimpleFeatureType ftype, SamplingUnit su){
-		Object[] data = new Object[su.getSurveyDesign().getSamplingUnitAttributes().size() + 4];
+		Object[] data = new Object[su.getSurveyDesign().getSamplingUnitAttributes().size() + 3];
 		data[0] = su.getId() + "." + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$ 
-	
 		data[1] = su.getId(); 
-		data[2] = su.getBuffer();
-		int i = 3;
+		int i = 2;
 		for (SurveyDesignSamplingUnitAttribute att : su.getSurveyDesign().getSamplingUnitAttributes()){
 			for (SamplingUnitAttributeValue v : su.getAttributes()){
 				if (att.getSamplingUnitAttribute().equals(v.getSamplingUnitAttribute())){

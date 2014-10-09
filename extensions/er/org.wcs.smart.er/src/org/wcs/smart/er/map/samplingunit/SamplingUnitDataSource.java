@@ -162,7 +162,7 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 				try{
 					SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 					
-					sb.append("fid:String,id:String,buffer:Double"); //$NON-NLS-1$
+					sb.append("fid:String,id:String"); //$NON-NLS-1$
 					HashSet<String> names = new HashSet<String>();
 					for (SurveyDesignSamplingUnitAttribute sua : lDesign.getSamplingUnitAttributes()){
 					

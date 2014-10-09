@@ -177,7 +177,6 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 				List<SamplingUnit> sus = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", copy)).list(); //$NON-NLS-1$
 				for (SamplingUnit s2: sus){
 					SamplingUnit newsu = new SamplingUnit();
-					newsu.setBuffer(s2.getBuffer());
 					newsu.setGeom(s2.getGeom());
 					newsu.setId(s2.getId());
 					newsu.setState(s2.getState());

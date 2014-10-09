@@ -118,9 +118,6 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 			if (type == null) {
 				throw new Exception(Messages.ShpSamplingUnitImporter_SamplingUnitTypeError);
 			}
-
-			Double bufferValue = (Double) options.get(BUFFER_KEY);
-
 			List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
 			for (Object key : options.keySet()) {
 				if (key instanceof SamplingUnitAttribute) {
@@ -173,8 +170,6 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 
 					SamplingUnit su = new SamplingUnit();
 					su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
-					su.setBuffer(bufferValue);
-
 					Geometry g = (Geometry) sf.getDefaultGeometry();
 					if (type == SamplingUnitType.PLOT) {
 						if (!(g instanceof Point)) {

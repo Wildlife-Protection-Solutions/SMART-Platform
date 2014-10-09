@@ -37,7 +37,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
  */
 public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 
-	public static enum FixedColumns{TYPE, ID, BUFFER, LENGTH, STATE};
+	public static enum FixedColumns{TYPE, ID, LENGTH, STATE};
 	
 	private String key;
 	private AttributeType type;
@@ -98,8 +98,7 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 					}
 				};
 		}else if ( (type == null &&
-				(key.equals(FixedColumns.BUFFER.name()) ||
-				key.equals(FixedColumns.LENGTH.name()))) || 
+				(key.equals(FixedColumns.LENGTH.name()))) || 
 				(type == AttributeType.NUMERIC))  { 
 			
 				comparator = new Comparator<Object>() {
@@ -128,12 +127,6 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 					return su.getType().getGuiName();
 				}else if(key.equals(FixedColumns.ID.name())){
 					return su.getId();
-				}else if (key.equals(FixedColumns.BUFFER.name())){
-					if (su.getBuffer() == null){
-						return null; 
-					}else{
-						return su.getBuffer();
-					}
 				}else if (key.equals(FixedColumns.LENGTH.name())){
 					if (su.getGeometryLengthKm() == null){
 						return null; 
@@ -165,12 +158,6 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 				return su.getType().getGuiName();
 			}else if(key.equals(FixedColumns.ID.name())){
 				return su.getId();
-			}else if (key.equals(FixedColumns.BUFFER.name())){
-				if (su.getBuffer() == null){
-					return ""; //$NON-NLS-1$
-				}else{
-					return su.getBuffer().toString();
-				}
 			}else if (key.equals(FixedColumns.LENGTH.name())){
 				if (su.getGeometryLengthKm() == null){
 					return ""; //$NON-NLS-1$

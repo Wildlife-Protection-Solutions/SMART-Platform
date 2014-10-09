@@ -194,6 +194,11 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		combo.addSelectionListener(new SelectionAdapter() {	
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (getType() == Attribute.AttributeType.LIST){
+					listPanel.setVisible(true);
+				}else{
+					listPanel.setVisible(false);
+				}
 				validate();
 			}
 		});
@@ -221,7 +226,8 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		//init fields
 		nameKeyControls.initFields(toUpdate, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		cmbType.setSelection(new StructuredSelection(toUpdate.getType()));
-		
+		listPanel.setVisible(toUpdate.getType() == AttributeType.LIST);
+
 		return composite;
 	}
 	

@@ -65,7 +65,6 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 	private TypePage typePage;
 	private FileWizardPage filePage;
 	private AttributePage attributePage;
-	private BufferPage bufferPage;
 	private boolean finishOk = false;
 	
 	/**
@@ -107,7 +106,6 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 		final HashMap<Object, Object> params = new HashMap<Object, Object>();
 		params.put(CsvSamplingUnitImporter.DELIMETER_KEY, filePage.getDelimiter());
 		params.put(ISamplingUnitImporter.TYPE_KEY, typePage.getType());
-		params.put(ISamplingUnitImporter.BUFFER_KEY, bufferPage.getArea());
 		params.put(ISamplingUnitImporter.PROJECTION_KEY, attributePage.getProjection());
 		params.put(ISamplingUnitImporter.ID_FIELD_KEY, attributePage.getIdField());
 		params.put(ISamplingUnitImporter.X1_FIELD_KEY, attributePage.getX1Field());
@@ -203,10 +201,8 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
     	typePage = new TypePage();
     	filePage = new FileWizardPage(true);
     	attributePage = new AttributePage(false, surveyDesign, HibernateManager.getCaProjectionList(session));
-    	bufferPage = new BufferPage();
     	
     	super.addPage(typePage);
-    	super.addPage(bufferPage);
     	super.addPage(filePage);
     	super.addPage(attributePage);
     	
@@ -224,7 +220,6 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 				event.getTargetPage() == attributePage){
 			
 			HashMap<String, Object> options = new HashMap<String, Object>();
-			options.put(ISamplingUnitImporter.TYPE_KEY, bufferPage.getType());
 			String[] items = filePage.getFieldNames(options);
 			if (items == null){
 				event.doit = false;
@@ -237,10 +232,6 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 			canFinish = true;
 		}else{
 			canFinish = false;
-		}
-		
-		if (event.getTargetPage() == bufferPage){
-			bufferPage.setType(getSamplingUnitType());
 		}
 		
 	}

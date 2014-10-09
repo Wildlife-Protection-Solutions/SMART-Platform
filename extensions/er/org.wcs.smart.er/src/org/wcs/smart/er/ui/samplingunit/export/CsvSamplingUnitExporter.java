@@ -122,7 +122,6 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			data[index++] = unit.getId();
 			data[index++] = unit.getType().getGuiName();
 			data[index++] = unit.getState().getGuiName();
-			data[index++] = unit.getBuffer() == null ? "" : unit.getBuffer().toString(); //$NON-NLS-1$
 			if (type != SamplingUnitType.PLOT){
 				Double l = unit.getGeometryLengthKm();
 				data[index++] = l == null ? "" : l.toString(); //$NON-NLS-1$
@@ -216,7 +215,6 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			data[index++] = Messages.CsvSamplingUnitExporter_idColumnName;
 			data[index++] = Messages.CsvSamplingUnitExporter_typeColumnName;
 			data[index++] = Messages.CsvSamplingUnitExporter_stateColumnName;
-			data[index++] = Messages.CsvSamplingUnitExporter_bufferColumnName;
 			if (type != SamplingUnitType.PLOT){
 				data[index++] = Messages.CsvSamplingUnitExporter_lengthColumnName;
 				data[index++] = Messages.CsvSamplingUnitExporter_x1ColumnName;

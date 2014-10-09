@@ -81,7 +81,6 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 	 * 
 	 * <p>Required Options: </p>
 	 * <ul>
-	 * <li>BUFFER_KEY - value is a double</li>
 	 * <li>TYPE_KEY - the SamplingUnitType</li>
 	 * <li>PROJECTION_KEY - the projection of the source data</li>
 	 * <li>ID_FIELD_KEY - the id field </li>
@@ -103,7 +102,6 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 			throw new Exception(Messages.CsvSamplingUnitImporter_InvalidType);
 		}
 		
-		Double bufferValue = (Double) options.get(BUFFER_KEY);
 		Projection proj = (Projection)options.get(PROJECTION_KEY);
 		String idField = (String)options.get(ID_FIELD_KEY);
 		String x1Field = (String)options.get(X1_FIELD_KEY);
@@ -170,8 +168,6 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 				
 				SamplingUnit su = new SamplingUnit();
 				su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
-								
-				su.setBuffer(bufferValue);
 				
 				if (type == SamplingUnitType.PLOT){
 					//point

@@ -109,7 +109,6 @@ public class SamplingUnit extends UuidItem {
 	private byte[] geom;
 	private Geometry geometry;
 	private String id;
-	private Double buffer;
 	private SurveyDesign surveyDesign;
 	private SamplingUnitType type;
 	private List<SamplingUnitAttributeValue> attributes;
@@ -199,15 +198,6 @@ public class SamplingUnit extends UuidItem {
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	@Column(name="buffer")
-	public Double getBuffer() {
-		return buffer;
-	}
-
-	public void setBuffer(Double buffer) {
-		this.buffer = buffer;
 	}
 
 	/**

@@ -84,9 +84,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 	private Text txtType;
 	private Text txtId;
 	private ComboViewer cmbState;
-	private Text txtBuffer;
-	
-	private ControlDecoration cdBuffer;
+		
 	private ControlDecoration cdId;
 	
 	private HashMap<SamplingUnitAttribute, Object> attribute2Control;
@@ -122,13 +120,6 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 
 		try {
 			su.setId(txtId.getText());
-
-			if (txtBuffer.getText().trim().length() > 0) {
-				su.setBuffer(Double.parseDouble(txtBuffer.getText()));
-			} else {
-				su.setBuffer(null);
-			}
-
 			su.setState((State) ((IStructuredSelection) cmbState.getSelection())
 					.getFirstElement());
 
@@ -277,16 +268,6 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		cdId.hide();
 		txtId.addModifyListener(validateListener);
 		
-		
-		l = new Label(comp, SWT.NONE);
-		l.setText(Messages.EditSamplingUnitDialog_BufferLabel);
-		
-		txtBuffer = new Text(comp, SWT.BORDER);
-		txtBuffer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		cdBuffer = createDecoration(txtBuffer);
-		cdBuffer.hide();
-		txtBuffer.addModifyListener(validateListener);
-		
 		l = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
@@ -335,9 +316,6 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		txtType.setText(su.getType().getGuiName());
 		cmbState.setSelection(new StructuredSelection(su.getState()));
 		txtId.setText(su.getId());
-		if (su.getBuffer() != null){
-			txtBuffer.setText(su.getBuffer().toString());
-		}
 		
 		for(SamplingUnitAttributeValue v : su.getAttributes()){
 			Object control = attribute2Control.get(v.getSamplingUnitAttribute()); 
@@ -387,27 +365,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 				cdId.hide();
 			}
 		}
-		
-		
-		if (txtBuffer.getText().trim().length() != 0){
-			try{
-				Double d = Double.valueOf(txtBuffer.getText());
-				if (d < 0){
-					error = true;
-					cdBuffer.setDescriptionText(Messages.EditSamplingUnitDialog_BufferValidError);
-					cdBuffer.show();
-				}else{
-					cdBuffer.hide();
-				}
-			}catch (Exception ex){
-				cdBuffer.setDescriptionText(Messages.EditSamplingUnitDialog_NumberError);
-				cdBuffer.show();
-				error = true;
-			}
-		}else{
-			cdBuffer.hide();
-		}
-		
+				
 		for (Entry<SamplingUnitAttribute, Object> entry : attribute2Control.entrySet()){
 
 			Object txtAttribute = entry.getValue();

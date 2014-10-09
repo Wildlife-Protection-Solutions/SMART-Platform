@@ -651,14 +651,6 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		idColumn.getColumn().setText(Messages.SamplingUnitEditorPage_IdColumnName);
 		idColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, idColumn));
 		
-		TableViewerColumn bufferColumn = new TableViewerColumn(suTable, SWT.NONE);
-		labelProvider = new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.BUFFER.name());
-		bufferColumn.setLabelProvider(labelProvider);
-		bufferColumn.getColumn().setResizable(true);
-		bufferColumn.getColumn().setWidth(60);
-		bufferColumn.getColumn().setText(Messages.SamplingUnitEditorPage_BufferColumnName);
-		bufferColumn.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, bufferColumn));
-		
 		TableViewerColumn lengthColumn = new TableViewerColumn(suTable, SWT.NONE);
 		labelProvider = new SamplingUnitColumnLabelProvider(SamplingUnitColumnLabelProvider.FixedColumns.LENGTH.name());
 		lengthColumn.setLabelProvider(labelProvider);
