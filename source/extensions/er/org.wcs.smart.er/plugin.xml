@@ -942,6 +942,14 @@
             commandId="org.wcs.smart.er.surveydesignimport"
             icon="images/icons/obj16/survey_design_import.png">
       </image>
+      <image
+            commandId="org.wcs.smart.er.missionImportHandler"
+            icon="images/icons/obj16/mission_import.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.er.missionExportHandler"
+            icon="images/icons/obj16/mission_export.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.editors">

@@ -76,17 +76,8 @@ public class MissionImporter {
 	 * @throws Exception
 	 */
 	public static Mission importMission(File file, boolean keepIDs, IProgressMonitor monitor) throws Exception{
-		
-		if (SmartUtils.isZip(file)){
-			//process as zip file
-			monitor.beginTask(IMPORTING_MISSION_TASKNAME, 4);
-			return importXmlToMission(file, keepIDs, monitor);
-		}else{
-			monitor.beginTask(IMPORTING_MISSION_TASKNAME, 3);
-			//return importMissionFromFile(file, keepIDs, monitor);
-			return importXmlToMission(file, keepIDs, monitor);
-			
-		}
+		monitor.beginTask(IMPORTING_MISSION_TASKNAME, 4);
+		return importXmlToMission(file, keepIDs, monitor);
 	}
 	
 	/**
@@ -100,20 +91,33 @@ public class MissionImporter {
 	private static Mission importXmlToMission(File zipFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
 		
 		MissionType ptype = null;
-		//unzip 
-		monitor.subTask("Processing Zip File");
-		File directory = unzip(zipFile);
-		if (directory == null || !directory.isDirectory()){
-			throw new Exception (MessageFormat.format("Error unzipping file {0}", new Object[]{ zipFile.getAbsoluteFile()}));
+		String[] files;
+		File directory;
+		if (SmartUtils.isZip(zipFile)){
+			//unzip 
+			directory = unzip(zipFile);
+			if (directory == null || !directory.isDirectory()){
+				throw new Exception (MessageFormat.format("Error unzipping file {0}", new Object[]{ zipFile.getAbsoluteFile()}));
+			}
+			//file xml file
+			files = directory.list();
+		}else{
+			files = new String[1];
+			files[0] = zipFile.getName();
+			directory = zipFile;
 		}
+		
 		monitor.worked(1);
 		
-		//file xml file
-		String[] files = directory.list();
 		
 		monitor.subTask("Reading xml file.");
 		for (int i = 0; i < files.length; i ++){
-			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
+			File f;
+			if(directory.isFile()){
+				f = new File(directory.getAbsolutePath());
+			}else{
+				f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
+			}
 			if (f.isFile()){
 				//lets try reading the 
 				FileInputStream in = new FileInputStream(f);
@@ -134,7 +138,9 @@ public class MissionImporter {
 		if (ptype == null){
 			
 			try{
-				FileUtils.deleteDirectory(directory);
+				if(directory.isDirectory()){
+					FileUtils.deleteDirectory(directory);
+				}
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
@@ -146,7 +152,9 @@ public class MissionImporter {
 		
 		monitor.subTask("Removing temporary files.");
 		try{
-			FileUtils.deleteDirectory(directory);
+			if(directory.isDirectory()){
+				FileUtils.deleteDirectory(directory);
+			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 		}
