@@ -122,7 +122,6 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SMAPLING_UNIT_BUFFER));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME));
@@ -235,7 +234,6 @@ public class SurveyQueryColumnManager {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_START));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT));
-		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SMAPLING_UNIT_BUFFER));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_ID));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME));

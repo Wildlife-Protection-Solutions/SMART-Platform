@@ -65,7 +65,6 @@ public class SurveyQueryColumn extends QueryColumn {
 		MISSION_TRACKLENGTH(Messages.SurveyQueryColumn_TrackLengthLabel, ColumnType.NUMBER, "mission:tracklength"), //$NON-NLS-1$
 		
 		SAMPLING_UNIT(Messages.SurveyQueryColumn_SuLabel, ColumnType.STRING, "su:id"),  //$NON-NLS-1$
-		SMAPLING_UNIT_BUFFER(Messages.SurveyQueryColumn_SuBufferLabel, ColumnType.NUMBER, "su:buffer"),  //$NON-NLS-1$
 		
 		WAYPOINT_ID(Messages.SurveyQueryColumn_WaypointIdLabel, ColumnType.INTEGER,"waypoint:id"), //$NON-NLS-1$
 		WAYPOINT_DATE(Messages.SurveyQueryColumn_WpDateLabel, ColumnType.DATE,"waypoint:date"), //$NON-NLS-1$
@@ -125,7 +124,6 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_END: return item.getMissionEnd();
 				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
-				case SMAPLING_UNIT_BUFFER: return item.getSmaplingUnitBuffer();
 				case WAYPOINT_ID: return item.getWaypointId();
 				case WAYPOINT_DATE: return item.getWaypointTime();
 				case WAYPOINT_TIME: return item.getWaypointTime(); 
@@ -156,7 +154,6 @@ public class SurveyQueryColumn extends QueryColumn {
 					
 //				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
-				case SMAPLING_UNIT_BUFFER: return item.getSmaplingUnitBuffer(); 
 			}
 		}
 		return ""; //$NON-NLS-1$

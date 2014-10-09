@@ -67,13 +67,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == SamplingUnitType.PLOT || 
 				type == SamplingUnitType.TRANSECT){ 
-			int length = sd.getSamplingUnitAttributes().size() + 3;
+			int length = sd.getSamplingUnitAttributes().size() + 2;
 			if (type == SamplingUnitType.TRANSECT){
 				length ++;
 			}
 			names = new String[length];
 			names[i++] = "sd:su:id"; //$NON-NLS-1$
-			names[i++] = "sd:su:buffer"; //$NON-NLS-1$
 			names[i++] = "sd:su:state"; //$NON-NLS-1$
 			if (type == SamplingUnitType.TRANSECT){
 				names[i++] = "sd:su:length"; //$NON-NLS-1$
@@ -98,14 +97,13 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == SamplingUnitType.PLOT || 
 				type == SamplingUnitType.TRANSECT){ 
-			int length = sd.getSamplingUnitAttributes().size() + 3;
+			int length = sd.getSamplingUnitAttributes().size() + 2;
 			if (type == SamplingUnitType.TRANSECT){
 				length ++;
 			}
 			names = new String[length];
 			
 			names[i++] = Messages.SurveySamplingUnitTable_IDColumnLabel;
-			names[i++] = Messages.SurveySamplingUnitTable_BufferColumnLabel;
 			names[i++] = Messages.SurveySamplingUnitTable_StateColumnLabel;
 			if (type == SamplingUnitType.TRANSECT){
 				names[i++] = "Length (km)";	
@@ -130,14 +128,13 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 		int i= 0;
 		if (type == SamplingUnitType.PLOT || 
 				type == SamplingUnitType.TRANSECT){
-			int length = sd.getSamplingUnitAttributes().size() + 3;
+			int length = sd.getSamplingUnitAttributes().size() + 2;
 			if (type == SamplingUnitType.TRANSECT){
 				length ++;
 			}
 			names = new int[length];
 		
 			names[i++] = java.sql.Types.VARCHAR;
-			names[i++] = java.sql.Types.DOUBLE;
 			names[i++] = java.sql.Types.VARCHAR;
 			if (type == SamplingUnitType.TRANSECT){
 				names[i++] = java.sql.Types.DOUBLE;
@@ -192,8 +189,6 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			if (index == 0){
 				return e.getId();
 			}else if (index == 1){
-				return e.getBuffer();
-			}else if (index == 2){
 				return e.getState().getGuiName();
 			}else{
 				if (type == SamplingUnitType.TRANSECT){

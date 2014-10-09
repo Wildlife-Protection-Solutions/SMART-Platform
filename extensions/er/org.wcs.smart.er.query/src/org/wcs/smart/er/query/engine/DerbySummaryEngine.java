@@ -1459,7 +1459,6 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		if (includeObservations){
 			sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
-			sql.append(tablePrefix(SamplingUnit.class) + ".buffer, "); //$NON-NLS-1$
 			
 			sql.append(tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -1502,7 +1501,6 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		
 		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
-		sql.append("sampling_unit_buffer double,"); //$NON-NLS-1$
 		
 		sql.append("wp_mission_track_uuid char(16) for bit data,"); //$NON-NLS-1$
 		

@@ -630,7 +630,6 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnit.class) + ".buffer, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 		if (includeObservations){
@@ -664,7 +663,6 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		
 		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
-		sql.append("sampling_unit_buffer double,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("wp_datetime timestamp,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data"); //$NON-NLS-1$
