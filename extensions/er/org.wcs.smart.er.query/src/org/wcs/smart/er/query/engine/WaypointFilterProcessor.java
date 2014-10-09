@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -739,6 +740,15 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(SamplingUnitAttribute.class) + ".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid "); //$NON-NLS-1$
 		
+		if (lfilter.getAttributeType() == AttributeType.LIST){
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(SamplingUnitAttributeListItem.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnitAttributeValue.class) + ".list_element_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnitAttributeListItem.class) + ".uuid "); //$NON-NLS-1$	
+		}
+
+		
 		sql.append(" WHERE "); //$NON-NLS-1$
 		sql.append(prefix(SamplingUnitAttribute.class) + ".keyId = '" + lfilter.getSamplingUnitAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" AND "); //$NON-NLS-1$
@@ -763,8 +773,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
 				sql.append("'"); //$NON-NLS-1$
 			}
-			
-			
+		}else if (lfilter.getAttributeType() == AttributeType.LIST){
+			sql.append(prefix(SamplingUnitAttributeListItem.class));
+			sql.append(".keyid = '"); //$NON-NLS-1$
+			sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+			sql.append("'");  //$NON-NLS-1$
 		}
 		
 		QueryPlugIn.logSql(sql.toString());

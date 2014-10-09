@@ -25,6 +25,7 @@ public class Messages extends NLS {
 	public static String DerbyObservationEngine_progress7;
 	public static String DerbyObservationEngine_ProgressAdditionalData;
 	public static String DerbyObservationEngine_ProgressLeader;
+	public static String DerbyObservationEngine_SuAttributeProgress;
 	public static String DerbySummaryEngine_InvalidRateFilterValues;
 	public static String DerbySummaryEngine_LoadingTableProgress;
 	public static String DerbySummaryEngine_ProcessingQueryProgress;
@@ -46,6 +47,7 @@ public class Messages extends NLS {
 	public static String FilterContentProvider_SamplingUnitAttributesLabel;
 	public static String FilterContentProvider_SuLabel;
 	public static String FilterContentProvider_TrackTypeNode;
+	public static String FilterProcessor_DateFilterNotSupported;
 	public static String FilterProcessor_progress1;
 	public static String FilterProcessor_progress3;
 	public static String FilterProcessor_progress4;
@@ -112,7 +114,16 @@ public class Messages extends NLS {
 	public static String QueryServiceInfo_Title;
 	public static String RemoveERQueryJob_UninstallError;
 	public static String RemoveERQueryJob_UninstallJobName;
+	public static String SamplingUnitAttributeDropItem_LoadingLabel;
+	public static String SamplingUnitAttributeDropItem_loadJobName;
 	public static String SamplingUnitAttributeFilter_AttributeNotFound;
+	public static String SamplingUnitAttributeFilter_ListItemNotFound;
+	public static String SamplingUnitAttributeGroupBy_InvalidKey;
+	public static String SamplingUnitAttributeGroupBy_KeyNotFound;
+	public static String SamplingUnitAttributeGroupByDropItem_AllLabel;
+	public static String SamplingUnitAttributeGroupByDropItem_FiltersLabel;
+	public static String SamplingUnitAttributeGroupByDropItem_IncludedLabel;
+	public static String SamplingUnitAttributeGroupByDropItem_LoadError;
 	public static String SamplingUnitAttributeQueryColumn_SuLabel;
 	public static String SamplingUnitDropItem_Label;
 	public static String SamplingUnitFilter_MissionTrackNotFound;
@@ -152,7 +163,9 @@ public class Messages extends NLS {
 	public static String SurveyGroupByContentProvider_MissionIdNode;
 	public static String SurveyGroupByContentProvider_MissionPropertiesNode;
 	public static String SurveyGroupByContentProvider_ObserverNode;
+	public static String SurveyGroupByContentProvider_SamplingUnitAttributesLabel;
 	public static String SurveyGroupByContentProvider_SamplingUnitNode;
+	public static String SurveyGroupByContentProvider_suJobName;
 	public static String SurveyGroupByContentProvider_SurveyIdNode;
 	public static String SurveyGroupByTreeItem_TreeNodeLabel;
 	public static String SurveyIdDropItem_LoadIdsJobName;
@@ -214,6 +227,7 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumnManager_missionattributejobname;
 	public static String SurveyQueryFactory_DefaultQueryName;
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
+	public static String SurveySummaryQueryType_QueryError;
 	public static String SurveySummaryQueryType_QueryTypeName;
 	public static String SurveyValuesTreeNode_MissionTrackLengthItem;
 	public static String SurveyValuesTreeNode_SurveyValuesNodeLabel;

@@ -29,6 +29,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider.Node;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -82,6 +83,8 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 				return ((MissionAttribute)element).getName();
 			}else if (element instanceof MissionProperty){
 				return ((MissionProperty) element).getAttribute().getName();
+			}else if (element instanceof SamplingUnitAttribute){
+				return ((SamplingUnitAttribute)element).getName();
 			}
 			return super.getText(element);
 		}
@@ -101,9 +104,13 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
 				}else if (node == Node.SAMPLING_UNITS){
 					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ICON);
+				}else if (node == Node.SAMPLING_UNITS_ATT){
+					return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ATTRIBUTE_ICON);
 				}else if (node == Node.OBSERVER){
 					return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EMPLOYEE_ICON);
 				}
+			}else if (element instanceof SamplingUnitAttribute){
+				return ((SamplingUnitAttribute)element).getType().getImage();
 			}
 			return super.getImage(element);
 		}

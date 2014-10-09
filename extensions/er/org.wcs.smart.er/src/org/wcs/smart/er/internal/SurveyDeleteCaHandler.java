@@ -167,6 +167,12 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 	
 	private void deleteSamplingUnitAttributes(ConservationArea ca, Session session) throws Exception{
 		Query q = session.createQuery(
+				"DELETE SamplingUnitAttributeListItem li WHERE li.attribute IN " +//$NON-NLS-1$
+				"(SELECT sa FROM SamplingUnitAttribute sa WHERE sa.conservationArea = :conservationArea)"); //$NON-NLS-1$
+		q.setParameter("conservationArea", ca); //$NON-NLS-1$
+		q.executeUpdate();
+		
+		q = session.createQuery(
 				"DELETE FROM SamplingUnitAttribute WHERE conservationArea = :conservationArea"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
 		q.executeUpdate();

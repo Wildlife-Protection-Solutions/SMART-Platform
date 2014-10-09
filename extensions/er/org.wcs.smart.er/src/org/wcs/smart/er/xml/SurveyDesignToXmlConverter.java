@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.er.xml;
 
 import java.text.MessageFormat;
@@ -11,6 +32,7 @@ import javax.xml.datatype.DatatypeFactory;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -199,9 +221,17 @@ public class SurveyDesignToXmlConverter {
 			for(SamplingUnitAttributeValue suav : su.getAttributes()){
 				org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue xmlsuav = new org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue();
 				
-				xmlsuav.setDoubleValue(suav.getNumberValue());
+				
 				xmlsuav.setSamplingUnitId(suav.getSamplingUnit().getId());
-				xmlsuav.setStringValue(suav.getStringValue());
+				if (suav.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+					xmlsuav.setStringValue(suav.getStringValue());	
+				}else if (suav.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
+					xmlsuav.setDoubleValue(suav.getNumberValue());
+				}else if (suav.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+					if (suav.getAttributeListItem() != null){
+						xmlsuav.setStringValue(suav.getAttributeListItem().getKeyId());
+					}
+				}
 				xmlsuav.setSamplingUnitAttributeId(suav.getSamplingUnitAttribute().getKeyId());
 				xmlsu.getSamplingUnitAttributeValue().add(xmlsuav);
 			}

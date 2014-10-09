@@ -187,7 +187,13 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = new DropItem[]{createSamplingUnitDropItem((SamplingUnit)source)};
 			}
 		}else if (source instanceof SamplingUnitAttribute){
-			items = new DropItem[]{createSamplingUnitAttributeDropItem((SamplingUnitAttribute) source)};
+			if (queryItemPanelId.equals(FilterItemPanel.ID) ||
+					queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
+				items = new DropItem[]{createSamplingUnitAttributeDropItem((SamplingUnitAttribute) source)};
+			}else if (queryItemPanelId.equals(GroupByValueItemPanel.ID)){
+				items = new DropItem[]{createSamplingUnitAttributeGroupByDropItem((SamplingUnitAttribute)source)};
+			}
+			
 		}else if (source instanceof MissionTrack){
 			if (queryItemPanelId.equals(FilterItemPanel.ID) ||
 					queryItemPanelId.equals(MissionTrackFilterItemPanel.ID) ){
@@ -243,6 +249,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	
 	public DropItem createMissionAttributeGroupByDropItem(MissionAttribute attribute){
 		return new MissionAttributeGroupByDropItem(attribute);
+	}
+
+	public DropItem createSamplingUnitAttributeGroupByDropItem(SamplingUnitAttribute attribute){
+		return new SamplingUnitAttributeGroupByDropItem(attribute);
 	}
 	
 	public DropItem createSurveyIdGroupByDropItem(){

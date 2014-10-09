@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -228,6 +229,12 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 								add = true;
 							}
 							sv.setStringValue(s);
+						} else if (att.getType() == AttributeType.LIST){
+							SamplingUnitAttributeListItem listValue = ImportAttributes.findMatch(att, (String)sf.getAttribute(field));
+							if (listValue != null){
+								add = true;
+								sv.setAttributeListItem(listValue);
+							}
 						}
 						if (add) {
 							su.getAttributes().add(sv);

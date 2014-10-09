@@ -147,19 +147,7 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 				//search attributes
 				for (SamplingUnitAttributeValue sua : su.getAttributes()){
 					if (sua.getSamplingUnitAttribute().getKeyId().equals(key)){
-						if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-							if (sua.getStringValue() == null){
-								return null;
-							}else{
-								return sua.getStringValue();
-							}
-						}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-							if (sua.getNumberValue() == null){
-								return null;
-							}else{
-								return sua.getNumberValue();
-							}
-						}
+						return sua.getValueAsString();
 					}
 				}
 				return null;
@@ -195,19 +183,7 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 				//search attributes
 				for (SamplingUnitAttributeValue sua : su.getAttributes()){
 					if (sua.getSamplingUnitAttribute().getKeyId().equals(key)){
-						if (sua.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-							if (sua.getStringValue() == null){
-								return ""; //$NON-NLS-1$
-							}else{
-								return sua.getStringValue();
-							}
-						}else if (sua.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-							if (sua.getNumberValue() == null){
-								return ""; //$NON-NLS-1$
-							}else{
-								return sua.getNumberValue().toString();
-							}
-						}
+						return sua.getValueAsString();
 					}
 				}
 				return ""; //$NON-NLS-1$

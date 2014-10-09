@@ -41,6 +41,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -252,7 +253,7 @@ public class FilterProcessor implements IFilterProcessor {
 		if (dateFilter.getDateFieldOption() != MissionStartDateField.INSTANCE 
 				&& dateFilter.getDateFieldOption() != MissionEndDateField.INSTANCE
 				&& dateFilter.getDateFieldOption() != WaypointDateField.INSTANCE){
-			throw new SQLException(MessageFormat.format("Date filter {0} not supported.", new Object[]{dateFilter.getDateFilterOption().getGuiName()}));
+			throw new SQLException(MessageFormat.format(Messages.FilterProcessor_DateFilterNotSupported, new Object[]{dateFilter.getDateFilterOption().getGuiName()}));
 		}
 		StringBuilder sql = new StringBuilder();
 		
@@ -848,7 +849,12 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" SELECT DISTINCT "); //$NON-NLS-1$
 				sql.append(prefix(SamplingUnit.class));
 				sql.append(".uuid, "); //$NON-NLS-1$
-				sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getColumn()); //$NON-NLS-1$						
+				if (key.getType() == AttributeType.LIST) {
+					sql.append("l.keyid "); //$NON-NLS-1$
+				} else {
+					sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getColumn()); //$NON-NLS-1$						
+				}
+										
 				sql.append(" as "); //$NON-NLS-1$
 				sql.append(key.getKey());
 				sql.append(" "); //$NON-NLS-1$
@@ -889,6 +895,13 @@ public class FilterProcessor implements IFilterProcessor {
 						sql.append(cfilter);
 					}
 				}
+				
+				if (key.getType() == AttributeType.LIST) {
+					sql.append(" JOIN "); //$NON-NLS-1$
+					sql.append(name(SamplingUnitAttributeListItem.class));
+					sql.append(" l on l.uuid = " + prefix(SamplingUnitAttributeValue.class) + ".list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				
 				sql.append("WHERE "); //$NON-NLS-1$
 				sql.append(" " + prefix(SamplingUnitAttribute.class) + ".keyid = '"); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(key.getKey());

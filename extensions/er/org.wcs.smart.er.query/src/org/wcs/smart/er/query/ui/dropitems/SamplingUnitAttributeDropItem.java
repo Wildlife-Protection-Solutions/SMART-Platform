@@ -21,6 +21,18 @@
  */
 package org.wcs.smart.er.query.ui.dropitems;
 
+import java.util.ArrayList;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -33,33 +45,90 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
+import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.query.ui.model.ListItem;
 
 /**
- * Sampling unit attribute drop item that supports text and numeric attributes.
+ * Sampling unit attribute drop item that supports text, list
+ * and numeric attributes.
  * 
  * @author Emily
  *
  */
 public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDropItem {
 	
+	
 	protected String text;
 	protected String key;
 	
 	private String currentValue = null;
 	private String currentOp = null;	
-
 	private Label lblAttribute;
 	private Text value;
 	private Combo operators;
 	private AttributeType type = null;
+	
+	private SamplingUnitAttribute ma;
+	private ComboViewer listViewer;
+	private ListItem currentSelection = null;
 				
 	private Font smallerFont;
 		
+	/*
+	 * Job to load the attribute list options
+	 */
+	private Job loadItemsJobs = new Job(Messages.SamplingUnitAttributeDropItem_loadJobName){
+
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			
+			final ArrayList<ListItem> items = new ArrayList<ListItem>();
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				SamplingUnitAttribute attribute = (SamplingUnitAttribute) s.load(SamplingUnitAttribute.class, ma.getUuid());
+				for (SamplingUnitAttributeListItem i : attribute.getAttributeList()){
+					items.add(new ListItem(i.getUuid(), i.getName(), i.getKeyId()));
+				}
+				//add the any item
+				items.add(0, AttributeFilter.ANY_OPTION);				
+				if (currentSelection != null && !items.contains(currentSelection)){
+					//item is not longer active; but still in query
+					items.add(currentSelection);
+				}
+
+			}finally{
+				s.getTransaction().rollback();
+				s.close();
+			}
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					if (listViewer == null || listViewer.getCombo().isDisposed()){
+						return;
+					}
+					if (currentSelection != null && !items.contains(currentSelection)){
+						items.add(currentSelection);
+					}
+					listViewer.setInput(items.toArray(new ListItem[items.size()]));
+					if (currentSelection != null){
+						listViewer.setSelection(new StructuredSelection(currentSelection));
+					}else{
+						listViewer.setSelection(new StructuredSelection(AttributeFilter.ANY_OPTION));
+					}
+					getTargetPanel().redraw();
+				}});
+			return Status.OK_STATUS;
+		}};
 	/**
 	 * Creates a new attribute drop item
 	 * 
@@ -68,6 +137,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	 * @param att the category attribute to make up the drop item
 	 */
 	public SamplingUnitAttributeDropItem(SamplingUnitAttribute attribute) {
+		this.ma = attribute;
 		this.type = attribute.getType();
 		this.text = attribute.getName();
 		this.key = "s:suattribute:" + type.typeKey + ":" + attribute.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
@@ -122,6 +192,23 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 			querypart.append(" \""); //$NON-NLS-1$
 			querypart.append(value.getText());
 			querypart.append("\""); //$NON-NLS-1$
+		}else if (type == AttributeType.LIST){
+			StringBuilder query = new StringBuilder(this.key);
+			query.append(" = "); //$NON-NLS-1$
+			
+			ListItem it = null;
+			if (currentSelection != null){
+				it = currentSelection;
+			}else{
+				IStructuredSelection sel = (IStructuredSelection) listViewer.getSelection();
+				if (sel != null && !sel.isEmpty()){
+					it = (ListItem) sel.getFirstElement();
+				}
+			}
+			if (it != null && (it.getUuid() != null || it == AttributeFilter.ANY_OPTION)){			
+				query.append(it.getKey());
+			}
+			return query.toString();
 		}
 		return querypart.toString();
 	}
@@ -142,6 +229,14 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	 */
 	@Override
 	protected void createComposite(Composite parent) {
+		if (type == AttributeType.NUMERIC ||
+				type == AttributeType.TEXT){
+			createDefaultComposite(parent);
+		}else if (type == AttributeType.LIST){
+			createListComposite(parent);
+		}
+	}
+	private void createDefaultComposite(Composite parent){
 		Composite main = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(4, false);
 		layout.marginWidth = 0;
@@ -216,6 +311,50 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 				value.setText(currentValue);
 			}
 		}
+	}
+	
+	protected void createListComposite(Composite parent) {
+		Composite main = new Composite(parent, SWT.NONE);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginTop = 0;
+		gl.marginBottom = 0;
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		
+		main.setLayout(gl);
+		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
+		
+		lblAttribute = new Label(main, SWT.NONE);
+
+		listViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
+		
+		FontData fd = (listViewer.getCombo().getFont().getFontData()[0]);
+		fd.setHeight(fd.getHeight() - 1);
+		smallerFont = new Font(Display.getCurrent(), fd);
+		listViewer.getCombo().setFont(smallerFont);
+		listViewer.setContentProvider(ArrayContentProvider.getInstance());
+		listViewer.setLabelProvider(ListItem.createLabelProvider());
+		
+		listViewer.addPostSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				ListItem newSelection = (ListItem) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
+				ListItem lastSelection = currentSelection;
+				
+				currentSelection = newSelection;
+				if (! (lastSelection != null && lastSelection.equals(newSelection))){
+					queryChanged();	
+				}
+			}
+		});
+		listViewer.setInput(new ListItem[]{new ListItem(Messages.SamplingUnitAttributeDropItem_LoadingLabel)});
+		
+		initDrag(main);
+		initDrag(lblAttribute);
+		
+		
+		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
+		loadItemsJobs.schedule();
 	}
 	
 }

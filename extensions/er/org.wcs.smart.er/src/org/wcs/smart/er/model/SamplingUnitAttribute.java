@@ -21,13 +21,18 @@
  */
 package org.wcs.smart.er.model;
 
+import java.util.List;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -51,6 +56,8 @@ public class SamplingUnitAttribute extends NamedKeyItem{
 	
 	private ConservationArea ca;
 	
+	private List<SamplingUnitAttributeListItem> attributeList;
+	
 	/**
 	 * 
 	 * @return the attribute type
@@ -73,4 +80,24 @@ public class SamplingUnitAttribute extends NamedKeyItem{
 	public void setConservationArea(ConservationArea conservationArea){
 		this.ca = conservationArea;
 	}
+	
+	/**
+	 * Only valid for list attributes.
+	 * 
+	 * @return set of valid list elements
+	 */
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade={CascadeType.ALL}, orphanRemoval=true)
+	@OrderBy(clause = "list_order")
+	public List<SamplingUnitAttributeListItem> getAttributeList(){
+		return this.attributeList;
+	}
+	/**
+	 * Only valid for list attributes.
+	 * 
+	 * @param attributeList the set of valid list elements
+	 */
+	public void setAttributeList(List<SamplingUnitAttributeListItem> attributeList){
+		this.attributeList = attributeList;
+	}
+	
 }

@@ -60,6 +60,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -88,7 +89,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 	private ControlDecoration cdBuffer;
 	private ControlDecoration cdId;
 	
-	private HashMap<SamplingUnitAttribute, Text> attribute2Control;
+	private HashMap<SamplingUnitAttribute, Object> attribute2Control;
 	private HashMap<SamplingUnitAttribute, ControlDecoration> attribute2Error;
 	
 	private List<SamplingUnit> siblings;
@@ -134,9 +135,27 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 			List<SamplingUnitAttributeValue> toDelete = new ArrayList<SamplingUnitAttributeValue>();
 			List<SamplingUnitAttributeValue> toAdd = new ArrayList<SamplingUnitAttributeValue>();
 			for (SamplingUnitAttribute sua : attribute2Control.keySet()) {
-				Text txt = attribute2Control.get(sua);
-
-				if (txt.getText().trim().length() == 0) {
+				Object control = attribute2Control.get(sua);
+				
+				boolean isEmpty = false;
+				Object value = null;
+				if (sua.getType() == AttributeType.NUMERIC || 
+						sua.getType() == AttributeType.TEXT){
+					if (((Text)control).getText().trim().isEmpty()){
+						isEmpty = true;
+					}else{
+						value = ((Text)control).getText();
+					}
+					
+				}else{
+					if (((ComboViewer)control).getSelection().isEmpty() || 
+						!(((StructuredSelection)((ComboViewer)control).getSelection()).getFirstElement() instanceof SamplingUnitAttributeListItem)){ 
+						isEmpty = true;
+					}else{
+						value = ((StructuredSelection)(((ComboViewer)control).getSelection())).getFirstElement();
+					}
+				}
+				if (isEmpty) {
 					// remove
 					for (SamplingUnitAttributeValue suav : su.getAttributes()) {
 						if (suav.getSamplingUnitAttribute().equals(sua)) {
@@ -160,11 +179,17 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 					}
 
 					if (sua.getType() == AttributeType.TEXT) {
-						toUpdate.setStringValue(txt.getText().trim());
+						toUpdate.setStringValue(((String)value));
 						toUpdate.setNumberValue(null);
+						toUpdate.setAttributeListItem(null);
 					} else if (sua.getType() == AttributeType.NUMERIC) {
-						toUpdate.setNumberValue(Double.valueOf(txt.getText()));
+						toUpdate.setNumberValue(Double.valueOf((String)value));
 						toUpdate.setStringValue(null);
+						toUpdate.setAttributeListItem(null);
+					} else if (sua.getType() == AttributeType.LIST){
+						toUpdate.setAttributeListItem((SamplingUnitAttributeListItem)value);
+						toUpdate.setNumberValue( null );
+						toUpdate.setStringValue( null );
 					}
 
 				}
@@ -276,21 +301,35 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 			}
 		});
 	
-		attribute2Control = new HashMap<SamplingUnitAttribute, Text>();
+		attribute2Control = new HashMap<SamplingUnitAttribute, Object>();
 		attribute2Error = new HashMap<SamplingUnitAttribute, ControlDecoration>();
 		
 		for (SurveyDesignSamplingUnitAttribute a : attributes){
 			l = new Label(comp, SWT.NONE);
 			l.setText(a.getSamplingUnitAttribute().getName() + ":"); //$NON-NLS-1$
 			
-			final Text txtAttribute = new Text(comp, SWT.BORDER);
-			txtAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			txtAttribute.addModifyListener(validateListener);
-			final ControlDecoration cd = createDecoration(txtAttribute);
-			cd.hide();
+			if (a.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC ||
+					a.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
+				final Text txtAttribute = new Text(comp, SWT.BORDER);
+				txtAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				txtAttribute.addModifyListener(validateListener);
+				final ControlDecoration cd = createDecoration(txtAttribute);
+				cd.hide();
 			
-			attribute2Control.put(a.getSamplingUnitAttribute(), txtAttribute);
-			attribute2Error.put(a.getSamplingUnitAttribute(), cd);
+				attribute2Control.put(a.getSamplingUnitAttribute(), txtAttribute);
+				attribute2Error.put(a.getSamplingUnitAttribute(), cd);
+			}else if (a.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+				ComboViewer lstViewer = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
+				lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+				lstViewer.setContentProvider(ArrayContentProvider.getInstance());
+				lstViewer.setLabelProvider(SamplingUnitLabelProvider.INSTANCE);
+				List<Object> values = new ArrayList<Object>();
+				values.add(""); //$NON-NLS-1$
+				values.addAll(a.getSamplingUnitAttribute().getAttributeList());
+				lstViewer.setInput(values);
+				
+				attribute2Control.put(a.getSamplingUnitAttribute(), lstViewer);
+			}
 		}
 		
 		txtType.setText(su.getType().getGuiName());
@@ -301,11 +340,15 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		}
 		
 		for(SamplingUnitAttributeValue v : su.getAttributes()){
-			Text txt = attribute2Control.get(v.getSamplingUnitAttribute());
+			Object control = attribute2Control.get(v.getSamplingUnitAttribute()); 
 			if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-				txt.setText(v.getStringValue());
+				((Text)control).setText(v.getStringValue());
 			}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-				txt.setText(v.getNumberValue().toString());
+				((Text)control).setText(v.getNumberValue().toString());
+			}else if (v.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+				if (v.getSamplingUnitAttribute() != null){
+					((ComboViewer)control).setSelection(new StructuredSelection(v.getAttributeListItem()));
+				}
 			}
 		}
 		
@@ -365,13 +408,13 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 			cdBuffer.hide();
 		}
 		
-		for (Entry<SamplingUnitAttribute, Text> entry : attribute2Control.entrySet()){
+		for (Entry<SamplingUnitAttribute, Object> entry : attribute2Control.entrySet()){
 
-			Text txtAttribute = entry.getValue();
+			Object txtAttribute = entry.getValue();
 			ControlDecoration cd = attribute2Error.get(entry.getKey());
 			
 			if (entry.getKey().getType() == AttributeType.TEXT){
-				if (txtAttribute.getText().trim().length() > SamplingUnitAttribute.MAX_STRING_LENGTH){
+				if (((Text)txtAttribute).getText().trim().length() > SamplingUnitAttribute.MAX_STRING_LENGTH){
 					cd.setDescriptionText(MessageFormat.format(Messages.EditSamplingUnitDialog_StringError, new Object[]{SamplingUnitAttribute.MAX_STRING_LENGTH}));
 					cd.show();
 					error = true;
@@ -379,9 +422,9 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 					cd.hide();
 				}
 			}else if (entry.getKey().getType() == AttributeType.NUMERIC){
-				if (txtAttribute.getText().trim().length() != 0){
+				if (((Text)txtAttribute).getText().trim().length() != 0){
 					try{
-						Double.valueOf(txtAttribute.getText());
+						Double.valueOf(((Text)txtAttribute).getText());
 						cd.hide();
 					}catch (Exception ex){
 						cd.setDescriptionText(Messages.EditSamplingUnitDialog_NumberError);

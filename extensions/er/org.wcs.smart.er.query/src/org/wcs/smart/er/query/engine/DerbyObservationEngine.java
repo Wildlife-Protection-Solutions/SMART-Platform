@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
@@ -241,7 +242,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 	private void populateTemporaryTableExtra(Connection c, Session session, 
 			SurveyObservationQuery query, IProgressMonitor monitor) throws SQLException {
 
-		monitor.beginTask(Messages.DerbyObservationEngine_ProgressAdditionalData, 8);
+		monitor.beginTask(Messages.DerbyObservationEngine_ProgressAdditionalData, 9);
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -434,6 +435,22 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		if (monitor.isCanceled()){
 			return;
 		}
+		
+		//sampling unit list
+		monitor.subTask(Messages.DerbyObservationEngine_SuAttributeProgress);
+		WpoaLinkedData suListData = new WpoaLinkedData("_sulist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
+			@Override
+			public String getLabel(Session session, byte[] cauuid, byte[] uuid) {
+				return Label.getDescription(uuid);
+			}
+		};
+		populateAdditionalSuTable(c, session, suListData);
+		monitor.worked(1);
+		if (monitor.isCanceled()){
+			return;
+		}
+		
+		
 		monitor.done();
 	}
 
@@ -527,6 +544,60 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		}
 	}
 
+	private void populateAdditionalSuTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE "); //$NON-NLS-1$
+		sql.append(queryDataTable + linkedData.getPostfix());
+		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql.toString());
+		c.createStatement().execute(sql.toString());
+
+		sql = new StringBuilder();
+		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
+		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(SamplingUnitAttributeValue.class));
+		sql.append(" inner join "); //$NON-NLS-1$
+		sql.append(queryDataTable);
+		sql.append(" r on r.samplingunit_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
+		sql.append(".su_attribute_uuid WHERE "); //$NON-NLS-1$
+		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
+		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		sql.append(" is not null "); //$NON-NLS-1$
+		
+		QueryPlugIn.logSql(sql.toString());
+		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		
+		sql = new StringBuilder();
+		sql.append("INSERT INTO "); //$NON-NLS-1$
+		sql.append( queryDataTable + linkedData.getPostfix());
+		sql.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql.toString());
+		PreparedStatement statement = c.prepareStatement(sql.toString());
+		int count = 0;
+		try {
+			while (rs.next()) {
+				byte[] uuid = rs.getBytes(1);
+				if (uuid != null) {
+					byte[] cauuid = rs.getBytes(2);
+					String value = linkedData.getLabel(session, cauuid, uuid);
+					statement.setBytes(1, uuid);
+					statement.setString(2, value);
+					statement.addBatch();
+					count++;
+					if (count >= 100){
+						statement.executeBatch();
+						count = 0;
+					}
+				}
+			}
+			statement.executeBatch();
+		} finally {
+			rs.close();
+		}
+	}
 	
 	/**
 	 * Wrapper class for populating linked data (additional columns)

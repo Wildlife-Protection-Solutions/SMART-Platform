@@ -32,14 +32,13 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
-import org.wcs.smart.er.model.MissionTrack.TrackType;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
@@ -153,13 +152,7 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 		for (SurveyDesignSamplingUnitAttribute att : su.getSurveyDesign().getSamplingUnitAttributes()){
 			for (SamplingUnitAttributeValue v : su.getAttributes()){
 				if (att.getSamplingUnitAttribute().equals(v.getSamplingUnitAttribute())){
-					if (v.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
-						data[i] = v.getStringValue();
-					}else if (v.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
-						data[i] = v.getNumberValue();
-					}else{
-						data[i] = null;
-					}
+					data[i] = v.getValueAsString();
 					break;
 				}
 			}

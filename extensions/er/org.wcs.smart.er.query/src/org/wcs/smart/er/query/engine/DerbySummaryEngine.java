@@ -47,6 +47,9 @@ import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
+import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -55,6 +58,7 @@ import org.wcs.smart.er.query.filter.summary.ISurveyGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
+import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
@@ -1135,7 +1139,46 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				String field = tablePrefix(MissionAttributeListItem.class) + "_" + itemcnt + ".keyid"; //$NON-NLS-1$ //$NON-NLS-2$
 				groupByInnerSql.append( field + " as " + "mp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
 				groupBySql.append("mp_" + itemcnt); //$NON-NLS-1$
+			
+			}else if (gb instanceof SamplingUnitAttributeGroupBy){
 				
+				fromSql.append(" JOIN "); //$NON-NLS-1$
+				fromSql.append(tableNames.get(SamplingUnitAttributeValue.class));
+				fromSql.append(" "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(" on "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(".su_uuid = temp.sampling_unit_uuid"); //$NON-NLS-1$
+			
+				fromSql.append(" JOIN "); //$NON-NLS-1$
+				fromSql.append(tableNames.get(SamplingUnitAttribute.class));
+				fromSql.append(" "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(" on "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(".uuid = "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(".su_attribute_uuid "); //$NON-NLS-1$
+				fromSql.append(" AND "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttribute.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(".keyid = '"); //$NON-NLS-1$
+				fromSql.append(((SamplingUnitAttributeGroupBy)gb).getAttributeKey());
+				fromSql.append("' "); //$NON-NLS-1$
+				
+				//always list
+				fromSql.append(" JOIN "); //$NON-NLS-1$
+				fromSql.append(tableNames.get(SamplingUnitAttributeListItem.class));
+				fromSql.append(" "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(" on "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttributeListItem.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(".uuid ="); //$NON-NLS-1$
+				fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+				fromSql.append(".list_element_uuid "); //$NON-NLS-1$
+				
+				String field = tablePrefix(SamplingUnitAttributeListItem.class) + "_" + itemcnt + ".keyid"; //$NON-NLS-1$ //$NON-NLS-2$
+				groupByInnerSql.append( field + " as " + "mp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+				groupBySql.append("mp_" + itemcnt); //$NON-NLS-1$	
 			}else if (gb instanceof SamplingUnitGroupBy){
 				if (value instanceof MissionValueItem){
 

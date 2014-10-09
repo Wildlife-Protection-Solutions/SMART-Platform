@@ -258,6 +258,9 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 				for(SamplingUnit u : units){
 					for (SamplingUnitAttributeValue v:  u.getAttributes()){
 						v.getSamplingUnitAttribute().getKeyId();
+						if (v.getAttributeListItem() != null){
+							v.getAttributeListItem().getName();
+						}
 					}
 				}
 				

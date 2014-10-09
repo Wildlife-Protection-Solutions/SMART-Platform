@@ -38,6 +38,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.ReprojectUtils;
@@ -233,6 +234,12 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 						if (value.trim().length() > 0){
 							suv.setNumberValue(  Double.valueOf(value) );
 							add = true;
+						}
+					}else if (att.getType() == AttributeType.LIST){
+						SamplingUnitAttributeListItem listValue = ImportAttributes.findMatch(att,  value);
+						if (listValue != null){
+							add = true;
+							suv.setAttributeListItem(listValue);
 						}
 					}else{
 						throw new Exception(MessageFormat.format(Messages.CsvSamplingUnitImporter_InvalidAttributeType, new Object[]{att.getType()}));

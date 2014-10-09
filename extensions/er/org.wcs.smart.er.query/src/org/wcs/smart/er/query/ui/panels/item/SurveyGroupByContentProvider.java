@@ -38,8 +38,10 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -56,9 +58,11 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 
 	private SurveyDesign design;
 	
-	private List<MissionAttribute> allMissionAttributes = null;
+	private List<MissionAttribute> listMissionAttributes = null;
+	private List<SamplingUnitAttribute> listSamplingUnitAttributes = null;
 	
 	private boolean triedMission = false;
+	private boolean triedSamplingUnits = false;
 	
 	private Viewer viewer;
 	
@@ -76,7 +80,7 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 						p.getAttribute().getName();
 					}
 				}else{
-					allMissionAttributes = s.createCriteria(MissionAttribute.class)
+					listMissionAttributes = s.createCriteria(MissionAttribute.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.add(Restrictions.eq("type", Attribute.AttributeType.LIST)) //$NON-NLS-1$
 							.list();
@@ -95,12 +99,47 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 		}
 	};
 	
+	@SuppressWarnings("unchecked")
+	private Job loadSamplingUnitPropertiesJob = new Job(Messages.SurveyGroupByContentProvider_suJobName){
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			Session s = HibernateManager.openSession();
+			try{
+				if (design != null){
+					listSamplingUnitAttributes = new ArrayList<SamplingUnitAttribute>();
+					s.update(design);
+					for (SurveyDesignSamplingUnitAttribute p : design.getSamplingUnitAttributes()){
+						p.getSamplingUnitAttribute().getName();
+						if (p.getSamplingUnitAttribute().getType() == AttributeType.LIST){
+							listSamplingUnitAttributes.add(p.getSamplingUnitAttribute());
+						}
+					}
+				}else{
+					listSamplingUnitAttributes = s.createCriteria(SamplingUnitAttribute.class)
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+							.add(Restrictions.eq("type", Attribute.AttributeType.LIST)) //$NON-NLS-1$
+							.list();
+				}
+			}finally{
+				s.close();
+			}
+			
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+					((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SAMPLING_UNITS_ATT), Node.SAMPLING_UNITS_ATT));
+					
+				}});	
+			return Status.OK_STATUS;
+		}
+	};
 	
 	public enum Node{
 		SURVEY_ID(Messages.SurveyGroupByContentProvider_SurveyIdNode),
 		MISSION_ID(Messages.SurveyGroupByContentProvider_MissionIdNode),
 		MISSION_PROP(Messages.SurveyGroupByContentProvider_MissionPropertiesNode),
 		SAMPLING_UNITS(Messages.SurveyGroupByContentProvider_SamplingUnitNode),
+		SAMPLING_UNITS_ATT(Messages.SurveyGroupByContentProvider_SamplingUnitAttributesLabel),
 		OBSERVER(Messages.SurveyGroupByContentProvider_ObserverNode);
 		
 		public String guiName;
@@ -125,7 +164,9 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 			this.design = null;
 		}
 		triedMission = false;
-		allMissionAttributes = null;
+		triedSamplingUnits = false;
+		listMissionAttributes = null;
+		listSamplingUnitAttributes = null;
 	}
 
 	@Override
@@ -164,8 +205,8 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 					return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
 				}
 			}else{
-				if (allMissionAttributes != null){
-					return allMissionAttributes.toArray();
+				if (listMissionAttributes != null){
+					return listMissionAttributes.toArray();
 				}else{
 					if (triedMission){
 						return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
@@ -176,6 +217,17 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 				}
 				
 				//get all mission attributes in the system
+			}
+		}else if (parentElement == Node.SAMPLING_UNITS_ATT){
+			if (listSamplingUnitAttributes != null){
+				return listSamplingUnitAttributes.toArray();
+			}else{
+				if (triedSamplingUnits){
+					return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
+				}
+				triedSamplingUnits = true;
+				loadSamplingUnitPropertiesJob.schedule();
+				return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
 			}
 		}else if (parentElement instanceof Survey){
 			return ((Survey) parentElement).getMissions().toArray();
@@ -189,6 +241,8 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 			return rootNode;
 		}else if (element instanceof MissionProperty){
 			return Node.MISSION_PROP;
+		}else if (element instanceof SamplingUnitAttribute){
+			return Node.SAMPLING_UNITS_ATT;
 		}
 		return null;
 	}
@@ -196,6 +250,8 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 	@Override
 	public boolean hasChildren(Object element) {
 		if (element == Node.MISSION_PROP){
+			return true;
+		}else if (element == Node.SAMPLING_UNITS_ATT){
 			return true;
 		}
 		return false;

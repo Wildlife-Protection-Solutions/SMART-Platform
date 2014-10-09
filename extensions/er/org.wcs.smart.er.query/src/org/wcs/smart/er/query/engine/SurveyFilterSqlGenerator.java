@@ -275,6 +275,13 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " '" + val.toLowerCase() + "' )";      //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$//$NON-NLS-4$
 			}
 			return queryStr;
+		}else if (filter.getAttributeType() == AttributeType.LIST) {
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+				// any option
+				return "( sua.sua_" + filter.getSamplingUnitAttributeKey() + " is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
+			} else {
+				return "( sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " '" + (String) filter.getValue() + "' )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			}
 		}else{
 			throw new IllegalStateException("Only numeric and text sampling unit attribute types are supported."); //$NON-NLS-1$
 		}
