@@ -36,6 +36,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.xml.model.missions.MembersType;
@@ -137,10 +138,13 @@ public class MissionToXmlConverter {
 
 	private static TracksType convertMissionTrack(MissionTrack mt) throws DatatypeConfigurationException{
 		TracksType track = new TracksType();
-		track.setDate(toXmlTime(mt.getDate()));
+		track.setDate(SmartUtils.toXmlDate(mt.getDate()));
 		track.setGeom(mt.getGeom());
 		track.setId(mt.getId());
-		track.setSamplingUnitId(mt.getSamplingUnit().getId());
+		SamplingUnit su = mt.getSamplingUnit();
+		if(su != null){
+			track.setSamplingUnitId(su.getId());
+		}
 		track.setTrackType(mt.getType().toString());
 		return track;
 	}

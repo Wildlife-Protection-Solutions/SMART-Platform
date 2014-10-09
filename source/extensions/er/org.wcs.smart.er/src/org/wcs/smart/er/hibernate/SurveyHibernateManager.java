@@ -98,11 +98,13 @@ public class SurveyHibernateManager {
 			//save all the waypoints as well
 			if (mission.getWaypoints() != null) {
 				for (SurveyWaypoint wp: mission.getWaypoints()){
+					
+					
 					if (wp.getWaypoint().getAttachments() != null){
 						//update all the waypoint attachments directory
 						for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
 							wa.setDatastoreFolderExtension(
-								((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(wp.getWaypoint()));
+								((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(mission));
 						}
 					}
 					if (wp.getWaypoint().getObservations() != null){
@@ -110,14 +112,14 @@ public class SurveyHibernateManager {
 							if (wo.getAttachments() != null){
 								for (ObservationAttachment wa : wo.getAttachments()){
 									wa.setDatastoreFolderExtension(
-											((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(wp.getWaypoint()));
+											((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(mission));
 								}
 							}
 						}
 					}
-					
 					session.saveOrUpdate(wp.getWaypoint());
 					session.saveOrUpdate(wp);
+				
 				}
 			}
 		}

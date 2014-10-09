@@ -175,7 +175,7 @@ public class XMLtoMissionConverter {
 			mt.setId(xmlMt.getId());
 
 			mt.setMission(m);
-			mt.setSamplingUnit(findSamplingUnit(mt.getSamplingUnit().getId() ,session));
+			mt.setSamplingUnit(findSamplingUnit(xmlMt.getSamplingUnitId() ,session));
 			mt.setType(MissionTrack.TrackType.valueOf(xmlMt.getTrackType()));
 			
 			m.getTracks().add(mt);

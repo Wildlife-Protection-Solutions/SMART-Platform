@@ -103,5 +103,17 @@ public class SurveyWaypointSource implements IWaypointSource{
 		
 		return sb.toString();
 	}
+	
+	public String getDatastoreFileLocation(Mission m){
+		StringBuilder sb = new StringBuilder();
+		sb.append(SurveyDesign.SURVEY_FILESTORE_LOC);
+		sb.append(File.separator);
+		if (m != null){
+			sb.append(SmartUtils.encodeHex(m.getUuid()));
+			sb.append(File.separator);
+		}
+		
+		return sb.toString();
+	}
 
 }
