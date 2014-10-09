@@ -71,6 +71,8 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 	
 	private List<MissionComposite> localPages;
 	
+	private Object lastPage;
+	
 	/**
 	 * Creates a new wizard
 	 */
@@ -135,7 +137,9 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 	@Override
 	public boolean performFinish() {
 		//update last page
-		((MissionCompositeWizardPage)getPages()[getPageCount() - 1]).updateModel(newMission);
+        if (lastPage instanceof MissionCompositeWizardPage) {
+            ((MissionCompositeWizardPage) lastPage).updateModel(newMission);
+        }
 		
 		session.beginTransaction();
 		try{
@@ -212,5 +216,10 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 			
 			canFinish = ((IWizardPage)event.getTargetPage()).getNextPage() == null;
 		}
+		
+        if (event.doit) {
+            lastPage = event.getTargetPage();
+        }
+		
 	}
 }
