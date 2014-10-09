@@ -41,6 +41,7 @@ import javax.persistence.Transient;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -70,15 +71,14 @@ public class SamplingUnit extends UuidItem {
 	 * @author Emily
 	 *
 	 */
-	public enum SamplingUnitType{
-		TRANSECT ("Transect", EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
-		PLOT ("Plot", EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON),
-		RECON ("Reconnaissance", EcologicalRecordsPlugIn.SAMPLING_UNIT_RECON_ICON);
+	public enum GeometryType{
+		TRANSECT (Messages.SamplingUnit_LinearGeomType, EcologicalRecordsPlugIn.SAMPLING_UNIT_TRANSECT_ICON),
+		PLOT (Messages.SamplingUnit_PointGeomType, EcologicalRecordsPlugIn.SAMPLING_UNIT_PLOT_ICON);
 		
 		private String guiName;
 		private String imageKey;
 		
-		private SamplingUnitType(String gui, String imageKey){
+		private GeometryType(String gui, String imageKey){
 			this.guiName = gui;
 			this.imageKey = imageKey;
 		}
@@ -92,8 +92,8 @@ public class SamplingUnit extends UuidItem {
 	}
 	
 	public enum State{
-		ACTIVE("Active"),
-		INACTIVE("Inactive");
+		ACTIVE(Messages.SamplingUnit_ActiveState),
+		INACTIVE(Messages.SamplingUnit_InActiveState);
 		
 		private String guiName;
 		
@@ -110,7 +110,7 @@ public class SamplingUnit extends UuidItem {
 	private Geometry geometry;
 	private String id;
 	private SurveyDesign surveyDesign;
-	private SamplingUnitType type;
+	private GeometryType type;
 	private List<SamplingUnitAttributeValue> attributes;
 	private State state;
 	
@@ -172,7 +172,7 @@ public class SamplingUnit extends UuidItem {
 			this.geom = writer.write(geometry);
 			this.geometry = geometry;
 		}else{
-			throw new RuntimeException(MessageFormat.format("{0} geometries are not supported for sampling units.", new Object[]{geometry.getClass().getName()}));
+			throw new RuntimeException(MessageFormat.format(Messages.SamplingUnit_GeometryTypeNotSupported, new Object[]{geometry.getClass().getName()}));
 		}
 	}
 
@@ -218,14 +218,14 @@ public class SamplingUnit extends UuidItem {
 	 */
 	@Column(name="unit_type")
 	@Enumerated(EnumType.STRING)
-	public SamplingUnitType getType() {
+	public GeometryType getType() {
 		return type;
 	}
 	/**
 	 * 
 	 * @param type the attribute type
 	 */
-	public void setType(SamplingUnitType type) {
+	public void setType(GeometryType type) {
 		this.type = type;
 	}
 	

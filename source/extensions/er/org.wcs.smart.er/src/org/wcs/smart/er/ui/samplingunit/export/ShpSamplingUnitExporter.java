@@ -39,7 +39,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitDataSource;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -62,12 +62,12 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 		monitor.beginTask(Messages.ShpSamplingUnitExporter_Progress1, 1);
 		
 		
-		SamplingUnitType type = (SamplingUnitType) options.get(SU_TYPE_KEY);
+		GeometryType type = (GeometryType) options.get(SU_TYPE_KEY);
 		if (type == null){
 			throw new Exception(Messages.ShpSamplingUnitExporter_SuTypeError);
 		}
 		
-		Set<SamplingUnitType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, session);
+		Set<GeometryType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, session);
 		if (!types.contains(type)){
 			//nothing to export
 			return;

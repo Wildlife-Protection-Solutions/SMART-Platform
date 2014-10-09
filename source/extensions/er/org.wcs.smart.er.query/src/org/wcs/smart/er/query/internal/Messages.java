@@ -127,6 +127,7 @@ public class Messages extends NLS {
 	public static String SamplingUnitAttributeQueryColumn_SuLabel;
 	public static String SamplingUnitDropItem_Label;
 	public static String SamplingUnitFilter_MissionTrackNotFound;
+	public static String SamplingUnitFilter_NoneFilterName;
 	public static String SamplingUnitFilter_SamplingUnitNotFound;
 	public static String SamplingUnitGroupByDropItem_AllLabel;
 	public static String SamplingUnitGroupByDropItem_FiltersLabel;

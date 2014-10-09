@@ -23,7 +23,6 @@ package org.wcs.smart.er.ui.samplingunit.export;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
@@ -35,8 +34,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
-import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
@@ -67,12 +65,12 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			Session session,
 			HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
 		
-		SamplingUnitType type = (SamplingUnitType) options.get(SU_TYPE_KEY);
+		GeometryType type = (GeometryType) options.get(SU_TYPE_KEY);
 		if (type == null){
 			throw new Exception(Messages.CsvSamplingUnitExporter_SuTypeError);
 		}
 		
-		Set<SamplingUnitType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, session);
+		Set<GeometryType> types = SurveyHibernateManager.getInstance().getSamplingUnitTypes(sd, session);
 		if (!types.contains(type)){
 			//nothing to export
 			return;
@@ -86,19 +84,14 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 		sd = (SurveyDesign) session.load(SurveyDesign.class, sd.getUuid());
 		CSVWriter writer = new CSVWriter(new FileWriter(f), delimiter);
 		try{
-			if (type == SamplingUnitType.PLOT ||
-					type == SamplingUnitType.TRANSECT){
-				exportPlotsAndTransects(type, writer, sd, session, monitor);
-			}else if (type == SamplingUnitType.RECON){
-				exportRecon(type, writer, sd, session, monitor);
-			}
+			exportPlotsAndTransects(type, writer, sd, session, monitor);
 		}finally{
 			writer.close();	
 			monitor.done();
 		}
 	}
 	
-	private void exportPlotsAndTransects(SamplingUnitType type, CSVWriter writer, 
+	private void exportPlotsAndTransects(GeometryType type, CSVWriter writer, 
 			SurveyDesign sd, Session session, IProgressMonitor monitor){
 		
 		WKTWriter wktWriter = new WKTWriter();
@@ -122,7 +115,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			data[index++] = unit.getId();
 			data[index++] = unit.getType().getGuiName();
 			data[index++] = unit.getState().getGuiName();
-			if (type != SamplingUnitType.PLOT){
+			if (type != GeometryType.PLOT){
 				Double l = unit.getGeometryLengthKm();
 				data[index++] = l == null ? "" : l.toString(); //$NON-NLS-1$
 				LineString ls = (LineString)unit.getGeometry();
@@ -162,49 +155,12 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 		}
 	}
 	
-	private void exportRecon(SamplingUnitType type, CSVWriter writer, 
-			SurveyDesign sd, Session session, IProgressMonitor monitor){
-		WKTWriter wktWriter = new WKTWriter();
-		
-		//write header
-		String[] headers = getHeaders(type, sd);
-		writer.writeNext(headers);
-
-		@SuppressWarnings("unchecked")
-		List<MissionTrack> units = session.createCriteria(MissionTrack.class, "mt") //$NON-NLS-1$
-				.createAlias("mt.mission", "m") //$NON-NLS-1$ //$NON-NLS-2$
-				.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
-				.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
-				.add(Restrictions.eq("type", MissionTrack.TrackType.RECON)) //$NON-NLS-1$
-				.list();
-		
-		monitor.beginTask(Messages.CsvSamplingUnitExporter_Progress, units.size());
-		int index = 0;
-		for (MissionTrack unit : units){
-			index = 0;
-			String[] data = new String[headers.length];
-				
-			data[index++] = unit.getId();
-			data[index++] = unit.getMission().getId();
-			data[index++] = unit.getMission().getSurvey().getId();
-			data[index++] = DateFormat.getDateInstance().format(unit.getDate());
-			
-			LineString ls = (LineString)unit.getLineString();
-			data[index++] = String.valueOf(ls.getCoordinateN(0).x);
-			data[index++] = String.valueOf(ls.getCoordinateN(0).y);
-			data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
-			data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
-			data[index++] = wktWriter.write(unit.getLineString());
-			writer.writeNext(data);
-		}
-	}
-
-	private String[] getHeaders(SamplingUnitType type, SurveyDesign sd){
-		if (type == SamplingUnitType.TRANSECT ||
-				type == SamplingUnitType.PLOT){
+	private String[] getHeaders(GeometryType type, SurveyDesign sd){
+		if (type == GeometryType.TRANSECT ||
+				type == GeometryType.PLOT){
 			
 			int size = 6;
-			if (type != SamplingUnitType.PLOT){
+			if (type != GeometryType.PLOT){
 				size +=4;
 			}
 			size += sd.getSamplingUnitAttributes().size();
@@ -215,7 +171,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			data[index++] = Messages.CsvSamplingUnitExporter_idColumnName;
 			data[index++] = Messages.CsvSamplingUnitExporter_typeColumnName;
 			data[index++] = Messages.CsvSamplingUnitExporter_stateColumnName;
-			if (type != SamplingUnitType.PLOT){
+			if (type != GeometryType.PLOT){
 				data[index++] = Messages.CsvSamplingUnitExporter_lengthColumnName;
 				data[index++] = Messages.CsvSamplingUnitExporter_x1ColumnName;
 				data[index++] = Messages.CsvSamplingUnitExporter_y1ColumnName;
@@ -229,18 +185,6 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			for (SurveyDesignSamplingUnitAttribute a : sd.getSamplingUnitAttributes()){
 				data[index++] = a.getSamplingUnitAttribute().getName();
 			}
-			return data;
-		}else if (type == SamplingUnitType.RECON){
-			String[] data = new String[9];
-			data[0] = Messages.CsvSamplingUnitExporter_idColumnName;
-			data[1] = Messages.CsvSamplingUnitExporter_missionIdColumnName;
-			data[2] = Messages.CsvSamplingUnitExporter_surveyIdColumnName;
-			data[3] = Messages.CsvSamplingUnitExporter_dateColumnName;
-			data[4] = Messages.CsvSamplingUnitExporter_x1ColumnName;
-			data[5] = Messages.CsvSamplingUnitExporter_y1ColumnName;
-			data[6] = Messages.CsvSamplingUnitExporter_x2ColumnName;
-			data[7] = Messages.CsvSamplingUnitExporter_y2ColumnName;
-			data[8] = Messages.CsvSamplingUnitExporter_wktColumnName;
 			return data;
 		}
 		return null;

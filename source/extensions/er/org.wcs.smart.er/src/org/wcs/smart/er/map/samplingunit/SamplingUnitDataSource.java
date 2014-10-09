@@ -39,7 +39,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -59,7 +59,6 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 	
 	private SimpleFeatureType tType;
 	private SimpleFeatureType pType;
-	private SimpleFeatureType rType;
 	
 	/**
 	 * Creates a new data source for the given survey design.
@@ -86,35 +85,29 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 		this.sd = sd;
 		this.tType = null;
 		this.pType = null;
-		this.rType = null;
 	}
 	
 	@Override
 	public String[] getTypeNames() throws IOException {
 		return new String[]{
-				SamplingUnitType.PLOT.name(), 
-				SamplingUnitType.TRANSECT.name(),
-				SamplingUnitType.RECON.name()};
+				GeometryType.PLOT.name(), 
+				GeometryType.TRANSECT.name()
+		};
 	}
 
 	@Override
 	public SimpleFeatureType getSchema(String typeName) throws IOException {
 		try{
-			if (typeName.equals(SamplingUnitType.TRANSECT.name())){
+			if (typeName.equals(GeometryType.TRANSECT.name())){
 				if (tType == null){
 					tType = createType(typeName);
 				}
 				return tType;
-			}else if (typeName.equals(SamplingUnitType.PLOT.name())){
+			}else if (typeName.equals(GeometryType.PLOT.name())){
 				if (pType == null){
 					pType = createType(typeName);
 				}
 				return pType;
-			}else if (typeName.equals(SamplingUnitType.RECON.name())){
-				if (rType == null){
-					rType = createType(typeName);
-				}
-				return rType;
 			}
 		}catch (SchemaException ex){
 			throw new IOException(ex);
@@ -140,20 +133,7 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 	
 
 	private String getFeatureSchemaDef(final String typeName){
-	
-		
 		final StringBuilder sb = new StringBuilder();
-		
-		if (typeName.equals(SamplingUnitType.RECON.name())){
-			sb.append("fid:String,"); //$NON-NLS-1$
-			sb.append("id:String,"); //$NON-NLS-1$
-			sb.append("mission_id:String,"); //$NON-NLS-1$
-			sb.append("survey_id:String,");  //$NON-NLS-1$
-			sb.append("date:Date,"); //$NON-NLS-1$
-			sb.append("geom:LineString:srid=4326"); //$NON-NLS-1$
-			return sb.toString();
-		}
-		
 		Job j = new Job("build feature schema job"){ //$NON-NLS-1$
 
 			@Override
@@ -190,9 +170,9 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 						}
 					}
 					sb.append(",geom:"); //$NON-NLS-1$
-					if (typeName.equals(SamplingUnitType.PLOT.name())){
+					if (typeName.equals(GeometryType.PLOT.name())){
 						sb.append("Point:srid=4326"); //$NON-NLS-1$
-					}else if (typeName.equals(SamplingUnitType.TRANSECT.name())){
+					}else if (typeName.equals(GeometryType.TRANSECT.name())){
 						sb.append("LineString:srid=4326"); //$NON-NLS-1$
 					}
 				}finally{

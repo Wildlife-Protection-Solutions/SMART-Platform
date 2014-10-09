@@ -45,7 +45,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.ui.samplingunit.load.ImportAttributes;
@@ -209,7 +209,7 @@ public class SurveyDesignFromXmlConverter {
 			unit.setGeom(xmlunit.getGeom());
 			unit.setId(xmlunit.getId());
 			unit.setState(SamplingUnit.State.valueOf(xmlunit.getState()));
-			unit.setType(SamplingUnitType.valueOf(xmlunit.getType()));
+			unit.setType(GeometryType.valueOf(xmlunit.getType()));
 			unit.setSurveyDesign(convertedDesign);
 			newUnits.add(unit);
 			unit.setAttributes(new ArrayList<SamplingUnitAttributeValue>());

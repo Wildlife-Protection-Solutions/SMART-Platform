@@ -37,7 +37,7 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
@@ -70,17 +70,17 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 		ShapefileDataStore store = new ShapefileDataStore(f.toURI().toURL());
 		
 		try{
-			SamplingUnit.SamplingUnitType suType = (SamplingUnitType) options.get(TYPE_KEY);
+			SamplingUnit.GeometryType suType = (GeometryType) options.get(TYPE_KEY);
 			SimpleFeatureType type = store.getSchema();
 			
 			//validate geometry types
 			boolean error = false;
-			if (suType == SamplingUnitType.PLOT){
+			if (suType == GeometryType.PLOT){
 				//only point geometry types supported
 				if (!Point.class.isAssignableFrom(type.getGeometryDescriptor().getType().getBinding())){
 					error = true;
 				}
-			}else if (suType == SamplingUnitType.TRANSECT ){
+			}else if (suType == GeometryType.TRANSECT ){
 				if (!LineString.class.isAssignableFrom(type.getGeometryDescriptor().getType().getBinding()) && 
 					!MultiLineString.class.isAssignableFrom(type.getGeometryDescriptor().getType().getBinding())){
 					error = true;
@@ -114,7 +114,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		ShapefileDataStore store = new ShapefileDataStore(f.toURI().toURL());
 		try {
-			SamplingUnit.SamplingUnitType type = (SamplingUnitType) options.get(TYPE_KEY);
+			SamplingUnit.GeometryType type = (GeometryType) options.get(TYPE_KEY);
 			if (type == null) {
 				throw new Exception(Messages.ShpSamplingUnitImporter_SamplingUnitTypeError);
 			}
@@ -171,14 +171,14 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 					SamplingUnit su = new SamplingUnit();
 					su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
 					Geometry g = (Geometry) sf.getDefaultGeometry();
-					if (type == SamplingUnitType.PLOT) {
+					if (type == GeometryType.PLOT) {
 						if (!(g instanceof Point)) {
 							throw new Exception(
 									MessageFormat
 											.format(Messages.ShpSamplingUnitImporter_GeomTypeNotSupported,
 													new Object[] { g.getClass().getName() }));
 						}
-					} else if (type == SamplingUnitType.TRANSECT) {
+					} else if (type == GeometryType.TRANSECT) {
 						if (g instanceof MultiLineString) {
 							if (((MultiLineString) g).getNumGeometries() > 1) {
 								throw new Exception(

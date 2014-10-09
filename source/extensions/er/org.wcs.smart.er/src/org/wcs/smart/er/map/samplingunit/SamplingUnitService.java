@@ -43,7 +43,7 @@ import org.geotools.data.DataStore;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 
 /**
  * Service for sampling units. Must be associated
@@ -154,9 +154,8 @@ public class SamplingUnitService extends IService {
 				if (members == null){
 					members = new ArrayList<SamplingUnitGeoResource>();
 					//add two types
-					members.add(new SamplingUnitGeoResource(this, SamplingUnitType.PLOT.name()));
-					members.add(new SamplingUnitGeoResource(this, SamplingUnitType.TRANSECT.name()));
-					members.add(new SamplingUnitGeoResource(this, SamplingUnitType.RECON.name()));
+					members.add(new SamplingUnitGeoResource(this, GeometryType.PLOT.name()));
+					members.add(new SamplingUnitGeoResource(this, GeometryType.TRANSECT.name()));
 				}
 			}
 		}

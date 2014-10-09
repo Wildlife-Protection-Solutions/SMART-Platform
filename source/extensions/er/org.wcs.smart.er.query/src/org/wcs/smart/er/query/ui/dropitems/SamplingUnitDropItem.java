@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.util.SmartUtils;
@@ -63,7 +64,12 @@ public class SamplingUnitDropItem extends DropItem {
 	@Override
 	public String asQueryPart() {
 		if (su != null){
-			return "s:samplingunit:" + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$
+			if (su == SamplingUnitFilter.NONE){
+				return "s:samplingunit:" + SamplingUnitFilter.NONE_KEY; //$NON-NLS-1$
+			}else{
+				return "s:samplingunit:" + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$
+			}
+			
 		}else if (mt != null){
 			return "s:samplingunittrack:" + SmartUtils.encodeHex(mt.getUuid()); //$NON-NLS-1$
 		}

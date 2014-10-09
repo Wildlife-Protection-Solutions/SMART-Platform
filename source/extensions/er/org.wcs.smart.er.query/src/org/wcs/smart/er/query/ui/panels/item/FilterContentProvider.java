@@ -49,6 +49,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -155,21 +156,10 @@ public class FilterContentProvider implements ITreeContentProvider{
 			Session s = HibernateManager.openSession();
 			try{
 				if (design != null){
-					List<Object> allUnits = new ArrayList<Object>();
-					List<Object> units = SurveyHibernateManager.getInstance().getSamplingUnits(design, s);
-					for (Object x : units){
-						if (x instanceof SamplingUnit){
-							((SamplingUnit) x).getId();
-							((SamplingUnit) x).getType();
-							allUnits.add(x);
-						}else if (x instanceof MissionTrack){
-							((MissionTrack) x).getId();
-							if (!qType.getKey().equals(MissionTrackQueryType.KEY)){
-								allUnits.add(x);
-							}
-						}
-					}
-					sunits = allUnits;
+					List<SamplingUnit> allUnits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s);
+					sunits = new ArrayList<Object>();
+					sunits.addAll(allUnits);
+					sunits.add(SamplingUnitFilter.NONE);
 				}else{
 					sunits = null;
 				}

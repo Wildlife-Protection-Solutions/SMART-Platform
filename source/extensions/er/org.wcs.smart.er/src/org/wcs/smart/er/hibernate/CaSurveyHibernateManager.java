@@ -36,7 +36,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -66,9 +66,9 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 *  
 	 * @return all sampling units for the given conservation area
 	 */
-	public List<Object> getSamplingUnits(SurveyDesign survey, Session s){
+	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s){
 		
-		List<Object> units = new ArrayList<Object>();
+		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		
 		//get fixed sampling units
 		StringBuilder sb = new StringBuilder();
@@ -80,23 +80,41 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		
 		List<SamplingUnit> unit = q.list();
 		units.addAll(unit);
+		
+		return units;
+	}
+	
+	/**
+	 * Gets all sampling units for a survey design;
+	 * This includes all fixed sampling units and reconnaissance
+	 * sampling units (represented as tracks).
+	 *  
+	 * <p>
+	 * If in CCAA mode, will return all sampling units in all
+	 * conservation ares whose survey keys match.
+	 * </p>
+	 *  
+	 * @return all sampling units for the given conservation area
+	 */
+	public List<MissionTrack> getAdHocMissionTracks(SurveyDesign survey, Session s){
+		
+		List<MissionTrack> units = new ArrayList<MissionTrack>();
 
 		//get reconnaissance tracks
-		sb = new StringBuilder();
+		StringBuilder sb = new StringBuilder();
 		sb.append("FROM MissionTrack "); //$NON-NLS-1$
 		sb.append(" WHERE mission.survey.surveyDesign = :survey "); //$NON-NLS-1$
 		sb.append(" AND type = :type  "); //$NON-NLS-1$
 		
-		q = s.createQuery(sb.toString());
+		Query q = s.createQuery(sb.toString());
 		q.setParameter("survey", survey); //$NON-NLS-1$
-		q.setParameter("type", MissionTrack.TrackType.RECON); //$NON-NLS-1$
+		q.setParameter("type", MissionTrack.TrackType.TRACK); //$NON-NLS-1$
 		
 		List<MissionTrack> tracks = q.list();
 		units.addAll(tracks);
 		
 		return units;
 	}
-	
 	/**
 	 * Gets all sampling units for a particular
 	 * mission.  This includes all suvrey design sampling units
@@ -126,7 +144,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 
 		//get reconnaissance tracks
 		for (MissionTrack mt : mission.getTracks()){
-			if (mt.getType() == TrackType.RECON){
+			if (mt.getType() == TrackType.SAMPLING_UNIT){
 				units.add(mt);
 			}
 		}
@@ -233,26 +251,22 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	 * Determines all sampling unit types associated with survey design
 	 */
 	@Override
-	public Set<SamplingUnit.SamplingUnitType> getSamplingUnitTypes(SurveyDesign sd, Session s){
-		
-		HashSet<SamplingUnit.SamplingUnitType> types = new HashSet<SamplingUnit.SamplingUnitType>();
-		
+	public Set<SamplingUnit.GeometryType> getSamplingUnitTypes(SurveyDesign sd, Session s){
+		HashSet<SamplingUnit.GeometryType> types = new HashSet<SamplingUnit.GeometryType>();
 		for (Object x : getSamplingUnits(sd, s)){
 			if (x instanceof SamplingUnit){
 				types.add(((SamplingUnit) x).getType());
 			}
 		}
-		
-		Long cnt = (Long)s.createCriteria(MissionTrack.class, "mt") //$NON-NLS-1$
-			.createAlias("mt.mission", "m") //$NON-NLS-1$ //$NON-NLS-2$
-			.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
-			.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
-			.add(Restrictions.eq("type", TrackType.RECON)) //$NON-NLS-1$
-			.setProjection(Projections.rowCount()).list().get(0);
-		if (cnt > 0){
-			types.add(SamplingUnitType.RECON);
-		}
-		
+//		Long cnt = (Long)s.createCriteria(MissionTrack.class, "mt") //$NON-NLS-1$
+//			.createAlias("mt.mission", "m") //$NON-NLS-1$ //$NON-NLS-2$
+//			.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+//			.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
+//			.add(Restrictions.eq("type", TrackType.RECON)) //$NON-NLS-1$
+//			.setProjection(Projections.rowCount()).list().get(0);
+//		if (cnt > 0){
+//			types.add(GeometryType.RECON);
+//		}
 		return types;
 	}
 	

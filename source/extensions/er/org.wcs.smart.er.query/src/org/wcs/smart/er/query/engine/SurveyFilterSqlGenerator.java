@@ -231,21 +231,34 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		//TODO: this works for waypoint filters but not track filters
 		if (engine instanceof DerbyMissionTrackEngine){
 			if (filter.getType() == Type.SAMPLINGUNIT){
-				return engine.tablePrefix(SamplingUnit.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+				if (filter.isNone()){
+					return engine.tablePrefix(SamplingUnit.class) + ".uuid is null"; //$NON-NLS-1$ 					
+				}else{
+					return engine.tablePrefix(SamplingUnit.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}else if (filter.getType() == Type.TRACK){
 				return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
 			}
 		}else if (engine instanceof DerbyMissionEngine){
 			//survey waypoint su or track  
 			if (filter.getType() == Type.SAMPLINGUNIT){
-				return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				if (filter.isNone()){
+					return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid is null " //$NON-NLS-1$ //$NON-NLS-2$
+							+ " OR " + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null)"; //$NON-NLS-1$ //$NON-NLS-2$ 
+				}else{
+					return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						+ " OR " + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				}
 			}else if (filter.getType() == Type.TRACK){
 				return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}else{
 			if (filter.getType() == Type.SAMPLINGUNIT){
-				return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+				if (filter.isNone()){
+					return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null"; //$NON-NLS-1$
+				}else{
+					return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
 			}else if (filter.getType() == Type.TRACK){
 				return engine.tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
 			}

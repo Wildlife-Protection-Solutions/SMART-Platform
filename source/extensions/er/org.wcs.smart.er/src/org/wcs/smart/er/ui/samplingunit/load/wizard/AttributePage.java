@@ -47,7 +47,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
@@ -190,7 +190,7 @@ public class AttributePage extends WizardPage {
 
 		if (importer.getClass().equals(CsvSamplingUnitImporter.class)) {
 
-			if (((ImportWizard) getWizard()).getSamplingUnitType() == SamplingUnitType.PLOT) {
+			if (((ImportWizard) getWizard()).getSamplingUnitType() == GeometryType.PLOT) {
 				l = new Label(g, SWT.NONE);
 				l.setText(Messages.AttributePage_xLabel);
 

@@ -37,7 +37,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -50,7 +50,7 @@ public class SamplingUnitGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public SamplingUnitGeoResourceInfo( SamplingUnitGeoResource resource, IProgressMonitor monitor){
-		String title = SamplingUnitType.valueOf(resource.getDataType()).getGuiName();
+		String title = GeometryType.valueOf(resource.getDataType()).getGuiName();
 		try {
 			String sdName = ((SamplingUnitService)resource.service(monitor)).getCachedName();
 			title += " [" + sdName + "]"; //$NON-NLS-1$ //$NON-NLS-2$

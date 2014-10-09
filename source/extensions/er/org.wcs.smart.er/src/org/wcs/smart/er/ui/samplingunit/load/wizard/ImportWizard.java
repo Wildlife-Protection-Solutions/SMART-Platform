@@ -42,7 +42,7 @@ import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnit.SamplingUnitType;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.samplingunit.load.CsvSamplingUnitImporter;
 import org.wcs.smart.er.ui.samplingunit.load.ISamplingUnitImporter;
@@ -210,7 +210,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
     	((WizardDialog) getContainer()).addPageChangingListener(this);
     }
 
-    public SamplingUnitType getSamplingUnitType(){
+    public GeometryType getSamplingUnitType(){
     	return typePage.getType();
     }
 
