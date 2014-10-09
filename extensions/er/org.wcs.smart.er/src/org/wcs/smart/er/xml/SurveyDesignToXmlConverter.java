@@ -45,6 +45,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SmartUtils;
 
 
 /**
@@ -79,24 +80,9 @@ public class SurveyDesignToXmlConverter {
 			xml.getNames().add(xmlpair);
 		}
 
-		//start date
-		GregorianCalendar c = new GregorianCalendar();
-		Date start = surveyDesign.getStartDate();
-		if(start != null){
-			c.setTime(start);
-			xml.setStartDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-		}else{
-			xml.setStartDate(null);
-		}
-
-		//end date
-		Date end = surveyDesign.getEndDate();
-		if(end != null){
-			c.setTime(end);
-			xml.setEndDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-		}else{
-			xml.setEndDate(null);
-		}
+		//start & end dates
+		xml.setStartDate(SmartUtils.toXmlDate(surveyDesign.getStartDate()));
+		xml.setEndDate(SmartUtils.toXmlDate(surveyDesign.getEndDate()));
 		
 		//use distance and direction
 		xml.setTrackDistanceDirection(surveyDesign.getTrackDistanceDirection());

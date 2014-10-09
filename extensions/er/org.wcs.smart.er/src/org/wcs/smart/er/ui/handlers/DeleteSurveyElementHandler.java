@@ -217,6 +217,7 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 							if (m.getWaypoints() != null){
 								for (SurveyWaypoint sw : m.getWaypoints()){
 									session.delete(sw.getWaypoint());
+									session.delete(sw);
 								}
 							}
 						}
