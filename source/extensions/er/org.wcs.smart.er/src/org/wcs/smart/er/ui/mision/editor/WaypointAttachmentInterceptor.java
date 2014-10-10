@@ -27,6 +27,7 @@ import org.hibernate.type.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -64,18 +65,20 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 		 * here; otherwise they get left behind
 		 */
 		if (entity instanceof Mission){
-			if (((Mission) entity).getWaypoints() != null){
-				for (SurveyWaypoint wp : ((Mission) entity).getWaypoints()){
-					if (wp.getWaypoint().getAttachments() != null){
-						for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
-							toDelete.add(att.getFullFile());
+			for (MissionDay md : ((Mission) entity).getMissionDays()){
+				if (md.getWaypoints() != null){
+					for (SurveyWaypoint wp : md.getWaypoints()){
+						if (wp.getWaypoint().getAttachments() != null){
+							for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
+								toDelete.add(att.getFullFile());
+							}
 						}
-					}
-					if (wp.getWaypoint().getObservations() != null){
-						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-							if (wo.getAttachments()!= null){
-								for (ObservationAttachment att : wo.getAttachments()){
-									toDelete.add(att.getFullFile());
+						if (wp.getWaypoint().getObservations() != null){
+							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+								if (wo.getAttachments()!= null){
+									for (ObservationAttachment att : wo.getAttachments()){
+										toDelete.add(att.getFullFile());
+									}
 								}
 							}
 						}

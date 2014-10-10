@@ -82,12 +82,12 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 	@Override
 	protected void okPressed() {
 		Job job = null;
-		Mission m = track.getMission();
+		Mission m = track.getMissionDay().getMission();
 		//save then close
 		if (editTrack.getLineString() == null){
 			//delete track
-			m.getTracks().remove(track);
-			track.setMission(null);
+			track.getMissionDay().getTracks().remove(track);
+			track.setMissionDay(null);
 			job = new DeleteMissionTracksJob(track);
 		}else{
 			track.setLineString(editTrack.getLineString());

@@ -25,7 +25,6 @@ import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -61,12 +60,12 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Mission editor
@@ -75,7 +74,10 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdaptable{
-
+	
+	private static final String HOUR_LABEL = Messages.MissionEditor_HourLabel;
+	private static final String MINUTE_LABEL = Messages.MissionEditor_MinuteLabel;
+	
 	public static final String ID = "org.wcs.smart.er.ui.mission.MissionEditor"; //$NON-NLS-1$
 
 	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
@@ -155,34 +157,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}
 	};
 	
-//	/**
-//	 * Converts a double that represents a time range into
-//	 * and hours and minutes string.  For example: 20.5 is 
-//	 * converted into "20h 30m"
-//	 * 
-//	 * @param hrs time range in hours
-//	 * @return formatted string
-//	 */
-//	public static String formatTimeRange(Double hrs){
-//		boolean minus = false;
-//		if (hrs < 0){
-//			minus = true;
-//			hrs = -hrs;
-//		}
-//		int lhrs = (int)Math.floor(hrs);
-//		int lmin = (int)Math.round((hrs - lhrs) * 60.0);
-//		
-//		if (lmin == 60){
-//			lmin = 0;
-//			lhrs++;
-//		}
-//		if (minus){
-//			return "-" + lhrs + " hour " + " " + lmin + " min"; //$NON-NLS-1$ //$NON-NLS-2$
-//		}else{
-//			return lhrs + " hour "  + " " + lmin + " min"; //$NON-NLS-1$
-//		}
-//	}
-	
 	/**
 	 * New mission editor; registers events
 	 */
@@ -222,8 +196,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			try{
 				this.mission = (Mission) session.load(Mission.class, muuid);
 				//load mission items so don't have lazy loading issues later.
-				this.mission.getWaypoints().size();
-				this.mission.getTracks().size();
+				for (MissionDay md : mission.getMissionDays()){
+					md.getWaypoints().size();
+					md.getTracks().size();
+				}
 
 				this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();
 				
@@ -326,22 +302,14 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 					i++;
 				}
 			}
+			
 			int insertindex = 1;
-			Calendar calStart = SmartUtils.convertDate(getMission().getStartDate());
-			calStart.set(Calendar.HOUR, 0);
-			calStart.set(Calendar.MINUTE, 0);
-			calStart.set(Calendar.SECOND, 0);
-			calStart.set(Calendar.MILLISECOND, 0);
-			
-			Calendar calEnd = SmartUtils.convertDate(getMission().getEndDate());
-			
-			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
-				MissionDayPageEditorInput input = new MissionDayPageEditorInput(SmartUtils.getDatePart(calStart.getTime(), false));
+			for (MissionDay md : getMission().getMissionDays()){
+				MissionDayPageEditorInput input = new MissionDayPageEditorInput(md.getDate());
 				MissionDayPage editor = new MissionDayPage(this);
 				super.addPage(insertindex, editor, input);
 				super.setPageText(insertindex, DateFormat.getDateInstance(DateFormat.MEDIUM).format(input.getDay()));
 				insertindex++;
-				calStart.add(Calendar.DAY_OF_MONTH, 1);
 			}
 
 		} catch (Exception ex) {
@@ -475,6 +443,35 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			return getMap();
 		}
 		return super.getAdapter(adaptee);
+	}
+	
+	
+	/**
+	 * Converts a double that represents a time range into
+	 * and hours and minutes string.  For example: 20.5 is 
+	 * converted into "20h 30m"
+	 * 
+	 * @param hrs time range in hours
+	 * @return formatted string
+	 */
+	public static String formatTimeRange(Double hrs){
+		boolean minus = false;
+		if (hrs < 0){
+			minus = true;
+			hrs = -hrs;
+		}
+		int lhrs = (int)Math.floor(hrs);
+		int lmin = (int)Math.round((hrs - lhrs) * 60.0);
+		
+		if (lmin == 60){
+			lmin = 0;
+			lhrs++;
+		}
+		if (minus){
+			return "-" + lhrs + HOUR_LABEL + " " + lmin + MINUTE_LABEL; //$NON-NLS-1$ //$NON-NLS-2$
+		}else{
+			return lhrs + HOUR_LABEL + " " + lmin + MINUTE_LABEL; //$NON-NLS-1$
+		}
 	}
 	
 }

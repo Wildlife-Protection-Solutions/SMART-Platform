@@ -37,6 +37,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -300,6 +301,15 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(prefix(Mission.class));
 		sql.append(".survey_uuid "); //$NON-NLS-1$
 		
+		sql.append(" inner join "); //$NON-NLS-1$
+		sql.append(namePrefix(MissionDay.class));
+		usedTables.add(MissionDay.class);
+		sql.append(" on ");  //$NON-NLS-1$
+		sql.append(prefix(Mission.class));
+		sql.append(".uuid = "); //$NON-NLS-1$
+		sql.append(prefix(MissionDay.class));
+		sql.append(".mission_uuid "); //$NON-NLS-1$
+		
 		if (dateFilter != null && 
 				(dateFilter.getDateFieldOption() == MissionStartDateField.INSTANCE ||
 				dateFilter.getDateFieldOption() == MissionEndDateField.INSTANCE)){
@@ -324,8 +334,8 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(namePrefix(SurveyWaypoint.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(SurveyWaypoint.class));
-			sql.append(".mission_uuid = "); //$NON-NLS-1$
-			sql.append(prefix(Mission.class));
+			sql.append(".mission_day_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(MissionDay.class));
 			sql.append(".uuid "); //$NON-NLS-1$
 		
 			if (this.suAttributeTable != null){
@@ -415,8 +425,8 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(namePrefix(MissionTrack.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(prefix(MissionTrack.class));
-			sql.append(".mission_uuid = "); //$NON-NLS-1$
-			sql.append(prefix(Mission.class));
+			sql.append(".mission_day_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(MissionDay.class));
 			sql.append(".uuid "); //$NON-NLS-1$
 		}
 		
@@ -545,11 +555,17 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(prefix(Mission.class)); 
 				sql.append(" ON " + prefix(Survey.class) + ".uuid = " + prefix(Mission.class) + ".survey_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				sql.append(" join "); //$NON-NLS-1$
-				
+
+				sql.append(name(MissionDay.class));
+				sql.append(" as ");//$NON-NLS-1$
+				sql.append(prefix(MissionDay.class)); 
+				sql.append(" ON " + prefix(Mission.class) + ".uuid = " + prefix(MissionDay.class) + ".mission_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql.append(" join "); //$NON-NLS-1$
+
 				sql.append(name(SurveyWaypoint.class));
 				sql.append(" as ");//$NON-NLS-1$
 				sql.append(prefix(SurveyWaypoint.class)); 
-				sql.append(" on " + prefix(SurveyWaypoint.class) + ".mission_uuid = " + prefix(Mission.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				sql.append(" on " + prefix(SurveyWaypoint.class) + ".mission_day_uuid = " + prefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				
 				sql.append(" join "); //$NON-NLS-1$
 				sql.append(name(Waypoint.class));

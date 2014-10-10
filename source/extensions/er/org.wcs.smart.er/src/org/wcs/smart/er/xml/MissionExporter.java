@@ -38,6 +38,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -161,13 +162,15 @@ public class MissionExporter {
 
 			/* add all attachments */
 			List<ISmartAttachment> allAttach = new ArrayList<ISmartAttachment>();
-			for (SurveyWaypoint wp : mission.getWaypoints()) {
-				if (wp.getWaypoint().getAttachments() != null){
-					allAttach.addAll(wp.getWaypoint().getAttachments());
-				}
-				for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-					if (wo.getAttachments() != null){
-						allAttach.addAll(wo.getAttachments());
+			for (MissionDay md : mission.getMissionDays()){
+				for (SurveyWaypoint wp : md.getWaypoints()) {
+					if (wp.getWaypoint().getAttachments() != null){
+						allAttach.addAll(wp.getWaypoint().getAttachments());
+					}
+					for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+						if (wo.getAttachments() != null){
+							allAttach.addAll(wo.getAttachments());
+						}
 					}
 				}
 			}

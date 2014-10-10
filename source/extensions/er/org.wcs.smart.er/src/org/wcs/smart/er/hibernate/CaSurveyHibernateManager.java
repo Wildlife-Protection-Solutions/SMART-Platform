@@ -29,14 +29,10 @@ import java.util.Set;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.er.model.MissionTrack.TrackType;
-import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -103,7 +99,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		//get reconnaissance tracks
 		StringBuilder sb = new StringBuilder();
 		sb.append("FROM MissionTrack "); //$NON-NLS-1$
-		sb.append(" WHERE mission.survey.surveyDesign = :survey "); //$NON-NLS-1$
+		sb.append(" WHERE missionDay.mission.survey.surveyDesign = :survey "); //$NON-NLS-1$
 		sb.append(" AND type = :type  "); //$NON-NLS-1$
 		
 		Query q = s.createQuery(sb.toString());
@@ -113,42 +109,6 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		List<MissionTrack> tracks = q.list();
 		units.addAll(tracks);
 		
-		return units;
-	}
-	/**
-	 * Gets all sampling units for a particular
-	 * mission.  This includes all suvrey design sampling units
-	 * and reconnaissance sampling units for the specific mission.
-	 *  
-	 * <p>
-	 * If in CCAA mode, will return all sampling units in all
-	 * conservation ares whose survey keys match.
-	 * </p>
-	 *  
-	 * @return all sampling units for the given conservation area
-	 */
-	public List<Object> getSamplingUnits(Mission mission, Session s){
-		
-		List<Object> units = new ArrayList<Object>();
-		
-		//get fixed sampling units
-		StringBuilder sb = new StringBuilder();
-		sb.append("FROM SamplingUnit a "); //$NON-NLS-1$
-		sb.append(" WHERE a.surveyDesign = :survey "); //$NON-NLS-1$
-		
-		Query q = s.createQuery(sb.toString());
-		q.setParameter("survey", mission.getSurvey().getSurveyDesign()); //$NON-NLS-1$
-		
-		List<SamplingUnit> unit = q.list();
-		units.addAll(unit);
-
-		//get reconnaissance tracks
-		for (MissionTrack mt : mission.getTracks()){
-			if (mt.getType() == TrackType.SAMPLING_UNIT){
-				units.add(mt);
-			}
-		}
-
 		return units;
 	}
 

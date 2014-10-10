@@ -189,11 +189,11 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			if (index == 0){
 				return mt.getId();
 			}else if (index == 1){
-				return mt.getMission().getId();
+				return mt.getMissionDay().getMission().getId();
 			}else if (index == 2){
-				return mt.getMission().getSurvey().getId();
+				return mt.getMissionDay().getMission().getSurvey().getId();
 			}else if (index == 3){
-				return mt.getDate();
+				return mt.getMissionDay().getDate();
 			}else if (index == 4){
 				return mt.getGeometryLengthKm();
 			}

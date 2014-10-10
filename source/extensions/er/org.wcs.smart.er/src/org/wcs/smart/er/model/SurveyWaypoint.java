@@ -57,7 +57,7 @@ public class SurveyWaypoint {
 	/*
 	 * Associated mission
 	 */
-	private Mission mission;
+	private MissionDay missionDay;
 	
 	/*
 	 * Associated sampling unit; NOTE: the sampling
@@ -112,13 +112,13 @@ public class SurveyWaypoint {
 	}
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="mission_uuid", referencedColumnName="uuid")
-	public Mission getMission(){
-		return this.mission;
+	@JoinColumn(name="mission_day_uuid", referencedColumnName="uuid")
+	public MissionDay getMissionDay(){
+		return this.missionDay;
 	}
 	
-	public void setMission(Mission mission){
-		this.mission = mission;
+	public void setMissionDay(MissionDay missionDay){
+		this.missionDay = missionDay;
 	}
 	
 	@Override

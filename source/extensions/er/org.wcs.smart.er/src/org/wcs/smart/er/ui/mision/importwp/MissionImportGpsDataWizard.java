@@ -33,7 +33,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.IImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
@@ -47,16 +47,18 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 
-	private Mission mission;
+	private MissionDay missionDay;
 	
-	public MissionImportGpsDataWizard(Mission mission, ImportType type) {
+	public MissionImportGpsDataWizard(MissionDay missionDay, ImportType type) {
 		super(type);
-		this.mission = mission;
+		this.missionDay = missionDay;
 	}
 
 	@Override
 	public IImportEngine[] getEngines() {
-		return new IImportEngine[]{new MissionGpsImportEngine(getDateOption()),  new MissionGpxImportEngine(getDateOption()), new MissionCsvImportEngine(getDateOption())};
+		return new IImportEngine[]{new MissionGpsImportEngine(missionDay),  
+				new MissionGpxImportEngine(missionDay), 
+				new MissionCsvImportEngine(missionDay)};
 	}
 
 	@Override
@@ -88,7 +90,7 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 							return;
 						}
 						
-						String message = engine.updateSourceObject(getImportOption(), getType(), mission, getImportedData(), monitor);
+						String message = engine.updateSourceObject(getImportOption(), getType(), missionDay, getImportedData(), monitor);
 						successMessage[0] = message;
 					} catch (final Exception e) {
 						Display.getDefault().syncExec(new Runnable(){

@@ -22,6 +22,9 @@
 package org.wcs.smart.er.ui.mision.udig;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -29,6 +32,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.util.SmartUtils;
 
@@ -40,12 +44,15 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class MissionTrackFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
-	private Mission mission;
 	private SimpleFeatureType featureType;
-	private int cnt;
+	private Iterator<MissionTrack> iterator;
 	
 	public MissionTrackFeatureReader(Mission mission, SimpleFeatureType type){
-		this.mission = mission;
+		List<MissionTrack> me = new ArrayList<MissionTrack>();
+		for (MissionDay md : mission.getMissionDays()){
+			me.addAll(md.getTracks());
+		}
+		iterator = me.iterator();
 		this.featureType = type;
 	}
 	
@@ -57,14 +64,13 @@ public class MissionTrackFeatureReader implements FeatureReader<SimpleFeatureTyp
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
-		SimpleFeature feature = createFeature(mission.getTracks().get(cnt));
-		cnt++;
+		SimpleFeature feature = createFeature(iterator.next());
 		return feature;
 	}
 
 	@Override
 	public boolean hasNext() throws IOException {
-		return cnt < mission.getTracks().size();
+		return iterator.hasNext();
 	}
 
 	@Override
@@ -76,9 +82,9 @@ public class MissionTrackFeatureReader implements FeatureReader<SimpleFeatureTyp
 		Object[] data = new Object[7];
 		data[0] = fid;
 		data[1] = point.getId();
-		data[2] = point.getDate();
+		data[2] = point.getMissionDay().getDate();
 		data[3] = point.getSamplingUnit() == null ? "" : point.getSamplingUnit().getId(); //$NON-NLS-1$
-		data[4] = point.getMission().getId();
+		data[4] = point.getMissionDay().getMission().getId();
 		data[5] = point.getGeometryLengthKm();
 		data[6] = point.getLineString();
 		return SimpleFeatureBuilder.build(featureType, data, fid);

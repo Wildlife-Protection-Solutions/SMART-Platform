@@ -38,7 +38,7 @@ import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.MissionComposite;
@@ -127,9 +127,11 @@ public class MissionEditorDialog extends TitleAreaDialog {
 				
 				//waypoints
 				List<SurveyWaypoint> wpDelete = new ArrayList<SurveyWaypoint>();
-				for (SurveyWaypoint sw : toUpdate.getWaypoints()){
-					if (!isBetweenMissionDates(SmartUtils.getDatePart(sw.getWaypoint().getDateTime(), false))){
-						wpDelete.add(sw);
+				for (MissionDay md : toUpdate.getMissionDays()){
+					for (SurveyWaypoint sw : md.getWaypoints()){
+						if (!isBetweenMissionDates(SmartUtils.getDatePart(sw.getWaypoint().getDateTime(), false))){
+							wpDelete.add(sw);
+						}
 					}
 				}
 				for (SurveyWaypoint sw : wpDelete){
@@ -139,19 +141,19 @@ public class MissionEditorDialog extends TitleAreaDialog {
 				}
 				
 				//tracks
-				List<MissionTrack> toDelete = new ArrayList<MissionTrack>();
-				for (MissionTrack mt : toUpdate.getTracks()){
-					if (!isBetweenMissionDates(mt.getDate())){
-						mt.setMission(null);
-						toDelete.add(mt);
-					}
-				}
-				toUpdate.getTracks().removeAll(toDelete);
-				
+				//TODO:
+//				for (MissionDay md : toUpdate.getMissionDays()){
+//					List<MissionTrack> toDelete = new ArrayList<MissionTrack>();
+//					for (MissionTrack mt : md.getTracks()){
+//						if (!isBetweenMissionDates(mt.getDate())){
+//							mt.setMission(null);
+//							toDelete.add(mt);
+//						}
+//					}
+//					md.getTracks().removeAll(toDelete);
+//				}
 			}
 			
-		
-		
 			session.getTransaction().commit();
 			isChanged = false;
 			getButton(IDialogConstants.OK_ID).setEnabled(false);

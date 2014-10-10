@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
@@ -63,6 +64,7 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		tablePrefix.put(SurveyDesign.class, "sd"); //$NON-NLS-1$
 		tablePrefix.put(Survey.class, "s"); //$NON-NLS-1$
 		tablePrefix.put(Mission.class, "m"); //$NON-NLS-1$
+		tablePrefix.put(MissionDay.class, "md"); //$NON-NLS-1$
 		tablePrefix.put(MissionAttribute.class, "ma"); //$NON-NLS-1$
 		tablePrefix.put(MissionAttributeListItem.class, "mali"); //$NON-NLS-1$
 		tablePrefix.put(MissionProperty.class, "mp"); //$NON-NLS-1$
@@ -84,6 +86,7 @@ public abstract class DerbySurveyQueryEngine extends AbstractQueryEngine {
 		tableNames.put(SurveyDesign.class, "smart.survey_design"); //$NON-NLS-1$
 		tableNames.put(Survey.class, "smart.survey"); //$NON-NLS-1$
 		tableNames.put(Mission.class, "smart.mission"); //$NON-NLS-1$
+		tableNames.put(MissionDay.class, "smart.mission_day"); //$NON-NLS-1$
 		tableNames.put(MissionAttribute.class, "smart.mission_attribute"); //$NON-NLS-1$
 		tableNames.put(MissionAttributeListItem.class, "smart.mission_attribute_list"); //$NON-NLS-1$
 		tableNames.put(MissionProperty.class, "smart.mission_property"); //$NON-NLS-1$

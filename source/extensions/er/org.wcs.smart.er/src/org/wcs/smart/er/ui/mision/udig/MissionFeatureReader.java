@@ -22,6 +22,9 @@
 package org.wcs.smart.er.ui.mision.udig;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -29,6 +32,7 @@ import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.util.SmartUtils;
 
@@ -45,13 +49,16 @@ import com.vividsolutions.jts.geom.Point;
  */
 public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, SimpleFeature> {
 
-	private Mission mission;
 	private SimpleFeatureType featureType;
-	private int cnt;
 	private GeometryFactory gf = new GeometryFactory();
+	private Iterator<SurveyWaypoint> iterator;
 	
 	public MissionFeatureReader(Mission mission, SimpleFeatureType type){
-		this.mission = mission;
+		List<SurveyWaypoint> me = new ArrayList<SurveyWaypoint>();
+		for (MissionDay md : mission.getMissionDays()){
+			me.addAll(md.getWaypoints());
+		}
+		iterator = me.iterator();
 		this.featureType = type;
 	}
 	
@@ -63,14 +70,13 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
-		SimpleFeature feature = createFeature(mission.getWaypoints().get(cnt));
-		cnt++;
+		SimpleFeature feature = createFeature(iterator.next());
 		return feature;
 	}
 
 	@Override
 	public boolean hasNext() throws IOException {
-		return cnt < mission.getWaypoints().size();
+		return iterator.hasNext();
 	}
 
 	@Override

@@ -23,7 +23,6 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.Date;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -39,7 +38,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -55,26 +54,19 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 
 	private boolean isChanged = false;
 	
-	private Mission mission;
-	private Date date;
-	
+	private MissionDay missionDay;
 	private TracksComposite cmp;
 
-	public MissionTrackEditDialog(Shell shell, Mission mission, Date date) {
+	public MissionTrackEditDialog(Shell shell, MissionDay mission) {
 		super(shell);
-		this.date = date;
-		this.mission = mission;
+		this.missionDay = mission;
 	}
 
 
-	public Mission getMission() {
-		return mission;
+	public MissionDay getMissionDay() {
+		return missionDay;
 	}
-	
-	public Date getDate() {
-		return date;
-	}
-	
+		
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		Composite comp = (Composite) super.createDialogArea(parent);
@@ -83,9 +75,9 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			this.mission = (Mission) session.load(Mission.class, mission.getUuid());
+			this.missionDay = (MissionDay) session.load(MissionDay.class, missionDay.getUuid());
 
-			String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, mission.getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(date));
+			String title = MessageFormat.format(Messages.MissionTrackEditDialog_Title, missionDay.getMission().getId(), DateFormat.getDateInstance(DateFormat.MEDIUM).format(missionDay.getDate()));
 			setTitle(title);
 			getShell().setText(title);
 			setMessage(Messages.MissionTrackEditDialog_Message);
@@ -153,11 +145,11 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 					q.setParameter("mt", mt); //$NON-NLS-1$
 					q.executeUpdate();
 				
-					mt.setMission(null);
+					mt.setMissionDay(null);
 				}
 			}
 			
-			session.saveOrUpdate(mission);
+			session.saveOrUpdate(missionDay);
 			session.getTransaction().commit();
 		} catch (Exception ex) {
 			EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackEditDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -168,7 +160,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 
 		isChanged = false;
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
-		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, missionDay);
 		return true;
 	}
 	

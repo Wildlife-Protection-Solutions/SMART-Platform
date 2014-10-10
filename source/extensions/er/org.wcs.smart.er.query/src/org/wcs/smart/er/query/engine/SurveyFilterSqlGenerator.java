@@ -29,6 +29,7 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
@@ -379,11 +380,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			table = engine.tablePrefix(Mission.class);
 			field = "end_datetime"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == WaypointDateField.INSTANCE){
-			table = engine.tablePrefix(Waypoint.class);
-			field = "datetime"; //$NON-NLS-1$
+			table = engine.tablePrefix(MissionDay.class);
+			field = "mission_day"; //$NON-NLS-1$
 		}else if (filter.getDateFieldOption() == MissionTrackDateField.INSTANCE){
-			table = engine.tablePrefix(MissionTrack.class);
-			field = "track_date"; //$NON-NLS-1$
+			table = engine.tablePrefix(MissionDay.class);
+			field = "mission_day"; //$NON-NLS-1$
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.SurveyFilterSqlGenerator_DateFilterNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
 		}

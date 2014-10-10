@@ -48,6 +48,7 @@ import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -214,10 +215,13 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 					if (survey.getMissions() != null){
 						for (Mission m : survey.getMissions()){
 							dirsToDelete.add(m.getFilestoreLocation());
-							if (m.getWaypoints() != null){
-								for (SurveyWaypoint sw : m.getWaypoints()){
-									session.delete(sw.getWaypoint());
-									session.delete(sw);
+							for (MissionDay md : m.getMissionDays()){
+								if (md.getWaypoints() != null){
+									for (SurveyWaypoint sw : md.getWaypoints()){
+										session.delete(sw.getWaypoint());
+										session.delete(sw);
+									}
+									
 								}
 							}
 						}
@@ -297,9 +301,11 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 				if (survey.getMissions() != null){
 					for (Mission m : survey.getMissions()){
 						dirsToDelete.add(m.getFilestoreLocation());
-						if (m.getWaypoints() != null){
-							for (SurveyWaypoint sw : m.getWaypoints()){
-								session.delete(sw.getWaypoint());
+						for (MissionDay md : m.getMissionDays()){
+							if (md.getWaypoints() != null){
+								for (SurveyWaypoint sw : md.getWaypoints()){
+									session.delete(sw.getWaypoint());
+								}
 							}
 						}
 					}
@@ -373,10 +379,12 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 				
 				//waypoint delete not cascaded so we need to delete
 				//explicitly
-				if (mission.getWaypoints() != null){
-					for (SurveyWaypoint w : mission.getWaypoints()){
-						session.delete(w.getWaypoint());
-						session.delete(w);
+				for (MissionDay md : mission.getMissionDays()){
+					if (md.getWaypoints() != null){
+						for (SurveyWaypoint w : md.getWaypoints()){
+							session.delete(w.getWaypoint());
+							session.delete(w);
+						}
 					}
 				}
 				//delete mission

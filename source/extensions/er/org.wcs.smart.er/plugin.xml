@@ -88,6 +88,10 @@
             ca_property=".attribute.conservationArea"
             class="org.wcs.smart.er.model.SamplingUnitAttributeListItem">
       </class>
+      <class
+            ca_property=".mission.survey.surveyDesign.conservationArea"
+            class="org.wcs.smart.er.model.MissionDay">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.observation.ObservationSource">

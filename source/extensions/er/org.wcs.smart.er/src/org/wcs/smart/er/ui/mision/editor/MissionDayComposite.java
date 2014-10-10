@@ -26,6 +26,7 @@ import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,12 +36,10 @@ import java.util.Map.Entry;
 
 import net.refractions.udig.project.ui.ApplicationGIS;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -64,19 +63,26 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -92,6 +98,7 @@ import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -118,25 +125,21 @@ import org.wcs.smart.util.SmartUtils;
 public class MissionDayComposite {
 
 	private MissionDayPage editor;
-	private Mission mission;
 	
 	private Composite mainComposite;
 
-//	private DateTime dtStartTime;
-//	private DateTime dtEndTime;
-//	private Text restMinutes;
-//	private Label lblTotalHours;
-//	private Font okayFont;
-	
+	private DateTime dtStartTime;
+	private DateTime dtEndTime;
+	private Text restMinutes;
+	private Label lblTotalHours;
+	private Font okayFont;
+	private Font errorFont;
 	private Label txtDistance;
 	
 	private TableViewer observationTable;
 	private ObservationOptions observationOptions;
-	private List<SurveyWaypoint> input;
-	
 	
 	private Hyperlink lnkImportWaypoints;
-	
 	private TableViewer trackTable;
 	private Hyperlink lnkEditTrack;
 
@@ -196,121 +199,121 @@ public class MissionDayComposite {
 		 ((GridLayout)timeInfo.getLayout()).marginHeight = 0;
 		timeInfo.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-//		Composite c = toolkit.createComposite(timeInfo);
-//		c.setLayout(new GridLayout(2, false));
-//		((GridLayout)c.getLayout()).marginWidth = 0;
-//		((GridLayout)c.getLayout()).marginHeight = 0;
-//		toolkit.createLabel(c, Messages.MissionDayComposite_StartTime);
-//		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
-//		toolkit.adapt(dtStartTime);
-//		dtStartTime.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				updateTotalHours();
-//			}
-//			
-//		});
-//		dtStartTime.setEnabled(canEdit);
-//		dtStartTime.addFocusListener(new FocusAdapter() {			
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				if (timeEqual(SmartUtils.getTime(dtStartTime).getTime(), patrolLegDate.getStartTime().getTime())){
-//					//no changes made
-//					return;
-//				}
-//				editor.getPatrolEditor().save(patrolLegDate);
-//				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
-//			}
-//		});
-//
-//		c = toolkit.createComposite(timeInfo);
-//		c.setLayout(new GridLayout(2, false));
-//		((GridLayout)c.getLayout()).marginWidth = 0;
-//		((GridLayout)c.getLayout()).marginHeight = 0;
-//		toolkit.createLabel(c, Messages.MissionDayComposite_EndTime);
-//		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
-//		toolkit.adapt(dtEndTime);
-//		dtEndTime.addSelectionListener(new SelectionAdapter() {
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				updateTotalHours();
-//			}
-//		});
-//		dtEndTime.setEnabled(canEdit);
-//		dtEndTime.addFocusListener(new FocusAdapter() {			
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				if (timeEqual(SmartUtils.getTime(dtEndTime).getTime(), patrolLegDate.getEndTime().getTime())){
-//					//no changes made
-//					return;
-//				}
-//				editor.getPatrolEditor().save(patrolLegDate);
-//				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
-//			}
-//		});
-//
-//		
-//		c = toolkit.createComposite(timeInfo);
-//		c.setLayout(new GridLayout(2, false));
-//		((GridLayout)c.getLayout()).marginWidth = 0;
-//		((GridLayout)c.getLayout()).marginHeight = 0;
-//		toolkit.createLabel(c, Messages.MissionDayComposite_RestMinutes);
-//		restMinutes = toolkit.createText(c, "0", SWT.BORDER); //$NON-NLS-1$
-//		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
-//		gd.widthHint = 30;
-//		restMinutes.setLayoutData(gd);
-//		restMinutes.setEnabled(canEdit);
-//		restMinutes.addFocusListener(new FocusListener() {
-//			private int oldValue; 
-//			
-//			@Override
-//			public void focusLost(FocusEvent e) {
-//				try{
-//					int x = Integer.parseInt(restMinutes.getText());
-//					if (patrolLegDate.getRestMinutes() != null && x == patrolLegDate.getRestMinutes()){
-//						return;
-//					}
-//					if (x < 0){
-//						throw new Exception("Rest minutes cannot be negative."); //$NON-NLS-1$
-//					}
-//				}catch (Exception ex){
-//					restMinutes.setText(String.valueOf(oldValue));
-//					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_Error_DialogTitle, Messages.PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage1);
-//					Display.getCurrent().asyncExec(new Runnable() {
-//						@Override
-//						public void run() {
-//							restMinutes.setFocus();
-//						}
-//					});
-//					
-//				}
-//				updateTotalHours();
-//				editor.getPatrolEditor().save(patrolLegDate);
-//				PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_DATES_LEG, patrolLegDate);
-//			}
-//			
-//			@Override
-//			public void focusGained(FocusEvent e) {
-//				oldValue = Integer.parseInt(restMinutes.getText());
-//			}
-//		});
-//		
-//		
-//		c = toolkit.createComposite(timeInfo);
-//		c.setLayout(new GridLayout(2, false));
-//		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-//		((GridLayout)c.getLayout()).marginWidth = 0;
-//		((GridLayout)c.getLayout()).marginHeight = 0;
-//		toolkit.createLabel(c, "Total Hours:");
-//		lblTotalHours = toolkit.createLabel(c, "Invalid Total Hours");
-//		okayFont = lblTotalHours.getFont();
-//		
-//		FontData fd = okayFont.getFontData()[0];
-//		fd.setStyle(SWT.BOLD);
-//		
-//		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
-//		gd.widthHint = 30;
-//		lblTotalHours.setLayoutData(gd);
+		Composite c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		toolkit.createLabel(c, Messages.MissionDayComposite_StartTime);
+		dtStartTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
+		toolkit.adapt(dtStartTime);
+		dtStartTime.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateTotalHours();
+			}
+			
+		});
+		dtStartTime.setEnabled(canEdit);
+		dtStartTime.addFocusListener(new FocusAdapter() {			
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (timeEqual(SmartUtils.getTime(dtStartTime).getTime(),
+						missionDay.getStartTime().getTime())){
+					//no changes made
+					return;
+				}
+				saveChanges();
+			}
+		});
+
+		c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		toolkit.createLabel(c, Messages.MissionDayComposite_EndTime);
+		dtEndTime = new DateTime(c, SWT.TIME | SWT.MEDIUM | SWT.BORDER);
+		toolkit.adapt(dtEndTime);
+		dtEndTime.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateTotalHours();
+			}
+		});
+		dtEndTime.setEnabled(canEdit);
+		dtEndTime.addFocusListener(new FocusAdapter() {			
+			@Override
+			public void focusLost(FocusEvent e) {
+				if (timeEqual(SmartUtils.getTime(dtEndTime).getTime(), 
+						missionDay.getEndTime().getTime())){
+					return;
+				}
+				saveChanges();
+			}
+		});
+
+		
+		c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		toolkit.createLabel(c, Messages.MissionDayComposite_RestMinutes);
+		restMinutes = toolkit.createText(c, "0", SWT.BORDER); //$NON-NLS-1$
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER, false, false);
+		gd.widthHint = 30;
+		restMinutes.setLayoutData(gd);
+		restMinutes.setEnabled(canEdit);
+		restMinutes.addFocusListener(new FocusListener() {
+			private int oldValue; 
+			
+			@Override
+			public void focusLost(FocusEvent e) {
+				try{
+					int x = Integer.parseInt(restMinutes.getText());
+					if (missionDay.getRestMinutes() != null && 
+							x == missionDay.getRestMinutes()){
+						return;
+					}
+					if (x < 0){
+						throw new Exception("Rest minutes cannot be negative."); //$NON-NLS-1$
+					}
+				}catch (Exception ex){
+					restMinutes.setText(String.valueOf(oldValue));
+					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.MissionDayComposite_Error, Messages.MissionDayComposite_InvalidRestMinutes);
+					Display.getCurrent().asyncExec(new Runnable() {
+						@Override
+						public void run() {
+							restMinutes.setFocus();
+						}
+					});
+					
+				}
+				updateTotalHours();
+				saveChanges();
+			}
+			
+			@Override
+			public void focusGained(FocusEvent e) {
+				oldValue = Integer.parseInt(restMinutes.getText());
+			}
+		});
+		
+		
+		c = toolkit.createComposite(timeInfo);
+		c.setLayout(new GridLayout(2, false));
+		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 0;
+		toolkit.createLabel(c, Messages.MissionDayComposite_TotalHours);
+		lblTotalHours = toolkit.createLabel(c, Messages.MissionDayComposite_InvalidHours);
+		okayFont = lblTotalHours.getFont();
+		
+		FontData fd = okayFont.getFontData()[0];
+		fd.setStyle(SWT.BOLD);
+		errorFont = new Font(Display.getDefault(), fd);
+		
+		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
+		gd.widthHint = 30;
+		lblTotalHours.setLayoutData(gd);
 
 		
 		Composite half = toolkit.createComposite(mainComposite);
@@ -356,8 +359,8 @@ public class MissionDayComposite {
 		
 		toolkit.createLabel(distComp, Messages.MissionDayComposite_DistanceTraveled);
 		txtDistance = toolkit.createLabel(distComp, "0", SWT.NONE); //$NON-NLS-1$
-//		txtDistance.setEditable(false);
-		GridData gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1);
+
+		gd = new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1);
 		gd.widthHint = 50;
 		txtDistance.setLayoutData(gd);
 		
@@ -421,18 +424,55 @@ public class MissionDayComposite {
 				}
 			});
 		}
-//		updateTotalHours();
+		updateTotalHours();
 		
 		return mainComposite;
 	}
-
+	
+	private void saveChanges(){
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(0);
+		cal.set(Calendar.HOUR_OF_DAY, dtEndTime.getHours());
+		cal.set(Calendar.MINUTE, dtEndTime.getMinutes());
+		cal.set(Calendar.SECOND, dtEndTime.getSeconds());
+		Time t = new Time(cal.getTimeInMillis());
+		missionDay.setEndTime(t);
+		
+		cal.setTimeInMillis(0);
+		cal.set(Calendar.HOUR_OF_DAY, dtStartTime.getHours());
+		cal.set(Calendar.MINUTE, dtStartTime.getMinutes());
+		cal.set(Calendar.SECOND, dtStartTime.getSeconds());
+		t = new Time(cal.getTimeInMillis());
+		missionDay.setStartTime(t);
+		
+		int rest = 0;
+		try{
+			rest = Integer.parseInt(restMinutes.getText());
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.log("Could not parse rest minutes", ex); //$NON-NLS-1$
+		}
+		missionDay.setRestMinutes(rest);
+		
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		try{
+			session.saveOrUpdate(missionDay);
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			
+		}finally{
+			session.close();
+		}
+		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, editor.getMissionEditor().getMission());
+	}
+		
 	private void setupObservationTable() {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.heightHint = observationTable.getTable().computeSize(SWT.DEFAULT, SWT.DEFAULT).y;
 		observationTable.getTable().setLayoutData(gd);
 		observationTable.getTable().setLinesVisible(true);
 		observationTable.getTable().setHeaderVisible(true);
-		observationTable.setContentProvider(new ObservableListContentProvider());
+		observationTable.setContentProvider(ArrayContentProvider.getInstance());
 		
 		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(observationTable, new FocusCellHighlighter(observationTable){});
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(observationTable) {
@@ -495,38 +535,54 @@ public class MissionDayComposite {
 		}
 	}
 	
+	private MissionDay findMissionDay(Mission m){
+		for (MissionDay md : m.getMissionDays()){
+			if (SmartUtils.isSameDate(md.getDate(), editor.getDay())){
+				return md;		
+			}
+		}
+		return null;
+	}
+	
+	private MissionDay missionDay;
+	
 	public void initData() {
+		missionDay = null;
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			this.mission = (Mission) session.merge(editor.getMissionEditor().getMission());
-//			Date date = editor.getDay();
-//			
-//			Calendar cal = Calendar.getInstance();
-//			if (mission.getStartDate() != date) {
-//				cal.setTime(mission.getStartDate());
-//				dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
-//						cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
-//			}else{
-//				dtStartTime.setTime(0,0,0);
-//			}
-//			if (mission.getEndDate() != date) {
-//				cal.setTime(mission.getEndDate());
-//				dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
-//						cal.get(Calendar.SECOND));
-//			}else{
-//				dtEndTime.setTime(23,59,59);
-//			}
-			//TODO:
-//			if (data.getRestMinutes() == null) {
-//				restMinutes.setText("0"); //$NON-NLS-1$
-//			} else {
-//				restMinutes.setText(String.valueOf(data.getRestMinutes()));
-//			}
-	//
-//			this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
+			Mission m = editor.getMissionEditor().getMission();
+			session.update(m);
+			//find mission day
+			missionDay = findMissionDay(m);
+			if (missionDay == null){
+				throw new IllegalStateException(MessageFormat.format(Messages.MissionDayComposite_DayNotFound, new Object[]{editor.getDay().toString()}));
+			}
 
-			List<MissionTrack> tracks = buildTrackInput(mission);
+			dtStartTime.setTime(0,0,0);
+			if (missionDay.getStartTime() != null){
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(missionDay.getStartTime());
+				dtStartTime.setTime(cal.get(Calendar.HOUR_OF_DAY),
+						cal.get(Calendar.MINUTE), cal.get(Calendar.SECOND));
+			}
+			
+			dtEndTime.setTime(23,59,59);
+			if (missionDay.getEndTime() != null){
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(missionDay.getEndTime());
+				dtEndTime.setTime(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE),
+						cal.get(Calendar.SECOND));
+			}
+			if (missionDay.getRestMinutes() == null) {
+				restMinutes.setText("0"); //$NON-NLS-1$
+			} else {
+				restMinutes.setText(String.valueOf(missionDay.getRestMinutes()));
+			}
+	
+			this.lblTotalHours.setText(String.valueOf(missionDay.getHoursWorked()));
+
+			List<MissionTrack> tracks = missionDay.getTracks();
 			trackTable.setInput(tracks);
 			double distance = 0;
 			for (MissionTrack mt : tracks){
@@ -534,12 +590,23 @@ public class MissionDayComposite {
 			}
 			txtDistance.setText(String.valueOf(distance));
 			
-			if (mission.getWaypoints() == null) {
-				mission.setWaypoints(new ArrayList<SurveyWaypoint>());
+			if (missionDay.getWaypoints() == null) {
+				missionDay.setWaypoints(new ArrayList<SurveyWaypoint>());
 			}
-			input = buildWaypointInput(mission);
-			WritableList inputList = new WritableList(input, SurveyWaypoint.class);
-			observationTable.setInput(inputList);
+			//load waypoints and attach to session; for performance reasons
+			//waypoints are not cascaded (otherwise saves are cascaded too)
+			for (SurveyWaypoint wp : missionDay.getWaypoints()) {
+				session.update(wp.getWaypoint());
+				if (wp.getSamplingUnit() != null){
+					session.update(wp.getSamplingUnit());
+					wp.getSamplingUnit().getId();
+				}
+				
+				if (wp.getWaypoint().getObservations() != null){
+					wp.getWaypoint().getObservations().size();
+				}
+			}
+			observationTable.setInput(missionDay.getWaypoints());
 			observationTable.refresh();
 			observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 				
@@ -549,7 +616,8 @@ public class MissionDayComposite {
 						boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 						btnDeleteWaypoint.setEnabled(enabled);
 						
-						if (!SmartUtils.isSameDate(mission.getStartDate(), mission.getEndDate())) {
+						if (!SmartUtils.isSameDate(editor.getMissionEditor().getMission().getStartDate(), 
+								editor.getMissionEditor().getMission().getEndDate())) {
 							btnMoveWaypoint.setEnabled(enabled);	
 						} else {
 							btnMoveWaypoint.setEnabled(false);
@@ -557,12 +625,11 @@ public class MissionDayComposite {
 					}
 				}
 			});
-			samplingUnitEditor.setInput(mission, editor.getDay());
+			samplingUnitEditor.setInput(missionDay);
 			
 //			this.viewTrackPoints.setEnabled( this.patrolLegDate.getTrack() != null );
 					
-//			updateTotalHours();
-//			updateDistance();
+			updateTotalHours();
 			
 			if (btnMoveWaypoint != null){
 				btnMoveWaypoint.setEnabled(false);
@@ -571,27 +638,28 @@ public class MissionDayComposite {
 				btnDeleteWaypoint.setEnabled(false);
 			}
 			
-//			if (editor.getPatrolEditor().canEdit() != null){
-//				dtEndTime.setEnabled(false);
-//				dtStartTime.setEnabled(false);
-//				restMinutes.setEditable(false);
-//				restMinutes.setEnabled(false);
-//				
-//				btnAddWaypoint.setVisible(false);
-//				btnDeleteWaypoint.setVisible(false);
-//				btnMoveWaypoint.setVisible(false);
-//				
-//				importTrack.setVisible(false);
-//				lblImportWaypoints.setVisible(false);
-//				
-//			}
+			if (editor.getMissionEditor().canEdit() != null){
+				dtEndTime.setEnabled(false);
+				dtStartTime.setEnabled(false);
+				restMinutes.setEditable(false);
+				restMinutes.setEnabled(false);
+				
+				btnAddWaypoint.setVisible(false);
+				btnDeleteWaypoint.setVisible(false);
+				btnMoveWaypoint.setVisible(false);
+				
+				lnkImportWaypoints.setVisible(false);
+				lnkEditTrack.setVisible(false);
+				
+			}
 		
 			List<Employee> emps = new ArrayList<Employee>();
-			for (MissionMember mm : mission.getMembers()){
+			for (MissionMember mm : missionDay.getMission().getMembers()){
 				emps.add(mm.getMember());
 				mm.getMember().getFullLabel();
 			}
 			observationEditor.setObservers(emps);
+			
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		} finally {
@@ -601,28 +669,6 @@ public class MissionDayComposite {
 		
 	}
 
-	private List<SurveyWaypoint> buildWaypointInput(Mission m) {
-		List<SurveyWaypoint> tblInput = new ArrayList<SurveyWaypoint>();
-		Date date = editor.getDay();
-		for (SurveyWaypoint p : m.getWaypoints()) {
-			if (SmartUtils.isSameDate(p.getWaypoint().getDateTime(), date)) {
-				tblInput.add(p);
-			}
-		}
-		return tblInput;
-	}
-
-	private List<MissionTrack> buildTrackInput(Mission m) {
-		List<MissionTrack> tblInput = new ArrayList<MissionTrack>();
-		Date date = editor.getDay();
-		for (MissionTrack t : m.getTracks()) {
-			if (SmartUtils.isSameDate(t.getDate(), date)) {
-				tblInput.add(t);
-			}
-		}
-		return tblInput;
-	}
-	
 	private void resize(){
 		if (observationTableColumns == null){
 			return ;
@@ -647,9 +693,9 @@ public class MissionDayComposite {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			this.mission = (Mission) session.merge(editor.getMissionEditor().getMission());
+			MissionDay md = (MissionDay)session.merge(missionDay);
 
-			for (Iterator<SurveyWaypoint> iterator = mission.getWaypoints().iterator(); iterator.hasNext();) {
+			for (Iterator<SurveyWaypoint> iterator = md.getWaypoints().iterator(); iterator.hasNext();) {
 				SurveyWaypoint e = iterator.next();
 				String str = getWaypointValueAsString(e, column);
 				
@@ -670,7 +716,7 @@ public class MissionDayComposite {
 
 	protected void showEditTrackDialog() {
 		try {
-			final MissionTrackEditDialog editDialog = new MissionTrackEditDialog(editor.getSite().getShell(), mission, editor.getDay());
+			final MissionTrackEditDialog editDialog = new MissionTrackEditDialog(editor.getSite().getShell(), missionDay);
 			editDialog.open();
 		} finally {
 			ApplicationGIS.getToolManager().setCurrentEditor(editor.getMissionEditor());
@@ -678,7 +724,7 @@ public class MissionDayComposite {
 	}
 	
 	protected void showImportWaypointWizard() {
-		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(mission, GPSDataImport.ImportType.WAYPOINT);
+		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(missionDay, GPSDataImport.ImportType.WAYPOINT);
 		wizard.setDateOption(editor.getDay());
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(editor.getSite().getShell());
 		try {
@@ -700,9 +746,39 @@ public class MissionDayComposite {
 		}
 	}
 
-//	protected void updateTotalHours() {
-//	}
+	protected void updateTotalHours() {
+		double d = Double.parseDouble(this.restMinutes.getText());
+		double time = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime() - d * 60 * 1000;
+		time = time / (1000 * 60 * 60);
+		//lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time));
+		lblTotalHours.setText(MissionEditor.formatTimeRange(time));
+		if (time < 0){
+			lblTotalHours.setFont(errorFont);
+			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+			lblTotalHours.setToolTipText(Messages.MissionDayComposite_startBeforeEnd);
+		}else{
+			lblTotalHours.setFont(okayFont);
+			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+			lblTotalHours.setToolTipText(null);
+		}
+	}
 
+	private boolean timeEqual(long t1, long t2){
+		Calendar c1 = Calendar.getInstance();
+		c1.setTimeInMillis(t1);
+		Calendar c2 = Calendar.getInstance();
+		c2.setTimeInMillis(t2);
+		
+		int[] fields = new int[]{Calendar.HOUR_OF_DAY, Calendar.MINUTE, Calendar.SECOND, Calendar.MILLISECOND};
+		
+		for (int i = 0; i < fields.length; i ++){
+			if (c1.get(fields[i]) != c2.get(fields[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public void refreshTable() {
 		observationTable.refresh();
 	}
@@ -711,7 +787,7 @@ public class MissionDayComposite {
 		double y = 0, x = 0;
 		int id = -1;
 		Date last = null;
-		for (Iterator<SurveyWaypoint> iterator = input.iterator(); iterator.hasNext();) {
+		for (Iterator<SurveyWaypoint> iterator = missionDay.getWaypoints().iterator(); iterator.hasNext();) {
 			SurveyWaypoint e = iterator.next();
 			Date t = (Date)getWaypointValue(e, OtColumn.TIME);
 			
@@ -731,15 +807,14 @@ public class MissionDayComposite {
 		}
 		if (add.open() == Window.OK){
 			SurveyWaypoint wp = add.getWaypoint();
-			wp.setMission(mission);
+			wp.setMissionDay(missionDay);
 			
-			wp.getWaypoint().setDateTime(SmartUtils.getDatePart(editor.getDay(), false));
+			wp.getWaypoint().setDateTime(SmartUtils.getDatePart(missionDay.getDate(), false));
 			
-			mission.getWaypoints().add(wp);
-			input.add(wp);
+			missionDay.getWaypoints().add(wp);
 			
 			editor.getMissionEditor().save(Collections.singleton(wp));
-			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, editor.getMissionEditor().getMission());
 		}
 	}
 
@@ -753,9 +828,8 @@ public class MissionDayComposite {
 		
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			SurveyWaypoint w = (SurveyWaypoint) iterator.next();
-			if (mission.getWaypoints().remove(w)){
-				input.remove(w);
-				w.setMission(null);
+			if (missionDay.getWaypoints().remove(w)){
+				w.setMissionDay(null);
 				deleted.add(w);
 			}	
 		}
@@ -770,7 +844,7 @@ public class MissionDayComposite {
 					
 					@Override
 					public void run() {
-						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+						SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, editor.getMissionEditor().getMission());
 					}
 				});
 			}
@@ -778,21 +852,22 @@ public class MissionDayComposite {
 	}
 
 	protected void moveSelectedWaypoints() {
-		MoveWaypointDialog dialog = new MoveWaypointDialog(Display.getCurrent().getActiveShell(), mission, editor.getDay());
-		if (dialog.open() == Window.OK && !SmartUtils.isSameDate(editor.getDay(), dialog.getMoveToDate())) {
-			
+		MoveWaypointDialog dialog = new MoveWaypointDialog(Display.getCurrent().getActiveShell(), missionDay);
+		if (dialog.open() == Window.OK) {
 			IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
 			
+			MissionDay moveTo = dialog.getMoveToDate();
 			List<SurveyWaypoint> toUpdate = new ArrayList<SurveyWaypoint>();
 			for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 				SurveyWaypoint w = (SurveyWaypoint) iterator.next();
 				toUpdate.add(w);
 				Waypoint wp = w.getWaypoint();
-				wp.setDateTime(SmartUtils.combineDateTime(dialog.getMoveToDate(), wp.getDateTime()));
+				wp.setDateTime(SmartUtils.combineDateTime(moveTo.getDate(), wp.getDateTime()));
+				w.setMissionDay(moveTo);
 			}
 
 			editor.getMissionEditor().save(toUpdate);
-			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, editor.getMissionEditor().getMission());
 		}
 	}
 	
@@ -911,7 +986,7 @@ public class MissionDayComposite {
 			needSave = true;
 		} else if (column == OtColumn.TIME) {
 			if (value instanceof Date){
-				waypoint.setDateTime(SmartUtils.combineDateTime(editor.getDay(), new Time(((Date)value).getTime())));
+				waypoint.setDateTime(SmartUtils.combineDateTime(missionDay.getDate(), new Time(((Date)value).getTime())));
 				needSave = true;
 			}
 		} else if (column == OtColumn.DIRECTION) {
@@ -961,6 +1036,31 @@ public class MissionDayComposite {
 		}
 		observationTable.refresh();
 	}
+	
+	public void dispose(){
+		doubleCellEditor.dispose();
+		nullableDoubleCellEditor.dispose();
+		integerCellEditor.dispose();
+		timeEditor.dispose();
+		attachmentEditor.dispose();
+		commentEditor.dispose();
+		observationEditor.dispose();
+		doubleCellEditor = null;
+		nullableDoubleCellEditor = null;
+		integerCellEditor = null;
+		timeEditor = null;
+		attachmentEditor = null;
+		commentEditor = null;
+		observationEditor = null;
+		
+		if (errorFont != null && !errorFont.isDisposed()){
+			errorFont.dispose();
+		}
+
+		mainComposite.dispose();
+		mainComposite = null;
+	}
+	
 	
 	/**
 	 * ColumnLabelProvider

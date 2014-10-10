@@ -59,8 +59,8 @@ public class Mission extends UuidItem{
 	private Date end;
 	private String comment;
 	
-	private List<SurveyWaypoint> waypoints;
-	private List<MissionTrack> tracks;
+
+	private List<MissionDay> days;
 	
 	private List<MissionMember> members;
 	private List<MissionPropertyValue> properties;
@@ -116,30 +116,15 @@ public class Mission extends UuidItem{
 		this.comment = comment;
 	}
 	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission")
-	public List<SurveyWaypoint> getWaypoints() {
-		if (waypoints == null) {
-			waypoints = new ArrayList<SurveyWaypoint>();
-		}
-		return this.waypoints;
+	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission", cascade = {CascadeType.ALL})
+	public List<MissionDay> getMissionDays() {
+		return this.days;
 	}
 	
-	public void setWaypoints(List<SurveyWaypoint> waypoints){
-		this.waypoints = waypoints;
+	public void setMissionDays(List<MissionDay> days){
+		this.days = days;
 	}
-	
-	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission", orphanRemoval = true, cascade={CascadeType.ALL})
-	public List<MissionTrack> getTracks(){
-		if (tracks == null) {
-			tracks = new ArrayList<MissionTrack>();
-		}
-		return this.tracks;
-	}
-	
-	public void setTracks(List<MissionTrack> tracks){
-		this.tracks = tracks;
-	}
-	
+		
 	/**
 	 * The mission property values associated with the
 	 * mission.

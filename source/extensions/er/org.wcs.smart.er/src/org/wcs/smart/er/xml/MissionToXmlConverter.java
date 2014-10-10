@@ -19,9 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package org.wcs.smart.er.xml;
-
 	
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -33,6 +31,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
@@ -40,6 +39,7 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.xml.model.missions.MembersType;
+import org.wcs.smart.er.xml.model.missions.MissionDayType;
 import org.wcs.smart.er.xml.model.missions.MissionPropertyValuesType;
 import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.er.xml.model.missions.SurveyType;
@@ -89,14 +89,20 @@ public class MissionToXmlConverter {
 			xml.getMembers().add( convertMissionMember(member) );
 		}
 
-		// survey waypoints
-		for(SurveyWaypoint swp : m.getWaypoints()){
-			xml.getSurveyWaypoints().add(convertSurveyWaypoint(swp));
-		}
-		
-		//tracks
-		for(MissionTrack mt : m.getTracks()){
-			xml.getTracks().add(convertMissionTrack(mt));
+		for (MissionDay md : m.getMissionDays()){
+			MissionDayType xmlmdt = convertMissionDay(md);
+			
+			// survey waypoints
+			for(SurveyWaypoint swp : md.getWaypoints()){
+				xmlmdt.getSurveyWaypoints().add(convertSurveyWaypoint(swp));
+			}
+			
+			//tracks
+			for(MissionTrack mt : md.getTracks()){
+				xmlmdt.getTracks().add(convertMissionTrack(mt));
+			}
+			
+			xml.getDays().add(xmlmdt);
 		}
 		
 		//mission property values
@@ -134,11 +140,20 @@ public class MissionToXmlConverter {
 		xmlmpv.setStringValue(mpv.getStringValue());
 		return xmlmpv;
 	}
+	
+	private static MissionDayType convertMissionDay(MissionDay md) throws DatatypeConfigurationException {
+		MissionDayType xml = new MissionDayType ();
+		xml.setDate(SmartUtils.toXmlDate(md.getDate()));
+		xml.setStartTime(toXmlTime(md.getStartTime()));
+		xml.setEndTime(toXmlTime(md.getEndTime()));
+		
+		return xml;
+		
+	}
 
 
 	private static TracksType convertMissionTrack(MissionTrack mt) throws DatatypeConfigurationException{
 		TracksType track = new TracksType();
-		track.setDate(SmartUtils.toXmlDate(mt.getDate()));
 		track.setGeom(mt.getGeom());
 		track.setId(mt.getId());
 		SamplingUnit su = mt.getSamplingUnit();

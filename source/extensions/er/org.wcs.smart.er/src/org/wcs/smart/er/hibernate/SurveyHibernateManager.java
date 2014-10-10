@@ -33,6 +33,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.SmartDB;
@@ -94,30 +95,29 @@ public class SurveyHibernateManager {
 			session.flush();
 		
 			//save all the waypoints as well
-			if (mission.getWaypoints() != null) {
-				for (SurveyWaypoint wp: mission.getWaypoints()){
-					
-					
-					if (wp.getWaypoint().getAttachments() != null){
-						//update all the waypoint attachments directory
-						for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-							wa.setDatastoreFolderExtension(
-								((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(mission));
+			for (MissionDay md : mission.getMissionDays()){
+				if (md.getWaypoints() != null) {
+					for (SurveyWaypoint wp: md.getWaypoints()){
+						if (wp.getWaypoint().getAttachments() != null){
+							//update all the waypoint attachments directory
+							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
+								wa.setDatastoreFolderExtension(
+										((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(mission));
+							}
 						}
-					}
-					if (wp.getWaypoint().getObservations() != null){
-						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
-							if (wo.getAttachments() != null){
-								for (ObservationAttachment wa : wo.getAttachments()){
-									wa.setDatastoreFolderExtension(
+						if (wp.getWaypoint().getObservations() != null){
+							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
+								if (wo.getAttachments() != null){
+									for (ObservationAttachment wa : wo.getAttachments()){
+										wa.setDatastoreFolderExtension(
 											((SurveyWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(mission));
+									}
 								}
 							}
 						}
+						session.saveOrUpdate(wp.getWaypoint());
+						session.saveOrUpdate(wp);
 					}
-					session.saveOrUpdate(wp.getWaypoint());
-					session.saveOrUpdate(wp);
-				
 				}
 			}
 		}

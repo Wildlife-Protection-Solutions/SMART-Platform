@@ -134,7 +134,7 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
-			final String sql = "SELECT geometry FROM smart.mission_track where mission_uuid in (SELECT mission_uuid FROM " + queryTempTable + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			final String sql = "SELECT geometry FROM smart.mission_track where mission_day_uuid in (SELECT mission_day_uuid FROM " + queryTempTable + " )"; //$NON-NLS-1$ //$NON-NLS-2$
 			s.doWork(new Work(){
 
 				@Override

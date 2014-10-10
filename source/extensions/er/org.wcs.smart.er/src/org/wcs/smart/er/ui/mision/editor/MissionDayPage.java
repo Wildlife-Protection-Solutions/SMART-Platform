@@ -49,7 +49,7 @@ import org.wcs.smart.observation.model.ObservationOptions;
 public class MissionDayPage extends EditorPart {
 
 	private MissionEditor editor;
-	private Date day;
+	private Date date;
 	
 	private ScrolledForm frmSummary; 
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
@@ -72,7 +72,7 @@ public class MissionDayPage extends EditorPart {
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
 		setSite(site);
 		setInput(input);
-		day = ((MissionDayPageEditorInput)input).getDay();
+		date = ((MissionDayPageEditorInput)input).getDay();
 	}
 
 	@Override
@@ -102,9 +102,9 @@ public class MissionDayPage extends EditorPart {
 		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
 		StringBuilder text = new StringBuilder(Messages.MissionDayPage_Mission);
 		text.append(" "); //$NON-NLS-1$
-		text.append(dayFormat.format(day));
+		text.append(dayFormat.format(date));
 		text.append(", "); //$NON-NLS-1$
-		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(day));
+		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(date));
 		frmSummary.setText(text.toString());
 		frmSummary.getBody().setLayout(new GridLayout(1, false));
 		
@@ -125,6 +125,7 @@ public class MissionDayPage extends EditorPart {
 	@Override
 	public void dispose() {
 		super.dispose();
+		dayComposite.dispose();
 	}
 	
 	public MissionEditor getMissionEditor() {
@@ -132,6 +133,6 @@ public class MissionDayPage extends EditorPart {
 	}
 	
 	public Date getDay() {
-		return day;
+		return date;
 	}
 }

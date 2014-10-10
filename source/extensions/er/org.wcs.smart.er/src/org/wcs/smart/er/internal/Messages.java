@@ -242,7 +242,17 @@ public class Messages extends NLS {
 	public static String MissionAttributeListItemDeleteAdvisor_DeleteError;
 	public static String MissionAttributeListItemDeleteAdvisor_InvalidObject;
 	public static String MissionCsvImportEngine_SavingWaypoints;
+	public static String MissionDataImport_NoWaypoints;
+
+	public static String MissionDataImport_NumberImported;
+
+	public static String MissionDataImport_NumberImported2;
+
 	public static String MissionDataImport_ResultMessage;
+
+	public static String MissionDataImport_TrackIdLabel;
+
+	public static String MissionDataImport_TrackLabel;
 	public static String MissionDataSource_SchemaNotSupported;
 	public static String MissionDataSourceFactory_Description;
 	public static String MissionDataSourceFactory_Name;
@@ -251,6 +261,8 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_AddWaypoint;
 	public static String MissionDayComposite_Attachment;
 	public static String MissionDayComposite_Comment;
+	public static String MissionDayComposite_DayNotFound;
+
 	public static String MissionDayComposite_DeleteDialog_Message;
 	public static String MissionDayComposite_DeleteDialog_Title;
 	public static String MissionDayComposite_DeleteWaypoint;
@@ -259,9 +271,15 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_Distance;
 	public static String MissionDayComposite_DistanceTraveled;
 	public static String MissionDayComposite_EndTime;
+
+	public static String MissionDayComposite_Error;
 	public static String MissionDayComposite_Files;
 	public static String MissionDayComposite_ImportWaypoints;
 	public static String MissionDayComposite_ImportWizardError;
+	public static String MissionDayComposite_InvalidHours;
+
+	public static String MissionDayComposite_InvalidRestMinutes;
+
 	public static String MissionDayComposite_Link_Edit;
 	public static String MissionDayComposite_LoadingWizard;
 	public static String MissionDayComposite_MoveWaypoint;
@@ -270,8 +288,12 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_ObservationsWaypoints;
 	public static String MissionDayComposite_RestMinutes;
 	public static String MissionDayComposite_SamplingUnit;
+
+	public static String MissionDayComposite_startBeforeEnd;
 	public static String MissionDayComposite_StartTime;
 	public static String MissionDayComposite_Time;
+
+	public static String MissionDayComposite_TotalHours;
 	public static String MissionDayComposite_Tracks;
 	public static String MissionDayComposite_WaypointID;
 	public static String MissionDayComposite_X;
@@ -287,7 +309,11 @@ public class Messages extends NLS {
 
 	public static String MissionEditor_EditorError4;
 
+	public static String MissionEditor_HourLabel;
+
 	public static String MissionEditor_MapPage;
+
+	public static String MissionEditor_MinuteLabel;
 
 	public static String MissionEditor_MissionLabel;
 

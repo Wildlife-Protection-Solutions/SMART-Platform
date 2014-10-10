@@ -23,24 +23,24 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.er.model.MissionDay;
 
 /**
  * Dialog to select a day to move waypoints to.
@@ -50,22 +50,19 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class MoveWaypointDialog extends TitleAreaDialog {
 
-	private Mission mission;
+	private MissionDay missionDay;
 
-	private List<Date> dates;
-	private Date moveTo;
+	private MissionDay moveTo;
 	
-	public MoveWaypointDialog(Shell parentShell, Mission m, Date date) {
+	public MoveWaypointDialog(Shell parentShell, MissionDay missionDay) {
 		super(parentShell);
-		
-		this.mission = m;
-		moveTo = date;
+		this.missionDay = missionDay;
 	}
 
 	/**
 	 * @return the day picked by the user
 	 */
-	public Date getMoveToDate(){
+	public MissionDay getMoveToDate(){
 		return this.moveTo;
 	}
 	
@@ -74,21 +71,11 @@ public class MoveWaypointDialog extends TitleAreaDialog {
 		return true;
 	}
 
-	public List<Date> createDates() {
-		Calendar calStart = SmartUtils.convertDate(mission.getStartDate());
-		calStart.set(Calendar.HOUR, 0);
-		calStart.set(Calendar.MINUTE, 0);
-		calStart.set(Calendar.SECOND, 0);
-		calStart.set(Calendar.MILLISECOND, 0);
-		
-		Calendar calEnd = SmartUtils.convertDate(mission.getEndDate());
-		List<Date> daysList = new ArrayList<Date>();
-		
-		while (calStart.before(calEnd) || calStart.equals(calEnd)) {
-			daysList.add(SmartUtils.getDatePart(calStart.getTime(), false));
-			calStart.add(Calendar.DAY_OF_MONTH, 1);
-		}
-		return daysList;
+	private List<MissionDay> createDates() {
+		ArrayList<MissionDay> days = new ArrayList<MissionDay>();
+		days.addAll(missionDay.getMission().getMissionDays());
+		days.remove(missionDay);
+		return days;
 	}
 	
 	@Override
@@ -102,20 +89,25 @@ public class MoveWaypointDialog extends TitleAreaDialog {
 		Label lbl = new Label(legtype, SWT.NONE);
 		lbl.setText(Messages.MoveWaypointDialog_MoveToLabel);
 		
-		final Combo dtCombo = new Combo(legtype, SWT.DROP_DOWN | SWT.READ_ONLY);
-
-		dates = createDates();
-		for (Date dt : dates) {
-			dtCombo.add(DateFormat.getDateInstance(DateFormat.MEDIUM).format(dt));
-		}
-		dtCombo.select(dates.indexOf(moveTo));
-		
-		dtCombo.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				moveTo = dates.get(dtCombo.getSelectionIndex());
+		final ComboViewer cmbViewer = new ComboViewer(legtype, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
+		cmbViewer.setLabelProvider(new LabelProvider(){
+			public String getText(Object element){
+				return DateFormat.getDateInstance().format(((MissionDay)element).getDate());
 			}
 		});
+		List<MissionDay> days = createDates();
+		cmbViewer.setInput(days);
+		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				moveTo = null;
+				if (!cmbViewer.getSelection().isEmpty()){
+					moveTo = (MissionDay) ((StructuredSelection)cmbViewer.getSelection()).getFirstElement();
+				}
+			}
+		});
+		cmbViewer.setSelection(new StructuredSelection(days.get(0)));
 		
 		setTitle(Messages.MoveWaypointDialog_Title);
 		setMessage(Messages.MoveWaypointDialog_Description);

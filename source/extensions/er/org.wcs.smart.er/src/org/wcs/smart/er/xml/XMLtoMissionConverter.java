@@ -22,6 +22,7 @@
 package org.wcs.smart.er.xml;
 
 import java.io.File;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -45,6 +46,7 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
@@ -54,6 +56,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.er.xml.model.missions.MembersType;
+import org.wcs.smart.er.xml.model.missions.MissionDayType;
 import org.wcs.smart.er.xml.model.missions.MissionPropertyValuesType;
 import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.er.xml.model.missions.SurveyWaypointsType;
@@ -143,42 +146,40 @@ public class XMLtoMissionConverter {
 			mission.setEndDate(null);
 		}
 		
-		
 		if(keepIDs){
 			mission.setId(xml.getId());
 		}else{
 			mission.setId(SurveyHibernateManager.generateMissionId(session));
 		}
-
-
 		
 		setMembersAndLeader(mission, xml);
 		createAndSetSurvey(mission, xml);
-		setMissionPropertyValues(mission, xml);
-		setTracks(mission, xml);
-
-		//must have created and set the Tracks before calling setwaypoints. 
-		setWaypoints(mission, xml);
-	}
-	
+		mission.setMissionDays(new ArrayList<MissionDay>());
 		
-	
+		setMissionPropertyValues(mission, xml);
+		for (MissionDayType mdtxml : xml.getDays()){
+			MissionDay md = new MissionDay();
+			md.setDate(mdtxml.getDate().toGregorianCalendar().getTime());
+			md.setStartTime( new Time(mdtxml.getStartTime().toGregorianCalendar().getTime().getTime()) );
+			md.setEndTime( new Time(mdtxml.getEndTime().toGregorianCalendar().getTime().getTime()) );
+			md.setMission(mission);
+			
+			mission.getMissionDays().add(md);
+			setTracks(md, mdtxml);
 
-	private void setTracks(Mission m, MissionType xml) {
+			//must have created and set the Tracks before calling setwaypoints. 
+			setWaypoints(md, mdtxml);
+		}
+	}
+
+	private void setTracks(MissionDay m, MissionDayType xml) {
 		for(TracksType xmlMt : xml.getTracks()){
 			MissionTrack mt = new MissionTrack();
-			
-			XMLGregorianCalendar temp = xmlMt.getDate();
-			if(temp != null){
-				mt.setDate(temp.toGregorianCalendar().getTime());
-			}else{
-				mt.setDate(null);
-			}
 			
 			mt.setGeom(xmlMt.getGeom());
 			mt.setId(xmlMt.getId());
 
-			mt.setMission(m);
+			mt.setMissionDay(m);
 			mt.setSamplingUnit(findSamplingUnit(xmlMt.getSamplingUnitId() ,session));
 			mt.setType(MissionTrack.TrackType.valueOf(xmlMt.getTrackType()));
 			
@@ -199,13 +200,8 @@ public class XMLtoMissionConverter {
 			mpv.setAttributeListItem( getMissionListItem(xmlMpv.getListElementKeyId()) );
 			
 			m.getMissionPropertyValues().add(mpv);
-		}
-		
+		}		
 	}
-
-	
-
-	
 
 	private void createAndSetSurvey(Mission m, MissionType xml) {
 		Survey survey = new Survey();
@@ -234,8 +230,6 @@ public class XMLtoMissionConverter {
 		m.setSurvey(survey);
 	}
 
-	
-
 	private void setMembersAndLeader(Mission m, MissionType xml) {
 		m.setMembers(new ArrayList<MissionMember>());
 		
@@ -258,25 +252,21 @@ public class XMLtoMissionConverter {
 		
 	}
 
-	private void setWaypoints(Mission m, MissionType xml) {
+	private void setWaypoints(MissionDay m, MissionDayType xml) {
 		for(SurveyWaypointsType xmlWp : xml.getSurveyWaypoints()){
 			SurveyWaypoint swp = new SurveyWaypoint();
 			
 			Waypoint wp = convertWaypoint(xmlWp.getWaypoints());
 			swp.setWaypoint(wp);
-			swp.setMission(m);
+			swp.setMissionDay(m);
 			swp.setMissionTrack( getTrackById(m, xmlWp.getMissionTrackId()) );
 			swp.setSamplingUnit(findSamplingUnit(xmlWp.getSamplingUnitId() ,session));
 
 			m.getWaypoints().add(swp);
-		}
-			
-		
+		}		
 	}
-	
 
-
-	private MissionTrack getTrackById(Mission m, String missionTrackId) {
+	private MissionTrack getTrackById(MissionDay m, String missionTrackId) {
 		for(MissionTrack mt : m.getTracks()){
 			if(mt.getId().equals(missionTrackId)){
 				return mt;
