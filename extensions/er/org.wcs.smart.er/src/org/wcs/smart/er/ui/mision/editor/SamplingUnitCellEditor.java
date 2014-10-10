@@ -22,7 +22,6 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,7 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -54,7 +53,8 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 
     private LoadSamplingUnitJob loadValues = new LoadSamplingUnitJob();
 
-    private Date missionDate; 
+    private MissionDay missionDay;
+    
     private boolean samplingUnitsOnly;
     
     public SamplingUnitCellEditor(Composite parent, boolean samplingUnitsOnly) {
@@ -62,9 +62,9 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 		this.samplingUnitsOnly = samplingUnitsOnly;
 	}
 
-	public void setInput(Mission mission, Date missionDate) {
-		this.missionDate = missionDate;
-		setInput(mission.getSurvey().getSurveyDesign());
+	public void setInput(MissionDay missionDay) {
+		this.missionDay = missionDay;
+		setInput(this.missionDay.getMission().getSurvey().getSurveyDesign());
 	}
 	
 	private void setInput(SurveyDesign surveyDesign) {
@@ -135,7 +135,7 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 				if (!samplingUnitsOnly){
 					List<MissionTrack> mt = SurveyHibernateManager.getInstance().getAdHocMissionTracks(surveyDesign, s);
 					for (MissionTrack t : mt){
-						if (t.getDate().compareTo(missionDate) == 0){
+						if (t.getMissionDay().equals(missionDay)){
 							items.add(t);
 						}
 					}

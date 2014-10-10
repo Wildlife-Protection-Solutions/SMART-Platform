@@ -28,7 +28,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -98,7 +97,6 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -167,14 +165,9 @@ public class TracksComposite extends Composite implements MapPart{
 		updateInput();
 	}
 	
-	private List<MissionTrack> buildTrackInput(Mission m) {
+	private List<MissionTrack> buildTrackInput() {
 		List<MissionTrack> tblInput = new ArrayList<MissionTrack>();
-		Date date = dialog.getDate();
-		for (MissionTrack t : m.getTracks()) {
-			if (SmartUtils.isSameDate(t.getDate(), date)) {
-				tblInput.add(t);
-			}
-		}
+		tblInput.addAll(dialog.getMissionDay().getTracks());
 		
 		//sort tracks based on start time
 		Collections.sort(tblInput, new Comparator<MissionTrack>() {
@@ -189,7 +182,7 @@ public class TracksComposite extends Composite implements MapPart{
 	}
 	
 	public void updateInput() {
-		trackViewer.setInput(buildTrackInput(dialog.getMission()).toArray());
+		trackViewer.setInput(buildTrackInput());
 	}
 
 	private void createControls() {
@@ -370,7 +363,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		//add track layer
 		try{
-			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(MissionServiceExtension.createURUL(dialog.getMission()), null);
+			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(MissionServiceExtension.createURUL(dialog.getMissionDay().getMission()), null);
 			for (IResolve r : resolves){
 				IService service = r.resolve(IService.class, null);
 				if (service != null && service instanceof MissionService){
@@ -388,7 +381,7 @@ public class TracksComposite extends Composite implements MapPart{
 						newLayers.add(layer);
 					}
 				}
-				missionService.refresh(dialog.getMission(), null);
+				missionService.refresh(dialog.getMissionDay().getMission(), null);
 				AddLayersCommand command = new AddLayersCommand(newLayers, 0){
 					@Override
 					public void run( IProgressMonitor monitor ) throws Exception {
@@ -410,7 +403,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		//add sampling unit layers
 		try{
-			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(SamplingUnitServiceExtension.createURL(dialog.getMission().getSurvey().getSurveyDesign().getUuid()), null);
+			List<IResolve> resolves = CatalogPlugin.getDefault().getLocalCatalog().find(SamplingUnitServiceExtension.createURL(dialog.getMissionDay().getMission().getSurvey().getSurveyDesign().getUuid()), null);
 			for (IResolve r : resolves){
 				IService service = r.resolve(IService.class, null);
 				if (service != null && service instanceof SamplingUnitService){
@@ -567,8 +560,8 @@ public class TracksComposite extends Composite implements MapPart{
 	
 	protected void importTracks() {
 		if (!confirmChanges()) return;
-		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(dialog.getMission(), GPSDataImport.ImportType.TRACK);
-		wizard.setDateOption(dialog.getDate());
+		final ImportGpsDataWizard wizard = new MissionImportGpsDataWizard(dialog.getMissionDay(), GPSDataImport.ImportType.TRACK);
+		wizard.setDateOption(dialog.getMissionDay().getDate());
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
@@ -623,7 +616,7 @@ public class TracksComposite extends Composite implements MapPart{
 		}
 		for (int i = 1; i < tracksToMerge.size(); i ++){
 			toDelete.add(tracksToMerge.get(i));
-			dialog.getMission().getTracks().remove(tracksToMerge.get(i));
+			dialog.getMissionDay().getTracks().remove(tracksToMerge.get(i));
 			Coordinate[] cs = tracksToMerge.get(i).getLineString().getCoordinates();
 			if (!ls.get(ls.size()-1).equals2D(cs[0])){
 				ls.add(cs[0]);
@@ -695,14 +688,13 @@ public class TracksComposite extends Composite implements MapPart{
 						}
 						trackToSplit.setLineString(newLs[0]);
 						MissionTrack newTrack = new MissionTrack();
-						newTrack.setDate(trackToSplit.getDate());
 						newTrack.setId(trackToSplit.getId());
 						newTrack.setLineString(newLs[1]);
-						newTrack.setMission(trackToSplit.getMission());
+						newTrack.setMissionDay(trackToSplit.getMissionDay());
 						newTrack.setSamplingUnit(trackToSplit.getSamplingUnit());
 						newTrack.setType(trackToSplit.getType());
 						
-						trackToSplit.getMission().getTracks().add(newTrack);
+						trackToSplit.getMissionDay().getTracks().add(newTrack);
 						
 						infoLabel.setText(""); //$NON-NLS-1$
 						refresh(true);
@@ -741,7 +733,7 @@ public class TracksComposite extends Composite implements MapPart{
 		mapViewer.getMap().getRenderManager().refresh(null);
 		if (missionService != null){
 			try {
-				missionService.refresh(dialog.getMission(), null);
+				missionService.refresh(dialog.getMissionDay().getMission(), null);
 			} catch (IOException e) {
 				setError(Messages.TracksComposite_MapError + e.getMessage());
 				EcologicalRecordsPlugIn.log(e.getMessage(), e);
@@ -770,7 +762,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		//delete the track and remove any waypoint references to it.
 		for (MissionTrack mt : toDelete){
-			dialog.getMission().getTracks().remove(mt);
+			dialog.getMissionDay().getTracks().remove(mt);
 		}
 		this.toDelete.addAll(toDelete);
 		refresh(true);
@@ -846,7 +838,7 @@ public class TracksComposite extends Composite implements MapPart{
 		SuTableEditor(TableViewer viewer) {
 			super(viewer);
 			this.editor = new SamplingUnitCellEditor(trackViewer.getTable(), true);	
-			editor.setInput(dialog.getMission(), dialog.getDate());
+			editor.setInput(dialog.getMissionDay());
 		}
 
 		@Override
@@ -946,7 +938,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		Stroke toDay = sf.createStroke(ff.literal("#0080FF"), ff.literal(2.0)); //$NON-NLS-1$
 
-		Filter dateFilter = ff.equals(ff.property("date"), ff.literal(dialog.getDate())); //$NON-NLS-1$
+		Filter dateFilter = ff.equals(ff.property("date"), ff.literal(dialog.getMissionDay().getDate())); //$NON-NLS-1$
 		LineSymbolizer otherSym = sf.createLineSymbolizer();
 		otherSym.setStroke(otherDays);
 		

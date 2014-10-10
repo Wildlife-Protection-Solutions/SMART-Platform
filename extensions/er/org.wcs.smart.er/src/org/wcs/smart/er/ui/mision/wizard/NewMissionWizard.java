@@ -21,7 +21,11 @@
  */
 package org.wcs.smart.er.ui.mision.wizard;
 
+import java.sql.Time;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -38,9 +42,12 @@ import org.wcs.smart.er.hibernate.SurveyDesignFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesign.State;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.CommentComposite;
 import org.wcs.smart.er.ui.mision.DateComposite;
@@ -50,8 +57,11 @@ import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
+import org.wcs.smart.er.ui.mision.editor.MissionDayPage;
+import org.wcs.smart.er.ui.mision.editor.MissionDayPageEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Wizard for creating a new mission.
@@ -132,7 +142,15 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     		c.addChangeListener(updateButtons);
     	}
 	}
-	
+	private Time createTime(int hours, int minute, int second){
+		Calendar cForProcessing = Calendar.getInstance();
+		cForProcessing.setTimeInMillis(0);
+		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
+		cForProcessing.set(Calendar.MINUTE, minute);
+		cForProcessing.set(Calendar.SECOND, second);
+		cForProcessing.set(Calendar.MILLISECOND, 0);
+		return new Time(cForProcessing.getTime().getTime());
+	}
 	
 	@Override
 	public boolean performFinish() {
@@ -143,6 +161,30 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		
 		session.beginTransaction();
 		try{
+			
+			//create days
+			Calendar calStart = SmartUtils.convertDate(newMission.getStartDate());
+			calStart.set(Calendar.HOUR, 0);
+			calStart.set(Calendar.MINUTE, 0);
+			calStart.set(Calendar.SECOND, 0);
+			calStart.set(Calendar.MILLISECOND, 0);
+			
+			Calendar calEnd = SmartUtils.convertDate(newMission.getEndDate());
+			newMission.setMissionDays(new ArrayList<MissionDay>());
+			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+				MissionDay md = new MissionDay();
+				md.setDate(SmartUtils.getDatePart(calStart.getTime(), false));
+				md.setStartTime(createTime(0, 0, 0));
+				md.setEndTime(createTime(23, 59, 59));
+				md.setRestMinutes(0);
+				md.setTracks(new ArrayList<MissionTrack>());
+				md.setWaypoints(new ArrayList<SurveyWaypoint>());
+				md.setMission(newMission);
+				newMission.getMissionDays().add(md);
+				
+				calStart.add(Calendar.DAY_OF_MONTH, 1);
+			}
+			
 			session.save(newMission);
 			session.getTransaction().commit();
 			

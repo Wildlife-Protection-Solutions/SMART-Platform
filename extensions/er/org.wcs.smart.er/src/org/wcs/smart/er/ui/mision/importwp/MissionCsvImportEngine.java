@@ -22,12 +22,11 @@
 package org.wcs.smart.er.ui.mision.importwp;
 
 import java.text.MessageFormat;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
@@ -42,20 +41,20 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class MissionCsvImportEngine extends CsvImportEngine {
 
-	private Date date;
+	private MissionDay missionDay;
 	
 	public MissionCsvImportEngine() {
 	}
 
-	public MissionCsvImportEngine(Date date) {
-		this.date = date;
+	public MissionCsvImportEngine(MissionDay missionDay) {
+		this.missionDay = missionDay;
 	}
 
-	public Date getDate() {
-		return date;
+	public MissionDay getDate() {
+		return missionDay;
 	}
-	public void setDate(Date date) {
-		this.date = date;
+	public void setDate(MissionDay missionDay) {
+		this.missionDay = missionDay;
 	}
 
 	@Override
@@ -63,13 +62,13 @@ public class MissionCsvImportEngine extends CsvImportEngine {
 			Object object, List<Waypoint> waypoints, IProgressMonitor monitor)
 			throws Exception {
 		if(type == ImportType.WAYPOINT) {
-			Mission mission = (Mission) object;
+			MissionDay missionDay = (MissionDay) object;
 
 			//if no ID was given, get the largest ID from the patrol 
 			//so far and reset the id's of the points about to be saved. 
 			if (getConfiguration().getIdColumn() == -1) {
 				int max = 0;
-				for(SurveyWaypoint wp : mission.getWaypoints()) {
+				for(SurveyWaypoint wp : missionDay.getWaypoints()) {
 					if (wp.getWaypoint().getId() > max){
 						max = wp.getWaypoint().getId();
 					}
@@ -80,7 +79,7 @@ public class MissionCsvImportEngine extends CsvImportEngine {
 				}
 			}
 			monitor.setTaskName(MessageFormat.format(Messages.MissionCsvImportEngine_SavingWaypoints, new Object[]{waypoints.size()}));
-			return MissionDataImport.saveWaypoints(option, mission, date, waypoints);
+			return MissionDataImport.saveWaypoints(option, missionDay.getMission(), missionDay, waypoints);
 		}
 		return null;
 	}

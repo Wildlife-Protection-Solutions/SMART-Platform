@@ -53,7 +53,7 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 			return su.getId();
 		}else if (element instanceof MissionTrack){
 			MissionTrack t = (MissionTrack)element;
-			return SimpleDateFormat.getDateInstance(DateFormat.MEDIUM).format(t.getDate());
+			return SimpleDateFormat.getDateInstance(DateFormat.MEDIUM).format(t.getMissionDay().getDate());
 		}else if (element instanceof SamplingUnitAttribute){
 			return ((SamplingUnitAttribute) element).getName();
 		}else if (element instanceof SurveyDesignSamplingUnitAttribute){

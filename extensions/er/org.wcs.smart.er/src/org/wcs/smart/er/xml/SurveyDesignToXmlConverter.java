@@ -22,12 +22,9 @@
 package org.wcs.smart.er.xml;
 
 import java.text.MessageFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;

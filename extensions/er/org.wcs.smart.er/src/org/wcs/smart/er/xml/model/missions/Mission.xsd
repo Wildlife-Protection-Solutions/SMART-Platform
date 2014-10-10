@@ -6,16 +6,13 @@
     	<sequence>
     		<element name="Members" type="tns:MembersType"
     			maxOccurs="unbounded" minOccurs="0">
-    		</element>
-    		<element name="Tracks" type="tns:TracksType"
-    			maxOccurs="unbounded" minOccurs="0">
-    		</element>
-    		<element name="SurveyWaypoints"
-    			type="tns:SurveyWaypointsType" maxOccurs="unbounded"
+    		</element>
+    		<element name="Survey" type="tns:SurveyType"></element>
+    		<element name="MissionPropertyValues"
+    			type="tns:MissionPropertyValuesType" maxOccurs="unbounded"
     			minOccurs="0">
     		</element>
-    		<element name="Survey" type="tns:SurveyType"></element>
-    		<element name="MissionPropertyValues" type="tns:MissionPropertyValuesType" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="Days" type="tns:MissionDayType" maxOccurs="unbounded" minOccurs="0"></element>
     	</sequence>
     	<attribute name="id" type="string"></attribute>
     	<attribute name="startDate" type="date"></attribute>
@@ -103,5 +100,20 @@
     	<attribute name="numberValue" type="double"></attribute>
     	<attribute name="stringValue" type="string"></attribute>
     	<attribute name="listElementKeyId" type="string"></attribute>
+    </complexType>
+
+    <complexType name="MissionDayType">
+    	<sequence>
+    		<element name="Tracks" type="tns:TracksType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="SurveyWaypoints"
+    			type="tns:SurveyWaypointsType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="date" type="date"></attribute>
+    	<attribute name="startTime" type="time"></attribute>
+    	<attribute name="endTime" type="time"></attribute>
     </complexType>
 </schema>

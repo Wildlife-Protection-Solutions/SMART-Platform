@@ -413,7 +413,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
 		//need to add the tracks
-		Query q = session.createQuery("FROM MissionTrack WHERE mission.uuid = :uuid"); //$NON-NLS-1$
+		Query q = session.createQuery("FROM MissionTrack WHERE missionDay.mission.uuid = :uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", rs.getBytes("mission_uuid"));  //$NON-NLS-1$//$NON-NLS-2$
 		List<MissionTrack> mts = q.list();
 		for (MissionTrack mt : mts){

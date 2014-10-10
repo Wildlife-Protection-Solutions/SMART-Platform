@@ -22,13 +22,13 @@
 package org.wcs.smart.er.ui.mision.importwp;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.GpsImportEngine;
@@ -43,20 +43,21 @@ import org.wcs.smart.observation.model.Waypoint;
  */
 public class MissionGpsImportEngine extends GpsImportEngine {
 
-	private Date date;
+private MissionDay missionDay;
 	
 	public MissionGpsImportEngine() {
+		//empty
+	}
+	
+	public MissionGpsImportEngine(MissionDay missionDay) {
+		this.missionDay = missionDay;
 	}
 
-	public MissionGpsImportEngine(Date date) {
-		this.date = date;
+	public MissionDay getDate() {
+		return missionDay;
 	}
-
-	public Date getDate() {
-		return date;
-	}
-	public void setDate(Date date) {
-		this.date = date;
+	public void setDate(MissionDay missionDay) {
+		this.missionDay = missionDay;
 	}
 
 
@@ -65,28 +66,30 @@ public class MissionGpsImportEngine extends GpsImportEngine {
 			Object object, List<Waypoint> waypoints, IProgressMonitor monitor)
 			throws Exception {
 		String message = null;
-		Mission mission = (Mission) object;
+		MissionDay missionDay = (MissionDay) object;
 		if (type == ImportType.WAYPOINT) {
-			message = MissionDataImport.saveWaypoints(option, mission, date, waypoints);
+			message = MissionDataImport.saveWaypoints(option, missionDay.getMission(), missionDay, waypoints);
 		} else if (type == ImportType.TRACK) {
-			List<MissionTrack> tracks  = new ArrayList<MissionTrack>();
+			HashMap<MissionDay, List<MissionTrack>> tracks = new HashMap<MissionDay, List<MissionTrack>>();
 			if (option == ImportOption.ALL) {
-				tracks = MissionDataImport.convertTracks(waypoints, mission);
+				tracks = MissionDataImport.convertTracks(waypoints, missionDay.getMission().getMissionDays());
 				message = MessageFormat.format(Messages.MissionImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
 			}else if (option == ImportOption.DATE){
 				List<MissionTrack> track = MissionDataImport.convertToTrack(waypoints, true);
 				for (MissionTrack t : track){
-					t.setDate(date);
+					t.setMissionDay(missionDay);
 					track.add(t);
 				}
+				tracks.put(missionDay, track);
 				message = MessageFormat.format(Messages.MissionImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
 			} else {
 				MissionTrack track = MissionDataImport.convertToTrack(waypoints, false).get(0);
-				track.setDate(date);
-				tracks.add(track);
+				track.setMissionDay(missionDay);
+				tracks.put(missionDay, Collections.singletonList(track));
+				
 				message = Messages.MissionImportEngine_ImportSingleTrack;
 			}
-			MissionDataImport.saveTracks(mission, tracks);
+			MissionDataImport.saveTracks(tracks);
 		}
 		return message;
 	}

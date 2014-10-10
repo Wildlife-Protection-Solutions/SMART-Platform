@@ -38,7 +38,7 @@ public class MissionTrackLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof MissionTrack) {
 			MissionTrack track = (MissionTrack) element;
-			return track.getId() + " [" + DateFormat.getDateInstance().format(track.getDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			return track.getId() + " [" + DateFormat.getDateInstance().format(track.getMissionDay().getDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return super.getText(element);
 	}

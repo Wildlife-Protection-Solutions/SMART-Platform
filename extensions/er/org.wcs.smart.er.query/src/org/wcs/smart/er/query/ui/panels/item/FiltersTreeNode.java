@@ -84,7 +84,7 @@ public class FiltersTreeNode implements IItemTreeNode{
 					if (value == null){
 						value = ""; //$NON-NLS-1$
 					}
-					return MessageFormat.format("{0} [{1}]", new Object[]{value, DateFormat.getDateInstance().format(((MissionTrack)element).getDate())});  //$NON-NLS-1$
+					return MessageFormat.format("{0} [{1}]", new Object[]{value, DateFormat.getDateInstance().format(((MissionTrack)element).getMissionDay().getDate())});  //$NON-NLS-1$
 				}else if (element instanceof SamplingUnitAttribute){
 					return ((SamplingUnitAttribute) element).getName();
 				}else if (element instanceof MissionTrack.TrackType){

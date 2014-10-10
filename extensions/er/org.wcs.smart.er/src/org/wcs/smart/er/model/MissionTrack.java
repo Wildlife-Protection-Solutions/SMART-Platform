@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.model;
 
-import java.util.Date;
 import java.util.TimeZone;
 
 import javax.persistence.Basic;
@@ -77,9 +76,8 @@ public class MissionTrack extends UuidItem{
 	private Float distance = null;
 	private TrackType type;
 	
-	private Mission mission;
+	private MissionDay missionDay;
 	private LineString ls;
-	private Date trackDate;
 	
 	private String id;
 	
@@ -118,13 +116,13 @@ public class MissionTrack extends UuidItem{
 	
 	
 	@ManyToOne
-	@JoinColumn(name="mission_uuid")
-	public Mission getMission() {
-		return mission;
+	@JoinColumn(name="mission_day_uuid")
+	public MissionDay getMissionDay() {
+		return missionDay;
 	}
 	
-	public void setMission(Mission mission) {
-		this.mission = mission;
+	public void setMissionDay(MissionDay missionDay) {
+		this.missionDay = missionDay;
 	}
 	
 	@ManyToOne
@@ -136,16 +134,7 @@ public class MissionTrack extends UuidItem{
 	public void setSamplingUnit(SamplingUnit unit) {
 		this.unit = unit;
 	}
-	
-	@Column(name="track_date")
-	public Date getDate(){
-		return this.trackDate;
-	}
-	
-	public void setDate(Date trackDate){
-		this.trackDate = trackDate;
-	}
-	
+		
 	@Column(name="id")
 	public String getId(){
 		return this.id;

@@ -27,21 +27,26 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.editor.SaveMissionTracksJob;
 import org.wcs.smart.er.ui.mision.editor.SaveWaypointJob;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
+import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
@@ -67,25 +72,52 @@ public class MissionDataImport {
 	 * @return status message
 	 * @throws InterruptedException
 	 */
-	public static String saveWaypoints(ImportOption op, final Mission mission, Date date, List<Waypoint> waypoints) throws InterruptedException {
+	public static String saveWaypoints(ImportOption op, final Mission mission, 
+			MissionDay missionDay, List<Waypoint> waypoints) throws InterruptedException {
+		
 		String message = null;
+		final Set<MissionDay> modified = new HashSet<MissionDay>();
 		final List<SurveyWaypoint> addedWaypoints = new ArrayList<SurveyWaypoint>();
-		for (Waypoint w : waypoints) {
-			SurveyWaypoint swp = new SurveyWaypoint();
-			swp.setMission(mission);
-			swp.setWaypoint(w);				
-			
-			mission.getWaypoints().add(swp);
-			addedWaypoints.add(swp);
-			if (op == ImportOption.SELECT && date != null) {
-				Date wpdt = date;
-				if (swp.getWaypoint().getDateTime() != null) {
-					wpdt = SmartUtils.combineDateTime(wpdt, new Time(swp.getWaypoint().getDateTime().getTime()));
+		if (op == ImportOption.ALL){
+			//assign waypoints to days
+			modified.addAll(assignWaypoints(waypoints, mission.getMissionDays()));
+
+			int cnt = 0;
+			for(MissionDay md : modified){
+				for (SurveyWaypoint pw : md.getWaypoints()){
+					if (pw.getWaypoint().getUuid() == null){
+						//new waypoint add to our cnt
+						cnt++;
+					}
 				}
-				swp.getWaypoint().setDateTime(wpdt);
+				addedWaypoints.addAll(md.getWaypoints());
 			}
+			if (addedWaypoints.size() == 0){
+				//nothing imported; not date matched
+				message = MessageFormat.format(Messages.MissionDataImport_NoWaypoints, new  Object[]{ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName});
+			}else{
+				//only one leg; so this is the number of dates
+				message = MessageFormat.format(Messages.MissionDataImport_NumberImported, new Object[]{cnt, modified.size()});
+			}	
+		}else{
+			modified.add(missionDay);
+			for (Waypoint w : waypoints){
+				SurveyWaypoint sw = new SurveyWaypoint();
+				sw.setMissionDay(missionDay);
+				sw.setWaypoint(w);				
+				
+				missionDay.getWaypoints().add(sw);
+				addedWaypoints.add(sw);
+				if (op == ImportOption.SELECT){
+					Date wpdt = missionDay.getDate();
+					if (sw.getWaypoint().getDateTime() != null){
+						wpdt = SmartUtils.combineDateTime(wpdt, new Time(sw.getWaypoint().getDateTime().getTime()));
+					}
+					sw.getWaypoint().setDateTime(wpdt);
+				}
+			}
+			message = MessageFormat.format(Messages.MissionDataImport_NumberImported2, new Object[]{waypoints.size()});
 		}
-		message = MessageFormat.format(Messages.MissionDataImport_ResultMessage, new Object[]{addedWaypoints.size()});
 		
 		//start up a save job
 		SaveWaypointJob saveJob = new SaveWaypointJob();
@@ -103,58 +135,69 @@ public class MissionDataImport {
 		return message;
 	}
 
-	public static List<MissionTrack> convertTracks(List<Waypoint> waypoints, Mission mission) {
-		Date start = SmartUtils.getDatePart(mission.getStartDate(), false);
-		Date end = SmartUtils.getDatePart(mission.getEndDate(), false);
-
-		Map<String, Item> tracks = new HashMap<String, Item>();
+	/**
+	 * Converts waypoints to tracks based on 
+	 * imported dates and the patrol leg dates.
+	 * 
+	 * @param waypoints
+	 * @param mission
+	 * @return
+	 */
+	public static HashMap<MissionDay, List<MissionTrack>> convertTracks(List<Waypoint> waypoints, List<MissionDay> missionDays) {
 		
-		for (Waypoint point : waypoints) {
-			if (point.getDateTime() == null) {
+		HashMap<MissionDay, List<MissionTrack>> mdtracks = new HashMap<MissionDay, List<MissionTrack>>();
+		
+		Map<String, Item> tracksPnts = new HashMap<String, Item>();
+		for (Waypoint point : waypoints){
+			if (point.getDateTime() == null){
 				continue;
 			}
 			Date wpdt = point.getDateTime();
-			wpdt = SmartUtils.getDatePart(wpdt, false);
-			if (betweenDates(wpdt, start, end)) {
-				String key = wpdt.toString() + "_" + point.getSourceId();
-				Item trackpnts = tracks.get(key);
-				if (trackpnts == null) {
-					trackpnts = new Item();
-					trackpnts.date = wpdt;
-					trackpnts.waypoints = new ArrayList<Waypoint>();
-					
-					tracks.put(key, trackpnts);
+			for (MissionDay mday : missionDays){
+				if (SmartUtils.getDatePart(wpdt, false).equals(
+						SmartUtils.getDatePart(mday.getDate(), false))){
+
+					String key = mday.getDate().toString() + "_" + point.getSourceId(); //$NON-NLS-1$
+					Item trackpnts = tracksPnts.get(key);
+					if (trackpnts == null) {
+						trackpnts = new Item();
+						trackpnts.date = wpdt;
+						trackpnts.missionDay = mday;
+						trackpnts.waypoints = new ArrayList<Waypoint>();
+						
+						tracksPnts.put(key, trackpnts);
+					}
+					trackpnts.waypoints.add(point);
+					break;
 				}
-				trackpnts.waypoints.add(point);
 			}
 		}
 		
-		List<MissionTrack> output = new ArrayList<MissionTrack>();
 		//convert to tracks
 		int cnt = 0;
-		for (Iterator<Item> iterator = tracks.values().iterator(); iterator.hasNext();) {
+		for (Iterator<Item> iterator = tracksPnts.values().iterator(); iterator.hasNext();) {
 			Item value = iterator.next(); 
 			MissionTrack newTrack = convertToTrack(value.waypoints, false).get(0);
 			String id = value.waypoints.get(0).getSourceId();
 			cnt++;
 			if (id == null || id.length() == 0){
-				id = "Track " + cnt; 
+				id = MessageFormat.format(Messages.MissionDataImport_TrackIdLabel, new Object[]{cnt});
 			}
 			newTrack.setId(id);
-			newTrack.setDate(value.date);
+			newTrack.setMissionDay(value.missionDay);
 			newTrack.setType(TrackType.SAMPLING_UNIT);
 			if (newTrack != null){
-				output.add(newTrack);
+				List<MissionTrack> tracks = mdtracks.get(value.missionDay);
+				if (tracks == null){
+					tracks = new ArrayList<MissionTrack>();
+					mdtracks.put(value.missionDay, tracks);
+				}
+				tracks.add(newTrack);
 			}
 		}
-		return output;
-		
+		return mdtracks;		
 	}
 
-	private static boolean betweenDates(Date date, Date start, Date end) {
-		return ( date.equals(start) || date.after(start) ) &&  (date.equals(end) || date.before(end));
-	}
-		
 	/**
 	 * Converts a set of waypoints to a track.  Coordinates are first sorted
 	 * by date/time.  If useSource is specified then multiple tracks are generated based on the 
@@ -168,7 +211,7 @@ public class MissionDataImport {
 			LineString track = GPSDataImport.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
 			MissionTrack t = new MissionTrack();
 			t.setLineString(track);
-			t.setId("Track");
+			t.setId(Messages.MissionDataImport_TrackLabel);
 			return Collections.singletonList(t);
 		}else{
 			HashMap<String, List<Waypoint>> wps = new HashMap<String, List<Waypoint>>();
@@ -186,8 +229,8 @@ public class MissionDataImport {
 				MissionTrack mt = convertToTrack(ws, false).get(0);
 				cnt++;
 				String id = ws.get(0).getSourceId();
-				if (id == null){
-					id = "Track " + cnt;
+				if (id == null || id.length() == 0){
+					id = MessageFormat.format(Messages.MissionDataImport_TrackIdLabel, new Object[]{cnt});
 				}
 				mt.setId(id);
 				
@@ -198,32 +241,80 @@ public class MissionDataImport {
 		}
 	}
 
-	public static void saveTracks(final Mission mission, List<MissionTrack> tracks) throws InterruptedException {
-		for (MissionTrack track : tracks) {
-			if (track.getType() == null) {
-				track.setType(TrackType.SAMPLING_UNIT);
+	public static void saveTracks(Map<MissionDay, List<MissionTrack>> tracks) throws InterruptedException {
+		Mission mission = null;
+		List<MissionTrack> tracksToSave = new ArrayList<MissionTrack>();
+		for (Iterator<Entry<MissionDay, List<MissionTrack>>> iterator = tracks.entrySet().iterator(); iterator.hasNext();) {
+			Entry<MissionDay, List<MissionTrack>> type = (Entry<MissionDay, List<MissionTrack>>) iterator.next();
+			
+			for (MissionTrack track : type.getValue()){
+				MissionDay md = type.getKey();
+				mission = md.getMission();
+				if (track.getType() == null){
+					track.setType(TrackType.SAMPLING_UNIT);
+				}
+				md.getTracks().add(track);
+				track.setMissionDay(md);
 			}
-			track.setMission(mission);
-			mission.getTracks().add(track);
+			tracksToSave.addAll(type.getValue());
 		}
 		
-		SaveMissionTracksJob saveJob = new SaveMissionTracksJob(tracks);
+		SaveMissionTracksJob saveJob = new SaveMissionTracksJob(tracksToSave);
 		saveJob.schedule();
 		saveJob.join();
 		
 		//fire events
+		final Mission lmission = mission;
 		Display.getDefault().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, mission);
+				SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, lmission);
 			}
 		});
 	}
 
+	/**
+	 * For each waypoint, determines the patrol leg day and adds the waypoint
+	 * to that patrol leg day.
+	 * 
+	 * @param waypoints  Set of waypoints to process
+	 * @param patrolLegs set of patrol legs
+	 * @param monitor progress monitor
+	 * 
+	 * @return list of patrol leg days modified
+	 */
+	public static Set<MissionDay> assignWaypoints(List<Waypoint> waypoints, List<MissionDay> days){
+		Set<MissionDay> modified = new HashSet<MissionDay>();
+		
+		for (Waypoint point : waypoints){
+			Date wpdt = point.getDateTime();
+			if (wpdt == null){
+				continue;
+			}
+			//find patrol leg day based on times
+			for (Iterator<MissionDay> iterator = days.iterator(); iterator.hasNext();) {
+				MissionDay mday = (MissionDay) iterator.next();				
+				if (SmartUtils.getDatePart(wpdt, false).equals(
+						SmartUtils.getDatePart(mday.getDate(), false))){
+					
+					SurveyWaypoint se = new SurveyWaypoint();
+					se.setMissionDay(mday);
+					se.setWaypoint(point);
+					mday.getWaypoints().add(se);
+					modified.add(mday);
+					break;
+				}
+			}
+		}
+		return modified;
+	}
+	
+	
 	static class Item{
 		public Date date;
 		public String id;
-		List<Waypoint> waypoints;
+		public MissionDay missionDay;
+		public List<Waypoint> waypoints;
 		
 	}
 }

@@ -36,6 +36,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
@@ -372,9 +373,11 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
 		
+		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionDay.class) + ".mission_day, "); //$NON-NLS-1$
+		
 		sql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionTrack.class) + ".track_type, "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionTrack.class) + ".track_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionTrack.class) + ".id, "); //$NON-NLS-1$
 		sql.append("smart.distanceInMeter(" + tablePrefix(MissionTrack.class) + ".geometry) / 1000.0, "); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
@@ -404,9 +407,11 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
 		sql.append("mission_enddate timestamp,"); //$NON-NLS-1$
 	
+		sql.append("missionday_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("missionday_date date,"); //$NON-NLS-1$
+		
 		sql.append("mission_trackuuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("mission_tracktype varchar(32),"); //$NON-NLS-1$
-		sql.append("mission_trackdate date,"); //$NON-NLS-1$
 		sql.append("mission_trackid varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_tracklength double,"); //$NON-NLS-1$
 		
@@ -438,7 +443,7 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 		
 		it.setTrackUuid(rs.getBytes("mission_trackuuid")); //$NON-NLS-1$
 		it.setTrackType(TrackType.valueOf(rs.getString("mission_tracktype"))); //$NON-NLS-1$
-		it.setTrackDate(rs.getDate("mission_trackdate")); //$NON-NLS-1$
+		it.setTrackDate(rs.getDate("missionday_date")); //$NON-NLS-1$
 		it.setTrackId(rs.getString("mission_trackid")); //$NON-NLS-1$
 		it.setTrackLength(rs.getDouble("mission_tracklength")); //$NON-NLS-1$
 		

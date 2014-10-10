@@ -55,9 +55,7 @@ import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-
 import org.wcs.smart.util.SmartUtils;
-import org.wcs.smart.er.internal.Messages;
 
 /**
  * Class responsible for importing a mission.

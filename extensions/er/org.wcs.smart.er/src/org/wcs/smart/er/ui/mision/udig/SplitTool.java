@@ -139,6 +139,8 @@ public class SplitTool extends SimpleTool implements KeyListener {
 				}
 				
 				finishCommand.onFinish(cs);
+				
+				setActive(false);
 			} catch (Exception e) {
 				EcologicalRecordsPlugIn.displayLog(Messages.SplitTool_ToolError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			}
@@ -148,6 +150,7 @@ public class SplitTool extends SimpleTool implements KeyListener {
 	@Override
 	public void setActive(boolean active) {
 		super.setActive(active);
+		points.clear();
 		
 		if (active) {
 			Control control = getContext().getViewportPane().getControl();
@@ -157,6 +160,8 @@ public class SplitTool extends SimpleTool implements KeyListener {
 			control.removeKeyListener(this);
 			
 			finishCommand.onFinish(null);
+			disposeCommand();
+			points.clear();
 		}
 
 	}

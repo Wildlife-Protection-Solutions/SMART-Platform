@@ -32,6 +32,7 @@ import org.geotools.data.DataStoreFactorySpi;
 import org.hibernate.Session;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
@@ -114,8 +115,10 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 				mission = (Mission)session.load(Mission.class, SmartUtils.decodeHex(uuid));
 				if (mission != null ){
 					//load lazy items
-					mission.getWaypoints().size();
-					mission.getTracks().size();
+					for (MissionDay md : mission.getMissionDays()){
+						md.getWaypoints().size();
+						md.getTracks().size();
+					}
 				}
 			}
 		}catch (Exception ex){

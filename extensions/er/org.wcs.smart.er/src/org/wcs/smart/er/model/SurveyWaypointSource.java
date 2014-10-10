@@ -74,7 +74,7 @@ public class SurveyWaypointSource implements IWaypointSource{
 				try{
 					List<?> pws = s.createCriteria(SurveyWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).list(); //$NON-NLS-1$
 					if (pws.size() > 0){
-						surveyDir[0] = SmartUtils.getDirectoryPath(((SurveyWaypoint)pws.get(0)).getMission().getUuid());
+						surveyDir[0] = SmartUtils.getDirectoryPath(((SurveyWaypoint)pws.get(0)).getMissionDay().getMission().getUuid());
 					}else{
 						EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + SmartUtils.encodeHex(wp.getUuid()), null);
 					}

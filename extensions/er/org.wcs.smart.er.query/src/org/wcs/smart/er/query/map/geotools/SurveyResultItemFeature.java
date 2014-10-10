@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
@@ -168,13 +169,15 @@ public class SurveyResultItemFeature {
 		data[3] = mission.getEndDate();
 		data[4] = mission.getComment();
 		
-		if (mission.getTracks().size() > 0){
-			List<LineString> geoms = new ArrayList<LineString>();
-			for (MissionTrack mt : mission.getTracks()){
+		List<LineString> geoms = new ArrayList<LineString>();
+		for (MissionDay md : mission.getMissionDays()){
+			for (MissionTrack mt : md.getTracks()){
 				geoms.add(mt.getLineString());
 			}
+		}
+		
+		if (geoms.size() > 0){
 			Geometry g = gf.createMultiLineString(geoms.toArray(new LineString[geoms.size()]));
-			//System.out.println(mission.getTracks().size() + ":" + g.toText() + ":" + mission.getId());
 			data[5] = g;
 		}else{
 			data[5] = null;
