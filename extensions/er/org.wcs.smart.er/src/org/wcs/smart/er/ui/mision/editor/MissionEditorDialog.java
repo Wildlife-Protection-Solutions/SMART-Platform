@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +41,7 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.MissionComposite;
@@ -126,32 +129,61 @@ public class MissionEditorDialog extends TitleAreaDialog {
 				//2. remove any tracks that are not associated with a day
 				
 				//waypoints
-				List<SurveyWaypoint> wpDelete = new ArrayList<SurveyWaypoint>();
+				List<MissionDay> wpDelete = new ArrayList<MissionDay>();
 				for (MissionDay md : toUpdate.getMissionDays()){
+					if (!isBetweenMissionDates(
+							SmartUtils.getDatePart(md.getDate(), false))){
+						wpDelete.add(md);
+					}
+					
+				}
+				for (MissionDay md : wpDelete){
 					for (SurveyWaypoint sw : md.getWaypoints()){
-						if (!isBetweenMissionDates(SmartUtils.getDatePart(sw.getWaypoint().getDateTime(), false))){
-							wpDelete.add(sw);
+						Waypoint delete = sw.getWaypoint();
+						session.delete(sw);
+						session.delete(delete);
+					}
+					
+					for (MissionTrack mt : md.getTracks()){
+						session.delete(mt);
+					}
+					md.getWaypoints().clear();
+					md.getTracks().clear();
+					
+					session.delete(md);
+				}
+				toUpdate.getMissionDays().removeAll(wpDelete);
+				
+				//need to create new mission days as required
+				//create days
+				Calendar calStart = SmartUtils.convertDate(toUpdate.getStartDate());
+				calStart.set(Calendar.HOUR, 0);
+				calStart.set(Calendar.MINUTE, 0);
+				calStart.set(Calendar.SECOND, 0);
+				calStart.set(Calendar.MILLISECOND, 0);
+				
+				Calendar calEnd = SmartUtils.convertDate(toUpdate.getEndDate());
+				while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+					boolean found = false;
+					for(MissionDay md : toUpdate.getMissionDays()){
+						if (SmartUtils.isSameDate(md.getDate(), calStart.getTime())){
+							found = true;
+							break;
 						}
 					}
+					if (!found){
+						MissionDay md = new MissionDay();
+						md.setDate(SmartUtils.getDatePart(calStart.getTime(), false));
+						md.setStartTime(createTime(0, 0, 0));
+						md.setEndTime(createTime(23, 59, 59));
+						md.setRestMinutes(0);
+						md.setTracks(new ArrayList<MissionTrack>());
+						md.setWaypoints(new ArrayList<SurveyWaypoint>());
+						md.setMission(toUpdate);
+						toUpdate.getMissionDays().add(md);
+					}
+					calStart.add(Calendar.DAY_OF_MONTH, 1);
 				}
-				for (SurveyWaypoint sw : wpDelete){
-					Waypoint delete = sw.getWaypoint();
-					session.delete(sw);
-					session.delete(delete);
-				}
-				
-				//tracks
-				//TODO:
-//				for (MissionDay md : toUpdate.getMissionDays()){
-//					List<MissionTrack> toDelete = new ArrayList<MissionTrack>();
-//					for (MissionTrack mt : md.getTracks()){
-//						if (!isBetweenMissionDates(mt.getDate())){
-//							mt.setMission(null);
-//							toDelete.add(mt);
-//						}
-//					}
-//					md.getTracks().removeAll(toDelete);
-//				}
 			}
 			
 			session.getTransaction().commit();
@@ -166,6 +198,16 @@ public class MissionEditorDialog extends TitleAreaDialog {
 		
 		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, toUpdate);
 		return true;
+	}
+	
+	private Time createTime(int hours, int minute, int second){
+		Calendar cForProcessing = Calendar.getInstance();
+		cForProcessing.setTimeInMillis(0);
+		cForProcessing.set(Calendar.HOUR_OF_DAY, hours);
+		cForProcessing.set(Calendar.MINUTE, minute);
+		cForProcessing.set(Calendar.SECOND, second);
+		cForProcessing.set(Calendar.MILLISECOND, 0);
+		return new Time(cForProcessing.getTime().getTime());
 	}
 	
 	private boolean isBetweenMissionDates(Date date){

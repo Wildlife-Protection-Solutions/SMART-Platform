@@ -551,8 +551,8 @@ public class MissionDayComposite {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			Mission m = editor.getMissionEditor().getMission();
-			session.update(m);
+			Mission m = (Mission) session.merge(editor.getMissionEditor().getMission());
+
 			//find mission day
 			missionDay = findMissionDay(m);
 			if (missionDay == null){
