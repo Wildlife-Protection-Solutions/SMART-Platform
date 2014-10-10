@@ -66,6 +66,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Mission editor
@@ -83,6 +84,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	public static final DecimalFormat DISTANCE_FORMATTER = new DecimalFormat("#0.##"); //$NON-NLS-1$
 	
 	private Mission mission = null;
+	private Date[] missionDates = null;
 	
 	private MissionSummaryPage summaryEditor;
 	private MissionMapPage mapPage;
@@ -117,13 +119,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 						Job j = new Job(Messages.MissionEditor_reloadJobName) {
 							@Override
 							protected IStatus run(IProgressMonitor monitor) {
-								Date cstart = mission.getStartDate();
-								Date cend = mission.getEndDate();
-								
+								Date[] lastDates = missionDates;
 								mission = null;
 								getMission(); //to avoid nested transactions exception
-								
-								final boolean datesChanged = !cstart.equals(mission.getStartDate()) || !cend.equals(mission.getEndDate());
+								final boolean datesChanged = !SmartUtils.isSameDate(lastDates[0], missionDates[0])|| !SmartUtils.isSameDate(lastDates[1], missionDates[1]);
 								mapPage.refresh();
 								Display.getDefault().syncExec(new Runnable(){
 									@Override
@@ -195,6 +194,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			session.beginTransaction();
 			try{
 				this.mission = (Mission) session.load(Mission.class, muuid);
+				missionDates = new Date[]{new Date(mission.getStartDate().getTime()), new Date(mission.getEndDate().getTime())};
 				//load mission items so don't have lazy loading issues later.
 				for (MissionDay md : mission.getMissionDays()){
 					md.getWaypoints().size();
