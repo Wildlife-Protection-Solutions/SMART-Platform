@@ -308,14 +308,100 @@ public class Messages extends NLS {
 	public static String MissionEmployeeComposite_MissionLeader;
 	public static String MissionEmployeeComposite_MissionMemberLabel;
 	public static String MissionEmployeeComposite_Title;
+
+	public static String MissionExporter_0;
+
+	public static String MissionExporter_1;
+
+	public static String MissionExporter_2;
+
+	public static String MissionExporter_3;
+
+	public static String MissionExportHandler_0;
+
+	public static String MissionExportHandler_1;
+
+	public static String MissionExportHandler_2;
+
+	public static String MissionExportHandler_3;
+
+	public static String MissionExportHandler_5;
+
+	public static String MissionExportHandler_6;
+
+	public static String MissionExportHandler_7;
+
+	public static String MissionExportHandler_8;
+
+	public static String MissionExportHandler_9;
 	public static String MissionGeoResourceInfo_TracksTitle;
 	public static String MissionGeoResourceInfo_WaypointsTitle;
+	public static String MissionImportDialog_0;
+
+	public static String MissionImportDialog_1;
+
+	public static String MissionImportDialog_2;
+
+	public static String MissionImportDialog_3;
+
+	public static String MissionImportDialog_4;
+
+	public static String MissionImportDialog_5;
+
+	public static String MissionImportDialog_6;
+
 	public static String MissionImportEngine_ImportMultiTrack;
 	public static String MissionImportEngine_ImportSingleTrack;
+
+	public static String MissionImporter_0;
+
+	public static String MissionImporter_1;
+
+	public static String MissionImporter_10;
+
+	public static String MissionImporter_11;
+
+	public static String MissionImporter_12;
+
+	public static String MissionImporter_13;
+
+	public static String MissionImporter_2;
+
+	public static String MissionImporter_3;
+
+	public static String MissionImporter_4;
+
+	public static String MissionImporter_5;
+
+	public static String MissionImporter_6;
+
+	public static String MissionImporter_7;
+
+	public static String MissionImporter_8;
+
+	public static String MissionImporter_9;
 	public static String MissionImportGpsDataWizard_DialogTitle;
 	public static String MissionImportGpsDataWizard_ImportError;
 	public static String MissionImportGpsDataWizard_NoData;
 	public static String MissionImportGpsDataWizard_SuccessMessage;
+
+	public static String MissionImportHandler_0;
+
+	public static String MissionImportHandler_1;
+
+	public static String MissionImportHandler_2;
+
+	public static String MissionImportHandler_3;
+
+	public static String MissionImportHandler_4;
+
+	public static String MissionImportHandler_6;
+
+	public static String MissionImportHandler_7;
+
+	public static String MissionImportHandler_8;
+
+	public static String MissionImportHandler_9;
 	public static String MissionMapPage_AddLayersJob_Error;
 	public static String MissionMapPage_AddLayersJob_Title;
 	public static String MissionMapPage_RefreshLayersJob_Error;

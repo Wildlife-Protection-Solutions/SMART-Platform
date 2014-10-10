@@ -27,14 +27,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.SmartDB;
@@ -86,7 +84,7 @@ public class SurveyHibernateManager {
 	
 	public static void saveMission(Mission mission, Session session, boolean saveWaypoints) throws Exception{
 		if (mission.getId() == null ){
-			String id = SurveyHibernateManager.generateMissionId(mission, session);
+			String id = SurveyHibernateManager.generateMissionId(session);
 			mission.setId(id);
 		}
 		
@@ -125,23 +123,27 @@ public class SurveyHibernateManager {
 		}
 	}
 	
-	public static String generateMissionId(Mission m, Session s) {
+	public static String generateMissionId( Session s) {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(m.getSurvey().getSurveyDesign().getConservationArea().getId());
+		sb.append(SmartDB.getCurrentConservationArea().getId());
 
-		Query q = s
-				.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
-		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("ca", m.getSurvey().getSurveyDesign().getConservationArea().getId()); //$NON-NLS-1$
+//		Query q = s
+//				.createQuery("SELECT id FROM Mission m, Survey s, SurveyDesign sd WHERE m.id like :id and sd.conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
+//		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+//		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
+		List<?> results = s.createCriteria(Mission.class).createAlias("survey", "s")
+			.add(Restrictions.like("id", sb.toString() + "%")).addOrder(Order.desc("id"))
+			.list(); //$NON-NLS-1$ 
+		
 		long idNumber = 0;
-		List<?> results = q.list();
 		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-			String localId = (String) iterator.next();
+			Mission m =  (Mission) iterator.next();
+			String localId = m.getId(); 
 			try {
-				idNumber = Integer.parseInt(localId.substring(localId
-						.lastIndexOf('_') + 1));
+				int offset = localId.lastIndexOf('M') + 1;
+				idNumber = Integer.parseInt(localId.substring(offset));
 				break;
 			} catch (Exception ex) {
 				// not of the form CAID_# skip this one

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.mission.export.MultiMissionExportDialog;
 import org.wcs.smart.er.xml.MissionExporter;
@@ -79,14 +80,14 @@ public class MissionExportHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
-					monitor.beginTask("Export Missions", missions.size());
+					monitor.beginTask(Messages.MissionExportHandler_0, missions.size());
 					int exportCnt = 0;
 					for (int i = 0; i < missions.size(); i++) {
 						if (monitor.isCanceled()) break;
 						byte[] puuid = missions.get(i);
 						String id = null;
 						try {
-							monitor.subTask(MessageFormat.format("Exporting Mission {0}",new Object[]{ SmartUtils.encodeHex(puuid)}));
+							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_1,new Object[]{ SmartUtils.encodeHex(puuid)}));
 							Mission m = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
@@ -95,34 +96,34 @@ public class MissionExportHandler extends AbstractHandler {
 								m = (Mission) s.load(Mission.class, puuid);
 								id = m.getId();
 							} catch (Exception ex) {
-								displayLogError(MessageFormat.format("Error Parsing Mission, ID: {0}", new Object[]{SmartUtils.encodeHex(puuid)}), ex);
+								displayLogError(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
 								s.close();
 							}
 
-							monitor.subTask(MessageFormat.format("Exporting Mission ID: {0}",new Object[]{ id }));
+							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_3,new Object[]{ id }));
 
 							File outFile = MissionExporter.getOutputFile(dir, m.getId(), includeAtt);
 							MissionExporter.exportPatrol(m, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							displayLogError(MessageFormat.format("Error exporting Missions: {0}", new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+							displayLogError(MessageFormat.format("Error exporting Missions: {0}", new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()){
-						displayInfo("Export Cancelled", MessageFormat.format("{0, number, integer} of {2, number, integer} selected missions exported to {1}.", new Object[]{exportCnt,dir.toString(),missions.size()}));
+						displayInfo(Messages.MissionExportHandler_5, MessageFormat.format(Messages.MissionExportHandler_6, new Object[]{exportCnt,dir.toString(),missions.size()}));
 					}else{
-						displayInfo("Export Complete.", MessageFormat.format("{0, number, integer} of {2, number, integer} selected missions exported to {1}.", new Object[]{exportCnt,dir.toString(),missions.size()}));
+						displayInfo(Messages.MissionExportHandler_7, MessageFormat.format(Messages.MissionExportHandler_8, new Object[]{exportCnt,dir.toString(),missions.size()}));
 					}
 				}
 
 			});
 		} catch (Exception e) {
 			EcologicalRecordsPlugIn.displayLog(
-					"Could not export the missions." + e.getLocalizedMessage(), e);
+					Messages.MissionExportHandler_9 + e.getLocalizedMessage(), e);
 		}
 
 		return null;

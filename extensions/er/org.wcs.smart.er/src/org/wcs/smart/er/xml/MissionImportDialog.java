@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.common.control.XmlImportDialog;
+import org.wcs.smart.er.internal.Messages;
 
 
 /**
@@ -49,9 +50,9 @@ public class MissionImportDialog extends XmlImportDialog {
 
 	public MissionImportDialog() {
 		super(Display.getCurrent().getActiveShell(),
-				"Import Mission and Survey Data",
-				"Import Missions and Surveys",
-				"Select the Mission files to Import");
+				Messages.MissionImportDialog_0,
+				Messages.MissionImportDialog_1,
+				Messages.MissionImportDialog_2);
 	}
 
 	@Override
@@ -63,8 +64,8 @@ public class MissionImportDialog extends XmlImportDialog {
 		optionCmp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Button btnAssign = new Button(optionCmp, SWT.RADIO);
-		btnAssign.setText("Assign New Mission IDs");
-		btnAssign.setToolTipText("A new system generated mission id will be assigned to each imported mission.");
+		btnAssign.setText(Messages.MissionImportDialog_3);
+		btnAssign.setToolTipText(Messages.MissionImportDialog_4);
 		btnAssign.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnAssign.setSelection(true);
 		btnAssign.addSelectionListener(new SelectionAdapter() {
@@ -75,8 +76,8 @@ public class MissionImportDialog extends XmlImportDialog {
 		});
 		
 		Button btnKeep = new Button(optionCmp, SWT.RADIO);
-		btnKeep.setText("Keep Mission IDs");
-		btnKeep.setToolTipText("The Mission IDs in the selected file will be used");
+		btnKeep.setText(Messages.MissionImportDialog_5);
+		btnKeep.setToolTipText(Messages.MissionImportDialog_6);
 		btnKeep.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnKeep.addSelectionListener(new SelectionAdapter() {
 			@Override
