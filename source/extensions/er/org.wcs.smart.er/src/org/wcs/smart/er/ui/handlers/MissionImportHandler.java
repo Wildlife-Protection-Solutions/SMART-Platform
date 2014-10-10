@@ -45,6 +45,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.xml.MissionImportDialog;
 import org.wcs.smart.er.xml.MissionImporter;
@@ -57,7 +58,7 @@ import org.wcs.smart.er.xml.MissionImporter;
  * @since 4.0.0
  */
 public class MissionImportHandler extends AbstractHandler {
-	private static final String MISSION_NOT_IMPORTED_ERROR_MSG = "Unable to Import Survey or Mission. ";
+	private static final String MISSION_NOT_IMPORTED_ERROR_MSG = Messages.MissionImportHandler_0;
 
 
 	/**
@@ -79,7 +80,7 @@ public class MissionImportHandler extends AbstractHandler {
 			File file = new File(files.get(0));
 			if (!file.exists()) {
 				MessageDialog.openError(Display.getCurrent().getActiveShell(),
-						"Error" , MessageFormat.format("The location {0} cannot be found",  new Object[]{file.toString()}));
+						Messages.MissionImportHandler_1 , MessageFormat.format(Messages.MissionImportHandler_2,  new Object[]{file.toString()}));
 				return null;
 			}			
 			importFile(activeWorkbench, file, dialog.isKeepIDs());
@@ -114,13 +115,13 @@ public class MissionImportHandler extends AbstractHandler {
 					});
 					
 					
-					monitor.beginTask("Loading Missions", files.size());
+					monitor.beginTask(Messages.MissionImportHandler_3, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
 					int imported = 0;
 					for (int i = 0; i < files.size(); i ++){
 						File file = new File(files.get(i));
-						monitor.subTask("Processing" + file.toString());
+						monitor.subTask(Messages.MissionImportHandler_4 + file.toString());
 						monitor.worked(1);
 						if (file.isDirectory()) continue;
 						try{
@@ -130,14 +131,14 @@ public class MissionImportHandler extends AbstractHandler {
 								SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.MISSION_ADDED, m);
 							}
 						}catch (Exception ex){
-							EcologicalRecordsPlugIn.displayLog(MessageFormat.format("File {0} not imported" + "\n\n", new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+							EcologicalRecordsPlugIn.displayLog(MessageFormat.format("File {0} not imported" + "\n\n", new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 						if (monitor.isCanceled()){
 							final int aimported = imported;
 							display.syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), "Cancelled", MessageFormat.format("The import has been cancelled.  {0} of {1} patrols have been loaded.", aimported, files.size()));									
+									MessageDialog.openInformation(display.getActiveShell(), Messages.MissionImportHandler_6, MessageFormat.format(Messages.MissionImportHandler_7, aimported, files.size()));									
 								}
 							});
 							
@@ -148,7 +149,7 @@ public class MissionImportHandler extends AbstractHandler {
 					display.syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(display.getActiveShell(), "Import Complete", MessageFormat.format("Import Complete.  {0} of {1} files imported.", iimported, files.size()));
+							MessageDialog.openInformation(display.getActiveShell(), Messages.MissionImportHandler_8, MessageFormat.format(Messages.MissionImportHandler_9, iimported, files.size()));
 							
 						}});
 				}

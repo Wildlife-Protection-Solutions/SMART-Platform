@@ -48,6 +48,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
@@ -56,6 +57,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.er.internal.Messages;
 
 /**
  * Class responsible for importing a mission.
@@ -65,7 +67,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class MissionImporter {
 	
-	private static final String IMPORTING_MISSION_TASKNAME = "Importing Mission";
+	private static final String IMPORTING_MISSION_TASKNAME = Messages.MissionImporter_0;
 
 
 	/**
@@ -97,7 +99,7 @@ public class MissionImporter {
 			//unzip 
 			directory = unzip(zipFile);
 			if (directory == null || !directory.isDirectory()){
-				throw new Exception (MessageFormat.format("Error unzipping file {0}", new Object[]{ zipFile.getAbsoluteFile()}));
+				throw new Exception (MessageFormat.format(Messages.MissionImporter_1, new Object[]{ zipFile.getAbsoluteFile()}));
 			}
 			//file xml file
 			files = directory.list();
@@ -110,7 +112,7 @@ public class MissionImporter {
 		monitor.worked(1);
 		
 		
-		monitor.subTask("Reading xml file.");
+		monitor.subTask(Messages.MissionImporter_2);
 		for (int i = 0; i < files.length; i ++){
 			File f;
 			if(directory.isFile()){
@@ -144,13 +146,13 @@ public class MissionImporter {
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log("Error deleting temporary directory", ex); //$NON-NLS-1$
 			}
-			throw new Exception ("Mission xml file not found in zip file.");
+			throw new Exception (Messages.MissionImporter_3);
 		}
 		monitor.worked(1);
 		
 		Mission m = convertAndSave(ptype, keepIDs, directory, monitor);
 		
-		monitor.subTask("Removing temporary files.");
+		monitor.subTask(Messages.MissionImporter_4);
 		try{
 			if(directory.isDirectory()){
 				FileUtils.deleteDirectory(directory);
@@ -205,7 +207,7 @@ public class MissionImporter {
 		XMLtoMissionConverter converter = new XMLtoMissionConverter();
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
-			monitor.subTask("Validating");
+			monitor.subTask(Messages.MissionImporter_5);
 			//check if a mission in the database with the given mission id already exists
 			if (xmlMission.getId() != null){
 				if (SurveyHibernateManager.isDuplicateId(xmlMission.getId(), SmartDB.getCurrentConservationArea(), session)){
@@ -217,8 +219,8 @@ public class MissionImporter {
 
 						@Override
 						public void run() {
-							String message = keepIDs ? MessageFormat.format("The database already contains a mission with the id ''{0}'' provided in the file.  If you continue another mission with the same ID will be added, potentially duplicating data.\n\nDo you want to continue with the import?", pid) : MessageFormat.format("The database already contains a mission with the id ''{0}'' provided in the file.  If you continue a new mission with a new ID will be generated, potentially duplicating data.\n\nDo you want to continue with the import?", pid);
-							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), "Import Mission", 
+							String message = keepIDs ? MessageFormat.format(Messages.MissionImporter_6, pid) : MessageFormat.format(Messages.MissionImporter_7, pid);
+							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.MissionImporter_8, 
 									null, message,
 									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
 							int ret = dialog.open();
@@ -235,7 +237,7 @@ public class MissionImporter {
 					}
 				}
 			}		
-			monitor.subTask("Converting");
+			monitor.subTask(Messages.MissionImporter_9);
 			converter.fromXml(xmlMission, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 		} finally {
 			if (session.isOpen()){
@@ -262,8 +264,8 @@ public class MissionImporter {
 				public void run() {
 					ConfirmInputDialog dialog = new ConfirmInputDialog(
 							Display.getDefault().getActiveShell(),
-							"Mission Import",
-							"Some data could not be imported.  The following list identifies the problems that occurred while importing the mission data.  If you continue the data identified below will not be imported.  Would you like to continue with the import?",
+							Messages.MissionImporter_10,
+							Messages.MissionImporter_11,
 							message, null);
 					if (dialog.open() != ConfirmInputDialog.OK){
 						cont[0] = false;
@@ -276,7 +278,7 @@ public class MissionImporter {
 			}
 
 		}
-		monitor.subTask("Saving");
+		monitor.subTask(Messages.MissionImporter_12);
 		Mission imported = converter.getImportedMission();
 		
 		//performing actual save in database
@@ -300,7 +302,7 @@ public class MissionImporter {
 			session.getTransaction().commit();
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog("Could not save mission." + ex.getLocalizedMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionImporter_13 + ex.getLocalizedMessage(), ex);
 			return null;
 		}finally{
 			session.close();

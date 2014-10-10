@@ -144,7 +144,11 @@ public class XMLtoMissionConverter {
 		}
 		
 		
-		mission.setId(xml.getId());
+		if(keepIDs){
+			mission.setId(xml.getId());
+		}else{
+			mission.setId(SurveyHibernateManager.generateMissionId(session));
+		}
 
 
 		

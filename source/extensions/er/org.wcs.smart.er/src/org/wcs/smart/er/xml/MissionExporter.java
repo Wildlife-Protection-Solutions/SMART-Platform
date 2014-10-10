@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.xml.model.missions.MissionType;
@@ -76,12 +77,12 @@ public class MissionExporter {
 	 * @throws Exception 
 	 */
 	public static File exportPatrol(Mission mission, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Exporting Mission", includeAttachments ? 4 : 2);
+		monitor.beginTask(Messages.MissionExporter_0, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
 			session.refresh(mission);
 			
-			monitor.subTask("Converting Mission to XML");
+			monitor.subTask(Messages.MissionExporter_1);
 			MissionType xml = MissionToXmlConverter.toXml(mission);
 			
 			/*
@@ -112,7 +113,7 @@ public class MissionExporter {
 	 * Writes the patrol without including attachments
 	 */
 	private static File exportMissionWithoutAttachments(MissionType xml, File file, IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Writing Mission to file");
+		monitor.subTask(Messages.MissionExporter_2);
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
 		try {
 			MissionXmlManager.writeDataModel(xml, out);
@@ -136,7 +137,7 @@ public class MissionExporter {
 		exportMissionWithoutAttachments(xml, xmlFile, monitor);
 		
 		
-		monitor.subTask("Packaging Attachments");
+		monitor.subTask(Messages.MissionExporter_3);
 		//create zip file
 		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
 		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
