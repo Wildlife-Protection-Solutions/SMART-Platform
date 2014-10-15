@@ -49,7 +49,7 @@ import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.ui.samplingunit.load.ImportAttributes;
-import org.wcs.smart.er.xml.model.surveyDesign.NamesType;
+import org.wcs.smart.er.xml.model.surveydesign.NamesType;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -61,7 +61,7 @@ import org.wcs.smart.hibernate.SmartDB;
 @SuppressWarnings("unchecked")
 public class SurveyDesignFromXmlConverter {
 
-	public static SurveyDesign fromXml(org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign xml, Session session) throws ParseException{
+	public static SurveyDesign fromXml(org.wcs.smart.er.xml.model.surveydesign.SurveyDesign xml, Session session) throws ParseException{
 		
 		//create the Survey object 
 		SurveyDesign surveyDesign = new SurveyDesign();
@@ -88,7 +88,7 @@ public class SurveyDesignFromXmlConverter {
 		
 		//add the survey design properties 
 		ArrayList<SurveyDesignProperty> sdProperties = new ArrayList<SurveyDesignProperty>();
-		for (org.wcs.smart.er.xml.model.surveyDesign.SurveyDesignProperty xmlSDproperty : xml.getSurveyDesignProperty()){
+		for (org.wcs.smart.er.xml.model.surveydesign.SurveyDesignProperty xmlSDproperty : xml.getSurveyDesignProperty()){
 			SurveyDesignProperty sdp = new SurveyDesignProperty();
 			sdp.setName(xmlSDproperty.getName());
 			sdp.setValue(xmlSDproperty.getValue());
@@ -101,14 +101,14 @@ public class SurveyDesignFromXmlConverter {
 		//if property is found, we use that property otherwise
 		//we import the property as a new property
 		surveyDesign.setMissionProperties(new ArrayList<MissionProperty>());
-		for (org.wcs.smart.er.xml.model.surveyDesign.MissionProperty xmlproperty : xml.getMissionProperty()){
+		for (org.wcs.smart.er.xml.model.surveydesign.MissionProperty xmlproperty : xml.getMissionProperty()){
 			MissionProperty mp = new MissionProperty();
 			mp.setSurveyDesign(surveyDesign);
 			mp.setOrder(xmlproperty.getOrder());
 			surveyDesign.getMissionProperties().add(mp);
 			
 			//check if the attribute exists already		
-			org.wcs.smart.er.xml.model.surveyDesign.MissionAttribute xmlattr = xmlproperty.getMissionAttribute();
+			org.wcs.smart.er.xml.model.surveydesign.MissionAttribute xmlattr = xmlproperty.getMissionAttribute();
 			MissionAttribute existingAttr = getMissionAttribute(xmlattr, session);
 			if(existingAttr == null){
 				//create a new mission attribute
@@ -119,7 +119,7 @@ public class SurveyDesignFromXmlConverter {
 				attr.setType(AttributeType.valueOf(xmlattr.getAttributeType()));
 				
 				attr.setAttributeList(new ArrayList<MissionAttributeListItem>());
-				for(org.wcs.smart.er.xml.model.surveyDesign.MissionAttributeListItem xmlmali : xmlattr.getMissionAttributeListItem()){
+				for(org.wcs.smart.er.xml.model.surveydesign.MissionAttributeListItem xmlmali : xmlattr.getMissionAttributeListItem()){
 					MissionAttributeListItem mali = new MissionAttributeListItem();
 					mali.setAttribute(attr);
 					mali.setKeyId(xmlmali.getKeyid());
@@ -163,13 +163,13 @@ public class SurveyDesignFromXmlConverter {
 
 		//sampling units attributes
 		surveyDesign.setSamplingUnitAttributes(new ArrayList<SurveyDesignSamplingUnitAttribute>());
-		for(org.wcs.smart.er.xml.model.surveyDesign.SurveyDesignSamplingUnitAttribute xmlsdsua : xml.getSurveyDesignSamplingUnitAttribute()){
+		for(org.wcs.smart.er.xml.model.surveydesign.SurveyDesignSamplingUnitAttribute xmlsdsua : xml.getSurveyDesignSamplingUnitAttribute()){
 			
 			SurveyDesignSamplingUnitAttribute sdsua = new SurveyDesignSamplingUnitAttribute();
 			sdsua.setSurveyDesign(surveyDesign);
 			surveyDesign.getSamplingUnitAttributes().add(sdsua);
 			
-			org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttribute xmlsua = xmlsdsua.getSamplingUnitAttributes().get(0);
+			org.wcs.smart.er.xml.model.surveydesign.SamplingUnitAttribute xmlsua = xmlsdsua.getSamplingUnitAttributes().get(0);
 			SamplingUnitAttribute existingSua = getSamplingUnitAttribute(xmlsua, session);
 			
 			if(existingSua == null){
@@ -180,7 +180,7 @@ public class SurveyDesignFromXmlConverter {
 				sua.setKeyId(xmlsua.getKeyId());
 				importNames(xmlsua.getNames(), sua, session, false);
 				sua.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
-				for (org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeListItem xmlsuli : xmlsua.getListItems()){
+				for (org.wcs.smart.er.xml.model.surveydesign.SamplingUnitAttributeListItem xmlsuli : xmlsua.getListItems()){
 					SamplingUnitAttributeListItem suli = new SamplingUnitAttributeListItem();
 					suli.setAttribute(sua);
 					suli.setKeyId(xmlsuli.getKeyId());
@@ -200,10 +200,10 @@ public class SurveyDesignFromXmlConverter {
 		return surveyDesign;
 	}
 	
-	public static List<SamplingUnit> getSamplingUnits(org.wcs.smart.er.xml.model.surveyDesign.SurveyDesign xml, SurveyDesign convertedDesign, Session session) throws ParseException{
+	public static List<SamplingUnit> getSamplingUnits(org.wcs.smart.er.xml.model.surveydesign.SurveyDesign xml, SurveyDesign convertedDesign, Session session) throws ParseException{
 		List<SamplingUnit> newUnits = new ArrayList<SamplingUnit>();
 		
-		for (org.wcs.smart.er.xml.model.surveyDesign.SamplingUnit xmlunit : xml.getSamplingUnit()){
+		for (org.wcs.smart.er.xml.model.surveydesign.SamplingUnit xmlunit : xml.getSamplingUnit()){
 			
 			SamplingUnit unit = new SamplingUnit();
 			unit.setGeom(xmlunit.getGeom());
@@ -215,7 +215,7 @@ public class SurveyDesignFromXmlConverter {
 			unit.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
 			
 			//sampling unit attribute values
-			for(org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeValue xmlsuav : xmlunit.getSamplingUnitAttributeValue()){
+			for(org.wcs.smart.er.xml.model.surveydesign.SamplingUnitAttributeValue xmlsuav : xmlunit.getSamplingUnitAttributeValue()){
 				SamplingUnitAttributeValue suav = new SamplingUnitAttributeValue();
 				boolean found = false;
 				for(SurveyDesignSamplingUnitAttribute sua : convertedDesign.getSamplingUnitAttributes()){					
@@ -245,14 +245,14 @@ public class SurveyDesignFromXmlConverter {
 
 	}
 
-	private static MissionAttribute getMissionAttribute(org.wcs.smart.er.xml.model.surveyDesign.MissionAttribute xmlattr, Session s) {
+	private static MissionAttribute getMissionAttribute(org.wcs.smart.er.xml.model.surveydesign.MissionAttribute xmlattr, Session s) {
 		List<MissionAttribute> values = s.createCriteria(MissionAttribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
 				.add(Restrictions.eq("keyId", xmlattr.getKeyId())).list(); //$NON-NLS-1$ 
 		if (values.size() > 0){
 			MissionAttribute attr = values.get(0);
 			
-			for(org.wcs.smart.er.xml.model.surveyDesign.MissionAttributeListItem xmlMali :xmlattr.getMissionAttributeListItem()){
+			for(org.wcs.smart.er.xml.model.surveydesign.MissionAttributeListItem xmlMali :xmlattr.getMissionAttributeListItem()){
 				boolean match = false;
 				for(MissionAttributeListItem mali : attr.getAttributeList()){
 					if(xmlMali.getKeyid().equals(mali.getKeyId())){
@@ -277,14 +277,14 @@ public class SurveyDesignFromXmlConverter {
 		return null;
 	}
 
-	private static SamplingUnitAttribute getSamplingUnitAttribute(org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttribute xmlsua, Session s) {
+	private static SamplingUnitAttribute getSamplingUnitAttribute(org.wcs.smart.er.xml.model.surveydesign.SamplingUnitAttribute xmlsua, Session s) {
 		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
 				.add(Restrictions.eq("keyId", xmlsua.getKeyId())).list(); //$NON-NLS-1$ 
 		if (values.size() > 0){
 			SamplingUnitAttribute attr = values.get(0);
 			
-			for(org.wcs.smart.er.xml.model.surveyDesign.SamplingUnitAttributeListItem xmlMali :xmlsua.getListItems()){
+			for(org.wcs.smart.er.xml.model.surveydesign.SamplingUnitAttributeListItem xmlMali :xmlsua.getListItems()){
 				boolean match = false;
 				for(SamplingUnitAttributeListItem mali : attr.getAttributeList()){
 					if(xmlMali.getKeyId().equals(mali.getKeyId())){

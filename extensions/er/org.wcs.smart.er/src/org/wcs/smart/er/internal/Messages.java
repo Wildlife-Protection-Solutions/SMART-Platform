@@ -848,6 +848,38 @@ public class Messages extends NLS {
 	public static String TypePage_suTypeLabel;
 	public static String TypePage_Title;
 	public static String TypePage1_Title;
+
+	public static String XMLtoMissionConverter_0;
+
+	public static String XMLtoMissionConverter_1;
+
+	public static String XMLtoMissionConverter_10;
+
+	public static String XMLtoMissionConverter_11;
+
+	public static String XMLtoMissionConverter_12;
+
+	public static String XMLtoMissionConverter_13;
+
+	public static String XMLtoMissionConverter_14;
+
+	public static String XMLtoMissionConverter_15;
+
+	public static String XMLtoMissionConverter_2;
+
+	public static String XMLtoMissionConverter_3;
+
+	public static String XMLtoMissionConverter_4;
+
+	public static String XMLtoMissionConverter_5;
+
+	public static String XMLtoMissionConverter_6;
+
+	public static String XMLtoMissionConverter_7;
+
+	public static String XMLtoMissionConverter_8;
+
+	public static String XMLtoMissionConverter_9;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
