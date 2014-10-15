@@ -88,7 +88,14 @@ public class SurveyDeleteCaHandler implements ICaDeleteHandler{
 
 		//mission tracks 
 		q = session.createQuery(
-				"DELETE MissionTrack mp WHERE mp.mission IN " + //$NON-NLS-1$
+				"DELETE MissionTrack mt WHERE mt.missionDay IN (SELECT md FROM MissionDay md WHERE md.mission IN " + //$NON-NLS-1$
+				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea))"); //$NON-NLS-1$
+		q.setParameter("conservationArea", ca); //$NON-NLS-1$
+		q.executeUpdate();
+
+		//mission days
+		q = session.createQuery(
+				"DELETE MissionDay md WHERE md.mission IN " + //$NON-NLS-1$
 				"(SELECT ma FROM Mission ma join ma.survey s join s.surveyDesign sd WHERE sd.conservationArea = :conservationArea)"); //$NON-NLS-1$
 		q.setParameter("conservationArea", ca); //$NON-NLS-1$
 		q.executeUpdate();
