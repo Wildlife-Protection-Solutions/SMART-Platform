@@ -93,8 +93,9 @@ public class EditSurveyDialog extends TitleAreaDialog{
 	
 	@Override
 	public boolean close(){
-		try{
-			session.close();
+		try {
+			if (session.isOpen())
+				session.close();
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		}
