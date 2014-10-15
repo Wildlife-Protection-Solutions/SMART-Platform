@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.er.xml.model.surveyDesign;
+package org.wcs.smart.er.xml.model.surveydesign;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;

@@ -6,4 +6,4 @@
 //
 
 @javax.xml.bind.annotation.XmlSchema(namespace = "http://www.smartconservationsoftware.org/xml/1.0/entitytype", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
-package org.wcs.smart.er.xml.model.surveyDesign;
+package org.wcs.smart.er.xml.model.surveydesign;

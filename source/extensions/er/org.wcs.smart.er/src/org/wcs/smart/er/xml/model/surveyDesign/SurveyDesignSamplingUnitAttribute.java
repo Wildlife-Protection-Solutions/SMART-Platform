@@ -6,7 +6,7 @@
 //
 
 
-package org.wcs.smart.er.xml.model.surveyDesign;
+package org.wcs.smart.er.xml.model.surveydesign;
 
 import java.util.ArrayList;
 import java.util.List;

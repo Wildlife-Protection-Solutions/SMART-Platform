@@ -43,6 +43,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -162,6 +163,7 @@ public class XMLtoMissionConverter {
 			md.setDate(mdtxml.getDate().toGregorianCalendar().getTime());
 			md.setStartTime( new Time(mdtxml.getStartTime().toGregorianCalendar().getTime().getTime()) );
 			md.setEndTime( new Time(mdtxml.getEndTime().toGregorianCalendar().getTime().getTime()) );
+			md.setRestMinutes(mdtxml.getRestMinutes());
 			md.setMission(mission);
 			
 			mission.getMissionDays().add(md);
@@ -301,7 +303,7 @@ public class XMLtoMissionConverter {
 					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + MissionXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
 					if (!f.exists()){
 						warnings.add(MessageFormat.format(
-								"Attachment {0} will not be imported.  File not found ''{1}''", new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XMLtoMissionConverter_0, new Object[]{ filename, f.getAbsolutePath()}));
 								
 					}else{
 						att.setCopyFromLocation(f);
@@ -338,7 +340,7 @@ public class XMLtoMissionConverter {
 					File f = new File(attachmentLocation.getAbsoluteFile() + File.separator + MissionXmlManager.ATTACHMENT_DIR_NAME + File.separator + filename );
 					if (!f.exists()){
 						warnings.add(MessageFormat.format(
-								"Attachment {0} will not be imported.  File not found ''{1}''", new Object[]{ filename, f.getAbsolutePath()}));
+								Messages.XMLtoMissionConverter_1, new Object[]{ filename, f.getAbsolutePath()}));
 					}else{
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
@@ -351,7 +353,7 @@ public class XMLtoMissionConverter {
 		
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
-			warnings.add(MessageFormat.format("Observation category {0} for waypoint {1} on {2} could not be found. These observations will not be imported.",
+			warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_2,
 					new Object[]{xml.getCategoryKey(),parent.getId() ,DateFormat.getDateTimeInstance().format(parent.getDateTime())  }) 
 					);
 			return null;
@@ -373,13 +375,13 @@ public class XMLtoMissionConverter {
 						ob.getAttributes().add(attribute);
 					}else{
 						warnings.add(
-								MessageFormat.format("Waypoint {0}, the observation on {1} has more than one value for the attribute {2}.  Only a single value can exist for each attribute within a given observation; only the first will be used all others will be ignored.",
+								MessageFormat.format(Messages.XMLtoMissionConverter_3,
 										new Object[]{parent.getId(), DateFormat.getDateTimeInstance().format(parent.getDateTime()), attribute.getAttribute().getKeyId()})); 
 										
 					}
 				}else{
 					warnings.add(MessageFormat.format(
-						"Not all data imported for waypoint {0} on {1}. See previous errors", new Object[]{
+						Messages.XMLtoMissionConverter_4, new Object[]{
 							parent.getId(),DateFormat.getDateTimeInstance().format(parent.getDateTime()) }) 
 					);
 					
@@ -396,7 +398,7 @@ public class XMLtoMissionConverter {
 		
 		Attribute dmAttribute = findAttribute(type.getAttributeKey(), parent.getCategory());
 		if (dmAttribute == null){
-			warnings.add(MessageFormat.format("Attribute {0} could not be found for category {1}.  Attribute information will not be imported.",
+			warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_5,
 					new Object[]{type.getAttributeKey(), parent.getCategory().getHkey()}));
 			return null;
 		}else{
@@ -410,45 +412,45 @@ public class XMLtoMissionConverter {
 				
 			}else if (dmAttribute.getType() == AttributeType.NUMERIC){
 				if (type.getDValue() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no double value. Attribute information will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_6, new Object[]{type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setNumberValue(type.getDValue());
 			}else if (dmAttribute.getType() == AttributeType.TEXT){
 				if (type.getSValue() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no string value. Attribute information will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_7, new Object[]{type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setStringValue(type.getSValue());	
 			}else if (dmAttribute.getType() == AttributeType.DATE){
 				if (type.getSValue() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no string value. Attribute information will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_8, new Object[]{type.getAttributeKey()}));
 					return null;
 				}
 				if (!Attribute.isValidDateString(type.getSValue())){
-					warnings.add(MessageFormat.format("The date string ''{0}'' is not valid for attribute ''{1}''  (Requires ''{2}'').  Attribute data will not be imported.", new Object[]{type.getSValue(), type.getAttributeKey(), Attribute.DATE_FORMAT}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_9, new Object[]{type.getSValue(), type.getAttributeKey(), Attribute.DATE_FORMAT}));
 					return null;
 				}
 				attribute.setStringValue(type.getSValue());
 			}else if (dmAttribute.getType() == AttributeType.LIST){
 				if (type.getItemKey() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no value. Attribute information will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_10, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
 				AttributeListItem item = findAttributeListItem(type.getItemKey(), dmAttribute);
 				if (item == null){
-					warnings.add(MessageFormat.format("No list item with key {0} for attribute {1}.  Attribute information will not be imported.", new Object[]{type.getItemKey(),type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_11, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}	
 				attribute.setAttributeListItem(item);
 			}else if (dmAttribute.getType() == AttributeType.TREE){
 				if (type.getItemKey() == null){
-					warnings.add(MessageFormat.format("Attribute {0} has no value. Attribute information will not be imported.", new Object[]{type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_12, new Object[]{type.getAttributeKey()}));
 					return null;
 				}	
 				AttributeTreeNode item = findAttributeTreeItem(type.getItemKey(), dmAttribute);
 				if (item == null){
-					warnings.add(MessageFormat.format("No tree item with key {0} for attribute {1}.  Attribute information will not be imported.", new Object[]{type.getItemKey(),type.getAttributeKey()}));
+					warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_13, new Object[]{type.getItemKey(),type.getAttributeKey()}));
 					return null;
 				}
 				attribute.setAttributeTreeNode(item);
@@ -502,7 +504,7 @@ public class XMLtoMissionConverter {
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			throw new IllegalStateException("There should never be more than one attribute with the same key. Please review the data model.");
+			throw new IllegalStateException(Messages.XMLtoMissionConverter_14);
 		}else{
 			Attribute att = (Attribute) results.get(0);
 			//ensure attribute exists for category
@@ -594,7 +596,7 @@ public class XMLtoMissionConverter {
 		if (results.size() == 0){
 			return null;
 		}else if (results.size() > 1){
-			warnings.add(MessageFormat.format("Multiple options found for {0}. Using the first value found.", new Object[]{objectType}));
+			warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_15, new Object[]{objectType}));
 			return (NamedItem)results.get(0);
 		}else{
 			return (NamedItem)results.get(0);

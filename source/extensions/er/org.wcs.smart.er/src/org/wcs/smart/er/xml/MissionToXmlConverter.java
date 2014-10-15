@@ -146,7 +146,7 @@ public class MissionToXmlConverter {
 		xml.setDate(SmartUtils.toXmlDate(md.getDate()));
 		xml.setStartTime(toXmlTime(md.getStartTime()));
 		xml.setEndTime(toXmlTime(md.getEndTime()));
-		
+		xml.setRestMinutes(md.getRestMinutes());
 		return xml;
 		
 	}
