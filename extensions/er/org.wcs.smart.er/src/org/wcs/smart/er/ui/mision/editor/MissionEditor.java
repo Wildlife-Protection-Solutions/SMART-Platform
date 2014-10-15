@@ -126,7 +126,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 								mission = null;
 								getMission(); //to avoid nested transactions exception
 								final boolean datesChanged = !SmartUtils.isSameDate(lastDates[0], missionDates[0])|| !SmartUtils.isSameDate(lastDates[1], missionDates[1]);
-								mapPage.refresh();
+								
 								Display.getDefault().syncExec(new Runnable(){
 									@Override
 									public void run() {
@@ -143,7 +143,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 											}								
 										}
 									}});
-								
+									mapPage.refresh();
 								return Status.OK_STATUS;
 							}					
 						};

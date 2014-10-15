@@ -38,7 +38,6 @@ import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.Point;
 
 /**
  * Feature reader for mission observation points.
@@ -85,7 +84,15 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	
 	private SimpleFeature createFeature(SurveyWaypoint point){
 		String fid = point.getWaypoint().getId() + "." + SmartUtils.encodeHex(point.getWaypoint().getUuid()); //$NON-NLS-1$
-		Point pnt = gf.createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));
-		return new SurveyFeature(SimpleFeatureBuilder.build(featureType, new Object[]{fid,point.getWaypoint().getId(),pnt},fid));
+		
+		Object[] data = new Object[6];
+		data[0] = fid;
+		data[1] = point.getWaypoint().getId();
+		data[2] = point.getWaypoint().getDateTime();
+		data[3] = point.getWaypoint().getObservationsAsString();
+		data[4] = point.getWaypoint().getComment();
+		data[5] = gf.createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));		
+		
+		return new SurveyFeature(SimpleFeatureBuilder.build(featureType, data, fid));
 	}
 }
