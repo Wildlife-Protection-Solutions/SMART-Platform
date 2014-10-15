@@ -26,15 +26,12 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
+import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.wizard.NewSurveyDesignWizard;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
  * Handler for creating new survey design.
@@ -49,11 +46,9 @@ public class NewSurveyDesignHandler extends AbstractHandler {
 		if (sd == null){
 			return null;
 		}
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState()), SurveyDesignEditor.ID);
-		} catch (PartInitException e) {
-			EcologicalRecordsPlugIn.displayLog(Messages.EditSurveyElementHandler_DesignError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
-		}
+		
+		FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
+		EditSurveyElementHandler.editSurveyDesign(HandlerUtil.getActiveShell(event), new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState()));
 		
 		return null;
 	}

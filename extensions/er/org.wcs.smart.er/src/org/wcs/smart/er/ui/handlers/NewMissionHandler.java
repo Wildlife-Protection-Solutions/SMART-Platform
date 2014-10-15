@@ -32,12 +32,15 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.wizard.NewMissionWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
  * Handler for creating new missions.
@@ -79,13 +82,24 @@ public class NewMissionHandler extends AbstractHandler {
 		}
 		
 	
-		newMission(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
+		Mission m = newMission(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
+		if (m == null) {
+			return null;
+		}
+		
+		FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
+		EditSurveyElementHandler.editMission(HandlerUtil.getActiveShell(event), m.getUuid(), m.getId());
+		
 		return null;
 	}
 	
-	public static void newMission(Shell parent, byte[] parentDesign, byte[] parentSurvey){
-		WizardDialog dialog = new WizardDialog(parent, 
-				new NewMissionWizard(parentDesign, parentSurvey));
-		dialog.open();
+	public static Mission newMission(Shell parent, byte[] parentDesign, byte[] parentSurvey){
+		NewMissionWizard newWizard = new NewMissionWizard(parentDesign, parentSurvey);
+		WizardDialog wd = new WizardDialog(parent, newWizard);
+		if (wd.open() == WizardDialog.OK){
+			return newWizard.getNewMission();
+		}else{
+			return null;
+		}
 	}
 }

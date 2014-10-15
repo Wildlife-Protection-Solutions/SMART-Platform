@@ -33,10 +33,12 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.survey.wizard.NewSurveyWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
  * New survey handler.
@@ -76,7 +78,9 @@ public class NewSurveyHandler extends AbstractHandler {
 			}
 		}
 		
-		newSurvey(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
+		if (newSurvey(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey)) {
+			FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
+		}
 		
 		return null;
 	}
@@ -87,8 +91,9 @@ public class NewSurveyHandler extends AbstractHandler {
 	 * @param parentDesign parent survey design; can be null if unknown
 	 * @param parentSurvey sibling survey; can be null if unknown
 	 */
-	public static void newSurvey(Shell parent, byte[] parentDesign, byte[] parentSurvey){
-		WizardDialog wd = new WizardDialog(parent, new NewSurveyWizard(parentDesign, parentSurvey));
-		wd.open();
+	public static boolean newSurvey(Shell parent, byte[] parentDesign, byte[] parentSurvey){
+		NewSurveyWizard newWizard = new NewSurveyWizard(parentDesign, parentSurvey);
+		WizardDialog wd = new WizardDialog(parent, newWizard);
+		return wd.open() == WizardDialog.OK;
 	}
 }
