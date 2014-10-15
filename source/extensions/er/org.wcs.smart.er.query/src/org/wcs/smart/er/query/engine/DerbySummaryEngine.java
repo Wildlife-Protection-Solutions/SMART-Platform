@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -489,9 +490,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			if (!usedTables.contains(MissionTrack.class)) {
 				fromSql.append(" left join "); //$NON-NLS-1$
 				fromSql.append(tableNamePrefix(MissionTrack.class));
-				fromSql.append( " on temp.mission_uuid = "); //$NON-NLS-1$ 
+				fromSql.append( " on temp.mission_day_uuid = "); //$NON-NLS-1$ 
 				fromSql.append(tablePrefix(MissionTrack.class));
-				fromSql.append(".mission_uuid " ); //$NON-NLS-1$
+				fromSql.append(".mission_day_uuid " ); //$NON-NLS-1$
 				usedTables.add(MissionTrack.class);
 			}
 			
@@ -1072,7 +1073,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						fromSql.append(tableNames.get(MissionTrack.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(MissionTrack.class));
-						fromSql.append(" on temp.mission_uuid = " + tablePrefix(MissionTrack.class) + ".mission_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+						fromSql.append(" on temp.mission_day_uuid = "); //$NON-NLS-1$
+						fromSql.append( tablePrefix(MissionTrack.class) + ".mission_day_uuid"); //$NON-NLS-1$
 						usedTables.add(MissionTrack.class);
 					}
 					fromSql.append(" left join "); //$NON-NLS-1$
@@ -1190,7 +1192,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						fromSql.append(tableNames.get(MissionTrack.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(MissionTrack.class));
-						fromSql.append(" on temp.mission_uuid = " + tablePrefix(MissionTrack.class) + ".mission_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+						fromSql.append(" on temp.mission_day_uuid = "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(MissionTrack.class) + ".mission_day_uuid"); //$NON-NLS-1$ 
 						usedTables.add(MissionTrack.class);
 					}
 					if (((MissionValueItem) value).getValueItem() == ValueItem.TRACK_LENGTH){
@@ -1237,43 +1240,10 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					groupByInnerSql.append( " case when temp.sampling_unit_uuid is null then temp.wp_mission_track_uuid else temp.sampling_unit_uuid end as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
 					groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				}
-				
-//				String prefix = getTablePrefix((PatrolGroupBy) gb);
-//				String name = getFieldName((PatrolGroupBy) gb);
-//				if (prefix != null){
-//					groupByInnerSql.append(prefix + "."); //$NON-NLS-1$
-//				}
-//				groupByInnerSql.append(name + " as " + "gp_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
-//				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
-//				
-//				if (((PatrolGroupBy)gb).getOption() == PatrolQueryOption.EMPLOYEE){
-//					fromSql.append(" left join "); //$NON-NLS-1$
-//					fromSql.append(tableNames.get(PatrolLegMember.class));
-//					fromSql.append(" "); //$NON-NLS-1$
-//					fromSql.append(tablePrefix(PatrolLegMember.class));
-//					fromSql.append(" on temp.pl_uuid = " + tablePrefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-//				}else if (((PatrolGroupBy)gb).getOption().getType() == PatrolQueryOptionType.KEY){
-//					PatrolQueryOption op = ((PatrolGroupBy)gb).getOption();
-//					fromSql.append(" left join "); //$NON-NLS-1$
-//					fromSql.append(tableNames.get(op.getSourceClass()));
-//					fromSql.append(" on temp."); //$NON-NLS-1$
-//					fromSql.append(getUuidFieldName(op));
-//					fromSql.append(" = "  ); //$NON-NLS-1$
-//					fromSql.append(tablePrefix(op.getSourceClass()));
-//					fromSql.append(".uuid"); //$NON-NLS-1$
-//				}
 			}else if (gb instanceof DateGroupBy){
 				IDateGroupBy op = ((DateGroupBy)gb).getOption();
 			
-				String groupByString = "temp.wp_datetime"; //$NON-NLS-1$
-				if (value instanceof MissionValueItem){
-					if (((MissionValueItem) value).getValueItem() == ValueItem.TRACK_LENGTH){
-						//user track length
-						groupByString = tablePrefix(MissionTrack.class) + ".track_date"; //$NON-NLS-1$
-					}
-					//TODO: validate this works mission value items
-				}
-				
+				String groupByString = "temp.mission_day"; //$NON-NLS-1$
 				//data model value item; therefore we use the waypoint date
 				if (op.getClass().equals(DayDateGroupBy.class)){
 					groupByInnerSql.append(groupByString + " as datePart_" + itemcnt); //$NON-NLS-1$
@@ -1456,7 +1426,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
-
+		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionDay.class) + ".mission_day, "); //$NON-NLS-1$
 		
 		
 		if (includeObservations){
@@ -1469,14 +1440,13 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid "); //$NON-NLS-1$
 		}else{
+			sql.append("cast(null as char for bit data),");	//su_uuid //$NON-NLS-1$
+			sql.append("cast(null as char),");	//suid //$NON-NLS-1$
+			sql.append("cast(null as char for bit data),");	//trackuuid //$NON-NLS-1$
 			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as char),");	//wpob_uuid //$NON-NLS-1$
-			sql.append("cast(null as double),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as timestamp),");	//wpob_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data)");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as timestamp),");	//wp_datetime //$NON-NLS-1$
+			sql.append("cast(null as char for bit data),");	//wpuuid //$NON-NLS-1$
+			sql.append("cast(null as char for bit data)");	//employee_uuid  //$NON-NLS-1$
 		}
 		return sql.toString();
 	}
@@ -1501,6 +1471,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_start timestamp,"); //$NON-NLS-1$
 		sql.append("mission_end timestamp,"); //$NON-NLS-1$
+		
+		sql.append("mission_day_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_day date,"); //$NON-NLS-1$
 		
 		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
