@@ -100,7 +100,7 @@ public class MissionDataSource extends AbstractDataStore{
 	}
 
 	private SimpleFeatureType createPointSchema() throws SchemaException{
-		String spec = "fid:String,id:String,geom:Point:srid=4326"; //$NON-NLS-1$
+		String spec = "fid:String,id:Integer,date:Date,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType("smart." + MISSIONWAYPOINT_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}

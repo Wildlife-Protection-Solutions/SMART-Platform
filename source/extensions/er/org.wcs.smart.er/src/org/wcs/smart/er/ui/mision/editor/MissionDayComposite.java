@@ -552,10 +552,10 @@ public class MissionDayComposite {
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			Mission m = (Mission) session.merge(editor.getMissionEditor().getMission());
+			session.update(editor.getMissionEditor().getMission());
 
 			//find mission day
-			missionDay = findMissionDay(m);
+			missionDay = findMissionDay(editor.getMissionEditor().getMission());
 			if (missionDay == null){
 				throw new IllegalStateException(MessageFormat.format(Messages.MissionDayComposite_DayNotFound, new Object[]{editor.getDay().toString()}));
 			}
