@@ -252,7 +252,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	public MissionAttribute getMissionAttributeByKey(String missionAttributeKeyId, Session session) {
 		List<MissionAttribute> list = session.createCriteria(MissionAttribute.class)
 				.add(Restrictions.eq("keyId", missionAttributeKeyId)) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		if (list.size() > 0){
 			return list.get(0);
@@ -263,9 +263,9 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	@Override
 	public MissionAttributeListItem getMissionAttributeListItenByKey(String key, Session session) {
 		List<MissionAttributeListItem> list = session.createCriteria(MissionAttributeListItem.class)
-				.createAlias("attribute", "a")
+				.createAlias("attribute", "a") //$NON-NLS-1$ //$NON-NLS-2$
 				.add(Restrictions.eq("keyId", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("a.conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("a.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		if (list.size() > 0){
 			return list.get(0);
@@ -276,9 +276,9 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	@Override
 	public SamplingUnit getSamplingUnitById(String key, Session session) {
 		List<SamplingUnit> list = session.createCriteria(SamplingUnit.class)
-				.createAlias("surveyDesign","sd")
+				.createAlias("surveyDesign","sd") //$NON-NLS-1$ //$NON-NLS-2$
 				.add(Restrictions.eq("id", key)) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		if (list.size() > 0){
 			return list.get(0);
@@ -290,9 +290,9 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	@Override
 	public Survey getSurveyById(Session session, String id) {
 		List<Survey> surveys = session.createCriteria(Survey.class)
-				.createAlias("surveyDesign", "sd")
+				.createAlias("surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
 				.add(Restrictions.eq("id", id)) //$NON-NLS-1$
-				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea()))
+				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.list();
 		if (surveys.size() > 0){
 			return surveys.get(0);

@@ -1,7 +1,3 @@
-
-
-
-
 /*
  * Copyright (C) 2012 Wildlife Conservation Society
  *

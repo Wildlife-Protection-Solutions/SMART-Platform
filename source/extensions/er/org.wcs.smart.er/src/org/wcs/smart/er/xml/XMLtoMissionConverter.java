@@ -35,7 +35,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -559,10 +558,6 @@ public class XMLtoMissionConverter {
 		return HibernateManager.findEmployeeByIdAndName(type.getEmployeeId(), type.getGivenName(), type.getFamilyName(), ca, session);
 	}
 	
-	private  Employee findEmployeeById(MembersType type){
-		return HibernateManager.findEmployeeById(type.getEmployeeId(), ca, session);
-	}
-	
 	private  Employee findEmployeeByName(MembersType type){
 		return HibernateManager.findEmployeeByName(type.getGivenName(), type.getFamilyName(), ca, session);
 	}
@@ -582,27 +577,6 @@ public class XMLtoMissionConverter {
 	private SamplingUnit findSamplingUnit(String key, Session session) {
 		return SurveyHibernateManager.getInstance().getSamplingUnitById(key, session);
 	}
-	
-	private NamedItem findValue(String langCode, String value, String objectType){
-		
-		String sql = "SELECT c FROM Language a, Label b, " + objectType + " c WHERE b.id.language = a.uuid AND b.id.element.uuid = c.uuid and a.code = :cd and b.value = :value and c.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
-		
-		Query query = session.createQuery(sql);
-		query.setParameter("cd", langCode); //$NON-NLS-1$
-		query.setParameter("value", value); //$NON-NLS-1$
-		query.setParameter("ca", ca); //$NON-NLS-1$
-		
-		List<?> results = query.list();
-		if (results.size() == 0){
-			return null;
-		}else if (results.size() > 1){
-			warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_15, new Object[]{objectType}));
-			return (NamedItem)results.get(0);
-		}else{
-			return (NamedItem)results.get(0);
-		}
-	}
-	
-	
+
 }
 

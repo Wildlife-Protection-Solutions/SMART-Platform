@@ -25,12 +25,18 @@ package org.wcs.smart.er.ui.mission.export;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Survey tree item for mission/survey tree.
+ * 
+ * @author Emily
+ *
+ */
 public class SurveyTreeItem implements TreeItem{
 
 	private String name;
 	private byte[] uuid;
 	
-	List<MissionTreeItem> children;
+	private List<MissionTreeItem> children;
 	
 	public SurveyTreeItem(){
 		children = new ArrayList<MissionTreeItem>();

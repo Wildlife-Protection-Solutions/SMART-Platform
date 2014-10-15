@@ -121,6 +121,8 @@ public class Messages extends NLS {
 
 	public static String DistanceDirectionComposite_Title;
 
+	public static String EcologicalRecordsPlugIn_ErrorDialogTitle;
+
 	public static String EditMissionAttributeDialog_DeleteButton;
 	public static String EditMissionAttributeDialog_DeleteDialotTitle;
 	public static String EditMissionAttributeDialog_DeleteError;
@@ -360,6 +362,12 @@ public class Messages extends NLS {
 	public static String MissionExportHandler_8;
 
 	public static String MissionExportHandler_9;
+	public static String MissionFilterDialog_Dates;
+
+	public static String MissionFilterDialog_Message;
+
+	public static String MissionFilterDialog_Title;
+
 	public static String MissionGeoResourceInfo_TracksTitle;
 	public static String MissionGeoResourceInfo_WaypointsTitle;
 	public static String MissionImportDialog_0;
@@ -496,6 +504,24 @@ public class Messages extends NLS {
 	public static String MoveWaypointDialog_MoveToLabel;
 
 	public static String MoveWaypointDialog_Title;
+
+	public static String MultiMissionExportDialog_CouldNotCreate;
+
+	public static String MultiMissionExportDialog_DialotTitle;
+
+	public static String MultiMissionExportDialog_DirectoryDoesNotExist;
+
+	public static String MultiMissionExportDialog_FilterLabel;
+
+	public static String MultiMissionExportDialog_InvalidDirectory;
+
+	public static String MultiMissionExportDialog_LoadingListJobName;
+
+	public static String MultiMissionExportDialog_Message;
+
+	public static String MultiMissionExportDialog_SelectionRequired;
+
+	public static String MultiMissionExportDialog_Title;
 
 	public static String NameIdComposite_Button_Change;
 	public static String NameIdComposite_Description;
@@ -848,6 +874,24 @@ public class Messages extends NLS {
 	public static String TypePage_suTypeLabel;
 	public static String TypePage_Title;
 	public static String TypePage1_Title;
+
+	public static String XmlMultiExportTreeViewerDialog_AttachmentsLabel;
+
+	public static String XmlMultiExportTreeViewerDialog_BrowseLabel;
+
+	public static String XmlMultiExportTreeViewerDialog_DeSelectAll;
+
+	public static String XmlMultiExportTreeViewerDialog_DestinationFolder;
+
+	public static String XmlMultiExportTreeViewerDialog_IncludeAttachments;
+
+	public static String XmlMultiExportTreeViewerDialog_InvalidNamesDialog;
+
+	public static String XmlMultiExportTreeViewerDialog_ItemOverwriteWarning;
+
+	public static String XmlMultiExportTreeViewerDialog_OverwriteWarning;
+
+	public static String XmlMultiExportTreeViewerDialog_SelectAll;
 
 	public static String XMLtoMissionConverter_0;
 

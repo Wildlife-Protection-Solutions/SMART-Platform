@@ -22,10 +22,8 @@
 package org.wcs.smart.er.ui.mision.wizard;
 
 import java.sql.Time;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -57,8 +55,6 @@ import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
-import org.wcs.smart.er.ui.mision.editor.MissionDayPage;
-import org.wcs.smart.er.ui.mision.editor.MissionDayPageEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
