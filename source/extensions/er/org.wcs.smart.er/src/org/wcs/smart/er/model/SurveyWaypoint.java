@@ -37,6 +37,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.eclipse.core.runtime.PlatformObject;
 import org.wcs.smart.observation.model.Waypoint;
 
 /**
@@ -52,7 +53,7 @@ import org.wcs.smart.observation.model.Waypoint;
 	@AssociationOverride(name = "id.waypoint", 
 		joinColumns = @JoinColumn(name = "wp_uuid")) })
 
-public class SurveyWaypoint {
+public class SurveyWaypoint extends PlatformObject {
 	
 	/*
 	 * Associated mission
@@ -139,6 +140,15 @@ public class SurveyWaypoint {
 			return Arrays.hashCode(getWaypoint().getUuid());
 		}
 		return super.hashCode();
+	}
+	
+	@Override
+	@Transient
+	public Object getAdapter(Class adapter) {
+		if (adapter.equals(Waypoint.class)){
+			return getWaypoint();
+		}
+		return super.getAdapter(adapter);
 	}
 	
 	@Embeddable
