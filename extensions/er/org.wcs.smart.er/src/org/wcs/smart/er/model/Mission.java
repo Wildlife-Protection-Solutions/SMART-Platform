@@ -33,6 +33,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
@@ -117,6 +118,7 @@ public class Mission extends UuidItem{
 	}
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission", cascade = {CascadeType.ALL})
+	@OrderBy("mission_day asc")
 	public List<MissionDay> getMissionDays() {
 		return this.days;
 	}

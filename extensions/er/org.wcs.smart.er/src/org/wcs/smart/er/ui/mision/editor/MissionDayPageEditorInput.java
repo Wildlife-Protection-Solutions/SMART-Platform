@@ -79,4 +79,16 @@ public class MissionDayPageEditorInput implements IEditorInput {
 		return MessageFormat.format(Messages.MissionDayPageEditorInput_Tooltip, DateFormat.getDateInstance(DateFormat.MEDIUM).format(day.getTime()));
 	}
 
+	@Override
+	public boolean equals(Object other){
+		if (other instanceof MissionDayPageEditorInput){
+			return ((MissionDayPageEditorInput) other).day.equals(this.day);
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return day.hashCode();
+	}
 }
