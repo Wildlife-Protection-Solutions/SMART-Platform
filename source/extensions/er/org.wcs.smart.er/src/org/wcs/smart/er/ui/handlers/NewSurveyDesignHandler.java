@@ -52,7 +52,7 @@ public class NewSurveyDesignHandler extends AbstractHandler {
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState()), SurveyDesignEditor.ID);
 		} catch (PartInitException e) {
-			EcologicalRecordsPlugIn.displayLog(Messages.EditSurveyElementHandler_MissionError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+			EcologicalRecordsPlugIn.displayLog(Messages.EditSurveyElementHandler_DesignError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 		}
 		
 		return null;
