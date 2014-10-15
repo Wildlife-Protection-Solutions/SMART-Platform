@@ -388,6 +388,7 @@ public class MissionDayComposite {
 		observationTable = new TableViewer(mainComposite, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 		toolkit.adapt(observationTable.getTable());
 		setupObservationTable();
+		editor.getMissionEditor().getSelectionProvider().addSelectionProvider(observationTable);
 		observationTable.getTable().addPaintListener(new PaintListener() {
 			boolean called = false;
 			@Override

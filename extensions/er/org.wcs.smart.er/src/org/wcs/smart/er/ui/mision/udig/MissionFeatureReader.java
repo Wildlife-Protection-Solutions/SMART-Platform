@@ -84,8 +84,8 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	}
 	
 	private SimpleFeature createFeature(SurveyWaypoint point){
-		String fid = SmartUtils.encodeHex(point.getWaypoint().getUuid());
+		String fid = point.getWaypoint().getId() + "." + SmartUtils.encodeHex(point.getWaypoint().getUuid()); //$NON-NLS-1$
 		Point pnt = gf.createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));
-		return SimpleFeatureBuilder.build(featureType, new Object[]{fid,point.getWaypoint().getId(),pnt},fid);
+		return new SurveyFeature(SimpleFeatureBuilder.build(featureType, new Object[]{fid,point.getWaypoint().getId(),pnt},fid));
 	}
 }

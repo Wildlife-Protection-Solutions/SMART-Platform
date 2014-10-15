@@ -53,6 +53,7 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.common.control.CombinedSelectionProvider;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -92,6 +93,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private Projection[] projections;
 	private Boolean trackDistanceDirection = null;
 	private ObservationOptions options;
+	
+	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 	private ISurveyEventListener missionDeleteListener = new ISurveyEventListener() {
 		@Override
@@ -226,6 +229,15 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return this.options;
 	}
 	
+	
+	/**
+	 * Editor selection provider.
+	 * @return
+	 */
+	public CombinedSelectionProvider getSelectionProvider(){
+		return this.selectionProvider;
+	}
+	
 	/**
 	 * 
 	 * @return if the mission should record distance and direction
@@ -268,6 +280,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			setPageText(mapIndex, Messages.MissionEditor_MapPage);
 			setPageImage(mapIndex, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 			
+			getSite().setSelectionProvider(selectionProvider);
 		} catch (final Throwable t) {
 			getSite().getPage().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override

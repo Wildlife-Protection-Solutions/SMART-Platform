@@ -1044,5 +1044,15 @@
          </cursor>
       </modalTool>
    </extension>
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.wcs.smart.er.ui.mision.udig.SurveyFeature"
+            class="org.wcs.smart.er.ui.mision.udig.WaypointFeatureAdapterFactory">
+         <adapter
+               type="org.wcs.smart.observation.model.Waypoint">
+         </adapter>
+      </factory>
+   </extension>
 
 </plugin>
