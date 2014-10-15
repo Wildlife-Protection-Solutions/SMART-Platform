@@ -39,7 +39,7 @@
             class="org.wcs.smart.er.model.SurveyWaypoint">
       </class>
       <class
-            ca_property=".mission.survey.surveyDesign.conservationArea"
+            ca_property=".missionDay.mission.survey.surveyDesign.conservationArea"
             class="org.wcs.smart.er.model.MissionTrack">
       </class>
       <class
