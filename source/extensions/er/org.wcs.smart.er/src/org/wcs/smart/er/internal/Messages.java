@@ -447,7 +447,15 @@ public class Messages extends NLS {
 	public static String MissionServiceInfo_Keyword4;
 	public static String MissionSummaryPage_CommentsLabel;
 
+	public static String MissionSummaryPage_DayColumnLabel;
+
+	public static String MissionSummaryPage_DistanceColumnLabel;
+
+	public static String MissionSummaryPage_EndColumnLabel;
+
 	public static String MissionSummaryPage_EndDate;
+
+	public static String MissionSummaryPage_HoursColumnLabel;
 
 	public static String MissionSummaryPage_LeaderLabel;
 
@@ -462,6 +470,8 @@ public class Messages extends NLS {
 	public static String MissionSummaryPage_Properties;
 
 	public static String MissionSummaryPage_PropertyLabel;
+
+	public static String MissionSummaryPage_StartColumnLabel;
 
 	public static String MissionSummaryPage_StartDate;
 

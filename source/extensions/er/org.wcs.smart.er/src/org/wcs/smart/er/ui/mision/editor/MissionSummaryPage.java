@@ -29,7 +29,10 @@ import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -42,6 +45,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -55,8 +59,10 @@ import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.ui.mision.CommentComposite;
 import org.wcs.smart.er.ui.mision.DateComposite;
 import org.wcs.smart.er.ui.mision.IdComposite;
@@ -82,6 +88,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 	private Text txtEnd;
 	private TableViewer lstMembers;
 	private TableViewer tblProperties;
+	private TableViewer dataTable;
 	private Form form;
 	
 	public MissionSummaryPage(MissionEditor missionEditor){
@@ -317,6 +324,67 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			new Label(dataProp, SWT.NONE);
 		}
 		
+		Composite dataTableComp = toolkit.createComposite(dataProp);
+		dataTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
+		dataTableComp.setLayout(new TableColumnLayout());
+		
+		dataTable = new TableViewer(dataTableComp, SWT.BORDER | SWT.FULL_SELECTION);
+		toolkit.adapt(dataTable.getTable());
+		dataTable.setContentProvider(ArrayContentProvider.getInstance());
+		dataTable.getTable().setHeaderVisible(true);
+		dataTable.getTable().setLinesVisible(true);
+		dataTable.addDoubleClickListener(new IDoubleClickListener() {
+			
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				MissionDay md = (MissionDay) ((StructuredSelection)dataTable.getSelection()).getFirstElement();
+				if (md == null){
+					return;
+				}
+				MissionDayPageEditorInput input = new MissionDayPageEditorInput(md.getDate());
+				IEditorPart[] parts = missionEditor.findEditors(input);
+				if (parts != null && parts.length == 1){
+					missionEditor.setActiveEditor(parts[0]);
+				}else{
+					EcologicalRecordsPlugIn.displayLog(MessageFormat.format("Could not find editor page for mission day {0}.", new Object[]{md.getDate()}), null); //$NON-NLS-1$
+				}				
+			}
+		});
+		String[] columns = new String[]{Messages.MissionSummaryPage_DayColumnLabel, Messages.MissionSummaryPage_StartColumnLabel, Messages.MissionSummaryPage_EndColumnLabel, Messages.MissionSummaryPage_DistanceColumnLabel, Messages.MissionSummaryPage_HoursColumnLabel};
+		int[] size = new int[]{20, 20, 20, 20, 20};
+		
+		
+		for (int i = 0; i < columns.length; i ++){
+		
+			TableViewerColumn dayColumn = new TableViewerColumn(dataTable, SWT.NONE);
+			dayColumn.getColumn().setResizable(true);
+			dayColumn.getColumn().setText(columns[i]);
+			final int col = i;
+			dayColumn.setLabelProvider(new ColumnLabelProvider() {
+				@Override
+				public String getText(Object element) {
+					MissionDay md = (MissionDay)element;
+					if (col == 0){
+						return DateFormat.getDateInstance().format(md.getDate());
+					}else if (col == 1){
+						return DateFormat.getTimeInstance().format(md.getStartTime());
+					}else if (col == 2){
+						return DateFormat.getTimeInstance().format(md.getEndTime());
+					}else if (col == 3){
+						double d = 0;
+						for (MissionTrack mt : md.getTracks()){
+							d += mt.getDistance();
+						}
+						return String.valueOf(d);
+					}else if (col == 4){
+						return MissionEditor.formatTimeRange(md.getHoursWorked());
+					}
+					return super.getText(element);
+				}
+			});
+			tLayout.setColumnData(dayColumn.getColumn(), new ColumnWeightData(size[i]));
+		}
+		
 		
 		Point p = comp.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 		scrolltop.setMinSize(p.x, p.y+20);
@@ -341,6 +409,8 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			
 			txtStart.setText(DateFormat.getDateInstance().format(mission.getStartDate()));
 			txtEnd.setText(DateFormat.getDateInstance().format(mission.getEndDate()));
+			
+			dataTable.setInput(mission.getMissionDays());
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		} finally {

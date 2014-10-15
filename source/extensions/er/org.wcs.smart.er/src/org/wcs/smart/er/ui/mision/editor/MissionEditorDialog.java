@@ -24,6 +24,8 @@ package org.wcs.smart.er.ui.mision.editor;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -184,7 +186,17 @@ public class MissionEditorDialog extends TitleAreaDialog {
 					}
 					calStart.add(Calendar.DAY_OF_MONTH, 1);
 				}
+				
+				//ensure these are sorted correctly
+				Collections.sort(toUpdate.getMissionDays(), new Comparator<MissionDay>() {
+
+					@Override
+					public int compare(MissionDay o1, MissionDay o2) {
+						return o1.getDate().compareTo(o2.getDate());
+					}
+				});
 			}
+			
 			
 			session.getTransaction().commit();
 			isChanged = false;
