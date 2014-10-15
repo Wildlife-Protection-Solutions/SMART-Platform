@@ -22,17 +22,18 @@
 
 package org.wcs.smart.er.ui.mission.export;
 
-import java.util.Date;
 
+/**
+ * Mission tree item for survey/mission tree
+ * 
+ * @author Emily
+ *
+ */
 public class MissionTreeItem implements TreeItem {
 
 	private String name;
 	private byte[] uuid;
-
-	private Date startDate;
-	private Date endDate;
-	
-	SurveyTreeItem parent;
+	private SurveyTreeItem parent;
 	
 	public String getName() {
 		return name;

@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package org.wcs.smart.er.xml;
 
 import java.io.IOException;
@@ -41,7 +40,6 @@ import org.wcs.smart.er.xml.model.missions.ObjectFactory;
  * @author Jeff
  * @since 4.0.0
  */
-
 public class MissionXmlManager {
 	private static final String METADATA_CLASSES_PACKAGE = "org.wcs.smart.er.xml.model.missions"; //$NON-NLS-1$
 	

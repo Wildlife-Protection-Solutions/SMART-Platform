@@ -24,8 +24,10 @@
 package org.wcs.smart.er.ui.mission.export;
 
 import java.io.File;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -43,6 +45,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 
@@ -61,7 +64,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
-	private static final String EXPORT_DIALOGTITLE = "Export Missions to XML";
+	private static final String EXPORT_DIALOGTITLE = Messages.MultiMissionExportDialog_DialotTitle;
 
 	private static IDialogSettings dialogSettings = new DialogSettings("org.wcs.smart.patrol.export.dialog"); //$NON-NLS-1$
 	static{
@@ -77,15 +80,15 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 	 * @param patrol patrol to export
 	 */
 	public MultiMissionExportDialog(Shell parentShell) {
-		super(parentShell, "The missiosn below have been filtered.  Click <a>here</a> to change filter.");
+		super(parentShell, Messages.MultiMissionExportDialog_FilterLabel);
 		this.currentFilter.setDateFilter(DateFilter.LAST_30_DAYS, null, null);
 	}
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle("Export Missions");
-		setMessage("Select the Missions you wish to export");
-		getShell().setText("Export Missions");
+		setTitle(Messages.MultiMissionExportDialog_Title);
+		setMessage(Messages.MultiMissionExportDialog_Message);
+		getShell().setText(Messages.MultiMissionExportDialog_Title);
 		loadObjectData();
 		return super.createDialogArea(parent);
 	}
@@ -106,21 +109,21 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 	private boolean validate(){
 		
 		if (super.getTreeViewer().getCheckedElements().length == 0) {
-			MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, "You much select at least 1 mission to export.");
+			MessageDialog.openInformation(getShell(), EXPORT_DIALOGTITLE, Messages.MultiMissionExportDialog_SelectionRequired);
 			return false;
 		}
 		
 		File dir = new File(txtFile.getText());
 		if (!dir.exists()) {
-			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format("The selected directory does not exist: {0}", new Object[]{dir.getAbsolutePath()}))) {
+			if (!MessageDialog.openQuestion(getShell(), EXPORT_DIALOGTITLE, MessageFormat.format(Messages.MultiMissionExportDialog_DirectoryDoesNotExist, new Object[]{dir.getAbsolutePath()}))) {
 				return false;
 			}
 			if (!SmartUtils.createDirectory(dir)){
-				EcologicalRecordsPlugIn.displayLog("Could not created selected directory.", null);
+				EcologicalRecordsPlugIn.displayLog(Messages.MultiMissionExportDialog_CouldNotCreate, null);
 				return false;
 			}
 		}else if (!dir.isDirectory()){
-			EcologicalRecordsPlugIn.displayLog(MessageFormat.format("{0} is not a valid directory.", new Object[]{dir.toString()}),null);
+			EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MultiMissionExportDialog_InvalidDirectory, new Object[]{dir.toString()}),null);
 			return false;
 		}
 		return true;
@@ -144,7 +147,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 
 	@Override
 	protected void loadObjectData() {
-		Job loadMissions = new Job("Loading Mission List"){
+		Job loadMissions = new Job(Messages.MultiMissionExportDialog_LoadingListJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
@@ -162,8 +165,9 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 
 						if(prevSurvey != null && surveyName.equals(prevSurvey.getName()) ){
 							MissionTreeItem mti = new MissionTreeItem();
-							mti.setName(row[1] + " [" + row[2] + " - " + row[3] + "]");
+							mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
 							mti.setUuid((byte[]) row[0]);
+							mti.setParent(prevSurvey);
 							prevSurvey.getChildren().add(mti);
 						}else{
 							SurveyTreeItem surveyTreeItem = new SurveyTreeItem();
@@ -171,8 +175,9 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 							surveyTreeItem.setUuid((byte[]) row[5]);
 							
 							MissionTreeItem mti = new MissionTreeItem();
-							mti.setName(row[1] + " [" + row[2] + " - " + row[3] + "]");
+							mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
 							mti.setUuid((byte[]) row[0]);
+							mti.setParent(surveyTreeItem);
 							surveyTreeItem.getChildren().add(mti);
 							
 							prevSurvey = surveyTreeItem;
@@ -206,10 +211,11 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 			}
 			
 		};
-		loadMissions.schedule();
+		loadMissions.schedule();	
+	}
 	
-		
-		
+	private String createMissionLabel(String id, Date start, Date end){
+		return id + " [" + DateFormat.getDateInstance().format(start) + " - " + DateFormat.getDateInstance().format(end) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	@Override

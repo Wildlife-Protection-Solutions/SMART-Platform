@@ -23,8 +23,6 @@ package org.wcs.smart.er.ui.mission.export;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.Survey;
 
 /**
  * Label provider for survey/mission tree

@@ -19,9 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package org.wcs.smart.er.ui.handlers;
-
  
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -49,7 +47,6 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.xml.MissionImportDialog;
 import org.wcs.smart.er.xml.MissionImporter;
-
 
 /**
  * Command handler for importing mission data from xml and zip files.

@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Session;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionTrack;

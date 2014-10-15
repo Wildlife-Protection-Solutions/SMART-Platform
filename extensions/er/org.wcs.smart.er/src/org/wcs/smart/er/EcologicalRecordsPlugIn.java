@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.internal.SurveyDeleteCaHandler;
 /**
  * The activator class controls the plug-in life cycle
@@ -161,7 +162,7 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 
 			@Override
 			public void run() {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", message);
+				MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EcologicalRecordsPlugIn_ErrorDialogTitle, message);
 			}
 			
 		});

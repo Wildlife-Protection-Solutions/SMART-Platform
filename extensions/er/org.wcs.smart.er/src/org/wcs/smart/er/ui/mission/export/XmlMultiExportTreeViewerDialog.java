@@ -57,6 +57,8 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.common.filter.IUpdatableView;
+import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -100,7 +102,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 				String fileName = SmartUtils.getFileName(objName);
 				if (file2Obj.containsKey(fileName)) {
 					//output file name conflict error (two exported items will try to write data in a same file)
-					MessageDialog.openWarning(getShell(), "Invalid File Names", MessageFormat.format("Objects with names {0} and {1} will be written to the same output file with the name {2}.\n\nRename one of the objects or export them separately.", file2Obj.get(fileName), objName, fileName));
+					MessageDialog.openWarning(getShell(), Messages.XmlMultiExportTreeViewerDialog_InvalidNamesDialog, MessageFormat.format(Messages.XmlMultiExportTreeViewerDialog_ItemOverwriteWarning, file2Obj.get(fileName), objName, fileName));
 					return;
 				}
 				file2Obj.put(fileName, objName);
@@ -144,7 +146,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		// create OK and Cancel buttons by default
-		Button b = createButton(parent, IDialogConstants.OK_ID, "Export", true);
+		Button b = createButton(parent, IDialogConstants.OK_ID, DialogConstants.EXPORT_BUTTON_TEXT, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 
 		b.setEnabled(false);
@@ -163,7 +165,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("Destination Folder" + "*:"); //$NON-NLS-1$
+		lbl.setText(Messages.XmlMultiExportTreeViewerDialog_DestinationFolder + "*:");  //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		txtFile = new Text(main, SWT.BORDER);
 		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -185,7 +187,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		}
 				
 		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText("Browse");
+		btnBrowse.setText(Messages.XmlMultiExportTreeViewerDialog_BrowseLabel);
 		btnBrowse.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -203,7 +205,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		});
 
 		lbl = new Label(main, SWT.NONE);
-		lbl.setText("Include Attachements" + "**:"); //$NON-NLS-1$
+		lbl.setText(Messages.XmlMultiExportTreeViewerDialog_AttachmentsLabel + "**:"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		btnIncludeAttachments = new Button(main, SWT.CHECK);
@@ -337,7 +339,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		lowerComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP,true,false,3,1));
 		
 		final Link selectAll = new Link(lowerComp, SWT.NONE);
-		selectAll.setText("<a>" + "Select All" + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		selectAll.setText("<a>" + Messages.XmlMultiExportTreeViewerDialog_SelectAll + "</a>");  //$NON-NLS-1$ //$NON-NLS-2$
 		
 		lbl = new Label(lowerComp, SWT.VERTICAL | SWT.SEPARATOR);
 		gd = new GridData(SWT.FILL, SWT.FILL, false, false);
@@ -345,7 +347,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		lbl.setLayoutData(gd);
 		
 		final Link deselectAll = new Link(lowerComp, SWT.NONE);
-		deselectAll.setText("<a>" + "Deselect All" + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		deselectAll.setText("<a>" + Messages.XmlMultiExportTreeViewerDialog_DeSelectAll + "</a>");   //$NON-NLS-1$ //$NON-NLS-2$
 		
 		Listener listener = new Listener(){
 			@Override
@@ -358,14 +360,14 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		lbl = new Label(main, SWT.WRAP);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd.widthHint = 250;
-		lbl.setText("*" + "Existing files may automatically be overwritten."); //$NON-NLS-1$
+		lbl.setText("*" + Messages.XmlMultiExportTreeViewerDialog_OverwriteWarning); //$NON-NLS-1$
 		lbl.setLayoutData(gd);
 		
 		
 		lbl = new Label(main, SWT.WRAP);
 		gd = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
 		gd.widthHint = 250;
-		lbl.setText("**" + "If attachments are included a zip file will be generated that includes the selected object and attachments. Otherwise only a xml file is exported."); //$NON-NLS-1$
+		lbl.setText("**" + Messages.XmlMultiExportTreeViewerDialog_IncludeAttachments); //$NON-NLS-1$
 		lbl.setLayoutData(gd);
 		
 		return composite;

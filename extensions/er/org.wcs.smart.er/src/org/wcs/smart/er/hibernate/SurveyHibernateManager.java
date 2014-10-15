@@ -133,9 +133,9 @@ public class SurveyHibernateManager {
 //		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
 //		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 
-		List<?> results = s.createCriteria(Mission.class).createAlias("survey", "s")
-			.add(Restrictions.like("id", sb.toString() + "%")).addOrder(Order.desc("id"))
-			.list(); //$NON-NLS-1$ 
+		List<?> results = s.createCriteria(Mission.class).createAlias("survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
+			.add(Restrictions.like("id", sb.toString() + "%")).addOrder(Order.desc("id")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			.list();
 		
 		long idNumber = 0;
 		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {

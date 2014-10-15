@@ -21,18 +21,16 @@
  */
 package org.wcs.smart.er.ui.mission.export;
 
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.DateFilterComposite;
 import org.wcs.smart.common.filter.SmartFilterDialog;
-import org.wcs.smart.common.filter.StringFilterComposite;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -47,12 +45,6 @@ public class MissionFilterDialog extends SmartFilterDialog {
 	private MissionViewFilter currentFilter;
 	
 	private DateFilterComposite dateFilterCmp;
-	private StringFilterComposite patrolIdFilterCmp;
-	
-	//type filter
-	private Button btnFilterTypes;
-	private Button btnIncludeAllTypes;
-	private CheckboxTableViewer patrolTypeTableViewer;
 	
 	/**
 	 * Create the dialog.
@@ -93,9 +85,9 @@ public class MissionFilterDialog extends SmartFilterDialog {
 	 */
 	protected Control createDialogArea(Composite parent) {
 		final Composite filter = (Composite)super.createDialogArea(parent);
-		setMessage("Filter the Missions");
-		setTitle("Mission Filter");
-		getShell().setText("Mission Filter");
+		setMessage(Messages.MissionFilterDialog_Message);
+		setTitle(Messages.MissionFilterDialog_Title);
+		getShell().setText(Messages.MissionFilterDialog_Title);
 		
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -104,7 +96,7 @@ public class MissionFilterDialog extends SmartFilterDialog {
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-			Composite dateFilterExpComp = createGroupComposite("Mission Dates", composite);
+			Composite dateFilterExpComp = createGroupComposite(Messages.MissionFilterDialog_Dates, composite);
 			dateFilterCmp = new DateFilterComposite(dateFilterExpComp, SWT.NONE, this);
 			
 			updateControlsValues();
