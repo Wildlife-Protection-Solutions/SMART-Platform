@@ -402,7 +402,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	@Override
 	public void doSaveAs() {
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
 	 */

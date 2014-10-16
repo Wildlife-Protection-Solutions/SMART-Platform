@@ -58,7 +58,9 @@ public class MissionTrack extends UuidItem{
 	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
 	public enum TrackType {
-		SAMPLING_UNIT (Messages.MissionTrack_SuTrackGuiName), 
+		// track as associated with su 
+		SAMPLING_UNIT (Messages.MissionTrack_SuTrackGuiName),
+		// track has not su association
 		TRACK (Messages.MissionTrack_TrackGuiName);
 	
 		private String guiName;
@@ -75,15 +77,13 @@ public class MissionTrack extends UuidItem{
 	private byte[] geom;
 	private Float distance = null;
 	private TrackType type;
-	
 	private MissionDay missionDay;
 	private LineString ls;
-	
 	private String id;
-	
 	private SamplingUnit unit;
 	
-	public MissionTrack(){	
+	public MissionTrack(){
+		this.type = TrackType.TRACK;
 	}
 	
 	@Column(name="geometry")
@@ -110,7 +110,7 @@ public class MissionTrack extends UuidItem{
 		return this.type;
 	}
 	
-	public void setType(TrackType type){
+	protected void setType(TrackType type){
 		this.type = type;
 	}
 	
@@ -133,6 +133,11 @@ public class MissionTrack extends UuidItem{
 	
 	public void setSamplingUnit(SamplingUnit unit) {
 		this.unit = unit;
+		if (unit == null){
+			setType(TrackType.TRACK);
+		}else{
+			setType(TrackType.SAMPLING_UNIT);
+		}
 	}
 		
 	@Column(name="id")

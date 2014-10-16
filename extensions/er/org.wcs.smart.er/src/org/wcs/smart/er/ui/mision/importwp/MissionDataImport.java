@@ -41,7 +41,6 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.ui.mision.editor.SaveMissionTracksJob;
 import org.wcs.smart.er.ui.mision.editor.SaveWaypointJob;
@@ -185,7 +184,6 @@ public class MissionDataImport {
 			}
 			newTrack.setId(id);
 			newTrack.setMissionDay(value.missionDay);
-			newTrack.setType(TrackType.SAMPLING_UNIT);
 			if (newTrack != null){
 				List<MissionTrack> tracks = mdtracks.get(value.missionDay);
 				if (tracks == null){
@@ -250,9 +248,6 @@ public class MissionDataImport {
 			for (MissionTrack track : type.getValue()){
 				MissionDay md = type.getKey();
 				mission = md.getMission();
-				if (track.getType() == null){
-					track.setType(TrackType.SAMPLING_UNIT);
-				}
 				md.getTracks().add(track);
 				track.setMissionDay(md);
 			}

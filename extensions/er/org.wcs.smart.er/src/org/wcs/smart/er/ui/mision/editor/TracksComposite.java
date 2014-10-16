@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
@@ -98,7 +97,6 @@ import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.ui.ISurveyListener;
 import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
@@ -504,7 +502,7 @@ public class TracksComposite extends Composite implements MapPart{
 	}
 	
 	private void updateMapSelection(){
-		 
+		 if (trackLayers == null) return;
 		//update map language
 		IStructuredSelection selection = (IStructuredSelection) trackViewer.getSelection();
 		
@@ -646,11 +644,10 @@ public class TracksComposite extends Composite implements MapPart{
 					if (TracksComposite.this.isDisposed())
 						return;
 					toolComp.selectLastTool();
-					splitItem.setSelection(false);
-
 					if (points == null){
 						//tool has been de-activated
 						clearMessage();
+						splitItem.setSelection(false);
 						return;
 					}
 					IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
@@ -694,7 +691,6 @@ public class TracksComposite extends Composite implements MapPart{
 						newTrack.setLineString(newLs[1]);
 						newTrack.setMissionDay(trackToSplit.getMissionDay());
 						newTrack.setSamplingUnit(trackToSplit.getSamplingUnit());
-						newTrack.setType(trackToSplit.getType());
 						
 						trackToSplit.getMissionDay().getTracks().add(newTrack);
 						
@@ -784,7 +780,7 @@ public class TracksComposite extends Composite implements MapPart{
 			tpd.open();
 			
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
-			
+			toolComp.selectLastTool();
 			refresh(false);
 		}
 	}
@@ -854,23 +850,19 @@ public class TracksComposite extends Composite implements MapPart{
 						changed = true;
 						t.setSamplingUnit(null);
 					}
-					
-					t.setType(TrackType.TRACK);
 				}else{
 					Object value2 = editor.getSamplingUnit((Integer)value);
 					if (value2 != null && value2 instanceof SamplingUnit){
 						if ((t.getSamplingUnit() != null && !t.getSamplingUnit().equals(value2)) || 
 								t.getSamplingUnit() == null){
 							t.setSamplingUnit((SamplingUnit) value2);
-							t.setType(TrackType.SAMPLING_UNIT);
-							changed = true;
+												changed = true;
 						}
 					}else{
 						if (t.getSamplingUnit() != null){
 							t.setSamplingUnit(null);
 							changed = true;
-						}
-						t.setType(TrackType.TRACK);
+						}					
 					}
 				}
 				if (changed){
@@ -938,7 +930,7 @@ public class TracksComposite extends Composite implements MapPart{
 				new float[]{15,1},
 				null, null, null);
 		
-		Stroke toDay = sf.createStroke(ff.literal("#0080FF"), ff.literal(2.0)); //$NON-NLS-1$
+		Stroke toDay = sf.createStroke(ff.literal("#0080FF"), ff.literal(3.0)); //$NON-NLS-1$
 
 		Filter dateFilter = ff.equals(ff.property("date"), ff.literal(dialog.getMissionDay().getDate())); //$NON-NLS-1$
 		LineSymbolizer otherSym = sf.createLineSymbolizer();
