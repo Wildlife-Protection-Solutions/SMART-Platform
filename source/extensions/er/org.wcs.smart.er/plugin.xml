@@ -111,7 +111,7 @@
             class="org.wcs.smart.er.ui.SurveyDesignListView"
             icon="images/icons/obj16/survey.png"
             id="org.wcs.smart.er.surveyDesignListView"
-            name="Surveys"
+            name="%survey.view.name"
             restorable="true">
       </view>
    </extension>
@@ -141,11 +141,11 @@
          <menu
                icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.er.menu.survey"
-               label="Survey">
+               label="%survey.menu.label">
             <command
                   commandId="org.wcs.smart.er.mission.new"
                   style="push"
-                  tooltip="creates a new mission">
+                  tooltip="%mission.command.tooltip">
                <visibleWhen
                      checkEnabled="true">
                   <or>
@@ -188,7 +188,7 @@
             <command
                   commandId="org.wcs.smart.er.surveydesign.new"
                   style="push"
-                  tooltip="creates a new survey design">
+                  tooltip="%surveydesign.command.tooltip">
                <visibleWhen
                      checkEnabled="true">
                   <or>
@@ -209,7 +209,7 @@
             </separator>
             <command
                   commandId="org.wcs.smart.er.surveydesignexport"
-                  label="Export Survey Designs"
+                  label="%survey.export.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="true">
@@ -227,7 +227,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.er.surveydesignimport"
-                  label="Import Survey Designs"
+                  label="%survey.import.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="true">
@@ -245,7 +245,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.er.missionExportHandler"
-                  label="Export Missions and Surveys"
+                  label="%mission.survey.export.command.label"
                   style="push">
                <visibleWhen
                      checkEnabled="true">
@@ -267,7 +267,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.er.missionImportHandler"
-                  label="Import Missions and Surveys"
+                  label="%mission.survey.import.command.label"
                   style="push">
             </command>
             <separator
@@ -315,10 +315,10 @@
             <command
                   commandId="org.wcs.smart.er.showsurveys"
                   icon="images/icons/obj16/survey.png"
-                  label="View Surveys"
+                  label="%survey.view.command.label"
                   mnemonic="x"
                   style="push"
-                  tooltip="displays list of surveys">
+                  tooltip="%survey.view.command.tooltip">
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -334,7 +334,7 @@
          <command
                commandId="org.wcs.smart.er.delete"
                style="push"
-               tooltip="deletes the selected survey items">
+               tooltip="%survey.delete.command.tooltip">
             <visibleWhen
                   checkEnabled="false">
                <or>
@@ -356,7 +356,7 @@
          <command
                commandId="org.wcs.smart.er.surveydesign.new"
                style="push"
-               tooltip="creates a new survey design">
+               tooltip="%surveydesign.create.command.tooltip">
             <visibleWhen
                   checkEnabled="true">
                <or>
@@ -395,7 +395,7 @@
          <command
                commandId="org.wcs.smart.er.mission.new"
                style="push"
-               tooltip="creates a new mission">
+               tooltip="%mission.create.command.tooltip">
             <visibleWhen
                   checkEnabled="true">
                <or>
@@ -417,7 +417,7 @@
          <command
                commandId="org.wcs.smart.er.filter"
                style="push"
-               tooltip="Filters the view items">
+               tooltip="%filter.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -426,9 +426,9 @@
          <command
                commandId="org.wcs.smart.er.showsurveys"
                icon="images/icons/obj16/survey.png"
-               label="View Surveys"
+               label="%survey.view.command.label1"
                style="push"
-               tooltip="displays list of surveys">
+               tooltip="%survey.view.command.tooltip1">
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -443,7 +443,7 @@
          <command
                commandId="org.wcs.smart.er.editItem"
                style="push"
-               tooltip="edits the selected item">
+               tooltip="%edit.command.tooltip">
             <visibleWhen
                   checkEnabled="true">
                <or>
@@ -469,7 +469,7 @@
          <command
                commandId="org.wcs.smart.er.mission.new"
                style="push"
-               tooltip="creates a new mission">
+               tooltip="%mission.create.command.tooltip1">
             <visibleWhen
                   checkEnabled="true">
                <or>
@@ -516,7 +516,7 @@
          <command
                commandId="org.wcs.smart.er.delete"
                style="push"
-               tooltip="deletes the selected survey items">
+               tooltip="%survey.delete.command.tooltip1">
             <visibleWhen
                   checkEnabled="true">
                <or>
@@ -847,55 +847,55 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.er.showsurveys"
-            name="View Surveys">
+            name="%survey.view.command.label2">
       </command>
       <command
             id="org.wcs.smart.er.surveydesign.new"
-            name="New Survey Design...">
+            name="%surveydesign.create.command.name">
       </command>
       <command
             id="org.wcs.smart.er.delete"
-            name="Delete ...">
+            name="%delete.command.name">
       </command>
       <command
             id="org.wcs.smart.er.survey.new"
-            name="New Survey...">
+            name="%survey.create.command.name">
       </command>
       <command
             id="org.wcs.smart.er.mission.new"
-            name="New Mission ...">
+            name="%mission.create.command.name">
       </command>
       <command
             id="org.wcs.smart.er.missionattributes.show"
-            name="Mission Properties ...">
+            name="%mission.properties.command.name">
       </command>
       <command
             id="org.wcs.smart.er.su.show"
-            name="Sampling Unit Attributes ...">
+            name="%samplingunitattr.command.name">
       </command>
       <command
             id="org.wcs.smart.er.filter"
-            name="Filter Items">
+            name="%filter.command.name">
       </command>
       <command
             id="org.wcs.smart.er.editItem"
-            name="Edit...">
+            name="%edit.command.name">
       </command>
       <command
             id="org.wcs.smart.er.surveydesignexport"
-            name="Export Survey Designs">
+            name="%surveydesign.export.command.name">
       </command>
       <command
             id="org.wcs.smart.er.surveydesignimport"
-            name="Import Survey Designs">
+            name="%surveydesign.import.command.name">
       </command>
       <command
             id="org.wcs.smart.er.missionExportHandler"
-            name="Export Missions">
+            name="%mission.export.command.name">
       </command>
       <command
             id="org.wcs.smart.er.missionImportHandler"
-            name="Import Missions">
+            name="%mission.import.command.name">
       </command>
    </extension>
    <extension
@@ -962,14 +962,14 @@
             default="false"
             icon="images/icons/obj16/survey_design.png"
             id="org.wcs.smart.er.SurveyDesignEditor"
-            name="Survey Design Editor">
+            name="%surveydesign.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.er.ui.mision.editor.MissionEditor"
             default="false"
             icon="images/icons/obj16/mission.png"
             id="org.wcs.smart.er.ui.mission.MissionEditor"
-            name="Mission Editor">
+            name="%mission.editor.name">
       </editor>
    </extension>
    <extension
@@ -1004,7 +1004,7 @@
       <service
             class="org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension"
             id="org.wcs.smart.udig.er.catalog.SmartSamplingUnitService"
-            name="Survey Design Sampling Unit Service">
+            name="%samplingunit.service.name">
       </service>
    </extension>
    <extension
@@ -1033,9 +1033,9 @@
             class="org.wcs.smart.er.ui.mision.udig.SplitTool"
             icon="images/icons/obj16/split_track.png"
             id="org.wcs.smart.er.track.split"
-            name="Split Track"
+            name="%splittrack.modalTool.name"
             onToolbar="true"
-            tooltip="splits mission track">
+            tooltip="%splittrack.modalTool.tooltip">
          <cursor
                hotspotX="10"
                hotspotY="10"

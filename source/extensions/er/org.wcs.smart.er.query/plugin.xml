@@ -125,14 +125,14 @@
          <menu
                icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
-               label="Survey Queries"
-               tooltip="%patrolquery.menu.tooltip">
+               label="%surveyquery.menu.label"
+               tooltip="%surveyquery.menu.tooltip">
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_observation_query.png"
-                  label="New Survey Observation Query ..."
+                  label="%surveyquery.observation.command.label"
                   style="pulldown"
-                  tooltip="creates a new observation query for survey elements">
+                  tooltip="%surveyquery.observation.command.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveyobservation">
@@ -141,9 +141,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_waypoint_query.png"
-                  label="New Survey Incident Query ..."
+                  label="%surveyquery.incident.command.label"
                   style="push"
-                  tooltip="creates a new incident query for survey elements">
+                  tooltip="%surveyquery.incident.command.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveywaypoint">
@@ -152,9 +152,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_missiontrack_query.png"
-                  label="New Mission Track Query"
+                  label="%surveyquery.track.command.label"
                   style="push"
-                  tooltip="queries mission tracks">
+                  tooltip="%surveyquery.track.command.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveymissiontrack">
@@ -163,9 +163,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_mission_query.png"
-                  label="New Mission Query ..."
+                  label="%surveyquery.mission.command.label"
                   style="push"
-                  tooltip="creates a new mission query for survey elements">
+                  tooltip="%surveyquery.mission.command.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveymission">
@@ -174,9 +174,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_summary_query.png"
-                  label="New Suvery Summary Query ..."
+                  label="%surveyquery.summary.command.label"
                   style="push"
-                  tooltip="creates a new summary query for survey elements">
+                  tooltip="%surveyquery.summary.command.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveysummary">
@@ -185,9 +185,9 @@
             <command
                   commandId="org.wcs.smart.query.createUnknownQuery"
                   icon="images/icons/obj16/survey_gridded_query.png"
-                  label="New Survey Grid Query"
+                  label="%surveyquery.grid.command.label"
                   style="push"
-                  tooltip="creates a new gridded query for survey elements">
+                  tooltip="%surveyquery.grid.command.tooltip">
                <parameter
                      name="org.wcs.smart.query.type"
                      value="surveygrid">
@@ -201,8 +201,8 @@
          <menu
                icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
-               label="Survey Queries"
-               tooltip="%patrolquery.menu.tooltip">
+               label="%surveyquery.menu.label1"
+               tooltip="%surveyquery.menu.tooltip1">
          </menu>
       </menuContribution>
    </extension>
@@ -234,21 +234,21 @@
             default="false"
             icon="images/icons/obj16/survey_observation_query.png"
             id="org.wcs.smart.er.query.ui.SimpleQueryResultsEditor"
-            name="Survey Observation Query Editor">
+            name="%surveyquery.observation.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.er.query.ui.editor.SurveyGriddedEditor"
             default="false"
             icon="images/icons/obj16/survey_gridded_query.png"
             id="org.wcs.smart.er.query.ui.GriddedEditor"
-            name="Survey Gridded Query Editor">
+            name="%surveyquery.grid.editor.name">
       </editor>
       <editor
             class="org.wcs.smart.er.query.ui.editor.SurveySummaryEditor"
             default="false"
             icon="images/icons/obj16/survey_summary_query.png"
             id="org.wcs.smart.er.query.ui.SummaryEditor"
-            name="Survey Summary Query Editor">
+            name="%surveyquery.summary.editor.name">
       </editor>
    </extension>
    <extension
