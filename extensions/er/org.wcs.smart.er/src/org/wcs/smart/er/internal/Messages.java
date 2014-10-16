@@ -867,6 +867,8 @@ public class Messages extends NLS {
 	public static String TracksComposite_TrackId;
 
 	public static String TracksComposite_TracksTab;
+
+	public static String TracksComposite_zoomToLabel;
 	public static String TypePage_linesLabel;
 	public static String TypePage_Message;
 	public static String TypePage1_Message;

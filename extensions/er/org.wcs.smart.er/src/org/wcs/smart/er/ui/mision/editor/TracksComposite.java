@@ -37,6 +37,7 @@ import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.selection.SelectCommand;
 import net.refractions.udig.project.internal.render.ViewportModel;
@@ -49,7 +50,10 @@ import net.refractions.udig.style.sld.SLDContent;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -76,6 +80,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.ToolBar;
@@ -118,6 +123,7 @@ import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.LineString;
@@ -287,6 +293,40 @@ public class TracksComposite extends Composite implements MapPart{
 				updateMapSelection();	
 			}
 		});
+		
+		MenuManager mgr = new MenuManager();
+		Menu menu = mgr.createContextMenu(trackViewer.getTable());
+		trackViewer.getTable().setMenu(menu);
+		mgr.add(new Action(Messages.TracksComposite_zoomToLabel, 
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.ZOOM_TRACK_ICON)) {
+			@Override
+			public void run(){
+				zoomTrack();
+			}
+		});
+		mgr.add(new Separator());
+		mgr.add(new Action(Messages.TracksComposite_Edit, 
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.EDIT_TRACK_ICON)) {
+			@Override
+			public void run(){
+				editTrack();
+			}
+		});
+		mgr.add(new Action(Messages.TracksComposite_MergeLabel, 
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.MERGE_TRACK_ICON)) {
+			@Override
+			public void run(){
+				mergeTrack();
+			}
+		}); 
+		mgr.add(new Action(Messages.TracksComposite_deleteLabel, 
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().getDescriptor(EcologicalRecordsPlugIn.DELETE_ICON)) {
+			@Override
+			public void run(){
+				deleteTrack();
+			}
+		}); 
+		
 		final TableViewerColumn columnId = new TableViewerColumn(trackViewer, SWT.NONE);
 		columnId.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -782,6 +822,26 @@ public class TracksComposite extends Composite implements MapPart{
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			toolComp.selectLastTool();
 			refresh(false);
+		}
+	}
+
+	protected void zoomTrack() {
+		if (!confirmChanges()) return;
+		
+		IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
+		Envelope env = null;
+		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
+			MissionTrack track = (MissionTrack) iterator.next();
+			if (env == null){
+				env = track.getLineString().getEnvelopeInternal();
+			}else{
+				env.expandToInclude(track.getLineString().getEnvelopeInternal());
+			}
+			
+		}
+		if (env != null){
+			SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, SmartDB.DATABASE_CRS);
+			getMap().sendCommandASync(bbox);
 		}
 	}
 
