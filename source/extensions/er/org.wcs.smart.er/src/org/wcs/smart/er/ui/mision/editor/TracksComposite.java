@@ -643,6 +643,8 @@ public class TracksComposite extends Composite implements MapPart{
 				
 				@Override
 				public void onFinish(List<Coordinate> points) {
+					if (TracksComposite.this.isDisposed())
+						return;
 					toolComp.selectLastTool();
 					splitItem.setSelection(false);
 
