@@ -38,12 +38,12 @@
       <TableCategory
             icon="images/icons/obj16/sampling_unit.png"
             id="org.wcs.smart.er.query.report.table.samplingunit"
-            name="Survey Sampling Units">
+            name="%samplingunit.tablecategory.name">
       </TableCategory>
       <TableCategory
             icon="images/icons/obj16/survey_design.png"
             id="org.wcs.smart.er.query.report.table.properties"
-            name="Survey Properties">
+            name="%properties.tablecategory.name">
       </TableCategory>
       <DynamicTable
             category="org.wcs.smart.er.query.report.table.properties"
