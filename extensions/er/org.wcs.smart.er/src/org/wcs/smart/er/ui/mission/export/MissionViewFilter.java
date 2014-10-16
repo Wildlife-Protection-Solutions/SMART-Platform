@@ -84,7 +84,7 @@ public class MissionViewFilter {
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT m.uuid, m.id, m.startDate, m.endDate, s.id, s.uuid "); //$NON-NLS-1$
+		str.append("SELECT m.uuid, m.id, m.startDate, m.endDate, s.id, s.uuid, sd.keyId "); //$NON-NLS-1$
 		str.append("FROM Mission m JOIN m.survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
 		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
 	

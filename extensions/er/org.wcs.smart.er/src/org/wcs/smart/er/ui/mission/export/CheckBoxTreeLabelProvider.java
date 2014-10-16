@@ -47,7 +47,7 @@ public class CheckBoxTreeLabelProvider extends LabelProvider {
 	 */
 	public String getText(Object element) {
 		if (element instanceof SurveyTreeItem){
-			return ((SurveyTreeItem) element).getName();
+			return ((SurveyTreeItem) element).getName() + " [" + ((SurveyTreeItem) element).getSurveyDesignName() + "]";  //$NON-NLS-1$//$NON-NLS-2$
 		}else if (element instanceof MissionTreeItem){
 			return ((MissionTreeItem) element).getName();
 		}

@@ -173,6 +173,7 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 							SurveyTreeItem surveyTreeItem = new SurveyTreeItem();
 							surveyTreeItem.setName(surveyName);
 							surveyTreeItem.setUuid((byte[]) row[5]);
+							surveyTreeItem.setSurveyDesignName((String)row[6]);
 							
 							MissionTreeItem mti = new MissionTreeItem();
 							mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));

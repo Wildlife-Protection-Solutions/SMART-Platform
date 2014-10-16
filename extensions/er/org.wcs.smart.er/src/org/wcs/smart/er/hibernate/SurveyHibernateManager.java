@@ -150,7 +150,7 @@ public class SurveyHibernateManager {
 			}
 		}
 		sb.append("_"); //$NON-NLS-1$
-		sb.append("M"); //$NON-NLS-1$
+		//sb.append("M"); //$NON-NLS-1$  //not so good for non-english language installs. Just going to leave it without a prefix I guess.
 		idNumber = (idNumber + 1) % 1000000;
 		if (idNumber <= 0) {
 			idNumber = 1;
