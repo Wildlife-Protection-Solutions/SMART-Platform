@@ -160,7 +160,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 
 		isChanged = false;
 		getButton(IDialogConstants.OK_ID).setEnabled(false);
-		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, missionDay);
+		SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_MODIFIED, missionDay.getMission());
 		return true;
 	}
 	
