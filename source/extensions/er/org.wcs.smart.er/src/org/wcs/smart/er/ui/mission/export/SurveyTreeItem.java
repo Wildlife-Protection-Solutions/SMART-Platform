@@ -35,6 +35,7 @@ public class SurveyTreeItem implements TreeItem{
 
 	private String name;
 	private byte[] uuid;
+	private String surveyDesignName;
 	
 	private List<MissionTreeItem> children;
 	
@@ -58,6 +59,14 @@ public class SurveyTreeItem implements TreeItem{
 	
 	public List<MissionTreeItem> getChildren(){
 		return children;
+	}
+
+	public String getSurveyDesignName() {
+		return surveyDesignName;
+	}
+
+	public void setSurveyDesignName(String name) {
+		this.surveyDesignName =  name;
 	}
 
 }
