@@ -147,7 +147,7 @@ public class TracksComposite extends Composite implements MapPart{
 	private MapViewer mapViewer;
 	private MapToolComposite toolComp;
 	
-	private List<Layer> trackLayers = null;
+	private List<Layer> trackLayers = new ArrayList<Layer>();
 	
 	private MissionService missionService = null;
 	private SamplingUnitService suService = null;
