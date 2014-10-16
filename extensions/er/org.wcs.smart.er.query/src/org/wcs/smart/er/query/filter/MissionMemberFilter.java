@@ -52,6 +52,13 @@ public class MissionMemberFilter implements IFilter {
 	}
 	
 	/**
+	 * Sets the employee uuid
+	 * @param uuid
+	 */
+	public void setUuid(byte[] uuid){
+		this.uuid = uuid;
+	}
+	/**
 	 * if leader of member filter
 	 * @return
 	 */

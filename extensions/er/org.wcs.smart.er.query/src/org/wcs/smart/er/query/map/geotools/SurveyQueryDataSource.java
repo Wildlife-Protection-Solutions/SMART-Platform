@@ -46,6 +46,7 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class SurveyQueryDataSource extends AbstractDataStore{
 
+	public static final String FEATURETYPE_PREFIX = "smart"; //$NON-NLS-1$
 	/**
 	 * waypoint query data source
 	 */
@@ -149,17 +150,17 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
 		return type;
 	}
 	
 	private SimpleFeatureType createMissionTrackSchema() throws SchemaException{
-		SimpleFeatureType type = DataUtilities.createType("smart." + WAYPOINT_MISSION_TRACK_TYPE, getMissionTrackFeatureSchemaDef()); //$NON-NLS-1$
+		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_MISSION_TRACK_TYPE, getMissionTrackFeatureSchemaDef()); //$NON-NLS-1$
 		return type;
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		SimpleFeatureType type = DataUtilities.createType("smart." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
+		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
 		return type;
 	}
 	

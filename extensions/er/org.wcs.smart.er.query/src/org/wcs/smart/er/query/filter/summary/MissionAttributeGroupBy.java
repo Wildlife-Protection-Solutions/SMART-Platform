@@ -99,6 +99,13 @@ public class MissionAttributeGroupBy implements IGroupBy{
 	public String getKeyPart() {
 		return "sgb:missionproperty:l:"; //$NON-NLS-1$
 	}
+	/**
+	 * 
+	 * @return the raw group by items
+	 */
+	public String[] getRawItems(){
+		return this.items;
+	}
 
 	@Override
 	public GroupByType getType() {

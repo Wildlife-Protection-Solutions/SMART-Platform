@@ -108,6 +108,14 @@ public class SurveyIdGroupBy implements ISurveyGroupBy {
 		return allItems;
 	}
 
+	/**
+	 * 
+	 * @return the raw group by items
+	 */
+	public String[] getRawItems(){
+		return this.items;
+	}
+	
 	@Override
 	public DropItem asDropItem(Session session) throws Exception {
 		DropItem di = SurveyDropItemFactory.INSTANCE.createSurveyIdGroupByDropItem();

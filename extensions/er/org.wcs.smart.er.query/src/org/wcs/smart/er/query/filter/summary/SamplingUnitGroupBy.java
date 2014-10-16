@@ -89,6 +89,14 @@ public class SamplingUnitGroupBy implements ISurveyGroupBy{
 	public String getKeyPart() {
 		return "sgb:samplingunit:"; //$NON-NLS-1$
 	}
+	
+	/**
+	 * 
+	 * @return the raw group by items
+	 */
+	public String[] getRawItems(){
+		return this.items;
+	}
 
 	@Override
 	public GroupByType getType() {
