@@ -117,7 +117,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 	private Label lblCoordinates;
 	private Button lblSRID;
 	
-	private MapToolComposite tools;
+	protected MapToolComposite tools;
 	
 	IPartListener2 partlistener = new IPartListener2(){
 	        public void partActivated( IWorkbenchPartReference partRef ) {
