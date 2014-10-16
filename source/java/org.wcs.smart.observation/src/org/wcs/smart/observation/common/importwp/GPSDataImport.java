@@ -144,7 +144,7 @@ public class GPSDataImport {
 			type = (GpxType) ((JAXBElement<?>) o).getValue();
 		} catch (Exception ex) {
 			throw new Exception(MessageFormat.format(
-					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + ex.getMessage(), ex);
+					Messages.GPSDataImport_TrackError_CouldNotReadFile, new Object[]{gpxFile.getAbsolutePath()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 		if (type == null){
