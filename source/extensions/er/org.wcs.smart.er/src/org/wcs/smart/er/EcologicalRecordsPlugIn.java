@@ -69,6 +69,7 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 	public static final String SPLIT_TRACK_ICON = "org.wcs.smart.er.track.split"; //$NON-NLS-1$
 	public static final String MERGE_TRACK_ICON = "org.wcs.smart.er.track.merge"; //$NON-NLS-1$
 	public static final String EDIT_TRACK_ICON = "org.wcs.smart.er.track.edit"; //$NON-NLS-1$
+	public static final String ZOOM_TRACK_ICON = "org.wcs.smart.er.track.zoom"; //$NON-NLS-1$
 	
 	public static final String MISSION_LEADER_ICON = "org.wcs.smart.er.mission.leader"; //$NON-NLS-1$
 	public static final String MISSION_MEMBER_ICON = "org.wcs.smart.er.mission.member"; //$NON-NLS-1$
@@ -146,6 +147,7 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	reg.put(SPLIT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/split_track.png")); //$NON-NLS-1$
      	reg.put(EDIT_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/edit_track.png")); //$NON-NLS-1$
      	reg.put(MERGE_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/merge_track.png")); //$NON-NLS-1$
+     	reg.put(ZOOM_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_track.png")); //$NON-NLS-1$
     }
     
     
