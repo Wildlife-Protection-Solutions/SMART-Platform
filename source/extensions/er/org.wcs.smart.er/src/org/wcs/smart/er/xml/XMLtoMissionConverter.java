@@ -182,7 +182,6 @@ public class XMLtoMissionConverter {
 
 			mt.setMissionDay(m);
 			mt.setSamplingUnit(findSamplingUnit(xmlMt.getSamplingUnitId() ,session));
-			mt.setType(MissionTrack.TrackType.valueOf(xmlMt.getTrackType()));
 			
 			m.getTracks().add(mt);
 		}

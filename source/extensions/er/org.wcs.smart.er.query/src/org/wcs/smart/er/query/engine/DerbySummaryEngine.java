@@ -496,7 +496,12 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				usedTables.add(MissionTrack.class);
 			}
 			
-			selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
+			if (valueItem instanceof MissionValueItem &&
+					((MissionValueItem)valueItem).getValueItem() == ValueItem.TRACK_LENGTH){
+				selectSql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
+			}else{		
+				selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
+			}
 			
 		}else if (valueItem.getValueItem() == ValueItem.MISSION_COUNT){
 			valueSql.append("temp.mission_uuid"); //$NON-NLS-1$
@@ -1146,14 +1151,33 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				groupBySql.append("mp_" + itemcnt); //$NON-NLS-1$
 			
 			}else if (gb instanceof SamplingUnitAttributeGroupBy){
-				
-				fromSql.append(" JOIN "); //$NON-NLS-1$
-				fromSql.append(tableNames.get(SamplingUnitAttributeValue.class));
-				fromSql.append(" "); //$NON-NLS-1$
-				fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
-				fromSql.append(" on "); //$NON-NLS-1$
-				fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
-				fromSql.append(".su_uuid = temp.sampling_unit_uuid"); //$NON-NLS-1$
+				if (value instanceof MissionValueItem){
+					if (!usedTables.contains(MissionTrack.class)) {
+						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(tableNames.get(MissionTrack.class));
+						fromSql.append(" "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(MissionTrack.class));
+						fromSql.append(" on temp.mission_day_uuid = "); //$NON-NLS-1$
+						fromSql.append(tablePrefix(MissionTrack.class) + ".mission_day_uuid"); //$NON-NLS-1$ 
+						usedTables.add(MissionTrack.class);
+					}
+					fromSql.append(" JOIN "); //$NON-NLS-1$
+					fromSql.append(tableNames.get(SamplingUnitAttributeValue.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".su_uuid = "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(MissionTrack.class) + ".sampling_unit_uuid"); //$NON-NLS-1$
+				}else{
+					fromSql.append(" JOIN "); //$NON-NLS-1$
+					fromSql.append(tableNames.get(SamplingUnitAttributeValue.class));
+					fromSql.append(" "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "_" + itemcnt); //$NON-NLS-1$
+					fromSql.append(".su_uuid = temp.sampling_unit_uuid"); //$NON-NLS-1$
+				}
 			
 				fromSql.append(" JOIN "); //$NON-NLS-1$
 				fromSql.append(tableNames.get(SamplingUnitAttribute.class));
@@ -1200,10 +1224,12 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						//sampling unit link must come from track 
 						groupByInnerSql.append( " case when "); //$NON-NLS-1$
 						groupByInnerSql.append(tablePrefix(MissionTrack.class));
-						groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.SAMPLING_UNIT + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+						groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.TRACK + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 						groupByInnerSql.append( " then "); //$NON-NLS-1$
-						groupByInnerSql.append(tablePrefix(MissionTrack.class));
-						groupByInnerSql.append( ".uuid else "); //$NON-NLS-1$
+//						groupByInnerSql.append(tablePrefix(MissionTrack.class));
+//						groupByInnerSql.append( ".uuid "); //$NON-NLS-1$
+						groupByInnerSql.append( " null "); //$NON-NLS-1$
+						groupByInnerSql.append( " else "); //$NON-NLS-1$
 						groupByInnerSql.append(tablePrefix(MissionTrack.class));
 						groupByInnerSql.append( ".sampling_unit_uuid end "); //$NON-NLS-1$
 						groupByInnerSql.append( " as " + "gp_"+ itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1222,7 +1248,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 							groupByInnerSql.append(" else "); //$NON-NLS-1$
 								groupByInnerSql.append( " case when "); //$NON-NLS-1$
 								groupByInnerSql.append(tablePrefix(MissionTrack.class));
-								groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.SAMPLING_UNIT + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+								groupByInnerSql.append( ".track_type = '" + MissionTrack.TrackType.TRACK + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 								groupByInnerSql.append( " then "); //$NON-NLS-1$
 								groupByInnerSql.append(tablePrefix(MissionTrack.class));
 								groupByInnerSql.append( ".uuid else "); //$NON-NLS-1$
