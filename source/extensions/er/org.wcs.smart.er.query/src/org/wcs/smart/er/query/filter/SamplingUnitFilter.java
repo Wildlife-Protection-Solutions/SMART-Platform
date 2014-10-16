@@ -77,6 +77,11 @@ public class SamplingUnitFilter implements IFilter {
 	public String getUuid(){
 		return this.uuid;
 	}
+	
+	public void setUuid(String uuid){
+		this.uuid = uuid;
+	}
+	
 	@Override
 	public String asString() {
 		if (unitType == Type.SAMPLINGUNIT){

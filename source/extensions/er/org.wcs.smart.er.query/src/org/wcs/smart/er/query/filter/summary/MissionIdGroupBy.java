@@ -90,6 +90,14 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 		return GroupByType.BYTE;
 	}
 
+	/**
+	 * 
+	 * @return the raw group by items
+	 */
+	public String[] getRawItems(){
+		return this.items;
+	}
+	
 	@Override
 	public List<ListItem> getItems(Session session) {
 		List<ListItem> allItems = new ArrayList<ListItem>();
