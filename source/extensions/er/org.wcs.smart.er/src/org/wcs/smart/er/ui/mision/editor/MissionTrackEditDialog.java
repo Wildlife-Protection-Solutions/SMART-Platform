@@ -146,6 +146,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 					q.executeUpdate();
 				
 					mt.setMissionDay(null);
+					session.delete(mt);
 				}
 			}
 			
