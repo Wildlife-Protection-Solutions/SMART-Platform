@@ -151,10 +151,13 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	 * @param data data to initialize drop item
 	 */
 	public void initializeData(Object data){
-		if (data != null && data instanceof String[]){
+		if (type == AttributeType.NUMERIC || 
+				type == AttributeType.TEXT){
 			String[] initd = (String[])data;
 			this.currentOp = initd[0];
 			this.currentValue = initd[1];
+		}else if (type == AttributeType.LIST){
+			this.currentSelection = (ListItem) data;
 		}
 	}
 

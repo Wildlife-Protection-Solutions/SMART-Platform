@@ -132,7 +132,7 @@ public class MissionFilter implements IFilter {
 			return new DropItem[]{di};
 		}else if (type == Type.UUID){
 			try{
-				Mission mission = (Mission) session.load(Mission.class, SmartUtils.decodeHex(value));
+				Mission mission = (Mission) session.get(Mission.class, SmartUtils.decodeHex(value));
 				if (mission == null){
 					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionFilter_MissionNotFound, new Object[]{value}))};
 				}

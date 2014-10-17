@@ -22,9 +22,7 @@
 package org.wcs.smart.er.query.importexport;
 
 import org.hibernate.Session;
-import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
-import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;

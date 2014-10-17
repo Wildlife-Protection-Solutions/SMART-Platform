@@ -286,5 +286,32 @@
             version="1.0.0">
       </action>
    </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.er.query.importexport.SurveyGridQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.er.query.importexport.SurveySimpleQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.er.query.importexport.SurveySummaryQueryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.er.query.importexport.SurveyShapeQueryExporter">
+      </Exporter>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.import">
+      <QueryImporter
+            class="org.wcs.smart.er.query.importexport.SurveyGridQueryDefinitionImporter">
+      </QueryImporter>
+      <QueryImporter
+            class="org.wcs.smart.er.query.importexport.SurveySimpleQueryDefinitionImporter">
+      </QueryImporter>
+      <QueryImporter
+            class="org.wcs.smart.er.query.importexport.SurveySummaryQueryDefinitionImporter">
+      </QueryImporter>
+   </extension>
 
 </plugin>

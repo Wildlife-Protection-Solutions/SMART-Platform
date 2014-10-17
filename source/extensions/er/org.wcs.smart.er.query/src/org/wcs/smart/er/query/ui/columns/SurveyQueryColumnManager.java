@@ -469,6 +469,7 @@ public class SurveyQueryColumnManager {
 		protected IStatus run(IProgressMonitor monitor) {
 			columns = new ArrayList<MissionPropertyQueryColumn>();
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
 				if (sd == null){
 					List<MissionAttribute> all = s.createCriteria(MissionAttribute.class)
@@ -482,6 +483,7 @@ public class SurveyQueryColumnManager {
 						columns.add(new MissionPropertyQueryColumn(mp.getAttribute()));
 					}
 				}
+				s.getTransaction().rollback();
 			}finally{
 				s.close();
 			}

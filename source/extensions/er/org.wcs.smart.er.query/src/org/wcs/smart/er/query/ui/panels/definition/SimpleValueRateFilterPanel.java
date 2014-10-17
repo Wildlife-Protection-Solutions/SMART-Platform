@@ -64,7 +64,7 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 		return new FilterDefintionPanel(false){
 			@Override
 			public String getId(){
-				return ID + "." + type.name(); //$NON-NLS-1$
+				return SimpleValueRateFilterPanel.ID + "." + type.name(); //$NON-NLS-1$
 			}
 			
 			@Override

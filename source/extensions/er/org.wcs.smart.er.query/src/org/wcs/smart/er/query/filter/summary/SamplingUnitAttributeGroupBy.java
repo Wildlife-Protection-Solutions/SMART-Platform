@@ -97,7 +97,7 @@ public class SamplingUnitAttributeGroupBy implements IGroupBy{
 
 	@Override
 	public String getKeyPart() {
-		return "sgb:suproperty:l:"; //$NON-NLS-1$
+		return "sgb:suproperty:l:" + attributeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
