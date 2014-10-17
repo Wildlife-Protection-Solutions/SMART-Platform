@@ -615,6 +615,8 @@ public class Messages extends NLS {
 	public static String SamplingUnitEditorPage_UnknownErrorDescription;
 	public static String SamplingUnitEditorPage_ZoomToMenuLabel;
 	public static String SamplingUnitEditorPage_zoomTooltip;
+
+	public static String SamplingUnitGeoResourceInfo_SuLayerNamePrefix;
 	public static String SamplingUnitService_Description;
 	public static String SamplingUnitService_Keyword1;
 	public static String SamplingUnitService_Keyword2;

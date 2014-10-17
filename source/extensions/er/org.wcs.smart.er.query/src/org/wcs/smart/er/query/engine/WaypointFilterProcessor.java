@@ -288,7 +288,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			};
 			queryFilter.accept(missionTracks);
 			if (needstracks[0]){
-				sql.append(" inner join "); //$NON-NLS-1$
+				sql.append(" left join "); //$NON-NLS-1$
 				sql.append(namePrefix(MissionTrack.class));
 				sql.append(" on ");  //$NON-NLS-1$
 				sql.append(prefix(MissionDay.class));
@@ -315,13 +315,13 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 		
-		sql.append(" inner join "); //$NON-NLS-1$
+		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(namePrefix(Waypoint.class));
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
 		sql.append(prefix(SurveyWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$
 		
-		sql.append(" join "); //$NON-NLS-1$
+		sql.append(" left join "); //$NON-NLS-1$
 		sql.append(waypointTable + " as waypointTable "); //$NON-NLS-1$
 		sql.append(" on "); //$NON-NLS-1$
 		sql.append(prefix(Waypoint.class) + ".uuid = "); //$NON-NLS-1$
@@ -715,12 +715,16 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}
 			
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
-			sql.append(prefix(MissionAttributeListItem.class));
-			sql.append(".keyid = '"); //$NON-NLS-1$
-			sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
-			sql.append("'");  //$NON-NLS-1$
+			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+				sql.append(prefix(MissionAttributeListItem.class));
+				sql.append(".uuid is not null"); //$NON-NLS-1$
+			}else{
+				sql.append(prefix(MissionAttributeListItem.class));
+				sql.append(".keyid = '"); //$NON-NLS-1$
+				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+				sql.append("'");  //$NON-NLS-1$
+			}
 		}
-		
 		
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
@@ -797,10 +801,15 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append("'"); //$NON-NLS-1$
 			}
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
-			sql.append(prefix(SamplingUnitAttributeListItem.class));
-			sql.append(".keyid = '"); //$NON-NLS-1$
-			sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
-			sql.append("'");  //$NON-NLS-1$
+			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+				sql.append(prefix(SamplingUnitAttributeListItem.class));
+				sql.append(".uuid is not null"); //$NON-NLS-1$
+			}else{
+				sql.append(prefix(SamplingUnitAttributeListItem.class));
+				sql.append(".keyid = '"); //$NON-NLS-1$
+				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+				sql.append("'");  //$NON-NLS-1$
+			}
 		}
 		
 		QueryPlugIn.logSql(sql.toString());

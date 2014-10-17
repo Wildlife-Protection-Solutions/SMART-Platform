@@ -114,6 +114,8 @@ public class QueryService extends IQueryService {
 		}
 		if (ds instanceof SurveyQueryDataSource){
 			((SurveyQueryDataSource)ds).resetSchema(SurveyQueryDataSource.WAYPOINT_TYPE);
+			((SurveyQueryDataSource)ds).resetSchema(SurveyQueryDataSource.TRACKS_TYPE);
+			
 		}
 	}	
 	

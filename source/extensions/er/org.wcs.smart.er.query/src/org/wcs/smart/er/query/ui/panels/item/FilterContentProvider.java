@@ -183,6 +183,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 		protected IStatus run(IProgressMonitor monitor) {
 			
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
 				if (design != null){
 					List<SurveyDesignSamplingUnitAttribute> attributes = s.createCriteria(SurveyDesignSamplingUnitAttribute.class)
@@ -203,6 +204,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 					a.getName();
 					a.getType();
 				}
+				s.getTransaction().rollback();
 			}finally{
 				s.close();
 			}
