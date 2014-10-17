@@ -203,6 +203,9 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					}
 				}else if (filter instanceof SamplingUnitFilter){
 					SamplingUnitFilter suFilter = (SamplingUnitFilter) filter;
+					if (suFilter.getUuid().equals(SamplingUnitFilter.NONE_KEY)){
+						return;
+					}
 					Object x = session.load(SamplingUnit.class, SmartUtils.decodeHex(suFilter.getUuid()));
 					if (x != null 
 							&& x instanceof SamplingUnit

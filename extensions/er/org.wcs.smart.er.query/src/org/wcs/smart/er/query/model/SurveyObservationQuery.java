@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -135,6 +136,21 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 				queryColumns.add(q);
 			}	
 		}
+		HashSet<String> visible = null;
+		if (visibleColumns != null){
+			String[] bits = visibleColumns.split(","); //$NON-NLS-1$
+			visible = new HashSet<String>();
+			for (int i = 0; i < bits.length; i ++){
+				visible.add(bits[i]);
+			}
+		}
+		for (QueryColumn q : queryColumns){
+			if (visible == null || visible.contains(q.getKey())){
+				q.setVisible(true);
+			}else{
+				q.setVisible(false);
+			}
+		}
 	}
 	
 	
@@ -163,6 +179,11 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 	 * @return
 	 */
 	public void setSurveyDesign(String key){
+		if ((this.surveyDesignKey != null && this.surveyDesignKey.equals(key)) ||
+			(surveyDesignKey == null && key == null)  ){
+			//nothing has changed so we don't want to clear information
+			return;
+		}
 		this.surveyDesignKey = key;
 		this.surveyDesign = null;
 		synchronized (LOCK) {

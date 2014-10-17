@@ -380,7 +380,7 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 		initDrag(main);
 		initDrag(lblAttribute);
 		
-		lblAttribute.setText(formatStringForLabel(this.text));
+		lblAttribute.setText(formatStringForLabel(this.text + " " +Messages.MissionAttributeDropItem_MissionLabel)); //$NON-NLS-1$
 		if (currentValue != null){
 			if (value != null){
 				value.setText(currentValue);
@@ -434,7 +434,7 @@ public class MissionAttributeDropItem extends DropItem implements IFilterDropIte
 		initDrag(lblAttribute);
 		
 		
-		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
+		lblAttribute.setText(formatStringForLabel(this.text + " " + Messages.MissionAttributeDropItem_MissionLabel + " = ")); //$NON-NLS-1$ //$NON-NLS-2$
 		loadItemsJobs.schedule();
 	}
 

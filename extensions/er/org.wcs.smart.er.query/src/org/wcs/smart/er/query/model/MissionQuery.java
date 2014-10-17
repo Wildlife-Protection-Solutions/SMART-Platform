@@ -231,6 +231,11 @@ public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQue
 	 * @return
 	 */
 	public void setSurveyDesign(String key){
+		if ((this.surveyDesignKey != null && this.surveyDesignKey.equals(key)) ||
+			(surveyDesignKey == null && key == null)  ){
+			//nothing has changed so we don't want to clear information
+			return;
+		}
 		this.surveyDesignKey = key;
 		this.surveyDesign = null;
 		synchronized (LOCK) {

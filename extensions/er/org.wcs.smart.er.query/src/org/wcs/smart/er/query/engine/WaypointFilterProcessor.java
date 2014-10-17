@@ -695,7 +695,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(" AND "); //$NON-NLS-1$
 		if (lfilter.getAttributeType() == AttributeType.NUMERIC){
 			sql.append(prefix(MissionPropertyValue.class));
-			sql.append(".double_value "); //$NON-NLS-1$
+			sql.append(".number_value "); //$NON-NLS-1$
 			sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
 			sql.append(" " + lfilter.getValue().toString()); //$NON-NLS-1$
 		}else if (lfilter.getAttributeType() == AttributeType.TEXT){
