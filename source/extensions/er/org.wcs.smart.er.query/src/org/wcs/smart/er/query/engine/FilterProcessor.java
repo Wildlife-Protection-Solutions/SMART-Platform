@@ -443,7 +443,7 @@ public class FilterProcessor implements IFilterProcessor {
 			if (filter != null && filter.length() > 0) {
 				sql.append(" WHERE "); //$NON-NLS-1$
 				where = false;
-			    sql.append(filter);
+			    sql.append( "(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		
@@ -456,7 +456,7 @@ public class FilterProcessor implements IFilterProcessor {
 				}else{
 					sql.append(" and "); //$NON-NLS-1$
 				}
-				sql.append(filter);
+				sql.append( "(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
@@ -896,6 +896,18 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(namePrefix(Waypoint.class));
 				sql.append(" on " + prefix(SurveyWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(MissionDay.class));
+				sql.append(" on " + prefix(SurveyWaypoint.class) + ".mission_day_uuid = " + prefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				if (dateFilter != null &&
+						(dateFilter.getDateFieldOption() instanceof MissionStartDateField ||
+								dateFilter.getDateFieldOption() instanceof MissionStartDateField)){
+					sql.append(" join "); //$NON-NLS-1$
+					sql.append(namePrefix(Mission.class));
+					sql.append(" on " + prefix(MissionDay.class) + ".mission_uuid = " + prefix(Mission.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
+				}
 				if (dateFilter != null) {
 					String dfilter = SurveyFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 					if (dfilter.length() > 0) {

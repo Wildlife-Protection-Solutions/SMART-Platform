@@ -65,6 +65,7 @@ public class Messages extends NLS {
 	public static String GroupByValueItemPanel_RefreshingJobName;
 	public static String MissionAttributeDropItem_LoadingLabel;
 	public static String MissionAttributeDropItem_loadListItemsJob;
+	public static String MissionAttributeDropItem_MissionLabel;
 	public static String MissionAttributeFilter_AttributeNotFoundError;
 	public static String MissionAttributeFilter_ListItemNotFoundError;
 	public static String MissionAttributeGroupBy_AttributeNotFound;

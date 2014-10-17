@@ -203,7 +203,7 @@ public class SurveyQueryColumnManager {
 		
 		//data model columns
 		for (QueryColumn q : getDataModelColumns()){
-			cols.add(q);
+			cols.add(q.clone());
 		}
 		
 		return cols.toArray(new QueryColumn[cols.size()]);
