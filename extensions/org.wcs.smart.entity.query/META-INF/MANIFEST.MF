@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Entity Query PlugIn
 Bundle-SymbolicName: org.wcs.smart.entity.query;singleton:=true
-Bundle-Version: 4.0.0
+Bundle-Version: 3.1.0
 Bundle-Activator: org.wcs.smart.entity.query.EntityQueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,

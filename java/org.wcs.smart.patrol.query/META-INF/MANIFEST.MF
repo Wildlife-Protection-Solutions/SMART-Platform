@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: org.wcs.smart.patrol.query;singleton:=true
-Bundle-Version: 4.0.0
+Bundle-Version: 3.1.0
 Bundle-Activator: org.wcs.smart.patrol.query.PatrolQueryPlugIn
 Require-Bundle: org.wcs.smart,
  org.wcs.smart.query,
