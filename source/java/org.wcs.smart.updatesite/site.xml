@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.cybertracker.feature_4.0.0.jar" id="org.wcs.smart.cybertracker.feature" version="4.0.0">
+   <feature url="features/org.wcs.smart.cybertracker.feature_3.1.0.jar" id="org.wcs.smart.cybertracker.feature" version="3.1.0">
       <category name="cybertracker"/>
    </feature>
-   <feature url="features/org.wcs.smart.intelligence.feature_4.0.0.jar" id="org.wcs.smart.intelligence.feature" version="4.0.0">
+   <feature url="features/org.wcs.smart.intelligence.feature_3.1.0.jar" id="org.wcs.smart.intelligence.feature" version="3.1.0">
       <category name="intelligence"/>
    </feature>
-   <feature url="features/org.wcs.smart.plan.feature_4.0.0.jar" id="org.wcs.smart.plan.feature" version="4.0.0">
+   <feature url="features/org.wcs.smart.plan.feature_3.1.0.jar" id="org.wcs.smart.plan.feature" version="3.1.0">
       <category name="planning"/>
    </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature_4.0.0.jar" id="org.wcs.smart.independentincident.feature" version="4.0.0">
+   <feature url="features/org.wcs.smart.independentincident.feature_3.1.0.jar" id="org.wcs.smart.independentincident.feature" version="3.1.0">
       <category name="independentincident"/>
    </feature>
-   <feature url="features/org.wcs.smart.entity.feature_4.0.0.jar" id="org.wcs.smart.entity.feature" version="4.0.0">
+   <feature url="features/org.wcs.smart.entity.feature_3.1.0.jar" id="org.wcs.smart.entity.feature" version="3.1.0">
       <category name="entity"/>
    </feature>
-   <feature url="features/org.wcs.smart.er.feature_4.0.0.jar" id="org.wcs.smart.er.feature" version="4.0.0">
+   <feature url="features/org.wcs.smart.er.feature_3.1.0.jar" id="org.wcs.smart.er.feature" version="3.1.0">
       <category name="ecologicalrecords"/>
    </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
