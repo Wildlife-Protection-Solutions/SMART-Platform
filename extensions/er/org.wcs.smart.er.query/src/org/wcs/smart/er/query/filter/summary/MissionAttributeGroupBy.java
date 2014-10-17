@@ -97,7 +97,7 @@ public class MissionAttributeGroupBy implements IGroupBy{
 
 	@Override
 	public String getKeyPart() {
-		return "sgb:missionproperty:l:"; //$NON-NLS-1$
+		return "sgb:missionproperty:l:" + attributeKey + ":"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	/**
 	 * 

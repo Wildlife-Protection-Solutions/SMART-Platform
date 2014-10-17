@@ -38,6 +38,7 @@ import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -51,6 +52,8 @@ import org.wcs.smart.query.xml.model.UuidItemType;
  */
 public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionImporter {
 
+	private String qTypeInternal;
+	
 	@Override
 	public boolean canImport(IQueryType qt) {
 		return qt.getKey().equals(SurveyObservationQueryType.KEY) ||
@@ -63,27 +66,47 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		InputStream is = new ByteArrayInputStream(queryDef.getBytes());
 		
-		Parser parser = new Parser(is);
-		QueryFilter queryFilter = parser.QueryFilter();
-		is.close();
+		if (qTypeInternal.equals(MissionTrackQueryType.KEY)){
+			Parser parser = new Parser(is);
+			IFilter filter = parser.ExpressionPart();
+			is.close();
+			
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try {
+				SurveyQueryValidator validator = new SurveyQueryValidator(uuidLookup, session);
+				warnings.addAll(validator.validate(filter));
+			} finally {
+				session.getTransaction().rollback();
+				session.close();
+			}
+			return filter.asString();
+			
+		}else{
+			Parser parser = new Parser(is);
+			QueryFilter queryFilter = parser.QueryFilter();
+			is.close();
+			
+			Session session = HibernateManager.openSession();
+			session.beginTransaction();
+			try {
+				SurveyQueryValidator validator = new SurveyQueryValidator(uuidLookup, session);
+				warnings.addAll(validator.validate(queryFilter.getFilter()));
+			} finally {
+				session.getTransaction().rollback();
+				session.close();
+			}
+			return queryFilter.asString();
 
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			SurveyQueryValidator validator = new SurveyQueryValidator(langCode, uuidLookup, session);
-			warnings.addAll(validator.validate(queryFilter.getFilter()));
-		} finally {
-			session.getTransaction().rollback();
-			session.close();
 		}
-		return queryFilter.asString();
 	}
 
 	@Override
 	public Query importQuery(QueryType qt) throws Exception{
+		qTypeInternal = qt.getQueryType();
 		Query query = super.importQuery(qt);
 		for (QueryPart part : qt.getQueryPart()) {
-			if (part.getKey().equals("surveyDesignFilter")){
+			if (part.getKey().equals("surveyDesignFilter")){ //$NON-NLS-1$
 				((ISurveyQuery)query).setSurveyDesign(part.getValue());
 			}
 		}

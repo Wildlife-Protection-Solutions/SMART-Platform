@@ -53,6 +53,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
@@ -539,8 +540,10 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(tableNames.get(MissionTrack.class) + " " + tablePrefix.get(MissionTrack.class)); //$NON-NLS-1$
-		sql.append(" join " + tableNames.get(Mission.class) + " " + tablePrefix.get(Mission.class) ); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append(" on " + tablePrefix.get(Mission.class) + ".uuid = " + tablePrefix.get(MissionTrack.class) + ".mission_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql.append(" join " + tableNamePrefix(MissionDay.class) ); //$NON-NLS-1$
+		sql.append(" on " + tablePrefix(MissionDay.class) + ".uuid = " + tablePrefix(MissionTrack.class) + ".mission_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+		sql.append(" join " + tableNamePrefix(Mission.class) ); //$NON-NLS-1$ 
+		sql.append(" on " + tablePrefix.get(Mission.class) + ".uuid = " + tablePrefix.get(MissionDay.class) + ".mission_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sql.append(" join " + tableNames.get(Survey.class) + " " + tablePrefix.get(Survey.class) ); //$NON-NLS-1$ //$NON-NLS-2$
 		sql.append(" on " + tablePrefix.get(Survey.class) + ".uuid = " + tablePrefix.get(Mission.class) + ".survey_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		sql.append(" join " + tableNames.get(SurveyDesign.class) + " " + tablePrefix.get(SurveyDesign.class) ); //$NON-NLS-1$ //$NON-NLS-2$
@@ -628,6 +631,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -660,6 +664,8 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_start timestamp,"); //$NON-NLS-1$
 		sql.append("mission_end timestamp,"); //$NON-NLS-1$
+		
+		sql.append("mission_day_uuid char(16) for bit data,"); //$NON-NLS-1$
 		
 		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
@@ -729,7 +735,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(MissionTrack.class));
 		sql.append(", ("); //$NON-NLS-1$
-		sql.append("SELECT distinct mission_uuid as unqid"); //$NON-NLS-1$
+		sql.append("SELECT distinct mission_day_uuid as unqid"); //$NON-NLS-1$
 		if (dataField != null){
 			//additional data required for rasterization
 			for (int i = 0; i < dataField.length; i ++){
@@ -740,7 +746,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(dataTable);
 		sql.append(") tmp "); //$NON-NLS-1$
 		sql.append("WHERE " ); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionTrack.class) + ".mission_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(MissionTrack.class) + ".mission_day_uuid = "); //$NON-NLS-1$
 		sql.append("tmp.unqid"); //$NON-NLS-1$
 
 		QueryPlugIn.logSql(sql.toString());

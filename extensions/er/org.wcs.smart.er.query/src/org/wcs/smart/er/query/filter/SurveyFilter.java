@@ -132,7 +132,7 @@ public class SurveyFilter implements IFilter {
 			return new DropItem[]{di};
 		}else if (type == Type.UUID){
 			try{
-				Survey s = (Survey) session.load(Survey.class, SmartUtils.decodeHex(value));
+				Survey s = (Survey) session.get(Survey.class, SmartUtils.decodeHex(value));
 				if (s == null){
 					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SurveyFilter_SurveyNotFound, new Object[]{value}))};
 				}

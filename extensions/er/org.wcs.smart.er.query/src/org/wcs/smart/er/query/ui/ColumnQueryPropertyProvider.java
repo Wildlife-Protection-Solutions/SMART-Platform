@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.ui;
 
 import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.query.common.model.AbstractColumnQueryPropertyProvider;
@@ -39,6 +40,7 @@ public class ColumnQueryPropertyProvider extends AbstractColumnQueryPropertyProv
 	public boolean isValid(IQueryType query) {
 		if (query.getClass().equals(SurveyObservationQueryType.class) || 
 			query.getClass().equals(SurveyWaypointQueryType.class) ||
+			query.getClass().equals(MissionTrackQueryType.class) ||
 			query.getClass().equals(MissionQueryType.class)){
 			return true;
 		}

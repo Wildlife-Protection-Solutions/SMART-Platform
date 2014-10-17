@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
@@ -70,22 +71,19 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SurveyQueryValidator extends QueryDefinitionValidator {
 
-	private static final String COULDNOTRESOLVE_ERRMSG = "Could not resolve filter {0}.";
+	private static final String COULDNOTRESOLVE_ERRMSG = Messages.SurveyQueryValidator_FilterError;
 	
-	private String langCode;
 	private HashMap<String, UuidItemType> uuidLookup;
 	
 
 	/**
-	 * @param langCode the language value of the query 
+	 *  
 	 * @param uuidLookup a uuid lookup map that looks up uuid values
 	 * @param session database session
 	 * 
 	 */
-	public SurveyQueryValidator(String langCode, HashMap<String, UuidItemType> uuidLookup, Session session ){
+	public SurveyQueryValidator(HashMap<String, UuidItemType> uuidLookup, Session session ){
 		super(session);
-		
-		this.langCode = langCode;
 		this.uuidLookup = uuidLookup;
 	}
 
@@ -176,9 +174,9 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 						((MissionMemberFilter)filter).setUuid(e.getUuid());
 					}else{
 						throw new Exception(
-							MessageFormat.format("Could not resolve survey filter {0}.  Could not find a matching employee with value {1}",
+							MessageFormat.format(Messages.SurveyQueryValidator_EmployeeNotFound,
 										new Object[]{filter.asString(), 
-										item.getValue().get(0) + " "+ item.getValue().get(1) + " [" + item.getId() + "] "}));
+										item.getValue().get(0) + " "+ item.getValue().get(1) + " [" + item.getId() + "] "})); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					}	
 					
 				}else if (filter instanceof MissionFilter){
@@ -190,7 +188,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 								&& ((Mission)x).getSurvey().getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 							return;
 						}
-						throw new Exception(MessageFormat.format("Could not resolve mission filter {0}.", new Object[]{filter.asString()}));
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MissionNotFound, new Object[]{filter.asString()}));
 					}
 				}else if (filter instanceof SurveyFilter){
 					if (((SurveyFilter) filter).getType() == SurveyFilter.Type.UUID){
@@ -201,7 +199,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 								&& ((Survey)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 							return;
 						}
-						throw new Exception(MessageFormat.format("Could not resolve survey filter {0}.", new Object[]{filter.asString()}));
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SurveyNotFound, new Object[]{filter.asString()}));
 					}
 				}else if (filter instanceof SamplingUnitFilter){
 					SamplingUnitFilter suFilter = (SamplingUnitFilter) filter;
@@ -218,14 +216,14 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 							suFilter.setUuid(SmartUtils.encodeHex(it.getUuid()));
 						}
 					}
-					throw new Exception(MessageFormat.format("Could not resolve sampling unit filter {0}.  Could not find matching sampling unit.",
+					throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuNotFound,
 							new Object[]{suFilter.asString()}));
 				}else if (filter instanceof MissionPropertyFilter){
 					MissionPropertyFilter mpFilter = (MissionPropertyFilter) filter;
 					//validate mission attribute
 					NamedKeyItem it = findKeyValue(mpFilter.getAttributeKey(), MissionAttribute.class.getSimpleName());
 					if (it == null){
-						throw new Exception(MessageFormat.format("Could not find the mission property with key {0}", new Object[]{mpFilter.getAttributeKey()}));
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MisisonAttributeNotFound, new Object[]{mpFilter.getAttributeKey()}));
 					}
 					if (mpFilter.getAttributeType() == AttributeType.LIST){
 						validateMissionAttributeListItem((String)mpFilter.getValue(), mpFilter.getAttributeKey());
@@ -233,9 +231,9 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SamplingUnitAttributeFilter){
 					SamplingUnitAttributeFilter mpFilter = (SamplingUnitAttributeFilter) filter;
 					//validate mission attribute
-					NamedKeyItem it = findKeyValue(mpFilter.getSamplingUnitAttributeKey(), MissionAttribute.class.getSimpleName());
+					NamedKeyItem it = findKeyValue(mpFilter.getSamplingUnitAttributeKey(), SamplingUnitAttribute.class.getSimpleName());
 					if (it == null){
-						throw new Exception(MessageFormat.format("Could not find the sampling unit attribute with key {0}", new Object[]{mpFilter.getSamplingUnitAttributeKey()}));
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuAttributeNotFound, new Object[]{mpFilter.getSamplingUnitAttributeKey()}));
 					}
 					if (mpFilter.getAttributeType() == AttributeType.LIST){
 						validateSamplingUnitAttributeListItem((String)mpFilter.getValue(), mpFilter.getSamplingUnitAttributeKey());
@@ -245,7 +243,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 							((SurveyDesignFilter) filter).getKey(),
 							SurveyDesign.class.getSimpleName());
 					if (it == null){
-						throw new Exception(MessageFormat.format("No survey design found with the key {0}.", new Object[]{((SurveyDesignFilter) filter).getKey()}));
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SurveyDesignNotFound, new Object[]{((SurveyDesignFilter) filter).getKey()}));
 					}
 				}
 			}catch(Exception ex){
@@ -269,7 +267,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					//validate mission attribute
 					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), MissionAttribute.class.getSimpleName());
 					if (it == null){
-						throw new Exception(MessageFormat.format("Could not find the mission attribute with key {0}", new Object[]{gb.getAttributeKey()}));
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MissionAttributeKeyNotFound, new Object[]{gb.getAttributeKey()}));
 					}
 					if (gb.getRawItems() != null){
 						for (String item : gb.getRawItems()){
@@ -282,7 +280,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					//validate mission attribute
 					NamedKeyItem it = findKeyValue(gb.getAttributeKey(), SamplingUnitAttribute.class.getSimpleName());
 					if (it == null){
-						throw new Exception(MessageFormat.format("Could not find the sampling unit attribute with key {0}", new Object[]{gb.getAttributeKey()}));
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuAttributeKeyNotFound, new Object[]{gb.getAttributeKey()}));
 					}
 					if (gb.getRawItems() != null){
 						for (String item : gb.getRawItems()){
@@ -306,7 +304,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 								continue;
 							}
 						}
-						throw new Exception(MessageFormat.format("Could not find sampling unit group by option {0}.  Could not find matching sampling unit.",
+						throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuGroupByError,
 							new Object[]{gb.asString()}));
 					}
 				}else if (filter instanceof SurveyIdGroupBy){
@@ -337,7 +335,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 	 */
 	public SamplingUnit findSamplingUnit(String key){
 		
-		String sql = "SELECT c FROM SamplingUnit c WHERE id = :keyId and c.surveyDesign.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM SamplingUnit c WHERE id = :keyId and c.surveyDesign.conservationArea = :ca "; //$NON-NLS-1$ 
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
@@ -364,19 +362,15 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		if (key.equals(AttributeFilter.ANY_OPTION.getKey())){
 			return ;
 		}
-		String sql = "SELECT c FROM " + MissionAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.missionAttribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM " + MissionAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		
 		List<?> results = query.list();
-		if (results.size() == 0){
-			return ;
-		}else if (results.size() > 1){
-			return ;
-		}else{
-			throw new Exception(MessageFormat.format("Could not find the mission attribute list item with key {0} for mission property {1}.", new Object[]{key, attributeKey}));
+		if (results.size() == 0 || results.size() > 1){
+			throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_MissionListItemNotFound, new Object[]{key, attributeKey}));
 		}
 	}
 	
@@ -391,19 +385,15 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 		if (key.equals(AttributeFilter.ANY_OPTION.getKey())){
 			return ;
 		}
-		String sql = "SELECT c FROM " + SamplingUnitAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.samplingUnit.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "SELECT c FROM " + SamplingUnitAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
 		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		
 		List<?> results = query.list();
-		if (results.size() == 0){
-			return ;
-		}else if (results.size() > 1){
-			return ;
-		}else{
-			throw new Exception(MessageFormat.format("Could not find the sampling unit attribute list item with key {0} for mission property {1}.", new Object[]{key, attributeKey}));
+		if (results.size() == 0 || results.size() > 1){
+			throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuListItemNotFound, new Object[]{key, attributeKey}));
 		}
 	}
 }

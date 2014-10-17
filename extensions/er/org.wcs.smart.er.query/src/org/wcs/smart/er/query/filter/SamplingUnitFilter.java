@@ -105,7 +105,7 @@ public class SamplingUnitFilter implements IFilter {
 				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(NONE)};
 			}
 			
-			SamplingUnit su = (SamplingUnit) session.load(SamplingUnit.class, SmartUtils.decodeHex(uuid));
+			SamplingUnit su = (SamplingUnit) session.get(SamplingUnit.class, SmartUtils.decodeHex(uuid));
 			if (su != null){
 				su.getId();
 				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(su)};
@@ -114,7 +114,7 @@ public class SamplingUnitFilter implements IFilter {
 			}
 		}
 		if (unitType == Type.TRACK){
-			MissionTrack su = (MissionTrack) session.load(MissionTrack.class, SmartUtils.decodeHex(uuid));
+			MissionTrack su = (MissionTrack) session.get(MissionTrack.class, SmartUtils.decodeHex(uuid));
 			if (su != null){
 				su.getId();
 				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(su)};

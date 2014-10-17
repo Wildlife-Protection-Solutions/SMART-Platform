@@ -24,7 +24,6 @@ package org.wcs.smart.er.query.importexport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
-import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.model.SurveySummaryQueryType;
@@ -55,7 +54,7 @@ public class SurveySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	protected void validateQuery(SumQueryDefinition sumDef, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session)
 			throws Exception {
-		SurveyQueryValidator validator = new SurveyQueryValidator(langCode, uuidLookup, session);
+		SurveyQueryValidator validator = new SurveyQueryValidator(uuidLookup, session);
 		if (sumDef.getValueFilter() != null ){
 			warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
 		}
@@ -81,7 +80,7 @@ public class SurveySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	public Query importQuery(QueryType qt) throws Exception{
 		Query query = super.importQuery(qt);
 		for (QueryPart part : qt.getQueryPart()) {
-			if (part.getKey().equals("surveyDesignFilter")){
+			if (part.getKey().equals("surveyDesignFilter")){ //$NON-NLS-1$
 				((ISurveyQuery)query).setSurveyDesign(part.getValue());
 			}
 		}

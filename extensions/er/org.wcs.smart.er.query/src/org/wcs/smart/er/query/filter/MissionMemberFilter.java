@@ -83,7 +83,7 @@ public class MissionMemberFilter implements IFilter {
 
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
-		Employee e = (Employee) session.load(Employee.class, uuid);
+		Employee e = (Employee) session.get(Employee.class, uuid);
 		if (e == null){
 			return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionMemberFilter_EmployeeNotFound, new Object[]{SmartUtils.encodeHex(uuid)}))};
 		}

@@ -23,13 +23,9 @@ package org.wcs.smart.er.query.importexport;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.Survey;
-import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.filter.MissionMemberFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
-import org.wcs.smart.er.query.filter.SurveyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.xml.model.QueryType;

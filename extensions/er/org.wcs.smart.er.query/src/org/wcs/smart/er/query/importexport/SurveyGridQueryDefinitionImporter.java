@@ -57,7 +57,7 @@ public class SurveyGridQueryDefinitionImporter extends GriddedQueryDefinitionImp
 	protected void validateQuery(GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 		
-		SurveyQueryValidator validator = new SurveyQueryValidator(langCode,uuidLookup, session);
+		SurveyQueryValidator validator = new SurveyQueryValidator(uuidLookup, session);
 		if (def.getValueFilter() != null){
 			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
 		}
@@ -75,7 +75,7 @@ public class SurveyGridQueryDefinitionImporter extends GriddedQueryDefinitionImp
 	public Query importQuery(QueryType qt) throws Exception{
 		Query query = super.importQuery(qt);
 		for (QueryPart part : qt.getQueryPart()) {
-			if (part.getKey().equals("surveyDesignFilter")){
+			if (part.getKey().equals("surveyDesignFilter")){ //$NON-NLS-1$
 				((ISurveyQuery)query).setSurveyDesign(part.getValue());
 			}
 		}

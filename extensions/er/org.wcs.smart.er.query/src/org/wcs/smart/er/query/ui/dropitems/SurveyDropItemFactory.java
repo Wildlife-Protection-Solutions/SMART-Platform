@@ -53,6 +53,7 @@ import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
+import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.TrackFilterDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider;
@@ -472,11 +473,11 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			SumQueryDefinition def = q.getQueryDefinition();
 			
 			//value filter panel
-			proxy.setDropItems(FilterDefintionPanel.ID, //+ "." + FilterDefintionPanel.PanelType.RATE, 
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.RATE,  //$NON-NLS-1$
 					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
 //			//rate filter panel
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE, //$NON-NLS-1$
-//					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE, //$NON-NLS-1$
+					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
 			//column group by
 			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
 					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
@@ -499,13 +500,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 //			
 		}else if(proxy.getQuery().getType().getKey().equals(SurveyGridQueryType.KEY)){
 			SurveyGriddedQuery q = (SurveyGriddedQuery) proxy.getQuery();
-			GridQueryDefinition def = q.getQueryDefinition();
+			GridQueryDefinition def = q.getQueryDefinition();			
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
+			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
 			
-			proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(def.getValueFilter().getFilter(), session)); 
-			
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-//			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + ValueRateFilterDeifnitionPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
-//			
 			DropItem valueItem = null;
 			try{
 				valueItem = def.getValuePart().asDropItem(session);
@@ -517,9 +515,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				valueItem = new ErrorDropItem(ex.getMessage());
 			}
 			proxy.setDropItems(GriddedDefinitionPanel.VALUE_PANEL_ID,
-					Collections.singletonList(valueItem));
-//					
-//			
+					Collections.singletonList(valueItem));			
 		}
 	}
 	
