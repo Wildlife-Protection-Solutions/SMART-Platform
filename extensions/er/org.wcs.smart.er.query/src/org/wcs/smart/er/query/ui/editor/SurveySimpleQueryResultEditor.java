@@ -122,7 +122,6 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	@Override
 	public IQueryService createQueryService() {
-		//return null;
 		return new QueryService(getQuery());
 	}
 	

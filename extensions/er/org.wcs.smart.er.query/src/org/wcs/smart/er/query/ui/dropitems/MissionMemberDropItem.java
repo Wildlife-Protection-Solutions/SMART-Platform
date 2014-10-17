@@ -82,6 +82,7 @@ public class MissionMemberDropItem extends DropItem implements IFilterDropItem {
 			
 			final List<Employee> data = new ArrayList<Employee>();
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try {
 				List<Employee> employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
 				data.addAll(employees);
@@ -91,6 +92,7 @@ public class MissionMemberDropItem extends DropItem implements IFilterDropItem {
 						return Collator.getInstance().compare(e0.getFullLabel().toUpperCase(), e1.getFullLabel().toUpperCase());
 					}
 				});
+				s.getTransaction().rollback();
 			} finally {
 				s.close();
 			}
