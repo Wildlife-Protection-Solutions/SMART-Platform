@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Mission_QNAME = new QName("http://www.example.org/Mission/", "Mission");
+    private final static QName _Mission_QNAME = new QName("http://www.example.org/Mission/", "Mission"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.er.xml.model.missions

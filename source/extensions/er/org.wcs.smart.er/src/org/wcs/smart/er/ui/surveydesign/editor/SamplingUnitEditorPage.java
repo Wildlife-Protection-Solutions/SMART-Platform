@@ -221,6 +221,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
     private Job loadValues = new Job(Messages.SamplingUnitEditorPage_loadingValuesJobName){
 
 		
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			SurveyDesign sd = editor.getSurveyDesign();
@@ -494,6 +495,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		Object x = ((IStructuredSelection)suTable.getSelection()).getFirstElement();
 		if (x == null) return;
 		if (x instanceof SamplingUnit){
+			@SuppressWarnings("unchecked")
 			List<SamplingUnit> siblings = (List<SamplingUnit>) suTable.getInput();
 			siblings.remove(x);
 			EditSamplingUnitDialog d = new EditSamplingUnitDialog(getSite().getShell(), (SamplingUnit)x, siblings);

@@ -31,8 +31,8 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Names_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/entitytype", "Names");
-    private final static QName _SurveyDesign_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/entitytype", "SurveyDesign");
+    private final static QName _Names_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/entitytype", "Names");  //$NON-NLS-1$//$NON-NLS-2$
+    private final static QName _SurveyDesign_QNAME = new QName("http://www.smartconservationsoftware.org/xml/1.0/entitytype", "SurveyDesign"); //$NON-NLS-1$ //$NON-NLS-2$
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: org.wcs.smart.er.xml.model.surveyDesign

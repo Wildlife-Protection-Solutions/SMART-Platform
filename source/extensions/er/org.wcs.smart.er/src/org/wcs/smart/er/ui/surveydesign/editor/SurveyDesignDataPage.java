@@ -239,6 +239,7 @@ public class SurveyDesignDataPage extends EditorPart {
 			public void dispose() {
 			}
 
+			@SuppressWarnings("unchecked")
 			public void inputChanged(Viewer viewer, Object oldInput,
 					Object newInput) {
 				if (newInput instanceof List){
