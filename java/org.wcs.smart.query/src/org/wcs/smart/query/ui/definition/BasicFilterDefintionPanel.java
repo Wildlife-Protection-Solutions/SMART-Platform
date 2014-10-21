@@ -567,7 +567,9 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 		addItems(q.getDropItems(getId()));
 		
 		if (q.getQuery() instanceof SimpleQuery){
-			setFilterType( ((SimpleQuery)q.getQuery()).getFilter().getFilterType() );
+			if (((SimpleQuery)q.getQuery()).getFilter() != null){
+				setFilterType( ((SimpleQuery)q.getQuery()).getFilter().getFilterType() );
+			}
 		}else if (q.getQuery() instanceof GriddedQuery){
 			if ( ((GriddedQuery)q.getQuery()).getQueryDefinition() != null &&
 					((GriddedQuery)q.getQuery()).getQueryDefinition().getValueFilter() != null){
