@@ -152,6 +152,7 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 			
 			session.saveOrUpdate(missionDay);
 			session.getTransaction().commit();
+			cmp.clearTracksToDelete();
 		} catch (Exception ex) {
 			EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackEditDialog_SaveError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return false;

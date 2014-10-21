@@ -137,10 +137,7 @@ public class SplitTool extends SimpleTool implements KeyListener {
 					Coordinate c2 = ReprojectUtils.reproject(c1.x, c1.y, getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS);
 					cs.add(c2);
 				}
-				
 				finishCommand.onFinish(cs);
-				
-				setActive(false);
 			} catch (Exception e) {
 				EcologicalRecordsPlugIn.displayLog(Messages.SplitTool_ToolError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			}
