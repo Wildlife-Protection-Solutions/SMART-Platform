@@ -229,7 +229,6 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Sampling unit filter
 	 */
 	protected String asSql(SamplingUnitFilter filter, IQueryEngine engine) throws SQLException{
-		//TODO: this works for waypoint filters but not track filters
 		if (engine instanceof DerbyMissionTrackEngine){
 			if (filter.getType() == Type.SAMPLINGUNIT){
 				if (filter.isNone()){
@@ -244,8 +243,10 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			//survey waypoint su or track  
 			if (filter.getType() == Type.SAMPLINGUNIT){
 				if (filter.isNone()){
-					return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid is null " //$NON-NLS-1$ //$NON-NLS-2$
-							+ " OR " + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null)"; //$NON-NLS-1$ //$NON-NLS-2$ 
+					return " ( ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid is null AND "  //$NON-NLS-1$ //$NON-NLS-2$
+							+ engine.tablePrefix(MissionTrack.class) + ".uuid is not null )" //$NON-NLS-1$
+							+ " OR (" + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null " //$NON-NLS-1$ //$NON-NLS-2$
+							+ " AND " + engine.tablePrefix(SurveyWaypoint.class) + ".wp_uuid is not null))"; //$NON-NLS-1$ //$NON-NLS-2$
 				}else{
 					return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						+ " OR " + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
