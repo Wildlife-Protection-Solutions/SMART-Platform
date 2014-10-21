@@ -75,8 +75,8 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 			Session s = HibernateManager.openSession();
 			try{
 				if (design != null){
-					s.update(design);
-					for (MissionProperty p : design.getMissionProperties()){
+					SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, design.getUuid());
+					for (MissionProperty p : lDesign.getMissionProperties()){
 						p.getAttribute().getName();
 					}
 				}else{
@@ -107,8 +107,8 @@ public class SurveyGroupByContentProvider implements ITreeContentProvider{
 			try{
 				if (design != null){
 					listSamplingUnitAttributes = new ArrayList<SamplingUnitAttribute>();
-					s.update(design);
-					for (SurveyDesignSamplingUnitAttribute p : design.getSamplingUnitAttributes()){
+					SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, design.getUuid());
+					for (SurveyDesignSamplingUnitAttribute p : lDesign.getSamplingUnitAttributes()){
 						p.getSamplingUnitAttribute().getName();
 						if (p.getSamplingUnitAttribute().getType() == AttributeType.LIST){
 							listSamplingUnitAttributes.add(p.getSamplingUnitAttribute());
