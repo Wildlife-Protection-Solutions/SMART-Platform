@@ -52,17 +52,19 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	
 	/**
 	 * Gets all sampling units for a survey design;
-	 * This includes all fixed sampling units and reconnaissance
-	 * sampling units (represented as tracks).
+	 * This includes all fixed sampling units.
 	 *  
 	 * <p>
 	 * If in CCAA mode, will return all sampling units in all
 	 * conservation ares whose survey keys match.
 	 * </p>
 	 *  
+	 * @param survey the survey design 
+	 * @param s current session
+	 * @param state the state of sampling unit; null if you want all 
 	 * @return all sampling units for the given conservation area
 	 */
-	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s){
+	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s, SamplingUnit.State state){
 		
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		
@@ -70,15 +72,21 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 		StringBuilder sb = new StringBuilder();
 		sb.append("FROM SamplingUnit a "); //$NON-NLS-1$
 		sb.append(" WHERE a.surveyDesign = :survey "); //$NON-NLS-1$
+		if (state != null){
+			sb.append(" AND a.state = :state");	 //$NON-NLS-1$
+		}
 		
 		Query q = s.createQuery(sb.toString());
 		q.setParameter("survey", survey); //$NON-NLS-1$
-		
+		if (state != null){
+			q.setParameter("state", state); //$NON-NLS-1$
+		}
 		List<SamplingUnit> unit = q.list();
 		units.addAll(unit);
 		
 		return units;
 	}
+	
 	
 	/**
 	 * Gets all sampling units for a survey design;
@@ -213,20 +221,11 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 	@Override
 	public Set<SamplingUnit.GeometryType> getSamplingUnitTypes(SurveyDesign sd, Session s){
 		HashSet<SamplingUnit.GeometryType> types = new HashSet<SamplingUnit.GeometryType>();
-		for (Object x : getSamplingUnits(sd, s)){
+		for (Object x : getSamplingUnits(sd, s, null)){
 			if (x instanceof SamplingUnit){
 				types.add(((SamplingUnit) x).getType());
 			}
 		}
-//		Long cnt = (Long)s.createCriteria(MissionTrack.class, "mt") //$NON-NLS-1$
-//			.createAlias("mt.mission", "m") //$NON-NLS-1$ //$NON-NLS-2$
-//			.createAlias("m.survey", "s") //$NON-NLS-1$ //$NON-NLS-2$
-//			.add(Restrictions.eq("s.surveyDesign", sd)) //$NON-NLS-1$
-//			.add(Restrictions.eq("type", TrackType.RECON)) //$NON-NLS-1$
-//			.setProjection(Projections.rowCount()).list().get(0);
-//		if (cnt > 0){
-//			types.add(GeometryType.RECON);
-//		}
 		return types;
 	}
 	

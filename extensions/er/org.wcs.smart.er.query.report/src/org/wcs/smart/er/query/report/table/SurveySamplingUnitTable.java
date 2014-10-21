@@ -142,7 +142,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 	@Override
 	public List<Object> getValues (Collection<ConservationArea> cas, Session session) {
 		List<Object> sus = new ArrayList<Object>();
-		for (Object su : SurveyHibernateManager.getInstance().getSamplingUnits(sd, session)){
+		for (Object su : SurveyHibernateManager.getInstance().getSamplingUnits(sd, session, null)){
 			if (su instanceof SamplingUnit){
 				SamplingUnit s = (SamplingUnit)su;
 				if (s.getType() == type){

@@ -93,7 +93,7 @@ public class SamplingUnitGroupByDropItem extends DropItem
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			List<SamplingUnit> objects = SurveyHibernateManager.getInstance().getSamplingUnits(currentDesign, s);
+			List<SamplingUnit> objects = SurveyHibernateManager.getInstance().getSamplingUnits(currentDesign, s, null);
 			for (SamplingUnit su : objects){
 				items.add(new ListItem(su.getUuid(), su.getId(), null));
 			}
