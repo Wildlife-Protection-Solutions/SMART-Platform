@@ -90,7 +90,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				try {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
-							true, true, new SubProgressMonitor(monitor, 50));
+							true, false, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
 					
