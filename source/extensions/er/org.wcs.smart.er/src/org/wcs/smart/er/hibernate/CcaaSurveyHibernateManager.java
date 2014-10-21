@@ -44,11 +44,11 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 public class CcaaSurveyHibernateManager implements ISurveyHibernateManager{
 
 	@Override
-	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s) {
+	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s, SamplingUnit.State state) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
 	@Override
 	public List<MissionTrack> getAdHocMissionTracks(SurveyDesign survey, Session s){
 		return null;		

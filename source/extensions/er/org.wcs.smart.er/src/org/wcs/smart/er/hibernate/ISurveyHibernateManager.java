@@ -37,9 +37,9 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 public interface ISurveyHibernateManager {
 
 	/**
-	 * Gets all sampling units for a conservation area and survey.
-	 * This includes all fixed sampling units and reconnaissance
-	 * sampling units (represented as tracks).
+	 * Gets all sampling units for a conservation area and survey with
+	 * the given state.  If the state is null then all sampling units
+	 * will be returned.  It does not include reconnissance mission tracks.
 	 *  
 	 * <p>
 	 * If in CCAA mode, will return all sampling units in all
@@ -48,8 +48,8 @@ public interface ISurveyHibernateManager {
 	 *  
 	 * @return all sampling units for the given conservation area
 	 */
-	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s);
-	
+	public List<SamplingUnit> getSamplingUnits(SurveyDesign survey, Session s, SamplingUnit.State state);
+
 	/**
 	 * Returns all mission tracks that are not associated with a sampling
 	 * unit.

@@ -156,7 +156,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 			Session s = HibernateManager.openSession();
 			try{
 				if (design != null){
-					List<SamplingUnit> allUnits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s);
+					List<SamplingUnit> allUnits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s, null);
 					sunits = new ArrayList<Object>();
 					sunits.addAll(allUnits);
 					sunits.add(SamplingUnitFilter.NONE);

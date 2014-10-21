@@ -130,7 +130,7 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 			try {
 				//load units
 				List<Object> items = new ArrayList<Object>();
-				items.addAll(SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, s));
+				items.addAll(SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, s, SamplingUnit.State.ACTIVE));
 				
 				if (!samplingUnitsOnly){
 					List<MissionTrack> mt = SurveyHibernateManager.getInstance().getAdHocMissionTracks(surveyDesign, s);
@@ -140,6 +140,9 @@ public class SamplingUnitCellEditor extends ComboBoxCellEditor {
 						}
 					}
 				}
+				//add inactive items at end
+				items.addAll(SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, s, SamplingUnit.State.INACTIVE));
+				
 				items.add(0, null);
 				units = items;
 			} finally {

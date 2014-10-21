@@ -162,7 +162,7 @@ public class SamplingUnitGroupBy implements ISurveyGroupBy{
 				return null;
 			}
 			List<SamplingUnit> objects = SurveyHibernateManager.getInstance()
-						.getSamplingUnits(filterDesign, session);
+						.getSamplingUnits(filterDesign, session, null);
 			for (SamplingUnit o : objects){
 				SamplingUnit su = (SamplingUnit) o;
 				items.add(new ListItem(su.getUuid(), su.getId(), null));
