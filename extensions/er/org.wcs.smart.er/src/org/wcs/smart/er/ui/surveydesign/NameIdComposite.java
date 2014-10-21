@@ -132,23 +132,16 @@ public class NameIdComposite extends SurveyDesignComposite {
 		btnChangeKey.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
-				if (!MessageDialog
-						.openConfirm(
-								parent.getShell(),
-								Messages.NameIdComposite_EditKey_Title,
-								Messages.NameIdComposite_EditKey_Message)) {
-					return;
-				}
 				InputDialog id = new KeyInputDialog(parent.getShell(), 
 						txtKey.getText(), otherKeys);
 				int ret = id.open();
 				if (ret != Window.CANCEL) {
 					txtKey.setText(id.getValue());
 					txtName.removeKeyListener(generateKeyListener);
+					validate();
+					fireChangeListeners();
 				}
-				validate();
-				fireChangeListeners();
+				
 			}
 		});
 		
