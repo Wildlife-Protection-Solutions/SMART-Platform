@@ -77,7 +77,7 @@ public class MissionExporter {
 	 * 
 	 * @throws Exception 
 	 */
-	public static File exportPatrol(Mission mission, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
+	public static File exportMission(Mission mission, File file, boolean includeAttachments, IProgressMonitor monitor) throws Exception{
 		monitor.beginTask(Messages.MissionExporter_0, includeAttachments ? 4 : 2);
 		Session session = HibernateManager.openSession();
 		try {
@@ -86,21 +86,12 @@ public class MissionExporter {
 			monitor.subTask(Messages.MissionExporter_1);
 			MissionType xml = MissionToXmlConverter.toXml(mission);
 			
-			/*
-			for (IXmlExtraDataContribution edc : XmlExtraDataContributionFactory.getContributions()) {
-				List<ExtraDataType> extraData = edc.exportData(mission);
-				if (extraData != null) {
-					xml.getExtraData().addAll(extraData);
-				}
-			}
-			*/
-			
 			monitor.worked(1);
 			
 			if (!includeAttachments){
 				return exportMissionWithoutAttachments(xml, file, monitor);
 			}else{
-				return exportPatrolWithAttachments(mission, xml, file, monitor);
+				return exportMissionWithAttachments(mission, xml, file, monitor);
 			}
 		} finally {
 			if (session.isOpen()) {
@@ -128,7 +119,7 @@ public class MissionExporter {
 	/**
 	 * Writes the patrol including attachments
 	 */
-	private static File exportPatrolWithAttachments(Mission mission, MissionType xml, File f, IProgressMonitor monitor) throws Exception{
+	private static File exportMissionWithAttachments(Mission mission, MissionType xml, File f, IProgressMonitor monitor) throws Exception{
 		int index = f.getName().lastIndexOf('.');
 		String name = f.getName();
 		if (index >= 0){

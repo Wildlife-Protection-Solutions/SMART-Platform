@@ -106,7 +106,7 @@ public class MissionExportHandler extends AbstractHandler {
 							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_3,new Object[]{ id }));
 
 							File outFile = MissionExporter.getOutputFile(dir, m.getId(), includeAtt);
-							MissionExporter.exportPatrol(m, outFile, includeAtt, new NullProgressMonitor());
+							MissionExporter.exportMission(m, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
 							displayLogError(MessageFormat.format("Error exporting Missions: {0}", new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
