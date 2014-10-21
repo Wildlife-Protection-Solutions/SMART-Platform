@@ -226,7 +226,8 @@ public class SurveyDesignFromXmlConverter {
 					}
 				}
 				if(!found){
-					throw new ParseException(Messages.SurveyDesignImportHandler_5 + xmlsuav.getSamplingUnitAttributeId() + Messages.SurveyDesignImportHandler_6, 0);
+					throw new ParseException(
+							MessageFormat.format(Messages.SurveyDesignFromXmlConverter_MissingSuAttribute, new Object[]{xmlsuav.getSamplingUnitAttributeId()}), 0);
 				}
 				if (suav.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
 					suav.setStringValue(xmlsuav.getStringValue());	

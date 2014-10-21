@@ -72,7 +72,7 @@ public class MissionTrackQueryType implements IQueryType {
 
 	@Override
 	public String getGuiName() {
-		return Messages.MissionQueryType_MissionQueryName;
+		return Messages.MissionTrackQueryType_MissionTrackQueryType;
 	}
 
 	@Override

@@ -88,7 +88,6 @@ public class Messages extends NLS {
 	public static String MissionInfoSection_NA;
 	public static String MissionInfoSection_NumMissions;
 	public static String MissionLegnthValueDropItem_TrackLengthLabel;
-	public static String MissionLengthValueItem_Label;
 	public static String MissionMemberDropItem_LeaderLabel;
 	public static String MissionMemberDropItem_LeaderText;
 	public static String MissionMemberDropItem_LoadingEmployeeJob;
@@ -102,6 +101,7 @@ public class Messages extends NLS {
 	public static String MissionTrackInfoSection_NA;
 	public static String MissionTrackInfoSection_NumMissions;
 	public static String MissionTrackInfoSection_NumTracks;
+	public static String MissionTrackQueryType_MissionTrackQueryType;
 	public static String MissionValueItem_NumberOfMissionsLabel;
 	public static String MissionValueItem_NumberOfSurveyLabel;
 	public static String MissionValueItem_ValueItemNotSupported;
@@ -206,7 +206,6 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumn_MissionIdLabel;
 	public static String SurveyQueryColumn_MissionLeaderLabel;
 	public static String SurveyQueryColumn_MissionStartLabel;
-	public static String SurveyQueryColumn_SuBufferLabel;
 	public static String SurveyQueryColumn_SuLabel;
 	public static String SurveyQueryColumn_SurveyDesignEnddateLabel;
 	public static String SurveyQueryColumn_SurveyDesignLabel;
@@ -244,7 +243,6 @@ public class Messages extends NLS {
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryError;
 	public static String SurveySummaryQueryType_QueryTypeName;
-	public static String SurveyValuesTreeNode_MissionTrackLengthItem;
 	public static String SurveyValuesTreeNode_SurveyValuesNodeLabel;
 	public static String SurveyWaypointQueryType_IncidentQuery;
 	public static String TrackTypeDropItem_TrackTypeLabel;
