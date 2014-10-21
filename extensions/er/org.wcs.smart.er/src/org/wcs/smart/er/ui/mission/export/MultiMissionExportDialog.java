@@ -60,7 +60,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 
 public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog implements IMissionFilteringView{
-		
 
 	private static final String OUTPUT_DIR = "outputDir"; //$NON-NLS-1$
 	private static final String INCLUDE_ATTACHMENT = "attachements"; //$NON-NLS-1$
@@ -77,7 +76,6 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 	 * Creates a new dialog.
 	 * 
 	 * @param parentShell parent shell
-	 * @param patrol patrol to export
 	 */
 	public MultiMissionExportDialog(Shell parentShell) {
 		super(parentShell, Messages.MultiMissionExportDialog_FilterLabel);

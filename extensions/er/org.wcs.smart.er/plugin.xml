@@ -208,6 +208,33 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.er.missionExportHandler"
+                  label="%mission.survey.export.command.label"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.er.missionImportHandler"
+                  label="%mission.survey.import.command.label"
+                  style="push">
+            </command>
+            <command
                   commandId="org.wcs.smart.er.surveydesignexport"
                   label="%survey.export.command.label"
                   style="push">
@@ -242,33 +269,6 @@
                      </test>
                   </or>
                </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.er.missionExportHandler"
-                  label="%mission.survey.export.command.label"
-                  style="push">
-               <visibleWhen
-                     checkEnabled="true">
-                  <or>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                     <test
-                           property="org.wcs.smart.smartAdminUser"
-                           value="dataentry">
-                     </test>
-                  </or>
-               </visibleWhen>
-            </command>
-            <command
-                  commandId="org.wcs.smart.er.missionImportHandler"
-                  label="%mission.survey.import.command.label"
-                  style="push">
             </command>
             <separator
                   name="org.wcs.smart.er.separator3"
@@ -373,7 +373,8 @@
          </command>
          <command
                commandId="org.wcs.smart.er.survey.new"
-               style="push">
+               style="push"
+               tooltip="%survey.create.command.tooltip">
             <visibleWhen
                   checkEnabled="true">
                <or>

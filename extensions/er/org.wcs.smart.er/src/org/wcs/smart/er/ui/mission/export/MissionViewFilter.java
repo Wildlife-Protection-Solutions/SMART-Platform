@@ -84,7 +84,7 @@ public class MissionViewFilter {
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT m.uuid, m.id, m.startDate, m.endDate, s.id, s.uuid, sd.keyId "); //$NON-NLS-1$
+		str.append("SELECT m.uuid, m.id, m.startDate, m.endDate, s.id, s.uuid, sd.name "); //$NON-NLS-1$
 		str.append("FROM Mission m JOIN m.survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
 		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
 	
@@ -92,7 +92,7 @@ public class MissionViewFilter {
 			str.append(" AND "); //$NON-NLS-1$
 			str.append(" ( m.endDate >= :date1 and m.startDate <= :date2 ) "); //$NON-NLS-1$
 		}
-		str.append("ORDER BY s.id, m.id desc"); //$NON-NLS-1$
+		str.append("ORDER BY s.startDate desc, s.id, m.startDate desc, m.id"); //$NON-NLS-1$
 	
 		Query query = s.createQuery(str.toString()).setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		if (dateFilter != null) {
