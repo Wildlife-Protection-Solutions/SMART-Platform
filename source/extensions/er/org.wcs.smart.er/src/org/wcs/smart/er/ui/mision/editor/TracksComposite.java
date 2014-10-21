@@ -683,11 +683,11 @@ public class TracksComposite extends Composite implements MapPart{
 				public void onFinish(List<Coordinate> points) {
 					if (TracksComposite.this.isDisposed())
 						return;
-					toolComp.selectLastTool();
 					if (points == null){
 						//tool has been de-activated
 						clearMessage();
 						splitItem.setSelection(false);
+						toolComp.selectLastTool();
 						return;
 					}
 					IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
@@ -736,6 +736,9 @@ public class TracksComposite extends Composite implements MapPart{
 						
 						infoLabel.setText(""); //$NON-NLS-1$
 						refresh(true);
+						
+						//de-active
+						toolComp.selectLastTool();
 					}
 					
 					
@@ -809,6 +812,10 @@ public class TracksComposite extends Composite implements MapPart{
 	public List<MissionTrack> getTracksToDelete(){
 		return this.toDelete;
 	}
+	
+	public void clearTracksToDelete(){
+		toDelete.clear();
+	}
 
 	protected void editTrack() {
 		if (!confirmChanges()) return;
@@ -826,8 +833,6 @@ public class TracksComposite extends Composite implements MapPart{
 	}
 
 	protected void zoomTrack() {
-		if (!confirmChanges()) return;
-		
 		IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
 		Envelope env = null;
 		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
