@@ -133,6 +133,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 					Query q = session.createQuery("SELECT sua FROM SamplingUnitAttributeValue sua JOIN sua.id.samplingUnit su WHERE sua.id.samplingUnitAttribute = :sua AND su.surveyDesign = :sd"); //$NON-NLS-1$
 					q.setParameter("sua", a.getSamplingUnitAttribute()); //$NON-NLS-1$
 					q.setParameter("sd", this.design); //$NON-NLS-1$
+					@SuppressWarnings("unchecked")
 					List<SamplingUnitAttributeValue> values = q.list();
 					
 					for (SamplingUnitAttributeValue v : values){
@@ -172,6 +173,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 	}
 	
 	private void initValues(boolean keepCurrent){
+		@SuppressWarnings("unchecked")
 		List<SamplingUnitAttribute> allAttributes = 
 				session.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
@@ -218,6 +220,7 @@ public class SurveyDesignSamplingUnitAttributeDialog extends TitleAreaDialog {
 				sua.setConservationArea(SmartDB.getCurrentConservationArea());
 				sua.setType(AttributeType.TEXT);
 				
+				@SuppressWarnings("unchecked")
 				List<SamplingUnitAttribute> siblings = session
 						.createCriteria(SamplingUnitAttribute.class)
 						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$

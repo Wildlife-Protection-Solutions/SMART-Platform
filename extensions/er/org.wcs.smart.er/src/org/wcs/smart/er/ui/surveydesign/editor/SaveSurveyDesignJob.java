@@ -70,6 +70,7 @@ public class SaveSurveyDesignJob extends Job {
 					Query query = session.createQuery(sqlquery);
 					query.setParameter("attribute", mp.getAttribute()); //$NON-NLS-1$
 					query.setParameter("sd", db); //$NON-NLS-1$
+					@SuppressWarnings("unchecked")
 					List<MissionPropertyValue> toDelete = query.list();
 					for (MissionPropertyValue v: toDelete){
 						session.delete(v);
