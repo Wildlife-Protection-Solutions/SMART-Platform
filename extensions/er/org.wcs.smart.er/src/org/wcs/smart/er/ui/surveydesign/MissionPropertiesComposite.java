@@ -80,7 +80,9 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 		lblWarn.setVisible(design.getUuid() != null);
 		
 		@SuppressWarnings("unchecked")
-		List<MissionAttribute> allAttributes = session.createCriteria(MissionAttribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+		List<MissionAttribute> allAttributes = session.createCriteria(MissionAttribute.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.list(); 
 		List<MissionAttribute> selectedAttributes = new ArrayList<MissionAttribute>();
 		
 		if (design.getMissionProperties() != null){
@@ -90,13 +92,13 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 			}
 		}
 		attributesComposite.setLabelProvider(new AttributeLabelProvider());
-		attributesComposite.setItemsData(allAttributes, selectedAttributes);
 		attributesComposite.setItemComparator(new Comparator<MissionAttribute>() {
 			@Override
 			public int compare(MissionAttribute arg0, MissionAttribute arg1) {
 				return Collator.getInstance().compare(arg0.getName(), arg1.getName());
 			}
 		});
+		attributesComposite.setItemsData(allAttributes, selectedAttributes);
 		attributesComposite.addSelectionChangedListener(new IListChanged<MissionAttribute>() {
 			@Override
 			public void listChanged(List<MissionAttribute> items) {
