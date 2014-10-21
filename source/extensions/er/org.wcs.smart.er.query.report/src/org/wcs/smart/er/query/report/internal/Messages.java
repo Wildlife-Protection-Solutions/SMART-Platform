@@ -13,7 +13,6 @@ public class Messages extends NLS {
 	public static String SurveyDesignPropertyTable_StatusLabel;
 	public static String SurveyReportQuery_SummaryQueryError;
 	public static String SurveyReportQuery_UnsupportedQueryType;
-	public static String SurveySamplingUnitTable_BufferColumnLabel;
 	public static String SurveySamplingUnitTable_IDColumnLabel;
 	public static String SurveySamplingUnitTable_LongDisplayName;
 	public static String SurveySamplingUnitTable_StateColumnLabel;
