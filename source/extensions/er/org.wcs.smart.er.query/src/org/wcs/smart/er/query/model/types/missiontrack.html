@@ -9,6 +9,7 @@ p{
 	font-family:Verdana;
 	font-size:11px;
 }
+
 .psmall{
 	font-family:Verdana;
 	font-size:10px;
@@ -18,30 +19,28 @@ p{
 <body>
 <h1>Survey Mission Track Query</h1>
 <p>
-Display all mission tracks that match the given filters.  Track type, sampling unit, mission
-and area filters are applied directly to the track.  Observation filters are applied to observations
-associated with the mission associated with the track.
+Display all mission tracks that match the given filters.  Filters include track type, sampling unit, mission
+and area and area applied to the track.
 </p>
 <p><b>Mission Track Query vs Mission Query</b></p>
-<ul>
-<li><p>Mission Track Queries generate on one record per track (and include track properties).  Mission queries create
-one record per mission.</p></li>
-<li><p>Mission Track Queries filters are applied to the mission tracks, not the observations.
-Therefore if you filter on a sampling unit, it will return tracks that match the sampling
-unit, not observations.  Mission queries apply the filters to the observations.
+<p>
+Mission Track Queries generate on one record per track (and include track properties).  Filters
+are limited to track, mission and survey properties (cannot query on observation details). 
+Mission Queries generate on one record per mission and merge all tracks into a single feature on the map.  Filters
+include mission and survey properties as well as observation details (data model filters). 
 </p>
-</li> 
-</ul>
+
+<p> 
+Results will include one record per track that matches the given filters.  No
+observation or incident information is included in the results.  Track details are displayed
+in a tabular window.  Tracks locations are displayed in a map window.
+</p>
 
 <table>
 <tr><td><img style="border: 1px solid" src="./missiontrack.png"/></td></tr>
 <tr><td><p class="psmall"><b>Example Mission Track Query</b></p></td></tr>
 </table>
-<p> 
-Results will include one record per mission that matches the given filters.  No
-observation or incident information is included in the results.  Mission details are displayed
-in a tabular window.  Mission tracks are displayed in a map window.
-</p>
+
 <p> 
 
 </p>
