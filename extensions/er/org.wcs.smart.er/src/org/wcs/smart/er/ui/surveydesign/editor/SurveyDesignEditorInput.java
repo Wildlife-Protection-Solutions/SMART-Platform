@@ -53,6 +53,15 @@ public class SurveyDesignEditorInput implements IEditorInput {
 		this.key = key;
 	}
 	
+	/**
+	 * Survey design state
+	 * 
+	 * @return
+	 */
+	public SurveyDesign.State getState(){
+		return this.state;
+	}
+	
 	public byte[] getUuid() {
 		return uuid;
 	}

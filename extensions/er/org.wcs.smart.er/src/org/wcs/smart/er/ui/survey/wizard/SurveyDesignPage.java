@@ -94,7 +94,13 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 
 		if (survey.getSurveyDesign() != null){
 			SurveyDesign sd = survey.getSurveyDesign();
-			cmbViewer.setSelection(new StructuredSelection(new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState())));
+			
+			SurveyDesignEditorInput sdei = new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState());
+			if (!items.contains(sdei)){
+				items.add(sdei);
+			}
+			cmbViewer.refresh();
+			cmbViewer.setSelection(new StructuredSelection(sdei));
 		}else{
 			
 		}
