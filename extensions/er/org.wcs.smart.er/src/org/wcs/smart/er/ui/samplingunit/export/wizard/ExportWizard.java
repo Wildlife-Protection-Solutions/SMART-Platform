@@ -120,28 +120,42 @@ public class ExportWizard extends Wizard implements IPageChangingListener{
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ExportWizard_ProgressLabel, 2);
-					Session session = HibernateManager.openSession();
-					try {
+					
+					try{
 						if (exportPlots) {
-							File plotFile = new File(dir, surveyDesign.getName() + "_" + "plots" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.PLOT);
-							exporter.exportFile(plotFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
+							Session session = HibernateManager.openSession();
+							try {
+								File plotFile = new File(dir, surveyDesign.getName() + "_" + "plots" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.PLOT);
+								exporter.exportFile(plotFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
+							}finally{
+								if (session.isOpen()){
+									session.close();
+								}
+							}
 						}else{
 							monitor.worked(1);
 						}
 						if (exportTransects) {
-							options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.TRANSECT);
-							File transectFile = new File(dir, surveyDesign.getName() + "_" + "transects" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-							exporter.exportFile(transectFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
+							Session session = HibernateManager.openSession();
+							try{
+								options.put(ISamplingUnitExporter.SU_TYPE_KEY, GeometryType.TRANSECT);
+								File transectFile = new File(dir, surveyDesign.getName() + "_" + "transects" + "." + exporter.getFileExtension()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								exporter.exportFile(transectFile, surveyDesign, session, options, new SubProgressMonitor(monitor, 1));
+							}finally{
+								if (session.isOpen()){
+									session.close();
+								}
+							}
 						}else{
 							monitor.worked(1);
 						}
+					
 					} catch (Exception ex) {
 						EcologicalRecordsPlugIn.displayLog(
 								Messages.ExportWizard_ExportError + "\n\n" //$NON-NLS-1$
 										+ ex.getMessage(), ex);
 					} finally {
-						session.close();
 						monitor.done();
 					}
 				}
