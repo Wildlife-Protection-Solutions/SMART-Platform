@@ -183,11 +183,10 @@ public class SurveyFilter {
 	public Query buildQuery(Session s){ 
 		StringBuilder str = new StringBuilder();
 		
-		str.append("SELECT s.uuid, s.id, s.startDate, lbl.value "); //$NON-NLS-1$
-		str.append("FROM Survey s JOIN s.surveyDesign sd, Label lbl "); //$NON-NLS-1$
+		str.append("SELECT s.uuid, s.id, s.startDate, sd.name "); //$NON-NLS-1$
+		str.append("FROM Survey s JOIN s.surveyDesign sd "); //$NON-NLS-1$
 		str.append("WHERE sd.conservationArea = :ca " ); //$NON-NLS-1$
-		str.append("AND  lbl.id.element.uuid = sd.uuid AND lbl.id.language = :language "); //$NON-NLS-1$
-		
+
 		boolean and = true;
 		boolean or = false;
 		if (state != null ){
@@ -233,11 +232,10 @@ public class SurveyFilter {
 			str.append(")"); //$NON-NLS-1$
 		}
 		
-		str.append("ORDER BY  lbl.value asc, s.startDate desc, s.id asc "); //$NON-NLS-1$
+		str.append("ORDER BY s.startDate desc, s.id asc "); //$NON-NLS-1$
 		
 		Query query = s.createQuery(str.toString())
-				.setParameter("ca", SmartDB.getCurrentConservationArea()) //$NON-NLS-1$
-				.setParameter("language", SmartDB.getCurrentLanguage()); //$NON-NLS-1$
+				.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 			
 		if (state != null ){
 			query.setParameter("states", this.state); //$NON-NLS-1$

@@ -523,6 +523,7 @@ public class SurveyDesignDataPage extends EditorPart {
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<TreeNode> nodes = new ArrayList<TreeNode>();
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
 				SurveyFilter sf = new SurveyFilter();
 				sf.setDateFilter(null, null, null);
@@ -532,8 +533,7 @@ public class SurveyDesignDataPage extends EditorPart {
 				List<SurveyEditorInput> surveys = SurveyHibernateManager.getInstance().getSurveys(s, sf);
 				for(SurveyEditorInput in : surveys){
 					Survey ss = (Survey) s.load(Survey.class, in.getUuid());
-					TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), ss.getStartDate(), ss.getEndDate(), TreeNode.Type.SURVEY);
-					
+					TreeNode node = new TreeNode(ss.getUuid(), ss.getId(), ss.getStartDate(), ss.getEndDate(), TreeNode.Type.SURVEY);					
 					for (Mission m : ss.getMissions()){
 						TreeNode kid = new TreeNode(m.getUuid(), m.getId(), m.getStartDate(), m.getEndDate(), TreeNode.Type.MISSION);
 						node.addKid(kid);
@@ -549,16 +549,15 @@ public class SurveyDesignDataPage extends EditorPart {
 				Collections.sort(nodes, treeNodeComparator);
 				
 			}finally{
+				s.getTransaction().rollback();
 				s.close();
 			}
 
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			Display.getDefault().syncExec(new Runnable(){
-
+			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					if (dataViewer == null || dataViewer.getTree().isDisposed()) return;
-					
 					dataViewer.setInput(nodes);
 					dataViewer.expandAll();
 					dataViewer.refresh();

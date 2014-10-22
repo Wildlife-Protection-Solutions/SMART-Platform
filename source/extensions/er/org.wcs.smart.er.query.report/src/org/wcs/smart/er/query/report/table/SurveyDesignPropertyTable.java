@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.query.report.internal.Messages;
@@ -47,9 +48,11 @@ public class SurveyDesignPropertyTable extends SmartBirtTable {
 	private SurveyDesign sd;
 	
 	public SurveyDesignPropertyTable(SurveyDesign sd) {
-		super(MessageFormat.format(Messages.SurveyDesignPropertyTable_LongTableName, new Object[]{sd.getName()}),
+		super(MessageFormat.format(Messages.SurveyDesignPropertyTable_LongTableName, 
+				new Object[]{sd.getName()}),
 				sd.getName(),
-				SD_PREFIX + ":" + sd.getKeyId()); //$NON-NLS-1$ 
+				SD_PREFIX + ":" + sd.getKeyId(), //$NON-NLS-1$
+				EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_DESIGN_ICON));  
 		this.sd = sd;
 	}
 

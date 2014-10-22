@@ -21,13 +21,19 @@
  */
 package org.wcs.smart.er.query.ui;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -110,15 +116,53 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		
 		List<SurveyDesignEditorInput> sds = SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, null);
+		Collections.sort(sds, new Comparator<SurveyDesignEditorInput>() {
+
+			@Override
+			public int compare(SurveyDesignEditorInput arg0,
+					SurveyDesignEditorInput arg1) {
+				if (arg0.getState().equals(arg1.getState())){
+					return Collator.getInstance().compare(arg0.getName(), arg1.getName());
+				}
+				if (arg0.getState() == SurveyDesign.State.ACTIVE){
+					return -1;
+				}
+				return 1;
+			}
+		});
+		boolean hasAll = false;
 		List<Object> all = new ArrayList<Object>();
 		all.addAll(sds);
-		all.add(Messages.SurveyDesignDialog_AllDesignsLabel);
+		for (int i = 0; i < all.size(); i++){
+			if (all.get(i) instanceof SurveyDesignEditorInput
+					&& (((SurveyDesignEditorInput)all.get(i)).getState() == SurveyDesign.State.INACTIVE)){
+				all.add(i, Messages.SurveyDesignDialog_InactiveSeparator);
+				all.add(i, new SurveyDesignEditorInput(Messages.SurveyDesignDialog_AllDesignsLabel, null, null, null));
+				hasAll = true;
+				break;
+			}
+		}
+		if (!hasAll){
+			all.add(Messages.SurveyDesignDialog_AllDesignsLabel);
+		}
+		
 		cmbViewer.setInput(all);
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		if (sds.size() > 0){
 			cmbViewer.setSelection(new StructuredSelection(sds.get(0)));
 		}
-	
+		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object selection = ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
+				if (!(selection instanceof SurveyDesignEditorInput)){
+					getButton(IDialogConstants.OK_ID).setEnabled(false);
+				}else{
+					getButton(IDialogConstants.OK_ID).setEnabled(true);
+				}
+			}
+		});
 		return composite;
 	}
 	

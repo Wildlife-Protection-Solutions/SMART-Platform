@@ -148,6 +148,7 @@ public class Messages extends NLS {
 	public static String SurveyDataSourceFactory_ReadOnlyError;
 	public static String SurveyDesignDialog_AllDesignsLabel;
 	public static String SurveyDesignDialog_DesignLabel;
+	public static String SurveyDesignDialog_InactiveSeparator;
 	public static String SurveyDesignDialog_Message;
 	public static String SurveyDesignDialog_Title;
 	public static String SurveyDropItem_SurveyLabel;
