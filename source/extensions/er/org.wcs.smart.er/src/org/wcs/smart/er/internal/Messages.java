@@ -50,6 +50,10 @@ public class Messages extends NLS {
 	public static String ConfigurableModelComposite_DataModel;
 	public static String ConfigurableModelComposite_Description;
 	public static String ConfigurableModelComposite_Title;
+
+	public static String ConfigurableModelDeleteAdvisor_InvalidType;
+
+	public static String ConfigurableModelDeleteAdvisor_SurveyCnt;
 	public static String CsvSamplingUnitExporter_idColumnName;
 	public static String CsvSamplingUnitExporter_lengthColumnName;
 	public static String CsvSamplingUnitExporter_Progress;
