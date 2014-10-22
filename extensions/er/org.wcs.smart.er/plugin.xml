@@ -233,6 +233,23 @@
                   commandId="org.wcs.smart.er.missionImportHandler"
                   label="%mission.survey.import.command.label"
                   style="push">
+               <visibleWhen
+                     checkEnabled="true">
+                  <or>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           property="org.wcs.smart.smartAdminUser"
+                           value="dataentry">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.er.surveydesignexport"
