@@ -71,6 +71,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 							summaryPage.initValues();
 							suPage.initValues();	
 							dataPage.initValues();
+							setPartName(surveyDesign.getName());
 						}});
 					
 				}

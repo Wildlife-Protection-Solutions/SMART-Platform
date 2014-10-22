@@ -133,6 +133,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		txtName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtName.setEditable(false);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtName.getLayoutData()).widthHint = 50;
 		Hyperlink editLink = createLink(content);
 		if (editLink != null){
 			editLink.addHyperlinkListener(new HyperlinkAdapter() {
@@ -175,6 +176,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		txtConfigurableModel = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtConfigurableModel.setEditable(false);
 		txtConfigurableModel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		((GridData)txtConfigurableModel.getLayoutData()).widthHint = 50;
 		createEditLink(content, PanelType.MODEL);
 
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
@@ -197,6 +199,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1);
 		gd.heightHint = 40;
 		gd.widthHint = 100;
+		gd.minimumHeight = 40;
 		txtDescription.setLayoutData(gd);
 		Hyperlink lnk = createEditLink(content, PanelType.DESCRIPTION);
 		if (lnk != null){
@@ -206,19 +209,22 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		
 		l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Properties);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+		
 		Composite propertiesTableCmp = new Composite(content, SWT.NONE);
 		propertiesTableCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 4, 1));
 		((GridData)propertiesTableCmp.getLayoutData()).widthHint = 60;
+		((GridData)propertiesTableCmp.getLayoutData()).heightHint = 40;
+		
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		propertiesTableCmp.setLayout(tableLayout);
+		
 		Table propertiesTable = toolkit.createTable(propertiesTableCmp, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		propertiesTable.setHeaderVisible(true);
 		propertiesTable.setLinesVisible(true);
 		propertiesList = new TableViewer(propertiesTable);
 		propertiesList.setContentProvider(ArrayContentProvider.getInstance());
 		createPropertyColumns(propertiesList);
-		propertiesTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)propertiesTable.getLayoutData()).minimumHeight = 60;
+		
 		Hyperlink pLink = createEditLink(content, PanelType.PROPERTIES);
 		if (pLink != null){
 			pLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));

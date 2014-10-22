@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.surveydesign;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -51,6 +52,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -80,7 +82,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		TableColumnLayout tableLayout = new TableColumnLayout();
 		tableCmp.setLayout(tableLayout);
 		
-		tableViewer = new TableViewer(tableCmp, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL);
+		tableViewer = new TableViewer(tableCmp, SWT.BORDER | SWT.FULL_SELECTION | SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI);
 
 		createColumns(tableViewer);
 
@@ -160,6 +162,11 @@ public class PropertiesComposite extends SurveyDesignComposite {
 			protected String get(SurveyDesignProperty p) {
 				return p.getName();
 			}
+
+			@Override
+			protected int getTextLimit() {
+				return SurveyDesign.PROPERTY_NAME_LENGTH;
+			}
 		});
 
 		final TableViewerColumn colValue = createTableViewerColumn(viewer, Messages.PropertiesComposite_ValueColumn, 180);
@@ -182,6 +189,10 @@ public class PropertiesComposite extends SurveyDesignComposite {
 			@Override
 			protected String get(SurveyDesignProperty p) {
 				return p.getValue();
+			}
+			@Override
+			protected int getTextLimit() {
+				return SurveyDesign.PROPERTY_VALUE_LENGTH;
 			}
 		});
 	}
@@ -209,8 +220,13 @@ public class PropertiesComposite extends SurveyDesignComposite {
 	}
 
 	protected void deleteProperty() {
-		Object obj = ((IStructuredSelection)tableViewer.getSelection()).getFirstElement();
-		input.remove(obj);
+		for (Iterator<?> iterator = ((IStructuredSelection)tableViewer.getSelection()).iterator(); iterator.hasNext();){
+			Object o = (Object)iterator.next();
+			if (o instanceof SurveyDesignProperty){
+				input.remove(o);
+			}
+		}
+		
 		tableViewer.refresh();
 		fireChangeListeners();
 	}
@@ -254,6 +270,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		public PropertyEditingSupport(TableViewer viewer) {
 			super(viewer);
 			this.editor = new TextCellEditor(viewer.getTable());
+			((Text)editor.getControl()).setTextLimit(getTextLimit());
 		}
 
 		@Override
@@ -279,6 +296,7 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		}
 
 		protected abstract String get(SurveyDesignProperty p);
+		protected abstract int getTextLimit();
 		
 		@Override
 		protected CellEditor getCellEditor(Object element) {
