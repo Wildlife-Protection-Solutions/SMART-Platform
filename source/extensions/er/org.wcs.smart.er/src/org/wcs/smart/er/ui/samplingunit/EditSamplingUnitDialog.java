@@ -119,7 +119,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		session.beginTransaction();
 
 		try {
-			su.setId(txtId.getText());
+			su.setId(txtId.getText().trim());
 			su.setState((State) ((IStructuredSelection) cmbState.getSelection())
 					.getFirstElement());
 
@@ -357,7 +357,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		}
 
 		if (!error){
-			if (!SmartUtils.isSimpleString(txtId.getText(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, SamplingUnit.ID_MAX_LENGTH)){
+			if (!SmartUtils.isSimpleString(txtId.getText().trim(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, SamplingUnit.ID_MAX_LENGTH)){
 				cdId.setDescriptionText(MessageFormat.format(Messages.EditSamplingUnitDialog_IdError, new Object[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, SamplingUnit.ID_MAX_LENGTH}));
 				cdId.show();
 				error = true;
