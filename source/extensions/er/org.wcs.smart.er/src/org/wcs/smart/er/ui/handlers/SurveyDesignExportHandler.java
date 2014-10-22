@@ -167,7 +167,8 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 									fout.close();
 								}
 							}catch (Exception ex){
-								EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignExportHandler_ExportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+								EcologicalRecordsPlugIn.displayLog(
+										MessageFormat.format(Messages.SurveyDesignExportHandler_ExportError, new Object[]{sdei.getName()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 							}
 							monitor.worked(1);
 						}
