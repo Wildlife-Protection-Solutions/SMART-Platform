@@ -44,6 +44,7 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 
@@ -147,6 +148,16 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 			design.setConfigurableModel(copy.getConfigurableModel());
 			design.setTrackDistanceDirection(copy.getTrackDistanceDirection());
 			design.setConservationArea(copy.getConservationArea());
+			
+			//survey design properties
+			design.setProperties(new ArrayList<SurveyDesignProperty>());
+			for (SurveyDesignProperty sdp : copy.getProperties()){
+				SurveyDesignProperty sdp1 = new SurveyDesignProperty();
+				sdp1.setName(sdp.getName());
+				sdp1.setSurveyDesign(design);
+				sdp1.setValue(sdp.getValue());
+				design.getProperties().add(sdp1);
+			}
 			
 			design.setMissionProperties(new ArrayList<MissionProperty>());
 			if (copy.getMissionProperties() != null){
