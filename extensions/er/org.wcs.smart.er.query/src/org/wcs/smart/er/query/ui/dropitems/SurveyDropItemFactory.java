@@ -208,6 +208,10 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = new DropItem[]{createMissionCountValueItem()};
 			}else if (source == SurveyValuesTreeNode.Node.SURVEY_COUNT){
 				items = new DropItem[]{createSurveyCountValueItem()};
+			}else if (source == SurveyValuesTreeNode.Node.MISSION_DAY_COUNT){
+				items = new DropItem[]{createMissionDayCountValueItem()};
+			}else if (source == SurveyValuesTreeNode.Node.MISSION_HOUR_COUNT){
+				items = new DropItem[]{createMissionHourCountValueItem()};
 			}
 		}
 		
@@ -227,6 +231,14 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	
 	public DropItem createMissionCountValueItem(){
 		return new MissionValueDropItem(MissionValueItem.ValueItem.MISSION_COUNT);
+	}
+	
+	public DropItem createMissionDayCountValueItem(){
+		return new MissionValueDropItem(MissionValueItem.ValueItem.DAY_COUNT);
+	}
+	
+	public DropItem createMissionHourCountValueItem(){
+		return new MissionValueDropItem(MissionValueItem.ValueItem.HOUR_COUNT);
 	}
 	
 	public DropItem createSurveyCountValueItem(){

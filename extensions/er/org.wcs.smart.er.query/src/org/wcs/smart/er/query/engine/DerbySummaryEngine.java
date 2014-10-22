@@ -511,7 +511,51 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			selectSql.append("temp.survey_uuid as uniqueid, "); //$NON-NLS-1$
 			valueSql.append("temp.survey_uuid"); //$NON-NLS-1$
 			valueAggSql.append("count(survey_uuid)"); //$NON-NLS-1$
+		}else if (valueItem.getValueItem() == ValueItem.DAY_COUNT){
+			selectSql.append("temp.mission_day_uuid as uniqueid, "); //$NON-NLS-1$
+			valueSql.append("temp.mission_day_uuid"); //$NON-NLS-1$
+			valueAggSql.append("count(mission_day_uuid)"); //$NON-NLS-1$
+		}else if (valueItem.getValueItem() == ValueItem.HOUR_COUNT){
+			
+			selectSql.append("temp.mission_day_uuid as uniqueid, "); //$NON-NLS-1$
+			
+			if (!hasAreaGroupBy){
+				
+				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(tableNamePrefix(MissionDay.class));
+				fromSql.append(" on temp.mission_day_uuid = "); //$NON-NLS-1$
+				fromSql.append(tablePrefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$
+				
+				valueSql.append(tablePrefix(MissionDay.class) + ".start_time as md_start_time, "); //$NON-NLS-1$
+				valueSql.append(tablePrefix(MissionDay.class) + ".end_time as md_end_time, "); //$NON-NLS-1$
+				valueSql.append(tablePrefix(MissionDay.class) + ".rest_minutes as md_rest"); //$NON-NLS-1$
+				
+				valueAggSql.append("sum (({fn timestampdiff(SQL_TSI_SECOND, md_start_time, md_end_time) } / (3600.0)) - (md_rest / 60.0))"); //$NON-NLS-1$
+				
+			}else{
+				StringBuilder append = new StringBuilder();
+				
+				valueSql.append("smart.computeHours("); //$NON-NLS-1$
+				for (int i = 0; i < areaGroupByPrefix.size() - 1; i ++){
+					valueSql.append("smart.intersection("); //$NON-NLS-1$
+					valueSql.append(areaGroupByPrefix.get(i));
+					valueSql.append(".geom,"); //$NON-NLS-1$
+					append.append(")"); //$NON-NLS-1$
+				}
+				valueSql.append(areaGroupByPrefix.get(areaGroupByPrefix.size() - 1)+ ".geom"); //$NON-NLS-1$
+				valueSql.append(append);
+					
+				valueSql.append(","); //$NON-NLS-1$
+				valueSql.append(tablePrefix(MissionTrack.class));
+				valueSql.append(".geometry) as hours "); //$NON-NLS-1$
+				
+				
+				valueAggSql.append("sum(hours)"); //$NON-NLS-1$
+				
+			}
+			
 		}
+		
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT "); //$NON-NLS-1$

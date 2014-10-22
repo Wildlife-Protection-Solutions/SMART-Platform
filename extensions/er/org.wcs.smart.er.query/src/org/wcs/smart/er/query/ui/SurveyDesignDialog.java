@@ -78,7 +78,8 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 	@Override
 	public void okPressed(){
 		Object selection =  ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
-		if (selection instanceof SurveyDesignEditorInput){
+		if (selection instanceof SurveyDesignEditorInput &&
+			((SurveyDesignEditorInput)selection).getUuid() != null){
 			sd = (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignEditorInput)selection).getUuid());
 		}else{
 			sd = null;

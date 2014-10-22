@@ -35,7 +35,7 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  *
  */
 public class MissionValueDropItem extends AbstractValueDropItem implements IValueDropItem{
-
+	
 	private MissionValueItem.ValueItem item;
 	
 	public MissionValueDropItem(MissionValueItem.ValueItem item){
