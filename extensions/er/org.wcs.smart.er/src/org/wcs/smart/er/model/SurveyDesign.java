@@ -52,6 +52,12 @@ import org.wcs.smart.er.internal.Messages;
 @Table(name="smart.survey_design")
 public class SurveyDesign extends NamedKeyItem {
 	
+	public static final int DESCRIPTION_LENGTH = 32700;
+	
+	public static final int PROPERTY_NAME_LENGTH = 256;
+	
+	public static final int PROPERTY_VALUE_LENGTH = 8200;
+	
 	/**
 	 * Survey states.
 	 */

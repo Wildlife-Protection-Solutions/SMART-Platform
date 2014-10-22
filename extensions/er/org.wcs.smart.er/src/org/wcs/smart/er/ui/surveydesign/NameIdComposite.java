@@ -97,7 +97,6 @@ public class NameIdComposite extends SurveyDesignComposite {
 		
 		txtName = new Text(part, SWT.BORDER);
 		txtName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		
 		txtName.addListener(SWT.Modify, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
@@ -117,7 +116,7 @@ public class NameIdComposite extends SurveyDesignComposite {
 		txtKey = new Text(part, SWT.BORDER);
 		txtKey.setEditable(false);
 		txtKey.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
-		
+	
 		cdKey = createDecoration(txtKey);
 		cdKey.setDescriptionText(Messages.NameIdComposite_Invalid_Key);
 			
@@ -145,6 +144,7 @@ public class NameIdComposite extends SurveyDesignComposite {
 		});
 		
 		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		((GridData)part.getLayoutData()).widthHint = 100;
 		return part;
 	}
 

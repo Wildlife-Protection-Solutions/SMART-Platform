@@ -54,7 +54,10 @@ public class DescriptionComposite extends SurveyDesignComposite {
 		l.setText(Messages.DescriptionComposite_Label_Description);
 		
 		txtDescription = new Text(part, SWT.MULTI | SWT.WRAP | SWT.V_SCROLL | SWT.BORDER);
+		txtDescription.setTextLimit(SurveyDesign.DESCRIPTION_LENGTH);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)txtDescription.getLayoutData()).widthHint = 350;
+		((GridData)txtDescription.getLayoutData()).heightHint = 100;
 		txtDescription.addModifyListener(new ModifyListener() {
 			
 			@Override
