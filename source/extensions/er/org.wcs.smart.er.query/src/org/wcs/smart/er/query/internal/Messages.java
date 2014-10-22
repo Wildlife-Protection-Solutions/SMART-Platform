@@ -102,6 +102,8 @@ public class Messages extends NLS {
 	public static String MissionTrackInfoSection_NumMissions;
 	public static String MissionTrackInfoSection_NumTracks;
 	public static String MissionTrackQueryType_MissionTrackQueryType;
+	public static String MissionValueItem_NumberOfDays;
+	public static String MissionValueItem_NumberOfHours;
 	public static String MissionValueItem_NumberOfMissionsLabel;
 	public static String MissionValueItem_NumberOfSurveyLabel;
 	public static String MissionValueItem_ValueItemNotSupported;

@@ -181,9 +181,13 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int MISSION_COUNT = 89;
   /** RegularExpression Id. */
-  int SURVEY_COUNT = 90;
+  int MISSION_DAY_COUNT = 90;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 91;
+  int MISSION_HOUR_COUNT = 91;
+  /** RegularExpression Id. */
+  int SURVEY_COUNT = 92;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 93;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -280,6 +284,8 @@ public interface ParserConstants {
     "<WAYPOINT_OBSERVER_GROUPBY_ITEM>",
     "\"s:missiontracklength\"",
     "\"s:missioncount\"",
+    "\"s:missiondaycount\"",
+    "\"s:missionhourcount\"",
     "\"s:surveycount\"",
     "<QUOTED_STRING>",
   };

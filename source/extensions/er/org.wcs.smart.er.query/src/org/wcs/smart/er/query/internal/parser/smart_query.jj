@@ -97,6 +97,8 @@ TOKEN :
 |  < WAYPOINT_OBSERVER_GROUPBY_ITEM : < WAYPOINT_OBSERVER_KEY > ":" (< UUID >)? (":" < UUID > )* >  
 |  < MISSION_TRACK_LENGTH : "s:missiontracklength" >
 |  < MISSION_COUNT : "s:missioncount" >
+|  < MISSION_DAY_COUNT : "s:missiondaycount" >
+|  < MISSION_HOUR_COUNT : "s:missionhourcount" >
 |  < SURVEY_COUNT : "s:surveycount" >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
@@ -269,6 +271,16 @@ IValueItem SingleValueItem() :
 		< MISSION_COUNT >
 		{
 		  	item = MissionValueItem.createMissionCountItem();
+	 	}
+	|
+		< MISSION_DAY_COUNT >
+		{
+		  	item = MissionValueItem.createMissionDayCountItem();
+	 	}
+	|
+		< MISSION_HOUR_COUNT >
+		{
+		  	item = MissionValueItem.createMissionHoursCountItem();
 	 	}
 	|
 		< SURVEY_COUNT >

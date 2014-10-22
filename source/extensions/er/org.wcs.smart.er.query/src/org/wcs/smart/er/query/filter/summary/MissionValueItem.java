@@ -40,7 +40,9 @@ public class MissionValueItem implements IValueItem {
 	public enum ValueItem{
 		TRACK_LENGTH(Messages.MissionLegnthValueDropItem_TrackLengthLabel, "s:missiontracklength"), //$NON-NLS-1$
 		MISSION_COUNT(Messages.MissionValueItem_NumberOfMissionsLabel, "s:missioncount"), //$NON-NLS-1$
-		SURVEY_COUNT(Messages.MissionValueItem_NumberOfSurveyLabel, "s:surveycount"); //$NON-NLS-1$
+		SURVEY_COUNT(Messages.MissionValueItem_NumberOfSurveyLabel, "s:surveycount"), //$NON-NLS-1$
+		DAY_COUNT(Messages.MissionValueItem_NumberOfDays, "s:missiondaycount"), //$NON-NLS-1$
+		HOUR_COUNT(Messages.MissionValueItem_NumberOfHours, "s:missionhourcount"); //$NON-NLS-1$
 		
 		public String guiName;
 		public String key;
@@ -73,6 +75,22 @@ public class MissionValueItem implements IValueItem {
 	 */
 	public static MissionValueItem createSurveyCountItem(){
 		return new MissionValueItem(ValueItem.SURVEY_COUNT);
+	}
+	
+	/**
+	 * Create new mission day count item
+	 * @return
+	 */
+	public static MissionValueItem createMissionDayCountItem(){
+		return new MissionValueItem(ValueItem.DAY_COUNT);
+	}
+	
+	/**
+	 * Create new mission hour count item
+	 * @return
+	 */
+	public static MissionValueItem createMissionHoursCountItem(){
+		return new MissionValueItem(ValueItem.HOUR_COUNT);
 	}
 	
 	private MissionValueItem.ValueItem item;
@@ -108,6 +126,10 @@ public class MissionValueItem implements IValueItem {
 			return SurveyDropItemFactory.INSTANCE.createMissionCountValueItem();
 		}else if (item == ValueItem.SURVEY_COUNT){
 			return SurveyDropItemFactory.INSTANCE.createSurveyCountValueItem();
+		}else if (item == ValueItem.DAY_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionDayCountValueItem();
+		}else if (item == ValueItem.HOUR_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionHourCountValueItem();
 		}
 		return new ErrorDropItem(Messages.MissionValueItem_ValueItemNotSupported + item.guiName);
 	}
