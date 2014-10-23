@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.er.internal.Messages;
@@ -52,24 +53,32 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 
 	private MultipleSelectComposite<MissionAttribute> attributesComposite; 
 	
-	private Label lblWarn;
+	private Composite warn;
+	
 	
 	public MissionPropertiesComposite(){
 		super();
 	}
 	
 	@Override
-	public Control createControl(final Composite parent) {	
+	public Control createControl(final Composite parent) {
+		warn = new Composite(parent, SWT.NONE);
+		warn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		warn.setLayout(new GridLayout(2, false));
+		
 		Composite part = new Composite(parent, SWT.NONE);
 		part.setLayout(new GridLayout(3, false));
+		
+		Label lblWarnImage = new Label(warn, SWT.NONE);
+		lblWarnImage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.WARN_ICON));
+		
+		Label lblWarn = new Label(warn, SWT.WRAP);
+		lblWarn.setText(Messages.MissionPropertiesComposite_DeleteWarning );
+		lblWarn.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, false));
 		
 		attributesComposite = new MultipleSelectComposite<MissionAttribute>(part, SWT.NONE);
 		attributesComposite.setLabelAllText(Messages.MissionPropertiesComposite_AllMissionAttributes);
 		attributesComposite.setLabelSelectedText(Messages.MissionPropertiesComposite_SelectedMissionAttributes);
-
-		lblWarn = new Label(part, SWT.WRAP);
-		lblWarn.setText(Messages.MissionPropertiesComposite_DeleteWarning );
-		lblWarn.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 
 		part.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		return part;
@@ -77,7 +86,7 @@ public class MissionPropertiesComposite extends SurveyDesignComposite {
 
 	@Override
 	public void init(SurveyDesign design, Session session) {
-		lblWarn.setVisible(design.getUuid() != null);
+		warn.setVisible(design.getUuid() != null);
 		
 		@SuppressWarnings("unchecked")
 		List<MissionAttribute> allAttributes = session.createCriteria(MissionAttribute.class)
