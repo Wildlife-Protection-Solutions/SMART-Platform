@@ -523,6 +523,8 @@ public class Messages extends NLS {
 	public static String SurveyComposite_Description;
 	public static String SurveyComposite_SurveyLabel;
 	public static String SurveyComposite_Title;
+	public static String SurveyDatePage_DateRangeWarn;
+
 	public static String SurveyDatePage_Message;
 	public static String SurveyDatePage_Title;
 	public static String SurveyDeleteCaHandler_deleteMissionProp;
