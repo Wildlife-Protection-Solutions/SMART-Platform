@@ -39,7 +39,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -173,9 +172,17 @@ public class ImportAttributes implements IRunnableWithProgress {
 						}else if (index.getKey().getType() == Attribute.AttributeType.LIST){
 							if (!newValue.trim().isEmpty()){
 								
-								listValue = findMatch(index.getKey(), newValue);
+								listValue = ISamplingUnitImporter.findMatch(index.getKey(), newValue);
 								if (listValue == null){
 									warnings.add(MessageFormat.format(Messages.ImportAttributes_ListAttributeNotFound, new Object[]{newValue, index.getKey().getName(), lineCnt}));
+									break;
+								}
+							}
+						}else if (index.getKey().getType() == Attribute.AttributeType.TEXT){
+							if (!newValue.trim().isEmpty()){
+								String error = ISamplingUnitImporter.validateStringAttributeValue(newValue, index.getKey());
+								if (error != null){
+									warnings.add(MessageFormat.format(Messages.ImportAttributes_TextToLong, new Object[]{error, lineCnt}));
 									break;
 								}
 							}
@@ -276,31 +283,5 @@ public class ImportAttributes implements IRunnableWithProgress {
 		.add(Restrictions.eq("id", id)).list(); //$NON-NLS-1$
 	}
 	
-	public static SamplingUnitAttributeListItem findMatch(SamplingUnitAttribute su, String value){
-		if (value == null) return null;
-		value = value.trim();
-	
-		//search keys; likely won't match
-		for (SamplingUnitAttributeListItem item : su.getAttributeList()){
-			if (item.getKeyId().equals(value)){
-				return item;
-			}
-		}
-		//search current language name
-		for (SamplingUnitAttributeListItem item : su.getAttributeList()){
-			if (item.getName().equals(value)){
-				return item;
-			}
-		}
-			
-		//search all names; case insensitive
-		for (SamplingUnitAttributeListItem item : su.getAttributeList()){
-			for (Label l : item.getNames()){
-				if (l.getValue().toUpperCase().equals(value.toUpperCase())){
-					return item;
-				}
-			}
-		}
-		return null;
-	}
+
 }

@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.GeometryType;
@@ -104,7 +105,12 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 		
 		//setup parameters
 		final HashMap<Object, Object> params = new HashMap<Object, Object>();
-		params.put(CsvSamplingUnitImporter.DELIMETER_KEY, filePage.getDelimiter());
+		try{
+			params.put(CsvSamplingUnitImporter.DELIMETER_KEY, filePage.getDelimiter());
+		}catch (Exception ex){
+			MessageDialog.openError(getShell(), Messages.ImportWizard_ErrorTitle, ex.getMessage());
+			return false ;
+		}
 		params.put(ISamplingUnitImporter.TYPE_KEY, typePage.getType());
 		params.put(ISamplingUnitImporter.PROJECTION_KEY, attributePage.getProjection());
 		params.put(ISamplingUnitImporter.ID_FIELD_KEY, attributePage.getIdField());
@@ -130,6 +136,13 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 					
 					finishOk = false;
 
+					List<SamplingUnit> existing = SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, session, null);
+					HashSet<String> existingIds = new HashSet<String>();
+					for (SamplingUnit su : existing){
+						existingIds.add(su.getId());
+					}
+					
+					params.put(ISamplingUnitImporter.EXISTING_IDS_KEY, existingIds);
 					//get units
 					List<SamplingUnit> units = null;
 					monitor.subTask(Messages.ImportWizard_ProgressLabel2);
@@ -144,7 +157,7 @@ public class ImportWizard extends Wizard implements IPageChangingListener{
 						return;
 					}
 
-					//validate ids
+					//validate ids unique within file
 					HashSet<String> ids = new HashSet<String>();
 					for(SamplingUnit su : units){
 						if (ids.contains(su.getId())){

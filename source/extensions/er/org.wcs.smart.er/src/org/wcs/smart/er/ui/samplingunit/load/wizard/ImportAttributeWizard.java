@@ -80,20 +80,21 @@ public class ImportAttributeWizard extends Wizard implements IPageChangingListen
 	
 	@Override
 	public boolean performFinish() {
-		ImportAttributes ia = new ImportAttributes(
-				filePage.getFile(), 
-				filePage.getDelimiter(), 
-				attributePage.getIdField(),
-				attributePage.getAttributeFields(),
-				surveyDesign);
-		
 		try {
+			ImportAttributes ia = new ImportAttributes(
+					filePage.getFile(), 
+					filePage.getDelimiter(), 
+					attributePage.getIdField(),
+					attributePage.getAttributeFields(),
+					surveyDesign);
+			
 			getContainer().run(true, false, ia);
+			return !ia.hasError();
 		} catch (Exception e) {
 			EcologicalRecordsPlugIn.displayLog(Messages.ImportAttributeWizard_ImportError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			return false;
 		}
-		return  !ia.hasError();
+		
 	}
 
 	

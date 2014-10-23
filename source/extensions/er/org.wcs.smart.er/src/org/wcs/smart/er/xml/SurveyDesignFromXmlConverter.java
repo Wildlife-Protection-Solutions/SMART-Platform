@@ -40,15 +40,15 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
-import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.model.SurveyDesignProperty;
-import org.wcs.smart.er.ui.samplingunit.load.ImportAttributes;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.er.ui.samplingunit.load.ISamplingUnitImporter;
 import org.wcs.smart.er.xml.model.surveydesign.NamesType;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -234,7 +234,7 @@ public class SurveyDesignFromXmlConverter {
 				}else if (suav.getSamplingUnitAttribute().getType() == AttributeType.NUMERIC){
 					suav.setNumberValue(xmlsuav.getDoubleValue());
 				}else if (suav.getSamplingUnitAttribute().getType() == AttributeType.LIST){
-					SamplingUnitAttributeListItem item = ImportAttributes.findMatch(suav.getSamplingUnitAttribute(), xmlsuav.getStringValue());
+					SamplingUnitAttributeListItem item = ISamplingUnitImporter.findMatch(suav.getSamplingUnitAttribute(), xmlsuav.getStringValue());
 					suav.setAttributeListItem(item);
 				}
 				

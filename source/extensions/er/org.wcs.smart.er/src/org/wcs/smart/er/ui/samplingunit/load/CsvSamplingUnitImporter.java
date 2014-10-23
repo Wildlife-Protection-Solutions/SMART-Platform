@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +55,7 @@ import com.vividsolutions.jts.geom.GeometryFactory;
  * @author Emily
  *
  */
-public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
+public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 
 	public static final String DELIMETER_KEY = "DELIMITER"; //$NON-NLS-1$
 
@@ -91,6 +92,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 	 * <li>DELIMETER_KEY - the field delimiter</li>
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor) throws Exception {
 		
@@ -110,6 +112,8 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 		String y2Field = (String)options.get(Y2_FIELD_KEY);
 		Character delim = (Character) options.get(DELIMETER_KEY);
 		
+		HashSet<String> existingIds = (HashSet<String>) options.get(EXISTING_IDS_KEY);
+		
 		//read file - getting cnt for progress
 		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
 		int fileCnt = 0;
@@ -121,6 +125,7 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 			reader.close();
 		}
 		
+		final List<String> warnings = new ArrayList<String>();
 		//read file 
 		monitor.beginTask(MessageFormat.format(Messages.CsvSamplingUnitImporter_Progress1, new Object[]{f.getAbsoluteFile()}), fileCnt);
 		reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
@@ -195,17 +200,14 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 					}
 					su.setGeometry(gf.createLineString(new Coordinate[]{p1,p2}));
 				}
-				
+
+				String id = null;
 				if (idColumn != null){
-					String id = headers[idColumn];
-					if (id.length() == 0){
-						id = AUTO_GENERATE_KEY_PREFIX + " " + cnt; //$NON-NLS-1$
-					}
-					su.setId(id);
-				}else{
-					su.setId(AUTO_GENERATE_KEY_PREFIX + " " + cnt); //$NON-NLS-1$
+					id = headers[idColumn];
 				}
+				id = generateId(id, cnt, existingIds, warnings);
 				
+				su.setId(id);
 				su.setState(SamplingUnit.State.ACTIVE);
 				su.setType(type);
 
@@ -223,19 +225,30 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 					boolean add = false;
 					if (att.getType() == AttributeType.TEXT){
 						if (value.length() > 0){
-							suv.setStringValue(value);
-							add = true;
+							String error = super.validateStringAttributeValue(value, att);
+							if (error != null){
+								warnings.add(error);
+							}else{
+								suv.setStringValue(value);
+								add = true;
+							}
 						}
 					}else if (att.getType() == AttributeType.NUMERIC){						
 						if (value.trim().length() > 0){
-							suv.setNumberValue(  Double.valueOf(value) );
-							add = true;
+							try{
+								suv.setNumberValue(  Double.valueOf(value) );
+								add = true;
+							}catch (Exception ex){
+								warnings.add(MessageFormat.format(Messages.CsvSamplingUnitImporter_InvalidDoubleValue, new Object[]{value, att.getName()}));
+							}
 						}
 					}else if (att.getType() == AttributeType.LIST){
-						SamplingUnitAttributeListItem listValue = ImportAttributes.findMatch(att,  value);
+						SamplingUnitAttributeListItem listValue = findMatch(att, value);
 						if (listValue != null){
 							add = true;
 							suv.setAttributeListItem(listValue);
+						}else{
+							warnings.add(getSamplingUnitListItemNotFoundError(value, att));
 						}
 					}else{
 						throw new Exception(MessageFormat.format(Messages.CsvSamplingUnitImporter_InvalidAttributeType, new Object[]{att.getType()}));
@@ -251,6 +264,8 @@ public class CsvSamplingUnitImporter implements ISamplingUnitImporter {
 			reader.close();
 			monitor.done();
 		}
+		
+		super.showWarnings(warnings);
 		return units;
 	}
 

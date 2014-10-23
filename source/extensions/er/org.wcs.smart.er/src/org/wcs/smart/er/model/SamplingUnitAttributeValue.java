@@ -54,7 +54,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 	@AssociationOverride(name = "id.samplingUnitAttribute", 
 		joinColumns = @JoinColumn(name = "su_attribute_uuid")) })
 public class SamplingUnitAttributeValue {
-
+	
 	private SamplingUnitAttributeValuePk id = new SamplingUnitAttributeValuePk();
 	
 	private String stringValue = null;
