@@ -23,21 +23,17 @@ package org.wcs.smart.ca;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.util.SmartUtils;
 
@@ -50,7 +46,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 @Entity
 @Table(name="smart.conservation_area")
-public class ConservationArea {
+public class ConservationArea extends UuidItem {
 
 	public static final byte[] MULTIPLE_CA = new byte[]{0,0,0,0,
 		0,0,0,0,
@@ -88,17 +84,6 @@ public class ConservationArea {
 		employees = new ArrayList<Employee>();
 		languages = new HashSet<Language>();
 	}
-	
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid(){
-		return this.uuid;
-	}
-	public void setUuid(byte[] uuid){
-		this.uuid = uuid;
-	}
-	
 	
 	public String getId() {
 		return id;
@@ -184,24 +169,5 @@ public class ConservationArea {
 	}
 
 
-	/**
-	 * Two conservation areas are the same if they
-	 * share the same uuid.
-	 */
-	@Override
-	public boolean equals(Object other){
-		if (other == null || !(other instanceof ConservationArea)){
-			return false;
-		}
-		return Arrays.equals(uuid, ((ConservationArea)other).uuid);
-	}
-	
-	/**
-	 * Generates a hashcode based on the uuid
-	 */
-	@Override
-	public int hashCode(){
-		return Arrays.hashCode(uuid);
-	}
 }
 
