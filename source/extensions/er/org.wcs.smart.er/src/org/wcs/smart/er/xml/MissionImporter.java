@@ -298,7 +298,7 @@ public class MissionImporter {
 			session.getTransaction().commit();
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionImporter_13 + ex.getLocalizedMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionImporter_13 + " " + ex.getLocalizedMessage(), ex);
 			return null;
 		}finally{
 			session.close();

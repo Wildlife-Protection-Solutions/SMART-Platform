@@ -142,7 +142,7 @@ public class SurveyHibernateManager {
 			Mission m =  (Mission) iterator.next();
 			String localId = m.getId(); 
 			try {
-				int offset = localId.lastIndexOf('M') + 1;
+				int offset = localId.lastIndexOf('_') + 1;
 				idNumber = Integer.parseInt(localId.substring(offset));
 				break;
 			} catch (Exception ex) {
