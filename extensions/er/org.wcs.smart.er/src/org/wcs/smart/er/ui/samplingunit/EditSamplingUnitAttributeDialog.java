@@ -207,7 +207,10 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		nameKeyControls.createControls(composite, true, toUpdate.getUuid() == null, new IChangeListener() {
 			@Override
 			public void itemModified() {
-				validate();
+				((SamplingUnitLabelProvider)lstViewer.getLabelProvider()).setLanguage(nameKeyControls.getSelectedLanguage());
+				lstViewer.refresh();
+				
+				validate();	
 			}
 		});
 		
@@ -238,7 +241,7 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		
 		lstViewer = new TableViewer(listPanel,SWT.BORDER);
 		lstViewer.setContentProvider(ArrayContentProvider.getInstance());
-		lstViewer.setLabelProvider(SamplingUnitLabelProvider.INSTANCE);
+		lstViewer.setLabelProvider(new SamplingUnitLabelProvider());
 		lstViewer.setInput(copyItems);
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;

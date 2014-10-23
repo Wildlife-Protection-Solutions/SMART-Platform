@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
@@ -42,9 +43,15 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 
 	public static final SamplingUnitLabelProvider INSTANCE = new SamplingUnitLabelProvider();
 	
-	private SamplingUnitLabelProvider(){
+	private Language currentLanguage = null;
+	
+	public SamplingUnitLabelProvider(){
 		
-	};
+	}
+	
+	public void setLanguage(Language lang){
+		this.currentLanguage = lang;
+	}
 	
 	@Override
 	public String getText(Object element) {
@@ -53,13 +60,25 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 			return su.getId();
 		}else if (element instanceof MissionTrack){
 			MissionTrack t = (MissionTrack)element;
-			return SimpleDateFormat.getDateInstance(DateFormat.MEDIUM).format(t.getMissionDay().getDate());
+			return t.getId() + " [" + SimpleDateFormat.getDateInstance(DateFormat.MEDIUM).format(t.getMissionDay().getDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 		}else if (element instanceof SamplingUnitAttribute){
-			return ((SamplingUnitAttribute) element).getName();
+			if (currentLanguage == null){
+				return ((SamplingUnitAttribute) element).getName();
+			}else{
+				return ((SamplingUnitAttribute)element).findName(currentLanguage);
+			}
 		}else if (element instanceof SurveyDesignSamplingUnitAttribute){
-			return ((SurveyDesignSamplingUnitAttribute) element).getSamplingUnitAttribute().getName();
+			if (currentLanguage == null){
+				return ((SurveyDesignSamplingUnitAttribute) element).getSamplingUnitAttribute().getName();
+			}else{
+				return ((SurveyDesignSamplingUnitAttribute)element).getSamplingUnitAttribute().findName(currentLanguage);
+			}
 		}else if (element instanceof SamplingUnitAttributeListItem){
-			return ((SamplingUnitAttributeListItem) element).getName();
+			if (currentLanguage == null){
+				return ((SamplingUnitAttributeListItem) element).getName();
+			}else{
+				return ((SamplingUnitAttributeListItem) element).findName(currentLanguage);
+			}
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
 	}
