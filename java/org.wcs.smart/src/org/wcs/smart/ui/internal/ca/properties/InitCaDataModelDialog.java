@@ -37,7 +37,6 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -64,6 +63,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.datamodel.xml.DataModelXmlToSmartConverter;
+import org.wcs.smart.ui.ConservationAreaLabelProvider;
 import org.wcs.smart.ui.internal.ca.LanguageSelectionDialog;
 
 /**
@@ -247,16 +247,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			caViewer = new ComboViewer(imp, SWT.DROP_DOWN | SWT.READ_ONLY);
 			caViewer.getControl().setEnabled(false);
 			caViewer.setContentProvider(ArrayContentProvider.getInstance());
-			caViewer.setLabelProvider(new LabelProvider() {
-				public String getText(Object element) {
-					if (element instanceof ConservationArea) {
-						ConservationArea ca = (ConservationArea) element;
-						return ca.getNameLabel();
-					}
-					return super.getText(element);
-				}
-			});
-
+			caViewer.setLabelProvider(new ConservationAreaLabelProvider());
 			caViewer.setInput(areas.toArray());
 			caViewer.setSelection(new StructuredSelection(areas.get(0)));
 		}

@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -22,6 +21,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.SmartStartUp;
+import org.wcs.smart.ui.ConservationAreaLabelProvider;
 
 public class CaWizardTemplatePage  extends CaWizardPage  {
 	
@@ -73,14 +73,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 		
 		lstCa = new ComboViewer(templateComp);
 		lstCa.setContentProvider(ArrayContentProvider.getInstance());
-		lstCa.setLabelProvider(new LabelProvider(){
-			public String getText(Object element){
-				if (element instanceof ConservationArea){
-					return ((ConservationArea) element).getNameLabel();
-				}
-				return super.getText(element);
-			}
-		});
+		lstCa.setLabelProvider(new ConservationAreaLabelProvider());
 		lstCa.setInput(new String[]{Messages.CaWizardTemplatePage_LoadingLabel});
 		lstCa.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnNew.setSelection(true);

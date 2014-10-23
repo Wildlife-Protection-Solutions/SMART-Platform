@@ -34,7 +34,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -70,6 +69,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.startup.SmartStartUp;
+import org.wcs.smart.ui.ConservationAreaLabelProvider;
 import org.wcs.smart.ui.internal.startup.InitializeDialog;
 import org.wcs.smart.ui.internal.startup.StartUpAdvancedDialog;
 import org.wcs.smart.ui.internal.startup.StartUpDialog;
@@ -346,15 +346,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		
 		cmvConservationArea = new ComboViewer(cmbConservationArea);
 		cmvConservationArea.setContentProvider(ArrayContentProvider.getInstance());
-		cmvConservationArea.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof ConservationArea){
-					ConservationArea ca = ((ConservationArea)element);
-					return ca.getNameLabel();
-				}
-				return super.getText(element);
-			}
-		});		
+		cmvConservationArea.setLabelProvider(new ConservationAreaLabelProvider());		
 		
 		Label lblUserName = new Label(fCompositeLogin, SWT.NONE);
 		lblUserName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));

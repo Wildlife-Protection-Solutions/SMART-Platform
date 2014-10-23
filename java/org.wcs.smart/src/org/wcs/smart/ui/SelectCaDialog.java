@@ -32,7 +32,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -108,16 +107,7 @@ public class SelectCaDialog extends TitleAreaDialog {
 		l.setText(Messages.SelectCaDialog_CaLabel);
 		
 		caList = CheckboxTableViewer.newCheckList(comp, SWT.CHECK | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.MULTI);
-		caList.setLabelProvider(new LabelProvider(){
-			@Override
-			public String getText(Object element){
-				if (element instanceof ConservationArea){
-					return ((ConservationArea)element).getNameLabel();
-				}
-				return super.getText(element);
-				
-			}
-		});
+		caList.setLabelProvider(new ConservationAreaLabelProvider());
 		caList.getTable().addKeyListener(new KeyListener(){
 			@Override
 			public void keyPressed(KeyEvent e) {
