@@ -42,7 +42,7 @@ import org.wcs.smart.er.internal.Messages;
  */
 public class MissionImportDialog extends XmlImportDialog {
 	
-	private boolean keepIDs = false;
+	private boolean keepIDs = true;
 
 	public MissionImportDialog() {
 		super(Display.getCurrent().getActiveShell(),
@@ -63,7 +63,7 @@ public class MissionImportDialog extends XmlImportDialog {
 		btnAssign.setText(Messages.MissionImportDialog_3);
 		btnAssign.setToolTipText(Messages.MissionImportDialog_4);
 		btnAssign.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		btnAssign.setSelection(true);
+		btnAssign.setSelection(false);
 		btnAssign.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -75,6 +75,7 @@ public class MissionImportDialog extends XmlImportDialog {
 		btnKeep.setText(Messages.MissionImportDialog_5);
 		btnKeep.setToolTipText(Messages.MissionImportDialog_6);
 		btnKeep.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		btnKeep.setSelection(true);
 		btnKeep.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
