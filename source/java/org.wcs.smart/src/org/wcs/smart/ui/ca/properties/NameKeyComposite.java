@@ -27,7 +27,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
@@ -277,8 +276,8 @@ public class NameKeyComposite {
 									Messages.NameKeyComposite_ChangeKey_ConfirmDialog_Message)) {
 						return;
 					}
-					InputDialog id = new KeyInputDialog(parent.getShell(), txtKey.getText(), siblings);
-					int ret = id.open();
+					KeyInputDialog id = new KeyInputDialog(parent.getShell(), txtKey.getText(), siblings);
+					int ret = id.openNoWarning();
 					if (ret != Window.CANCEL) {
 						txtKey.setText(id.getValue());
 						txtName.removeKeyListener(generateKeyListener);
