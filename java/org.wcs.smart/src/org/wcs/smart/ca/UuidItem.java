@@ -92,8 +92,8 @@ public class UuidItem {
 	
 	
 	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
+		if (getUuid() != null){
+			return Arrays.hashCode(getUuid());
 		}
 		return super.hashCode();
 	}
