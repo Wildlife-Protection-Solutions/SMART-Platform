@@ -24,7 +24,7 @@ package org.wcs.smart.er.ui.surveydesign;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.InputDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.window.Window;
@@ -130,9 +130,16 @@ public class NameIdComposite extends SurveyDesignComposite {
 		btnChangeKey.addSelectionListener(new SelectionAdapter() {			
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				InputDialog id = new KeyInputDialog(parent.getShell(), 
+				if (!MessageDialog.openConfirm(
+								parent.getShell(),
+								Messages.NameIdComposite_EditKey_Title,
+								Messages.NameIdComposite_EditKey_Message)) {
+					return;
+				}
+				
+				KeyInputDialog id = new KeyInputDialog(parent.getShell(), 
 						txtKey.getText(), otherKeys);
-				int ret = id.open();
+				int ret = id.openNoWarning();
 				if (ret != Window.CANCEL) {
 					txtKey.setText(id.getValue());
 					txtName.removeKeyListener(generateKeyListener);
