@@ -36,8 +36,10 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -74,7 +76,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * @author Emily
  *
  */
-public class EditSamplingUnitDialog extends TitleAreaDialog{
+public class EditSamplingUnitDialog extends TitleAreaDialog implements ModifyListener, ISelectionChangedListener{
 
 	private Session session;
 	private SamplingUnit su;
@@ -217,13 +219,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		
 		session = HibernateManager.openSession();
 		this.su = (SamplingUnit) session.load(SamplingUnit.class, su.getUuid());
-		
-		ModifyListener validateListener = new ModifyListener(){
-			@Override
-			public void modifyText(ModifyEvent e) {
-				validate();
-			}};
-		
+
 		ScrolledComposite sc = new ScrolledComposite(parent, SWT.V_SCROLL);
 		sc.setExpandHorizontal(true);
 		sc.setExpandVertical(true);
@@ -265,7 +261,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cdId = createDecoration(txtId);
 		cdId.hide();
-		txtId.addModifyListener(validateListener);
+		txtId.addModifyListener(this);
 		
 		l = new Label(comp, SWT.SEPARATOR | SWT.HORIZONTAL);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -292,7 +288,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 					a.getSamplingUnitAttribute().getType() == AttributeType.TEXT){
 				final Text txtAttribute = new Text(comp, SWT.BORDER);
 				txtAttribute.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-				txtAttribute.addModifyListener(validateListener);
+				txtAttribute.addModifyListener(this);
 				final ControlDecoration cd = createDecoration(txtAttribute);
 				cd.hide();
 			
@@ -307,6 +303,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 				values.add(""); //$NON-NLS-1$
 				values.addAll(a.getSamplingUnitAttribute().getAttributeList());
 				lstViewer.setInput(values);
+				lstViewer.addSelectionChangedListener(this);
 				
 				attribute2Control.put(a.getSamplingUnitAttribute(), lstViewer);
 			}
@@ -413,4 +410,16 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		cd.setShowHover(true);
 		return cd;
 	}
+	
+	
+	@Override
+	public void modifyText(ModifyEvent e) {
+		validate();
+	}
+	
+	@Override
+	public void selectionChanged(SelectionChangedEvent event) {
+		validate();
+	}
+	
 }
