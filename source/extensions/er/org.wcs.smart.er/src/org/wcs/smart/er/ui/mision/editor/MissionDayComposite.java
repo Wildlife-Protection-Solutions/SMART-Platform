@@ -645,12 +645,21 @@ public class MissionDayComposite {
 				restMinutes.setEditable(false);
 				restMinutes.setEnabled(false);
 				
-				btnAddWaypoint.setVisible(false);
-				btnDeleteWaypoint.setVisible(false);
-				btnMoveWaypoint.setVisible(false);
-				
-				lnkImportWaypoints.setVisible(false);
-				lnkEditTrack.setVisible(false);
+				if (btnAddWaypoint != null){
+					btnAddWaypoint.setVisible(false);
+				}
+				if (btnDeleteWaypoint != null){
+					btnDeleteWaypoint.setVisible(false);
+				}
+				if (btnMoveWaypoint != null){
+					btnMoveWaypoint.setVisible(false);
+				}
+				if (lnkImportWaypoints != null){
+					lnkImportWaypoints.setVisible(false);
+				}
+				if (lnkEditTrack != null){
+					lnkEditTrack.setVisible(false);
+				}
 				
 			}
 		
