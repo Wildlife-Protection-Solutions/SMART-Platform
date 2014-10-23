@@ -34,7 +34,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
@@ -55,6 +54,7 @@ import org.wcs.smart.export.config.ICsvImportDialogConfig;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.ConservationAreaLabelProvider;
 
 /**
  * Dialog for importing from csv file or another conservation area
@@ -204,15 +204,7 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 
 		caViewer = new ComboViewer(imp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		caViewer.setContentProvider(ArrayContentProvider.getInstance());
-		caViewer.setLabelProvider(new LabelProvider() {
-			public String getText(Object element) {
-				if (element instanceof ConservationArea) {
-					ConservationArea ca = (ConservationArea) element;
-					return ca.getNameLabel();
-				}
-				return super.getText(element);
-			}
-		});
+		caViewer.setLabelProvider(new ConservationAreaLabelProvider());
 		caViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

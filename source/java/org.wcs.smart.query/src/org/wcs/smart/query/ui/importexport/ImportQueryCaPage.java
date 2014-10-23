@@ -27,7 +27,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
@@ -41,6 +40,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.ui.ConservationAreaLabelProvider;
 
 /**
  * Wizard page to select a Conservation Area which is not
@@ -73,15 +73,7 @@ public class ImportQueryCaPage extends WizardPage {
 		
 		cmbViewer = new ComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
-		cmbViewer.setLabelProvider(new LabelProvider(){
-			public String getText(Object element) {
-				if (element instanceof ConservationArea){
-					ConservationArea ca = ((ConservationArea)element);
-					return ca.getNameLabel();
-				}
-				return super.getText(element);
-			}
-		});
+		cmbViewer.setLabelProvider(new ConservationAreaLabelProvider());
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Session session = HibernateManager.openSession();
