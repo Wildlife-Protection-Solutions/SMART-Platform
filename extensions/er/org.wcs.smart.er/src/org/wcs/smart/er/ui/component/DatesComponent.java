@@ -174,7 +174,18 @@ public class DatesComponent implements SelectionListener{
 	
 	public void setError(String error){
 		if (!cdEnd.isVisible()){
+			cdEnd.setImage(FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 			cdEnd.setDescriptionText(error);
+			cdEnd.show();
+		}
+	}
+	
+	public void setWarning(String warning){
+		if (!cdEnd.isVisible()){
+			cdEnd.setImage(FieldDecorationRegistry.getDefault()
+					.getFieldDecoration(FieldDecorationRegistry.DEC_WARNING).getImage());
+			cdEnd.setDescriptionText(warning);
 			cdEnd.show();
 		}
 	}
@@ -230,8 +241,6 @@ public class DatesComponent implements SelectionListener{
 	 */
 	protected ControlDecoration createDecoration(Control control){
 		ControlDecoration cd = new ControlDecoration(control, SWT.LEFT | SWT.TOP);
-		cd.setImage(FieldDecorationRegistry.getDefault()
-				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
 		cd.setShowHover(true);
 		return cd;
 	}

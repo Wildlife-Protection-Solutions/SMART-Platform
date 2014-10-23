@@ -51,6 +51,7 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 	
 	private Text txtId;
 	private ControlDecoration cdId;
+	private Label sd;
 	
 	protected SurveyIdPage() {
 		super("ID_PAGE"); //$NON-NLS-1$
@@ -61,6 +62,9 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		sd = new Label(main, SWT.NONE);
+		sd.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
@@ -105,7 +109,8 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 		}else{
 			txtId.setText(""); //$NON-NLS-1$
 		}
-		
+		sd.setText(survey.getSurveyDesign().getName());
+		sd.getParent().layout(true);
 	}
 
 	@Override

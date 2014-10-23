@@ -27,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -43,6 +44,8 @@ import org.wcs.smart.er.ui.mision.SurveyComposite;
 public class MissionCompositeWizardPage extends WizardPage {
 
 	private MissionComposite composite;
+	private Label sd;
+	
 	/**
 	 * Creates a new wizard page
 	 * @param composite the composite represented by the wizard page
@@ -57,6 +60,9 @@ public class MissionCompositeWizardPage extends WizardPage {
 		Composite center = new Composite(parent, SWT.NONE);
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		sd = new Label(center, SWT.NONE);
+		sd.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
 		
 		composite.createControl(center);
 		
@@ -85,14 +91,11 @@ public class MissionCompositeWizardPage extends WizardPage {
 		if (composite instanceof SurveyComposite){
 			((SurveyComposite)composite).init(mission, survey, session);
 		}else{
-			composite.init(mission, session);	
-		}
-		
-		
-		if (mission.getSurvey() != null){
-			super.setTitle(mission.getSurvey().getSurveyDesign().getName() + " - " + mission.getSurvey().getId() + ""); //$NON-NLS-1$ //$NON-NLS-2$
-		}else{
-			super.setTitle(composite.getTitle());	
+			composite.init(mission, session);
+			if (mission.getSurvey() != null){
+				sd.setText(mission.getSurvey().getId() + " - " + mission.getSurvey().getSurveyDesign().getName()); //$NON-NLS-1$
+				sd.getParent().layout();
+			}
 		}
 	}
 	

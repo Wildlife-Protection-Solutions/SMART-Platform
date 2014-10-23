@@ -21,6 +21,10 @@
  */
 package org.wcs.smart.er.ui.survey.wizard;
 
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -28,6 +32,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Survey;
@@ -42,6 +47,8 @@ import org.wcs.smart.er.ui.component.DatesComponent;
 public class SurveyDatePage extends WizardPage implements INewSurveyWizardPage{
 	
 	private DatesComponent dates;
+	private Label sd;
+	private Survey survey;
 	
 	protected SurveyDatePage() {
 		super("DATEPAGE"); //$NON-NLS-1$
@@ -53,6 +60,9 @@ public class SurveyDatePage extends WizardPage implements INewSurveyWizardPage{
 		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		sd = new Label(main, SWT.NONE);
+		sd.setLayoutData(new GridData(SWT.RIGHT, SWT.TOP, true, false));
+
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
 		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
@@ -64,6 +74,7 @@ public class SurveyDatePage extends WizardPage implements INewSurveyWizardPage{
 		dates.addModifiedListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				validate2();
 				getWizard().getContainer().updateButtons();
 			}
 		});
@@ -80,14 +91,58 @@ public class SurveyDatePage extends WizardPage implements INewSurveyWizardPage{
 	
 	@Override
 	public void initControls(Survey survey, Session session) {
+		this.survey = survey;
 		if (survey.getStartDate() != null){
 			dates.setStartDate(survey.getStartDate());
 		}
 		if (survey.getEndDate() != null){
 			dates.setEndDate(survey.getEndDate());
 		}
+		
+		sd.setText(survey.getSurveyDesign().getName());
+		sd.getParent().layout(true);
+		
+		validate2();
+		
 	}
 
+	private void validate2(){
+		boolean datewarn = false;
+		Date start = dates.getStartDate();
+		Date end = dates.getEndDate();
+		
+		if (survey.getSurveyDesign().getStartDate() != null){
+			//ensure start date is not before design start date
+			//ensure end date is not before design start date
+			if (start.before(survey.getSurveyDesign().getStartDate())){
+				datewarn = true;
+			}
+			if (end.before(survey.getSurveyDesign().getStartDate())){
+				datewarn = true;
+			}
+		}
+		if (survey.getSurveyDesign().getEndDate() != null){
+			//ensure start date is not after end date
+			//ensure end date is not after end date
+			if (start.after(survey.getSurveyDesign().getEndDate())){
+				datewarn = true;
+			}
+			if (end.after(survey.getSurveyDesign().getEndDate())){
+				datewarn = true;
+			}
+		}
+			
+		if (datewarn){
+			dates.setWarning(
+				MessageFormat.format(Messages.SurveyDatePage_DateRangeWarn,
+					new Object[]{
+						survey.getSurveyDesign().getStartDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateFormat.getDateInstance().format(survey.getSurveyDesign().getStartDate()),
+								survey.getSurveyDesign().getEndDate() == null ? Messages.EditSurveyDialog_UndefinedDate : DateFormat.getDateInstance().format(survey.getSurveyDesign().getEndDate())
+						}
+				));
+		}
+		
+	}
 	@Override
 	public boolean updateSurvey(Survey survey, Session session) {
 		survey.setStartDate(dates.getStartDate());
