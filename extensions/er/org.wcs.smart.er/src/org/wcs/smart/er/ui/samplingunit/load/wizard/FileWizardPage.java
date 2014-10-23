@@ -29,7 +29,6 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -48,7 +47,6 @@ import org.wcs.smart.er.ui.samplingunit.load.CsvSamplingUnitImporter;
 import org.wcs.smart.er.ui.samplingunit.load.ISamplingUnitImporter;
 import org.wcs.smart.er.ui.samplingunit.load.ShpSamplingUnitImporter;
 import org.wcs.smart.export.dialog.DelimiterCombo;
-import org.wcs.smart.export.dialog.DelimiterCombo.Delimiter;
 
 /**
  * Sampling unit wizard page; file wizard
@@ -148,8 +146,8 @@ public class FileWizardPage extends WizardPage {
 		}
 	}
 
-	public Character getDelimiter(){
-		return new Character( ((Delimiter) ((IStructuredSelection)delimiter.getSelection()).getFirstElement()).value); 
+	public Character getDelimiter() throws Exception{
+		return delimiter.getDelimiter(); 
 	}
 	public ISamplingUnitImporter getImporter(){
 		return this.importer;
@@ -163,6 +161,18 @@ public class FileWizardPage extends WizardPage {
 		fieldsNames = null;
 		final File f = new File(txtFile.getText());
 		final boolean isCsv = delimiter.getControl().getEnabled();
+		
+		Character lDelim = null;
+		if (isCsv){
+			try{
+				lDelim = delimiter.getDelimiter();
+			}catch (Exception ex){
+				MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, ex.getMessage());
+				return null;
+			}
+		}
+		final Character delimi = lDelim;
+		
 		if (!f.exists()){
 			MessageDialog.openInformation(getShell(), Messages.FileWizardPage_ErrorTitle, 
 					MessageFormat.format(Messages.FileWizardPage_FileNotFound, new Object[]{f.getAbsolutePath()}));
@@ -181,8 +191,7 @@ public class FileWizardPage extends WizardPage {
 					params.putAll(options);
 					if (!supportsShp || isCsv){
 						importer = new CsvSamplingUnitImporter();
-						DelimiterCombo.Delimiter delimiterfield = (Delimiter) ((IStructuredSelection)delimiter.getSelection()).getFirstElement();
-						params.put(CsvSamplingUnitImporter.DELIMETER_KEY, new Character(delimiterfield.value));
+						params.put(CsvSamplingUnitImporter.DELIMETER_KEY, delimi);
 					}else{
 						importer = new ShpSamplingUnitImporter();
 					}

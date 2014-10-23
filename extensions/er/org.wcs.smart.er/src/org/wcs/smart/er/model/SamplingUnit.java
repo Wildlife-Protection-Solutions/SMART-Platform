@@ -43,6 +43,8 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SmartUtils.RegExLevel;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -241,5 +243,18 @@ public class SamplingUnit extends UuidItem {
 	
 	public void setState(State state){
 		this.state = state;
+	}
+	
+	/**
+	 * Validates the sampling unit id.  Does not ensure uniqueness.
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public static String validateId(String id){
+		if (!SmartUtils.isSimpleString(id, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, SamplingUnit.ID_MAX_LENGTH)){
+			return MessageFormat.format(Messages.SamplingUnit_IdError, new Object[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, SamplingUnit.ID_MAX_LENGTH});
+		}
+		return null;
 	}
 }

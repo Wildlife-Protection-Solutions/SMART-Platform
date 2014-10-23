@@ -65,8 +65,6 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
-import org.wcs.smart.util.SmartUtils.RegExLevel;
 
 /**
  * Dalog for editing sampling unit.  This dialog
@@ -110,6 +108,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 	public void createButtonsForButtonBar(Composite parent){
 		super.createButtonsForButtonBar(parent);
 		getButton(IDialogConstants.OK_ID).setText(DialogConstants.SAVE_TEXT);
+		getButton(IDialogConstants.OK_ID).setEnabled(false);
 	}
 	
 	@Override
@@ -357,8 +356,9 @@ public class EditSamplingUnitDialog extends TitleAreaDialog{
 		}
 
 		if (!error){
-			if (!SmartUtils.isSimpleString(txtId.getText().trim(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, SamplingUnit.ID_MAX_LENGTH)){
-				cdId.setDescriptionText(MessageFormat.format(Messages.EditSamplingUnitDialog_IdError, new Object[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, SamplingUnit.ID_MAX_LENGTH}));
+			String idError = SamplingUnit.validateId(txtId.getText().trim()); 
+			if (idError != null){
+				cdId.setDescriptionText(idError);
 				cdId.show();
 				error = true;
 			}else{

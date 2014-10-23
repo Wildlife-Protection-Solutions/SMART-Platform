@@ -25,15 +25,19 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureReader;
 import org.geotools.data.shapefile.ng.ShapefileDataStore;
+import org.geotools.geometry.jts.JTS;
+import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -42,6 +46,7 @@ import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
+import org.wcs.smart.hibernate.SmartDB;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -54,7 +59,7 @@ import com.vividsolutions.jts.geom.Point;
  * @author Emily
  *
  */
-public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
+public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 
 	/**
 	 * Gets the field names.  This also validates the geometry type against
@@ -106,6 +111,7 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 
 	
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<SamplingUnit> importFile(File f, HashMap<Object, Object> options, IProgressMonitor monitor)
 			throws Exception {
@@ -113,6 +119,9 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 		monitor.beginTask(MessageFormat.format(Messages.ShpSamplingUnitImporter_Progress1, new Object[]{f.getAbsolutePath()}), 2);
 		List<SamplingUnit> units = new ArrayList<SamplingUnit>();
 		ShapefileDataStore store = new ShapefileDataStore(f.toURI().toURL());
+		final List<String> warnings = new ArrayList<String>();
+		HashSet<String> existingIds = (HashSet<String>) options.get(EXISTING_IDS_KEY);
+		
 		try {
 			SamplingUnit.GeometryType type = (GeometryType) options.get(TYPE_KEY);
 			if (type == null) {
@@ -153,6 +162,10 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 			}
 			monitor.worked(1);
 
+			MathTransform transform = null;
+			if (!CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS,store.getSchema().getCoordinateReferenceSystem())){
+				transform = CRS.findMathTransform(store.getSchema().getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS);
+			}
 			String idField = (String) options.get(ID_FIELD_KEY);
 			FeatureReader<SimpleFeatureType, SimpleFeature> reader = store
 					.getFeatureReader();
@@ -160,14 +173,13 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 			try {
 				while (reader.hasNext()) {
 					SimpleFeature sf = reader.next();
-					String id = null;
 					cnt++;
+					String id = null;
 					if (idField != null) {
 						id = sf.getAttribute(idField).toString();
-					} else {
-						id = AUTO_GENERATE_KEY_PREFIX + " " + cnt; //$NON-NLS-1$
 					}
-
+					id = generateId(id, cnt, existingIds, warnings);
+					
 					SamplingUnit su = new SamplingUnit();
 					su.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
 					Geometry g = (Geometry) sf.getDefaultGeometry();
@@ -196,6 +208,11 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 													new Object[] { g.getClass().getName() }));
 						}
 					}
+					// reproject geometry if required
+					if (transform != null){
+						g = JTS.transform(g, transform);
+					}
+					
 					su.setGeometry(g);
 					su.setId(id);
 					su.setState(State.ACTIVE);
@@ -220,15 +237,25 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 							sv.setNumberValue(d.doubleValue());
 						} else if (att.getType() == AttributeType.TEXT) {
 							String s = sf.getAttribute(field).toString();
+							
 							if (s != null) {
-								add = true;
+								String error = super.validateStringAttributeValue(s, att);
+								if (error != null){
+									warnings.add(error);
+								}else{
+									sv.setStringValue(s);
+									add = true;
+								}
 							}
-							sv.setStringValue(s);
+							
 						} else if (att.getType() == AttributeType.LIST){
-							SamplingUnitAttributeListItem listValue = ImportAttributes.findMatch(att, (String)sf.getAttribute(field));
+							String value = (String)sf.getAttribute(field);
+							SamplingUnitAttributeListItem listValue = findMatch(att, value);
 							if (listValue != null){
 								add = true;
 								sv.setAttributeListItem(listValue);
+							}else{
+								warnings.add(getSamplingUnitListItemNotFoundError(value, att));
 							}
 						}
 						if (add) {
@@ -245,7 +272,10 @@ public class ShpSamplingUnitImporter implements ISamplingUnitImporter{
 			store.dispose();
 			monitor.done();
 		}
+		
+		super.showWarnings(warnings);
 		return units;
 	}
+
 
 }
