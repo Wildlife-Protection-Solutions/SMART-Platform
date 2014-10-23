@@ -121,7 +121,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 				LineString ls = (LineString)unit.getGeometry();
 				data[index++] = String.valueOf(ls.getCoordinateN(0).x);
 				data[index++] = String.valueOf(ls.getCoordinateN(0).y);
-				data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
+				data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).x);
 				data[index++] = String.valueOf(ls.getCoordinateN(ls.getNumPoints()-1).y);
 			
 				data[index++] = wktWriter.write(unit.getGeometry());
