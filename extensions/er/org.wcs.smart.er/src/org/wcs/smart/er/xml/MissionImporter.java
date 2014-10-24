@@ -160,29 +160,6 @@ public class MissionImporter {
 		
 	}
 
-	
-// Don't think I need this actually
-//	/**
-//	 * Imports a mission that is a xml file.
-//	 * @param xmlFile the xml file to import
-//	 * @return mission created or null
-//	 * @throws Exception
-//	 */
-//	public static Mission importMissionFromFile(File xmlFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
-//		MissionType ptype = null;
-//		FileInputStream in = new FileInputStream(xmlFile);
-//		try{
-//			monitor.subTask("Reading XML");
-//			ptype = MissionXmlManager.readDataModel(in);
-//			monitor.worked(1);
-//		}finally{
-//			in.close();
-//		}
-//		if (ptype == null){
-//			throw new Exception("Error Reading XML file.");
-//		}
-//		return convertAndSave(ptype, keepIDs, null, monitor);
-//	}
 
 	/**
 	 * Converts the given xml mission object
