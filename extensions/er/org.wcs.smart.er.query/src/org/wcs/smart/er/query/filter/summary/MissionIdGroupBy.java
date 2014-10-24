@@ -144,7 +144,8 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 					.createAlias("survey.surveyDesign", "sd") //$NON-NLS-1$ //$NON-NLS-2$
 					.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 					.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
-					.addOrder(Order.asc("s.id")) //$NON-NLS-1$
+					.addOrder(Order.desc("startDate")) //$NON-NLS-1$
+					.addOrder(Order.desc("sd.startDate")) //$NON-NLS-1$ 
 					.list();
 			for (Mission m : missions){
 				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + " - " + m.getSurvey().getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -157,7 +158,8 @@ public class MissionIdGroupBy implements ISurveyGroupBy {
 				.add(Restrictions.eq("sd.conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.eq("sd.keyId", filter.getKey())) //$NON-NLS-1$
 				.addOrder(Order.asc("sd.keyId")) //$NON-NLS-1$
-					.addOrder(Order.asc("s.id")) //$NON-NLS-1$
+				.addOrder(Order.desc("startDate")) //$NON-NLS-1$
+				.addOrder(Order.desc("sd.startDate")) //$NON-NLS-1$ 
 				.list();
 			for (Mission m : missions){
 				ListItem li = new ListItem(m.getUuid(), m.getId() + " [" + m.getSurvey().getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$

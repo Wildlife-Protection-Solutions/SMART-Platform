@@ -185,9 +185,11 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int MISSION_HOUR_COUNT = 91;
   /** RegularExpression Id. */
-  int SURVEY_COUNT = 92;
+  int MISSION_PERSONHOUR_COUNT = 92;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 93;
+  int SURVEY_COUNT = 93;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 94;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -286,6 +288,7 @@ public interface ParserConstants {
     "\"s:missioncount\"",
     "\"s:missiondaycount\"",
     "\"s:missionhourcount\"",
+    "\"s:missionpersonhourcount\"",
     "\"s:surveycount\"",
     "<QUOTED_STRING>",
   };
