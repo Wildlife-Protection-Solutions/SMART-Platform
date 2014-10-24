@@ -22,11 +22,14 @@
 package org.wcs.smart.er.ui.surveydesign.wizard;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
@@ -37,9 +40,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
@@ -47,6 +53,8 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.ConservationAreaLabelProvider;
 
 /**
  * Wizard page that asks the use if they want
@@ -60,15 +68,25 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 
 	private Button opBlank;
 	private Button opTemplate;
+	private ComboViewer cmbCa;
+	private Map<ConservationArea, List<SurveyDesign>> ca2designs;
 	private ComboViewer cmbDesigns ;
-	private List<SurveyDesign> templates;
 	private Button chCopySu;
 	
 	private List<SamplingUnit> newSamplingUnits = null;
 	
 	public TemplateWizardPage(List<SurveyDesign> templates){
 		super("TEMPLATE"); //$NON-NLS-1$
-		this.templates = templates;
+		ca2designs = new HashMap<ConservationArea, List<SurveyDesign>>();
+		for (SurveyDesign sd : templates) {
+			ConservationArea ca = sd.getConservationArea();
+			List<SurveyDesign> list = ca2designs.get(ca);
+			if (list == null) {
+				list = new ArrayList<SurveyDesign>();
+				ca2designs.put(ca, list);
+			}
+			list.add(sd);
+		}
 	}
 	
 	@Override
@@ -93,38 +111,70 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		opTemplate.setText(Messages.TemplateWizardPage_TemplateDesign);
 		opTemplate.setSelection(false);
 		
-		cmbDesigns = new ComboViewer(part, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Composite templeteCmp = new Composite(part, SWT.NONE);
+		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gd.horizontalIndent = 20;
+		templeteCmp.setLayoutData(gd);
+		templeteCmp.setLayout(new GridLayout(2, false));
+		
+		Label caLabel = new Label(templeteCmp, SWT.NONE);
+		caLabel.setText(Messages.TemplateWizardPage_ConservationArea);
+
+		cmbCa = new ComboViewer(templeteCmp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		cmbCa.setContentProvider(ArrayContentProvider.getInstance());
+		cmbCa.setLabelProvider(new ConservationAreaLabelProvider());
+		cmbCa.setInput(ca2designs.keySet());
+		cmbCa.setSelection(new StructuredSelection(SmartDB.getCurrentConservationArea()));
+		cmbCa.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				widgetSelected(null);
+				updateDesignInput();
+			}
+		});
+		cmbCa.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbCa.getControl().setEnabled(false);
+
+		Label designLabel = new Label(templeteCmp, SWT.NONE);
+		designLabel.setText(Messages.TemplateWizardPage_SurveyDesign);
+		
+		cmbDesigns = new ComboViewer(templeteCmp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbDesigns.setContentProvider(ArrayContentProvider.getInstance());
 		cmbDesigns.setLabelProvider(SurveyDesignLabelProvider.getInstance());
-		cmbDesigns.setInput(templates);
+//		cmbDesigns.setInput(templates);
 		cmbDesigns.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				widgetSelected(null);
 			}
 		});
-		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalIndent = 20;
-		gd.widthHint = 200;
-		cmbDesigns.getControl().setLayoutData(gd);
+		cmbDesigns.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbDesigns.getControl().setEnabled(false);
 	
-		chCopySu = new Button(part, SWT.CHECK);
+		chCopySu = new Button(templeteCmp, SWT.CHECK);
 		chCopySu.setSelection(false);
 		chCopySu.setEnabled(false);
 		chCopySu.setText(Messages.TemplateWizardPage_CopySuLabels);
-		
-		gd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gd.horizontalIndent = 20;
-		chCopySu.setLayoutData(gd);
+		chCopySu.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		
 		opTemplate.addSelectionListener(this);
 		opBlank.addSelectionListener(this);
 		
+		updateDesignInput();
+		
 		super.setControl(part2);
 	}
 	
+	protected void updateDesignInput() {
+		IStructuredSelection sel = (IStructuredSelection) cmbCa.getSelection();
+		List<SurveyDesign> designsList = null;
+		if (!sel.isEmpty()) {
+			designsList = ca2designs.get(sel.getFirstElement());
+		}
+		cmbDesigns.setInput(designsList != null ? designsList : new Object[0]);
+	}
+
 	@Override
 	public boolean isPageComplete() {
 		if (opTemplate.getSelection() && cmbDesigns.getSelection().isEmpty()){
@@ -137,37 +187,68 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 	
 	public void updateModel(SurveyDesign design, Session session){
 		if (opTemplate.getSelection()){
+			if (((StructuredSelection)cmbCa.getSelection()).isEmpty()){
+				return;
+			}
 			if (((StructuredSelection)cmbDesigns.getSelection()).isEmpty()){
 				return;
 			}
+			ConservationArea copyCa = (ConservationArea) ((StructuredSelection)cmbCa.getSelection()).getFirstElement();
+			boolean isSameCa = SmartDB.getCurrentConservationArea().equals(copyCa);
 			//copy of design elements
 			SurveyDesign copy = (SurveyDesign) ((StructuredSelection)cmbDesigns.getSelection()).getFirstElement();
 			design.setStartDate(copy.getStartDate());
 			design.setEndDate(copy.getEndDate());
 			design.setDescription(copy.getDescription());
-			design.setConfigurableModel(copy.getConfigurableModel());
 			design.setTrackDistanceDirection(copy.getTrackDistanceDirection());
-			design.setConservationArea(copy.getConservationArea());
+			design.setConservationArea(SmartDB.getCurrentConservationArea());
+			
+			design.setMissionProperties(new ArrayList<MissionProperty>());
+			if (isSameCa) {
+				design.setConfigurableModel(copy.getConfigurableModel());
+				if (copy.getMissionProperties() != null){
+					for (MissionProperty mp : copy.getMissionProperties()){
+						MissionProperty clone = new MissionProperty();
+						clone.setSurveyDesign(design);
+						clone.setOrder(mp.getOrder());
+						clone.setAttribute(mp.getAttribute());
+						
+						design.getMissionProperties().add(clone);
+					}
+				}
+			} else {
+				//try to find mission properties with the same key in current CA
+				List<String> keysList = new ArrayList<String>();
+				for (MissionProperty mp : copy.getMissionProperties()) {
+					keysList.add(mp.getAttribute().getKeyId());
+				}
+				if (!keysList.isEmpty()) {
+					@SuppressWarnings("unchecked")
+					List<MissionAttribute> attributes = session.createCriteria(MissionAttribute.class)
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+							.add(Restrictions.in("keyId", keysList)).list(); //$NON-NLS-1$
+					
+					for (int i = 0; i < attributes.size(); i++) {
+						MissionProperty clone = new MissionProperty();
+						clone.setSurveyDesign(design);
+						clone.setOrder(i);
+						clone.setAttribute(attributes.get(i));
+						
+						design.getMissionProperties().add(clone);
+					}
+				}
+			}
 			
 			//survey design properties
 			design.setProperties(new ArrayList<SurveyDesignProperty>());
-			for (SurveyDesignProperty sdp : copy.getProperties()){
-				SurveyDesignProperty sdp1 = new SurveyDesignProperty();
-				sdp1.setName(sdp.getName());
-				sdp1.setSurveyDesign(design);
-				sdp1.setValue(sdp.getValue());
-				design.getProperties().add(sdp1);
-			}
-			
-			design.setMissionProperties(new ArrayList<MissionProperty>());
-			if (copy.getMissionProperties() != null){
-				for (MissionProperty mp : copy.getMissionProperties()){
-					MissionProperty clone = new MissionProperty();
+			if (copy.getProperties() != null){
+				for (SurveyDesignProperty sdp : copy.getProperties()){
+					SurveyDesignProperty clone = new SurveyDesignProperty();
 					clone.setSurveyDesign(design);
-					clone.setOrder(mp.getOrder());
-					clone.setAttribute(mp.getAttribute());
-					
-					design.getMissionProperties().add(clone);
+					clone.setName(sdp.getName());
+					clone.setValue(sdp.getValue());
+
+					design.getProperties().add(clone);
 				}
 			}
 			
@@ -185,6 +266,7 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 			newSamplingUnits = null;
 			if (chCopySu.getSelection()){
 				newSamplingUnits = new ArrayList<SamplingUnit>();
+				@SuppressWarnings("unchecked")
 				List<SamplingUnit> sus = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", copy)).list(); //$NON-NLS-1$
 				for (SamplingUnit s2: sus){
 					SamplingUnit newsu = new SamplingUnit();
@@ -226,6 +308,7 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 	
 	@Override
 	public void widgetSelected(SelectionEvent e) {
+		cmbCa.getControl().setEnabled(opTemplate.getSelection());
 		cmbDesigns.getControl().setEnabled(opTemplate.getSelection());
 		chCopySu.setEnabled(opTemplate.getSelection());
 		
