@@ -337,6 +337,8 @@ public class Messages extends NLS {
 	public static String MissionImporter_11;
 	public static String MissionImporter_12;
 	public static String MissionImporter_13;
+
+	public static String MissionImporter_14;
 	public static String MissionImporter_2;
 	public static String MissionImporter_3;
 	public static String MissionImporter_4;
@@ -714,6 +716,12 @@ public class Messages extends NLS {
 	public static String XMLtoMissionConverter_12;
 	public static String XMLtoMissionConverter_13;
 	public static String XMLtoMissionConverter_14;
+
+	public static String XMLtoMissionConverter_15;
+
+	public static String XMLtoMissionConverter_16;
+
+	public static String XMLtoMissionConverter_17;
 	public static String XMLtoMissionConverter_2;
 	public static String XMLtoMissionConverter_3;
 	public static String XMLtoMissionConverter_4;

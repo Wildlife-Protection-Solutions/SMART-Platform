@@ -235,12 +235,46 @@ public class MissionImporter {
 			}		
 			monitor.subTask(Messages.MissionImporter_9);
 			converter.fromXml(xmlMission, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
+		
 		} finally {
 			if (session.isOpen()){
 				session.close();
 			}
 		}
 
+		session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		try {
+			List<String> errors = new ArrayList<String>();
+			errors.addAll(converter.getValidationErrors());
+			//display errors in xml file
+			if (!errors.isEmpty()) {
+				StringBuilder sb = new StringBuilder();
+				for (String str: errors){
+					sb.append(str);
+					sb.append(SmartUtils.LINE_SEPARATOR);
+				}
+				final String message = sb.toString();
+				Display.getDefault().syncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(),Messages.MissionImporter_14,null,message,
+								MessageDialog.ERROR, new String[]{IDialogConstants.OK_LABEL}, 1);
+						dialog.open();
+						return ;
+					}
+				});
+				return null;
+			}
+		}finally {
+			if (session.isOpen()){
+				session.close();
+			}
+		}
+
+		
+		
+		
 		List<String> warnings = new ArrayList<String>();
 		warnings.addAll(converter.getWarnings());
 		monitor.worked(1);
@@ -289,7 +323,7 @@ public class MissionImporter {
 				//no existing survey, save the new one from the xml file.
 				session.saveOrUpdate(imported.getSurvey());
 			}else{
-				//there is an existing survey with this id, associate the mission with it instaed of creating a new one.
+				//there is an existing survey with this id, associate the mission with it instead of creating a new one.
 				imported.setSurvey(survey);
 				survey.getMissions().add(imported);
 			}
@@ -298,7 +332,7 @@ public class MissionImporter {
 			session.getTransaction().commit();
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			EcologicalRecordsPlugIn.displayLog(Messages.MissionImporter_13 + " " + ex.getLocalizedMessage(), ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionImporter_13 + " " + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return null;
 		}finally{
 			session.close();
