@@ -62,6 +62,7 @@ import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -103,6 +104,24 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			if (mission.equals(MissionEditor.this.mission)){
 				MissionEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 
+					@Override
+					public void run() {
+						MissionEditor.this.getEditorSite().getWorkbenchWindow()
+							.getActivePage().closeEditor(MissionEditor.this, false);
+					}});
+			}
+		}
+	};
+	
+	/*
+	 * if the survey is deleted also close the editor
+	 */
+	private ISurveyEventListener surveyDeleteListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+			Survey survey = (Survey)o;
+			if (survey.equals(MissionEditor.this.mission.getSurvey())){
+				MissionEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						MissionEditor.this.getEditorSite().getWorkbenchWindow()
@@ -167,6 +186,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_DELETED, missionDeleteListener);
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionModifiedListener);
+		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DELETED, surveyDeleteListener);
 	}
 
 	/**
@@ -183,6 +203,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_DELETED, missionDeleteListener);
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionModifiedListener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DELETED, surveyDeleteListener);
 	}
 	
 	/**

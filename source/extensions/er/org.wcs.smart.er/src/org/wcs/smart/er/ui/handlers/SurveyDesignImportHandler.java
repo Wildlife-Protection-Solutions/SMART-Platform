@@ -64,12 +64,14 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
+import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.xml.SurveyDesignFromXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
  * Handler for importing entity types.
@@ -193,6 +195,7 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 		}else if (newDesign != null){
 			//open editor
 			try {
+				FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new SurveyDesignEditorInput(newDesign.getName(), newDesign.getUuid(), newDesign.getKeyId(), newDesign.getState()), SurveyDesignEditor.ID);
 			} catch (PartInitException e) {
 
