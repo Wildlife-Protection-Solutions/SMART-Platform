@@ -99,6 +99,7 @@ TOKEN :
 |  < MISSION_COUNT : "s:missioncount" >
 |  < MISSION_DAY_COUNT : "s:missiondaycount" >
 |  < MISSION_HOUR_COUNT : "s:missionhourcount" >
+|  < MISSION_PERSONHOUR_COUNT: "s:missionpersonhourcount" >
 |  < SURVEY_COUNT : "s:surveycount" >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
@@ -282,6 +283,10 @@ IValueItem SingleValueItem() :
 		{
 		  	item = MissionValueItem.createMissionHoursCountItem();
 	 	}
+	|
+		< MISSION_PERSONHOUR_COUNT >
+		{
+		  	item = MissionValueItem.createMissionPersonHoursCountItem();		} 
 	|
 		< SURVEY_COUNT >
 		{
