@@ -32,8 +32,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -119,10 +121,10 @@ public class CyberTrackerConfExporter {
 	 * here we check and inform the user
 	 */
 	private boolean validateAttributes(){
-		List<CmNode> toCheck = new ArrayList<CmNode>();
+		Queue<CmNode> toCheck = new LinkedList<CmNode>();
 		toCheck.addAll(configurableModel.getNodes());
-		while(toCheck.size() > 0){
-			CmNode node = toCheck.remove(0);
+		while(!toCheck.isEmpty()){
+			CmNode node = toCheck.remove();
 			if (node.getCmAttributes() != null){
 				for (final CmAttribute a : node.getCmAttributes()){
 					if (a.getAttribute().getType() == AttributeType.DATE){
@@ -140,7 +142,7 @@ public class CyberTrackerConfExporter {
 					}
 				}
 			}
-			
+			toCheck.addAll(node.getChildren());
 		}
 		return true;
 	}
