@@ -49,6 +49,7 @@ import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SmartUtils.RegExLevel;
 
 import com.vividsolutions.jts.geom.LineString;
 
@@ -179,7 +180,9 @@ public class MissionDataImport {
 			MissionTrack newTrack = convertToTrack(value.waypoints, false).get(0);
 			String id = value.waypoints.get(0).getSourceId();
 			cnt++;
-			if (id == null || id.length() == 0){
+			if (id == null 
+					|| id.length() == 0 
+					|| !SmartUtils.isSimpleString(id, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, MissionTrack.MAX_ID_LENGTH, 1)){
 				id = MessageFormat.format(Messages.MissionDataImport_TrackIdLabel, new Object[]{cnt});
 			}
 			newTrack.setId(id);
@@ -227,7 +230,9 @@ public class MissionDataImport {
 				MissionTrack mt = convertToTrack(ws, false).get(0);
 				cnt++;
 				String id = ws.get(0).getSourceId();
-				if (id == null || id.length() == 0){
+				if (id == null 
+						|| id.length() == 0 
+						|| !SmartUtils.isSimpleString(id, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, MissionTrack.MAX_ID_LENGTH, 1)){
 					id = MessageFormat.format(Messages.MissionDataImport_TrackIdLabel, new Object[]{cnt});
 				}
 				mt.setId(id);

@@ -665,9 +665,13 @@ public class Messages extends NLS {
 	public static String TracksComposite_DeleteTitle;
 	public static String TracksComposite_deleteTooltip;
 	public static String TracksComposite_Edit;
+
+	public static String TracksComposite_ErrorDialogTitle;
 	public static String TracksComposite_editTooltip;
 	public static String TracksComposite_Import;
 	public static String TracksComposite_ImportTitle;
+
+	public static String TracksComposite_InvalidId;
 	public static String TracksComposite_importTooltip;
 	public static String TracksComposite_LayersLabel;
 	public static String TracksComposite_MapConfigurationError;

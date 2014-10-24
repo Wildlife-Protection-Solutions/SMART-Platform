@@ -55,6 +55,8 @@ import com.vividsolutions.jts.io.WKBWriter;
 @Table(name="smart.mission_track")
 public class MissionTrack extends UuidItem{
 
+	public static final int MAX_ID_LENGTH = 128;
+	
 	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
 	public enum TrackType {
