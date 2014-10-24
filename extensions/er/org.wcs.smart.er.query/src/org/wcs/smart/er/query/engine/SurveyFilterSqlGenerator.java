@@ -45,6 +45,7 @@ import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.MissionTrackDateField;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SurveyFilter;
@@ -228,43 +229,37 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	/*
 	 * Sampling unit filter
 	 */
-	protected String asSql(SamplingUnitFilter filter, IQueryEngine engine) throws SQLException{
-		if (engine instanceof DerbyMissionTrackEngine){
+	protected String asSql(SamplingUnitFilter filter, IQueryEngine engine) throws SQLException{		
+		if (filter.getSource() == null){
+			throw new SQLException("Sampling unit filter source table not set.");
+		}
+		
+		if (filter.getSource() == Source.TRACK){
+			//match on mission track
 			if (filter.getType() == Type.SAMPLINGUNIT){
 				if (filter.isNone()){
-					return engine.tablePrefix(SamplingUnit.class) + ".uuid is null"; //$NON-NLS-1$ 					
+					return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid is null AND "  //$NON-NLS-1$ //$NON-NLS-2$
+							+ engine.tablePrefix(MissionTrack.class) + ".uuid is not null )"; //$NON-NLS-1$
 				}else{
-					return engine.tablePrefix(SamplingUnit.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}else if (filter.getType() == Type.TRACK){
-				return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
-			}
-		}else if (engine instanceof DerbyMissionEngine){
-			//survey waypoint su or track  
-			if (filter.getType() == Type.SAMPLINGUNIT){
-				if (filter.isNone()){
-					return " ( ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid is null AND "  //$NON-NLS-1$ //$NON-NLS-2$
-							+ engine.tablePrefix(MissionTrack.class) + ".uuid is not null )" //$NON-NLS-1$
-							+ " OR (" + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null " //$NON-NLS-1$ //$NON-NLS-2$
-							+ " AND " + engine.tablePrefix(SurveyWaypoint.class) + ".wp_uuid is not null))"; //$NON-NLS-1$ //$NON-NLS-2$
-				}else{
-					return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-						+ " OR " + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					return engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}else if (filter.getType() == Type.TRACK){
 				return engine.tablePrefix(MissionTrack.class) + ".uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-			}
-		}else{
+			}			
+		}else if (filter.getSource() == Source.OBSERVATION){
+			//observation 
 			if (filter.getType() == Type.SAMPLINGUNIT){
 				if (filter.isNone()){
-					return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null"; //$NON-NLS-1$
+					return " (" + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null " //$NON-NLS-1$ //$NON-NLS-2$
+							+ " AND " + engine.tablePrefix(SurveyWaypoint.class) + ".wp_uuid is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
 				}else{
-					return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+					return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$ 
 				}
 			}else if (filter.getType() == Type.TRACK){
-				return engine.tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid = x'" + filter.getUuid() + "'";  //$NON-NLS-1$//$NON-NLS-2$
+				return engine.tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid = x'" + filter.getUuid() + "'"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
+		
 		return ""; //$NON-NLS-1$
 	}
 	

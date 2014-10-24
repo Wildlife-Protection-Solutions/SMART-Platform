@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.engine;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
@@ -50,6 +51,7 @@ import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -273,32 +275,31 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		sql.append(prefix(MissionDay.class));
 		sql.append(".mission_uuid "); //$NON-NLS-1$
 		
-		if (engine instanceof DerbyMissionEngine){
-			//do need join mission tracks?
-			final boolean[] needstracks = new boolean[]{false};
-			IFilterVisitor missionTracks = new IFilterVisitor() {
-				@Override
-				public void visit(IFilter filter) {
-					if (needstracks[0]) return;
-					if (filter instanceof SamplingUnitFilter){
-						needstracks[0] = true;
-					}
-					
+		
+		//do need join mission tracks?
+		final boolean[] needstracks = new boolean[]{false};
+		IFilterVisitor missionTracks = new IFilterVisitor() {
+			@Override
+			public void visit(IFilter filter) {
+				if (needstracks[0]) return;
+				if (filter instanceof SamplingUnitFilter &&
+					((SamplingUnitFilter) filter).getSource() == Source.TRACK){
+					needstracks[0] = true;
 				}
-			};
-			queryFilter.accept(missionTracks);
-			if (needstracks[0]){
-				sql.append(" left join "); //$NON-NLS-1$
-				sql.append(namePrefix(MissionTrack.class));
-				sql.append(" on ");  //$NON-NLS-1$
-				sql.append(prefix(MissionDay.class));
-				sql.append(".uuid = "); //$NON-NLS-1$
-				sql.append(prefix(MissionTrack.class));
-				sql.append(".mission_day_uuid "); //$NON-NLS-1$	
 				
-				usedTables.add(MissionTrack.class);
 			}
+		};
+		queryFilter.accept(missionTracks);
+		if (needstracks[0]){
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(namePrefix(MissionTrack.class));
+			sql.append(" on ");  //$NON-NLS-1$
+			sql.append(prefix(MissionDay.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(prefix(MissionTrack.class));
+			sql.append(".mission_day_uuid "); //$NON-NLS-1$	
 			
+			usedTables.add(MissionTrack.class);
 		}
 		
 		sql.append(" left join "); //$NON-NLS-1$
@@ -732,6 +733,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	
 	
 	private void processSamplingUnitAttributeFilter(SamplingUnitAttributeFilter lfilter, String colName, Connection c) throws SQLException{
+		if (lfilter.getSource() == Source.TRACK){
+			throw new SQLException(MessageFormat.format("Sampling unit attribute filters with source of {0} are not supported for waypoint filters.", new Object[]{SamplingUnitFilter.Source.TRACK}));
+		}
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(colName + " (wp_uuid)"); //$NON-NLS-1$	

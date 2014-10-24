@@ -60,6 +60,7 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
@@ -205,7 +206,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					monitor.worked(40);
 				}catch (Exception ex){
 					ERQueryPlugIn.log(ex.getMessage(), ex);
-					throw new SQLException(ex);
+					throw new SQLException(ex.getMessage(), ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryGridTable(c);
@@ -254,6 +255,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter);
 			try{
+				SamplingUnitFilterProcessor.updateSamplingUnitFilter(filter.getFilter(), SamplingUnitFilter.Source.OBSERVATION);
 				filterer.processFilter(c, filter.getFilter(), dateFilter, query.getConservationAreaFilterAsFilter(), 
 					needsObservation, false, new SubProgressMonitor(monitor, 90));
 			}finally{
@@ -717,8 +719,15 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			SurveyCntValueComputer valueComputer = new SurveyCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 			return computeMissionTrack(c, engine, dataField);
+		}else if (item.getValueItem() == MissionValueItem.ValueItem.DAY_COUNT){
+			dataField = new String[]{"mission_day_uuid"}; //$NON-NLS-1$
+			UuidCellMerger cellMerger = new UuidCellMerger();
+			SurveyCntValueComputer valueComputer = new SurveyCntValueComputer();
+			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
+			return computeMissionTrack(c, engine, dataField);
+		}else{
+			throw new Exception(MessageFormat.format("The value {0} is not supported.", new Object[]{item.getValueItem().guiName}));
 		}
-		return null;
 	}
 	
 	private Collection<GridResultItem> computeMissionTrack(Connection c, 

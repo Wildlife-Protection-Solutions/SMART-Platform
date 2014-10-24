@@ -128,7 +128,7 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 		groupbynodes.add(new DataModelTreeNode(DataModelTreeNode.Type.GROUPBY));
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
-		valuenodes.add(new SurveyValuesTreeNode());
+		valuenodes.add(new SurveyValuesTreeNode(SurveyValuesTreeNode.Node.values()));
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  groupbynodes, valuenodes);

@@ -55,6 +55,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.ISurveyGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
@@ -233,6 +234,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter);
 					try{
+						SamplingUnitFilterProcessor.updateSamplingUnitFilter(valueFilter.getFilter(), SamplingUnitFilter.Source.OBSERVATION);
 						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, new SubProgressMonitor(monitor, 10));
 					}finally{
 						filterer.dropTemporaryTables(c);
@@ -257,7 +259,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						monitor.worked(10);
 					}else{
 						rateTable = createTempTableName();
-						
+						SamplingUnitFilterProcessor.updateSamplingUnitFilter(rateFilter.getFilter(), SamplingUnitFilter.Source.OBSERVATION);
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter);
 						try{
 							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, new SubProgressMonitor(monitor, 10));
@@ -1103,19 +1105,11 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		
 		int itemcnt = 1;
 		boolean waypointAdd = false;
-		
-		boolean hasObservation = false;
-		HasObservationGroupByVisitor visitor = new HasObservationGroupByVisitor();
-		for (IGroupBy gb : groupBy.getGroupBys()){
-			visitor.visit(gb);
-		}
-		hasObservation = visitor.hasAttribute() || visitor.hasCategory();
-		
+			
 		for (IGroupBy gb : groupBy.getGroupBys()){
 			if (gb instanceof AreaGroupBy){
 				if (value instanceof CategoryValueItem
-						|| value instanceof AttributeValueItem
-						|| hasObservation) {
+						|| value instanceof AttributeValueItem) {
 					//category and attribute value area group bys use the waypoint location
 					AreaGroupBy agb = (AreaGroupBy) gb;
 					String key = agb.getAreaType().name() + "_" + itemcnt; //$NON-NLS-1$s
