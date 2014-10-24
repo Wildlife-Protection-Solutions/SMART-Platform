@@ -33,16 +33,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -54,6 +54,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
@@ -113,7 +115,8 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtDistance;
 	private Text txtDirection;
 	private ListViewer attachments;
-	private TableViewer observationTable ;
+	private List<Employee> employees = null;
+	private TreeViewer dataViewer  = null;
 	
 	public IncidentSummaryPage(IncidentEditor editor){
 		this.editor = editor;
@@ -226,7 +229,8 @@ public class IncidentSummaryPage extends EditorPart {
 				}
 			});
 			this.attachments.setInput(allAtts);
-			this.observationTable.setInput(incident.getObservations());
+			this.dataViewer.setInput(incident.getObservations());
+			this.dataViewer.expandAll();
 		}finally{
 			session.close();
 		}
@@ -358,82 +362,146 @@ public class IncidentSummaryPage extends EditorPart {
 		observationTableComp.setLayout(new GridLayout(1, false));
 		observationSection.setClient(observationTableComp);
 		
-		Composite innerTable = toolkit.createComposite(observationTableComp);
-		innerTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		TableColumnLayout tlayout = new TableColumnLayout();
-		innerTable.setLayout(tlayout);
+		Tree dataTree = new Tree(observationTableComp, SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
+		dataTree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		dataTree.setHeaderVisible(true);
+		dataTree.setLinesVisible(true);
 		
-		observationTable = new TableViewer(innerTable, SWT.FULL_SELECTION | SWT.BORDER);
-		observationTable.setContentProvider(ArrayContentProvider.getInstance());
-
-		observationTable.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		observationTable.getTable().setLinesVisible(true);
-		observationTable.getTable().setHeaderVisible(true);
-		
-		editor.getSite().setSelectionProvider(observationTable);
-		
-		TableViewerColumn colFirstName = new TableViewerColumn(observationTable, SWT.NONE);
-		colFirstName.getColumn().setWidth(200);
-		colFirstName.getColumn().setText(Messages.IncidentSummaryPage_CategoryLabel);
-		colFirstName.setLabelProvider(new ColumnLabelProvider() {
-		  @Override
-		  public String getText(Object element) {
-		    WaypointObservation p = (WaypointObservation) element;
-		    return p.getCategory().getFullCategoryName();
-		  }
-		});
-		tlayout.setColumnData(colFirstName.getColumn(), new ColumnWeightData(20));
-		
-		TableViewerColumn colAttributes = new TableViewerColumn(observationTable, SWT.NONE);
-		colAttributes.getColumn().setWidth(200);
-		colAttributes.getColumn().setText(Messages.IncidentSummaryPage_AttributeLabel);
-		colAttributes.setLabelProvider(new ColumnLabelProvider() {
-		  @Override
-		  public String getText(Object element) {
-		    StringBuilder sb = new StringBuilder();
-			for (WaypointObservationAttribute att : ((WaypointObservation)element).getAttributes()){
-				sb.append(att.getAttribute().getName());
-				sb.append(Messages.IncidentSummaryPage_EqualsFunction);
-				sb.append(att.getAttributeValueAsString());
-				sb.append("   "); //$NON-NLS-1$
+		dataViewer = new TreeViewer(dataTree);
+	
+		dataViewer.setContentProvider(new ITreeContentProvider(){
+			private List<WaypointObservation> elements;
+			
+			public Object[] getChildren(Object element) {
+				if (element instanceof WaypointObservation){
+					return ((WaypointObservation) element).getAttributes().toArray();
+				}
+				return null;
 			}
-			return sb.toString();
-		  }
+
+			public Object getParent(Object element) {
+				if (element instanceof WaypointObservation) return null;
+				if (element instanceof WaypointObservationAttribute){
+					return ((WaypointObservationAttribute) element).getObservation();
+				}
+				return null;
+			}
+
+			public boolean hasChildren(Object element) {
+				if (element instanceof WaypointObservation) return true;
+				return false;
+			}
+
+			public Object[] getElements(Object parent) {
+				if (elements == null){
+					return new String[]{Messages.IncidentSummaryPage_LoadingLabel};
+				}
+				return elements.toArray();
+			}
+
+			public void dispose() {
+			}
+
+			public void inputChanged(Viewer viewer, Object oldInput,
+					Object newInput) {
+				if (newInput instanceof List){
+					elements = (List<WaypointObservation>) newInput;
+				}
+			}
 		});
-		tlayout.setColumnData(colAttributes.getColumn(), new ColumnWeightData(70));
+		
+		final int[] colIndex = {0,1,2,3,4};
+		
+		TreeColumn column1 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
+		column1.setText(Messages.IncidentSummaryPage_CategoryLabel);
+		column1.setWidth(150);
+		
+		TreeColumn column2 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
+		column2.setText(Messages.IncidentSummaryPage_AttributeLabel);
+		column2.setWidth(100);
+		
+		TreeColumn column3 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
+		column3.setText(Messages.IncidentSummaryPage_ValueLabel);
+		column3.setWidth(100);
 		
 		if (editor.getOptions().getTrackObserver()){
-			TableViewerColumn colObserver = new TableViewerColumn(observationTable, SWT.NONE);
-			colObserver.getColumn().setText(Messages.IncidentSummaryPage_ColumnLabel);
-			colObserver.setLabelProvider(new ColumnLabelProvider() {
-				@Override
-				public String getText(Object element) {
-					WaypointObservation o =  ((WaypointObservation)element);
-					if (o.getObserver() == null){
-						return ""; //$NON-NLS-1$
-					}else{
-						return o.getObserver().getShortLabel();
-					}
-				}
-			});
-			tlayout.setColumnData(colObserver.getColumn(), new ColumnWeightData(15));
+			TreeColumn column4 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
+			column4.setText(Messages.IncidentSummaryPage_ObserverLabel);
+			column4.setWidth(150);
+		}else{
+			colIndex[3] = -1;
+			colIndex[4] = 3;
 		}
 		
-		TableViewerColumn colAttachments = new TableViewerColumn(observationTable, SWT.NONE);
-		colAttachments.getColumn().setText(Messages.IncidentSummaryPage_AttachmentsColumnName);
-		colAttachments.setLabelProvider(new ColumnLabelProvider() {
-		  @Override
-		  public String getText(Object element) {
-			  WaypointObservation o =  ((WaypointObservation)element);
-			  if (o.getAttachments() != null && o.getAttachments().size() > 0){				  
-				  return MessageFormat.format(Messages.IncidentSummaryPage_AttachmentsColumnContent, new Object[]{String.valueOf(o.getAttachments().size())});
-			  }
-			  return ""; //$NON-NLS-1$
-		  }
+		TreeColumn column5 = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
+		column5.setText(Messages.IncidentSummaryPage_AttachmentsColumnName);
+		column5.setWidth(100);
+		
+		
+		
+		dataViewer.setLabelProvider(new ITableLabelProvider() {
+			
+			@Override
+			public void removeListener(ILabelProviderListener listener) {
+			}
+			
+			@Override
+			public boolean isLabelProperty(Object element, String property) {
+				return false;
+			}
+			
+			@Override
+			public void dispose() {}
+			
+			@Override
+			public void addListener(ILabelProviderListener listener) {}
+			
+			@Override
+			public String getColumnText(Object element, int columnIndex) {
+				if (element instanceof String){
+					return (String) element;
+				}
+				if (columnIndex == colIndex[0]){
+					//category
+					if (element instanceof WaypointObservation){
+						return ((WaypointObservation) element).getCategory().getName();
+					}
+				}else if (columnIndex == colIndex[1]){
+					//attribute
+					if (element instanceof WaypointObservationAttribute){
+						return ((WaypointObservationAttribute) element).getAttribute().getName();
+					}
+				}else  if (columnIndex == colIndex[2]){
+					//value
+					if (element instanceof WaypointObservationAttribute){
+						return ((WaypointObservationAttribute) element).getAttributeValueAsString();
+					}
+				}else  if (columnIndex == colIndex[3]){
+					//observer
+					if (element instanceof WaypointObservation){
+						WaypointObservation o = (WaypointObservation)element;
+						if (o.getObserver() != null){
+							return ((WaypointObservation) element).getObserver().getFullLabel();
+						}
+					}
+				}else if (columnIndex == colIndex[4]){
+					//attachements
+					if (element instanceof WaypointObservation){
+						WaypointObservation o = (WaypointObservation)element;
+						if (o.getAttachments() != null && o.getAttachments().size() > 0){				  
+							return MessageFormat.format(Messages.IncidentSummaryPage_AttachmentsColumnContent, new Object[]{String.valueOf(o.getAttachments().size())});
+						}
+					}
+				}
+				return ""; //$NON-NLS-1$
+			}
+			
+			@Override
+			public Image getColumnImage(Object element, int columnIndex) {
+				
+				return null;
+			}
 		});
-		tlayout.setColumnData(colAttachments.getColumn(), new ColumnWeightData(15));
-		
-		
 		
 		
 		if (canEdit == null){
@@ -445,7 +513,7 @@ public class IncidentSummaryPage extends EditorPart {
 				}
 			});
 			
-			observationTable.addDoubleClickListener(new IDoubleClickListener() {
+			dataViewer.addDoubleClickListener(new IDoubleClickListener() {
 				@Override
 				public void doubleClick(DoubleClickEvent event) {
 					editIncident();
@@ -453,7 +521,6 @@ public class IncidentSummaryPage extends EditorPart {
 			});
 			
 		}
-		
 		initData(editor.getIncident());
 	}
 	
@@ -462,8 +529,6 @@ public class IncidentSummaryPage extends EditorPart {
 				new ObservationWizard(editor.getIncident(), getEmployees()));
 		wd.open();
 	}
-	
-	private List<Employee> employees = null;
 	
 	private List<Employee> getEmployees(){
 		if (employees == null){
@@ -526,7 +591,5 @@ public class IncidentSummaryPage extends EditorPart {
 		txtIncidentId.setFocus();
 	}
 	
-	
-
 }
 

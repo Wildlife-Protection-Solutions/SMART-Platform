@@ -99,7 +99,7 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_AttributeLabel;
 	public static String IncidentSummaryPage_CannotEdit;
 	public static String IncidentSummaryPage_CategoryLabel;
-	public static String IncidentSummaryPage_ColumnLabel;
+	public static String IncidentSummaryPage_ObserverLabel;
 	public static String IncidentSummaryPage_CommentsLabel;
 	public static String IncidentSummaryPage_DateLabel;
 	public static String IncidentSummaryPage_DirectionLabel;
@@ -108,6 +108,7 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_EmployeeLoadJobName;
 	public static String IncidentSummaryPage_EqualsFunction;
 	public static String IncidentSummaryPage_IdLabel;
+	public static String IncidentSummaryPage_LoadingLabel;
 	public static String IncidentSummaryPage_LocationLabel;
 	public static String IncidentSummaryPage_LocationSeparator;
 	public static String IncidentSummaryPage_ObservationAttachmentsLabel;
@@ -115,6 +116,7 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_SectionDescription;
 	public static String IncidentSummaryPage_SectionLabel;
 	public static String IncidentSummaryPage_TimeLabel;
+	public static String IncidentSummaryPage_ValueLabel;
 	public static String IndepedentIncidentSource_IndIncidentWaypointsourceName;
 	public static String IndIncidentListView_LoadingLabel;
 	public static String IndIncidentListView_UpdateJobName;
