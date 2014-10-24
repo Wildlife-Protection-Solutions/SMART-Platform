@@ -103,7 +103,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			Composite observerComp = new Composite(parent, SWT.NONE);
 			observerComp.setLayout(new GridLayout(2, false));
 			((GridLayout)observerComp.getLayout()).marginHeight = 0;
-		
+			observerComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
 			Label l = new Label(observerComp, SWT.NONE);
 			l.setText(Messages.ObservationSummaryWizardPage_ObserverLabel);
 			l.setFont(boldFont);
@@ -122,7 +123,8 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 					return super.getText(element);
 				}
 			});
-			employeeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+			employeeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			((GridData)employeeViewer.getControl().getLayoutData()).widthHint = 100;
 			
 			List<Object> objects = new ArrayList<Object>();
 			objects.add(""); //$NON-NLS-1$

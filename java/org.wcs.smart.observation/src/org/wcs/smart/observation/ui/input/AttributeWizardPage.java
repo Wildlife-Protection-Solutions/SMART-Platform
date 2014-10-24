@@ -475,7 +475,9 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		}
 
 		currentAttachments = new ArrayList<ObservationAttachment>();
-		currentAttachments.addAll(editingOb.getAttachments());
+		if (editingOb.getAttachments() != null){
+			currentAttachments.addAll(editingOb.getAttachments());
+		}
 		attachmentViewer.setInput(currentAttachments);
 		attsModified = false;
 		
