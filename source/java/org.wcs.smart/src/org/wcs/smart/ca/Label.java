@@ -111,28 +111,30 @@ public class Label  {
 				}
 			}
 			
-			if(SmartDB.isMultipleAnalysis()){
-				final String elementuuidstr = SmartUtils.encodeHex(elementuuid);
-				final String[] temp = new String[]{null};
-				//for whatever reason when i did this as hibernate queries
-				//i could not load entity tables in reports; I don't understand why
-				//but it would try to load additional objects that weren't needed and this causes
-				//all sorts of addition problems.
-				s.doWork(new Work(){
-					@Override
-					public void execute(Connection c) throws SQLException {
-						ResultSet rs = c.createStatement().executeQuery(
-								"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
-								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
-								"' and a.code = '" + SmartDB.getConservationAreaConfiguration().getLanguage().getCode() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ 
-						try{
-							if (rs.next()){
-								temp[0] = rs.getString(1);
-								return;
-							}
-						}finally{
-							rs.close();
+			final String elementuuidstr = SmartUtils.encodeHex(elementuuid);
+			final String[] temp = new String[]{null};
+			//for whatever reason when i did this as hibernate queries
+			//i could not load entity tables in reports; I don't understand why
+			//but it would try to load additional objects that weren't needed and this causes
+			//all sorts of addition problems.
+			s.doWork(new Work(){
+				@Override
+				public void execute(Connection c) throws SQLException {
+					//try to find with the same language/country code
+					ResultSet rs = c.createStatement().executeQuery(
+							"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
+							"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
+							"' and a.code = '" + SmartDB.getConservationAreaConfiguration().getLanguage().getCode() + "'"); //$NON-NLS-1$ //$NON-NLS-2$ 
+					try{
+						if (rs.next()){
+							temp[0] = rs.getString(1);
+							return;
 						}
+					}finally{
+						rs.close();
+					}
+					//try to find with the same language code
+					if (SmartDB.getConservationAreaConfiguration().getLanguage().getCode().contains("_")) { //$NON-NLS-1$
 						try{
 							rs = c.createStatement().executeQuery(
 									"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
@@ -146,10 +148,24 @@ public class Label  {
 						}finally{
 							rs.close();
 						}
-					}});
-				if (temp[0] != null){
-					description = temp[0];
-				}
+					}
+					//try to find any forcing default to be first
+					try{
+						rs = c.createStatement().executeQuery(
+								"SELECT l.value from smart.i18n_label l join smart.language a on " + //$NON-NLS-1$
+								"a.uuid = l.language_uuid where l.element_uuid = x'" + elementuuidstr +  //$NON-NLS-1$
+								"' order by a.ISDEFAULT desc"); //$NON-NLS-1$ 
+						if (rs.next()){
+							temp[0] = rs.getString(1);
+							return;
+						}
+					}finally{
+						rs.close();
+					}
+					
+				}});
+			if (temp[0] != null){
+				description = temp[0];
 			}
 		}
 		if (lbl != null) {
