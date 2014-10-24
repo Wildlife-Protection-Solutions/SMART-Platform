@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
@@ -88,6 +89,8 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
+					//TODO: this should probably be observation OR track
+					SamplingUnitFilterProcessor.updateSamplingUnitFilter(query.getFilter().getFilter(), SamplingUnitFilter.Source.OBSERVATION);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
 							true, false, new SubProgressMonitor(monitor, 50));

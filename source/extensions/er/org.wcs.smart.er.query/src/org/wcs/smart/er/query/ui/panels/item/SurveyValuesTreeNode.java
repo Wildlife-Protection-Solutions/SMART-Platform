@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.ui.panels.item;
 
+import java.util.List;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -62,11 +64,12 @@ public class SurveyValuesTreeNode implements IItemTreeNode{
 			this.image = image;
 		}
 	};
+	
 	/**
 	 * type of node
 	 * @param type
 	 */
-	public SurveyValuesTreeNode(){
+	public SurveyValuesTreeNode(final Node[] roots){
 		provider = new ITreeContentProvider(){
 
 			@Override
@@ -80,7 +83,7 @@ public class SurveyValuesTreeNode implements IItemTreeNode{
 
 			@Override
 			public Object[] getElements(Object inputElement) {
-				return Node.values();
+				return roots;
 			}
 
 			@Override

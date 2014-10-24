@@ -62,9 +62,20 @@ public class SamplingUnitFilter implements IFilter {
 	
 	public enum Type {SAMPLINGUNIT, TRACK};
 	
+	public enum Source {OBSERVATION, TRACK};
+	private Source joinTable;
+	
 	public SamplingUnitFilter(String uuid, Type type){
 		this.unitType = type;
 		this.uuid = uuid;
+	}
+	
+	public void setSource(Source source){
+		this.joinTable = source;
+	}
+	
+	public Source getSource(){
+		return this.joinTable;
 	}
 	
 	public boolean isNone(){

@@ -30,6 +30,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.hibernate.SmartDB;
@@ -72,6 +73,7 @@ public class SamplingUnitAttributeFilter implements IFilter {
 	private String samplingUnitAttributeKey;
 	private Attribute.AttributeType type;
 	private Object value;
+	private SamplingUnitFilter.Source joinTable;
 	
 	public SamplingUnitAttributeFilter(String attributeKey, Attribute.AttributeType type, Operator op, Object value){
 		this.samplingUnitAttributeKey = attributeKey;
@@ -82,6 +84,14 @@ public class SamplingUnitAttributeFilter implements IFilter {
 		if (type == AttributeType.TEXT && value != null){
 			this.value = SmartUtils.stripQuotes((String)value);
 		}
+	}
+	
+	public void setSource(Source source){
+		this.joinTable = source;
+	}
+	
+	public Source getSource(){
+		return this.joinTable;
 	}
 	
 	/**

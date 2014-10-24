@@ -51,6 +51,7 @@ import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -338,14 +339,6 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(prefix(MissionDay.class));
 			sql.append(".uuid "); //$NON-NLS-1$
 		
-			if (this.suAttributeTable != null){
-				sql.append(" left join "); //$NON-NLS-1$
-				sql.append(suAttributeTable + " sua"); //$NON-NLS-1$
-				sql.append(" on "); //$NON-NLS-1$
-				sql.append(prefix(SurveyWaypoint.class));
-				sql.append(".sampling_unit_uuid = sua.sampling_unit_uuid"); //$NON-NLS-1$
-			}
-		
 			if (onlyObservations){
 				sql.append(" inner join "); //$NON-NLS-1$
 			}else{
@@ -409,11 +402,11 @@ public class FilterProcessor implements IFilterProcessor {
 		//do need join mission tracks?
 		final boolean[] needstracks = new boolean[]{false};
 		IFilterVisitor missionTracks = new IFilterVisitor() {
-			
 			@Override
 			public void visit(IFilter filter) {
 				if (needstracks[0]) return;
-				if (filter instanceof SamplingUnitFilter){
+				if (filter instanceof SamplingUnitFilter
+						&& ((SamplingUnitFilter)filter).getSource() == Source.TRACK ){
 					needstracks[0] = true;
 				}
 				
@@ -430,6 +423,19 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(".uuid "); //$NON-NLS-1$
 		}
 		
+		if (this.suAttributeTable != null){
+			sql.append(" left join "); //$NON-NLS-1$
+			sql.append(suAttributeTable + " sua"); //$NON-NLS-1$
+			sql.append(" on "); //$NON-NLS-1$
+			if (sucollector.getSource() == Source.OBSERVATION){
+				sql.append(prefix(SurveyWaypoint.class));
+				sql.append(".sampling_unit_uuid = sua.sampling_unit_uuid"); //$NON-NLS-1$
+			}else{
+				//join attributes to track
+				sql.append(prefix(MissionTrack.class));
+				sql.append(".sampling_unit_uuid = sua.sampling_unit_uuid"); //$NON-NLS-1$
+			}
+		}
 		// area filters
 		AreaFilterVisitor areaVisitor = new AreaFilterVisitor(sql, engine, usedTables);
 		queryFilter.accept(areaVisitor);

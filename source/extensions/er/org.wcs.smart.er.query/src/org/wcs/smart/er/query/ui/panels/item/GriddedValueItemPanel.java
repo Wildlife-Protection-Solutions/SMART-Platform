@@ -77,7 +77,7 @@ public class GriddedValueItemPanel  extends AbstractQueryItemPanel{
 		main.setLayout(gl);
 		
 		List<IItemTreeNode> valuenodes = new ArrayList<IItemTreeNode>();
-		valuenodes.add(new SurveyValuesTreeNode());
+		valuenodes.add(new SurveyValuesTreeNode(new SurveyValuesTreeNode.Node[]{SurveyValuesTreeNode.Node.MISSION_LENGTH,SurveyValuesTreeNode.Node.MISSION_COUNT, SurveyValuesTreeNode.Node.SURVEY_COUNT, SurveyValuesTreeNode.Node.MISSION_DAY_COUNT}));
 		valuenodes.add(new DataModelTreeNode(DataModelTreeNode.Type.VALUE));
 		
 		ItemTreeNodeTree tree = new ItemTreeNodeTree(main, SWT.NONE,  null, valuenodes);

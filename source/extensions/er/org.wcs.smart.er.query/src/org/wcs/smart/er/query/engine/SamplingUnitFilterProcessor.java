@@ -21,54 +21,32 @@
  */
 package org.wcs.smart.er.query.engine;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
-import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Finds all sampling unit attribute filters and combines them
- * into a set of AttributeInfo classes.  Only one per sampling unit 
- * attribute is created.
+ * Processing sampling units assigning the filter type.
  * 
  * @author Emily
  *
  */
-public class SamplingUnitAttributeFilterCollectorVisitor implements IFilterVisitor{
+public class SamplingUnitFilterProcessor {
 
-	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
-	private SamplingUnitFilter.Source source = null;
-	
-	@Override
-	public void visit(IFilter filter) {
-		if (filter instanceof SamplingUnitAttributeFilter){
-			SamplingUnitAttributeFilter f = (SamplingUnitAttributeFilter) filter;
-			AttributeInfo in = new AttributeInfo(f.getSamplingUnitAttributeKey(), f.getAttributeType());
-			if (!filters.contains(in)){
-				filters.add(in);
+	public static void updateSamplingUnitFilter(IFilter filter,
+			SamplingUnitFilter.Source source) {
+		final SamplingUnitFilter.Source lsrc = source;
+		IFilterVisitor visitor = new IFilterVisitor() {
+			@Override
+			public void visit(IFilter filter) {
+				if (filter instanceof SamplingUnitFilter) {
+					((SamplingUnitFilter) filter).setSource(lsrc);
+				}else if (filter instanceof SamplingUnitAttributeFilter){
+					((SamplingUnitAttributeFilter)filter).setSource(lsrc);
+				}
 			}
-			source = f.getSource();
-		}
-	}
-	
-	/**
-	 * 
-	 * @return list of attribute filters found
-	 */
-	public Set<AttributeInfo> getAttributeInfo(){
-		return this.filters;
-	}
-	
-	/**
-	 * The sampling unit source
-	 * @return
-	 */
-	public SamplingUnitFilter.Source getSource(){
-		return this.source;
+		};
+		filter.accept(visitor);
 	}
 }
-
