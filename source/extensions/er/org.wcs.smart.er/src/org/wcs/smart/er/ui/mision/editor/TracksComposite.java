@@ -121,6 +121,7 @@ import org.wcs.smart.ui.map.MapToolComposite;
 import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SmartUtils.RegExLevel;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -866,8 +867,13 @@ public class TracksComposite extends Composite implements MapPart{
 			if (element instanceof MissionTrack) {
 				MissionTrack t = (MissionTrack) element;
 				if (!t.getId().equals(value)){
-					t.setId((String)value);
-					refresh(true);
+					String svalue = ((String) value).trim();
+					if (!SmartUtils.isSimpleString(svalue, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, MissionTrack.MAX_ID_LENGTH, 1)){
+						MessageDialog.openError(getShell(), Messages.TracksComposite_ErrorDialogTitle, MessageFormat.format(Messages.TracksComposite_InvalidId, new Object[]{MissionTrack.MAX_ID_LENGTH, SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+					}else{
+						t.setId(svalue);
+						refresh(true);
+					}
 				}
 			}
 		}
