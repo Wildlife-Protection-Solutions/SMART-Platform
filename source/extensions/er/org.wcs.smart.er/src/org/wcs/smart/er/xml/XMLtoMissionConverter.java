@@ -87,6 +87,8 @@ public class XMLtoMissionConverter {
 	private Mission mission;
 	private List<String> warnings = new ArrayList<String>();
 	
+	private List<String> validationErrors = new ArrayList<String>();
+	
 	private File attachmentLocation = null;
 	
 	
@@ -153,6 +155,10 @@ public class XMLtoMissionConverter {
 		}
 		
 		setMembersAndLeader(mission, xml);
+		if(mission.getLeader() == null){
+			addValidationError(Messages.XMLtoMissionConverter_16);
+		}
+		
 		createAndSetSurvey(mission, xml);
 		mission.setMissionDays(new ArrayList<MissionDay>());
 		
@@ -225,7 +231,12 @@ public class XMLtoMissionConverter {
 		missionList.add(m);
 		survey.setMissions(missionList);
 		
-		survey.setSurveyDesign(findSurveyDesignByKey(xml.getSurvey().getSurveyDesignKeyId()) );
+		SurveyDesign sd = findSurveyDesignByKey(xml.getSurvey().getSurveyDesignKeyId());
+		if(sd == null){
+			addValidationError(Messages.XMLtoMissionConverter_15 + xml.getSurvey().getSurveyDesignKeyId());
+		}else{
+			survey.setSurveyDesign(sd);
+		}
 	
 		m.setSurvey(survey);
 	}
@@ -240,7 +251,12 @@ public class XMLtoMissionConverter {
 			if(employee == null){
 				employee = findEmployeeByName(xmlMember);
 			}
-			member.setMember(employee);
+			if(employee == null){
+				warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_17, new Object[]{ xmlMember.getGivenName(), xmlMember.getFamilyName()}));
+				return;
+			}else{
+				member.setMember(employee);				
+			}
 			member.setIsLeader(xmlMember.isLeader());
 			member.setMission(m);
 			
@@ -575,6 +591,14 @@ public class XMLtoMissionConverter {
 	
 	private SamplingUnit findSamplingUnit(String key, Session session) {
 		return SurveyHibernateManager.getInstance().getSamplingUnitById(key, session);
+	}
+
+	public List<String> getValidationErrors() {
+		return validationErrors;
+	}
+
+	public void addValidationError(String error) {
+		this.validationErrors.add(error);
 	}
 
 }
