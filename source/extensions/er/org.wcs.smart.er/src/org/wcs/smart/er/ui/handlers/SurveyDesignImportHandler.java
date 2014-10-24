@@ -32,31 +32,18 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.internal.Messages;
@@ -93,8 +80,8 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 			return null;
 		}
 			
-		final File importFile = dialog.getFile();
-	
+		final List<String> importFiles = dialog.getFileNames();
+		
 		errorMessage = null;
 		exception = null;
 		newDesign = null;
@@ -105,79 +92,83 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask(Messages.SurveyDesignImportHandler_0, 100);
+					monitor.beginTask(Messages.SurveyDesignImportHandler_0, importFiles.size());
 					
 					monitor.subTask(Messages.SurveyDesignImportHandler_1);
 					org.wcs.smart.er.xml.model.surveydesign.SurveyDesign xmlsd = null;
-					try{
-						FileInputStream fin = new FileInputStream(importFile);
+					for(String fileString : importFiles){
+						File file = new File(fileString);
 						try{
-							xmlsd = SurveyDesignXMLManager.readDataModel(fin);
-						}finally{
-							fin.close();
-						}
-					}catch (Exception ex){
-						errorMessage = Messages.SurveyDesignImportHandler_2;
-						exception = ex;
-						return;
-					}
-					monitor.worked(50);
-					
-					monitor.subTask(Messages.SurveyDesignImportHandler_3);
-				
-					Session session = HibernateManager.openSession();
-					try{
-						SurveyDesign sd = SurveyDesignFromXmlConverter.fromXml(xmlsd, session);
-						
-						//ensure key doesn't already exist
-						List<?> existingDesigns = session.createCriteria(SurveyDesign.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))  //$NON-NLS-1$
-								.add(Restrictions.eq("keyId", sd.getKeyId())).list(); //$NON-NLS-1$
-						if (existingDesigns.size() > 0){
-							errorMessage = MessageFormat.format(Messages.SurveyDesignImportHandler_4, new Object[]{sd.getKeyId()});
+							FileInputStream fin = new FileInputStream(file);
+							try{
+								xmlsd = SurveyDesignXMLManager.readDataModel(fin);
+							}finally{
+								fin.close();
+							}
+						}catch (Exception ex){
+							errorMessage = Messages.SurveyDesignImportHandler_2;
+							exception = ex;
 							return;
 						}
-						//save to the database
-						try{						
-							session.beginTransaction();
+						monitor.worked(1);
+					
+					
+						monitor.subTask(Messages.SurveyDesignImportHandler_3);
+				
+						Session session = HibernateManager.openSession();
+						try{
+							SurveyDesign sd = SurveyDesignFromXmlConverter.fromXml(xmlsd, session);
+						
+						//	ensure key doesn't already exist
+							List<?> existingDesigns = session.createCriteria(SurveyDesign.class)
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))  //$NON-NLS-1$
+								.add(Restrictions.eq("keyId", sd.getKeyId())).list(); //$NON-NLS-1$
+							if (existingDesigns.size() > 0){
+								errorMessage = MessageFormat.format(Messages.SurveyDesignImportHandler_4, new Object[]{sd.getKeyId()});
+								return;
+							}
+						//	save to the database
+							try{						
+								session.beginTransaction();
 												
-							//update/add new mission properties	
-							for( MissionProperty mp : sd.getMissionProperties()){
-								session.saveOrUpdate(mp.getAttribute());
-							}
+								//update/add new mission properties	
+								for( MissionProperty mp : sd.getMissionProperties()){
+									session.saveOrUpdate(mp.getAttribute());
+								}
 							
 
-							//update/add new sampling unit attributes
-							for (SurveyDesignSamplingUnitAttribute sdua: sd.getSamplingUnitAttributes()){
-								session.saveOrUpdate(sdua.getSamplingUnitAttribute());
-							}
+								//update/add new sampling unit attributes
+								for (SurveyDesignSamplingUnitAttribute sdua: sd.getSamplingUnitAttributes()){
+									session.saveOrUpdate(sdua.getSamplingUnitAttribute());
+								}
 							
-							//save survey design
-							session.saveOrUpdate(sd);
+								//save survey design
+								session.saveOrUpdate(sd);
 							
-							//save sampling Units
-							List<SamplingUnit> units =  SurveyDesignFromXmlConverter.getSamplingUnits(xmlsd, sd, session);
-							for (SamplingUnit su : units){
-								session.saveOrUpdate(su);
+								//save sampling Units
+								List<SamplingUnit> units =  SurveyDesignFromXmlConverter.getSamplingUnits(xmlsd, sd, session);
+								for (SamplingUnit su : units){
+									session.saveOrUpdate(su);
+								}
+	
+								session.getTransaction().commit();
+								newDesign = sd;
+							}catch (Exception ex){
+								session.getTransaction().rollback();
+								throw ex;
 							}
-
-							session.getTransaction().commit();
-							newDesign = sd;
-						}catch (Exception ex){
-							session.getTransaction().rollback();
-							throw ex;
+						}catch(ParseException parse){
+							errorMessage = parse.getMessage();
+							exception = parse;
+							return;
+						}catch(Exception ex){
+							errorMessage = "An Error occured when loading Survey Design: " + "\n\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$
+							exception = ex;
+							return;
+						}finally{
+							session.close();
 						}
-					}catch(ParseException parse){
-						errorMessage = parse.getMessage();
-						exception = parse;
-						return;
-					}catch(Exception ex){
-						errorMessage = "An Error occured when loading Survey Design: " + "\n\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$
-						exception = ex;
-						return;
-					}finally{
-						session.close();
-					}
+					}//end loop of each xml file.
 					
 					
 					if (newDesign != null){
@@ -205,95 +196,26 @@ public class SurveyDesignImportHandler extends AbstractHandler {
 		return null;
 	}
 	
-	class ImportEntityTypeDialog extends TitleAreaDialog{
+	class ImportEntityTypeDialog extends XmlImportDialog{
 
-		private static final String LAST_DIR_KEY = "LAST_IMPORT_DIR"; //$NON-NLS-1$
-		
-		private Text txtFile;
-		private File file;
-		
 		public ImportEntityTypeDialog(Shell parentShell) {
 			super(parentShell);
 		}
-		
-		public File getFile(){
-			return this.file;
-		}
-		
-		protected void okPressed() {
-			file = new File(txtFile.getText());
-			if (!file.exists()) {
-				MessageDialog.openError(getShell(), Messages.SurveyDesignImportHandler_8, 
-						MessageFormat.format(Messages.SurveyDesignImportHandler_9,new Object[] { file.toString() }));
-				return;
-			}
-			EcologicalRecordsPlugIn.getDefault().getDialogSettings().put(LAST_DIR_KEY, file.toString());
 
+		protected void okPressed() {
 			super.okPressed();
 		}
 		
 		protected Control createDialogArea(Composite parent) {
+
+			Composite container = (Composite) super.createDialogArea(parent);
 			
 			setTitle(Messages.SurveyDesignImportHandler_10);
 			setMessage(Messages.SurveyDesignImportHandler_11);
 			getShell().setText(Messages.SurveyDesignImportHandler_10);
 			
-			Composite p = (Composite) super.createDialogArea(parent);
-			
-			Composite contents = new Composite(p, SWT.NONE);
-			contents.setLayout(new GridLayout(3, false));
-			contents.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			Label l = new Label(contents, SWT.NONE);
-			l.setText(Messages.SurveyDesignImportHandler_13);
-			l.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-			
-			txtFile = new Text(contents, SWT.BORDER);
-			txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			
-			
-			String location = EcologicalRecordsPlugIn.getDefault().getDialogSettings().get(LAST_DIR_KEY);
-			if (location != null){
-				txtFile.setText(location);
-			}else{
-				txtFile.setText(""); //$NON-NLS-1$
-			}
-			
-			txtFile.addModifyListener(new ModifyListener() {
-				@Override
-				public void modifyText(ModifyEvent e) {
-					getButton(IDialogConstants.OK_ID).setEnabled(txtFile.getText().length() > 0);
-				}
-			});
-			
-			Button btnBrowse = new Button(contents, SWT.NONE);
-			btnBrowse.setText(Messages.SurveyDesignImportHandler_14);
-			btnBrowse.addSelectionListener(new SelectionAdapter() {
-				@Override
-				public void widgetSelected(SelectionEvent e) {
-					FileDialog fd = new FileDialog(getShell(), SWT.OPEN);
-					
-					String ext = "xml"; //$NON-NLS-1$
-					String name= Messages.SurveyDesignImportHandler_15;
-					
-					String[] extensions = new String[]{"*." + ext, "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-					String[] names = new String[]{name + " (*." + ext + ")", Messages.SurveyDesignImportHandler_16}; //$NON-NLS-1$ //$NON-NLS-2$
-					
-					fd.setFilterExtensions(extensions);
-					fd.setFilterNames(names);
-					
-					fd.setFilterPath(txtFile.getText());
-					fd.setFileName(txtFile.getText());
-					
-					String f = fd.open();
-					if (f != null) {
-						txtFile.setText(f);
-					}
-				}
-			});
-			
-			
-			return p;
+			return container;
+
 		}
 		
 	}
