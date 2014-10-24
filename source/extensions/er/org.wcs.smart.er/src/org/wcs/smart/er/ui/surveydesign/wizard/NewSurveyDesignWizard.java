@@ -172,8 +172,8 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
     	List<ConfigurableModel> models = session.createCriteria(ConfigurableModel.class)
     			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
     	
-    	List<SurveyDesign> others = session.createCriteria(SurveyDesign.class)
-    			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+    	List<SurveyDesign> others = session.createCriteria(SurveyDesign.class).list();
+//    			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
     	
     	if (others.size() > 0){
     		//only add template option if other survey available

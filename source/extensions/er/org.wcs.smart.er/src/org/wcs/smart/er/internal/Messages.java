@@ -656,8 +656,12 @@ public class Messages extends NLS {
 	public static String SurveyWaypointSource_Name;
 	public static String SurveyWaypointSource_WaypointNotFound;
 	public static String TemplateWizardPage_BlankDesign;
+	public static String TemplateWizardPage_ConservationArea;
+
 	public static String TemplateWizardPage_CopySuLabels;
 	public static String TemplateWizardPage_Description;
+
+	public static String TemplateWizardPage_SurveyDesign;
 	public static String TemplateWizardPage_TemplateDesign;
 	public static String TemplateWizardPage_Title;
 	public static String TracksComposite_CouldNotSplit;
