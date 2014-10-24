@@ -209,6 +209,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			}
 		});
 		lstMembers.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)lstMembers.getControl().getLayoutData()).widthHint = 100;
 		
 		if (canEdit){
 			Hyperlink edit = toolkit.createHyperlink(left, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
@@ -229,6 +230,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		txtComment = toolkit.createText(right, "", SWT.MULTI); //$NON-NLS-1$
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtComment.setEditable(false);
+		((GridData)txtComment.getLayoutData()).widthHint = 100;
 		if (canEdit){
 			Hyperlink edit = toolkit.createHyperlink(right, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
@@ -401,7 +403,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			session.update(mission);
 
 			form.setText(Messages.MissionSummaryPage_MissionLabel + mission.getId());
-			txtSurveyId.setText(mission.getSurvey().getId());
+			txtSurveyId.setText(mission.getSurvey().getId() + " [" + mission.getSurvey().getSurveyDesign().getName() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
 			txtComment.setText(mission.getComment() == null ? "" : mission.getComment()); //$NON-NLS-1$
 			txtId.setText(mission.getId());
 			lstMembers.setInput(mission.getMembers());
