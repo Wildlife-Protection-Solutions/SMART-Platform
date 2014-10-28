@@ -140,6 +140,14 @@ public class QueryEditorTableContent {
 	}
 	
 	/**
+	 * Sets table input and info section to null 
+	 */
+	public void clear(){
+		resultsTable.setInput((IPagedQueryResultSet)null);
+		infoSection.updateControls(null);
+	}
+	
+	/**
 	 * Sets the state of the progress area to cancelled
 	 * which disables the progress bar, cancel button and
 	 * updates the text to "cancelled"

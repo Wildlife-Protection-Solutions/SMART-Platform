@@ -87,7 +87,9 @@ public abstract class QueryResultsTable {
 		if (getColumnSorter() != null){
 			getColumnSorter().setSortColumn(null);
 		}
+		
 		table.getTable().setRedraw(true);
+		table.setInput(null);
 	}
 	
 	
