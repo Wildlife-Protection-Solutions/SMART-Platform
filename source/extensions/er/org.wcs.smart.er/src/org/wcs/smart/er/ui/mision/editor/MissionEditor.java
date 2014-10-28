@@ -63,6 +63,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -135,8 +136,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		
 		@Override
 		public void event(final Object o) {
-			if (o instanceof Mission) {
-				if ( Arrays.equals(((Mission)o).getUuid(), mission.getUuid())) {
+			if ((o instanceof Mission && 
+				( Arrays.equals(((Mission)o).getUuid(), mission.getUuid()))) 
+				|| ((o instanceof SurveyDesign 
+					&& ((SurveyDesign)o).equals(mission.getSurvey().getSurveyDesign())))){
 					try {
 						Job j = new Job(Messages.MissionEditor_reloadJobName) {
 							@Override
@@ -174,7 +177,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 					}
 
 				}
-			}
+			
 		}
 	};
 	
@@ -187,6 +190,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_DELETED, missionDeleteListener);
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionModifiedListener);
 		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DELETED, surveyDeleteListener);
+		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DESIGN_MODIFIED, missionModifiedListener);
 	}
 
 	/**
@@ -204,6 +208,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_DELETED, missionDeleteListener);
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionModifiedListener);
 		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DELETED, surveyDeleteListener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_MODIFIED, missionModifiedListener);
 	}
 	
 	/**
