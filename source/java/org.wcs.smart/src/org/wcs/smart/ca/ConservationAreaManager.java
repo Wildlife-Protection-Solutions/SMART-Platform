@@ -116,7 +116,8 @@ public class ConservationAreaManager {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConservationAreaManager_Error_DeletingFilestore + fileStore.getAbsolutePath(), ex);
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), 
+								Messages.ConservationAreaManager_Error_DeletingFilestore + fileStore.getAbsolutePath(), ex);
 						}});
 				}
 			}

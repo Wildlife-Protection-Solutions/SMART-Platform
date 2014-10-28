@@ -70,7 +70,6 @@ public class ConservationArea extends UuidItem {
 	 */
 	public static final int MAX_DESIGNATION_LENGTH = 1024;
 	
-	private byte[] uuid;
 	private String id;
 	private String name;
 	private String designation;
@@ -164,7 +163,7 @@ public class ConservationArea extends UuidItem {
 	@Transient
 	public String getFileDataStoreLocation(){
 		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(uuid);
+		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(getUuid());
 		return filestore;
 	}
 
