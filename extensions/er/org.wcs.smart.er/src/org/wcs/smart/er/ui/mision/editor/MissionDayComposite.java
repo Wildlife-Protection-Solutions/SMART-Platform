@@ -509,7 +509,7 @@ public class MissionDayComposite {
 			}
 			
 			final TableViewerColumn column = new TableViewerColumn(observationTable,SWT.NONE);
-			column.setLabelProvider(new ObsrvationTableLabelProvider(columntype));
+			column.setLabelProvider(new ObservationTableLabelProvider(columntype));
 			column.getColumn().setText(columntype.guiName);
 			column.getColumn().setResizable(true);
 			column.getColumn().setMoveable(false);
@@ -790,7 +790,7 @@ public class MissionDayComposite {
 	}
 	
 	public void refreshTable() {
-		observationTable.refresh();
+		observationTable.refresh(true);
 	}
 	
 	protected void addWaypoint() {
@@ -1071,17 +1071,20 @@ public class MissionDayComposite {
 		mainComposite = null;
 	}
 	
+	public void refreshSamplingUnitEditor(){
+		samplingUnitEditor.setInput(missionDay);
+	}
 	
 	/**
 	 * ColumnLabelProvider
 	 * @author elitvin
 	 * @since 3.0.0
 	 */
-	private class ObsrvationTableLabelProvider extends ColumnLabelProvider {
+	private class ObservationTableLabelProvider extends ColumnLabelProvider {
 
 		private OtColumn column = null;
 
-		public ObsrvationTableLabelProvider(OtColumn column) {
+		public ObservationTableLabelProvider(OtColumn column) {
 			this.column = column;
 		}
 

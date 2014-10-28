@@ -59,7 +59,7 @@ public class MissionDayPage extends EditorPart {
 	public MissionDayPage(MissionEditor editor) {
 		this.editor = editor;
 	}
-	
+		
 	@Override
 	public void doSave(IProgressMonitor monitor) {
 	}
