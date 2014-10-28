@@ -309,6 +309,14 @@ public class MissionDataImport {
 		return modified;
 	}
 	
+	public static MissionTrack createTrackFromWaypoints(MissionDay missionDay){
+		List<Waypoint> wps = new ArrayList<Waypoint>();
+		for (SurveyWaypoint sw : missionDay.getWaypoints()){
+			wps.add(sw.getWaypoint());
+		}
+		MissionTrack mt = convertToTrack(wps, false).get(0);
+		return mt;
+	}
 	
 	static class Item{
 		public Date date;
