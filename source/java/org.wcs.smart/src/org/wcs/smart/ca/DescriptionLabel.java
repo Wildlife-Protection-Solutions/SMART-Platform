@@ -137,24 +137,24 @@ public class DescriptionLabel {
 			}
 			DescLabelItemPK p = (DescLabelItemPK)key;
 			
-			if (p.language == null || this.language == null ||
-				p.element == null || this.element == null ){
+			if (p.getLanguage() == null || this.getLanguage() == null ||
+				p.getElement() == null || this.getElement() == null ){
 				
-				if (p.language == null && this.language == null && 
-					p.element == null && this.element == null){
+				if (p.getLanguage() == null && this.getLanguage() == null && 
+					p.getElement() == null && this.getElement() == null){
 						return true;
 				}
 				return false;
 			}
 			
-			return p.language.equals(this.language)
-					&& Arrays.equals(p.element, this.element);
+			return p.getLanguage().equals(this.getLanguage())
+					&& Arrays.equals(p.getElement(), this.getElement());
 		}
 		@Override
 		public int hashCode() {
 		    int code = 0;
-		    if (language!= null) {code += Arrays.hashCode(getLanguage().getUuid());}
-		    if (element != null) {code += Arrays.hashCode(element); }
+		    if (getLanguage() != null) {code += Arrays.hashCode(getLanguage().getUuid());}
+		    if (getElement() != null) {code += Arrays.hashCode(getElement()); }
 		    return code;
 		  }
 	}

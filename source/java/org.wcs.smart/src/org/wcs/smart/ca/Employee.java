@@ -50,7 +50,7 @@ import org.wcs.smart.internal.Messages;
  */
 @Entity
 @Table(name = "smart.employee")
-public class Employee {
+public class Employee extends UuidItem {
 
 	/**
 	 * UUID for the 'shared' employee.  This employee uuid
@@ -123,8 +123,6 @@ public class Employee {
 	};
 	
 	
-	private byte[] uuid;
-	
 	private String id;
 	private String givenName;
 	private String familyName;
@@ -147,16 +145,6 @@ public class Employee {
 		this.dateCreated = new Date();
 	}
 
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
-	
 	@Column(name="id")
 	public String getId() {
 		return id;
@@ -290,20 +278,6 @@ public class Employee {
 	@Transient
 	public boolean isActive(){
 		return this.endEmploymentDate == null;
-	}
-	
-	
-	@Override
-	public boolean equals(Object obj){
-		if (obj == null || !(obj instanceof Employee)){
-			return false;
-		}
-		return Arrays.equals(uuid, ((Employee)obj).getUuid());
-	}
-	
-	@Override
-	public int hashCode(){
-		return Arrays.hashCode(uuid);
 	}
 	
 	/**

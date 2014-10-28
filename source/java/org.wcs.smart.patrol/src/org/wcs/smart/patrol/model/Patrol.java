@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.model;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -34,8 +33,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -44,10 +41,10 @@ import javax.persistence.Transient;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -59,7 +56,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 @Entity
 @Table(name="smart.patrol")
-public class Patrol {
+public class Patrol extends UuidItem {
 
 	/**
 	 * Location of patrol data in the filestore
@@ -92,7 +89,6 @@ public class Patrol {
 	 */
 	public static final int MAX_COMMENT_LENGTH = 32700;
 	
-	private byte[] uuid;
 	private ConservationArea ca;
 	private Station station;
 	private Team team;
@@ -110,17 +106,6 @@ public class Patrol {
 	
 	public Patrol(){
 		
-	}
-
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -300,28 +285,6 @@ public class Patrol {
 	}
 	
 	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Patrol){
-			Patrol s = (Patrol)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
-	
 	/**
 	 * 
 	 * <p>
@@ -334,7 +297,7 @@ public class Patrol {
 	 */
 	@Transient
 	public String getPatrolDatastorePath(){
-		return PATROL_FILESTORE_LOC + File.separator + SmartUtils.getDirectoryPath(uuid);
+		return PATROL_FILESTORE_LOC + File.separator + SmartUtils.getDirectoryPath(getUuid());
 	}
 
 

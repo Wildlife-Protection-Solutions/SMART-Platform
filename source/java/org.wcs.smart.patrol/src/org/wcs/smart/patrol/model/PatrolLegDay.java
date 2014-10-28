@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.model;
 
 import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -32,8 +31,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -41,7 +38,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.ca.UuidItem;
 
 /**
  * Patrol leg day object.
@@ -56,9 +53,8 @@ import org.hibernate.annotations.GenericGenerator;
  */
 @Entity
 @Table(name="smart.patrol_leg_day")
-public class PatrolLegDay {
+public class PatrolLegDay extends UuidItem {
 	
-	private byte[] uuid;
 	private Date date;
 
 	private List<PatrolWaypoint> waypoints;
@@ -75,16 +71,6 @@ public class PatrolLegDay {
 	 * with one to one relationships
 	 */
 	private List<Track> tracks; 
-	
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
 	
 	@Column(name="patrol_day")
 	public Date getDate() {
@@ -191,26 +177,4 @@ public class PatrolLegDay {
 		this.tracks = tracks;
 	}
 	
-	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof PatrolLegDay){
-			PatrolLegDay s = (PatrolLegDay)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
 }

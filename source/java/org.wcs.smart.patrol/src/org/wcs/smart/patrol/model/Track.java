@@ -21,22 +21,19 @@
  */
 package org.wcs.smart.patrol.model;
 
-import java.util.Arrays;
 import java.util.TimeZone;
 
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.hibernate.annotations.GenericGenerator;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.util.GeometryUtils;
 
@@ -52,11 +49,10 @@ import com.vividsolutions.jts.io.WKBWriter;
  */
 @Entity
 @Table(name="smart.track")
-public class Track {
+public class Track extends UuidItem {
 	
 	public static TimeZone ZTIMEZONE = TimeZone.getTimeZone("GMT"); //$NON-NLS-1$
 	
-	private byte[] uuid;
 	private byte[] geom;
 	private Float distance;
 	private PatrolLegDay patrolLegDay;
@@ -64,21 +60,6 @@ public class Track {
 	
 	public Track(){
 		
-	}
-	
-	/**
-	 * 
-	 * @return the uuid for the list element
-	 */
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
 	}
 	
 	@Column(name="geometry")
@@ -141,27 +122,4 @@ public class Track {
 		this.ls = ls;
 	}
 	
-	
-	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof Track){
-			Track s = (Track)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
 }

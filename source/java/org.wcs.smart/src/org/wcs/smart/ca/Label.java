@@ -299,24 +299,25 @@ public class Label  {
 			}
 			LabelItemPK p = (LabelItemPK)key;
 			
-			if (p.language == null || this.language == null ||
-				p.element == null || this.element == null ){
+			if (p.getLanguage() == null || this.getLanguage() == null ||
+				p.getElement() == null || this.getElement() == null ){
 				
-				if (p.language == null && this.language == null && 
-					p.element == null && this.element == null){
+				if (p.getLanguage() == null && this.getLanguage() == null && 
+					p.getElement() == null && this.getElement() == null){
 						return true;
 				}
 				return false;
 			}
 			
-			return p.language.equals(this.language)
-					&& Arrays.equals(p.element.getUuid(), this.element.getUuid());
+			return p.getLanguage().equals(this.getLanguage())
+					&& Arrays.equals(p.getElement().getUuid(), this.getElement().getUuid());
 		}
+		
 		@Override
 		public int hashCode() {
 		    int code = 0;
-		    if (language!= null) {code += Arrays.hashCode(getLanguage().getUuid());}
-		    if (element != null && element.getUuid() != null) {code += Arrays.hashCode(element.getUuid()); }
+		    if (getLanguage() != null) {code += Arrays.hashCode(getLanguage().getUuid());}
+		    if (getElement() != null && getElement().getUuid() != null) {code += Arrays.hashCode(getElement().getUuid()); }
 		    return code;
 		  }
 	}

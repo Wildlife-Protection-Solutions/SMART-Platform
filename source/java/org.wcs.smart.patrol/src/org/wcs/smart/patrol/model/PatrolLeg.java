@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.model;
 
 import java.sql.Time;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,8 +34,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -45,9 +42,9 @@ import javax.persistence.Transient;
 
 import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.OrderBy;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -58,10 +55,9 @@ import org.wcs.smart.util.SmartUtils;
  */
 @Entity
 @Table(name="smart.patrol_leg")
-public class PatrolLeg {
+public class PatrolLeg extends UuidItem {
 	
 	public static final int ID_MAX_SIZE = 50;
-	private byte[] uuid;
 	private Patrol patrol;
 	private Date startDate;
 	private Date endDate;
@@ -70,16 +66,6 @@ public class PatrolLeg {
 
 	private List<PatrolLegMember> members;
 	private List<PatrolLegDay> days;
-	
-	@Id
-	@GeneratedValue(generator="uuid")
-	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
-		return uuid;
-	}
-	public void setUuid(byte[] uuid) {
-		this.uuid = uuid;
-	}
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="patrol_uuid", referencedColumnName="uuid")
@@ -352,30 +338,5 @@ public class PatrolLeg {
 			}
 		});
 	}
-	
-	
-	@Override
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
-		}
-	}
-	
-	@Override
-	public boolean equals(Object other){
-		if (other != null && other instanceof PatrolLeg){
-			PatrolLeg s = (PatrolLeg)other;
-			if (s.getUuid() == null && this.getUuid() == null){
-				return super.equals(s);
-			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
-			}
-		}
-		return false;
-	}
-	
-	
 	
 }

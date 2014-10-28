@@ -89,12 +89,11 @@ public abstract class PlanTarget{
 	}
 
 	@Transient
-	public int hashCode(){
-		if (uuid != null){
-			return Arrays.hashCode(uuid);
-		}else{
-			return super.hashCode();
+	public int hashCode() {
+		if (getUuid() != null) {
+			return Arrays.hashCode(getUuid());
 		}
+		return super.hashCode();
 	}
 
 	@Override
