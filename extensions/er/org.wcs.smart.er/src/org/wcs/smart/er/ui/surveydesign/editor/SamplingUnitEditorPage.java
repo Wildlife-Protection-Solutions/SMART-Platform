@@ -321,11 +321,12 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		form.getBody().setLayout(gl);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		SashForm sash = new SashForm(form.getBody(), SWT.HORIZONTAL);
+		SashForm sash = new SashForm(form.getBody(), SWT.VERTICAL);
 		sash.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		createUnitsSection(sash, toolkit);
 		createMapsSection(sash,toolkit);
+		
 		
 		initValues();
 	}

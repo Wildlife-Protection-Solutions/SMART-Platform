@@ -61,6 +61,9 @@ public class CommentComposite extends MissionComposite {
 				fireChangeListeners();
 			}
 		});
+		txtComment.setTextLimit(Mission.MAX_LENGTH_COMMENT);
+		((GridData)txtComment.getLayoutData()).widthHint = 200;
+		((GridData)txtComment.getLayoutData()).heightHint = 200;
 		
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		return part;
