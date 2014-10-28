@@ -132,22 +132,10 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				objects.addAll( getWizardLocal().getObservers() );
 			}
 			employeeViewer.setInput(objects);
-			Employee em = null;
-			if (getWizardLocal().getWaypoint().getObservations() == null){
-				getWizardLocal().getWaypoint().setObservations(new ArrayList<WaypointObservation>());
-			}
-			for (WaypointObservation wp : getWizardLocal().getWaypoint().getObservations()){
-				if (wp.getObserver() != null){
-					em = wp.getObserver();
-				}
-			}
-			if (em != null){
-				employeeViewer.setSelection(new StructuredSelection(em));
+			if (getWizardLocal().getObserver() != null){
+				employeeViewer.setSelection(new StructuredSelection(getWizardLocal().getObserver()));
 			}
 		}
-		
-		
-		
 		
 		ScrolledComposite scrolled = new ScrolledComposite(parent,  SWT.V_SCROLL | SWT.H_SCROLL );
 		scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -366,9 +354,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 	public boolean beforeMoveNext(IWizardPage target) {
 		//update observer
 		if (employeeViewer != null){
-			for (WaypointObservation wo : getWizardLocal().getWaypoint().getObservations()){
-				wo.setObserver(getObserver());
-			}
+			getWizardLocal().setObserver(getObserver());
 		}
 		
 		if (target instanceof ObservationWizardPage){

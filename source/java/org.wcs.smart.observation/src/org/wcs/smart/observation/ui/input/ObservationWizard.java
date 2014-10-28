@@ -82,6 +82,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	private List<Employee> observers;
 	
 	private ObservationOptions ops = null;
+	private Employee observer = null;
+	
 	/**
 	 * Creates a new wizard. 
 	 * 
@@ -115,10 +117,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 					observations.put(ob.getCategory(), lst);
 				}
 				lst.add(ob);
-				
-//				for (WaypointObservationAttribute a : ob.getAttributes()){
-//					a.setAttribute((Attribute)session.merge(a.getAttribute()));
-//				}
+				observer = ob.getObserver();
 			}
 		}
 		this.workingObservations.putAll(observations);
@@ -203,7 +202,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		}
 		ArrayList<WaypointObservation> ops = new ArrayList<WaypointObservation>();
 		ops.addAll(catObservations);
-//		this.observations.put(category, ops);
 		this.workingObservations.put(category, ops);
 	}
 	
@@ -214,7 +212,6 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * @return set of waypoint observations
 	 */
 	public Collection<WaypointObservation> getWaypointObservation(Category category){
-//		return this.observations.get(category);
 		return this.workingObservations.get(category);
 	}
 	
@@ -374,6 +371,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		wp.getObservations().clear();
 		wp.getObservations().addAll(wobservations);
 		for (WaypointObservation wo : wp.getObservations()){
+			wo.setObserver(observer);
 			session.saveOrUpdate(wo);
 		}
 		//commit changes
@@ -392,6 +390,24 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		return true;
 	}
 
+	/**
+	 * Sets the observer.  Will be used to update waypoints
+	 * on save.
+	 * 
+	 * @param observer
+	 */
+	public void setObserver(Employee observer){
+		this.observer = observer;
+	}
+	
+	/**
+	 * Current observer
+	 * 
+	 * @return
+	 */
+	public Employee getObserver(){
+		return this.observer;
+	}
 	/**
 	 * Merges the current working observations with the 'final' observation
 	 * list.
