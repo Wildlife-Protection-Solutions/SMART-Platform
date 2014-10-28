@@ -168,12 +168,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 				return e.getState().getGuiName();
 			}else{
 				if (type == GeometryType.TRANSECT){
-					if (index == 3){
+					if (index == 2){
 						return e.getGeometryLengthKm();
 					}
 					index--;
 				}
-				SamplingUnitAttribute sua = sd.getSamplingUnitAttributes().get(index - 3).getSamplingUnitAttribute();
+				SamplingUnitAttribute sua = sd.getSamplingUnitAttributes().get(index - 2).getSamplingUnitAttribute();
 				for (SamplingUnitAttributeValue suav : e.getAttributes()){
 					if (suav.getSamplingUnitAttribute().equals(sua)){
 						if (sua.getType() == AttributeType.TEXT){
