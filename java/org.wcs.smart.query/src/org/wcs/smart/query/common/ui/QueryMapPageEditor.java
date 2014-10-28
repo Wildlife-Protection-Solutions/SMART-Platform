@@ -214,7 +214,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
      * Dispose of current query service
      * and refresh to create a new one as required.
      */
-    public void reset() {
+    public void reset(boolean refresh) {
 		if (queryService != null) {
 			// remove layers
 			try{
@@ -236,7 +236,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 			queryService.dispose(null);
 			queryService = null;
 			
-			refresh();
+			if (refresh){
+				refresh();
+			}
 		}
 		
 	}

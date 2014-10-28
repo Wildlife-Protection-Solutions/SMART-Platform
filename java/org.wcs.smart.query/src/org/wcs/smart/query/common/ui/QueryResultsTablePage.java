@@ -168,6 +168,13 @@ public class QueryResultsTablePage  extends EditorPart  {
 	}
 	
 	/**
+	 * Clears the current results from the table.
+	 */
+	public void clearTable(){
+		content.clear();
+	}
+	
+	/**
 	 * Displays the progress bar
 	 */
 	public void showProgressArea(){

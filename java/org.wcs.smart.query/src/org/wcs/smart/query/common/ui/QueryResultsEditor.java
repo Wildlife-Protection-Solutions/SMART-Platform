@@ -79,7 +79,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 
 	protected QueryProxy query;
 	protected QueryResultsTablePage page1;
-	private QueryMapPageEditor page2;
+	protected QueryMapPageEditor page2;
 	private boolean isDirty = false;
 	
 	/*
@@ -411,7 +411,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 		updatePartName();
 		page1.getQueryResultsTable().clearColumns();
 		page1.initPage();
-		page2.reset();
+		page2.reset(true);
 		
 		setDirty(false);
 		

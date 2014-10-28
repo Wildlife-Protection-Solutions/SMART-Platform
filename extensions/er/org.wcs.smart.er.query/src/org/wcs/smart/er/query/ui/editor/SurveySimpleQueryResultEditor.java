@@ -59,10 +59,18 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 		public void surveyDesignChange(ISurveyQuery query) {
 			if (!getQuery().equals(query)) return;
 			
+			//clear current results
+			page1.clearTable();
+			
+			//update table columns
 			getQueryResultsTable().clearColumns();
 			getQueryResultsTable().initQuery(getQueryInternal());
-		
+			
+			//update layer
+			page2.reset(false);
 			addSuLayer.schedule();
+			
+			
 		}
 	};
 	
