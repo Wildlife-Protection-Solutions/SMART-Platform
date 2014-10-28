@@ -144,7 +144,7 @@ public class ReportQuery {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + Arrays.hashCode(queryUuid);
+			result = prime * result + Arrays.hashCode(getQueryUuid());
 			result = prime * result + ((report == null) ? 0 : report.hashCode());
 			return result;
 		}
@@ -162,7 +162,7 @@ public class ReportQuery {
 			if (getClass() != obj.getClass())
 				return false;
 			ReportQueryPk other = (ReportQueryPk) obj;
-			if (!Arrays.equals(queryUuid, other.queryUuid))
+			if (!Arrays.equals(getQueryUuid(), other.getQueryUuid()))
 				return false;
 			if (report == null) {
 				if (other.report != null)
