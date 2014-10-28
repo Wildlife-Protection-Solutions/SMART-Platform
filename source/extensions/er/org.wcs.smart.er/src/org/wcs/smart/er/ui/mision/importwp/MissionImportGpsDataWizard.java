@@ -58,7 +58,8 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 	public IImportEngine[] getEngines() {
 		return new IImportEngine[]{new MissionGpsImportEngine(missionDay),  
 				new MissionGpxImportEngine(missionDay), 
-				new MissionCsvImportEngine(missionDay)};
+				new MissionCsvImportEngine(missionDay),
+				new MissionTrackFromWaypointEngine(missionDay)};
 	}
 
 	@Override
