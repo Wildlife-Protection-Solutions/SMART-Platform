@@ -13,7 +13,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.forms,
  org.eclipse.jface.databinding,
  org.eclipse.core.databinding.observable,
- net.refractions.udig.style.sld;bundle-version="1.2.0"
+ net.refractions.udig.style.sld;bundle-version="1.2.0",
+ net.refractions.udig.mapgraphic;bundle-version="1.4.0",
+ net.refractions.udig.legend;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.er,
