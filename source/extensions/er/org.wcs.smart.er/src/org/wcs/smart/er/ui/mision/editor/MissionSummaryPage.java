@@ -227,7 +227,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		//comments
 		l = toolkit.createLabel(right, Messages.MissionSummaryPage_CommentsLabel);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
-		txtComment = toolkit.createText(right, "", SWT.MULTI); //$NON-NLS-1$
+		txtComment = toolkit.createText(right, "", SWT.MULTI | SWT.V_SCROLL | SWT.WRAP); //$NON-NLS-1$
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtComment.setEditable(false);
 		((GridData)txtComment.getLayoutData()).widthHint = 100;

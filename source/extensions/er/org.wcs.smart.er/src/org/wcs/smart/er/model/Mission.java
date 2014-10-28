@@ -53,16 +53,15 @@ import org.wcs.smart.util.SmartUtils;
 public class Mission extends UuidItem{
 
 	public static final int MAX_LENGTH_ID = 128; 
-			
+	public static final int MAX_LENGTH_COMMENT = 32700;
+	
 	private String id;
 	private Survey survey;
 	private Date start;
 	private Date end;
 	private String comment;
-	
 
 	private List<MissionDay> days;
-	
 	private List<MissionMember> members;
 	private List<MissionPropertyValue> properties;
 	
