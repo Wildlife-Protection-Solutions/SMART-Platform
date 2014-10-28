@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,9 +32,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.refractions.udig.catalog.CatalogPlugin;
+import net.refractions.udig.catalog.ID;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IResolve;
 import net.refractions.udig.catalog.IService;
+import net.refractions.udig.mapgraphic.internal.MapGraphicService;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
@@ -484,6 +487,13 @@ public class TracksComposite extends Composite implements MapPart{
 			}
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(Messages.TracksComposite_MapConfigurationError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+		
+		ID tmp = new ID(MapGraphicService.SERVICE_ID, "legend"); //$NON-NLS-1$
+		IGeoResource resource = CatalogPlugin.getDefault().getLocalCatalog().getById(IGeoResource.class, tmp, null);
+		if (resource != null){
+			AddLayersCommand command = new AddLayersCommand(Collections.singleton(resource));
+			mapViewer.getMap().sendCommandASync(command);
 		}
 	}
 
