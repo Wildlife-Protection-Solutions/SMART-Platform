@@ -37,7 +37,7 @@
             class="org.wcs.smart.er.query.model.MissionQueryType">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter"
-               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.trackObservation">
          </DefinitionPanel>
       </QueryType>
       <QueryType
@@ -49,7 +49,7 @@
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.er.survey.definition.filter.valuerate"
-               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.trackObservation">
          </DefinitionPanel>
       </QueryType>
       <QueryType
@@ -61,7 +61,7 @@
          </DefinitionPanel>
          <DefinitionPanel
                id="org.wcs.smart.er.survey.definition.filter.valuerate"
-               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
+               itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.trackObservation">
          </DefinitionPanel>
       </QueryType>
    </extension>
@@ -82,6 +82,10 @@
       <QueryItemPanel
             id="org.wcs.smart.er.query.survey.filterItemPanel.misisonTrack"
             panel="org.wcs.smart.er.query.ui.panels.item.MissionTrackFilterItemPanel">
+      </QueryItemPanel>
+      <QueryItemPanel
+            id="org.wcs.smart.er.query.survey.filterItemPanel.trackObservation"
+            panel="org.wcs.smart.er.query.ui.panels.item.TrackObservationFilterItemPanel">
       </QueryItemPanel>
    </extension>
    <extension

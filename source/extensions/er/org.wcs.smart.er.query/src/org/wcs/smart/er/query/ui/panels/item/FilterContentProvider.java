@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.ui.panels.item;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,6 +53,7 @@ import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;
+import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -170,7 +172,12 @@ public class FilterContentProvider implements ITreeContentProvider{
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
-					((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SAMPLING_UNITS), Node.SAMPLING_UNITS));
+					if (hasTrackObservationSuOption()){
+						((TreeViewer)viewer).refresh();
+					}else{
+						((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SAMPLING_UNITS), Node.SAMPLING_UNITS));
+					}
+					
 					
 				}});
 			return Status.OK_STATUS;
@@ -220,7 +227,11 @@ public class FilterContentProvider implements ITreeContentProvider{
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
-					((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SAMPLING_UNIT_ATTRIBUTE), Node.SAMPLING_UNIT_ATTRIBUTE));
+					if (hasTrackObservationSuOption()){
+						((TreeViewer)viewer).refresh();
+					}else{
+						((TreeViewer)viewer).refresh(new WrappedTreeNode((IItemTreeNode) getParent(Node.SAMPLING_UNIT_ATTRIBUTE), Node.SAMPLING_UNIT_ATTRIBUTE));
+					}
 					
 				}});
 			return Status.OK_STATUS;
@@ -237,8 +248,13 @@ public class FilterContentProvider implements ITreeContentProvider{
 		OBSERVER(Messages.FilterContentProvider_ObserverLabel),
 		MISSION_MEMBER(Messages.FilterContentProvider_MissionMemberNode),
 		MISSION_LEADER(Messages.FilterContentProvider_MissionLeaderNode),
-		TRACKTYPE(Messages.FilterContentProvider_TrackTypeNode);
-		
+		TRACKTYPE(Messages.FilterContentProvider_TrackTypeNode),
+		TRACK_SAMPLING_UNIT(MessageFormat.format(Messages.FilterContentProvider_TrackSamplingUnits, new Object[]{SamplingUnitFilter.Source.TRACK.guiName})),
+		OBSERVATION_SAMPLING_UNIT(MessageFormat.format(Messages.FilterContentProvider_ObservationSamplingUnits, new Object[]{SamplingUnitFilter.Source.OBSERVATION.guiName})),
+		SAMPLING_UNITS_OBS(Messages.FilterContentProvider_SuLabel),
+		SAMPLING_UNIT_ATTRIBUTE_OBS(Messages.FilterContentProvider_SamplingUnitAttributesLabel),
+		SAMPLING_UNITS_TRK(Messages.FilterContentProvider_SuLabel),
+		SAMPLING_UNIT_ATTRIBUTE_TRK(Messages.FilterContentProvider_SamplingUnitAttributesLabel);
 		
 		public String guiName;
 		
@@ -252,6 +268,18 @@ public class FilterContentProvider implements ITreeContentProvider{
 		this.qType = type;
 	}
 	
+	private boolean hasTrackObservationSuOption(){
+		if (qType.getKey().equals(SurveySummaryQueryType.KEY)){
+			
+			//TODO: implement others
+			return true;
+		}
+		return false;
+	}
+	
+	public void setQueryType(IQueryType type){
+		this.qType = type;
+	}
 	
 	@Override
 	public void dispose() {
@@ -295,7 +323,17 @@ public class FilterContentProvider implements ITreeContentProvider{
 			}
 		}else{
 			if (this.design != null){
-				return new Object[]{
+				if (hasTrackObservationSuOption()){
+					return new Object[]{
+							Node.SURVEY_ID, 
+							Node.MISSION_ID, 
+							Node.SURVEY_MISSION, 
+							Node.MISSION_PROP,
+							Node.OBSERVATION_SAMPLING_UNIT,
+							Node.TRACK_SAMPLING_UNIT, 
+							Node.OBSERVER};
+				}else{
+					return new Object[]{
 						Node.SURVEY_ID, 
 						Node.MISSION_ID, 
 						Node.SURVEY_MISSION, 
@@ -303,13 +341,24 @@ public class FilterContentProvider implements ITreeContentProvider{
 						Node.SAMPLING_UNITS, 
 						Node.SAMPLING_UNIT_ATTRIBUTE, 
 						Node.OBSERVER};
+				}
 			}else{
-				return new Object[]{
+				if (hasTrackObservationSuOption()){
+					return new Object[]{	
+							Node.SURVEY_ID, 
+							Node.MISSION_ID, 
+							Node.MISSION_PROP, 
+							Node.OBSERVATION_SAMPLING_UNIT,
+							Node.TRACK_SAMPLING_UNIT, 
+							Node.OBSERVER};
+				}else{
+					return new Object[]{	
 						Node.SURVEY_ID, 
 						Node.MISSION_ID, 
 						Node.MISSION_PROP, 
 						Node.SAMPLING_UNIT_ATTRIBUTE, 
 						Node.OBSERVER};
+				}
 			}
 		}
 	}
@@ -330,9 +379,36 @@ public class FilterContentProvider implements ITreeContentProvider{
 					}
 				}
 			}
-		}else if (parentElement == Node.SAMPLING_UNITS){
+		}else if (parentElement == Node.OBSERVATION_SAMPLING_UNIT){
+			if (design != null){
+				return new Node[]{Node.SAMPLING_UNITS_OBS, Node.SAMPLING_UNIT_ATTRIBUTE_OBS};
+			}else{
+				return new Node[]{Node.SAMPLING_UNIT_ATTRIBUTE_OBS};
+			}
+		}else if (parentElement == Node.TRACK_SAMPLING_UNIT){
+			if (design != null){
+				return new Node[]{Node.SAMPLING_UNITS_TRK, Node.SAMPLING_UNIT_ATTRIBUTE_TRK};
+			}else{
+				return new Node[]{Node.SAMPLING_UNIT_ATTRIBUTE_TRK};
+			}
+		}else if (parentElement == Node.SAMPLING_UNITS ||
+				parentElement == Node.SAMPLING_UNITS_OBS || 
+				parentElement == Node.SAMPLING_UNITS_TRK){
 			if (sunits != null){
-				return sunits.toArray();
+				if (parentElement == Node.SAMPLING_UNITS){
+					return sunits.toArray();	
+				}else{
+					List<SamplingUnitWrapper> wrappers = new ArrayList<SamplingUnitWrapper>();
+					SamplingUnitFilter.Source source = SamplingUnitFilter.Source.OBSERVATION;
+					if (parentElement == Node.SAMPLING_UNITS_TRK){
+						source = SamplingUnitFilter.Source.TRACK;
+					}
+					for (Object su : sunits){
+						SamplingUnitWrapper wrapper = new SamplingUnitWrapper(su, source);
+						wrappers.add(wrapper);
+					}
+					return wrappers.toArray();
+				}
 			}
 			if(triedUnits){
 				return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
@@ -341,9 +417,24 @@ public class FilterContentProvider implements ITreeContentProvider{
 				loadSamplingUnits.schedule();
 				return new Object[]{Messages.SurveyItemContentProvider_LoadingLabel};
 			}
-		}else if (parentElement == Node.SAMPLING_UNIT_ATTRIBUTE){
+		}else if (parentElement == Node.SAMPLING_UNIT_ATTRIBUTE ||
+				parentElement == Node.SAMPLING_UNIT_ATTRIBUTE_OBS ||
+				parentElement == Node.SAMPLING_UNIT_ATTRIBUTE_TRK){
 			if (unitAttributes != null){
-				return unitAttributes.toArray();
+				if (parentElement == Node.SAMPLING_UNIT_ATTRIBUTE){
+					return unitAttributes.toArray();
+				}else{
+					List<SamplingUnitWrapper> wrappers = new ArrayList<SamplingUnitWrapper>();
+					SamplingUnitFilter.Source source = SamplingUnitFilter.Source.OBSERVATION;
+					if (parentElement == Node.SAMPLING_UNIT_ATTRIBUTE_TRK){
+						source = SamplingUnitFilter.Source.TRACK;
+					}
+					for (Object su : unitAttributes){
+						SamplingUnitWrapper wrapper = new SamplingUnitWrapper(su, source);
+						wrappers.add(wrapper);
+					}
+					return wrappers.toArray();
+				}
 			}
 			if(triedUnitAttributes){
 				return new Object[]{Messages.SurveyItemContentProvider_ErrorLabel};
@@ -406,6 +497,12 @@ public class FilterContentProvider implements ITreeContentProvider{
 					element == Node.MISSION_MEMBER){
 				return Node.MISSION_PROP;
 			}
+			if (element == Node.SAMPLING_UNITS_OBS || element == Node.SAMPLING_UNIT_ATTRIBUTE_OBS){
+				return Node.OBSERVATION_SAMPLING_UNIT;
+			}
+			if (element == Node.SAMPLING_UNITS_TRK || element == Node.SAMPLING_UNIT_ATTRIBUTE_TRK){
+				return Node.TRACK_SAMPLING_UNIT;
+			}
 			return rootNode;
 		}else if (element instanceof MissionTrack.TrackType){
 			return Node.TRACKTYPE;
@@ -422,6 +519,12 @@ public class FilterContentProvider implements ITreeContentProvider{
 				element == Node.SAMPLING_UNITS ||
 				element == Node.SAMPLING_UNIT_ATTRIBUTE || 
 				element == Node.TRACKTYPE ||
+				element == Node.OBSERVATION_SAMPLING_UNIT ||
+				element == Node.TRACK_SAMPLING_UNIT ||
+				element == Node.SAMPLING_UNITS_OBS ||
+				element == Node.SAMPLING_UNITS_TRK ||
+				element == Node.SAMPLING_UNIT_ATTRIBUTE_OBS ||
+				element == Node.SAMPLING_UNIT_ATTRIBUTE_TRK ||
 				element instanceof Survey){
 			return true;
 		}

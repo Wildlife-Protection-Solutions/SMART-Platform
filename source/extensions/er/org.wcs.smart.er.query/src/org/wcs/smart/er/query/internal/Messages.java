@@ -11,6 +11,7 @@ public class Messages extends NLS {
 	public static String DerbyGridEngine_ProgressFilters;
 	public static String DerbyGridEngine_ProgressTrackLocations;
 	public static String DerbyGridEngine_RunQueryProgress;
+	public static String DerbyGridEngine_UnsupportedValue;
 	public static String DerbyGridEngine_ValueNotSupported;
 	public static String DerbyMissionEngine_ProgressAdditionalData;
 	public static String DerbyMissionEngine_ProgressMissionLeader;
@@ -43,9 +44,11 @@ public class Messages extends NLS {
 	public static String FilterContentProvider_LoadSuJobName;
 	public static String FilterContentProvider_MissionLeaderNode;
 	public static String FilterContentProvider_MissionMemberNode;
+	public static String FilterContentProvider_ObservationSamplingUnits;
 	public static String FilterContentProvider_ObserverLabel;
 	public static String FilterContentProvider_SamplingUnitAttributesLabel;
 	public static String FilterContentProvider_SuLabel;
+	public static String FilterContentProvider_TrackSamplingUnits;
 	public static String FilterContentProvider_TrackTypeNode;
 	public static String FilterProcessor_DateFilterNotSupported;
 	public static String FilterProcessor_progress1;
@@ -132,7 +135,9 @@ public class Messages extends NLS {
 	public static String SamplingUnitDropItem_Label;
 	public static String SamplingUnitFilter_MissionTrackNotFound;
 	public static String SamplingUnitFilter_NoneFilterName;
+	public static String SamplingUnitFilter_ObservationSuFilterLabel;
 	public static String SamplingUnitFilter_SamplingUnitNotFound;
+	public static String SamplingUnitFilter_TrackSuFilterLabel;
 	public static String SamplingUnitGroupByDropItem_AllLabel;
 	public static String SamplingUnitGroupByDropItem_FiltersLabel;
 	public static String SamplingUnitGroupByDropItem_IncludedLabel;
@@ -166,6 +171,8 @@ public class Messages extends NLS {
 	public static String SurveyFilterSqlGenerator_missionAttributeError;
 	public static String SurveyFilterSqlGenerator_missionPropertyError;
 	public static String SurveyGridQueryType_QueryTypeName;
+	public static String SurveyGridQueryType_SummaryQueryError1;
+	public static String SurveyGridQueryType_SummaryQueryError2;
 	public static String SurveyGroupByContentProvider_MissionIdNode;
 	public static String SurveyGroupByContentProvider_MissionPropertiesNode;
 	public static String SurveyGroupByContentProvider_ObserverNode;
@@ -247,6 +254,9 @@ public class Messages extends NLS {
 	public static String SurveySimpleQueryResultEditor_LoadSuJobName;
 	public static String SurveySummaryQueryType_QueryError;
 	public static String SurveySummaryQueryType_QueryTypeName;
+	public static String SurveySummaryQueryType_SummaryQueryError1;
+	public static String SurveySummaryQueryType_SummaryQueryError2;
+	public static String SurveySummaryQueryType_SummaryQueryError3;
 	public static String SurveyValuesTreeNode_SurveyValuesNodeLabel;
 	public static String SurveyWaypointQueryType_IncidentQuery;
 	public static String TrackTypeDropItem_TrackTypeLabel;

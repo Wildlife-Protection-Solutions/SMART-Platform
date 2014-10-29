@@ -19,34 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.engine;
+package org.wcs.smart.er.query.ui.panels.item;
 
-import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
-import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Processing sampling units assigning the filter type.
+ * Wrapper from sampling unit item to identify the
+ * source of the unit (track or observation)
  * 
  * @author Emily
  *
  */
-public class SamplingUnitFilterProcessor {
+public class SamplingUnitWrapper {
 
-	public static void updateSamplingUnitFilter(IFilter filter,
-			SamplingUnitFilter.Source source) {
-		final SamplingUnitFilter.Source lsrc = source;
-		IFilterVisitor visitor = new IFilterVisitor() {
-			@Override
-			public void visit(IFilter filter) {
-				if (filter instanceof SamplingUnitFilter) {
-					((SamplingUnitFilter) filter).setSource(lsrc);
-				}else if (filter instanceof SamplingUnitAttributeFilter){
-					((SamplingUnitAttributeFilter)filter).setSource(lsrc);
-				}
-			}
-		};
-		filter.accept(visitor);
+	private Object samplingUnit;
+	private SamplingUnitFilter.Source source;
+	
+	public SamplingUnitWrapper(Object samplingUnit, SamplingUnitFilter.Source source){
+		this.samplingUnit = samplingUnit;
+		this.source = source;
+	}
+	
+	public Object getSamplingUnit(){
+		return this.samplingUnit;
+	}
+	
+	public SamplingUnitFilter.Source getSource(){
+		return this.source;
 	}
 }

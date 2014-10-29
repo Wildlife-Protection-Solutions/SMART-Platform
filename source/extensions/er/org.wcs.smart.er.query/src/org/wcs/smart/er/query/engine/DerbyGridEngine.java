@@ -60,7 +60,9 @@ import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.internal.Messages;
@@ -76,13 +78,14 @@ import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.UuidCellMerger;
-import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -103,6 +106,8 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	
 	private String dataTable;
 	private String gridTable;
+	
+	private boolean hasTrackFilter = false;
 	/**
 	 * Runs the given survey query and retrieves the results from the database.
 	 * 
@@ -244,18 +249,38 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			boolean needsObservation = false;
 			
 			HasObservationValueVisitor vv = new HasObservationValueVisitor();
-			vv.visit(value);
-			HasObservationFilterVisitor ov = new HasObservationFilterVisitor();
-			ov.visit(filter.getFilter());
+			value.accept(vv);
+			
+			SurveyHasObservationFilterVisitor ov = new SurveyHasObservationFilterVisitor();
+			filter.getFilter().accept(ov);
 			
 			if (vv.hasCategory() || vv.hasAttribute() ||
-				ov.hasAttributeFilter() || ov.hasCategoryFilter()){
+				ov.hasAttributeFilter() || ov.hasCategoryFilter() || ov.hasSamplingUnitObservationFilter()){
 				needsObservation = true;
+			}
+			
+			//do need join mission tracks?
+			final boolean[] needstracks = new boolean[]{false};
+			IFilterVisitor missionTracks = new IFilterVisitor() {
+				@Override
+				public void visit(IFilter filter) {
+					if (needstracks[0]) return;
+					if ((filter instanceof SamplingUnitFilter
+							&& ((SamplingUnitFilter)filter).getSource() == Source.TRACK) ||
+						(filter instanceof SamplingUnitAttributeFilter &&
+							((SamplingUnitAttributeFilter)filter).getSource() == Source.TRACK)){
+						needstracks[0] = true;
+					}
+					
+				}
+			};
+			if (filter.getFilter() != null){
+				filter.getFilter().accept(missionTracks);
+				hasTrackFilter = needstracks[0];
 			}
 			
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable, sdFilter);
 			try{
-				SamplingUnitFilterProcessor.updateSamplingUnitFilter(filter.getFilter(), SamplingUnitFilter.Source.OBSERVATION);
 				filterer.processFilter(c, filter.getFilter(), dateFilter, query.getConservationAreaFilterAsFilter(), 
 					needsObservation, false, new SubProgressMonitor(monitor, 90));
 			}finally{
@@ -633,14 +658,27 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(tablePrefix(Mission.class) + ".id, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".start_datetime, "); //$NON-NLS-1$
 		sql.append(tablePrefix(Mission.class) + ".end_datetime, "); //$NON-NLS-1$
+		
 		sql.append(tablePrefix(MissionDay.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
+		
+		if (hasTrackFilter){
+			sql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
+		}else{
+			sql.append("cast(null as char for bit data),");	 //$NON-NLS-1$
+		}
+		
+		
 		if (includeObservations){
+			sql.append(tablePrefix(SamplingUnit.class) + ".uuid, "); //$NON-NLS-1$
+			sql.append(tablePrefix(SamplingUnit.class) + ".id, "); //$NON-NLS-1$
+			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
+			sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
 		}else{
+			sql.append("cast(null as char for bit data),");	 //$NON-NLS-1$
+			sql.append("cast(null as varchar(128)),");	 //$NON-NLS-1$
+			sql.append("cast(null as char for bit data),");	 //$NON-NLS-1$
+			sql.append("cast(null as timestamp),");	 //$NON-NLS-1$
 			sql.append("cast(null as char for bit data)");	 //$NON-NLS-1$
 		}
 		return sql.toString();
@@ -668,6 +706,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append("mission_end timestamp,"); //$NON-NLS-1$
 		
 		sql.append("mission_day_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_track_uuid char(16) for bit data,"); //$NON-NLS-1$
 		
 		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
@@ -726,7 +765,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
 			return computeMissionTrack(c, engine, dataField);
 		}else{
-			throw new Exception(MessageFormat.format("The value {0} is not supported.", new Object[]{item.getValueItem().guiName}));
+			throw new Exception(MessageFormat.format(Messages.DerbyGridEngine_UnsupportedValue, new Object[]{item.getValueItem().guiName}));
 		}
 	}
 	
@@ -744,7 +783,11 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(MissionTrack.class));
 		sql.append(", ("); //$NON-NLS-1$
-		sql.append("SELECT distinct mission_day_uuid as unqid"); //$NON-NLS-1$
+		if (hasTrackFilter){
+			sql.append("SELECT distinct mission_track_uuid as unqid"); //$NON-NLS-1$
+		}else{
+			sql.append("SELECT distinct mission_day_uuid as unqid"); //$NON-NLS-1$
+		}
 		if (dataField != null){
 			//additional data required for rasterization
 			for (int i = 0; i < dataField.length; i ++){
@@ -755,8 +798,13 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		sql.append(dataTable);
 		sql.append(") tmp "); //$NON-NLS-1$
 		sql.append("WHERE " ); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionTrack.class) + ".mission_day_uuid = "); //$NON-NLS-1$
+		if (hasTrackFilter){
+			sql.append(tablePrefix(MissionTrack.class) + ".uuid = "); //$NON-NLS-1$
+		}else{
+			sql.append(tablePrefix(MissionTrack.class) + ".mission_day_uuid = "); //$NON-NLS-1$
+		}
 		sql.append("tmp.unqid"); //$NON-NLS-1$
+		
 
 		QueryPlugIn.logSql(sql.toString());
 		ResultSet rs = c.createStatement().executeQuery(sql.toString());

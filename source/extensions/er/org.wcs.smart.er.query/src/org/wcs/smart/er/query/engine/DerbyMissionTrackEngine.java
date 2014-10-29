@@ -33,15 +33,14 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
-import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
@@ -89,7 +88,6 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				SamplingUnitFilterProcessor.updateSamplingUnitFilter(query.getFilter().getFilter(), SamplingUnitFilter.Source.TRACK);
 				try {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 

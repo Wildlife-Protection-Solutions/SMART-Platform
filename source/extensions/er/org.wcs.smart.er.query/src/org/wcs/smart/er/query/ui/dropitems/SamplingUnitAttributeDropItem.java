@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.query.ui.dropitems;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -49,6 +50,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.filter.AttributeFilter;
@@ -82,6 +84,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	private ListItem currentSelection = null;
 				
 	private Font smallerFont;
+	private SamplingUnitFilter.Source source;
 		
 	/*
 	 * Job to load the attribute list options
@@ -136,13 +139,32 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	 * @param target drop target
 	 * @param att the category attribute to make up the drop item
 	 */
-	public SamplingUnitAttributeDropItem(SamplingUnitAttribute attribute) {
+	public SamplingUnitAttributeDropItem(SamplingUnitAttribute attribute, SamplingUnitFilter.Source source) {
+		this.source = source;
 		this.ma = attribute;
 		this.type = attribute.getType();
 		this.text = attribute.getName();
 		this.key = "s:suattribute:" + type.typeKey + ":" + attribute.getKeyId(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
+	/**
+	 * Creates a new attribute drop item
+	 * 
+	 * @param parent parent composite
+	 * @param target drop target
+	 * @param att the category attribute to make up the drop item
+	 */
+	public SamplingUnitAttributeDropItem(SamplingUnitAttribute attribute) {
+		this(attribute, null);
+	}
+	
+	/**
+	 * Sets the sampling unit filter source
+	 * @param source
+	 */
+	public void setSource(SamplingUnitFilter.Source source){
+		this.source = source;
+	}
 	
 	/**
 	 * <p>
@@ -167,9 +189,9 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	@Override
 	public String getText() {
 		if (operators != null){
-			return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " " ;//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
+			return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " ";//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
-			return this.text;
+			return this.text; 
 		}
 		
 	}
@@ -182,6 +204,8 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		StringBuilder querypart = new StringBuilder();
 		if (type == AttributeType.NUMERIC){
 			querypart.append (this.key);
+			querypart.append(":"); //$NON-NLS-1$
+			querypart.append(source.queryKey);
 			querypart.append( " "); //$NON-NLS-1$
 			querypart.append(Operator.NUMERIC_OPS[operators.getSelectionIndex()].asSmartValue());
 			querypart.append(" "); //$NON-NLS-1$
@@ -189,15 +213,18 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 			
 		}else if (type == AttributeType.TEXT){
 			querypart.append (this.key);
+			querypart.append(":"); //$NON-NLS-1$
+			querypart.append(source.queryKey);
 			querypart.append( " "); //$NON-NLS-1$
-			
 			querypart.append(Operator.STRING_OPS[operators.getSelectionIndex()].asSmartValue());
 			querypart.append(" \""); //$NON-NLS-1$
 			querypart.append(value.getText());
 			querypart.append("\""); //$NON-NLS-1$
 		}else if (type == AttributeType.LIST){
-			StringBuilder query = new StringBuilder(this.key);
-			query.append(" = "); //$NON-NLS-1$
+			querypart.append (this.key);
+			querypart.append(":"); //$NON-NLS-1$
+			querypart.append(source.queryKey);
+			querypart.append(" = "); //$NON-NLS-1$
 			
 			ListItem it = null;
 			if (currentSelection != null){
@@ -209,9 +236,8 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 				}
 			}
 			if (it != null && (it.getUuid() != null || it == AttributeFilter.ANY_OPTION)){			
-				query.append(it.getKey());
+				querypart.append(it.getKey());
 			}
-			return query.toString();
 		}
 		return querypart.toString();
 	}
@@ -308,7 +334,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		initDrag(main);
 		initDrag(lblAttribute);
 		
-		lblAttribute.setText(formatStringForLabel(this.text));
+		lblAttribute.setText(MessageFormat.format("({0}) {1}", new Object[]{source.guiName, formatStringForLabel(this.text)})); //$NON-NLS-1$
 		if (currentValue != null){
 			if (value != null){
 				value.setText(currentValue);
@@ -355,8 +381,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		initDrag(main);
 		initDrag(lblAttribute);
 		
-		
-		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
+		lblAttribute.setText(MessageFormat.format("({0}) {1} = ", new Object[]{source.guiName, formatStringForLabel(this.text)})); //$NON-NLS-1$
 		loadItemsJobs.schedule();
 	}
 	

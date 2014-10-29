@@ -19,41 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.panels;
+package org.wcs.smart.er.query.engine;
 
-import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.query.model.Query;
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
+import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
+import org.wcs.smart.query.model.filter.IFilter;
 
 /**
- * An interface for a survey query panel.  Can be used for
- * both definition and item panels.
- * 
- * Provides the ability to get a survey design, update
- * the panel based on a new design and get the current query.
+ * Has observation filter visitor for survey visitors.
  * 
  * @author Emily
  *
  */
-public interface ISurveyPanel {
-	
-	/**
-	 * 
-	 * @return the current survey design or null if not applicable
-	 */
-	public SurveyDesign getSurveyDesign();
-	
-	/**
-	 * Updates the panel based on the new survey design
-	 * 
-	 * @param currentDesign
-	 * @param qType
-	 */
-	public void refreshPanel(SurveyDesign currentDesign);
-	
-	/**
-	 * 
-	 * @return the current query or null if not applicable
-	 */
-	public Query getQuery();
-	
+public class SurveyHasObservationFilterVisitor extends HasObservationFilterVisitor {
+
+	private boolean hasSu = false;
+
+	@Override
+	public void visit(IFilter filter) {
+		super.visit(filter);
+		if (super.hasAttributeFilter() || super.hasCategoryFilter() || hasSu)
+			return;
+		if (filter instanceof SamplingUnitFilter) {
+			if (((SamplingUnitFilter) filter).getSource() == Source.OBSERVATION) {
+				hasSu = true;
+			}
+		} else if (filter instanceof SamplingUnitAttributeFilter) {
+			if (((SamplingUnitAttributeFilter) filter).getSource() == Source.OBSERVATION) {
+				hasSu = true;
+			}
+		}
+	}
+
+	public boolean hasSamplingUnitObservationFilter() {
+		return hasSu;
+	}
+
 }

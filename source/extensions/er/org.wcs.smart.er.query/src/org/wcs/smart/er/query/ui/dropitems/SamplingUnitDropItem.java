@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.ui.dropitems;
 import java.text.MessageFormat;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -44,34 +45,47 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SamplingUnitDropItem extends DropItem {
 
+	private SamplingUnitFilter.Source source = null;	
 	private SamplingUnit su = null;
 	private MissionTrack mt = null;
 	
+	private Font smallerFont;
 	
 	public SamplingUnitDropItem(SamplingUnit su){
 		this.su = su;
 	}
 	
+	public SamplingUnitDropItem(SamplingUnit su, SamplingUnitFilter.Source source){
+		this.su = su;
+		this.source = source;
+	}
+
 	public SamplingUnitDropItem(MissionTrack mt){
 		this.mt = mt;
 	}
 	
+	
+	public void setSource(SamplingUnitFilter.Source source){
+		this.source = source;
+	}
+	
+	
 	@Override
 	public String getText() {
-		return MessageFormat.format(Messages.SamplingUnitDropItem_Label, new Object[]{su == null? mt.getId() : su.getId()});
+		return MessageFormat.format(Messages.SamplingUnitDropItem_Label, new Object[]{su == null? mt.getId() : su.getId(), source.guiName});
 	}
 
 	@Override
 	public String asQueryPart() {
 		if (su != null){
 			if (su == SamplingUnitFilter.NONE){
-				return "s:samplingunit:" + SamplingUnitFilter.NONE_KEY; //$NON-NLS-1$
+				return "s:samplingunit:" + source.queryKey + ":" + SamplingUnitFilter.NONE_KEY; //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				return "s:samplingunit:" + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$
+				return "s:samplingunit:" + source.queryKey + ":" + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 		}else if (mt != null){
-			return "s:samplingunittrack:" + SmartUtils.encodeHex(mt.getUuid()); //$NON-NLS-1$
+			return "s:samplingunittrack:" + source.queryKey + ":" + SmartUtils.encodeHex(mt.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}
@@ -81,15 +95,21 @@ public class SamplingUnitDropItem extends DropItem {
 	}
 
 	@Override
+	public void dispose(){
+		super.dispose();
+		if (smallerFont != null){
+			smallerFont.dispose();
+		}
+	}
+	@Override
 	protected void createComposite(Composite parent) {
 		Composite c = new Composite(parent, SWT.NONE);
-		c.setLayout(new GridLayout());
-		
+		GridLayout gl = new GridLayout();
+		gl.marginWidth = gl.marginHeight = 0;
+		c.setLayout(gl);
 		Label l = new Label(c, SWT.NONE);
 		l.setText(getText());
-		
 		initDrag(l);
-		
+		initDrag(c);
 	}
-
 }

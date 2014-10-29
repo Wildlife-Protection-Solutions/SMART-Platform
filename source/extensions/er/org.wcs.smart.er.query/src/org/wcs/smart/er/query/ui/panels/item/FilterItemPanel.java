@@ -99,11 +99,9 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 			}
 		}
 	};
-	
 	public FilterItemPanel() {
-		qType = QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY);
+		this.qType = QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY);
 	}
-	
 	public FilterItemPanel(IQueryType qType) {
 		this.qType = qType;
 	}
@@ -173,7 +171,6 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 		this.currentDesign = currentDesign;
 		if (filterTreeViewer != null){
 			Object input = filterTreeViewer.getInput();
-		
 			if (input instanceof HashMap){
 				HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
 				input2.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});

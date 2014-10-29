@@ -36,7 +36,9 @@ import org.wcs.smart.util.SmartUtils;
 
 /**
  * Sampling unit filter.
- * 
+ * <p>
+ * "s:samplingunit:(obs | trk):(<uuid> | none)
+ * </p>
  * @author Emily
  *
  */
@@ -50,11 +52,13 @@ public class SamplingUnitFilter implements IFilter {
 	}
 	
 	public static SamplingUnitFilter createSamplingUnitFilter(String key){
-		return new SamplingUnitFilter(key.split(":")[2], Type.SAMPLINGUNIT); //$NON-NLS-1$
+		String[] bits = key.split(":"); //$NON-NLS-1$
+		return new SamplingUnitFilter(bits[3], Type.SAMPLINGUNIT, keyToSource(bits[2]));
 	}
 	
 	public static SamplingUnitFilter createMissionTrackFilter(String key){
-		return new SamplingUnitFilter(key.split(":")[2], Type.TRACK); //$NON-NLS-1$
+		String[] bits = key.split(":"); //$NON-NLS-1$
+		return new SamplingUnitFilter(bits[3], Type.TRACK, keyToSource(bits[2]));
 	}
 	
 	private String uuid;
@@ -62,15 +66,34 @@ public class SamplingUnitFilter implements IFilter {
 	
 	public enum Type {SAMPLINGUNIT, TRACK};
 	
-	public enum Source {OBSERVATION, TRACK};
+	public enum Source {
+		OBSERVATION ("obs", Messages.SamplingUnitFilter_ObservationSuFilterLabel),  //$NON-NLS-1$
+		TRACK ("trk", Messages.SamplingUnitFilter_TrackSuFilterLabel); //$NON-NLS-1$
+		
+		public String queryKey;
+		public String guiName;
+		
+		Source(String queryKey, String guiName){
+			this.queryKey = queryKey;
+			this.guiName = guiName;
+		}
+	};
+	
 	private Source joinTable;
 	
-	public SamplingUnitFilter(String uuid, Type type){
-		this.unitType = type;
-		this.uuid = uuid;
+	public static Source keyToSource(String key){
+		for (Source s : Source.values()){
+			if (s.queryKey.equals(key)){
+				return s;
+			}
+		}
+		return null;
 	}
 	
-	public void setSource(Source source){
+	
+	public SamplingUnitFilter(String uuid, Type type, Source source){
+		this.unitType = type;
+		this.uuid = uuid;
 		this.joinTable = source;
 	}
 	

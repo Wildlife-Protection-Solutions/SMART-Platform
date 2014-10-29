@@ -23,7 +23,6 @@ package org.wcs.smart.er.query.engine;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
@@ -50,8 +49,8 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
-import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -734,8 +733,109 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	
 	private void processSamplingUnitAttributeFilter(SamplingUnitAttributeFilter lfilter, String colName, Connection c) throws SQLException{
 		if (lfilter.getSource() == Source.TRACK){
-			throw new SQLException(MessageFormat.format("Sampling unit attribute filters with source of {0} are not supported for waypoint filters.", new Object[]{SamplingUnitFilter.Source.TRACK}));
+			//observation
+			StringBuilder sql = new StringBuilder();
+			sql.append("INSERT INTO "); //$NON-NLS-1$
+			sql.append(colName + " (wp_uuid)"); //$NON-NLS-1$	
+			sql.append(" SELECT distinct ");  //$NON-NLS-1$
+			sql.append(prefix(SurveyWaypoint.class));
+			sql.append(".wp_uuid");  //$NON-NLS-1$
+			
+			sql.append(" FROM ");  //$NON-NLS-1$
+			sql.append(waypointTable);
+			sql.append(" join ");  //$NON-NLS-1$
+			sql.append(namePrefix(SurveyWaypoint.class));
+			sql.append(" on " + waypointTable + ".wp_uuid = "); //$NON-NLS-1$  //$NON-NLS-2$
+			sql.append(prefix(SurveyWaypoint.class));
+			sql.append(".wp_uuid"); //$NON-NLS-1$
+
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(MissionDay.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(MissionDay.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(prefix(SurveyWaypoint.class));
+			sql.append(".mission_day_uuid "); //$NON-NLS-1$
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(MissionTrack.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(MissionDay.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(prefix(MissionTrack.class));
+			sql.append(".mission_day_uuid "); //$NON-NLS-1$
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(SamplingUnit.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnit.class));
+			sql.append(".uuid = "); //$NON-NLS-1$
+			sql.append(prefix(MissionTrack.class));
+			sql.append(".sampling_unit_uuid "); //$NON-NLS-1$
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(SamplingUnitAttributeValue.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnitAttributeValue.class) + ".su_uuid = "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$
+			
+			sql.append(" join "); //$NON-NLS-1$
+			sql.append(namePrefix(SamplingUnitAttribute.class));
+			sql.append(" on "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnitAttribute.class) + ".uuid = "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid "); //$NON-NLS-1$
+			
+			if (lfilter.getAttributeType() == AttributeType.LIST){
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(SamplingUnitAttributeListItem.class));
+				sql.append(" on "); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnitAttributeValue.class) + ".list_element_uuid = "); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnitAttributeListItem.class) + ".uuid "); //$NON-NLS-1$	
+			}
+
+			
+			sql.append(" WHERE "); //$NON-NLS-1$
+			sql.append(prefix(SamplingUnitAttribute.class) + ".keyId = '" + lfilter.getSamplingUnitAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(" AND "); //$NON-NLS-1$
+			if (lfilter.getAttributeType() == AttributeType.NUMERIC){
+				sql.append(prefix(SamplingUnitAttributeValue.class));
+				sql.append(".number_value "); //$NON-NLS-1$
+				sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
+				sql.append(" " + lfilter.getValue().toString()); //$NON-NLS-1$
+			}else if (lfilter.getAttributeType() == AttributeType.TEXT){
+				sql.append(" LOWER("); //$NON-NLS-1$
+				sql.append(prefix(SamplingUnitAttributeValue.class));
+				sql.append(".string_value ) "); //$NON-NLS-1$
+				sql.append(SurveyFilterSqlGenerator.INSTANCE.asSql(lfilter.getOperator()));
+				
+				if (lfilter.getOperator() == Operator.STR_CONTAINS || 
+						lfilter.getOperator() == Operator.STR_NOTCONTAINS){
+					sql.append(" '%"); //$NON-NLS-1$
+					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+					sql.append("%' "); //$NON-NLS-1$
+				}else if (lfilter.getOperator() == Operator.STR_EQUALS){
+					sql.append(" '"); //$NON-NLS-1$
+					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+					sql.append("'"); //$NON-NLS-1$
+				}
+			}else if (lfilter.getAttributeType() == AttributeType.LIST){
+				if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+					sql.append(prefix(SamplingUnitAttributeListItem.class));
+					sql.append(".uuid is not null"); //$NON-NLS-1$
+				}else{
+					sql.append(prefix(SamplingUnitAttributeListItem.class));
+					sql.append(".keyid = '"); //$NON-NLS-1$
+					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+					sql.append("'");  //$NON-NLS-1$
+				}
+			}
+			
+			QueryPlugIn.logSql(sql.toString());
+			c.createStatement().execute(sql.toString());
+			return;
 		}
+		
+		//observation
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(colName + " (wp_uuid)"); //$NON-NLS-1$	

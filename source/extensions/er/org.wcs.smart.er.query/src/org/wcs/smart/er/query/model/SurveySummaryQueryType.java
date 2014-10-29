@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.HasTrackFilterVisitor;
+import org.wcs.smart.er.query.engine.SurveyHasObservationFilterVisitor;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
@@ -45,6 +47,7 @@ import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SummaryDefinitionPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
+import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
@@ -188,7 +191,7 @@ public class SurveySummaryQueryType implements IQueryType {
 			Parser parser = new Parser(is);
 			def = parser.SumQuery();
 		}catch (Exception ex){
-			ERQueryPlugIn.log(ex.getMessage(), ex);
+			//ERQueryPlugIn.log(ex.getMessage(), ex);
 			return ex.getMessage();
 		}finally{
 			try {
@@ -198,6 +201,57 @@ public class SurveySummaryQueryType implements IQueryType {
 			}
 		}
 		
+		boolean hasObservationValue = false;
+		boolean hasObservationFilter = false;
+		boolean hasTrackFilter = false;
+		boolean hasObservationGroupBy = false;
+		
+		HasObservationGroupByVisitor v0 = new HasObservationGroupByVisitor();
+		def.getRowGroupByPart().visit(v0);
+		hasObservationGroupBy = v0.hasAttribute() || v0.hasCategory();
+		if (!hasObservationGroupBy){
+			def.getColumnGroupByPart().visit(v0);
+			hasObservationGroupBy = v0.hasAttribute() || v0.hasCategory();
+		}
+		
+		HasObservationValueVisitor v1 = new HasObservationValueVisitor();
+		def.getValuePart().visit(v1);
+		hasObservationValue = v1.hasAttribute() || v1.hasCategory();
+		
+		SurveyHasObservationFilterVisitor v2 = new SurveyHasObservationFilterVisitor();
+		if (def.getValueFilter() != null && def.getValueFilter().getFilter() != null){
+			def.getValueFilter().getFilter().accept(v2);
+			hasObservationFilter = v2.hasAttributeFilter() || v2.hasCategoryFilter() || v2.hasSamplingUnitObservationFilter();
+		}
+		
+		if (!hasObservationFilter){
+			if (def.getRateFilter() != null && def.getRateFilter().getFilter() != null){
+				def.getRateFilter().getFilter().accept(v2);
+				hasObservationFilter = v2.hasAttributeFilter() || v2.hasCategoryFilter() || v2.hasSamplingUnitObservationFilter();
+			}
+		}
+
+		HasTrackFilterVisitor v3 = new HasTrackFilterVisitor();
+		if (def.getValueFilter() != null && def.getValueFilter().getFilter() != null){
+			def.getValueFilter().getFilter().accept(v3);
+			hasTrackFilter = v3.hasTrack();
+		}
+		if (!hasTrackFilter){
+			if (def.getRateFilter() != null && def.getRateFilter().getFilter() != null){
+				def.getRateFilter().getFilter().accept(v3);
+				hasTrackFilter = v3.hasTrack();
+			}
+		}
+		
+		if (hasObservationValue && hasTrackFilter){
+			return Messages.SurveySummaryQueryType_SummaryQueryError1;
+		}
+		if (hasTrackFilter && hasObservationFilter){
+			return Messages.SurveySummaryQueryType_SummaryQueryError2;
+		}
+		if (hasObservationGroupBy && hasTrackFilter){
+			return Messages.SurveySummaryQueryType_SummaryQueryError3;
+		}
 		//CANNOT GROUP BY DataModelItem (Category, Attribute) 
 		//and sampling Unit and compute track length
 		if (def != null){
@@ -248,11 +302,7 @@ public class SurveySummaryQueryType implements IQueryType {
 				if (isTrack[0] && gbDm && gbSu[0]){
 					return Messages.SurveySummaryQueryType_QueryError;
 				}
-			}
-
-			
-			
-			
+			}	
 		}
 		return null;
 	}
@@ -260,7 +310,6 @@ public class SurveySummaryQueryType implements IQueryType {
 	public static IDateFieldFilter[] validDateFields(){
 		return new IDateFieldFilter[]{WaypointDateField.INSTANCE, MissionStartDateField.INSTANCE, MissionEndDateField.INSTANCE};
 	}
-	
 	
 	@Override
 	public URL getDescription() {
