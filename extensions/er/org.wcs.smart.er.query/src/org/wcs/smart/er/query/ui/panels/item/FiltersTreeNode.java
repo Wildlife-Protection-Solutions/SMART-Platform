@@ -89,6 +89,8 @@ public class FiltersTreeNode implements IItemTreeNode{
 					return ((SamplingUnitAttribute) element).getName();
 				}else if (element instanceof MissionTrack.TrackType){
 					return ((MissionTrack.TrackType)element).getGuiName();
+				}else if (element instanceof SamplingUnitWrapper){
+					return getText(((SamplingUnitWrapper) element).getSamplingUnit());
 				}
 				return super.getText(element);
 			}
@@ -105,11 +107,15 @@ public class FiltersTreeNode implements IItemTreeNode{
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SURVEY_ICON);
 					}else if (node == Node.SURVEY_MISSION){
 						return ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.ALL_SURVEY_ICON);
-					}else if (node == Node.SAMPLING_UNITS){
+					}else if (node == Node.SAMPLING_UNITS ||
+							node == Node.SAMPLING_UNITS_OBS || 
+							node == Node.SAMPLING_UNITS_TRK ){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ICON);
 					}else if (node == Node.OBSERVER){
 						return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EMPLOYEE_ICON);
-					}else if (node == Node.SAMPLING_UNIT_ATTRIBUTE){
+					}else if (node == Node.SAMPLING_UNIT_ATTRIBUTE ||
+							node == Node.SAMPLING_UNIT_ATTRIBUTE_OBS || 
+							node == Node.SAMPLING_UNIT_ATTRIBUTE_TRK ){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_ATTRIBUTE_ICON);
 					}else if (node == Node.MISSION_LEADER){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_LEADER_ICON);
@@ -117,6 +123,10 @@ public class FiltersTreeNode implements IItemTreeNode{
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.MISSION_MEMBER_ICON);
 					}else if (node == Node.TRACKTYPE){
 						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.SAMPLING_UNIT_RECON_ICON);
+					}else if (node == Node.OBSERVATION_SAMPLING_UNIT){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.OBS_SAMPLING_UNIT_ICON);
+					}else if (node == Node.TRACK_SAMPLING_UNIT){
+						return EcologicalRecordsPlugIn.getDefault().getImageRegistry().get(EcologicalRecordsPlugIn.TRK_SAMPLING_UNIT_ICON);
 					}
 				}
 				if (element instanceof SamplingUnit){
@@ -124,6 +134,9 @@ public class FiltersTreeNode implements IItemTreeNode{
 						return null;
 					}
 					return ((SamplingUnit) element).getType().getImage();
+				}
+				if (element instanceof SamplingUnitWrapper){
+					return getImage(((SamplingUnitWrapper) element).getSamplingUnit());
 				}
 //				if (element instanceof MissionTrack){
 //					return SamplingUnit.GeometryType.RECON.getImage();

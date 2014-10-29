@@ -55,16 +55,15 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.ISurveyGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
-import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
@@ -73,7 +72,6 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
@@ -212,15 +210,15 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					
 					if (!needsObservationValue){
 						
-						HasObservationFilterVisitor visitor = new HasObservationFilterVisitor();
-						visitor.visit(valueFilter.getFilter());
-						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
+						SurveyHasObservationFilterVisitor visitor = new SurveyHasObservationFilterVisitor();
+						valueFilter.getFilter().accept(visitor);
+						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter() || visitor.hasSamplingUnitObservationFilter()){
 							needsObservationValue = true;
 						}
 						
 						visitor.clear();
-						visitor.visit(rateFilter.getFilter());
-						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
+						rateFilter.getFilter().accept(visitor);
+						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter() || visitor.hasSamplingUnitObservationFilter()){
 							needsObservationRate = true;
 						}
 					}
@@ -234,7 +232,6 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter);
 					try{
-						SamplingUnitFilterProcessor.updateSamplingUnitFilter(valueFilter.getFilter(), SamplingUnitFilter.Source.OBSERVATION);
 						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, new SubProgressMonitor(monitor, 10));
 					}finally{
 						filterer.dropTemporaryTables(c);
@@ -259,7 +256,6 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						monitor.worked(10);
 					}else{
 						rateTable = createTempTableName();
-						SamplingUnitFilterProcessor.updateSamplingUnitFilter(rateFilter.getFilter(), SamplingUnitFilter.Source.OBSERVATION);
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter);
 						try{
 							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, new SubProgressMonitor(monitor, 10));

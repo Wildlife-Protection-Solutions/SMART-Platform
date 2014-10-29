@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.er.query.ui.panels.item;
 
-import java.util.List;
-
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;

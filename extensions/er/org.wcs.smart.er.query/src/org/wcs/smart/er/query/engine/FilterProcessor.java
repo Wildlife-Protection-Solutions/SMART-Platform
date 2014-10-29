@@ -49,9 +49,10 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
-import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -59,7 +60,6 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
-import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -85,7 +85,7 @@ public class FilterProcessor implements IFilterProcessor {
 	private DerbySurveyQueryEngine engine;
 	private SurveyDesignFilter designFilter;
 	
-	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
+	private SurveyHasObservationFilterVisitor observationFilterVisitor = new SurveyHasObservationFilterVisitor();
 	private MissionPropertyFilterCollectorVisitor mpcollector = new MissionPropertyFilterCollectorVisitor();
 	private SamplingUnitAttributeFilterCollectorVisitor sucollector = new SamplingUnitAttributeFilterCollectorVisitor();
 	
@@ -311,9 +311,7 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(prefix(MissionDay.class));
 		sql.append(".mission_uuid "); //$NON-NLS-1$
 		
-		if (dateFilter != null && 
-				(dateFilter.getDateFieldOption() == MissionStartDateField.INSTANCE ||
-				dateFilter.getDateFieldOption() == MissionEndDateField.INSTANCE)){
+		if (dateFilter != null){
 			String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 			if (filter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$
@@ -330,7 +328,7 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(".uuid = mt.mission_uuid"); //$NON-NLS-1$
 		}
 
-		if (populateObservation || dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE){
+		if (populateObservation ){
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(SurveyWaypoint.class));
 			sql.append(" on "); //$NON-NLS-1$
@@ -352,15 +350,7 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append(".uuid "); //$NON-NLS-1$
 			usedTables.add(Waypoint.class);
 			usedTables.add(SurveyWaypoint.class);
-			
-			if (dateFilter != null && dateFilter.getDateFilterOption() == WaypointDateField.INSTANCE) {
-				String filter = SurveyFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
-				if (filter.length() > 0) {
-					sql.append(" and "); //$NON-NLS-1$
-					sql.append(filter);
-				}
-			}
-			
+
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(SamplingUnit.class));
 			sql.append(" on "); //$NON-NLS-1$
@@ -405,8 +395,10 @@ public class FilterProcessor implements IFilterProcessor {
 			@Override
 			public void visit(IFilter filter) {
 				if (needstracks[0]) return;
-				if (filter instanceof SamplingUnitFilter
-						&& ((SamplingUnitFilter)filter).getSource() == Source.TRACK ){
+				if ((filter instanceof SamplingUnitFilter
+						&& ((SamplingUnitFilter)filter).getSource() == Source.TRACK) ||
+					(filter instanceof SamplingUnitAttributeFilter &&
+						((SamplingUnitAttributeFilter)filter).getSource() == Source.TRACK)){
 					needstracks[0] = true;
 				}
 				
@@ -414,6 +406,9 @@ public class FilterProcessor implements IFilterProcessor {
 		};
 		queryFilter.accept(missionTracks);
 		if (needstracks[0]){
+			if (populateObservation){
+				throw new SQLException("Cannot process a query that filters both observation and track items.");
+			}
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(MissionTrack.class));
 			sql.append(" on "); //$NON-NLS-1$

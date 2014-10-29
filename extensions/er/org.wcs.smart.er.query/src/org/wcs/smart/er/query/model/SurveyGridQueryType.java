@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.HasTrackFilterVisitor;
+import org.wcs.smart.er.query.engine.SurveyHasObservationFilterVisitor;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.internal.Messages;
@@ -41,10 +43,12 @@ import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
@@ -177,9 +181,10 @@ public class SurveyGridQueryType implements IQueryType {
 		//validate query
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
+		GridQueryDefinition def = null;
 		try{
 			Parser parser = new Parser(is);
-			parser.GridQuery();
+			def = parser.GridQuery();
 		}catch (Exception ex){
 			return ex.getMessage();
 		}finally{
@@ -188,6 +193,46 @@ public class SurveyGridQueryType implements IQueryType {
 			} catch (IOException e) {
 				//eatme
 			}
+		}
+		
+		boolean hasObservationValue = false;
+		boolean hasObservationFilter = false;
+		boolean hasTrackFilter = false;
+		
+		HasObservationValueVisitor v1 = new HasObservationValueVisitor();
+		def.getValuePart().accept(v1);
+		hasObservationValue = v1.hasAttribute() || v1.hasCategory();
+		
+		SurveyHasObservationFilterVisitor v2 = new SurveyHasObservationFilterVisitor();
+		if (def.getValueFilter() != null && def.getValueFilter().getFilter() != null){
+			def.getValueFilter().getFilter().accept(v2);
+			hasObservationFilter = v2.hasAttributeFilter() || v2.hasCategoryFilter() || v2.hasSamplingUnitObservationFilter();
+		}
+		
+		if (!hasObservationFilter){
+			if (def.getRateFilter() != null && def.getRateFilter().getFilter() != null){
+				def.getRateFilter().getFilter().accept(v2);
+				hasObservationFilter = v2.hasAttributeFilter() || v2.hasCategoryFilter() || v2.hasSamplingUnitObservationFilter();
+			}
+		}
+
+		HasTrackFilterVisitor v3 = new HasTrackFilterVisitor();
+		if (def.getValueFilter() != null && def.getValueFilter().getFilter() != null){
+			def.getValueFilter().getFilter().accept(v3);
+			hasTrackFilter = v3.hasTrack();
+		}
+		if (!hasTrackFilter){
+			if (def.getRateFilter() != null && def.getRateFilter().getFilter() != null){
+				def.getRateFilter().getFilter().accept(v3);
+				hasTrackFilter = v3.hasTrack();
+			}
+		}
+		
+		if (hasObservationValue && hasTrackFilter){
+			return Messages.SurveyGridQueryType_SummaryQueryError1;
+		}
+		if (hasTrackFilter && hasObservationFilter){
+			return Messages.SurveyGridQueryType_SummaryQueryError2;
 		}
 		return null;
 	}

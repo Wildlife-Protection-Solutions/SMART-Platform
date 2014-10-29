@@ -55,7 +55,7 @@ public class SamplingUnitAttributeFilter implements IFilter {
 	/**
 	 * Creates a new filter
 	 * 
-	 * @param key key of the form "s:suattribute:<TYPE>:<ATTRIBUTE KEY>"
+	 * @param key key of the form "s:suattribute:<TYPE>:<ATTRIBUTE KEY>:<WPT|OBS>"
 	 * @return
 	 */
 	public static SamplingUnitAttributeFilter createFilter(String key, Operator op, Object value){
@@ -63,9 +63,9 @@ public class SamplingUnitAttributeFilter implements IFilter {
 		
 		String keyString = bits[3];
 		String strtype = bits[2];
-		
+		SamplingUnitFilter.Source source = SamplingUnitFilter.keyToSource(bits[4]);
 		Attribute.AttributeType type = Attribute.decodeAttributeTypeKey(strtype);
-		SamplingUnitAttributeFilter filter = new SamplingUnitAttributeFilter(keyString, type, op, value);
+		SamplingUnitAttributeFilter filter = new SamplingUnitAttributeFilter(keyString, type, op, value, source);
 		return filter;
 	}
 	
@@ -75,7 +75,10 @@ public class SamplingUnitAttributeFilter implements IFilter {
 	private Object value;
 	private SamplingUnitFilter.Source joinTable;
 	
-	public SamplingUnitAttributeFilter(String attributeKey, Attribute.AttributeType type, Operator op, Object value){
+	public SamplingUnitAttributeFilter(String attributeKey, 
+			Attribute.AttributeType type, 
+			Operator op, Object value, SamplingUnitFilter.Source source){
+		this.joinTable = source;
 		this.samplingUnitAttributeKey = attributeKey;
 		this.op = op;
 		this.value = value;
@@ -128,7 +131,7 @@ public class SamplingUnitAttributeFilter implements IFilter {
 	
 	@Override
 	public String asString() {
-		String key = "s:suattribute:" + type.typeKey  + ":" + samplingUnitAttributeKey + " " + op.asSmartValue() ;  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+		String key = "s:suattribute:" + type.typeKey  + ":" + samplingUnitAttributeKey + ":" + joinTable.queryKey + " " + op.asSmartValue() ;  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		 if (type == AttributeType.NUMERIC){
 			return key + " " + ((Double)value).toString();  //$NON-NLS-1$  
 		}else if (type == AttributeType.TEXT){
@@ -150,7 +153,7 @@ public class SamplingUnitAttributeFilter implements IFilter {
 			SamplingUnitAttribute sa = (SamplingUnitAttribute) session.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.eq("keyId", samplingUnitAttributeKey)).list().get(0); //$NON-NLS-1$
-			DropItem di = SurveyDropItemFactory.INSTANCE.createSamplingUnitAttributeDropItem(sa);
+			DropItem di = SurveyDropItemFactory.INSTANCE.createSamplingUnitAttributeDropItem(sa, joinTable);
 			
 			if (type.equals(AttributeType.NUMERIC) ||
 					type.equals(AttributeType.TEXT)){

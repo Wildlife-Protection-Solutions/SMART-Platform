@@ -32,10 +32,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.ISurveyQuery;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
+import org.wcs.smart.er.query.model.SurveyObservationQueryType;
+import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.er.query.ui.SurveyDesignDialog;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
+import org.wcs.smart.er.query.ui.dropitems.SamplingUnitAttributeDropItem;
+import org.wcs.smart.er.query.ui.dropitems.SamplingUnitDropItem;
 import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.query.model.Query;
@@ -128,17 +134,52 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	 * adds a drop item;setting the survey design if appropriate
 	 */
 	public void addItem(DropItem item) {
+		configureSamplingUnitDropItem(item);
 		super.addItem(item);
 		if (item instanceof ISurveyDesignDropItem) {
 			((ISurveyDesignDropItem) item).setSurveyDesign(currentDesign);
 		}
 	}
 
+	private void configureSamplingUnitDropItem(DropItem item){
+		String key = currentQuery.getQuery().getType().getKey();
+	
+		if (item instanceof SamplingUnitDropItem){
+			SamplingUnitDropItem suItem = (SamplingUnitDropItem) item;
+		
+			//these have fixed source; others are variable and defined 
+			// elsewhere
+			if (key.equals(MissionTrackQueryType.KEY)){
+				suItem.setSource(Source.TRACK);
+			}else if (key.equals(SurveyWaypointQueryType.KEY)){
+				suItem.setSource(Source.OBSERVATION);
+			}else if (key.equals(SurveyObservationQueryType.KEY)){
+				suItem.setSource(Source.OBSERVATION);
+			}
+		}else if (item instanceof SamplingUnitAttributeDropItem){
+			SamplingUnitAttributeDropItem suItem = (SamplingUnitAttributeDropItem) item;
+			
+			//these have fixed source; others are variable and defined 
+			// elsewhere
+			if (key.equals(MissionTrackQueryType.KEY)){
+				suItem.setSource(Source.TRACK);
+			}else if (key.equals(SurveyWaypointQueryType.KEY)){
+				suItem.setSource(Source.OBSERVATION);
+			}else if (key.equals(SurveyObservationQueryType.KEY)){
+				suItem.setSource(Source.OBSERVATION);
+			}
+		}
+	}
 	/**
 	 * adds a collection of drop items; sets the 
 	 * survey designs if appropriate
 	 */
 	public void addItems(Collection<DropItem> items) {
+		if (items != null){
+			for (DropItem item : items){
+				configureSamplingUnitDropItem(item);
+			}
+		}
 		super.addItems(items);
 		for (DropItem item : super.items) {
 			if (item instanceof ISurveyDesignDropItem) {
