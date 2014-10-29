@@ -124,6 +124,7 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 	public String asQueryPart() {
 		StringBuilder sql = new StringBuilder();
 		sql.append(ObserverDropItem.KEY_PART); 
+		sql.append(":"); //$NON-NLS-1$
 		if (selectedItems != null && selectedItems.size() > 0){
 			for (ListItem li : selectedItems){
 				sql.append(SmartUtils.encodeHex(li.getUuid()) + ":"); //$NON-NLS-1$
