@@ -1218,7 +1218,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			return "sum(distance)"; //$NON-NLS-1$
 		case NUM_HOURS:
 			if (!hasAreaGroupBy){
-				return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))"; //$NON-NLS-1$
+				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end / 60.0))"; //$NON-NLS-1$
 			}else{
 				return "sum(hours)"; //$NON-NLS-1$
 			}
@@ -1226,7 +1226,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			return "count(pl_member)"; //$NON-NLS-1$
 		case MAN_HOURS:
 			if (!hasAreaGroupBy){
-				return "sum({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 60.0 * 60.0))"; //$NON-NLS-1$
+				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end  / 60.0))"; //$NON-NLS-1$
 			}else{
 				return "sum(hours)"; //$NON-NLS-1$
 			}
@@ -1267,7 +1267,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case NUM_HOURS:
 			if (!hasAreaGroupBy){
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
-						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time"; //$NON-NLS-1$
+						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time," + //$NON-NLS-1$
+						tablePrefix(PatrolLegDay.class) + ".rest_minutes as pld_rest_minutes "; //$NON-NLS-1$
 			}else{
 				StringBuilder append = new StringBuilder();
 				StringBuilder valueSql = new StringBuilder();
@@ -1292,7 +1293,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			if (!hasAreaGroupBy){
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
-						tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
+						tablePrefix(PatrolLegDay.class) + ".rest_minutes as pld_rest_minutes," + //$NON-NLS-1$
+						tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member "; //$NON-NLS-1$
 			}else{
 				StringBuilder valueSql = new StringBuilder();
 				StringBuilder append = new StringBuilder();
