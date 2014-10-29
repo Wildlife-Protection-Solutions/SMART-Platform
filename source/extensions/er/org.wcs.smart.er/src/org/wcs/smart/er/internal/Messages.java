@@ -592,12 +592,6 @@ public class Messages extends NLS {
 	public static String SurveyDesignFilterDialog_Title;
 	public static String SurveyDesignImportHandler_0;
 	public static String SurveyDesignImportHandler_1;
-	public static String SurveyDesignImportHandler_10;
-	public static String SurveyDesignImportHandler_11;
-	public static String SurveyDesignImportHandler_13;
-	public static String SurveyDesignImportHandler_14;
-	public static String SurveyDesignImportHandler_15;
-	public static String SurveyDesignImportHandler_16;
 	public static String SurveyDesignImportHandler_2;
 	public static String SurveyDesignImportHandler_3;
 	public static String SurveyDesignImportHandler_4;

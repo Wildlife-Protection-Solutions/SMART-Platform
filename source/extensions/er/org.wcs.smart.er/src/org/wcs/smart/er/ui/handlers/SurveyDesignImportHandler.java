@@ -21,44 +21,12 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
-import java.text.ParseException;
-import java.util.List;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.ui.handlers.HandlerUtil;
-import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.common.control.XmlImportDialog;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.SurveyEventHandler;
-import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.MissionProperty;
-import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
-import org.wcs.smart.er.ui.SurveyDesignListView;
-import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
-import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
-import org.wcs.smart.er.xml.SurveyDesignFromXmlConverter;
-import org.wcs.smart.er.xml.SurveyDesignXMLManager;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.er.ui.surveydesign.importing.ImportSurveyDesignWizard;
 
 /**
  * Handler for importing entity types.
@@ -68,157 +36,14 @@ import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 public class SurveyDesignImportHandler extends AbstractHandler {
 
-	private String errorMessage = null;
-	private Exception exception = null;
-	private SurveyDesign newDesign = null;
-	
 	@Override
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 
-		ImportEntityTypeDialog dialog = new ImportEntityTypeDialog(HandlerUtil.getActiveShell(event));
-		if (dialog.open() != Window.OK){
-			return null;
-		}
-			
-		final List<String> importFiles = dialog.getFileNames();
-		
-		errorMessage = null;
-		exception = null;
-		newDesign = null;
-		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
-		try{
-			pmd.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					monitor.beginTask(Messages.SurveyDesignImportHandler_0, importFiles.size());
-					
-					monitor.subTask(Messages.SurveyDesignImportHandler_1);
-					org.wcs.smart.er.xml.model.surveydesign.SurveyDesign xmlsd = null;
-					for(String fileString : importFiles){
-						File file = new File(fileString);
-						try{
-							FileInputStream fin = new FileInputStream(file);
-							try{
-								xmlsd = SurveyDesignXMLManager.readDataModel(fin);
-							}finally{
-								fin.close();
-							}
-						}catch (Exception ex){
-							errorMessage = Messages.SurveyDesignImportHandler_2;
-							exception = ex;
-							return;
-						}
-						monitor.worked(1);
-					
-					
-						monitor.subTask(Messages.SurveyDesignImportHandler_3);
-				
-						Session session = HibernateManager.openSession();
-						try{
-							SurveyDesign sd = SurveyDesignFromXmlConverter.fromXml(xmlsd, session);
-						
-						//	ensure key doesn't already exist
-							List<?> existingDesigns = session.createCriteria(SurveyDesign.class)
-								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))  //$NON-NLS-1$
-								.add(Restrictions.eq("keyId", sd.getKeyId())).list(); //$NON-NLS-1$
-							if (existingDesigns.size() > 0){
-								errorMessage = MessageFormat.format(Messages.SurveyDesignImportHandler_4, new Object[]{sd.getKeyId()});
-								return;
-							}
-						//	save to the database
-							try{						
-								session.beginTransaction();
-												
-								//update/add new mission properties	
-								for( MissionProperty mp : sd.getMissionProperties()){
-									session.saveOrUpdate(mp.getAttribute());
-								}
-							
+		ImportSurveyDesignWizard wizard = new ImportSurveyDesignWizard();
+		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
+		wd.open();
 
-								//update/add new sampling unit attributes
-								for (SurveyDesignSamplingUnitAttribute sdua: sd.getSamplingUnitAttributes()){
-									session.saveOrUpdate(sdua.getSamplingUnitAttribute());
-								}
-							
-								//save survey design
-								session.saveOrUpdate(sd);
-							
-								//save sampling Units
-								List<SamplingUnit> units =  SurveyDesignFromXmlConverter.getSamplingUnits(xmlsd, sd, session);
-								for (SamplingUnit su : units){
-									session.saveOrUpdate(su);
-								}
-	
-								session.getTransaction().commit();
-								newDesign = sd;
-							}catch (Exception ex){
-								session.getTransaction().rollback();
-								throw ex;
-							}
-						}catch(ParseException parse){
-							errorMessage = parse.getMessage();
-							exception = parse;
-							return;
-						}catch(Exception ex){
-							errorMessage = "An Error occured when loading Survey Design: " + "\n\n" + ex.getMessage(); //$NON-NLS-1$ //$NON-NLS-2$
-							exception = ex;
-							return;
-						}finally{
-							session.close();
-						}
-					}//end loop of each xml file.
-					
-					
-					if (newDesign != null){
-						SurveyEventHandler.getInstance().fireEvent(SurveyEventHandler.EventType.SURVEY_DESIGN_ADDED, newDesign);
-					}
-				}
-			});
-			}catch (Exception ex){
-				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-			}
-		
-		
-		if (errorMessage != null || exception != null){
-			EcologicalRecordsPlugIn.displayLog(errorMessage != null ? errorMessage : exception.getMessage(), exception);
-		}else if (newDesign != null){
-			//open editor
-			try {
-				FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
-				PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(new SurveyDesignEditorInput(newDesign.getName(), newDesign.getUuid(), newDesign.getKeyId(), newDesign.getState()), SurveyDesignEditor.ID);
-			} catch (PartInitException e) {
-
-			}
-			
-		}
 		return null;
 	}
 	
-	class ImportEntityTypeDialog extends XmlImportDialog{
-
-		public ImportEntityTypeDialog(Shell parentShell) {
-			super(parentShell);
-		}
-
-		protected void okPressed() {
-			super.okPressed();
-		}
-		
-		protected Control createDialogArea(Composite parent) {
-
-			Composite container = (Composite) super.createDialogArea(parent);
-			
-			setTitle(Messages.SurveyDesignImportHandler_10);
-			setMessage(Messages.SurveyDesignImportHandler_11);
-			getShell().setText(Messages.SurveyDesignImportHandler_10);
-			
-			return container;
-
-		}
-		
-	}
-	
-
 }
