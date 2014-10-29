@@ -115,8 +115,8 @@ public class ImportSurveyDesignDesignsPage extends WizardPage{
 		});
 					
 		setControl(main);
-		setTitle("Import Survey Design(s)");
-		setMessage("Select the survey design(s) to import.");
+		setTitle(Messages.ImportSurveyDesignWizard_Title);
+		setMessage(Messages.ImportSurveyDesignDesignsPage_Message);
 		
 	}
 

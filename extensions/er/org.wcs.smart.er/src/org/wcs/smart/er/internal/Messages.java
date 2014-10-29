@@ -198,6 +198,28 @@ public class Messages extends NLS {
 	public static String ImportOptionDialog_Message;
 	public static String ImportOptionDialog_NewLabel;
 	public static String ImportOptionDialog_Title;
+
+	public static String ImportSurveyDesignCaPage_ConservationArea;
+
+	public static String ImportSurveyDesignCaPage_Message;
+
+	public static String ImportSurveyDesignDesignsPage_Message;
+
+	public static String ImportSurveyDesignFilesPage_AllFiles;
+
+	public static String ImportSurveyDesignFilesPage_Files;
+
+	public static String ImportSurveyDesignFilesPage_Message;
+
+	public static String ImportSurveyDesignFilesPage_Xml;
+
+	public static String ImportSurveyDesignSourcePage_ConservationArea;
+
+	public static String ImportSurveyDesignSourcePage_File;
+
+	public static String ImportSurveyDesignSourcePage_Message;
+
+	public static String ImportSurveyDesignWizard_Title;
 	public static String ImportWizard_ErrorTitle;
 	public static String ImportWizard_IdNoUnique;
 	public static String ImportWizard_ImportError;

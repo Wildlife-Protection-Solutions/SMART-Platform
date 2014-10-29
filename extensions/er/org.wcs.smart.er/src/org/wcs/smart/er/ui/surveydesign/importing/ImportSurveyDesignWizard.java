@@ -76,7 +76,7 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 	private SurveyDesign newDesign = null;
 	
 	public ImportSurveyDesignWizard() {
-		setWindowTitle("Import Survey Design(s)");
+		setWindowTitle(Messages.ImportSurveyDesignWizard_Title);
 		super.setNeedsProgressMonitor(true);
 	}
 
