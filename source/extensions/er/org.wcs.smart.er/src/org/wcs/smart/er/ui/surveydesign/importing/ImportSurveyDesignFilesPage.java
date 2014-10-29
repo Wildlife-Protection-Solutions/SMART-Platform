@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -72,7 +73,7 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 		main.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText("File(s):");
+		lbl.setText(Messages.ImportSurveyDesignFilesPage_Files);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		final ListViewer lstFiles = new ListViewer(main, SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
@@ -103,7 +104,7 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 						SWT.OPEN | SWT.MULTI);
 				
 				String[] extensions = new String[]{"*.xml", "*.*"}; //$NON-NLS-1$ //$NON-NLS-2$
-				String[] names = new String[]{"Xml", "All Files"};
+				String[] names = new String[]{Messages.ImportSurveyDesignFilesPage_Xml, Messages.ImportSurveyDesignFilesPage_AllFiles};
 				
 				fd.setFilterExtensions(extensions);
 				fd.setFilterNames(names);
@@ -141,8 +142,8 @@ public class ImportSurveyDesignFilesPage extends WizardPage {
 		});
 		
 		
-		setTitle("Import Survey Design(s)");
-		setMessage("Select Survey Design XML file(s) to import");
+		setTitle(Messages.ImportSurveyDesignWizard_Title);
+		setMessage(Messages.ImportSurveyDesignFilesPage_Message);
 		setPageComplete(false);
 		setControl(main);
 	}

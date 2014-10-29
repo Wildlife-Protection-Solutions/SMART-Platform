@@ -27,6 +27,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.er.internal.Messages;
 
 /**
  * Wizard page to select the import source
@@ -58,15 +59,15 @@ public class ImportSurveyDesignSourcePage extends WizardPage {
 		main.setLayout(new GridLayout(1, false));
 
 		opFile = new Button(main, SWT.RADIO);
-		opFile.setText("Import from file");
+		opFile.setText(Messages.ImportSurveyDesignSourcePage_File);
 		opFile.setSelection(true);
 		
 		opCa = new Button(main, SWT.RADIO);
-		opCa.setText("Import from another Conservation Area");
+		opCa.setText(Messages.ImportSurveyDesignSourcePage_ConservationArea);
 
 		
-		setTitle("Import Survey Design(s)");
-		setMessage("Select where you want to import survey design(s) from");
+		setTitle(Messages.ImportSurveyDesignWizard_Title);
+		setMessage(Messages.ImportSurveyDesignSourcePage_Message);
 		setPageComplete(true);
 		setControl(main);
 	

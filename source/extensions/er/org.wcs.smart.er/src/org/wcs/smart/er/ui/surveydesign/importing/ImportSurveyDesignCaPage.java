@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
@@ -69,7 +70,7 @@ public class ImportSurveyDesignCaPage extends WizardPage {
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(top, SWT.NONE);
-		l.setText("Conservation Area:");
+		l.setText(Messages.ImportSurveyDesignCaPage_ConservationArea);
 		
 		cmbViewer = new ComboViewer(top, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -98,8 +99,8 @@ public class ImportSurveyDesignCaPage extends WizardPage {
 		
 		
 		setControl(main);
-		setTitle("Import Survey Design(s)");
-		setMessage("Select the Conservation Area to import survey design(s) from.");
+		setTitle(Messages.ImportSurveyDesignWizard_Title);
+		setMessage(Messages.ImportSurveyDesignCaPage_Message);
 	}
 	
 	public ConservationArea getConservationArea(){
