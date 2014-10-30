@@ -162,6 +162,9 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 			}
 			monitor.worked(1);
 
+			if (store.getSchema().getCoordinateReferenceSystem() == null){
+				throw new Exception(Messages.ShpSamplingUnitImporter_ProjectionNotFound);
+			}
 			MathTransform transform = null;
 			if (!CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS,store.getSchema().getCoordinateReferenceSystem())){
 				transform = CRS.findMathTransform(store.getSchema().getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS);

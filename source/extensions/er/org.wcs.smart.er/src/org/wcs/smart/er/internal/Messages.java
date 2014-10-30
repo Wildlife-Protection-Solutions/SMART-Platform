@@ -542,6 +542,8 @@ public class Messages extends NLS {
 	public static String ShpSamplingUnitImporter_GeomTypeNotSupported3;
 	public static String ShpSamplingUnitImporter_InvalidGeometryType;
 	public static String ShpSamplingUnitImporter_Progress1;
+
+	public static String ShpSamplingUnitImporter_ProjectionNotFound;
 	public static String ShpSamplingUnitImporter_SamplingUnitTypeError;
 	public static String SplitTool_ToolError;
 	public static String StatusComposite_Active;
