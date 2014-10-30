@@ -24,7 +24,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.v200.Upgrader112To200;
 import org.wcs.smart.upgrade.v300.Upgrader200To300;
 import org.wcs.smart.upgrade.v300.Upgrader300To302;
-import org.wcs.smart.upgrade.v400.Upgrader302To400;
+import org.wcs.smart.upgrade.v310.Upgrader302To310;
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
@@ -99,7 +99,7 @@ public class UpgradeEngine {
 				case V300:
 					Upgrader300To302.upgrade(s, monitor);
 				case V302:
-					Upgrader302To400.upgrade(s, monitor);
+					Upgrader302To310.upgrade(s, monitor);
 				default:
 					break;
 				}

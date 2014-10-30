@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.upgrade.v400;
+package org.wcs.smart.upgrade.v310;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,10 +39,10 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
-public class Upgrader302To400 {
+public class Upgrader302To310 {
 	
 	public static void upgrade(Session s, IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader302To400_progresslabel);
+		monitor.subTask(Messages.Upgrader302To310_progresslabel);
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -87,10 +87,8 @@ public class Upgrader302To400 {
 		c.createStatement().execute(sql);
 		
 		/* VERSION UDATE */ 
-		sql = "update smart.db_version set version = '4.0.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
+		sql = "update smart.db_version set version = '3.1.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
-		
-		
 		
 		c.commit();
 	}
