@@ -135,7 +135,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	 */
 	public static boolean isValid(URL url){
 		if (url.getProtocol().equals(PROTOCOL)){
-			if (url.getHost().equals(HOST) && url.getPath().equals("/")){ //$NON-NLS-1$
+			if (url.getHost().equals(HOST) && url.getPath().startsWith("/er/")){ //$NON-NLS-1$
 				return true;
 			}
 		}
