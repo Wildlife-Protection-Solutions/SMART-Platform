@@ -546,9 +546,7 @@ public class TracksComposite extends Composite implements MapPart{
 		toolComp.createComposite(mapComp);
 		MapInfoAreaComposite infoComp = new MapInfoAreaComposite(mapComp, SWT.NONE, mapViewer) ;
 		infoComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-//		mapViewer.getMap().get
-//		layer.getStyleBlackboard().get(SLDContent.ID);
+		toolComp.selectTool(MapToolComposite.UDIG_PAN_ID);
 	}
 	
 	private void updateMapSelection(){
