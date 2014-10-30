@@ -79,9 +79,6 @@ public class Upgrader302To310 {
 		sql = "update smart.observation_options set observer = false"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
 		
-		sql = "alter table smart.cm_attribute_list add column list_order integer"; //$NON-NLS-1$
-		c.createStatement().execute(sql);
-		
 		/* configurable model */
 		sql = "grant select on smart.configurable_model to analyst"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
