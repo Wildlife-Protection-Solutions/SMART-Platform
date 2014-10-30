@@ -151,10 +151,9 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		//run the startup script which initializes the splash screen elements
 		startup();
 
-		
 		//auto-login for testing
-		txtUserName.setText("smart"); //$NON-NLS-1$
-		txtPassword.setText("smart"); //$NON-NLS-1$
+//		txtUserName.setText("smart"); //$NON-NLS-1$
+//		txtPassword.setText("smart"); //$NON-NLS-1$
 		//handleButtonOKWidgetSelected();
 
 		doEventLoop();
