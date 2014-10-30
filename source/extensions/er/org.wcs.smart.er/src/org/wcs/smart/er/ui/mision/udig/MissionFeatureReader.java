@@ -82,16 +82,23 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	public void close() throws IOException {
 	}
 	
+	//String spec = 
+	//"fid:String,id:Integer,date:Date,sampling_unit_id:String,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
 	private SimpleFeature createFeature(SurveyWaypoint point){
 		String fid = point.getWaypoint().getId() + "." + SmartUtils.encodeHex(point.getWaypoint().getUuid()); //$NON-NLS-1$
 		
-		Object[] data = new Object[6];
+		Object[] data = new Object[7];
 		data[0] = fid;
 		data[1] = point.getWaypoint().getId();
 		data[2] = point.getWaypoint().getDateTime();
-		data[3] = point.getWaypoint().getObservationsAsString();
-		data[4] = point.getWaypoint().getComment();
-		data[5] = gf.createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));		
+		if (point.getSamplingUnit() != null){
+			data[3] = point.getSamplingUnit().getId();
+		}else{
+			data[3] = ""; //$NON-NLS-1$
+		}
+		data[4] = point.getWaypoint().getObservationsAsString();
+		data[5] = point.getWaypoint().getComment();
+		data[6] = gf.createPoint(new Coordinate(point.getWaypoint().getX(),point.getWaypoint().getY()));		
 		
 		return new SurveyFeature(SimpleFeatureBuilder.build(featureType, data, fid));
 	}
