@@ -219,6 +219,12 @@ public class Messages extends NLS {
 
 	public static String ImportSurveyDesignSourcePage_Message;
 
+	public static String ImportSurveyDesignWizard_Error;
+
+	public static String ImportSurveyDesignWizard_Report_Message;
+
+	public static String ImportSurveyDesignWizard_Report_Title;
+
 	public static String ImportSurveyDesignWizard_Title;
 	public static String ImportWizard_ErrorTitle;
 	public static String ImportWizard_IdNoUnique;
@@ -609,6 +615,8 @@ public class Messages extends NLS {
 	public static String SurveyDesignExportHandler_SurveyDesignsLabels;
 	public static String SurveyDesignExportHandler_Title;
 	public static String SurveyDesignFromXmlConverter_0;
+
+	public static String SurveyDesignFromXmlConverter_1;
 
 	public static String SurveyDesignFromXmlConverter_MissingSuAttribute;
 	public static String SurveyDesignFilterDialog_Message;

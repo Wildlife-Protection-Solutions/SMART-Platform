@@ -28,6 +28,8 @@ import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Language;
@@ -149,8 +151,13 @@ public class SurveyDesignFromXmlConverter {
 		
 			if(success == false){
 				//no config model found
-				throw new ParseException(
-						MessageFormat.format(Messages.SurveyDesignFromXmlConverter_0, new Object[]{cmName}), 0);
+				final String msg = MessageFormat.format(Messages.SurveyDesignFromXmlConverter_0, cmName, surveyDesign.getName());
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.SurveyDesignFromXmlConverter_1, msg);
+					}
+				});
 			}
 		}
 		
@@ -338,7 +345,7 @@ public class SurveyDesignFromXmlConverter {
 			if (xmlDefaultName != null){
 				toUpdate.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(),xmlDefaultName);
 			}else{
-				if (required){
+				if (required && !names.isEmpty()){
 					toUpdate.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), 
 						names.get(0).getValue());
 				}

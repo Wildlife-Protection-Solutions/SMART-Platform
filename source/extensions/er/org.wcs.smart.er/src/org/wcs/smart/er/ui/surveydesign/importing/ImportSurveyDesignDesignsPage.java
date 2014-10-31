@@ -163,5 +163,16 @@ public class ImportSurveyDesignDesignsPage extends WizardPage{
 		j.schedule();
 		setPageComplete(false);
 	}
+
+	public List<SurveyDesign> getDesigns() {
+		Object[] checkedElements = tblEntities.getCheckedElements();
+		List<SurveyDesign> designs = new ArrayList<SurveyDesign>(checkedElements.length);
+		for (Object obj : checkedElements) {
+			if (obj instanceof SurveyDesign) {
+				designs.add((SurveyDesign)obj);
+			}
+		}
+		return designs;
+	}
 	
 }
