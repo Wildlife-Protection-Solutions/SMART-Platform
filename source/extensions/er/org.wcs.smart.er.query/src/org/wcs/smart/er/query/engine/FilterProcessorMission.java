@@ -40,10 +40,8 @@ import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.model.filter.AttributeInfo;
@@ -523,7 +521,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		String lTempTable = engine.createTempTableName();
 		for (AttributeInfo key : keys){
 			monitor.subTask(Messages.FilterProcessor_progress5  + key.getKey());
-			
+
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
@@ -547,7 +545,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 					sql.append(prefix(SamplingUnitAttributeValue.class) + "." + key.getColumn()); //$NON-NLS-1$						
 				}
 				
-				sql.append(" as "); //$NON-NLS-1$
+				sql.append(" as col_"); //$NON-NLS-1$
 				sql.append(key.getKey());
 				sql.append(" "); //$NON-NLS-1$
 				
@@ -562,16 +560,27 @@ public class FilterProcessorMission implements IFilterProcessor {
 				sql.append(" join "); //$NON-NLS-1$
 				sql.append(namePrefix(SamplingUnit.class));
 				sql.append(" on " + prefix(SamplingUnitAttributeValue.class) + ".su_uuid= " + prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(namePrefix(SurveyWaypoint.class));
-				sql.append(" on " + prefix(SurveyWaypoint.class) + ".sampling_unit_uuid= " + prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				
-				sql.append(" join "); //$NON-NLS-1$
-				sql.append(namePrefix(Waypoint.class));
-				sql.append(" on " + prefix(SurveyWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(MissionTrack.class));
+				sql.append(" on " + prefix(MissionTrack.class) + ".sampling_unit_uuid= " + prefix(SamplingUnit.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(MissionDay.class));
+				sql.append(" on " + prefix(MissionTrack.class) + ".mission_day_uuid = " + prefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(Mission.class));
+				sql.append(" on " + prefix(MissionDay.class) + ".mission_uuid = " + prefix(Mission.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(Survey.class));
+				sql.append(" on " + prefix(Mission.class) + ".survey_uuid = " + prefix(Survey.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				sql.append(" join "); //$NON-NLS-1$
+				sql.append(namePrefix(SurveyDesign.class));
+				sql.append(" on " + prefix(Survey.class) + ".survey_design_uuid = " + prefix(SurveyDesign.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
 				if (dateFilter != null) {
 					String dfilter = SurveyFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 					if (dfilter.length() > 0) {
@@ -581,7 +590,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 				}
 				
 				if (caFilter != null) {
-					String cfilter = SurveyFilterSqlGenerator.INSTANCE. asSql(caFilter, prefix(Waypoint.class));
+					String cfilter = SurveyFilterSqlGenerator.INSTANCE. asSql(caFilter, prefix(SurveyDesign.class));
 					if (cfilter.length() > 0) {
 						sql.append(" and "); //$NON-NLS-1$
 						sql.append(cfilter);
