@@ -186,8 +186,8 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 								fin.close();
 							}
 						}catch (Exception ex){
-							EcologicalRecordsPlugIn.displayLog(Messages.SurveyDesignImportHandler_2, ex);
-							break; //continue importing other files
+							EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.SurveyDesignImportHandler_2, file.getName()), ex);
+							continue; //continue importing other files
 						}
 
 						try{
@@ -201,7 +201,7 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 							monitor.worked(1);
 						}catch(ParseException parse){
 							EcologicalRecordsPlugIn.displayLog(parse.getMessage(), parse);
-							break; //continue importing other files;
+							continue; //continue importing other files;
 						}
 					}//end loop of each xml file.
 					session.close();
