@@ -104,8 +104,10 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private ISurveyEventListener missionDeleteListener = new ISurveyEventListener() {
 		@Override
 		public void event(Object o) {
-			Mission mission = (Mission)o;
-			if (mission.equals(MissionEditor.this.mission)){
+			if ((o instanceof Mission &&  
+			     mission.equals((Mission)o)) || 
+			     (o instanceof SurveyDesign &&
+			    mission.getSurvey().getSurveyDesign().equals((SurveyDesign)o))){
 				MissionEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 
 					@Override
@@ -191,6 +193,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		super();
 
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_DELETED, missionDeleteListener);
+		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DESIGN_DELETED, missionDeleteListener);
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, missionModifiedListener);
 		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DELETED, surveyDeleteListener);
 		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DESIGN_MODIFIED, missionModifiedListener);
@@ -207,7 +210,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	@Override
 	public void dispose() {
 		super.dispose();
-		
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_DELETED, missionDeleteListener);
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_DELETED, missionDeleteListener);
 		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, missionModifiedListener);
 		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DELETED, surveyDeleteListener);
