@@ -133,36 +133,39 @@ public class AttributePage extends WizardPage {
 			createGeometryAttributeFields(importer, g, fields);
 		}
 		
-		Group g2 = new Group(main, SWT.NONE);
-		g2.setText(Messages.AttributePage_OptionalLabel);
-		g2.setLayout(new GridLayout(2, false));
-		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		viewers = new HashMap<SamplingUnitAttribute, ComboViewer>();
-		String[] attFields = new String[fields.length +1];
-		attFields[0] = ""; //$NON-NLS-1$
-		for (int i = 0; i < fields.length; i ++){
-			attFields[i+1] = fields[i];
-		}
 		List<SurveyDesignSamplingUnitAttribute> atts = new ArrayList<SurveyDesignSamplingUnitAttribute>();
 		atts.addAll(design.getSamplingUnitAttributes());
-		Collections.sort(atts, new Comparator<SurveyDesignSamplingUnitAttribute>() {
-			@Override
-			public int compare(SurveyDesignSamplingUnitAttribute o1, SurveyDesignSamplingUnitAttribute o2) {
-				return Collator.getInstance().compare(o1.getSamplingUnitAttribute().getName(), o2.getSamplingUnitAttribute().getName());
+		viewers = new HashMap<SamplingUnitAttribute, ComboViewer>();
+		if (atts.size() > 0){
+			Group g2 = new Group(main, SWT.NONE);
+			g2.setText(Messages.AttributePage_OptionalLabel);
+			g2.setLayout(new GridLayout(2, false));
+			g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			String[] attFields = new String[fields.length +1];
+			attFields[0] = ""; //$NON-NLS-1$
+			for (int i = 0; i < fields.length; i ++){
+				attFields[i+1] = fields[i];
 			}
-		});
-		
-		for (SurveyDesignSamplingUnitAttribute sda: atts){
-			l = new Label(g2, SWT.NONE);
-			l.setText(sda.getSamplingUnitAttribute().getName() + ":"); //$NON-NLS-1$
 			
-			ComboViewer viewer = new ComboViewer(g2, SWT.DROP_DOWN | SWT.READ_ONLY);
-			viewer.setLabelProvider(new LabelProvider());
-			viewer.setContentProvider(ArrayContentProvider.getInstance());
-			viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-			viewer.setInput(attFields);
+			Collections.sort(atts, new Comparator<SurveyDesignSamplingUnitAttribute>() {
+				@Override
+				public int compare(SurveyDesignSamplingUnitAttribute o1, SurveyDesignSamplingUnitAttribute o2) {
+					return Collator.getInstance().compare(o1.getSamplingUnitAttribute().getName(), o2.getSamplingUnitAttribute().getName());
+				}
+			});
 			
-			viewers.put(sda.getSamplingUnitAttribute(), viewer);
+			for (SurveyDesignSamplingUnitAttribute sda: atts){
+				l = new Label(g2, SWT.NONE);
+				l.setText(sda.getSamplingUnitAttribute().getName() + ":"); //$NON-NLS-1$
+				
+				ComboViewer viewer = new ComboViewer(g2, SWT.DROP_DOWN | SWT.READ_ONLY);
+				viewer.setLabelProvider(new LabelProvider());
+				viewer.setContentProvider(ArrayContentProvider.getInstance());
+				viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+				viewer.setInput(attFields);
+				
+				viewers.put(sda.getSamplingUnitAttribute(), viewer);
+			}
 		}
 		
 		if (attributesOnly){
