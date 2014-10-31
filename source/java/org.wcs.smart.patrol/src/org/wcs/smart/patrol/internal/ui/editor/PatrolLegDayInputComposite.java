@@ -278,19 +278,6 @@ public class PatrolLegDayInputComposite {
 			lblImportWaypoints.setVisible(false);
 			
 		}
-	
-		//setup employees
-		List<Employee> emps = new ArrayList<Employee>();
-		for (PatrolLegMember m : patrolLegDate.getPatrolLeg().getMembers()){
-			emps.add(m.getMember());
-		}
-		Collections.sort(emps, new Comparator<Employee>() {
-			@Override
-			public int compare(Employee arg0, Employee arg1) {
-				return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
-			}
-		});
-		observationEditor.setObservers(emps);
 	}
 
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
@@ -1104,6 +1091,24 @@ public class PatrolLegDayInputComposite {
 			}else if (column == OtColumn.COMMENT){
 				return commentEditor;
 			}else if (column == OtColumn.OBSERVATION){
+				//setup employees; if observer is being tracked;
+				//we do this each time to ensure the observer list
+				//is up-to-date
+				if (editor.getPatrolEditor().getOptions().getTrackObserver()){
+					List<Employee> emps = new ArrayList<Employee>();
+					for (PatrolLegMember m : patrolLegDate.getPatrolLeg().getMembers()){
+						emps.add(m.getMember());
+					}
+					Collections.sort(emps, new Comparator<Employee>() {
+						@Override
+						public int compare(Employee arg0, Employee arg1) {
+							return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+						}
+					});
+					observationEditor.setObservers(emps);
+				}else{
+					observationEditor.setObservers(null);
+				}
 				return observationEditor;
 			}
 			return null;

@@ -57,6 +57,10 @@ public class Messages extends NLS {
 	public static String CSVImportConfiguration_2;
 	public static String CSVImportConfiguration_9;
 
+	public static String EmployeeDeleteAdvisor_DeleteError;
+
+	public static String EmployeeDeleteAdvisor_InvalidObjectType;
+
 	public static String ImportCSVDetailsComposite_0;
 	public static String ImportCSVDetailsComposite_1;
 	public static String ImportCSVDetailsComposite_10;

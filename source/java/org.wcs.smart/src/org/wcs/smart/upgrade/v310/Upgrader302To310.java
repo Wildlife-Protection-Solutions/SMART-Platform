@@ -69,7 +69,7 @@ public class Upgrader302To310 {
 		String sql = "alter table smart.wp_observation add column employee_uuid char(16) for bit data"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
 		
-		sql = "alter table smart.wp_observation add constraint obs_employee_uuid_fk FOREIGN KEY (employee_uuid) references smart.employee(uuid) on UPDATE RESTRICT ON DELETE CASCADE"; //$NON-NLS-1$
+		sql = "alter table smart.wp_observation add constraint obs_employee_uuid_fk FOREIGN KEY (employee_uuid) references smart.employee(uuid) on UPDATE RESTRICT ON DELETE RESTRICT"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
 		
 		/* add observer options */

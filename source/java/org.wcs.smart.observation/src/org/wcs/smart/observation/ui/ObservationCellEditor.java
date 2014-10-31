@@ -89,8 +89,8 @@ public class ObservationCellEditor extends DialogCellEditor {
 	private Display focusDisplay;
 	
 	private List<Category> currentSelection = null;	//current catetory selected from tree drop down
-	private List<Employee> observers;
-	private ConfigurableModel cmModel;
+	private List<Employee> observers = null;
+	private ConfigurableModel cmModel = null;
 	
 	/**
 	 * Job for loading data model for tree drop down

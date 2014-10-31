@@ -75,6 +75,7 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.ui.newwizard.CommentComposite;
 import org.wcs.smart.incident.ui.newwizard.DateTimeComposite;
@@ -115,7 +116,6 @@ public class IncidentSummaryPage extends EditorPart {
 	private Text txtDistance;
 	private Text txtDirection;
 	private ListViewer attachments;
-	private List<Employee> employees = null;
 	private TreeViewer dataViewer  = null;
 	
 	public IncidentSummaryPage(IncidentEditor editor){
@@ -189,6 +189,7 @@ public class IncidentSummaryPage extends EditorPart {
 			this.txtDate.setText(DateFormat.getDateInstance().format(incident.getDateTime()));
 			this.txtTime.setText(DateFormat.getTimeInstance().format(incident.getDateTime()));
 			ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+			
 			Point p = Projection.transform(incident.getX(), incident.getY(), observationOptions.getViewProjection());
 			this.txtLocation.setText(p.getX() + Messages.IncidentSummaryPage_LocationSeparator + p.getY());
 		
@@ -530,34 +531,41 @@ public class IncidentSummaryPage extends EditorPart {
 		wd.open();
 	}
 	
+	private List<Employee> employees;
 	private List<Employee> getEmployees(){
-		if (employees == null){
-			Job j = new Job(Messages.IncidentSummaryPage_EmployeeLoadJobName){
-				@Override
-				protected IStatus run(IProgressMonitor monitor) {
-					Session s = HibernateManager.openSession();
-					try{
+		employees = null;
+		Job j = new Job(Messages.IncidentSummaryPage_EmployeeLoadJobName){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				try{
+					ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
+					if (!observationOptions.getTrackObserver()){
+						employees = null;
+					}else{
 						employees = HibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), s);
-					}finally{
-						s.close();
 					}
+				}finally{
+					s.close();
+				}
+				if (employees != null){
 					Collections.sort(employees, new Comparator<Employee>() {
 						@Override
 						public int compare(Employee arg0, Employee arg1) {
 							return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
 						}
 					});
-					return Status.OK_STATUS;
 				}
-			};
-			j.schedule();
-			
-			try {
-				j.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				return Status.OK_STATUS;
 			}
+		};
+		j.schedule();
+			
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			IncidentPlugIn.log(e.getMessage(), e);
 		}
 		return employees;
 		

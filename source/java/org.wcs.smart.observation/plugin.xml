@@ -24,6 +24,10 @@
             advisor="org.wcs.smart.observation.internal.advisor.CategoryAttributeDMAdvisor"
             class="org.wcs.smart.ca.datamodel.CategoryAttribute">
       </DeleteAdvisor>
+      <DeleteAdvisor
+            advisor="org.wcs.smart.observation.internal.advisor.EmployeeDeleteAdvisor"
+            class="org.wcs.smart.ca.Employee">
+      </DeleteAdvisor>
    </extension>
    <extension
          point="org.eclipse.ui.views">
