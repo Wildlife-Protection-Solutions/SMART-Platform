@@ -494,7 +494,11 @@ public class MissionDayComposite {
 		timeEditor = new TimeCellEditor(observationTable.getTable());
 		attachmentEditor = new AttachmentCellEditor(observationTable.getTable());
 		commentEditor = new TextCellEditor(observationTable.getTable(), SWT.MULTI | SWT.WRAP);
-		observationEditor = new ObservationCellEditor(observationTable.getTable());
+		if (editor.getMissionEditor().getConfigurableModel() != null){
+			observationEditor = new ObservationCellEditor(observationTable.getTable(), editor.getMissionEditor().getConfigurableModel());
+		}else{
+			observationEditor = new ObservationCellEditor(observationTable.getTable());
+		}
 		samplingUnitEditor = new SamplingUnitCellEditor(observationTable.getTable(), false);
 		
 		observationTableColumns = new HashMap<OtColumn, TableViewerColumn>();
