@@ -201,6 +201,7 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 			design.setEndDate(copy.getEndDate());
 			design.setDescription(copy.getDescription());
 			design.setTrackDistanceDirection(copy.getTrackDistanceDirection());
+			design.setTrackObserver(copy.getTrackObserver());
 			design.setConservationArea(SmartDB.getCurrentConservationArea());
 			
 			design.setMissionProperties(new ArrayList<MissionProperty>());

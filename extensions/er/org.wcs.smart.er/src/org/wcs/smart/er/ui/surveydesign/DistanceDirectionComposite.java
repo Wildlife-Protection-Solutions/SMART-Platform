@@ -29,7 +29,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -44,6 +43,7 @@ import org.wcs.smart.util.SmartUtils;
 public class DistanceDirectionComposite extends SurveyDesignComposite {
 
 	private Button chDistance;
+	private Button chObserver;
 	
 	@Override
 	public Control createControl(Composite parent) {
@@ -52,11 +52,8 @@ public class DistanceDirectionComposite extends SurveyDesignComposite {
 		part.setLayout(new GridLayout(1, false));
 		
 		Composite inner = new Composite(part, SWT.NONE);
-		inner.setLayout(new GridLayout(2, false));
-		
-		Label l = new Label(inner, SWT.NONE);
-		l.setText(SmartUtils.formatStringForLabel(Messages.DistanceDirectionComposite_Label));
-		
+		inner.setLayout(new GridLayout(1, false));
+			
 		chDistance = new Button(inner, SWT.CHECK);
 		chDistance.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -64,6 +61,17 @@ public class DistanceDirectionComposite extends SurveyDesignComposite {
 				fireChangeListeners();	
 			}
 		});
+		chDistance.setText(SmartUtils.formatStringForLabel(Messages.DistanceDirectionComposite_Label));
+		
+		chObserver = new Button(inner, SWT.CHECK);
+		chObserver.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				fireChangeListeners();	
+			}
+		});
+		chObserver.setText(SmartUtils.formatStringForLabel(Messages.DistanceDirectionComposite_RecordObserverOption));
+
 		inner.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		part.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -73,11 +81,13 @@ public class DistanceDirectionComposite extends SurveyDesignComposite {
 	@Override
 	public void init(SurveyDesign design, Session session) {
 		chDistance.setSelection(design.getTrackDistanceDirection());
+		chObserver.setSelection(design.getTrackObserver());
 	}
 
 	@Override
 	public void updateDesign(SurveyDesign design) {
 		design.setTrackDistanceDirection(chDistance.getSelection());
+		design.setTrackObserver(chObserver.getSelection());
 	}
 
 

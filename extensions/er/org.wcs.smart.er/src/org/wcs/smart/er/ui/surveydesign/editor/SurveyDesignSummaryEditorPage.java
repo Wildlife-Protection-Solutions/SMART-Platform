@@ -79,6 +79,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	private Text txtDescription;
 	private Text txtConfigurableModel;
 	private Button btnDistance;
+	private Button btnObserver;
 	private TableViewer missionPropertiesList;
 	private TableViewer propertiesList;
 	
@@ -182,16 +183,28 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 
-		toolkit.createLabel(content, SmartUtils.formatStringForLabel(Messages.SurveyDesignSummaryEditorPage_DistanceDirectionLabel));
-		btnDistance = toolkit.createButton(content, "", SWT.CHECK); //$NON-NLS-1$
+		Label l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_ObservationOptions);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		((GridData)l.getLayoutData()).verticalIndent = 2;
+		
+		Composite opsComp = toolkit.createComposite(content);
+		opsComp.setLayout(new GridLayout(1, false));
+		
+		btnDistance = toolkit.createButton(opsComp, SmartUtils.formatStringForLabel(Messages.SurveyDesignSummaryEditorPage_DistanceDirectionLabel), SWT.CHECK); 
 		btnDistance.setEnabled(false);
 		btnDistance .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		createEditLink(content, PanelType.DISTANCE);
+		
+		btnObserver = toolkit.createButton(opsComp, SmartUtils.formatStringForLabel(Messages.SurveyDesignSummaryEditorPage_ObserverOption), SWT.CHECK); 
+		btnObserver.setEnabled(false);
+		btnObserver .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+				
+		Hyperlink link = createEditLink(content, PanelType.DISTANCE);
+		link.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));
 		
-		Label l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Description);
+		l = toolkit.createLabel(content, Messages.SurveyDesignSummaryEditorPage_Description);
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
 		txtDescription = toolkit.createText(content, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
@@ -322,6 +335,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 			txtConfigurableModel.setText(Messages.ConfigurableModelComposite_DataModel);
 		}
 		btnDistance.setSelection(design.getTrackDistanceDirection());
+		btnObserver.setSelection(design.getTrackObserver());
 		
 		missionPropertiesList.setInput(design.getMissionProperties().toArray());
 		propertiesList.setInput(design.getProperties().toArray());

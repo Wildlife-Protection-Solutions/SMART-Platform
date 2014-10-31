@@ -38,6 +38,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *       &lt;attribute name="startDate" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="endDate" type="{http://www.w3.org/2001/XMLSchema}date" />
  *       &lt;attribute name="trackDistanceDirection" type="{http://www.w3.org/2001/XMLSchema}boolean" />
+ *       &lt;attribute name="trackObserver" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="description" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="state" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="configurableModelName" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -77,6 +78,8 @@ public class SurveyDesign {
     protected XMLGregorianCalendar endDate;
     @XmlAttribute
     protected Boolean trackDistanceDirection;
+    @XmlAttribute
+    protected Boolean trackObserver;
     @XmlAttribute
     protected String description;
     @XmlAttribute
@@ -303,6 +306,30 @@ public class SurveyDesign {
         this.trackDistanceDirection = value;
     }
 
+    /**
+     * Gets the value of the trackObserver property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isTrackObserver() {
+        return trackObserver;
+    }
+
+    /**
+     * Sets the value of the trackObserver property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setTrackObserver(Boolean value) {
+        this.trackObserver = value;
+    }
+    
     /**
      * Gets the value of the description property.
      * 

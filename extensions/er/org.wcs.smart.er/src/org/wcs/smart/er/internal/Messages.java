@@ -105,6 +105,8 @@ public class Messages extends NLS {
 	public static String DescriptionComposite_Title;
 	public static String DistanceDirectionComposite_Description;
 	public static String DistanceDirectionComposite_Label;
+
+	public static String DistanceDirectionComposite_RecordObserverOption;
 	public static String DistanceDirectionComposite_Title;
 	public static String EcologicalRecordsPlugIn_ErrorDialogTitle;
 	public static String EditMissionAttributeDialog_DeleteButton;
@@ -654,6 +656,10 @@ public class Messages extends NLS {
 	public static String SurveyDesignSummaryEditorPage_Key;
 	public static String SurveyDesignSummaryEditorPage_Name;
 	public static String SurveyDesignSummaryEditorPage_NameColumn;
+
+	public static String SurveyDesignSummaryEditorPage_ObservationOptions;
+
+	public static String SurveyDesignSummaryEditorPage_ObserverOption;
 	public static String SurveyDesignSummaryEditorPage_Properties;
 	public static String SurveyDesignSummaryEditorPage_PropertiesDescription;
 	public static String SurveyDesignSummaryEditorPage_PropertiesSectionLabel;

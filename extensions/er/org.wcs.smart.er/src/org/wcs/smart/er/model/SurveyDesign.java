@@ -85,6 +85,7 @@ public class SurveyDesign extends NamedKeyItem {
 	private Date endDate;
 	
 	private boolean trackDistanceDirection;
+	private boolean trackObserver;
 	
 	private String description;
 	
@@ -141,6 +142,15 @@ public class SurveyDesign extends NamedKeyItem {
 		this.trackDistanceDirection = trackDistanceDirection;
 	}
 
+	@Column(name="observer")
+	public boolean getTrackObserver() {
+		return trackObserver;
+	}
+
+	public void setTrackObserver(boolean trackObserver) {
+		this.trackObserver = trackObserver;
+	}
+	
 	@Column(name="description")
 	public String getDescription() {
 		return description;

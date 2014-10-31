@@ -31,12 +31,15 @@ elementFormDefault="qualified">
     		<element name="SamplingUnit" type="tns:samplingUnit"
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
-    		<element ref="tns:Names" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element ref="tns:Names" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
     	</sequence>
     	<attribute name="startDate" type="date"></attribute>
     	<attribute name="endDate" type="date"></attribute>
     	<attribute name="trackDistanceDirection" type="boolean"></attribute>
-    	<attribute name="description" type="string"></attribute>
+        <attribute name="trackObserver" type="boolean"></attribute>
+        <attribute name="description" type="string"></attribute>
     	<attribute name="state" type="string"></attribute>
     	<attribute name="configurableModelName" type="string"></attribute>
     	<attribute name="keyid" type="string"></attribute>

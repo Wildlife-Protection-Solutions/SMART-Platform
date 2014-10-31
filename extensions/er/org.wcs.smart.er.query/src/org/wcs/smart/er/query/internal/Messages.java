@@ -217,6 +217,7 @@ public class Messages extends NLS {
 	public static String SurveyQueryColumn_MissionIdLabel;
 	public static String SurveyQueryColumn_MissionLeaderLabel;
 	public static String SurveyQueryColumn_MissionStartLabel;
+	public static String SurveyQueryColumn_ObserverLabel;
 	public static String SurveyQueryColumn_SuLabel;
 	public static String SurveyQueryColumn_SurveyDesignEnddateLabel;
 	public static String SurveyQueryColumn_SurveyDesignLabel;
