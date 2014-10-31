@@ -26,6 +26,9 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -43,6 +46,7 @@ import org.wcs.smart.er.model.SurveyDesign.State;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Survey design wizard page.
@@ -75,6 +79,16 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		cmbViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
+				if (x instanceof String){
+					createSurveyDesign();
+				}
+			}
+		});
 		
 		setTitle(Messages.SurveyDesignPage_Title);
 		setMessage(Messages.SurveyDesignPage_Message);
@@ -84,29 +98,41 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 	
 	@Override
 	public void initControls(Survey survey, Session session) {
-		
+		loadDesigns(session, survey.getSurveyDesign());
+	}
+	
+	private void loadDesigns(Session session, SurveyDesign init){
 		SurveyDesignFilter filter = new SurveyDesignFilter();
 		filter.setSurveyStates(new State[]{SurveyDesign.State.ACTIVE});
 		List<Object> items = new ArrayList<Object>();
 		items.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, filter));
 		items.add(Messages.SurveyDesignPage_NewDesignItem);
 		cmbViewer.setInput(items);
-
-		if (survey.getSurveyDesign() != null){
-			SurveyDesign sd = survey.getSurveyDesign();
-			
-			SurveyDesignEditorInput sdei = new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState());
+		
+		if (init != null){
+			SurveyDesignEditorInput sdei = new SurveyDesignEditorInput(init.getName(), init.getUuid(), init.getKeyId(), init.getState());
 			if (!items.contains(sdei)){
 				items.add(sdei);
 			}
 			cmbViewer.refresh();
 			cmbViewer.setSelection(new StructuredSelection(sdei));
-		}else{
-			
 		}
-		
 	}
 
+	private void createSurveyDesign(){
+		//New Survey Design Wizard...
+		//this will close the hibernate current hibernate session
+		SurveyDesign sd = NewSurveyDesignHandler.showNewDesignWizard(getShell());
+		if (sd == null || sd.getUuid() == null){
+			//new design not created
+			return;
+		}			
+		
+		Session session = HibernateManager.openSession();
+		loadDesigns(session, sd);
+	}
+	
+	
 	@Override
 	public boolean updateSurvey(Survey survey, Session session) {
 		Object x = ((StructuredSelection)cmbViewer.getSelection()).getFirstElement();
@@ -114,17 +140,8 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 			SurveyDesign sd = (SurveyDesign) session.load(SurveyDesign.class, ((SurveyDesignEditorInput) x).getUuid());
 			survey.setSurveyDesign(sd);
 			return true;
-		}else{
-			//New Survey Design Wizard...
-			//this will close the hibernate current hibernate session
-			SurveyDesign sd = NewSurveyDesignHandler.showNewDesignWizard(getShell());
-			if (sd == null || sd.getUuid() == null){
-				//new design not created
-				return false;
-			}			
-			survey.setSurveyDesign(sd);
-			return true;
 		}
+		return false;
 	}
 
 }

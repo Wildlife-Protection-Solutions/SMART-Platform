@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -42,6 +43,10 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler;
+import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
+import org.wcs.smart.er.ui.survey.wizard.NewSurveyWizard;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Allow users to select a survey for the mission.
@@ -82,6 +87,10 @@ public class SurveyComposite extends MissionComposite{
 		cmbSurveys.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				Object x = ((StructuredSelection)cmbSurveys.getSelection()).getFirstElement();
+				if (x instanceof String){
+					createSurvey();
+				}
 				fireChangeListeners();
 			}
 		});
@@ -96,7 +105,10 @@ public class SurveyComposite extends MissionComposite{
 		}else{
 			kids = SurveyHibernateManager.getInstance().getActiveSurveys(parentSurvey, s);
 		}
-		cmbSurveys.setInput(kids);
+		List<Object> inputs = new ArrayList<Object>();
+		inputs.addAll(kids);
+		inputs.add("< Create New Survey ... >");
+		cmbSurveys.setInput(inputs);
 	}
 	
 	/**
@@ -124,6 +136,19 @@ public class SurveyComposite extends MissionComposite{
 	public void init(Mission design, Session session) {
 	}
 
+	private void createSurvey(){
+		//New Survey ...
+		//this will close the hibernate current hibernate session
+		Survey newSurvey = NewSurveyHandler.newSurvey(cmbSurveys.getControl().getShell(), parentSurvey.getUuid(), null );
+		if (newSurvey == null){
+			//new survey not created
+			return;
+		}
+		session = HibernateManager.openSession();
+		refreshSurveys(session);
+		cmbSurveys.setSelection(new StructuredSelection(newSurvey));
+	}
+	
 	@Override
 	public void updateDesign(Mission mission) {
 		Object first = ((IStructuredSelection)cmbSurveys.getSelection()).getFirstElement() ;

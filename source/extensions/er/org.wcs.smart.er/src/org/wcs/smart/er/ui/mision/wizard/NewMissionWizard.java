@@ -238,10 +238,14 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
+		//session may be closed by new survey design wizard
+		if (!session.isOpen()){
+			session = HibernateManager.openSession();
+		}
+		
 		//update design with page values
 		if (event.getCurrentPage() instanceof MissionCompositeWizardPage){
 			((MissionCompositeWizardPage)event.getCurrentPage()).updateModel(newMission);
-			
 			MissionCompositeWizardPage p = (MissionCompositeWizardPage) event.getCurrentPage();
 			if (p.getComposite() instanceof SurveyDesignComposite){
 				this.parentDesign = ((SurveyDesignComposite)p.getComposite()).getSurveyDesign(session);
