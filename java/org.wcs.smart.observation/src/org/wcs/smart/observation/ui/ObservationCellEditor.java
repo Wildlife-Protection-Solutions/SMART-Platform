@@ -54,6 +54,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.internal.Messages;
@@ -79,7 +80,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 	
 	private Waypoint wp;	//waypoint being modified
 	private ObservationWizardDialog dialog;
-
+	
 	private boolean fireModify = true;	//if txtFilter change events to be fired
 	private boolean isEditable = false;	//if txtFilter is editable
 	private boolean dialogOpen = false;	//if dialog is being opend
@@ -89,6 +90,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 	
 	private List<Category> currentSelection = null;	//current catetory selected from tree drop down
 	private List<Employee> observers;
+	private ConfigurableModel cmModel;
 	
 	/**
 	 * Job for loading data model for tree drop down
@@ -133,12 +135,18 @@ public class ObservationCellEditor extends DialogCellEditor {
 		}
 	};
 	
+	
+	public ObservationCellEditor(Composite parent){
+		this(parent, null);
+	}
+	
 	/**
 	 * Creates a new observation cell editor
 	 * @param parent
 	 */
-	public ObservationCellEditor(Composite parent) {
+	public ObservationCellEditor(Composite parent, ConfigurableModel cmModel) {
 		super(parent);
+		this.cmModel = cmModel;
 		super.addListener(new ICellEditorListener() {
 			@Override
 			public void editorValueChanged(boolean oldValidState, boolean newValidState) {
@@ -437,7 +445,7 @@ public class ObservationCellEditor extends DialogCellEditor {
 		}
 		Waypoint wp = (Waypoint) super.getValue();
 
-		final ObservationWizard wizard = new ObservationWizard(wp, this.observers);
+		final ObservationWizard wizard = new ObservationWizard(wp, this.observers, this.cmModel);
 		if (currentSelection != null){
 			wizard.setInitialCategories(currentSelection);
 		}

@@ -36,8 +36,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
+import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider;
 import org.wcs.smart.observation.internal.Messages;
-import org.wcs.smart.observation.ui.input.SearchTree.IChangeListener;
 import org.wcs.smart.ui.properties.DataModelContentProvider;
 import org.wcs.smart.ui.properties.DataModelLabelProvider;
 
@@ -52,8 +53,7 @@ import org.wcs.smart.ui.properties.DataModelLabelProvider;
 public class ObservationWizardPage extends WizardPage implements IObservationWizardPage{
 
 	public static final String PAGE_NAME = Messages.ObservationWizardPage_PageName;
-
-	private TreeViewer dmTreeViewer = null;
+	
 	private SearchTree searchTree = null;
 	private boolean moveNext = true;
 	
@@ -76,21 +76,29 @@ public class ObservationWizardPage extends WizardPage implements IObservationWiz
 		
 		PatternFilter patternFilter = new PatternFilter();
 		
-		searchTree = new SearchTree(main,  SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER  | SWT.MULTI, patternFilter);
+		searchTree = new SearchTree(main,  SWT.H_SCROLL | SWT.V_SCROLL  | SWT.MULTI, patternFilter, ((ObservationWizard)getWizard()).getConfigurableModel() != null);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.heightHint = 400;
 		searchTree.setLayoutData(gd);
-		dmTreeViewer = searchTree.getViewer();
+		TreeViewer dmTreeViewer = searchTree.getViewer();
 		dmTreeViewer.setContentProvider(new DataModelContentProvider(true, true));
 		dmTreeViewer.setLabelProvider(new DataModelLabelProvider());
 		dmTreeViewer.setAutoExpandLevel(3);
 		dmTreeViewer.setInput(  ((ObservationWizard)getWizard()).getDataModel() ); 
 
+		TreeViewer cmTreeViewer = searchTree.getCmViewer();
+		if (cmTreeViewer != null){
+			cmTreeViewer.setContentProvider(new ConfigurableModelTreeContentProvider(true, false));
+			cmTreeViewer.setLabelProvider(new ConfigurableModelLabelProvider());
+			cmTreeViewer.setAutoExpandLevel(3);
+			cmTreeViewer.setInput(  ((ObservationWizard)getWizard()).getConfigurableModel() );
+		}
+		
 		for (int i = 0; i <  ((ObservationWizard)getWizard()).getCategoryCount(); i ++){
 			searchTree.selectedList.add(((ObservationWizard)getWizard()).getCategoryToProcess(i));
 		}
 		searchTree.listViewer.refresh(true);
-		searchTree.addChangeListener(new IChangeListener() {
+		searchTree.addChangeListener(new SearchTree.IChangeListener() {
 			
 			@Override
 			public void listModified() {
