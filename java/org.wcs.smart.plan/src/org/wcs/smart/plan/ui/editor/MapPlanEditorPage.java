@@ -84,8 +84,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 
 	private PlanEditor parentEditor;
 
-	private IViewportModelListener initListener = null; 
-	
 	private PlanTargetService planTargetService = null;
 	private PlanTargetService subPlanTargetService = null;
 	private LoadDefaultLayersJob loadDefaultLayers;
@@ -99,6 +97,9 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 	//returns all tracklogs for patrols related
 	//to the query
 	private IGeoResource patrolLayer = null;
+
+	private final Object lockObj = new Object();	
+	private boolean isDisposing = false;
 	
 	/*
 	 * Job for adding or refreshing the
@@ -115,23 +116,37 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			if (lPlan == null){
 				return Status.OK_STATUS;
 			}
-			try {
-				if (subPlanTargetService != null){
-					subPlanTargetService.refresh(lPlan, monitor);
-					mapViewer.getRenderManager().refresh(null);
-				}else{
+
+			if (subPlanTargetService == null) {
+				try {
 					//wait until plan target layer is added first
+					if (isDisposing) return Status.CANCEL_STATUS;
 					loadDefaultLayers.join();
+					if (isDisposing) return Status.CANCEL_STATUS;
 					addLayerJob.join();
-					subPlanTargetService = new PlanTargetService(lPlan, true);
-	    			List<IGeoResource> layers = (List<IGeoResource>) subPlanTargetService.resources(monitor);
-	    			AddLayersCommand command = new AddLayersCommand(layers, getMap().getLayersInternal().size());
-	    			getMap().sendCommandASync(command);
+					if (isDisposing) return Status.CANCEL_STATUS;
+				} catch (Exception e) {					
+					SmartPlanPlugIn.displayLog(Messages.MapPlanEditorPage_SubPlanError + e.getLocalizedMessage(), e);
 				}
-			} catch (Exception e) {					
-				SmartPlanPlugIn.displayLog(Messages.MapPlanEditorPage_SubPlanError + e.getLocalizedMessage(), e);
-				
 			}
+			
+			synchronized (lockObj) {
+				try {
+					if (subPlanTargetService != null){
+						subPlanTargetService.refresh(lPlan, monitor);
+						mapViewer.getRenderManager().refresh(null);
+					}else{
+						subPlanTargetService = new PlanTargetService(lPlan, true);
+		    			@SuppressWarnings("unchecked")
+						List<IGeoResource> layers = (List<IGeoResource>) subPlanTargetService.resources(monitor);
+		    			AddLayersCommand command = new AddLayersCommand(layers, getMap().getLayersInternal().size());
+		    			getMap().sendCommandASync(command);
+					}
+				} catch (Exception e) {					
+					SmartPlanPlugIn.displayLog(Messages.MapPlanEditorPage_SubPlanError + e.getLocalizedMessage(), e);
+				}
+			}
+			
 			return Status.OK_STATUS;
 		}
 		
@@ -144,34 +159,39 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 	 * the plan target layer to the map.
 	 */
 	private Job addLayerJob = new Job(Messages.MapPlanEditorPage_PlanJobName) {
+		
+		private IViewportModelListener initListener;
+		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
-			planTargetService = new PlanTargetService(parentEditor.getPlan(), false);
-			
 	    	try {
 	    		loadDefaultLayers.join();
-	    		
-	    		//target layer
-	    		final List<IGeoResource> layers = new ArrayList<IGeoResource>(planTargetService.resources(monitor));
-	    		IGeoResource tracks = createTrackPoints(monitor);
-	    		if (tracks != null){
-	    			layers.add(tracks);
-	    		}
-	    		AddPlanningLayers command = new AddPlanningLayers(layers);
-	    		getMap().sendCommandASync(command);
-	    		
-	    		initListener = new IViewportModelListener() {
-					@Override
-					public void changed(ViewportModelEvent event) {
-						if (getMap() != null){
-							getMap().getViewportModel().removeViewportModelListener(initListener);
-							getMap().sendCommandASync(new ZoomExtentCommand());
+	    		if (isDisposing) return Status.CANCEL_STATUS;
+
+	    		synchronized (lockObj) {
+	    			planTargetService = new PlanTargetService(parentEditor.getPlan(), false);
+					
+		    		//target layer
+		    		final List<IGeoResource> layers = new ArrayList<IGeoResource>(planTargetService.resources(monitor));
+		    		IGeoResource tracks = createTrackPoints(monitor);
+		    		if (tracks != null){
+		    			layers.add(tracks);
+		    		}
+		    		AddPlanningLayers command = new AddPlanningLayers(layers);
+		    		getMap().sendCommandASync(command);
+		    		
+		    		initListener = new IViewportModelListener() {
+						@Override
+						public void changed(ViewportModelEvent event) {
+							if (getMap() != null){
+								getMap().getViewportModel().removeViewportModelListener(initListener);
+								getMap().sendCommandASync(new ZoomExtentCommand());
+							}
+							
 						}
-						
-					}
-				};
-	    		getMap().getViewportModel().addViewportModelListener(initListener);
+					};
+		    		getMap().getViewportModel().addViewportModelListener(initListener);
+				}
 				
 			} catch (Exception e) {
 				return new Status(IStatus.ERROR, 
@@ -191,6 +211,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			
 			//add pq to map
 			IService service = QueryServiceFactory.generateQueryService(pq);
+			@SuppressWarnings("unchecked")
 			List<IGeoResource> layers = (List<IGeoResource>) service.resources(monitor);
 			if (layers.size() > 0){
 				patrolLayer = layers.get(0);
@@ -207,15 +228,17 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
     private Job refreshJob = new Job(Messages.MapPlanEditorPage_RefreshMapJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (planTargetService != null){
-				try {
-					planTargetService.refresh(parentEditor.getPlan(), null);
-				} catch (IOException e) {
-					SmartPlanPlugIn.log(Messages.MapPlanEditorPage_RefreshError, e);
+			synchronized (lockObj) {
+				if (planTargetService != null){
+					try {
+						planTargetService.refresh(parentEditor.getPlan(), null);
+					} catch (IOException e) {
+						SmartPlanPlugIn.log(Messages.MapPlanEditorPage_RefreshError, e);
+					}
 				}
+				//clear selection
+				mapViewer.getRenderManager().refresh(null);
 			}
-			//clear selection
-			mapViewer.getRenderManager().refresh(null);
 			return Status.OK_STATUS;
 		}
     };
@@ -226,19 +249,20 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
     private Job refreshPatrolsJob = new Job(Messages.MapPlanEditorPage_RefreshMapJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (patrolLayer != null){
-				try{
-					PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, monitor);
-					pq.clearCachedResults(); //clear cached results
-					if (pq != null){
-						pq.setQueryFilter(generateQueryString()); //update filter
+			synchronized (lockObj) {
+				if (patrolLayer != null){
+					try{
+						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, monitor);
+						pq.clearCachedResults(); //clear cached results
+						if (pq != null){
+							pq.setQueryFilter(generateQueryString()); //update filter
+						}
+					}catch (IOException e){
+						SmartPlanPlugIn.log("Error refreshing patrols layers." + e.getMessage(), e); //$NON-NLS-1$
 					}
-				}catch (IOException e){
-					SmartPlanPlugIn.log("Error refreshing patrols layers." + e.getMessage(), e); //$NON-NLS-1$
+					mapViewer.getRenderManager().refresh(null);
 				}
-				mapViewer.getRenderManager().refresh(null);
 			}
-			
 			return Status.OK_STATUS;
 		}
     };
@@ -311,45 +335,45 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
         addLayers();
 	}
 
-    @Override
-    public void dispose() {
-        super.dispose();
-        if (loadDefaultLayers != null){
-        	loadDefaultLayers.cancel();
-        	loadDefaultLayers = null;
-        }
-        addLayerJob.cancel();
-        addLayerJob = null;
-        
-        //dispose of patrol service
-        CatalogPlugin.getDefault().getLocalCatalog().remove(planTargetService);
-        planTargetService.dispose(null);
-        planTargetService = null;
-        CatalogPlugin.getDefault().getLocalCatalog().remove(subPlanTargetService);
-        subPlanTargetService.dispose(null);
-        subPlanTargetService = null;
-        
-        refreshJob.cancel();
-        refreshJob = null;
-        
-        if (patrolLayer != null){
-        	try{
-        		IService service = patrolLayer.resolve(IService.class, null);
-        		CatalogPlugin.getDefault().getLocalCatalog().remove(service);
-        		service.dispose(null);
-        		patrolLayer.dispose(null);
-        		patrolLayer = null;
-        	}catch(IOException ex){
-        		
-        	}
-        }
-        
-        
-        subPlanTargetService = null;
-        refreshPatrolsJob.cancel();
-        refreshPatrolsJob = null;
-    }
+	@Override
+	public void dispose() {
+		super.dispose();
+		isDisposing = true;
 
+		refreshSubPlanLayer.cancel();
+		if (loadDefaultLayers != null){
+			loadDefaultLayers.cancel();
+		}
+		addLayerJob.cancel();
+		refreshJob.cancel();
+		refreshPatrolsJob.cancel(); 
+
+		synchronized (lockObj) {
+			//dispose of patrol service
+			if (planTargetService != null) {
+				CatalogPlugin.getDefault().getLocalCatalog().remove(planTargetService);
+				planTargetService.dispose(null);
+			}
+
+			if (subPlanTargetService != null) {
+				CatalogPlugin.getDefault().getLocalCatalog().remove(subPlanTargetService);
+				subPlanTargetService.dispose(null);
+				subPlanTargetService = null;
+			}
+
+			if (patrolLayer != null){
+				try{
+					IService service = patrolLayer.resolve(IService.class, null);
+					CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+					service.dispose(null);
+					patrolLayer.dispose(null);
+					patrolLayer = null;
+				}catch(IOException ex){
+					SmartPlanPlugIn.log(ex.getMessage(), ex);
+				}
+			}
+		}
+	}
 
     private String generateQueryString(){
     	final Set<PatrolEditorInput> childPatrols = new HashSet<PatrolEditorInput>(); 
