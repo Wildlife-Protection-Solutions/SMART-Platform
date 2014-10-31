@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.SurveyListTreeNode;
@@ -78,7 +79,8 @@ public class NewSurveyHandler extends AbstractHandler {
 			}
 		}
 		
-		if (newSurvey(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey)) {
+		Survey newSurvey = newSurvey(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
+		if (newSurvey != null){
 			FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
 		}
 		
@@ -90,10 +92,15 @@ public class NewSurveyHandler extends AbstractHandler {
 	 * @param parent
 	 * @param parentDesign parent survey design; can be null if unknown
 	 * @param parentSurvey sibling survey; can be null if unknown
+	 * 
+	 * @return the newly created survey of null if not created
 	 */
-	public static boolean newSurvey(Shell parent, byte[] parentDesign, byte[] parentSurvey){
+	public static Survey newSurvey(Shell parent, byte[] parentDesign, byte[] parentSurvey){
 		NewSurveyWizard newWizard = new NewSurveyWizard(parentDesign, parentSurvey);
 		WizardDialog wd = new WizardDialog(parent, newWizard);
-		return wd.open() == WizardDialog.OK;
+		if (wd.open() == WizardDialog.OK){
+			return newWizard.getNewSurvey();
+		}
+		return null;
 	}
 }

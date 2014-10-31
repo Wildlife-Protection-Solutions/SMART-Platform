@@ -74,6 +74,14 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 		}
 	}
 	
+	/**
+	 * 
+	 * @return the newly create survey 
+	 */
+	public Survey getNewSurvey(){
+		return this.newSurvey;
+	}
+	
 	@Override
 	public void dispose(){
 		if (session.isOpen()){
@@ -144,14 +152,15 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		boolean update = ((INewSurveyWizardPage)event.getCurrentPage()).updateSurvey(newSurvey, session);
-		if (!update){
-			event.doit = false;
-		}
 		//session may be closed by new survey design wizard
 		if (!session.isOpen()){
 			session = HibernateManager.openSession();
 		}
+		boolean update = ((INewSurveyWizardPage)event.getCurrentPage()).updateSurvey(newSurvey, session);
+		if (!update){
+			event.doit = false;
+		}
+
 		((INewSurveyWizardPage)event.getTargetPage()).initControls(newSurvey, session);
 		
 		if (event.getTargetPage() == datePage){
