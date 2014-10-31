@@ -873,7 +873,7 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 										
 				sql.append(" as "); //$NON-NLS-1$
-				sql.append(key.getKey());
+				sql.append("col_" + key.getKey());
 				sql.append(" "); //$NON-NLS-1$
 				
 				sql.append("FROM "); //$NON-NLS-1$
