@@ -44,12 +44,10 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationAttachment;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -82,20 +80,20 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	private List<Category> toProcess;
 	private List<Employee> observers;
 	
-	private ObservationOptions ops = null;
 	private Employee observer = null;
 	private ConfigurableModel cm;
+	
+	private boolean trackObserver = false;
 	
 	/**
 	 * Creates a new observation wizard that displays only the
 	 * data model. 
 	 * 
 	 * @param wp waypoint to update
-	 * @param observers observer list
+	 * @param observers observer list; if null observer will not be recorded
 	 */
 	public ObservationWizard(Waypoint wp, List<Employee> observers){
 		this(wp, observers, null);
-		
 	}
 	
 	/**
@@ -103,7 +101,7 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * the configurable model. 
 	 * 
 	 * @param wp waypoint to update
-	 * @param observers observer list
+	 * @param observers observer list; if null observer will not be recorded
 	 * @param cm configurable model
 	 */
 	public ObservationWizard(Waypoint wp, List<Employee> observers, ConfigurableModel cm){
@@ -113,14 +111,13 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		super.setNeedsProgressMonitor(false);
 		
 		this.observers = observers;
-		
+		this.trackObserver = (observers != null);
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
 		if (this.cm != null){
 			this.cm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid());
 		}
 		
-		ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
 		session.update(wp);
 		
 		this.wp = wp;
@@ -157,8 +154,8 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	 * 
 	 * @return the observation options
 	 */
-	public ObservationOptions getObservationOptions(){
-		return this.ops;
+	public boolean getTrackObserver(){
+		return this.trackObserver;
 	}
 	
 	/**

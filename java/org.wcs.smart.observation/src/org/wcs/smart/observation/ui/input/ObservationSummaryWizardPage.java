@@ -99,7 +99,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 		parent.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)parent.getLayout()).marginHeight = 0;
 		
-		if (getWizardLocal().getObservationOptions().getTrackObserver()){
+		if (getWizardLocal().getTrackObserver()){
 			Composite observerComp = new Composite(parent, SWT.NONE);
 			observerComp.setLayout(new GridLayout(2, false));
 			((GridLayout)observerComp.getLayout()).marginHeight = 0;
@@ -132,8 +132,15 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				objects.addAll( getWizardLocal().getObservers() );
 			}
 			employeeViewer.setInput(objects);
-			if (getWizardLocal().getObserver() != null){
-				employeeViewer.setSelection(new StructuredSelection(getWizardLocal().getObserver()));
+			Employee selection = getWizardLocal().getObserver();
+			if (selection != null){
+				//ensure it is an option; even if not in the list
+				if (!objects.contains(selection)){
+					objects.add(selection);
+					employeeViewer.setInput(objects);
+				}
+				
+				employeeViewer.setSelection(new StructuredSelection(selection));
 			}
 		}
 		
