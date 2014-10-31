@@ -38,7 +38,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.observation.model.ObservationOptions;
 
 /**
  * Mission Day Page. It represents one day within a mission.
@@ -88,7 +87,6 @@ public class MissionDayPage extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 
-		ObservationOptions observationOptions = editor.getOptions();
 		frmSummary = toolkit.createScrolledForm(parent);
 
 		String errorMsg = editor.canEdit();
@@ -108,7 +106,7 @@ public class MissionDayPage extends EditorPart {
 		frmSummary.setText(text.toString());
 		frmSummary.getBody().setLayout(new GridLayout(1, false));
 		
-		dayComposite = new MissionDayComposite(this, observationOptions);
+		dayComposite = new MissionDayComposite(this);
 		dayComposite.createComposite(frmSummary.getBody(), toolkit);
 		dayComposite.initData();
 	}

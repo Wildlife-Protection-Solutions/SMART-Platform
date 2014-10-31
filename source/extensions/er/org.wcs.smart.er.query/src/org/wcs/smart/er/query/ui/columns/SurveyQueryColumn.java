@@ -73,7 +73,8 @@ public class SurveyQueryColumn extends QueryColumn {
 		WAYPOINT_Y(Messages.SurveyQueryColumn_YLabel, ColumnType.NUMBER, "waypoint:y"),  //$NON-NLS-1$
 		WAYPOINT_DIRECTION(Messages.SurveyQueryColumn_DirectionLabel, ColumnType.NUMBER,"waypoint:direction"),  //$NON-NLS-1$
 		WAYPOINT_DISTANCE(Messages.SurveyQueryColumn_DistanceLabel, ColumnType.NUMBER,"waypoint:distance"),  //$NON-NLS-1$
-		WAYPOINT_COMMENT(Messages.SurveyQueryColumn_CommentLabel, ColumnType.STRING,"waypoint:comment");  //$NON-NLS-1$
+		WAYPOINT_COMMENT(Messages.SurveyQueryColumn_CommentLabel, ColumnType.STRING,"waypoint:comment"),  //$NON-NLS-1$
+		WAYPOINT_OBSERVER(Messages.SurveyQueryColumn_ObserverLabel, ColumnType.STRING, "waypoint:observer");   //$NON-NLS-1$
 		
 		private String guiName;
 		private ColumnType type;
@@ -132,6 +133,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_DIRECTION: return item.getWaypointDirection(); 
 				case WAYPOINT_DISTANCE: return item.getWaypointDistance(); 
 				case WAYPOINT_COMMENT: return item.getWaypointComment(); 
+				case WAYPOINT_OBSERVER: return item.getWaypointObserver();
 			}
 		}else if (queryResultItem instanceof MissionTrackResultItem){
 			MissionTrackResultItem item = (MissionTrackResultItem)queryResultItem;
@@ -150,9 +152,6 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_TRACKDATE: return item.getTrackDate();
 				case MISSION_TRACKTYPE: return item.getTrackType().getGuiName();
 				case MISSION_TRACKID: return item.getTrackId();
-				case MISSION_TRACKLENGTH: return item.getTrackLength();
-					
-//				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 			}
 		}

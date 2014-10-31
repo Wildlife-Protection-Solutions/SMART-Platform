@@ -84,6 +84,7 @@ public class SurveyDesignFromXmlConverter {
 			surveyDesign.setEndDate(null);
 		}
 		surveyDesign.setTrackDistanceDirection(xml.isTrackDistanceDirection());
+		surveyDesign.setTrackObserver(xml.isTrackObserver());
 		surveyDesign.setDescription(xml.getDescription());
 		surveyDesign.setKeyId(xml.getKeyid());
 		importNames(xml.getNames(), surveyDesign, session, true);

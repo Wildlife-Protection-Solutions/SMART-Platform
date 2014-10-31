@@ -63,6 +63,7 @@ public class SurveyDesignImporter {
 		design.setEndDate(copy.getEndDate());
 		design.setDescription(copy.getDescription());
 		design.setTrackDistanceDirection(copy.getTrackDistanceDirection());
+		design.setTrackObserver(copy.getTrackObserver());
 		design.setConservationArea(SmartDB.getCurrentConservationArea());
 
 		importNames(session, design, copy.getNames(), true);

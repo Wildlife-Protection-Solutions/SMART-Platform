@@ -83,6 +83,7 @@ public class SurveyDesignToXmlConverter {
 		
 		//use distance and direction
 		xml.setTrackDistanceDirection(surveyDesign.getTrackDistanceDirection());
+		xml.setTrackObserver(surveyDesign.getTrackObserver());
 		
 		//description
 		xml.setDescription(surveyDesign.getDescription());

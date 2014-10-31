@@ -95,6 +95,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	
 	private Projection[] projections;
 	private Boolean trackDistanceDirection = null;
+	private Boolean trackObserver = null;
 	private ConfigurableModel configurableModel = null;
 	private ObservationOptions options;
 	
@@ -225,6 +226,8 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			
 			byte[] muuid = ((MissionEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
+			
+			
 			session.beginTransaction();
 			try{
 				this.mission = (Mission) session.load(Mission.class, muuid);
@@ -236,6 +239,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				}
 
 				this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();
+				this.trackObserver = mission.getSurvey().getSurveyDesign().getTrackObserver();
 				this.configurableModel = mission.getSurvey().getSurveyDesign().getConfigurableModel();
 				
 				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
@@ -252,15 +256,6 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		}
 		return this.mission;
 	}
-
-	/**
-	 * 
-	 * @return current observation options
-	 */
-	public ObservationOptions getOptions(){
-		return this.options;
-	}
-	
 	
 	/**
 	 * Editor selection provider.
@@ -280,6 +275,19 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 			getMission();
 		}
 		return this.trackDistanceDirection;
+	}
+	
+	/**
+	 * if the mission should record observer
+	 * for observations
+	 * 
+	 * @return
+	 */
+	public boolean trackObserver(){
+		if (this.trackObserver == null){
+			getMission();
+		}
+		return this.trackObserver;
 	}
 	
 	/**
@@ -367,6 +375,14 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	@Override
 	public boolean isSaveAsAllowed() {
 		return false;
+	}
+
+	/**
+	 * Current observation options as of time of editor load
+	 * @return
+	 */
+	public ObservationOptions getObservationOptions(){
+		return this.options;
 	}
 	
 	/**

@@ -23,11 +23,13 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Time;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -107,7 +109,6 @@ import org.wcs.smart.er.ui.mision.importwp.MissionImportGpsDataWizard;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
-import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
@@ -137,7 +138,6 @@ public class MissionDayComposite {
 	private Label txtDistance;
 	
 	private TableViewer observationTable;
-	private ObservationOptions observationOptions;
 	
 	private Hyperlink lnkImportWaypoints;
 	private TableViewer trackTable;
@@ -179,9 +179,8 @@ public class MissionDayComposite {
 		}
 	}
 
-	public MissionDayComposite(MissionDayPage editor, ObservationOptions observationOptions) {
+	public MissionDayComposite(MissionDayPage editor) {
 		this.editor = editor;
-		this.observationOptions = observationOptions;
 	}
 	
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
@@ -664,16 +663,7 @@ public class MissionDayComposite {
 				if (lnkEditTrack != null){
 					lnkEditTrack.setVisible(false);
 				}
-				
 			}
-		
-			List<Employee> emps = new ArrayList<Employee>();
-			for (MissionMember mm : missionDay.getMission().getMembers()){
-				emps.add(mm.getMember());
-				mm.getMember().getFullLabel();
-			}
-			observationEditor.setObservers(emps);
-			
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		} finally {
@@ -891,9 +881,9 @@ public class MissionDayComposite {
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
-			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getX());
+			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), editor.getMissionEditor().getObservationOptions().getViewProjection()).getX());
 		} else if (column == OtColumn.NORTH) {
-			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getY());
+			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), editor.getMissionEditor().getObservationOptions().getViewProjection()).getY());
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
@@ -1122,7 +1112,27 @@ public class MissionDayComposite {
 			case TIME: 			return timeEditor;
 			case ATTACHMENTS:	return attachmentEditor;
 			case COMMENT:		return commentEditor;
-			case OBSERVATION:	return observationEditor;
+			case OBSERVATION:
+				//setup employees here incase they have changed
+				if (editor.getMissionEditor().trackObserver()){
+					List<Employee> emps = new ArrayList<Employee>();
+					for (MissionMember mm : missionDay.getMission().getMembers()){
+						emps.add(mm.getMember());
+						mm.getMember().getFullLabel();
+					}
+					//sort
+					Collections.sort(emps, new Comparator<Employee>() {
+						@Override
+						public int compare(Employee arg0, Employee arg1) {
+							return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+						}
+					});
+					observationEditor.setObservers(emps);
+				}else{
+					observationEditor.setObservers(null);
+				}
+				
+				return observationEditor;
 			case SAMPLING_UNIT: return samplingUnitEditor;
 			default:
 				break;
