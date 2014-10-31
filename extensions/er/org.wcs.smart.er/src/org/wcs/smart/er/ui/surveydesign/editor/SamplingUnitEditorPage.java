@@ -326,6 +326,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		
 		createUnitsSection(sash, toolkit);
 		createMapsSection(sash,toolkit);
+		sash.setWeights(new int[]{35,65});
 		
 		
 		initValues();
