@@ -46,6 +46,10 @@ public class Messages extends NLS {
 	public static String CategoryDMAdvisor_DeleteError;
 	public static String CategoryDMAdvisor_Error_InvalidObjectType;
 
+	public static String CmSearchTree_ConfigurableModelOption;
+
+	public static String CmSearchTree_DataModelOption;
+
 	public static String CSVImportConfiguration_0;
 	public static String CSVImportConfiguration_1;
 	public static String CSVImportConfiguration_11;

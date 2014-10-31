@@ -43,11 +43,27 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 
 	private CmRootNode rootNode = new CmRootNode();
 	private boolean showRoot = false;
+	private boolean showAttributes = true;
 	private String message = null;
 	
+	/**
+	 * Creates a new content provider
+	 * 
+	 * @param showRoot if the root is to be displayed
+	 */
 	public ConfigurableModelTreeContentProvider(boolean showRoot) {
+		this(showRoot, true);
+	}
+	
+	/**
+	 * Creates a new content provider 
+	 * @param showRoot if the root is to be displayed
+	 * @param showAttributes if attributes are to be included
+	 */
+	public ConfigurableModelTreeContentProvider(boolean showRoot, boolean showAttributes) {
 		super();
 		this.showRoot = showRoot;
+		this.showAttributes = showAttributes;
 	}
 
 	@Override
@@ -79,9 +95,11 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 			if (nodes != null && !nodes.isEmpty()) {
 				return nodes.toArray();
 			}
-			List<CmAttribute> attributes = n.getCmAttributes();
-			if (attributes != null && !attributes.isEmpty()) {
-				return attributes.toArray();
+			if (showAttributes){
+				List<CmAttribute> attributes = n.getCmAttributes();
+				if (attributes != null && !attributes.isEmpty()) {
+					return attributes.toArray();
+				}
 			}
 		}
 		if (parentElement instanceof ConfigurableModel) {
@@ -112,7 +130,10 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		if (element instanceof CmNode) {
 			CmNode n = (CmNode) element;
 			List<CmNode> nodes = n.getChildren();
-			List<CmAttribute> attributes = n.getCmAttributes();
+			List<CmAttribute> attributes = null;
+			if (showAttributes){
+				attributes = n.getCmAttributes();
+			}
 			return (nodes != null && !nodes.isEmpty()) || (attributes != null && !attributes.isEmpty());
 		}
 		if (element instanceof ConfigurableModel) {

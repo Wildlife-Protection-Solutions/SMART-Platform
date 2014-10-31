@@ -41,6 +41,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -83,15 +84,31 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 	
 	private ObservationOptions ops = null;
 	private Employee observer = null;
+	private ConfigurableModel cm;
 	
 	/**
-	 * Creates a new wizard. 
+	 * Creates a new observation wizard that displays only the
+	 * data model. 
 	 * 
-	 * @param wp Waypoint to gather observations for
+	 * @param wp waypoint to update
+	 * @param observers observer list
 	 */
 	public ObservationWizard(Waypoint wp, List<Employee> observers){
-		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{String.valueOf(wp.getId())}));
+		this(wp, observers, null);
 		
+	}
+	
+	/**
+	 * Creates a new wizard that displays only the data model and 
+	 * the configurable model. 
+	 * 
+	 * @param wp waypoint to update
+	 * @param observers observer list
+	 * @param cm configurable model
+	 */
+	public ObservationWizard(Waypoint wp, List<Employee> observers, ConfigurableModel cm){
+		setWindowTitle(MessageFormat.format(Messages.ObservationWizard_PageName, new Object[]{String.valueOf(wp.getId())}));
+		this.cm = cm;
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(false);
 		
@@ -99,6 +116,9 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 		
 		session = HibernateManager.openSession(new AttachmentInterceptor());
 		session.beginTransaction();
+		if (this.cm != null){
+			this.cm = (ConfigurableModel) session.get(ConfigurableModel.class, cm.getUuid());
+		}
 		
 		ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
 		session.update(wp);
@@ -121,6 +141,16 @@ public class ObservationWizard extends Wizard implements IPageChangingListener{
 			}
 		}
 		this.workingObservations.putAll(observations);
+	}
+	
+	/**
+	 * The configurable model to display or null if configurable
+	 * model option not used.
+	 * 
+	 * @return
+	 */
+	public ConfigurableModel getConfigurableModel(){
+		return this.cm;
 	}
 	
 	/**

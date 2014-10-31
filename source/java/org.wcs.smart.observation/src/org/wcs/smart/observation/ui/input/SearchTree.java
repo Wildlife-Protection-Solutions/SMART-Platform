@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.observation.ui.input;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -73,6 +72,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.PlatformUI;
@@ -80,6 +81,7 @@ import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 
@@ -103,11 +105,6 @@ public class SearchTree extends Composite {
 	 * not yet been created.
 	 */
 	protected Text filterText;
-
-	/**
-	 * The number of items selected in the tree
-	 */
-	protected Label lblCountSelected;
 	
 	/**
 	 * The control representing the clear button for the filter text entry. This
@@ -121,6 +118,7 @@ public class SearchTree extends Composite {
 	 * <code>null</code> after the widget creation methods are complete.
 	 */
 	protected TreeViewer treeViewer;
+	protected TreeViewer cmTreeViewer;
 
 	/**
 	 * The list viewer for the selected items. 
@@ -176,6 +174,7 @@ public class SearchTree extends Composite {
 	private String previousFilterText;
 	private boolean narrowingDown;
 	private List<IChangeListener> changeListener = new ArrayList<IChangeListener>();
+	private TabFolder bits;
 	
 	/**
 	 * Image descriptor for enabled clear button.
@@ -205,6 +204,8 @@ public class SearchTree extends Composite {
 		}
 	}
 
+	private boolean hasCmOption;
+	
 	/**
 	 * Create a new instance of the receiver.
 	 * 
@@ -216,11 +217,19 @@ public class SearchTree extends Composite {
 	 *            the filter to be used
 	 * @param useNewLook
 	 *            <code>true</code> if the new 3.5 look should be used
+	 * @param hasCmOption <code>true</code> if the search tree should have
+	 * the ability to show a configurable model as well as the default model
+	 * 
 	 * @since 3.5
 	 */
-	public SearchTree(Composite parent, int treeStyle, PatternFilter filter) {
+	public SearchTree(Composite parent, int treeStyle, PatternFilter filter, 
+			boolean hasCmOption) {
 		super(parent, SWT.NONE);
 		this.parent = parent;
+		this.hasCmOption = hasCmOption;
+		if (!hasCmOption){
+			treeStyle = treeStyle | SWT.BORDER;
+		}
 		init(treeStyle, filter);
 	}
 	
@@ -241,7 +250,6 @@ public class SearchTree extends Composite {
 		createRefreshJob();
 		setInitialText(INITIAL_TEXT);
 		setFont(parent.getFont());
-
 	}
 
 	/**
@@ -271,11 +279,7 @@ public class SearchTree extends Composite {
 		filterComposite.setFont(parent.getFont());
 
 		createFilterControls(filterComposite);
-		filterComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING,
-				true, false));
-		
-		lblCountSelected = new Label(this, SWT.NONE);
-		lblCountSelected.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		filterComposite.setLayoutData(new GridData(SWT.FILL, SWT.BEGINNING, true, false));
 
 		treeComposite = new Composite(this, SWT.NONE);
 		GridLayout treeCompositeLayout = new GridLayout();
@@ -342,7 +346,33 @@ public class SearchTree extends Composite {
 		final Composite treeComp = new Composite(parent, SWT.NONE);
 		treeComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		treeViewer = doCreateTreeViewer(treeComp, style);
+		Composite dmTreeComp = treeComp;
+		Composite cmTreeComp = treeComp;
+		
+		if (hasCmOption){
+			bits = new TabFolder(treeComp, SWT.NONE);
+		
+			TabItem dmItem = new TabItem(bits, SWT.NONE);
+			dmItem.setText(Messages.CmSearchTree_DataModelOption);
+		
+			dmTreeComp = new Composite(bits, SWT.NONE);
+			GridLayout gl = new GridLayout();
+			gl.marginWidth = gl.marginHeight = 0;
+			dmTreeComp.setLayout(gl);
+			dmItem.setControl(dmTreeComp);
+		
+			TabItem cmItem = new TabItem(bits, SWT.NONE);
+			cmItem.setText(Messages.CmSearchTree_ConfigurableModelOption);
+			bits.setSelection(1);
+			cmTreeComp = new Composite(bits, SWT.NONE);
+			gl = new GridLayout();
+			gl.marginWidth = gl.marginHeight = 0;
+			cmTreeComp.setLayout(gl);
+			cmItem.setControl(cmTreeComp);
+		}
+		
+		treeViewer = doCreateTreeViewer(dmTreeComp, style);
+		treeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		treeViewer.getControl().addDisposeListener(new DisposeListener() {
 			/*
 			 * (non-Javadoc)
@@ -370,8 +400,40 @@ public class SearchTree extends Composite {
 				
 			}
 		});
-
 		treeViewer.addFilter(patternFilter);
+		
+		if (hasCmOption){
+			cmTreeViewer = doCreateTreeViewer(cmTreeComp, style);
+			cmTreeViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			cmTreeViewer.getControl().addDisposeListener(new DisposeListener() {
+				/*
+				 * (non-Javadoc)
+				 * 
+				 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+				 */
+				public void widgetDisposed(DisposeEvent e) {
+					refreshJob.cancel();
+				}
+			});
+			cmTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
+				
+				@Override
+				public void doubleClick(DoubleClickEvent event) {
+					addSelectionToList();
+				}
+			});
+			cmTreeViewer.getTree().addTraverseListener(new TraverseListener() {
+				@Override
+				public void keyTraversed(TraverseEvent e) {
+					if (e.keyCode == SWT.CR){
+						addSelectionToList();
+						e.doit = false;
+					}
+					
+				}
+			});
+			cmTreeViewer.addFilter(patternFilter);
+		}
 		createButtonPanel(treeComp);
 		
 		selectedList = new ArrayList<Category>();
@@ -504,6 +566,8 @@ public class SearchTree extends Composite {
 	protected WorkbenchJob doCreateRefreshJob() {
 		return new WorkbenchJob("Refresh Filter") {//$NON-NLS-1$
 			public IStatus runInUIThread(IProgressMonitor monitor) {
+				TreeViewer[] viewers = new TreeViewer[]{treeViewer, cmTreeViewer};
+				
 				if (treeViewer.getControl().isDisposed()) {
 					return Status.CANCEL_STATUS;
 				}
@@ -513,116 +577,111 @@ public class SearchTree extends Composite {
 					return Status.OK_STATUS;
 				}
 
-				boolean initial = initialText != null
-						&& initialText.equals(text);
+				boolean initial = initialText != null && initialText.equals(text);
 				if (initial) {
 					patternFilter.setPattern(null);
 				} else if (text != null) {
 					patternFilter.setPattern(text);
 				}
 				if (text.length() == 0){
-					treeViewer.getControl().setRedraw(false);
-					if (!narrowingDown) {
-						// collapse all
-						TreeItem[] is = treeViewer.getTree().getItems();
-						for (int i = 0; i < is.length; i++) {
-							TreeItem item = is[i];
-							if (item.getExpanded()) {
-								treeViewer.setExpandedState(item.getData(),
-										false);
+					for (TreeViewer viewer: viewers){
+						if (viewer == null) continue;
+						viewer.getControl().setRedraw(false);
+						if (!narrowingDown) {
+							// collapse all
+							TreeItem[] is = viewer.getTree().getItems();
+							for (int i = 0; i < is.length; i++) {
+								TreeItem item = is[i];
+								if (item.getExpanded()) {
+									viewer.setExpandedState(item.getData(),false);
+								}
 							}
 						}
+						viewer.refresh(true);
+						viewer.getControl().setRedraw(true);
+						viewer.expandToLevel(3);
 					}
-					treeViewer.refresh(true);
-					treeViewer.getControl().setRedraw(true);
 					
-					treeViewer.expandToLevel(3);
 					return Status.OK_STATUS;
 				}
 
-				
-				List<Object> matched = new ArrayList<Object>();
-				recursiveFindMatched(treeViewer.getInput(), matched);
-
-				if (monitor.isCanceled()){
-					return Status.CANCEL_STATUS;
-				}
-				lblCountSelected.setText(MessageFormat.format(Messages.SearchTree_ItemsMatchedLabel, new Object[]{ matched.size()}));
-				if (matched.size() > 0){
-				//	treeViewer.collapseAll();
-				//	treeViewer.expandToLevel(2);
+				for (TreeViewer viewer : viewers){
+					if (viewer == null) continue;
+					
+					List<Object> matched = new ArrayList<Object>();
+					recursiveFindMatched(viewer, viewer.getInput(), matched);
+	
 					if (monitor.isCanceled()){
 						return Status.CANCEL_STATUS;
 					}
-					//treeViewer.collapseToLevel(treeViewer.getInput(), 1);
-					IStructuredSelection sel = new StructuredSelection(matched);
-					treeViewer.setSelection(sel, true);
-				}else{
-					treeViewer.setSelection(null);
-				}
-				
-				Control redrawFalseControl = treeComposite != null ? treeComposite
-						: treeViewer.getControl();
-				try {
-					// don't want the user to see updates that will be made to
-					// the tree
-					// we are setting redraw(false) on the composite to avoid
-					// dancing scrollbar
-					redrawFalseControl.setRedraw(false);
-					if (!narrowingDown) {
-						// collapse all
-						TreeItem[] is = treeViewer.getTree().getItems();
-						for (int i = 0; i < is.length; i++) {
-							TreeItem item = is[i];
-							if (item.getExpanded()) {
-								treeViewer.setExpandedState(item.getData(),
-										false);
-							}
-						}
-					}
-					treeViewer.refresh(true);
-
-					if (text.length() > 0 && !initial) {
-						/*
-						 * Expand elements one at a time. After each is
-						 * expanded, check to see if the filter text has been
-						 * modified. If it has, then cancel the refresh job so
-						 * the user doesn't have to endure expansion of all the
-						 * nodes.
-						 */
-						TreeItem[] items = getViewer().getTree().getItems();
-						int treeHeight = getViewer().getTree().getBounds().height;
-						int numVisibleItems = treeHeight
-								/ getViewer().getTree().getItemHeight();
-						long stopTime = SOFT_MAX_EXPAND_TIME
-								+ System.currentTimeMillis();
-						boolean cancel = false;
-						if (items.length > 0
-								&& recursiveExpand(items, monitor, stopTime,
-										new int[] { numVisibleItems })) {
-							cancel = true;
-						}
-
-						// enabled toolbar - there is text to clear
-						// and the list is currently being filtered
-						updateToolbar(true);
-						
-						if (cancel) {
+					if (matched.size() > 0){
+						if (monitor.isCanceled()){
 							return Status.CANCEL_STATUS;
 						}
-					} else {
-						// disabled toolbar - there is no text to clear
-						// and the list is currently not filtered
-						updateToolbar(false);
+						IStructuredSelection sel = new StructuredSelection(matched);
+						viewer.setSelection(sel, true);
+					}else{
+						viewer.setSelection(null);
 					}
-				} finally {
-					// done updating the tree - set redraw back to true
-					TreeItem[] items = getViewer().getTree().getItems();
-					if (items.length > 0
-							&& getViewer().getTree().getSelectionCount() == 0) {
-						treeViewer.getTree().setTopItem(items[0]);
+					
+					Control redrawFalseControl = treeComposite != null ? treeComposite : viewer.getControl();
+					try {
+						// don't want the user to see updates that will be made to
+						// the tree
+						// we are setting redraw(false) on the composite to avoid
+						// dancing scrollbar
+						redrawFalseControl.setRedraw(false);
+						if (!narrowingDown) {
+							// collapse all
+							TreeItem[] is = viewer.getTree().getItems();
+							for (int i = 0; i < is.length; i++) {
+								TreeItem item = is[i];
+								if (item.getExpanded()) {
+									viewer.setExpandedState(item.getData(),false);
+								}
+							}
+						}
+						viewer.refresh(true);
+	
+						if (text.length() > 0 && !initial) {
+							/*
+							 * Expand elements one at a time. After each is
+							 * expanded, check to see if the filter text has been
+							 * modified. If it has, then cancel the refresh job so
+							 * the user doesn't have to endure expansion of all the
+							 * nodes.
+							 */
+							TreeItem[] items = viewer.getTree().getItems();
+							int treeHeight = viewer.getTree().getBounds().height;
+							int numVisibleItems = treeHeight / viewer.getTree().getItemHeight();
+							long stopTime = SOFT_MAX_EXPAND_TIME + System.currentTimeMillis();
+							boolean cancel = false;
+							if (items.length > 0
+									&& recursiveExpand(viewer, items, monitor, stopTime, new int[] { numVisibleItems })) {
+								cancel = true;
+							}
+	
+							// enabled toolbar - there is text to clear
+							// and the list is currently being filtered
+							updateToolbar(true);
+							
+							if (cancel) {
+								return Status.CANCEL_STATUS;
+							}
+						} else {
+							// disabled toolbar - there is no text to clear
+							// and the list is currently not filtered
+							updateToolbar(false);
+						}
+					} finally {
+						// done updating the tree - set redraw back to true
+						TreeItem[] items = viewer.getTree().getItems();
+						if (items.length > 0
+								&& viewer.getTree().getSelectionCount() == 0) {
+							viewer.getTree().setTopItem(items[0]);
+						}
+						redrawFalseControl.setRedraw(true);
 					}
-					redrawFalseControl.setRedraw(true);
 				}
 				return Status.OK_STATUS;
 			}
@@ -637,7 +696,7 @@ public class SearchTree extends Composite {
 			 * @param numItemsLeft
 			 * @return true if canceled
 			 */
-			private boolean recursiveExpand(TreeItem[] items,
+			private boolean recursiveExpand(TreeViewer viewer, TreeItem[] items,
 					IProgressMonitor monitor, long cancelTime,
 					int[] numItemsLeft) {
 				boolean canceled = false;
@@ -653,11 +712,11 @@ public class SearchTree extends Composite {
 							if (!item.getExpanded()) {
 								// do the expansion through the viewer so that
 								// it can refresh children appropriately.
-								treeViewer.setExpandedState(itemData, true);
+								viewer.setExpandedState(itemData, true);
 							}
 							TreeItem[] children = item.getItems();
 							if (items.length > 0) {
-								canceled = recursiveExpand(children, monitor,
+								canceled = recursiveExpand(viewer, children, monitor,
 										cancelTime, numItemsLeft);
 							}
 						}
@@ -669,26 +728,26 @@ public class SearchTree extends Composite {
 		};
 	}
 
-	private void recursiveFindMatched(Object root, List<Object> items){
+	private void recursiveFindMatched(TreeViewer viewer, Object root, List<Object> items){
 		if (getFilterString() == null || getFilterString().length() == 0 || getFilterString().equals(getInitialText())) return;
 		
-		if (root == treeViewer.getInput()){
-			Object[] kids = ((ITreeContentProvider)treeViewer.getContentProvider()).getElements(root);
+		if (root == viewer.getInput()){
+			Object[] kids = ((ITreeContentProvider)viewer.getContentProvider()).getElements(root);
 			for (int i = 0; i < kids.length; i ++){
-				recursiveFindMatched(kids[i], items);
+				recursiveFindMatched(viewer, kids[i], items);
 			}
 			return;
 		}
 		
-		boolean amIVisisble = patternFilter.isElementVisible(treeViewer, root);
+		boolean amIVisisble = patternFilter.isElementVisible(viewer, root);
 		if (amIVisisble){
-			Object[] kids = ((ITreeContentProvider)treeViewer.getContentProvider()).getChildren(root);
+			Object[] kids = ((ITreeContentProvider)viewer.getContentProvider()).getChildren(root);
 			boolean isKidVisible = false;
 			if (kids != null){
 				for (int i = 0; i < kids.length; i ++){
-					if (patternFilter.isElementVisible(treeViewer, kids[i])){
+					if (patternFilter.isElementVisible(viewer, kids[i])){
 						isKidVisible = true;
-						recursiveFindMatched(kids[i], items);
+						recursiveFindMatched(viewer, kids[i], items);
 					}
 				}
 			}
@@ -763,9 +822,9 @@ public class SearchTree extends Composite {
 			 */
 			public void keyPressed(KeyEvent e) {
 				// on a CR we want to transfer focus to the list
-				boolean hasItems = getViewer().getTree().getItemCount() > 0;
+				boolean hasItems = getActiveViewer().getTree().getItemCount() > 0;
 				if (hasItems && e.keyCode == SWT.ARROW_DOWN) {
-					treeViewer.getTree().setFocus();
+					getActiveViewer().getTree().setFocus();
 					return;
 				}
 			}
@@ -776,7 +835,7 @@ public class SearchTree extends Composite {
 			public void keyTraversed(TraverseEvent e) {
 				if (e.detail == SWT.TRAVERSE_RETURN) {
 					e.doit = false;
-					if (getViewer().getTree().getItemCount() == 0) {
+					if (getActiveViewer().getTree().getItemCount() == 0) {
 						Display.getCurrent().beep();
 					} else {
 						addSelectionToList();
@@ -825,18 +884,35 @@ public class SearchTree extends Composite {
 		
 	}
 	
+	private TreeViewer getActiveViewer(){
+		TreeViewer sourceViewer = null;
+		if (bits == null || bits.getSelectionIndex() == 0){
+			sourceViewer = treeViewer;
+		}else{
+			sourceViewer = cmTreeViewer;
+		}
+		return sourceViewer;
+	}
 	/*
 	 * adds the selection from the treeviewer to the list viewer
 	 */
 	private void addSelectionToList(){
-		IStructuredSelection selection = (IStructuredSelection)treeViewer.getSelection();
+		TreeViewer sourceViewer = getActiveViewer();
+		IStructuredSelection selection = (IStructuredSelection)sourceViewer.getSelection();
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object x = (Object) iterator.next();
 			if (x instanceof Category && !selectedList.contains(x)){
 				selectedList.add((Category)x);
-			}	
+			}else if (x instanceof CmNode){
+				if (((CmNode)x).getCategory() != null){
+					Category c = ((CmNode)x).getCategory();
+					if (!selectedList.contains(c)){
+						selectedList.add(c);
+					}
+				}
+			}
 		}
-		treeViewer.setSelection(null);
+		sourceViewer.setSelection(null);
 		listViewer.refresh();
 		
 		fireListChanged();
@@ -1036,6 +1112,9 @@ public class SearchTree extends Composite {
 		return treeViewer;
 	}
 
+	public TreeViewer getCmViewer(){
+		return cmTreeViewer;
+	}
 	/**
 	 * Get the filter text for the receiver, if it was created. Otherwise return
 	 * <code>null</code>.
