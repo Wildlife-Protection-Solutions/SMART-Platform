@@ -54,6 +54,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.CombinedSelectionProvider;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -94,6 +95,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	
 	private Projection[] projections;
 	private Boolean trackDistanceDirection = null;
+	private ConfigurableModel configurableModel = null;
 	private ObservationOptions options;
 	
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
@@ -211,6 +213,9 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_MODIFIED, missionModifiedListener);
 	}
 	
+	public ConfigurableModel getConfigurableModel(){
+		return this.configurableModel;
+	}
 	/**
 	 * Gets the mission from the database; reloading if necessary
 	 * @return
@@ -231,6 +236,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				}
 
 				this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();
+				this.configurableModel = mission.getSurvey().getSurveyDesign().getConfigurableModel();
 				
 				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 				this.projections = tmp.toArray(new Projection[tmp.size()]);
