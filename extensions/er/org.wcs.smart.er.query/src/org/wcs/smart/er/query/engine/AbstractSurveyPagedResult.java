@@ -422,6 +422,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					sql.append( queryTempTable );
 					sql.append(".samplingunit_uuid)"); //$NON-NLS-1$
 					c.createStatement().execute(sql.toString());
+					break;
 				case LIST:
 					sql = new StringBuilder();
 					sql.append("UPDATE "); //$NON-NLS-1$
@@ -436,20 +437,20 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
 					sql.append(".list_element_uuid "); //$NON-NLS-1$
 					sql.append(" JOIN "); //$NON-NLS-1$
-					sql.append(engine.tableNamePrefix(SamplingUnitAttributeValue.class));
+					sql.append(engine.tableNamePrefix(SamplingUnitAttribute.class));
 					sql.append(" ON "); //$NON-NLS-1$
-					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
+					sql.append(engine.tablePrefix(SamplingUnitAttribute.class));
 					sql.append(".uuid =  "); //$NON-NLS-1$
 					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
-					sql.append(".sampling_unit_attribute_uuid "); //$NON-NLS-1$
+					sql.append(".su_attribute_uuid "); //$NON-NLS-1$
 					sql.append("and "); //$NON-NLS-1$
 					sql.append(engine.tablePrefix(SamplingUnitAttribute.class));
 					sql.append(".keyid = '" + key + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 					sql.append(" WHERE "); //$NON-NLS-1$
 					sql.append(engine.tablePrefix(SamplingUnitAttributeValue.class));
-					sql.append(".sampling_unit_uuid = "); //$NON-NLS-1$
+					sql.append(".su_uuid = "); //$NON-NLS-1$
 					sql.append( queryTempTable); 
-					sql.append(".sampling_unit_uuid)"); //$NON-NLS-1$
+					sql.append(".samplingunit_uuid)"); //$NON-NLS-1$
 					c.createStatement().execute(sql.toString());
 					
 					break;
