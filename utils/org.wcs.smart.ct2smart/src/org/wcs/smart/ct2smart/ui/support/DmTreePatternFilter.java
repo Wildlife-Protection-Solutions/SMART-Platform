@@ -1,7 +1,7 @@
 package org.wcs.smart.ct2smart.ui.support;
 
+import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -18,7 +18,7 @@ public class DmTreePatternFilter extends PatternFilter {
 
 	@Override
 	public boolean isLeafMatch(Viewer viewer, Object element) {
-		String labelText = ((LabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
+		String labelText = ((ColumnLabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
 		if (labelText == null) {
 			return false;
 		}
