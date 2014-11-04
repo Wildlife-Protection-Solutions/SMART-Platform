@@ -202,7 +202,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog implements ModifyLis
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.displayLog(
 					MessageFormat.format(Messages.EditSamplingUnitDialog_ErrorSavingChanges, new Object[]{su.getId()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
-			if (session.getTransaction().isActive()){
+			if (session.isOpen() && session.getTransaction().isActive()){
 				session.getTransaction().rollback();
 			}
 		}finally{

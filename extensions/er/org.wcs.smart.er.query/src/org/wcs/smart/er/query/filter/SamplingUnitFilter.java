@@ -136,13 +136,13 @@ public class SamplingUnitFilter implements IFilter {
 	public DropItem[] getDropItems(Session session) throws Exception {
 		if (unitType == Type.SAMPLINGUNIT){
 			if (uuid.equals(NONE_KEY)){
-				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(NONE)};
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(NONE, joinTable)};
 			}
 			
 			SamplingUnit su = (SamplingUnit) session.get(SamplingUnit.class, SmartUtils.decodeHex(uuid));
 			if (su != null){
 				su.getId();
-				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(su)};
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(su, joinTable)};
 			}else{
 				return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SamplingUnitFilter_SamplingUnitNotFound, new Object[]{uuid}))}; 
 			}
