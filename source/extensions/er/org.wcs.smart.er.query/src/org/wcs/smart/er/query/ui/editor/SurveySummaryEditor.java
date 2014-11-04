@@ -21,6 +21,11 @@
  */
 package org.wcs.smart.er.query.ui.editor;
 
+import org.wcs.smart.er.ISurveyEventListener;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.query.common.model.SummaryQuery;
@@ -38,6 +43,36 @@ public class SurveySummaryEditor extends SummaryEditor{
 
 	public static final String ID = "org.wcs.smart.er.query.ui.SummaryEditor"; //$NON-NLS-1$
 
+	private ISurveyEventListener surveyDesignListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+			if (o instanceof SurveyDesign){
+				SurveyDesign qd = ((ISurveyQuery)getQuery()).getSurveyDesignAsObject();
+				if (qd != null && qd.equals(o)){
+					reparseQuery();		
+				}
+			}
+				
+		}
+	};
+	
+	/**
+	 * Creates a new editor
+	 */
+	public SurveySummaryEditor(){
+		super();
+		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DESIGN_MODIFIED, surveyDesignListener);
+	}
+	
+	/**
+	 * Disposes editor
+	 */
+	@Override
+	public void dispose(){
+		super.dispose();
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_MODIFIED, surveyDesignListener);
+	}
+	
 	public SummaryQuery createNewQuery(){
 		return SurveyQueryFactory.createSummaryQuery();
 	}

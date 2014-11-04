@@ -71,8 +71,11 @@ public class SamplingUnitGroupByDropItem extends DropItem
 	
 	@Override
 	public void dispose(){
-		smallerFont.dispose();
 		super.dispose();
+		if (smallerFont != null){
+			smallerFont.dispose();
+			smallerFont = null;
+		}
 	}
 	
 	@Override
