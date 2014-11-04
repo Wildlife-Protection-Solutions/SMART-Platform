@@ -104,7 +104,11 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				}
 				page1.updateAndShowTable(results);
 			} catch (Exception ex) {
-				QueryPlugIn.displayLog(Messages.QueryResultsEditor_ErrorRunningQuery, ex);
+				String message = Messages.QueryResultsEditor_ErrorRunningQuery;
+				if (ex.getCause() != null){
+					message += " " + ex.getCause().getMessage(); //$NON-NLS-1$
+				}
+				QueryPlugIn.displayLog(message, ex);
 				page1.updateAndShowTable(null);
 			}
 			page2.refresh();

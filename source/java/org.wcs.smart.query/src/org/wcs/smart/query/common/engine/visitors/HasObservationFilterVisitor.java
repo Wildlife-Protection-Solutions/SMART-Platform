@@ -25,6 +25,7 @@ import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
+import org.wcs.smart.query.model.filter.ObserverFilter;
 
 /**
  * Determines if an observation filter (category or attribute filter)
@@ -37,7 +38,7 @@ public class HasObservationFilterVisitor implements IFilterVisitor{
 
 	private boolean hasCategory = false;
 	private boolean hasAttribute = false;
-	
+	private boolean hasObserver = false;
 	
 	@Override
 	public void visit(IFilter filter) {
@@ -46,6 +47,8 @@ public class HasObservationFilterVisitor implements IFilterVisitor{
 			hasAttribute = true;
 		}else if (filter instanceof CategoryFilter){
 			hasCategory = true;
+		}else if (filter instanceof ObserverFilter){
+			hasObserver = true;
 		}
 	}
 	
@@ -59,11 +62,20 @@ public class HasObservationFilterVisitor implements IFilterVisitor{
 
 	/**
 	 * 
-	 * @return ture if filter contains an attribute filter
+	 * @return true if filter contains an attribute filter
 	 */
 	public boolean hasAttributeFilter(){
 		return this.hasAttribute;
 	}
+	
+	/**
+	 * 
+	 * @return true if observer filter
+	 */
+	public boolean hasObserverFilter(){
+		return this.hasObserver;
+	}
+	
 	
 	/**
 	 * clears the state of the visitor so it can be re-used
@@ -71,5 +83,6 @@ public class HasObservationFilterVisitor implements IFilterVisitor{
 	public void clear(){
 		hasCategory = false;
 		hasAttribute = false;
+		hasObserver = false;
 	}
 }
