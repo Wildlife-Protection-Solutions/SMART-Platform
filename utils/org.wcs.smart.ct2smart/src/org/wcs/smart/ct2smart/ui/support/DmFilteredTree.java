@@ -12,10 +12,6 @@ package org.wcs.smart.ct2smart.ui.support;
  *     Jacek Pospychala - bug 187762
  *     Mohamed Tarief - tarief@eg.ibm.com - IBM - Bug 174481
  *******************************************************************************/
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.ToolBarManager;
@@ -61,9 +57,10 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.internal.WorkbenchMessages;
-import org.eclipse.ui.progress.WorkbenchJob;
 
 /**
+ * NOTE: This is adopted copy of FilteredTree. Some objects are changed and Job is replaced with single threaded filterTree()
+ * 
  * A simple control that provides a text widget and a tree viewer. The contents
  * of the text widget are used to drive a PatternFilter that is on the viewer.
  * 
@@ -124,11 +121,6 @@ public class DmFilteredTree extends Composite {
 	 * The text to initially show in the filter text control.
 	 */
 	protected String initialText = ""; //$NON-NLS-1$
-
-	/**
-	 * The job used to refresh the tree.
-	 */
-	private Job refreshJob;
 
 	/**
 	 * The parent composite of the filtered tree.
@@ -215,7 +207,7 @@ public class DmFilteredTree extends Composite {
 		this.parent = parent;
 		this.useNewLook = useNewLook;
 	}
-
+	
 	/**
 	 * Create the filtered tree.
 	 * 
@@ -231,7 +223,7 @@ public class DmFilteredTree extends Composite {
 		showFilterControls = true; //we don't want to refer to PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.SHOW_FILTERED_TEXTS);
 		
 		createControl(parent, treeStyle);
-		createRefreshJob();
+//		createRefreshJob();
 		setInitialText(WorkbenchMessages.FilteredTree_FilterMessage);
 		setFont(parent.getFont());
 
@@ -341,16 +333,16 @@ public class DmFilteredTree extends Composite {
 		treeViewer = doCreateTreeViewer(parent, style);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		treeViewer.getControl().setLayoutData(data);
-		treeViewer.getControl().addDisposeListener(new DisposeListener() {
-			/*
-			 * (non-Javadoc)
-			 * 
-			 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
-			 */
-			public void widgetDisposed(DisposeEvent e) {
-				refreshJob.cancel();
-			}
-		});
+//		treeViewer.getControl().addDisposeListener(new DisposeListener() {
+//			/*
+//			 * (non-Javadoc)
+//			 * 
+//			 * @see org.eclipse.swt.events.DisposeListener#widgetDisposed(org.eclipse.swt.events.DisposeEvent)
+//			 */
+//			public void widgetDisposed(DisposeEvent e) {
+//				refreshJob.cancel();
+//			}
+//		});
 		treeViewer.addFilter(patternFilter);
 		return treeViewer.getControl();
 	}
@@ -394,147 +386,120 @@ public class DmFilteredTree extends Composite {
 	 * Create the refresh job for the receiver.
 	 * 
 	 */
-	private void createRefreshJob() {
-		refreshJob = doCreateRefreshJob();
-		refreshJob.setSystem(true);
-	}
+//	private void createRefreshJob() {
+//		refreshJob = doCreateRefreshJob();
+//		refreshJob.setSystem(true);
+//	}
 
-	/**
-	 * Creates a workbench job that will refresh the tree based on the current filter text.
-	 * Subclasses may override.
-	 * 
-	 * @return a workbench job that can be scheduled to refresh the tree
-	 * 
-	 * @since 3.4
-	 */
-	protected WorkbenchJob doCreateRefreshJob() {
-		return new WorkbenchJob("Refresh Filter") {//$NON-NLS-1$
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				if (treeViewer.getControl().isDisposed()) {
-					return Status.CANCEL_STATUS;
-				}
+	//copied from doCreateRefreshJob()
+	protected void filterTree() {
+		if (treeViewer.getControl().isDisposed()) {
+			return;
+		}
 
-				String text = getFilterString();
-				if (text == null) {
-					return Status.OK_STATUS;
-				}
+		String text = getFilterString();
+		if (text == null) {
+			return;
+		}
 
-				boolean initial = initialText != null
-						&& initialText.equals(text);
-				if (initial) {
-					patternFilter.setPattern(null);
-				} else if (text != null) {
-					patternFilter.setPattern(text);
-				}
+		boolean initial = initialText != null
+				&& initialText.equals(text);
+		if (initial) {
+			patternFilter.setPattern(null);
+		} else if (text != null) {
+			patternFilter.setPattern(text);
+		}
 
-				Control redrawFalseControl = treeComposite != null ? treeComposite
-						: treeViewer.getControl();
-				try {
-					// don't want the user to see updates that will be made to
-					// the tree
-					// we are setting redraw(false) on the composite to avoid
-					// dancing scrollbar
-					redrawFalseControl.setRedraw(false);
-					if (!narrowingDown) {
-						// collapse all
-						TreeItem[] is = treeViewer.getTree().getItems();
-						for (int i = 0; i < is.length; i++) {
-							TreeItem item = is[i];
-							if (item.getExpanded()) {
-								treeViewer.setExpandedState(item.getData(),
-										false);
-							}
-						}
+		Control redrawFalseControl = treeComposite != null ? treeComposite
+				: treeViewer.getControl();
+		try {
+			// don't want the user to see updates that will be made to
+			// the tree
+			// we are setting redraw(false) on the composite to avoid
+			// dancing scrollbar
+			redrawFalseControl.setRedraw(false);
+			if (!narrowingDown) {
+				// collapse all
+				TreeItem[] is = treeViewer.getTree().getItems();
+				for (int i = 0; i < is.length; i++) {
+					TreeItem item = is[i];
+					if (item.getExpanded()) {
+						treeViewer.setExpandedState(item.getData(),
+								false);
 					}
-					treeViewer.refresh(true);
-
-					if (text.length() > 0 && !initial) {
-						/*
-						 * Expand elements one at a time. After each is
-						 * expanded, check to see if the filter text has been
-						 * modified. If it has, then cancel the refresh job so
-						 * the user doesn't have to endure expansion of all the
-						 * nodes.
-						 */
-						TreeItem[] items = getViewer().getTree().getItems();
-						int treeHeight = getViewer().getTree().getBounds().height;
-						int numVisibleItems = treeHeight
-								/ getViewer().getTree().getItemHeight();
-						long stopTime = SOFT_MAX_EXPAND_TIME
-								+ System.currentTimeMillis();
-						boolean cancel = false;
-						if (items.length > 0
-								&& recursiveExpand(items, monitor, stopTime,
-										new int[] { numVisibleItems })) {
-							cancel = true;
-						}
-
-						// enabled toolbar - there is text to clear
-						// and the list is currently being filtered
-						updateToolbar(true);
-						
-						if (cancel) {
-							return Status.CANCEL_STATUS;
-						}
-					} else {
-						// disabled toolbar - there is no text to clear
-						// and the list is currently not filtered
-						updateToolbar(false);
-					}
-				} finally {
-					// done updating the tree - set redraw back to true
-					TreeItem[] items = getViewer().getTree().getItems();
-					if (items.length > 0
-							&& getViewer().getTree().getSelectionCount() == 0) {
-						treeViewer.getTree().setTopItem(items[0]);
-					}
-					redrawFalseControl.setRedraw(true);
 				}
-				return Status.OK_STATUS;
 			}
+			treeViewer.refresh(true);
 
-			/**
-			 * Returns true if the job should be canceled (because of timeout or
-			 * actual cancellation).
-			 * 
-			 * @param items
-			 * @param monitor
-			 * @param cancelTime
-			 * @param numItemsLeft
-			 * @return true if canceled
-			 */
-			private boolean recursiveExpand(TreeItem[] items,
-					IProgressMonitor monitor, long cancelTime,
-					int[] numItemsLeft) {
-				boolean canceled = false;
-				for (int i = 0; !canceled && i < items.length; i++) {
-					TreeItem item = items[i];
-					boolean visible = numItemsLeft[0]-- >= 0;
-					if (monitor.isCanceled()
-							|| (!visible && System.currentTimeMillis() > cancelTime)) {
-						canceled = true;
-					} else {
-						Object itemData = item.getData();
-						if (itemData != null) {
-							if (!item.getExpanded()) {
-								// do the expansion through the viewer so that
-								// it can refresh children appropriately.
-								treeViewer.setExpandedState(itemData, true);
-							}
-							TreeItem[] children = item.getItems();
-							if (items.length > 0) {
-								canceled = recursiveExpand(children, monitor,
-										cancelTime, numItemsLeft);
-							}
-						}
+			if (text.length() > 0 && !initial) {
+				/*
+				 * Expand elements one at a time. After each is
+				 * expanded, check to see if the filter text has been
+				 * modified. If it has, then cancel the refresh job so
+				 * the user doesn't have to endure expansion of all the
+				 * nodes.
+				 */
+				TreeItem[] items = getViewer().getTree().getItems();
+				int treeHeight = getViewer().getTree().getBounds().height;
+				int numVisibleItems = treeHeight
+						/ getViewer().getTree().getItemHeight();
+				long stopTime = SOFT_MAX_EXPAND_TIME
+						+ System.currentTimeMillis();
+				boolean cancel = false;
+				if (items.length > 0
+						&& recursiveExpand(items, stopTime,
+								new int[] { numVisibleItems })) {
+					cancel = true;
+				}
+
+				// enabled toolbar - there is text to clear
+				// and the list is currently being filtered
+				updateToolbar(true);
+				
+				if (cancel) {
+					return;
+				}
+			} else {
+				// disabled toolbar - there is no text to clear
+				// and the list is currently not filtered
+				updateToolbar(false);
+			}
+		} finally {
+			// done updating the tree - set redraw back to true
+			TreeItem[] items = getViewer().getTree().getItems();
+			if (items.length > 0
+					&& getViewer().getTree().getSelectionCount() == 0) {
+				treeViewer.getTree().setTopItem(items[0]);
+			}
+			redrawFalseControl.setRedraw(true);
+		}
+	}
+	
+	private boolean recursiveExpand(TreeItem[] items,  long cancelTime, int[] numItemsLeft) {
+		boolean canceled = false;
+		for (int i = 0; !canceled && i < items.length; i++) {
+			TreeItem item = items[i];
+			boolean visible = numItemsLeft[0]-- >= 0;
+			if (!visible && System.currentTimeMillis() > cancelTime) {
+				canceled = true;
+			} else {
+				Object itemData = item.getData();
+				if (itemData != null) {
+					if (!item.getExpanded()) {
+						// do the expansion through the viewer so that
+						// it can refresh children appropriately.
+						treeViewer.setExpandedState(itemData, true);
+					}
+					TreeItem[] children = item.getItems();
+					if (items.length > 0) {
+						canceled = recursiveExpand(children, cancelTime, numItemsLeft);
 					}
 				}
-				return canceled;
 			}
-
-		};
+		}
+		return canceled;
 	}
-
+	
 	protected void updateToolbar(boolean visible) {
 		if (clearButtonControl != null) {
 			clearButtonControl.setVisible(visible);
@@ -785,8 +750,8 @@ public class DmFilteredTree extends Composite {
 				|| getFilterString().startsWith(previousFilterText);
 		previousFilterText = getFilterString();
 		// cancel currently running job first, to prevent unnecessary redraw
-		refreshJob.cancel();
-		refreshJob.schedule(getRefreshJobDelay());
+		filterTree();
+		
 	}
 	
 	/**
@@ -956,6 +921,9 @@ public class DmFilteredTree extends Composite {
 	 * @param string
 	 */
 	protected void setFilterText(String string) {
+		if (filterText.isDisposed()) {
+			return;
+		}
 		if (filterText != null) {
 			filterText.setText(string);
 			selectAll();
