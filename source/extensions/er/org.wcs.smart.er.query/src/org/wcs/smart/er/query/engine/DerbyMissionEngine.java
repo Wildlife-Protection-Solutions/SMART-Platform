@@ -88,9 +88,15 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
+					SurveyHasObservationFilterVisitor vv = new SurveyHasObservationFilterVisitor();
+					boolean needsObservations = false;
+					if (query.getFilter() != null && query.getFilter().getFilter() != null){
+						query.getFilter().getFilter().accept(vv);
+						needsObservations = vv.hasObservationFilter();
+					}
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							query.getConservationAreaFilterAsFilter(), 
-							true, false, new SubProgressMonitor(monitor, 50));
+							needsObservations, false, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
 					

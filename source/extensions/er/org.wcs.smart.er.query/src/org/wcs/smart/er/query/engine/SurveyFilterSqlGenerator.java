@@ -230,7 +230,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 */
 	protected String asSql(SamplingUnitFilter filter, IQueryEngine engine) throws SQLException{		
 		if (filter.getSource() == null){
-			throw new SQLException("Sampling unit filter source table not set.");
+			throw new SQLException(Messages.SurveyFilterSqlGenerator_SamplingUnitSourceNotSet);
 		}
 		
 		if (filter.getSource() == Source.TRACK){

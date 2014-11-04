@@ -53,8 +53,24 @@ public class SurveyHasObservationFilterVisitor extends HasObservationFilterVisit
 		}
 	}
 
+	/**
+	 * 
+	 * @return true if has sampling unit observation filter
+	 */
 	public boolean hasSamplingUnitObservationFilter() {
 		return hasSu;
 	}
-
+	
+	/**
+	 * True if filter has category, attribute, observer or sampling unit observation
+	 * filter.
+	 * 
+	 * @return true if the filter filters on any observeration related item
+	 */
+	public boolean hasObservationFilter(){
+		return hasCategoryFilter() || 
+				hasAttributeFilter() || 
+				hasObserverFilter() || 
+				hasSamplingUnitObservationFilter();
+	}
 }

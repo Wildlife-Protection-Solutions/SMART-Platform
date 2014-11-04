@@ -221,13 +221,13 @@ public class SurveySummaryQueryType implements IQueryType {
 		SurveyHasObservationFilterVisitor v2 = new SurveyHasObservationFilterVisitor();
 		if (def.getValueFilter() != null && def.getValueFilter().getFilter() != null){
 			def.getValueFilter().getFilter().accept(v2);
-			hasObservationFilter = v2.hasAttributeFilter() || v2.hasCategoryFilter() || v2.hasSamplingUnitObservationFilter();
+			hasObservationFilter = v2.hasObservationFilter();
 		}
 		
 		if (!hasObservationFilter){
 			if (def.getRateFilter() != null && def.getRateFilter().getFilter() != null){
 				def.getRateFilter().getFilter().accept(v2);
-				hasObservationFilter = v2.hasAttributeFilter() || v2.hasCategoryFilter() || v2.hasSamplingUnitObservationFilter();
+				hasObservationFilter = v2.hasObservationFilter();
 			}
 		}
 

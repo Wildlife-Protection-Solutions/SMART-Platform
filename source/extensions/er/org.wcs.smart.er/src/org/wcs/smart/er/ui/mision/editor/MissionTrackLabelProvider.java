@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.text.DateFormat;
-
 import org.eclipse.jface.viewers.LabelProvider;
 import org.wcs.smart.er.model.MissionTrack;
 
@@ -38,7 +36,11 @@ public class MissionTrackLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof MissionTrack) {
 			MissionTrack track = (MissionTrack) element;
-			return track.getId() + " [" + DateFormat.getDateInstance().format(track.getMissionDay().getDate()) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+			String label = track.getId();
+			if (track.getSamplingUnit() != null){
+				label += " (" + track.getSamplingUnit().getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			return label;
 		}
 		return super.getText(element);
 	}
