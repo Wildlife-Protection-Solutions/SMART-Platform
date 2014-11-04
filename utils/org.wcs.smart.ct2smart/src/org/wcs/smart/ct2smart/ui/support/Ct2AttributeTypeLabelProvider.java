@@ -31,6 +31,7 @@ public class Ct2AttributeTypeLabelProvider extends ColumnLabelProvider {
 			case META_LON: return "Longitude";
 			case META_MEMBERS: return "Members";
 			case META_MANDATE: return "Mandate";					
+			case META_COMMENT: return "Comment";					
 		}
 		return type.toString();
 	}

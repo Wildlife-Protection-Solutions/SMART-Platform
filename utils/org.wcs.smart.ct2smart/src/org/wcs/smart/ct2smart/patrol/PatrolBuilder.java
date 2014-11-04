@@ -100,6 +100,7 @@ public class PatrolBuilder {
 		
 		Set<String> members = new HashSet<String>();
 		LabelType mandate = null;
+		String comment = ""; //$NON-NLS-1$
 		
 				
 		for (TagS s : sList) {
@@ -214,6 +215,11 @@ public class PatrolBuilder {
 					case META_MEMBERS:
 						members.addAll(membersParser.parseMembers(a.getV()));
 						break;
+					case META_COMMENT:
+						if (!comment.isEmpty())
+							comment += "\n"; //$NON-NLS-1$
+						comment += a.getN() + " = " + a.getV(); //$NON-NLS-1$
+						break;
 					case IGNORE:
 						break;
 				}
@@ -265,6 +271,7 @@ public class PatrolBuilder {
 
 		patrol.setStartDate(xmlDate);
 		patrol.setEndDate(xmlDate);
+		patrol.setComment(comment);
 
 		leg.setStartDate(xmlDate);
 		leg.setEndDate(xmlDate);
