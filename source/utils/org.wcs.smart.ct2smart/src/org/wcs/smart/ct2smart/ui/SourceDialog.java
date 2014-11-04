@@ -2,6 +2,7 @@ package org.wcs.smart.ct2smart.ui;
 
 import java.sql.Connection;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -142,7 +143,13 @@ public class SourceDialog extends Composite {
 		shell.pack();
 		shell.open();
 		while (!shell.isDisposed ()) {
-			if (!display.readAndDispatch ()) display.sleep ();
+			try {
+				if (!display.readAndDispatch ()) display.sleep ();
+			} catch (Exception e) {
+				System.err.println(e);
+				e.printStackTrace();
+				MessageDialog.openError(display.getActiveShell(), "Error", e.toString() + "\nSee console for details.");
+			}
 		}
 		display.dispose();
 		
