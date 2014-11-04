@@ -24,6 +24,7 @@
 			<xs:enumeration value="META_LON" />
 			<xs:enumeration value="META_MEMBERS" />
 			<xs:enumeration value="META_MANDATE" />
+			<xs:enumeration value="META_COMMENT" />
 		</xs:restriction>
 	</xs:simpleType>
 
