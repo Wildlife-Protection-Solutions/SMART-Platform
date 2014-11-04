@@ -407,7 +407,7 @@ public class FilterProcessor implements IFilterProcessor {
 		queryFilter.accept(missionTracks);
 		if (needstracks[0]){
 			if (populateObservation){
-				throw new SQLException("Cannot process a query that filters both observation and track items.");
+				throw new SQLException(Messages.FilterProcessor_CannotFilterTrackAndObs);
 			}
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(MissionTrack.class));
@@ -873,7 +873,7 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 										
 				sql.append(" as "); //$NON-NLS-1$
-				sql.append("col_" + key.getKey());
+				sql.append("col_" + key.getKey()); //$NON-NLS-1$
 				sql.append(" "); //$NON-NLS-1$
 				
 				sql.append("FROM "); //$NON-NLS-1$

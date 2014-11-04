@@ -212,7 +212,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						
 						SurveyHasObservationFilterVisitor visitor = new SurveyHasObservationFilterVisitor();
 						valueFilter.getFilter().accept(visitor);
-						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter() || visitor.hasSamplingUnitObservationFilter()){
+						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter() || 
+								visitor.hasObservationFilter()){
 							needsObservationValue = true;
 						}
 						

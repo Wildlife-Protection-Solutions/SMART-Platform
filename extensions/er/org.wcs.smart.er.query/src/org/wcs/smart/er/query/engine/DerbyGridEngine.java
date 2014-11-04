@@ -58,7 +58,6 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
@@ -88,7 +87,6 @@ import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
@@ -254,8 +252,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			SurveyHasObservationFilterVisitor ov = new SurveyHasObservationFilterVisitor();
 			filter.getFilter().accept(ov);
 			
-			if (vv.hasCategory() || vv.hasAttribute() ||
-				ov.hasAttributeFilter() || ov.hasCategoryFilter() || ov.hasSamplingUnitObservationFilter()){
+			if (vv.hasCategory() || vv.hasAttribute() || ov.hasObservationFilter()){
 				needsObservation = true;
 			}
 			
@@ -578,15 +575,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		
 		if (dateFilter != null ){
 			String dfilter = SurveyFilterSqlGenerator.INSTANCE.toSql(dateFilter, this);
-			if (dfilter.length() > 0) {
-				if (dateFilter.getDateFieldOption() == WaypointDateField.INSTANCE){
-					//need to join to waypoint table
-					sql.append(" join " + tableNames.get(SurveyWaypoint.class) + " " + tablePrefix.get(SurveyWaypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
-					sql.append(" on " + tablePrefix.get(SurveyWaypoint.class) + ".mission_uuid = " + tablePrefix.get(Mission.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					sql.append(" join " + tableNames.get(Waypoint.class) + " " + tablePrefix.get(Waypoint.class) ); //$NON-NLS-1$ //$NON-NLS-2$
-					sql.append(" on " + tablePrefix.get(Waypoint.class) + ".uuid = " + tablePrefix.get(SurveyWaypoint.class) + ".wp_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				}
-				
+			if (dfilter.length() > 0) {				
 				sql.append(" and "); //$NON-NLS-1$
 				sql.append(dfilter);
 			}

@@ -13,7 +13,7 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
  *
  */
 public class HasTrackFilterVisitor implements IFilterVisitor{
-	boolean hasTrack = false;
+	private boolean hasTrack = false;
 
 	@Override
 	public void visit(IFilter filter) {

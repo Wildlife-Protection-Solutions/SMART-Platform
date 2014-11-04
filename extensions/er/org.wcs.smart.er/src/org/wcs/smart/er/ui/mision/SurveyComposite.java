@@ -43,9 +43,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler;
 import org.wcs.smart.er.ui.handlers.NewSurveyHandler;
-import org.wcs.smart.er.ui.survey.wizard.NewSurveyWizard;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -107,7 +105,7 @@ public class SurveyComposite extends MissionComposite{
 		}
 		List<Object> inputs = new ArrayList<Object>();
 		inputs.addAll(kids);
-		inputs.add("< Create New Survey ... >");
+		inputs.add(Messages.SurveyComposite_CreateNewSurvey);
 		cmbSurveys.setInput(inputs);
 	}
 	

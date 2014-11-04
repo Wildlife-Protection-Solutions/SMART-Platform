@@ -50,6 +50,7 @@ public class Messages extends NLS {
 	public static String FilterContentProvider_SuLabel;
 	public static String FilterContentProvider_TrackSamplingUnits;
 	public static String FilterContentProvider_TrackTypeNode;
+	public static String FilterProcessor_CannotFilterTrackAndObs;
 	public static String FilterProcessor_DateFilterNotSupported;
 	public static String FilterProcessor_progress1;
 	public static String FilterProcessor_progress3;
@@ -98,6 +99,7 @@ public class Messages extends NLS {
 	public static String MissionMemberDropItem_MemberText;
 	public static String MissionMemberFilter_EmployeeNotFound;
 	public static String MissionPropertyQueryColumn_MissionPropertyColumnLabel;
+	public static String MissionQueryType_CannotCombineTrackAndObsFilters;
 	public static String MissionQueryType_MissionQueryName;
 	public static String MissionStartDateField_Name;
 	public static String MissionTrackDateField_Name;
@@ -170,6 +172,7 @@ public class Messages extends NLS {
 	public static String SurveyFilterSqlGenerator_DateFilterNotSupported;
 	public static String SurveyFilterSqlGenerator_missionAttributeError;
 	public static String SurveyFilterSqlGenerator_missionPropertyError;
+	public static String SurveyFilterSqlGenerator_SamplingUnitSourceNotSet;
 	public static String SurveyGridQueryType_QueryTypeName;
 	public static String SurveyGridQueryType_SummaryQueryError1;
 	public static String SurveyGridQueryType_SummaryQueryError2;

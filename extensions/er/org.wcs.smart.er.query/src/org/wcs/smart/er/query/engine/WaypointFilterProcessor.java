@@ -48,7 +48,6 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.MissionPropertyFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
-import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
@@ -276,20 +275,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		
 		
 		//do need join mission tracks?
-		final boolean[] needstracks = new boolean[]{false};
-		IFilterVisitor missionTracks = new IFilterVisitor() {
-			@Override
-			public void visit(IFilter filter) {
-				if (needstracks[0]) return;
-				if (filter instanceof SamplingUnitFilter &&
-					((SamplingUnitFilter) filter).getSource() == Source.TRACK){
-					needstracks[0] = true;
-				}
-				
-			}
-		};
+		HasTrackFilterVisitor missionTracks = new HasTrackFilterVisitor();
 		queryFilter.accept(missionTracks);
-		if (needstracks[0]){
+		if (missionTracks.hasTrack()){
 			sql.append(" left join "); //$NON-NLS-1$
 			sql.append(namePrefix(MissionTrack.class));
 			sql.append(" on ");  //$NON-NLS-1$

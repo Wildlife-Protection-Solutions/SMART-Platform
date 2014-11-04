@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.HasTrackFilterVisitor;
+import org.wcs.smart.er.query.engine.SurveyHasObservationFilterVisitor;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.internal.Messages;
@@ -41,6 +43,7 @@ import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -132,9 +135,10 @@ public class MissionQueryType implements IQueryType {
 		String queryString = filter;
 		if (queryString.isEmpty()) return null;
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
+		QueryFilter def = null;
 		try{
 			Parser parser = new Parser(is);
-			parser.QueryFilter();
+			def = parser.QueryFilter();
 		}catch (Throwable ex){
 			return ex.getMessage();
 		}finally{
@@ -144,6 +148,22 @@ public class MissionQueryType implements IQueryType {
 				//eatme
 			}
 		}
+		
+		boolean hasObservationFilter = false;
+		boolean hasTrackFilter = false;
+		SurveyHasObservationFilterVisitor v2 = new SurveyHasObservationFilterVisitor();
+		HasTrackFilterVisitor v3 = new HasTrackFilterVisitor();
+		if (def.getFilter() != null){
+			def.getFilter().accept(v2);
+			hasObservationFilter = v2.hasObservationFilter();
+			def.getFilter().accept(v3);
+			hasTrackFilter = v3.hasTrack();
+		}
+		
+		if (hasObservationFilter && hasTrackFilter){
+			return Messages.MissionQueryType_CannotCombineTrackAndObsFilters;
+		}
+		
 		return null;
 	}
 
