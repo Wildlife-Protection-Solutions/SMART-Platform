@@ -70,9 +70,9 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
 		if (queryType.getKey().equals(PatrolQueryType.KEY)){
-			return DataUtilities.createType("smart." + PatrolQueryDataSource.PATROL_TYPE, PatrolQueryDataSource.getFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+			return DataUtilities.createType("smart." + PatrolQueryDataSource.PATROL_TYPE, PatrolQueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}else{
-			return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+			return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}
 	}
 		

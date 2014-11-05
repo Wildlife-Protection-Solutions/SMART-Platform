@@ -60,21 +60,13 @@ public class QueryResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createObservationFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+	public static SimpleFeature createObservationFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
 		data[0] = it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (int i = 0; i < columns.size(); i ++){
-			Object x =  columns.get(i).getValue(it);
-			if (x instanceof Boolean){
-				if ((Boolean)x){
-					x = 0;
-				}else{
-					x = 1;
-				}
-			}
-			data[i + 1] = x;
+			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
 		
@@ -94,21 +86,13 @@ public class QueryResultItemFeature {
 	 * @param ftype the feature type 
 	 * @return created feature 
 	 */
-	public static SimpleFeature createTrackFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
+	public static SimpleFeature createTrackFeature(PatrolQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
 		data[0] = it.getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
 		
 		for (int i = 0; i < columns.size(); i ++){
-			Object x =  columns.get(i).getValue(it);
-			if (x instanceof Boolean){
-				if ((Boolean)x){
-					x = 0;
-				}else{
-					x = 1;
-				}
-			}
-			data[i + 1] = x;
+			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 
 		if (it.getTrack() == null || it.getTrack().size() == 0) {

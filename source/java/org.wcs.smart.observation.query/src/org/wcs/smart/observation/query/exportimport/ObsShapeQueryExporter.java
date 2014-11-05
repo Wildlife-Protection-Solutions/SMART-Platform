@@ -61,7 +61,7 @@ public class ObsShapeQueryExporter extends ShapeQueryExporter{
 	}
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+		return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		
 	}
 		
