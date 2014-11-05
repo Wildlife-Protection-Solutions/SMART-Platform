@@ -106,6 +106,8 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 	}
 	
 	private class Ct2AttributeValueEditingSupport extends SmartAttributeValueEditingSupport {
+		
+		private String attrMapTo;
 
 		public Ct2AttributeValueEditingSupport(TableViewer viewer, DataModelLookup lookup, SmartAttributeValueLabelProvider labelProvider) {
 			super(viewer, lookup, labelProvider);
@@ -114,7 +116,8 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		@Override
 		protected CellEditor getCellEditor(Object arg0) {
 			if (arg0 instanceof Ct2AttributeValue) {
-				return getAttributeEditor(attribute.getMapTo());
+				attrMapTo = attribute.getMapTo(); //we need to use this one as on setInput() attribute may change and editor value may be updated afterwards
+				return getAttributeEditor(attrMapTo);
 			}
 			return super.getCellEditor(arg0);
 		}
@@ -123,7 +126,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		protected Object getValue(Object arg0) {
 			if (arg0 instanceof Ct2AttributeValue) {
 				Ct2AttributeValue v = (Ct2AttributeValue) arg0;
-				return getEditorValue(attribute.getMapTo(), v.getMapTo());
+				return getEditorValue(attrMapTo, v.getMapTo());
 			}
 			return super.getValue(arg0);
 		}
@@ -132,7 +135,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		protected void setValue(Object arg0, Object arg1) {
 			if (arg0 instanceof Ct2AttributeValue) {
 				Ct2AttributeValue a = (Ct2AttributeValue) arg0;
-				a.setMapTo(getModelValue(attribute.getMapTo(), arg1));
+				a.setMapTo(getModelValue(attrMapTo, arg1));
 				getViewer().refresh();
 			} else {
 				super.setValue(arg0, arg1);
