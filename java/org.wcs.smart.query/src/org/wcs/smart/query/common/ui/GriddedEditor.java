@@ -513,7 +513,9 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 				}finally{
 					try{
 						session.getTransaction().rollback();
-					}catch (Exception ex){}
+					}catch (Exception ex){
+						QueryPlugIn.log(ex.getMessage(), ex);
+					}
 					session.close();
 				}
 				return Status.OK_STATUS;
