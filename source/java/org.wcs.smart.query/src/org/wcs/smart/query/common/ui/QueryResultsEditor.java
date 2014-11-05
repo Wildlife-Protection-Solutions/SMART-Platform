@@ -242,6 +242,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 	
 	/**
+	 * Loads the query from the database; if you want the cached query use getQueryProxy()
 	 * @return the query
 	 */
 	public Query getQuery(){
@@ -509,7 +510,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 						@Override
 						public void run() {
 							try {
-								getQuery().getType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+								getQueryProxy().getQuery().getType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
 							} catch (Exception ex) {
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}
@@ -518,7 +519,9 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				} finally {
 					try{
 						session.getTransaction().rollback();
-					}catch(Exception ex){}
+					}catch(Exception ex){
+						QueryPlugIn.log(ex.getMessage(), ex);
+					}
 					session.close();
 				}
 				return Status.OK_STATUS;

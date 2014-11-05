@@ -478,7 +478,9 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				}finally{
 					try{
 						session.getTransaction().rollback();
-					}catch(Exception ex){}
+					}catch(Exception ex){
+						QueryPlugIn.log(ex.getMessage(), ex);
+					}
 					session.close();
 				}
 				return Status.OK_STATUS;

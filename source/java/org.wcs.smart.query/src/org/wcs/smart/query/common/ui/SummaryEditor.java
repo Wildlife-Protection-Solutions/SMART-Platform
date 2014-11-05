@@ -483,7 +483,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 				final Session session = HibernateManager.openSession();
 				session.beginTransaction();
 				try{
-				Display.getDefault().syncExec(new Runnable(){
+					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							try{
@@ -495,7 +495,9 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 				}finally{
 					try{
 						session.getTransaction().rollback();
-					}catch(Exception ex){}
+					}catch(Exception ex){
+						QueryPlugIn.log(ex.getMessage(), ex);
+					}
 					session.close();
 				}
 				return Status.OK_STATUS;
