@@ -25,12 +25,6 @@ public class ExtraAttributeEditingSupport extends EditingSupport {
 		this.labelProvider = labelProvider;
 		this.attributes = new ArrayList<AttributeType>(attributes.size());
 		this.attributes.addAll(attributes);
-		Collections.sort(this.attributes, new Comparator<AttributeType>() {
-			@Override
-			public int compare(AttributeType a1, AttributeType a2) {
-				return ExtraAttributeEditingSupport.this.labelProvider.getText(a1).toLowerCase().compareTo(ExtraAttributeEditingSupport.this.labelProvider.getText(a2).toLowerCase());
-			}
-		});
 		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN);
 	}
 
@@ -41,6 +35,12 @@ public class ExtraAttributeEditingSupport extends EditingSupport {
 
 	@Override
 	protected CellEditor getCellEditor(Object arg0) {
+		Collections.sort(this.attributes, new Comparator<AttributeType>() {
+			@Override
+			public int compare(AttributeType a1, AttributeType a2) {
+				return labelProvider.getText(a1).toLowerCase().compareTo(labelProvider.getText(a2).toLowerCase());
+			}
+		});
 		List<String> items = new ArrayList<String>();
 		for (AttributeType a : attributes) {
 			items.add(labelProvider.getText(a));
