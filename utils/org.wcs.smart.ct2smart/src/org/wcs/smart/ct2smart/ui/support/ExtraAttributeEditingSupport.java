@@ -1,6 +1,8 @@
 package org.wcs.smart.ct2smart.ui.support;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -20,8 +22,15 @@ public class ExtraAttributeEditingSupport extends EditingSupport {
 
 	public ExtraAttributeEditingSupport(ColumnViewer viewer, List<AttributeType> attributes, SmartAttributeLabelProvider labelProvider) {
 		super(viewer);
-		this.attributes = attributes;
 		this.labelProvider = labelProvider;
+		this.attributes = new ArrayList<AttributeType>(attributes.size());
+		this.attributes.addAll(attributes);
+		Collections.sort(this.attributes, new Comparator<AttributeType>() {
+			@Override
+			public int compare(AttributeType a1, AttributeType a2) {
+				return ExtraAttributeEditingSupport.this.labelProvider.getText(a1).toLowerCase().compareTo(ExtraAttributeEditingSupport.this.labelProvider.getText(a2).toLowerCase());
+			}
+		});
 		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN);
 	}
 
