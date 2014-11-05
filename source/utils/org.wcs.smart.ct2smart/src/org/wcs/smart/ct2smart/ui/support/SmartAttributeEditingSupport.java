@@ -98,13 +98,13 @@ public class SmartAttributeEditingSupport extends EditingSupport {
 		if (arg0 instanceof Ct2Attribute) {
 			Ct2Attribute a = (Ct2Attribute) arg0;
 			String[] items = itemsMap.get(a.getType());
-			Arrays.sort(items, new Comparator<String>() {
-				@Override
-				public int compare(String o1, String o2) {
-					return labelProvider.getText(o1).toLowerCase().compareTo(labelProvider.getText(o2).toLowerCase());
-				}
-			});
 			if (items != null) {
+				Arrays.sort(items, new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						return labelProvider.getText(o1).toLowerCase().compareTo(labelProvider.getText(o2).toLowerCase());
+					}
+				});
 				String[] names = new String[items.length];
 				for (int i = 0; i < items.length; i++) {
 					names[i] = labelProvider.getText(items[i]);
