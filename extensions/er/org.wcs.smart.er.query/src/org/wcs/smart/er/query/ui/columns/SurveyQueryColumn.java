@@ -126,8 +126,8 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_LEADER: return item.getMissionLeader();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case WAYPOINT_ID: return item.getWaypointId();
-				case WAYPOINT_DATE: return item.getWaypointTime();
-				case WAYPOINT_TIME: return item.getWaypointTime(); 
+				case WAYPOINT_DATE: return item.getWaypointDateTime();
+				case WAYPOINT_TIME: return item.getWaypointDateTime(); 
 				case WAYPOINT_X: return item.getWaypointX(); 
 				case WAYPOINT_Y: return item.getWaypointY(); 
 				case WAYPOINT_DIRECTION: return item.getWaypointDirection(); 
@@ -153,9 +153,10 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_TRACKTYPE: return item.getTrackType().getGuiName();
 				case MISSION_TRACKID: return item.getTrackId();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
+				case MISSION_TRACKLENGTH: return item.getTrackLength();
 			}
 		}
-		return ""; //$NON-NLS-1$
+		return null;
 	}
 
 	/**

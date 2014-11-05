@@ -80,13 +80,13 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
 		if (queryType.getKey().equals(MissionQueryType.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}else if ( query.getType().getKey().equals(SurveyObservationQueryType.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}else if (query.getType().getKey().equals(SurveyWaypointQueryType.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}else if (query.getType().getKey().equals(MissionTrackQueryType.KEY)){
-			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns)); //$NON-NLS-1$
+			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}
 		return null;
 		

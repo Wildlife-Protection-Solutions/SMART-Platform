@@ -87,7 +87,7 @@ public class EntityQueryDataSource extends AbstractDataStore{
 		try{
 			if (typeName.equals(TYPENAME)){
 				if (featureSchema==null){
-					featureSchema = createQuerySchema(query.getQueryColumns());
+					featureSchema = createQuerySchema(query.getQueryColumns(), true);
 				}
 				return featureSchema;
 			}
@@ -97,15 +97,10 @@ public class EntityQueryDataSource extends AbstractDataStore{
 		}	
 	}
 	
-	public static SimpleFeatureType createQuerySchema(List<QueryColumn> columns) throws SchemaException {
+	public static SimpleFeatureType createQuerySchema(List<QueryColumn> columns, boolean supportsTime) throws SchemaException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("fid:String"); //$NON-NLS-1$
-		for (QueryColumn col : columns){
-			sb.append(","); //$NON-NLS-1$
-			sb.append(col.getName().replaceAll(" ", "_")); //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(":"); //$NON-NLS-1$
-			sb.append(col.getType().geotoolsType);
-		}
+		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
 		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
 		
 		SimpleFeatureType type =  DataUtilities.createType(TYPENAME, sb.toString()); 

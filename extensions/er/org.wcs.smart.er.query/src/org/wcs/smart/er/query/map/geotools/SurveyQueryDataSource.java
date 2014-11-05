@@ -23,7 +23,6 @@ package org.wcs.smart.er.query.map.geotools;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 import org.geotools.data.AbstractDataStore;
@@ -150,7 +149,7 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(query.getQueryColumns(), true)); //$NON-NLS-1$
 		return type;
 	}
 	
@@ -160,54 +159,22 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns())); //$NON-NLS-1$
+		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns(), true)); //$NON-NLS-1$
 		return type;
 	}
 	
-	public static String getWaypointFeatureSchemaDef(List<QueryColumn> columns){
+	public static String getWaypointFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		StringBuilder sb = new StringBuilder();
 		sb.append("fid:String"); //$NON-NLS-1$
-		HashSet<String> names = new HashSet<String>();
-		for (int i = 0; i < columns.size(); i++){
-			sb.append(","); //$NON-NLS-1$
-			String name = columns.get(i).getName();
-			name = name.replaceAll(" ", "_");  //$NON-NLS-1$//$NON-NLS-2$
-			name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			String tempname = name;
-			int cnt = 1;
-			while(names.contains(tempname)){
-				tempname = name + "_" + cnt; //$NON-NLS-1$
-				cnt++;
-			}
-			sb.append(tempname);
-			sb.append(":"); //$NON-NLS-1$
-			sb.append(columns.get(i).getType().geotoolsType);
-		}
+		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
 		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
-	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns){
+	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		StringBuilder sb = new StringBuilder();
 		sb.append("fid:String"); //$NON-NLS-1$
-		HashSet<String> names = new HashSet<String>();
-		for (int i = 0; i < columns.size(); i++){
-			sb.append(","); //$NON-NLS-1$
-			String name = columns.get(i).getName();
-			name = name.replaceAll(" ", "_");  //$NON-NLS-1$//$NON-NLS-2$
-			name = name.replaceAll("[^\\p{L}\\p{Nd}_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
-			
-			String tempname = name;
-			int cnt = 1;
-			while(names.contains(tempname)){
-				tempname = name + "_" + cnt; //$NON-NLS-1$
-				cnt++;
-			}
-			sb.append(tempname);
-			sb.append(":"); //$NON-NLS-1$
-			sb.append(columns.get(i).getType().geotoolsType);
-		}
+		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
 		sb.append(",geom:MultiLineString:srid=4326"); //$NON-NLS-1$
 		return sb.toString();
 	}

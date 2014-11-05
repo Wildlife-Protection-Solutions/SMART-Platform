@@ -729,13 +729,11 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		it.setSamplingUnitUuid(rs.getBytes("samplingunit_uuid")); //$NON-NLS-1$
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		
-		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
-		
 		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointTime(rs.getDate("wp_date")); //$NON-NLS-1$
+		it.setWaypointDateTime(rs.getTimestamp("wp_date")); //$NON-NLS-1$
 		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
