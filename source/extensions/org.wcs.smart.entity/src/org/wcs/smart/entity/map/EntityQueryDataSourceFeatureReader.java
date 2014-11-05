@@ -135,15 +135,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 		data[0] = it.getEntityId() + "." + SmartUtils.encodeHex(it.getWaypointUuid()); //$NON-NLS-1$ 
 		
 		for (int i = 0; i < columns.size(); i ++){
-			Object x =  columns.get(i).getValue(it);
-			if (x instanceof Boolean){
-				if ((Boolean)x){
-					x = 0;
-				}else{
-					x = 1;
-				}
-			}
-			data[i + 1] = x;
+			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
 		

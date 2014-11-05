@@ -69,15 +69,7 @@ public class SurveyResultItemFeature {
 		data[0] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (int i = 0; i < columns.size(); i ++){
-			Object x =  columns.get(i).getValue(it);
-			if (x instanceof Boolean){
-				if ((Boolean)x){
-					x = 0;
-				}else{
-					x = 1;
-				}
-			}
-			data[i + 1] = x;
+			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
 		
@@ -101,15 +93,7 @@ public class SurveyResultItemFeature {
 		data[0] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (int i = 0; i < columns.size(); i ++){
-			Object x =  columns.get(i).getValue(it);
-			if (x instanceof Boolean){
-				if ((Boolean)x){
-					x = 0;
-				}else{
-					x = 1;
-				}
-			}
-			data[i + 1] = x;
+			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		
 		Geometry g = null;
@@ -134,18 +118,15 @@ public class SurveyResultItemFeature {
 	public static SimpleFeature createTrackFeature(MissionTrackResultItem it, Session session,
 			List<QueryColumn> columns, SimpleFeatureType ftype){
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getMissionId() + "." + SmartUtils.encodeHex(it.getTrackUuid()) + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		data[0] = it.getMissionId() + "." + SmartUtils.encodeHex(it.getTrackUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (int i = 0; i < columns.size(); i ++){
-			Object x =  columns.get(i).getValue(it);
-			if (x instanceof Boolean){
-				if ((Boolean)x){
-					x = 0;
-				}else{
-					x = 1;
-				}
+			if (i == 3){
+//				data[i+1] = null;
+				data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			}else{
+				data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 			}
-			data[i + 1] = x;
 		}
 		MissionTrack mt = (MissionTrack) session.load(MissionTrack.class, it.getTrackUuid());
 		data[data.length -1] = mt.getLineString();

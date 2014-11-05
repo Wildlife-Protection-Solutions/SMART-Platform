@@ -65,7 +65,6 @@ public class SurveyQueryResultItem implements IResultItem{
 	private String samplingUnitId;
 	
 	private Date wpDateTime;
-	private Date waypointTime;
 	
 	private byte[] waypointUuid;
 	private int waypointId;
@@ -246,27 +245,16 @@ public class SurveyQueryResultItem implements IResultItem{
 	/**
 	 * @return waypoint date 
 	 */
-	public Date getWpDateTime() {
+	public Date getWaypointDateTime() {
 		return wpDateTime;
 	}
 	/**
 	 * @param wpDateTime waypoint date 
 	 */
-	public void setWpDateTime(Date wpDateTime) {
+	public void setWaypointDateTime(Date wpDateTime) {
 		this.wpDateTime = wpDateTime;
 	}
-	/**
-	 * @return waypoint time
-	 */
-	public Date getWaypointTime() {
-		return waypointTime;
-	}
-	/**
-	 * @param wpTime waypoint time
-	 */
-	public void setWaypointTime(Date wpTime) {
-		this.waypointTime = wpTime;
-	}
+
 	/**
 	 * @return waypoint id
 	 */

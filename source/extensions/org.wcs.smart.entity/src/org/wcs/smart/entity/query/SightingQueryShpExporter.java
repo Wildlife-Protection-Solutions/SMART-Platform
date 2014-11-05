@@ -56,7 +56,7 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType)
 			throws Exception {
-		return EntityQueryDataSource.createQuerySchema(queryColumns);
+		return EntityQueryDataSource.createQuerySchema(queryColumns, false);
 	}
 	
 	/* (non-Javadoc)
