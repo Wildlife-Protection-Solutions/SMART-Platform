@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.intelligence.feature.nl.hi"
       label="Intelligence Hindi Language Pack"
-      version="3.0.0"
+      version="3.1.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.0.0">
+      license-feature-version="3.1.0">
 
    <description>
       The Hindi translations for the Intelligence plugin.
