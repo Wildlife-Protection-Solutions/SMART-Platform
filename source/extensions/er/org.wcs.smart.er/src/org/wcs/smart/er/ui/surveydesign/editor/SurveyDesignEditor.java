@@ -65,7 +65,8 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 				byte[] uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
 				if (Arrays.equals(source.getUuid(), uuid)) {
 					surveyDesign = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
-					Display.getDefault().syncExec(new Runnable(){
+					getSurveyDesign();
+					Display.getDefault().asyncExec(new Runnable(){
 						@Override
 						public void run() {
 							summaryPage.initValues();
@@ -147,17 +148,22 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 		if (surveyDesign == null) {
 			byte[] puuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
-			session.clear(); //for some reason this may be active session with attached old survey design
 			session.beginTransaction();
-			surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
-			surveyDesign.getNames().size();
-			if (surveyDesign.getConfigurableModel() != null) {
-				surveyDesign.getConfigurableModel().getNames().size();
+			try{
+				surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
+				surveyDesign.getNames().size();
+				surveyDesign.getName();
+				if (surveyDesign.getConfigurableModel() != null) {
+					surveyDesign.getConfigurableModel().getNames().size();
+				}
+				surveyDesign.getMissionProperties().size();
+				surveyDesign.getProperties().size();
+			}catch (Exception ex){
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
 			}
-			surveyDesign.getMissionProperties().size();
-			surveyDesign.getProperties().size();
-			session.getTransaction().commit();
-			session.close();
 		}
 		return surveyDesign;
 	}

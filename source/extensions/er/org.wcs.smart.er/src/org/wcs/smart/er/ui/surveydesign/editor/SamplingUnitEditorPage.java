@@ -87,6 +87,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.map.samplingunit.SamplingUnitDataSource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitService;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -230,6 +231,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			List<SurveyDesignSamplingUnitAttribute> attributes = null;
 		
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
 				sd = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 				sd.getName();
@@ -264,16 +266,19 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 						}
 					}
 				}
-				
+			}catch (Exception ex){
+				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 			}finally{
+				s.getTransaction().rollback();
 				s.close();
+				s = null;
 			}
 			
 			//update ui
 			final List<SamplingUnit> sus = units;
 			final String name = sd.getName() + ": " + Messages.SamplingUnitEditorPage_SamplingUnitLabel; //$NON-NLS-1$
 			final List<SurveyDesignSamplingUnitAttribute> lattributes = attributes;
-			Display.getDefault().syncExec(new Runnable(){
+			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					form.setText(name);
@@ -740,7 +745,13 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 
 	private void configureAttributes(){
 		SurveyDesignSamplingUnitAttributeDialog d = new SurveyDesignSamplingUnitAttributeDialog(getSite().getShell(), editor.getSurveyDesign());
-		d.open();
+		if (d.open() == SurveyDesignSamplingUnitAttributeDialog.OK){
+			try {
+				((SamplingUnitDataSource)suService.getDataStore(null)).update(editor.getSurveyDesign());
+			} catch (IOException e) {
+				EcologicalRecordsPlugIn.log(e.getMessage(), e);
+			}
+		}
 	}
 	
 	private void importSu(){
