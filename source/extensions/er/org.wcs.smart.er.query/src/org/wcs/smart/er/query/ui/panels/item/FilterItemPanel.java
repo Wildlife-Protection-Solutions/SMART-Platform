@@ -99,8 +99,9 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 			}
 		}
 	};
+
 	public FilterItemPanel() {
-		this.qType = QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY);
+		this(QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY));
 	}
 	public FilterItemPanel(IQueryType qType) {
 		this.qType = qType;
@@ -112,6 +113,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 		gl.marginWidth = gl.marginHeight = 0;
 		main.setLayout(gl);
 		
+		//EVENTS
 		ConservationAreaManager.getInstance().addAreaChangeListener(areaListener);
 		main.addDisposeListener(new DisposeListener() {
 			@Override
@@ -170,8 +172,10 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	public void refreshPanel(SurveyDesign currentDesign){
 		this.currentDesign = currentDesign;
 		if (filterTreeViewer != null){
+			
 			Object input = filterTreeViewer.getInput();
 			if (input instanceof HashMap){
+				filterTreeViewer.setInput(LOADING_TEXT);
 				HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
 				input2.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
 		

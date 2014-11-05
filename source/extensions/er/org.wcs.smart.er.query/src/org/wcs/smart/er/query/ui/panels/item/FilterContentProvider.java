@@ -155,20 +155,22 @@ public class FilterContentProvider implements ITreeContentProvider{
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			
+			List<Object> lUnits = null;
 			Session s = HibernateManager.openSession();
+			s.beginTransaction();
 			try{
 				if (design != null){
 					List<SamplingUnit> allUnits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s, null);
-					sunits = new ArrayList<Object>();
-					sunits.addAll(allUnits);
-					sunits.add(SamplingUnitFilter.NONE);
-				}else{
-					sunits = null;
+					lUnits = new ArrayList<Object>();
+					lUnits.addAll(allUnits);
+					lUnits.add(SamplingUnitFilter.NONE);
 				}
 			}finally{
+				s.getTransaction().rollback();
 				s.close();
 			}
 			
+			sunits = lUnits;
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -188,7 +190,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			
+			List<SamplingUnitAttribute> lAttributes = null;
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
@@ -197,17 +199,17 @@ public class FilterContentProvider implements ITreeContentProvider{
 							.add(Restrictions.eq("id.surveyDesign", design)) //$NON-NLS-1$
 							.list();
 					
-					unitAttributes = new ArrayList<SamplingUnitAttribute>();
+					lAttributes = new ArrayList<SamplingUnitAttribute>();
 					for (SurveyDesignSamplingUnitAttribute a : attributes){
-						unitAttributes.add(a.getSamplingUnitAttribute());			
+						lAttributes.add(a.getSamplingUnitAttribute());			
 					}
 				}else{					
-					unitAttributes = s.createCriteria(SamplingUnitAttribute.class)
+					lAttributes = s.createCriteria(SamplingUnitAttribute.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list();
 				}
 				
-				for (SamplingUnitAttribute a : unitAttributes){
+				for (SamplingUnitAttribute a : lAttributes){
 					a.getName();
 					a.getType();
 				}
@@ -216,13 +218,14 @@ public class FilterContentProvider implements ITreeContentProvider{
 				s.close();
 			}
 			
-			Collections.sort(unitAttributes, new Comparator<SamplingUnitAttribute>() {
+			Collections.sort(lAttributes, new Comparator<SamplingUnitAttribute>() {
 				@Override
 				public int compare(SamplingUnitAttribute arg0,
-						SamplingUnitAttribute arg1) {
-					return Collator.getInstance().compare(arg0.getName(), arg1.getName());
+					SamplingUnitAttribute arg1) {
+				return Collator.getInstance().compare(arg0.getName(), arg1.getName());
 				}
 			});
+			unitAttributes = lAttributes;
 			
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override

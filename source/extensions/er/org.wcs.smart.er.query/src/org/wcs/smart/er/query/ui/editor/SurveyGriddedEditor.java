@@ -26,6 +26,10 @@ import net.refractions.udig.project.internal.Map;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.wcs.smart.er.ISurveyEventListener;
+import org.wcs.smart.er.SurveyEventHandler;
+import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
@@ -60,12 +64,26 @@ public class SurveyGriddedEditor extends GriddedEditor  {
 	
 	private AddSamplingUnitLayersJob addSuLayer = null;
 
+	private ISurveyEventListener surveyDesignListener = new ISurveyEventListener() {
+		@Override
+		public void event(Object o) {
+			if (o instanceof SurveyDesign){
+				SurveyDesign qd = ((ISurveyQuery)getQuery()).getSurveyDesignAsObject();
+				if (qd != null && qd.equals(o)){
+					reparseQuery();		
+				}
+			}
+				
+		}
+	};
+		
 	/**
 	 * Creates a new results editor
 	 */
 	public SurveyGriddedEditor(){
 		super();
-		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(updateTable);	
+		SurveyQueryEventManager.getInstance().addSurveyDesignChangeListener(updateTable);
+		SurveyEventHandler.getInstance().addListener(EventType.SURVEY_DESIGN_MODIFIED, surveyDesignListener);
 	}
 	
 	
@@ -76,6 +94,7 @@ public class SurveyGriddedEditor extends GriddedEditor  {
 	public void dispose(){
 		super.dispose();
 		SurveyQueryEventManager.getInstance().removeSurveyDesignChangeListener(updateTable);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_MODIFIED, surveyDesignListener);
 		addSuLayer.dispose();
 	}
 	
