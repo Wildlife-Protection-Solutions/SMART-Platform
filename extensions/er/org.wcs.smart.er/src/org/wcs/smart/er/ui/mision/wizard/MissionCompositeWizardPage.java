@@ -69,6 +69,7 @@ public class MissionCompositeWizardPage extends WizardPage {
 		super.setControl( center );
 		super.setTitle(composite.getTitle());
 		super.setDescription(composite.getDescription());
+		super.setErrorMessage(composite.getErrorMessage());
 	}
 
 	/**

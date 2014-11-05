@@ -256,7 +256,9 @@ public class MissionEditorDialog extends TitleAreaDialog {
 			public void compositeModified() {
 				if (getButton(IDialogConstants.OK_ID) == null) return;
 				getButton(IDialogConstants.OK_ID).setEnabled(composite.isValid());
+				setErrorMessage(composite.getErrorMessage());
 				isChanged = true;
+				
 			}
 		});
 		

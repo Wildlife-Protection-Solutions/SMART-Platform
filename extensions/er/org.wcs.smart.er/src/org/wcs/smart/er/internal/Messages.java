@@ -575,6 +575,8 @@ public class Messages extends NLS {
 	public static String SurveyDesign_ActiveStateLabel;
 	public static String SurveyDesign_InActiveStateLabel;
 	public static String SurveyDesignComposite_Description;
+
+	public static String SurveyDesignComposite_NeedsSurveyDesign;
 	public static String SurveyDesignComposite_SdLabel;
 	public static String SurveyDesignComposite_Title;
 	public static String SurveyDesignDataPage_DeleteDialogTitle;
@@ -639,6 +641,8 @@ public class Messages extends NLS {
 	public static String SurveyDesignListView_SurveysTabName;
 	public static String SurveyDesignPage_Label;
 	public static String SurveyDesignPage_Message;
+	public static String SurveyDesignPage_NeedsSurveyDesign;
+
 	public static String SurveyDesignPage_NewDesignItem;
 	public static String SurveyDesignPage_Title;
 	public static String SurveyDesignSamplingUnitAttributeDialog_AllSuLAbel;

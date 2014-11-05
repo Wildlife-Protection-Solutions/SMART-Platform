@@ -133,4 +133,11 @@ public class SurveyDesignComposite extends MissionComposite{
 		return Messages.SurveyDesignComposite_Description;
 	}
 
+	@Override
+	public String getErrorMessage() {
+		if (surveys.size() == 0){
+			return Messages.SurveyDesignComposite_NeedsSurveyDesign;
+		}
+		return null;
+	}
 }

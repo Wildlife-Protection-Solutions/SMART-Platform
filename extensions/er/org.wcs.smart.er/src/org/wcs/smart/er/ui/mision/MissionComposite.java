@@ -103,4 +103,12 @@ public abstract class MissionComposite {
 	 */
 	public abstract String getDescription();
 	
+	/**
+	 * This returns null, sub classes can overwrite.
+	 * @return the error message to display in the wizard dialog
+	 * 
+	 */
+	public String getErrorMessage(){
+		return null;
+	}
 }
