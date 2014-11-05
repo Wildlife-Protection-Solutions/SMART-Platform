@@ -1,15 +1,10 @@
 package org.wcs.smart.ct2smart.ui;
 
 import java.io.File;
-import java.io.IOException;
-import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -30,7 +25,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.matcher.FileUtil;
@@ -187,7 +181,7 @@ public class DmMatcherDialog extends Composite {
 		innerPanel.setLayout(new StackLayout());
 		innerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		infoComposite = new MatchAttributeComposite(innerPanel, dmLookup);
+		infoComposite = new MatchAttributeComposite(innerPanel, dmLookup, session.getConnection());
 		addLanguageChangedListener(infoComposite);
 
 		categoryComposite = new CategoryMapComposite(innerPanel, dmLookup, session.getCt2Smart());

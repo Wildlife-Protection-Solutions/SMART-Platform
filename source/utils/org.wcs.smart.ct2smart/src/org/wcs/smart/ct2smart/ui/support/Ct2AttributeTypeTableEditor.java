@@ -80,7 +80,18 @@ public class Ct2AttributeTypeTableEditor extends EditingSupport {
 		if ((arg0 instanceof Ct2Attribute) && (arg1 instanceof Integer)) {
 			Integer i = (Integer) arg1;
 			Ct2Attribute a = (Ct2Attribute) arg0;
-			a.setType(Ct2AttributeType.values()[i]);
+			Ct2AttributeType newType = Ct2AttributeType.values()[i];
+//			if (Ct2AttributeType.REF.equals(newType)) {
+//				if (!Ct2AttributeType.REF.equals(a.getType()) && a.getCt2AttributeValue().isEmpty()) {
+//					//switched from non-REF to REF
+//					//need to load possible values
+//					a.getCt2AttributeValue();
+//				}
+//			} else if (Ct2AttributeType.REF.equals(a.getType())) {
+//				//switched from REF to non-REF
+//				
+//			}
+			a.setType(newType);
 			if (!Ct2AttributeTypeUtil.canMap(a.getType())) {
 				a.setMapTo(null);
 				a.setCategoryKey(null);
