@@ -148,12 +148,10 @@ public class ImportSurveyDesignDesignsPage extends WizardPage{
 					s.getTransaction().rollback();
 					s.close();
 				}
-				Display.getDefault().syncExec(new Runnable(){
-
+				Display.getDefault().asyncExec(new Runnable(){
 					@Override
 					public void run() {
-						if(tblEntities.getTable().isDisposed()) return;
-						
+						if ( tblEntities.getTable().isDisposed() ) return;
 						tblEntities.setInput(items);
 					}});
 				

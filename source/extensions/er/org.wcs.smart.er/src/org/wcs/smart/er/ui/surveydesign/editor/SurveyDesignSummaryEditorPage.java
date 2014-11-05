@@ -199,7 +199,9 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 		btnObserver .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 				
 		Hyperlink link = createEditLink(content, PanelType.DISTANCE);
-		link.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		if (link != null){
+			link.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		}
 		
 		emptySpace = toolkit.createLabel(content, ""); //$NON-NLS-1$
 		emptySpace.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1));

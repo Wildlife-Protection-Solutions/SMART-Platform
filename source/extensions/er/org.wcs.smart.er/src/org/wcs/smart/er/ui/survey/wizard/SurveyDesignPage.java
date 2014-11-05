@@ -37,6 +37,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.hibernate.SurveyDesignFilter;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
@@ -70,7 +71,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		
 		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(center, SWT.NONE);
 		l.setText(Messages.SurveyDesignPage_Label);
@@ -106,7 +107,9 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		filter.setSurveyStates(new State[]{SurveyDesign.State.ACTIVE});
 		List<Object> items = new ArrayList<Object>();
 		items.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(session, filter));
-		items.add(Messages.SurveyDesignPage_NewDesignItem);
+		if (SurveyPermissionManager.INSTANCE.canCreateSurveyDesign() == null){
+			items.add(Messages.SurveyDesignPage_NewDesignItem);
+		}
 		cmbViewer.setInput(items);
 		
 		if (init != null){
@@ -116,6 +119,10 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 			}
 			cmbViewer.refresh();
 			cmbViewer.setSelection(new StructuredSelection(sdei));
+		}
+		
+		if (items.size() == 0){
+			setErrorMessage(Messages.SurveyDesignPage_NeedsSurveyDesign);
 		}
 	}
 

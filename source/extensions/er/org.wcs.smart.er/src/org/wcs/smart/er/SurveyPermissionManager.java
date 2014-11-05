@@ -138,8 +138,8 @@ public class SurveyPermissionManager {
 	
 	/**
 	 * Determines if the current user can edit any survey designs.
-	 * If can edit otherwise it will return a string
-	 * describing why the mission cannot be modified.
+	 * If can edit it will return null, otherwise it will return a string
+	 * describing why the survey design cannot be modified.
 	 * 
 	 * @param mission
 	 * @param op
@@ -157,6 +157,19 @@ public class SurveyPermissionManager {
 		}
 		return Messages.SurveyPermissionManager_InvalidUserType;
 	}
+	
+	/**
+	 * Determines if the current user can
+	 * create a new survey design.  If can create
+	 * it will return null, otherwise it will return 
+	 * a description explaining why cannot be created.
+	 * 
+	 * @return
+	 */
+	public String canCreateSurveyDesign(){
+		return canEditSurveyDesign();
+	}
+	
 	
 	/**
 	 * 
