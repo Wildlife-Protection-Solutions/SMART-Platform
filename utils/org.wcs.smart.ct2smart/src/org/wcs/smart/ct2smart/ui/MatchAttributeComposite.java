@@ -21,9 +21,17 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
@@ -50,8 +58,11 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 	private ExtraAttributeComposite extraAttrCmp;
 	private ValueMapComposite valueMapCmp;
 	
-	public MatchAttributeComposite(Composite parent, DataModelLookup lookup) {
+	private Connection connection;
+	
+	public MatchAttributeComposite(Composite parent, DataModelLookup lookup, Connection c) {
 		super(parent, SWT.NONE);
+		this.connection = c;
 		typeLabelProvider = new Ct2AttributeTypeLabelProvider();
 		attrLabelProvider = new SmartAttributeLabelProvider(lookup);
 
@@ -79,8 +90,37 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 		typeLabel = new Label(group, SWT.NONE);
 		mapToLabel = new Label(group, SWT.NONE);
 		
+		Button rawBtn = new Button(group, SWT.PUSH);
+		rawBtn.setText("View Raw Values");
+		rawBtn.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				showRawValues();
+			}
+		});
+		
 		extraAttrCmp = new ExtraAttributeComposite(group, lookup);
 		valueMapCmp = new ValueMapComposite(group, lookup);
+		
+	}
+
+	protected void showRawValues() {
+		try {
+			ResultSet attrRs = connection.createStatement().executeQuery("select n, i, id from CT_TO_SMART.ATTRIBUTES where i = '" + attribute.getI() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (attrRs.next()) {
+				String valuesSql = "select distinct a"+attrRs.getString(3)+" from CT_TO_SMART.CSV"; //$NON-NLS-1$ //$NON-NLS-2$
+				ResultSet valRs = connection.createStatement().executeQuery(valuesSql);
+				String values = "Raw values for \"" + attribute.getN() + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
+				while (valRs.next()) {
+					values += "\n" + valRs.getString(1); //$NON-NLS-1$
+				}
+				MessageDialog.openInformation(getShell(), "Raw values", values);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		
 		
 	}
 
