@@ -396,6 +396,16 @@ public class XmlToPatrolConverter {
 				}
 			}
 		}
+		if (xml.getObserver() != null){
+			Employee e = findEmployeeByIdAndName(xml.getObserver());
+			if (e == null){
+				warnings.add(MessageFormat.format(
+						Messages.XmlToPatrolConverter_ObserverNotFound,
+						new Object[]{xml.getObserver().getGivenName(), xml.getObserver().getFamilyName()}));
+			}else{
+				ob.setObserver(e);
+			}
+		}
 		
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){

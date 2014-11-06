@@ -597,6 +597,7 @@ public class Messages extends NLS {
 	public static String XmlToPatrolConverter_Error_TranpsortTypeNotFound;
 	public static String XmlToPatrolConverter_InvalidDateString;
 	public static String XmlToPatrolConverter_InvalidPatrolId;
+	public static String XmlToPatrolConverter_ObserverNotFound;
 	public static String XmlToPatrolConverter_Warning_AttachmentFileNotFound;
 	public static String XmlToPatrolConverter_Warning_AttributeNotFound;
 	public static String XmlToPatrolConverter_Warning_CategoryNotFound;
