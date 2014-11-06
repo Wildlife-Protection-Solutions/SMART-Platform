@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -38,7 +37,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.ui.support.ExtraAttributeEditingSupport;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeLabelProvider;
@@ -50,11 +48,10 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
  * @author elitvin
  * @since 3.0.0
  */
-public class ExtraAttributeComposite extends Composite implements ILanguageChangedListener {
+public abstract class ExtraAttributeComposite extends Composite implements ILanguageChangedListener {
 
 	private TableViewer viewer;
 	private DataModelLookup lookup;
-	private Ct2Attribute attribute;
 
 	private Button btnAdd;
 	private Button btnRemove;
@@ -119,22 +116,14 @@ public class ExtraAttributeComposite extends Composite implements ILanguageChang
 		});
 	}
 
-	protected void addExtraAttribute() {
-		attribute.getExtraAttribute().add(new ExtraAttribute());
-		viewer.refresh();
+	protected TableViewer getViewer() {
+		return viewer;
 	}
 	
-	protected void deleteExtraAttribute() {
-		Object toDel = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-		attribute.getExtraAttribute().remove(toDel);
-		viewer.refresh();
-	}
+	protected abstract void addExtraAttribute();
+	
+	protected abstract void deleteExtraAttribute();
 
-	public void setInput(Ct2Attribute attribute) {
-		this.attribute = attribute;
-		viewer.setInput(attribute.getExtraAttribute());
-	}
-	
 	private void createColumns() {
 		TableViewerColumn aCol = createTableViewerColumn("Attribute", 200);
 		attrLabelProvider = new SmartAttributeLabelProvider(lookup) {
