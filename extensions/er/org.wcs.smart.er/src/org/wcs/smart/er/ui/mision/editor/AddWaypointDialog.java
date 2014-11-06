@@ -220,11 +220,13 @@ public class AddWaypointDialog extends TitleAreaDialog{
 				}
 			}
 		}
-		Double x = null;
-		Double y = null;
+		Double x = 0.0;
+		Double y = 0.0;
+		int id = 0;
 		if (lastWp != null){
 			x = lastWp.getWaypoint().getX();
 			y = lastWp.getWaypoint().getY();
+			id = lastWp.getWaypoint().getId();
 		}
 		if (currentProjection != null) {
 			lstProjections.setSelection(new StructuredSelection(currentProjection));			
@@ -257,7 +259,8 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		};
 		
 		txtWaypointId = new Text(waypointComp, SWT.BORDER);
-		txtWaypointId.setText(String.valueOf(lastWp.getWaypoint().getId() + 1));
+
+		txtWaypointId.setText(String.valueOf(id));
 		txtWaypointId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWaypointId.addModifyListener(validation);
 		txtWaypointId.addFocusListener(new FocusListener() {
