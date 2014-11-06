@@ -156,11 +156,11 @@ public class PatrolBuilder {
 					}
 					case REF: {
 						WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
-						obs.getAttributes().add(obsAttr);
 						obsAttr.setAttributeKey(cta.getMapTo());
 						for (Ct2AttributeValue val : cta.getCt2AttributeValue()) {
-							if (a.getV().equals(val.getI())) {
+							if (a.getV().equals(val.getI()) && !Boolean.TRUE.equals(val.isIgnore())) {
 								obsAttr.setItemKey(val.getMapTo());
+								obs.getAttributes().add(obsAttr);
 								break;
 							}
 						}
