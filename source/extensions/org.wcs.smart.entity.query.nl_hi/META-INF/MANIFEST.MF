@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Hindi Entity Tracker Query Fragment
 Bundle-SymbolicName: org.wcs.smart.entity.query.nl_hi
-Bundle-Version: 1.0.0
-Fragment-Host: org.wcs.smart.entity.query;bundle-version="1.0.0"
+Bundle-Version: 3.1.0
+Fragment-Host: org.wcs.smart.entity.query;bundle-version="3.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: org.wcs.smart

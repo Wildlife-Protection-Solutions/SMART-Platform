@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.entity.feature.nl.th"
       label="SMART Entity Tracker Thai Language Pack"
-      version="3.0.0"
+      version="3.1.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.0.0">
+      license-feature-version="3.1.0">
 
    <description>
       The Thai translations for the Entity Tracker plugin.
