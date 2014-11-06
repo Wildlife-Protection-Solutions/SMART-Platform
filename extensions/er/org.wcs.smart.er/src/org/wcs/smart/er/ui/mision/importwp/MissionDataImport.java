@@ -208,6 +208,10 @@ public class MissionDataImport {
 	 * @return track
 	 */
 	public static List<MissionTrack> convertToTrack(List<Waypoint> coordinates, boolean useSource){
+		if (coordinates.size() < 2){
+			//cannot create linestrings if less than 2 coordinates
+			return Collections.emptyList();
+		}
 		if (!useSource){
 			LineString track = GPSDataImport.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
 			MissionTrack t = new MissionTrack();
@@ -314,8 +318,12 @@ public class MissionDataImport {
 		for (SurveyWaypoint sw : missionDay.getWaypoints()){
 			wps.add(sw.getWaypoint());
 		}
-		MissionTrack mt = convertToTrack(wps, false).get(0);
-		return mt;
+		List<MissionTrack> tracks  = convertToTrack(wps, false);
+		if (tracks.size() != 0){
+			MissionTrack mt = convertToTrack(wps, false).get(0);
+			return mt;
+		} 
+		return null;
 	}
 	
 	static class Item{
