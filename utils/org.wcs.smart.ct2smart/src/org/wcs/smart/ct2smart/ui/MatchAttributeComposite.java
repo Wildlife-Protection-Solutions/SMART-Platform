@@ -55,7 +55,7 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 	private Ct2AttributeTypeLabelProvider typeLabelProvider;
 	private SmartAttributeLabelProvider attrLabelProvider;
 	
-	private ExtraAttributeComposite extraAttrCmp;
+	private Ct2AttributeEAComposite extraAttrCmp;
 	private ValueMapComposite valueMapCmp;
 	
 	private Connection connection;
@@ -99,7 +99,7 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 			}
 		});
 		
-		extraAttrCmp = new ExtraAttributeComposite(group, lookup);
+		extraAttrCmp = new Ct2AttributeEAComposite(group, lookup);
 		valueMapCmp = new ValueMapComposite(group, lookup);
 		
 	}

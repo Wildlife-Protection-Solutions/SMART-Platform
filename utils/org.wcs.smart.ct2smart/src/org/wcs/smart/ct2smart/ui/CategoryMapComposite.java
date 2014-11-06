@@ -27,6 +27,9 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -58,6 +61,9 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 	
 	private List<Ct2Attribute> columns;
 	
+	private CtCategoryEAComposite extraAttrCmp;
+
+	
 	public CategoryMapComposite(Composite parent, DataModelLookup lookup, Ct2Smart ct2Smart) {
 		super(parent, SWT.NONE);
 		this.lookup = lookup;
@@ -66,11 +72,10 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		try {
 			catMapBuilder = new CategoryMapBuilder(ConnectionUtil.getConnection());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		GridLayout gd = new GridLayout(2, false);
+		GridLayout gd = new GridLayout(1, false);
 		gd.marginBottom = 0;
 		gd.marginHeight = 0;
 		gd.marginLeft = 0;
@@ -95,12 +100,29 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		GridData tgridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		tgridData.heightHint = 150;
 		viewer.getControl().setLayoutData(tgridData);
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent arg0) {		
+				viewerSelectionChanged();
+			}
+		});
 
 		if (ct2Smart != null) {
 			columns = extractColumns(ct2Smart);
 			rebuildColumns();
 		}
 		
+		extraAttrCmp = new CtCategoryEAComposite(this, lookup);
+	}
+
+	protected void viewerSelectionChanged() {
+		Object obj = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+		if (obj instanceof CtCategory) {
+			CtCategory c = (CtCategory)obj;
+			extraAttrCmp.setInput(c);
+			extraAttrCmp.setVisible(true);
+			layout();
+		}
 	}
 
 	public void setInput(Ct2Smart ct2Smart) {
@@ -112,12 +134,12 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 			try {
 				ct2Smart.getCtCategory().addAll(catMapBuilder.extractCategoryValues(columns));
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			rebuildColumns();
 		}
 		viewer.setInput(ct2Smart.getCtCategory());
+		extraAttrCmp.setVisible(false);
 	}
 
 	public List<Ct2Attribute> extractColumns(Ct2Smart ct2Smart) {

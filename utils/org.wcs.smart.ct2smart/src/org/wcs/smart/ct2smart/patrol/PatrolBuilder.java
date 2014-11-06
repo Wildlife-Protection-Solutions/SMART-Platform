@@ -112,11 +112,18 @@ public class PatrolBuilder {
 			legDay.getWaypoints().add(wp);
 			wp.setId(legDay.getWaypoints().size());
 
-			String defaultCategoryKey = getDefaultCategory(s);
+			CtCategory defaultCategory = getDefaultCategory(s);
+			String defaultCategoryKey = defaultCategory != null ? defaultCategory.getCategoryKey() : null;
 			WaypointObservationType defObs = new WaypointObservationType();
 			wp.getObservations().add(defObs);
 			defObs.setCategoryKey(defaultCategoryKey);
 			
+			for (ExtraAttribute ea : defaultCategory.getExtraAttribute()) {
+				WaypointObservationAttributeType obsAttr = ea2woa(ea);
+				if (obsAttr != null) {
+					defObs.getAttributes().add(obsAttr);
+				}
+			}
 
 			for (TagA a : s) {
 				Ct2Attribute cta = lookup.findAttribute(a.getI());
@@ -234,33 +241,9 @@ public class PatrolBuilder {
 				}
 				
 				for (ExtraAttribute ea : cta.getExtraAttribute()) {
-					WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
-					obs.getAttributes().add(obsAttr);
-					obsAttr.setAttributeKey(ea.getAttributeKey());
-					AttributeType dmAttr = dmLookup.getAttribute(ea.getAttributeKey());
-					if (dmAttr == null) {
-						System.err.println("ERROR: Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
-						continue;
-					}
-					String type = dmAttr.getType();
-					if ("LIST".equals(type) || "TREE".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
-						obsAttr.setItemKey(ea.getValueKey());
-
-					} else if ("TEXT".equals(type)) { //$NON-NLS-1$
-						obsAttr.setSValue(ea.getValueKey());
-
-					} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
-						try {
-							obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
-						} catch (NumberFormatException e) {
-							System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
-						}
-						
-					} else if ("BOOLEAN".equals(type)) { //$NON-NLS-1$
-						obsAttr.setBValue("True".equals(ea.getValueKey()));
-					
-					} else {
-						System.err.println("ERROR: Unsupported type for extra attribute:" + type);
+					WaypointObservationAttributeType obsAttr = ea2woa(ea);
+					if (obsAttr != null) {
+						obs.getAttributes().add(obsAttr);
 					}
 				}
 			}
@@ -316,6 +299,39 @@ public class PatrolBuilder {
 		return patrol;
 	}
 
+	private WaypointObservationAttributeType ea2woa(ExtraAttribute ea) {
+		WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+		obsAttr.setAttributeKey(ea.getAttributeKey());
+		AttributeType dmAttr = dmLookup.getAttribute(ea.getAttributeKey());
+		if (dmAttr == null) {
+			System.err.println("ERROR: Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
+			return null;
+		}
+		String type = dmAttr.getType();
+		if ("LIST".equals(type) || "TREE".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
+			obsAttr.setItemKey(ea.getValueKey());
+
+		} else if ("TEXT".equals(type)) { //$NON-NLS-1$
+			obsAttr.setSValue(ea.getValueKey());
+
+		} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
+			try {
+				obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
+			} catch (NumberFormatException e) {
+				System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
+				return null;
+			}
+			
+		} else if ("BOOLEAN".equals(type)) { //$NON-NLS-1$
+			obsAttr.setBValue("True".equals(ea.getValueKey()));
+		
+		} else {
+			System.err.println("ERROR: Unsupported type for extra attribute:" + type);
+			return null;
+		}
+		return obsAttr;
+	}
+	
 	private LineString createTrack(List<TagT> tList) throws ParseException {
 		List<Coordinate> coordinates = new ArrayList<Coordinate>();
 		Date date;
@@ -331,7 +347,7 @@ public class PatrolBuilder {
 		return CoordinateUtil.buildLineString(coordinates);
 	}
 
-	private String getDefaultCategory(TagS s) {
+	private CtCategory getDefaultCategory(TagS s) {
 		List<Ct2AttributeValuePair> data = new ArrayList<Ct2AttributeValuePair>();
 		for (TagA a : s) {
 			Ct2Attribute cta = lookup.findAttribute(a.getI());
@@ -354,7 +370,7 @@ public class PatrolBuilder {
 			}
 			System.out.println("Warning: No category defined for following items: " + info);
 		}
-		return c != null ? c.getCategoryKey() : null;
+		return c;
 	}
 	
 	//copy from SmartUtil

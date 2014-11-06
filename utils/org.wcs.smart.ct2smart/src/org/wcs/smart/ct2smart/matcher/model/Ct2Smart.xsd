@@ -64,6 +64,7 @@
 	<xs:complexType name="CtCategory">
 		<xs:sequence>
 			<xs:element name="CtCategoryMap" type="CtCategoryMap" maxOccurs="unbounded" minOccurs="0" />
+			<xs:element name="ExtraAttribute" type="ExtraAttribute" maxOccurs="unbounded" minOccurs="0" />
 		</xs:sequence>
 		<xs:attribute type="xs:string" name="categoryKey" use="optional" />
 	</xs:complexType>
