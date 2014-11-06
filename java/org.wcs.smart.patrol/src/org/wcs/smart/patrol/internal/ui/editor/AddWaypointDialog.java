@@ -130,9 +130,8 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		
-		parent.setLayout(new GridLayout(1, false));
-		
+		parent = (Composite)super.createDialogArea(parent);
+				
 		Composite waypointComp = new Composite(parent, SWT.NONE);
 		waypointComp.setLayout(new GridLayout(2, false));
 		waypointComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -142,7 +141,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lbl.setText(Messages.AddWaypointDialog_Projection_Label);
 
 		
-		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN);
+		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.widthHint = 100;
 		lstProjections.getControl().setLayoutData(gd);
