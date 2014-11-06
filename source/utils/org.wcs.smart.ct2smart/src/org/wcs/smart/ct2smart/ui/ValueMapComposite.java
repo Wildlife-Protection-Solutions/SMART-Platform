@@ -1,5 +1,11 @@
 package org.wcs.smart.ct2smart.ui;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -8,15 +14,22 @@ import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeValueEditingSupport;
 import org.wcs.smart.ct2smart.ui.support.SmartAttributeValueLabelProvider;
+import org.wcs.smart.util.SmartUtils;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 public class ValueMapComposite extends Composite implements ILanguageChangedListener {
 
@@ -51,6 +64,62 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		GridData tgridData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		tgridData.heightHint = 150;
 		viewer.getControl().setLayoutData(tgridData);
+
+		Button btnCsvExport = new Button(this, SWT.PUSH);
+		btnCsvExport.setText("Csv Export");
+		btnCsvExport.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				exportCsv();
+			}
+		});
+		
+	}
+
+	protected void exportCsv() {
+		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+		dlg.setFilterNames(new String[] {"CSV file"});
+		dlg.setFilterExtensions(new String[] {"*.csv"}); //$NON-NLS-1$
+		String fn = dlg.open();
+		if (fn != null) {
+			if (!fn.endsWith(".csv")) { //$NON-NLS-1$
+				fn += ".csv"; //$NON-NLS-1$
+			}
+			CSVWriter writer = null;
+			File file = new File(fn);
+			try {
+				writer = new CSVWriter(
+						new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+						',', '"',SmartUtils.LINE_SEPARATOR); 
+
+				// WriteHeaders
+				String[] headerColumns = new String[] {"CyberTracker Value", "SMART Value", "SMART key", "Ignore"};
+				writer.writeNext(headerColumns);
+
+				//for each row write one record
+				for (Ct2AttributeValue attr : attribute.getCt2AttributeValue()) {
+					String csvout[] = new String[headerColumns.length];
+					csvout[0] = attr.getN();
+					csvout[1] = valLabelProvider.getText(attr);
+					csvout[2] = attr.getMapTo();
+					csvout[3] = String.valueOf(Boolean.TRUE.equals(attr.isIgnore()));
+					writer.writeNext(csvout);
+					
+				}
+				writer.close();
+				MessageDialog.openInformation(getShell(), "CSV Export", "CSV Export completed.");
+			} catch (IOException ex) {
+				try {
+					if (writer != null) {
+						writer.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				ex.printStackTrace();
+			}
+		}
+		
 		
 	}
 
