@@ -159,6 +159,7 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 		boolean update = ((INewSurveyWizardPage)event.getCurrentPage()).updateSurvey(newSurvey, session);
 		if (!update){
 			event.doit = false;
+			return;
 		}
 
 		((INewSurveyWizardPage)event.getTargetPage()).initControls(newSurvey, session);

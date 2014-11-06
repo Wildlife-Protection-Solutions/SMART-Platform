@@ -220,6 +220,14 @@ public class MissionToXmlConverter {
 			xml.getAttachments().add(attach.getFilename());
 		}
 		
+		if (observation.getObserver() != null){
+			MembersType mm = new MembersType();
+			mm.setEmployeeId(observation.getObserver().getId());
+			mm.setFamilyName(observation.getObserver().getFamilyName());
+			mm.setGivenName(observation.getObserver().getGivenName());
+			xml.setObserver(mm);
+		}
+		
 		for (WaypointObservationAttribute att : observation.getAttributes()){
 			WaypointObservationAttributeType xml2 = new WaypointObservationAttributeType();
 			xml2.setAttributeKey(att.getAttribute().getKeyId());

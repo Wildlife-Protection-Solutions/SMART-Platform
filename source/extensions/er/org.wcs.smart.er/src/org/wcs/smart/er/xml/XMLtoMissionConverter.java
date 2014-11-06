@@ -365,6 +365,17 @@ public class XMLtoMissionConverter {
 			}
 		}
 		
+		if (xml.getObserver() != null){
+			Employee e = findEmployeeByIdAndName(xml.getObserver());
+			if (e == null){
+				warnings.add(
+						MessageFormat.format(
+								Messages.XMLtoMissionConverter_ObserverNotFound, 
+								new Object[]{xml.getObserver().getGivenName(), xml.getObserver().getFamilyName()}));
+			}else{
+				ob.setObserver(e);
+			}
+		}
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XMLtoMissionConverter_2,

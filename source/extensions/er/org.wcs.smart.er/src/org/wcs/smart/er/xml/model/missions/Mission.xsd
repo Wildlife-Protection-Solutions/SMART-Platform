@@ -60,13 +60,14 @@
     			maxOccurs="unbounded" minOccurs="0">
     		</element>
     		<element name="observations"
-    			type="tns:WaypointObservationType" maxOccurs="unbounded" minOccurs="0">
-    		</element>
+    			type="tns:WaypointObservationType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
     	</sequence>
     	<attribute name="id" type="int"></attribute>
     	<attribute name="x" type="double"></attribute>
     	<attribute name="y" type="double"></attribute>
-    	<attribute name="dateTime" type="dateTime"></attribute>
+    	<attribute name="dateTime" type="dateTime"></attribute>
     </complexType>
     <complexType name="WaypointObservationType">
     	<sequence>
@@ -74,7 +75,10 @@
     			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
     			minOccurs="0">
     		</element>
-    		<element name="attachments" type="string" maxOccurs="unbounded" minOccurs="0"></element>
+    		<element name="attachments" type="string"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="observer" type="tns:MembersType" maxOccurs="1" minOccurs="0"></element>
     	</sequence>
     	<attribute name="categoryKey" type="string"></attribute>
     </complexType>
