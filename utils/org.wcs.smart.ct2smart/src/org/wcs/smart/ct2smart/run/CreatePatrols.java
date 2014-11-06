@@ -22,7 +22,7 @@ public class CreatePatrols {
 		
 		PatrolExtractor extractor = new PatrolExtractor();
 		Ct2Smart ct2Smart = FileUtil.loadCt2Smart(new File("match_super_x.xml"));
-		PatrolBuilder builder = new PatrolBuilder(ct2Smart);
+		PatrolBuilder builder = new PatrolBuilder(ct2Smart, null); //TODO: null may cause NullPointer if contain extra attributes
 		
 		Connection c = ConnectionUtil.getConnection();
 		String[] uniqueId = new String[] {"Date", "Unit_ID", "DeviceId"};
