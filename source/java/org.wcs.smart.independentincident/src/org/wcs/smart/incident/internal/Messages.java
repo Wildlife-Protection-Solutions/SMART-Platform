@@ -151,6 +151,7 @@ public class Messages extends NLS {
 	public static String XmlToIncident_ListValueNotFound;
 	public static String XmlToIncident_MultpleAttributeValues;
 	public static String XmlToIncident_NoValueFound;
+	public static String XmlToIncident_ObserverNotFound;
 	public static String XmlToIncident_StringValueNotFound;
 	public static String XmlToIncident_TooManyAttributes;
 	public static String XmlToIncident_TreeNodeNotFound;

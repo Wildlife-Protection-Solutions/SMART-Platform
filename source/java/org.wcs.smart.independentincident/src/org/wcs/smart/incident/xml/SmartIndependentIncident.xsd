@@ -35,21 +35,38 @@ elementFormDefault="qualified">
  			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
  			minOccurs="0">
  		</element>
- 		<element name="attachments" type="string" maxOccurs="unbounded" minOccurs="0"></element>
+ 		<element name="attachments" type="string" maxOccurs="unbounded"
+ 			minOccurs="0">
+ 		</element>
+ 		<element name="observer" type="tns:EmployeeType" maxOccurs="1" minOccurs="0"></element>
  	</sequence>
  	<attribute name="categoryKey" type="string"></attribute>
  </complexType>
 
  <complexType name="WaypointObservationAttributeType">
-    	<sequence>
-    		<element name="sValue" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="dValue" type="double" maxOccurs="1" minOccurs="0"></element>
-    		<element name="itemKey" type="string" maxOccurs="1" minOccurs="0"></element>
-    		<element name="bValue" type="boolean" maxOccurs="1" minOccurs="0"></element>
-    	</sequence>
-    	<attribute name="attributeKey" type="string"></attribute>
-    </complexType>
+ 	<sequence>
+ 		<element name="sValue" type="string" maxOccurs="1"
+ 			minOccurs="0">
+ 		</element>
+ 		<element name="dValue" type="double" maxOccurs="1"
+ 			minOccurs="0">
+ 		</element>
+ 		<element name="itemKey" type="string" maxOccurs="1"
+ 			minOccurs="0">
+ 		</element>
+ 		<element name="bValue" type="boolean" maxOccurs="1"
+ 			minOccurs="0">
+ 		</element>
+ 	</sequence>
+ 	<attribute name="attributeKey" type="string"></attribute>
+ </complexType>
 
 
-    <element name="Waypoint" type="tns:WaypointType"></element>
+ <element name="Waypoint" type="tns:WaypointType"></element>
+
+ <complexType name="EmployeeType">
+ 	<attribute name="employeeId" type="string"></attribute>
+ 	<attribute name="givenName" type="string"></attribute>
+ 	<attribute name="familyName" type="string"></attribute>
+ </complexType>
 </schema>

@@ -63,6 +63,14 @@ public class ObjectFactory {
     public WaypointType createWaypointType() {
         return new WaypointType();
     }
+    
+    /**
+     * Create an instance of {@link EmployeeType }
+     * 
+     */
+    public EmployeeType createEmployeeType() {
+        return new EmployeeType();
+    }
 
     /**
      * Create an instance of {@link JAXBElement }{@code <}{@link WaypointType }{@code >}}

@@ -28,6 +28,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.incident.xml.model.EmployeeType;
 import org.wcs.smart.incident.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.incident.xml.model.WaypointObservationType;
 import org.wcs.smart.incident.xml.model.WaypointType;
@@ -68,6 +69,14 @@ public class IncidentToXml {
 		for (WaypointObservation ob  : incident.getObservations()){
 			WaypointObservationType wot = new WaypointObservationType();
 			wot.setCategoryKey(ob.getCategory().getHkey());
+			
+			if (ob.getObserver() != null){
+				EmployeeType observer = new EmployeeType();
+				observer.setEmployeeId(ob.getObserver().getId());
+				observer.setFamilyName(ob.getObserver().getFamilyName());
+				observer.setGivenName(ob.getObserver().getGivenName());
+				wot.setObserver(observer);
+			}
 			
 			for (ObservationAttachment attach : ob.getAttachments()){
 				wot.getAttachments().add(attach.getFilename());
