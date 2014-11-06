@@ -37,6 +37,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
+import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagE;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
@@ -71,8 +72,8 @@ public class CsvPatrolExtractor {
 	}
 
 
-	public void extract(String folder, Ct2Smart ct2Smart) throws Exception {
-		PatrolBuilder builder = new PatrolBuilder(ct2Smart);
+	public void extract(String folder, Ct2Smart ct2Smart, DataModelLookup dmLookup) throws Exception {
+		PatrolBuilder builder = new PatrolBuilder(ct2Smart, dmLookup);
 		
 		String[] uniqueId = new String[] {"Date", "Unit_ID", "DeviceId"};
 		String[] columnNames = getCsvColumns(uniqueId);

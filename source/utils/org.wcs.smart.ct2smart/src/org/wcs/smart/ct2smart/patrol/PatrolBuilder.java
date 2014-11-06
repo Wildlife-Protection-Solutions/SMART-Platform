@@ -26,9 +26,11 @@ import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.parser.TeamMembersParser;
 import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
+import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
 import org.wcs.smart.ct2smart.xml.parser.TagT;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.patrol.xml.model.LabelType;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
 import org.wcs.smart.patrol.xml.model.PatrolLegType;
@@ -50,10 +52,12 @@ public class PatrolBuilder {
 	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
 	
 	private Ct2SmartLookup lookup;
+	private DataModelLookup dmLookup;
 	private TeamMembersParser membersParser = new TeamMembersParser();
 	
-	public PatrolBuilder(Ct2Smart ct2Smart) {
+	public PatrolBuilder(Ct2Smart ct2Smart, DataModelLookup dmLookup) {
 		lookup = new Ct2SmartLookup(ct2Smart);
+		this.dmLookup = dmLookup;
 	}
 
 	public PatrolType createPatrol(List<TagS> sList, List<TagT> tList) throws DatatypeConfigurationException, ParseException {
@@ -233,7 +237,31 @@ public class PatrolBuilder {
 					WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
 					obs.getAttributes().add(obsAttr);
 					obsAttr.setAttributeKey(ea.getAttributeKey());
-					obsAttr.setItemKey(ea.getValueKey()); //TODO: numeric, text, boolean
+					AttributeType dmAttr = dmLookup.getAttribute(ea.getAttributeKey());
+					if (dmAttr == null) {
+						System.err.println("ERROR: Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
+						continue;
+					}
+					String type = dmAttr.getType();
+					if ("LIST".equals(type) || "TREE".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
+						obsAttr.setItemKey(ea.getValueKey());
+
+					} else if ("TEXT".equals(type)) { //$NON-NLS-1$
+						obsAttr.setSValue(ea.getValueKey());
+
+					} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
+						try {
+							obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
+						} catch (NumberFormatException e) {
+							System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
+						}
+						
+					} else if ("BOOLEAN".equals(type)) { //$NON-NLS-1$
+						obsAttr.setBValue("True".equals(ea.getValueKey()));
+					
+					} else {
+						System.err.println("ERROR: Unsupported type for extra attribute:" + type);
+					}
 				}
 			}
 			
