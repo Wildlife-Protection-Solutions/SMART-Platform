@@ -4,12 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.patrol.query.internal.messages"; //$NON-NLS-1$
-	public static String AbstractValueDropItem_ChangeRankLink;
-	public static String AbstractValueDropItem_ComputeRateLink;
-	public static String AbstractValueDropItem_RateofChangePerLabel;	
-	public static String AttributeValueDropItem_NoAggregation_Warning;
 	public static String AttributeValueItem_AggNoSupported;
-	public static String CombinedValueItem_PER_LABEL;
 	public static String DerbyFilterToSqlGenerator_DateFilteNotSupported;
 	public static String DerbyGridEngine_Error_PatrolValueNotSupported;
 	public static String DerbyGridEngine_Progress_CalculatingGridValue;
@@ -30,7 +25,6 @@ public class Messages extends NLS {
 	public static String DerbyQueryEngine2_Progress_ProcessingAttribute;
 	public static String DerbyQueryEngine2_Progress_ProcessingAttributes;
 	public static String DerbyQueryEngine2_Progress_RunningQuery;
-	public static String DerbyQueryResult_CleanUpJob_Title;
 	public static String DerbySummaryEngine_InvalidRateFilterComputation;
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
@@ -42,8 +36,6 @@ public class Messages extends NLS {
 	public static String FilterValidator_PatrolFilter_ValueMatchingError;
 	public static String FilterValidator_PatrolFilterError;
 	public static String FilterValidator_PatrolFilterErrorB;
-	public static String FixedColumnLabelProvider_BooleanPatrolAttribute_FalseLabel;
-	public static String FixedColumnLabelProvider_BooleanPatrolAttribute_TrueLabel;
 	public static String FixedQueryColumn_ArmedColumnName;
 	public static String FixedQueryColumn_CaIdColumnName;
 	public static String FixedQueryColumn_CaNameColumnName;

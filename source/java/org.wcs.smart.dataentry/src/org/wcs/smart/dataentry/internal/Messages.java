@@ -35,7 +35,6 @@ public class Messages extends NLS {
 	public static String CmTemplateCloner_CategoryNotFoundErrpr;
 	public static String CmTemplateCloner_CopyConfigModelName;
 	public static String CmTemplateCloner_CopyProgress;
-	public static String CmTemplateCloner_ListItemNotFoundError;
 	public static String CmTemplateCloner_TreeNodeNotFoundError;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
 	public static String CmXmlToSmartImporter_ImportingFromXml;
