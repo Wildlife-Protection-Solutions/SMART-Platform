@@ -204,6 +204,14 @@ public class PatrolToXmlConverter {
 			xml.getAttachments().add(attach.getFilename());
 		}
 		
+		if (observation.getObserver() != null){
+			PatrolMemberType member = new PatrolMemberType();
+			member.setEmployeeId(observation.getObserver().getId());
+			member.setFamilyName(observation.getObserver().getFamilyName());
+			member.setGivenName(observation.getObserver().getGivenName());
+			xml.setObserver(member);
+		}
+		
 		for (WaypointObservationAttribute att : observation.getAttributes()){
 			WaypointObservationAttributeType xml2 = new WaypointObservationAttributeType();
 			xml2.setAttributeKey(att.getAttribute().getKeyId());

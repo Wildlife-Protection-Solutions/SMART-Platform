@@ -10,6 +10,7 @@ package org.wcs.smart.patrol.xml.model;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -28,6 +29,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.1/patrol}WaypointObservationAttributeType" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="attachments" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="observer" type="{http://www.example.org/Mission/}PatrolMemberType" maxOccurs="1" minOccurs="0"/>         
  *       &lt;/sequence>
  *       &lt;attribute name="categoryKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
@@ -40,12 +42,14 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "WaypointObservationType", propOrder = {
     "attributes",
-    "attachments"
+    "attachments",
+    "observer"
 })
 public class WaypointObservationType {
 
     protected List<WaypointObservationAttributeType> attributes;
     protected List<String> attachments;
+    protected PatrolMemberType observer;
     @XmlAttribute
     protected String categoryKey;
 
@@ -130,5 +134,28 @@ public class WaypointObservationType {
     public void setCategoryKey(String value) {
         this.categoryKey = value;
     }
+    
+    /**
+     * Gets the value of the observers property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link MembersType }
+     *     
+     */
+    public PatrolMemberType getObserver() {
+        return observer;
+    }
 
+    /**
+     * Sets the value of the observers property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link MembersType }
+     *     
+     */
+    public void setObserver(PatrolMemberType value) {
+        this.observer = value;
+    }
 }
