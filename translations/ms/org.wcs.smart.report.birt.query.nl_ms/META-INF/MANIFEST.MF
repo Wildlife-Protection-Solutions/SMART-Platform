@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart.report.birt.query Malay NLS Support
 Bundle-SymbolicName: org.wcs.smart.report.birt.query.nl_ms
-Bundle-Version: 3.0.0
+Bundle-Version: 3.1.0
 Bundle-Vendor: org.wcs.smart
-Fragment-Host: org.wcs.smart.report.birt.query;bundle-version="3.0.0"
+Fragment-Host: org.wcs.smart.report.birt.query;bundle-version="3.1.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
