@@ -105,7 +105,6 @@ public class Messages extends NLS {
 	public static String ImportFromWaypointWizardPage_PageName;
 	public static String ImportFromWaypointWizardPage_PageTitle;
 	
-	public static String ImportGpsDataWizard_DialogTitle;
 	public static String ImportGpsDataWizard_GPS_WarningNoneFound;
 	public static String ImportGpxWizardPage_AllFilesFilterName;
 	public static String ImportGpxWizardPage_FilesLabel;
@@ -195,7 +194,6 @@ public class Messages extends NLS {
 	public static String PatrolOptionsPropertyPage_DialogMessage;
 	public static String PatrolOptionsPropertyPage_DialogTitle;
 	public static String PatrolOptionsPropertyPage_DistanceDirection_DescLabel;
-	public static String PatrolOptionsPropertyPage_DistanceDirection_OpLabel;
 	public static String PatrolOptionsPropertyPage_Error_CouldNotSave;
 	public static String PatrolOptionsPropertyPage_Error_EditTimeInvalid;
 	public static String PatrolOptionsPropertyPage_PageName;
@@ -206,7 +204,6 @@ public class Messages extends NLS {
 	public static String SearchTree_AddCategories_ToolTip;
 	public static String SearchTree_ClearSelection_Tooltip;
 	public static String SearchTree_DefaultText;
-	public static String SearchTree_ItemsMatchedLabel;
 	public static String SearchTree_RemoveAllCategories_Tooltip;
 	public static String SearchTree_RemoveCategories_ToolTip;
 	public static String SmartPatrolPlugIn_Error_DialogMessage1;

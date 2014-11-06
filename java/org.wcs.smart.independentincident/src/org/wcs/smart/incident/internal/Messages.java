@@ -106,7 +106,6 @@ public class Messages extends NLS {
 	public static String IncidentSummaryPage_DistanceLabel;
 	public static String IncidentSummaryPage_EditButtonName;
 	public static String IncidentSummaryPage_EmployeeLoadJobName;
-	public static String IncidentSummaryPage_EqualsFunction;
 	public static String IncidentSummaryPage_IdLabel;
 	public static String IncidentSummaryPage_LoadingLabel;
 	public static String IncidentSummaryPage_LocationLabel;

@@ -859,7 +859,6 @@ public class Messages extends NLS {
 	public static String SelectCaDialog_SelectAllOption;
 	public static String SelectCaDialog_SelectLabel;
 	public static String SelectCaDialog_ShellTitle;
-	public static String SetBasemapTool_RestoreBasemap_JobName;
 	public static String ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel;
 	public static String ShowDataModelPropertyPageHandler_Progress_LoadingDataModel;
 	public static String ShowDefaultMapPerspective_Error_LoadingPerspective;

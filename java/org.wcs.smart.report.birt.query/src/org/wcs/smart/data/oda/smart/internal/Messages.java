@@ -8,9 +8,6 @@ public class Messages extends NLS {
 	public static String ReportQueryListener_BeforeSave_QueryUsedWarning;
 	public static String ReportQueryListener_QuerySaveError;
 	public static String ReportQueryListener_Warning_DialogTitle;
-
-	public static String SmartBirtTableUtils_ErrorReadingTables;
-
 	public static String SmartConnection_Error_DatasetNotSupported;
 	public static String SmartDatasetMetadata_SmartDataSourceName;
 	public static String SmartDriver_Underfined_MappingType;

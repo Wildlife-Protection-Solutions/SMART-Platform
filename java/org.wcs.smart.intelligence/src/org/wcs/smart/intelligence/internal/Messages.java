@@ -94,8 +94,6 @@ public class Messages extends NLS {
 
 	public static String ExportIntelligenceTemplateHandler_ReportDesignFiles;
 
-	public static String ImportIntelligenceHandler_CancelInfoDialog_Message;
-
 	public static String ImportIntelligenceHandler_CancelInfoDialog_Title;
 
 	public static String ImportIntelligenceHandler_CancelledMessage;

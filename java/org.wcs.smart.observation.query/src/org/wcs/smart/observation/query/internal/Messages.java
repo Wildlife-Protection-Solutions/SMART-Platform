@@ -16,7 +16,6 @@ public class Messages extends NLS {
 	public static String DerbyQueryEngine2_Progress_ProcessingAttribute;
 	public static String DerbyQueryEngine2_Progress_ProcessingAttributes;
 	public static String DerbyQueryEngine2_Progress_RunningQuery;
-	public static String DerbyQueryResult_CleanUpJob_Title;
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
@@ -98,9 +97,6 @@ public class Messages extends NLS {
 	public static String ObservationQueryType_QueryName;
 	public static String ObservationSummaryQueryType_QueryName;
 	public static String ObservationWaypointQueryType_QueryName;
-	public static String ObserverDropItem_loadingList;
-	public static String ObserverDropItem_ObserverLabel;
-	public static String ObserverFilter_EmployeeNotFound;
 
 	static {
 		// initialize resource bundle

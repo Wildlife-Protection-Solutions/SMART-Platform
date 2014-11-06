@@ -97,7 +97,6 @@ public class Messages extends NLS {
 	public static String DeleteItemHandler_ConfirmMessage;
 	public static String DeleteItemHandler_ErrorClosingEditor;
 	public static String DeleteItemHandler_ErrorDeleteFolder;
-	public static String DeleteItemHandler_ErrorDeletingQuery;
 	public static String DeleteItemHandler_ErrorDeletingQueryB;
 	public static String DeleteItemHandler_ErrorQueryNotFound;
 	public static String DropItem_deleteitemTooltip;
@@ -220,7 +219,6 @@ public class Messages extends NLS {
 	public static String ImportQueryWizard_ErrorDialogTitle;
 	public static String ImportQueryWizard_ErrorDialogTitle1;
 	public static String ImportQueryWizard_ErrorImportingFile;
-	public static String ImportQueryWizard_ErrorOpeningEditor;
 	public static String ImportQueryWizard_ImportCompleteMessage;
 	public static String ImportQueryWizard_ImportCompleteTitle;
 	public static String ImportQueryWizard_ImportError;
