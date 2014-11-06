@@ -3,6 +3,8 @@ package org.wcs.smart.ct2smart.ui;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -75,6 +77,19 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		valLabelProvider = new Ct2AttributeValueLabelProvider(lookup);
 		vCol.setLabelProvider(valLabelProvider);
 		vCol.setEditingSupport(new Ct2AttributeValueEditingSupport(viewer, lookup, valLabelProvider));
+
+		TableViewerColumn iCol = createTableViewerColumn("Ignore", 250);
+		iCol.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof Ct2AttributeValue) {
+					Ct2AttributeValue v = (Ct2AttributeValue) element;
+					return Boolean.TRUE.equals(v.isIgnore()) ? "Yes" : "No";
+				}
+				return super.getText(element);
+			}
+		});
+		iCol.setEditingSupport(new IgnoreValueEditingSupport(viewer));
 		
 	}
 
@@ -105,6 +120,12 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		
 	}
 	
+	@Override
+	public void languageChanged(String langCode) {
+		valLabelProvider.languageChanged(langCode);
+		viewer.refresh();
+	}
+
 	private class Ct2AttributeValueEditingSupport extends SmartAttributeValueEditingSupport {
 		
 		private String attrMapTo;
@@ -143,9 +164,50 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		}
 	}
 
-	@Override
-	public void languageChanged(String langCode) {
-		valLabelProvider.languageChanged(langCode);
-		viewer.refresh();
+	private class IgnoreValueEditingSupport extends EditingSupport {
+
+		private final String[] NO_YES_ITEMS = new String[] {"No", "Yes"};
+		
+		private ComboBoxCellEditor cbEditor;
+		
+		public IgnoreValueEditingSupport(TableViewer viewer) {
+			super(viewer);
+			Table table = viewer.getTable();
+			cbEditor = new ComboBoxCellEditor(table, new String[0], SWT.DROP_DOWN | SWT.READ_ONLY);
+
+		}
+
+		@Override
+		protected boolean canEdit(Object arg0) {
+			return true;
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object arg0) {
+		cbEditor.setItems(NO_YES_ITEMS);
+		return cbEditor ;
+		}
+
+		@Override
+		protected Object getValue(Object arg0) {
+			if (arg0 instanceof Ct2AttributeValue) {
+				Ct2AttributeValue v = (Ct2AttributeValue) arg0;
+				if (Boolean.TRUE.equals(v.isIgnore()))
+					return 1;
+			}
+			return 0;
+		}
+
+		@Override
+		protected void setValue(Object arg0, Object arg1) {
+			if (arg0 instanceof Ct2AttributeValue && arg1 instanceof Integer) {
+				Ct2AttributeValue a = (Ct2AttributeValue) arg0;
+				Integer i = (Integer) arg1;
+				a.setIgnore(i.equals(1));
+				getViewer().refresh();
+			}
+		}
+		
 	}
+	
 }
