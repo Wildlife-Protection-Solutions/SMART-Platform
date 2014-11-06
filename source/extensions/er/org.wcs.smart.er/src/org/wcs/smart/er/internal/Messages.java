@@ -441,6 +441,8 @@ public class Messages extends NLS {
 	public static String MissionTrackFromWaypointEngine_MultiDayMessage;
 
 	public static String MissionTrackFromWaypointEngine_SingleDayMessage;
+
+	public static String MissionTrackFromWaypointEngine_TwoPointsRequired;
 	public static String MoveWaypointDialog_Description;
 	public static String MoveWaypointDialog_MoveToLabel;
 	public static String MoveWaypointDialog_Title;

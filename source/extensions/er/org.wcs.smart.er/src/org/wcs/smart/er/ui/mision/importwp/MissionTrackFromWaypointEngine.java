@@ -61,16 +61,22 @@ public class MissionTrackFromWaypointEngine extends TrackFromWaypointEngine {
 			int cnt = 0;
 			for (MissionDay md : missionDay.getMission().getMissionDays()){
 				MissionTrack mt = MissionDataImport.createTrackFromWaypoints(md);
-				mt.setMissionDay(md);
-				tracks.put(md, Collections.singletonList(mt));
+				if (mt != null){
+					mt.setMissionDay(md);
+					tracks.put(md, Collections.singletonList(mt));
+				}
 				cnt++;
 			}
-			message = MessageFormat.format(Messages.MissionTrackFromWaypointEngine_MultiDayMessage, new Object[]{cnt});
+			message = MessageFormat.format(Messages.MissionTrackFromWaypointEngine_MultiDayMessage, new Object[]{cnt, tracks.size()});
 		}else if (option == ImportOption.DATE){
 			MissionTrack mt = MissionDataImport.createTrackFromWaypoints(missionDay);
-			mt.setMissionDay(missionDay);
-			tracks.put(missionDay, Collections.singletonList(mt));
-			message = MessageFormat.format(Messages.MissionTrackFromWaypointEngine_SingleDayMessage, new Object[]{DateFormat.getDateInstance().format(missionDay.getDate())});
+			if (mt != null){
+				mt.setMissionDay(missionDay);
+				tracks.put(missionDay, Collections.singletonList(mt));
+				message = MessageFormat.format(Messages.MissionTrackFromWaypointEngine_SingleDayMessage, new Object[]{DateFormat.getDateInstance().format(missionDay.getDate())});
+			}else{
+				message = Messages.MissionTrackFromWaypointEngine_TwoPointsRequired;
+			}
 		}
 		MissionDataImport.saveTracks(tracks);
 		return message;
