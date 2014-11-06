@@ -88,6 +88,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 				if (x instanceof String){
 					createSurveyDesign();
 				}
+				getWizard().getContainer().updateButtons();
 			}
 		});
 		
@@ -139,6 +140,14 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		loadDesigns(session, sd);
 	}
 	
+	@Override
+	public boolean isPageComplete(){
+		Object x = ((StructuredSelection)cmbViewer.getSelection()).getFirstElement();
+		if (x instanceof SurveyDesignEditorInput){
+			return true;
+		}
+		return false;
+	}
 	
 	@Override
 	public boolean updateSurvey(Survey survey, Session session) {
