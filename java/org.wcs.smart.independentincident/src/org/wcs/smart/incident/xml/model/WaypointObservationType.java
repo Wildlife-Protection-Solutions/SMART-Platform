@@ -29,6 +29,7 @@ import javax.xml.bind.annotation.XmlType;
  *       &lt;sequence>
  *         &lt;element name="attributes" type="{http://www.smartconservationsoftware.org/xml/1.0/independentincident}WaypointObservationAttributeType" maxOccurs="unbounded" minOccurs="0"/>
  *         &lt;element name="attachments" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="observer" type="{http://www.example.org/Mission/}EmployeeType" maxOccurs="1" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="categoryKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
@@ -41,12 +42,14 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "WaypointObservationType", propOrder = {
     "attributes",
-    "attachments"
+    "attachments",
+    "observer"
 })
 public class WaypointObservationType {
 
     protected List<WaypointObservationAttributeType> attributes;
     protected List<String> attachments;
+    protected EmployeeType observer;
     @XmlAttribute
     protected String categoryKey;
 
@@ -132,4 +135,27 @@ public class WaypointObservationType {
         this.categoryKey = value;
     }
 
+    /**
+     * Gets the value of the observers property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link EmployeeType }
+     *     
+     */
+    public EmployeeType getObserver() {
+        return observer;
+    }
+
+    /**
+     * Sets the value of the observers property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link EmployeeType }
+     *     
+     */
+    public void setObserver(EmployeeType value) {
+        this.observer = value;
+    }
 }

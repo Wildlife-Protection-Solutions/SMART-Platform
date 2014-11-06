@@ -30,14 +30,17 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.incident.xml.model.EmployeeType;
 import org.wcs.smart.incident.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.incident.xml.model.WaypointObservationType;
 import org.wcs.smart.incident.xml.model.WaypointType;
@@ -177,7 +180,19 @@ public class XmlToIncident {
 				}
 			}
 		}
-		
+		if (xml.getObserver() != null){
+			
+			Employee e = findEmployee(xml.getObserver());
+			if (e == null){
+				warnings.add(MessageFormat.format(
+						Messages.XmlToIncident_ObserverNotFound,
+						new Object[]{xml.getObserver().getGivenName(), xml.getObserver().getFamilyName()}));
+				
+			}else{
+				ob.setObserver(e);
+			}
+			
+		}
 		Category cat = findCategory(xml.getCategoryKey());
 		if (cat == null){
 			warnings.add(MessageFormat.format(Messages.XmlToIncident_CategoryNotFound,
@@ -378,6 +393,10 @@ public class XmlToIncident {
 		
 	}
 	
+	private  Employee findEmployee(EmployeeType type){	
+		return HibernateManager.findEmployeeByIdAndName(type.getEmployeeId(), type.getGivenName(), type.getFamilyName(), ca, session);
+	}
+
 }
 
 
