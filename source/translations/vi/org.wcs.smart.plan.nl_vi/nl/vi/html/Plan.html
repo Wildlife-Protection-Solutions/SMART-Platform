@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <title>Requirements</title>
+  <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
+  <link href="smart_help.css" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+<h1><a id="Plans">Plans Plugin</a></h1>
+
+<p>SMART Plans allow for a set of targets to be assigned to a patrol or series
+of patrols and to keep track of available and active rangers. SMART plans can
+be arranged in a parent-child relationship where a parent plan can have a
+number of children plans (sub-plans) that are associated with the parent. Plans
+are assigned to patrols, and when a patrol returns from the field and the data
+has been entered into SMART the software will automatically validate whether
+the objectives have been met or not. Plans, including maps, can be printed in
+PDF form which could be used by managers or those in the field.</p>
+
+<p></p>
+
+<h4><strong><a id="DevelopingPlans">Developing Plans</a></strong></h4>
+
+<p>A plan allows for specific targets and goals to be assigned to a
+Conservation Area, station, team or series of patrols. A plan is created
+through the use of a wizard, similar to the wizard used to create patrols.
+After a plan has been created, it can be associated with a patrol or series of
+patrols, which then use(s) the track information to calculate the success or
+failure of defined targets.</p>
+
+<p></p>
+
+<p><strong>Steps in Creating a Plan</strong></p>
+
+<p><strong>1. Template </strong><strong>-</strong> Create a plan from scratch
+or use an existing plan as a template</p>
+
+<p><strong>2. Plan Type -</strong> Choose the type of plan (Patrol, Team,
+Station or Conservation Area) and available rangers for the plan</p>
+
+<p><strong>3. Parent Plan -</strong> Choose whether the plan is a sub-plan of
+another plan or stands alone</p>
+
+<p><strong>4. Plan Information -</strong> Plan ID, Name and Description</p>
+
+<p><strong>5. Station / Team -</strong> Selection of the Team and Station
+involved in the plan</p>
+
+<p><strong>6. Plan Dates -</strong> Selection of the start and end date of the
+plan</p>
+
+<p><strong>7. Plan Targets -</strong> Add targets and objectives to the plan</p>
+
+<p></p>
+
+<p><strong>Target Types</strong></p>
+<dl>
+  <dt><strong>Numeric</strong> - targets include distance and amount of patrol
+  time</dt>
+</dl>
+
+<p><img alt="numeric plan" src="images/numericPlan.png" width="351"
+height="345" /></p>
+
+<p><strong>Numeric Target Types:</strong></p>
+<ul>
+  <li>Distance Travelled</li>
+  <li>Patrol Hours</li>
+  <li>Patrol Days</li>
+  <li>Patrol Man-Hours</li>
+</ul>
+
+<p></p>
+<dl>
+  <dt><strong>Administrative</strong> - can be defined and described as
+  required by the administrators and planners of the Conservation Area patrols.
+  SMART does not automatically evaluate the pass/fail of Administrative
+  patrols. When an administrative patrol target has been achieved, the check
+  box for "Target has been achieved" will be manually selected.</dt>
+</dl>
+
+<p><img alt="Administrative Plan" src="images/AdministrativePlan.png"
+width="352" height="349" /></p>
+
+<p></p>
+<dl>
+  <dt><strong>Spatial</strong> - locations within the Conservation Area that
+  need to be visited by the patrols, specified by manual coordinate input or
+  through a mapping interface <img alt="Add Spatial Target Point"
+  src="images/AddSpatialTarget.png" width="16" height="16" />. The Distance for
+  Completion (meters) parameter defines how close to the exact coordinates the
+  patrol needs to be before the target location is considered to be
+  successfully visited.</dt>
+</dl>
+
+<p><img alt="Spatial Target" src="images/SpatialTarget.png" width="708"
+height="548" /></p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Plan Summary Overview</strong></p>
+
+<p><strong><img alt="plan overview summary"
+src="images/PlanOverviewSummary.png" width="716" height="694" /></strong></p>
+<ul>
+</ul>
+
+<p><strong>edit</strong> - edits the selected plan target</p>
+
+<p><strong>manage</strong> - opens a dialog to add new targets</p>
+
+<p><strong>refresh</strong> - refreshes validation checks on patrols associated
+with these targets</p>
+
+<p></p>
+
+<h4><strong><a id="LinkPatrolPlan">Linking Patrols to Plans</a></strong></h4>
+
+<p>After a plan has been created, it can then be assigned to a patrol or
+multiple patrols. </p>
+
+<p>Linking a patrol to a plan requires that the user open that specific patrol
+in the Patrol Perspective and click on the "Other" tab (bottom of window).</p>
+
+<p>Then, clicking on the edit link next to the Plan window will open a dialog
+to link the active patrol with a plan.</p>
+
+<p></p>
+
+<p><img alt="Linking a Patrol to a Plan" src="images/linkingPlanPatrols.png"
+width="769" height="593" /></p>
+
+<p></p>
+
+<h4><strong><a id="validatePlan">Validating Plans</a></strong></h4>
+
+<p>After a patrol has been linked to a plan, SMART can validate the numeric and
+spatial targets. These targets are validated against the track information, so
+if no track information has been entered the validation of the plans will not
+be successful. </p>
+
+<p></p>
+
+<p><img alt="plan validation" src="images/PlanValidation.png" width="741"
+height="201" /></p>
+
+<p></p>
+
+<p>After the patrols and plans have been linked, the user will need to click
+the refresh button to run the validation. When the target has been successfully
+validated, the red circle turns green. This applies to numeric and spatial
+targets.</p>
+
+<p></p>
+
+<p>Validation of administrative targets is a manual process which requires the
+user to select and edit the Admin targets and click the checkbox "Target has
+been achieved".</p>
+
+<p><img alt="Admin plan validation" src="images/adminTargetValidation.png"
+width="589" height="261" /></p>
+
+<p></p>
+
+<p>Returning to the overview and clicking the refresh button the Admin target
+is validated and changed to successful.</p>
+
+<p><img alt="admin validation" src="images/PlanValidation2.png" width="733"
+height="200" /></p>
+
+<p></p>
+
+<p></p>
+
+<h4><strong><a id="printPlan">Printing Plans</a></strong></h4>
+
+<p>After a plan has been created it can be converted and viewed in a PDF
+format. The PDF can then be printed or saved for later access. </p>
+
+<p><img alt="Export Plan PDF" src="images/exportPlanPDF.png" width="603"
+height="356" /></p>
+
+<p>To print the active plan requires the user to click the PDF icon (see image
+above) or to select the menu item Planning--Export to PDF. SMART will then
+generate a PDF using a default template and then open up the PDF for the user
+to print.</p>
+
+<p></p>
+
+<p><strong>Editing the Plan Template</strong></p>
+
+<p>To edit the plan template users will need to select the menu item
+<em>Planning--Plan Template--Edit Planning Template</em>. This will open up the
+BIRT reporting framework that is also used to create Conservation Area reports.
+Information on how to edit BIRT reports can be found in the Help section of
+BIRT Report Developer Guide.</p>
+
+<p></p>
+</body>
+</html>
