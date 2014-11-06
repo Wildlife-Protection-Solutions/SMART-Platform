@@ -18,6 +18,90 @@
    <feature url="features/org.wcs.smart.er.feature_3.1.0.jar" id="org.wcs.smart.er.feature" version="3.1.0">
       <category name="ecologicalrecords"/>
    </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.fr_3.1.0.jar" id="org.wcs.smart.cybertracker.feature.nl.fr" version="3.1.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.ru_3.1.0.jar" id="org.wcs.smart.cybertracker.feature.nl.ru" version="3.1.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.th_3.1.0.jar" id="org.wcs.smart.cybertracker.feature.nl.th" version="3.1.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature.nl.zh_3.1.0.jar" id="org.wcs.smart.cybertracker.feature.nl.zh" version="3.1.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.es_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.es" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.fr_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.fr" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.ru_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.ru" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.th_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.th" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.vi_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.vi" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.zh_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.zh" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.es_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.es" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.fr_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.fr" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.ru_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.ru" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.th_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.th" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.zh_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.zh" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.es_3.1.0.jar" id="org.wcs.smart.es" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.fr_3.1.0.jar" id="org.wcs.smart.fr" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.ru_3.1.0.jar" id="org.wcs.smart.ru" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.th_3.1.0.jar" id="org.wcs.smart.th" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.vi_3.1.0.jar" id="org.wcs.smart.vi" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.zh_3.1.0.jar" id="org.wcs.smart.zh" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.vi_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.vi" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.lo_3.1.0.jar" id="org.wcs.smart.lo" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.ms_3.1.0.jar" id="org.wcs.smart.ms" version="3.1.0">
+      <category name="smart"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.lo_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.lo" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature.nl.ms_3.1.0.jar" id="org.wcs.smart.plan.feature.nl.ms" version="3.1.0">
+      <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.lo_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.lo" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature.nl.ms_3.1.0.jar" id="org.wcs.smart.intelligence.feature.nl.ms" version="3.1.0">
+      <category name="intelligence"/>
+   </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
