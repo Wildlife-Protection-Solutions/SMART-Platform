@@ -633,8 +633,6 @@ public class Messages extends NLS {
 	public static String SurveyDesignImportHandler_2;
 	public static String SurveyDesignImportHandler_3;
 	public static String SurveyDesignImportHandler_4;
-	public static String SurveyDesignImportHandler_8;
-	public static String SurveyDesignImportHandler_9;
 	public static String SurveyDesignListView_DesignsTabName;
 	public static String SurveyDesignListView_LoadError;
 	public static String SurveyDesignListView_LoadingJobName;
