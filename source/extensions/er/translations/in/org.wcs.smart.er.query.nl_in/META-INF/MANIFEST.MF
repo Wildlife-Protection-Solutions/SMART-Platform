@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART Indonesian Ecological Records Query Fragment
+Bundle-SymbolicName: org.wcs.smart.er.query.nl_in
+Bundle-Version: 3.1.0
+Fragment-Host: org.wcs.smart.er.query;bundle-version="3.1.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: org.wcs.smart
