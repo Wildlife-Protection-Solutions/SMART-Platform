@@ -788,26 +788,28 @@ public class MissionDayComposite {
 	}
 	
 	protected void addWaypoint() {
-		double y = 0, x = 0;
-		int id = -1;
-		Date last = null;
+		SurveyWaypoint lastWp = null;
+		
 		for (Iterator<SurveyWaypoint> iterator = missionDay.getWaypoints().iterator(); iterator.hasNext();) {
 			SurveyWaypoint e = iterator.next();
 			Date t = (Date)getWaypointValue(e, OtColumn.TIME);
 			
-			if(last == null || t.after(last) || t.equals(last)  ){
-				y = (Double) getWaypointValue(e, OtColumn.NORTH);
-				x = (Double) getWaypointValue(e, OtColumn.EAST);
-				id = (Integer) getWaypointValue(e, OtColumn.ID);
-				last = t;
+			if(lastWp == null || 
+					t.after((Date)getWaypointValue(lastWp, OtColumn.TIME)) || 
+					t.equals((Date)getWaypointValue(lastWp, OtColumn.TIME))  ){
+				lastWp = e;
 			}
 		}
 		AddWaypointDialog add;
 	
-		if(x == 0 && y == 0){
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), editor.getMissionEditor().getAvailableProjections());
+		if(lastWp == null){
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), 
+					editor.getMissionEditor().getAvailableProjections(),
+					editor.getMissionEditor().getSamplingUnits());
 		}else{
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x, id+1, editor.getMissionEditor().getAvailableProjections());
+			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), lastWp,
+					editor.getMissionEditor().getAvailableProjections(),
+					editor.getMissionEditor().getSamplingUnits());
 		}
 		if (add.open() == Window.OK){
 			SurveyWaypoint wp = add.getWaypoint();

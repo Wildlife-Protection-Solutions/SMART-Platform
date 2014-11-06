@@ -16,9 +16,15 @@ public class Messages extends NLS {
 	public static String AddWaypointDialog_InvalidXYError;
 	public static String AddWaypointDialog_InvalidYError;
 	public static String AddWaypointDialog_Message;
+
+	public static String AddWaypointDialog_NoneOption;
 	public static String AddWaypointDialog_ParseCRSError;
 	public static String AddWaypointDialog_Projection;
+	public static String AddWaypointDialog_SamplingUnitLabel;
+
 	public static String AddWaypointDialog_SaveError;
+
+	public static String AddWaypointDialog_SuCoordinateError;
 	public static String AddWaypointDialog_Title;
 	public static String AddWaypointDialog_WaypointID;
 	public static String AddWaypointDialog_X;

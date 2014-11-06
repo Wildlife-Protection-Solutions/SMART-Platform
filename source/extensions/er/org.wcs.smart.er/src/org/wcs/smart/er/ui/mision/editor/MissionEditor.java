@@ -60,12 +60,14 @@ import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.SurveyPermissionManager;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -98,7 +100,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	private Boolean trackObserver = null;
 	private ConfigurableModel configurableModel = null;
 	private ObservationOptions options;
-	
+	private List<SamplingUnit> sUnits;
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 	private ISurveyEventListener missionDeleteListener = new ISurveyEventListener() {
@@ -252,6 +254,11 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				if (options.getViewProjection() != null) {
 					options.getViewProjection().getDefinition(); //load lazy items
 				}
+				
+				this.sUnits = SurveyHibernateManager.getInstance().getSamplingUnits(mission.getSurvey().getSurveyDesign(), session, null);
+				for (SamplingUnit s : sUnits){
+					s.getId();
+				}
 				session.getTransaction().commit();
 			}finally{
 				session.close();
@@ -268,6 +275,13 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		return this.selectionProvider;
 	}
 	
+	/**
+	 * Sampling unit associated with current design;
+	 * @return
+	 */
+	public List<SamplingUnit> getSamplingUnits(){
+		return sUnits;
+	}
 	/**
 	 * 
 	 * @return if the mission should record distance and direction

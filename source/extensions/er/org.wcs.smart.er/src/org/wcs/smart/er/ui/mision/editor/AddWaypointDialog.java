@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -45,9 +48,12 @@ import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
+import org.wcs.smart.er.ui.samplingunit.SamplingUnitLabelProvider;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
@@ -55,7 +61,9 @@ import org.wcs.smart.ui.ProjectionLabelProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.linearref.LengthIndexedLine;
 
 /**
  * Dialog for adding a new waypoint.
@@ -68,29 +76,28 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	private Text txtWaypointId;
 	private Text txtX;
 	private Text txtY;
+	private ComboViewer lstSamplingUnit;
 	private ComboViewer lstProjections;
-	private double y;
-	private double x;
-	private int waypointId;
 	private Projection[] projections;
 	private Projection currentProjection;
 	
+	private List<SamplingUnit> sunits;
 	private SurveyWaypoint newWaypoint;
+	private SurveyWaypoint lastWp = null;
 	
-	public AddWaypointDialog(Shell parentShell, Projection[] projections) {
+	public AddWaypointDialog(Shell parentShell, Projection[] projections, 
+			List<SamplingUnit> samplingUnits) {
 		super(parentShell);
-		x = 0;
-		y = 0;
-		waypointId = 0;
+		lastWp = null;
 		this.projections = projections;
+		this.sunits = samplingUnits;
 	}
 	
-	public AddWaypointDialog(Shell parentShell, double y, double x, int waypointId, Projection[] projections) {
-		this(parentShell, projections);
+	public AddWaypointDialog(Shell parentShell, SurveyWaypoint lastWp,
+			Projection[] projections, List<SamplingUnit> samplingUnits) {
+		this(parentShell, projections, samplingUnits);
 		
-		this.x = x;
-		this.y = y;
-		this.waypointId = waypointId;
+		this.lastWp = lastWp;
 	}
 	
 	public SurveyWaypoint getWaypoint(){
@@ -99,12 +106,21 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	
 	@Override
 	protected void okPressed() {
+		SamplingUnit unit = null;
+		if (!lstSamplingUnit.getSelection().isEmpty()){
+			Object x = ((IStructuredSelection)lstSamplingUnit.getSelection()).getFirstElement();
+			if (x instanceof SamplingUnit){
+				unit = (SamplingUnit) x;
+			}
+		}
 		newWaypoint = new SurveyWaypoint();
 		Waypoint wp = new Waypoint();
 		wp.setId(Integer.parseInt(txtWaypointId.getText()));
 		wp.setSourceId(SurveyWaypointSource.KEY);
 		wp.setConservationArea(SmartDB.getCurrentConservationArea());
+	
 		newWaypoint.setWaypoint(wp);
+		newWaypoint.setSamplingUnit(unit);
 		
 		try {
 			//reproject
@@ -128,19 +144,66 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		
-		parent.setLayout(new GridLayout(1, false));
-		
+		parent = (Composite)super.createDialogArea(parent);
+
 		Composite waypointComp = new Composite(parent, SWT.NONE);
 		waypointComp.setLayout(new GridLayout(2, false));
 		waypointComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		
 		Label lbl = new Label(waypointComp, SWT.NONE);
-		lbl.setText(Messages.AddWaypointDialog_Projection);
-
+		lbl.setText(Messages.AddWaypointDialog_SamplingUnitLabel);
 		
-		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN);
+		lstSamplingUnit= new ComboViewer(waypointComp, SWT.DROP_DOWN | SWT.READ_ONLY);
+		lstSamplingUnit.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		lstSamplingUnit.setContentProvider(ArrayContentProvider.getInstance());
+		lstSamplingUnit.setLabelProvider(SamplingUnitLabelProvider.INSTANCE);
+		List<Object> copyUnits = new ArrayList<Object>();
+		String none = Messages.AddWaypointDialog_NoneOption;
+		copyUnits.add(none);
+		copyUnits.addAll(sunits);
+		lstSamplingUnit.setInput(copyUnits);
+		lstSamplingUnit.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				setErrorMessage(null);
+				if (lstSamplingUnit.getSelection().isEmpty()) return;
+				Object x = ((IStructuredSelection)lstSamplingUnit.getSelection()).getFirstElement();
+				if (x instanceof SamplingUnit){
+					SamplingUnit su = (SamplingUnit)x;
+					//update x and y values
+					Coordinate c = null;
+					if (su.getGeometry() instanceof Point){
+						c = ((Point)su.getGeometry()).getCoordinate();
+					}else if (su.getGeometry() instanceof LineString){
+						LengthIndexedLine lil = new LengthIndexedLine(su.getGeometry());
+						c = lil.extractPoint(su.getGeometry().getLength() / 2);
+					}
+					if (c == null) return;
+
+					//if c will be in lat/long - we need to reproject o current projection
+					CoordinateReferenceSystem src = SmartDB.DATABASE_CRS;
+					try{
+						CoordinateReferenceSystem trg  = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs();
+						Point p = (Point) JTS.transform(gf.createPoint(new Coordinate(c.x, c.y)), CRS.findMathTransform(src, trg));
+					
+						if (p != null){
+							txtX.setText(String.valueOf(p.getCoordinate().x));
+							txtY.setText(String.valueOf(p.getCoordinate().y));
+						}
+					}catch (Exception ex){
+						setErrorMessage(Messages.AddWaypointDialog_SuCoordinateError);
+						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+					}
+				}
+				
+			}
+		});
+		
+		lbl = new Label(waypointComp, SWT.NONE);
+		lbl.setText(Messages.AddWaypointDialog_Projection);
+		
+		lstProjections = new ComboViewer(waypointComp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
 		gd.widthHint = 100;
 		lstProjections.getControl().setLayoutData(gd);
@@ -156,6 +219,12 @@ public class AddWaypointDialog extends TitleAreaDialog{
 					break;
 				}
 			}
+		}
+		Double x = null;
+		Double y = null;
+		if (lastWp != null){
+			x = lastWp.getWaypoint().getX();
+			y = lastWp.getWaypoint().getY();
 		}
 		if (currentProjection != null) {
 			lstProjections.setSelection(new StructuredSelection(currentProjection));			
@@ -188,7 +257,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		};
 		
 		txtWaypointId = new Text(waypointComp, SWT.BORDER);
-		txtWaypointId.setText(String.valueOf(waypointId));
+		txtWaypointId.setText(String.valueOf(lastWp.getWaypoint().getId() + 1));
 		txtWaypointId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		txtWaypointId.addModifyListener(validation);
 		txtWaypointId.addFocusListener(new FocusListener() {
@@ -205,7 +274,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lbl.setText(Messages.AddWaypointDialog_X);
 		txtX = new Text(waypointComp, SWT.BORDER);
 		txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if(x != 0)txtX.setText(String.valueOf(x));
+		if (x != 0) txtX.setText(String.valueOf(x));
 		txtX.addModifyListener(validation);
 		txtX.addFocusListener(new FocusListener() {
 			@Override
@@ -221,7 +290,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		lbl.setText(Messages.AddWaypointDialog_Y);
 		txtY = new Text(waypointComp, SWT.BORDER);
 		txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if(y != 0)txtY.setText(String.valueOf(y));
+		if (y != 0) txtY.setText(String.valueOf(y));
 		txtY.addModifyListener(validation);
 		txtY.addFocusListener(new FocusListener() {
 			@Override
@@ -232,6 +301,14 @@ public class AddWaypointDialog extends TitleAreaDialog{
 				txtY.selectAll();
 			}
 		});
+		
+		Object wpSelection = none;
+		if (lastWp != null){
+			if (lastWp.getSamplingUnit() != null){
+				wpSelection = lastWp.getSamplingUnit();
+			}
+		}
+		lstSamplingUnit.setSelection(new StructuredSelection(wpSelection));
 		
 		setMessage(Messages.AddWaypointDialog_Message);
 		setTitle(Messages.AddWaypointDialog_Title);
@@ -253,6 +330,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		}
 	}
 
+	
 	@Override
 	protected Control createContents(Composite parent) {
 		Control ctr = super.createContents(parent);
@@ -263,7 +341,9 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	private void validate(){
 		String error = findError();
 		setErrorMessage(error);
-		getButton(OK).setEnabled(error == null);
+		if(getButton(OK) != null){
+			getButton(OK).setEnabled(error == null);
+		}
 	}
 	private String findError(){
 		CoordinateReferenceSystem sourceCrs = null;
@@ -289,8 +369,10 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			return Messages.AddWaypointDialog_EmptyXError;
 		}
 
+		Double x = null;
+		Double y = null;
 		try{
-			Double.parseDouble(txtX.getText());
+			x = Double.parseDouble(txtX.getText());
 		}catch (NumberFormatException ex){
 			return Messages.AddWaypointDialog_InvalidXError;
 		}
@@ -299,13 +381,13 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			return Messages.AddWaypointDialog_EmptyYError;
 		}
 		try{
-			Double.parseDouble(txtY.getText());
+			y = Double.parseDouble(txtY.getText());
 		}catch (NumberFormatException ex){
 			return Messages.AddWaypointDialog_InvalidYError;
 		}
 		
 		try{
-			Point point = gf.createPoint(new Coordinate(x,y));
+			Point point = gf.createPoint(new Coordinate(x, y));
 			JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 		}catch (Exception ex){
 			return Messages.AddWaypointDialog_InvalidXYError + ex.getLocalizedMessage();
