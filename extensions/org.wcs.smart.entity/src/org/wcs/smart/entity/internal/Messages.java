@@ -124,7 +124,6 @@ public class Messages extends NLS {
 	public static String EntityQueryService_ServiceName;
 	public static String EntitySightingQuery_QueryName;
 	public static String EntitySightingQueryType_QueryTypeName;
-	public static String EntityTable_EntityTypeTableName;
 	public static String EntityTable_LongName;
 	public static String EntityTemplateCloner_AttributeNotFound;
 	public static String EntityTemplateCloner_ProgressCloning3;
@@ -355,7 +354,6 @@ public class Messages extends NLS {
 	public static String SightingPage_QueryResultSectionTitle;
 	public static String SightingPage_ReloadButtonLabel;
 	public static String SightingPage_SightingPageName;
-	public static String SightingPagedResults_CleanUpJobName;
 	public static String SightingQueryColumn_CaIdColumnName;
 	public static String SightingQueryColumn_CaNameColumnName;
 	public static String SightingQueryColumn_CommentColumnName;
