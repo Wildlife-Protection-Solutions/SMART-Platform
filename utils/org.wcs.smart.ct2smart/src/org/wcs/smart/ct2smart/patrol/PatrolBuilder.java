@@ -141,10 +141,15 @@ public class PatrolBuilder {
 						break;
 					}
 					case NUMERIC: {
-						WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
-						obs.getAttributes().add(obsAttr);
-						obsAttr.setAttributeKey(cta.getMapTo());
-						obsAttr.setDValue(Double.valueOf(a.getV()));
+						try {
+							WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+							obs.getAttributes().add(obsAttr);
+							obsAttr.setAttributeKey(cta.getMapTo());
+							obsAttr.setDValue(Double.valueOf(a.getV()));
+						} catch (NumberFormatException e) {
+							System.err.println("Failed to convert to double. Attribute: " + a.getN() + " value: " + a.getV());
+							throw e;
+						}
 						break;
 					}
 					case TEXT: {
@@ -218,7 +223,7 @@ public class PatrolBuilder {
 					case META_COMMENT:
 						if (!comment.isEmpty())
 							comment += "\n"; //$NON-NLS-1$
-						comment += a.getN() + " = " + a.getV(); //$NON-NLS-1$
+						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + a.getV(); //$NON-NLS-1$
 						break;
 					case IGNORE:
 						break;
