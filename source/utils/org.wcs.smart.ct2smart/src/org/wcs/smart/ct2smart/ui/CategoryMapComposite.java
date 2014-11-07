@@ -26,7 +26,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
+import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ComboBoxCellEditor;
+import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -165,6 +168,19 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		TableViewerColumn catCol = createTableViewerColumn("SMART Category", 250);
 		catCol.setLabelProvider(catLabelProvider);
 		catCol.setEditingSupport(new SmartCategoryEditingSupport(viewer, lookup, catLabelProvider));
+
+		TableViewerColumn iCol = createTableViewerColumn("Ignore", 100);
+		iCol.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof CtCategory) {
+					CtCategory v = (CtCategory) element;
+					return Boolean.TRUE.equals(v.isIgnore()) ? "Yes" : "No";
+				}
+				return super.getText(element);
+			}
+		});
+		iCol.setEditingSupport(new IgnoreCategoryValueEditingSupport(viewer));
 		
 		viewer.getTable().setRedraw(true);
 	}
@@ -223,4 +239,51 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		}
 		
 	}
+	
+	private class IgnoreCategoryValueEditingSupport extends EditingSupport {
+
+		private final String[] NO_YES_ITEMS = new String[] {"No", "Yes"};
+		
+		private ComboBoxCellEditor cbEditor;
+		
+		public IgnoreCategoryValueEditingSupport(TableViewer viewer) {
+			super(viewer);
+			Table table = viewer.getTable();
+			cbEditor = new ComboBoxCellEditor(table, new String[0], SWT.DROP_DOWN | SWT.READ_ONLY);
+
+		}
+
+		@Override
+		protected boolean canEdit(Object arg0) {
+			return true;
+		}
+
+		@Override
+		protected CellEditor getCellEditor(Object arg0) {
+		cbEditor.setItems(NO_YES_ITEMS);
+		return cbEditor ;
+		}
+
+		@Override
+		protected Object getValue(Object arg0) {
+			if (arg0 instanceof CtCategory) {
+				CtCategory v = (CtCategory) arg0;
+				if (Boolean.TRUE.equals(v.isIgnore()))
+					return 1;
+			}
+			return 0;
+		}
+
+		@Override
+		protected void setValue(Object arg0, Object arg1) {
+			if (arg0 instanceof CtCategory && arg1 instanceof Integer) {
+				CtCategory a = (CtCategory) arg0;
+				Integer i = (Integer) arg1;
+				a.setIgnore(i.equals(1));
+				getViewer().refresh();
+			}
+		}
+		
+	}
+	
 }

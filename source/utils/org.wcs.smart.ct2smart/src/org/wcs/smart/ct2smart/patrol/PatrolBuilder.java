@@ -113,16 +113,18 @@ public class PatrolBuilder {
 			wp.setId(legDay.getWaypoints().size());
 
 			CtCategory defaultCategory = getDefaultCategory(s);
+			boolean ignoreCategory = defaultCategory != null && Boolean.TRUE.equals(defaultCategory.isIgnore());
 			String defaultCategoryKey = defaultCategory != null ? defaultCategory.getCategoryKey() : null;
 			WaypointObservationType defObs = new WaypointObservationType();
-			wp.getObservations().add(defObs);
 			defObs.setCategoryKey(defaultCategoryKey);
-			
 			for (ExtraAttribute ea : defaultCategory.getExtraAttribute()) {
 				WaypointObservationAttributeType obsAttr = ea2woa(ea);
 				if (obsAttr != null) {
 					defObs.getAttributes().add(obsAttr);
 				}
+			}
+			if (!ignoreCategory) {
+				wp.getObservations().add(defObs);
 			}
 
 			for (TagA a : s) {
@@ -232,8 +234,12 @@ public class PatrolBuilder {
 						members.addAll(membersParser.parseMembers(a.getV()));
 						break;
 					case META_COMMENT:
-						if (!comment.isEmpty())
+						if (ignoreCategory && obs == defObs) {
+							break;
+						}
+						if (!comment.isEmpty()) {
 							comment += "\n"; //$NON-NLS-1$
+						}
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + a.getV(); //$NON-NLS-1$
 						break;
 					case IGNORE:
@@ -368,7 +374,7 @@ public class PatrolBuilder {
 				info += value != null ? value.getN() : "null";
 				info += " " + pair.value;
 			}
-			System.out.println("Warning: No category defined for following items: " + info);
+			System.err.println("ERROR: No category defined for following items: " + info);
 		}
 		return c;
 	}
