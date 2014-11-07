@@ -69,12 +69,15 @@ public class MappingValidator {
 
 			AttributeType a = lookup.getAttribute(key);
 			if (a == null) {
-				errors.add(MessageFormat.format("Attribute \"{0}\" is mapped to key \"{1}\" which doesn't exist in datamodel", cta.getN(), key));
+				errors.add(MessageFormat.format("Attribute \"{0}\" is mapped to key \"{1}\" which do not exist in datamodel", cta.getN(), key));
 				continue;
 			}
 			
 			Set<String> valueKeysSet = buildValueKeysSet(a);
 			for (Ct2AttributeValue ctv : cta.getCt2AttributeValue()) {
+				if (Boolean.TRUE.equals(ctv.isIgnore())) {
+					continue;
+				}
 				String vkey = ctv.getMapTo();
 				if (vkey == null || vkey.isEmpty()) {
 					errors.add(MessageFormat.format("No mapping is specified for attribute value \"{0}\" in attribute \"{1}\"", ctv.getN(), cta.getN()));
@@ -82,7 +85,7 @@ public class MappingValidator {
 				}
 				
 				if (!valueKeysSet.contains(vkey)) {
-					errors.add(MessageFormat.format("Attribute value \"{0}\" in attribute \"{1}\" has mapped to key \"{2}\" which doesn't exist in datamodel", ctv.getN(), cta.getN(), vkey));
+					errors.add(MessageFormat.format("Attribute value \"{0}\" in attribute \"{1}\" has mapped to key \"{2}\" which do not exist in datamodel", ctv.getN(), cta.getN(), vkey));
 					continue;
 				}
 			}
@@ -92,7 +95,7 @@ public class MappingValidator {
 				//attributed is mapped to specific category -> check if it exists in datamodel in this category
 				CategoryType c = lookup.getCategory(catKey);
 				if (c == null) {
-					errors.add(MessageFormat.format("Attribute \"{0}\" with key \"{1}\" is mapped to category \"{2}\" which doesn't exist in datamodel", cta.getN(), cta.getMapTo(), catKey));
+					errors.add(MessageFormat.format("Attribute \"{0}\" with key \"{1}\" is mapped to category \"{2}\" which do not exist in datamodel", cta.getN(), cta.getMapTo(), catKey));
 					continue;
 				}
 				Set<String> dmKeys = getInnerAttributeKeys(c, lookup);
@@ -106,15 +109,18 @@ public class MappingValidator {
 
 		AttributeLookup aLookup = new AttributeLookup(ConnectionUtil.getConnection());
 		for (CtCategory ctc : ct2Smart.getCtCategory()) {
+			if (Boolean.TRUE.equals(ctc.isIgnore())) {
+				continue;
+			}
 			String key = ctc.getCategoryKey();
 			if (key == null || key.isEmpty()) {
-				errors.add(MessageFormat.format("No mapping is specified for category set {0}", pairsToString(ctc)));
+				errors.add(MessageFormat.format("No mapping is specified for category set: {0}", pairsToString(ctc)));
 				continue;
 			}
 			
 			CategoryType c = lookup.getCategory(key);
 			if (c == null) {
-				errors.add(MessageFormat.format("Category \"{0}\" is mapped to key \"{1}\" which doesn't exist in datamodel", pairsToString(ctc), key));
+				errors.add(MessageFormat.format("Category \"{0}\" is mapped to key \"{1}\" which do not exist in datamodel", pairsToString(ctc), key));
 				continue;
 			}
 			
