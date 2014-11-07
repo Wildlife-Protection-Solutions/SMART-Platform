@@ -24,15 +24,20 @@ package org.wcs.smart.er.query.ui.dropitems;
 import java.text.MessageFormat;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.IFilterDropItem;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -43,12 +48,17 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class SamplingUnitDropItem extends DropItem {
+public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropItem, IFilterDropItem{
 
+	private Color redColor = null;
+	private Color defaultColor = null;
+	
 	private SamplingUnitFilter.Source source = null;	
 	private SamplingUnit su = null;
 	private MissionTrack mt = null;
+	private SurveyDesign sd = null;
 	
+	private Label label = null;
 	private Font smallerFont;
 	
 	public SamplingUnitDropItem(SamplingUnit su){
@@ -68,15 +78,32 @@ public class SamplingUnitDropItem extends DropItem {
 	public void setSource(SamplingUnitFilter.Source source){
 		this.source = source;
 	}
-	
-	
+
+	public String getErrorMessage(){
+		if (sd == null){
+			return Messages.SamplingUnitDropItem_DesignRequired;
+		}else if (!sd.equals(su.getSurveyDesign())){
+			return Messages.SamplingUnitDropItem_InvalidDesign;
+		}
+		return null;
+	}
+		
 	@Override
 	public String getText() {
+		String error = getErrorMessage();
+		if (error != null){
+			return error;
+		}
 		return MessageFormat.format(Messages.SamplingUnitDropItem_Label, new Object[]{su == null? mt.getId() : su.getId(), source.guiName});
 	}
 
 	@Override
 	public String asQueryPart() {
+		String error = getErrorMessage();
+		if (error != null){
+			return null;
+		}
+		
 		if (su != null){
 			if (su == SamplingUnitFilter.NONE){
 				return "s:samplingunit:" + source.queryKey + ":" + SamplingUnitFilter.NONE_KEY; //$NON-NLS-1$ //$NON-NLS-2$
@@ -100,16 +127,41 @@ public class SamplingUnitDropItem extends DropItem {
 		if (smallerFont != null){
 			smallerFont.dispose();
 		}
+		if (redColor != null){
+			redColor.dispose();
+		}
 	}
 	@Override
 	protected void createComposite(Composite parent) {
+		redColor =  new Color(Display.getDefault(),new RGB(255, 210,210) );
+		
 		Composite c = new Composite(parent, SWT.NONE);
 		GridLayout gl = new GridLayout();
 		gl.marginWidth = gl.marginHeight = 0;
 		c.setLayout(gl);
-		Label l = new Label(c, SWT.NONE);
-		l.setText(getText());
-		initDrag(l);
+		label = new Label(c, SWT.NONE);
+		label.setText(getText());
+		initDrag(label);
 		initDrag(c);
+		defaultColor = label.getBackground();
+	}
+
+	private void updateLabel(){
+		String msg = getErrorMessage();
+		if (msg != null){
+			label.setBackground(redColor);
+			label.getParent().getParent().setBackground(redColor);
+		}else{
+			label.setBackground(defaultColor);
+			label.getParent().getParent().setBackground(defaultColor);
+		}
+		label.setText(getText());
+		getTargetPanel().redraw();
+	}
+	
+	@Override
+	public void setSurveyDesign(SurveyDesign design) {
+		this.sd = design;
+		updateLabel();
 	}
 }

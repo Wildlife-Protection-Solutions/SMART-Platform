@@ -37,6 +37,7 @@ import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionStartDateField;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
+import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
@@ -265,6 +266,8 @@ public class SurveySummaryQueryType implements IQueryType {
 				public void visit(IGroupBy groupBy) {
 					if (gbSu[0]) return;
 					if (groupBy instanceof SamplingUnitGroupBy){
+						gbSu[0] = true;
+					}else if (groupBy instanceof SamplingUnitAttributeGroupBy){
 						gbSu[0] = true;
 					}
 				}
