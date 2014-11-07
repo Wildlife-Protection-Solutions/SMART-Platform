@@ -35,10 +35,13 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
@@ -50,9 +53,12 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -66,8 +72,7 @@ import org.wcs.smart.query.ui.model.ListItem;
  * @author Emily
  *
  */
-public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDropItem {
-	
+public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDropItem, ISurveyDesignDropItem {
 	
 	protected String text;
 	protected String key;
@@ -78,14 +83,26 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	private Text value;
 	private Combo operators;
 	private AttributeType type = null;
-	
 	private SamplingUnitAttribute ma;
+	private Label lblError ;
+	
 	private ComboViewer listViewer;
 	private ListItem currentSelection = null;
 				
 	private Font smallerFont;
 	private SamplingUnitFilter.Source source;
-		
+	
+	private SurveyDesign sd;
+	private boolean isAttributeSd = true;
+	private Composite parent;
+	private Color redColor;
+	private Color defaultColor;
+	
+	private Composite defaultComp = null;
+	private Composite listComp = null;
+	private Composite errorComp = null;
+	private Composite outer = null;
+	
 	/*
 	 * Job to load the attribute list options
 	 */
@@ -188,12 +205,22 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	 */
 	@Override
 	public String getText() {
+		String error = getErrorMessage();
+		if (error != null){
+			return null;
+		}
 		if (operators != null){
 			return this.text + " " + operators.getItem(operators.getSelectionIndex()) + " ";//+ value.getText() ; //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
 			return this.text; 
+		}	
+	}
+	
+	private String getErrorMessage(){
+		if (!isAttributeSd){
+			return Messages.SamplingUnitAttributeDropItem_SuError;
 		}
-		
+		return null;
 	}
 
 	/**
@@ -201,6 +228,10 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	 */
 	@Override
 	public String asQueryPart() {
+		String error = getErrorMessage();
+		if (error != null){
+			return null;
+		}
 		StringBuilder querypart = new StringBuilder();
 		if (type == AttributeType.NUMERIC){
 			querypart.append (this.key);
@@ -251,6 +282,9 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		if (smallerFont != null){
 			smallerFont.dispose();
 		}
+		if (redColor != null){
+			redColor.dispose();
+		}
 	}
 
 	/**
@@ -258,15 +292,31 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	 */
 	@Override
 	protected void createComposite(Composite parent) {
-		if (type == AttributeType.NUMERIC ||
-				type == AttributeType.TEXT){
-			createDefaultComposite(parent);
+		this.parent = parent;
+		this.defaultColor = parent.getBackground();
+		
+		outer = new Composite(parent, SWT.NONE);
+		StackLayout layout = new StackLayout();
+		outer.setLayout(layout);
+		
+		createErrorComposite(outer);
+		if (type == AttributeType.NUMERIC || type == AttributeType.TEXT){
+			createDefaultComposite(outer);
+			layout.topControl = defaultComp;
 		}else if (type == AttributeType.LIST){
-			createListComposite(parent);
+			createListComposite(outer);
+			layout.topControl = listComp;
+		}
+		if (getErrorMessage() != null){
+			layout.topControl = errorComp;
+			parent.setBackground(redColor);
 		}
 	}
+
+	
 	private void createDefaultComposite(Composite parent){
 		Composite main = new Composite(parent, SWT.NONE);
+		defaultComp = main;
 		GridLayout layout = new GridLayout(4, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
@@ -344,6 +394,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 	
 	protected void createListComposite(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
+		listComp = main;
 		GridLayout gl = new GridLayout(2, false);
 		gl.marginTop = 0;
 		gl.marginBottom = 0;
@@ -384,5 +435,64 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		lblAttribute.setText(MessageFormat.format("({0}) {1} = ", new Object[]{source.guiName, formatStringForLabel(this.text)})); //$NON-NLS-1$
 		loadItemsJobs.schedule();
 	}
+
+	protected void createErrorComposite(Composite parent) {
+		redColor =  new Color(Display.getDefault(),new RGB(255, 210,210) );
+		
+		Composite c = new Composite(parent, SWT.NONE);
+		errorComp = c;
+		c.setBackground(redColor);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginHeight = gl.marginWidth = 0;
+		c.setLayout(gl);
+		
+		Label lblImage = new Label(c, SWT.NONE);
+		lblImage.setImage(QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.EXCLAMATION_ICON));
+		lblImage.setBackground(redColor);
+		lblError = new Label(c, SWT.NONE);
+		lblError.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		if (getErrorMessage() != null){
+			lblError.setText(getErrorMessage());
+		}
+		lblError.setBackground(redColor);
+	}
 	
+	@Override
+	public void setSurveyDesign(SurveyDesign design) {
+		this.sd = design;
+		if (sd != null){
+			isAttributeSd = false;
+			Session s = HibernateManager.openSession();
+			try{
+				SurveyDesign temp = (SurveyDesign) s.load(SurveyDesign.class, design.getUuid());
+				for (SurveyDesignSamplingUnitAttribute att : temp.getSamplingUnitAttributes()){
+					if (att.getSamplingUnitAttribute().equals(ma)){
+						isAttributeSd = true;
+						break;
+					}
+				}
+			}finally{
+				s.close();
+			}
+		}else{
+			isAttributeSd = true;
+		}
+		updateComposite();
+	}
+	
+	private void updateComposite(){
+		if (getErrorMessage() != null){
+			lblError.setText(getErrorMessage());
+			((StackLayout)outer.getLayout()).topControl = errorComp;
+			parent.setBackground(redColor);
+		}else if (type == AttributeType.NUMERIC || type == AttributeType.TEXT){
+			((StackLayout)outer.getLayout()).topControl = defaultComp;
+			parent.setBackground(defaultColor);
+		}else if (type == AttributeType.LIST){
+			((StackLayout)outer.getLayout()).topControl = listComp;
+			parent.setBackground(defaultColor);
+		}
+		outer.layout();
+		getTargetPanel().redraw();
+	}
 }

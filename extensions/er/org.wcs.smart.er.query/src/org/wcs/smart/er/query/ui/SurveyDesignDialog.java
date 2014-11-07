@@ -61,9 +61,11 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 	private Session session;
 	private SurveyDesign sd;
 	private ComboViewer cmbViewer;
+	private SurveyDesign current;
 	
-	public SurveyDesignDialog(Shell parentShell) {
+	public SurveyDesignDialog(Shell parentShell, SurveyDesign current) {
 		super(parentShell);
+		this.current = current;
 	}
 	
 	
@@ -132,25 +134,29 @@ public class SurveyDesignDialog extends TitleAreaDialog{
 			}
 		});
 		boolean hasAll = false;
+		SurveyDesignEditorInput allItem = new SurveyDesignEditorInput(Messages.SurveyDesignDialog_AllDesignsLabel, null, null, null);
 		List<Object> all = new ArrayList<Object>();
 		all.addAll(sds);
 		for (int i = 0; i < all.size(); i++){
 			if (all.get(i) instanceof SurveyDesignEditorInput
 					&& (((SurveyDesignEditorInput)all.get(i)).getState() == SurveyDesign.State.INACTIVE)){
 				all.add(i, Messages.SurveyDesignDialog_InactiveSeparator);
-				all.add(i, new SurveyDesignEditorInput(Messages.SurveyDesignDialog_AllDesignsLabel, null, null, null));
+				all.add(i, allItem);
 				hasAll = true;
 				break;
 			}
 		}
 		if (!hasAll){
-			all.add(Messages.SurveyDesignDialog_AllDesignsLabel);
+			all.add(allItem);
 		}
 		
 		cmbViewer.setInput(all);
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		if (sds.size() > 0){
-			cmbViewer.setSelection(new StructuredSelection(sds.get(0)));
+		if (current != null){
+			cmbViewer.setSelection(new StructuredSelection(new SurveyDesignEditorInput(null, current.getUuid(), null, null)));	
+		}else{
+			cmbViewer.setSelection(new StructuredSelection(allItem));
+			
 		}
 		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			

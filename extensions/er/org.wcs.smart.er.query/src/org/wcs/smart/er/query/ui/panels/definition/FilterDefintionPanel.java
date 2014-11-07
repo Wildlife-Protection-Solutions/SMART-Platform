@@ -146,7 +146,6 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	
 		if (item instanceof SamplingUnitDropItem){
 			SamplingUnitDropItem suItem = (SamplingUnitDropItem) item;
-		
 			//these have fixed source; others are variable and defined 
 			// elsewhere
 			if (key.equals(MissionTrackQueryType.KEY)){
@@ -170,6 +169,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 			}
 		}
 	}
+	
 	/**
 	 * adds a collection of drop items; sets the 
 	 * survey designs if appropriate
@@ -243,8 +243,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 
 				@Override
 				public void widgetSelected(SelectionEvent e) {
-					SurveyDesignDialog dialog = new SurveyDesignDialog(outer
-							.getShell());
+					SurveyDesignDialog dialog = new SurveyDesignDialog(outer.getShell(), currentDesign);
 					if (dialog.open() == SurveyDesignDialog.OK) {
 						// update query
 						SurveyDesign newDesign = dialog.getSelectedDesign();

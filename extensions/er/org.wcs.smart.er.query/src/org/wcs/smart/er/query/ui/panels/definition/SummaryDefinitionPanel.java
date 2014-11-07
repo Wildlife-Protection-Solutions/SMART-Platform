@@ -180,7 +180,7 @@ public class SummaryDefinitionPanel extends AbstractSummaryGroupByValuePanel
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				SurveyDesignDialog dialog = new SurveyDesignDialog(parent.getShell());
+				SurveyDesignDialog dialog = new SurveyDesignDialog(parent.getShell(), currentDesign);
 				if (dialog.open() == SurveyDesignDialog.OK) {
 					// update query
 					SurveyDesign newDesign = dialog.getSelectedDesign();

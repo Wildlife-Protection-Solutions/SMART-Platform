@@ -28,11 +28,14 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackAdapter;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -45,6 +48,8 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -61,7 +66,7 @@ import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
  *
  */
 public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
-		IGroupByDropItem {
+		IGroupByDropItem, ISurveyDesignDropItem {
 
 	private SamplingUnitAttribute attribute;
 	private List<ListItem> filters = null;
@@ -69,6 +74,11 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 	private ToolTip toolTip;
 	private Font smallerFont;
 	private Label lblText;
+	private boolean isValidSd = true;
+	private SurveyDesign sd;
+	private Composite main;
+	private Color redColor;
+	private Color defaultColor;
 	
 	/**
 	 * Creates a new attribute list group by drop item for a attribute.
@@ -132,6 +142,10 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 			smallerFont.dispose();
 			smallerFont = null;
 		}
+		if (redColor != null){
+			redColor.dispose();
+			redColor = null;
+		}
 	}
 
 	/**
@@ -162,6 +176,9 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 	//s:missionproperty:l:" < DM_KEY > ":" ( < DM_KEY > )? (":" < DM_KEY > )* ) 
 	@Override
 	public String asQueryPart() {
+		if (!isValidSd){
+			return null;
+		}
 		StringBuilder sb = new StringBuilder();
 		sb.append("sgb:suproperty:"); //$NON-NLS-1$
 		sb.append(attribute.getType().typeKey);
@@ -202,7 +219,30 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 	protected void createComposite(Composite parent) {
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayout(new GridLayout(2, false));
+		this.main = comp;
+		defaultColor = comp.getBackground();
+		
+		if (!isValidSd){
+			createErrorCompoiste(main);
+		}else{
+			createLabelComposite(main);
+		}
+	}
 
+	private void createErrorCompoiste(Composite comp){
+		if (redColor == null){
+			redColor =  new Color(Display.getDefault(),new RGB(255, 210,210) );
+		}
+		comp.getParent().setBackground(redColor);
+		comp.setBackground(redColor);
+		Label lblError = new Label(comp, SWT.NONE);
+		lblError.setBackground(redColor);
+		lblError.setText(Messages.SamplingUnitAttributeGroupByDropItem_AttributeNotValid);
+	}
+	
+	private void createLabelComposite(Composite comp){
+		comp.getParent().setBackground(defaultColor);
+		comp.setBackground(defaultColor);
 		lblText = new Label(comp, SWT.NONE);
 		lblText.setText(formatStringForLabel(attribute.getName()));
 		initDrag(lblText);
@@ -240,7 +280,7 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 			}
 		});
 
-		toolTip = new ToolTip(parent.getShell(), SWT.BALLOON);
+		toolTip = new ToolTip(comp.getShell(), SWT.BALLOON);
 		toolTip.setText(Messages.SamplingUnitAttributeGroupByDropItem_IncludedLabel);
 		toolTip.setAutoHide(false);
 		updateLabel();
@@ -256,7 +296,6 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 			}
 		});
 	}
-
 	private void updateToolTipMessage() {
 		StringBuilder tipStr = new StringBuilder();
 		if (filters == null || filters.size() == 0) {
@@ -275,5 +314,40 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 	private void updateLabel(){
 		lblText.setText( formatStringForLabel(getText()));
 		updateToolTipMessage();
+	}
+
+	@Override
+	public void setSurveyDesign(SurveyDesign design) {
+		this.sd = design;
+		if (sd != null){
+			isValidSd = false;
+			Session s = HibernateManager.openSession();
+			try{
+				SurveyDesign temp = (SurveyDesign) s.load(SurveyDesign.class, design.getUuid());
+				for (SurveyDesignSamplingUnitAttribute att : temp.getSamplingUnitAttributes()){
+					if (att.getSamplingUnitAttribute().equals(attribute)){
+						isValidSd = true;
+						break;
+					}
+				}
+			}finally{
+				s.close();
+			}
+		}else{
+			isValidSd = true;
+		}
+		if (main != null){
+			for (Control c : main.getChildren()){
+				c.dispose();
+			}
+			
+			if (!isValidSd){
+				createErrorCompoiste(main);
+			}else{
+				createLabelComposite(main);
+			}
+		}
+		
+		getTargetPanel().redraw();
 	}
 }
