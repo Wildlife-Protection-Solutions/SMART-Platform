@@ -82,6 +82,7 @@ public class SmartAttributeEditingSupport extends EditingSupport {
 			List<String> list = tempMap.get(key);
 			itemsMap.put(key, list.toArray(new String[list.size()]));
 		}
+		itemsMap.put(Ct2AttributeType.REF_BOOL, itemsMap.get(Ct2AttributeType.BOOL)); //we need the same values as for BOOL
 	}
 
 	@Override
