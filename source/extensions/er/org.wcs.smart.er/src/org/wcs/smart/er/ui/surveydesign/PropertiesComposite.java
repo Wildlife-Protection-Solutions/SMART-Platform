@@ -107,12 +107,13 @@ public class PropertiesComposite extends SurveyDesignComposite {
 		btnCmp.setLayout(new GridLayout(1, false));
 		btnCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 
-		Button btnAdd = new Button(btnCmp, SWT.NONE);
+		final Button btnAdd = new Button(btnCmp, SWT.NONE);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				btnAdd.setFocus();
 				addProperty();
 			}
 
