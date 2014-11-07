@@ -18,6 +18,7 @@
 			<xs:enumeration value="NUMERIC" />
 			<xs:enumeration value="BOOL" />
 			<xs:enumeration value="REF" />
+			<xs:enumeration value="REF_BOOL" />
 			<xs:enumeration value="CATEGORY" />
 			<xs:enumeration value="META_DATE" />
 			<xs:enumeration value="META_TIME" />

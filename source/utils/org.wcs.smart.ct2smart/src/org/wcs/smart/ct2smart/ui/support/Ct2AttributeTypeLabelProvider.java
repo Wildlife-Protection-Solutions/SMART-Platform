@@ -24,6 +24,7 @@ public class Ct2AttributeTypeLabelProvider extends ColumnLabelProvider {
 			case NUMERIC: return "Numeric";
 			case BOOL: return "Boolean";
 			case REF: return "List or Tree";
+			case REF_BOOL: return "Boolean Reference";
 			case CATEGORY: return "Category";
 			case META_DATE: return "Date";
 			case META_TIME: return "Time";

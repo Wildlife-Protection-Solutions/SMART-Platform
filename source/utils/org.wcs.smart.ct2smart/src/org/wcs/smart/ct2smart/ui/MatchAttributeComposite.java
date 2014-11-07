@@ -139,7 +139,7 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 			extraAttrCmp.setVisible(false);
 		}
 
-		if (Ct2AttributeType.REF.equals(attribute.getType())) {
+		if (Ct2AttributeType.REF.equals(attribute.getType()) || Ct2AttributeType.REF_BOOL.equals(attribute.getType())) {
 			valueMapCmp.setInput(attribute);
 			valueMapCmp.setVisible(true);
 		} else {

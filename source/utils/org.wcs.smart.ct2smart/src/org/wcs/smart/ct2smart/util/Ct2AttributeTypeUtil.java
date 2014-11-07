@@ -10,6 +10,7 @@ public class Ct2AttributeTypeUtil {
 			case NUMERIC:
 			case BOOL:
 			case REF:
+			case REF_BOOL:
 				return true;
 			default:
 				return false;
