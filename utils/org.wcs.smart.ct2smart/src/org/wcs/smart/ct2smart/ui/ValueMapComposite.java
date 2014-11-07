@@ -147,7 +147,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		vCol.setLabelProvider(valLabelProvider);
 		vCol.setEditingSupport(new Ct2AttributeValueEditingSupport(viewer, lookup, valLabelProvider));
 
-		TableViewerColumn iCol = createTableViewerColumn("Ignore", 250);
+		TableViewerColumn iCol = createTableViewerColumn("Ignore", 100);
 		iCol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
