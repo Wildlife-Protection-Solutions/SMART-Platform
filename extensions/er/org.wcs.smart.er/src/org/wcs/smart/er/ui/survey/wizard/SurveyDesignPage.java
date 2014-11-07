@@ -58,6 +58,20 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage{
 
 	private ComboViewer cmbViewer;
+	private ISelectionChangedListener changeListener = new ISelectionChangedListener() {
+		
+		@Override
+		public void selectionChanged(SelectionChangedEvent event) {
+			Object x = ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
+			if (x instanceof String){
+				createSurveyDesign();
+			}
+			if (getWizard().getContainer().getShell() != null){
+				getWizard().getContainer().updateButtons();
+			}
+		}
+	};
+	
 	
 	protected SurveyDesignPage() {
 		super("DESIGN_PAGE"); //$NON-NLS-1$
@@ -80,17 +94,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		cmbViewer.setLabelProvider(SurveyDesignLabelProvider.getInstance());
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		cmbViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				Object x = ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
-				if (x instanceof String){
-					createSurveyDesign();
-				}
-				getWizard().getContainer().updateButtons();
-			}
-		});
+		
 		
 		setTitle(Messages.SurveyDesignPage_Title);
 		setMessage(Messages.SurveyDesignPage_Message);
@@ -113,6 +117,7 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		}
 		cmbViewer.setInput(items);
 		
+		
 		if (init != null){
 			SurveyDesignEditorInput sdei = new SurveyDesignEditorInput(init.getName(), init.getUuid(), init.getKeyId(), init.getState());
 			if (!items.contains(sdei)){
@@ -124,6 +129,11 @@ public class SurveyDesignPage extends WizardPage implements INewSurveyWizardPage
 		
 		if (items.size() == 0){
 			setErrorMessage(Messages.SurveyDesignPage_NeedsSurveyDesign);
+		}
+		
+		if (changeListener != null){
+			cmbViewer.addSelectionChangedListener(changeListener);
+			changeListener = null;
 		}
 	}
 
