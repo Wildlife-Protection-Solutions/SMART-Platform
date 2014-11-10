@@ -98,8 +98,10 @@ public class CTPureJdbcCsvParserHandler extends DefaultHandler {
 		try {
 			if (S.equals(qName)) {
 				processS(s);
-				if (s_id % 1000 == 0)
+				if (s_id % 1000 == 0) {
 					connection.commit();
+					System.out.println("Processed <S> id: " + s_id);
+				}
 				
 			} else if (T.equals(qName)) {
 				if (t != null) {
@@ -132,7 +134,7 @@ public class CTPureJdbcCsvParserHandler extends DefaultHandler {
 				connection.commit();
 				
 				col = col_id;
-				connection.createStatement().executeUpdate("alter table ct_to_smart.csv add column a"+col+" varchar(512)");  //$NON-NLS-1$//$NON-NLS-2$
+				connection.createStatement().executeUpdate("alter table ct_to_smart.csv add column a"+col+" varchar(1024)");  //$NON-NLS-1$//$NON-NLS-2$
 				connection.commit();
 
 				col_id++;
