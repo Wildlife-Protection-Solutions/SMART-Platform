@@ -16,6 +16,7 @@ import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup;
 public class MappingsMerger {
 
 	public static void main(String[] args) throws JAXBException, IOException {
+		System.out.println("Merging mappings...");
 		String fromFileStr = args.length > 0 ? args[0] : "match_super_x.xml";
 		String toFileStr   = args.length > 1 ? args[1] : "match_super.xml";
 		Ct2Smart from = FileUtil.loadCt2Smart(new File(fromFileStr));
@@ -55,6 +56,7 @@ public class MappingsMerger {
 			if (vFrom != null) {
 				//NOTE: N and I must be the same by design!!!
 				vTo.setMapTo(vFrom.getMapTo());
+				vTo.setIgnore(vFrom.isIgnore());
 			}
 		}
 	}
