@@ -133,9 +133,14 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		
 		if (!isEqual(columns, items)) {
 			columns = items;
-			ct2Smart.getCtCategory().clear();
 			try {
-				ct2Smart.getCtCategory().addAll(catMapBuilder.extractCategoryValues(columns));
+				List<CtCategory> oldCats = new ArrayList<CtCategory>(ct2Smart.getCtCategory().size());
+				oldCats.addAll(ct2Smart.getCtCategory());
+				ct2Smart.getCtCategory().clear();
+				List<CtCategory> newCats = catMapBuilder.extractCategoryValues(columns);
+				CategoryMatcher matcher = new CategoryMatcher();
+				matcher.match(newCats, oldCats);
+				ct2Smart.getCtCategory().addAll(newCats);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
