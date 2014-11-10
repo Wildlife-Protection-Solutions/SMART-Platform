@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.swt.internal.win32.DLLVERSIONINFO;
 import org.wcs.smart.ct2smart.dao.ConnectionUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
@@ -47,7 +46,6 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryAttributeLink;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.CategoryType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
-import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 /**
  * @author elitvin
