@@ -16,11 +16,13 @@ import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup;
 public class MappingsMerger {
 
 	public static void main(String[] args) throws JAXBException, IOException {
-		Ct2Smart from = FileUtil.loadCt2Smart(new File("match_super_x.xml"));
-		Ct2Smart to = FileUtil.loadCt2Smart(new File("match_super.xml"));
+		String fromFileStr = args.length > 0 ? args[0] : "match_super_x.xml";
+		String toFileStr   = args.length > 1 ? args[1] : "match_super.xml";
+		Ct2Smart from = FileUtil.loadCt2Smart(new File(fromFileStr));
+		Ct2Smart to = FileUtil.loadCt2Smart(new File(toFileStr));
 		MappingsMerger merger = new MappingsMerger();
 		merger.merge(from, to);
-		FileUtil.write(new File("match_super_merged.xml"), to);
+		FileUtil.write(new File("merged_mapping.xml"), to);
 		System.out.println("Merge done");
 	}
 	
