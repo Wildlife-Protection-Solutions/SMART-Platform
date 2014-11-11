@@ -51,6 +51,8 @@ public class CategoryMatcher {
 				}
 				if (found) {
 					nc.setCategoryKey(oc.getCategoryKey());
+					nc.getExtraAttribute().clear();
+					nc.getExtraAttribute().addAll(oc.getExtraAttribute());
 					break;
 				}
 			}
