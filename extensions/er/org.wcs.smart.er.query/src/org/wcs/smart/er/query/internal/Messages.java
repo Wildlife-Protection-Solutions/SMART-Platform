@@ -39,6 +39,7 @@ public class Messages extends NLS {
 	public static String DerbyWaypointEngine_LeaderProgress;
 	public static String DerbyWaypointEngine_ProgressMissionProperties;
 	public static String DerbyWaypointEngine_RunQueryProgress;
+	public static String ERDatabaseUpgrader_Info;
 	public static String ERQueryPlugIn_ErrorDialogTitle;
 	public static String FilterContentProvider_loadingSuAttributeJobName;
 	public static String FilterContentProvider_LoadSuJobName;
