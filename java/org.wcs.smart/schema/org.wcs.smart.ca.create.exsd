@@ -6,7 +6,7 @@
          <meta.schema plugin="org.wcs.smart" id="org.wcs.smart.ca.create" name="Conservation Area Create Handler"/>
       </appinfo>
       <documentation>
-         [Enter description of this extension point.]
+         An extension point that allows plugins to execute some code when a new conservation area is created.  This allows plugin to initialize a database with some fixed values.
       </documentation>
    </annotation>
 
@@ -67,7 +67,7 @@
          <meta.section type="since"/>
       </appinfo>
       <documentation>
-         [Enter the first release in which this extension point appears.]
+         3.1.0
       </documentation>
    </annotation>
 
