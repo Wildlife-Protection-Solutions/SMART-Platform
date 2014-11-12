@@ -317,5 +317,11 @@
             class="org.wcs.smart.er.query.importexport.SurveySummaryQueryDefinitionImporter">
       </QueryImporter>
    </extension>
+   <extension
+         point="org.wcs.smart.dbUpgrage">
+      <dbUpgrader
+            upgrader="org.wcs.smart.er.query.upgrade.ERDatabaseUpgrader">
+      </dbUpgrader>
+   </extension>
 
 </plugin>
