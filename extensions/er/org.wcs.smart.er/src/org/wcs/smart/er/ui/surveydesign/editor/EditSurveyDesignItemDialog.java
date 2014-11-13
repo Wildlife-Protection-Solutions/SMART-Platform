@@ -97,6 +97,11 @@ public class EditSurveyDesignItemDialog extends AbstractPropertyJHeaderDialog {
 			e.printStackTrace();
 		}
 
+    	//ensure sesion is closed to clear any cached items before fire handlers
+    	if (session.isOpen()){
+    		session.close();
+    	}
+    	
     	if (Status.OK_STATUS.equals(saveJob.getResult())) {
 			setChangesMade(false);
 			SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_DESIGN_MODIFIED, surveyDesign);
