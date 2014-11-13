@@ -420,7 +420,6 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	 * the entity type name.
 	 */
 	private void translateName() {
-//		if (!EntityPermissionManager.canCreateEditDeleteTypes()) return;
 		final SurveyDesign toEdit = parentEditor.getSurveyDesign();
 		
 		TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(

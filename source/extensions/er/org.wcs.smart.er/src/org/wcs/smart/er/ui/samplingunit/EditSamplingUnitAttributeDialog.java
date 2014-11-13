@@ -38,8 +38,10 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
@@ -246,7 +248,12 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
 		((GridData)lstViewer.getControl().getLayoutData()).widthHint = 300;
-		
+		lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				configureButtons();
+			}
+		});
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -344,6 +351,8 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		btnDown.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnDown.addSelectionListener(this);
 		
+		configureButtons();
+		
 	}
 	
 	private void reorder(){
@@ -365,6 +374,14 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		if (dialog.open() == OK){
 			lstViewer.refresh();
 		}
+	}
+	
+	private void configureButtons(){
+		boolean isEnabled = lstViewer.getSelection().isEmpty();
+		btnDelete.setEnabled(!isEnabled);
+		btnEdit.setEnabled(!isEnabled);
+		btnDown.setEnabled(!isEnabled);
+		btnUp.setEnabled(!isEnabled);
 	}
 	
 	private void validate(){

@@ -38,8 +38,10 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.ViewerDropAdapter;
@@ -235,7 +237,12 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		lstViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstViewer.getControl().getLayoutData()).heightHint = 200;
 		((GridData)lstViewer.getControl().getLayoutData()).widthHint = 300;
-		
+		lstViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				configureButtons();	
+			}
+		});
 		lstViewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
@@ -347,6 +354,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		nameKeyControls.initFields(toUpdate, siblings, SmartDB.getCurrentConservationArea().getDefaultLanguage());
 		cmbType.setSelection(new StructuredSelection(toUpdate.getType()));
 		listPanel.setVisible(toUpdate.getType() == AttributeType.LIST);
+		configureButtons();
 		
 		return composite;
 	}
@@ -360,6 +368,13 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 		}
 	}
 	
+	private void configureButtons(){
+		boolean isEnabled = lstViewer.getSelection().isEmpty();
+		btnDelete.setEnabled(!isEnabled);
+		btnEdit.setEnabled(!isEnabled);
+		btnDown.setEnabled(!isEnabled);
+		btnUp.setEnabled(!isEnabled);
+	}
 	
 	private Attribute.AttributeType getType(){
 		return (AttributeType) ((IStructuredSelection)cmbType.getSelection()).getFirstElement();

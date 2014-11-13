@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -151,13 +152,17 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 			session.beginTransaction();
 			try{
 				surveyDesign = (SurveyDesign) session.load(SurveyDesign.class, puuid);
-				surveyDesign.getNames().size();
 				surveyDesign.getName();
 				if (surveyDesign.getConfigurableModel() != null) {
 					surveyDesign.getConfigurableModel().getNames().size();
 				}
 				surveyDesign.getMissionProperties().size();
 				surveyDesign.getProperties().size();
+				
+				//ensure all languages are loaded; this is to support the translate link
+				for (Label l : surveyDesign.getNames()){
+					l.getLanguage().equals(null);
+				}
 			}catch (Exception ex){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 			}finally{
