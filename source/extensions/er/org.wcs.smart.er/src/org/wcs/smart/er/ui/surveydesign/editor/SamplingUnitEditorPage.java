@@ -588,8 +588,22 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 				}
 			}
 		}
-			
-		SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, SmartDB.DATABASE_CRS);
+		
+		//expend envelope by 10%
+		env.expandBy((env.getMaxX() - env.getMinX()) * 0.1, (env.getMaxY() - env.getMinY()) * 0.1);
+		
+		//zoom but fix a minimum scale factor
+		SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, SmartDB.DATABASE_CRS){
+			private static final int MINZOOM = 10000;
+			@Override
+			protected void runImpl(IProgressMonitor monitor) {
+				super.runImpl(monitor);
+				
+				if(super.getMap().getViewportModel().getScaleDenominator() < MINZOOM){
+					super.getMap().getViewportModelInternal().setScale(MINZOOM);
+				}
+			}
+		};
 		getMap().sendCommandASync(bbox);
 	}
 	
