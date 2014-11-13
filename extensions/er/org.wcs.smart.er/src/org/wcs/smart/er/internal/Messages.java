@@ -407,6 +407,8 @@ public class Messages extends NLS {
 	public static String MissionPropertiesComposite_Title;
 	public static String MissionPropertyValuesComposite_Description;
 	public static String MissionPropertyValuesComposite_InvalidNumber;
+
+	public static String MissionPropertyValuesComposite_NoPropertiesDefined;
 	public static String MissionPropertyValuesComposite_Title;
 	public static String MissionServiceInfo_Description;
 	public static String MissionServiceInfo_Keyword1;

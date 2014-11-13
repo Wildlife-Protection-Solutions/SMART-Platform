@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,6 +95,14 @@ public class MissionPropertyValuesComposite extends MissionComposite implements 
 		outer.setLayout(new GridLayout(2, false));
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		if (properties.size() == 0){
+			Label l = new Label(outer, SWT.WRAP);
+			l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+			l.setText(MessageFormat.format(
+					Messages.MissionPropertyValuesComposite_NoPropertiesDefined,
+					new Object[]{mission.getSurvey().getSurveyDesign().getName()}));
+			((GridData)l.getLayoutData()).widthHint = 100;
+		}
 		//create controls for all properties
 		for (MissionProperty mp : properties){
 			Label l = new Label(outer, SWT.NONE);
