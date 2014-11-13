@@ -50,7 +50,13 @@ import org.wcs.smart.internal.Messages;
  */
 @Entity
 @Table(name = "smart.employee")
-public class Employee extends UuidItem {
+/*
+ * If this class extends UuidItem then a hibernate error occurs when trying
+ * to load cross conservation area (conservation area) reports:
+ * org.hibernate.PropertyAccessException: IllegalArgumentException occurred while calling setter of org.wcs.smart.ca.Employee.conservationArea
+ * So this class is not extending UuidItem for now.
+ */
+public class Employee {
 
 	/**
 	 * UUID for the 'shared' employee.  This employee uuid
@@ -123,6 +129,8 @@ public class Employee extends UuidItem {
 	};
 	
 	
+	private byte[] uuid;
+	
 	private String id;
 	private String givenName;
 	private String familyName;
@@ -145,6 +153,16 @@ public class Employee extends UuidItem {
 		this.dateCreated = new Date();
 	}
 
+	@Id
+	@GeneratedValue(generator="uuid")
+	@GenericGenerator(name= "uuid", strategy="uuid2")
+	public byte[] getUuid() {
+		return uuid;
+	}
+	public void setUuid(byte[] uuid) {
+		this.uuid = uuid;
+	}
+	
 	@Column(name="id")
 	public String getId() {
 		return id;
@@ -278,6 +296,25 @@ public class Employee extends UuidItem {
 	@Transient
 	public boolean isActive(){
 		return this.endEmploymentDate == null;
+	}
+	
+	
+	@Override
+	public boolean equals(Object other){
+		if (other != null && other instanceof Employee){
+			Employee s = (Employee)other;
+			if (s.getUuid() == null && this.getUuid() == null){
+				return this == s;
+			}else if (s.getUuid() != null && this.getUuid() != null){
+				return Arrays.equals(s.getUuid(), this.getUuid());
+			}
+		}
+		return false;
+	}
+	
+	@Override
+	public int hashCode(){
+		return Arrays.hashCode(getUuid());
 	}
 	
 	/**

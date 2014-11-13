@@ -47,11 +47,13 @@
       </TableCategory>
       <DynamicTable
             category="org.wcs.smart.er.query.report.table.properties"
-            class="org.wcs.smart.er.query.report.table.SurveyPropertyTables">
+            class="org.wcs.smart.er.query.report.table.SurveyPropertyTables"
+            supportsCcaa="false">
       </DynamicTable>
       <DynamicTable
             category="org.wcs.smart.er.query.report.table.samplingunit"
-            class="org.wcs.smart.er.query.report.table.SurveySamplingUnitTables">
+            class="org.wcs.smart.er.query.report.table.SurveySamplingUnitTables"
+            supportsCcaa="false">
       </DynamicTable>
    </extension>
 

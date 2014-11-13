@@ -115,7 +115,7 @@ public class SurveySummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public boolean supportsCrossCaQueries() {
-		return true;
+		return false;
 	}
 
 	/**

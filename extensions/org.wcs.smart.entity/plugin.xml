@@ -571,7 +571,8 @@
       </TableCategory>
       <DynamicTable
             category="org.wcs.smart.entity.tables"
-            class="org.wcs.smart.entity.report.DynamicSmartTables">
+            class="org.wcs.smart.entity.report.DynamicSmartTables"
+            supportsCcaa="true">
       </DynamicTable>
    </extension>
 

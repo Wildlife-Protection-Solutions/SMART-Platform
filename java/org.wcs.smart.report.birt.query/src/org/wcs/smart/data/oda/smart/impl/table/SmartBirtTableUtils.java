@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Utilities for reading extension point information
@@ -132,7 +133,14 @@ public class SmartBirtTableUtils {
 		cachedDynamic = new HashMap<TableCategory, IDynamicSmartTables>();
 		cachedStatic = new HashMap<TableCategory, List<SmartBirtTable>>();
 		for (int i = 0; i < config.length; i++) {
+			boolean canAdd = true;
+			if (SmartDB.isMultipleAnalysis()){
+				canAdd = Boolean.valueOf(config[i].getAttribute("supportsCcaa")); //$NON-NLS-1$
+			}
+			if (!canAdd) continue;
+			
 			if (config[i].getName().equals("StaticTable")) { //$NON-NLS-1$
+				
 				TableCategory tc = categories.get(config[i].getAttribute("category")); //$NON-NLS-1$
 				SmartBirtTable table = (SmartBirtTable) config[i].createExecutableExtension("class"); //$NON-NLS-1$
 
