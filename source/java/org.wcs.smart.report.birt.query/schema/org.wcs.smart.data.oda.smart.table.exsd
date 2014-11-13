@@ -74,6 +74,13 @@ that are not known until runtime.  Tables can belong to categories (for UI purpo
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="supportsCcaa" type="boolean" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
@@ -97,6 +104,13 @@ that are not known until runtime.  Tables can belong to categories (for UI purpo
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.data.oda.smart.impl.table.IDynamicSmartTables"/>
                </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="supportsCcaa" type="boolean" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
             </annotation>
          </attribute>
       </complexType>

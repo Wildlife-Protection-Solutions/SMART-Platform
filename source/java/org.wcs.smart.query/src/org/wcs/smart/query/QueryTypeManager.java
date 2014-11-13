@@ -23,6 +23,7 @@ package org.wcs.smart.query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -204,20 +205,41 @@ public class QueryTypeManager {
 			}else if (e.getName().equals(QUERYTYPE_EXTNAME)){
 				try {
 					IQueryType qType = (IQueryType) e.createExecutableExtension("class"); //$NON-NLS-1$
-					aTypes.add(qType);
 					
-					String id = e.getAttribute(QUERYTYPEGROUP_EXTNAME);
-					for (QueryCategory g : groups){
-						if (g.getId().equals(id)){
-							g.addQueryType(qType);
+					//check ccaa status
+					boolean isValid = false;
+					if (SmartDB.isMultipleAnalysis()){
+						if (qType.supportsCrossCaQueries()){
+							isValid = true;
+									
+						}
+					}else{
+						if (qType.supportsSingleCaQueries()){
+							isValid = true;
 						}
 					}
 					
+					if (isValid){
+						aTypes.add(qType);
+					
+						String id = e.getAttribute(QUERYTYPEGROUP_EXTNAME);
+						for (QueryCategory g : groups){
+							if (g.getId().equals(id)){
+								g.addQueryType(qType);
+							}
+						}
+					}
 				} catch (CoreException e1) {
 					QueryPlugIn.log(Messages.QueryTypeManager_QueryTypeError, e1);
 				}
+			}			
+		}
+		//remove any groups without any types
+		for (Iterator<QueryCategory> iterator = groups.iterator(); iterator.hasNext();) {
+			QueryCategory category = (QueryCategory) iterator.next();
+			if (category.getTypes() == null || category.getTypes().size() == 0){
+				iterator.remove();
 			}
-			
 			
 		}
 		this.allTypes = aTypes.toArray(new IQueryType[aTypes.size()]);

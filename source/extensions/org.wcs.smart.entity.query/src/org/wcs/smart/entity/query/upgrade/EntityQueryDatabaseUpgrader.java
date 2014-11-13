@@ -34,8 +34,8 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 /**
  * Entity query upgrade operations while upgrade/restore backup.
  * 
- * @author elitvin
- * @since 3.0.0
+ * @author egouge
+ * @since 3.1.0
  */
 public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 

@@ -10,31 +10,38 @@
       </TableCategory>
       <StaticTable
             category="org.wcs.smart.ca.tables"
-            class="org.wcs.smart.reporttable.ca.EmployeeTable">
+            class="org.wcs.smart.reporttable.ca.EmployeeTable"
+            supportsCcaa="true">
       </StaticTable>
       <StaticTable
             category="org.wcs.smart.ca.tables"
-            class="org.wcs.smart.reporttable.ca.AgencyRankTable">
+            class="org.wcs.smart.reporttable.ca.AgencyRankTable"
+            supportsCcaa="true">
       </StaticTable>
       <StaticTable
             category="org.wcs.smart.ca.tables"
-            class="org.wcs.smart.reporttable.ca.StationTable">
+            class="org.wcs.smart.reporttable.ca.StationTable"
+            supportsCcaa="true">
       </StaticTable>
       <StaticTable
             category="org.wcs.smart.ca.tables"
-            class="org.wcs.smart.reporttable.patrol.PatrolMandateTable">
+            class="org.wcs.smart.reporttable.patrol.PatrolMandateTable"
+            supportsCcaa="true">
       </StaticTable>
       <StaticTable
             category="org.wcs.smart.ca.tables"
-            class="org.wcs.smart.reporttable.patrol.PatrolTransportTable">
+            class="org.wcs.smart.reporttable.patrol.PatrolTransportTable"
+            supportsCcaa="true">
       </StaticTable>
       <StaticTable
             category="org.wcs.smart.ca.tables"
-            class="org.wcs.smart.reporttable.patrol.TeamTable">
+            class="org.wcs.smart.reporttable.patrol.TeamTable"
+            supportsCcaa="true">
       </StaticTable>
       <StaticTable
             category="org.wcs.smart.ca.tables"
-            class="org.wcs.smart.reporttable.ca.CaTable">
+            class="org.wcs.smart.reporttable.ca.CaTable"
+            supportsCcaa="true">
       </StaticTable>
    </extension>
 

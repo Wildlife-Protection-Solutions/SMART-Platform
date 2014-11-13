@@ -197,6 +197,12 @@
                      value="surveygrid">
                </parameter>
             </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
       <menuContribution
@@ -207,6 +213,12 @@
                id="org.wcs.smart.query.createquery.surveyquery"
                label="%surveyquery.menu.label1"
                tooltip="%surveyquery.menu.tooltip1">
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
          </menu>
       </menuContribution>
    </extension>
