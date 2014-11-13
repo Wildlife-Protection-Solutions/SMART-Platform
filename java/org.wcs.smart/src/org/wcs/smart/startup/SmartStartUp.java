@@ -237,9 +237,7 @@ public class SmartStartUp {
 					SmartDB.setCurrentUser(users.get(0), ca);
 					ConservationAreaConfiguration config = new ConservationAreaConfiguration(areas, users);
 					SmartDB.setConservationAreaConfiguration(config);
-					
-					
-					
+										
 					return true;
 				}
 			} catch (Exception ex) {
