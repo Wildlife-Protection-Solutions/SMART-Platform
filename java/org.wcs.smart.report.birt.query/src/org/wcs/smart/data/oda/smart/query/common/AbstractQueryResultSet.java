@@ -242,6 +242,8 @@ public abstract class AbstractQueryResultSet implements IResultSet {
 			return (Time) lastObject;
 		}else if (lastObject instanceof Date){
 			return new Time(((Date)lastObject).getTime());
+		}else if (lastObject instanceof java.util.Date){
+			return new Time(((java.util.Date)lastObject).getTime());
 		}else if (lastObject == null){
 			return null;
 		}
