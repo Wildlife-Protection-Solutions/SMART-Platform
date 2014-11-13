@@ -126,6 +126,9 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 		}finally{
 			session.close(); 
 		}
+		if (mission == null){
+			throw new IOException(Messages.MissionDataSourceFactory_MissionNotFound);
+		}
 		return new MissionDataSource(new MissionService(mission));
 	}
 

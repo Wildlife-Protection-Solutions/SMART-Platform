@@ -124,7 +124,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		
 		//mission attribute filters
 		monitor.subTask(Messages.FilterProcessor_ProgressMissionFilters);
-		queryFilter.accept(mpcollector);
+		qFilter.accept(mpcollector);
 		if (mpcollector.getAttributeInfo().size() > 0){
 			this.missionTable = engine.createTempTableName();
 			createMissionTable(c, qFilter, caFilter, dateFilter, monitor);
@@ -133,7 +133,7 @@ public class FilterProcessorMission implements IFilterProcessor {
 		
 		//sampling unit attribute filter
 		monitor.subTask(Messages.FilterProcessor_ProgressSuFilters);
-		queryFilter.accept(sucollector);
+		qFilter.accept(sucollector);
 		if (sucollector.getAttributeInfo().size() > 0){
 			this.suAttributeTable = engine.createTempTableName();
 			createSamplingUnitAttributeTable(c, qFilter, caFilter, dateFilter, monitor);

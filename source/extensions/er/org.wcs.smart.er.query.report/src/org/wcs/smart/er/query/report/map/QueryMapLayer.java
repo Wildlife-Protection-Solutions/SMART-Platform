@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.er.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
@@ -79,6 +80,7 @@ public class QueryMapLayer implements IBirtMapLayerManager {
 			if (queryTypeKey.equals(SurveyGridQueryType.KEY) ||
 					queryTypeKey.equals(MissionQueryType.KEY) ||
 					queryTypeKey.equals(SurveyObservationQueryType.KEY) ||
+					queryTypeKey.equals(MissionTrackQueryType.KEY) ||
 					queryTypeKey.equals(SurveyWaypointQueryType.KEY)){
 				return true;
 			}

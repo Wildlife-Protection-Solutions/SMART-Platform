@@ -104,10 +104,15 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 				for (int i = 0; i < filterItems.length; i ++){
 					copies.add(filterItems[i]);
 				}
+				
 			}
 			session.getTransaction().rollback();
+			
+			//update rate filter
 			rateFilter.addItems(copies);
-			rateFilter.setFilterType(filterPart.getFilterType());
+			if (filterPart != null){
+				rateFilter.setFilterType(filterPart.getFilterType());
+			}
 		}catch (Exception ex){
 			QueryPlugIn.displayLog(Messages.SimpleValueRateFilterPanel_CopyError, ex);
 			if (session != null && session.getTransaction().isActive()){

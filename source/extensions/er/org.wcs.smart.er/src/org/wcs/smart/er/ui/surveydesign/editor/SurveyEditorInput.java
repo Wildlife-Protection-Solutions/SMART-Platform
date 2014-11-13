@@ -101,8 +101,8 @@ public class SurveyEditorInput implements IEditorInput {
 
 	@Override
 	public boolean equals(Object other){
-		if (other instanceof SurveyDesignEditorInput){
-			return Arrays.equals(uuid, ((SurveyDesignEditorInput) other).getUuid());
+		if (other instanceof SurveyEditorInput){
+			return Arrays.equals(uuid, ((SurveyEditorInput) other).getUuid());
 		}
 		return false;
 	}

@@ -281,6 +281,8 @@ public class Messages extends NLS {
 	public static String MissionDataImport_TrackLabel;
 	public static String MissionDataSource_SchemaNotSupported;
 	public static String MissionDataSourceFactory_Description;
+
+	public static String MissionDataSourceFactory_MissionNotFound;
 	public static String MissionDataSourceFactory_Name;
 	public static String MissionDataSourceFactory_ParameterName;
 	public static String MissionDataSourceFactory_ReadOnlySource;
