@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 public class PackageProduct {
 
 	public static final String VERSION = "3.1.0";
-	public static final String RC = "rc12";
+	public static final String RC = "rc13";
 	
 	public static final String GPS_BABEL = "C:\\data\\SMART\\Exports\\dependencies\\GPSBabel";
 	
@@ -154,6 +154,17 @@ public class PackageProduct {
 		ZipUtil.createZip(new File[]{macDir}, outFile);
 	}
 	
+	public static void zipWindows() throws Exception{
+		System.out.println("Zipping Windows");
+		File winDir = new File(BUILD_WIN32, APP_NAME);
+		
+		File outFile = new File(BUILD_WIN32, "smart." + VERSION + ".win32" + (RC.length() == 0 ? "" : ".") + RC + ".zip" );
+		if (outFile.exists()){
+			outFile.delete();
+		}
+		ZipUtil.createZip(new File[]{winDir}, outFile);
+	}
+	
 	public static void copyToNetworkLinux() throws Exception{
 		System.out.println("copy to network - linux");
 		File srcFile = new File(BUILD_LINUX32, "smart." + VERSION + ".linux32" + (RC.length() == 0 ? "" : ".") + RC + ".zip" );
@@ -173,18 +184,19 @@ public class PackageProduct {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//		copyToNetworkWindows();
+			zipWindows();
+			copyToNetworkWindows();
 		
-		packageUpdateSize();
-
-		processWindows();
-
-		processMac();
-		zipMac();
-		copyToNetworkMacosx();
-		
-		processLinux();
-		zipLinux();
-		copyToNetworkLinux();
+//		packageUpdateSize();
+//
+//		processWindows();
+//
+//		processMac();
+//		zipMac();
+//		copyToNetworkMacosx();
+//		
+//		processLinux();
+//		zipLinux();
+//		copyToNetworkLinux();
 	}
 }
