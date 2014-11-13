@@ -95,6 +95,7 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
+					if (listViewer == null || listViewer.getControl().isDisposed()) return;
 					listViewer.setInput(fes);
 					if (currentSelection != null){
 						listViewer.setSelection(new StructuredSelection(currentSelection));
