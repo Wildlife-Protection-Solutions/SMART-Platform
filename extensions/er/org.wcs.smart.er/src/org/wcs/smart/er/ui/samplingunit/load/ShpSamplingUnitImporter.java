@@ -236,8 +236,11 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 							Number d = (Number) sf.getAttribute(field);
 							if (d != null) {
 								add = true;
+								sv.setNumberValue(d.doubleValue());
+							}else{
+								sv.setNumberValue(null);
 							}
-							sv.setNumberValue(d.doubleValue());
+							
 						} else if (att.getType() == AttributeType.TEXT) {
 							String s = sf.getAttribute(field).toString();
 							

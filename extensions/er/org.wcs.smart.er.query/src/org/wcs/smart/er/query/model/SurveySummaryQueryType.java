@@ -208,9 +208,12 @@ public class SurveySummaryQueryType implements IQueryType {
 		boolean hasObservationGroupBy = false;
 		
 		HasObservationGroupByVisitor v0 = new HasObservationGroupByVisitor();
-		def.getRowGroupByPart().visit(v0);
-		hasObservationGroupBy = v0.hasAttribute() || v0.hasCategory();
-		if (!hasObservationGroupBy){
+		if (def.getRowGroupByPart() != null){
+			def.getRowGroupByPart().visit(v0);
+			hasObservationGroupBy = v0.hasAttribute() || v0.hasCategory();
+		}
+		
+		if (!hasObservationGroupBy && def.getColumnGroupByPart() != null){
 			def.getColumnGroupByPart().visit(v0);
 			hasObservationGroupBy = v0.hasAttribute() || v0.hasCategory();
 		}

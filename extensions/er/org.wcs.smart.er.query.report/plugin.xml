@@ -23,6 +23,10 @@
             class="org.wcs.smart.er.query.report.query.SurveyReportQuery"
             queryTypeKey="surveygrid">
       </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.er.query.report.query.SurveyReportQuery"
+            queryTypeKey="surveymissiontrack">
+      </QueryTypeDataset>
    </extension>
    <extension
          point="org.wcs.smart.report.birt.maplayer">

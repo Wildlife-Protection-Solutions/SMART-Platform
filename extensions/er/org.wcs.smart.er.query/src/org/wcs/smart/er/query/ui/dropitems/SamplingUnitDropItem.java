@@ -25,7 +25,6 @@ import java.text.MessageFormat;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -59,8 +58,7 @@ public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropI
 	private SurveyDesign sd = null;
 	
 	private Label label = null;
-	private Font smallerFont;
-	
+		
 	public SamplingUnitDropItem(SamplingUnit su){
 		this.su = su;
 	}
@@ -124,9 +122,6 @@ public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropI
 	@Override
 	public void dispose(){
 		super.dispose();
-		if (smallerFont != null){
-			smallerFont.dispose();
-		}
 		if (redColor != null){
 			redColor.dispose();
 		}

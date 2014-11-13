@@ -165,12 +165,7 @@ public class QueryService extends IQueryService {
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
 					}else if (query.getType().getClass().equals(MissionTrackQueryType.class)){
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
-//					}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
-//						members.add(new QueryGeoResource(this, SurveyQueryDataSource.PATROL_TYPE));
-//					}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
-//						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
-					}
-					
+					}	
 				}
 			}
 		}

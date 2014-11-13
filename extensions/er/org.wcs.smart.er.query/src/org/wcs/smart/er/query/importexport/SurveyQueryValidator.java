@@ -134,17 +134,8 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 	@Override
 	public List<String> validate(IValueItem item) throws Exception{
 		List<String> warnings = super.validate(item);
-		
-		ValueVisitor vv = new ValueVisitor();
-		item.accept(vv);
-		if (vv.ex != null){
-			throw vv.ex;
-		}
 		return warnings;
 	}
-	
-	
-	
 	
 	class FilterValidatorVisitor implements IFilterVisitor{
 
@@ -157,7 +148,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 			try{
 				if (filter instanceof MissionMemberFilter){
 					byte[] uuid = ((MissionMemberFilter)filter).getUuid();
-					Object x = session.load(Employee.class, uuid);
+					Object x = session.get(Employee.class, uuid);
 					if (x != null 
 							&& x instanceof Employee
 							&& ((Employee)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
@@ -182,7 +173,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof MissionFilter){
 					if (((MissionFilter) filter).getType() == MissionFilter.Type.UUID){
 						byte[] uuid = SmartUtils.decodeHex(((MissionFilter)filter).getValue());
-						Object x = session.load(Mission.class, uuid);
+						Object x = session.get(Mission.class, uuid);
 						if (x != null 
 								&& x instanceof Mission
 								&& ((Mission)x).getSurvey().getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
@@ -193,7 +184,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof SurveyFilter){
 					if (((SurveyFilter) filter).getType() == SurveyFilter.Type.UUID){
 						byte[] uuid = SmartUtils.decodeHex(((SurveyFilter)filter).getValue());
-						Object x = session.load(Survey.class, uuid);
+						Object x = session.get(Survey.class, uuid);
 						if (x != null 
 								&& x instanceof Survey
 								&& ((Survey)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
@@ -206,7 +197,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					if (suFilter.isNone()){
 						return;
 					}
-					Object x = session.load(SamplingUnit.class, SmartUtils.decodeHex(suFilter.getUuid()));
+					Object x = session.get(SamplingUnit.class, SmartUtils.decodeHex(suFilter.getUuid()));
 					if (x != null 
 							&& x instanceof SamplingUnit
 							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
@@ -294,12 +285,12 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					SamplingUnitGroupBy gb = (SamplingUnitGroupBy) filter;
 					String[] items = gb.getRawItems();
 					for (int i = 0; i < items.length;i++){
-						Object x = session.load(SamplingUnit.class, SmartUtils.decodeHex(items[i]));
+						Object x = session.get(SamplingUnit.class, SmartUtils.decodeHex(items[i]));
 						if (x != null 
 							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 							continue;
 						}
-						UuidItemType item = uuidLookup.get(  SmartUtils.encodeHex(((MissionMemberFilter)filter).getUuid())  );
+						UuidItemType item = uuidLookup.get( items[i] );
 						if (item != null){
 							SamplingUnit it = findSamplingUnit(item.getId());
 							if (it != null){
@@ -319,15 +310,6 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 			}
 		}
 	}
-		
-	class ValueVisitor implements IValueVisitor{
-		private Exception ex;
-		
-		@Override
-		public void visit(IValueItem item) {
-			if (ex != null) return ;
-		}
-	};
 	
 	/**
 	 * Looks up a named by item by the keyid

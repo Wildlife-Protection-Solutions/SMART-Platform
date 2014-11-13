@@ -39,6 +39,7 @@ import org.wcs.smart.data.oda.smart.query.common.PagedQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
 import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
@@ -99,7 +100,8 @@ public class SurveyReportQuery implements ISmartQuery {
 	public IResultSetMetaData getMetaData(SmartQuery query) throws OdaException {
 		if (query.getQuery().getType().getKey().equals(SurveyObservationQueryType.KEY) ||
 				query.getQuery().getType().getKey().equals(SurveyWaypointQueryType.KEY) ||
-				query.getQuery().getType().getKey().equals(MissionQueryType.KEY)){
+				query.getQuery().getType().getKey().equals(MissionQueryType.KEY) ||
+				query.getQuery().getType().getKey().equals(MissionTrackQueryType.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) query.getQuery());
 		} else if (query.getQuery().getType().getKey().equals(SurveySummaryQueryType.KEY)) {
 			return new SurveySummaryQueryResultSetMetadata((SurveySummaryQuery) query.getQuery());
@@ -142,7 +144,8 @@ public class SurveyReportQuery implements ISmartQuery {
 		
 		if (query.getQuery().getType().getKey().equals(SurveyObservationQueryType.KEY) ||
 				query.getQuery().getType().getKey().equals(SurveyWaypointQueryType.KEY) ||
-				query.getQuery().getType().getKey().equals(MissionQueryType.KEY)){
+				query.getQuery().getType().getKey().equals(MissionQueryType.KEY) ||
+				query.getQuery().getType().getKey().equals(MissionTrackQueryType.KEY)){
 			((SimpleQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new PagedQueryResultSet(query.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(query), 

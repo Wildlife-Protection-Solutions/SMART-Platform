@@ -257,7 +257,8 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			}finally{
 				session.getTransaction().rollback();
 			}
-
+			if (type == null) return;
+			
 			StringBuilder sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryTempTable);

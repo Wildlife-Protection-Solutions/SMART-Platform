@@ -730,8 +730,9 @@ public class TracksComposite extends Composite implements MapPart{
 						}
 						LineString[] newLs = GeometryUtils.splitSimple(ls1, new Coordinate(intersection.getX(), intersection.getY()));
 
-						if (newLs == null || newLs.length != 2 || !(newLs[0] instanceof LineString) || !(newLs[0] instanceof LineString)){
+						if (newLs == null || newLs.length != 2){
 							setError(Messages.TracksComposite_CouldNotSplit);
+							return;
 						}
 						trackToSplit.setLineString(newLs[0]);
 						MissionTrack newTrack = new MissionTrack();

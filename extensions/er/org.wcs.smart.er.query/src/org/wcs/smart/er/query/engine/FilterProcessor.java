@@ -252,7 +252,7 @@ public class FilterProcessor implements IFilterProcessor {
 			boolean populateObservation)
 			throws SQLException {
 
-		if (dateFilter.getDateFieldOption() != MissionStartDateField.INSTANCE 
+		if (dateFilter != null && dateFilter.getDateFieldOption() != MissionStartDateField.INSTANCE 
 				&& dateFilter.getDateFieldOption() != MissionEndDateField.INSTANCE
 				&& dateFilter.getDateFieldOption() != WaypointDateField.INSTANCE){
 			throw new SQLException(MessageFormat.format(Messages.FilterProcessor_DateFilterNotSupported, new Object[]{dateFilter.getDateFilterOption().getGuiName()}));

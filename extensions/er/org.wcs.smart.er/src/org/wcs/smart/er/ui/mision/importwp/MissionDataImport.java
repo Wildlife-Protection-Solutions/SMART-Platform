@@ -187,14 +187,13 @@ public class MissionDataImport {
 			}
 			newTrack.setId(id);
 			newTrack.setMissionDay(value.missionDay);
-			if (newTrack != null){
-				List<MissionTrack> tracks = mdtracks.get(value.missionDay);
-				if (tracks == null){
-					tracks = new ArrayList<MissionTrack>();
-					mdtracks.put(value.missionDay, tracks);
-				}
-				tracks.add(newTrack);
+
+			List<MissionTrack> tracks = mdtracks.get(value.missionDay);
+			if (tracks == null){
+				tracks = new ArrayList<MissionTrack>();
+				mdtracks.put(value.missionDay, tracks);
 			}
+			tracks.add(newTrack);
 		}
 		return mdtracks;		
 	}
