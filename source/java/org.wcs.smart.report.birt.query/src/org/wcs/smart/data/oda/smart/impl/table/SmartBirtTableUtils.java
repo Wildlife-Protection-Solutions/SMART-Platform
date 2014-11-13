@@ -134,7 +134,7 @@ public class SmartBirtTableUtils {
 		cachedStatic = new HashMap<TableCategory, List<SmartBirtTable>>();
 		for (int i = 0; i < config.length; i++) {
 			boolean canAdd = true;
-			if (SmartDB.isMultipleAnalysis()){
+			if (SmartDB.getCurrentConservationArea() != null && SmartDB.isMultipleAnalysis()){
 				canAdd = Boolean.valueOf(config[i].getAttribute("supportsCcaa")); //$NON-NLS-1$
 			}
 			if (!canAdd) continue;

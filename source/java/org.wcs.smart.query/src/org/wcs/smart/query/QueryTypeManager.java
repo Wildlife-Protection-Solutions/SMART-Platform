@@ -208,7 +208,7 @@ public class QueryTypeManager {
 					
 					//check ccaa status
 					boolean isValid = false;
-					if (SmartDB.isMultipleAnalysis()){
+					if (SmartDB.getCurrentConservationArea() != null && SmartDB.isMultipleAnalysis()){
 						if (qType.supportsCrossCaQueries()){
 							isValid = true;
 									
@@ -311,8 +311,7 @@ public class QueryTypeManager {
 	 * 
 	 */
 	private void findSupportedType(){	
-		boolean isSingle = !SmartDB.isMultipleAnalysis();
-		
+		boolean isSingle = SmartDB.getCurrentConservationArea() == null || !SmartDB.isMultipleAnalysis();
 		List<IQueryType> sTypes = new ArrayList<IQueryType>();
 		for (IQueryType qType: getAllQueryTypes()){
 			boolean add = false;
