@@ -22,8 +22,10 @@
 package org.wcs.smart.er.ui.mision;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -38,7 +40,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
@@ -59,7 +63,9 @@ public class MissionEmployeeComposite extends MissionComposite {
 
 	private MultipleSelectComposite<Employee> composite;
 	private ComboViewer leaderViewer = null;
-
+	private Composite warnComp;
+	private Label errorlbl;
+	private HashSet<Employee> observers ;
 	
 	public MissionEmployeeComposite() {
 	}
@@ -72,6 +78,17 @@ public class MissionEmployeeComposite extends MissionComposite {
 		
 		c.setLayout(new GridLayout(1, false));
 		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		warnComp = new Composite(c, SWT.NONE);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginWidth = gl.marginHeight = 0;
+		warnComp.setLayout(gl);
+		warnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		Label l = new Label(warnComp, SWT.NONE);
+		l.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ERROR_ICON));
+		errorlbl = new Label(warnComp, SWT.NONE);
+		errorlbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		warnComp.setVisible(false);
 		
 		composite = new MultipleSelectComposite<Employee>(c, SWT.NONE);
 		composite.setLabelProvider(EmployeeLabelProvider.getInstance());
@@ -147,6 +164,19 @@ public class MissionEmployeeComposite extends MissionComposite {
 		if (leader != null) {
 			leaderViewer.setSelection(new StructuredSelection(leader));
 		}
+		
+		//find all observers
+		observers = new HashSet<Employee>();
+		if (mission.getUuid() != null){
+			Query q = session.createQuery("SELECT distinct wpo.observer from WaypointObservation wpo, SurveyWaypoint sw WHERE wpo.waypoint = sw.id.waypoint and sw.missionDay.mission = :mission"); //$NON-NLS-1$
+			q.setParameter("mission", mission); //$NON-NLS-1$
+			observers.addAll(q.list());
+		}else{
+			if (warnComp != null){
+				warnComp.dispose();
+				warnComp = null;
+			}
+		}
 	}
 
 	@Override
@@ -162,11 +192,11 @@ public class MissionEmployeeComposite extends MissionComposite {
 		for (MissionMember mm: mission.getMembers()){
 			if (!copy.contains(mm.getMember())){
 				toDelete.add(mm);
-				
 			}else{
 				copy.remove(mm.getMember());
 			}
 		}
+		
 		mission.getMembers().removeAll(toDelete);
 		for (MissionMember mm : toDelete){
 			mm.setId(null);
@@ -193,11 +223,28 @@ public class MissionEmployeeComposite extends MissionComposite {
 
 	@Override
 	public boolean isValid() {
-		IStructuredSelection selection = (IStructuredSelection)leaderViewer.getSelection();
-		if (composite.getSelectedItemsAsList().size() > 0 && selection != null && selection.getFirstElement() != null) {
-			return true;
+		
+		if (warnComp != null){
+			warnComp.setVisible(false);
+			List<Employee> selected =  composite.getSelectedItemsAsList();
+			for (Employee observer : observers){
+				if (!selected.contains(observer)){
+					warnComp.setVisible(true);
+					errorlbl.setText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverError, new Object[]{observer.getFullLabel()}));
+					errorlbl.setToolTipText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverErrorTooltip, new Object[]{observer.getFullLabel()}));
+					warnComp.layout(true);
+					return false;
+				}
+			}
 		}
-		return false;
+		
+		IStructuredSelection selection = (IStructuredSelection)leaderViewer.getSelection();
+		if (!(composite.getSelectedItemsAsList().size() > 0 && 
+				selection != null && selection.getFirstElement() != null)) {
+			return false;
+		}
+
+		return true;
 	}
 
 	@Override
