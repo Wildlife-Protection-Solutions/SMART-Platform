@@ -77,7 +77,11 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 			if (currentLanguage == null){
 				return ((SamplingUnitAttributeListItem) element).getName();
 			}else{
-				return ((SamplingUnitAttributeListItem) element).findName(currentLanguage);
+				String value = ((SamplingUnitAttributeListItem)element).findNameNull(currentLanguage);
+				if (value == null){
+					value = ((SamplingUnitAttributeListItem)element).getName();
+				}
+				return value + " [" + ((SamplingUnitAttributeListItem)element).getKeyId() + "]"; //$NON-NLS-1$ //$NON-NLS-2$ 
 			}
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
