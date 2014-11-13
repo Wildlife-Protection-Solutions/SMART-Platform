@@ -140,6 +140,9 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 				//search attributes
 				for (SamplingUnitAttributeValue sua : su.getAttributes()){
 					if (sua.getSamplingUnitAttribute().getKeyId().equals(key)){
+						if (sua.getSamplingUnitAttribute().getType() ==  AttributeType.NUMERIC){
+							return sua.getNumberValue();
+						}
 						return sua.getValueAsString();
 					}
 				}
