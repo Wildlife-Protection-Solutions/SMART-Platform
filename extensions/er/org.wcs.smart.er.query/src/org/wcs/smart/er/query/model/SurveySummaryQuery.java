@@ -233,11 +233,15 @@ public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							Session s = HibernateManager.openSession();
-							List<?> results = s.createCriteria(SurveyDesign.class)
+							try{
+								List<?> results = s.createCriteria(SurveyDesign.class)
 								.add(Restrictions.eq("keyId", surveyDesignKey)) //$NON-NLS-1$
 								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-							if (results.size() > 0){
-								surveyDesign = (SurveyDesign) results.get(0);
+								if (results.size() > 0){
+									surveyDesign = (SurveyDesign) results.get(0);
+								}
+							}finally{
+								s.close();
 							}
 							return Status.OK_STATUS;
 						}};
