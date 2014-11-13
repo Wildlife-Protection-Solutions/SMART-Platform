@@ -341,6 +341,10 @@ public class Messages extends NLS {
 	public static String MissionEmployeeComposite_Description;
 	public static String MissionEmployeeComposite_MissionLeader;
 	public static String MissionEmployeeComposite_MissionMemberLabel;
+
+	public static String MissionEmployeeComposite_ObserverError;
+
+	public static String MissionEmployeeComposite_ObserverErrorTooltip;
 	public static String MissionEmployeeComposite_Title;
 	public static String MissionExporter_0;
 	public static String MissionExporter_1;
