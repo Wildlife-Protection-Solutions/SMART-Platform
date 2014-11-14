@@ -42,17 +42,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.er.model.SurveyDesignProperty;
-import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.er.ui.surveydesign.importing.SurveyDesignImporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.ConservationAreaLabelProvider;
 
@@ -193,104 +188,16 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 			if (((StructuredSelection)cmbDesigns.getSelection()).isEmpty()){
 				return;
 			}
-			ConservationArea copyCa = (ConservationArea) ((StructuredSelection)cmbCa.getSelection()).getFirstElement();
-			boolean isSameCa = SmartDB.getCurrentConservationArea().equals(copyCa);
-			//copy of design elements
-			SurveyDesign copy = (SurveyDesign) ((StructuredSelection)cmbDesigns.getSelection()).getFirstElement();
-			design.setStartDate(copy.getStartDate());
-			design.setEndDate(copy.getEndDate());
-			design.setDescription(copy.getDescription());
-			design.setTrackDistanceDirection(copy.getTrackDistanceDirection());
-			design.setTrackObserver(copy.getTrackObserver());
-			design.setConservationArea(SmartDB.getCurrentConservationArea());
 			
-			design.setMissionProperties(new ArrayList<MissionProperty>());
-			if (isSameCa) {
-				design.setConfigurableModel(copy.getConfigurableModel());
-				if (copy.getMissionProperties() != null){
-					for (MissionProperty mp : copy.getMissionProperties()){
-						MissionProperty clone = new MissionProperty();
-						clone.setSurveyDesign(design);
-						clone.setOrder(mp.getOrder());
-						clone.setAttribute(mp.getAttribute());
-						
-						design.getMissionProperties().add(clone);
-					}
-				}
-			} else {
-				//try to find mission properties with the same key in current CA
-				List<String> keysList = new ArrayList<String>();
-				for (MissionProperty mp : copy.getMissionProperties()) {
-					keysList.add(mp.getAttribute().getKeyId());
-				}
-				if (!keysList.isEmpty()) {
-					@SuppressWarnings("unchecked")
-					List<MissionAttribute> attributes = session.createCriteria(MissionAttribute.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.in("keyId", keysList)).list(); //$NON-NLS-1$
-					
-					for (int i = 0; i < attributes.size(); i++) {
-						MissionProperty clone = new MissionProperty();
-						clone.setSurveyDesign(design);
-						clone.setOrder(i);
-						clone.setAttribute(attributes.get(i));
-						
-						design.getMissionProperties().add(clone);
-					}
-				}
-			}
+			SurveyDesign toCopy = (SurveyDesign) ((StructuredSelection)cmbDesigns.getSelection()).getFirstElement();
 			
-			//survey design properties
-			design.setProperties(new ArrayList<SurveyDesignProperty>());
-			if (copy.getProperties() != null){
-				for (SurveyDesignProperty sdp : copy.getProperties()){
-					SurveyDesignProperty clone = new SurveyDesignProperty();
-					clone.setSurveyDesign(design);
-					clone.setName(sdp.getName());
-					clone.setValue(sdp.getValue());
-
-					design.getProperties().add(clone);
-				}
-			}
-			
-			//copy sampling unit attributes
-			design.setSamplingUnitAttributes(new ArrayList<SurveyDesignSamplingUnitAttribute>());
-			for (SurveyDesignSamplingUnitAttribute sua : copy.getSamplingUnitAttributes()){
-				SurveyDesignSamplingUnitAttribute a2 = new SurveyDesignSamplingUnitAttribute();
-				a2.setSamplingUnitAttribute(sua.getSamplingUnitAttribute());
-				a2.setSurveyDesign(design);
-				
-				design.getSamplingUnitAttributes().add(a2);
-			}
-			
-			//copy sampling units & associated attributes
-			newSamplingUnits = null;
+			SurveyDesignImporter.copyDesign(design, toCopy, session);
 			if (chCopySu.getSelection()){
-				newSamplingUnits = new ArrayList<SamplingUnit>();
-				@SuppressWarnings("unchecked")
-				List<SamplingUnit> sus = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", copy)).list(); //$NON-NLS-1$
-				for (SamplingUnit s2: sus){
-					SamplingUnit newsu = new SamplingUnit();
-					newsu.setGeom(s2.getGeom());
-					newsu.setId(s2.getId());
-					newsu.setState(s2.getState());
-					newsu.setSurveyDesign(design);
-					newsu.setType(s2.getType());
-					newsu.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
-					
-					for (SamplingUnitAttributeValue suav : s2.getAttributes()){
-						SamplingUnitAttributeValue newAv = new SamplingUnitAttributeValue();
-						newAv.setNumberValue(suav.getNumberValue());
-						newAv.setStringValue(suav.getStringValue());
-						newAv.setSamplingUnit(newsu);
-						newAv.setSamplingUnitAttribute(suav.getSamplingUnitAttribute());
-						newsu.getAttributes().add(newAv);
-					}
-					newSamplingUnits.add(newsu);
-				}
-				
+				newSamplingUnits = SurveyDesignImporter.importSamplingUnits(session, toCopy, design);
+			}else{
+				newSamplingUnits = null;
 			}
-			
+
 		}else{
 			//clear
 			design.setStartDate(null);
@@ -299,6 +206,7 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 			design.setConfigurableModel(null);
 			design.setTrackDistanceDirection(false);
 			design.setMissionProperties(null);
+			newSamplingUnits = null;
 		}
 	}
 	

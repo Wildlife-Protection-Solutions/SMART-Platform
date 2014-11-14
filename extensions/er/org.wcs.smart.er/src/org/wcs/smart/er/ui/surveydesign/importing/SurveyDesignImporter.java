@@ -40,6 +40,8 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignProperty;
@@ -113,27 +115,39 @@ public class SurveyDesignImporter {
 		}
 		
 		//copy sampling unit attributes
-		design.setSamplingUnitAttributes(new ArrayList<SurveyDesignSamplingUnitAttribute>());
-		for (SurveyDesignSamplingUnitAttribute sua : copy.getSamplingUnitAttributes()){
-			SurveyDesignSamplingUnitAttribute a2 = new SurveyDesignSamplingUnitAttribute();
-			a2.setSamplingUnitAttribute(sua.getSamplingUnitAttribute());
-			a2.setSurveyDesign(design);
-			
-			design.getSamplingUnitAttributes().add(a2);
-		}
-
+		importSamplingUnitAttributes(session, design, copy);
+		
 		//copy sampling units & associated attributes
 //		List<SamplingUnit> newSamplingUnits = cloneSamplingUnits(session, copy, design);
 		
 		return design;
 	}
 
+	
+	private void importSamplingUnitAttributes(Session session, SurveyDesign to, SurveyDesign from) {
+		//import sampling unit attributes; creating new attributes that have not been defined
+		
+		to.setSamplingUnitAttributes(new ArrayList<SurveyDesignSamplingUnitAttribute>());
+		for (SurveyDesignSamplingUnitAttribute property : from.getSamplingUnitAttributes()){
+			SurveyDesignSamplingUnitAttribute copy = new SurveyDesignSamplingUnitAttribute();
+			copy.setSurveyDesign(to);
+			SamplingUnitAttribute attribute = getSamplingUnitAttribute(session, property.getSamplingUnitAttribute());
+			if (attribute == null){
+				//create new sampling unit attribute
+				attribute = createSamplingUnitAttribute(property.getSamplingUnitAttribute(), session);
+			}
+			copy.setSamplingUnitAttribute(attribute);
+			to.getSamplingUnitAttributes().add(copy);	
+		}
+	}
+	
 	private void importMissionProperties(Session session, SurveyDesign to, SurveyDesign from) {
 		//import mission properties
 		//if property is found, we use that property otherwise
 		//we import the property as a new property
 		to.setMissionProperties(new ArrayList<MissionProperty>());
 		for (MissionProperty property : from.getMissionProperties()){
+			
 			MissionProperty mp = new MissionProperty();
 			mp.setSurveyDesign(to);
 			mp.setOrder(property.getOrder());
@@ -165,10 +179,15 @@ public class SurveyDesignImporter {
 				//attribute already exists, link it
 				mp.setAttribute(existingAttr);
 			}
+			
+			
 		}
 	}
 
 	private MissionAttribute getMissionAttribute(Session s, MissionAttribute source) {
+		if (source.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+			return source;
+		}
 		@SuppressWarnings("unchecked")
 		List<MissionAttribute> values = s.createCriteria(MissionAttribute.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
@@ -198,6 +217,67 @@ public class SurveyDesignImporter {
 			return attr;
 		}
 		return null;
+	}
+	
+	private SamplingUnitAttribute getSamplingUnitAttribute(Session s, SamplingUnitAttribute source) {
+		if (source.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+			return source;
+		}
+		
+		@SuppressWarnings("unchecked")
+		List<SamplingUnitAttribute> values = s.createCriteria(SamplingUnitAttribute.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()) ) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", source.getKeyId())).list(); //$NON-NLS-1$ 
+		
+		if (values.size() > 0){
+			SamplingUnitAttribute attr = values.get(0);
+			
+			//if this is list we need to match list items as well
+			for(SamplingUnitAttributeListItem srcMali : source.getAttributeList()){
+				boolean match = false;
+				for(SamplingUnitAttributeListItem mali : attr.getAttributeList()){
+					if(srcMali.getKeyId().equals(mali.getKeyId())){
+						match = true;
+						break;
+					}
+				}
+				if (!match){
+					//missing list item, add it
+					SamplingUnitAttributeListItem newmali = new SamplingUnitAttributeListItem();
+					newmali.setAttribute(attr);
+					newmali.setKeyId(srcMali.getKeyId());
+					newmali.setListOrder(srcMali.getListOrder());
+					importNames(s, newmali, srcMali.getNames(), false);
+					attr.getAttributeList().add(newmali);
+				}
+
+			}
+			return attr;
+		}
+		return null;
+	}
+	
+	private SamplingUnitAttribute createSamplingUnitAttribute(SamplingUnitAttribute from, Session session){
+		if (from.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+			return from;
+		}
+		SamplingUnitAttribute attr = new SamplingUnitAttribute();
+		attr.setConservationArea(SmartDB.getCurrentConservationArea());
+		attr.setKeyId(from.getKeyId());
+		importNames(session, attr, from.getNames(), false);
+		attr.setType(from.getType());
+		
+		attr.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
+		for(SamplingUnitAttributeListItem srcMali : from.getAttributeList()){
+			SamplingUnitAttributeListItem mali = new SamplingUnitAttributeListItem();
+			mali.setAttribute(attr);
+			mali.setKeyId(srcMali.getKeyId());
+			mali.setListOrder(srcMali.getListOrder());
+			mali.setUuid(null);
+			importNames(session, mali, srcMali.getNames(), false);
+			attr.getAttributeList().add(mali);
+		}
+		return attr;
 	}
 	
 	private void importNames(Session session, NamedItem toUpdate, Set<Label> names, boolean required) {
@@ -238,10 +318,12 @@ public class SurveyDesignImporter {
 		
 	}
 	
-	public List<SamplingUnit> importSamplingUnits(Session session, SurveyDesign from, SurveyDesign to) {
+	public static List<SamplingUnit> importSamplingUnits(Session session, SurveyDesign from, SurveyDesign to) {
 		List<SamplingUnit> newSamplingUnits = new ArrayList<SamplingUnit>();
 		@SuppressWarnings("unchecked")
 		List<SamplingUnit> sus = session.createCriteria(SamplingUnit.class).add(Restrictions.eq("surveyDesign", from)).list(); //$NON-NLS-1$
+		boolean isSameCa = from.getConservationArea().equals(to.getConservationArea());
+		
 		for (SamplingUnit s2: sus){
 			SamplingUnit newsu = new SamplingUnit();
 			newsu.setGeom(s2.getGeom());
@@ -252,11 +334,46 @@ public class SurveyDesignImporter {
 			newsu.setAttributes(new ArrayList<SamplingUnitAttributeValue>());
 			
 			for (SamplingUnitAttributeValue suav : s2.getAttributes()){
+				boolean add = true;
+		
+				SamplingUnitAttribute attribute = suav.getSamplingUnitAttribute();
+				if (!isSameCa){
+					//need to find attribute with the same key in the new design
+					add = false;
+					for (SurveyDesignSamplingUnitAttribute newAttribute : to.getSamplingUnitAttributes()){
+						if (newAttribute.getSamplingUnitAttribute().getKeyId().equals(attribute.getKeyId())){
+							attribute = newAttribute.getSamplingUnitAttribute();
+							add = true;
+							break;
+						}
+					}
+				}
+				if (!add) continue;
+				
 				SamplingUnitAttributeValue newAv = new SamplingUnitAttributeValue();
+				newAv.setSamplingUnitAttribute(attribute);
 				newAv.setNumberValue(suav.getNumberValue());
 				newAv.setStringValue(suav.getStringValue());
+				
+				if (suav.getAttributeListItem() != null){
+					if (isSameCa){
+						newAv.setAttributeListItem(suav.getAttributeListItem());
+					}else{
+						add = false;
+						//need to find the sampling unit list item from the new ca; if new ca
+						String keyToFind = suav.getAttributeListItem().getKeyId();
+						for (SamplingUnitAttributeListItem li : attribute.getAttributeList()){
+							if (li.getKeyId().equals(keyToFind)){
+								add = true;
+								newAv.setAttributeListItem(li);
+								break;
+							}
+						}
+					}	
+				}
+				if (!add) continue;
+				
 				newAv.setSamplingUnit(newsu);
-				newAv.setSamplingUnitAttribute(suav.getSamplingUnitAttribute());
 				newsu.getAttributes().add(newAv);
 			}
 			newSamplingUnits.add(newsu);
@@ -264,4 +381,56 @@ public class SurveyDesignImporter {
 		return newSamplingUnits;
 	}
 	
+	
+	/**
+	 * Clones the information to toCopy into toUpdate.
+	 * 
+	 * @param toCopy the survey design to copy
+	 * @param includeSamplingUnits if sampling units should be cloned
+	 * @param session
+	 * @return list of cloned sampling units if includeSamplingUnits is true; otherwise returns null
+	 */
+	public static void copyDesign(SurveyDesign toUpdate, SurveyDesign toCopy, Session session){
+		//copy of design elements
+		SurveyDesign clone = toUpdate;
+		clone.setStartDate(toCopy.getStartDate());
+		clone.setEndDate(toCopy.getEndDate());
+		clone.setDescription(toCopy.getDescription());
+		clone.setTrackDistanceDirection(toCopy.getTrackDistanceDirection());
+		clone.setTrackObserver(toCopy.getTrackObserver());
+		clone.setConservationArea(SmartDB.getCurrentConservationArea());
+		
+		//mission properties
+		SurveyDesignImporter im = new SurveyDesignImporter();
+		im.importMissionProperties(session, clone, toCopy);
+		for (MissionProperty mp : clone.getMissionProperties()){
+			if (mp.getAttribute().getUuid() == null){
+				session.save(mp.getAttribute());
+			}
+		}
+		session.flush();
+		
+		//sampling unit attributes
+		im.importSamplingUnitAttributes(session, clone, toCopy);
+		for (SurveyDesignSamplingUnitAttribute att: clone.getSamplingUnitAttributes()){
+			if (att.getSamplingUnitAttribute().getUuid() == null){
+				session.save(att.getSamplingUnitAttribute());
+			}
+		}
+		session.flush();
+		
+		
+		//survey design properties
+		clone.setProperties(new ArrayList<SurveyDesignProperty>());
+		if (clone.getProperties() != null){
+			for (SurveyDesignProperty sdp : clone.getProperties()){
+				SurveyDesignProperty propclone = new SurveyDesignProperty();
+				propclone.setSurveyDesign(clone);
+				propclone.setName(sdp.getName());
+				propclone.setValue(sdp.getValue());
+
+				clone.getProperties().add(propclone);
+			}
+		}	
+	}
 }

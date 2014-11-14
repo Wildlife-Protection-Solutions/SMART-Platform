@@ -147,7 +147,7 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 					for(SurveyDesign source : designs){
 						source = (SurveyDesign)session.merge(source);
 						SurveyDesign sd = importer.importSurveyDesign(session, source);
-						List<SamplingUnit> newSamplingUnits = importer.importSamplingUnits(session, source, sd);
+						List<SamplingUnit> newSamplingUnits = SurveyDesignImporter.importSamplingUnits(session, source, sd);
 						if (processSave(session, sd, newSamplingUnits)) {
 							lastDesign = sd;
 							successCount++;
