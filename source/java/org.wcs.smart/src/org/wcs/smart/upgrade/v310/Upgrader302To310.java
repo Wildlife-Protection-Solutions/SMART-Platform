@@ -73,7 +73,7 @@ public class Upgrader302To310 {
 		c.createStatement().execute(sql);
 		
 		/* add observer options */
-		sql = "alter table smart.OBSERVATION_OPTIONS add column observer boolean default false not null;"; //$NON-NLS-1$
+		sql = "alter table smart.OBSERVATION_OPTIONS add column observer boolean default false not null"; //$NON-NLS-1$
 		c.createStatement().execute(sql);
 				
 		/* configurable model */
