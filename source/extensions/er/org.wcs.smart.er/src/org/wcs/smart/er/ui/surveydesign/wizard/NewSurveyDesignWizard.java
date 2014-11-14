@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.ui.surveydesign.wizard;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
@@ -172,17 +173,23 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
     	List<ConfigurableModel> models = session.createCriteria(ConfigurableModel.class)
     			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
     	
-    	List<SurveyDesign> others = session.createCriteria(SurveyDesign.class).list();
-//    			.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+    	List<SurveyDesign> allOthers = session.createCriteria(SurveyDesign.class).list();
     	
-    	if (others.size() > 0){
+    	List<SurveyDesign> caOthers = new ArrayList<SurveyDesign>();
+    	for (SurveyDesign d : allOthers){
+    		if (d.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
+    			caOthers.add(d);
+    		}
+    	}
+    	
+    	if (allOthers.size() > 0){
     		//only add template option if other survey available
-    		templatePage = new TemplateWizardPage(others);
+    		templatePage = new TemplateWizardPage(allOthers);
     		super.addPage(templatePage);
     	}
     	
     	comps = new SurveyDesignComposite[]{
-    			new NameIdComposite(others),
+    			new NameIdComposite(caOthers),
     			new DateComposites(),
     			new DistanceDirectionComposite(),
     			new ConfigurableModelComposite(models),
