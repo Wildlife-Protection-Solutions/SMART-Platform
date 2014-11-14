@@ -346,8 +346,8 @@ public class SamplingUnitAttributeGroupByDropItem extends DropItem implements
 			}else{
 				createLabelComposite(main);
 			}
+			main.layout(true);
+			getTargetPanel().redraw();
 		}
-		
-		getTargetPanel().redraw();
 	}
 }
