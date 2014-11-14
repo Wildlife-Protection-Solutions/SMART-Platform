@@ -139,6 +139,8 @@ public class MissionValueItem implements IValueItem {
 			return SurveyDropItemFactory.INSTANCE.createMissionDayCountValueItem();
 		}else if (item == ValueItem.HOUR_COUNT){
 			return SurveyDropItemFactory.INSTANCE.createMissionHourCountValueItem();
+		}else if (item == ValueItem.MANHOURS_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionPersonHourCountValueItem();
 		}
 		return new ErrorDropItem(Messages.MissionValueItem_ValueItemNotSupported + item.guiName);
 	}
