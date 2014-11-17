@@ -196,13 +196,17 @@ public class MappingValidator {
 		}
 		AttributeTreeKeyLookup treeNodeLookup = new AttributeTreeKeyLookup(a);
 		result.addAll(treeNodeLookup.getKeysSet());
+		if ("BOOLEAN".equals(a.getType())) { //$NON-NLS-1$
+			result.add("True"); //$NON-NLS-1$
+			result.add("False"); //$NON-NLS-1$
+		}
 		return result;
 	}
 
 	private String pairsToString(CtCategory ctc) {
 		StringBuilder sb = new StringBuilder();
 		for (CtCategoryMap m : ctc.getCtCategoryMap()) {
-			sb.append(m.getAn()).append("=").append(m.getVn()).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(m.getAn()).append("=").append(m.getVn()).append(" | "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return sb.toString();
 	}
