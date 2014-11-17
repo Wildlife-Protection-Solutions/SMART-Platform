@@ -88,8 +88,8 @@ public class CsvPatrolExtractor {
 //			System.out.println("Extracting patrol for: " + sb);
 			List<TagS> sList = extractS(columnNames, uniqueValues);
 			List<TagT> tList = extractT(uniqueValues[2], uniqueValues[0]);
-			PatrolType p = builder.createPatrol(sList, tList);
-			p.setId(uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-'));
+			String id = uniqueValues[1] + "-patrol-" + uniqueValues[0].replace('/', '-');
+			PatrolType p = builder.createPatrol(sList, tList, id);
 			
 			FileUtil.write(new File(folder + "\\" + p.getId() + ".xml"), p); //$NON-NLS-1$ //$NON-NLS-2$
 		}

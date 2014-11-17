@@ -60,7 +60,7 @@ public class PatrolBuilder {
 		this.dmLookup = dmLookup;
 	}
 
-	public PatrolType createPatrol(List<TagS> sList, List<TagT> tList) throws DatatypeConfigurationException, ParseException {
+	public PatrolType createPatrol(List<TagS> sList, List<TagT> tList, String id) throws DatatypeConfigurationException, ParseException {
 
 		LineString line = createTrack(tList);
 		
@@ -73,6 +73,7 @@ public class PatrolBuilder {
 		}
 		
 		PatrolType patrol = new PatrolType();
+		patrol.setId(id);
 		patrol.setIsArmed(false);
 		patrol.setPatrolType("GROUND");
 		
@@ -232,7 +233,7 @@ public class PatrolBuilder {
 							mandate.setLanguageCode(LANGUAGE_CODE);
 							mandate.setValue(v);
 						} else if (!v.equals(mandate.getValue())) {
-							System.err.println("Two different mandates in one patrol: " + mandate.getValue() + " and " + v);
+							System.err.println("Two different mandates in one patrol (" + patrol.getId() + "): " + mandate.getValue() + " and " + v);
 						}
 						break;
 					}
