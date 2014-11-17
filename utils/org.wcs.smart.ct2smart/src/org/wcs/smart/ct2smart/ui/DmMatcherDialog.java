@@ -68,6 +68,7 @@ public class DmMatcherDialog extends Composite {
 		this.setLayout(layout);
 
 		GridData gridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.widthHint = 1200;
 		this.setLayoutData(gridData);
 
 		this.setSize(840, 640);
