@@ -223,7 +223,7 @@ public class PatrolBuilder {
 						String v = a.getV();
 						for (Ct2AttributeValue val : cta.getCt2AttributeValue()) {
 							if (v.equals(val.getI())) {
-								v = val.getMapTo();
+								v = val.getN();
 								break;
 							}
 						}
