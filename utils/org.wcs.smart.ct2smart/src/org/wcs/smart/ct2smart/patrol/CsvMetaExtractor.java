@@ -112,7 +112,7 @@ public class CsvMetaExtractor {
 						while (dataSet.next()) {
 							String str = dataSet.getString(1);
 							if (str != null) {
-								if (CsvMatchFileBuilder.CT_ID_PATTERN.matcher(str).matches()) {
+								if (CsvMatchFileBuilder.isCtId(str)) {
 									ResultSet elSet = c.createStatement().executeQuery("select n from ct_to_smart.ELEMENT where i = '" + str + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 									//NOTE: elSet MUST be of size 1
 									while (elSet.next()) {
