@@ -551,24 +551,23 @@ public class XmlToPatrolConverter {
 			
 	}
 	private Attribute findAttribute(String key, Category category){
-		if (key == null) {
-			return null;
-		}
-		String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
-		Query query = session.createQuery(sql);
-		query.setParameter("key", key); //$NON-NLS-1$
-		query.setParameter("ca", ca); //$NON-NLS-1$
-		
-		List<?> results = query.list();
-		if (results.size() == 0){
-			return null;
-		}else if (results.size() > 1){
-			throw new IllegalStateException(Messages.XmlToPatrolConverter_Error_DuplicateAttributes);
-		}else{
-			Attribute att = (Attribute) results.get(0);
-			//ensure attribute exists for category
-			if (findCategoryAttribute(category, att)){
-				return att;
+		if (key != null) {
+			String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
+			Query query = session.createQuery(sql);
+			query.setParameter("key", key); //$NON-NLS-1$
+			query.setParameter("ca", ca); //$NON-NLS-1$
+			
+			List<?> results = query.list();
+			if (results.size() == 0){
+				return null;
+			}else if (results.size() > 1){
+				throw new IllegalStateException(Messages.XmlToPatrolConverter_Error_DuplicateAttributes);
+			}else{
+				Attribute att = (Attribute) results.get(0);
+				//ensure attribute exists for category
+				if (findCategoryAttribute(category, att)){
+					return att;
+				}
 			}
 		}
 		return null;
