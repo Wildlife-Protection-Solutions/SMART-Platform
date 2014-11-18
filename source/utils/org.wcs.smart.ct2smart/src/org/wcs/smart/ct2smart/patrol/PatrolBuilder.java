@@ -1,5 +1,6 @@
 package org.wcs.smart.ct2smart.patrol;
 
+import java.sql.SQLException;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -18,6 +19,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.geotools.referencing.GeodeticCalculator;
+import org.wcs.smart.ct2smart.matcher.CsvMatchFileBuilder;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeValue;
@@ -27,6 +29,8 @@ import org.wcs.smart.ct2smart.matcher.model.ExtraAttribute;
 import org.wcs.smart.ct2smart.parser.TeamMembersParser;
 import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
+import org.wcs.smart.ct2smart.ui.ElementsLookup;
+import org.wcs.smart.ct2smart.ui.MatchSession;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
 import org.wcs.smart.ct2smart.xml.parser.TagT;
@@ -51,10 +55,20 @@ public class PatrolBuilder {
 
 	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
 	
+	private MatchSession session;
 	private Ct2SmartLookup lookup;
 	private DataModelLookup dmLookup;
 	private TeamMembersParser membersParser = new TeamMembersParser();
-	
+	private ElementsLookup elLookup;
+
+	public PatrolBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
+		this.session = session;
+		this.dmLookup = dmLookup;
+		lookup = new Ct2SmartLookup(session.getCt2Smart());
+		elLookup = new ElementsLookup(session.getConnection());
+	}
+
+	@Deprecated
 	public PatrolBuilder(Ct2Smart ct2Smart, DataModelLookup dmLookup) {
 		lookup = new Ct2SmartLookup(ct2Smart);
 		this.dmLookup = dmLookup;
@@ -247,7 +261,14 @@ public class PatrolBuilder {
 						if (!comment.isEmpty()) {
 							comment += "\n"; //$NON-NLS-1$
 						}
-						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + a.getV(); //$NON-NLS-1$
+						String v = a.getV();
+						if (CsvMatchFileBuilder.isCtId(v)) {
+							String vEl = elLookup.getN(v);
+							if (vEl != null) {
+								v = vEl;
+							}
+						}
+						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
 					case IGNORE:
 						break;
@@ -301,7 +322,7 @@ public class PatrolBuilder {
 		PatrolMemberType member = new PatrolMemberType();
 		member.setIsLeader(false);
 		member.setIsPilot(false);
-		String[] parts = fullName.split(" ");
+		String[] parts = fullName.split(" "); //$NON-NLS-1$
 		switch (parts.length) {
 		case 2:
 			member.setFamilyName(parts[1]);
@@ -309,6 +330,7 @@ public class PatrolBuilder {
 			break;
 		case 1:
 			member.setFamilyName(parts[0]);
+			member.setGivenName(parts[0]);
 			break;
 
 		default:

@@ -226,7 +226,7 @@ public class DmMatcherDialog extends Composite {
 			CsvPatrolExtractor exporter;
 			try {
 				exporter = new CsvPatrolExtractor(session.getConnection());
-				exporter.extract(f, session.getCt2Smart(), dmLookup);
+				exporter.extract(f, session, dmLookup);
 				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
