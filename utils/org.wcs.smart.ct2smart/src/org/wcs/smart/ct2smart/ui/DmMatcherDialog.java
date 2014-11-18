@@ -239,10 +239,15 @@ public class DmMatcherDialog extends Composite {
 		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
 		String f = dd.open();
 		if (f != null) {
+			boolean isOk = true;
 			CsvMetaExtractor metaExtractor = new CsvMetaExtractor(session);
-			metaExtractor.exportMembers(new File(f + "\\" + "members.csv"));
-			metaExtractor.exportMandates(new File(f + "\\" + "mandates.csv"));
-			MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
+			isOk = metaExtractor.exportMembers(new File(f + "\\" + "members.csv")) && isOk;
+			isOk = metaExtractor.exportMandates(new File(f + "\\" + "mandates.csv")) && isOk;
+			if (isOk) {
+				MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
+			} else {
+				MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation. See console for details.");
+			}
 		}
 	}
 	

@@ -32,7 +32,7 @@ public class CsvMetaExtractor {
 		this.session = session;
 	}
 
-	public void exportMembers(File file) {
+	public boolean exportMembers(File file) {
 		Set<String> members = new HashSet<String>();
 		TeamMembersParser membersParser = new TeamMembersParser();
 		Connection c = session.getConnection();
@@ -55,6 +55,7 @@ public class CsvMetaExtractor {
 				} catch (SQLException e) {
 					System.err.println("Error extracting employees i=" + cta.getI());
 					e.printStackTrace();
+					return false;
 				}
 			}
 		}
@@ -69,13 +70,11 @@ public class CsvMetaExtractor {
 			String[] headerColumns = new String[] {"ID","GIVEN NAME","FAMILY NAME","BIRTHDATE","GENDER","START EMPLOYMENT","END EMPLOYMENT","AGENCY","RANK"};
 			writer.writeNext(headerColumns);
 
-			int id = 195001000;
 			//for each row write one record
 			for (String emp : members) {
 				String csvout[] = new String[headerColumns.length];
-				id++;
 				PatrolMemberType member = PatrolBuilder.toMember(emp);
-				csvout[0] = String.valueOf(id);
+//				csvout[0] = null;
 				csvout[1] = member.getGivenName();
 				csvout[2] = member.getFamilyName();
 				csvout[3] = "1950-01-01";
@@ -93,10 +92,12 @@ public class CsvMetaExtractor {
 				e.printStackTrace();
 			}
 			ex.printStackTrace();
+			return false;
 		}
+		return true;
 	}
 
-	public void exportMandates(File file) {
+	public boolean exportMandates(File file) {
 		Set<String> mandates = new HashSet<String>();
 		Connection c = session.getConnection();
 		
@@ -127,6 +128,7 @@ public class CsvMetaExtractor {
 				} catch (SQLException e) {
 					System.err.println("Error extracting mandates i=" + cta.getI());
 					e.printStackTrace();
+					return false;
 				}
 			}
 		}
@@ -153,6 +155,9 @@ public class CsvMetaExtractor {
 				e.printStackTrace();
 			}
 			ex.printStackTrace();
+			return false;
 		}
+		return true;
 	}
+	
 }
