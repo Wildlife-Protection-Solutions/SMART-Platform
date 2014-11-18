@@ -40,11 +40,16 @@ public class TeamMembersParser {
 	}
 
 	public Set<String> parseMembers(String rawString) {
-		String[] split = rawString.split(",|;|:|\r\n| and | AND |  "); //$NON-NLS-1$
-//		System.out.println(Arrays.toString(split));
+		String[] split = rawString.split(",|;|:|\r\n| and | AND "); //$NON-NLS-1$
 		Set<String> result = new HashSet<String>();
 		for (String s : split) {
-			result.addAll(spaceCut(s.trim()));
+			String[] dobleSpSplit = s.trim().split("  "); //$NON-NLS-1$
+			for (String str : dobleSpSplit) {
+				String x = str.trim();
+				if (!x.isEmpty()) {
+					result.addAll(spaceCut(x));
+				}
+			}
 		}
 		return result;
 	}
