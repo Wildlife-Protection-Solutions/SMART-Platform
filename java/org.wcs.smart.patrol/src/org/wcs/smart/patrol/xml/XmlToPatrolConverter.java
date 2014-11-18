@@ -551,6 +551,9 @@ public class XmlToPatrolConverter {
 			
 	}
 	private Attribute findAttribute(String key, Category category){
+		if (key == null) {
+			return null;
+		}
 		String sql = "FROM Attribute WHERE conservationArea = :ca and keyid = :key"; //$NON-NLS-1$
 		Query query = session.createQuery(sql);
 		query.setParameter("key", key); //$NON-NLS-1$
