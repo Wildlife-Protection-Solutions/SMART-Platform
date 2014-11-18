@@ -30,9 +30,9 @@ public class CsvMatchFileBuilder {
 	}
 
 	
-	private static Pattern CT_ID_PATTERN = Pattern.compile("\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\}"); //$NON-NLS-1$
-	private static Pattern BOOLEAN_PATTERN = Pattern.compile("True|False"); //$NON-NLS-1$
-	private static Pattern NUMERIC_PATTERN = Pattern.compile("\\d+(.\\d)?\\d?"); //$NON-NLS-1$
+	public static Pattern CT_ID_PATTERN = Pattern.compile("\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\}"); //$NON-NLS-1$
+	public static Pattern BOOLEAN_PATTERN = Pattern.compile("True|False"); //$NON-NLS-1$
+	public static Pattern NUMERIC_PATTERN = Pattern.compile("\\d+(.\\d)?\\d?"); //$NON-NLS-1$
 	
 	public Ct2Smart create(Connection c) throws SQLException {
 		ResultSet attrRs = c.createStatement().executeQuery("select n, i, id from CT_TO_SMART.ATTRIBUTES"); //$NON-NLS-1$

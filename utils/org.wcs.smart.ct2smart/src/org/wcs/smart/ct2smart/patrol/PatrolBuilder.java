@@ -274,23 +274,8 @@ public class PatrolBuilder {
 		}
 
 		for (String fullName : members) {
-			PatrolMemberType member = new PatrolMemberType();
+			PatrolMemberType member = toMember(fullName);
 			leg.getMembers().add(member);
-			member.setIsLeader(false);
-			member.setIsPilot(false);
-			String[] parts = fullName.split(" ");
-			switch (parts.length) {
-			case 2:
-				member.setFamilyName(parts[1]);
-				member.setGivenName(parts[0]);
-				break;
-			case 1:
-				member.setFamilyName(parts[0]);
-				break;
-
-			default:
-				break;
-			}
 		}
 		if (!leg.getMembers().isEmpty()) {
 			leg.getMembers().get(0).setIsLeader(true);
@@ -312,6 +297,26 @@ public class PatrolBuilder {
 		return patrol;
 	}
 
+	public static final PatrolMemberType toMember(String fullName) {
+		PatrolMemberType member = new PatrolMemberType();
+		member.setIsLeader(false);
+		member.setIsPilot(false);
+		String[] parts = fullName.split(" ");
+		switch (parts.length) {
+		case 2:
+			member.setFamilyName(parts[1]);
+			member.setGivenName(parts[0]);
+			break;
+		case 1:
+			member.setFamilyName(parts[0]);
+			break;
+
+		default:
+			break;
+		}
+		return member;
+	}
+	
 	private WaypointObservationAttributeType ea2woa(ExtraAttribute ea) {
 		WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
 		obsAttr.setAttributeKey(ea.getAttributeKey());

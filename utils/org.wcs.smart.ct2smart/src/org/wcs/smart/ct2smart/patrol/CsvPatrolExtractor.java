@@ -26,14 +26,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.xml.datatype.DatatypeConfigurationException;
 
 import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;

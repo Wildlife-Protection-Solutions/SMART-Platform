@@ -9,6 +9,10 @@ import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
 import org.wcs.smart.ct2smart.matcher.model.CtCategory;
 import org.wcs.smart.ct2smart.matcher.model.CtCategoryMap;
 
+/**
+ * @author elitvin
+ * @since 3.0.0
+ */
 public class Ct2SmartLookup {
 
 	private Ct2Smart ct2Smart;
