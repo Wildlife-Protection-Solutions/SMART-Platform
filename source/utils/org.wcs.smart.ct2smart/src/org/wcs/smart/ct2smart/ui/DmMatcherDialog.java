@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
+import org.wcs.smart.ct2smart.patrol.CsvMetaExtractor;
 import org.wcs.smart.ct2smart.patrol.CsvPatrolExtractor;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeLabelProvider;
 import org.wcs.smart.ct2smart.ui.support.Ct2AttributeTypeTableEditor;
@@ -92,7 +93,7 @@ public class DmMatcherDialog extends Composite {
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Composite buttonsCmp = new Composite(top, SWT.NONE);
-		buttonsCmp.setLayout(new GridLayout(3, false));
+		buttonsCmp.setLayout(new GridLayout(4, false));
 		buttonsCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		
 		Button btnSave = new Button(buttonsCmp, SWT.PUSH);
@@ -113,6 +114,15 @@ public class DmMatcherDialog extends Composite {
 			}
 		});
 
+		Button btnMeta = new Button(buttonsCmp, SWT.PUSH);
+		btnMeta.setText("Generate meta");
+		btnMeta.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				generateMeta();
+			}
+		});
+		
 		Button btnValidate = new Button(buttonsCmp, SWT.PUSH);
 		btnValidate.setText("Validate mapping");
 		btnValidate.addSelectionListener(new SelectionAdapter() {
@@ -222,6 +232,17 @@ public class DmMatcherDialog extends Composite {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		}
+	}
+
+	protected void generateMeta() {
+		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		String f = dd.open();
+		if (f != null) {
+			CsvMetaExtractor metaExtractor = new CsvMetaExtractor(session);
+			metaExtractor.exportMembers(new File(f + "\\" + "members.csv"));
+			metaExtractor.exportMandates(new File(f + "\\" + "mandates.csv"));
+			MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
 		}
 	}
 	
