@@ -26,6 +26,11 @@ public class Messages extends NLS {
 	public static String ArmedComposite_Title;
 	public static String ArmedScreenOptionComposite_Armed_No;
 	public static String ArmedScreenOptionComposite_Armed_Yes;
+	public static String CombinedReportBuilder_DateTime;
+	public static String CombinedReportBuilder_Id;
+	public static String CombinedReportBuilder_Times;
+	public static String CombinerReportDialog_Message;
+	public static String CombinerReportDialog_Title;
 	public static String CommentComposite_Comments_Label;
 	public static String CommentComposite_PatrolCommentTooLongErrorMessage;
 	public static String CommentComposite_Title;
