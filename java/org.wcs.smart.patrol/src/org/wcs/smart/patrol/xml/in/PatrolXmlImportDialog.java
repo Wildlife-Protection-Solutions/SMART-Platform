@@ -41,7 +41,7 @@ import org.wcs.smart.patrol.internal.Messages;
  */
 public class PatrolXmlImportDialog extends XmlImportDialog {
 	
-	private boolean keepIDs = false;
+	private ImportConfig config = new ImportConfig();
 
 	public PatrolXmlImportDialog() {
 		super(Display.getCurrent().getActiveShell(),
@@ -66,7 +66,7 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		btnAssign.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				keepIDs = false;
+				config.setKeepIDs(false);
 			}
 		});
 		
@@ -77,14 +77,26 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		btnKeep.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				keepIDs = true;
+				config.setKeepIDs(true);
 			}
 		});
 
+		final Button btnIgnoreWarn = new Button(optionCmp, SWT.CHECK);
+		btnIgnoreWarn.setText("Ignore warnings (combined report)");
+		btnIgnoreWarn.setToolTipText("Ignore warnings on import and display combined warning report");
+		btnIgnoreWarn.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		btnIgnoreWarn.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				config.setIgnoreWarnings(btnIgnoreWarn.getSelection());
+			}
+		});
+		
 		return container;
 	}
 	
-	public boolean isKeepIDs() {
-		return keepIDs;
+	public ImportConfig getConfig() {
+		return config;
 	}
+
 }

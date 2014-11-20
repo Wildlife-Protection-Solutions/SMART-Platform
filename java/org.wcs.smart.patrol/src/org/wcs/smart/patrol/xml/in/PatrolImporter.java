@@ -77,15 +77,15 @@ public class PatrolImporter {
 	 * @param monitor progress monitor 
 	 * @throws Exception
 	 */
-	public static Patrol importPatrol(File file, boolean keepIDs, IProgressMonitor monitor) throws Exception{
+	public static Patrol importPatrol(File file, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		
 		if (SmartUtils.isZip(file)){
 			//process as zip file
 			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 4);
-			return importXmlToPatrol(file, keepIDs, monitor);
+			return importXmlToPatrol(file, config, monitor);
 		}else{
 			monitor.beginTask(IMPORTING_PATROL_TASKNAME, 3);
-			return importPatrolFromFile(file, keepIDs, monitor);
+			return importPatrolFromFile(file, config, monitor);
 		}
 	}
 	
@@ -97,7 +97,7 @@ public class PatrolImporter {
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
-	private static Patrol importXmlToPatrol(File zipFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
+	private static Patrol importXmlToPatrol(File zipFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		
 		PatrolType ptype = null;
 		//unzip 
@@ -142,7 +142,7 @@ public class PatrolImporter {
 		}
 		monitor.worked(1);
 		
-		Patrol p = convertAndSave(ptype, keepIDs, directory, monitor);
+		Patrol p = convertAndSave(ptype, config, directory, monitor);
 		
 		monitor.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
 		try{
@@ -160,7 +160,7 @@ public class PatrolImporter {
 	 * @return patrol created or null
 	 * @throws Exception
 	 */
-	private static Patrol importPatrolFromFile(File xmlFile, boolean keepIDs, IProgressMonitor monitor) throws Exception{
+	private static Patrol importPatrolFromFile(File xmlFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		PatrolType ptype = null;
 		FileInputStream in = new FileInputStream(xmlFile);
 		try{
@@ -173,7 +173,7 @@ public class PatrolImporter {
 		if (ptype == null){
 			throw new Exception(Messages.PatrolImporter_Error_ReadingPatrolXmlFile);
 		}
-		return convertAndSave(ptype, keepIDs, null, monitor);
+		return convertAndSave(ptype, config, null, monitor);
 	}
 
 	/**
@@ -191,7 +191,7 @@ public class PatrolImporter {
 	 * @return created Patrol or null
 	 * @throws Exception
 	 */
-	private static Patrol  convertAndSave(PatrolType xmlPatrol, final boolean keepIDs, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+	private static Patrol  convertAndSave(PatrolType xmlPatrol, final ImportConfig config, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
 		XmlToPatrolConverter converter = new XmlToPatrolConverter();
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
@@ -207,7 +207,7 @@ public class PatrolImporter {
 
 						@Override
 						public void run() {
-							String message = keepIDs ? MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage_SameId, pid) : MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, pid);
+							String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage_SameId, pid) : MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, pid);
 							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_ImportPatrol_DialogTitle, 
 									null, message,
 									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
@@ -226,7 +226,7 @@ public class PatrolImporter {
 				}
 			}		
 			monitor.subTask(Messages.PatrolImporter_Progress_ConvertingPatrol);
-			converter.fromXml(xmlPatrol, keepIDs, session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
+			converter.fromXml(xmlPatrol, config.isKeepIDs(), session, SmartDB.getCurrentConservationArea(), attachmentDirectory);
 		} finally {
 			if (session.isOpen()){
 				session.close();
@@ -249,7 +249,7 @@ public class PatrolImporter {
 		monitor.worked(1);
 
 		//display reported conversion warnings if they present
-		if (!warnings.isEmpty()) {
+		if (!config.isIgnoreWarnings() && !warnings.isEmpty()) {
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){
 				sb.append(str);
@@ -276,6 +276,8 @@ public class PatrolImporter {
 				return null;
 			}
 
+		} else {
+			config.getWarnings().addAll(warnings);
 		}
 		
 		//performing actual save in database
