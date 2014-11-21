@@ -3,6 +3,7 @@ package org.wcs.smart.ct2smart.patrol;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -247,7 +248,7 @@ public class PatrolBuilder {
 							mandate.setLanguageCode(LANGUAGE_CODE);
 							mandate.setValue(v);
 						} else if (!v.equals(mandate.getValue())) {
-							System.err.println("Two different mandates in one patrol (" + patrol.getId() + "): " + mandate.getValue() + " and " + v);
+							System.out.println("WARN: Two different mandates in one patrol (" + patrol.getId() + "): " + mandate.getValue() + " and " + v);
 						}
 						break;
 					}
@@ -283,6 +284,7 @@ public class PatrolBuilder {
 			}
 			
 			if (wp.getX() == null || wp.getY() == null) {
+				System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
 				Coordinate c = CoordinateUtil.interpolate(line, combine(wpDate, wpTime));
 				if (c != null) {
 					if (wp.getX() == null)
@@ -291,7 +293,22 @@ public class PatrolBuilder {
 						wp.setY(c.y);
 				}
 			}
-			
+
+			if (wp.getX() == null || wp.getY() == null) {
+				System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Using previous waypoint coordinates.", patrol.getId(), wp.getId()));
+				List<WaypointType> waypoints = legDay.getWaypoints();
+				if (waypoints.size() > 2) {
+					WaypointType prevWp = waypoints.get(waypoints.size()-2);
+					if (wp.getX() == null)
+						wp.setX(prevWp.getX());
+					if (wp.getY() == null)
+						wp.setY(prevWp.getY());
+				}
+			}
+
+			if (wp.getX() == null || wp.getY() == null) {
+				System.err.println(MessageFormat.format("ERROR: Coordinate problem in patrol {0} waypoint {1}. Importing this patrol will cause error in SMART.", patrol.getId(), wp.getId()));
+			}			
 		}
 
 		for (String fullName : members) {
