@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.xml.in;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,8 +66,11 @@ public class CombinedReportBuilder {
 			map.put(adopted, count+1);
 		}
 		
+		List<String> wList = new ArrayList<String>(map.keySet());
+		Collections.sort(wList);
+		
 		StringBuilder sb = new StringBuilder();
-		for (String warn : map.keySet()) {
+		for (String warn : wList) {
 			Integer count = map.get(warn);
 			if (count > 1) {
 				sb.append(MessageFormat.format(Messages.CombinedReportBuilder_Times, count));
