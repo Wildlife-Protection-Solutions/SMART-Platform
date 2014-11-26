@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol.xml.in;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class ImportConfig {
 	private boolean keepIDs = false;
 	private boolean ignoreWarnings = false;
 	private List<String> warnings = new ArrayList<String>();
+	private List<String> warnFiles = new ArrayList<String>();
 	
 	public boolean isKeepIDs() {
 		return keepIDs;
@@ -52,5 +54,14 @@ public class ImportConfig {
 	
 	public List<String> getWarnings() {
 		return warnings;
+	}
+	
+	public List<String> getWarningFiles() {
+		return warnFiles;
+	}
+	
+	public void addWarnings(List<String> warnings, File f){
+		this.warnFiles.add(f.getAbsolutePath());
+		this.warnings.addAll(warnings);
 	}
 }
