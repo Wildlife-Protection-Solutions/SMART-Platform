@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -283,6 +285,27 @@ public class PatrolBuilder {
 				}
 			}
 			
+			//validate that we have unique attributes for each observation
+			for (WaypointObservationType obs : wp.getObservations()) {
+				Map<String, WaypointObservationAttributeType> key2Attr = new HashMap<String, WaypointObservationAttributeType>();
+				List<WaypointObservationAttributeType> duplicates = new ArrayList<WaypointObservationAttributeType>();
+				for (WaypointObservationAttributeType attr : obs.getAttributes()) {
+					WaypointObservationAttributeType prevAttr = key2Attr.get(attr.getAttributeKey());
+					if (prevAttr == null) {
+						key2Attr.put(attr.getAttributeKey(), attr);
+					} else {
+						//attr duplicates prevAttr
+						if (isSameValue(attr, prevAttr)) {
+							System.out.println(MessageFormat.format("INFO: Duplicate attributes in patrol {0} waypoint {1} with key ''{2}''. Values (item, double, string): {3}, {4}, {5}. Duplicate was dropped out.", patrol.getId(), wp.getId(), attr.getAttributeKey(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							duplicates.add(attr);
+						} else {
+							System.out.println(MessageFormat.format("WARN: Two diffent attributes in patrol {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Warning will appear on import", patrol.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+						}
+					}
+				}
+				obs.getAttributes().removeAll(duplicates);
+			}
+			
 			if (wp.getX() == null || wp.getY() == null) {
 				System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
 				Coordinate c = CoordinateUtil.interpolate(line, combine(wpDate, wpTime));
@@ -335,6 +358,16 @@ public class PatrolBuilder {
 		return patrol;
 	}
 
+	private boolean isSameValue(WaypointObservationAttributeType a1, WaypointObservationAttributeType a2) {
+		return isSame(a1.getItemKey(), a2.getItemKey()) && isSame(a1.getDValue(), a2.getDValue()) && isSame(a1.getSValue(), a2.getSValue());
+	}
+
+	private boolean isSame(Object o1, Object o2) {
+		if (o1 == null) 
+			return o2 == null;
+		return o1.equals(o2);
+	}
+	
 	public static final PatrolMemberType toMember(String fullName) {
 		PatrolMemberType member = new PatrolMemberType();
 		member.setIsLeader(false);
