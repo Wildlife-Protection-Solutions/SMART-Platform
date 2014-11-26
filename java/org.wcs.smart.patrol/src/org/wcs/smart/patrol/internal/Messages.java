@@ -27,6 +27,7 @@ public class Messages extends NLS {
 	public static String ArmedScreenOptionComposite_Armed_No;
 	public static String ArmedScreenOptionComposite_Armed_Yes;
 	public static String CombinedReportBuilder_DateTime;
+	public static String CombinedReportBuilder_FilesLabel;
 	public static String CombinedReportBuilder_Id;
 	public static String CombinedReportBuilder_Times;
 	public static String CombinerReportDialog_Message;
@@ -527,9 +528,13 @@ public class Messages extends NLS {
 	public static String PatrolWaypointSource_PatrolWaypointSourceName;
 	public static String PatrolWaypointSource_WaypointNotFoundError;
 	public static String PatrolXmlImportDialog_AutoGenerateIdsTooltip;
+	public static String PatrolXmlImportDialog_IdsOptionLabel;
+	public static String PatrolXmlImportDialog_IgnoreWarningOp;
+	public static String PatrolXmlImportDialog_IgnoreWarningsTooltip;
 	public static String PatrolXmlImportDialog_KeepId;
 	public static String PatrolXmlImportDialog_KeepIdsTooltip;
 	public static String PatrolXmlImportDialog_NewId;
+	public static String PatrolXmlImportDialog_WarningsOpLabel;
 	public static String SavePatrolPartJob_Name;
 	public static String ScreenOption_Armed;
 	public static String ScreenOption_Comment;

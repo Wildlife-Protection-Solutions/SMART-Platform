@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.patrol.internal.Messages;
 
@@ -57,11 +58,21 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 		Composite optionCmp = new Composite(container, SWT.NONE);
 		optionCmp.setLayout(new GridLayout());
 		optionCmp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+
+		Label l = new Label(optionCmp, SWT.NONE);
+		l.setText(Messages.PatrolXmlImportDialog_IdsOptionLabel);
+		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		Button btnAssign = new Button(optionCmp, SWT.RADIO);
+		Composite op = new Composite(optionCmp, SWT.NONE);
+		op.setLayout(new GridLayout());
+		((GridLayout)op.getLayout()).marginHeight = 0;
+		((GridLayout)op.getLayout()).marginWidth = 20;
+		op.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		Button btnAssign = new Button(op, SWT.RADIO);
 		btnAssign.setText(Messages.PatrolXmlImportDialog_NewId);
 		btnAssign.setToolTipText(Messages.PatrolXmlImportDialog_AutoGenerateIdsTooltip);
-		btnAssign.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		btnAssign.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		btnAssign.setSelection(true);
 		btnAssign.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -69,8 +80,8 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 				config.setKeepIDs(false);
 			}
 		});
-		
-		Button btnKeep = new Button(optionCmp, SWT.RADIO);
+
+		Button btnKeep = new Button(op, SWT.RADIO);
 		btnKeep.setText(Messages.PatrolXmlImportDialog_KeepId);
 		btnKeep.setToolTipText(Messages.PatrolXmlImportDialog_KeepIdsTooltip);
 		btnKeep.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
@@ -81,9 +92,18 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 			}
 		});
 
-		final Button btnIgnoreWarn = new Button(optionCmp, SWT.CHECK);
-		btnIgnoreWarn.setText("Ignore warnings (combined report)");
-		btnIgnoreWarn.setToolTipText("Ignore warnings on import and display combined warning report");
+		l = new Label(optionCmp, SWT.NONE);
+		l.setText(Messages.PatrolXmlImportDialog_WarningsOpLabel);
+		
+		op = new Composite(optionCmp, SWT.NONE);
+		op.setLayout(new GridLayout());
+		((GridLayout)op.getLayout()).marginHeight = 0;
+		((GridLayout)op.getLayout()).marginWidth = 20;
+		op.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		
+		final Button btnIgnoreWarn = new Button(op, SWT.CHECK);
+		btnIgnoreWarn.setText(Messages.PatrolXmlImportDialog_IgnoreWarningOp);
+		btnIgnoreWarn.setToolTipText(Messages.PatrolXmlImportDialog_IgnoreWarningsTooltip);
 		btnIgnoreWarn.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		btnIgnoreWarn.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -91,7 +111,6 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 				config.setIgnoreWarnings(btnIgnoreWarn.getSelection());
 			}
 		});
-		
 		return container;
 	}
 	

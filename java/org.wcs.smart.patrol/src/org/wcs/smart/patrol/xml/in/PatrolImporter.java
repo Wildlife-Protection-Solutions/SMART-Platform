@@ -142,7 +142,7 @@ public class PatrolImporter {
 		}
 		monitor.worked(1);
 		
-		Patrol p = convertAndSave(ptype, config, directory, monitor);
+		Patrol p = convertAndSave(ptype, config, directory, zipFile, monitor);
 		
 		monitor.subTask(Messages.PatrolImporter_Progress_RemovingTempFiles);
 		try{
@@ -173,7 +173,7 @@ public class PatrolImporter {
 		if (ptype == null){
 			throw new Exception(Messages.PatrolImporter_Error_ReadingPatrolXmlFile);
 		}
-		return convertAndSave(ptype, config, null, monitor);
+		return convertAndSave(ptype, config, null, xmlFile, monitor);
 	}
 
 	/**
@@ -191,7 +191,8 @@ public class PatrolImporter {
 	 * @return created Patrol or null
 	 * @throws Exception
 	 */
-	private static Patrol  convertAndSave(PatrolType xmlPatrol, final ImportConfig config, File attachmentDirectory, IProgressMonitor monitor) throws Exception {
+	private static Patrol  convertAndSave(PatrolType xmlPatrol, final ImportConfig config, 
+			File attachmentDirectory, File sourceFile, IProgressMonitor monitor) throws Exception {
 		XmlToPatrolConverter converter = new XmlToPatrolConverter();
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
@@ -277,7 +278,7 @@ public class PatrolImporter {
 			}
 
 		} else {
-			config.getWarnings().addAll(warnings);
+			config.addWarnings(warnings, sourceFile);
 		}
 		
 		//performing actual save in database

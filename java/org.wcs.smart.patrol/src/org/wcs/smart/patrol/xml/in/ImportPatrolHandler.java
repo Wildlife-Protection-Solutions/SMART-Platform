@@ -91,15 +91,16 @@ public class ImportPatrolHandler extends AbstractHandler {
 		}
 		
 		if (config.isIgnoreWarnings()) {
-			reportCombinedWarnings(config.getWarnings()); 
+			reportCombinedWarnings(config); 
 		}
 
 		return null;
 	}
 
-	private void reportCombinedWarnings(List<String> warnings) {
+	private void reportCombinedWarnings(ImportConfig config) {
 		CombinedReportBuilder reportBuilder = new CombinedReportBuilder();
-		String message = reportBuilder.buildReport(warnings);
+		String message = reportBuilder.buildReport(config.getWarnings(), config.getWarningFiles());	
+		
 		ReportDialog dialog = new ReportDialog(
 				Display.getDefault().getActiveShell(),
 				Messages.CombinerReportDialog_Title,

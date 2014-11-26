@@ -55,7 +55,7 @@ public class CombinedReportBuilder {
 		return msg.replaceAll("\\{\\d\\}", "(.*)");  //$NON-NLS-1$//$NON-NLS-2$
 	}
 	
-	public String buildReport(List<String> warnings) {
+	public String buildReport(List<String> warnings, List<String> files) {
 		Map<String, Integer> map = new HashMap<String, Integer>();
 		for (String warn : warnings) {
 			String adopted = adopt(warn);
@@ -78,6 +78,14 @@ public class CombinedReportBuilder {
 			sb.append(warn);
 			sb.append(SmartUtils.LINE_SEPARATOR);
 		}
+		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(Messages.CombinedReportBuilder_FilesLabel);
+		sb.append(SmartUtils.LINE_SEPARATOR);
+		for (String file : files){
+			sb.append(file);
+			sb.append(SmartUtils.LINE_SEPARATOR);
+		}
+		
 		return sb.toString();
 	}
 
