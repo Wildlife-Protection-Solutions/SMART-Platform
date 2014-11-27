@@ -936,6 +936,24 @@
             class="org.wcs.smart.query.common.importexport.GridArcImageExporter">
       </Exporter>
    </extension>
+   <extension
+         point="net.refractions.udig.project.renderer">
+      <renderer
+            class="org.wcs.smart.query.udig.render.SmartMemoryGridCoverageMetricsFactory"
+            id="org.wcs.smart.udig.render.SmartGridRenderer"
+            name="SMART Raster Renderer">
+      </renderer>
+   </extension>
+   <extension
+         point="net.refractions.udig.style.styleConfigurator">
+      <styleConfigurator
+            class="org.wcs.smart.query.udig.render.SmartGridCellStyleConfigurator"
+            id="gridcell"
+            label="Grid Cell Border"
+            requires="org.wcs.smart.query.common.model.udig.RasterService"
+            styleId="net.refractions.udig.style.sld">
+      </styleConfigurator>
+   </extension>
 
 
 </plugin>

@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.query.udig.render;
+
+import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.render.AbstractRenderMetrics;
+import net.refractions.udig.project.render.ICompositeRenderContext;
+import net.refractions.udig.project.render.IRenderContext;
+import net.refractions.udig.project.render.IRenderMetricsFactory;
+import net.refractions.udig.project.render.IRenderer;
+
+import org.wcs.smart.query.common.model.udig.RasterService;
+
+
+/**
+ * The Render metrics factory for grid coverage renderer that includes
+ * cell bounds.
+ *
+ */
+public class SmartMemoryGridCoverageMetricsFactory implements IRenderMetricsFactory {
+
+    /**
+     * Ensures that we can get an AbstractGridCoverage2DReader out of this class.
+     * 
+     * @see net.refractions.udig.project.render.RenderMetricsFactory#canRender(net.refractions.udig.project.render.RenderTools)
+     * @param context
+     * @return true if we can render the provided context using BasicGridCoverageRenderer
+     */
+    public boolean canRender( IRenderContext context ) {
+        if( context instanceof ICompositeRenderContext ){
+            return false;
+        }
+        IGeoResource geoResource = context.getGeoResource();
+		if( geoResource.canResolve(RasterService.class) ){
+			return true;
+		}
+		return false;
+    }
+
+    /**
+     * Strategy object used to indicate how well a renderer can draw.
+     * 
+     * @see net.refractions.udig.project.render.RenderMetricsFactory#createMetrics(net.refractions.udig.project.render.RenderTools)
+     * @param context
+     * @return render metrics for the provided context
+     */
+    public AbstractRenderMetrics createMetrics( IRenderContext context ) {
+        return new SmartMemoryCoverageMetrics(context, this);
+    }
+
+    public Class< ? extends IRenderer> getRendererType() {
+        return SmartMemoryGridCoverageRenderer.class;
+    }
+
+}
