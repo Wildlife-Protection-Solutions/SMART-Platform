@@ -77,6 +77,15 @@ public class TreeDropDownViewer {
 			}
 		});
 		
+		main.addListener(SWT.Traverse, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (event.detail == SWT.TRAVERSE_ESCAPE){
+					event.doit = false;
+					hide();
+				}
+			}});
+		
 		GridLayout gl = new GridLayout(1, false);
 		gl.horizontalSpacing = 0;
 		gl.verticalSpacing = 0;
