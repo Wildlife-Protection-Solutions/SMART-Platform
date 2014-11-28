@@ -24,10 +24,8 @@ package org.wcs.smart.query.internal.hibernate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
@@ -119,37 +117,28 @@ public class CaQueryHibernateManagerImpl extends AbstractQueryHibernateManager {
 		HashMap<Integer, List<QueryEditorInput>> queries = new HashMap<Integer, List<QueryEditorInput>>();
 	
 		for (IQueryType type : QueryTypeManager.getInstance().getSupportedQueryTypes()){
-		
-			Query hquery = session
-					.createQuery("SELECT a.uuid, a.name, a.folder.uuid, a.isShared, a.id " //$NON-NLS-1$
-							+ "FROM " //$NON-NLS-1$
-							+ type.getHibernateClass().getSimpleName()
-							+ " a " //$NON-NLS-1$
-							+ "WHERE a.conservationArea = :ca " //$NON-NLS-1$
-							+ "and (a.isShared ='true' or a.owner= :user)"); //$NON-NLS-1$
-			hquery.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			hquery.setParameter("user", SmartDB.getCurrentEmployee()); //$NON-NLS-1$
 
-			List<?> results = hquery.list();
-			for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
-				Object[] object = (Object[]) iterator.next();
-				QueryEditorInput proxy = new QueryEditorInput((byte[]) object[0],
-						(String) object[1], (String) object[4],
-						(Boolean) object[3], type);
+			@SuppressWarnings("unchecked")
+			List<org.wcs.smart.query.model.Query> objects = session.createCriteria(type.getHibernateClass())
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.or(Restrictions.eq("isShared", true),Restrictions.eq("owner", SmartDB.getCurrentEmployee()))) //$NON-NLS-1$ //$NON-NLS-2$
+				.list();
+			
+			for (org.wcs.smart.query.model.Query q : objects){
+				QueryEditorInput proxy = new QueryEditorInput(q.getUuid(),q.getName(),q.getId(),q.getIsShared(),q.getType());
 				byte[] key = null;
-				if (object[2] == null) {
-					if (((Boolean) object[3]).booleanValue()) {
+				if (q.getFolder() == null) {
+					if (q.getIsShared()) {
 						// root conservation area queries
 						key = CA_QUERY_KEY;
 					} else {
 						key = USER_QUERY_KEY;
 					}
 				} else {
-					key = (byte[]) object[2];
+					key = q.getFolder().getUuid();
 				}
 				if (key != null) {
-					List<QueryEditorInput> proxies = queries.get(Arrays
-							.hashCode(key));
+					List<QueryEditorInput> proxies = queries.get(Arrays.hashCode(key));
 					if (proxies == null) {
 						proxies = new ArrayList<QueryEditorInput>();
 						queries.put(Arrays.hashCode(key), proxies);
