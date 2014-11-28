@@ -80,16 +80,18 @@ public abstract class QueryResultsTable {
 		if(table.getTable().isDisposed()) return;
 		
 		table.getTable().setRedraw(false);
-		for (TableColumn tc : table.getTable().getColumns()){
-			tc.dispose();
+		try{
+			for (TableColumn tc : table.getTable().getColumns()){
+				tc.dispose();
+			}
+			tableViewerColumns = null;
+			if (getColumnSorter() != null){
+				getColumnSorter().setSortColumn(null);
+			}
+		}finally{
+			table.getTable().setRedraw(true);
 		}
-		tableViewerColumns = null;
-		if (getColumnSorter() != null){
-			getColumnSorter().setSortColumn(null);
-		}
-		
-		table.getTable().setRedraw(true);
-		table.setInput(null);
+		setInput(null);
 	}
 	
 	

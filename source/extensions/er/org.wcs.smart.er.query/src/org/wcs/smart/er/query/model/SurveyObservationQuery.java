@@ -131,10 +131,13 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 	@Override
 	protected void initQueryColumns() {
 		synchronized (LOCK) {
-			this.queryColumns = new ArrayList<QueryColumn>();
+			if (this.queryColumns != null) return;
+			
+			ArrayList<QueryColumn> temp = new ArrayList<QueryColumn>();
 			for (QueryColumn q : SurveyQueryColumnManager.getInstance().getObservationQueryColumns(getSurveyDesignAsObject())){
-				queryColumns.add(q);
+				temp.add(q);
 			}	
+			this.queryColumns = temp;
 		}
 		HashSet<String> visible = null;
 		if (visibleColumns != null){
