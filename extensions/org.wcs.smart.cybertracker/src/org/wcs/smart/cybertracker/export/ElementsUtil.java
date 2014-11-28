@@ -84,7 +84,7 @@ public class ElementsUtil {
 		List<CyberTrackerId> idList = new ArrayList<CyberTrackerId>();
 		if (labels.size() != tag0Values.size()) {
 			//development validation
-			throw new IllegalArgumentException("Lables and Tag0 lists are expected to be of an equl size."); //$NON-NLS-1$
+			throw new IllegalArgumentException("Lables and Tag0 lists are expected to be of an equal size."); //$NON-NLS-1$
 		}
 		int size = labels.size() > tag0Values.size() ? tag0Values.size() : labels.size(); //size of smallest array (it is expected that arrays are of same size!!!)
 		for (int i = 0; i < size; i++) {
