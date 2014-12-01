@@ -107,6 +107,10 @@ public class CyberTrackerConfExporter {
 	
 	private CyberTrackerId defaultAttrValuesResultId;
 	
+	private List<CyberTrackerId> photoResultIds;
+	private List<CyberTrackerId> addPhotoResultIds;
+	private List<CyberTrackerId> addPhotoElementIds;
+	
 	private Session session;
 	private ConfigurableModel configurableModel;
 	
@@ -173,6 +177,9 @@ public class CyberTrackerConfExporter {
 			newWpElementsIds = createNewWpElementsIds(elements);
 			defaultAttrValuesResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
+			photoResultIds = new ArrayList<CyberTrackerId>();
+			addPhotoResultIds = new ArrayList<CyberTrackerId>();
+			addPhotoElementIds = ElementsUtil.buildBooleanElements(elements);
 			return performExport(destFolder, monitor);
 		} finally {
 			screensFactory = null;
@@ -853,9 +860,7 @@ public class CyberTrackerConfExporter {
 	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, boolean addPhoto, boolean photoRequired) {
 		List<Node> nodeList = new ArrayList<Node>();
 		if (addPhoto) {
-			Node photoNode = screensFactory.createPhoto(id.getNodeId(), Messages.CyberTrackerExporter_ScreenTitle_Photo, photoRequired);
-			id = linkToNext(photoNode);
-			nodeList.add(photoNode);
+			id = addPhotos(id, nodeList, photoRequired, 3);
 		}
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
 //		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
@@ -876,6 +881,58 @@ public class CyberTrackerConfExporter {
 //		control2.setTranslateMinorScreenId(startId.getNodeId());
 		nodeList.add(node);
 		return nodeList;
+	}
+
+	private CyberTrackerId addPhotos(CyberTrackerId id, List<Node> nodeList, boolean photoRequired, int count) {
+		List<CyberTrackerId> ctIdList = new ArrayList<CyberTrackerId>(2*count);
+		for (int i = 0; i < 2*count; i++) {
+			ctIdList.add(new CyberTrackerId());
+		}
+		CyberTrackerId lastId = ctIdList.get(ctIdList.size()-1);
+		
+		for (int i = 0; i < count; i++) {
+			if (i > 0 || !photoRequired) {
+				CyberTrackerId nextId = ctIdList.get(2*i);
+				List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
+				ids.add(new CyberTrackerIdMap(nextId, addPhotoElementIds.get(0))); //"Yes" navigate to next photo
+				ids.add(new CyberTrackerIdMap(lastId, addPhotoElementIds.get(1))); //"No" navigate to save screen
+				String msg = (i == 0) ? "Add photo?" : "Add another photo?";
+				Node node = ctUtil.createRadioNode(id.getNodeId(), msg, ids, null, true);
+				id = nextId;
+				nodeList.add(node);
+			}
+
+			String title = MessageFormat.format("Photo {0}", i+1);
+			Node photoNode = screensFactory.createPhoto(id.getNodeId(), title, getPhotoResultId(i).getItemId(), i==0 && photoRequired);
+			id = ctIdList.get(2*i+1);
+			Control control2 = ScreensObjectFactory.getNavigationControl(photoNode);
+			control2.setTranslateNextScreenId(id.getNodeId());
+			nodeList.add(photoNode);
+
+		}
+		return lastId;
+	}
+	
+	private CyberTrackerId getPhotoResultId(int index) {
+		if (photoResultIds.size() >= index) {
+			for (int i = photoResultIds.size(); i <= index; i++) {
+				CyberTrackerId id = new CyberTrackerId();
+				ElementsUtil.addElementsItem(elements, "#Photo"+i, id.getItemId());
+				photoResultIds.add(id);
+			}
+		}
+		return photoResultIds.get(index);
+	}
+
+	private CyberTrackerId getAddPhotoResultId(int index) {
+		if (addPhotoResultIds.size() >= index) {
+			for (int i = addPhotoResultIds.size(); i <= index; i++) {
+				CyberTrackerId id = new CyberTrackerId();
+				ElementsUtil.addElementsItem(elements, "#AddPhoto"+i, id.getItemId());
+				addPhotoResultIds.add(id);
+			}
+		}
+		return addPhotoResultIds.get(index);
 	}
 	
 	private void split(List<CmAttribute> fullList, List<CmAttribute> toShow, List<CmAttribute> invisibleList) {

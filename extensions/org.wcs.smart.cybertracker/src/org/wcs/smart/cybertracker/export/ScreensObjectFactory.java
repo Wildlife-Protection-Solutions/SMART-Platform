@@ -409,7 +409,7 @@ public class ScreensObjectFactory {
         <Id>???</Id>
         <Name>???</Name>
 		<Items>
-			<Value>{82D16C8E-776E-4E8B-A459-6EBF62E50076}</Value> <!-- this is PHOTO_ID -->
+			<Value>???</Value> <!-- this is resultId -->
 		</Items>        
         <DataClass>TctScreen</DataClass>
         <Data>
@@ -422,14 +422,14 @@ public class ScreensObjectFactory {
         </Data>
     </Node>
 	 */
-	public Node createPhoto(String id, String name, boolean required) {
+	public Node createPhoto(String id, String name, String resultId, boolean required) {
 		Node node = new Node();
 		node.setId(id);
 		node.setName(name);
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Items items = new Node.Items();
-		items.getValue().add(ICyberTrackerConstants.PHOTO);
+		items.getValue().add(resultId);
 		node.setItems(items);
 
 		Node.Data data = new Node.Data();
@@ -439,7 +439,7 @@ public class ScreensObjectFactory {
 		Controls controls = new Controls();
 		controls.getControl().add(createControl2());
 		controls.getControl().add(createControl11());
-		controls.getControl().add(createPhotoControl12(required));
+		controls.getControl().add(createPhotoControl12(resultId, required));
 		data.setControls(controls);
 		node.setData(data);
 		
@@ -851,10 +851,10 @@ public class ScreensObjectFactory {
 	    <Width>240</Width>
 	    <Height>264</Height>
 	    <Translate__Font>Arial,12,B</Translate__Font>
-	    <Translate__Element>{82D16C8E-776E-4E8B-A459-6EBF62E50076}</Translate__Element>   <!-- this is PHOTO_ID -->
+	    <Translate__Element>???</Translate__Element>   <!-- this is resultId -->
 	 </Control>
 	 */
-	private Control createPhotoControl12(boolean required) {
+	private Control createPhotoControl12(String resultId, boolean required) {
 		Controls.Control control = new Controls.Control();
 		control.setType("{02F601F3-28BD-4D1F-A9DD-CAA71ABC25FC}"); //$NON-NLS-1$
 		control.setId(12);
@@ -864,7 +864,7 @@ public class ScreensObjectFactory {
 		control.setWidth(240);
 		control.setHeight(264);
 		control.setTranslateFont("Arial,12,B"); //$NON-NLS-1$
-		control.setTranslateElement(ICyberTrackerConstants.PHOTO);
+		control.setTranslateElement(resultId);
 		control.setRequired(required ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
 		return control;
 	}
