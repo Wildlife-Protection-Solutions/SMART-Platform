@@ -93,6 +93,8 @@ public class PatrolScreensUtil {
 	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
 	public static final String RESULT_DEFAULT_PATROL_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
 
+	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
+	
 	/**
 	 * Contains data filled by {@link PatrolScreensUtil}
 	 * @author elitvin

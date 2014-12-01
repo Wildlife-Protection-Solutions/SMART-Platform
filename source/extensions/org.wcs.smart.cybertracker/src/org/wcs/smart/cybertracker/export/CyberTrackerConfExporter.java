@@ -108,7 +108,6 @@ public class CyberTrackerConfExporter {
 	private CyberTrackerId defaultAttrValuesResultId;
 	
 	private List<CyberTrackerId> photoResultIds;
-	private List<CyberTrackerId> addPhotoResultIds;
 	private List<CyberTrackerId> addPhotoElementIds;
 	
 	private Session session;
@@ -178,7 +177,6 @@ public class CyberTrackerConfExporter {
 			defaultAttrValuesResultId = new CyberTrackerId();
 			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			photoResultIds = new ArrayList<CyberTrackerId>();
-			addPhotoResultIds = new ArrayList<CyberTrackerId>();
 			addPhotoElementIds = ElementsUtil.buildBooleanElements(elements);
 			return performExport(destFolder, monitor);
 		} finally {
@@ -917,24 +915,13 @@ public class CyberTrackerConfExporter {
 		if (photoResultIds.size() >= index) {
 			for (int i = photoResultIds.size(); i <= index; i++) {
 				CyberTrackerId id = new CyberTrackerId();
-				ElementsUtil.addElementsItem(elements, "#Photo"+i, id.getItemId());
+				ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_PHOTO + i, id.getItemId());
 				photoResultIds.add(id);
 			}
 		}
 		return photoResultIds.get(index);
 	}
 
-	private CyberTrackerId getAddPhotoResultId(int index) {
-		if (addPhotoResultIds.size() >= index) {
-			for (int i = addPhotoResultIds.size(); i <= index; i++) {
-				CyberTrackerId id = new CyberTrackerId();
-				ElementsUtil.addElementsItem(elements, "#AddPhoto"+i, id.getItemId());
-				addPhotoResultIds.add(id);
-			}
-		}
-		return addPhotoResultIds.get(index);
-	}
-	
 	private void split(List<CmAttribute> fullList, List<CmAttribute> toShow, List<CmAttribute> invisibleList) {
 		for (CmAttribute attr : fullList) {
 			if (attr.isVisible()) {
