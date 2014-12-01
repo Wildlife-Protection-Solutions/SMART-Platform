@@ -279,7 +279,7 @@ public class SmartImporter {
 		
 		Waypoint wp = findOrAddWaypoint(legDay, s, eMap);
 		addObservations(wp, s, eMap, session);
-		addAttachments(wp, s);
+		addAttachments(wp, s, eMap);
 	}
 
 	protected void addObservations(Waypoint wp, S s, Map<String, E> eMap, Session session) {
@@ -592,7 +592,7 @@ public class SmartImporter {
 		}
 	}
 
-	private void addAttachments(Waypoint wp, S s) {
+	private void addAttachments(Waypoint wp, S s, Map<String, E> eMap) {
 		String mediaFolder = null;
 		try {
 			mediaFolder = PdaUtil.getCTMediaFolder();
@@ -600,7 +600,7 @@ public class SmartImporter {
 			CyberTrackerPlugIn.log("Could not determine CyberTracker ExportMedia folder", ex); //$NON-NLS-1$
 		}
 		for (S.A a : s.getA()) {
-			if (ICyberTrackerConstants.PHOTO.equals(a.getI())) {
+			if (isPhotoI(a.getI(), eMap)) {
 				if (mediaFolder == null) {
 					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_ExportMedia_UnknownFolder, a.getV()));
 					continue;
@@ -653,6 +653,18 @@ public class SmartImporter {
 	
 	protected void clearWarning() {
 		warnings.clear();
+	}
+	
+	private boolean isPhotoI(String i, Map<String, E> eMap) {
+		if (i != null) {
+			if (ICyberTrackerConstants.PHOTO.equals(i))
+				return true;
+			E e = eMap.get(i);
+			if (e != null) {
+				return e.getN().startsWith(PatrolScreensUtil.RESULT_PHOTO);
+			}
+		}
+		return false;
 	}
 
 	public static class CoordinateZComparator implements Comparator<Coordinate> {
