@@ -858,7 +858,7 @@ public class CyberTrackerConfExporter {
 	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, boolean addPhoto, boolean photoRequired) {
 		List<Node> nodeList = new ArrayList<Node>();
 		if (addPhoto) {
-			id = addPhotos(id, nodeList, photoRequired, 3);
+			id = addPhotos(id, nodeList, photoRequired, ctUtil.getCtProperties().getMaxPhotoCount());
 		}
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
 //		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
@@ -889,7 +889,7 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId lastId = ctIdList.get(ctIdList.size()-1);
 		
 		for (int i = 0; i < count; i++) {
-			if (i > 0 || !photoRequired) {
+			if ((i > 0 || !photoRequired) && (count > 1)) {
 				CyberTrackerId nextId = ctIdList.get(2*i);
 				List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 				ids.add(new CyberTrackerIdMap(nextId, addPhotoElementIds.get(0))); //"Yes" navigate to next photo
@@ -900,7 +900,7 @@ public class CyberTrackerConfExporter {
 				nodeList.add(node);
 			}
 
-			String title = MessageFormat.format(Messages.CyberTrackerExporter_ScreenTitle_PhotoNum, i+1);
+			String title = count > 1 ? MessageFormat.format(Messages.CyberTrackerExporter_ScreenTitle_PhotoNum, i+1) : Messages.CyberTrackerExporter_ScreenTitle_Photo;
 			Node photoNode = screensFactory.createPhoto(id.getNodeId(), title, getPhotoResultId(i).getItemId(), i==0 && photoRequired);
 			id = ctIdList.get(2*i+1);
 			Control control2 = ScreensObjectFactory.getNavigationControl(photoNode);

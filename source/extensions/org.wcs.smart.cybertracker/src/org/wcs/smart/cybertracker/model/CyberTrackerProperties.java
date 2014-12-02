@@ -57,6 +57,9 @@ public class CyberTrackerProperties extends UuidItem {
 
 	public static final int UTM_ZONE_MIN_VALUE = 0;
 	public static final int UTM_ZONE_MAX_VALUE = 60;
+
+	public static final int MAX_PHOTO_COUNT_MIN_VALUE = 1;
+	public static final int MAX_PHOTO_COUNT_MAX_VALUE = 100;
 	
 	public static final Integer[] GMT_VALUES = {
 		-1200,
@@ -165,6 +168,8 @@ public class CyberTrackerProperties extends UuidItem {
 	private static final int projection = 0;
     private static final int utmZone = 0;
 
+    private static final int maxPhotoCount = 10;
+    
 	private Map<OptionID, CyberTrackerPropertiesOption> options;
 	
 	public Map<OptionID, CyberTrackerPropertiesOption> getOptions() {
@@ -456,5 +461,12 @@ public class CyberTrackerProperties extends UuidItem {
 	}
 	public void setUtmZone(int zone) {
 		getOption(OptionID.UTM_ZONE).setIntegerValue(zone);
+	}
+
+	public int getMaxPhotoCount() {
+		return getIntValue(OptionID.MAX_PHOTO_COUNT, maxPhotoCount);
+	}
+	public void setMaxPhotoCount(int count) {
+		getOption(OptionID.MAX_PHOTO_COUNT).setIntegerValue(count);
 	}
 }

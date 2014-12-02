@@ -215,6 +215,9 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_KioskMode_Tooltip;
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars;
 	public static String CyberTrackerPropertiesDialog_LargeScrollBars_Tooltip;
+	public static String CyberTrackerPropertiesDialog_MaxPhotoCount;
+	public static String CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip;
+	public static String CyberTrackerPropertiesDialog_MaxPhotoCountInvalid;
 	public static String CyberTrackerPropertiesDialog_Message;
 	public static String CyberTrackerPropertiesDialog_Projection;
 	public static String CyberTrackerPropertiesDialog_Projection_Tooltip;
