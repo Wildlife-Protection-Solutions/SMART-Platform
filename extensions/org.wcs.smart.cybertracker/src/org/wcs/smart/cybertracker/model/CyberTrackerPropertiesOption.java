@@ -84,7 +84,8 @@ public class CyberTrackerPropertiesOption extends UuidItem {
 		CAN_PAUSE,
 		SHOW_EDIT,
 		SHOW_GPS,
-		STORAGE_TIME;
+		STORAGE_TIME,
+		MAX_PHOTO_COUNT;
 	}
 
 	private ConservationArea conservationArea;

@@ -103,6 +103,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
     private ComboViewer timeOffset;
     private Text txtSkipButtonTimeout;
     private Text txtStorageTime;
+    private Text txtMaxPhotoCount;
     
     private Button btnManualGPS;
     private Button btnAllowSkipManual;
@@ -127,6 +128,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
     private ControlDecoration FileNameDecoration;
 
     private ControlDecoration utmZoneDecoration;
+    
+    private ControlDecoration maxPhotoCountDecoration;
 	
 	public CyberTrackerPropertiesDialog() {
 		super(Display.getCurrent().getActiveShell(), Messages.CyberTrackerPropertiesDialog_Title);
@@ -513,6 +516,37 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		storageTimeDecoration.setShowHover(true);
 		storageTimeDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_StorageTimeInvalid, CyberTrackerProperties.STORAGE_TIME_MIN_VALUE, CyberTrackerProperties.STORAGE_TIME_MAX_VALUE));
 		storageTimeDecoration.hide();
+		
+		
+		
+		
+		Label lblMaxPhotoCount = new Label(generalContainer, SWT.NONE);
+		lblMaxPhotoCount.setText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount);
+		lblMaxPhotoCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip);
+
+		txtMaxPhotoCount = new Text(generalContainer, SWT.BORDER);
+		txtMaxPhotoCount.setToolTipText(Messages.CyberTrackerPropertiesDialog_MaxPhotoCount_Tooltip);
+		txtMaxPhotoCount.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		txtMaxPhotoCount.setText(String.valueOf(ctProperties.getMaxPhotoCount()));
+		txtMaxPhotoCount.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				if (isMaxPhotoCountValid()) {
+					maxPhotoCountDecoration.hide();
+				} else {
+					maxPhotoCountDecoration.show();
+				}
+				setChangesMade(true);
+			}
+
+		});
+
+		maxPhotoCountDecoration = new ControlDecoration(txtMaxPhotoCount, SWT.LEFT);
+		maxPhotoCountDecoration.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		maxPhotoCountDecoration.setShowHover(true);
+		maxPhotoCountDecoration.setDescriptionText(MessageFormat.format(Messages.CyberTrackerPropertiesDialog_MaxPhotoCountInvalid, CyberTrackerProperties.MAX_PHOTO_COUNT_MIN_VALUE, CyberTrackerProperties.MAX_PHOTO_COUNT_MAX_VALUE));
+		maxPhotoCountDecoration.hide();
 		
 		
 		
@@ -974,12 +1008,23 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		}
 	}
 	
+	private boolean isMaxPhotoCountValid() {
+		if (txtMaxPhotoCount == null || txtMaxPhotoCount.getText() == null || txtMaxPhotoCount.getText().isEmpty())
+			return false;
+		try {
+			Integer result = Integer.valueOf(txtMaxPhotoCount.getText());
+			return result >= CyberTrackerProperties.MAX_PHOTO_COUNT_MIN_VALUE && result <= CyberTrackerProperties.MAX_PHOTO_COUNT_MAX_VALUE;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
 	private boolean isFileNameDecorationValid() {
 		return new File(txtFileName.getText()).isFile();
 	}
 
 	private boolean validate() {
-		return isStorageTimeValid() && isExitPinValid() &&
+		return isStorageTimeValid() && isExitPinValid() && isMaxPhotoCountValid() &&
 				isSigtingAccuracyValid() && isSigtingFixCountValid() && 
 				isTrackTimerValid() && isSkipButtonTimeoutValid() && isTrackAccuracyValid() && isUtmZoneValid();
 	}
@@ -1014,6 +1059,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 		ctProperties.setShowEdit(btnShowEdit.getSelection());
 		ctProperties.setShowGPS(btnShowGPS.getSelection());
 		ctProperties.setStorageTime(Integer.valueOf(txtStorageTime.getText()));
+		ctProperties.setMaxPhotoCount(Integer.valueOf(txtMaxPhotoCount.getText()));
 		
 		ctProperties.setUseTitleBar(btnUseTitleBar.getSelection());
 		ctProperties.setUseLargeTitles(btnLargeTitles.getSelection());
