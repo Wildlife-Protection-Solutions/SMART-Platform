@@ -44,6 +44,8 @@ import net.refractions.udig.project.internal.StyleEntry;
 @Entity
 public abstract class StyledQuery extends Query {
 
+	public static final String QUERY_STYLE_KEY = "queryStyle"; //$NON-NLS-1$
+	
 	private String styleMemento;
 	
 	// a single query can create multiple layers 

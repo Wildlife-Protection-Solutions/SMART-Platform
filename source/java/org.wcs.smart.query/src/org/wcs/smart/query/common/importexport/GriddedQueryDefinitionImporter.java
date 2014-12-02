@@ -32,6 +32,7 @@ import org.wcs.smart.query.importexport.IQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.xml.model.QueryPart;
@@ -79,6 +80,7 @@ public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 			uuidLookup.put(type.getUuid(), type);
 		}
 		
+		String stylePart = null;
 		for (QueryPart part : qt.getQueryPart()) {
 			
 			if (part.getKey().equalsIgnoreCase("definition")) { //$NON-NLS-1$
@@ -100,14 +102,17 @@ public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 				}
 			}else if (part.getKey().equalsIgnoreCase("crs")){ //$NON-NLS-1$
 				griddedQuery.setCrsDefinition(part.getValue());
+			}else if (part.getKey().equalsIgnoreCase(StyledQuery.QUERY_STYLE_KEY)){
+				stylePart = part.getValue();
 			}
-		}
-		
-		
+		}		
 		griddedQuery.setConservationArea(SmartDB.getCurrentConservationArea());
 		griddedQuery.setOwner(SmartDB.getCurrentEmployee());
-		
 		griddedQuery.setConservationAreaFilter(new ConservationAreaFilter(true));
+		
+		if (griddedQuery instanceof StyledQuery && stylePart != null){
+			griddedQuery.setStyle(stylePart);
+		}
 		
 		return griddedQuery;
 	}
