@@ -22,6 +22,7 @@
 
 package org.wcs.smart.query.common.ui;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -31,8 +32,12 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.ILayer;
+import net.refractions.udig.project.ILayerListener;
+import net.refractions.udig.project.LayerEvent;
+import net.refractions.udig.project.LayerEvent.EventType;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
@@ -47,6 +52,7 @@ import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -58,6 +64,7 @@ import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -69,10 +76,35 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
  */
 public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 
+	private static final String RESOURCE_KEY = "raster"; //$NON-NLS-1$
+	
 	private GriddedEditor parentEditor;
 	private RasterService rasterService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
 
+	private ILayerListener styleListener = new ILayerListener() {
+		
+		@Override
+		public void refresh(LayerEvent event) {
+			if (event.getType() == EventType.STYLE){
+				try{
+					updateStyle(event.getSource());
+				}catch (Exception ex){
+					QueryPlugIn.log("Error setting query layer style. " + ex.getMessage(), ex); //$NON-NLS-1$
+				}
+			}
+		}
+		
+		private void updateStyle(ILayer layer) throws IOException{
+			StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
+			sq.updateStyle(RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					parentEditor.setDirty(true);
+				}});
+		}
+	};
 	/*
 	 * Job for adding Raster layer to map
 	 */
@@ -143,7 +175,23 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 
 			map.getRenderManagerInternal().disableRendering();
 			// add the new layers to the map
-			AddLayersCommand command = new AddLayersCommand(layers);
+			AddLayersCommand command = new AddLayersCommand(layers){
+				 public void run( IProgressMonitor monitor ) throws Exception {
+					super.run(monitor);
+
+					if (parentEditor.getQueryProxy().getQuery() instanceof StyledQuery) {
+						// update layer style
+						final StyledQuery sq = ((StyledQuery) parentEditor.getQueryProxy().getQuery());
+						ILayer layer = getLayers().get(0);
+						if (sq.getStyle() != null) {
+							sq.applyStyle(RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
+						}
+
+						// add style listener
+						layer.addListener(styleListener);
+					}	 
+				 }
+			};
 			map.sendCommandSync(command);
 			// setup styles
 			map.getRenderManagerInternal().enableRendering();

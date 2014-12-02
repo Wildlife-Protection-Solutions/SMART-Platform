@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.upgrade.v300;
+package org.wcs.smart.upgrade.v320;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -40,21 +40,22 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  * @author Emily
  *
  */
-public class Upgrader300To302 implements IDatabaseUpgrader{
+public class Upgrader310To320 implements IDatabaseUpgrader {
 	
 	public void upgrade(Session s, IProgressMonitor monitor) {
-		monitor.subTask(Messages.Upgrader300To302_ProgressMessage);
+		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try {
 					c.setAutoCommit(false);
-					upgrade300To301(c);
+					upgrade(c);
 				} catch (final Exception e) {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.Upgrader200To300_Error, e);
+							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), 
+									Messages.Upgrader310To320_ErrorMessage, e);
 						}
 					});
 				} finally {
@@ -64,17 +65,25 @@ public class Upgrader300To302 implements IDatabaseUpgrader{
 		});
 	}
 
-	private static void upgrade300To301(Connection c) throws Exception {
+	private static void upgrade(Connection c) throws Exception {
 		
-		/* remove orphaned patrols */
-		String sql = "delete from smart.waypoint where SOURCE = 'PATROL' " //$NON-NLS-1$
-					+ "and uuid not in (select wp_uuid from smart.PATROL_WAYPOINT)"; //$NON-NLS-1$
-		c.createStatement().execute(sql);
+		String[] sql = new String[]{
+				"alter table smart.obs_waypoint_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.obs_observation_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.obs_gridded_query add column style long varchar",  //$NON-NLS-1$
+				
+				"alter table smart.observation_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.waypoint_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.patrol_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.gridded_query add column style long varchar" //$NON-NLS-1$
+		};
 		
-
+		for (String s : sql){
+			c.createStatement().execute(s);
+		}
 		/* VERSION UDATE */ 
-		sql = "update smart.db_version set version = '3.0.2' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
-		c.createStatement().execute(sql);
+		String ssql = "update smart.db_version set version = '3.2.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
+		c.createStatement().execute(ssql);
 		
 		c.commit();
 	}

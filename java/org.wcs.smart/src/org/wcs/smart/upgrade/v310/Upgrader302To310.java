@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.upgrade.IDatabaseUpgrader;
 
 /**
  * Upgrades from database version 300 to 301.  The only
@@ -39,9 +40,9 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
-public class Upgrader302To310 {
+public class Upgrader302To310 implements IDatabaseUpgrader{
 	
-	public static void upgrade(Session s, IProgressMonitor monitor) {
+	public void upgrade(Session s, IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader302To310_progresslabel);
 		s.doWork(new Work() {
 			@Override

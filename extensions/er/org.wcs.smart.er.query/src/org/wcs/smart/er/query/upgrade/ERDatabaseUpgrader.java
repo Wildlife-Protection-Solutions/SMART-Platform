@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.updatesite.OnInstallAction;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -53,6 +54,41 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 			monitor.subTask(Messages.ERDatabaseUpgrader_Info);
 			OnInstallAction install = new OnInstallAction();
 			install.execute(null);
+		}
+	}
+	
+	/**
+	 * Upgrades from the currentVersion to the most recent version.
+	 * @param currentVersion
+	 * @param session
+	 */
+	public static final void upgrade(String currentVersion, Session session){
+		if (currentVersion.equals(ERQueryPlugIn.DB_VERSION_1)){
+			upgradeV1ToV2(session);
+		}
+	}
+	
+	private static void upgradeV1ToV2(Session session){
+		String[] sql = new String[]{
+				"alter table smart.survey_observation_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.survey_waypoint_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.survey_mission_track_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.survey_mission_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.survey_gridded_query add column style long varchar"}; //$NON-NLS-1$
+		
+		session.beginTransaction();
+		try{
+			for (String s : sql){
+				ERQueryPlugIn.log(s, null);
+				session.createSQLQuery(s).executeUpdate();
+			}
+		
+			HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_2, session);
+			session.getTransaction().commit();
+		}finally{
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
 		}
 	}
 

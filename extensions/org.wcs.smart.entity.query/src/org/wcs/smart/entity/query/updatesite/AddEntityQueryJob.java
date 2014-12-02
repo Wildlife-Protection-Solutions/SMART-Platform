@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.internal.Messages;
+import org.wcs.smart.entity.query.upgrade.EntityQueryDatabaseUpgrader;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -90,9 +91,13 @@ public class AddEntityQueryJob extends Job {
 		try{
 			String currentVersion = HibernateManager.getPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, session);
 			if (currentVersion == null){
-				return createDatabaseTables(session);
+				createDatabaseTables(session);
+				currentVersion = EntityQueryPlugIn.DB_VERSION_1;
 			}
-		}catch(final Exception e){
+			//run the upgrader to upgrade to the current version
+			EntityQueryDatabaseUpgrader.upgrade(currentVersion, session);
+			
+		}catch(final Throwable e){
 			//TODO: figure out what to do here, because this will install the new 
 			//version anyways
 			Display.getDefault().syncExec(new Runnable(){
@@ -114,31 +119,21 @@ public class AddEntityQueryJob extends Job {
 		
 	}
 	
-	private IStatus createDatabaseTables(Session session){
+	private void createDatabaseTables(Session session){
 		//check is required table exists		
-		try {
-			session.beginTransaction();
+		session.beginTransaction();
+		try{
 			
 			for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
 				EntityQueryPlugIn.log(CREATE_TABLE_SQL[i], null);
 				session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
 			}
-			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION, session);
+			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_1, session);
 			session.getTransaction().commit();
-		} catch (final Exception e) {
-			//causing deadlock if occurs during restore.
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					EntityQueryPlugIn.displayLog(Messages.AddEntityQueryJob_InstallError2, e);
-				}
-			});
-			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityQueryJob_InstallError + e.getLocalizedMessage(),e);
-		} finally {
-			if (session.getTransaction().isActive()) {
+		}finally{
+			if (session.getTransaction().isActive()){
 				session.getTransaction().rollback();
 			}
 		}
-		return Status.OK_STATUS;
 	}
 }

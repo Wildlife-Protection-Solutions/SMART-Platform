@@ -17,7 +17,8 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.er.query"; //$NON-NLS-1$
 	//The current db version
-	public static final String DB_VERSION = "1.0"; //$NON-NLS-1$
+	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
 
 	public static final String OBSERVATION_ICON = "org.wcs.smart.er.query.observation"; //$NON-NLS-1$
 	public static final String WAYPOINT_ICON = "org.wcs.smart.er.query.waypoint"; //$NON-NLS-1$

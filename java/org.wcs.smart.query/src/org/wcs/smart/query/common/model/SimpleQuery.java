@@ -33,6 +33,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
@@ -51,7 +52,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public abstract class SimpleQuery extends Query {
+public abstract class SimpleQuery extends StyledQuery {
 
 	/* db fields */
 	protected String strQueryFilter;

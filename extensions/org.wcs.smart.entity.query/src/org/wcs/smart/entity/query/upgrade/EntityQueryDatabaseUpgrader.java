@@ -21,13 +21,16 @@
  */
 package org.wcs.smart.entity.query.upgrade;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.updatesite.OnInstallAction;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -47,12 +50,60 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 			//it is some kind of error or wrong database version
 			return;
 		}
-		if (versions.get(EntityQueryPlugIn.PLUGIN_ID) == null) {
+		final String currentVersion = versions.get(EntityQueryPlugIn.PLUGIN_ID);
+		if (currentVersion == null) {
 			//Entity doesn't present in this configuration
 			//we need to perform install database support for the plug-in
+			
+			//this will install and upgrade to current version
 			monitor.subTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask);
 			OnInstallAction install = new OnInstallAction();
 			install.execute(null);
+		}else{
+			try{
+				upgrade(currentVersion, s);
+			}catch (final Throwable t){
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						EntityQueryPlugIn.displayLog(MessageFormat.format(Messages.EntityQueryDatabaseUpgrader_QueryUpdateError, new Object[]{currentVersion, EntityQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$
+					}
+				});
+			}
+		}
+		
+	}
+	
+	/**
+	 * Upgrades from the currentVersion to the most recent version.
+	 * @param currentVersion
+	 * @param session
+	 */
+	public static final void upgrade(String currentVersion, Session session){
+		if (currentVersion.equals(EntityQueryPlugIn.DB_VERSION_1)){
+			upgradeV1ToV2(session);
+		}
+	}
+	
+	private static void upgradeV1ToV2(Session session){
+		String[] sql = new String[]{
+				"alter table smart.entity_observation_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.entity_waypoint_query add column style long varchar", //$NON-NLS-1$
+				"alter table smart.entity_gridded_query add column style long varchar"}; //$NON-NLS-1$
+		
+		session.beginTransaction();
+		try{
+			for (String s : sql){
+				EntityQueryPlugIn.log(s, null);
+				session.createSQLQuery(s).executeUpdate();
+			}
+		
+			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_2, session);
+			session.getTransaction().commit();
+		}finally{
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
 		}
 	}
 
