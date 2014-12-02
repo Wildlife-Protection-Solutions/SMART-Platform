@@ -33,6 +33,7 @@ import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
@@ -93,6 +94,7 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 		
 		String strQueryFilter = ""; //$NON-NLS-1$
 		String strColumnFilter = ""; //$NON-NLS-1$
+		String stylePart = null;
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
@@ -100,6 +102,8 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 				}
 			}else if (part.getKey().equals("columns")){ //$NON-NLS-1$
 				strColumnFilter = part.getValue();
+			}else if (part.getKey().equals(StyledQuery.QUERY_STYLE_KEY)){
+				stylePart = part.getValue();
 			}
 		}
 		
@@ -110,6 +114,9 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 		
 		wq.setConservationAreaFilter(new ConservationAreaFilter(true));
 		
+		if (wq instanceof StyledQuery && stylePart != null){
+			wq.setStyle(stylePart);
+		}
 		
 		return wq;
 	}

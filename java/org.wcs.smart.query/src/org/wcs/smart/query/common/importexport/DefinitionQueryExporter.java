@@ -33,9 +33,11 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.xml.QueryXmlManager;
 import org.wcs.smart.query.xml.model.Query;
 import org.wcs.smart.query.xml.model.QueryName;
+import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 
 /**
@@ -48,7 +50,6 @@ import org.wcs.smart.query.xml.model.QueryType;
  * @since 1.0.0
  */
 public abstract class DefinitionQueryExporter implements IQueryExporter {
-
 	
 	@Override
 	public String getId(){
@@ -119,6 +120,17 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 		
 		writeQuerySpecifics(query, xmlQuery);
 		
+		if (query instanceof StyledQuery){
+			String styleString = ((StyledQuery) query).getStyle();
+			if (styleString != null){
+				QueryPart style = new QueryPart();
+				style.setKey(StyledQuery.QUERY_STYLE_KEY);
+				style.setValue(styleString);
+			
+				xmlQuery.getQueryPart().add(style);
+			}
+		}
+		
 		OutputStream fout = new BufferedOutputStream(new FileOutputStream(file));
 		try{
 			QueryXmlManager.writeQuery(wpquery, fout);
@@ -126,8 +138,4 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 			fout.close();
 		}		
 	}
-	
-
-	
-
 }

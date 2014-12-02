@@ -43,6 +43,7 @@ import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayerCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
+import net.refractions.udig.project.internal.impl.LayerImpl;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
