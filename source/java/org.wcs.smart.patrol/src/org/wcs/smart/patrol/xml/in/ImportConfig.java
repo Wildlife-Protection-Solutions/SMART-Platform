@@ -61,7 +61,9 @@ public class ImportConfig {
 	}
 	
 	public void addWarnings(List<String> warnings, File f){
-		this.warnFiles.add(f.getAbsolutePath());
+		if(warnings.size() > 0){
+			this.warnFiles.add(f.getAbsolutePath());
+		}
 		this.warnings.addAll(warnings);
 	}
 }
