@@ -894,13 +894,13 @@ public class CyberTrackerConfExporter {
 				List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 				ids.add(new CyberTrackerIdMap(nextId, addPhotoElementIds.get(0))); //"Yes" navigate to next photo
 				ids.add(new CyberTrackerIdMap(lastId, addPhotoElementIds.get(1))); //"No" navigate to save screen
-				String msg = (i == 0) ? "Add photo?" : "Add another photo?";
+				String msg = (i == 0) ? Messages.CyberTrackerExporter_ScreenTitle_AddPhoto : Messages.CyberTrackerExporter_ScreenTitle_AddAnotherPhoto;
 				Node node = ctUtil.createRadioNode(id.getNodeId(), msg, ids, null, true);
 				id = nextId;
 				nodeList.add(node);
 			}
 
-			String title = MessageFormat.format("Photo {0}", i+1);
+			String title = MessageFormat.format(Messages.CyberTrackerExporter_ScreenTitle_PhotoNum, i+1);
 			Node photoNode = screensFactory.createPhoto(id.getNodeId(), title, getPhotoResultId(i).getItemId(), i==0 && photoRequired);
 			id = ctIdList.get(2*i+1);
 			Control control2 = ScreensObjectFactory.getNavigationControl(photoNode);
