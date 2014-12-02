@@ -34,6 +34,7 @@ import org.wcs.smart.ct2smart.patrol.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.ct2smart.ui.DataModelLookup;
 import org.wcs.smart.ct2smart.ui.ElementsLookup;
 import org.wcs.smart.ct2smart.ui.MatchSession;
+import org.wcs.smart.ct2smart.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.ct2smart.xml.parser.TagA;
 import org.wcs.smart.ct2smart.xml.parser.TagS;
 import org.wcs.smart.ct2smart.xml.parser.TagT;
@@ -78,7 +79,7 @@ public class PatrolBuilder {
 	}
 
 	public PatrolType createPatrol(List<TagS> sList, List<TagT> tList, String id) throws DatatypeConfigurationException, ParseException {
-
+			
 		LineString line = createTrack(tList);
 		
 		TrackType track = null;
@@ -277,10 +278,12 @@ public class PatrolBuilder {
 						break;
 				}
 				
-				for (ExtraAttribute ea : cta.getExtraAttribute()) {
-					WaypointObservationAttributeType obsAttr = ea2woa(ea);
-					if (obsAttr != null) {
-						obs.getAttributes().add(obsAttr);
+				if (Ct2AttributeTypeUtil.canMap(cta.getType())) {
+					for (ExtraAttribute ea : cta.getExtraAttribute()) {
+						WaypointObservationAttributeType obsAttr = ea2woa(ea);
+						if (obsAttr != null) {
+							obs.getAttributes().add(obsAttr);
+						}
 					}
 				}
 			}
