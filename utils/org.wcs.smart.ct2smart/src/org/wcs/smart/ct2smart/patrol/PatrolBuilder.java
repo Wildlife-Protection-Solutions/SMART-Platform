@@ -298,9 +298,16 @@ public class PatrolBuilder {
 						if (isSameValue(attr, prevAttr)) {
 							System.out.println(MessageFormat.format("INFO: Duplicate attributes in patrol {0} waypoint {1} with key ''{2}''. Values (item, double, string): {3}, {4}, {5}. Duplicate was dropped out.", patrol.getId(), wp.getId(), attr.getAttributeKey(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 							duplicates.add(attr);
+						} else if (isDetailedKeyValue(attr, prevAttr)) {
+							System.out.println(MessageFormat.format("INFO: Similar attributes in patrol {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Only more detailed value will be used.", patrol.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							duplicates.add(attr);
+							if (attr.getItemKey().length() > prevAttr.getItemKey().length()) {
+								prevAttr.setItemKey(attr.getItemKey());
+							}
 						} else {
 							System.out.println(MessageFormat.format("WARN: Two diffent attributes in patrol {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Warning will appear on import", patrol.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 						}
+						
 					}
 				}
 				obs.getAttributes().removeAll(duplicates);
@@ -389,6 +396,29 @@ public class PatrolBuilder {
 		return o1.equals(o2);
 	}
 	
+	private boolean isDetailedKeyValue(WaypointObservationAttributeType a1, WaypointObservationAttributeType a2) {
+		if (isSame(a1.getDValue(), a2.getDValue()) && isSame(a1.getSValue(), a2.getSValue())) {
+			String k1 = a1.getItemKey();
+			String k2 = a2.getItemKey();
+			if (k1 != null && k2 != null) {
+				//<itemKey>biologicalresourceuse.huntingcollectingterrestrialanimals.trapping</itemKey>
+				//<itemKey>biologicalresourceuse.huntingcollectingterrestrialanimals</itemKey>
+				//we need to use more detailed key and drop the other one
+				//valid for trees only
+				String[] parts1 = k1.split("\\."); //$NON-NLS-1$
+				String[] parts2 = k2.split("\\."); //$NON-NLS-1$
+				int size = Math.min(parts1.length, parts2.length);
+				for (int i = 0; i < size; i++) {
+					if (!parts1[i].equals(parts2[i])) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
 	public static final PatrolMemberType toMember(String fullName) {
 		PatrolMemberType member = new PatrolMemberType();
 		member.setIsLeader(false);
