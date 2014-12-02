@@ -21,43 +21,19 @@
  */
 package org.wcs.smart.query.ui.editor;
 
-import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.common.model.udig.IQueryService;
 
 /**
- * All query editor should implement this interface.
- *
- * @author egouge
+ * Query editors that include a map page.
+ * 
+ * @author Emily
  *
  */
-public interface IQueryEditor {
+public interface IMapQueryEditor extends IQueryEditor {
 
 	/**
-	 * @return the query being edited
+	 * Creates a query service for the map 
+	 * @return
 	 */
-	public QueryProxy getQueryProxy();
-	
-	/**
-	 * 
-	 * @return the editor input
-	 */
-	public QueryEditorInput getInputInternal();
-	
-	
-	/**
-	 * Validates the editor input
-	 */
-	public void validate();
-	
-	/**
-	 * Re-parses the current query regenerating and ui elements.
-	 * Used when background query data changed.  For example area keys
-	 * or data model keys.
-	 */
-	public void reparseQuery();
-	
-	/**
-	 * Sets the state of editor
-	 * @param dirty
-	 */
-	public void setDirty(boolean dirty);
+	public abstract IQueryService createQueryService();
 }

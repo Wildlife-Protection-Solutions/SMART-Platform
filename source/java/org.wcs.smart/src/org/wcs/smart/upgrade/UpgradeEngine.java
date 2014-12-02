@@ -25,6 +25,7 @@ import org.wcs.smart.upgrade.v200.Upgrader112To200;
 import org.wcs.smart.upgrade.v300.Upgrader200To300;
 import org.wcs.smart.upgrade.v300.Upgrader300To302;
 import org.wcs.smart.upgrade.v310.Upgrader302To310;
+import org.wcs.smart.upgrade.v320.Upgrader310To320;
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
@@ -36,12 +37,21 @@ import org.wcs.smart.upgrade.v310.Upgrader302To310;
 public class UpgradeEngine {
 
 	private static final String EXTENSION_ID = "org.wcs.smart.dbUpgrage"; //$NON-NLS-1$
-
+	
 	private enum UpgradeFromVersion {
-		V112,
-		V200,
-		V300,
-		V302
+		V112("1.1.2", Upgrader112To200.class), //$NON-NLS-1$
+		V200("2.0.0", Upgrader200To300.class), //$NON-NLS-1$
+		V300("3.0.0", Upgrader300To302.class), //$NON-NLS-1$
+		V302("3.0.2", Upgrader302To310.class), //$NON-NLS-1$
+		V310("3.1.0", Upgrader310To320.class); //$NON-NLS-1$
+		
+		public String versionString;
+		public Class<? extends IDatabaseUpgrader> upgradeEngine;
+		
+		private UpgradeFromVersion(String version, Class<? extends IDatabaseUpgrader> engine){
+			this.versionString = version;
+			this.upgradeEngine = engine;
+		}
 	}
 	
 	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
@@ -66,16 +76,10 @@ public class UpgradeEngine {
 				}
 				
 				UpgradeFromVersion fromVersion = null;
-				if ("3.0.0".equals(version)) { //$NON-NLS-1$
-					fromVersion = UpgradeFromVersion.V300;
-				} else if ("2.0.0".equals(version)) { //$NON-NLS-1$
-					fromVersion = UpgradeFromVersion.V200;
-				} else if ("1.1.2".equals(version)) { //$NON-NLS-1$
-					fromVersion = UpgradeFromVersion.V112;
-				}else if ("3.0".equals(version)){ //$NON-NLS-1$
-					fromVersion = UpgradeFromVersion.V300;
-				}else if ("3.0.2".equals(version)){ //$NON-NLS-1$
-					fromVersion = UpgradeFromVersion.V302;
+				for (UpgradeFromVersion v : UpgradeFromVersion.values()){
+					if (v.versionString.equals(version)){
+						fromVersion = v;
+					}
 				}
 				
 				if (fromVersion == null) {
@@ -91,18 +95,22 @@ public class UpgradeEngine {
 					return;
 				}
 				
-				switch (fromVersion) {
-				case V112:
-					Upgrader112To200.upgrade(s, monitor);
-				case V200:
-					Upgrader200To300.upgrade(s, monitor);
-				case V300:
-					Upgrader300To302.upgrade(s, monitor);
-				case V302:
-					Upgrader302To310.upgrade(s, monitor);
-				default:
-					break;
+				//find the index of the current from version; then
+				//run all upgrades from that index to upgrade to the 
+				//current version
+				int startIndex = 0;
+				for (int i = 0; i < UpgradeFromVersion.values().length; i++){
+					if (fromVersion == UpgradeFromVersion.values()[i]){
+						startIndex = i ;
+						break;
+					}
 				}
+				for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++){
+					UpgradeFromVersion v = UpgradeFromVersion.values()[i];
+					IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
+					upgrader.upgrade(s, monitor);
+				}
+				
 			}
 			
 			if (currentVersions != null) {

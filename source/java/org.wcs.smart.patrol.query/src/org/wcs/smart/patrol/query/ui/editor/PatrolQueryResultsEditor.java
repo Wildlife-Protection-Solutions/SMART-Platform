@@ -43,14 +43,18 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.map.udig.QueryService;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.udig.IQueryService;
+import org.wcs.smart.query.common.ui.QueryMapPageEditor;
 import org.wcs.smart.query.common.ui.QueryResultsTable;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
@@ -60,7 +64,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
-import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
@@ -70,13 +74,14 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public class PatrolQueryResultsEditor extends MultiPageEditorPart implements MapPart, IQueryEditor, IAdaptable{
+public class PatrolQueryResultsEditor extends MultiPageEditorPart implements MapPart, IMapQueryEditor, IAdaptable{
 
 	public static final String ID = "org.wcs.smart.query.ui.PatrolQueryResultsEditor";  //$NON-NLS-1$
 
 	private QueryProxy query;
 	private PatrolQueryTableResultsPage page1;
-	private PatrolQueryMapPage page2;
+//	private PatrolQueryMapPage page2;
+	private QueryMapPageEditor page2;
 	private boolean isDirty = false;
 	
 	private IAreaModifiedListener areaListener = null;
@@ -285,14 +290,16 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			page1 = new PatrolQueryTableResultsPage(this);
 			addPage(0, page1, input);
 			setPageText(0, Messages.PatrolQueryResultsEditor_TableTabName);
+			setPageImage(0, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.TABLE_ICON));
 			if (this.query != null && this.getQuery().getUuid() == null){
 				page1.setQuery();
 			}
 			
-			page2 = new PatrolQueryMapPage(this);
+//			page2 = new PatrolQueryMapPage(this);
+			page2 = new QueryMapPageEditor(this);
 			addPage(1, page2, input);
 			setPageText(1, Messages.PatrolQueryResultsEditor_MapTabName);
-			
+			setPageImage(1, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		} catch (final Throwable t) {
 			QueryPlugIn.log("Could not open query editor", t); //$NON-NLS-1$
 		}finally{
@@ -371,7 +378,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		updatePartName();
 		page1.getQueryResultsTable().clearColumns();
 		page1.setQuery();
-		page2.reset();
+		page2.reset(true);
 		
 		setDirty(false);
 		//this is a bit of a hack to get the querylistview to be updated
@@ -495,5 +502,11 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 		}
 				
 		QueryEventManager.getInstance().fireRefreshQuery(getQuery());
+	}
+
+
+	@Override
+	public IQueryService createQueryService() {
+		return new QueryService(getQuery());
 	}
 }

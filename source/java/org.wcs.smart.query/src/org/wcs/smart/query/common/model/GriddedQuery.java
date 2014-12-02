@@ -37,6 +37,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.util.SmartUtils;
@@ -49,7 +50,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 @Entity
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public abstract class GriddedQuery extends Query {
+public abstract class GriddedQuery extends StyledQuery {
 	
 	protected String strQuery;			//query string stored in db
 	protected String crsDefinition;	//query crs definition stored in db

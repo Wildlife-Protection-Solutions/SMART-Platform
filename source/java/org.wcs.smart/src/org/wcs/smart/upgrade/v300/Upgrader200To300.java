@@ -37,6 +37,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
@@ -45,9 +46,9 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  * @author elitvin
  * @since 3.0.0
  */
-public class Upgrader200To300 {
+public class Upgrader200To300 implements IDatabaseUpgrader {
 
-	public static void upgrade(Session s, IProgressMonitor monitor) {
+	public void upgrade(Session s, IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader200To300_SubTask_Name);
 		s.doWork(new Work() {
 			@Override

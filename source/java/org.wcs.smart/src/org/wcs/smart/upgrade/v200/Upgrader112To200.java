@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
@@ -40,9 +41,9 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  * @author elitvin
  * @since 3.0.0
  */
-public class Upgrader112To200 {
+public class Upgrader112To200 implements IDatabaseUpgrader {
 
-	public static void upgrade(Session s, IProgressMonitor monitor) {
+	public void upgrade(Session s, IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader112To200_SubTask_Name);
 		s.doWork(new Work() {
 			@Override
@@ -64,7 +65,7 @@ public class Upgrader112To200 {
 		});
 	}
 
-	public static void upgrade112To200(Connection c) throws Exception {
+	private static void upgrade112To200(Connection c) throws Exception {
 		
 		InputStream in = Upgrader112To200.class.getClassLoader().getResourceAsStream("org/wcs/smart/upgrade/v200/version_2.0.0.sql"); //$NON-NLS-1$
 		UpgradeEngine.runScript(c, in);
@@ -81,7 +82,7 @@ public class Upgrader112To200 {
 		c.commit();
 	}
 
-	public static void upgradeCt111to200(Connection c) throws Exception{
+	private static void upgradeCt111to200(Connection c) throws Exception{
 		
 		String sql = "select count(*) from sys.SYSTABLES a join sys.SYSSCHEMAS b on a.schemaid = b.schemaid WHERE a.tablename='CYBERTRACKER_PROPERTIES' and b.schemaname='SMART'"; //$NON-NLS-1$
 		ResultSet rs = c.createStatement().executeQuery(sql);

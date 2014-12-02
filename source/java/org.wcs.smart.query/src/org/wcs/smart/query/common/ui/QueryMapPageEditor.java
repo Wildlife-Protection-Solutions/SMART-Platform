@@ -29,6 +29,10 @@ import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IService;
 import net.refractions.udig.project.ILayer;
+import net.refractions.udig.project.ILayerListener;
+import net.refractions.udig.project.LayerEvent;
+import net.refractions.udig.project.LayerEvent.EventType;
+import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
@@ -40,6 +44,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -47,6 +52,8 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.StyledQuery;
+import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
@@ -60,10 +67,39 @@ import org.wcs.smart.ui.map.SmartMapEditorPart;
  */
 public class QueryMapPageEditor extends SmartMapEditorPart{
 	
-	private QueryResultsEditor parentEditor;
+	private IMapQueryEditor parentEditor;
 	private IQueryService queryService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
 	private IViewportModelListener initListener ;
+	
+	private ILayerListener styleListener = new ILayerListener() {
+		
+		@Override
+		public void refresh(LayerEvent event) {
+			if (event.getType() == EventType.STYLE){
+				try{
+					updateStyle(event.getSource());
+				}catch (Exception ex){
+					QueryPlugIn.log("Error setting query layer style. " + ex.getMessage(), ex); //$NON-NLS-1$
+				}
+			}
+		}
+		
+		private void updateStyle(ILayer layer) throws IOException{
+			StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
+			
+			String dataType = layer.getGeoResource().getIdentifier().getRef();
+			if (dataType == null){
+				dataType = layer.getGeoResource().getID().toString();
+			}
+			sq.updateStyle(dataType, (StyleBlackboard) layer.getStyleBlackboard());
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					parentEditor.setDirty(true);
+				}});
+		}
+	};
 	/*
 	 * Job for adding query layer to map
 	 */
@@ -77,11 +113,37 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 			}
 	    	try {
 	    		List<IGeoResource> layers = (List<IGeoResource>) queryService.resources(monitor);
-	    		AddLayersCommand command = new AddLayersCommand(layers);
+				AddLayersCommand command = new AddLayersCommand(layers) {
+					@Override
+					public void run(IProgressMonitor monitor) throws Exception {
+						super.run(monitor);
+						
+						if (parentEditor.getQueryProxy().getQuery() instanceof StyledQuery){
+							//update layer style
+							final StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
+							if (sq.getStyle() != null){
+								for (ILayer layer : getLayers()){
+									try{
+										String dataType = layer.getGeoResource().getIdentifier().getRef();
+										if (dataType == null){
+											dataType = layer.getGeoResource().getID().toString();
+										}
+										sq.applyStyle(dataType, (StyleBlackboard)layer.getStyleBlackboard());
+									}catch (Exception ex){
+										QueryPlugIn.log(ex.getMessage(), ex);
+									}
+								}
+							}
+							
+							//add style listeners
+							for (final ILayer layer : getLayers()){
+								layer.addListener(styleListener);
+							}
+						}
+					}
+				};
 	    		if (getMap() == null) return Status.CANCEL_STATUS;
-
 	    		getMap().sendCommandASync(command);
-				
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, Messages.QueryMapPageEditor_UnknownStatus, IStatus.ERROR, Messages.QueryMapPageEditor_ErrorLoadingPages, e);
 			}
@@ -128,9 +190,12 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	 * Creates a new query map editor page
 	 * 
 	 * @param parent
-	 *            parent editor
+	 *            parent editor - this must extend MultiPageEditorPart
 	 */
-	public QueryMapPageEditor(QueryResultsEditor parent) {
+	public QueryMapPageEditor(IMapQueryEditor parent) {
+		if (!(parent instanceof MultiPageEditorPart)){
+			throw new RuntimeException("parent editor must extend MultiPageEditorPart"); //$NON-NLS-1$
+		}
 		this.parentEditor = parent;
 	}
 
@@ -139,7 +204,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	 */
 	@Override
 	public MultiPageEditorPart getParentEditor() {
-		return this.parentEditor;
+		return (MultiPageEditorPart)this.parentEditor;
 	}
 
 	

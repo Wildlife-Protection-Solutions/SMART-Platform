@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART
 Bundle-SymbolicName: org.wcs.smart;singleton:=true
-Bundle-Version: 3.1.0
+Bundle-Version: 3.2.0.ALPHA
 Bundle-Localization: plugin
 Bundle-Activator: org.wcs.smart.SmartPlugIn
 Require-Bundle: org.eclipse.core.databinding,
@@ -14,7 +14,8 @@ Require-Bundle: org.eclipse.core.databinding,
  net.refractions.udig.tool.default;bundle-version="1.3.0";visibility:=reexport,
  net.refractions.udig.info;bundle-version="1.3.3",
  net.refractions.udig.style.sld;bundle-version="1.2.0",
- org.eclipse.ui.forms;bundle-version="3.5.100"
+ org.eclipse.ui.forms;bundle-version="3.5.100",
+ net.refractions.udig.style;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
@@ -46,6 +47,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.wcs.smart.udig,
  org.wcs.smart.udig.catalog.smart,
  org.wcs.smart.udig.catalog.smart.ui,
+ org.wcs.smart.udig.style,
  org.wcs.smart.ui,
  org.wcs.smart.ui.ca.datamodel,
  org.wcs.smart.ui.ca.properties,

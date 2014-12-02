@@ -65,7 +65,7 @@ import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.ui.QueryEditorUtils;
 import org.wcs.smart.query.ui.definition.QueryDefView;
-import org.wcs.smart.query.ui.editor.IQueryEditor;
+import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
@@ -75,7 +75,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class QueryResultsEditor extends MultiPageEditorPart implements MapPart, IQueryEditor, IAdaptable{
+public abstract class QueryResultsEditor extends MultiPageEditorPart implements MapPart, IMapQueryEditor, IAdaptable{
 
 	protected QueryProxy query;
 	protected QueryResultsTablePage page1;
@@ -565,6 +565,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 * @return
 	 */
 	public abstract IQueryService createQueryService();
+	
 	/**
 	 * 
 	 * @return valid date filters for query
