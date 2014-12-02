@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -35,6 +38,20 @@ import org.eclipse.swt.widgets.Shell;
 public class Ct2SmartMatcher {
 
 	public static void main(String[] args) throws Exception {
+		if (args.length > 0) {
+			FileOutputStream fout = new FileOutputStream(args[0]);
+			FileOutputStream ferr = (args.length > 1) ? new FileOutputStream(args[1]) : fout;
+			
+			MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
+			MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
+			
+			PrintStream stdout = new PrintStream(multiOut);
+			PrintStream stderr = new PrintStream(multiErr);
+			
+			System.setOut(stdout);
+			System.setErr(stderr);
+		}
+		
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		
