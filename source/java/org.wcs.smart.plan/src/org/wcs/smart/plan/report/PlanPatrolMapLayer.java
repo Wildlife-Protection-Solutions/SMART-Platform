@@ -26,6 +26,7 @@ import java.util.List;
 
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IService;
+import net.refractions.udig.project.internal.StyleBlackboard;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -50,6 +51,11 @@ public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 	public PlanPatrolMapLayer() {
 	}
 
+	@Override
+	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource){
+		return null;
+	}
+	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
 		if (!(handle instanceof OdaDataSetHandle)){

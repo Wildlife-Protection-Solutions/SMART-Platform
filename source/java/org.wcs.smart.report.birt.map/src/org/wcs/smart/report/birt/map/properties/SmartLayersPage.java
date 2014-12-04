@@ -25,9 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.ui.graphics.Glyph;
-import net.refractions.udig.ui.graphics.SLDs;
-
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -66,14 +63,6 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.LineSymbolizer;
-import org.geotools.styling.PointSymbolizer;
-import org.geotools.styling.PolygonSymbolizer;
-import org.geotools.styling.RasterSymbolizer;
-import org.geotools.styling.Rule;
-import org.geotools.styling.Style;
-import org.geotools.styling.Symbolizer;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -247,10 +236,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			public Image getImage(Object element) {
 				if (element instanceof LayerDefinition){
 					if (((LayerDefinition) element).style != null){
-						Style sld = (Style) BirtMapUtils.mementoToStyle(((LayerDefinition)element).style);
-						if (sld != null){
-							return createImage(sld);
-						}
+						return BirtMapUtils.parseImageFromStyleString(((LayerDefinition)element).style);
 					}
 				}
 				return null;
@@ -700,57 +686,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	public void refresh(){
 		updateUI();
 	}
-	
-	
-	private  Image createImage(Style sld){
-		Rule r = getRule(sld);
-		if (r == null){
-			return null;
-		}
-		if (r.symbolizers().size() == 0){
-			return null;
-		}
-		
-		Symbolizer sym = r.symbolizers().get(0);
-		if (PointSymbolizer.class.isAssignableFrom(sym.getClass())){
-			return Glyph.point(r).createImage();
-		}else if (LineSymbolizer.class.isAssignableFrom(sym.getClass())){
-			return Glyph.line(r).createImage();
-		}else if (PolygonSymbolizer.class.isAssignableFrom(sym.getClass())){
-			return Glyph.polygon(r).createImage();
-		}else if (RasterSymbolizer.class.isAssignableFrom(sym.getClass())){
-			return Glyph.grid(null, null, null, null).createImage();
-		}		
-		return null;
-	}
-	
-	 private static Rule getRule( Style sld ) {
-	        Rule rule = null;
-	        int size = 0;
-
-	        for( FeatureTypeStyle style : sld.featureTypeStyles() ) {
-	            for( Rule potentialRule : style.rules() ) {
-	                if (potentialRule != null) {
-	                    Symbolizer[] symbs = potentialRule.getSymbolizers();
-	                    for( int m = 0; m < symbs.length; m++ ) {
-	                        if (symbs[m] instanceof PointSymbolizer) {
-	                            int newSize = SLDs.pointSize((PointSymbolizer) symbs[m]);
-	                            if (newSize > 16 && size != 0) {
-	                                // return with previous rule
-	                                return rule;
-	                            }
-	                            size = newSize;
-	                            rule = potentialRule;
-	                        } else {
-	                            return potentialRule;
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	        return rule;
-	    }
-	
 }
 
 

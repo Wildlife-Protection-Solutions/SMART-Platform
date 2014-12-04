@@ -30,6 +30,7 @@ import java.util.Map;
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IResolve;
+import net.refractions.udig.project.internal.StyleBlackboard;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -59,6 +60,11 @@ public class SurveySamplingUnitMapLayer implements IBirtMapLayerManager {
 	public SurveySamplingUnitMapLayer() {
 	}
 
+	@Override
+	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource){
+		return null;
+	}
+	
 	@Override
 	public boolean canAddToMap(DataSetHandle handle) {
 		if (!(handle instanceof OdaDataSetHandle)){

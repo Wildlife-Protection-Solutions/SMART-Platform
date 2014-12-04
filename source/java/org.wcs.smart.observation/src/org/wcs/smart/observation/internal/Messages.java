@@ -106,6 +106,8 @@ public class Messages extends NLS {
 	public static String ImportFromWaypointWizardPage_PageTitle;
 	
 	public static String ImportGpsDataWizard_GPS_WarningNoneFound;
+
+	public static String ImportGpsDataWizard_ImportOp;
 	public static String ImportGpxWizardPage_AllFilesFilterName;
 	public static String ImportGpxWizardPage_FilesLabel;
 	public static String ImportGpxWizardPage_GPXFileFilterName;

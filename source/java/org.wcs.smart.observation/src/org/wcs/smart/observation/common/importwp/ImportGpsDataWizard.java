@@ -33,6 +33,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 
 /**
@@ -58,7 +59,7 @@ public abstract class ImportGpsDataWizard extends Wizard implements IPageChangin
 	 * Creates a new wizard.
 	 */
 	public ImportGpsDataWizard(GPSDataImport.ImportType type) {
-		setWindowTitle(MessageFormat.format("Import {0} Data", new Object[]{type.guiName}));
+		setWindowTitle(MessageFormat.format(Messages.ImportGpsDataWizard_ImportOp, new Object[]{type.guiName}));
 		this.type = type;
 		super.setForcePreviousAndNextButtons(true);
 		super.setNeedsProgressMonitor(true);

@@ -61,7 +61,7 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 		//query text in the BIRT smart
 		//report item
 		List<Report> newReports = engine.getSession().createCriteria(Report.class).add(Restrictions.eq("conservationArea", engine.getNewCa())).list(); //$NON-NLS-1$
-		monitor.beginTask("Copying Report Map Items", newReports.size());
+		monitor.beginTask(Messages.SmartMapItemCloner_CloningReportItem, newReports.size());
 		for (Report r : newReports){
 			File reportFile = new File(new File(engine.getNewCa().getFileDataStoreLocation(), ReportPlugIn.REPORT_DIR), r.getFilename());
 			updateReportFile(r, reportFile, engine);

@@ -8,10 +8,12 @@ Require-Bundle: org.wcs.smart,
  org.wcs.smart.query,
  org.wcs.smart.report,
  org.eclipse.datatools.connectivity.oda.design.ui,
- org.eclipse.birt.report.designer.ui.editors
+ org.eclipse.birt.report.designer.ui.editors,
+ org.wcs.smart.report.birt.map;bundle-version="3.1.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.data.oda.smart.impl,
  org.wcs.smart.data.oda.smart.impl.table,
- org.wcs.smart.data.oda.smart.query.common
+ org.wcs.smart.data.oda.smart.query.common,
+ org.wcs.smart.report.birt.query.map
 Bundle-Vendor: org.wcs.smart

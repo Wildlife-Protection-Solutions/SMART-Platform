@@ -21,10 +21,6 @@
  */
 package org.wcs.smart.observation.common.importwp;
 
-import java.text.DateFormat;
-import java.text.MessageFormat;
-import java.util.Date;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -38,7 +34,7 @@ import org.wcs.smart.observation.internal.Messages;
 
 /**
  * Option composite for importing tracks and waypoints.  Three
- * options types are availabe: all, date and select.
+ * options types are available: all, date and select.
  * 
  * @author Emily
  *
@@ -55,13 +51,14 @@ public class ImportOptionsComposite extends Composite {
 	private ImportType importType;
 	private String warnMessage;
 	
-	private ImportOption[] validOptions = {ImportOption.ALL, ImportOption.DATE, ImportOption.SELECT};
+	private ImportOption[] validOptions = {ImportOption.ALL, 
+			ImportOption.DATE, 
+			ImportOption.SELECT};
+
 	private String[] labels = {Messages.ImportGpxWizardPage_ImportAllOp,
 			Messages.ImportGpxWizardPage_ImportSingleDayOp,
 			Messages.ImportGpxWizardPage_ImportSelectionOp};
-			
 
-//	private Date date;
 	
 	private Listener selectionListener = new Listener() {
 		@Override
@@ -70,25 +67,6 @@ public class ImportOptionsComposite extends Composite {
 		}
 	};
 	
-//	public ImportOptionsComposite(Composite parent, Date date, ImportType importType) {
-//		super(parent, SWT.NONE);
-//		this.importType = importType;
-//		String dateStr = date != null ? DateFormat.getDateInstance(DateFormat.MEDIUM).format(date) : ""; //$NON-NLS-1$
-//		validOptions = new ImportOption[]{ImportOption.ALL, ImportOption.DATE, ImportOption.SELECT};
-//		labels = new String[]{Messages.ImportGpxWizardPage_ImportAllOp,
-//				MessageFormat.format(Messages.ImportGpxWizardPage_ImportSingleDayOp, new Object[]{importType.guiName.toLowerCase(), dateStr}),
-//				MessageFormat.format(Messages.ImportGpxWizardPage_ImportSelectionOp, new Object[]{importType.guiName.toLowerCase(), dateStr})
-//		};
-//
-//		createContent();
-//	}
-
-//	public ImportOptionsComposite(Composite parent, Date date, ImportType importType) {
-//		super(parent, SWT.NONE);
-//		this.date = date;
-//		this.importType = importType;
-//		createContent();
-//	}
 	
 	/**
 	 * 
@@ -150,62 +128,14 @@ public class ImportOptionsComposite extends Composite {
 			gd.verticalIndent = 10;
 			lbl1.setLayoutData(gd);
 		}
-
-		//TODO: fix
-//		if (all && warnUser && pld.getPatrolLeg().getPatrol().getLegs().size() > 1){
-//			Label lbl1 = new Label(this, SWT.WRAP);
-//			lbl1.setText(MessageFormat.format(Messages.ImportOptionsComposite_ImportAllWarning , new Object[]{importType.guiName}));
-//			GridData gd = new GridData(SWT.FILL, SWT.CENTER, true, false, 3, 1);
-//			gd.widthHint = 500;
-//			gd.verticalIndent = 10;
-//			lbl1.setLayoutData(gd);
-//		}
 	}
-	
-//	protected String getDateString() {
-//		if (date == null)
-//			return ""; //$NON-NLS-1$
-//		String op = DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
-//		//TODO: fix
-////		if (pld.getPatrolLeg().getPatrol().getLegs().size() > 1){
-////			//more than one patrol; include leg id in import option
-////			op += " (" + Messages.ImportOptionsComposite_LegPrefix + ": " + pld.getPatrolLeg().getId() + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
-////		}
-//		return op;
-//	}
-
 	private Button createOptionButton(Composite parent, String label){
 		Button btn = new Button(parent, SWT.RADIO);
 		btn.setText(label);
 		btn.addListener(SWT.Selection, selectionListener);
 		return btn;
 	}
-	
-	
-//	private void createOpSelect(Composite parent, String label){
-//		opSelect = new Button(parent, SWT.RADIO);
-//		opSelect.setText(MessageFormat.format(label, new Object[]{importType.guiName.toLowerCase(), getDateString()}));
-//		opSelect.addListener(SWT.Selection, selectionListener);
-//	}
-//	private void createOpDate(Composite parent, String label){
-//		opDate = new Button(parent, SWT.RADIO);
-//		opDate.setText(MessageFormat.format(label, new Object[]{importType.guiName.toLowerCase(), getDateString()}) );
-//		opDate.setSelection(false);
-//		opDate.addListener(SWT.Selection, selectionListener);
-//	}
-//	
-//	private void createOpAll(Composite parent, String label){
-//		opAll = new Button(parent, SWT.RADIO);
-//		String message = label;
-//		//TODO: fix
-////		if (pld.getPatrolLeg().getPatrol().getLegs().size() > 1 && warnUser){
-////			message += "*"; //$NON-NLS-1$
-////		}
-//		opAll.setText(message);
-//		opAll.setSelection(true);
-//		opAll.addListener(SWT.Selection, selectionListener);
-//	}
-	
+
 	/**
 	 * 
 	 * @return the selected import option

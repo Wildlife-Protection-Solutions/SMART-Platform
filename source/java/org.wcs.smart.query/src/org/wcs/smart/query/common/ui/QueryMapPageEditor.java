@@ -129,6 +129,9 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 											dataType = layer.getGeoResource().getID().toString();
 										}
 										sq.applyStyle(dataType, (StyleBlackboard)layer.getStyleBlackboard());
+										
+//										((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
+										
 									}catch (Exception ex){
 										QueryPlugIn.log(ex.getMessage(), ex);
 									}

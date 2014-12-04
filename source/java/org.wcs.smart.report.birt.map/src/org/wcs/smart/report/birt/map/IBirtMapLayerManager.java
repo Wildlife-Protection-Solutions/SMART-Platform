@@ -24,12 +24,16 @@ package org.wcs.smart.report.birt.map;
 import java.util.List;
 
 import net.refractions.udig.catalog.IGeoResource;
+import net.refractions.udig.project.internal.StyleBlackboard;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 
 /**
- * BIRT Map Layer Manager
+ * This provides a presentation link between any BIRT datasethandle
+ * and a BIRT map.  Implementations should not store any state in these
+ * objects.  The objects are resued for multiple reports.
+ * 
  * @author Emily
  *
  */
@@ -41,6 +45,16 @@ public interface IBirtMapLayerManager {
 	 * @return
 	 */
 	public boolean canAddToMap(DataSetHandle handle);
+	
+	/**
+	 * This style blackboard represents the default style
+	 * for the map layer.  Users will have the ability to change the style, but this
+	 * function should always return the default style (if defined).  Can
+	 * return null if not defined or defined in the georesource.
+	 *  
+	 * @return the style blackboard to associated with the layer or null if none defined
+	 */
+	public StyleBlackboard getDefaultStyle(DataSetHandle handle, IGeoResource resource);
 	
 	/**
 	 * Creates georesources based on the dataset handle and report context

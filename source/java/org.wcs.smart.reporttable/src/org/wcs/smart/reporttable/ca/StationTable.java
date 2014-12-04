@@ -24,7 +24,6 @@ package org.wcs.smart.reporttable.ca;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
@@ -32,7 +31,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.reporttable.internal.Messages;
 /**
  * Wrapper to convert station objects
