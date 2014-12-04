@@ -17,8 +17,8 @@ public class MappingsMerger {
 
 	public static void main(String[] args) throws JAXBException, IOException {
 		System.out.println("Merging mappings...");
-		String fromFileStr = args.length > 0 ? args[0] : "match_super_x.xml";
-		String toFileStr   = args.length > 1 ? args[1] : "match_super.xml";
+		String fromFileStr = args.length > 0 ? args[0] : "d:\\c_14-10-28\\test_data\\AFI_Matching_Jeff_V25.xml";
+		String toFileStr   = args.length > 1 ? args[1] : "d:\\c_14-10-28\\test_data\\OKW_Matching_Empty.xml";
 		Ct2Smart from = FileUtil.loadCt2Smart(new File(fromFileStr));
 		Ct2Smart to = FileUtil.loadCt2Smart(new File(toFileStr));
 		MappingsMerger merger = new MappingsMerger();
