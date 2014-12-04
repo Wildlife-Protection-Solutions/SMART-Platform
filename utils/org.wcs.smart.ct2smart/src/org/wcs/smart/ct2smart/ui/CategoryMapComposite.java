@@ -21,10 +21,15 @@
  */
 package org.wcs.smart.ct2smart.ui;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -36,13 +41,18 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.ct2smart.dao.ConnectionUtil;
+import org.wcs.smart.ct2smart.matcher.FileUtil;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Attribute;
 import org.wcs.smart.ct2smart.matcher.model.Ct2AttributeType;
 import org.wcs.smart.ct2smart.matcher.model.Ct2Smart;
@@ -63,6 +73,7 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 	private CategoryMapBuilder catMapBuilder;
 	
 	private List<Ct2Attribute> columns;
+	private Ct2Smart input;
 	
 	private CtCategoryEAComposite extraAttrCmp;
 
@@ -115,6 +126,15 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 			rebuildColumns();
 		}
 		
+		Button btnAdd = new Button(group, SWT.PUSH);
+		btnAdd.setText("External Import");
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				importExternalCategories();
+			}
+		});
+		
 		extraAttrCmp = new CtCategoryEAComposite(this, lookup);
 	}
 
@@ -129,6 +149,7 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 	}
 
 	public void setInput(Ct2Smart ct2Smart) {
+		input = ct2Smart;
 		List<Ct2Attribute> items = extractColumns(ct2Smart);
 		
 		if (!isEqual(columns, items) || ct2Smart.getCtCategory().isEmpty()) {
@@ -222,7 +243,32 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		
 		return true;
 	}
-	
+
+	protected void importExternalCategories() {
+		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+		dlg.setFilterNames(new String[] {"XML file"});
+		dlg.setFilterExtensions(new String[] {"*.xml"});
+		String fn = dlg.open();
+		if (fn != null) {
+			try {
+				Ct2Smart from = FileUtil.loadCt2Smart(new File(fn));
+				input.getCtCategory().clear();
+				List<CtCategory> newCats = catMapBuilder.extractCategoryValues(columns);
+				CategoryMatcher matcher = new CategoryMatcher();
+				matcher.match(newCats, from.getCtCategory());
+				input.getCtCategory().addAll(newCats);
+				MessageDialog.openInformation(getShell(), "External import", "Matching category mappings are imported from extarnal mapping.");
+			} catch (Exception e) {
+				MessageDialog.openError(getShell(), "Error", "Error importing external category mapping data");
+				e.printStackTrace();
+			}
+			rebuildColumns();
+			viewer.setInput(input.getCtCategory());
+			extraAttrCmp.setVisible(false);
+		}
+		
+	}
+
 	private class CtCategoryLabelProvider extends ColumnLabelProvider {
 		private Ct2Attribute a;
 		
