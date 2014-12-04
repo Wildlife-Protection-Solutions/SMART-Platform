@@ -252,11 +252,11 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		if (fn != null) {
 			try {
 				Ct2Smart from = FileUtil.loadCt2Smart(new File(fn));
-				input.getCtCategory().clear();
-				List<CtCategory> newCats = catMapBuilder.extractCategoryValues(columns);
+//				input.getCtCategory().clear();
+//				List<CtCategory> newCats = catMapBuilder.extractCategoryValues(columns);
 				CategoryMatcher matcher = new CategoryMatcher();
-				matcher.match(newCats, from.getCtCategory());
-				input.getCtCategory().addAll(newCats);
+				matcher.match(input.getCtCategory(), from.getCtCategory());
+//				input.getCtCategory().addAll(newCats);
 				MessageDialog.openInformation(getShell(), "External import", "Matching category mappings are imported from extarnal mapping.");
 			} catch (Exception e) {
 				MessageDialog.openError(getShell(), "Error", "Error importing external category mapping data");
