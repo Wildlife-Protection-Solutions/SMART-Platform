@@ -79,7 +79,6 @@ public class ImportFromWaypointWizardPage extends ImportOptionsWizardPage {
 		center.setLayout(new GridLayout(1, false));
 		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
-		ImportGpsDataWizard w = ((ImportGpsDataWizard)getWizard());
 		ops = new ImportOptionsComposite(center, getImportType(), getValidOptions(), getOptionLabels(), getWarningMessage());
 		ops.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		ops.addListener(SWT.Selection, new Listener(){
@@ -87,8 +86,6 @@ public class ImportFromWaypointWizardPage extends ImportOptionsWizardPage {
 			public void handleEvent(Event event) {
 				updateComplete();
 			}});
-		
-		
 		
 		updateComplete();
 		super.setTitle(Messages.ImportFromWaypointWizardPage_PageTitle);

@@ -44,9 +44,14 @@ public class Messages extends NLS {
 	public static String StyleCellEditor_CreateMapLayerJobName;
 	public static String StyleCellEditor_Error_CouldNotCreateStyleEditor;
 	public static String StyleCellEditor_Error_CouldNotOpenStyleDialog;
+	public static String StyleEditorButtonListener_UnableToImportSld;
 	public static String SmartMapItem_Name;
 	public static String SmartMapItemCloner_CloneError;
+	public static String SmartMapItemCloner_CloningReportItem;
 	
+	public static String SmartStyleEditorDialog_RevertButton;
+	public static String SmartStyleEditorDialog_Title;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

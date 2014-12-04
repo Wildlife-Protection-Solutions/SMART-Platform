@@ -27,7 +27,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.style.sld.SLDContent;
+import net.refractions.udig.ui.graphics.Glyph;
+import net.refractions.udig.ui.graphics.SLDs;
 
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -38,8 +42,18 @@ import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.eclipse.birt.report.model.api.util.DimensionUtil;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.XMLMemento;
+import org.geotools.styling.FeatureTypeStyle;
+import org.geotools.styling.LineSymbolizer;
+import org.geotools.styling.PointSymbolizer;
+import org.geotools.styling.PolygonSymbolizer;
+import org.geotools.styling.RasterSymbolizer;
+import org.geotools.styling.Rule;
+import org.geotools.styling.Style;
+import org.geotools.styling.Symbolizer;
 import org.wcs.smart.report.birt.map.internal.Messages;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * Utilities to support the BIRT Smart map item generation. 
@@ -49,6 +63,36 @@ import org.wcs.smart.report.birt.map.internal.Messages;
  */
 public class BirtMapUtils {
 	
+	public static Image parseImageFromStyleString(String styleString){
+		StyleBlackboard sb = parseStyleString(styleString);
+		if (sb == null) return null;
+		
+		Style glyphStyle = (Style) sb.get(SLDContent.ID);
+		if (glyphStyle == null) return null;
+		
+		return createImage(glyphStyle);	
+	}
+	
+	public static StyleBlackboard parseStyleString(String styleString){
+		//for backwards compatibility this can either be a blackboard
+		//json string or a single SLD xmlMemento
+		if (styleString.startsWith("[")){ //$NON-NLS-1$
+			//blackboard
+			try{
+				StyleBlackboard sb = StyleManager.INSTANCE.fromString(styleString);
+				return sb;
+			}catch (Exception ex){
+				SmartMapItemPlugIn.log(ex.getMessage(), ex);
+				return null;
+			}
+		}else{
+			//xml sld content string
+			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
+			sb.put(SLDContent.ID, mementoToStyle(styleString));
+			return sb;
+		}
+		
+	}
 	
 	/**
 	 * Converts an xml style momento to a Style object. Assumes
@@ -57,7 +101,7 @@ public class BirtMapUtils {
 	 * @param xmlMemento
 	 * @return
 	 */
-	public static Object mementoToStyle(String xmlMemento) {
+	private static Object mementoToStyle(String xmlMemento) {
 		try {
 			XMLMemento memento = XMLMemento.createReadRoot(new StringReader(
 					xmlMemento));
@@ -187,5 +231,56 @@ public class BirtMapUtils {
 		}
 		
 		return layerExtensions;
+	}
+	
+	
+	
+	private static Image createImage(Style sld) {
+		Rule r = getRule(sld);
+		if (r == null) {
+			return null;
+		}
+		if (r.symbolizers().size() == 0) {
+			return null;
+		}
+
+		Symbolizer sym = r.symbolizers().get(0);
+		if (PointSymbolizer.class.isAssignableFrom(sym.getClass())) {
+			return Glyph.point(r).createImage();
+		} else if (LineSymbolizer.class.isAssignableFrom(sym.getClass())) {
+			return Glyph.line(r).createImage();
+		} else if (PolygonSymbolizer.class.isAssignableFrom(sym.getClass())) {
+			return Glyph.polygon(r).createImage();
+		} else if (RasterSymbolizer.class.isAssignableFrom(sym.getClass())) {
+			return Glyph.grid(null, null, null, null).createImage();
+		}
+		return null;
+	}
+
+	private static Rule getRule(Style sld) {
+		Rule rule = null;
+		int size = 0;
+
+		for (FeatureTypeStyle style : sld.featureTypeStyles()) {
+			for (Rule potentialRule : style.rules()) {
+				if (potentialRule != null) {
+					Symbolizer[] symbs = potentialRule.getSymbolizers();
+					for (int m = 0; m < symbs.length; m++) {
+						if (symbs[m] instanceof PointSymbolizer) {
+							int newSize = SLDs.pointSize((PointSymbolizer) symbs[m]);
+							if (newSize > 16 && size != 0) {
+								// return with previous rule
+								return rule;
+							}
+							size = newSize;
+							rule = potentialRule;
+						} else {
+							return potentialRule;
+						}
+					}
+				}
+			}
+		}
+		return rule;
 	}
 }

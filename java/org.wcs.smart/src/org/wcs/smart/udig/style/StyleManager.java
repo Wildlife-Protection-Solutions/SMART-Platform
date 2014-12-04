@@ -42,6 +42,7 @@ import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.XMLMemento;
 
 import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 /**
@@ -173,10 +174,12 @@ public class StyleManager {
 			if (se.getStyle() == null) continue;
 			String key = se.getID();
 			String value = se.getMemento();
-			writer.beginObject();
-			writer.name(ID_KEY).value(key); 
-			writer.name(VALUE_KEY).value(value); 
-			writer.endObject();
+			if (value != null){
+				writer.beginObject();
+				writer.name(ID_KEY).value(key); 
+				writer.name(VALUE_KEY).value(value); 
+				writer.endObject();
+			}
 		}
 		writer.endArray();
 		String value = sw.toString();
@@ -209,7 +212,11 @@ public class StyleManager {
 				if (name.equals(ID_KEY)){ 
 					styleId = reader.nextString();
 				}else if (name.equals(VALUE_KEY)){
-					value = reader.nextString();
+					if (reader.peek() != JsonToken.NULL){
+						value = reader.nextString();
+					}else{
+						reader.nextNull();
+					}
 				}else{
 					reader.skipValue();
 				}

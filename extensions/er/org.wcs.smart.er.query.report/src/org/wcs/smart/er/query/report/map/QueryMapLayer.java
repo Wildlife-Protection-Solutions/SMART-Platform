@@ -21,39 +21,16 @@
  */
 package org.wcs.smart.er.query.report.map;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
-import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IService;
 
-import org.eclipse.birt.report.engine.api.script.IReportContext;
-import org.eclipse.birt.report.model.api.DataSetHandle;
-import org.eclipse.birt.report.model.api.OdaDataSetHandle;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.hibernate.Session;
 import org.wcs.smart.er.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
-import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.query.QueryHibernateManager;
-import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.GridResultItem;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.DateFilter;
-import org.wcs.smart.query.model.filter.date.CustomDateFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.report.SmartReportParameters;
-import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
 
 /**
  * SMART query map layer implementation for survey queries
@@ -61,98 +38,24 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class QueryMapLayer implements IBirtMapLayerManager {
-
-	private static final String SMART_QUERY_ID = "org.wcs.smart.data.oda.smart.smartQueryDataset"; //$NON-NLS-1$
-	
-	public QueryMapLayer() {
-	}
+public class QueryMapLayer extends AbstractQueryMapLayer{
 
 	@Override
-	public boolean canAddToMap(DataSetHandle handle) {
-		if (!(handle instanceof OdaDataSetHandle)){
-			return false;
-		}
-		OdaDataSetHandle odaHandle = (OdaDataSetHandle)handle;
-		if (odaHandle.getExtensionID().equals(SMART_QUERY_ID)) {
-			String queryText = odaHandle.getQueryText();
-			String queryTypeKey = queryText.split(":")[0]; //$NON-NLS-1$
-			if (queryTypeKey.equals(SurveyGridQueryType.KEY) ||
-					queryTypeKey.equals(MissionQueryType.KEY) ||
-					queryTypeKey.equals(SurveyObservationQueryType.KEY) ||
-					queryTypeKey.equals(MissionTrackQueryType.KEY) ||
-					queryTypeKey.equals(SurveyWaypointQueryType.KEY)){
-				return true;
-			}
-			if (QueryTypeManager.getInstance().findDeprecatedQueryType(queryTypeKey)!= null){
-				return true;
-			}
+	public boolean canAddToMap(String queryTypeKey) {
+		if (queryTypeKey.equals(SurveyGridQueryType.KEY) ||
+				queryTypeKey.equals(MissionQueryType.KEY) ||
+				queryTypeKey.equals(SurveyObservationQueryType.KEY) ||
+				queryTypeKey.equals(MissionTrackQueryType.KEY) ||
+				queryTypeKey.equals(SurveyWaypointQueryType.KEY)){
+			return true;
 		}
 		return false;
 	}
 
+
 	@Override
-	public List<IGeoResource> createLayer(DataSetHandle handle, IReportContext context) throws Exception {
-		if (!(handle instanceof OdaDataSetHandle)){
-			return null;
-		}
-		String queryText = ((OdaDataSetHandle)handle).getQueryText();
-
-		byte[] quuid = SmartUtils.decodeHex(queryText.split(":")[1]); //$NON-NLS-1$
-		
-		String queryType = queryText.split(":")[0]; //$NON-NLS-1$
-		IQueryType qtype = QueryTypeManager.getInstance().findQueryType(queryType);
-		
-		/* for historic support */
-		if (qtype == null){
-			qtype = QueryTypeManager.getInstance().findDeprecatedQueryType(queryType);
-		}
-		Query q = null;
-		
-		//do not close session as assume it is managed by SmartConnection is BIRT report
-		Session session = HibernateManager.openSession();
-		q = QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
-		
-		IService qs = QueryServiceFactory.generateQueryService(q);
-		if (context == null){
-			List<? extends IGeoResource> resources = qs.resources(null);
-			ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();
-			thisresources.addAll(resources);
-			return thisresources;
-		}
-		CustomDateFilter cd = new CustomDateFilter();
-		cd.setDates((Date) context.getParameterValue(SmartReportParameters.PARAM_START_DATE_KEY),
-				(Date) context.getParameterValue(SmartReportParameters.PARAM_END_DATE_KEY));
-		DateFilter dateFilter = new DateFilter(
-				WaypointDateField.INSTANCE,cd);
-
-		ArrayList<IGeoResource> toAdd = new ArrayList<IGeoResource>();
-		if (qs != null) {
-			boolean add = true;
-			if (Query.class.isAssignableFrom( q.getClass() )){
-				q.setDateFilter(dateFilter);
-			}
-			
-			if (q instanceof SimpleQuery) {
-				((SimpleQuery) q).setDateFilter(dateFilter);
-				q.executeQuery(new NullProgressMonitor(), session);
-			} else if (q instanceof SurveyGriddedQuery ){
-				((SurveyGriddedQuery)q).setDateFilter(dateFilter);
-				Collection<GridResultItem> data = (Collection<GridResultItem>) q.executeQuery(new NullProgressMonitor(), session);
-				if (data.size() <= 0){
-					add = false;
-				}
-			}
-			if (add){
-				List<? extends IGeoResource> resources = qs.resources(null);
-				if (resources.size() > 0){
-					toAdd.add(resources.get(0));
-				}
-			}						
-		
-		}
-		return toAdd;
-		
+	public IService createQueryService(Query query) {
+		return QueryServiceFactory.generateQueryService(query);
 	}
 
 }

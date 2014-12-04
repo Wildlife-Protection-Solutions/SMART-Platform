@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.report.birt.map.properties;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,13 +29,12 @@ import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
-import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -44,11 +42,10 @@ import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.XMLMemento;
-import org.geotools.styling.Style;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * Style cell editor for styles
@@ -80,8 +77,7 @@ public class StyleCellEditor extends DialogCellEditor {
 			map = ProjectFactory.eINSTANCE.createMap();
 			final LayerDefinition mapLayer = (LayerDefinition) super.getValue();
 			final OdaDataSetHandle ds = mapLayer.handle;
-			final Object style = mapLayer.style != null ? BirtMapUtils.mementoToStyle(mapLayer.style) : null;
-
+			
 			Job j = new Job(Messages.StyleCellEditor_CreateMapLayerJobName) {
 
 				@Override
@@ -90,6 +86,7 @@ public class StyleCellEditor extends DialogCellEditor {
 
 					try {
 						if (mapLayer.mapLayer != null){
+							
 							List<? extends IGeoResource> resources = mapLayer.mapLayer.createLayer(ds, null);
 							IGeoResource iGeoResource = (IGeoResource) resources.get(0);
 							ArrayList<IGeoResource> thisresources = new ArrayList<IGeoResource>();
@@ -99,13 +96,23 @@ public class StyleCellEditor extends DialogCellEditor {
 							map.executeSyncWithoutUndo(cmd);
 							layer = cmd.getLayers().get(0);
 						
-							Object lstyle = style;
-							if (lstyle == null){
-								//lets see if we can get a style from the georesource
-								lstyle = (Style)iGeoResource.resolve(Style.class, new NullProgressMonitor());
+							//TODO: this needs testing I don't think layer.getgeoresource returns the correct resource
+							StyleBlackboard sb = null;
+							if (mapLayer.style != null){
+								//use user defined style for map
+								sb = BirtMapUtils.parseStyleString(mapLayer.style);
+							}else if (mapLayer.mapLayer.getDefaultStyle(ds, layer.getGeoResource()) != null){
+								//use default style defined by the map layer
+								sb = mapLayer.mapLayer.getDefaultStyle(ds, layer.getGeoResource());
+							}else{
+								//no defined style; udig will look in the georesource 
+								//for an later we'll look in the georesource for sld style
+								sb = null;
 							}
-							if (style != null) {
-								layer.getStyleBlackboard().put(SLDContent.ID, lstyle);
+							
+							if (sb != null){
+								layer.getStyleBlackboard().clear();
+								layer.getStyleBlackboard().addAll(sb);
 							}
 						}
 					} catch (Exception ex) {
@@ -121,17 +128,15 @@ public class StyleCellEditor extends DialogCellEditor {
 			SmartOpenStyleEditorAction action = new SmartOpenStyleEditorAction(layer);
 			action.run();
 			
-			CatalogPlugin.getDefault().getLocalCatalog().remove(layer.getGeoResource().service(null));
 			
-			if (action.getSelectedStyle() == null){
+			CatalogPlugin.getDefault().getLocalCatalog().remove(layer.getGeoResource().service(null));
+			if (action.getBlackboard() == null){
+				//user cancelled
 				return null;
 			}
-			SLDContent sld = new SLDContent();
-			XMLMemento memento = XMLMemento.createWriteRoot("styleEntry"); //$NON-NLS-1$
-	        sld.save(memento, action.getSelectedStyle());
-	        StringWriter writer = new StringWriter();
-            memento.save(writer);
-	        return writer.toString();
+			String savedBlackboard = StyleManager.INSTANCE.asString(action.getBlackboard());
+			return savedBlackboard;
+			
 		} catch (Exception ex) {
 			SmartMapItemPlugIn.displayLog(Messages.StyleCellEditor_Error_CouldNotOpenStyleDialog + ex.getMessage(), ex);
 		}

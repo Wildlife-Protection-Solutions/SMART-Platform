@@ -36,7 +36,6 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 public class ObservationReportQuery implements ISmartQuery {
 
 	public ObservationReportQuery() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

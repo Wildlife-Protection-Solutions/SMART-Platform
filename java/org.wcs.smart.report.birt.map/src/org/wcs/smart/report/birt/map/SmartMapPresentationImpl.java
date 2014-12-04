@@ -44,13 +44,13 @@ import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
 import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
 import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
 import net.refractions.udig.project.internal.impl.MapImpl;
 import net.refractions.udig.project.ui.ApplicationGIS;
 import net.refractions.udig.project.ui.ApplicationGIS.DrawMapParameter;
-import net.refractions.udig.style.sld.SLDContent;
 
 import org.eclipse.birt.core.exception.BirtException;
 import org.eclipse.birt.report.engine.extension.IRowSet;
@@ -163,7 +163,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 					HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 					params.put(SmartServiceExtension.CA_UUID_KEY, SmartDB.getCurrentConservationArea().getUuid());
 					SmartService ss = new SmartService(params);
-					List<IGeoResource> defaultLayers = (List<IGeoResource>) ss.resources(null);
+					List<? extends IGeoResource> defaultLayers = ss.resources(null);
     				AddLayersCommand alCommand = new AddLayersCommand(defaultLayers, 0);
     				renderedMap.sendCommandSync(alCommand);
 				}
@@ -186,10 +186,19 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 						  if (r.equals(l.getGeoResource())){
 							  l.setName(smrt.name);
 							  if (smrt.style != null){
-								  Object st = BirtMapUtils.mementoToStyle(smrt.style);
-								  if (st != null) {
-									  l.getStyleBlackboard().put(SLDContent.ID, st);
+								  //use user defined style
+								  StyleBlackboard sb = BirtMapUtils.parseStyleString(smrt.style);
+								  if (sb != null){
+									  l.getStyleBlackboard().clear();
+									  l.getStyleBlackboard().addAll(sb);
 								  }
+							  }else if (smrt.mapLayerManager.getDefaultStyle(smrt.handle, r) != null){
+								  //user layer default style; if defined
+								  l.getStyleBlackboard().clear();
+								  l.getStyleBlackboard().addAll(smrt.mapLayerManager.getDefaultStyle(smrt.handle, r));
+							  }else{
+								  //leave it blank; this has already asked the georesource
+								  //for the sld style if possible
 							  }
 						  }
 						}

@@ -24,10 +24,8 @@ package org.wcs.smart.reporttable.patrol;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.SmartDB;

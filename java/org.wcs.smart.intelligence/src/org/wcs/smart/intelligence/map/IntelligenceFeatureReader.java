@@ -68,6 +68,7 @@ public class IntelligenceFeatureReader implements FeatureReader<SimpleFeatureTyp
 
 	@Override
 	public boolean hasNext() throws IOException {
+		if (intel == null) return false;
 		return cnt < intel.getPoints().size();
 	}
 

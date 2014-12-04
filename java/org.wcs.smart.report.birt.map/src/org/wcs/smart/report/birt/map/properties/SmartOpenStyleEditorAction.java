@@ -22,17 +22,19 @@
 package org.wcs.smart.report.birt.map.properties;
 
 import java.lang.reflect.Field;
+import java.util.Iterator;
 
 import net.refractions.udig.project.internal.Layer;
+import net.refractions.udig.project.internal.ProjectFactory;
+import net.refractions.udig.project.internal.StyleBlackboard;
+import net.refractions.udig.project.internal.StyleEntry;
 import net.refractions.udig.style.sld.SLD;
 import net.refractions.udig.style.sld.editor.EditorPageManager;
-import net.refractions.udig.style.sld.editor.StyleEditorDialog;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.geotools.styling.Style;
 
 /**
  * 
@@ -49,7 +51,7 @@ public class SmartOpenStyleEditorAction {
     public static final String STYLE_ID = "net.refractions.udig.style.sld"; //$NON-NLS-1$
 
     private Layer selectedLayer;
-    private Style selectedStyle;
+    private StyleBlackboard updatedBlackboard = null;
 
     /**
      * Create a new <code>OpenPreferenceAction</code>
@@ -94,21 +96,30 @@ public class SmartOpenStyleEditorAction {
             // fallback on simple
             pageId = "simple"; //$NON-NLS-1$
         }
-
-//        String pageId = null;
+        
         final EditorPageManager manager = EditorPageManager.loadManager(null, selectedLayer);
 
-        StyleEditorDialog dialog = StyleEditorDialog.createDialogOn(shell, pageId, selectedLayer, manager);
+        SmartStyleEditorDialog dialog = SmartStyleEditorDialog.createSmartStyleDialog(shell, pageId, selectedLayer, manager);
+
         if (dialog.open() == Window.OK){
-        	selectedStyle = dialog.getStyle();
+        	updatedBlackboard = ProjectFactory.eINSTANCE.createStyleBlackboard();
+        	updatedBlackboard.clear();
+        	//add styles
+            for( Iterator< ? > itr = dialog.getSelectedLayer().getStyleBlackboard().getContent().iterator(); itr.hasNext(); ) {
+                StyleEntry entry = (StyleEntry) itr.next();
+                if (entry.getStyle() != null) {
+                	//this is key; we do this to ensure the style is correctly applied
+                    updatedBlackboard.put(entry.getID(), entry.getStyle());
+                }
+            }
         }
     }
     
     /**
-     * @return the style selected by the user
+     * @return true if user pressed ok; otherwise false
      */
-    public Style getSelectedStyle(){
-    	return selectedStyle;
+    public StyleBlackboard getBlackboard(){
+    	return updatedBlackboard;
     }
 
 }
