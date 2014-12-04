@@ -131,7 +131,7 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 	public void setInput(Ct2Smart ct2Smart) {
 		List<Ct2Attribute> items = extractColumns(ct2Smart);
 		
-		if (!isEqual(columns, items)) {
+		if (!isEqual(columns, items) || ct2Smart.getCtCategory().isEmpty()) {
 			columns = items;
 			try {
 				List<CtCategory> oldCats = new ArrayList<CtCategory>(ct2Smart.getCtCategory().size());
