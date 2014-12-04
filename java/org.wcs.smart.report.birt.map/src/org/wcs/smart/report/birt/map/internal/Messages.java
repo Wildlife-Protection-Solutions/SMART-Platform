@@ -14,8 +14,13 @@ public class Messages extends NLS {
 	public static String MapDialog_SetBounds_Button;
 	public static String SmartLayersPage_AddLayer_DialogMessage;
 	public static String SmartLayersPage_AddLayer_DialogTitle;
+	public static String SmartLayersPage_addtooltip;
 	public static String SmartLayersPage_BasemapLabel;
+	public static String SmartLayersPage_basemaptooltipe;
+	public static String SmartLayersPage_boundstooltip;
 	public static String SmartLayersPage_ClearBoundsLink;
+	public static String SmartLayersPage_ClearStyleButton;
+	public static String SmartLayersPage_cleartooltip;
 	public static String SmartLayersPage_CRSLabel;
 	public static String SmartLayersPage_DefaultBasemapLabel;
 	public static String SmartLayersPage_DefaultStyleLabel;
@@ -32,8 +37,10 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_MoveDownButton;
 	public static String SmartLayersPage_MoveUpButton;
 	public static String SmartLayersPage_NoBasemapLabel;
+	public static String SmartLayersPage_removetooltip;
+	public static String SmartLayersPage_resettooltip;
 	public static String SmartLayersPage_ReportDataset_ColumnName;
-	public static String SmartLayersPage_SetBoundsLink;
+	public static String SmartLayersPage_SetBoundsLink1;
 	public static String SmartLayersPage_Style_ColumnHeader;
 	public static String SmartMapItem_CouldNotParseCrs;
 	public static String SmartMapItemImageUi_ErrorCreatingMapItem;
