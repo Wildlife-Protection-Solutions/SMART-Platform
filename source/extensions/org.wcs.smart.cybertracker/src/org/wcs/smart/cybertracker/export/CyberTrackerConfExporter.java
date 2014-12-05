@@ -304,7 +304,7 @@ public class CyberTrackerConfExporter {
 			if (!attributeNodes.isEmpty()) {
 				result.addAll(attributeNodes);
 			} else {
-				//it appeared that category has not attributes to display -> show warning screen for that case
+				//it appeared that category has no attributes to display -> show warning screen for that case
 				result.add(createNoAttributeWarnNode(node, keyMap));
 			}
 			return result;
@@ -333,7 +333,7 @@ public class CyberTrackerConfExporter {
 		split(fullList, toShow, invisibleList);
 		
 		if (!toShow.isEmpty()) {
-			//check fir multiselect list
+			//check for multiselect list
 			CmAttribute cmAttr = toShow.get(0);
 			Attribute attribute = cmAttr.getAttribute();
 			if (AttributeType.LIST.equals(attribute.getType())) {
