@@ -47,8 +47,6 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class SmartGridCellStyleConfigurator extends IStyleConfigurator implements SelectionListener {
 
-	public static final String STYLE_ID = "org.wcs.smart.query.grid.style.border"; //$NON-NLS-1$
-	
 	private Button btnCheck;
 	
 	private Composite cStyle;
@@ -116,7 +114,7 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
     	gridSymbolizer = null;
     	rule = null;
     	
-        style = (Style) getStyleBlackboard().get(STYLE_ID);
+        style = (Style) getStyleBlackboard().get(SmartGridCellStyleContent.STYLE_ID);
         if (style == null){
         	style = sf.createStyle();
         	FeatureTypeStyle fts = sf.createFeatureTypeStyle();
@@ -161,10 +159,10 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 			gridSymbolizer.getStroke().setWidth(ff.literal(cmbSize.getSelection()));
 			gridSymbolizer.getStroke().setColor(ConstantExpression.color(btnColor.getColor()));
 			
-			getStyleBlackboard().put(STYLE_ID, style);	
+			getStyleBlackboard().put(SmartGridCellStyleContent.STYLE_ID, style);	
 		}else{			
 			//remove style
-			getStyleBlackboard().remove(STYLE_ID);
+			getStyleBlackboard().remove(SmartGridCellStyleContent.STYLE_ID);
 		}
 		
 		updateEnabledState();

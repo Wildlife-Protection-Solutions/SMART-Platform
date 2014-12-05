@@ -32,6 +32,7 @@ import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.ILayerListener;
 import net.refractions.udig.project.LayerEvent;
 import net.refractions.udig.project.LayerEvent.EventType;
+import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
 import net.refractions.udig.project.internal.commands.AddLayersCommand;
@@ -129,8 +130,8 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 											dataType = layer.getGeoResource().getID().toString();
 										}
 										sq.applyStyle(dataType, (StyleBlackboard)layer.getStyleBlackboard());
-										
-//										((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
+										//do this to ensure the correct events are fired
+										((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
 										
 									}catch (Exception ex){
 										QueryPlugIn.log(ex.getMessage(), ex);

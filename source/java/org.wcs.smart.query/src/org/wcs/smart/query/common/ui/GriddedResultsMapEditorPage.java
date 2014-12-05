@@ -185,6 +185,8 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 						ILayer layer = getLayers().get(0);
 						if (sq.getStyle() != null) {
 							sq.applyStyle(RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
+							//do this to ensure the correct events are fired
+							((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
 						}
 
 						// add style listener
