@@ -332,35 +332,7 @@ public class CyberTrackerConfExporter {
 		List<CmAttribute> invisibleList = new ArrayList<CmAttribute>();
 		split(fullList, toShow, invisibleList);
 		
-		if (!toShow.isEmpty()) {
-			//check for multiselect list
-			CmAttribute cmAttr = toShow.get(0);
-			Attribute attribute = cmAttr.getAttribute();
-			if (AttributeType.LIST.equals(attribute.getType())) {
-				if (cmAttr.isMultiselect() && cmAttr.isVisible()) {
-					CmAttribute numAttr = toShow.size() > 1 && toShow.get(1).isNumeric() ? toShow.get(1) : null;
-					List<CyberTrackerId> multiIds = addListElements(cmAttr, true, numAttr); 
-					Node mNode = buildMultiSelectNode(cmAttr, startId, multiIds, numAttr != null);
-					Control control2 = ScreensObjectFactory.getNavigationControl(mNode);
-					CyberTrackerId nextId = new CyberTrackerId();
-					//reference to "Next" screen
-					control2.setTranslateNextScreenId(nextId.getNodeId());
-					result.add(mNode);
-					if (numAttr != null)
-						toShow.remove(1);
-					toShow.remove(0); //as we just added a node for it
-					List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
-					for (int i = 0; i < multiIds.size(); i++) {
-						result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(i), i, false, cmNode.isPhotoAllowed(), cmNode.isPhotoRequired(), " ("+activeItems.get(i).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					result.addAll(createLastNodes(nextId, startId, recordDefaultValues(invisibleList), cmNode.isPhotoAllowed(), cmNode.isPhotoRequired()));
-					return result;
-				}
-			}
-			return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhotoAllowed(), cmNode.isPhotoRequired(), null, recordDefaultValues(invisibleList));
-		}
-		return result;
-		
+		return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhotoAllowed(), cmNode.isPhotoRequired(), null, recordDefaultValues(invisibleList));
 	}
 
 	private List<CyberTrackerId> addListElements(CmAttribute cmAttr) {
@@ -448,13 +420,35 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId id = startId;
 		for (int i = 0; i < attrList.size(); i++) {
 			CmAttribute cmAttr = attrList.get(i);
-			boolean linkToNext = terminate || i < attrList.size() - 1;
+			Attribute attribute = cmAttr.getAttribute();
 			if (!cmAttr.isVisible()) {
 				//should NEVER happen
 				//development validation! remove throw block after testing
 				throw new IllegalArgumentException("Arguments passed to this method MUST be visible"); //$NON-NLS-1$
 			}
-			Attribute attribute = cmAttr.getAttribute();
+
+			//block to check for multi-select / numeric multi-select
+			if (cmAttr.isMultiselect() && cmAttr.isVisible() && AttributeType.LIST.equals(attribute.getType())) {
+				CmAttribute numAttr = attrList.size() > i+1 && attrList.get(i+1).isNumeric() ? attrList.get(i+1) : null;
+				List<CyberTrackerId> multiIds = addListElements(cmAttr, true, numAttr); 
+				Node mNode = buildMultiSelectNode(cmAttr, id, multiIds, numAttr != null);
+				Control control2 = ScreensObjectFactory.getNavigationControl(mNode);
+				CyberTrackerId nextId = new CyberTrackerId();
+				//reference to "Next" screen
+				control2.setTranslateNextScreenId(nextId.getNodeId());
+				result.add(mNode);
+				int cutIndex = numAttr == null ? i+1 : i+2;
+				List<CmAttribute> toShow = attrList.subList(cutIndex, attrList.size()); //sublist of everything after multi-select / numeric multi-select
+				List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
+				for (int x = 0; x < multiIds.size(); x++) {
+					result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, addPhoto, photoRequired, " ("+activeItems.get(x).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				result.addAll(createLastNodes(nextId, startId, defaultValues, addPhoto, photoRequired));
+				return result;
+			}
+			//end of multi-select / numeric multi-select block
+			
+			boolean linkToNext = terminate || i < attrList.size() - 1;
 			CyberTrackerId resultElementId = getAttributeResultElementId(attribute, index); //id for result element in attribute screen node
 			switch (attribute.getType()) {
 			case NUMERIC:
