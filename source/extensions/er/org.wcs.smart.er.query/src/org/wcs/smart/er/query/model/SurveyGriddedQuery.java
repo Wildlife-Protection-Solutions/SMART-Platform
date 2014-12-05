@@ -137,6 +137,7 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 		q.setQuery(getQuery());
 		q.setCrsDefinition(getCrsDefinition());
 		q.setSurveyDesign(getSurveyDesign());
+		q.setStyle(getStyle());
 		return q;
 	}
 

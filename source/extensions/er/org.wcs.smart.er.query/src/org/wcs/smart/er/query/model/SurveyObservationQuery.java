@@ -117,6 +117,7 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 		q.setVisibleColumns(getVisibleColumns());
 		
 		q.setSurveyDesign(getSurveyDesign());
+		q.setStyle(getStyle());
 		return q;
 	}
 	/**

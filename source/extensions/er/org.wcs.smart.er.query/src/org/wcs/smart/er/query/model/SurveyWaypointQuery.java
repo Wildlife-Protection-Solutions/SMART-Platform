@@ -115,7 +115,7 @@ public class SurveyWaypointQuery extends WaypointQuery implements ISurveyQuery{
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
-		
+		q.setStyle(getStyle());
 		q.setSurveyDesign(getSurveyDesign());
 		return q;
 	}

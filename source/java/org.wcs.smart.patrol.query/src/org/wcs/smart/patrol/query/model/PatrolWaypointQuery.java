@@ -94,6 +94,7 @@ public class PatrolWaypointQuery extends WaypointQuery{
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
+		q.setStyle(getStyle());
 		return q;
 	}
 	

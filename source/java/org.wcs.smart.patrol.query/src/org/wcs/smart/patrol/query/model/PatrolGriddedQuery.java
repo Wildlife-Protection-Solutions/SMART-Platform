@@ -126,6 +126,7 @@ public class PatrolGriddedQuery extends GriddedQuery {
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQuery(getQuery());
 		q.setCrsDefinition(getCrsDefinition());
+		q.setStyle(getStyle());
 		return q;
 	}
 

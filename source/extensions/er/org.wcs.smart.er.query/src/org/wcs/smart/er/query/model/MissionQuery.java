@@ -191,7 +191,7 @@ public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQue
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
 		q.setSurveyDesign(getSurveyDesignAsObject());
-		
+		q.setStyle(getStyle());
 		return q;
 	}
 
