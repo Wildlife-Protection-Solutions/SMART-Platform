@@ -147,7 +147,9 @@ public class StyleManager {
 					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
 					if (sc != null){
 						Object style = sc.load(memento);
-						sb.put(sc.getId(), style);
+						if (style != null){
+							sb.put(sc.getId(), style);
+						}
 					}
 				}
 			}

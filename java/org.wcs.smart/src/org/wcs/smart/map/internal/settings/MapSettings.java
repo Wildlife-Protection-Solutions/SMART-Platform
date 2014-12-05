@@ -48,6 +48,7 @@ import net.refractions.udig.project.ILayer;
 import net.refractions.udig.project.StyleContent;
 import net.refractions.udig.project.internal.Layer;
 import net.refractions.udig.project.internal.Map;
+import net.refractions.udig.project.internal.ProjectFactory;
 import net.refractions.udig.project.internal.ProjectPackage;
 import net.refractions.udig.project.internal.StyleBlackboard;
 import net.refractions.udig.project.internal.StyleEntry;
@@ -508,34 +509,15 @@ public class MapSettings {
 			CoordinateReferenceSystem crs = ReferencingFactoryFinder.getCRSFactory(null).createFromWKT(savedLayer.getCRS());
 			layer.setCRS(crs);
 
-			// create a new style for the layer setting its values with those present in the registry
-			StyleBlackboard updatedStyleBlackboard = (StyleBlackboard) layer.getStyleBlackboard().clone();
+			//create a new empty blackboard to add styles to
+			StyleBlackboard updatedStyleBlackboard = ProjectFactory.eINSTANCE.createStyleBlackboard();
 			
-			// traverse the current style blackboard if the value is in the register then the clone is update
-			// with these values
-			List<StyleRegister> styleRegisterList = savedLayer.getStyleRegisterList();
-			for (StyleRegister styleRegister : styleRegisterList) {
-				boolean found = false;
-				// search the style to set the register value
-				for (StyleEntry newStyleEntry : layer.getStyleBlackboard().getContent()) {
-
-					if (newStyleEntry.getID().equals(styleRegister.getId())) {
-
-						// set the register values in the current style
-						Object style = mementoToStyle(styleRegister.getId(), styleRegister.getMemento());
-						updatedStyleBlackboard.put(newStyleEntry.getID(), style);
-						found = true;
-					}
-				}
-				if (!found){
-					Object style = mementoToStyle(styleRegister.getId(), styleRegister.getMemento());
-					updatedStyleBlackboard.put(styleRegister.getId(), style);
-				}
+			for (StyleRegister styleRegister : savedLayer.getStyleRegisterList()) {
+				Object style = mementoToStyle(styleRegister.getId(), styleRegister.getMemento());
+				updatedStyleBlackboard.put(styleRegister.getId(), style);
 			}
 			// change the current by the cloned and updated
 			layer.setStyleBlackboard(updatedStyleBlackboard);
-			//layer.refresh(null);
-			
 		} catch (Exception e) {
 			SmartPlugIn.log(Status.ERROR, Messages.MapSettings_Error_CreateMapLayer + savedLayer.getURI().toString() + ": " + e.getMessage(), e); //$NON-NLS-1$
 		}
@@ -756,7 +738,7 @@ public class MapSettings {
 			java.net.URI uri = new java.net.URI( SMARTBM_FILE_PROTOCOL, "//" + fileName, srcUri.getFragment()); //$NON-NLS-1$
 			trgUri = uri;
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(MessageFormat.format("The file ''{0}'' could not be imported into SMART and will not be added to the basemap." + "\n\n" + e.getMessage(), new Object[]{srcUri.getPath()}), e);
+			SmartPlugIn.displayLog(MessageFormat.format(Messages.MapSettings_FileImportError + "\n\n" + e.getMessage(), new Object[]{srcUri.getPath()}), e); //$NON-NLS-1$
 			
 			for (File f : localImportFiles){
 				try{

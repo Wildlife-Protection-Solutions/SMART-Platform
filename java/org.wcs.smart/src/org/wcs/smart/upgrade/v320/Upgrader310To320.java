@@ -75,7 +75,11 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				"alter table smart.observation_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.waypoint_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.patrol_query add column style long varchar", //$NON-NLS-1$
-				"alter table smart.gridded_query add column style long varchar" //$NON-NLS-1$
+				"alter table smart.gridded_query add column style long varchar", //$NON-NLS-1$
+				
+				"create table smart.map_styles (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, style_string long varchar not null, primary key (uuid))", //$NON-NLS-1$
+				"alter table smart.map_styles add constraint mapstyle_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE" //$NON-NLS-1$
+
 		};
 		
 		for (String s : sql){

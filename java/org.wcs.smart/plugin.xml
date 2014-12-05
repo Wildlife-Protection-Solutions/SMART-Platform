@@ -898,6 +898,9 @@
       <class
             class="org.wcs.smart.ca.datamodel.AggregationLabel">
       </class>
+      <class
+            class="org.wcs.smart.ca.SmartStyle">
+      </class>
    </extension>
    <extension
          point="net.refractions.udig.project.ui.tool">
@@ -1190,6 +1193,31 @@
       <FilestoreDirectory
             directory="maps">
       </FilestoreDirectory>
+   </extension>
+   <extension
+         point="net.refractions.udig.project.layerInterceptor">
+      <layerAdded
+            class="org.wcs.smart.udig.style.SmartLayerStyleInterceptor"
+            id="org.wcs.smart.layerAdded1"
+            name="SMART Style Configurator">
+      </layerAdded>
+   </extension>
+   <extension
+         point="net.refractions.udig.project.style">
+      <style
+            class="org.wcs.smart.udig.style.SmartLayerStyle"
+            id="org.wcs.smart.udig.savedStyle"
+            name="SMART Saved Style">
+      </style>
+   </extension>
+   <extension
+         point="net.refractions.udig.style.sld.StyleEditorPage">
+      <StyleEditorPage
+            class="org.wcs.smart.udig.SmartSavedStylePage"
+            contentType="net.refractions.udig.project.ILayer"
+            id="org.wcs.smart.udig.savedStyle"
+            label="SMART Saved Styles">
+      </StyleEditorPage>
    </extension>
 
 </plugin>

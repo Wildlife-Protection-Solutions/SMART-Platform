@@ -19,37 +19,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.udig;
+package org.wcs.smart.ca;
 
-import net.refractions.udig.project.IMap;
-import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.geotools.geometry.jts.ReferencedEnvelope;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 /**
- * Zoom tool for map.
+ * For saved smart styles.  Saves a single style blackboard
+ * as a json string.
+ * string.
  * 
  * @author Emily
- * @since 1.0.0
+ *
  */
-public class ZoomLayersTool extends AbstractActionTool {
+@Entity
+@Table(name ="smart.map_styles")
+public class SmartStyle extends NamedItem{
 
-	public ZoomLayersTool() {
-	}
-
-	@Override
-	public void run() {
+	private String styleString;
+	private ConservationArea ca;
+	
+	public SmartStyle(){
 		
-		IMap map = super.context.getMap();
-		ReferencedEnvelope bounds = map.getBounds(new NullProgressMonitor());
-		map.sendCommandASync(new SetViewportBBoxCommand(bounds));
 	}
-
-	@Override
-	public void dispose() {
-
+	
+	@Column(name = "style_string")
+	public String getStyleString(){
+		return this.styleString;
 	}
-
+	
+	public void setStyleString(String styleString){
+		this.styleString = styleString;
+	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
+	public ConservationArea getConservationArea(){
+		return this.ca;
+	}
+	
+	public void setConservationArea(ConservationArea ca){
+		this.ca = ca;
+	}
+	
 }
