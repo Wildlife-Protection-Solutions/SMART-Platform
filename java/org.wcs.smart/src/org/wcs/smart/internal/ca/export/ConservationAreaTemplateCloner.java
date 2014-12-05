@@ -26,11 +26,13 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
@@ -64,7 +66,7 @@ public class ConservationAreaTemplateCloner implements
 		//data model (categories, attributes, attribute list items, 
 		//attribute tree items, attribute aggregations
 		//and all associated labels
-		monitor.beginTask(Messages.ConservationAreaTemplateCloner_Progress_CopyCaInfo, 4);
+		monitor.beginTask(Messages.ConservationAreaTemplateCloner_Progress_CopyCaInfo, 5);
 		try{
 		    //DO NOT CLONE: employees, saved maps, area geometries
 			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyAgencyRank);
@@ -79,10 +81,36 @@ public class ConservationAreaTemplateCloner implements
 			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyDataModel);
 			cloneDataModel(engine, new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);
+			
+			monitor.subTask("Cloning Map Styles");
+			cloneMapStyles(engine);
+			monitor.worked(1);
+			
 		}finally{
 			monitor.done();
 		}
 	}
+	
+	/*
+	 * clone saved map styles
+	 */
+	private void cloneMapStyles(ConservationAreaClonerEngine engine){
+		Session session = engine.getSession();
+		@SuppressWarnings("unchecked")
+		List<SmartStyle> stylesToClone = session.createCriteria(SmartStyle.class)
+								.add(Restrictions.eq("conservationArea", engine.getTemplateCa())) //$NON-NLS-1$
+								.list();
+		for (SmartStyle style : stylesToClone){
+			SmartStyle clone = new SmartStyle();
+			clone.setConservationArea(engine.getNewCa());
+			clone.setStyleString(style.getStyleString());
+			engine.copyLabels(style, clone);
+			session.save(clone);
+			engine.addConservationItemMapping(style, clone);
+		}
+		session.flush();
+	}
+	
 	
 	/*
 	 * clone the data model
