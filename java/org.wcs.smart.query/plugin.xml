@@ -954,6 +954,14 @@
             styleId="net.refractions.udig.style.sld">
       </styleConfigurator>
    </extension>
+   <extension
+         point="net.refractions.udig.project.style">
+      <style
+            class="org.wcs.smart.query.udig.render.SmartGridCellStyleContent"
+            id="org.wcs.smart.query.grid.style.border"
+            name="SMART Grid Border Style">
+      </style>
+   </extension>
 
 
 </plugin>

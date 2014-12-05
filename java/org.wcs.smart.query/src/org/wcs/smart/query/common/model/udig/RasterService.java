@@ -362,9 +362,6 @@ public class RasterService extends AbstractRasterService {
 			this.reader.dispose();
 			this.reader = null;
 		}
-		
-		createRaster();
-
 	}	
 	
 	

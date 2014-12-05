@@ -49,7 +49,7 @@ public class SmartMemoryCoverageMetrics extends AbstractRenderMetrics {
     private static List<String> listExpectedStyleIds(){
         ArrayList<String> styleIds = new ArrayList<String>();
         styleIds.add(SLDContent.ID);   
-        styleIds.add(SmartGridCellStyleConfigurator.STYLE_ID);
+        styleIds.add(SmartGridCellStyleContent.STYLE_ID);
         return styleIds;
     }
     
@@ -60,12 +60,10 @@ public class SmartMemoryCoverageMetrics extends AbstractRenderMetrics {
      * @param factory
      */
     public SmartMemoryCoverageMetrics( IRenderContext context2, SmartMemoryGridCoverageMetricsFactory factory) {
-    	
         super( context2, factory, listExpectedStyleIds());
 		this.resolutionMetric = RES_PIXEL; // reads more then is required for the screen!
 		this.latencyMetric = LATENCY_MEMORY_CACHE;
-//		//keep this low to attempt to prefer this renderer for smart images
-		this.timeToDrawMetric = DRAW_IMAGE_MEMORY;// - 100;	
+		this.timeToDrawMetric = DRAW_IMAGE_MEMORY;	
     }
 
     @Override
@@ -98,6 +96,8 @@ public class SmartMemoryCoverageMetrics extends AbstractRenderMetrics {
 
     @Override
     public boolean canStyle( String styleID, Object value ) {
+    	if (styleID.equals(SmartGridCellStyleContent.STYLE_ID)) return true;
+    	
     	if( value != null && value instanceof Style){              
             Style style = (Style) value;
             return SLDs.rasterSymbolizer( style ) != null;

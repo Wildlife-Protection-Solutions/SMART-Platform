@@ -63,7 +63,7 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
     	
     	//now try to render grid around points    	
 		StyleBlackboard styleBlackboard = (StyleBlackboard) getContext().getLayer().getStyleBlackboard();
-		Style style = (Style) styleBlackboard.get(SmartGridCellStyleConfigurator.STYLE_ID);
+		Style style = (Style) styleBlackboard.get(SmartGridCellStyleContent.STYLE_ID);
 		if (style == null)
 			return;
 
