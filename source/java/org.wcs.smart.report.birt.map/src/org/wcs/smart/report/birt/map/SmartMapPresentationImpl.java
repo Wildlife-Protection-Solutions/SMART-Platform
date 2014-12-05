@@ -196,20 +196,27 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 						for (IGeoResource r : smrt.georesource){
 						  if (r.equals(l.getGeoResource())){
 							  l.setName(smrt.name);
+							  boolean styleChanged = false;
 							  if (smrt.style != null){
 								  //use user defined style
 								  StyleBlackboard sb = BirtMapUtils.parseStyleString(smrt.style);
 								  if (sb != null){
 									  l.getStyleBlackboard().clear();
 									  l.getStyleBlackboard().addAll(sb);
+									  styleChanged = true;
 								  }
 							  }else if (smrt.mapLayerManager.getDefaultStyle(smrt.handle, r) != null){
 								  //user layer default style; if defined
 								  l.getStyleBlackboard().clear();
 								  l.getStyleBlackboard().addAll(smrt.mapLayerManager.getDefaultStyle(smrt.handle, r));
+								  styleChanged = true;
 							  }else{
 								  //leave it blank; this has already asked the georesource
 								  //for the sld style if possible
+							  }
+							  if (styleChanged){
+								  //ensure events are fired
+								  l.setStyleBlackboard(l.getStyleBlackboard());
 							  }
 						  }
 						}

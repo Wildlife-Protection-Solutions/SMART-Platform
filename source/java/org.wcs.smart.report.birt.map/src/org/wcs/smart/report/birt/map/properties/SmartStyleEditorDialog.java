@@ -133,10 +133,13 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleE
 
         StyleEditorButtonListener listener = new StyleEditorButtonListener(this);
         
-              Button revertButton = createButton(compRight, REVERT_ID,
-                Messages.SmartStyleEditorDialog_RevertButton, false); 
+        Button revertButton = createButton(compRight, REVERT_ID, Messages.SmartStyleEditorDialog_RevertButton, false); 
         revertButton.setEnabled(false);
         revertButton.addListener(SWT.Selection, listener);
+        
+        Button applyButton = createButton(compRight, APPLY_ID, Messages.SmartStyleEditorDialog_ApplyButton, false); 
+        applyButton.setEnabled(false);
+        applyButton.addListener(SWT.Selection, new StyleEditorButtonListener(this));
         
         Button closeButton = createButton(compRight, CANCEL_ID,
                 IDialogConstants.CANCEL_LABEL, false); 
@@ -148,7 +151,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleE
         okButton.setEnabled(true);
         okButton.addListener(SWT.Selection, listener);
         
-        layout.numColumns=3;
+        layout.numColumns=2;
     }
 
     protected void setReturnCode(int code){
@@ -178,6 +181,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleE
     
     @Override
     public void setExitButtonState() {
+    	getButton(APPLY_ID).setEnabled(true);
     }
     
     @Override
@@ -185,6 +189,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleE
         getButton(IMPORT_ID).setEnabled(true);
         getButton(EXPORT_ID).setEnabled(true);
         getButton(REVERT_ID).setEnabled(true);
+        getButton(APPLY_ID).setEnabled(true);
         getButton(OK_ID).setEnabled(true);
         getButton(CANCEL_ID).setEnabled(true);
     }

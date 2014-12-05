@@ -56,6 +56,7 @@ public class Messages extends NLS {
 	public static String SmartMapItemCloner_CloneError;
 	public static String SmartMapItemCloner_CloningReportItem;
 	
+	public static String SmartStyleEditorDialog_ApplyButton;
 	public static String SmartStyleEditorDialog_RevertButton;
 	public static String SmartStyleEditorDialog_Title;
 
