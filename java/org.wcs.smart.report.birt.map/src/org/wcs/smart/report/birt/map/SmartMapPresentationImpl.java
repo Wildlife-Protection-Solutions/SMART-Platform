@@ -39,6 +39,7 @@ import javax.imageio.stream.ImageOutputStream;
 import net.refractions.udig.catalog.CatalogPlugin;
 import net.refractions.udig.catalog.IGeoResource;
 import net.refractions.udig.catalog.IService;
+import net.refractions.udig.catalog.IResolve.Status;
 import net.refractions.udig.mapgraphic.MapGraphic;
 import net.refractions.udig.project.IMap;
 import net.refractions.udig.project.internal.Layer;
@@ -170,11 +171,21 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 				
 			}
 			List<IGeoResource> toAdd = new ArrayList<IGeoResource>();
+			NullProgressMonitor monitor = new NullProgressMonitor();
 			for (GeoSmart layer : layers) {
 				if (layer.georesource != null){
-					toAdd.addAll(layer.georesource);
+					toAdd.addAll(layer.georesource);	
+					for (IGeoResource resource : layer.georesource){
+						IService service = resource.service(monitor);
+						if (service != null && service.getStatus() != Status.DISPOSED){
+							CatalogPlugin.getDefault().getLocalCatalog().remove(service);
+						}
+					}
 				}
 			}
+			monitor = null;
+			
+			
 			AddLayersCommand cmd = new AddLayersCommand(toAdd);
 			renderedMap.executeSyncWithoutUndo(cmd);
 			StringBuilder layerErrors = new StringBuilder();
@@ -362,6 +373,7 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 		return null;
 	}
 	
+	
 	/*
 	 * cleans up resources, removing from catalog as required
 	 */
@@ -371,14 +383,13 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			if (layer.georesource != null){
 				for (IGeoResource resource : layer.georesource){
 					IService service = resource.service(monitor);
-					if (service != null ){
+					if (service != null){
 						service.dispose(monitor);
 						CatalogPlugin.getDefault().getLocalCatalog().remove(service);
 					}
 					resource.dispose(monitor);
 				}
-			}
-			
+			}	
 		}
 	}
 	
