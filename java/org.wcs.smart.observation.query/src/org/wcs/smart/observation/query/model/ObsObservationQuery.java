@@ -135,6 +135,7 @@ public class ObsObservationQuery extends ObservationQuery implements IPagedQuery
 		q.setOwner(SmartDB.getCurrentEmployee());
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
+		q.setStyle(getStyle());
 		return q;
 	}
 	/**

@@ -191,7 +191,7 @@ public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurv
 		q.setQueryFilter(getQueryFilter());
 		q.setVisibleColumns(getVisibleColumns());
 		q.setSurveyDesign(getSurveyDesignAsObject());
-		
+		q.setStyle(getStyle());
 		return q;
 	}
 
