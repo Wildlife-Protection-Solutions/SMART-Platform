@@ -82,7 +82,7 @@ public class ConservationAreaTemplateCloner implements
 			cloneDataModel(engine, new SubProgressMonitor(monitor, 1));
 			monitor.worked(1);
 			
-			monitor.subTask("Cloning Map Styles");
+			monitor.subTask(Messages.ConservationAreaTemplateCloner_Progress_CopyStyles);
 			cloneMapStyles(engine);
 			monitor.worked(1);
 			

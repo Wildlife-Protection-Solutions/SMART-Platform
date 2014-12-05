@@ -326,6 +326,7 @@ public class Messages extends NLS {
 	public static String ConservationAreaTemplateCloner_Progress_CopyDataModel;
 	public static String ConservationAreaTemplateCloner_Progress_CopyProjection;
 	public static String ConservationAreaTemplateCloner_Progress_CopyStation;
+	public static String ConservationAreaTemplateCloner_Progress_CopyStyles;
 	public static String CreateCaWizard_Error_CreateCaError;
 	public static String CreateCaWizard_ErrorCopyInfo;
 	public static String CreateCaWizard_ErrorCreateFromTemplate;
