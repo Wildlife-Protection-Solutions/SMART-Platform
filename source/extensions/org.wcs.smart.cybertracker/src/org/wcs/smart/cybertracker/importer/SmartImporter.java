@@ -29,6 +29,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -90,7 +91,7 @@ public class SmartImporter {
 	private List<String> warnings = new ArrayList<String>();
 
 	public static DateFormat createCyberTrackerDateFormatter() {
-		DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //TODO: will this always work or CT might provide different format depending on locale settings?
+		DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //will this always work or CT might provide different format depending on locale settings?
 		return formatter;
 	}
 
@@ -313,6 +314,8 @@ public class SmartImporter {
 	private List<List<A>> splitObservationRecords(S s, Map<String, E> eMap) {
 		List<A> categories = new ArrayList<A>();
 		Map<Integer, List<A>> attributes = new HashMap<Integer, List<A>>();
+		List<A> preMsAtts = null;
+		boolean processMultiselect = true;
 		A defaultValue = null;
 		for (A a : s.getA()) {
 			E e = eMap.get(a.getI());
@@ -332,10 +335,22 @@ public class SmartImporter {
 			} else if (ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG.equals(e.getTag1())) {
 				defaultValue = a;
 			} else if (ElementsUtil.MULISELECT_ELEMENT_TAG.equals(e.getTag1())) {
+				if (processMultiselect) {
+					processMultiselect = false;
+					preMsAtts = attributes.remove(0); //all previously enter values MUST be here
+					if (preMsAtts == null) {
+						preMsAtts = Collections.emptyList();
+					}
+					if (!attributes.isEmpty()) {
+						//development validation; MUST never enter here
+						throw new IllegalStateException("Mapping to entry different from #0 present before multi-select occured."); //$NON-NLS-1$
+					}
+				}
 				Integer tag2 = e.getTag2() != null ? Integer.valueOf(e.getTag2()) : 0;
 				List<A> aList = attributes.get(tag2);
 				if (aList == null) {
 					aList = new ArrayList<A>();
+					aList.addAll(preMsAtts); //add all previously entered values as they should be applied to all items selected in multi-select
 					attributes.put(tag2, aList);
 				}
 				//create fake record as if it is result element for listAttribute with listAttributeValue
@@ -566,7 +581,6 @@ public class SmartImporter {
 			return wp;
 		}
 		
-		//TODO: test these changes
 		PatrolWaypoint lastWp = pld.getWaypoints().get(pld.getWaypoints().size()-1);
 		if (wp.getDateTime() != null) {
 			if (lastWp.getWaypoint().getDateTime() == null)
