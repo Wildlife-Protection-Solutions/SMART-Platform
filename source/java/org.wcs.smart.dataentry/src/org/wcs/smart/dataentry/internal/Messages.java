@@ -102,6 +102,7 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
 	public static String ListAttributeInfoComposite_Button_Edit;
+	public static String ListAttributeInfoComposite_MultiselectHint;
 	public static String ListAttributeInfoComposite_Values;
 	public static String ListAttributeInfoComposite_WarnDialogMessage;
 	public static String ListAttributeInfoComposite_WarnDialogTitle;
