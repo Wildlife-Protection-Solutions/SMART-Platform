@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -49,6 +50,7 @@ import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
@@ -97,6 +99,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 					updateListControl();
 				}
 				lastSelection = getSourceObject();
+				ListAttributeInfoComposite.this.layout(true, true);
 			}
 		});
 	}
@@ -116,16 +119,28 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private void updateMultiselectControl() {
 		CmAttribute cmAttr = getSourceObject();
-		boolean isEnabled = cmAttr.getOrder() == 0; //must be the first element for this option to be enabled
+		CmAttribute cmMultiAttr = getMulultiSelectedAttr(cmAttr.getNode());
+		boolean isEnabled = cmMultiAttr == null || cmAttr.equals(cmMultiAttr);
 		CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
-		btnMulti.setVisible(option != null);
 		lblMulti.setVisible(option != null);
+		btnMulti.setVisible(option != null);
 		btnMulti.setEnabled(isEnabled);
+		btnMulti.setText(isEnabled ? "" : MessageFormat.format(Messages.ListAttributeInfoComposite_MultiselectHint, cmMultiAttr.findNameNull(currentLanguage))); //$NON-NLS-1$
 		if (option != null && isEnabled) {
 			btnMulti.setSelection(option.getBooleanValue());
 		} else {
 			btnMulti.setSelection(false);
 		}
+	}
+	
+	private CmAttribute getMulultiSelectedAttr(CmNode cmNode) {
+		for (CmAttribute cmAttr : cmNode.getCmAttributes()) {
+			CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
+			if (option != null && Boolean.TRUE.equals(option.getBooleanValue())) {
+				return cmAttr;
+			}
+		}
+		return null;
 	}
 	
 	private void createDefaultControl(Composite parent) {

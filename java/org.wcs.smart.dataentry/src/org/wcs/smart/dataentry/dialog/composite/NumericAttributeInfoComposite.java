@@ -177,9 +177,9 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttribute cmAttr = getSourceObject();
 				boolean isEnabled = false;
-				if (cmAttr.getOrder() == 1) {
-					CmAttribute topAttr = cmAttr.getNode().getCmAttributes().get(0);
-					isEnabled = topAttr.isMultiselect() && topAttr.isVisible();
+				if (cmAttr.getOrder() > 0) {
+					CmAttribute prevAttr = cmAttr.getNode().getCmAttributes().get(cmAttr.getOrder()-1);
+					isEnabled = prevAttr.isMultiselect() && prevAttr.isVisible();
 				}
 				CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_NUMERIC);
 				btnBool.setVisible(option != null);
