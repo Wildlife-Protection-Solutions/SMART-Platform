@@ -22,14 +22,13 @@
 package org.wcs.smart.dataentry.model;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 
 import org.wcs.smart.ca.NamedItem;
+
 
 /**
  * Superclass used for configurable model attribute tree node
@@ -38,10 +37,8 @@ import org.wcs.smart.ca.NamedItem;
  * @author Emily
  *
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public class CmAttributeItem extends NamedItem{
-	
+@MappedSuperclass
+public abstract class CmAttributeItem extends NamedItem {
 	
 	private ConfigurableModel configurableModel;
 	private boolean isActive;
@@ -62,4 +59,10 @@ public class CmAttributeItem extends NamedItem{
 	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
+
+//	public abstract ConfigurableModel getConfigurableModel();
+//	public abstract void setConfigurableModel(ConfigurableModel configurableModel);
+	
+//	public abstract boolean getIsActive();
+//	public abstract void setIsActive(boolean isActive);
 }
