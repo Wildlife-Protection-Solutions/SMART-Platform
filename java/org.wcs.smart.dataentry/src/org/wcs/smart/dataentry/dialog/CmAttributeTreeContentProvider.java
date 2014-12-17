@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
+import org.wcs.smart.dataentry.model.FilteredSubList;
 
 /**
  * Content provided for an configurable model attribute tree
@@ -79,7 +80,12 @@ public class CmAttributeTreeContentProvider implements ITreeContentProvider {
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput instanceof CmAttribute){
 			if (active){
-				rootNodes = ((CmAttribute) newInput).getActiveTreeNodes();
+				rootNodes = new FilteredSubList<CmAttributeTreeNode>(((CmAttribute) newInput).getCurrentTree()) {
+					@Override
+					protected boolean matches(CmAttributeTreeNode t) {
+						return t.getIsActive();
+					}
+				};
 			}else{
 				rootNodes = ((CmAttribute) newInput).getCurrentTree();
 			}
@@ -113,7 +119,12 @@ public class CmAttributeTreeContentProvider implements ITreeContentProvider {
 			if (!active){
 				kids = ((CmAttributeTreeNode)parentElement).getChildren();
 			}else{
-				kids = ((CmAttributeTreeNode)parentElement).getActiveChildren();
+				kids = new FilteredSubList<CmAttributeTreeNode>(((CmAttributeTreeNode)parentElement).getChildren()) {
+					@Override
+					protected boolean matches(CmAttributeTreeNode t) {
+						return t.getIsActive();
+					}
+				};
 			}
 		}
 		if (kids != null && kids.size() > 0){

@@ -37,7 +37,6 @@ import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
-import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -86,19 +85,6 @@ public class CmAttributeTreeNode extends NamedItem {
 		this.children = children;
 	}
 
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL})
-	@Where(clause = "is_active")
-	@OrderBy(clause = "node_order")
-	@BatchSize(size=200)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	public List<CmAttributeTreeNode> getActiveChildren(){
-		return this.activeChildren;
-	}
-	
-	public void setActiveChildren(List<CmAttributeTreeNode> activeChildren){
-		this.activeChildren = activeChildren;
-	}
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="parent_uuid")
 //	@Cascade({CascadeType.SAVE_UPDATE})	

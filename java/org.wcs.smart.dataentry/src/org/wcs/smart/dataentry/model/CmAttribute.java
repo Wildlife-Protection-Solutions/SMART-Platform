@@ -119,22 +119,6 @@ public class CmAttribute extends NamedItem {
 		this.rootTreeNodes = tree;
 	}
 
-	/**
-	 * Only valid for tree attributes.
-	 * @return  set of root tree nodes
-	 */
-	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute")
-	@Where(clause = "parent_uuid is null and is_active")
-	@OrderBy(clause = "node_order")
-	//@BatchSize(size=200)
-	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
-	public List<CmAttributeTreeNode> getActiveTreeNodes(){
-		return this.activeTreeNodes;
-	}
-	public void setActiveTreeNodes(List<CmAttributeTreeNode> activeTreeNodes){
-		this.activeTreeNodes = activeTreeNodes;
-	}
-
 	@Transient
 	public List<CmAttributeTreeNode> getCurrentTree() {
 		return isUseCustomConfig() ? getTree() : getDefaultTree();

@@ -206,7 +206,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 	protected void deleteItems() {
 		for (Iterator<?> i = ((StructuredSelection)itemViewer.getSelection()).iterator(); i.hasNext();) {
 			CmAttributeTreeNode cmTreeNode = (CmAttributeTreeNode) i.next();
-			List<CmAttributeTreeNode> children = getTargetList(cmTreeNode.getParent());
+			CmAttributeTreeNode parent = cmTreeNode.getParent();
+			List<CmAttributeTreeNode> children = getTargetList(parent);
 			children.remove(cmTreeNode);
 			updateNodeOrder(children);
 			cmTreeNode.setParent(null);
@@ -518,11 +519,11 @@ public class EditTreeDialog extends TitleAreaDialog {
 		if (!enable){
 			//process all children
 			List<CmAttributeTreeNode> itemsToProcess = new ArrayList<CmAttributeTreeNode>();
-			itemsToProcess.addAll(cmTreeNode.getActiveChildren());
+			itemsToProcess.addAll(cmTreeNode.getChildren());
 			while(itemsToProcess.size() > 0){
 				CmAttributeTreeNode kid = itemsToProcess.remove(0);
 				processItem(kid, enable, false);
-				itemsToProcess.addAll(kid.getActiveChildren());
+				itemsToProcess.addAll(kid.getChildren());
 			}
 		
 		}else{
