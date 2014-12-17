@@ -33,6 +33,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
@@ -50,6 +52,8 @@ public class ConfigurableModel extends NamedItem {
     private ConservationArea conservationArea;
     private List<CmNode> nodes; //the root nodes for the data model
 
+	private List<CmAttributeTreeNode> defaultRootTreeNodes = null;
+    
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -72,6 +76,20 @@ public class ConfigurableModel extends NamedItem {
 		this.nodes = nodes;
 	}
 
+	
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@Where(clause = "parent_uuid is null and dm_attribute_uuid is not null")
+	@OrderBy(clause = "node_order")
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<CmAttributeTreeNode> getDefaultTrees() {
+		if (defaultRootTreeNodes == null) {
+			defaultRootTreeNodes = new ArrayList<CmAttributeTreeNode>();
+		}
+		return this.defaultRootTreeNodes;
+	}
+	public void setDefaultTrees(List<CmAttributeTreeNode> tree){
+		this.defaultRootTreeNodes = tree;
+	}
 	
 	/**
 	 * Moves an {@link CmNode} to a new position in the sibling list.
@@ -130,5 +148,5 @@ public class ConfigurableModel extends NamedItem {
 			}
 		}
 	}
-	
+
 }

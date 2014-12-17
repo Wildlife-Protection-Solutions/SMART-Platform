@@ -94,4 +94,11 @@ public class CmAttributeOptionFactory {
 		return option;
 	}
 	
+	public static CmAttributeOption createCustomCofigOption(CmAttribute attribute) {
+		CmAttributeOption option = new CmAttributeOption();
+		option.setCmAttribute(attribute);
+		option.setOptionId(CmAttributeOption.ID_CUSTOM_CONFIG);
+		option.setDoubleValue(0.0); //false by default
+		return option;
+	}
 }

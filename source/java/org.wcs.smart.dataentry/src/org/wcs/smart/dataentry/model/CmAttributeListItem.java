@@ -49,7 +49,5 @@ public class CmAttributeListItem extends CmAttributeItem {
 	public void setListItem(AttributeListItem listItem) {
 		this.listItem = listItem;
 	}
-	
-	
-	
+
 }

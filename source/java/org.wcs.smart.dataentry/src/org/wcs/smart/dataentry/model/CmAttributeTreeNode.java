@@ -21,12 +21,25 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.Where;
+import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
 /**
@@ -38,9 +51,17 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
  */
 @Entity
 @Table(name = "smart.cm_attribute_tree_node")
-public class CmAttributeTreeNode extends CmAttributeItem {
+public class CmAttributeTreeNode extends NamedItem {
 	
 	private AttributeTreeNode dmTreeNode;
+
+	private CmAttribute attribute = null;
+	private Attribute dmAttribute = null;
+	private int nodeOrder;
+	private List<CmAttributeTreeNode> children = new ArrayList<CmAttributeTreeNode>();
+	private List<CmAttributeTreeNode> activeChildren = new ArrayList<CmAttributeTreeNode>();
+	private CmAttributeTreeNode parent = null;
+	
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="dm_tree_node_uuid", referencedColumnName="uuid")
@@ -50,4 +71,88 @@ public class CmAttributeTreeNode extends CmAttributeItem {
 	public void setDmTreeNode(AttributeTreeNode dmTreeNode) {
 		this.dmTreeNode = dmTreeNode;
 	}
+	
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL}, orphanRemoval = true)
+	@OrderBy(clause = "node_order")
+	@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<CmAttributeTreeNode> getChildren(){
+		if (children == null) {
+			children = new ArrayList<CmAttributeTreeNode>();
+		}
+		return this.children;
+	}
+	public void setChildren(List<CmAttributeTreeNode> children){
+		this.children = children;
+	}
+
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="parent", cascade = {CascadeType.ALL})
+	@Where(clause = "is_active")
+	@OrderBy(clause = "node_order")
+	@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<CmAttributeTreeNode> getActiveChildren(){
+		return this.activeChildren;
+	}
+	
+	public void setActiveChildren(List<CmAttributeTreeNode> activeChildren){
+		this.activeChildren = activeChildren;
+	}
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="parent_uuid")
+//	@Cascade({CascadeType.SAVE_UPDATE})	
+	public CmAttributeTreeNode getParent(){
+		return this.parent;
+	}
+	public void setParent(CmAttributeTreeNode parent){
+		this.parent = parent;
+	}
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="cm_attribute_uuid", referencedColumnName="uuid")
+	public CmAttribute getAttribute() {
+		return attribute;
+	}
+	public void setAttribute(CmAttribute attribute) {
+		this.attribute = attribute;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="dm_attribute_uuid", referencedColumnName="uuid")
+	public Attribute getDmAttribute() {
+		return dmAttribute;
+	}
+	public void setDmAttribute(Attribute dmAttribute) {
+		this.dmAttribute = dmAttribute;
+	}
+	
+	@Column(name="node_order")
+	public int getNodeOrder(){
+		return this.nodeOrder;
+	}
+	public void setNodeOrder(int nodeOrder){
+		this.nodeOrder = nodeOrder;
+	}
+
+	private ConfigurableModel configurableModel;
+	private boolean isActive;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
+	public ConfigurableModel getConfigurableModel() {
+		return configurableModel;
+	}
+	public void setConfigurableModel(ConfigurableModel configurableModel) {
+		this.configurableModel = configurableModel;
+	}
+	
+	@Column(name="is_active")
+	public boolean getIsActive() {
+		return isActive;
+	}
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
+	}
+	
 }

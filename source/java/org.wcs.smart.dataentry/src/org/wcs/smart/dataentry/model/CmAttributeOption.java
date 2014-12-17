@@ -46,6 +46,7 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_MULTISELECT = "MULTISELECT"; //$NON-NLS-1$
 	public static final String ID_FLATTEN_TREE = "FLATTEN_TREE"; //$NON-NLS-1$
 	public static final String ID_NUMERIC = "NUMERIC"; //$NON-NLS-1$
+	public static final String ID_CUSTOM_CONFIG = "CUSTOM_CONFIG"; //$NON-NLS-1$
 	
 	private CmAttribute cmAttribute;
 	private String optionId; //NOTE: we cannot map this as emun in case we want to support some external options

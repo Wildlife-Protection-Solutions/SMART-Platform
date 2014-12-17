@@ -39,13 +39,13 @@ import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
-import org.wcs.smart.dataentry.dialog.RenameTreeDialog;
+import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider;
+import org.wcs.smart.dataentry.dialog.EditTreeDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
-import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
 /**
@@ -58,6 +58,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private TreeEditorField defaultValueTreeField;
 	private TreeViewer attributeTreeViewer;
+	private Button btnIsCustomConfig;
 	
 	private Object lastSelection;
 	/**
@@ -78,6 +79,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, Messages.CmAttributeInfoComposite_Option_FlattenTree, ""); //$NON-NLS-1$
 		createDefaultControl(container);
 		createTreeControl(container);	
+		createIsCustomConfigControl(container);
 		createRenameButton(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
@@ -96,11 +98,36 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (getSourceObject() != lastSelection){
 					//tree viewer
 					((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
-					attributeTreeViewer.setInput(getSourceObject().getAttribute());
+					attributeTreeViewer.setInput(getSourceObject());
 					attributeTreeViewer.expandToLevel(2);
 					attributeTreeViewer.refresh();
 				}
+				
+				btnIsCustomConfig.setSelection(getSourceObject().isUseCustomConfig());
+				
 				lastSelection = getSourceObject();
+			}
+		});
+	}
+
+	private void createIsCustomConfigControl(Composite parent) {
+		btnIsCustomConfig = new Button(parent, SWT.CHECK);
+		btnIsCustomConfig.setText("Use Custom Tree Configuration");
+		btnIsCustomConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		btnIsCustomConfig.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_CUSTOM_CONFIG);
+				if (option == null) {
+					option = CmAttributeOptionFactory.createCustomCofigOption(getSourceObject());
+					getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
+					getSession().saveOrUpdate(getSourceObject());
+				}
+				option.setBooleanValue(btnIsCustomConfig.getSelection());
+				attributeTreeViewer.setInput(getSourceObject());
+				attributeTreeViewer.expandToLevel(2);
+				attributeTreeViewer.refresh();
+				fireModelChanged();
 			}
 		});
 	}
@@ -169,7 +196,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		attributeTreeViewer = new TreeViewer(container);
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 		attributeTreeViewer.setLabelProvider(new CmTreeLabelProvider(getSession(), getModel()));
-		attributeTreeViewer.setContentProvider(new AttributeTreeContentProvider(true, false));
+		attributeTreeViewer.setContentProvider(new CmAttributeTreeContentProvider(false, false));
 	}
 	
 	private void createRenameButton(Composite container) {
@@ -183,7 +210,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (!MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage)){
 					return;
 				}
-				RenameTreeDialog dialog = new RenameTreeDialog(getShell(),getSourceObject().getAttribute(),getModel(),getSession());
+				EditTreeDialog dialog = new EditTreeDialog(getShell(), getSourceObject(), getModel(),getSession());
 				dialog.open();
 				
 				attributeTreeViewer.refresh();

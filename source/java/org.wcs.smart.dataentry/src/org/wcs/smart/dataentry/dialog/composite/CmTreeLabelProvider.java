@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
+import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider.CmTreeRootNode;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -53,9 +54,14 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 		
 	@Override
 	public String getText(Object element) {
+		if (element instanceof CmTreeRootNode){
+			return "Root";
+		}
+		
 		CmAttributeTreeNode node = getTreeNode(element);
+		
 		if (node != null){
-			String label =null;
+			String label = null;
 			if (getLanguage() == null){
 				label = node.findNameNull(SmartDB.getCurrentLanguage());
 			}else{
@@ -67,12 +73,17 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 			if (label != null){
 				return label;
 			}
+			return super.getText(node.getDmTreeNode());
 		}
 		return super.getText(element);
 	}
 	
 
 	private CmAttributeTreeNode getTreeNode(Object element){
+		if (element instanceof CmAttributeTreeNode) {
+			return (CmAttributeTreeNode) element;
+		}
+		
 		if (element instanceof AttributeTreeNode){
 			List<?> items = session.createCriteria(CmAttributeTreeNode.class)
 					.add(Restrictions.eq("dmTreeNode", ((AttributeTreeNode) element)))  //$NON-NLS-1$

@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -35,6 +37,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.annotations.OrderBy;
+import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 
@@ -50,6 +56,12 @@ public class CmAttribute extends NamedItem {
 	private Attribute attribute;
 	private Map<String, CmAttributeOption> cmAttributeOptions;
 	private int order;
+	
+	/* for tree type attributes */
+	private List<CmAttributeTreeNode> rootTreeNodes = null;
+	private List<CmAttributeTreeNode> activeTreeNodes = null;
+
+	private List<CmAttributeTreeNode> defaultTreeNodes = null;
 	
 	
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -88,6 +100,59 @@ public class CmAttribute extends NamedItem {
 	public void setOrder(int order) {
 		this.order = order;
 	}
+
+	/**
+	 * Only valid for tree attributes.
+	 * @return  set of root tree nodes
+	 */
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@Where(clause = "parent_uuid is null")
+	@OrderBy(clause = "node_order")
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<CmAttributeTreeNode> getTree(){
+		if (rootTreeNodes == null) {
+			rootTreeNodes = new ArrayList<CmAttributeTreeNode>();
+		}
+		return this.rootTreeNodes;
+	}
+	public void setTree(List<CmAttributeTreeNode> tree){
+		this.rootTreeNodes = tree;
+	}
+
+	/**
+	 * Only valid for tree attributes.
+	 * @return  set of root tree nodes
+	 */
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute")
+	@Where(clause = "parent_uuid is null and is_active")
+	@OrderBy(clause = "node_order")
+	//@BatchSize(size=200)
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<CmAttributeTreeNode> getActiveTreeNodes(){
+		return this.activeTreeNodes;
+	}
+	public void setActiveTreeNodes(List<CmAttributeTreeNode> activeTreeNodes){
+		this.activeTreeNodes = activeTreeNodes;
+	}
+
+	@Transient
+	public List<CmAttributeTreeNode> getCurrentTree() {
+		return isUseCustomConfig() ? getTree() : getDefaultTree();
+	}
+	
+	@Transient
+	public List<CmAttributeTreeNode> getDefaultTree() {
+		if (defaultTreeNodes == null) {
+			List<CmAttributeTreeNode> defaultTree = node.getModel().getDefaultTrees();
+			defaultTreeNodes = new FilteredSubList<CmAttributeTreeNode>(defaultTree) {
+				@Override
+				protected boolean matches(CmAttributeTreeNode t) {
+					return attribute.equals(t.getDmAttribute());
+				}
+			};
+		}
+		return defaultTreeNodes;
+	}
 	
 	@Transient
 	public boolean isVisible() {
@@ -110,6 +175,12 @@ public class CmAttribute extends NamedItem {
 	@Transient
 	public boolean isFlattenTree() {
 		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_FLATTEN_TREE);
+		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
+	}
+
+	@Transient
+	public boolean isUseCustomConfig() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_CUSTOM_CONFIG);
 		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
 	}
 	
