@@ -78,8 +78,16 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				"alter table smart.gridded_query add column style long varchar", //$NON-NLS-1$
 				
 				"create table smart.map_styles (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, style_string long varchar not null, primary key (uuid))", //$NON-NLS-1$
-				"alter table smart.map_styles add constraint mapstyle_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE" //$NON-NLS-1$
+				"alter table smart.map_styles add constraint mapstyle_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
 
+				"alter table smart.cm_attribute_tree_node add column cm_attribute_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node add column dm_attribute_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node add column parent_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node add column node_order SMALLINT", //$NON-NLS-1$
+
+				"UPDATE smart.cm_attribute_tree_node SET NODE_ORDER=0", //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node alter column DM_TREE_NODE_UUID NULL" //$NON-NLS-1$
+				
 		};
 		
 		for (String s : sql){
