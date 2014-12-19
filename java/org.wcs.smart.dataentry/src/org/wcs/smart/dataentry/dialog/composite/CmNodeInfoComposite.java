@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.text.MessageFormat;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -34,6 +35,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -184,6 +186,14 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 			}
 		}
 		node.setParent(null);
+		//remove default tree mapping if present
+		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(getModel());
+		for (Attribute a : CmDefaultTreesUtil.getPresentedTreeAttributes(node)) {
+			if (!existingTrees.contains(a)) {
+				//attribute is not present in CM anymore -> remove default mapping
+				getModel().removeDefaultTrees(a);
+			}
+		}
 		getSession().flush();
 		fireModelChanged();
 	}

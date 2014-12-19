@@ -44,10 +44,20 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class CmDefaultTreesUtil {
 
+	public static Set<Attribute> getPresentedTreeAttributes(CmNode node) {
+		Queue<CmNode> toCheck = new LinkedList<CmNode>();
+		toCheck.add(node);
+		return getPresentedTreeAttributes(toCheck);
+	}
+	
 	public static Set<Attribute> getPresentedTreeAttributes(ConfigurableModel model) {
-		Set<Attribute> result = new HashSet<Attribute>();
 		Queue<CmNode> toCheck = new LinkedList<CmNode>();
 		toCheck.addAll(model.getNodes());
+		return getPresentedTreeAttributes(toCheck);
+	}
+
+	private static Set<Attribute> getPresentedTreeAttributes(Queue<CmNode> toCheck) {
+		Set<Attribute> result = new HashSet<Attribute>();
 		while(!toCheck.isEmpty()) {
 			CmNode node = toCheck.remove();
 			if (node.getCmAttributes() != null) {
@@ -61,7 +71,7 @@ public class CmDefaultTreesUtil {
 		}
 		return result;
 	}
-
+	
 	public static List<CmAttributeTreeNode> buildDefaultTree(ConfigurableModel model, Attribute a) {
 		return buildDefaultTree(model, a, null, null);
 	}

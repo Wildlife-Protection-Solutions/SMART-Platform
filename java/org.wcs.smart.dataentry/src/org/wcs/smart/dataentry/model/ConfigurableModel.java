@@ -112,6 +112,13 @@ public class ConfigurableModel extends NamedItem {
 		}
 		return result;
 	}
+
+	@Transient
+	public void removeDefaultTrees(final Attribute attribute) {
+		List<CmAttributeTreeNode> tree = getDefaultTrees(attribute);
+		tree.clear(); //NOTE: as this is FilteredSubList is fill remove given items from original defaultRootTreeNodes list
+		attr2TreeMap.remove(attribute);
+	}
 	
 	/**
 	 * Moves an {@link CmNode} to a new position in the sibling list.
