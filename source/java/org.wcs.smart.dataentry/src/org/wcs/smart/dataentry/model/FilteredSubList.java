@@ -28,12 +28,10 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * List that is linked with original list but contains only elements 
+ * that match given criteria. All operations performed on filtered list
+ * will be performed on a source list as well.
+ * 
  * @author elitvin
  * @since 3.0.0
  */
@@ -77,8 +75,8 @@ public abstract class FilteredSubList<T> implements List<T> {
 
 	@Override
 	public void clear() {
+		source.removeAll(filteredList);
 		filteredList.clear();
-		source.clear();
 	}
 
 	@Override
