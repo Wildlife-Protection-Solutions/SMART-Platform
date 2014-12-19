@@ -24,6 +24,7 @@ package org.wcs.smart.dataentry.dialog.composite;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -50,6 +51,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
@@ -59,6 +61,7 @@ import org.wcs.smart.dataentry.dialog.DatamodelCategorySelectorDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -204,10 +207,23 @@ public abstract class AbstractInfoComposite extends Composite {
 			cma.setOrder(node.getCmAttributes().size());
 			cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 			node.getCmAttributes().add(cma);
+			if (AttributeType.TREE.equals(a.getType())) {
+				ensureDefaultTreeExists(a);
+			}
 		}
 		addToParent(node);
 		session.saveOrUpdate(node);
 		session.flush();
+	}
+
+	private void ensureDefaultTreeExists(Attribute a) {
+		ConfigurableModel m = getModel();
+		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
+		if (!existingTrees.contains(a)) {
+			List<CmAttributeTreeNode> defTree = CmDefaultTreesUtil.buildDefaultTree(m, a);
+			m.getDefaultTrees().addAll(defTree);
+			session.saveOrUpdate(m);
+		}
 	}
 
 	private DataModel getDataModel() {
