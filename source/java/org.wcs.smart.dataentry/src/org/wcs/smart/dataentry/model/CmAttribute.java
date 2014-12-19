@@ -59,9 +59,6 @@ public class CmAttribute extends NamedItem {
 	
 	/* for tree type attributes */
 	private List<CmAttributeTreeNode> rootTreeNodes = null;
-	private List<CmAttributeTreeNode> activeTreeNodes = null;
-
-	private List<CmAttributeTreeNode> defaultTreeNodes = null;
 	
 	
 	@ManyToOne(fetch = FetchType.EAGER)
@@ -126,16 +123,7 @@ public class CmAttribute extends NamedItem {
 	
 	@Transient
 	public List<CmAttributeTreeNode> getDefaultTree() {
-		if (defaultTreeNodes == null) {
-			List<CmAttributeTreeNode> defaultTree = node.getModel().getDefaultTrees();
-			defaultTreeNodes = new FilteredSubList<CmAttributeTreeNode>(defaultTree) {
-				@Override
-				protected boolean matches(CmAttributeTreeNode t) {
-					return attribute.equals(t.getDmAttribute());
-				}
-			};
-		}
-		return defaultTreeNodes;
+		return node.getModel().getDefaultTrees(attribute);
 	}
 	
 	@Transient

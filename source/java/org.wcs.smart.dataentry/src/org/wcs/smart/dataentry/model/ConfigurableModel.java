@@ -22,7 +22,9 @@
 package org.wcs.smart.dataentry.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -39,6 +41,7 @@ import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.datamodel.Attribute;
 
 
 /**
@@ -53,6 +56,7 @@ public class ConfigurableModel extends NamedItem {
     private List<CmNode> nodes; //the root nodes for the data model
 
 	private List<CmAttributeTreeNode> defaultRootTreeNodes = null;
+	private Map<Attribute, List<CmAttributeTreeNode>> attr2TreeMap = null;
     
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -89,6 +93,24 @@ public class ConfigurableModel extends NamedItem {
 	}
 	public void setDefaultTrees(List<CmAttributeTreeNode> tree){
 		this.defaultRootTreeNodes = tree;
+	}
+
+	@Transient
+	public List<CmAttributeTreeNode> getDefaultTrees(final Attribute attribute) {
+		if (attr2TreeMap == null) {
+			attr2TreeMap = new HashMap<Attribute, List<CmAttributeTreeNode>>();
+		}
+		List<CmAttributeTreeNode> result = attr2TreeMap.get(attribute);
+		if (result == null) {
+			result = new FilteredSubList<CmAttributeTreeNode>(getDefaultTrees()) {
+				@Override
+				protected boolean matches(CmAttributeTreeNode t) {
+					return attribute.equals(t.getDmAttribute());
+				}
+			};
+			attr2TreeMap.put(attribute, result);
+		}
+		return result;
 	}
 	
 	/**
