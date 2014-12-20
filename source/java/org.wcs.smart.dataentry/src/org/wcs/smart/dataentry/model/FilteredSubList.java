@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.NoSuchElementException;
 
 /**
  * List that is linked with original list but contains only elements 
@@ -106,7 +107,29 @@ public abstract class FilteredSubList<T> implements List<T> {
 
 	@Override
 	public Iterator<T> iterator() {
-		throw new UnsupportedOperationException();
+		return new Iterator<T>() {
+			private int cursor = 0;
+
+			@Override
+			public boolean hasNext() {
+				return cursor != filteredList.size();
+			}
+
+			@Override
+			public T next() {
+				int i = cursor;
+				if (i >= filteredList.size())
+					throw new NoSuchElementException();
+				cursor = i + 1;
+				return filteredList.get(i);
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+			
+		};
 	}
 
 	@Override
@@ -166,6 +189,7 @@ public abstract class FilteredSubList<T> implements List<T> {
 		return filteredList.toArray();
 	}
 
+	@SuppressWarnings("hiding")
 	@Override
 	public <T> T[] toArray(T[] a) {
 		return filteredList.toArray(a);

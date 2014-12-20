@@ -25,11 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -44,29 +43,17 @@ public class TreeNodeDataProvider {
 	List<IAttributeTreeNodeProxy> data;	
 	private Language language;
 	
-	public TreeNodeDataProvider(Attribute attribute, ConfigurableModel configurableModel, Language language, Session session) {
+	public TreeNodeDataProvider(CmAttribute attribute, ConfigurableModel configurableModel, Language language, Session session) {
 		this.language = language;
-		List<AttributeTreeNode> activeTreeNodes = attribute.getActiveTreeNodes();
-		if (activeTreeNodes != null) {
-			data = wrapTreeNodes(session, activeTreeNodes, configurableModel);
-		}
+		data = wrapTreeNodes(session, attribute.getCurrentTree(), configurableModel);
 	}
 
-	private List<IAttributeTreeNodeProxy> wrapTreeNodes(Session session, List<AttributeTreeNode> nodesList, ConfigurableModel configurableModel) {
+	private List<IAttributeTreeNodeProxy> wrapTreeNodes(Session session, List<CmAttributeTreeNode> nodesList, ConfigurableModel configurableModel) {
 		List<IAttributeTreeNodeProxy> result = new ArrayList<IAttributeTreeNodeProxy>();
-		CommonTreeNodeProxy proxy = null;
-		for (AttributeTreeNode dmItem : nodesList) {
-			CmAttributeTreeNode cmItem = getCmTreeNode(session, dmItem, configurableModel);
-			proxy = null;
-			if (cmItem != null) {
-				if (cmItem.getIsActive()) {
-					proxy = new CmTreeNodeProxy(cmItem);
-				}
-			} else {
-				proxy = new DmTreeNodeProxy(dmItem);
-			}
-			if (proxy != null) {
-				List<IAttributeTreeNodeProxy> children = wrapChildTreeNodes(session, dmItem, configurableModel);
+		for (CmAttributeTreeNode cmItem : nodesList) {
+			if (cmItem != null && cmItem.getIsActive()) {
+				CommonTreeNodeProxy proxy = new CmTreeNodeProxy(cmItem);
+				List<IAttributeTreeNodeProxy> children = wrapChildTreeNodes(session, cmItem, configurableModel);
 				proxy.setActiveChildren(children);
 				result.add(proxy);
 			}
@@ -74,23 +61,11 @@ public class TreeNodeDataProvider {
 		return result;
 	}
 	
-	private List<IAttributeTreeNodeProxy> wrapChildTreeNodes(Session session, AttributeTreeNode node, ConfigurableModel configurableModel) {
-		List<AttributeTreeNode> activeChildren = node.getActiveChildren();
-		if (activeChildren == null || activeChildren.isEmpty())
+	private List<IAttributeTreeNodeProxy> wrapChildTreeNodes(Session session, CmAttributeTreeNode node, ConfigurableModel configurableModel) {
+		List<CmAttributeTreeNode> children = node.getChildren();
+		if (children == null || children.isEmpty())
 			return null;
-		return wrapTreeNodes(session, activeChildren, configurableModel);
-	}
-	
-	private CmAttributeTreeNode getCmTreeNode(Session session, AttributeTreeNode element, ConfigurableModel configurableModel) {
-		if (configurableModel.getUuid() == null)
-			return null;
-		List<?> items = session.createCriteria(CmAttributeTreeNode.class)
-				.add(Restrictions.eq("dmTreeNode", element))  //$NON-NLS-1$
-				.add(Restrictions.eq("configurableModel", configurableModel)).list();  //$NON-NLS-1$
-		if (items.size() > 0) {
-			return (CmAttributeTreeNode) items.get(0);
-		}
-		return null;
+		return wrapTreeNodes(session, children, configurableModel);
 	}
 	
 	public List<IAttributeTreeNodeProxy> getActiveTreeNodes() {
@@ -106,25 +81,6 @@ public class TreeNodeDataProvider {
 		
 		public void setActiveChildren(List<IAttributeTreeNodeProxy> children) {
 			this.children = children;
-		}
-	}
-	
-	
-	private class DmTreeNodeProxy extends CommonTreeNodeProxy {
-		private AttributeTreeNode item;
-
-		public DmTreeNodeProxy(AttributeTreeNode item) {
-			this.item = item;
-		}
-
-		@Override
-		public String getName() {
-			return LanguageUtil.getName(item, language);
-		}
-
-		@Override
-		public byte[] getUuid() {
-			return item.getUuid();
 		}
 	}
 	
@@ -146,7 +102,8 @@ public class TreeNodeDataProvider {
 
 		@Override
 		public byte[] getUuid() {
-			return item.getDmTreeNode().getUuid();
+			AttributeTreeNode dmNode = item.getDmTreeNode();
+			return dmNode != null ? dmNode.getUuid() : null;
 		}
 	}
 	

@@ -58,7 +58,6 @@ public class CmAttributeTreeNode extends NamedItem {
 	private Attribute dmAttribute = null;
 	private int nodeOrder;
 	private List<CmAttributeTreeNode> children = new ArrayList<CmAttributeTreeNode>();
-	private List<CmAttributeTreeNode> activeChildren = new ArrayList<CmAttributeTreeNode>();
 	private CmAttributeTreeNode parent = null;
 	
 	
