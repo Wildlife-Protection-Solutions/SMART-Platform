@@ -100,7 +100,7 @@ public class CyberTrackerConfExporter {
 	private Map<Attribute, Map<Integer, CyberTrackerId>> attr2resultId = new HashMap<Attribute, Map<Integer, CyberTrackerId>>();
 	private Map<Integer, CyberTrackerId> nodeLevel2resultId = new HashMap<Integer, CyberTrackerId>();
 	private Map<Attribute, ListItemsDataProvider> listAttr2ItemData = new HashMap<Attribute, ListItemsDataProvider>();
-	private Map<Attribute, TreeNodeDataProvider> treeAttr2ItemData = new HashMap<Attribute, TreeNodeDataProvider>();
+	private Map<CmAttribute, TreeNodeDataProvider> treeAttr2ItemData = new HashMap<CmAttribute, TreeNodeDataProvider>();
 
 	private CyberTrackerId newWpResultId;
 	private List<CyberTrackerId> newWpElementsIds;
@@ -502,7 +502,7 @@ public class CyberTrackerConfExporter {
 				} else {
 					String nodeId = id.getNodeId();
 					id = linkToNext ? new CyberTrackerId() : null; //this id will be used for next screen
-					result.addAll(buildAttributeTreeNodes(attribute, nodeId, id, resultElementId.getItemId(), label, terminate));
+					result.addAll(buildAttributeTreeNodes(cmAttr, nodeId, id, resultElementId.getItemId(), label, terminate));
 					linkToNext = false; //for this case we track linking separately, we don't want any linking logic to be executed further for this attribute
 				}
 				break;
@@ -555,8 +555,7 @@ public class CyberTrackerConfExporter {
 	}
 	
 	private List<CyberTrackerId> addFinalTreeNodes(CmAttribute cmAttr) {
-		Attribute attribute = cmAttr.getAttribute();
-		List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(attribute);
+		List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(cmAttr);
 		if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
 			throw new IllegalArgumentException("Cannot add a flat tree screen without any items to display"); //$NON-NLS-1$
@@ -763,15 +762,15 @@ public class CyberTrackerConfExporter {
 	 * @param nodeId
 	 * @return
 	 */
-	private List<Node> buildAttributeTreeNodes(Attribute treeAttribute, String nodeId, CyberTrackerId navId, String resultElementId, String label, boolean terminate) {
+	private List<Node> buildAttributeTreeNodes(CmAttribute treeCmAttribute, String nodeId, CyberTrackerId navId, String resultElementId, String label, boolean terminate) {
 		List<Node> result = new ArrayList<Node>();
 		List<IAttributeTreeNodeProxy> activeTreeNodes = new ArrayList<IAttributeTreeNodeProxy>();
-		activeTreeNodes.addAll(getActiveTreeNodes(treeAttribute));
+		activeTreeNodes.addAll(getActiveTreeNodes(treeCmAttribute));
 		
 		Map<IAttributeTreeNodeProxy, CyberTrackerId> map = ctUtil.buildTreeNodeMap(activeTreeNodes);
 		List<CyberTrackerId> childIds = ctUtil.getChildrenIds(activeTreeNodes, map);
-		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeAttribute, currentLanguage) + label, childIds, null);
-		if (!treeAttribute.getIsRequired() && navId != null) {
+		Node treeRootNode = ctUtil.createRadioNode(nodeId, LanguageUtil.getName(treeCmAttribute, currentLanguage) + label, childIds, null);
+		if (!treeCmAttribute.getAttribute().getIsRequired() && navId != null) {
 			Control navControl = ScreensObjectFactory.getNavigationControl(treeRootNode);
 			navControl.setTranslateNextScreenId(navId.getNodeId());
 			Control control7 = ScreensObjectFactory.getRadioMainControl(treeRootNode);
@@ -931,7 +930,7 @@ public class CyberTrackerConfExporter {
 				}
 				case TREE:
 				{
-					List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(attribute);
+					List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(attr);
 					if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 						//skip invalid attribute (attribute without any possible value)
 						continue;
@@ -959,8 +958,8 @@ public class CyberTrackerConfExporter {
 		return dataProvider.getActiveListItems();
 	}
 
-	private List<IAttributeTreeNodeProxy> getActiveTreeNodes(Attribute attribute) {
-		if (attribute.getType() != AttributeType.TREE)
+	private List<IAttributeTreeNodeProxy> getActiveTreeNodes(CmAttribute attribute) {
+		if (attribute.getAttribute().getType() != AttributeType.TREE)
 			return null;
 		TreeNodeDataProvider dataProvider = treeAttr2ItemData.get(attribute);
 		if (dataProvider == null) {
