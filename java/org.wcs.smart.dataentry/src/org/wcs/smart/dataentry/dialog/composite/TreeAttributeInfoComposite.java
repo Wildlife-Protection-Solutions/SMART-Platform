@@ -207,14 +207,13 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		btnRename.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage)){
-					return;
+				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.TreeAttributeInfoComposite_WarnTitle, Messages.TreeAttributeInfoComposite_WarnMessage)) {
+					EditTreeDialog dialog = new EditTreeDialog(getShell(), getSourceObject(), getModel(),getSession());
+					dialog.open();
+					
+					attributeTreeViewer.refresh();
+					fireModelChanged();
 				}
-				EditTreeDialog dialog = new EditTreeDialog(getShell(), getSourceObject(), getModel(),getSession());
-				dialog.open();
-				
-				attributeTreeViewer.refresh();
-				fireModelChanged();
 			}
 		});
 		
