@@ -113,16 +113,16 @@ public class EditTreeDialog extends TitleAreaDialog {
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		org.eclipse.swt.widgets.Label dmLabel = new org.eclipse.swt.widgets.Label(left, SWT.NONE);
-		dmLabel.setText("Data Model Tree Values:");
+		dmLabel.setText(Messages.EditTreeDialog_DataModelValues);
 		
 		dmTreeViewer = createDmTreeViewer(left);
 
 		btnAddSubNodes = new Button(left, SWT.CHECK);
-		btnAddSubNodes.setText("Automatically add subnodes");
+		btnAddSubNodes.setText(Messages.EditTreeDialog_AutoAddSubnodes);
 		btnAddSubNodes.setSelection(true);
 
 		Button btnAddConf = new Button(left, SWT.PUSH);
-		btnAddConf.setText("Add to Configurable Tree");
+		btnAddConf.setText(Messages.EditTreeDialog_AddToConfTree);
 		btnAddConf.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -138,7 +138,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		org.eclipse.swt.widgets.Label cmLabel = new org.eclipse.swt.widgets.Label(middle, SWT.NONE);
-		cmLabel.setText("Configurable Model Tree Values:");
+		cmLabel.setText(Messages.EditTreeDialog_ConfigurableModelValues);
 
 		itemViewer = createItemViewer(middle);
 		
@@ -149,7 +149,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
 		Button btnAddGrp = new Button(btnPanel, SWT.PUSH);
-		btnAddGrp.setText("Add Group");
+		btnAddGrp.setText(Messages.EditTreeDialog_AddGroup);
 		btnAddGrp.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -187,7 +187,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		super.setButtonLayoutData(btnEnable);
 
 		Button btnDelete = new Button(btnPanel, SWT.PUSH);
-		btnDelete.setText("Delete");
+		btnDelete.setText(Messages.EditTreeDialog_Delete);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -229,7 +229,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 			cmTreeNode.setDmAttribute(attribute.getAttribute());
 		}
 		cmTreeNode.setIsActive(true);
-		cmTreeNode.updateName(SmartDB.getCurrentLanguage(), "New Group");
+		cmTreeNode.updateName(SmartDB.getCurrentLanguage(), Messages.EditTreeDialog_NewGroup);
 		cmTreeNode.setNodeOrder(children.size());
 		children.add(cmTreeNode);
 		currentSession.saveOrUpdate(cmTreeNode);
@@ -502,7 +502,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 	}
 	
 	protected String getDialogMessage() {
-		return Messages.RenameTreeDialog_DialogMessage;
+		return attribute.isUseCustomConfig() ? Messages.EditTreeDialog_MessageCustom : Messages.EditTreeDialog_MessageDefault;
 	}
 	
 	private void processItem(CmAttributeTreeNode cmTreeNode, boolean enable, boolean updateSelection){
