@@ -112,7 +112,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private void createIsCustomConfigControl(Composite parent) {
 		btnIsCustomConfig = new Button(parent, SWT.CHECK);
-		btnIsCustomConfig.setText("Use Custom Tree Configuration");
+		btnIsCustomConfig.setText(Messages.TreeAttributeInfoComposite_UseCustomConfiguration);
 		btnIsCustomConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		btnIsCustomConfig.addSelectionListener(new SelectionAdapter() {
 			@Override

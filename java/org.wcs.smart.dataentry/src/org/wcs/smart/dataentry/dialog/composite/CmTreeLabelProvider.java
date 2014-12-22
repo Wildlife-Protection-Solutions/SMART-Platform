@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider.CmTreeRootNode;
+import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -55,7 +56,7 @@ public class CmTreeLabelProvider extends AttributeTreeLabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof CmTreeRootNode){
-			return "Root";
+			return Messages.CmTreeLabelProvider_Root;
 		}
 		
 		CmAttributeTreeNode node = getTreeNode(element);

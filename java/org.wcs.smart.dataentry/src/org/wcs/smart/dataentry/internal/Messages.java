@@ -36,6 +36,7 @@ public class Messages extends NLS {
 	public static String CmTemplateCloner_CopyConfigModelName;
 	public static String CmTemplateCloner_CopyProgress;
 	public static String CmTemplateCloner_TreeNodeNotFoundError;
+	public static String CmTreeLabelProvider_Root;
 	public static String CmXmlToSmartImporter_DefaultLanguage_Error;
 	public static String CmXmlToSmartImporter_ImportingFromXml;
 	public static String CmXmlToSmartImporter_ImportingListItems;
@@ -101,6 +102,15 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Button_Add;
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
+	public static String EditTreeDialog_AddGroup;
+	public static String EditTreeDialog_AddToConfTree;
+	public static String EditTreeDialog_AutoAddSubnodes;
+	public static String EditTreeDialog_ConfigurableModelValues;
+	public static String EditTreeDialog_DataModelValues;
+	public static String EditTreeDialog_Delete;
+	public static String EditTreeDialog_MessageCustom;
+	public static String EditTreeDialog_MessageDefault;
+	public static String EditTreeDialog_NewGroup;
 	public static String ListAttributeInfoComposite_Button_Edit;
 	public static String ListAttributeInfoComposite_MultiselectHint;
 	public static String ListAttributeInfoComposite_Values;
@@ -108,13 +118,13 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_WarnDialogTitle;
 	public static String NumericAttributeInfoComposite_ErrorDialogTitle;
 	public static String RenameListDialog_DialogMessage;
-	public static String RenameTreeDialog_DialogMessage;
 	public static String ShowConfigurableModelHandler_LoadDataModel;
 	public static String ShowConfigurableModelHandler_LoadDataModel_Error;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Message;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Title;
 	public static String TranslatableNameComposite_Button_Translate;
 	public static String TreeAttributeInfoComposite_RenameButton;
+	public static String TreeAttributeInfoComposite_UseCustomConfiguration;
 	public static String TreeAttributeInfoComposite_valueLabel;
 	public static String TreeAttributeInfoComposite_WarnMessage;
 	public static String TreeAttributeInfoComposite_WarnTitle;
