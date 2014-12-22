@@ -100,7 +100,6 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 					((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
 					attributeTreeViewer.setInput(getSourceObject());
 					attributeTreeViewer.expandToLevel(2);
-					attributeTreeViewer.refresh();
 				}
 				
 				btnIsCustomConfig.setSelection(getSourceObject().isUseCustomConfig());
