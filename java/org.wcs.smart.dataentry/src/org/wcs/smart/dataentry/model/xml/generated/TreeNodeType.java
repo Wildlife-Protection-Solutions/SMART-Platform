@@ -13,25 +13,25 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for AttributeItemType complex type.
+ * <p>Java class for TreeNodeType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="AttributeItemType">
+ * &lt;complexType name="TreeNodeType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded"/>
+ *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="children" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
- *       &lt;attribute name="isActive" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="refKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="keyRef" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="isActive" type="{http://www.w3.org/2001/XMLSchema}boolean" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -40,19 +40,20 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "AttributeItemType", propOrder = {
-    "name"
+@XmlType(name = "TreeNodeType", propOrder = {
+    "name",
+    "children"
 })
-public class AttributeItemType {
+public class TreeNodeType {
 
-    @XmlElement(required = true)
     protected List<NameType> name;
-    @XmlAttribute
-    protected Boolean isActive;
+    protected List<TreeNodeType> children;
     @XmlAttribute
     protected String attributeKey;
     @XmlAttribute
-    protected String refKey;
+    protected String keyRef;
+    @XmlAttribute
+    protected Boolean isActive;
 
     /**
      * Gets the value of the name property.
@@ -84,27 +85,32 @@ public class AttributeItemType {
     }
 
     /**
-     * Gets the value of the isActive property.
+     * Gets the value of the children property.
      * 
-     * @return
-     *     possible object is
-     *     {@link Boolean }
-     *     
-     */
-    public Boolean isIsActive() {
-        return isActive;
-    }
-
-    /**
-     * Sets the value of the isActive property.
+     * <p>
+     * This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the children property.
      * 
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
-     *     
+     * <p>
+     * For example, to add a new item, do as follows:
+     * <pre>
+     *    getChildren().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link TreeNodeType }
+     * 
+     * 
      */
-    public void setIsActive(Boolean value) {
-        this.isActive = value;
+    public List<TreeNodeType> getChildren() {
+        if (children == null) {
+            children = new ArrayList<TreeNodeType>();
+        }
+        return this.children;
     }
 
     /**
@@ -132,27 +138,51 @@ public class AttributeItemType {
     }
 
     /**
-     * Gets the value of the refKey property.
+     * Gets the value of the keyRef property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getRefKey() {
-        return refKey;
+    public String getKeyRef() {
+        return keyRef;
     }
 
     /**
-     * Sets the value of the refKey property.
+     * Sets the value of the keyRef property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setRefKey(String value) {
-        this.refKey = value;
+    public void setKeyRef(String value) {
+        this.keyRef = value;
+    }
+
+    /**
+     * Gets the value of the isActive property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Boolean }
+     *     
+     */
+    public Boolean isIsActive() {
+        return isActive;
+    }
+
+    /**
+     * Sets the value of the isActive property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Boolean }
+     *     
+     */
+    public void setIsActive(Boolean value) {
+        this.isActive = value;
     }
 
 }

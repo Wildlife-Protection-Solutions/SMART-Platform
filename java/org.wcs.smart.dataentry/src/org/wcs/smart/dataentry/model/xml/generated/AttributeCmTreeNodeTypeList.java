@@ -16,16 +16,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for NodeTypeList complex type.
+ * <p>Java class for AttributeCmTreeNodeTypeList complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="NodeTypeList">
+ * &lt;complexType name="AttributeCmTreeNodeTypeList">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="node" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NodeType" maxOccurs="unbounded" minOccurs="0"/>
+ *         &lt;element name="treeNode" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,40 +35,40 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "NodeTypeList", propOrder = {
-    "node"
+@XmlType(name = "AttributeCmTreeNodeTypeList", propOrder = {
+    "treeNode"
 })
-public class NodeTypeList {
+public class AttributeCmTreeNodeTypeList {
 
-    protected List<NodeType> node;
+    protected List<TreeNodeType> treeNode;
 
     /**
-     * Gets the value of the node property.
+     * Gets the value of the treeNode property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the node property.
+     * This is why there is not a <CODE>set</CODE> method for the treeNode property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getNode().add(newItem);
+     *    getTreeNode().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link NodeType }
+     * {@link TreeNodeType }
      * 
      * 
      */
-    public List<NodeType> getNode() {
-        if (node == null) {
-            node = new ArrayList<NodeType>();
+    public List<TreeNodeType> getTreeNode() {
+        if (treeNode == null) {
+            treeNode = new ArrayList<TreeNodeType>();
         }
-        return this.node;
+        return this.treeNode;
     }
 
 }
