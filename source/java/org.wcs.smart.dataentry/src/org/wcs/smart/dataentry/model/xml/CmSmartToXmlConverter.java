@@ -82,15 +82,11 @@ public class CmSmartToXmlConverter {
 			processListItems(cm, xml, llookup, session);
 			monitor.worked(1);
 
-//			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
-//			processTreeNodes(cm, xml, llookup, session);
-//			monitor.worked(1);
-
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
 			processCmNodes(cm, xml, llookup, session, monitor);
 			monitor.worked(1);
 
-			monitor.subTask("Processing configurable model nodes for default tree mappings");
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
 			processDefaultTreeNodes(cm, xml, llookup);
 			monitor.worked(1);
 		} finally {
@@ -144,28 +140,6 @@ public class CmSmartToXmlConverter {
 			items.getItem().add(item);
 		}
 	}
-
-//	private static void processTreeNodes(ConfigurableModel cm,
-//			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-//			HashMap<String, Language> llookup, Session session) {
-//
-//		AttributeTreeNodeTypeList nodes = new AttributeTreeNodeTypeList();
-//		xml.setTreeNodes(nodes);
-//		
-//		Criteria query = session.createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("configurableModel", cm)); //$NON-NLS-1$
-//		@SuppressWarnings("unchecked")
-//		List<CmAttributeTreeNode> dbList = (List<CmAttributeTreeNode>) query.list();
-//		for (CmAttributeTreeNode dbItem : dbList) {
-//			AttributeItemType node = new AttributeItemType();
-//			setNames(node.getName(), dbItem.getNames(), llookup);
-//			node.setIsActive(dbItem.getIsActive());
-//			node.setRefKey(dbItem.getDmTreeNode().getKeyId());
-//			node.setAttributeKey(dbItem.getDmTreeNode().getAttribute().getKeyId());
-//			nodes.getNode().add(node);
-//		}
-//
-//		
-//	}
 
 	private static void processCmNodes(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
