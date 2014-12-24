@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.dataentry.dialog.composite.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -125,12 +126,19 @@ public class CmXmlToSmartImporter {
 			updateNames(cm, xmlCm.getName());
 			
 			cm.setNodes(processCmNodes(xmlCm.getNodes().getNode(), cm, null, monitor));
-			cm.setDefaultTrees(processCmTreeNodes(cm, null, null, xmlCm.getDefaultTrees().getTreeNode()));
+			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
+			if (xmlCm.getDefaultTrees() != null) {
+				//tree mapping was introduced in 3.2.0, previous version were using different mapping
+				cm.setDefaultTrees(processCmTreeNodes(cm, null, null, xmlCm.getDefaultTrees().getTreeNode()));
+			} else if (xmlCm.getTreeNodes() != null) {
+				//if we are here than we are importing data from version less than 3.2
+				//need to perform additional data conversion
+				List<CmAttributeTreeNode> treeNodes = processTreeNodes(xmlCm.getTreeNodes().getNode(), cm);
+				cm.setDefaultTrees(CmDefaultTreesUtil.upgradeDefaultTrees(cm, treeNodes));
+			}
 			
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingListItems);
 			List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
-//			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
-//			List<CmAttributeTreeNode> treeNodes = processTreeNodes(xmlCm.getTreeNodes().getNode(), cm);
 
 			if (!warnings.isEmpty()) {
 				StringBuilder sb = new StringBuilder();
@@ -164,9 +172,6 @@ public class CmXmlToSmartImporter {
 			for (CmAttributeListItem item : listItems) {
 				session.save(item);
 			}
-//			for (CmAttributeTreeNode node : treeNodes) {
-//				session.save(node);
-//			}
 			session.getTransaction().commit();
 			return cm;
 			
@@ -224,18 +229,18 @@ public class CmXmlToSmartImporter {
 		return result;
 	}
 
-//	private List<CmAttributeTreeNode> processTreeNodes(List<AttributeItemType> xmlItems, ConfigurableModel cm) {
-//		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
-//		for (AttributeItemType xmlItem : xmlItems) {
-//			CmAttributeTreeNode item = new CmAttributeTreeNode();
-//			item.setConfigurableModel(cm);
-//			updateNames(item, xmlItem.getName());
-//			item.setIsActive(xmlItem.isIsActive());
-//			item.setDmTreeNode(fetchAttributeTreeNode(xmlItem.getRefKey(), fetchAttribute(xmlItem.getAttributeKey())));
-//			result.add(item);
-//		}
-//		return result;
-//	}
+	private List<CmAttributeTreeNode> processTreeNodes(List<AttributeItemType> xmlItems, ConfigurableModel cm) {
+		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
+		for (AttributeItemType xmlItem : xmlItems) {
+			CmAttributeTreeNode item = new CmAttributeTreeNode();
+			item.setConfigurableModel(cm);
+			updateNames(item, xmlItem.getName());
+			item.setIsActive(xmlItem.isIsActive());
+			item.setDmTreeNode(fetchAttributeTreeNode(xmlItem.getRefKey(), fetchAttribute(xmlItem.getAttributeKey())));
+			result.add(item);
+		}
+		return result;
+	}
 
 	private List<CmNode> processCmNodes(List<NodeType> xmlNodes, ConfigurableModel cm, CmNode parent, IProgressMonitor monitor) {
 
