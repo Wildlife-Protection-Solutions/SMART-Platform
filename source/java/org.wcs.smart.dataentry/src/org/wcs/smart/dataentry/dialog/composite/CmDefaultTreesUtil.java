@@ -22,9 +22,11 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
@@ -73,23 +75,65 @@ public class CmDefaultTreesUtil {
 	}
 	
 	public static List<CmAttributeTreeNode> buildDefaultTree(ConfigurableModel model, Attribute a) {
-		return buildDefaultTree(model, a, null, null);
+		return buildDefaultTree(model, a, null, null, null);
 	}
 	
-	private static List<CmAttributeTreeNode> buildDefaultTree(ConfigurableModel model, Attribute a, CmAttributeTreeNode cmParent, AttributeTreeNode dmParent) {
+//	private static List<CmAttributeTreeNode> buildDefaultTree(ConfigurableModel model, Attribute a, CmAttributeTreeNode cmParent, AttributeTreeNode dmParent) {
+//		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
+//		List<AttributeTreeNode> source = dmParent != null ? dmParent.getActiveChildren() : a.getActiveTreeNodes();
+//		for (AttributeTreeNode dmNode : source) {
+//			CmAttributeTreeNode cmNode = new CmAttributeTreeNode();
+//			cmNode.setConfigurableModel(model);
+//			cmNode.setDmTreeNode(dmNode);
+//			cmNode.setIsActive(dmNode.getIsActive());
+//			cmNode.setParent(cmParent);
+//			cmNode.setNodeOrder(dmNode.getNodeOrder());
+//			cmNode.setDmAttribute(a);
+//			cmNode.setChildren(buildDefaultTree(model, a, cmNode, dmNode));
+//			result.add(cmNode);
+//		}
+//		return result;
+//	}
+
+	/**
+	 * Upgrades tree mapping used in 3.1.0 and previous versions to 3.2.0
+	 * @param oldNodes
+	 * @return
+	 */
+	public static List<CmAttributeTreeNode> upgradeDefaultTrees(ConfigurableModel m, List<CmAttributeTreeNode> oldNodes) {
+		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
+		Map<AttributeTreeNode, CmAttributeTreeNode> preMapping = new HashMap<AttributeTreeNode, CmAttributeTreeNode>();
+		for (CmAttributeTreeNode cmNode : oldNodes) {
+			preMapping.put(cmNode.getDmTreeNode(), cmNode);
+		}
+		Set<Attribute> existingTrees = CmDefaultTreesUtil.getPresentedTreeAttributes(m);
+		
+		for (Attribute a : existingTrees) {
+			List<CmAttributeTreeNode> defTree = buildDefaultTree(m, a, null, null, preMapping);
+			result.addAll(defTree);
+		}
+		
+		return result;
+	}
+
+	private static List<CmAttributeTreeNode> buildDefaultTree(ConfigurableModel model, Attribute a, CmAttributeTreeNode cmParent, AttributeTreeNode dmParent, Map<AttributeTreeNode, CmAttributeTreeNode> preMapping) {
 		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
 		List<AttributeTreeNode> source = dmParent != null ? dmParent.getActiveChildren() : a.getActiveTreeNodes();
 		for (AttributeTreeNode dmNode : source) {
-			CmAttributeTreeNode cmNode = new CmAttributeTreeNode();
-			cmNode.setConfigurableModel(model);
-			cmNode.setDmTreeNode(dmNode);
-			cmNode.setIsActive(dmNode.getIsActive());
+			CmAttributeTreeNode cmNode = preMapping == null ? null : preMapping.get(dmNode);
+			if (cmNode == null) {
+				cmNode = new CmAttributeTreeNode();
+				cmNode.setConfigurableModel(model);
+				cmNode.setDmTreeNode(dmNode);
+				cmNode.setIsActive(dmNode.getIsActive());
+			}
 			cmNode.setParent(cmParent);
 			cmNode.setNodeOrder(dmNode.getNodeOrder());
 			cmNode.setDmAttribute(a);
-			cmNode.setChildren(buildDefaultTree(model, a, cmNode, dmNode));
+			cmNode.setChildren(buildDefaultTree(model, a, cmNode, dmNode, preMapping));
 			result.add(cmNode);
 		}
 		return result;
 	}
+	
 }
