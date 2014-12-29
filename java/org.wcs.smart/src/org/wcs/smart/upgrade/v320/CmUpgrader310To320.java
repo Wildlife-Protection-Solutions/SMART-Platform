@@ -46,10 +46,9 @@ public class CmUpgrader310To320 {
 	private Session session;
 	private UUIDGenerator uuidGenerator;
 	
-	public void upgrade(Session session) {
-		this.session = session;
-		uuidGenerator = null;
-		session.doWork(new Work() {
+	public void upgrade(Session s) {
+		reset(s);
+		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				upgrade(c);
@@ -57,7 +56,12 @@ public class CmUpgrader310To320 {
 		});
 	}
 	
-	private void upgrade(Connection c) throws SQLException {
+	void reset(Session s) {
+		this.session = s;
+		uuidGenerator = null;
+	}
+	
+	void upgrade(Connection c) throws SQLException {
 		ResultSet cm_rs = c.createStatement().executeQuery("select UUID from smart.CONFIGURABLE_MODEL"); //$NON-NLS-1$
 		PreparedStatement ps = c.prepareStatement("select distinct cma.ATTRIBUTE_UUID from smart.CM_ATTRIBUTE cma left join smart.CM_NODE node on cma.NODE_UUID = node.UUID left join smart.DM_ATTRIBUTE dma on cma.ATTRIBUTE_UUID = dma.UUID where dma.ATT_TYPE = 'TREE' and node.CM_UUID = ?"); //$NON-NLS-1$
 		while (cm_rs.next()) {
@@ -139,4 +143,5 @@ public class CmUpgrader310To320 {
 		byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) session, object);
 		return uuid;
 	}
+
 }
