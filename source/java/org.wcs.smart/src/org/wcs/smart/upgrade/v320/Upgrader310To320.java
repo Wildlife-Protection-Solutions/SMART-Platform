@@ -87,7 +87,10 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				"alter table smart.cm_attribute_tree_node add column node_order SMALLINT", //$NON-NLS-1$
 
 				"UPDATE smart.cm_attribute_tree_node SET NODE_ORDER=0", //$NON-NLS-1$
-				"alter table smart.cm_attribute_tree_node alter column DM_TREE_NODE_UUID NULL" //$NON-NLS-1$
+				"alter table smart.cm_attribute_tree_node alter column DM_TREE_NODE_UUID NULL", //$NON-NLS-1$
+				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_parent_uuid_fk FOREIGN KEY (PARENT_UUID) REFERENCES smart.cm_attribute_tree_node (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
+				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_cm_attribute_uuid_fk FOREIGN KEY (CM_ATTRIBUTE_UUID) REFERENCES smart.cm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
+				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_dm_attribute_uuid_fk FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES smart.dm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE" //$NON-NLS-1$
 				
 		};
 		
