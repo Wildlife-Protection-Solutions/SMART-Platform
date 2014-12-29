@@ -33,9 +33,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 
 /**
- * Upgrades from database version 300 to 301.  The only
- * change in this version is the removal of orphaned
- * observations from the patrol editor bug #1076.
+ * Upgrades from database version 310 to 320.
  *
  * @author Emily
  *
