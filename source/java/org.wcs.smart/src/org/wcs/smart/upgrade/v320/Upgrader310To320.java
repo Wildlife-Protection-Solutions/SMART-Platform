@@ -42,8 +42,11 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  */
 public class Upgrader310To320 implements IDatabaseUpgrader {
 	
+	private CmUpgrader310To320 cmUpgrader = new CmUpgrader310To320();
+	
 	public void upgrade(Session s, IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
+		cmUpgrader.reset(s);
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -65,7 +68,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		});
 	}
 
-	private static void upgrade(Connection c) throws Exception {
+	private void upgrade(Connection c) throws Exception {
 		
 		String[] sql = new String[]{
 				"alter table smart.obs_waypoint_query add column style long varchar", //$NON-NLS-1$
@@ -93,6 +96,9 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		for (String s : sql){
 			c.createStatement().execute(s);
 		}
+		
+		cmUpgrader.upgrade(c);
+		
 		/* VERSION UDATE */ 
 		String ssql = "update smart.db_version set version = '3.2.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
 		c.createStatement().execute(ssql);
