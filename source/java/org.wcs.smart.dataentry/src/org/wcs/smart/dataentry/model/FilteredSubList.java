@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
+import javax.xml.transform.SourceLocator;
+
 /**
  * List that is linked with original list but contains only elements 
  * that match given criteria. All operations performed on filtered list
@@ -60,7 +62,12 @@ public abstract class FilteredSubList<T> implements List<T> {
 
 	@Override
 	public void add(int index, T element) {
-		throw new UnsupportedOperationException();
+		int sourceIndex = source.indexOf(filteredList.get(index));
+		if (sourceIndex < 0) {
+			throw new IllegalStateException("Item exists in filtered list but not in source list"); //$NON-NLS-1$
+		}
+		filteredList.add(index, element);
+		source.add(sourceIndex, element);
 	}
 
 	@Override
