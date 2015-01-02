@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -42,6 +43,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
@@ -337,6 +340,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 				EditTreeDialog.this.setCurrentSelection(currentNode, currentCmNode);
 			}
 		});
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		tree.addDragSupport(DND.DROP_MOVE, transferTypes , new CmAttributeTreeDragListener(tree));
+		tree.addDropSupport(DND.DROP_MOVE, transferTypes, new CmAttributeTreeDropListener(tree));
+		
 		tree.expandToLevel(2);
 		return tree;
 	}
