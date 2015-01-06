@@ -316,6 +316,8 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_StartTime;
 	public static String MissionDayComposite_Time;
 	public static String MissionDayComposite_TotalHours;
+	public static String MissionDayComposite_TrackEditLink;
+
 	public static String MissionDayComposite_Tracks;
 	public static String MissionDayComposite_WaypointID;
 	public static String MissionDayComposite_X;

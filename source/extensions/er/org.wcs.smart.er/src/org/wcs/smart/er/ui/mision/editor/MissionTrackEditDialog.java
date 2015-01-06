@@ -62,7 +62,6 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 		this.missionDay = mission;
 	}
 
-
 	public MissionDay getMissionDay() {
 		return missionDay;
 	}
@@ -173,6 +172,6 @@ public class MissionTrackEditDialog extends TitleAreaDialog {
 	
 	@Override
 	public Point getInitialSize(){
-		return new Point(800, 600);
+		return new Point(1000, 800);
 	}
 }

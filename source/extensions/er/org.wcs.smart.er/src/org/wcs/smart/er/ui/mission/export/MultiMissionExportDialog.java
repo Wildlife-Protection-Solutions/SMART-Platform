@@ -148,12 +148,14 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 		Job loadMissions = new Job(Messages.MultiMissionExportDialog_LoadingListJobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				List<SurveyTreeItem> dataList = new ArrayList<SurveyTreeItem>();
+				
 				Session s = HibernateManager.openSession();
 				s.beginTransaction();
 				try{
 					Query q = currentFilter.buildQuery(s); 
 					List<?> results = q.list();
-					List<SurveyTreeItem> dataList = new ArrayList<SurveyTreeItem>();
+					
 					
 					SurveyTreeItem prevSurvey = null;
 					
@@ -184,21 +186,6 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 
 						}
 					}
-					final Object[] data = new Object[dataList.size()];
-					
-					int counter = 0;
-					for(SurveyTreeItem si : dataList){
-						data[counter] = si;
-						counter++;
-					}
-					
-					getShell().getDisplay().asyncExec(new Runnable(){
-						@Override
-						public void run() {
-							getTreeViewer().setInput(data);
-							getTreeViewer().refresh();
-						}
-					});
 					
 				}finally{
 					if (s.getTransaction().isActive()){
@@ -206,6 +193,24 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 					}
 					s.close();
 				}
+				
+				final Object[] data = new Object[dataList.size()];
+				
+				int counter = 0;
+				for(SurveyTreeItem si : dataList){
+					data[counter] = si;
+					counter++;
+				}
+				if (getShell() == null || getShell().isDisposed()) return Status.OK_STATUS;
+				
+				getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						if (getTreeViewer().getTree().isDisposed()) return;
+						getTreeViewer().setInput(data);
+						getTreeViewer().refresh();
+					}
+				});
 				return Status.OK_STATUS;
 			}
 			
