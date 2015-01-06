@@ -58,6 +58,7 @@ import org.wcs.smart.patrol.query.hibernate.MultiCaPatrolQueryHibernateManagerIm
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
@@ -259,11 +260,17 @@ public class PatrolQueryOptions {
 	 */
 	public final static PatrolValueOption[] SUMMARY_ENCOUNTER_RATE_OPTIONS = {
 		PatrolValueOption.DISTANCE,
+		PatrolValueOption.DISTANCE_TOTAL,
 		PatrolValueOption.NUM_HOURS,
+		PatrolValueOption.NUM_HOURS_TOTAL,
 		PatrolValueOption.NUM_DAYS,
+		PatrolValueOption.NUM_DAYS_TOTAL,
 		PatrolValueOption.MAN_DAYS,
+		PatrolValueOption.MAN_DAYS_TOTAL,
 		PatrolValueOption.MAN_HOURS,
-		PatrolValueOption.NUM_PATROLS
+		PatrolValueOption.MAN_HOURS_TOTAL,
+		PatrolValueOption.NUM_PATROLS,
+		PatrolValueOption.NUM_PATROLS_TOTAL
 	};
 
 	public final static IValueDropItem[] SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS;
@@ -271,7 +278,8 @@ public class PatrolQueryOptions {
 		IValueDropItem[] ditems = new IValueDropItem[PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS.length];
 		int i = 0;
 		for (PatrolValueOption op : PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_OPTIONS){
-			ditems[i++] = (IValueDropItem) PatrolDropItemFactory.INSTANCE.createPatrolValueDropItem(op);
+			PatrolValueDropItem item = (PatrolValueDropItem) PatrolDropItemFactory.INSTANCE.createPatrolValueDropItem(op);
+			ditems[i++] = item; 
 		}	
 		SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS = ditems;
 	}
@@ -295,6 +303,20 @@ public class PatrolQueryOptions {
 		GRID_ENCOUNTER_RATE_DROP_OPTIONS = ditems;
 	}
 	
+	/**
+	 * Value options for patrol queries
+	 */
+	public final static PatrolValueOption[] PATROL_VALUE_OPTIONS = {
+		PatrolValueOption.NUM_PATROLS,
+		PatrolValueOption.NUM_DAYS,
+		PatrolValueOption.NUM_NIGHTS,
+		PatrolValueOption.DISTANCE,
+		PatrolValueOption.NUM_HOURS,
+		PatrolValueOption.NUM_MEMBERS,
+		PatrolValueOption.MAN_HOURS,
+		PatrolValueOption.MAN_DAYS
+	};
+
 	
 	/**
 	 * Represents the possible patrol values for summary
@@ -311,8 +333,15 @@ public class PatrolQueryOptions {
 		NUM_HOURS(Messages.PatrolQueryOptions_ValueOpNumberHours, "numhours", PatrolLegDay.class), //$NON-NLS-1$
 		NUM_MEMBERS(Messages.PatrolQueryOptions_ValueOpNumEmployees, "nummembers", PatrolLegMember.class), //$NON-NLS-1$
 		MAN_HOURS(Messages.PatrolQueryOptions_ValueOpPersonHrs, "manhours", PatrolLegDay.class), //$NON-NLS-1$
-		MAN_DAYS(Messages.PatrolQueryOptions_ValueOpPersonDays, "mandays", Patrol.class); //$NON-NLS-1$
+		MAN_DAYS(Messages.PatrolQueryOptions_ValueOpPersonDays, "mandays", Patrol.class), //$NON-NLS-1$
 		
+		NUM_PATROLS_TOTAL(Messages.PatrolQueryOptions_TotalNumPatrols, "totalnumpatrols", Patrol.class),  //$NON-NLS-1$
+		NUM_DAYS_TOTAL(Messages.PatrolQueryOptions_TotalNumDays, "totalnumdays", Patrol.class),  //$NON-NLS-1$
+		DISTANCE_TOTAL(Messages.PatrolQueryOptions_TotalDistance, "totaldistance", Track.class),  //$NON-NLS-1$
+		NUM_HOURS_TOTAL(Messages.PatrolQueryOptions_TotalNumHours, "totalnumhours", PatrolLegDay.class),  //$NON-NLS-1$
+		MAN_HOURS_TOTAL(Messages.PatrolQueryOptions_TotalPersonHours, "totalmanhours", PatrolLegDay.class),  //$NON-NLS-1$
+		MAN_DAYS_TOTAL(Messages.PatrolQueryOptions_TotalPersonDays, "totalmandays", Patrol.class);  //$NON-NLS-1$
+
 		String key;		//unique key
 		String guiName; //display name
 		Class<?> clazz; //class that contains the value variable
@@ -338,20 +367,26 @@ public class PatrolQueryOptions {
 		public Image getIcon(){
 			switch(this){
 				case NUM_PATROLS:
+				case NUM_PATROLS_TOTAL:
 					return PatrolQueryPlugIn.getDefault().getImageRegistry().get(PatrolQueryPlugIn.VALUE_NUM_PATROLS_ICON);
 				case NUM_DAYS:
+				case NUM_DAYS_TOTAL:
 					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_DAYS_ICON);
 				case NUM_NIGHTS:
 					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_NIGHTS_ICON);
 				case DISTANCE:
+				case DISTANCE_TOTAL:
 					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_DISTANCE_ICON);
 				case NUM_HOURS:
+				case NUM_HOURS_TOTAL:
 					return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON);
 				case NUM_MEMBERS:
 					return PatrolQueryPlugIn.getDefault().getImageRegistry().get(PatrolQueryPlugIn.VALUE_NUM_EMPLOYEES_ICON);
 				case MAN_HOURS:
+				case MAN_HOURS_TOTAL:
 					return PatrolQueryPlugIn.getDefault().getImageRegistry().get(PatrolQueryPlugIn.VALUE_PERSON_HOURS_ICON);
 				case MAN_DAYS:
+				case MAN_DAYS_TOTAL:
 					return PatrolQueryPlugIn.getDefault().getImageRegistry().get(PatrolQueryPlugIn.VALUE_PERSON_DAYS_ICON);
 			}
 			return null;
@@ -359,7 +394,19 @@ public class PatrolQueryOptions {
 	}
 	
 	
-	
+	public static final boolean isGroupByFilterValueItem(PatrolValueOption item){
+		switch(item){
+			case NUM_PATROLS_TOTAL: 
+			case NUM_DAYS_TOTAL: 
+			case DISTANCE_TOTAL: 
+			case NUM_HOURS_TOTAL:
+			case MAN_HOURS_TOTAL:
+			case MAN_DAYS_TOTAL:
+					return false;
+		
+		}
+		return true;
+	}
 
 	/**
 	 * Finds a particular patrol filter option based

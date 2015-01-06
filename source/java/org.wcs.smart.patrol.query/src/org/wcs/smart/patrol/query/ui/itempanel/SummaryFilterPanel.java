@@ -51,7 +51,6 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -194,7 +193,7 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 				input.put(PatrolGroupByTreeItem.KEY, options.toArray());
 				
 			}
-			input.put(PatrolValueTreeItem.KEY, PatrolValueOption.values());
+			input.put(PatrolValueTreeItem.KEY, PatrolQueryOptions.PATROL_VALUE_OPTIONS);
 
 			Display.getDefault().asyncExec(new Runnable(){
 

@@ -36,7 +36,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 
 	
 	private PatrolValueOption item;
-	
+	private String guiLabel;
 	/**
 	 * Creates a new drop item
 	 * @param item
@@ -44,6 +44,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	public PatrolValueDropItem(PatrolValueOption item){
 		super(true);
 		this.item = item;
+		this.guiLabel = item.getGuiName();
 	}
 	
 	/**
@@ -51,7 +52,11 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	 */
 	@Override
 	public String getValueText() {
-		return item.getGuiName();
+		return this.guiLabel;
+	}
+	
+	public void updateGuiName(String newName){
+		this.guiLabel = newName;
 	}
 
 	/**
@@ -79,5 +84,15 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	protected void initializeValueData(Object data) {
 	}
 	
+	@Override
+	public boolean equals(Object other){
+		return other instanceof PatrolValueDropItem &&
+				((PatrolValueDropItem)other).item.equals(this.item);
+	}
+	
+	@Override
+	public int hashCode(){
+		return this.item.hashCode();
+	}
 
 }

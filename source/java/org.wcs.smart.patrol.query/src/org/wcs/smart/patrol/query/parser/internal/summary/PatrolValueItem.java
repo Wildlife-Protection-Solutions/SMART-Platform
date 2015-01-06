@@ -48,6 +48,7 @@ public class PatrolValueItem implements IValueItem {
 	public static final PatrolValueItem createItem(String key){
 		return new PatrolValueItem(key);
 	}
+	
 
 	private String key = null;
 	private String aggregation = null;
@@ -114,5 +115,4 @@ public class PatrolValueItem implements IValueItem {
 	public void accept(IValueVisitor visitor){
 		visitor.visit(this);
 	}
-
 }

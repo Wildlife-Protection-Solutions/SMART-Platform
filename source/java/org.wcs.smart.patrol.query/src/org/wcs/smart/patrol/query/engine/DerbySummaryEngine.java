@@ -55,6 +55,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
 import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -455,8 +456,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			fromSql.append(".patrol_leg_day_uuid " ); //$NON-NLS-1$
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_MEMBERS ||
-			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  || 
-			patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
+			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  ||
+			patrolItem.getOption() == PatrolValueOption.MAN_HOURS_TOTAL  || 
+			patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ||
+			patrolItem.getOption() == PatrolValueOption.MAN_DAYS_TOTAL){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(PatrolLegMember.class));
 			fromSql.append(" on temp.pl_uuid = ");//$NON-NLS-1$
@@ -465,7 +468,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS ||
 			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS ||
-			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
+			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS_TOTAL  ||
+			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ||
+			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS_TOTAL){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(PatrolLegDay.class));
 			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$
@@ -853,26 +858,59 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
 		
 		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
-		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
-		if (values2.values().size() != 1){
-			throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterComputation);
-		}
-		Double denominator = values2.values().iterator().next();
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
-
-		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
-			Entry<SummaryResultKey, Double> type = iterator.next();			
-			SummaryResultKey key = new SummaryResultKey(type.getKey());
-			key.setValueKey(item.asString());
-			
-			Double value = type.getValue();
-			if (denominator == 0){
-				value = Double.NaN;
-			}else{
-				value = value / denominator;
-			}
-			results.put(key, value);
+		boolean filterValue2 = false;
+		if (item.getPart2() instanceof PatrolValueItem && 
+			PatrolQueryOptions.isGroupByFilterValueItem(  ((PatrolValueItem) item.getPart2()).getOption())){
+				filterValue2 = true;
 		}
+		
+		HashMap<SummaryResultKey, Double> values2 = null;
+		if (!filterValue2){
+			values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
+			if (values2.values().size() != 1){
+				throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterComputation);
+			}
+			
+			Double denominator = values2.values().iterator().next();
+			for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+				Entry<SummaryResultKey, Double> type = iterator.next();			
+				SummaryResultKey key = new SummaryResultKey(type.getKey());
+				key.setValueKey(item.asString());
+				
+				Double value = type.getValue();
+				if (denominator == 0){
+					value = Double.NaN;
+				}else{
+					value = value / denominator;
+				}
+				results.put(key, value);
+			}
+		}else{
+			values2 = computeValueItem(c, s, groupBy, item.getPart2(), caFilter, rateTable);
+			
+			
+			for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+				Entry<SummaryResultKey, Double> type = iterator.next();
+				
+				SummaryResultKey key2 = new SummaryResultKey(type.getKey());
+				key2.setValueKey(item.getPart2().asString());
+				Double denominator = values2.get(key2);
+				
+				Double value = type.getValue();
+				if (denominator == null || denominator == 0){
+					value = Double.NaN;
+				}else{
+					value = value / denominator;
+				}
+				
+				SummaryResultKey key = new SummaryResultKey(type.getKey());
+				key.setValueKey(item.asString());
+				results.put(key, value);
+			}
+		}
+
+		
 		return results;
 		
 	}
@@ -1209,14 +1247,18 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private String getAggFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
 		switch(item.getOption()){
 		case NUM_PATROLS:
+		case NUM_PATROLS_TOTAL:
 			return "count(p_uuid)"; //$NON-NLS-1$
 		case NUM_DAYS:
+		case NUM_DAYS_TOTAL:
 			return " count(pld_patrol_day)";  //$NON-NLS-1$
 		case NUM_NIGHTS:
 			return " count(pld_patrol_day) - count(distinct p_uuid) "; //$NON-NLS-1$
 		case DISTANCE:
+		case DISTANCE_TOTAL:
 			return "sum(distance)"; //$NON-NLS-1$
 		case NUM_HOURS:
+		case NUM_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end / 60.0))"; //$NON-NLS-1$
 			}else{
@@ -1225,12 +1267,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case NUM_MEMBERS:
 			return "count(pl_member)"; //$NON-NLS-1$
 		case MAN_HOURS:
+		case MAN_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end  / 60.0))"; //$NON-NLS-1$
 			}else{
 				return "sum(hours)"; //$NON-NLS-1$
 			}
 		case MAN_DAYS:
+		case MAN_DAYS_TOTAL:
 			return "count(pld_patrol_day) "; //$NON-NLS-1$
 		}
 		assert false;
@@ -1240,12 +1284,15 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private String getFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
 		switch(item.getOption()){
 		case NUM_PATROLS:
+		case NUM_PATROLS_TOTAL:
 			return "p_uuid"; //$NON-NLS-1$
 		case NUM_DAYS:
+		case NUM_DAYS_TOTAL:
 			return "pld_patrol_day"; //$NON-NLS-1$
 		case NUM_NIGHTS:
 			return "p_uuid, pld_patrol_day"; //$NON-NLS-1$
 		case DISTANCE:
+		case DISTANCE_TOTAL:
 			if (!hasAreaGroupBy){
 				return tablePrefix(Track.class) + ".distance as distance"; //$NON-NLS-1$
 			}else{
@@ -1265,6 +1312,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				return valueSql.toString();
 			}
 		case NUM_HOURS:
+		case NUM_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time," + //$NON-NLS-1$
@@ -1290,6 +1338,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case NUM_MEMBERS:
 			return tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		case MAN_HOURS:
+		case MAN_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
@@ -1317,6 +1366,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				return valueSql.toString();
 			}
 		case MAN_DAYS:
+		case MAN_DAYS_TOTAL:
 			return "pld_patrol_day, " + //$NON-NLS-1$
 			tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		}
