@@ -97,11 +97,14 @@ TOKEN :
 |  < SAMPLINGUNIT_GROUPBY_ITEM : "sgb:samplingunit:" (< UUID >)? (":" < UUID > )* >
 |  < WAYPOINT_OBSERVER_GROUPBY_ITEM : < WAYPOINT_OBSERVER_KEY > ":" (< UUID >)? (":" < UUID > )* >  
 |  < MISSION_TRACK_LENGTH : "s:missiontracklength" >
+|  < MISSION_TRACK_TOTAL_LENGTH : "s:totalmissiontracklength" >
 |  < MISSION_COUNT : "s:missioncount" >
+|  < MISSION_TOTAL_COUNT : "s:totalmissioncount" >
 |  < MISSION_DAY_COUNT : "s:missiondaycount" >
 |  < MISSION_HOUR_COUNT : "s:missionhourcount" >
 |  < MISSION_PERSONHOUR_COUNT: "s:missionpersonhourcount" >
 |  < SURVEY_COUNT : "s:surveycount" >
+|  < SURVEY_TOTAL_COUNT : "s:totalsurveycount" >
 }
 TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
 
@@ -270,9 +273,19 @@ IValueItem SingleValueItem() :
 		{
 		  	item = MissionValueItem.createTrackLengthItem();	 	}
 	|
+		< MISSION_TRACK_TOTAL_LENGTH >
+		{
+		  	item = MissionValueItem.createTotalTrackLengthItem();
+	 	}
+	|
 		< MISSION_COUNT >
 		{
 		  	item = MissionValueItem.createMissionCountItem();
+	 	}
+	|
+		< MISSION_TOTAL_COUNT >
+		{
+		  	item = MissionValueItem.createTotalMissionCountItem();
 	 	}
 	|
 		< MISSION_DAY_COUNT >
@@ -292,6 +305,11 @@ IValueItem SingleValueItem() :
 		< SURVEY_COUNT >
 		{
 		  	item = MissionValueItem.createSurveyCountItem();
+	 	}
+	|
+		< SURVEY_TOTAL_COUNT >
+		{
+		  	item = MissionValueItem.createTotalSurveyCountItem();
 	 	}		 	
 	)
 	{

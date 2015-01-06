@@ -59,8 +59,10 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
+import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 /**
  * Summary query type
  * @author Emily
@@ -69,6 +71,8 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
 public class SurveySummaryQueryType implements IQueryType {
 	
 	public static final String KEY = "surveysummary"; //$NON-NLS-1$
+	
+	private static IDropItemFactory dropItemFactory;
 	
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
@@ -131,7 +135,23 @@ public class SurveySummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public IDropItemFactory getDropItemFactory() {
-		return SurveyDropItemFactory.INSTANCE;
+		if (dropItemFactory == null){
+			dropItemFactory = new SurveyDropItemFactory(){
+				@Override
+				public DropItem[] generateDropItem(Object source, String queryItemPanelId) {
+					DropItem[] items = super.generateDropItem(source, queryItemPanelId);
+					if (items != null){
+						for (int i = 0; i < items.length; i ++){
+							if (items[i] instanceof AbstractValueDropItem){
+								((AbstractValueDropItem)items[i]).setEncounterRateOptions(SurveyDropItemFactory.SUMMARY_ENCOUNTER_RATE_ITEMS);
+							}
+						}
+					}
+					return items;					
+				}
+			};
+		}
+		return dropItemFactory;
 	}
 
 	/**

@@ -181,17 +181,23 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int MISSION_TRACK_LENGTH = 89;
   /** RegularExpression Id. */
-  int MISSION_COUNT = 90;
+  int MISSION_TRACK_TOTAL_LENGTH = 90;
   /** RegularExpression Id. */
-  int MISSION_DAY_COUNT = 91;
+  int MISSION_COUNT = 91;
   /** RegularExpression Id. */
-  int MISSION_HOUR_COUNT = 92;
+  int MISSION_TOTAL_COUNT = 92;
   /** RegularExpression Id. */
-  int MISSION_PERSONHOUR_COUNT = 93;
+  int MISSION_DAY_COUNT = 93;
   /** RegularExpression Id. */
-  int SURVEY_COUNT = 94;
+  int MISSION_HOUR_COUNT = 94;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 95;
+  int MISSION_PERSONHOUR_COUNT = 95;
+  /** RegularExpression Id. */
+  int SURVEY_COUNT = 96;
+  /** RegularExpression Id. */
+  int SURVEY_TOTAL_COUNT = 97;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 98;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -288,11 +294,14 @@ public interface ParserConstants {
     "<SAMPLINGUNIT_GROUPBY_ITEM>",
     "<WAYPOINT_OBSERVER_GROUPBY_ITEM>",
     "\"s:missiontracklength\"",
+    "\"s:totalmissiontracklength\"",
     "\"s:missioncount\"",
+    "\"s:totalmissioncount\"",
     "\"s:missiondaycount\"",
     "\"s:missionhourcount\"",
     "\"s:missionpersonhourcount\"",
     "\"s:surveycount\"",
+    "\"s:totalsurveycount\"",
     "<QUOTED_STRING>",
   };
 
