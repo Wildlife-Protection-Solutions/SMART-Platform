@@ -80,6 +80,9 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				
 				"create table smart.map_styles (uuid char(16) for bit data not null, ca_uuid char(16) for bit data not null, style_string long varchar not null, primary key (uuid))", //$NON-NLS-1$
 				"alter table smart.map_styles add constraint mapstyle_ca_uuid_fk FOREIGN KEY (ca_uuid) REFERENCES smart.conservation_area(UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.map_styles to data_entry", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.map_styles to manager", //$NON-NLS-1$
+				"GRANT ALL PRIVILEGES ON smart.map_styles to analyst" //$NON-NLS-1$
 
 				"alter table smart.cm_attribute_tree_node add column cm_attribute_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
 				"alter table smart.cm_attribute_tree_node add column dm_attribute_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
