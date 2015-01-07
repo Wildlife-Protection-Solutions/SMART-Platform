@@ -467,7 +467,9 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			}
 		}
 
-		if (valueItem.getValueItem() == ValueItem.TRACK_LENGTH){
+		if (valueItem.getValueItem() == ValueItem.TRACK_LENGTH || 
+			valueItem.getValueItem() == ValueItem.TRACK_LENGTH_TOTAL){
+			
 			if (!hasAreaGroupBy){
 				valueSql.append( "smart.distanceInMeter(" + tablePrefix(MissionTrack.class) + ".geometry) / 1000.0 as distance"); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
@@ -495,19 +497,15 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				fromSql.append(".mission_day_uuid " ); //$NON-NLS-1$
 				usedTables.add(MissionTrack.class);
 			}
+			selectSql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
 			
-			if (valueItem instanceof MissionValueItem &&
-					((MissionValueItem)valueItem).getValueItem() == ValueItem.TRACK_LENGTH){
-				selectSql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
-			}else{		
-				selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
-			}
-			
-		}else if (valueItem.getValueItem() == ValueItem.MISSION_COUNT){
+		}else if (valueItem.getValueItem() == ValueItem.MISSION_COUNT ||
+				valueItem.getValueItem() == ValueItem.MISSION_COUNT_TOTAL){
 			valueSql.append("temp.mission_uuid"); //$NON-NLS-1$
 			valueAggSql.append("count(mission_uuid)"); //$NON-NLS-1$
 			selectSql.append("temp.mission_uuid as uniqueid, "); //$NON-NLS-1$
-		}else if (valueItem.getValueItem() == ValueItem.SURVEY_COUNT){
+		}else if (valueItem.getValueItem() == ValueItem.SURVEY_COUNT ||
+				valueItem.getValueItem() == ValueItem.SURVEY_COUNT_TOTAL){
 			selectSql.append("temp.survey_uuid as uniqueid, "); //$NON-NLS-1$
 			valueSql.append("temp.survey_uuid"); //$NON-NLS-1$
 			valueAggSql.append("count(survey_uuid)"); //$NON-NLS-1$
@@ -981,25 +979,56 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
 		
 		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
-		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
-		if (values2.values().size() != 1){
-			throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterValues);
-		}
-		Double denominator = values2.values().iterator().next();
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
-
-		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
-			Entry<SummaryResultKey, Double> type = iterator.next();			
-			SummaryResultKey key = new SummaryResultKey(type.getKey());
-			key.setValueKey(item.asString());
-			
-			Double value = type.getValue();
-			if (denominator == 0){
-				value = Double.NaN;
-			}else{
-				value = value / denominator;
+		boolean needsGroupBy = false;
+		if (item.getPart2() instanceof MissionValueItem && ((MissionValueItem)item.getPart2()).requiresGroupByFilter()){
+			needsGroupBy = true;
+		}
+		
+		if (!needsGroupBy){
+			HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
+			if (values2.values().size() != 1){
+				throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterValues);
 			}
-			results.put(key, value);
+			Double denominator = values2.values().iterator().next();
+			
+
+			for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+				Entry<SummaryResultKey, Double> type = iterator.next();			
+				SummaryResultKey key = new SummaryResultKey(type.getKey());
+				key.setValueKey(item.asString());
+			
+				Double value = type.getValue();
+				if (denominator == 0){
+					value = Double.NaN;
+				}else{
+					value = value / denominator;
+				}
+				results.put(key, value);
+			}
+		}else{
+			HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, groupBy, item.getPart2(), caFilter, rateTable);
+			
+
+			for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+				Entry<SummaryResultKey, Double> type = iterator.next();			
+
+				SummaryResultKey key2 = new SummaryResultKey(type.getKey());
+				key2.setValueKey(item.getPart2().asString());
+				
+				Double denominator = values2.get(key2);
+
+				SummaryResultKey key = new SummaryResultKey(type.getKey());
+				key.setValueKey(item.asString());
+			
+				Double value = type.getValue();
+				if (denominator == null || denominator == 0){
+					value = Double.NaN;
+				}else{
+					value = value / denominator;
+				}
+				results.put(key, value);
+			}
 		}
 		return results;
 	}
@@ -1297,7 +1326,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						fromSql.append(tablePrefix(MissionTrack.class) + ".mission_day_uuid"); //$NON-NLS-1$ 
 						usedTables.add(MissionTrack.class);
 					}
-					if (((MissionValueItem) value).getValueItem() == ValueItem.TRACK_LENGTH){
+					if (((MissionValueItem) value).getValueItem() == ValueItem.TRACK_LENGTH ||
+							((MissionValueItem) value).getValueItem() == ValueItem.TRACK_LENGTH_TOTAL){
 						//sampling unit link must come from track 
 						groupByInnerSql.append( " case when "); //$NON-NLS-1$
 						groupByInnerSql.append(tablePrefix(MissionTrack.class));

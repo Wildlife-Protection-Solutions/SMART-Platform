@@ -113,6 +113,9 @@ public class Messages extends NLS {
 	public static String MissionValueItem_NumberOfMissionsLabel;
 	public static String MissionValueItem_NumberOfPersonHours;
 	public static String MissionValueItem_NumberOfSurveyLabel;
+	public static String MissionValueItem_TotalNumMissions;
+	public static String MissionValueItem_TotalNumSurveys;
+	public static String MissionValueItem_TotalTrackLength;
 	public static String MissionValueItem_ValueItemNotSupported;
 	public static String QueryGeoResourceInfo_TracksLabel;
 	public static String QueryGeoResourceInfo_WaypointLabel;

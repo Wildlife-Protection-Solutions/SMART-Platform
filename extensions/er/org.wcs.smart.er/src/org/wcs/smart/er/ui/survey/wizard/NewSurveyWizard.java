@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.survey.wizard;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
+import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
@@ -140,14 +141,25 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
     	super.addPage(sdPage);
     	super.addPage(idPage);
     	super.addPage(datePage);
-    	    	
+
     	((WizardDialog) getContainer()).addPageChangingListener(this);
     }
+	
 
+	@Override
+	public IWizardPage getStartingPage() {
+		if (newSurvey.getSurveyDesign() == null){
+			return super.getStartingPage();
+		}
+		
+		return idPage;
+	}
+	
 	@Override
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 		sdPage.initControls(newSurvey, session);
+		idPage.initControls(newSurvey, session);
 	}
 
 	@Override

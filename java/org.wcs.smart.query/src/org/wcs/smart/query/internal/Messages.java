@@ -107,7 +107,7 @@ public class Messages extends NLS {
 	public static String EncounterRateDialog_EncounterRateLabel;
 	public static String EncounterRateDialog_Error_NoSelection;
 	public static String EncounterRateDialog_ErrorDialogTitle;
-	public static String EncounterRateDialog_RateValueInfo;
+	public static String EncounterRateDialog_RateValueInfo1;
 	public static String EncounterRateDialog_RateValueLabel;
 	public static String ExportQueryListPage_DirDialogMessage;
 	public static String ExportQueryListPage_DirDialogText;

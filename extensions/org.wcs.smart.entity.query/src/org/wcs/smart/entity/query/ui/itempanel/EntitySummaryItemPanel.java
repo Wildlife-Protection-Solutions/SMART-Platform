@@ -79,7 +79,7 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 	private Composite main;
 	private AreaTreeNode areaTreeNode;
 	private EntityTypeTreeNode entityNode;
-	
+	private GeneralItem[] generalItems;
 	/*
 	 * listener for refreshing areas
 	 */
@@ -134,14 +134,14 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 		});
 		
 		List<IItemTreeNode> groupbynodes = new ArrayList<IItemTreeNode>();
-		GeneralItem[] items = null;
+		
 		if (SmartDB.isMultipleAnalysis()){
-			items = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.CONSERVATION_AREA};
+			generalItems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE, GeneralItem.CONSERVATION_AREA};
 		}else{
-			items = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE};
+			generalItems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE};
 		}
 		
-		groupbynodes.add(new GeneralTreeNode(Messages.EntitySummaryItemPanel_GeneralItemsLabel, items));
+		groupbynodes.add(new GeneralTreeNode(Messages.EntitySummaryItemPanel_GeneralItemsLabel, generalItems ));
 		
 		groupbynodes.add(new DateTreeNode());
 		if (!SmartDB.isMultipleAnalysis()){
@@ -207,6 +207,7 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 			dates.add(MonthDateGroupBy.INSTANCE);
 			dates.add(YearDateGroupBy.INSTANCE);
 			input.put(DateTreeNode.KEY, dates);
+			input.put(GeneralTreeNode.KEY, generalItems);
 			
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override

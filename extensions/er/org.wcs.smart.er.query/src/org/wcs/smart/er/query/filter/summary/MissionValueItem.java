@@ -43,7 +43,11 @@ public class MissionValueItem implements IValueItem {
 		SURVEY_COUNT(Messages.MissionValueItem_NumberOfSurveyLabel, "s:surveycount"), //$NON-NLS-1$
 		DAY_COUNT(Messages.MissionValueItem_NumberOfDays, "s:missiondaycount"), //$NON-NLS-1$
 		HOUR_COUNT(Messages.MissionValueItem_NumberOfHours, "s:missionhourcount"), //$NON-NLS-1$
-		MANHOURS_COUNT(Messages.MissionValueItem_NumberOfPersonHours, "s:missionpersonhourcount"); //$NON-NLS-1$
+		MANHOURS_COUNT(Messages.MissionValueItem_NumberOfPersonHours, "s:missionpersonhourcount"), //$NON-NLS-1$
+		
+		TRACK_LENGTH_TOTAL(Messages.MissionValueItem_TotalTrackLength, "s:totalmissiontracklength"),  //$NON-NLS-1$
+		MISSION_COUNT_TOTAL(Messages.MissionValueItem_TotalNumMissions, "s:totalmissioncount"),  //$NON-NLS-1$
+		SURVEY_COUNT_TOTAL(Messages.MissionValueItem_TotalNumSurveys, "s:totalsurveycount");  //$NON-NLS-1$
 		
 		public String guiName;
 		public String key;
@@ -63,6 +67,14 @@ public class MissionValueItem implements IValueItem {
 	}
 	
 	/**
+	 * Create new mission length item
+	 * @return
+	 */
+	public static MissionValueItem createTotalTrackLengthItem(){
+		return new MissionValueItem(ValueItem.TRACK_LENGTH_TOTAL);
+	}
+	
+	/**
 	 * Create new mission count item
 	 * @return
 	 */
@@ -71,11 +83,27 @@ public class MissionValueItem implements IValueItem {
 	}
 	
 	/**
+	 * Create new total mission count item
+	 * @return
+	 */
+	public static MissionValueItem createTotalMissionCountItem(){
+		return new MissionValueItem(ValueItem.MISSION_COUNT_TOTAL);
+	}
+	
+	/**
 	 * Create new survey count item
 	 * @return
 	 */
 	public static MissionValueItem createSurveyCountItem(){
 		return new MissionValueItem(ValueItem.SURVEY_COUNT);
+	}
+	
+	/**
+	 * Create new total survey count item
+	 * @return
+	 */
+	public static MissionValueItem createTotalSurveyCountItem(){
+		return new MissionValueItem(ValueItem.SURVEY_COUNT_TOTAL);
 	}
 	
 	/**
@@ -141,6 +169,12 @@ public class MissionValueItem implements IValueItem {
 			return SurveyDropItemFactory.INSTANCE.createMissionHourCountValueItem();
 		}else if (item == ValueItem.MANHOURS_COUNT){
 			return SurveyDropItemFactory.INSTANCE.createMissionPersonHourCountValueItem();
+		}else if (item == ValueItem.TRACK_LENGTH_TOTAL){
+			return SurveyDropItemFactory.INSTANCE.createTotalMissionLengthValueItem();
+		}else if (item == ValueItem.SURVEY_COUNT_TOTAL){
+			return SurveyDropItemFactory.INSTANCE.createTotalSurveyCountValueItem();
+		}else if (item == ValueItem.MISSION_COUNT_TOTAL){
+			return SurveyDropItemFactory.INSTANCE.createTotalMissionCountValueItem();
 		}
 		return new ErrorDropItem(Messages.MissionValueItem_ValueItemNotSupported + item.guiName);
 	}
@@ -155,4 +189,17 @@ public class MissionValueItem implements IValueItem {
 		visitor.visit(this);
 	}
 
+	/**
+	 * If this particular item should filter values based on group by
+	 * 
+	 * @return
+	 */
+	public boolean requiresGroupByFilter(){
+		if (item == ValueItem.TRACK_LENGTH_TOTAL || 
+				item == ValueItem.MISSION_COUNT_TOTAL || 
+				item == ValueItem.SURVEY_COUNT_TOTAL){
+			return false;
+		}
+		return true;
+	}
 }

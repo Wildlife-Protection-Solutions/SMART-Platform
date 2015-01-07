@@ -121,58 +121,14 @@ public class AreaFilter implements IFilter {
 	public AreaFilterGeometryType getGeometryType(){
 		return this.geomType;
 	}
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#asSql(java.util.HashMap)
-//	 */
-//	@Override
-//	public String asSql(HashMap<Class<?>, String> tableMapping, HashMap<IFilter, String> filterTables){
-//		StringBuilder sb = new StringBuilder();
-//		if (geomType == AreaFilterGeometryType.WAYPOINT){
-//			sb.append("smart.pointinpolygon(" );  //$NON-NLS-1$
-//			sb.append(tableMapping.get(Waypoint.class) + ".x, ");  //$NON-NLS-1$
-//			sb.append(tableMapping.get(Waypoint.class) + ".y, ");  //$NON-NLS-1$
-//			sb.append(  type.name() + "_" + key + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
-//			sb.append(")");  //$NON-NLS-1$
-//		}else if (geomType == AreaFilterGeometryType.TRACK){
-//			sb.append("smart.intersects(");  //$NON-NLS-1$
-//			sb.append(tableMapping.get(Track.class) + ".geometry, ");  //$NON-NLS-1$
-//			sb.append(type.name() + "_" + key + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
-//			sb.append(")");  //$NON-NLS-1$
-//		}
-//		return sb.toString();
-//	}
-//	
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#hasCategoryFilter()
-//	 */
-//	@Override
-//	public boolean hasCategoryFilter() {
-//		return false;
-//	}
-//
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#hasAttributeFilter()
-//	 */
-//	@Override
-//	public boolean hasAttributeFilter() {
-//		return false;
-//	}
-//
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#hasEmployeeFilter()
-//	 */
-//	@Override
-//	public boolean hasEmployeeFilter() {
-//		return false;
-//	}
-//
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#getAttributeFilters(java.util.HashSet)
-//	 */
-//	@Override
-//	public void getAttributeFilters(HashSet<AttributeInfo> attributes) {
-//	}
 
+	/**
+	 * changes the geometry type associated with the filter
+	 */
+	public void changeGeometryType(AreaFilterGeometryType geomType){
+		this.geomType = geomType;
+	}
+	
 	/*
 	 * Loads the area for the given type/key.
 	 */
@@ -201,14 +157,6 @@ public class AreaFilter implements IFilter {
 			return new DropItem[]{new ErrorDropItem(ex.getMessage())};
 		}
 	}
-
-//	/**
-//	 * @see org.wcs.smart.query.parser.filter.IFilter#getChildren()
-//	 */
-//	@Override
-//	public List<IFilter> getChildren() {
-//		return null;
-//	}
 	
 	public void accept(IFilterVisitor visitor){
 		visitor.visit(this);

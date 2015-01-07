@@ -6,8 +6,8 @@ import org.apache.commons.io.FileUtils;
 
 public class PackageProduct {
 
-	public static final String VERSION = "3.1.0";
-	public static final String RC = "rc13";
+	public static final String VERSION = "3.2.0";
+	public static final String RC = "em";
 	
 	public static final String GPS_BABEL = "C:\\data\\SMART\\Exports\\dependencies\\GPSBabel";
 	
@@ -184,12 +184,11 @@ public class PackageProduct {
 	}
 	
 	public static void main(String[] args) throws Exception{
-			zipWindows();
-			copyToNetworkWindows();
+//			zipWindows();
+//			copyToNetworkWindows();
 		
-//		packageUpdateSize();
-//
-//		processWindows();
+		packageUpdateSize();
+		processWindows();
 //
 //		processMac();
 //		zipMac();

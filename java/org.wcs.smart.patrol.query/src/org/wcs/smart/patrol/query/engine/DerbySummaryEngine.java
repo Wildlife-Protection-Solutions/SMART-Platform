@@ -55,6 +55,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
 import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
@@ -63,12 +64,15 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.visitors.AreaFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
+import org.wcs.smart.query.model.filter.AreaFilter;
+import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
@@ -104,8 +108,22 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 	
-	private String rateTable;
-	private String valueTable;
+	private String rateTrackTable;
+	private String rateWaypointTable;
+	private String valueTrackTable;
+	private String valueWaypointTable;
+	
+	private boolean needsObservationValue = false;
+	private boolean needsObservationRate = false;
+
+	private DateFilter localDateFilter;
+	private QueryFilter valueFilter;
+	private QueryFilter rateFilter;
+	private GroupByPart allGroupByParts;
+	private ValuePart valuePart;
+	
+	private boolean hasAreaFilter = false;
+	
 	/**
 	 * Executes the given summary query.
 	 * 
@@ -140,13 +158,42 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
 
-		valueTable = createTempTableName();
-		rateTable = createTempTableName();
-		
-
+		//parse query bits that are needed for processing
 		sumResults = new SummaryQueryResult();
 		cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 		
+		//create a date filter that caches the dates so the same
+		//dates are used for all parts of the query;
+		//otherwise different date filters will be computed
+		//for different parts of the queries
+		localDateFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));
+		
+		List<IGroupBy> all = new ArrayList<IGroupBy>();
+		all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
+		all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
+		allGroupByParts = new GroupByPart(all);
+		
+		valuePart = query.getQueryDefinition().getValuePart();
+		
+		
+		
+//		
+//		final Set<AreaFilter.AreaFilterGeometryType> areaTypes = new HashSet<AreaFilter.AreaFilterGeometryType>();
+//		if (hasAreaFilter.hasAreaFilter()){
+//			for (IValueItem item : query.getQueryDefinition().getValuePart().getValueItems()){
+//				if (item instanceof PatrolValueItem){
+//					areaTypes.add(AreaFilter.AreaFilterGeometryType.TRACK);
+//				}else{
+//					areaTypes.add(AreaFilter.AreaFilterGeometryType.WAYPOINT);
+//				}
+//			}
+//		}else{
+//			//it doesn't matter; just pick one here for ease of use
+//			areaTypes.add(AreaFilter.AreaFilterGeometryType.TRACK);
+//		}
+//		
+//		
+//		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -160,14 +207,6 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 						return;
 					}
 					
-					boolean needsObservationValue = false;
-					boolean needsObservationRate = false;
-					
-					List<IGroupBy> all = new ArrayList<IGroupBy>();
-					all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
-					all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
-					GroupByPart allGroupBy = new GroupByPart(all);
-					
 					HasObservationValueVisitor vv = new HasObservationValueVisitor();
 					query.getQueryDefinition().getValuePart().visit(vv);
 					needsObservationValue = vv.hasCategory() || vv.hasAttribute();
@@ -180,77 +219,85 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 							query.getQueryDefinition().getRowGroupByPart().visit(cv);
 							needsObservationValue = cv.hasCategory() || cv.hasAttribute();;
 						}
-						
 					}
 					needsObservationRate = needsObservationValue;
-					QueryFilter valueFilter = new QueryFilter(EmptyFilter.INSTANCE);
+					valueFilter = new QueryFilter(EmptyFilter.INSTANCE);
 					if (query.getQueryDefinition().getValueFilter() != null){
 						valueFilter = query.getQueryDefinition().getValueFilter();
 					}
-					QueryFilter rateFilter = new QueryFilter(EmptyFilter.INSTANCE);
+					rateFilter = new QueryFilter(EmptyFilter.INSTANCE);
 					if (query.getQueryDefinition().getRateFilter() != null){
 						rateFilter = query.getQueryDefinition().getRateFilter();
 					}
 					
+					//determine if has area filter
+					AreaFilterCollectorVisitor hasAreaFilterVisitor = new AreaFilterCollectorVisitor();
+					valueFilter.getFilter().accept(hasAreaFilterVisitor);
+					rateFilter.getFilter().accept(hasAreaFilterVisitor);
+					hasAreaFilter = hasAreaFilterVisitor.hasAreaFilter();
+					
 					if (!needsObservationValue){
-						
 						HasObservationFilterVisitor visitor = new HasObservationFilterVisitor();
 						visitor.visit(valueFilter.getFilter());
 						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
 							needsObservationValue = true;
 						}
-						
 						visitor.clear();
 						visitor.visit(rateFilter.getFilter());
 						if (visitor.hasAttributeFilter() || visitor.hasCategoryFilter()){
 							needsObservationRate = true;
 						}
 					}
-					
-					//create a date filter that caches the dates so the same
-					//dates are used for all parts of the query;
-					//otherwise different date filters will be computed
-					//for different parts of the queries
-					DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-					
-					
-					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable);
-					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
-					}finally{
-						filterer.dropTemporaryTables(c);
-					}
-					
-					if (monitor.isCanceled()){
-						return;
-					}
-					monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
-					
-					String vFilter = valueFilter.asString();
-					String rFilter = rateFilter.asString();
-					
-					if (vFilter.equals(rFilter)){
-						rateTable = valueTable;
-					}else{
-						rateTable = createTempTableName();
-						
-						
-						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
-						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
-						}finally{
-							rfilterer.dropTemporaryTables(c);
-						}
-						if (monitor.isCanceled()){
-							return;
-						}
-						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
-					}
+//
+//					
+//					for(AreaFilter.AreaFilterGeometryType type : areaTypes){
+//						for (AreaFilter af : hasAreaFilter.getAreaFilters()){
+//							af.changeGeometryType(type);
+//						}	
+//						String tableName = "";	 //$NON-NLS-1$
+//						if (type == AreaFilter.AreaFilterGeometryType.TRACK){
+//							tableName = valueTrackTable;
+//						}else if (type == AreaFilter.AreaFilterGeometryType.WAYPOINT){
+//							tableName = valueWaypointTable;
+//						}
+//						IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), tableName);
+//						try{
+//							filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
+//						}finally{
+//							filterer.dropTemporaryTables(c);
+//						}
+//					
+//						if (monitor.isCanceled()){
+//							return;
+//						}
+//					
+//						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
+//						addCategoryHkey(tableName, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+//					
+//					String vFilter = valueFilter.asString();
+//					String rFilter = rateFilter.asString();
+//					
+//					if (vFilter.equals(rFilter)){
+//						rateTable = valueTable;
+//					}else{
+//						rateTable = createTempTableName();
+//						
+//						
+//						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
+//						try{
+//							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
+//						}finally{
+//							rfilterer.dropTemporaryTables(c);
+//						}
+//						if (monitor.isCanceled()){
+//							return;
+//						}
+//						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
+//						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+//					}
 					
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
-							allGroupBy, query.getQueryDefinition().getValuePart(),
+							allGroupByParts, query.getQueryDefinition().getValuePart(),
 							query.getConservationAreaFilterAsFilter(),monitor);
 					
 					if (monitor.isCanceled() || data == null){
@@ -275,8 +322,18 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	}
 
 	private void dropTemporaryTables(Connection c){
-		dropTable(c, rateTable);
-		dropTable(c, valueTable);
+		if (rateTrackTable != null){
+			dropTable(c, rateTrackTable);
+		}
+		if (valueTrackTable != null){
+			dropTable(c, valueTrackTable);
+		}
+		if (rateWaypointTable != null){
+			dropTable(c, rateWaypointTable);
+		}
+		if (valueWaypointTable != null){
+			dropTable(c, valueWaypointTable);
+		}
 	}
 	
 	private void addCategoryHkey(String tableName, GroupByPart groupByPart, ValuePart values, Connection c) throws SQLException{
@@ -348,7 +405,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
 			monitor.subTask("Processing Value: " + it.asString()); //$NON-NLS-1$
-			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, valueTable) ; 
+			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, true, monitor) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
@@ -362,6 +419,79 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		
 	}
 
+	private String getFilterTable(boolean isValue, AreaFilter.AreaFilterGeometryType geomType, ConservationAreaFilter caFilter,
+			Connection c, IProgressMonitor monitor) throws SQLException{
+	
+		
+		if (isValue){
+			if (!hasAreaFilter || geomType == AreaFilterGeometryType.TRACK){
+				if (valueTrackTable == null){
+					//create filter table
+					valueTrackTable = createTempTableName();
+					valueTrackTable = createFilterTable(true, geomType, valueTrackTable, caFilter, c, monitor);
+				}
+				return valueTrackTable;
+			}else if (geomType == AreaFilterGeometryType.WAYPOINT){
+				if (valueWaypointTable == null){
+					//create filter table
+					valueWaypointTable = createTempTableName();
+					valueWaypointTable = createFilterTable(true, geomType, valueWaypointTable, caFilter, c, monitor);
+				}
+				return valueWaypointTable;
+			}
+		}else{
+			if (!hasAreaFilter || geomType == AreaFilterGeometryType.TRACK){
+				if (rateTrackTable == null){
+					//create filter table
+					rateTrackTable = createTempTableName();
+					rateTrackTable = createFilterTable(false, geomType, rateTrackTable, caFilter, c, monitor);
+				}
+				return rateTrackTable;
+			}else if (geomType == AreaFilterGeometryType.WAYPOINT){
+				if (rateWaypointTable == null){
+					//create filter table
+					rateWaypointTable = createTempTableName();
+					rateWaypointTable = createFilterTable(false, geomType, rateWaypointTable, caFilter, c, monitor);
+				}
+				return rateWaypointTable;
+			}
+		}
+		//should never get here
+		return null;
+	}
+	
+	private String createFilterTable(boolean isValue, AreaFilter.AreaFilterGeometryType geomType, 
+			String tableName, ConservationAreaFilter caFilter, Connection c, IProgressMonitor monitor) throws SQLException{
+
+		QueryFilter qFilter = null;
+		if (isValue){
+			qFilter = valueFilter;
+		}else{
+			qFilter = rateFilter;
+			
+			//this may be the same as an existing value filter; don't regenerate table 
+			if (qFilter.asString().equals(valueFilter.asString())){
+				return getFilterTable(true, geomType, caFilter, c, monitor);
+			}
+		}
+		
+		AreaFilterCollectorVisitor areaVisitor = new AreaFilterCollectorVisitor();
+		qFilter.getFilter().accept(areaVisitor);
+		for (AreaFilter af : areaVisitor.getAreaFilters()){
+			//update filter type
+			af.changeGeometryType(geomType);
+		}
+		IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(
+				qFilter.getFilterType(), tableName);
+		try{
+			rfilterer.processFilter(c, qFilter.getFilter(), localDateFilter, caFilter, needsObservationRate, false, monitor);
+		}finally{
+			rfilterer.dropTemporaryTables(c);
+		}
+		addCategoryHkey(tableName, allGroupByParts, valuePart, c);
+		
+		return tableName;
+	}
 
 	/**
 	 * Computes the data for a given value item
@@ -378,8 +508,19 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			GroupByPart groupBy, 
 			IValueItem it, 
 			ConservationAreaFilter caFilter,
-			String dataTable) throws SQLException {
+			boolean isValueItem,
+			IProgressMonitor monitor) throws SQLException {
 		
+		String dataTable = null;
+		if (it instanceof PatrolValueItem){
+			dataTable = getFilterTable(isValueItem, AreaFilterGeometryType.TRACK, caFilter, c, monitor);
+		}else if (it instanceof AttributeValueItem ||
+				  it instanceof CategoryValueItem){
+			dataTable = getFilterTable(isValueItem, AreaFilterGeometryType.WAYPOINT, caFilter, c, monitor);
+		}else if (it instanceof CombinedValueItem){
+			//TODO: what to do here?
+		}
+			
 		String cacheKey = it.asString() + "_" + groupBy.asString() + "_" + dataTable; //$NON-NLS-1$ //$NON-NLS-2$
 		HashMap<SummaryResultKey, Double> results = cachedValueToResults.get(cacheKey); 
 		if (results != null){
@@ -392,7 +533,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		}else if (it instanceof CategoryValueItem){
 			results = (getCategoryValue(dataTable, c, s, groupBy, (CategoryValueItem)it, caFilter));
 		}else if (it instanceof CombinedValueItem){
-			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter));
+			results = (getCombinedValue(c, s, groupBy, (CombinedValueItem)it, caFilter, monitor));
 		}
 		if (results != null){
 			cachedValueToResults.put(cacheKey, results); 
@@ -455,8 +596,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			fromSql.append(".patrol_leg_day_uuid " ); //$NON-NLS-1$
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_MEMBERS ||
-			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  || 
-			patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
+			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  ||
+			patrolItem.getOption() == PatrolValueOption.MAN_HOURS_TOTAL  || 
+			patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ||
+			patrolItem.getOption() == PatrolValueOption.MAN_DAYS_TOTAL){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(PatrolLegMember.class));
 			fromSql.append(" on temp.pl_uuid = ");//$NON-NLS-1$
@@ -464,8 +607,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			fromSql.append(".patrol_leg_uuid " ); //$NON-NLS-1$ 
 		}
 		if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS ||
+			  patrolItem.getOption() == PatrolValueOption.NUM_HOURS_TOTAL ||
 			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS ||
-			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ){
+			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS_TOTAL  ||
+			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ||
+			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS_TOTAL){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(PatrolLegDay.class));
 			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$
@@ -850,29 +996,64 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private HashMap<SummaryResultKey, Double> getCombinedValue(
 			Connection c, Session s, 
 			GroupByPart groupBy, 
-			CombinedValueItem item, ConservationAreaFilter caFilter) throws SQLException{
+			CombinedValueItem item, 
+			ConservationAreaFilter caFilter,
+			IProgressMonitor monitor) throws SQLException{
 		
-		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, valueTable);
-		HashMap<SummaryResultKey, Double> values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, rateTable);
-		if (values2.values().size() != 1){
-			throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterComputation);
-		}
-		Double denominator = values2.values().iterator().next();
+		HashMap<SummaryResultKey, Double> values1 = computeValueItem(c, s, groupBy, item.getPart1(), caFilter, true, monitor);
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
-
-		for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
-			Entry<SummaryResultKey, Double> type = iterator.next();			
-			SummaryResultKey key = new SummaryResultKey(type.getKey());
-			key.setValueKey(item.asString());
-			
-			Double value = type.getValue();
-			if (denominator == 0){
-				value = Double.NaN;
-			}else{
-				value = value / denominator;
-			}
-			results.put(key, value);
+		boolean filterValue2 = false;
+		if (item.getPart2() instanceof PatrolValueItem && 
+			PatrolQueryOptions.isGroupByFilterValueItem(  ((PatrolValueItem) item.getPart2()).getOption())){
+				filterValue2 = true;
 		}
+		
+		HashMap<SummaryResultKey, Double> values2 = null;
+		if (!filterValue2){
+			values2 = computeValueItem(c, s, new GroupByPart(new ArrayList<IGroupBy>()), item.getPart2(), caFilter, false, monitor);
+			if (values2.values().size() != 1){
+				throw new SQLException(Messages.DerbySummaryEngine_InvalidRateFilterComputation);
+			}
+			
+			Double denominator = values2.values().iterator().next();
+			for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+				Entry<SummaryResultKey, Double> type = iterator.next();			
+				SummaryResultKey key = new SummaryResultKey(type.getKey());
+				key.setValueKey(item.asString());
+				
+				Double value = type.getValue();
+				if (denominator == 0){
+					value = Double.NaN;
+				}else{
+					value = value / denominator;
+				}
+				results.put(key, value);
+			}
+		}else{
+			values2 = computeValueItem(c, s, groupBy, item.getPart2(), caFilter, false, monitor);
+			
+			
+			for (Iterator<Entry<SummaryResultKey, Double>> iterator = values1.entrySet().iterator(); iterator.hasNext();) {
+				Entry<SummaryResultKey, Double> type = iterator.next();
+				
+				SummaryResultKey key2 = new SummaryResultKey(type.getKey());
+				key2.setValueKey(item.getPart2().asString());
+				Double denominator = values2.get(key2);
+				
+				Double value = type.getValue();
+				if (denominator == null || denominator == 0){
+					value = Double.NaN;
+				}else{
+					value = value / denominator;
+				}
+				
+				SummaryResultKey key = new SummaryResultKey(type.getKey());
+				key.setValueKey(item.asString());
+				results.put(key, value);
+			}
+		}
+
+		
 		return results;
 		
 	}
@@ -1209,14 +1390,18 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private String getAggFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
 		switch(item.getOption()){
 		case NUM_PATROLS:
+		case NUM_PATROLS_TOTAL:
 			return "count(p_uuid)"; //$NON-NLS-1$
 		case NUM_DAYS:
+		case NUM_DAYS_TOTAL:
 			return " count(pld_patrol_day)";  //$NON-NLS-1$
 		case NUM_NIGHTS:
 			return " count(pld_patrol_day) - count(distinct p_uuid) "; //$NON-NLS-1$
 		case DISTANCE:
+		case DISTANCE_TOTAL:
 			return "sum(distance)"; //$NON-NLS-1$
 		case NUM_HOURS:
+		case NUM_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end / 60.0))"; //$NON-NLS-1$
 			}else{
@@ -1225,12 +1410,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case NUM_MEMBERS:
 			return "count(pl_member)"; //$NON-NLS-1$
 		case MAN_HOURS:
+		case MAN_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end  / 60.0))"; //$NON-NLS-1$
 			}else{
 				return "sum(hours)"; //$NON-NLS-1$
 			}
 		case MAN_DAYS:
+		case MAN_DAYS_TOTAL:
 			return "count(pld_patrol_day) "; //$NON-NLS-1$
 		}
 		assert false;
@@ -1240,12 +1427,15 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private String getFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
 		switch(item.getOption()){
 		case NUM_PATROLS:
+		case NUM_PATROLS_TOTAL:
 			return "p_uuid"; //$NON-NLS-1$
 		case NUM_DAYS:
+		case NUM_DAYS_TOTAL:
 			return "pld_patrol_day"; //$NON-NLS-1$
 		case NUM_NIGHTS:
 			return "p_uuid, pld_patrol_day"; //$NON-NLS-1$
 		case DISTANCE:
+		case DISTANCE_TOTAL:
 			if (!hasAreaGroupBy){
 				return tablePrefix(Track.class) + ".distance as distance"; //$NON-NLS-1$
 			}else{
@@ -1265,6 +1455,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				return valueSql.toString();
 			}
 		case NUM_HOURS:
+		case NUM_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time," + //$NON-NLS-1$
@@ -1290,6 +1481,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case NUM_MEMBERS:
 			return tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		case MAN_HOURS:
+		case MAN_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time, " + //$NON-NLS-1$
 						tablePrefix(PatrolLegDay.class) + ".end_time as pld_end_time, " + //$NON-NLS-1$
@@ -1317,6 +1509,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				return valueSql.toString();
 			}
 		case MAN_DAYS:
+		case MAN_DAYS_TOTAL:
 			return "pld_patrol_day, " + //$NON-NLS-1$
 			tablePrefix(PatrolLegMember.class) + ".employee_uuid as pl_member"; //$NON-NLS-1$
 		}

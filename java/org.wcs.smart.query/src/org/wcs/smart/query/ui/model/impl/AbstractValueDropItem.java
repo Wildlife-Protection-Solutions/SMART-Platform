@@ -236,7 +236,7 @@ public abstract class AbstractValueDropItem extends DropItem implements IValueDr
 	 * required.
 	 */
 	private void showRateDialog() {
-		EncounterRateDialog dialog = new EncounterRateDialog(main.getShell(), encounterRateOptions);
+		EncounterRateDialog dialog = new EncounterRateDialog(main.getShell(), encounterRateOptions, encounterRatio);
 		if (dialog.open() == Window.OK){
 			encounterRatio = dialog.getSelectedItems();
 			updateUi();

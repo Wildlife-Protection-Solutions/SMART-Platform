@@ -50,8 +50,10 @@ import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
+import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
  * Patrol Query Type
@@ -62,6 +64,8 @@ public class SurveyGridQueryType implements IQueryType {
 
 	
 	public static final String KEY = "surveygrid"; //$NON-NLS-1$
+	private static IDropItemFactory dropItemFactory;
+	
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
@@ -123,7 +127,23 @@ public class SurveyGridQueryType implements IQueryType {
 	 */
 	@Override
 	public IDropItemFactory getDropItemFactory() {
-		return SurveyDropItemFactory.INSTANCE;
+		if (dropItemFactory == null){
+			dropItemFactory = new SurveyDropItemFactory(){
+				@Override
+				public DropItem[] generateDropItem(Object source, String queryItemPanelId) {
+					DropItem[] items = super.generateDropItem(source, queryItemPanelId);
+					if (items != null){
+						for (int i = 0; i < items.length; i ++){
+							if (items[i] instanceof AbstractValueDropItem){
+								((AbstractValueDropItem)items[i]).setEncounterRateOptions(SurveyDropItemFactory.GRID_ENCOUNTER_RATE_ITEMS);
+							}
+						}
+					}
+					return items;					
+				}
+			};
+		}
+		return dropItemFactory;
 	}
 
 	/**
