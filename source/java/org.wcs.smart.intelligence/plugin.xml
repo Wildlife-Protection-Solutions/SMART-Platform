@@ -147,6 +147,11 @@
                   visible="true">
             </separator>
             <command
+                  commandId="org.wcs.smart.intelligence.ShowInformant"
+                  label="%informantview.command.label"
+                  style="push">
+            </command>
+            <command
                   commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
                   label="%view.command.label"
                   style="push"
@@ -481,6 +486,10 @@
             id="org.wcs.smart.intelligence.importTemplate"
             name="%command.importtemplate.name">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.ShowInformant"
+            name="%command.showinformant.name">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -656,6 +665,10 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ShowInformantDataHandler"
+            commandId="org.wcs.smart.intelligence.ShowInformant">
+      </handler>
    </extension>
    <extension
          point="org.wcs.smart.hibernate.mapping">
@@ -711,6 +724,12 @@
             id="org.wcs.smart.intelligence.IntelligenceEditor"
             matchingStrategy="org.wcs.smart.intelligence.ui.editor.IntelligenceEditorMatchingStrategy"
             name="%editor.name">
+      </editor>
+      <editor
+            class="org.wcs.smart.intelligence.informant.editor.InformantDataEditor"
+            default="false"
+            id="org.wcs.smart.intelligence.informant.InformantDataEditor"
+            name="%editor.informant.name">
       </editor>
    </extension>
    <extension
