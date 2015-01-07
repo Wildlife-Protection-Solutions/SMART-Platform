@@ -89,7 +89,12 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 				}else{
 					cdId.hide();
 				}
-				getWizard().getContainer().updateButtons();
+				
+				try{
+					getWizard().getContainer().updateButtons();
+				}catch (Exception ex){
+					//eat me; buttons probably not yet created
+				}
 			}
 		});
 		setTitle(Messages.SurveyIdPage_Title);
@@ -109,7 +114,9 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 		}else{
 			txtId.setText(""); //$NON-NLS-1$
 		}
-		sd.setText(survey.getSurveyDesign().getName());
+		if (survey.getSurveyDesign() != null){
+			sd.setText(survey.getSurveyDesign().getName());
+		}
 		sd.getParent().layout(true);
 	}
 
