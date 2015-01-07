@@ -338,7 +338,7 @@ public class MissionDayComposite {
 		((GridData)trTable.getLayoutData()).heightHint = 40;
 		((GridData)trTable.getLayoutData()).widthHint = 250;
 		if (canEdit){
-			lnkEditTrack = toolkit.createHyperlink(trackComp, Messages.MissionDayComposite_Link_Edit, SWT.NONE);
+			lnkEditTrack = toolkit.createHyperlink(trackComp, Messages.MissionDayComposite_TrackEditLink, SWT.NONE);
 			lnkEditTrack.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
 			lnkEditTrack.addHyperlinkListener(new HyperlinkAdapter(){
 				public void linkActivated(HyperlinkEvent e) {

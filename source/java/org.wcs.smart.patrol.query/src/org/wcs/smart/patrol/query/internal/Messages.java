@@ -129,6 +129,12 @@ public class Messages extends NLS {
 	public static String PatrolQueryOptions_QueryOpTeam;
 	public static String PatrolQueryOptions_QueryOpTransportType;
 	public static String PatrolQueryOptions_QueryOpType;
+	public static String PatrolQueryOptions_TotalDistance;
+	public static String PatrolQueryOptions_TotalNumDays;
+	public static String PatrolQueryOptions_TotalNumHours;
+	public static String PatrolQueryOptions_TotalNumPatrols;
+	public static String PatrolQueryOptions_TotalPersonDays;
+	public static String PatrolQueryOptions_TotalPersonHours;
 	public static String PatrolQueryOptions_ValueOpDistance;
 	public static String PatrolQueryOptions_ValueOpNumberDays;
 	public static String PatrolQueryOptions_ValueOpNumberHours;

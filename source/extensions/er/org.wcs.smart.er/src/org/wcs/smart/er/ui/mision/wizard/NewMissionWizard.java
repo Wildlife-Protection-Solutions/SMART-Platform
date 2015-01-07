@@ -138,6 +138,8 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     		c.addChangeListener(updateButtons);
     	}
 	}
+	
+	
 	private Time createTime(int hours, int minute, int second){
 		Calendar cForProcessing = Calendar.getInstance();
 		cForProcessing.setTimeInMillis(0);
@@ -235,6 +237,19 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
     	((WizardDialog) getContainer()).addPageChangingListener(this);
     }
 
+	@Override
+	public IWizardPage getStartingPage() {
+		if (parentDesign == null){
+			return super.getStartingPage();
+		}
+		if (parentSurvey == null){
+			return super.getStartingPage();
+		}
+		if (getPageCount() == 0) {
+			return null;
+		}
+		return getPages()[1];
+	}
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {

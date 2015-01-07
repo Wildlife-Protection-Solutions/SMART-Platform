@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -53,14 +54,16 @@ public class EncounterRateDialog extends TitleAreaDialog{
 	private IValueDropItem selectedRate;
 	
 	private IValueDropItem[] encounterRateOptions;
+	private IValueDropItem defaultSelection;
 	
 	/**
 	 * Creates new dialog
 	 * @param parent
 	 */
-	public EncounterRateDialog(Shell parent, IValueDropItem[] encounterRateOptions) {
+	public EncounterRateDialog(Shell parent, IValueDropItem[] encounterRateOptions, IValueDropItem defaultSelection) {
 		super(parent);
 		this.encounterRateOptions  = encounterRateOptions;
+		this.defaultSelection = defaultSelection;
 	}
 	
 	/**
@@ -122,14 +125,22 @@ public class EncounterRateDialog extends TitleAreaDialog{
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 		viewer.setInput(encounterRateOptions);
 		viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
-		viewer.getCombo().select(0);
+		if (defaultSelection != null){
+			for (Object x : encounterRateOptions){
+				if (defaultSelection.equals(x)){
+					viewer.setSelection(new StructuredSelection(x));
+					break;
+				}
+			}
+			
+		}
 		
 		new Label(main, SWT.NONE);
 		
 		Label lbl = new Label(main, SWT.WRAP);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false,2,1);
 		gd.widthHint = main.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-		lbl.setText("*" + Messages.EncounterRateDialog_RateValueInfo); //$NON-NLS-1$
+		lbl.setText("*" + Messages.EncounterRateDialog_RateValueInfo1); //$NON-NLS-1$
 		lbl.setLayoutData(gd);
 		
 		setMessage(Messages.EncounterRateDialog_DialogMessage);

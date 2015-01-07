@@ -147,37 +147,39 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int PATROL_VALUE_KEY = 72;
   /** RegularExpression Id. */
-  int SUM_CAT_VALUE_KEY = 73;
+  int PATROL_VALUE_ENCOUNTERRATE_KEY = 73;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_KEY = 74;
+  int SUM_CAT_VALUE_KEY = 74;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_KEY = 75;
+  int SUM_ATTRIBUTE_VALUE_KEY = 75;
   /** RegularExpression Id. */
-  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 76;
+  int SUM_CAT_ATT_VALUE_KEY = 76;
   /** RegularExpression Id. */
-  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 77;
+  int SUM_ATTRIBUTE_VALUE_LISTTREE_KEY = 77;
   /** RegularExpression Id. */
-  int AGG = 78;
+  int SUM_CAT_ATT_VALUE_LISTTREE_KEY = 78;
   /** RegularExpression Id. */
-  int DATE_GROUPBY_ITEM = 79;
+  int AGG = 79;
   /** RegularExpression Id. */
-  int QUERY_SPLITTER = 80;
+  int DATE_GROUPBY_ITEM = 80;
   /** RegularExpression Id. */
-  int PATROL_UUID_GROUPBY_OPTION = 81;
+  int QUERY_SPLITTER = 81;
   /** RegularExpression Id. */
-  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 82;
+  int PATROL_UUID_GROUPBY_OPTION = 82;
   /** RegularExpression Id. */
-  int PATROL_STRING_GROUPBY_OPTION = 83;
+  int PATROL_CONTRIBUTION_GROUPBY_OPTION = 83;
   /** RegularExpression Id. */
-  int CATEGORY_GROUPBY_ITEM = 84;
+  int PATROL_STRING_GROUPBY_OPTION = 84;
   /** RegularExpression Id. */
-  int AREA_GROUPBY_ITEM = 85;
+  int CATEGORY_GROUPBY_ITEM = 85;
   /** RegularExpression Id. */
-  int ATTRIBUTE_GROUPBY_ITEM = 86;
+  int AREA_GROUPBY_ITEM = 86;
   /** RegularExpression Id. */
-  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 87;
+  int ATTRIBUTE_GROUPBY_ITEM = 87;
   /** RegularExpression Id. */
-  int QUOTED_STRING = 88;
+  int CATEGORY_ATTRIBUTE_GROUPBY_ITEM = 88;
+  /** RegularExpression Id. */
+  int QUOTED_STRING = 89;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -257,6 +259,7 @@ public interface ParserConstants {
     "\"waypoint\"",
     "<PATROL_VALUE_ITEM>",
     "<PATROL_VALUE_KEY>",
+    "<PATROL_VALUE_ENCOUNTERRATE_KEY>",
     "<SUM_CAT_VALUE_KEY>",
     "<SUM_ATTRIBUTE_VALUE_KEY>",
     "<SUM_CAT_ATT_VALUE_KEY>",

@@ -96,12 +96,21 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 
 	public static SurveyDropItemFactory INSTANCE = new SurveyDropItemFactory();
 	
-	public final static IValueDropItem[] ENCOUNTER_RATE_DROP_ITEMS;
+	public final static IValueDropItem[] SUMMARY_ENCOUNTER_RATE_ITEMS;
+	public final static IValueDropItem[] GRID_ENCOUNTER_RATE_ITEMS;
 	static{
-		ENCOUNTER_RATE_DROP_ITEMS =  new IValueDropItem[] {
+		SUMMARY_ENCOUNTER_RATE_ITEMS =  new IValueDropItem[] {
+				(IValueDropItem)INSTANCE.createMissionLengthValueItem(),
+				(IValueDropItem)INSTANCE.createTotalMissionLengthValueItem(),
+				(IValueDropItem)INSTANCE.createMissionCountValueItem(),
+				(IValueDropItem)INSTANCE.createTotalMissionCountValueItem(),
+				(IValueDropItem)INSTANCE.createSurveyCountValueItem(),
+				(IValueDropItem)INSTANCE.createTotalSurveyCountValueItem()
+		};
+		GRID_ENCOUNTER_RATE_ITEMS =  new IValueDropItem[] {
 				(IValueDropItem)INSTANCE.createMissionLengthValueItem(),
 				(IValueDropItem)INSTANCE.createMissionCountValueItem(),
-				(IValueDropItem)INSTANCE.createSurveyCountValueItem()
+				(IValueDropItem)INSTANCE.createSurveyCountValueItem(),
 		};
 	}
 	
@@ -231,14 +240,6 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = new DropItem[]{createMissionPersonHourCountValueItem()};
 			}
 		}
-		
-		if (items != null){
-			for (int i = 0; i < items.length; i ++){
-				if (items[i] instanceof AbstractValueDropItem){
-					((AbstractValueDropItem)items[i]).setEncounterRateOptions(ENCOUNTER_RATE_DROP_ITEMS);
-				}
-			}
-		}
 		return items;	
 	}
 	
@@ -246,8 +247,16 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		return new MissionValueDropItem(MissionValueItem.ValueItem.TRACK_LENGTH);
 	}
 	
+	public DropItem createTotalMissionLengthValueItem(){
+		return new MissionValueDropItem(MissionValueItem.ValueItem.TRACK_LENGTH_TOTAL);
+	}
+	
 	public DropItem createMissionCountValueItem(){
 		return new MissionValueDropItem(MissionValueItem.ValueItem.MISSION_COUNT);
+	}
+	
+	public DropItem createTotalMissionCountValueItem(){
+		return new MissionValueDropItem(MissionValueItem.ValueItem.MISSION_COUNT_TOTAL);
 	}
 	
 	public DropItem createMissionDayCountValueItem(){
@@ -265,6 +274,9 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	
 	public DropItem createSurveyCountValueItem(){
 		return new MissionValueDropItem(MissionValueItem.ValueItem.SURVEY_COUNT);
+	}
+	public DropItem createTotalSurveyCountValueItem(){
+		return new MissionValueDropItem(MissionValueItem.ValueItem.SURVEY_COUNT_TOTAL);
 	}
 	
 	public DropItem createSamplingUnitGroupByDropItem(){
@@ -534,7 +546,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = def.getValuePart().getDropItems(session);
 				for (DropItem i : items){
 					if (i instanceof AbstractValueDropItem){
-						((AbstractValueDropItem)i).setEncounterRateOptions(ENCOUNTER_RATE_DROP_ITEMS);
+						((AbstractValueDropItem)i).setEncounterRateOptions(SUMMARY_ENCOUNTER_RATE_ITEMS);
 					}
 				}
 			}
@@ -551,7 +563,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			try{
 				valueItem = def.getValuePart().asDropItem(session);
 				if (valueItem instanceof AbstractValueDropItem){
-					((AbstractValueDropItem)valueItem).setEncounterRateOptions(ENCOUNTER_RATE_DROP_ITEMS);
+					((AbstractValueDropItem)valueItem).setEncounterRateOptions(GRID_ENCOUNTER_RATE_ITEMS);
 				}
 			}catch(Exception ex){
 				EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
