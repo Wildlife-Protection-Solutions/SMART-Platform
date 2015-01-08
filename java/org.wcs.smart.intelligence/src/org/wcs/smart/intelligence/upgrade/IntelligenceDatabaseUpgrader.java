@@ -50,12 +50,16 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 			//it is some kind of error or wrong database version
 			return;
 		}
-		if (versions.get(IntelligencePlugIn.PLUGIN_ID) == null) {
+		String v = versions.get(IntelligencePlugIn.PLUGIN_ID);
+		if (v == null) {
 			//Entity doesn't present in this configuration
 			//we need to perform install database support for the plug-in
 			monitor.subTask(Messages.IntelligenceDatabaseUpgrader_UpgradeTask);
 			OnInstallAction install = new OnInstallAction();
 			install.execute(null);
+		}
+		if ("3.0".equals(v)) { //$NON-NLS-1$
+			//TODO: implement upgrade logic and updatesite install/uninstall logic!!!!
 		}
 	}
 

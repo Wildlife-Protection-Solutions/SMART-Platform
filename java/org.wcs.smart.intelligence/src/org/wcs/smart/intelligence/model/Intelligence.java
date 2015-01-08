@@ -61,6 +61,7 @@ public class Intelligence extends NamedItem {
     private Date receivedDate;
     private IntelligenceSource source;
     private Patrol patrol;
+    private Informant informant;
     private Date fromDate;
     private Date toDate;
     private String description;
@@ -108,6 +109,16 @@ public class Intelligence extends NamedItem {
 		this.patrol = patrol;
 	}
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="informant_uuid", referencedColumnName="uuid")
+	public Informant getInformant() {
+		return informant;
+	}
+	
+	public void setInformant(Informant informant) {
+		this.informant = informant;
+	}
+	
 	@Column(name="from_date")
 	public Date getFromDate() {
 		return fromDate;

@@ -29,31 +29,20 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.ca.UuidItem;
 
 /**
- * Source types for intelligence.
- * 
  * @author elitvin
- * @since 3.0.0
+ * @since 3.2.0
  */
 @Entity
-@Table(name = "smart.intelligence_source")
-public class IntelligenceSource extends NamedKeyItem {
-	
-	public static final String PATROL_KEY = "patrol"; //$NON-NLS-1$
-	public static final String INFORMANT_KEY = "informant"; //$NON-NLS-1$
+@Table(name = "smart.informant")
+public class Informant extends UuidItem {
 
-	public static final String NAME = Messages.IntelligenceSource_Label;
-	public static final String KEY = Messages.IntelligenceSource_Key;
-
-	public static final Integer MAX_NAME_LENGTH = 64;
-	
-	private ConservationArea conservationArea;
-
+    private ConservationArea conservationArea;
 	public boolean isActive;
-	
+    private String id;
+    
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -70,16 +59,13 @@ public class IntelligenceSource extends NamedKeyItem {
 	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
- 
-	public static boolean isPatrolSource(IntelligenceSource source) {
-    	if (source == null)
-    		return false;
-    	return PATROL_KEY.equals(source.getKeyId());
-    }
 
-	public static boolean isInformantSource(IntelligenceSource source) {
-    	if (source == null)
-    		return false;
-    	return INFORMANT_KEY.equals(source.getKeyId());
-    }
+	@Column(name="id")
+    public String getId() {
+		return id;
+	}
+    public void setId(String id) {
+		this.id = id;
+	}
+	
 }
