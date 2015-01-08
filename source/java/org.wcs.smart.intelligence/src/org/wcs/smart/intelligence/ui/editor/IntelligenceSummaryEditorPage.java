@@ -81,6 +81,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	private Text txtDateReceived;
 	private Text txtSource;
 	private Hyperlink lnkPatrolID;
+	private Hyperlink lnkInformantID;
 	private Text txtShortName;
 	private Text txtDescription;
 	private Text txtFromDate;
@@ -191,6 +192,17 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		});
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
 
+		toolkit.createLabel(content, Messages.IntelligenceSummaryEditorPage_Informant_Label);
+		lnkInformantID = toolkit.createHyperlink(content, "", SWT.WRAP); //$NON-NLS-1$
+		lnkInformantID.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		lnkInformantID.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				//TODO:
+			}
+		});
+		toolkit.createLabel(content, ""); //$NON-NLS-1$
+		
 		toolkit.createLabel(content, Messages.IntelligenceDesc_Name_Label);
 		txtShortName = toolkit.createText(content, "", SWT.NONE); //$NON-NLS-1$
 		txtShortName.setEditable(false);
@@ -267,6 +279,9 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		lnkPatrolID.setText(value);
 		lnkPatrolID.setEnabled(intel.getPatrol() != null);
+		value = intel.getInformant() != null ? intel.getInformant().getId() : none;
+		lnkInformantID.setText(value);
+		lnkInformantID.setEnabled(intel.getInformant() != null);
 		txtShortName.setText(intel.getName());
 		txtDescription.setText(intel.getDescription());
 		txtFromDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getFromDate()));

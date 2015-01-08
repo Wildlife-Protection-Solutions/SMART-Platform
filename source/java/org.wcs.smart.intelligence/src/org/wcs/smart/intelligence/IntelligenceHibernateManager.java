@@ -37,6 +37,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.model.PatrolIntelligence;
@@ -336,6 +337,18 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		return query.list();
 	}
 
+	/**
+	 * Loads informants 
+	 */
+	@SuppressWarnings("unchecked")
+	public static List<Informant> getInformants(ConservationArea ca, Session s, boolean onlyActive){
+		Criteria query = s.createCriteria(Informant.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+		if (onlyActive) {
+			query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
+		}
+		return query.list();
+	}
+	
 	public static IntelligenceSource getPatrolSource(Session s) {
 		return getSourceByKeyId(s, IntelligenceSource.PATROL_KEY);
 	}

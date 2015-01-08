@@ -168,7 +168,11 @@ public class Messages extends NLS {
 
 	public static String IntelligenceDatesComposite_DateRange_Error;
 
-    public static String IntelligenceDesc_Description_Label;
+    public static String IntelligenceDbUpgrader30To32_ErrorMessage;
+
+	public static String IntelligenceDbUpgrader30To32_ProgressMessage;
+
+	public static String IntelligenceDesc_Description_Label;
 
     public static String IntelligenceDesc_Message;
 
@@ -344,9 +348,15 @@ public class Messages extends NLS {
 
     public static String IntelligenceSource_PatrolId_Label;
 
+	public static String IntelligenceSourceComposite_InformantId;
+
+	public static String IntelligenceSourceComposite_InformantLoad_Error;
+
 	public static String IntelligenceSourceComposite_NoSources_Error;
 
 	public static String IntelligenceSourceComposite_SourceLoad_Error;
+
+	public static String IntelligenceSummaryEditorPage_Informant_Label;
 
     public static String IntelligenceViewFilter_NameFilterName;
 

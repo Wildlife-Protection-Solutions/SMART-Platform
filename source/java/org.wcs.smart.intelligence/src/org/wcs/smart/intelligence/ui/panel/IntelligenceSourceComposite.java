@@ -35,6 +35,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -47,6 +48,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.patrol.model.Patrol;
@@ -68,10 +70,17 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	
     private ComboViewer sourceType;
     private List<IntelligenceSource> sourceTypeList;
+    private List<Informant> informantList;
     
-    private Label patrolLabel;
     private PatrolFilteredComboViewer patrolId;
 
+    private ComboViewer informantViewer;
+
+    private Composite detailsComposite;
+    private Composite emptyComposite;
+    private Composite patrolComposite;
+    private Composite informantComposite;
+    
     private ControlDecoration patrolIdDecoration;
 
 	/**
@@ -86,10 +95,17 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 		} catch (Exception e) {
 			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_SourceLoad_Error, e);
 			sourceTypeList = new ArrayList<IntelligenceSource>();
+		}
+
+		try {
+			informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), s, true);
+		} catch (Exception e) {
+			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_InformantLoad_Error, e);
+			informantList = new ArrayList<Informant>();
 		} finally {
 			s.close();
 		}
-
+		
 		setMessage(Messages.IntelligenceSource_Message);
 		if (!sourceTypeList.isEmpty()) {
 			createControls();
@@ -129,19 +145,45 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         sourceType.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				boolean isPatrolSelected = IntelligenceSource.isPatrolSource(getSelectedSourceType());
-				patrolLabel.setVisible(isPatrolSelected);
-				patrolId.setVisible(isPatrolSelected);
-				refreshPatrolDecoration();
+				if (IntelligenceSource.isPatrolSource(getSelectedSourceType())) {
+					((StackLayout)detailsComposite.getLayout()).topControl = patrolComposite;
+				} else if (IntelligenceSource.isInformantSource(getSelectedSourceType())) {
+					((StackLayout)detailsComposite.getLayout()).topControl = informantComposite;
+				} else {
+					((StackLayout)detailsComposite.getLayout()).topControl = emptyComposite;
+				}
+				detailsComposite.layout();
 				fireInputChangeListeners();				
 			}
 		});
         
-        patrolLabel = new Label(this, SWT.NONE);
+        detailsComposite = new Composite(this, SWT.NONE);
+		StackLayout layout = new StackLayout();
+		layout.marginHeight = 2;
+		layout.marginWidth = 0;
+		detailsComposite.setLayout(layout);
+        detailsComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+
+		emptyComposite = new Composite(detailsComposite, SWT.NONE);
+		emptyComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+		
+		patrolComposite = new Composite(detailsComposite, SWT.NONE);
+		GridLayout gd = new GridLayout(2, false);
+		gd.marginBottom=0;
+		gd.marginHeight = 0;
+		gd.marginLeft = 0;
+		gd.marginRight = 0;
+		gd.marginTop = 0;
+		gd.marginWidth = 0;
+		patrolComposite.setLayout(gd);
+		patrolComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+		Label patrolLabel = new Label(patrolComposite, SWT.NONE);
         patrolLabel.setText(Messages.IntelligenceSource_PatrolId_Label);
         patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        patrolId = new PatrolFilteredComboViewer(this);
+        patrolId = new PatrolFilteredComboViewer(patrolComposite);
         //below line is to fix decorator truncation issue
         ((GridLayout)patrolId.getLayout()).marginLeft = DECORATION_MARGIN;
         patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -158,6 +200,30 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         patrolIdDecoration.setShowHover(true);
         patrolIdDecoration.setDescriptionText(ERROR_PATROL_ID_REQUIRED);
 
+        
+
+		informantComposite = new Composite(detailsComposite, SWT.NONE);
+		gd = new GridLayout(2, false);
+		gd.marginBottom=0;
+		gd.marginHeight = 0;
+		gd.marginLeft = 0;
+		gd.marginRight = 0;
+		gd.marginTop = 0;
+		gd.marginWidth = 0;
+		informantComposite.setLayout(gd);
+		informantComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        
+		Label informantLabel = new Label(informantComposite, SWT.NONE);
+        informantLabel.setText(Messages.IntelligenceSourceComposite_InformantId);
+        informantLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
+        informantViewer = new ComboViewer(informantComposite, SWT.READ_ONLY);
+        informantViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+        informantViewer.setContentProvider(ArrayContentProvider.getInstance());
+        informantViewer.setLabelProvider(new InformantIdLabelProvider());
+ 
+        informantViewer.setInput(informantList);
+        
         if (!sourceTypeList.isEmpty())
         	sourceType.setSelection(new StructuredSelection(sourceTypeList.get(0)));
         
@@ -177,6 +243,8 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     	Patrol patrol = IntelligenceSource.isPatrolSource(source) ? getSelectedPatrol() : null;
        	intelligence.setSource(source);
 		intelligence.setPatrol(patrol);
+		Informant informant = IntelligenceSource.isInformantSource(source) ? getSelectedInformant() : null;
+		intelligence.setInformant(informant);
     }
 
 	@Override
@@ -191,8 +259,13 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	    	}
 	    }
 	    if (intelligence.getPatrol() != null) {
-	    	if (patrolId != null){
+	    	if (patrolId != null) {
 	    		patrolId.setSelection(intelligence.getPatrol());
+	    	}
+	    }
+	    if (intelligence.getInformant() != null) {
+	    	if (informantViewer != null) {
+	    		informantViewer.setSelection(new StructuredSelection(intelligence.getInformant()));
 	    	}
 	    }
 	}
@@ -224,12 +297,16 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     private Patrol getSelectedPatrol() {
     	return patrolId.getSelection();
     }
-	
+
+    private Informant getSelectedInformant() {
+    	IStructuredSelection selection = (IStructuredSelection) informantViewer.getSelection();
+    	return selection != null && !selection.isEmpty() ? (Informant)selection.getFirstElement() : null;
+    }
+    
     /**
      * LabelProvider used to display enum values from {@link IntelligenceSourceType}
      * 
      * @author elitvin
-     *
      */
     private class IntelligenceSourceLabelProvider extends LabelProvider {
     	@Override
@@ -241,4 +318,19 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
     	}
     }
 
+    /**
+     * LabelProvider used to display informant IDs
+     * 
+     * @author elitvin
+     */
+    private class InformantIdLabelProvider extends LabelProvider {
+    	@Override
+    	public String getText(Object element) {
+    		if (element instanceof Informant) {
+    			return ((Informant)element).getId();
+    		}
+    		return super.getText(element);
+    	}
+    }
+    
 }
