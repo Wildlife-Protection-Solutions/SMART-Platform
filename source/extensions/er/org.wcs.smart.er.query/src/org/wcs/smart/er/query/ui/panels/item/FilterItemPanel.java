@@ -101,6 +101,46 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 			}
 		}
 	};
+	
+	private Job refreshViewerJob = new Job(Messages.FilterItemPanel_RefreshFilterTreeJobName){
+		private Object input;
+		@SuppressWarnings("unchecked")
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			input = null;
+			Display.getDefault().syncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					input = filterTreeViewer.getInput();
+					if (input instanceof HashMap){
+						filterTreeViewer.setInput(LOADING_TEXT);
+					}
+				}});
+			if (input instanceof HashMap){
+				final HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
+				input2.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
+			
+				if (currentDesign != null && currentDesign.getConfigurableModel() != null){
+					//load the configurable model
+				
+					ConfigurableModel cm = DataentryHibernateManager.getFullConfigurableModel(currentDesign.getConfigurableModel().getUuid());
+					input2.put(DataModelTreeNode.KEY,  new Object[]{currentDesign, QueryDataModelManager.getInstance().getDataModel(), cm});
+				}else{
+					input2.put(DataModelTreeNode.KEY,  new Object[]{currentDesign, QueryDataModelManager.getInstance().getDataModel(), null});
+				}
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						filterTreeViewer.setInput(input2);
+						filterTreeViewer.refresh();
+					}
+					
+				});
+			}
+			return Status.OK_STATUS;
+		}
+	};
 
 	public FilterItemPanel() {
 		this(QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY));
@@ -171,56 +211,12 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	 * 
 	 * @param currentDesign the current survey design 
 	 */
-	@SuppressWarnings("unchecked")
 	public void refreshPanel(SurveyDesign currentDesign){
 		this.currentDesign = currentDesign;
 		if (filterTreeViewer != null){
 			refreshViewerJob.schedule();
 		}
-	}
-	
-	
-	private Job refreshViewerJob = new Job("Refresh Query Tree"){
-
-		private Object input;
-		@Override
-		protected IStatus run(IProgressMonitor monitor) {
-			input = null;
-			Display.getDefault().syncExec(new Runnable(){
-
-				@Override
-				public void run() {
-					input = filterTreeViewer.getInput();
-					if (input instanceof HashMap){
-						filterTreeViewer.setInput(LOADING_TEXT);
-					}
-				}});
-			if (input instanceof HashMap){
-				final HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
-				input2.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
-			
-				if (currentDesign != null && currentDesign.getConfigurableModel() != null){
-					//load the configurable model
-				
-					ConfigurableModel cm = DataentryHibernateManager.getFullConfigurableModel(currentDesign.getConfigurableModel().getUuid());
-					input2.put(DataModelTreeNode.KEY,  new Object[]{currentDesign, QueryDataModelManager.getInstance().getDataModel(), cm});
-				}else{
-					input2.put(DataModelTreeNode.KEY,  new Object[]{currentDesign, QueryDataModelManager.getInstance().getDataModel(), null});
-				}
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						filterTreeViewer.setInput(input2);
-						filterTreeViewer.refresh();
-					}
-					
-				});
-			}
-			return Status.OK_STATUS;
-		}
-		
-		
-	};
+	}	
 	
 	@Override
 	public void refreshPanel(){

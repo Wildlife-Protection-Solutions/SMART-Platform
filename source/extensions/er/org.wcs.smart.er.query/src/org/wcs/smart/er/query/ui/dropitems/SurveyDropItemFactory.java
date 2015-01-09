@@ -26,7 +26,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.xerces.impl.dtd.models.CMNode;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
@@ -85,6 +88,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.IValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
@@ -244,22 +248,82 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 				items = new DropItem[]{createMissionPersonHourCountValueItem()};
 			}
 		}else if (source instanceof CmNode){
-			items = new DropItem[]{processDropItem((CmNode) source)};
+			DropItem di = processCmNode((CmNode)source);
+			if (di != null){
+				items = new DropItem[]{di};
+			}
 		}else if (source instanceof CmAttribute){
-			items = new DropItem[]{createAttributeDropItem(new CategoryAttribute(((CmAttribute)source).getNode().getCategory(), ((CmAttribute)source).getAttribute()))};
+			DropItem di = createCmAttribute((CmAttribute)source);
+			if (di != null){
+				items = new DropItem[]{di};
+			}
 		}
 		return items;	
 	}
 	
-	
-	public DropItem processDropItem(CmNode node){
-		if (node.getCategory() != null){
-			Session s = HibernateManager.openSession();
-			try{
-				return createCategoryDropItem( (Category)s.load(Category.class, node.getCategory().getUuid()));
-			}finally{
-				s.close();
+	public DropItem createCmAttribute(final CmAttribute node){
+		//need our own connection to load category
+		final DropItem[] di = new DropItem[]{null};
+		Job j = new Job(""){ //$NON-NLS-1$
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				try{
+					Category c = (Category) s.load(Category.class, node.getNode().getCategory().getUuid());
+					Attribute att = (Attribute) s.load(Attribute.class, node.getAttribute().getUuid());
+					if (att.getType() == AttributeType.BOOLEAN ||
+							att.getType() == AttributeType.TEXT ||
+							att.getType() == AttributeType.NUMERIC ||
+							att.getType() == AttributeType.DATE){
+						di[0] = createAttributeDropItem(new CategoryAttribute(c, att));
+					}else if (att.getType() == AttributeType.LIST){
+						CmAttributeListDropItem ddi = new CmAttributeListDropItem(node, new CategoryAttribute(c, att));
+						di[0] = ddi;
+					}else if (att.getType() == AttributeType.TREE){
+						//for this version we are just going to treat this like the attribute from the datamodel;
+						//in the next version (with fully customized trees) we'll look at displaying the custom tree here.
+						di[0] = new AttributeTreeDropItem(new CategoryAttribute(c,att));
+					}
+				}finally{
+					s.close();
+				}
+				return Status.OK_STATUS;
 			}
+		};
+		j.setSystem(false);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		return di[0];
+		
+	}
+	private DropItem processCmNode(final CmNode node){
+		if (node.getCategory() != null){
+			//need our own connection to load category
+			final DropItem[] di = new DropItem[]{null};
+			Job j = new Job("") { //$NON-NLS-1$
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Session s = HibernateManager.openSession();
+					try{
+						di[0] = createCategoryDropItem( (Category)s.load(Category.class, node.getCategory().getUuid()));
+					}finally{
+						s.close();
+					}
+					return Status.OK_STATUS;
+				}
+			};
+			j.setSystem(true);
+			j.schedule();
+			try {
+				j.join();
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+			return di[0];
 		}
 		return null;
 	}

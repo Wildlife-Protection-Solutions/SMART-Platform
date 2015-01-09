@@ -29,6 +29,7 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.panels.item.configmodel.ConfigurableModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode.Type;
@@ -55,8 +56,8 @@ public class SurveyDataModelTreeNode implements IItemTreeNode{
 	
 			
 	private enum TreeNode{
-		DATA_MODEL("Full Data Model", SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON)),
-		CONFIG_MODEL("Configurable Model", DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.CONFIG_MODEL_ICON));
+		DATA_MODEL(Messages.SurveyDataModelTreeNode_CompleteDataModelLabel, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON)),
+		CONFIG_MODEL(Messages.SurveyDataModelTreeNode_ConfigurableModelLabel, DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.CONFIG_MODEL_ICON));
 		
 		String guiName;
 		Image icon;
@@ -74,7 +75,7 @@ public class SurveyDataModelTreeNode implements IItemTreeNode{
 	public SurveyDataModelTreeNode(Type type){
 		dataModelNode = new DataModelTreeNode(type);
 		configModelNode = new ConfigurableModelTreeNode(type);
-		this.name = "Data Model";
+		this.name = Messages.SurveyDataModelTreeNode_NodeName;
 		
 	}
 	

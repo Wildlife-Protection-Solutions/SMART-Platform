@@ -27,8 +27,9 @@ import org.eclipse.jface.viewers.Viewer;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.er.query.internal.Messages;
 /**
- * Content provider for providing data model item for query filters.
+ * Content provider for providing configurable data model item for query filters.
  * 
  * @author Emily
  *
@@ -84,7 +85,7 @@ public class FiltersConfigurableModelContentProvider implements ITreeContentProv
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if (configModel == null ){
-			return new String[]{"Loading..."};
+			return new String[]{Messages.FiltersConfigurableModelContentProvider_LoadingText};
 		}
 		return provider.getElements(inputElement);
 	}

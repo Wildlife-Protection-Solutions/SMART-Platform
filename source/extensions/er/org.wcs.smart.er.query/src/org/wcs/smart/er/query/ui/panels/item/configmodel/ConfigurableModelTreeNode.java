@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
@@ -51,7 +52,7 @@ public class ConfigurableModelTreeNode implements IItemTreeNode{
 		if (type == DataModelTreeNode.Type.FILTER){ 
 			provider = new FiltersConfigurableModelContentProvider();
 			labelprovider = ((FiltersConfigurableModelContentProvider)provider).getLabelProvider();
-			name = "Configurable Model";//Messages.DataModelTreeNode_DataModelFiltersLabel;
+			name = Messages.ConfigurableModelTreeNode_ConfigurableModelLabel;//Messages.DataModelTreeNode_DataModelFiltersLabel;
 //		}else if (type == Type.GROUPBY){
 //			provider = new SummaryDataModelContentProvider(SummaryDataModelContentProvider.Type.GROUPBY);
 //			labelprovider = ((SummaryDataModelContentProvider)provider).getLabelProvider();
