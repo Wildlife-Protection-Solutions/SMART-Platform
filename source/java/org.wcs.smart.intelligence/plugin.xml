@@ -690,6 +690,9 @@
       <class
             class="org.wcs.smart.intelligence.model.IntelligenceSource">
       </class>
+      <class
+            class="org.wcs.smart.intelligence.model.Informant">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.perspectives">

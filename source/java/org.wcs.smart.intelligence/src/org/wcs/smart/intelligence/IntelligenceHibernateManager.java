@@ -36,6 +36,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.intelligence.informant.InformantDataInterceptor;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -358,5 +359,29 @@ public class IntelligenceHibernateManager extends HibernateManager {
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.eq("keyId", keyId)); //$NON-NLS-1$
 		return (IntelligenceSource) query.uniqueResult();
-	}	
+	}
+
+	public static boolean saveInformant(Informant informant) {
+		Interceptor interceptor = new InformantDataInterceptor();
+		Session session = SmartHibernateManager.openSession(interceptor);
+		try {
+			return saveInformant(informant, session);
+		} finally {
+			session.close();
+		}
+	}
+	
+	public static boolean saveInformant(Informant informant, Session session) {
+		session.beginTransaction();
+		try {
+			session.saveOrUpdate(informant);
+			session.getTransaction().commit();
+			return true;
+		} catch (Exception ex) {
+			session.getTransaction().rollback();
+			IntelligencePlugIn.displayLog("Unable to save informant" + "\n"+ ex.getLocalizedMessage(), ex);
+			return false;
+		}
+	}
+	
 }

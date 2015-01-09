@@ -21,15 +21,24 @@
  */
 package org.wcs.smart.intelligence.model;
 
+import java.io.File;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.informant.PersistentManager;
+import org.wcs.smart.intelligence.informant.aes.EncryptedData;
+import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * @author elitvin
@@ -37,11 +46,15 @@ import org.wcs.smart.ca.UuidItem;
  */
 @Entity
 @Table(name = "smart.informant")
-public class Informant extends UuidItem {
+public final class Informant extends UuidItem {
+	
+	private static final String DIR_NAME = "aes";
 
     private ConservationArea conservationArea;
 	public boolean isActive;
     private String id;
+    
+    private EncryptedData encryptedData;
     
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -68,4 +81,49 @@ public class Informant extends UuidItem {
 		this.id = id;
 	}
 	
+    @Transient
+    public EncryptedData getEncryptedData() {
+    	if (encryptedData == null) {
+    		File file = getDataFile();
+			encryptedData = new EncryptedData();
+    		if (file != null && file.exists()) {
+    			Object obj = PersistentManager.fromFile(file);
+    			if (obj instanceof EncryptedData) {
+    				encryptedData = (EncryptedData) obj;
+    			}
+    		}
+    	}
+		return encryptedData;
+	}
+    @Transient
+    public void setEncryptedData(EncryptedData encryptedData) {
+		this.encryptedData = encryptedData;
+	}
+    
+    @Transient
+    public final Object get(InformantDataKey key) {
+    	return InformantAesManager.getInstance().get(this, key);
+    }
+    @Transient
+    public final void set(InformantDataKey key, Object value) {
+    	InformantAesManager.getInstance().set(this, key, value);
+    }
+
+    @Transient
+	public final File getDataFile() {
+		if (getUuid() != null) {
+    		String fn = SmartUtils.encodeHex(getUuid());
+    		File file = new File(getDatastoreFolderPath() + File.separator + fn + ".dat"); //$NON-NLS-1$
+			return file;
+		} else {
+			return null;
+		}
+	}
+	
+    @Transient
+	public final String getDatastoreFolderPath() {
+		return SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator
+				+ IntelligencePlugIn.INTELLIGENCE_DIR + File.separator + DIR_NAME;
+	}
+    
 }
