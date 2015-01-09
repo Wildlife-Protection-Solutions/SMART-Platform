@@ -47,6 +47,7 @@ import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
+import org.wcs.smart.intelligence.model.InformantDataKey;
 
 /**
  * Editor for viewing informant application data.
@@ -55,6 +56,43 @@ import org.wcs.smart.intelligence.model.Informant;
  * @since 3.2.0
  */
 public class InformantDataEditor extends EditorPart {
+	
+	/**
+	 * The supported patrol types.
+	 * 
+	 * @author elitvin
+	 * @since 1.0.0
+	 */
+	public enum InfromantColumn {
+		COL_FIRST_NAME ("First Name", InformantDataKey.FIRST_NAME),
+		COL_LAST_NAME ("Last Name", InformantDataKey.LAST_NAME),
+		COL_ADDRESS ("Address", InformantDataKey.ADDRESS),
+		COL_DESCRIPTION ("Description", InformantDataKey.DESCRIPTION);
+
+		private static final int DEFAULT_COLUMN_WIDTH = 80;
+		
+		private String guiName;
+		private InformantDataKey key;
+		private int width;
+		InfromantColumn(String guiName, InformantDataKey key) {
+			this(guiName, key, DEFAULT_COLUMN_WIDTH);
+		}
+		InfromantColumn(String guiName, InformantDataKey key, int width) {
+			this.guiName = guiName;
+			this.key = key;
+			this.width = width;
+		}
+		public String getGuiName() {
+			return this.guiName;
+		}
+		public int getWidth() {
+			return width;
+		}
+		public InformantDataKey getKey() {
+			return key;
+		}
+	}
+	
 
 	public static final String ID = "org.wcs.smart.intelligence.informant.InformantDataEditor"; //$NON-NLS-1$
 
@@ -128,12 +166,13 @@ public class InformantDataEditor extends EditorPart {
 		});
 		
 		//secure data
-//		for (CTPatrolTableColumn column : CTPatrolTableColumn.values()) {
-//			TableViewerColumn viewerColumn = new TableViewerColumn(v, SWT.NONE);
-//			viewerColumn.getColumn().setText(column.getGuiName());
-//			viewerColumn.getColumn().setWidth(column.getWidth());
-//			viewerColumn.setLabelProvider(new CTPatrolTableCellLabelProvider(column));
-//		}
+		for (InfromantColumn column : InfromantColumn.values()) {
+			TableViewerColumn viewerColumn = new TableViewerColumn(v, SWT.NONE);
+			viewerColumn.getColumn().setText(column.getGuiName());
+			viewerColumn.getColumn().setWidth(column.getWidth());
+			viewerColumn.setLabelProvider(new InformantColumnLabelProvider(column.getKey()));
+			viewerColumn.setEditingSupport(new InformantColumnEditingSupport(v, column.getKey()));
+		}
 	}
 
 	@Override
@@ -174,5 +213,5 @@ public class InformantDataEditor extends EditorPart {
 	public boolean isSaveAsAllowed() {
 		return false;
 	}
-	
+
 }
