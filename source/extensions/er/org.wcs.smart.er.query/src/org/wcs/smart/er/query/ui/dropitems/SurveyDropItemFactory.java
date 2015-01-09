@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.xerces.impl.dtd.models.CMNode;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
@@ -35,6 +36,8 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -66,6 +69,7 @@ import org.wcs.smart.er.query.ui.panels.item.SamplingUnitWrapper;
 import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.SurveyValuesTreeNode;
 import org.wcs.smart.er.query.ui.panels.item.TrackObservationFilterItemPanel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
@@ -239,10 +243,26 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			}else if (source == SurveyValuesTreeNode.Node.MISSION_PERSONHOUR_COUNT){
 				items = new DropItem[]{createMissionPersonHourCountValueItem()};
 			}
+		}else if (source instanceof CmNode){
+			items = new DropItem[]{processDropItem((CmNode) source)};
+		}else if (source instanceof CmAttribute){
+			items = new DropItem[]{createAttributeDropItem(new CategoryAttribute(((CmAttribute)source).getNode().getCategory(), ((CmAttribute)source).getAttribute()))};
 		}
 		return items;	
 	}
 	
+	
+	public DropItem processDropItem(CmNode node){
+		if (node.getCategory() != null){
+			Session s = HibernateManager.openSession();
+			try{
+				return createCategoryDropItem( (Category)s.load(Category.class, node.getCategory().getUuid()));
+			}finally{
+				s.close();
+			}
+		}
+		return null;
+	}
 	public DropItem createMissionLengthValueItem(){
 		return new MissionValueDropItem(MissionValueItem.ValueItem.TRACK_LENGTH);
 	}
