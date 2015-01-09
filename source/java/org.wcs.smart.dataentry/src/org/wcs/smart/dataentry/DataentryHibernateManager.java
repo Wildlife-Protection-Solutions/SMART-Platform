@@ -45,7 +45,9 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
 public class DataentryHibernateManager extends HibernateManager {
 
 	/**
-	 * Returns all ConfigurableModels
+	 * Returns all configurable models for the active conservation area. This does not load
+	 * the tree structure of the model.  @see getFullConfigurableModel if you need the entire
+	 * tree structure.
 	 * 
 	 * @param session
 	 * @return all ConfigurableModels
@@ -55,7 +57,9 @@ public class DataentryHibernateManager extends HibernateManager {
 	}
 	
 	/**
-	 * Returns all ConfigurableModels for a given conservation area
+	 * Returns all configurable models for a given conservation area.  This does not load
+	 * the tree structure of the model. @see getFullConfigurableModel if you need the entire
+	 * tree structure.
 	 * 
 	 * @param ca the conservation are to load from
 	 * @param session
@@ -69,10 +73,12 @@ public class DataentryHibernateManager extends HibernateManager {
 	}
 
 	/**
-	 * Returns all ConfigurableModels
+	 * Loads a configurable model and all nodes into memory.  This function
+	 * opens (and closes) a new session.
 	 * 
-	 * @param session
-	 * @return all ConfigurableModels
+	 * 
+	 * @param uuid the uuid of the configurable model to load
+	 * @return the loaded configurable model
 	 */
 	public static ConfigurableModel getFullConfigurableModel(byte[] uuid) {
 		if (uuid == null)
@@ -80,11 +86,7 @@ public class DataentryHibernateManager extends HibernateManager {
 		Session session = SmartHibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("uuid", uuid)); //$NON-NLS-1$
-			ConfigurableModel model = (ConfigurableModel) query.uniqueResult();
-			model.getNames().size();
-			fetchNodesData(model.getNodes());
-			return model;
+			return getFullConfigurableModel(uuid, session);
 		} finally {
 			session.getTransaction().commit();
 			session.close();
@@ -92,8 +94,10 @@ public class DataentryHibernateManager extends HibernateManager {
 	}
 	
 	/**
-	 * Returns all ConfigurableModels
+	 * Loads a configurale model and all nodes into memory using the provided
+	 * session object.
 	 * 
+	 * @param uuid the uuid of the configurable model to load
 	 * @param session
 	 * @return all ConfigurableModels
 	 */
@@ -111,12 +115,6 @@ public class DataentryHibernateManager extends HibernateManager {
 		if (nodes == null)
 			return;
 		for (CmNode cmNode : nodes) {
-			//load all lazy data
-//			cmNode.getCategory();
-//			cmNode.getNames().size();
-//			for (CmAttribute cma : cmNode.getCmAttributes()) {
-//				cma.getNames().size();
-//			}
 			cmNode.getCmAttributes().size();
 			fetchNodesData(cmNode.getChildren());
 		}

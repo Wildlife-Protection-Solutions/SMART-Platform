@@ -63,5 +63,12 @@
          </require>
       </templateCloner>
    </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.dataentry.showConfigurableModel"
+            icon="images/icons16/configmodel.png">
+      </image>
+   </extension>
 
 </plugin>

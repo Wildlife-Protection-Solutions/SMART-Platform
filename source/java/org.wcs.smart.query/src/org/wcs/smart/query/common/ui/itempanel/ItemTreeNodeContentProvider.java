@@ -88,8 +88,8 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 			kids = ((IItemTreeNode)parentElement).getContentProvider().getElements(null);
 			parent = (IItemTreeNode) parentElement;
 		}else if (parentElement instanceof WrappedTreeNode){
-			kids = ((WrappedTreeNode)parentElement).parent.getContentProvider().getChildren(((WrappedTreeNode)parentElement).item);
-			parent = ((WrappedTreeNode)parentElement).parent;
+			kids = ((WrappedTreeNode)parentElement).getParent().getContentProvider().getChildren(((WrappedTreeNode)parentElement).getItem());
+			parent = ((WrappedTreeNode)parentElement).getParent();
 		}
 		
 		if (kids != null){
@@ -107,11 +107,11 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 		if (element instanceof IItemTreeNode){
 			return null;
 		}else if (element instanceof WrappedTreeNode){
-			Object p = ((WrappedTreeNode) element).parent.getContentProvider().getParent(element);
+			Object p = ((WrappedTreeNode) element).getParent().getContentProvider().getParent(element);
 			if (p == null){
-				return ((WrappedTreeNode) element).parent;
+				return ((WrappedTreeNode) element).getParent();
 			}else{
-				return new WrappedTreeNode(((WrappedTreeNode) element).parent, p);
+				return new WrappedTreeNode(((WrappedTreeNode) element).getParent(), p);
 			}			
 		}
 		return null;
@@ -123,7 +123,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 		if (element instanceof IItemTreeNode){
 			return true;
 		}else if (element instanceof WrappedTreeNode){
-			return ((WrappedTreeNode) element).parent.getContentProvider().hasChildren(((WrappedTreeNode) element).item);
+			return ((WrappedTreeNode) element).getParent().getContentProvider().hasChildren(((WrappedTreeNode) element).getItem());
 		}
 		return getChildren(element).length > 0;
 	}
@@ -138,11 +138,11 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 		
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object object = (Object) iterator.next();
-			if (object instanceof WrappedTreeNode){
-				items.add( ((WrappedTreeNode) object).item );
-			}else{
-				items.add(object);
+			
+			while(object instanceof WrappedTreeNode){
+				object = ((WrappedTreeNode) object).getItem();
 			}
+			items.add(object);
 		}
 		
 		return new StructuredSelection(items);
@@ -160,7 +160,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 			if (element instanceof IItemTreeNode){
 				return ((IItemTreeNode) element).getImage();
 			}else if (element instanceof WrappedTreeNode){
-				return ((WrappedTreeNode) element).parent.getLabelProvider().getImage(((WrappedTreeNode) element).item);
+				return ((WrappedTreeNode) element).getParent().getLabelProvider().getImage(((WrappedTreeNode) element).getItem());
 			}
 			return super.getImage(element);
 			
@@ -175,7 +175,7 @@ public class ItemTreeNodeContentProvider implements ITreeContentProvider {
 			if (element instanceof IItemTreeNode){
 				return ((IItemTreeNode) element).getName();
 			}else if (element instanceof WrappedTreeNode){
-				return ((WrappedTreeNode) element).parent.getLabelProvider().getText(((WrappedTreeNode) element).item);
+				return ((WrappedTreeNode) element).getParent().getLabelProvider().getText(((WrappedTreeNode) element).getItem());
 			}
 			return super.getText(element);
 			

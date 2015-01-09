@@ -158,8 +158,8 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 			kids = ((IItemTreeNode)parentElement).getContentProvider().getElements(null);
 			parent = (IItemTreeNode) parentElement;
 		}else if (parentElement instanceof WrappedTreeNode){
-			kids = ((WrappedTreeNode)parentElement).parent.getContentProvider().getChildren(((WrappedTreeNode)parentElement).item);
-			parent = ((WrappedTreeNode)parentElement).parent;
+			kids = ((WrappedTreeNode)parentElement).getParent().getContentProvider().getChildren(((WrappedTreeNode)parentElement).getItem());
+			parent = ((WrappedTreeNode)parentElement).getParent();
 		}
 		
 		if (kids != null){
@@ -181,11 +181,11 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 				return RootNode.GROUPBY_OPS;
 			}
 		}else if (element instanceof WrappedTreeNode){
-			Object p = ((WrappedTreeNode) element).parent.getContentProvider().getParent(element);
+			Object p = ((WrappedTreeNode) element).getParent().getContentProvider().getParent(element);
 			if (p == null){
-				return ((WrappedTreeNode) element).parent;
+				return ((WrappedTreeNode) element).getParent();
 			}else{
-				return new WrappedTreeNode(((WrappedTreeNode) element).parent, p);
+				return new WrappedTreeNode(((WrappedTreeNode) element).getParent(), p);
 			}			
 		}
 		return null;
@@ -204,7 +204,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		}else if (element instanceof RootNode){
 			return true;
 		}else if (element instanceof WrappedTreeNode){
-			return ((WrappedTreeNode) element).parent.getContentProvider().hasChildren(((WrappedTreeNode) element).item);
+			return ((WrappedTreeNode) element).getParent().getContentProvider().hasChildren(((WrappedTreeNode) element).getItem());
 		}
 		return getChildren(element).length > 0;
 	}
@@ -220,7 +220,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object object = (Object) iterator.next();
 			if (object instanceof WrappedTreeNode){
-				items.add( ((WrappedTreeNode) object).item );
+				items.add( ((WrappedTreeNode) object).getItem() );
 			}else{
 				items.add(object);
 			}
@@ -242,7 +242,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 			}else if (element instanceof RootNode){
 				return ((RootNode) element).image;
 			}else if (element instanceof WrappedTreeNode){
-				return ((WrappedTreeNode) element).parent.getLabelProvider().getImage(((WrappedTreeNode) element).item);
+				return ((WrappedTreeNode) element).getParent().getLabelProvider().getImage(((WrappedTreeNode) element).getItem());
 			}
 			return super.getImage(element);
 			
@@ -259,7 +259,7 @@ public class TreeNodeGroupValueContentProvider implements ITreeContentProvider {
 			}else if (element instanceof RootNode){
 				return ((RootNode) element).name;
 			}else if (element instanceof WrappedTreeNode){
-				return ((WrappedTreeNode) element).parent.getLabelProvider().getText(((WrappedTreeNode) element).item);
+				return ((WrappedTreeNode) element).getParent().getLabelProvider().getText(((WrappedTreeNode) element).getItem());
 			}
 			return super.getText(element);
 			
