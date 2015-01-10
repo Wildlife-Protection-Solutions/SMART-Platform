@@ -121,7 +121,7 @@ public final class Informant extends UuidItem {
 	}
 	
     @Transient
-	public final String getDatastoreFolderPath() {
+	public static final String getDatastoreFolderPath() {
 		return SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator
 				+ IntelligencePlugIn.INTELLIGENCE_DIR + File.separator + DIR_NAME;
 	}

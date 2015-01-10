@@ -34,6 +34,10 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.util.SmartUtils;
+
 /**
  * Class responsible for saving/loading data to/from file.
  * 
@@ -43,6 +47,25 @@ import java.io.OutputStream;
 public class PersistentManager {
 
 	public static boolean toFile(File file, Object obj) {
+		if (file == null) {
+			return true;
+		}
+		if (!file.exists()) {
+			SmartUtils.createDirectory(file.getParentFile());
+			try {
+				file.createNewFile();
+			} catch (final IOException e) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						SmartPlugIn.displayLog(
+								null,
+								"Could not create file for informant data.",
+								e);
+					}});
+				return false;
+			}
+		}
 		try {
 			OutputStream fout = new FileOutputStream(file);
 			OutputStream buffer = new BufferedOutputStream(fout);
@@ -54,6 +77,7 @@ public class PersistentManager {
 				output.close();
 			}
 		} catch (IOException e) {
+			e.printStackTrace();
 			// TODO: handle exception
 		}
 		return false;

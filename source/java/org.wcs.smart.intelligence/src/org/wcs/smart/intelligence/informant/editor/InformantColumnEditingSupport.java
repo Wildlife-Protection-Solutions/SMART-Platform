@@ -25,7 +25,7 @@ import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.EditingSupport;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TextCellEditor;
-import org.wcs.smart.intelligence.informant.SaveInformantJob;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
 
@@ -71,14 +71,7 @@ public class InformantColumnEditingSupport extends EditingSupport {
 		if (element instanceof Informant) {
 			Informant i = (Informant) element;
 			i.set(key, value);
-			SaveInformantJob job = new SaveInformantJob(i);
-			job.schedule();
-			try {
-				job.join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			IntelligenceHibernateManager.saveInformant(i);
 		}
 		getViewer().refresh();
 	}
