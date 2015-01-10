@@ -38,7 +38,7 @@ public final class InformantAesManager {
 	private static final InformantAesManager manager = new InformantAesManager();
 	private static final AESTool aesTool = new AESTool();
 	
-	private transient char[] password = "superSecret".toCharArray(); //TODO
+	private transient char[] password = "superSecret1".toCharArray(); //TODO
 	private transient final Map<Informant, Map<InformantDataKey, Object>> data = new HashMap<Informant, Map<InformantDataKey,Object>>();
 	
 	private InformantAesManager() {

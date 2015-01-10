@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.informant.aes;
 
+import java.io.Serializable;
+
 /**
  * TODO Purpose of 
  * <p>
@@ -31,8 +33,10 @@ package org.wcs.smart.intelligence.informant.aes;
  * @author elitvin
  * @since 3.0.0
  */
-public class EncryptedData {
+public class EncryptedData implements Serializable {
 	
+	private static final long serialVersionUID = 1771476894573989245L;
+
 	private byte[] salt;
 	private byte[] iv;
 	private byte[] data;

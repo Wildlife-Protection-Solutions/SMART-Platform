@@ -36,7 +36,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
-import org.wcs.smart.intelligence.informant.InformantDataInterceptor;
+import org.wcs.smart.intelligence.informant.PersistentManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -362,8 +362,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static boolean saveInformant(Informant informant) {
-		Interceptor interceptor = new InformantDataInterceptor();
-		Session session = SmartHibernateManager.openSession(interceptor);
+		Session session = SmartHibernateManager.openSession();
 		try {
 			return saveInformant(informant, session);
 		} finally {
@@ -376,6 +375,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		try {
 			session.saveOrUpdate(informant);
 			session.getTransaction().commit();
+    		PersistentManager.toFile(informant.getDataFile(), informant.getEncryptedData());
 			return true;
 		} catch (Exception ex) {
 			session.getTransaction().rollback();

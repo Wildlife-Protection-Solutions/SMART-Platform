@@ -76,6 +76,9 @@ public final class AESTool {
     		return null;
     	}
     	byte[] bytes = decryptBytes(encryptedData, password);
+    	if (bytes == null) {
+    		return null;
+    	}
     	ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
     	ObjectInput in = null;
     	try {
