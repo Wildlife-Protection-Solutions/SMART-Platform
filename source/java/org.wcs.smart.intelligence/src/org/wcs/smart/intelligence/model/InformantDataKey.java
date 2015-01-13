@@ -30,6 +30,12 @@ package org.wcs.smart.intelligence.model;
 public enum InformantDataKey {
 	FIRST_NAME,
 	LAST_NAME,
+	START_DATE,
+	PHONE,
+	DESCRIPTION,
+	ROLE,
 	ADDRESS,
-	DESCRIPTION
+	COUNTRY,
+	CITY,
+	NOTES
 }

@@ -27,11 +27,16 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
@@ -45,6 +50,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
@@ -66,9 +72,15 @@ public class InformantDataEditor extends EditorPart {
 	public enum InfromantColumn {
 		COL_FIRST_NAME ("First Name", InformantDataKey.FIRST_NAME),
 		COL_LAST_NAME ("Last Name", InformantDataKey.LAST_NAME),
+		COL_START_DATE ("Start Date", InformantDataKey.START_DATE),
+		COL_PHONE ("Phone Number", InformantDataKey.PHONE),
+		COL_DESCRIPTION ("Description", InformantDataKey.DESCRIPTION),
+		COL_ROLE ("Title/Role", InformantDataKey.ROLE),
 		COL_ADDRESS ("Address", InformantDataKey.ADDRESS),
-		COL_DESCRIPTION ("Description", InformantDataKey.DESCRIPTION);
-
+		COL_CITY ("City", InformantDataKey.CITY),
+		COL_COUNTRY ("Country", InformantDataKey.COUNTRY),
+		COL_NOTES ("Notes", InformantDataKey.NOTES);
+		
 		private static final int DEFAULT_COLUMN_WIDTH = 80;
 		
 		private String guiName;
@@ -124,6 +136,35 @@ public class InformantDataEditor extends EditorPart {
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		main.setLayout(layout);
+
+		Composite upperCmp = toolkit.createComposite(main);
+		layout = new GridLayout(3, false);
+		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
+		upperCmp.setLayout(layout);
+		
+		Button btnSetPwd = toolkit.createButton(upperCmp, "Set password", SWT.PUSH);
+		btnSetPwd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performSetPassword();
+			}
+		});
+
+		Button btnClearPwd = toolkit.createButton(upperCmp, "Clear password", SWT.PUSH);
+		btnClearPwd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performClearPassword();
+			}
+		});
+
+		Button btnEdit = toolkit.createButton(upperCmp, "Edit", SWT.PUSH);
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performEdit();
+			}
+		});
 		
 		viewer = new TableViewer(main, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		toolkit.paintBordersFor(viewer.getTable());
@@ -137,6 +178,30 @@ public class InformantDataEditor extends EditorPart {
 		viewer.setInput(informantList);
 	}
 
+	protected void performSetPassword() {
+		PasswordInputDialog dialog = new PasswordInputDialog(getSite().getShell());
+		if (dialog.open() == Window.OK) {
+			InformantAesManager.getInstance().setPassword(dialog.getPassword());
+			viewer.refresh();
+		}
+	}
+
+	protected void performClearPassword() {
+		InformantAesManager.getInstance().clear();
+		viewer.refresh();
+	}
+
+	protected void performEdit() {
+		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+		if (selection != null && !selection.isEmpty()) {
+			Informant i = (Informant) selection.getFirstElement();
+			InformantEditor dialog = new InformantEditor(getSite().getShell(), i);
+			if (dialog.open() == Window.OK) {
+				viewer.refresh();
+			}
+		}
+	}
+	
 	private void addColumns(TableViewer v) {
 		//public data
 		TableViewerColumn idColumn = new TableViewerColumn(v, SWT.NONE);

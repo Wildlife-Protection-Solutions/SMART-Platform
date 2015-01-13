@@ -21,9 +21,20 @@
  */
 package org.wcs.smart.intelligence.informant.aes;
 
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
 
@@ -38,7 +49,8 @@ public final class InformantAesManager {
 	private static final InformantAesManager manager = new InformantAesManager();
 	private static final AESTool aesTool = new AESTool();
 	
-	private transient char[] password = "superSecret1".toCharArray(); //TODO
+	private transient char[] password = null;
+	private transient boolean isSetAllowed = true;
 	private transient final Map<Informant, Map<InformantDataKey, Object>> data = new HashMap<Informant, Map<InformantDataKey,Object>>();
 	
 	private InformantAesManager() {
@@ -48,32 +60,87 @@ public final class InformantAesManager {
 	public static final InformantAesManager getInstance() {
 		return manager;
 	}
+	
+	public final void setPassword(char[] password) {
+		clear();
+		this.password = password;
+	}
+
+	public final boolean isSetAllowed() {
+		return isSetAllowed;
+	}
 
 	public final void set(Informant informant, InformantDataKey key, Object value) {
 		if (data == null)
 			return;
+		if (password == null || !isSetAllowed) {
+			return;
+		}
 		Map<InformantDataKey, Object> info = data.get(informant);
 		if (info == null) {
 			//TODO: try decrypt first
 			info = new HashMap<InformantDataKey, Object>();
 			data.put(informant, info);
 		}
-		info.put(key, value);
-		EncryptedData encryptedData = aesTool.encrypt(info, password);
-		informant.setEncryptedData(encryptedData);
+		try {
+			EncryptedData encryptedData = aesTool.encrypt(info, password);
+			informant.setEncryptedData(encryptedData);
+			info.put(key, value);
+		} catch (InvalidKeyException e) {
+			IntelligencePlugIn.log("InvalidKeyException encrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchAlgorithmException e) {
+			IntelligencePlugIn.log("NoSuchAlgorithmException encrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidKeySpecException e) {
+			IntelligencePlugIn.log("InvalidKeySpecException encrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchPaddingException e) {
+			IntelligencePlugIn.log("NoSuchPaddingException encrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidParameterSpecException e) {
+			IntelligencePlugIn.log("InvalidParameterSpecException encrypting informant ", null); //$NON-NLS-1$
+		} catch (IllegalBlockSizeException e) {
+			IntelligencePlugIn.log("IllegalBlockSizeException encrypting informant ", null); //$NON-NLS-1$
+		} catch (BadPaddingException e) {
+			IntelligencePlugIn.log("BadPaddingException encrypting informant ", null); //$NON-NLS-1$
+		} catch (IOException e) {
+			IntelligencePlugIn.log("IOException encrypting informant ", null); //$NON-NLS-1$
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	public final Object get(Informant informant, InformantDataKey key) {
 		if (data == null)
 			return null; //data should never be null
+		if (password == null) {
+			return "<password protected>";
+		}
 		Map<InformantDataKey, Object> info = data.get(informant);
 		if (info == null) {
 			//TODO: ClassCast????
-			Object obj = aesTool.decrypt(informant.getEncryptedData(), password);
-			info = (Map<InformantDataKey, Object>) obj;
-			data.put(informant, info);
+			try {
+				Object obj = aesTool.decrypt(informant.getEncryptedData(), password);
+				info = (Map<InformantDataKey, Object>) obj;
+				data.put(informant, info);
+				isSetAllowed = true;
+			} catch (InvalidKeyException e) {
+				IntelligencePlugIn.log("InvalidKeyException decrypting informant ", null); //$NON-NLS-1$
+			} catch (NoSuchAlgorithmException e) {
+				IntelligencePlugIn.log("NoSuchAlgorithmException decrypting informant ", null); //$NON-NLS-1$
+			} catch (InvalidKeySpecException e) {
+				IntelligencePlugIn.log("InvalidKeySpecException decrypting informant ", null); //$NON-NLS-1$
+			} catch (NoSuchPaddingException e) {
+				IntelligencePlugIn.log("NoSuchPaddingException decrypting informant ", null); //$NON-NLS-1$
+			} catch (InvalidAlgorithmParameterException e) {
+				IntelligencePlugIn.log("InvalidAlgorithmParameterException decrypting informant ", null); //$NON-NLS-1$
+			} catch (IllegalBlockSizeException e) {
+				IntelligencePlugIn.log("IllegalBlockSizeException decrypting informant ", null); //$NON-NLS-1$
+			} catch (BadPaddingException e) {
+				IntelligencePlugIn.log("BadPaddingException decrypting informant ", null); //$NON-NLS-1$
+			} catch (IOException e) {
+				IntelligencePlugIn.log("IOException decrypting informant ", null); //$NON-NLS-1$
+			} catch (ClassNotFoundException e) {
+				IntelligencePlugIn.log("ClassNotFoundException decrypting informant ", null); //$NON-NLS-1$
+			}
 		}
-		return info != null ? info.get(key) : null;
+		return info != null ? info.get(key) : "<wrong password>";
 	}
 	
 	public final void clear() {
@@ -82,6 +149,8 @@ public final class InformantAesManager {
 				password[i] = '?';
 			}
 		}
+		password = null;
+		isSetAllowed = false;
 		if (data != null) {
 			//TODO: is there a safer way to remove objects from memory
 			data.clear();
