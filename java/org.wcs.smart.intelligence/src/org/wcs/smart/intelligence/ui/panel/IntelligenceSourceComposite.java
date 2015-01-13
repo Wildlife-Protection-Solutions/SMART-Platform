@@ -221,6 +221,12 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         informantViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
         informantViewer.setContentProvider(ArrayContentProvider.getInstance());
         informantViewer.setLabelProvider(new InformantIdLabelProvider());
+        informantViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+ 			@Override
+ 			public void selectionChanged(SelectionChangedEvent event) {
+ 				fireInputChangeListeners();				
+ 			}
+ 		});
  
         informantViewer.setInput(informantList);
         
