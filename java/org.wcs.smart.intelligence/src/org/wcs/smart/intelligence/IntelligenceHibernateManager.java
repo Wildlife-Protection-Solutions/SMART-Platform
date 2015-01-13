@@ -379,7 +379,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 			return true;
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			IntelligencePlugIn.displayLog("Unable to save informant" + "\n"+ ex.getLocalizedMessage(), ex);
+			IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_InformantSaveError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return false;
 		}
 	}

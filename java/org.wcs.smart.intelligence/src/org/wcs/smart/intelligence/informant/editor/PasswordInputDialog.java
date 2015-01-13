@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.intelligence.internal.Messages;
 
 /**
  * Dialog to input user password.
@@ -64,12 +65,12 @@ public class PasswordInputDialog extends Dialog {
 		
 		Label lblPassword = new Label(composite, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-		lblPassword.setText("Password:");
+		lblPassword.setText(Messages.PasswordInputDialog_Password);
 		
 		txtPassword = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 
-		super.getShell().setText("Enter password");
+		super.getShell().setText(Messages.PasswordInputDialog_Title);
 		return parent;
 	}
 	

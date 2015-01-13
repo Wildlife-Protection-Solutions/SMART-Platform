@@ -36,6 +36,7 @@ import java.io.OutputStream;
 
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -60,7 +61,7 @@ public class PersistentManager {
 					public void run() {
 						SmartPlugIn.displayLog(
 								null,
-								"Could not create file for informant data.",
+								Messages.PersistentManager_FileCreateError,
 								e);
 					}});
 				return false;
