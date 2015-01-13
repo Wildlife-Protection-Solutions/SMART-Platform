@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Ecological Records Query Plug-in
 Bundle-SymbolicName: org.wcs.smart.er.query;singleton:=true
-Bundle-Version: 3.1.0
+Bundle-Version: 3.1.1
 Bundle-Activator: org.wcs.smart.er.query.ERQueryPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
