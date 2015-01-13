@@ -24,12 +24,10 @@ package org.wcs.smart.intelligence.ui.handlers;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.handlers.HandlerUtil;
+import org.wcs.smart.intelligence.informant.InformantEditorInput;
 import org.wcs.smart.intelligence.informant.editor.InformantDataEditor;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
@@ -60,49 +58,6 @@ public class ShowInformantDataHandler extends AbstractHandler {
 			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
 		return null;
-	}
-
-	private class InformantEditorInput implements IEditorInput {
-		@SuppressWarnings("rawtypes")
-		@Override
-		public Object getAdapter(Class adapter) {
-			return null;
-		}
-
-		@Override
-		public boolean exists() {
-			return false;
-		}
-
-		@Override
-		public ImageDescriptor getImageDescriptor() {
-			return null;
-		}
-
-		@Override
-		public String getName() {
-			return "Name";
-		}
-
-		@Override
-		public IPersistableElement getPersistable() {
-			return null;
-		}
-
-		@Override
-		public String getToolTipText() {
-			return "Tooltip";
-		}
-		
-		@Override
-		public int hashCode() {
-			return 0;
-		}
-		
-		@Override
-		public boolean equals(Object obj) {
-			return obj instanceof InformantEditorInput;
-		}
 	}
 	
 }

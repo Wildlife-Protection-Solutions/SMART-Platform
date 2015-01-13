@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.Window;
@@ -240,6 +241,12 @@ public class InformantDataEditor extends EditorPart {
 			viewerColumn.getColumn().setText(column.getGuiName());
 			viewerColumn.getColumn().setWidth(column.getWidth());
 			viewerColumn.setLabelProvider(new InformantColumnLabelProvider(column.getKey()));
+		}
+	}
+
+	public void setSelection(Informant i) {
+		if (viewer != null && !viewer.getTable().isDisposed()) {
+			viewer.setSelection(new StructuredSelection(i));
 		}
 	}
 

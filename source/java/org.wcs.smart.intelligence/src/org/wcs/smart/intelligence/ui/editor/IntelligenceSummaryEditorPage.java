@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -59,10 +60,14 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.informant.InformantEditorInput;
+import org.wcs.smart.intelligence.informant.editor.InformantDataEditor;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
 import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -198,7 +203,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		lnkInformantID.addHyperlinkListener(new HyperlinkAdapter() {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
-				//TODO:
+				openInformant(parentEditor.getIntelligence().getInformant());
 			}
 		});
 		toolkit.createLabel(content, ""); //$NON-NLS-1$
@@ -359,6 +364,22 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		}
 	}
 
+	protected void openInformant(Informant i) {
+		if (i == null) {
+			return;
+		}
+		try {
+			IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().openEditor(new InformantEditorInput(), InformantDataEditor.ID);
+			if (editorPart instanceof InformantDataEditor) {
+				InformantDataEditor editor = (InformantDataEditor) editorPart;
+				editor.setSelection(i);
+			}
+		} catch (Throwable t) {
+			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
+		}
+	}
+	
 	@Override
 	public void setFocus() {
 		txtDateReceived.setFocus();
