@@ -64,22 +64,22 @@ import org.wcs.smart.intelligence.model.InformantDataKey;
 public class InformantDataEditor extends EditorPart {
 	
 	/**
-	 * The supported patrol types.
+	 * Secured informant columns
 	 * 
 	 * @author elitvin
-	 * @since 1.0.0
+	 * @since 3.2.0
 	 */
 	public enum InfromantColumn {
-		COL_FIRST_NAME ("First Name", InformantDataKey.FIRST_NAME),
-		COL_LAST_NAME ("Last Name", InformantDataKey.LAST_NAME),
-		COL_START_DATE ("Start Date", InformantDataKey.START_DATE),
-		COL_PHONE ("Phone Number", InformantDataKey.PHONE),
-		COL_DESCRIPTION ("Description", InformantDataKey.DESCRIPTION),
-		COL_ROLE ("Title/Role", InformantDataKey.ROLE),
-		COL_ADDRESS ("Address", InformantDataKey.ADDRESS),
-		COL_CITY ("City", InformantDataKey.CITY),
-		COL_COUNTRY ("Country", InformantDataKey.COUNTRY),
-		COL_NOTES ("Notes", InformantDataKey.NOTES);
+		COL_FIRST_NAME (Messages.InfromantColumn_FirstName, InformantDataKey.FIRST_NAME),
+		COL_LAST_NAME (Messages.InfromantColumn_LastName, InformantDataKey.LAST_NAME),
+		COL_START_DATE (Messages.InfromantColumn_StartDate, InformantDataKey.START_DATE),
+		COL_PHONE (Messages.InfromantColumn_Phone, InformantDataKey.PHONE),
+		COL_DESCRIPTION (Messages.InfromantColumn_Description, InformantDataKey.DESCRIPTION),
+		COL_ROLE (Messages.InfromantColumn_Role, InformantDataKey.ROLE),
+		COL_ADDRESS (Messages.InfromantColumn_Address, InformantDataKey.ADDRESS),
+		COL_CITY (Messages.InfromantColumn_City, InformantDataKey.CITY),
+		COL_COUNTRY (Messages.InfromantColumn_Country, InformantDataKey.COUNTRY),
+		COL_NOTES (Messages.InfromantColumn_Notes, InformantDataKey.NOTES);
 		
 		private static final int DEFAULT_COLUMN_WIDTH = 80;
 		
@@ -128,7 +128,7 @@ public class InformantDataEditor extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		Form form = toolkit.createForm(parent);
-		form.setText("Informant Data");
+		form.setText(Messages.InformantDataEditor_Title);
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
 		
@@ -142,7 +142,7 @@ public class InformantDataEditor extends EditorPart {
 		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		upperCmp.setLayout(layout);
 		
-		Button btnSetPwd = toolkit.createButton(upperCmp, "Set password", SWT.PUSH);
+		Button btnSetPwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
 		btnSetPwd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -150,7 +150,7 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 
-		Button btnClearPwd = toolkit.createButton(upperCmp, "Clear password", SWT.PUSH);
+		Button btnClearPwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_ClearPassword, SWT.PUSH);
 		btnClearPwd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -158,7 +158,7 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 
-		Button btnEdit = toolkit.createButton(upperCmp, "Edit", SWT.PUSH);
+		Button btnEdit = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -205,7 +205,7 @@ public class InformantDataEditor extends EditorPart {
 	private void addColumns(TableViewer v) {
 		//public data
 		TableViewerColumn idColumn = new TableViewerColumn(v, SWT.NONE);
-		idColumn.getColumn().setText("ID");
+		idColumn.getColumn().setText(Messages.InfromantColumn_ID);
 		idColumn.getColumn().setWidth(80);
 		idColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -218,13 +218,13 @@ public class InformantDataEditor extends EditorPart {
 		});
 
 		TableViewerColumn activeColumn = new TableViewerColumn(v, SWT.NONE);
-		activeColumn.getColumn().setText("Active");
+		activeColumn.getColumn().setText(Messages.InfromantColumn_Active);
 		activeColumn.getColumn().setWidth(50);
 		activeColumn.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
 				if (element instanceof Informant) {
-					return ((Informant)element).getIsActive() ? "Yes" : "No";
+					return ((Informant)element).getIsActive() ? Messages.InfromantColumn_Active_Yes : Messages.InfromantColumn_Active_No;
 				}
 				return super.getText(element);
 			}

@@ -132,6 +132,46 @@ public class Messages extends NLS {
 
 	public static String ImportIntelligenceTemplateHandler_ReportDesignFile;
 
+	public static String InformantDataEditor_Button_ClearPassword;
+
+	public static String InformantDataEditor_Button_Edit;
+
+	public static String InformantDataEditor_Button_SetPassword;
+
+	public static String InformantDataEditor_Title;
+
+	public static String InformantEditor_Message;
+
+	public static String InformantEditor_Title;
+
+	public static String InfromantColumn_Active;
+
+	public static String InfromantColumn_Active_No;
+
+	public static String InfromantColumn_Active_Yes;
+
+	public static String InfromantColumn_Address;
+
+	public static String InfromantColumn_City;
+
+	public static String InfromantColumn_Country;
+
+	public static String InfromantColumn_Description;
+
+	public static String InfromantColumn_FirstName;
+
+	public static String InfromantColumn_ID;
+
+	public static String InfromantColumn_LastName;
+
+	public static String InfromantColumn_Notes;
+
+	public static String InfromantColumn_Phone;
+
+	public static String InfromantColumn_Role;
+
+	public static String InfromantColumn_StartDate;
+
 	public static String Intelligence_Creator_Label;
 
 	public static String IntelligenceAttachments_Attachments_Label;
@@ -251,6 +291,8 @@ public class Messages extends NLS {
 	public static String IntelligenceHibernateManager_DeleteIntelligence_Error;
 
 	public static String IntelligenceHibernateManager_Error_CouldNotDeleteFilestore;
+
+	public static String IntelligenceHibernateManager_InformantSaveError;
 
 	public static String IntelligenceHibernateManager_Intelligence_NotFound_Error;
 
@@ -388,6 +430,10 @@ public class Messages extends NLS {
 
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
+	public static String PasswordInputDialog_Password;
+
+	public static String PasswordInputDialog_Title;
+
 	public static String PatrolDeleteHandler_DeleteWarningMessage;
 
 	public static String PatrolDeleteHandler_DeleteWarningTitle;
@@ -407,6 +453,8 @@ public class Messages extends NLS {
 	public static String PatrolMotivationComposite_Selector_Label;
 
 	public static String PatrolMotivationComposite_Selector_Selected_Label;
+
+	public static String PersistentManager_FileCreateError;
 
 	public static String RemoveIntelligenceJob_Error;
 

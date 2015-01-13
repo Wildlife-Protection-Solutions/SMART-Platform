@@ -38,17 +38,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.informant.editor.InformantDataEditor.InfromantColumn;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
-import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Editor for particular informant record.
+ * 
  * @author elitvin
  * @since 3.2.0
  */
@@ -62,7 +58,7 @@ public final class InformantEditor extends AbstractPropertyJHeaderDialog {
 	private Map<InfromantColumn, Text> col2Text;
 	
 	protected InformantEditor(Shell parent, Informant informant) {
-		super(parent, ""); //$NON-NLS-1$
+		super(parent, Messages.InformantEditor_Title);
 		this.informant = informant;
 	}
 
@@ -119,8 +115,8 @@ public final class InformantEditor extends AbstractPropertyJHeaderDialog {
 		}
 		
 		setChangesMade(false);
-		setTitle("Edit Informant");
-		setMessage("Edit informant related informantion.");
+		setTitle(Messages.InformantEditor_Title);
+		setMessage(Messages.InformantEditor_Message);
 		
 		return main;
 	}
