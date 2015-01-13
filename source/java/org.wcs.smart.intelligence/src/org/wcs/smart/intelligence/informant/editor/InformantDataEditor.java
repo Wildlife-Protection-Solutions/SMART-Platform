@@ -236,7 +236,6 @@ public class InformantDataEditor extends EditorPart {
 			viewerColumn.getColumn().setText(column.getGuiName());
 			viewerColumn.getColumn().setWidth(column.getWidth());
 			viewerColumn.setLabelProvider(new InformantColumnLabelProvider(column.getKey()));
-			viewerColumn.setEditingSupport(new InformantColumnEditingSupport(v, column.getKey()));
 		}
 	}
 
