@@ -136,11 +136,13 @@ public class InformantDataEditor extends EditorPart {
 		layout = new GridLayout();
 		layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		main.setLayout(layout);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite upperCmp = toolkit.createComposite(main);
 		layout = new GridLayout(3, false);
 		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		upperCmp.setLayout(layout);
+		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Button btnSetPwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
 		btnSetPwd.addSelectionListener(new SelectionAdapter() {
@@ -172,8 +174,10 @@ public class InformantDataEditor extends EditorPart {
 		viewer.getTable().setLinesVisible(true);
 		viewer.setContentProvider(ArrayContentProvider.getInstance());
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gd.heightHint = 300;
 		viewer.getTable().setLayoutData(gd);
 
+		viewer.setItemCount(0);
 		addColumns(viewer);
 		viewer.setInput(informantList);
 	}
