@@ -43,7 +43,7 @@ public final class AESTool {
         return new SecretKeySpec(secretKey.getEncoded(), "AES"); //$NON-NLS-1$
     }
 
-    public final EncryptedData encrypt(Object data, char[] password) {
+    public final EncryptedData encrypt(Object data, char[] password) throws IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException {
     	ByteArrayOutputStream bos = new ByteArrayOutputStream();
     	ObjectOutput out = null;
     	try {
@@ -51,9 +51,6 @@ public final class AESTool {
     		out.writeObject(data);
     		byte[] bytes = bos.toByteArray();
     		return encrypt(bytes, password);
-    	} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} finally {
     		try {
     			if (out != null) {
@@ -68,10 +65,9 @@ public final class AESTool {
     			// ignore close exception
     		}
     	}
-		return null;
     }
 
-    public final Object decrypt(EncryptedData encryptedData, char[] password) {
+    public final Object decrypt(EncryptedData encryptedData, char[] password) throws InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, IOException, ClassNotFoundException {
     	if (encryptedData == null || encryptedData.isEmpty()) {
     		return null;
     	}
@@ -85,12 +81,6 @@ public final class AESTool {
     		in = new ObjectInputStream(bis);
     		Object o = in.readObject(); 
     		return o;
-    	} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} finally {
     		try {
     			bis.close();
@@ -105,75 +95,27 @@ public final class AESTool {
     			// ignore close exception
     		}
     	}
-		return null;    	
     }
     
-    private final EncryptedData encrypt(byte[] data, char[] password) {
-		try {
-	    	byte[] salt = generateSalt(); 
-	    	SecretKeySpec secret = createKeySpec(password, salt);
-	        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //$NON-NLS-1$
-	        cipher.init(Cipher.ENCRYPT_MODE, secret);
-	        AlgorithmParameters params = cipher.getParameters();
-	        byte[] ivBytes = params.getParameterSpec(IvParameterSpec.class).getIV();
-	        byte[] encryptedBytes = cipher.doFinal(data);
-	        return new EncryptedData(salt, ivBytes, encryptedBytes);
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidKeySpecException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidParameterSpecException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalBlockSizeException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (BadPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-    	
+    private final EncryptedData encrypt(byte[] data, char[] password) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException {
+    	byte[] salt = generateSalt(); 
+    	SecretKeySpec secret = createKeySpec(password, salt);
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //$NON-NLS-1$
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        AlgorithmParameters params = cipher.getParameters();
+        byte[] ivBytes = params.getParameterSpec(IvParameterSpec.class).getIV();
+        byte[] encryptedBytes = cipher.doFinal(data);
+        return new EncryptedData(salt, ivBytes, encryptedBytes);
     }
 
-    private final byte[] decryptBytes(EncryptedData encryptedData, char[] password) {
-        try {
-        	SecretKeySpec secret = createKeySpec(password, encryptedData.getSalt());
-            // Decrypt the message
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //$NON-NLS-1$
-            cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(encryptedData.getIv()));
+    private final byte[] decryptBytes(EncryptedData encryptedData, char[] password) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    	SecretKeySpec secret = createKeySpec(password, encryptedData.getSalt());
+        // Decrypt the message
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding"); //$NON-NLS-1$
+        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(encryptedData.getIv()));
 
-            byte[] decryptedTextBytes = cipher.doFinal(encryptedData.getData());
-        	return decryptedTextBytes;
-        } catch (IllegalBlockSizeException e) {
-        	e.printStackTrace();
-        } catch (BadPaddingException e) {
-        	e.printStackTrace();
-        } catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidKeySpecException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (NoSuchPaddingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidAlgorithmParameterException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-        return null;
+        byte[] decryptedTextBytes = cipher.doFinal(encryptedData.getData());
+    	return decryptedTextBytes;
     }
 
     private final byte[] generateSalt() {
