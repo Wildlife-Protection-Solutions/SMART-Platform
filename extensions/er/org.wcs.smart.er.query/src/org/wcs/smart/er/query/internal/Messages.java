@@ -6,6 +6,9 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
 	public static String AddERQueryJob_InstallError;
 	public static String AddERQueryJob_JobName;
+	public static String CmAttributeListDropItem_loadModelAttributeJobName;
+	public static String CmCategoryAttributeFilter_invalidCatAttribute;
+	public static String ConfigurableModelTreeNode_ConfigurableModelLabel;
 	public static String DerbyGridEngine_CalcValueProgresss;
 	public static String DerbyGridEngine_CreateObsTableProgress;
 	public static String DerbyGridEngine_ProgressFilters;
@@ -51,6 +54,7 @@ public class Messages extends NLS {
 	public static String FilterContentProvider_SuLabel;
 	public static String FilterContentProvider_TrackSamplingUnits;
 	public static String FilterContentProvider_TrackTypeNode;
+	public static String FilterItemPanel_RefreshFilterTreeJobName;
 	public static String FilterProcessor_CannotFilterTrackAndObs;
 	public static String FilterProcessor_DateFilterNotSupported;
 	public static String FilterProcessor_progress1;
@@ -61,6 +65,7 @@ public class Messages extends NLS {
 	public static String FilterProcessor_ProgressDataTablePopulate;
 	public static String FilterProcessor_ProgressMissionFilters;
 	public static String FilterProcessor_ProgressSuFilters;
+	public static String FiltersConfigurableModelContentProvider_LoadingText;
 	public static String GriddedDefinitionPanel_AllLabel;
 	public static String GriddedDefinitionPanel_Label;
 	public static String GriddedValueItemPanel_ButtonText;
@@ -160,6 +165,9 @@ public class Messages extends NLS {
 	public static String SummaryDefinitionPanel_Name;
 	public static String SummaryDefinitionPanel_SurveyDesignLabel;
 	public static String SummaryDefinitionPanel_ValueRequiredError;
+	public static String SurveyDataModelTreeNode_CompleteDataModelLabel;
+	public static String SurveyDataModelTreeNode_ConfigurableModelLabel;
+	public static String SurveyDataModelTreeNode_NodeName;
 	public static String SurveyDataSourceFactory_Description;
 	public static String SurveyDataSourceFactory_DisplayName;
 	public static String SurveyDataSourceFactory_QueryUuidParameterName;
