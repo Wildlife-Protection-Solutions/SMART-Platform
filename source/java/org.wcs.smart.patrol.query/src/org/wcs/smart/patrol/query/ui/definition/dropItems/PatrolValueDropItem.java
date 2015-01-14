@@ -83,16 +83,5 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	@Override
 	protected void initializeValueData(Object data) {
 	}
-	
-	@Override
-	public boolean equals(Object other){
-		return other instanceof PatrolValueDropItem &&
-				((PatrolValueDropItem)other).item.equals(this.item);
-	}
-	
-	@Override
-	public int hashCode(){
-		return this.item.hashCode();
-	}
 
 }
