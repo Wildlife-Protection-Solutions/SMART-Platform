@@ -36,6 +36,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.query.filter.CmCategoryAttributeFilter;
 import org.wcs.smart.er.query.filter.MissionEndDateField;
 import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.filter.MissionMemberFilter;
@@ -109,6 +110,9 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return asSql((MissionMemberFilter)filter, engine);
 		}else if (filter instanceof TrackTypeFilter){
 			return asSql((TrackTypeFilter) filter, engine);
+		}else if (filter instanceof CmCategoryAttributeFilter){
+			CmCategoryAttributeFilter afilter = (CmCategoryAttributeFilter)filter;
+			return super.asSql(new CategoryAttributeFilter(afilter.getCategoryFilter(), afilter.getAttributeFilter()), engine);
 		}else{
 			return super.toSql(filter, engine); 
 		}
