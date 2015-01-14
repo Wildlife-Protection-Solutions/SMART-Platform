@@ -122,8 +122,15 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 		
+		IWizardPage start = getStartingPage();
+		
 		if (getStartingPage() instanceof MissionCompositeWizardPage){
 			((MissionCompositeWizardPage)getStartingPage()).initPage(newMission, parentDesign, session);
+		}
+		if (getPages()[0] != start){
+			if (getPages()[0] instanceof MissionCompositeWizardPage){
+				((MissionCompositeWizardPage)getPages()[0]).initPage(newMission, parentDesign, session);
+			}
 		}
 		
 		//configure listeners

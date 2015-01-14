@@ -252,12 +252,13 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 		int maxWidth = 0;
 		
 		for (int i = 0; i < items.size(); i++) {
-			Point pnt = items.get(i).getWidget().computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			DropItem di = items.get(i);
+			Point pnt = di.getWidget().computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			int height = Math.max(30, pnt.y);
 			maxWidth = Math.max(maxWidth, pnt.x);			
-			items.get(i).getWidget().setBounds(0, curry, pnt.x, height);
-			if (items.get(i).getWidget() != null) {
-				items.get(i).getWidget().layout();
+			di.getWidget().setBounds(0, curry, pnt.x, height);
+			if (di.getWidget() != null) {
+				di.getWidget().layout();
 			}
 			curry += height;
 		}
@@ -415,7 +416,10 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 					moveElements(event.x, event.y);
 					//remove proxy and put back the drop item
 					int i = items.indexOf(proxy);
-					items.add(i, dragItem);
+					if (!items.contains(dragItem)){
+						items.add(i, dragItem);	
+					}
+					
 					dragItem.getWidget().setVisible(true);
 				}
 				items.remove(proxy);
@@ -436,7 +440,7 @@ public abstract class ListDefinitionPanel implements IDefinitionPanel{
 					
 					if (r.contains(x, y)) {
 						target = children;
-						before = x < p.x + (childBounds.width / 2.0);
+						before = y < p.y + (childBounds.height / 2.0);
 						break;
 					}
 				}

@@ -31,8 +31,8 @@ package org.wcs.smart.query.common.ui.itempanel;
  */
 public class WrappedTreeNode {
 
-	IItemTreeNode parent;
-	Object item;
+	private IItemTreeNode parent;
+	private Object item;
 
 	public WrappedTreeNode(IItemTreeNode parent, Object item) {
 		this.parent = parent;
@@ -48,6 +48,14 @@ public class WrappedTreeNode {
 
 	public int hashCode() {
 		return item.hashCode();
+	}
+	
+	public Object getItem(){
+		return this.item;
+	}
+	
+	public IItemTreeNode getParent(){
+		return this.parent;
 	}
 }
 

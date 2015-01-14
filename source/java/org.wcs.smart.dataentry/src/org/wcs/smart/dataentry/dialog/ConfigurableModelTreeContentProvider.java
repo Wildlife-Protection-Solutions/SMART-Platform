@@ -84,7 +84,7 @@ public class ConfigurableModelTreeContentProvider implements ITreeContentProvide
 		}else if (inputElement instanceof String){
 			return new String[]{message};
 		}
-		return new Object[]{};
+		return showRoot ? new Object[]{rootNode} : getChildren(rootNode.model);
 	}
 
 	@Override

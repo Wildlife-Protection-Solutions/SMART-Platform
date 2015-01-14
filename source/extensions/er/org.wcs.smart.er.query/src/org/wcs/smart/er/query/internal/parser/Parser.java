@@ -36,6 +36,7 @@ public class Parser implements ParserConstants {
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CM_CAT_ATT_LIST_KEY:
     case CAT_ATT_TREE_KEY:
     case CAT_ATT_DATE_KEY:
     case DM_KEY:
@@ -79,6 +80,7 @@ public class Parser implements ParserConstants {
       case CAT_ATT_VALUE_KEY:
       case CAT_ATT_BOOL_KEY:
       case CAT_ATT_LIST_KEY:
+      case CM_CAT_ATT_LIST_KEY:
       case CAT_ATT_TREE_KEY:
       case CAT_ATT_DATE_KEY:
       case DM_KEY:
@@ -139,6 +141,7 @@ public class Parser implements ParserConstants {
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CM_CAT_ATT_LIST_KEY:
     case CAT_ATT_TREE_KEY:
     case CAT_ATT_DATE_KEY:
     case DM_KEY:
@@ -180,6 +183,7 @@ public class Parser implements ParserConstants {
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CM_CAT_ATT_LIST_KEY:
     case CAT_ATT_TREE_KEY:
     case CAT_ATT_DATE_KEY:
     case DM_KEY:
@@ -516,6 +520,7 @@ public class Parser implements ParserConstants {
     case CAT_ATT_VALUE_KEY:
     case CAT_ATT_BOOL_KEY:
     case CAT_ATT_LIST_KEY:
+    case CM_CAT_ATT_LIST_KEY:
     case CAT_ATT_TREE_KEY:
     case CAT_ATT_DATE_KEY:
     case SURVEY_ID_KEY:
@@ -679,6 +684,15 @@ public class Parser implements ParserConstants {
       jj_consume_token(DM_KEY);
                              value = token.image;
                 filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
+      break;
+    case CM_CAT_ATT_LIST_KEY:
+      jj_consume_token(CM_CAT_ATT_LIST_KEY);
+                                         key = token.image;
+      jj_consume_token(EQUAL);
+                            op = Operator.parseOperator(token.image);
+      jj_consume_token(DM_KEY);
+                             value = token.image;
+                filter = CmCategoryAttributeFilter.createListItemFilter(key,op,value);
       break;
     case ATT_TREE_KEY:
       jj_consume_token(ATT_TREE_KEY);
@@ -988,13 +1002,13 @@ public class Parser implements ParserConstants {
       jj_la1_0 = new int[] {0x40100,0x40100,0x8000000,0x40100,0x40100,0x0,0x0,0x400,0x100000,0x0,0x0,0x400,0x0,0x280,0x100,0x40000,0x0,0x0,0x0,0x0,0x0,0x3f800,0x3800000,0x4000100,0x280,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0xdff8bffe,0xdff8bffe,0x0,0xdff8bffe,0xdff8bffe,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xdff83ffe,0x410,0x1000208,0xdff83ffc,0x2080,0xd0f80104,0x0,0x0,0x0,0x0,};
+      jj_la1_1 = new int[] {0xbff17ffe,0xbff17ffe,0x0,0xbff17ffe,0xbff17ffe,0x10000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xbff07ffe,0x410,0x2000208,0xbff07ffc,0x4080,0xa1f00104,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x97,0x97,0x0,0x97,0x97,0x0,0xfe001f00,0x0,0x0,0xfe001f00,0x1ffc000,0x0,0x1ffc000,0x0,0x0,0x97,0x0,0x1,0x87,0x0,0x84,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x12f,0x12f,0x0,0x12f,0x12f,0x0,0xfc003e00,0x0,0x0,0xfc003e00,0x3ff8000,0x0,0x3ff8000,0x0,0x0,0x12f,0x0,0x2,0x10f,0x0,0x109,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_3() {
-      jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x3,0x0,0x0,0x3,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
+      jj_la1_3 = new int[] {0x0,0x0,0x0,0x0,0x0,0x0,0x7,0x0,0x0,0x7,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1111,7 +1125,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[99];
+    boolean[] la1tokens = new boolean[100];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1134,7 +1148,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 99; i++) {
+    for (int i = 0; i < 100; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;

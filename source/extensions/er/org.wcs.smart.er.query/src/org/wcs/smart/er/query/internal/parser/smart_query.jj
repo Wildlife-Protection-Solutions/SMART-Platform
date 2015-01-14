@@ -33,7 +33,7 @@ TOKEN :
   	(["-","+"])?< FLOAT >  | (["-","+"])?< FLOAT >    (      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >    )?     >| < #FLOAT :    < INTEGER >  | < INTEGER > ("." < INTEGER >)?  | "." < INTEGER >     >| < #INTEGER : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}TOKEN : /* Literal Constants */{  < S_CONST_LITERAL :    "true"  | "false"  | "null" >}
 /* Query Filters */
 TOKEN : 
-{
+{
  < CATEGORY_KEY : "category:"< DM_KEY > >
  | < ATT_STR_KEY : "attribute:s:"< DM_KEY > >
  | < ATT_VALUE_KEY : "attribute:n:"< DM_KEY > >
@@ -45,6 +45,7 @@ TOKEN :
  | <CAT_ATT_VALUE_KEY : "category:"<DM_KEY>":attribute:n:"<DM_KEY>>
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
+ | <CM_CAT_ATT_LIST_KEY : "category:"<DM_KEY>":cmattribute:l:"< UUID >":"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
@@ -562,7 +563,16 @@ IFilter AttributeExpression():
 	{
 		filter = CategoryAttributeFilter.createListItemFilter(key,op,value);
 	}
-	
+	| 
+	/* configurable model category-attribute list items */
+	(
+		< CM_CAT_ATT_LIST_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = CmCategoryAttributeFilter.createListItemFilter(key,op,value);
+	}
 	
 	| 
 	/* attribute tree items */

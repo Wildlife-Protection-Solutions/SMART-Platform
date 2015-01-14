@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
+import org.wcs.smart.dataentry.DataentryHibernateManager;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;
@@ -99,6 +101,46 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 			}
 		}
 	};
+	
+	private Job refreshViewerJob = new Job(Messages.FilterItemPanel_RefreshFilterTreeJobName){
+		private Object input;
+		@SuppressWarnings("unchecked")
+		@Override
+		protected IStatus run(IProgressMonitor monitor) {
+			input = null;
+			Display.getDefault().syncExec(new Runnable(){
+
+				@Override
+				public void run() {
+					input = filterTreeViewer.getInput();
+					if (input instanceof HashMap){
+						filterTreeViewer.setInput(LOADING_TEXT);
+					}
+				}});
+			if (input instanceof HashMap){
+				final HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
+				input2.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
+			
+				if (currentDesign != null && currentDesign.getConfigurableModel() != null){
+					//load the configurable model
+				
+					ConfigurableModel cm = DataentryHibernateManager.getFullConfigurableModel(currentDesign.getConfigurableModel().getUuid());
+					input2.put(DataModelTreeNode.KEY,  new Object[]{currentDesign, QueryDataModelManager.getInstance().getDataModel(), cm});
+				}else{
+					input2.put(DataModelTreeNode.KEY,  new Object[]{currentDesign, QueryDataModelManager.getInstance().getDataModel(), null});
+				}
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						filterTreeViewer.setInput(input2);
+						filterTreeViewer.refresh();
+					}
+					
+				});
+			}
+			return Status.OK_STATUS;
+		}
+	};
 
 	public FilterItemPanel() {
 		this(QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY));
@@ -127,7 +169,8 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 		nodes.add(surveyNode);
 		
 		if (!qType.getKey().equals(MissionTrackQueryType.KEY)){
-			nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));	
+//			nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
+			nodes.add(new SurveyDataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		}
 		
 		if (!SmartDB.isMultipleAnalysis()){
@@ -168,23 +211,12 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	 * 
 	 * @param currentDesign the current survey design 
 	 */
-	@SuppressWarnings("unchecked")
 	public void refreshPanel(SurveyDesign currentDesign){
 		this.currentDesign = currentDesign;
 		if (filterTreeViewer != null){
-			
-			Object input = filterTreeViewer.getInput();
-			if (input instanceof HashMap){
-				filterTreeViewer.setInput(LOADING_TEXT);
-				HashMap<Object, Object> input2 = (HashMap<Object, Object>) input;
-				input2.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
-		
-				filterTreeViewer.setInput(input2);
-				filterTreeViewer.refresh();
-			}
+			refreshViewerJob.schedule();
 		}
-	}
-	
+	}	
 	
 	@Override
 	public void refreshPanel(){
@@ -208,7 +240,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 			ops.add(Operator.BRACKETS);
 			
 			input.put(OperatorsTreeNode.KEY, ops);
-			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
+			input.put(DataModelTreeNode.KEY,  new Object[]{currentDesign, QueryDataModelManager.getInstance().getDataModel(), null});
 			input.put(FiltersTreeNode.KEY, new Object[]{currentDesign, surveyNode});
 			
 //			if (SmartDB.isMultipleAnalysis()){

@@ -65,18 +65,18 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 	
 	protected String text;
 	protected String key;
-	private Label lblAttribute;
-	private ComboViewer listViewer;
+	protected Label lblAttribute;
+	protected ComboViewer listViewer;
 
 	private Font smallerFont;
-	private Attribute attribute = null;
+	protected Attribute attribute = null;
 	
-	private ListItem currentSelection = null;
+	protected ListItem currentSelection = null;
 
 	/*
 	 * Job to load the attribute list options
 	 */
-	private Job loadItemsJobs = new Job(Messages.AttributeListDropItem_LoadingJobName){
+	protected Job loadItemsJobs = new Job(Messages.AttributeListDropItem_LoadingJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
