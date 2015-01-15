@@ -48,7 +48,7 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * @author elitvin
  * @since 3.2.0
  */
-public final class InformantEditor extends AbstractPropertyJHeaderDialog {
+public class InformantEditor extends AbstractPropertyJHeaderDialog {
 	
 	private Informant informant;
 	
@@ -56,9 +56,13 @@ public final class InformantEditor extends AbstractPropertyJHeaderDialog {
 	private Button btnActive;
 
 	private Map<InfromantColumn, Text> col2Text;
-	
-	protected InformantEditor(Shell parent, Informant informant) {
-		super(parent, Messages.InformantEditor_Title);
+
+	public InformantEditor(Shell parent, Informant informant) {
+		this(parent, informant, Messages.InformantEditor_Title);
+	}
+
+	protected InformantEditor(Shell parent, Informant informant, String title) {
+		super(parent, title);
 		this.informant = informant;
 	}
 

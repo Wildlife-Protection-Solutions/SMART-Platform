@@ -22,12 +22,19 @@
 package org.wcs.smart.intelligence.informant.editor;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import oms3.gen.booleanAccess;
+
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -112,20 +119,14 @@ public class InformantDataEditor extends EditorPart {
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
 	private TableViewer viewer;
-    private List<Informant> informantList;
+	
+	private Button btnEdit;
+	private Button btnAdd;
+	private Button btnDelete;
 	
 	public InformantDataEditor() {
-		Session s = HibernateManager.openSession();
-		try {
-			informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), s, false);
-		} catch (Exception e) {
-			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_InformantLoad_Error, e);
-			informantList = new ArrayList<Informant>();
-		} finally {
-			s.close();
-		}
 	}	
-	
+
 	@Override
 	public void createPartControl(Composite parent) {
 		Form form = toolkit.createForm(parent);
@@ -140,7 +141,7 @@ public class InformantDataEditor extends EditorPart {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Composite upperCmp = toolkit.createComposite(main);
-		layout = new GridLayout(3, false);
+		layout = new GridLayout(5, false);
 		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		upperCmp.setLayout(layout);
 		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -161,11 +162,27 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 
-		Button btnEdit = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
+		btnEdit = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performEdit();
+			}
+		});
+
+		btnAdd = toolkit.createButton(upperCmp, "Add", SWT.PUSH);
+		btnAdd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performAdd();
+			}
+		});
+
+		btnDelete = toolkit.createButton(upperCmp, "Delete", SWT.PUSH);
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performDelete();
 			}
 		});
 		
@@ -180,20 +197,55 @@ public class InformantDataEditor extends EditorPart {
 
 		viewer.setItemCount(0);
 		addColumns(viewer);
-		viewer.setInput(informantList);
+		
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				updateButtons();
+			}
+		});
+		
+		loadData();
+		updateButtons();
 	}
 
+	private void updateButtons() {
+		ISelection selection = viewer.getSelection();
+		btnDelete.setEnabled(canEdit() && selection != null && !selection.isEmpty());
+		btnEdit.setEnabled(canEdit() && selection != null && !selection.isEmpty());
+		btnAdd.setEnabled(canEdit());
+	}
+	private boolean canEdit() {
+		return InformantAesManager.getInstance().isDecrypted();
+	}
+	
+	private void loadData() {
+		List<Informant> informantList = null;
+		Session s = HibernateManager.openSession();
+		try {
+			informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), s, false);
+		} catch (Exception e) {
+			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_InformantLoad_Error, e);
+			informantList = new ArrayList<Informant>();
+		} finally {
+			s.close();
+		}
+		viewer.setInput(informantList);
+	}
+	
 	protected void performSetPassword() {
 		PasswordInputDialog dialog = new PasswordInputDialog(getSite().getShell());
 		if (dialog.open() == Window.OK) {
 			InformantAesManager.getInstance().setPassword(dialog.getPassword());
 			viewer.refresh();
+			updateButtons();
 		}
 	}
 
 	protected void performClearPassword() {
 		InformantAesManager.getInstance().clear();
 		viewer.refresh();
+		updateButtons();
 	}
 
 	protected void performEdit() {
@@ -201,12 +253,34 @@ public class InformantDataEditor extends EditorPart {
 		if (selection != null && !selection.isEmpty()) {
 			Informant i = (Informant) selection.getFirstElement();
 			InformantEditor dialog = new InformantEditor(getSite().getShell(), i);
-			if (dialog.open() == Window.OK) {
-				viewer.refresh();
-			}
+			dialog.open();
+			viewer.refresh();
 		}
 	}
 	
+	protected void performDelete() {
+		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+		if (selection != null && !selection.isEmpty()) {
+			if (MessageDialog.openQuestion(getSite().getShell(), "Confirm Delete", "Do you really want to delete selected records?")) {
+				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+					Informant informant = (Informant)  i.next();
+					IntelligenceHibernateManager.deleteInformant(informant);
+				}
+			}
+			loadData();
+		}
+	}
+
+	protected void performAdd() {
+		Informant i = new Informant();
+		i.setId("informant");
+		i.setIsActive(true);
+		i.setConservationArea(SmartDB.getCurrentConservationArea());
+		NewInformantEditor dialog = new NewInformantEditor(getSite().getShell(), i);
+		dialog.open();
+		loadData();
+	}
+
 	private void addColumns(TableViewer v) {
 		//public data
 		TableViewerColumn idColumn = new TableViewerColumn(v, SWT.NONE);
