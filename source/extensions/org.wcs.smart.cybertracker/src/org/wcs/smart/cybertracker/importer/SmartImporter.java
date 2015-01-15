@@ -474,6 +474,18 @@ public class SmartImporter {
 			wpoa.setNumberValue(value);
 			break;
 		}
+		case DATE:
+		{
+			try {
+				DateFormat formatter = createCyberTrackerDateFormatter();
+				wpoa.setDateValue(formatter.parse(av));
+			} catch (ParseException ex) {
+				CyberTrackerPlugIn.log(ex.getMessage(), ex);
+				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_CannotParseDate, e.getN(), av));
+				return null;
+			}
+			break;
+		}
 		}
 		return wpoa;
 	}

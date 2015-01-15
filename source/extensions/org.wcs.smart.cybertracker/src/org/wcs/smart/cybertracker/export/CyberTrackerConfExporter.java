@@ -32,18 +32,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -119,36 +115,6 @@ public class CyberTrackerConfExporter {
 		this.currentLanguage = currentLanguage;
 	}
 
-	/*
-	 * Currently date attribute types are not supported;
-	 * here we check and inform the user
-	 */
-	private boolean validateAttributes(){
-		Queue<CmNode> toCheck = new LinkedList<CmNode>();
-		toCheck.addAll(configurableModel.getNodes());
-		while(!toCheck.isEmpty()){
-			CmNode node = toCheck.remove();
-			if (node.getCmAttributes() != null){
-				for (final CmAttribute a : node.getCmAttributes()){
-					if (a.getAttribute().getType() == AttributeType.DATE){
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								MessageDialog.openError(
-										Display.getDefault().getActiveShell(), 
-										Messages.CyberTrackerConfExporter_ErrorDialog, 
-										MessageFormat.format(Messages.CyberTrackerConfExporter_DateAttributeExportError, new Object[]{a.getName()}));		
-							}});
-						
-						
-						return false;
-					}
-				}
-			}
-			toCheck.addAll(node.getChildren());
-		}
-		return true;
-	}
 	public File export(File destFolder, Object source, IProgressMonitor monitor) throws Exception {
 		session = HibernateManager.openSession();
 		session.beginTransaction();
@@ -162,9 +128,6 @@ public class CyberTrackerConfExporter {
 				configurableModel.setName(DEFAULT_DATAMODEL_EXPORT_NAME);
 			} else {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_InvalidSource, null);
-				return null;
-			}
-			if (!validateAttributes()){
 				return null;
 			}
 			
@@ -518,6 +481,12 @@ public class CyberTrackerConfExporter {
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
 				}
 				result.add(node);
+				break;
+			}
+			case DATE:
+			{
+				Node dateNode = screensFactory.createDate(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, resultElementId.getItemId(), attribute.getIsRequired());
+				result.add(dateNode);
 				break;
 			}
 			default:

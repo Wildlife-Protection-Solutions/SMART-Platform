@@ -66,10 +66,8 @@ public class Messages extends NLS {
 	public static String CyberTrackerCaDeleteHandler_DeleteProperties;
 	public static String CyberTrackerCaDeleteHandler_DeleteRegistryKey;
 	public static String CyberTrackerConfExporter_AttributeTypeNotSupported;
-	public static String CyberTrackerConfExporter_DateAttributeExportError;
 	public static String CyberTrackerConfExporter_DefaultValue_List_Error;
 	public static String CyberTrackerConfExporter_DefaultValue_Tree_Error;
-	public static String CyberTrackerConfExporter_ErrorDialog;
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
@@ -317,6 +315,7 @@ public class Messages extends NLS {
 	public static String SmartImporter_Transport_Load_Error;
 	public static String SmartImporter_Warn_AddToWaypointTimeframe;
 	public static String SmartImporter_Warn_AttributeTag0_Missing;
+	public static String SmartImporter_Warn_CannotParseDate;
 	public static String SmartImporter_Warn_CategoryTag0_Missing;
 	public static String SmartImporter_Warn_ElementNotDefined;
 	public static String SmartImporter_Warn_ExportMedia_FileNotFound;

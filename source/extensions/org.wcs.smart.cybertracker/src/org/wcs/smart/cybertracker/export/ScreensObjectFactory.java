@@ -445,6 +445,48 @@ public class ScreensObjectFactory {
 		
 		return node;
 	}
+
+	/**
+    <Node>
+        <Id>???</Id>
+        <Name>???</Name>
+		<Items>
+			<Value>???</Value> <!-- this is resultId -->
+		</Items>        
+        <DataClass>TctScreen</DataClass>
+        <Data>
+            <NextId>15</NextId>
+            <TemplateId>{BBDDFC72-79FC-4664-B398-CB57E614D71B}</TemplateId>
+            <Name>???</Name>
+            <Controls>
+                <Control>...</Control>
+                ...
+        </Data>
+    </Node>
+	 */
+	public Node createDate(String id, String name, String resultId, boolean required) {
+		Node node = new Node();
+		node.setId(id);
+		node.setName(name);
+		node.setDataClass("TctScreen"); //$NON-NLS-1$
+		
+		Node.Items items = new Node.Items();
+		items.getValue().add(resultId);
+		node.setItems(items);
+
+		Node.Data data = new Node.Data();
+		data.setNextId(15);
+		data.setTemplateId("{BBDDFC72-79FC-4664-B398-CB57E614D71B}"); //$NON-NLS-1$
+		data.setName(name);
+		Controls controls = new Controls();
+		controls.getControl().add(createControl2());
+		controls.getControl().add(createControl11());
+		controls.getControl().add(createDateControl13(resultId, required));
+		data.setControls(controls);
+		node.setData(data);
+		
+		return node;
+	}
 	
 	/**
 	<Control>
@@ -865,6 +907,33 @@ public class ScreensObjectFactory {
 		control.setHeight(264);
 		control.setTranslateFont("Arial,12,B"); //$NON-NLS-1$
 		control.setTranslateElement(resultId);
+		control.setRequired(required ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+		return control;
+	}
+
+	/**
+    <Control>
+        <Type>{5DFF7D37-8BA4-4B0A-A792-16BE539CA6BA}</Type>
+	    <Id>13</Id>
+	    <Align>5</Align>
+	    <Left>0</Left>
+	    <Top>32</Top>
+	    <Width>240</Width>
+	    <Height>264</Height>
+	    <Translate__Element>???</Translate__Element>   <!-- this is resultId -->
+	<Control>
+	*/
+	private Control createDateControl13(String resultId, boolean required) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{5DFF7D37-8BA4-4B0A-A792-16BE539CA6BA}"); //$NON-NLS-1$
+		control.setId(13);
+		control.setAlign(5);
+		control.setLeft(0);
+		control.setTop(32);
+		control.setWidth(240);
+		control.setHeight(264);
+		control.setTranslateElement(resultId);
+		//NOTE: required is not supported in 3.375
 		control.setRequired(required ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
 		return control;
 	}
