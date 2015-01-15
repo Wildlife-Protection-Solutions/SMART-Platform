@@ -383,5 +383,24 @@ public class IntelligenceHibernateManager extends HibernateManager {
 			return false;
 		}
 	}
+
+	public static void deleteInformant(Informant informant) {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			session.beginTransaction();
+			try {
+				session.delete(informant);
+				session.getTransaction().commit();
+				if (informant.getDataFile().exists()) {
+					FileUtils.forceDelete(informant.getDataFile());
+				}
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				IntelligencePlugIn.displayLog("Unable to delete informant" + "\n"+ ex.getLocalizedMessage(), ex);
+			}
+		} finally {
+			session.close();
+		}
+	}
 	
 }

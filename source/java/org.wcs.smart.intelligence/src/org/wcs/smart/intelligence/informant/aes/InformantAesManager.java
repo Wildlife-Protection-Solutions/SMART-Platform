@@ -50,7 +50,7 @@ public final class InformantAesManager {
 	private static final AESTool aesTool = new AESTool();
 	
 	private transient char[] password = null;
-	private transient boolean isSetAllowed = true;
+	private transient boolean isDecrypted = false;
 	private transient final Map<Informant, Map<InformantDataKey, Object>> data = new HashMap<Informant, Map<InformantDataKey,Object>>();
 	
 	private InformantAesManager() {
@@ -66,14 +66,14 @@ public final class InformantAesManager {
 		this.password = password;
 	}
 
-	public final boolean isSetAllowed() {
-		return isSetAllowed;
+	public final boolean isDecrypted() {
+		return isDecrypted;
 	}
 
 	public final void set(Informant informant, InformantDataKey key, Object value) {
 		if (data == null)
 			return;
-		if (password == null || !isSetAllowed) {
+		if (password == null || !isDecrypted) {
 			return;
 		}
 		Map<InformantDataKey, Object> info = data.get(informant);
@@ -118,8 +118,11 @@ public final class InformantAesManager {
 			try {
 				Object obj = aesTool.decrypt(informant.getEncryptedData(), password);
 				info = (Map<InformantDataKey, Object>) obj;
+				if (info == null) {
+					info = new HashMap<InformantDataKey, Object>();
+				}
 				data.put(informant, info);
-				isSetAllowed = true;
+				isDecrypted = true;
 			} catch (InvalidKeyException e) {
 				IntelligencePlugIn.log("InvalidKeyException decrypting informant ", null); //$NON-NLS-1$
 			} catch (NoSuchAlgorithmException e) {
@@ -150,7 +153,7 @@ public final class InformantAesManager {
 			}
 		}
 		password = null;
-		isSetAllowed = false;
+		isDecrypted = false;
 		if (data != null) {
 			//TODO: is there a safer way to remove objects from memory
 			data.clear();
