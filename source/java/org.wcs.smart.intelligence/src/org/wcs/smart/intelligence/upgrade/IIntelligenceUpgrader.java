@@ -32,6 +32,6 @@ import org.hibernate.Session;
  */
 public interface IIntelligenceUpgrader {
 
-	public void upgrade(Session s, IProgressMonitor monitor);
+	public boolean upgrade(Session s, IProgressMonitor monitor);
 	
 }

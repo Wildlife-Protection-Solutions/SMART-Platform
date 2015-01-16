@@ -26,9 +26,13 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
     private static final String BUNDLE_NAME = "org.wcs.smart.intelligence.internal.messages"; //$NON-NLS-1$
 
-    public static String AddIntelligenceJob_Error;
+    public static String AddIntelligenceJob_CannotUpgrade;
+
+	public static String AddIntelligenceJob_Error;
 
 	public static String AddIntelligenceJob_Title;
+
+	public static String AddIntelligenceJob_UpgradeError;
 
 	public static String CaDeleteHandler_DeletingIntelligences;
 
@@ -523,6 +527,8 @@ public class Messages extends NLS {
 	public static String SourceTypesPropertyDialog_SourceDuplicate;
 
 	public static String SourceTypesPropertyDialog_Title;
+
+	public static String UpgradeFromVersion_InstanceCreateError;
 
 	public static String XmlToIntelligenceConverter_DescriptionTooLong;
 
