@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 
 /**
@@ -39,7 +40,8 @@ import org.wcs.smart.intelligence.internal.Messages;
  */
 public class IntelligenceDbUpgrader30To32 implements IIntelligenceUpgrader {
 
-	public void upgrade(Session s, IProgressMonitor monitor) {
+	public boolean upgrade(Session s, IProgressMonitor monitor) {
+		final boolean result[] = new boolean[1];
 		monitor.subTask(Messages.IntelligenceDbUpgrader30To32_ProgressMessage);
 		s.doWork(new Work() {
 			@Override
@@ -47,6 +49,7 @@ public class IntelligenceDbUpgrader30To32 implements IIntelligenceUpgrader {
 				try {
 					c.setAutoCommit(false);
 					upgrade(c);
+					result[0] = true;
 				} catch (final Exception e) {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
@@ -55,11 +58,13 @@ public class IntelligenceDbUpgrader30To32 implements IIntelligenceUpgrader {
 									Messages.IntelligenceDbUpgrader30To32_ErrorMessage, e);
 						}
 					});
+					result[0] = false;
 				} finally {
 					c.setAutoCommit(true);
 				}
 			}
 		});
+		return result[0];
 	}
 
 	private void upgrade(Connection c) throws Exception {
@@ -80,7 +85,7 @@ public class IntelligenceDbUpgrader30To32 implements IIntelligenceUpgrader {
 		}
 		
 		/* VERSION UDATE */ 
-		String ssql = "update smart.db_version set version = '3.2' where plugin_id = 'org.wcs.smart.intelligence'"; //$NON-NLS-1$
+		String ssql = "update smart.db_version set version = '3.2' where plugin_id = '"+IntelligencePlugIn.PLUGIN_ID+"'"; //$NON-NLS-1$ //$NON-NLS-2$
 		c.createStatement().execute(ssql);
 		
 		c.commit();

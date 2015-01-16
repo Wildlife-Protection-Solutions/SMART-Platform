@@ -21,25 +21,39 @@
  */
 package org.wcs.smart.intelligence.upgrade;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.intelligence.updatesite.OnInstallAction;
-import org.wcs.smart.upgrade.IDatabaseUpgrader;
 
 /**
- * Intelligence upgrade operations while upgrade/restore backup.
- * 
  * @author elitvin
  * @since 3.0.0
  */
-public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
-
-	@Override
-	public void upgrade(Session s, IProgressMonitor monitor) {
-		monitor.subTask(Messages.IntelligenceDatabaseUpgrader_UpgradeTask);
-		OnInstallAction install = new OnInstallAction();
-		install.execute(null);
+public enum UpgradeFromVersion {
+	
+	V0(IntelligenceDbUpgrader0To30.class),
+	V30(IntelligenceDbUpgrader30To32.class);
+	
+	public Class<? extends IIntelligenceUpgrader> upgradeEngine;
+	
+	private UpgradeFromVersion(Class<? extends IIntelligenceUpgrader> engine){
+		this.upgradeEngine = engine;
 	}
-
+	
+	public IIntelligenceUpgrader createUpgradeEngine() {
+		try {
+			return upgradeEngine.newInstance();
+		} catch (Exception e) {
+			SmartPlugIn.displayLog(Messages.UpgradeFromVersion_InstanceCreateError, e);
+			return null;
+		}
+	}
+	
+	public static final UpgradeFromVersion fromString(String v) {
+		if (v == null || v.isEmpty() || "1.0".equals(v)) { //$NON-NLS-1$
+			return V0;
+		} else if ("3.0".equals(v)) { //$NON-NLS-1$
+			return V30;
+		}
+		return null;
+	}
 }
