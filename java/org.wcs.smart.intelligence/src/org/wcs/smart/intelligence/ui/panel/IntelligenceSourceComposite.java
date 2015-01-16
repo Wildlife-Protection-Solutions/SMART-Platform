@@ -22,6 +22,8 @@
 package org.wcs.smart.intelligence.ui.panel;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -68,6 +70,8 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 	private static final int DECORATION_MARGIN = 2;
 	private static final int NO_SOURCE_ERR_IMAGE_SIZE = 32;
 	
+	private static final Informant emptyInformant = new Informant();
+	
     private ComboViewer sourceType;
     private List<IntelligenceSource> sourceTypeList;
     private List<Informant> informantList;
@@ -105,6 +109,14 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 		} finally {
 			s.close();
 		}
+		Collections.sort(informantList, new Comparator<Informant>() {
+			@Override
+			public int compare(Informant i0, Informant i1) {
+				String id0 = i0.getId() != null ? i0.getId() : ""; //$NON-NLS-1$
+				return id0.compareTo(i1.getId());
+			}
+		});
+		informantList.add(0, emptyInformant);
 		
 		setMessage(Messages.IntelligenceSource_Message);
 		if (!sourceTypeList.isEmpty()) {
@@ -306,7 +318,11 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
 
     private Informant getSelectedInformant() {
     	IStructuredSelection selection = (IStructuredSelection) informantViewer.getSelection();
-    	return selection != null && !selection.isEmpty() ? (Informant)selection.getFirstElement() : null;
+    	if (selection != null && !selection.isEmpty()) {
+    		Informant i = (Informant)selection.getFirstElement();
+    		return i != emptyInformant ? i : null;
+    	}
+    	return null;
     }
     
     /**
