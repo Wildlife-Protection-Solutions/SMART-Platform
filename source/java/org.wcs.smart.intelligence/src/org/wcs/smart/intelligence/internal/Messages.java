@@ -296,6 +296,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceHibernateManager_Error_CouldNotDeleteFilestore;
 
+	public static String IntelligenceHibernateManager_InformantDeleteError;
+
 	public static String IntelligenceHibernateManager_InformantSaveError;
 
 	public static String IntelligenceHibernateManager_Intelligence_NotFound_Error;

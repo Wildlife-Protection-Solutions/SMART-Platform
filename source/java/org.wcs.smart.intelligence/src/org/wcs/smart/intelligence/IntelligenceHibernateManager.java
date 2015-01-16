@@ -396,7 +396,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 				}
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
-				IntelligencePlugIn.displayLog("Unable to delete informant" + "\n"+ ex.getLocalizedMessage(), ex);
+				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_InformantDeleteError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			}
 		} finally {
 			session.close();
