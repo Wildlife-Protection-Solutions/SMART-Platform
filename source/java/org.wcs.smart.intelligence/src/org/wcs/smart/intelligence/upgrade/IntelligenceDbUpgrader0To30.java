@@ -50,6 +50,8 @@ import org.wcs.smart.intelligence.internal.Messages;
  * @since 3.2.0
  */
 public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
+	
+	private static final String RESULT_VERSION = "3.1"; //$NON-NLS-1$
 
 	@Override
 	public boolean upgrade(Session session, IProgressMonitor monitor) {
@@ -78,6 +80,7 @@ public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
 		}
 		
 		try {
+			session.beginTransaction();
 			if (!mark.intelligence_source) {
 				createIntelligenceSourceTable(session);
 			}
@@ -93,7 +96,7 @@ public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
 			if (!mark.patrol_intelligence) {
 				createPatrolIntelligenceTable(session);
 			}
-			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION, session);
+			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, RESULT_VERSION, session);
 
 			session.getTransaction().commit();
 			
