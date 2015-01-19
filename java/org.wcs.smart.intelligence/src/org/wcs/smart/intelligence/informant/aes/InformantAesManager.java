@@ -70,6 +70,10 @@ public final class InformantAesManager {
 		return isDecrypted;
 	}
 
+	public final boolean isPasswordSet() {
+		return password != null;
+	}
+	
 	public final void set(Informant informant, InformantDataKey key, Object value) {
 		if (data == null)
 			return;
