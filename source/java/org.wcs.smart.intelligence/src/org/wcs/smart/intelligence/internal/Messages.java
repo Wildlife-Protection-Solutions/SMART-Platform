@@ -136,11 +136,21 @@ public class Messages extends NLS {
 
 	public static String ImportIntelligenceTemplateHandler_ReportDesignFile;
 
-	public static String InformantDataEditor_Button_ClearPassword;
+	public static String InformantDataEditor_Button_Add;
+
+	public static String InformantDataEditor_Button_Delete;
 
 	public static String InformantDataEditor_Button_Edit;
 
+	public static String InformantDataEditor_Button_Login;
+
+	public static String InformantDataEditor_Button_Logout;
+
 	public static String InformantDataEditor_Button_SetPassword;
+
+	public static String InformantDataEditor_DeleteDialog_Message;
+
+	public static String InformantDataEditor_DeleteDialog_Title;
 
 	public static String InformantDataEditor_Title;
 

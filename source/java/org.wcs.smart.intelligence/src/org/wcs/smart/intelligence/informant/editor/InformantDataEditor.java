@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import oms3.gen.booleanAccess;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -120,6 +118,8 @@ public class InformantDataEditor extends EditorPart {
 
 	private TableViewer viewer;
 	
+	private Composite upperCmp;
+	private Button btnLogin;
 	private Button btnEdit;
 	private Button btnAdd;
 	private Button btnDelete;
@@ -140,25 +140,17 @@ public class InformantDataEditor extends EditorPart {
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		Composite upperCmp = toolkit.createComposite(main);
+		upperCmp = toolkit.createComposite(main);
 		layout = new GridLayout(5, false);
 		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		upperCmp.setLayout(layout);
 		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Button btnSetPwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
-		btnSetPwd.addSelectionListener(new SelectionAdapter() {
+		btnLogin = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
+		btnLogin.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				performSetPassword();
-			}
-		});
-
-		Button btnClearPwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_ClearPassword, SWT.PUSH);
-		btnClearPwd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performClearPassword();
+				performLoginOrLogout();
 			}
 		});
 
@@ -170,7 +162,7 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 
-		btnAdd = toolkit.createButton(upperCmp, "Add", SWT.PUSH);
+		btnAdd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Add, SWT.PUSH);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -178,7 +170,7 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 
-		btnDelete = toolkit.createButton(upperCmp, "Delete", SWT.PUSH);
+		btnDelete = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Delete, SWT.PUSH);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -211,12 +203,27 @@ public class InformantDataEditor extends EditorPart {
 
 	private void updateButtons() {
 		ISelection selection = viewer.getSelection();
-		btnDelete.setEnabled(canEdit() && selection != null && !selection.isEmpty());
-		btnEdit.setEnabled(canEdit() && selection != null && !selection.isEmpty());
-		btnAdd.setEnabled(canEdit());
+		boolean isDecrypted = InformantAesManager.getInstance().isDecrypted();
+		boolean isPasswordSet = InformantAesManager.getInstance().isPasswordSet();
+		btnDelete.setEnabled(isDecrypted && selection != null && !selection.isEmpty());
+		btnEdit.setEnabled(isDecrypted && selection != null && !selection.isEmpty());
+		boolean isEmptyInput = isEmptyInput();
+		btnAdd.setEnabled(isDecrypted || (!isDecrypted && isPasswordSet && isEmptyInput));
+		if (isEmptyInput) {
+			btnLogin.setText(isPasswordSet ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_SetPassword);
+		} else {
+			btnLogin.setText(isDecrypted ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_Login);
+		}
+		upperCmp.layout();
 	}
-	private boolean canEdit() {
-		return InformantAesManager.getInstance().isDecrypted();
+
+	private boolean isEmptyInput() {
+		Object input = viewer.getInput();
+		if (input instanceof List) {
+			List<?> list = (List<?>) input;
+			return list.isEmpty();
+		}
+		return false;
 	}
 	
 	private void loadData() {
@@ -232,8 +239,25 @@ public class InformantDataEditor extends EditorPart {
 		}
 		viewer.setInput(informantList);
 	}
+
+	protected void performLoginOrLogout() {
+		boolean isEmptyInput = isEmptyInput();
+		if (isEmptyInput) {
+			if (InformantAesManager.getInstance().isPasswordSet()) {
+				performClearPassword();
+			} else {
+				performSetPassword(); //TODO: need dialog to confirm password
+			}
+		} else {
+			if (InformantAesManager.getInstance().isDecrypted()) {
+				performClearPassword();
+			} else {
+				performSetPassword();
+			}
+		}
+	}
 	
-	protected void performSetPassword() {
+	private void performSetPassword() {
 		PasswordInputDialog dialog = new PasswordInputDialog(getSite().getShell());
 		if (dialog.open() == Window.OK) {
 			InformantAesManager.getInstance().setPassword(dialog.getPassword());
@@ -242,7 +266,7 @@ public class InformantDataEditor extends EditorPart {
 		}
 	}
 
-	protected void performClearPassword() {
+	private void performClearPassword() {
 		InformantAesManager.getInstance().clear();
 		viewer.refresh();
 		updateButtons();
@@ -261,7 +285,7 @@ public class InformantDataEditor extends EditorPart {
 	protected void performDelete() {
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 		if (selection != null && !selection.isEmpty()) {
-			if (MessageDialog.openQuestion(getSite().getShell(), "Confirm Delete", "Do you really want to delete selected records?")) {
+			if (MessageDialog.openQuestion(getSite().getShell(), Messages.InformantDataEditor_DeleteDialog_Title, Messages.InformantDataEditor_DeleteDialog_Message)) {
 				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
 					Informant informant = (Informant)  i.next();
 					IntelligenceHibernateManager.deleteInformant(informant);
@@ -273,7 +297,7 @@ public class InformantDataEditor extends EditorPart {
 
 	protected void performAdd() {
 		Informant i = new Informant();
-		i.setId("informant");
+		i.setId("informant"); //$NON-NLS-1$
 		i.setIsActive(true);
 		i.setConservationArea(SmartDB.getCurrentConservationArea());
 		NewInformantEditor dialog = new NewInformantEditor(getSite().getShell(), i);
