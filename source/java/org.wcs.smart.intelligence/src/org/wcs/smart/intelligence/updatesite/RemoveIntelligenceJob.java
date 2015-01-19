@@ -81,6 +81,9 @@ public class RemoveIntelligenceJob extends Job {
 			if (DerbyHibernateExtensions.tableExists(session, "intelligence_source")){ //$NON-NLS-1$
 				session.createSQLQuery("DROP TABLE smart.intelligence_source").executeUpdate(); //$NON-NLS-1$
 			}	
+			if (DerbyHibernateExtensions.tableExists(session, "informant")){ //$NON-NLS-1$
+				session.createSQLQuery("DROP TABLE smart.informant").executeUpdate(); //$NON-NLS-1$
+			}	
 			
 			//delete filestore entries
 			for (ConservationArea ca : caList) {
