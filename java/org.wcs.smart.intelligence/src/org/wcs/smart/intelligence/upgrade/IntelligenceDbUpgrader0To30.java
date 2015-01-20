@@ -112,9 +112,6 @@ public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();
 			}
-			if (session.isOpen()) {
-				session.close();
-			}
 		}
 		return true;
 	}
