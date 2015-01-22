@@ -36,7 +36,12 @@ import org.wcs.smart.internal.Messages;
 public class PlugInConfigurationExporter implements ICaDataExporter {
 
 	public static final String CONFIG_TABLE_NAME = "db_versions"; //$NON-NLS-1$
-	
+
+	@Override
+	public int getRunLevel() {
+		return 0;
+	}
+
 	@Override
 	public void exportData(ICaDataExportEngine exportEngine,
 			IProgressMonitor monitor) throws Exception {

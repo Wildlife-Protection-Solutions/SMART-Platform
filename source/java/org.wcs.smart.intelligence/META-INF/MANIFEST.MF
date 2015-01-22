@@ -13,7 +13,8 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.patrol.query,
  org.wcs.smart.birt,
  org.wcs.smart.report.birt.map,
- org.wcs.smart.p2
+ org.wcs.smart.p2,
+ org.wcs.smart
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: org.wcs.smart.intelligence.model,

@@ -884,5 +884,11 @@
             class="org.wcs.smart.intelligence.CaCreateHandler">
       </handler>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.export">
+      <exporter
+            caExporter="org.wcs.smart.intelligence.InformantDataExporter">
+      </exporter>
+   </extension>
 
 </plugin>

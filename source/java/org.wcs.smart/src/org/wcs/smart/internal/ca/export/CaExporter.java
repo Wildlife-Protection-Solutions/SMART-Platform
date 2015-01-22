@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -101,6 +102,14 @@ public class CaExporter {
 	public void export(File destFile, IProgressMonitor monitor) throws Exception{
 		
 		List<ICaDataExporter> exporters = getExportExtensions();
+		Collections.sort(exporters, new Comparator<ICaDataExporter>() {
+
+			@Override
+			public int compare(ICaDataExporter arg0, ICaDataExporter arg1) {
+				return arg0.getRunLevel() - arg1.getRunLevel();
+			}
+			
+		});
 		
 		Session session = HibernateManager.openSession();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();

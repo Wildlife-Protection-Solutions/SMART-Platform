@@ -42,6 +42,11 @@ public class DataModelExporter implements ICaDataExporter {
 
 	public DataModelExporter() {
 	}
+	
+	@Override
+	public int getRunLevel() {
+		return 0;
+	}
 
 	/**
 	 * @see org.wcs.smart.ca.export.ICaDataExporter#exportData(org.wcs.smart.ca.export.ICaDataExportEngine, org.eclipse.core.runtime.IProgressMonitor)
