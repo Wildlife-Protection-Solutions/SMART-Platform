@@ -48,7 +48,7 @@ import org.wcs.smart.util.SmartUtils;
 @Table(name = "smart.informant")
 public final class Informant extends UuidItem {
 	
-	private static final String DIR_NAME = "aes";
+	private static final String DIR_NAME = "aes"; //$NON-NLS-1$
 
     private ConservationArea conservationArea;
 	public boolean isActive;
@@ -122,7 +122,12 @@ public final class Informant extends UuidItem {
 	
     @Transient
 	public static final String getDatastoreFolderPath() {
-		return SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator
+		return getDatastoreFolderPath(SmartDB.getCurrentConservationArea().getFileDataStoreLocation());
+	}
+
+    @Transient
+	public static final String getDatastoreFolderPath(String fileDataStoreLocation) {
+		return fileDataStoreLocation + File.separator
 				+ IntelligencePlugIn.INTELLIGENCE_DIR + File.separator + DIR_NAME;
 	}
     

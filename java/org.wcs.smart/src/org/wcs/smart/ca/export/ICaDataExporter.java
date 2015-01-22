@@ -40,5 +40,7 @@ public interface ICaDataExporter {
 	 * @throws Exception
 	 */
 	void exportData(ICaDataExportEngine exportEngine, IProgressMonitor monitor) throws Exception;
+
+	int getRunLevel();
 	
 }

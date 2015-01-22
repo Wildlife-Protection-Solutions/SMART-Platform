@@ -43,6 +43,11 @@ public class HibernateDataExporter implements ICaDataExporter {
 	}
 
 	@Override
+	public int getRunLevel() {
+		return 0;
+	}
+
+	@Override
 	public void exportData(ICaDataExportEngine exportEngine, IProgressMonitor monitor) throws Exception {
 		/* export all mapped tables */
 		List<TableInfo> info = HibernateManager.getTableInformation();

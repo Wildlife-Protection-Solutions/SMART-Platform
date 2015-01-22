@@ -154,6 +154,12 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_Title;
 
+	public static String InformantDataExporter_Dialog_Message;
+
+	public static String InformantDataExporter_Dialog_Title;
+
+	public static String InformantDataExporter_TaskLabel;
+
 	public static String InformantEditor_Message;
 
 	public static String InformantEditor_Title;
