@@ -136,6 +136,18 @@ public class Messages extends NLS {
 
 	public static String ImportIntelligenceTemplateHandler_ReportDesignFile;
 
+	public static String InformantBackupContributor_DeleteDataError;
+
+	public static String InformantBackupContributor_Dialog_Message;
+
+	public static String InformantBackupContributor_Dialog_Title;
+
+	public static String InformantBackupContributor_OpenFileError;
+
+	public static String InformantBackupContributor_Task_Remove;
+
+	public static String InformantBackupContributor_Task_Scan;
+
 	public static String InformantDataEditor_Button_Add;
 
 	public static String InformantDataEditor_Button_Delete;

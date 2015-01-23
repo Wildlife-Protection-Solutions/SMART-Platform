@@ -24,11 +24,18 @@ package org.wcs.smart.backup;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
@@ -43,6 +50,11 @@ import org.wcs.smart.util.ZipUtil;
  */
 public class DerbyBackupEngine {
 
+	/**
+	 * Export code extension point
+	 */
+	private static final String BACKUP_EXTENSION_ID = "org.wcs.smart.backup"; //$NON-NLS-1$
+	
 	/**
 	 * @return the default backup file name based on the current date
 	 */
@@ -97,7 +109,14 @@ public class DerbyBackupEngine {
 			
 				monitor.beginTask(Messages.DerbyBackupEngine_ProgressMessage, 2);
 			
-				return ZipUtil.createZip(dirsToBackup, outputFile, monitor);
+				if (ZipUtil.createZip(dirsToBackup, outputFile, monitor)) {
+					List<IBackupContributor> extensions = getBackupExtensions();
+					for (IBackupContributor ext : extensions) {
+						ext.process(outputFile, new SubProgressMonitor(monitor, 2));
+					}
+					return true;
+				}
+				return false;
 			}finally{
 				//now un-freeze			
 				Query q = session.createSQLQuery("CALL SYSCS_UTIL.SYSCS_UNFREEZE_DATABASE()"); //$NON-NLS-1$
@@ -119,4 +138,22 @@ public class DerbyBackupEngine {
 			return new File(backupDir).getAbsolutePath(); 
 		}
 	}
+	
+	/**
+	 * @return list of ca data exporter extension points
+	 */
+	private static List<IBackupContributor> getBackupExtensions() {
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<IBackupContributor> items = new ArrayList<>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(BACKUP_EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				items.add((IBackupContributor)e.createExecutableExtension("class")); //$NON-NLS-1$
+			}
+		}catch (Exception ex){
+			SmartPlugIn.log("Error getting backup extensions", ex); //$NON-NLS-1$
+		}
+		return items;
+	}
+	
 }
