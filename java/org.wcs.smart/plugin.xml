@@ -9,6 +9,7 @@
  <extension-point id="org.wcs.smart.ca.datamodel.editAdvisor" name="DataModel Edit Advisor" schema="schema/org.wcs.smart.ca.datamodel.editAdvisor.exsd"/>
  <extension-point id="org.wcs.smart.dbUpgrage" name="Database Upgrade Extension Point" schema="schema/org.wcs.smart.dbUpgrage.exsd"/>
  <extension-point id="org.wcs.smart.ca.create" name="Conservation Area Create Handler" schema="schema/org.wcs.smart.ca.create.exsd"/>
+ <extension-point id="org.wcs.smart.backup" name="System Backup" schema="schema/org.wcs.smart.backup.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"

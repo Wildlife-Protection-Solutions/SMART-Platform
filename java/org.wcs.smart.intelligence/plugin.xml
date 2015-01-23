@@ -890,5 +890,11 @@
             caExporter="org.wcs.smart.intelligence.InformantDataExporter">
       </exporter>
    </extension>
+   <extension
+         point="org.wcs.smart.backup">
+      <contributor
+            class="org.wcs.smart.intelligence.InformantBackupContributor">
+      </contributor>
+   </extension>
 
 </plugin>
