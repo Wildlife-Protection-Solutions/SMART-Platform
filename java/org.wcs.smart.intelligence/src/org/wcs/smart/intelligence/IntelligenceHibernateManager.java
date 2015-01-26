@@ -409,5 +409,24 @@ public class IntelligenceHibernateManager extends HibernateManager {
 			session.close();
 		}
 	}
+
+	public static void clearInformantsEncrptedData() {
+		Session session = SmartHibernateManager.openSession();
+		try {
+			try {
+				List<Informant> informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), session, false);
+				for (Informant informant : informantList) {
+					if (informant.getDataFile().exists()) {
+						FileUtils.forceDelete(informant.getDataFile());
+					}
+				}
+			} catch (Exception ex) {
+				session.getTransaction().rollback();
+				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_EncryptedDataClearError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			}
+		} finally {
+			session.close();
+		}
+	}
 	
 }
