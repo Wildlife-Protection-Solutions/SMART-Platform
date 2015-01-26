@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.informant.editor.InformantDataEditor.InfromantColumn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
@@ -97,6 +98,22 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
+		if (canEditSecureData()) {
+			createSecureContent(main);
+		} else {
+			Label lblInfo = new Label(main, SWT.NONE);
+			lblInfo.setText("* You need to login first to be able to change secured informant information.");
+			lblInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		}
+		
+		setChangesMade(false);
+		setTitle(Messages.InformantEditor_Title);
+		setMessage(Messages.InformantEditor_Message);
+		
+		return main;
+	}
+
+	private void createSecureContent(Composite main) {
 		//TODO: custom/different editors with validation?
 		col2Text = new HashMap<InformantDataEditor.InfromantColumn, Text>();
 		for (InfromantColumn col : InfromantColumn.values()) {
@@ -117,26 +134,34 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 			});
 			col2Text.put(col, txt);
 		}
-		
-		setChangesMade(false);
-		setTitle(Messages.InformantEditor_Title);
-		setMessage(Messages.InformantEditor_Message);
-		
-		return main;
 	}
 
 	protected void inputChanged() {
 		setChangesMade(true);
 	}
 
+	private boolean canEditSecureData() {
+		if (InformantAesManager.getInstance().isPasswordSet()) {
+			if (InformantAesManager.getInstance().isDecrypted(informant)) {
+				return true;
+			}
+			if (informant.getEncryptedData() == null || informant.getEncryptedData().isEmpty()) {
+				return !InformantAesManager.getInstance().containsInvalid();
+			}
+		}
+		return false;
+	}
+	
 	@Override
 	protected boolean performSave() {
 		informant.setId(txtId.getText());
 		informant.setIsActive(btnActive.getSelection());
 
-		for (InfromantColumn col : InfromantColumn.values()) {
-			Text txt = col2Text.get(col);
-			informant.set(col.getKey(), txt.getText());
+		if (col2Text != null) {
+			for (InfromantColumn col : InfromantColumn.values()) {
+				Text txt = col2Text.get(col);
+				informant.set(col.getKey(), txt.getText());
+			}
 		}
 		
 		IntelligenceHibernateManager.saveInformant(informant);

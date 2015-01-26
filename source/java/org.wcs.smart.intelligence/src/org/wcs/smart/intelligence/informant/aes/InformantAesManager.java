@@ -28,7 +28,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -50,8 +52,8 @@ public final class InformantAesManager {
 	private static final AESTool aesTool = new AESTool();
 	
 	private transient char[] password = null;
-	private transient boolean isDecrypted = false;
-	private transient final Map<Informant, Map<InformantDataKey, Object>> data = new HashMap<Informant, Map<InformantDataKey,Object>>();
+	private transient final Map<Informant, Map<InformantDataKey, Object>> data = new HashMap<>();
+	private transient final Set<Informant> invalidSet = new HashSet<>();
 	
 	private InformantAesManager() {
 		//nothing
@@ -66,30 +68,41 @@ public final class InformantAesManager {
 		this.password = password;
 	}
 
-	public final boolean isDecrypted() {
-		return isDecrypted;
+	public final boolean containsDecrypted() {
+		return !data.isEmpty();
 	}
 
+	public final boolean containsInvalid() {
+		return !invalidSet.isEmpty();
+	}
+	
+	public final boolean isDecrypted(Informant informant) {
+		return data.containsKey(informant);
+	}
+	
 	public final boolean isPasswordSet() {
 		return password != null;
 	}
 	
 	public final void set(Informant informant, InformantDataKey key, Object value) {
-		if (data == null)
+		if (data == null || informant == null)
 			return;
-		if (password == null || !isDecrypted) {
+		if (password == null) {
 			return;
 		}
 		Map<InformantDataKey, Object> info = data.get(informant);
 		if (info == null) {
-			//TODO: try decrypt first
 			info = new HashMap<InformantDataKey, Object>();
 			data.put(informant, info);
 		}
 		try {
-			EncryptedData encryptedData = aesTool.encrypt(info, password);
+			if (value != null && !"".equals(value)) { //$NON-NLS-1$
+				info.put(key, value);
+			} else {
+				info.remove(key);
+			}
+			EncryptedData encryptedData = !info.isEmpty() ? aesTool.encrypt(info, password) : new EncryptedData();
 			informant.setEncryptedData(encryptedData);
-			info.put(key, value);
 		} catch (InvalidKeyException e) {
 			IntelligencePlugIn.log("InvalidKeyException encrypting informant ", null); //$NON-NLS-1$
 		} catch (NoSuchAlgorithmException e) {
@@ -111,22 +124,27 @@ public final class InformantAesManager {
 
 	@SuppressWarnings("unchecked")
 	public final Object get(Informant informant, InformantDataKey key) {
-		if (data == null)
+		if (data == null || informant == null)
 			return null; //data should never be null
+		EncryptedData encryptedData = informant.getEncryptedData();
+		if (encryptedData == null || encryptedData.isEmpty()) {
+			return ""; //$NON-NLS-1$
+		}
 		if (password == null) {
 			return "<password protected>";
 		}
+		if (invalidSet.contains(informant)) {
+			return "<wrong password>";
+		}
 		Map<InformantDataKey, Object> info = data.get(informant);
 		if (info == null) {
-			//TODO: ClassCast????
 			try {
-				Object obj = aesTool.decrypt(informant.getEncryptedData(), password);
+				Object obj = aesTool.decrypt(encryptedData, password);
 				info = (Map<InformantDataKey, Object>) obj;
 				if (info == null) {
 					info = new HashMap<InformantDataKey, Object>();
 				}
 				data.put(informant, info);
-				isDecrypted = true;
 			} catch (InvalidKeyException e) {
 				IntelligencePlugIn.log("InvalidKeyException decrypting informant ", null); //$NON-NLS-1$
 			} catch (NoSuchAlgorithmException e) {
@@ -145,9 +163,15 @@ public final class InformantAesManager {
 				IntelligencePlugIn.log("IOException decrypting informant ", null); //$NON-NLS-1$
 			} catch (ClassNotFoundException e) {
 				IntelligencePlugIn.log("ClassNotFoundException decrypting informant ", null); //$NON-NLS-1$
+			} catch (Exception e) {
+				IntelligencePlugIn.log("Exception decrypting informant: " + e.getClass().toString(), null); //$NON-NLS-1$
 			}
 		}
-		return info != null ? info.get(key) : "<wrong password>";
+		if (info == null) {
+			invalidSet.add(informant);
+			return "<wrong password>";
+		}
+		return info.get(key);
 	}
 	
 	public final void clear() {
@@ -157,11 +181,11 @@ public final class InformantAesManager {
 			}
 		}
 		password = null;
-		isDecrypted = false;
 		if (data != null) {
 			//TODO: is there a safer way to remove objects from memory
 			data.clear();
 		}
+		invalidSet.clear();
 	}
 	
 }
