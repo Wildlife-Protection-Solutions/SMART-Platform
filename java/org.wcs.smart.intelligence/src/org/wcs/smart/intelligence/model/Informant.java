@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.model;
 
 import java.io.File;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -104,11 +105,17 @@ public final class Informant extends UuidItem {
     public final Object get(InformantDataKey key) {
     	return InformantAesManager.getInstance().get(this, key);
     }
-    @Transient
-    public final void set(InformantDataKey key, Object value) {
-    	InformantAesManager.getInstance().set(this, key, value);
-    }
 
+//    @Transient
+//    public final void set(InformantDataKey key, Object value) {
+//    	InformantAesManager.getInstance().set(this, key, value);
+//    }
+
+    @Transient
+    public final void set(Map<InformantDataKey, Object> data) {
+    	InformantAesManager.getInstance().set(this, data);
+    }
+    
     @Transient
 	public final File getDataFile() {
 		if (getUuid() != null) {
