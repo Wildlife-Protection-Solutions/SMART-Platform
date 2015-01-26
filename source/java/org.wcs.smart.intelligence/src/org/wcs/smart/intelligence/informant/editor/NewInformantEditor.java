@@ -36,14 +36,14 @@ import org.wcs.smart.intelligence.model.Informant;
 public class NewInformantEditor extends InformantEditor {
 
 	public NewInformantEditor(Shell parent, Informant informant) {
-		super(parent, informant, "Add Informant");
+		super(parent, informant, Messages.NewInformantEditor_Title);
 	}
 
 	protected Composite createContent(Composite parent) {
 		Composite c = super.createContent(parent);
 
-		setTitle("Add Informant");
-		setMessage("Enter informant related information.");
+		setTitle(Messages.NewInformantEditor_Title);
+		setMessage(Messages.NewInformantEditor_Message);
 		
 		return c;
 	}

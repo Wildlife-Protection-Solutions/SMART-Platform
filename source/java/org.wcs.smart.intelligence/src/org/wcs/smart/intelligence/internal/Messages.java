@@ -476,6 +476,10 @@ public class Messages extends NLS {
 
 	public static String MultiIntelligenceExportDialog_Title1;
 
+	public static String NewInformantEditor_Message;
+
+	public static String NewInformantEditor_Title;
+
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
 	public static String PasswordInputDialog_Password;
