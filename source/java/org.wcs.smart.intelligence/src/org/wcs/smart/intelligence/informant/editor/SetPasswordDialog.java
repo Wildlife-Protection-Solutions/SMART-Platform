@@ -43,7 +43,7 @@ import org.wcs.smart.intelligence.internal.Messages;
  */
 public class SetPasswordDialog extends TitleAreaDialog {
 	
-	private static final String PASSWORD_REGEXP = "^.*(?=.{8,})(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$"; //$NON-NLS-1$
+	private static final String PASSWORD_REGEXP = "^.*(?=.{8,})(?=..*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$"; //$NON-NLS-1$
 
 	private Text txtPassword;
 	private Text txtRePassword;

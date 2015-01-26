@@ -48,8 +48,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -178,6 +181,16 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 		
+		Hyperlink lnkForgotPwd = toolkit.createHyperlink(upperCmp, Messages.InformantDataEditor_ForgotPassword, SWT.WRAP);
+		lnkForgotPwd.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
+		lnkForgotPwd.addHyperlinkListener(new HyperlinkAdapter() {
+			@Override
+			public void linkActivated(HyperlinkEvent e) {
+				handleForgotPassword();
+			}
+		});
+
+		
 		viewer = new TableViewer(main, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		toolkit.paintBordersFor(viewer.getTable());
 		viewer.getTable().setHeaderVisible(true);
@@ -247,6 +260,14 @@ public class InformantDataEditor extends EditorPart {
 		viewer.setInput(informantList);
 	}
 
+	protected void handleForgotPassword() {
+		if (MessageDialog.openQuestion(getSite().getShell(), Messages.InformantDataEditor_ResetDialog_Title, Messages.InformantDataEditor_ResetDialog_Message)) {
+			IntelligenceHibernateManager.clearInformantsEncrptedData();
+			loadData();
+			updateButtons();
+		}
+	}
+	
 	protected void performLoginOrLogout() {
 		boolean isEmptyInput = isEmptySecureInput();
 		if (isEmptyInput) {
