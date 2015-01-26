@@ -253,19 +253,19 @@ public class InformantDataEditor extends EditorPart {
 			if (InformantAesManager.getInstance().isPasswordSet()) {
 				performLogout();
 			} else {
-				performSetPassword(); //TODO: need dialog to confirm password
+				performSetPassword();
 			}
 		} else {
 			if (InformantAesManager.getInstance().containsDecrypted()) {
 				performLogout();
 			} else {
-				performSetPassword();
+				performLogin();
 			}
 		}
 	}
 	
 	private void performSetPassword() {
-		PasswordInputDialog dialog = new PasswordInputDialog(getSite().getShell());
+		SetPasswordDialog dialog = new SetPasswordDialog(getSite().getShell());
 		if (dialog.open() == Window.OK) {
 			InformantAesManager.getInstance().setPassword(dialog.getPassword());
 			viewer.refresh();
@@ -273,6 +273,15 @@ public class InformantDataEditor extends EditorPart {
 		}
 	}
 
+	private void performLogin() {
+		PasswordInputDialog dialog = new PasswordInputDialog(getSite().getShell());
+		if (dialog.open() == Window.OK) {
+			InformantAesManager.getInstance().setPassword(dialog.getPassword());
+			viewer.refresh();
+			updateButtons();
+		}
+	}
+	
 	private void performLogout() {
 		InformantAesManager.getInstance().clear();
 		viewer.refresh();
