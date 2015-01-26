@@ -154,19 +154,19 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 
-		btnEdit = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
-		btnEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performEdit();
-			}
-		});
-
 		btnAdd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Add, SWT.PUSH);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performAdd();
+			}
+		});
+		
+		btnEdit = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performEdit();
 			}
 		});
 
@@ -203,27 +203,34 @@ public class InformantDataEditor extends EditorPart {
 
 	private void updateButtons() {
 		ISelection selection = viewer.getSelection();
-		boolean isDecrypted = InformantAesManager.getInstance().isDecrypted();
+		boolean hasDecrypted = InformantAesManager.getInstance().containsDecrypted();
 		boolean isPasswordSet = InformantAesManager.getInstance().isPasswordSet();
-		btnDelete.setEnabled(isDecrypted && selection != null && !selection.isEmpty());
-		btnEdit.setEnabled(isDecrypted && selection != null && !selection.isEmpty());
-		boolean isEmptyInput = isEmptyInput();
-		btnAdd.setEnabled(isDecrypted || (!isDecrypted && isPasswordSet && isEmptyInput));
+		boolean isEmptyInput = isEmptySecureInput();
+//		btnDelete.setEnabled(isDecrypted && selection != null && !selection.isEmpty());
+//		btnEdit.setEnabled(isDecrypted && selection != null && !selection.isEmpty());
+//		btnAdd.setEnabled(isDecrypted || (!isDecrypted && isPasswordSet && isEmptyInput));
+		btnEdit.setEnabled(selection != null && !selection.isEmpty());
+		btnDelete.setEnabled(selection != null && !selection.isEmpty());
 		if (isEmptyInput) {
 			btnLogin.setText(isPasswordSet ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_SetPassword);
 		} else {
-			btnLogin.setText(isDecrypted ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_Login);
+			btnLogin.setText(hasDecrypted ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_Login);
 		}
 		upperCmp.layout();
 	}
 
-	private boolean isEmptyInput() {
+	private boolean isEmptySecureInput() {
 		Object input = viewer.getInput();
 		if (input instanceof List) {
-			List<?> list = (List<?>) input;
-			return list.isEmpty();
+			@SuppressWarnings("unchecked")
+			List<Informant> list = (List<Informant>) input;
+			for (Informant i : list) {
+				if (i.getEncryptedData() != null && !i.getEncryptedData().isEmpty()) {
+					return false;
+				}
+			}
 		}
-		return false;
+		return true;
 	}
 	
 	private void loadData() {
@@ -241,16 +248,16 @@ public class InformantDataEditor extends EditorPart {
 	}
 
 	protected void performLoginOrLogout() {
-		boolean isEmptyInput = isEmptyInput();
+		boolean isEmptyInput = isEmptySecureInput();
 		if (isEmptyInput) {
 			if (InformantAesManager.getInstance().isPasswordSet()) {
-				performClearPassword();
+				performLogout();
 			} else {
 				performSetPassword(); //TODO: need dialog to confirm password
 			}
 		} else {
-			if (InformantAesManager.getInstance().isDecrypted()) {
-				performClearPassword();
+			if (InformantAesManager.getInstance().containsDecrypted()) {
+				performLogout();
 			} else {
 				performSetPassword();
 			}
@@ -266,7 +273,7 @@ public class InformantDataEditor extends EditorPart {
 		}
 	}
 
-	private void performClearPassword() {
+	private void performLogout() {
 		InformantAesManager.getInstance().clear();
 		viewer.refresh();
 		updateButtons();

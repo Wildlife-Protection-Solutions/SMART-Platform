@@ -37,6 +37,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.informant.PersistentManager;
+import org.wcs.smart.intelligence.informant.aes.EncryptedData;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -375,7 +376,13 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		try {
 			session.saveOrUpdate(informant);
 			session.getTransaction().commit();
-    		PersistentManager.toFile(informant.getDataFile(), informant.getEncryptedData());
+    		EncryptedData encryptedData = informant.getEncryptedData();
+    		File dataFile = informant.getDataFile();
+			if (!encryptedData.isEmpty()) {
+    			PersistentManager.toFile(dataFile, encryptedData);
+    		} else if (dataFile.exists()) {
+    			FileUtils.forceDelete(dataFile);
+    		}
 			return true;
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
