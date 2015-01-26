@@ -524,6 +524,20 @@ public class Messages extends NLS {
 
 	public static String RevertIntelligenceTemplateHandler_Error;
 
+	public static String SetPasswordDialog_ConfirmationUnmatched;
+
+	public static String SetPasswordDialog_ConfirmPassword;
+
+	public static String SetPasswordDialog_Message;
+
+	public static String SetPasswordDialog_NewPassword;
+
+	public static String SetPasswordDialog_Policy;
+
+	public static String SetPasswordDialog_PolicyUnmatched;
+
+	public static String SetPasswordDialog_Title;
+
 	public static String ShowIntelligencePersepctiveHandler_Error;
 
 	public static String SmartIntelligenceConnection_UnsupportedDataset;
