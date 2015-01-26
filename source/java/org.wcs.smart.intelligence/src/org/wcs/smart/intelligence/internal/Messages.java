@@ -172,6 +172,12 @@ public class Messages extends NLS {
 
 	public static String InformantDataExporter_TaskLabel;
 
+	public static String InformantEditor_Active;
+
+	public static String InformantEditor_Id;
+
+	public static String InformantEditor_LoginNotice;
+
 	public static String InformantEditor_Message;
 
 	public static String InformantEditor_Title;

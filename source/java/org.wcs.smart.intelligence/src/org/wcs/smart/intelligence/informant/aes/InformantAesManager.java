@@ -84,24 +84,24 @@ public final class InformantAesManager {
 		return password != null;
 	}
 	
-	public final void set(Informant informant, InformantDataKey key, Object value) {
+//	public final void set(Informant informant, InformantDataKey key, Object value) {
+//		Map<InformantDataKey, Object> info = data.get(informant);
+//		if (info == null) {
+//			info = new HashMap<InformantDataKey, Object>();
+//		}
+//		info.put(key, value);
+//		set(informant, info);
+//	}
+
+	public final void set(Informant informant, Map<InformantDataKey, Object> info) {
 		if (data == null || informant == null)
 			return;
 		if (password == null) {
 			return;
 		}
-		Map<InformantDataKey, Object> info = data.get(informant);
-		if (info == null) {
-			info = new HashMap<InformantDataKey, Object>();
-			data.put(informant, info);
-		}
+		data.put(informant, info);
 		try {
-			if (value != null && !"".equals(value)) { //$NON-NLS-1$
-				info.put(key, value);
-			} else {
-				info.remove(key);
-			}
-			EncryptedData encryptedData = !info.isEmpty() ? aesTool.encrypt(info, password) : new EncryptedData();
+			EncryptedData encryptedData = !isEmpty(info) ? aesTool.encrypt(info, password) : new EncryptedData();
 			informant.setEncryptedData(encryptedData);
 		} catch (InvalidKeyException e) {
 			IntelligencePlugIn.log("InvalidKeyException encrypting informant ", null); //$NON-NLS-1$
@@ -120,8 +120,22 @@ public final class InformantAesManager {
 		} catch (IOException e) {
 			IntelligencePlugIn.log("IOException encrypting informant ", null); //$NON-NLS-1$
 		}
+		
 	}
 
+	private boolean isEmpty(Map<InformantDataKey, Object> info) {
+		if (info != null) {
+			Set<InformantDataKey> keySet = info.keySet();
+			for (InformantDataKey key : keySet) {
+				Object value = info.get(key);
+				if (value != null && !"".equals(value)) { //$NON-NLS-1$
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public final Object get(Informant informant, InformantDataKey key) {
 		if (data == null || informant == null)

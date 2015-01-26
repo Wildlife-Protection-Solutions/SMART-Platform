@@ -41,6 +41,7 @@ import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.informant.editor.InformantDataEditor.InfromantColumn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
+import org.wcs.smart.intelligence.model.InformantDataKey;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
@@ -74,7 +75,7 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Label lblId = new Label(main, SWT.NONE);
-		lblId.setText("Id:");
+		lblId.setText(Messages.InformantEditor_Id);
 
 		txtId = new Text(main, SWT.BORDER);
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -87,7 +88,7 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 		});
 		
 		Label lblActive = new Label(main, SWT.NONE);
-		lblActive.setText("Active:");
+		lblActive.setText(Messages.InformantEditor_Active);
 
 		btnActive = new Button(main, SWT.CHECK);
 		btnActive.setSelection(informant.getIsActive());
@@ -102,7 +103,7 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 			createSecureContent(main);
 		} else {
 			Label lblInfo = new Label(main, SWT.NONE);
-			lblInfo.setText("* You need to login first to be able to change secured informant information.");
+			lblInfo.setText(Messages.InformantEditor_LoginNotice);
 			lblInfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		}
 		
@@ -158,10 +159,12 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 		informant.setIsActive(btnActive.getSelection());
 
 		if (col2Text != null) {
+			Map<InformantDataKey, Object> data = new HashMap<>();
 			for (InfromantColumn col : InfromantColumn.values()) {
 				Text txt = col2Text.get(col);
-				informant.set(col.getKey(), txt.getText());
+				data.put(col.getKey(), txt.getText());
 			}
+			informant.set(data);
 		}
 		
 		IntelligenceHibernateManager.saveInformant(informant);
