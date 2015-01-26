@@ -668,6 +668,12 @@
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.ShowInformantDataHandler"
             commandId="org.wcs.smart.intelligence.ShowInformant">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
       </handler>
    </extension>
    <extension
