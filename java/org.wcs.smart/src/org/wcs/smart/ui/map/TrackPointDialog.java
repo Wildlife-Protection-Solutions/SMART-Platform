@@ -376,6 +376,18 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		});
 	}
 
+	@Override
+	public boolean close() {
+		boolean ok = super.close();
+		if (ok && mapViewer != null) {
+			mapViewer.getRenderManager().stopRendering();
+			mapViewer.getRenderManager().dispose();
+			mapViewer.dispose();
+			mapViewer = null;
+		}
+		return ok;
+	}
+	
 	private void undoDelete(){
 		if (undo.size() <= 0) return;
 		
@@ -781,9 +793,8 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 	protected void cancelPressed(){
 		if (isModified){
 			//warn users
-			if (!MessageDialog.openQuestion(getShell(), Messages.TrackPointDialog_WarningTitle, 
-					Messages.TrackPointDialog_WarningMessage)){
-				return ;
+			if (!MessageDialog.openQuestion(getShell(), Messages.TrackPointDialog_WarningTitle, Messages.TrackPointDialog_WarningMessage)){
+				return;
 			}
 		}
 		super.cancelPressed();
@@ -821,8 +832,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 	}
 
 	@Override
-	public void setSelectionProvider(
-			IMapEditorSelectionProvider selectionProvider) {
+	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
 		mapViewer.setSelectionProvider(selectionProvider);
 	}
 

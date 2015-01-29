@@ -130,6 +130,8 @@ public class MapDialog extends Dialog implements MapPart{
 	public boolean close(){
 		boolean ok = super.close();
 		if (ok && viewer != null){
+			viewer.getRenderManager().stopRendering();
+			viewer.getRenderManager().dispose();
 			viewer.dispose();
 			viewer = null;
 		}

@@ -171,6 +171,15 @@ public class TracksComposite extends Composite implements MapPart{
 		createControls();
 		updateInput();
 	}
+
+	@Override
+	public void dispose(){
+		super.dispose();
+		mapViewer.getRenderManager().stopRendering();
+		mapViewer.getRenderManager().dispose();
+		mapViewer.dispose();
+		mapViewer = null;
+	}
 	
 	private List<MissionTrack> buildTrackInput() {
 		List<MissionTrack> tblInput = new ArrayList<MissionTrack>();
@@ -989,8 +998,7 @@ public class TracksComposite extends Composite implements MapPart{
 	}
 
 	@Override
-	public void setSelectionProvider(
-			IMapEditorSelectionProvider selectionProvider) {
+	public void setSelectionProvider(IMapEditorSelectionProvider selectionProvider) {
 		mapViewer.setSelectionProvider(selectionProvider);
 	}
 

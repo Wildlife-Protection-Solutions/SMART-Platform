@@ -129,6 +129,7 @@ public class MapComposite extends Composite implements MapPart {
 	public void dispose(){
 		super.dispose();
 		mapViewer.getRenderManager().stopRendering();
+		mapViewer.getRenderManager().dispose();
 		mapViewer.dispose();
 		mapViewer = null;
 	}
