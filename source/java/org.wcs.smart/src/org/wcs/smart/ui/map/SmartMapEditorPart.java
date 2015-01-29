@@ -409,6 +409,8 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         }
         
         getMap().getViewportModelInternal().setInitialized(false);
+        mapViewer.getRenderManager().stopRendering();
+        mapViewer.getRenderManager().dispose();
         mapViewer.dispose();
         getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
         partlistener = null;

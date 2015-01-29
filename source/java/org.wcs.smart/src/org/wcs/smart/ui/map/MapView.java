@@ -162,17 +162,14 @@ public class MapView extends ViewPart implements IDropTargetProvider, MapPart, I
 		
 		getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
 		
-		if (mapviewer != null && mapviewer.getViewport() != null
-				&& getMap() != null) {
-			mapviewer.getViewport().removePaneListener(
-					getMap().getViewportModelInternal());
+		if (mapviewer != null && mapviewer.getViewport() != null && getMap() != null) {
+			mapviewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
 		}
 		if (mapviewer != null) {
+			mapviewer.getRenderManager().stopRendering();
+			mapviewer.getRenderManager().dispose();
 			mapviewer.dispose();
 		}
-		
-		
-        
     }
 
     public void openContextMenu() {
