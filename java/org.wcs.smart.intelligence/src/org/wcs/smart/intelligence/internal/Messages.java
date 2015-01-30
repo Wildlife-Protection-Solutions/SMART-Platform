@@ -136,6 +136,10 @@ public class Messages extends NLS {
 
 	public static String ImportIntelligenceTemplateHandler_ReportDesignFile;
 
+	public static String InformantAesManager_InvalidPassword;
+
+	public static String InformantAesManager_PasswordProtected;
+
 	public static String InformantBackupContributor_DeleteDataError;
 
 	public static String InformantBackupContributor_Dialog_Message;
