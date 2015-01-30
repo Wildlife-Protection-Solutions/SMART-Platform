@@ -37,6 +37,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
 
@@ -145,10 +146,10 @@ public final class InformantAesManager {
 			return ""; //$NON-NLS-1$
 		}
 		if (password == null) {
-			return "<password protected>";
+			return Messages.InformantAesManager_PasswordProtected;
 		}
 		if (invalidSet.contains(informant)) {
-			return "<wrong password>";
+			return Messages.InformantAesManager_InvalidPassword;
 		}
 		Map<InformantDataKey, Object> info = data.get(informant);
 		if (info == null) {
@@ -183,7 +184,7 @@ public final class InformantAesManager {
 		}
 		if (info == null) {
 			invalidSet.add(informant);
-			return "<wrong password>";
+			return Messages.InformantAesManager_InvalidPassword;
 		}
 		return info.get(key);
 	}
