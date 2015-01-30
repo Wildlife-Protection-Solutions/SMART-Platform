@@ -45,25 +45,10 @@ public final class AESTool {
 
     public final EncryptedData encrypt(Object data, char[] password) throws IOException, InvalidKeyException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidParameterSpecException, IllegalBlockSizeException, BadPaddingException {
     	ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    	ObjectOutput out = null;
-    	try {
-    		out = new ObjectOutputStream(bos);   
+    	try (ObjectOutput out = new ObjectOutputStream(bos)) {
     		out.writeObject(data);
     		byte[] bytes = bos.toByteArray();
     		return encrypt(bytes, password);
-		} finally {
-    		try {
-    			if (out != null) {
-    				out.close();
-    			}
-    		} catch (IOException ex) {
-    			// ignore close exception
-    		}
-    		try {
-    			bos.close();
-    		} catch (IOException ex) {
-    			// ignore close exception
-    		}
     	}
     }
 
@@ -76,24 +61,9 @@ public final class AESTool {
     		return null;
     	}
     	ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-    	ObjectInput in = null;
-    	try {
-    		in = new ObjectInputStream(bis);
+    	try (ObjectInput in = new ObjectInputStream(bis)) {
     		Object o = in.readObject(); 
     		return o;
-		} finally {
-    		try {
-    			bis.close();
-    		} catch (IOException ex) {
-    			// ignore close exception
-    		}
-    		try {
-    			if (in != null) {
-    				in.close();
-    			}
-    		} catch (IOException ex) {
-    			// ignore close exception
-    		}
     	}
     }
     
