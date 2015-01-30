@@ -24,14 +24,10 @@ package org.wcs.smart.intelligence.informant.aes;
 import java.io.Serializable;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Class represents encrypted data that can be serialised.
+ *  
  * @author elitvin
- * @since 3.0.0
+ * @since 3.2.0
  */
 public class EncryptedData implements Serializable {
 	
