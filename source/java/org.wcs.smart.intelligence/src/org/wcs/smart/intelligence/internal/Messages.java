@@ -168,6 +168,8 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_DeleteDialog_Title;
 
+	public static String InformantDataEditor_DeleteInformant;
+
 	public static String InformantDataEditor_ForgotPassword;
 
 	public static String InformantDataEditor_Note;
@@ -175,6 +177,8 @@ public class Messages extends NLS {
 	public static String InformantDataEditor_ResetDialog_Message;
 
 	public static String InformantDataEditor_ResetDialog_Title;
+
+	public static String InformantDataEditor_SuccessDelete_Message;
 
 	public static String InformantDataEditor_Title;
 
@@ -338,6 +342,8 @@ public class Messages extends NLS {
 
     public static String IntelligenceHandler_TaskName;
 
+	public static String IntelligenceHibernateManager_DeleteInformant;
+
 	public static String IntelligenceHibernateManager_DeleteIntelligence_Error;
 
 	public static String IntelligenceHibernateManager_EncryptedDataClearError;
@@ -349,6 +355,8 @@ public class Messages extends NLS {
 	public static String IntelligenceHibernateManager_InformantSaveError;
 
 	public static String IntelligenceHibernateManager_Intelligence_NotFound_Error;
+
+	public static String IntelligenceHibernateManager_RemoveInformantLink_Message;
 
 	public static String IntelligenceHibernateManager_SaveIntelligence_Error;
 

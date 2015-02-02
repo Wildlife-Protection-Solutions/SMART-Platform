@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.intelligence.informant.editor;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -337,12 +338,17 @@ public class InformantDataEditor extends EditorPart {
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 		if (selection != null && !selection.isEmpty()) {
 			if (MessageDialog.openQuestion(getSite().getShell(), Messages.InformantDataEditor_DeleteDialog_Title, Messages.InformantDataEditor_DeleteDialog_Message)) {
+				int size = selection.size();
+				int count = 0;
 				for (Iterator<?> i = selection.iterator(); i.hasNext();) {
 					Informant informant = (Informant)  i.next();
-					IntelligenceHibernateManager.deleteInformant(informant);
+					if (IntelligenceHibernateManager.deleteInformant(informant)) {
+						count++;
+					}
 				}
+				loadData();
+				MessageDialog.openInformation(getSite().getShell(), Messages.InformantDataEditor_DeleteInformant, MessageFormat.format(Messages.InformantDataEditor_SuccessDelete_Message, count, size));
 			}
-			loadData();
 		}
 	}
 
