@@ -26,6 +26,8 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
 import org.hibernate.Interceptor;
 import org.hibernate.Query;
@@ -391,22 +393,61 @@ public class IntelligenceHibernateManager extends HibernateManager {
 		}
 	}
 
-	public static void deleteInformant(Informant informant) {
+	public static boolean deleteInformant(Informant informant) {
 		Session session = SmartHibernateManager.openSession();
 		try {
 			session.beginTransaction();
 			try {
+				Criteria query = session.createCriteria(Intelligence.class).add(Restrictions.eq("informant", informant)); //$NON-NLS-1$
+				@SuppressWarnings("unchecked")
+				List<Intelligence> intelList = (List<Intelligence>) query.list();
+				if (!intelList.isEmpty()) {
+					StringBuilder sb = new StringBuilder();
+					for (Intelligence intelligence : intelList) {
+						if (sb.length() > 0) {
+							sb.append(", "); //$NON-NLS-1$
+						}
+						sb.append('\'');
+						sb.append(intelligence.getName());
+						sb.append('\'');
+					}
+					final String message = MessageFormat.format(Messages.IntelligenceHibernateManager_RemoveInformantLink_Message, informant.getId(), sb.toString());
+					final boolean resume[] = {false};
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							resume[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.IntelligenceHibernateManager_DeleteInformant, message);
+						}
+						
+					});
+					if (!resume[0]) {
+						return false;
+					}
+					for (Intelligence intelligence : intelList) {
+						session.evict(intelligence.getInformant()); //to avoid org.hibernate.NonUniqueObjectException
+						intelligence.setInformant(null);
+						session.saveOrUpdate(intelligence);
+					}
+				}
 				session.delete(informant);
 				session.getTransaction().commit();
 				if (informant.getDataFile().exists()) {
 					FileUtils.forceDelete(informant.getDataFile());
 				}
+				session.close(); //some IntelligenceEventManager listeners might open session
+				for (Intelligence intelligence : intelList) {
+					IntelligenceEventManager.getInstance().intelligenceChanged(0, intelligence);
+				}
+				return true;
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
 				IntelligencePlugIn.displayLog(Messages.IntelligenceHibernateManager_InformantDeleteError + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+				return false;
 			}
 		} finally {
-			session.close();
+			if (session.isOpen()) {
+				session.close();
+			}
 		}
 	}
 
