@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.informant.editor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -120,12 +121,20 @@ public class InformantDataEditor extends EditorPart {
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
 	private TableViewer viewer;
+	private InformantSorter informantSorter;
 	
 	private Composite upperCmp;
 	private Button btnLogin;
 	private Button btnEdit;
 	private Button btnAdd;
 	private Button btnDelete;
+	
+	private final Comparator<Informant> idComparator = new Comparator<Informant>() {
+		@Override
+		public int compare(Informant i1, Informant i2) {
+			return i1.getId().compareTo(i2.getId());
+		}
+	};
 	
 	public InformantDataEditor() {
 	}	
@@ -200,6 +209,8 @@ public class InformantDataEditor extends EditorPart {
 		gd.heightHint = 300;
 		viewer.getTable().setLayoutData(gd);
 
+		informantSorter = new InformantSorter(viewer);
+		viewer.setComparator(informantSorter);
 		viewer.setItemCount(0);
 		addColumns(viewer);
 		
@@ -213,6 +224,7 @@ public class InformantDataEditor extends EditorPart {
 		toolkit.createLabel(main, Messages.InformantDataEditor_Note);
 		
 		loadData();
+		informantSorter.setSortColumn(viewer.getTable().getColumn(0));
 		updateButtons();
 	}
 
@@ -346,7 +358,7 @@ public class InformantDataEditor extends EditorPart {
 
 	private void addColumns(TableViewer v) {
 		//public data
-		TableViewerColumn idColumn = new TableViewerColumn(v, SWT.NONE);
+		final TableViewerColumn idColumn = new TableViewerColumn(v, SWT.NONE);
 		idColumn.getColumn().setText(Messages.InfromantColumn_ID);
 		idColumn.getColumn().setWidth(80);
 		idColumn.setLabelProvider(new ColumnLabelProvider() {
@@ -358,6 +370,14 @@ public class InformantDataEditor extends EditorPart {
 				return super.getText(element);
 			}
 		});
+		informantSorter.set(idColumn.getColumn(), idComparator);
+		idColumn.getColumn().addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				informantSorter.setSortColumn(idColumn.getColumn());
+			}	
+		});
+
 
 		TableViewerColumn activeColumn = new TableViewerColumn(v, SWT.NONE);
 		activeColumn.getColumn().setText(Messages.InfromantColumn_Active);
