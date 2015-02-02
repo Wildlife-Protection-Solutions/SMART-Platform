@@ -51,7 +51,7 @@ public class NewInformantEditor extends InformantEditor {
 	@Override
 	protected void createButtonsForButtonBar(Composite parent) {
 		super.createButtonsForButtonBar(parent);
-		setChangesMade(true);
+		getButton(IDialogConstants.OK_ID).setEnabled(true);
 	}
 	
 	@Override
