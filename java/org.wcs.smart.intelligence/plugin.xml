@@ -149,7 +149,8 @@
             <command
                   commandId="org.wcs.smart.intelligence.ShowInformant"
                   label="%informantview.command.label"
-                  style="push">
+                  style="push"
+                  tooltip="%informantview.command.tooltip">
             </command>
             <command
                   commandId="org.wcs.smart.intelligence.ShowIntelligencePersepctive"
@@ -737,6 +738,7 @@
       <editor
             class="org.wcs.smart.intelligence.informant.editor.InformantDataEditor"
             default="false"
+            icon="images/etool16/informant.png"
             id="org.wcs.smart.intelligence.informant.InformantDataEditor"
             name="%editor.informant.name">
       </editor>
@@ -783,6 +785,10 @@
       <image
             commandId="org.wcs.smart.intelligence.exportPdfEditor"
             icon="images/etool16/printpdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.ShowInformant"
+            icon="images/etool16/informant.png">
       </image>
    </extension>
    <extension
