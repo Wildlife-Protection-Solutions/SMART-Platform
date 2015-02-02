@@ -210,6 +210,8 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 		
+		toolkit.createLabel(main, Messages.InformantDataEditor_Note);
+		
 		loadData();
 		updateButtons();
 	}
