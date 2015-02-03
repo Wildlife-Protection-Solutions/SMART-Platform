@@ -24,8 +24,10 @@ package org.wcs.smart.intelligence.informant.editor;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -47,6 +49,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -74,6 +77,8 @@ import org.wcs.smart.intelligence.model.InformantDataKey;
  */
 public class InformantDataEditor extends EditorPart {
 	
+	public static final String ID = "org.wcs.smart.intelligence.informant.InformantDataEditor"; //$NON-NLS-1$
+
 	/**
 	 * Secured informant columns
 	 * 
@@ -115,9 +120,6 @@ public class InformantDataEditor extends EditorPart {
 			return key;
 		}
 	}
-	
-
-	public static final String ID = "org.wcs.smart.intelligence.informant.InformantDataEditor"; //$NON-NLS-1$
 
 	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
 
@@ -129,6 +131,9 @@ public class InformantDataEditor extends EditorPart {
 	private Button btnEdit;
 	private Button btnAdd;
 	private Button btnDelete;
+	private Button btnShow;
+	
+	private Map<TableColumn, Integer> securedColumnsMap = new HashMap<TableColumn, Integer>();
 	
 	private final Comparator<Informant> idComparator = new Comparator<Informant>() {
 		@Override
@@ -154,7 +159,7 @@ public class InformantDataEditor extends EditorPart {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		upperCmp = toolkit.createComposite(main);
-		layout = new GridLayout(5, false);
+		layout = new GridLayout(6, false);
 		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		upperCmp.setLayout(layout);
 		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -188,6 +193,16 @@ public class InformantDataEditor extends EditorPart {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performDelete();
+			}
+		});
+
+		btnShow = toolkit.createButton(upperCmp, "Show secured culumns", SWT.CHECK);
+		btnShow.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
+		btnShow.setSelection(true);
+		btnShow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				showSecuredColumns(btnShow.getSelection());
 			}
 		});
 		
@@ -229,6 +244,23 @@ public class InformantDataEditor extends EditorPart {
 		updateButtons();
 	}
 
+	protected void showSecuredColumns(boolean isVisible) {
+		for (TableColumn column : securedColumnsMap.keySet()) {
+			if (isVisible) {
+				if (column.getWidth() == 0) {
+					column.setWidth(securedColumnsMap.get(column));
+					column.setResizable(true);
+				}
+			} else {
+				if (column.getWidth() > 0) {
+					securedColumnsMap.put(column, column.getWidth());
+					column.setWidth(0);
+					column.setResizable(true);
+				}				
+			}
+		}
+	}
+
 	private void updateButtons() {
 		ISelection selection = viewer.getSelection();
 		boolean hasDecrypted = InformantAesManager.getInstance().containsDecrypted();
@@ -241,9 +273,12 @@ public class InformantDataEditor extends EditorPart {
 		btnDelete.setEnabled(selection != null && !selection.isEmpty());
 		if (isEmptyInput) {
 			btnLogin.setText(isPasswordSet ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_SetPassword);
+			btnShow.setVisible(isPasswordSet);
 		} else {
 			btnLogin.setText(hasDecrypted ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_Login);
+			btnShow.setVisible(hasDecrypted);
 		}
+		showSecuredColumns(btnShow.getVisible() && btnShow.getSelection());
 		upperCmp.layout();
 	}
 
@@ -404,6 +439,7 @@ public class InformantDataEditor extends EditorPart {
 			viewerColumn.getColumn().setText(column.getGuiName());
 			viewerColumn.getColumn().setWidth(column.getWidth());
 			viewerColumn.setLabelProvider(new InformantColumnLabelProvider(column.getKey()));
+			securedColumnsMap.put(viewerColumn.getColumn(), column.getWidth());
 		}
 	}
 
