@@ -164,6 +164,10 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_Button_SetPassword;
 
+	public static String InformantDataEditor_ConfirmationError_Message;
+
+	public static String InformantDataEditor_ConfirmationError_Title;
+
 	public static String InformantDataEditor_DeleteDialog_Message;
 
 	public static String InformantDataEditor_DeleteDialog_Title;
@@ -178,9 +182,17 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_ResetDialog_Title;
 
+	public static String InformantDataEditor_ShowCoulumns;
+
 	public static String InformantDataEditor_SuccessDelete_Message;
 
 	public static String InformantDataEditor_Title;
+
+	public static String InformantDataEditor_UserNameConfirmation_Button;
+
+	public static String InformantDataEditor_UserNameConfirmation_Message;
+
+	public static String InformantDataEditor_UserNameConfirmation_Title;
 
 	public static String InformantDataExporter_Dialog_Message;
 

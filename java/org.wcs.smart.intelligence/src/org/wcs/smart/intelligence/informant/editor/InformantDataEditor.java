@@ -68,6 +68,7 @@ import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
+import org.wcs.smart.ui.UserNamePasswordDialog;
 
 /**
  * Editor for viewing informant application data.
@@ -196,7 +197,7 @@ public class InformantDataEditor extends EditorPart {
 			}
 		});
 
-		btnShow = toolkit.createButton(upperCmp, "Show secured culumns", SWT.CHECK);
+		btnShow = toolkit.createButton(upperCmp, Messages.InformantDataEditor_ShowCoulumns, SWT.CHECK);
 		btnShow.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
 		btnShow.setSelection(true);
 		btnShow.addSelectionListener(new SelectionAdapter() {
@@ -312,6 +313,22 @@ public class InformantDataEditor extends EditorPart {
 
 	protected void handleForgotPassword() {
 		if (MessageDialog.openQuestion(getSite().getShell(), Messages.InformantDataEditor_ResetDialog_Title, Messages.InformantDataEditor_ResetDialog_Message)) {
+			//user need to enter login/password to remove secure data
+			UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(),
+					Messages.InformantDataEditor_UserNameConfirmation_Title,
+					Messages.InformantDataEditor_UserNameConfirmation_Message,
+					Messages.InformantDataEditor_UserNameConfirmation_Button);
+			if (dialog.open() == Window.CANCEL) {
+				return;
+			}
+			
+			if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
+				&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)) {
+				
+				MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.InformantDataEditor_ConfirmationError_Title, Messages.InformantDataEditor_ConfirmationError_Message);
+				return;
+			}
+			
 			IntelligenceHibernateManager.clearInformantsEncrptedData();
 			loadData();
 			updateButtons();
