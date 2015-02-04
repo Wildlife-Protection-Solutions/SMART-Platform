@@ -364,8 +364,12 @@ public class InformantDataEditor extends EditorPart {
 	private void performLogin() {
 		PasswordInputDialog dialog = new PasswordInputDialog(getSite().getShell());
 		if (dialog.open() == Window.OK) {
-			InformantAesManager.getInstance().setPassword(dialog.getPassword());
+			InformantAesManager manager = InformantAesManager.getInstance();
+			manager.setPassword(dialog.getPassword());
 			viewer.refresh();
+			if (manager.isPasswordSet() && !manager.containsDecrypted()) {
+				MessageDialog.openError(getSite().getShell(), Messages.InformantDataEditor_WrongPassword_Title, Messages.InformantDataEditor_WrongPassword_Message);
+			}
 			updateButtons();
 		}
 	}

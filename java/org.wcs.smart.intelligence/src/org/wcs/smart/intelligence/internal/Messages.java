@@ -194,6 +194,10 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_UserNameConfirmation_Title;
 
+	public static String InformantDataEditor_WrongPassword_Message;
+
+	public static String InformantDataEditor_WrongPassword_Title;
+
 	public static String InformantDataExporter_Dialog_Message;
 
 	public static String InformantDataExporter_Dialog_Title;
