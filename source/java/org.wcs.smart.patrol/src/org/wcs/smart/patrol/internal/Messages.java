@@ -270,6 +270,8 @@ public class Messages extends NLS {
 	public static String PatrolImporter_Progress_Saving;
 	public static String PatrolImporter_Progress_TaskName;
 	public static String PatrolImporter_Progress_Validating;
+	public static String PatrolImporter_Warn_DataDuplicate;
+	public static String PatrolImporter_Warn_SameId;
 	public static String PatrolLeaderWizardPage_LeaderPilotTitle;
 	public static String PatrolLeaderWizardPage_LeaderTitle;
 	public static String PatrolLeaderWizardPage_PageMessage_Leader;

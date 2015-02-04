@@ -201,28 +201,36 @@ public class PatrolImporter {
 			if (xmlPatrol.getId() != null){
 				if (PatrolHibernateManager.isDuplicateId(xmlPatrol.getId(), SmartDB.getCurrentConservationArea(), session)){
 					
-					//duplicate patrol id
-					final boolean[] cont = new boolean[]{true};
-					final String pid = xmlPatrol.getId();
-					Display.getDefault().syncExec(new Runnable(){
+					if (!config.isIgnoreWarnings()) {
+						//duplicate patrol id
+						final boolean[] cont = new boolean[]{true};
+						final String pid = xmlPatrol.getId();
+						Display.getDefault().syncExec(new Runnable(){
 
-						@Override
-						public void run() {
-							String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage_SameId, pid) : MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, pid);
-							MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_ImportPatrol_DialogTitle, 
-									null, message,
-									MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
-							int ret = dialog.open();
-							if (ret == 1){
-								//do not import
-								cont[0] = false;
-								return ;
-							}		
+							@Override
+							public void run() {
+								String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage_SameId, pid) : MessageFormat.format(Messages.PatrolImporter_ConfirmationMessage, pid);
+								MessageDialog dialog = new MessageDialog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_ImportPatrol_DialogTitle, 
+										null, message,
+										MessageDialog.QUESTION, new String[]{IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 1);
+								int ret = dialog.open();
+								if (ret == 1){
+									//do not import
+									cont[0] = false;
+									return ;
+								}		
+							}
+
+						});
+						if(!cont[0]){
+							return null;
 						}
-
-					});
-					if(!cont[0]){
-						return null;
+					} else {
+						//duplicate patrol id but user chose to ignore warnings
+						String pid = xmlPatrol.getId();
+						String fileName = sourceFile.getName();
+						String message = config.isKeepIDs() ? MessageFormat.format(Messages.PatrolImporter_Warn_SameId, xmlPatrol.getId(), fileName) : MessageFormat.format(Messages.PatrolImporter_Warn_DataDuplicate, pid, fileName);
+						config.addWarning(message, sourceFile);
 					}
 				}
 			}		

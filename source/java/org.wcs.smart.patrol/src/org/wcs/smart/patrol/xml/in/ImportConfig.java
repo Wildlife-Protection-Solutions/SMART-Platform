@@ -66,4 +66,9 @@ public class ImportConfig {
 		}
 		this.warnings.addAll(warnings);
 	}
+
+	public void addWarning(String warning, File f) {
+		this.warnFiles.add(f.getAbsolutePath());
+		this.warnings.add(warning);
+	}
 }
