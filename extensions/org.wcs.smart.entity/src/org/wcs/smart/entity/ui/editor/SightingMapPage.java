@@ -55,6 +55,7 @@ import org.wcs.smart.entity.model.EntityType.Type;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 /**
  * Map page that contains the latest sighting query and
  * the fixed positiong for fixed entity types.
@@ -240,13 +241,10 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 	
 	@Override
 	public void dispose(){
+		JobUtil.stopJobs(loadDefaultLayers, addLayerJob, addQueryReusltsJob, updateLayerJob);
+
 		super.dispose();
 		
-		loadDefaultLayers.cancel();
-		addLayerJob.cancel();
-		addQueryReusltsJob.cancel();
-		updateLayerJob.cancel();
-	    
 		if (queryService != null){
 			CatalogPlugin.getDefault().getLocalCatalog().remove(queryService);
 	        queryService.dispose(null);

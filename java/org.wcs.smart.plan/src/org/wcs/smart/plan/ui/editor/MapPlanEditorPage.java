@@ -72,6 +72,7 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -337,16 +338,10 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 
 	@Override
 	public void dispose() {
-		super.dispose();
 		isDisposing = true;
-
-		refreshSubPlanLayer.cancel();
-		if (loadDefaultLayers != null){
-			loadDefaultLayers.cancel();
-		}
-		addLayerJob.cancel();
-		refreshJob.cancel();
-		refreshPatrolsJob.cancel(); 
+		JobUtil.stopJobs(refreshSubPlanLayer, loadDefaultLayers, addLayerJob, refreshJob, refreshPatrolsJob);
+		
+		super.dispose();
 
 		synchronized (lockObj) {
 			//dispose of patrol service

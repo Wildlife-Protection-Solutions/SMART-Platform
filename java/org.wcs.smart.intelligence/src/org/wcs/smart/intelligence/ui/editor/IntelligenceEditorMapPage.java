@@ -45,6 +45,7 @@ import org.wcs.smart.intelligence.map.IntelligenceService;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 
 /**
  * Intelligence editor map page.
@@ -151,27 +152,24 @@ public class IntelligenceEditorMapPage extends SmartMapEditorPart {
 	}
 
     public void refresh(){
-    	refreshJob.cancel();
-    	refreshJob.schedule();
+    	if (refreshJob != null) {
+        	refreshJob.cancel();
+        	refreshJob.schedule();
+    	}
     }
 
     @Override
     public void dispose() {
+		JobUtil.stopJobs(loadDefaultLayersJob, addLayerJob, refreshJob);
+		loadDefaultLayersJob = null;
+		refreshJob = null;
+    	
         super.dispose();
-        if (loadDefaultLayersJob != null){
-        	loadDefaultLayersJob.cancel();
-        	loadDefaultLayersJob = null;
-        }
-        addLayerJob.cancel();
         
         //dispose of patrol service
         CatalogPlugin.getDefault().getLocalCatalog().remove(intelService);
         intelService.dispose(null);
         intelService = null;
-        
-        refreshJob.cancel();
-        refreshJob = null;
     }
-
 
 }

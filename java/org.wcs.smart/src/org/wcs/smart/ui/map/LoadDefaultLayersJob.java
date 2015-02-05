@@ -128,6 +128,9 @@ public class LoadDefaultLayersJob extends Job{
 
     				((RenderManagerImpl)map.getRenderManager()).disableRendering();
     				map.sendCommandSync(alCommand);
+
+    				if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+    				
     				map.getBlackboard().put(MapSettings.BASEMAP_BLACKBOARD_KEY,alCommand.getLayers());
     				((RenderManagerImpl)map.getRenderManager()).enableRendering();
     				((RenderManagerImpl)map.getRenderManager()).refresh(null);
