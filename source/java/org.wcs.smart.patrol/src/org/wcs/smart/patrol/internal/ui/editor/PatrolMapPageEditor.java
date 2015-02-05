@@ -52,6 +52,7 @@ import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 
 /**
  * Page for the editor for displaying a map
@@ -153,9 +154,11 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	/**
 	 * refresh the map and track layers
 	 */
-	public void refresh(){
-		refreshJob.cancel();
-		refreshJob.schedule();
+	public void refresh() {
+    	if (refreshJob != null) {
+        	refreshJob.cancel();
+        	refreshJob.schedule();
+    	}
 	}
 
 	private void addLayers(){
@@ -197,12 +200,11 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 
     @Override
     public void dispose() {
+    	JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
+    	loadDefaultLayers = null;
+        refreshJob = null;
+
         super.dispose();
-        if (loadDefaultLayers != null){
-        	loadDefaultLayers.cancel();
-        	loadDefaultLayers = null;
-        }
-        addLayerJob.cancel();
         
         PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolUpdatedListeners);
         
@@ -210,9 +212,6 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
         CatalogPlugin.getDefault().getLocalCatalog().remove(patrolService);
         patrolService.dispose(null);
         patrolService = null;
-        
-        refreshJob.cancel();
-        refreshJob = null;
     }
 
 

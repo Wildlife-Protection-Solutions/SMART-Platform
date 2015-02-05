@@ -58,6 +58,7 @@ import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 
 /**
  * Query editor page for displaying query results
@@ -251,21 +252,17 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
      */
     @Override
     public void dispose() {
-        super.dispose();
-        if (loadDefaultLayers != null){
-        	loadDefaultLayers.cancel();
-        	loadDefaultLayers = null;
-        }
-        addLayerJob.cancel();
+    	JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
+    	loadDefaultLayers = null;
+        refreshJob = null;
+
+    	super.dispose();
         
         if (queryService != null){
         	CatalogPlugin.getDefault().getLocalCatalog().remove(queryService);
         	queryService.dispose(null);
             queryService = null;
         }
-        
-        refreshJob.cancel();
-        refreshJob = null;
     }
     
     /**
@@ -274,7 +271,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
     public void refresh(){
     	if (queryService == null){
     		addLayerJob.schedule();
-    	}else{
+    	}else if (refreshJob != null) {
     		refreshJob.schedule();
     	}
     }

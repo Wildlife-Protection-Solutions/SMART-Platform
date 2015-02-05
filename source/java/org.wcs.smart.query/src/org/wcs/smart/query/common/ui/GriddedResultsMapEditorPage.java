@@ -68,6 +68,7 @@ import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 
 /**
  * Presents the map with the GridCoverage which result of queryS
@@ -308,13 +309,11 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 	 */
 	@Override
 	public void dispose() {
+		JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
+		loadDefaultLayers = null;
+		refreshJob = null;
+		
 		super.dispose();
-
-		if (loadDefaultLayers != null) {
-			loadDefaultLayers.cancel();
-			loadDefaultLayers = null;
-		}
-		addLayerJob.cancel();
 
 		if (rasterService != null) {
 			try {
@@ -324,10 +323,6 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 			this.rasterService.dispose(null);
 			this.rasterService = null;
 		}
-		refreshJob.cancel();
-		refreshJob = null;
-		
-		
 	}
 
 	/**
@@ -336,7 +331,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 	public void refresh(boolean firstRun) {
 		if (rasterService == null) {
 			addLayerJob.schedule();
-		} else {
+		} else if (refreshJob != null) {
 			refreshJob.schedule();
 		}
 

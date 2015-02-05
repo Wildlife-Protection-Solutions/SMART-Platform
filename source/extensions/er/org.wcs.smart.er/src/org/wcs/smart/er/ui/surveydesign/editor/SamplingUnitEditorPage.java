@@ -105,6 +105,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -296,12 +297,11 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 	}
 	
 	public void dispose(){
+		JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
+		loadDefaultLayers = null;
+		refreshJob = null;
+
 		super.dispose();
-		if (loadDefaultLayers != null) {
-			loadDefaultLayers.cancel();
-			loadDefaultLayers = null;
-		}
-		addLayerJob.cancel();
 		
 	    // dispose of patrol service
 		if (suService != null){
@@ -309,9 +309,6 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			suService.dispose(null);
 			suService = null;
 		}
-
-		refreshJob.cancel();
-		refreshJob = null;
 	}
 	
 	

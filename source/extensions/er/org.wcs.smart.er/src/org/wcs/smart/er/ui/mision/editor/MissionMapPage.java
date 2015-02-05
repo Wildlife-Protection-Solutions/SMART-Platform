@@ -45,6 +45,7 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.JobUtil;
 
 /**
  * Mission editor map page displaying tracks
@@ -146,11 +147,19 @@ public class MissionMapPage extends SmartMapEditorPart {
 		return this.parentEditor;
 	}
 	
-	public void refresh(){
-		refreshJob.cancel();
-		refreshJob.schedule();
+	public void refresh() {
+    	if (refreshJob != null) {
+        	refreshJob.cancel();
+        	refreshJob.schedule();
+    	}
 	}
 
+	@Override
+	public void dispose() {
+		JobUtil.stopJobs(loadDefaultLayers, addLayerJob, refreshJob);
+		super.dispose();
+	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
