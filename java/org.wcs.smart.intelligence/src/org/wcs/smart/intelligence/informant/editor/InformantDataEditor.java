@@ -52,6 +52,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.ISaveablePart2;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -76,7 +77,7 @@ import org.wcs.smart.ui.UserNamePasswordDialog;
  * @author elitvin
  * @since 3.2.0
  */
-public class InformantDataEditor extends EditorPart {
+public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 	
 	public static final String ID = "org.wcs.smart.intelligence.informant.InformantDataEditor"; //$NON-NLS-1$
 
@@ -490,8 +491,24 @@ public class InformantDataEditor extends EditorPart {
 	}
 	
 	@Override
+	public int promptToSaveOnClose() {
+		InformantAesManager manager = InformantAesManager.getInstance();
+		if (manager.isPasswordSet()) {
+			if (manager.containsDecrypted()) {
+				//prompt that user will be logged out
+				if (!MessageDialog.openQuestion(getSite().getShell(), Messages.InformantDataEditor_LogoutDialog_Title, Messages.InformantDataEditor_LogoutDialog_Message)) {
+					return ISaveablePart2.CANCEL;
+				}
+			}
+			manager.clear();
+		}
+		return ISaveablePart2.NO;
+	}
+	
+	@Override
 	public boolean isDirty() {
-		return false;
+		InformantAesManager manager = InformantAesManager.getInstance();
+		return manager.isPasswordSet() && manager.containsDecrypted();
 	}
 
 	@Override

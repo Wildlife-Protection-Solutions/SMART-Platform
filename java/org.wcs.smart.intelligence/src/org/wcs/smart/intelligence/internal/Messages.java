@@ -176,6 +176,10 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_ForgotPassword;
 
+	public static String InformantDataEditor_LogoutDialog_Message;
+
+	public static String InformantDataEditor_LogoutDialog_Title;
+
 	public static String InformantDataEditor_Note;
 
 	public static String InformantDataEditor_ResetDialog_Message;
