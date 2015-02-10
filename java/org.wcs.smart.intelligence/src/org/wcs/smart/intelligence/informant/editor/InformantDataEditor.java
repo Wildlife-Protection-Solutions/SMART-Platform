@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.intelligence.informant.editor;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,8 +32,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ISelection;
@@ -65,6 +71,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.intelligence.informant.PersistentManager;
+import org.wcs.smart.intelligence.informant.aes.EncryptedData;
 import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
@@ -133,6 +141,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 	private Button btnEdit;
 	private Button btnAdd;
 	private Button btnDelete;
+	private Button btnChangePwd;
 	private Button btnShow;
 	
 	private Map<TableColumn, Integer> securedColumnsMap = new HashMap<TableColumn, Integer>();
@@ -161,7 +170,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		upperCmp = toolkit.createComposite(main);
-		layout = new GridLayout(6, false);
+		layout = new GridLayout(7, false);
 		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
 		upperCmp.setLayout(layout);
 		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -198,6 +207,14 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 			}
 		});
 
+		btnChangePwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_ChangePassword, SWT.PUSH);
+		btnChangePwd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performChangePassword();
+			}
+		});
+		
 		btnShow = toolkit.createButton(upperCmp, Messages.InformantDataEditor_ShowCoulumns, SWT.CHECK);
 		btnShow.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
 		btnShow.setSelection(true);
@@ -276,9 +293,11 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		if (isEmptyInput) {
 			btnLogin.setText(isPasswordSet ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_SetPassword);
 			btnShow.setVisible(isPasswordSet);
+			btnChangePwd.setVisible(isPasswordSet);
 		} else {
 			btnLogin.setText(hasDecrypted ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_Login);
 			btnShow.setVisible(hasDecrypted);
+			btnChangePwd.setVisible(hasDecrypted);
 		}
 		showSecuredColumns(btnShow.getVisible() && btnShow.getSelection());
 		upperCmp.layout();
@@ -419,6 +438,53 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		loadData();
 	}
 
+	protected void performChangePassword() {
+		final ChangePasswordDialog dialog = new ChangePasswordDialog(getSite().getShell());
+		if (dialog.open() == Window.OK) {
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(getSite().getShell());
+			@SuppressWarnings("unchecked")
+			final List<Informant> informantList = (List<Informant>) viewer.getInput();
+			try {
+				pmd.run(true, false, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						InformantAesManager manager = InformantAesManager.getInstance();
+						monitor.beginTask(Messages.InformantDataEditor_Task_ChangePassword, 2*informantList.size());
+						Map<Informant, Map<InformantDataKey, Object>> i2data = new HashMap<>();
+						monitor.subTask(Messages.InformantDataEditor_Task_ExtractInformantData);
+						for (Informant informant : informantList) {
+							Map<InformantDataKey, Object> info = manager.get(informant);
+							i2data.put(informant, info);
+						}
+						
+						manager.setPassword(dialog.getPassword());
+						for (Informant informant : informantList) {
+							monitor.subTask(MessageFormat.format(Messages.InformantDataEditor_Task_EncryptInformantData, informant.getId()));
+							Map<InformantDataKey, Object> info = i2data.get(informant);
+							if (info != null) {
+								manager.set(informant, info);
+								EncryptedData encryptedData = informant.getEncryptedData();
+					    		File dataFile = informant.getDataFile();
+								if (!encryptedData.isEmpty()) {
+					    			PersistentManager.toFile(dataFile, encryptedData);
+					    		} else if (dataFile.exists()) {
+					    			try {
+										FileUtils.forceDelete(dataFile);
+									} catch (IOException e) {
+										IntelligencePlugIn.log("Cannot delete file", e); //$NON-NLS-1$
+									}
+					    		}
+							}
+						}
+					}
+				});
+				MessageDialog.openInformation(getSite().getShell(), Messages.InformantDataEditor_SuccessDialog_Title, Messages.InformantDataEditor_SuccessDialog_Message);
+			} catch (Exception e) {
+				IntelligencePlugIn.displayLog(Messages.InformantDataEditor_ChangePassword_Error, e);
+			}
+		}
+	}
+	
 	private void addColumns(TableViewer v) {
 		//public data
 		final TableViewerColumn idColumn = new TableViewerColumn(v, SWT.NONE);

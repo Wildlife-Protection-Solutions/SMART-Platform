@@ -67,6 +67,16 @@ public class SetPasswordDialog extends TitleAreaDialog {
 		composite.setLayout(new GridLayout(2, false));
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
+		createInnerContent(composite);
+		
+		super.getShell().setText(Messages.SetPasswordDialog_Title);
+		super.setTitle(Messages.SetPasswordDialog_Title);
+		super.setMessage(Messages.SetPasswordDialog_Message);
+		return parent;
+	}
+
+
+	protected void createInnerContent(Composite composite) {
 		Label lblPassword = new Label(composite, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		lblPassword.setText(Messages.SetPasswordDialog_NewPassword);
@@ -96,20 +106,18 @@ public class SetPasswordDialog extends TitleAreaDialog {
 		Label lblPolicy = new Label(composite, SWT.NONE);
 		lblPolicy.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1));
 		lblPolicy.setText(Messages.SetPasswordDialog_Policy);
-		
-		super.getShell().setText(Messages.SetPasswordDialog_Title);
-		super.setTitle(Messages.SetPasswordDialog_Title);
-		super.setMessage(Messages.SetPasswordDialog_Message);
-		return parent;
 	}
-
 	
 	protected void inputChanged() {
-		String error = validatePassword(txtPassword.getText(), txtRePassword.getText());
+		String error = validate();
 		getButton(IDialogConstants.OK_ID).setEnabled(error == null);
 		setErrorMessage(error);
 	}
 
+	protected String validate() {
+		return validatePassword(txtPassword.getText(), txtRePassword.getText());
+	}
+	
 	private String validatePassword(String pwd, String re) {
 		if (pwd.equals(re)) {
 			if (!pwd.matches(PASSWORD_REGEXP)) {
