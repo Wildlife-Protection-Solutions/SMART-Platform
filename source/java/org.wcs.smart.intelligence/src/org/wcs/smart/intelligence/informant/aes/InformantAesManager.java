@@ -27,6 +27,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -69,6 +70,10 @@ public final class InformantAesManager {
 		this.password = password;
 	}
 
+	public final boolean validatePassword(char[] password) {
+		return this.password != null && password != null && Arrays.equals(this.password, password);
+	}
+	
 	public final boolean containsDecrypted() {
 		return !data.isEmpty();
 	}
@@ -124,7 +129,7 @@ public final class InformantAesManager {
 		
 	}
 
-	private boolean isEmpty(Map<InformantDataKey, Object> info) {
+	private final boolean isEmpty(Map<InformantDataKey, Object> info) {
 		if (info != null) {
 			Set<InformantDataKey> keySet = info.keySet();
 			for (InformantDataKey key : keySet) {
@@ -136,20 +141,20 @@ public final class InformantAesManager {
 		}
 		return true;
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public final Object get(Informant informant, InformantDataKey key) {
+	public final Map<InformantDataKey, Object> get(Informant informant) {
 		if (data == null || informant == null)
 			return null; //data should never be null
 		EncryptedData encryptedData = informant.getEncryptedData();
 		if (encryptedData == null || encryptedData.isEmpty()) {
-			return ""; //$NON-NLS-1$
+			return null;
 		}
 		if (password == null) {
-			return Messages.InformantAesManager_PasswordProtected;
+			return null;
 		}
 		if (invalidSet.contains(informant)) {
-			return Messages.InformantAesManager_InvalidPassword;
+			return null;
 		}
 		Map<InformantDataKey, Object> info = data.get(informant);
 		if (info == null) {
@@ -184,23 +189,47 @@ public final class InformantAesManager {
 		}
 		if (info == null) {
 			invalidSet.add(informant);
+			return null;
+		}
+		return info;
+	}
+
+	public final Object get(Informant informant, InformantDataKey key) {
+		if (data == null || informant == null)
+			return null; //data should never be null
+		EncryptedData encryptedData = informant.getEncryptedData();
+		if (encryptedData == null || encryptedData.isEmpty()) {
+			return ""; //$NON-NLS-1$
+		}
+		if (password == null) {
+			return Messages.InformantAesManager_PasswordProtected;
+		}
+		if (invalidSet.contains(informant)) {
+			return Messages.InformantAesManager_InvalidPassword;
+		}
+		Map<InformantDataKey, Object> info = get(informant);
+		if (info == null) {
 			return Messages.InformantAesManager_InvalidPassword;
 		}
 		return info.get(key);
 	}
 	
 	public final void clear() {
+		clearPassword();
+		if (data != null) {
+			//TODO: is there a safer way to remove objects from memory
+			data.clear();
+		}
+		invalidSet.clear();
+	}
+
+	private final void clearPassword() {
 		if (password != null) {
 			for (int i = 0; i < password.length; i++) {
 				password[i] = '?';
 			}
 		}
 		password = null;
-		if (data != null) {
-			//TODO: is there a safer way to remove objects from memory
-			data.clear();
-		}
-		invalidSet.clear();
 	}
 	
 }

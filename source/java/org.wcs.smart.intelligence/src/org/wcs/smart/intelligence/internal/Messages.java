@@ -36,6 +36,14 @@ public class Messages extends NLS {
 
 	public static String CaDeleteHandler_DeletingIntelligences;
 
+	public static String ChangePasswordDialog_Message;
+
+	public static String ChangePasswordDialog_OldPassword;
+
+	public static String ChangePasswordDialog_OldPassword_Error;
+
+	public static String ChangePasswordDialog_Title;
+
 	public static String ConvertedIntelligenceExtraData_CannotDetermineName;
 
 	public static String ConvertedIntelligenceExtraData_CannotDetermineReceivedDate;
@@ -164,6 +172,10 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_Button_SetPassword;
 
+	public static String InformantDataEditor_ChangePassword;
+
+	public static String InformantDataEditor_ChangePassword_Error;
+
 	public static String InformantDataEditor_ConfirmationError_Message;
 
 	public static String InformantDataEditor_ConfirmationError_Title;
@@ -189,6 +201,16 @@ public class Messages extends NLS {
 	public static String InformantDataEditor_ShowCoulumns;
 
 	public static String InformantDataEditor_SuccessDelete_Message;
+
+	public static String InformantDataEditor_SuccessDialog_Message;
+
+	public static String InformantDataEditor_SuccessDialog_Title;
+
+	public static String InformantDataEditor_Task_ChangePassword;
+
+	public static String InformantDataEditor_Task_EncryptInformantData;
+
+	public static String InformantDataEditor_Task_ExtractInformantData;
 
 	public static String InformantDataEditor_Title;
 
