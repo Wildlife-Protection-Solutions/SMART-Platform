@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 /**
  * Clones the cybertracker properties when creating
@@ -44,7 +45,7 @@ public class CybertrackerTemplateCloner implements
 	@Override
 	public void cloneTemplateData(ConservationAreaClonerEngine engine, IProgressMonitor monitor) throws Exception {
 
-		monitor.beginTask("Copying Cybertracker Options", 1);
+		monitor.beginTask(Messages.CybertrackerTemplateCloner_TaskName, 1);
 		@SuppressWarnings("unchecked")
 		List<CyberTrackerPropertiesOption> list = engine.getSession().createCriteria(CyberTrackerPropertiesOption.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).list(); //$NON-NLS-1$
 		for (CyberTrackerPropertiesOption templateOption : list) {
