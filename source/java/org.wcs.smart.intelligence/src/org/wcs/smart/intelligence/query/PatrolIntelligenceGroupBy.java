@@ -39,7 +39,7 @@ public class PatrolIntelligenceGroupBy implements IExtensionGroupBy{
 
 	@Override
 	public String asString() {
-		return "contribution:patrol:intelligence"; //$NON-NLS-1$
+		return "patrol:contribution:intelligence:"; //$NON-NLS-1$
 	}
 
 	@Override
