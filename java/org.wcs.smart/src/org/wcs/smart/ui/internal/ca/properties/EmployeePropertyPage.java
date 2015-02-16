@@ -604,7 +604,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 			case FAMILY_NAME: return Collator.getInstance().compare(e1.getFamilyName(),e2.getFamilyName());
 			case GIVEN_NAME: return Collator.getInstance().compare(e1.getGivenName(),e2.getGivenName()) ;	
 			case AGENCY: return compareString(e1.getAgency() == null ? null : e1.getAgency().getName(), e2.getAgency() == null ? null : e2.getAgency().getName());
-			case RANK:return compareString(e1.getAgency() == null ? null : e1.getAgency().getName(), e2.getRank() == null ? null : e2.getRank().getName());
+			case RANK:return compareString(e1.getRank() == null ? null : e1.getRank().getName(), e2.getRank() == null ? null : e2.getRank().getName());
 			case GENDER: return e1.getGender() == e2.getGender() ? 0 : (e1.getGender() > e2.getGender() ? 1 : -1);
 			case BIRTHDATE: return compareDate(e1.getBirthDate(), e2.getBirthDate());
 			case DATE_CREATED: return compareDate(e1.getDateCreated(), e2.getDateCreated());
