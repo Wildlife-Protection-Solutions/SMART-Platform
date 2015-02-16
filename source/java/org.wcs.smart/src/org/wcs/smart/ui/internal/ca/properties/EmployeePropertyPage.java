@@ -763,7 +763,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	class EmployeeViewSorter extends ViewerComparator{
 		EmployeeTableViewerColumn column = null;
-		private int direction = SWT.DOWN;
+		private int direction = SWT.UP;
 		
 		public void setSortColumn(EmployeeTableViewerColumn sort){
 			
@@ -787,9 +787,9 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				return 0;
 			}
 			if (direction == SWT.UP){
-				return -compareValue(column.ecolumn, (Employee)object1, (Employee)object2);
-			}else{
 				return compareValue(column.ecolumn, (Employee)object1, (Employee)object2);
+			}else{
+				return -compareValue(column.ecolumn, (Employee)object1, (Employee)object2);
 			}
 
 		}
