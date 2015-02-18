@@ -14,6 +14,7 @@ public class Messages extends NLS {
 	public static String PreferenceInitializer_PreferenceError;
 	public static String PreloadingRepositoryHandler_CannotCompleteRequest;
 	public static String PreloadingRepositoryHandler_SoftwareUpdates;
+	public static String SitesPreferencePage_InvalidUser;
 	public static String SmartPolicy_InstallQuestion;
 	public static String SmartPolicy_PreferencePageName;
 	public static String SmartPolicy_Question;

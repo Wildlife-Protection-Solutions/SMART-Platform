@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
-            class="org.eclipse.equinox.p2.ui.RepositoryManipulationPage"
+            class="org.wcs.smart.p2.ui.SitesPreferencePage"
             id="org.wcs.smart.p2.ui.SitesPreferencePage"
             name="%sitepreferencepage.name">
       </page>
