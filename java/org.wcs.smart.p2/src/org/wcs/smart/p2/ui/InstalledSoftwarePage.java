@@ -36,7 +36,6 @@ package org.wcs.smart.p2.ui;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.equinox.internal.p2.ui.IProvHelpContextIds;
 import org.eclipse.equinox.internal.p2.ui.ProvUI;
-import org.eclipse.equinox.internal.p2.ui.ProvUIMessages;
 import org.eclipse.equinox.internal.p2.ui.actions.PropertyDialogAction;
 import org.eclipse.equinox.internal.p2.ui.actions.UninstallAction;
 import org.eclipse.equinox.internal.p2.ui.dialogs.CopyUtils;

@@ -22,10 +22,9 @@
 package org.wcs.smart.report.internal.ui;
 
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
@@ -37,18 +36,23 @@ import org.wcs.smart.report.ui.SmartLibraryEditorInput;
  * @author egouge
  *
  */
-public class EditLibraryHandler extends AbstractHandler {
+public class EditLibraryHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(){
 		SmartLibraryEditorInput ri = new SmartLibraryEditorInput(SmartBirtLibrary.getInstance().getLibraryFile());
 		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().openEditor(
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(
 					ri, IReportEditorContants.LIBRARY_EDITOR_ID, true);
 		} catch (Exception ex) {
 			ReportPlugIn.displayLog(Messages.EditLibraryHandler_Loading_Error + ex.getLocalizedMessage(), ex);
-		}		
-		return null;
+		}
+	}
+	
+	public static class EditLibraryHandlerWrapper extends DIHandler<EditLibraryHandler>{
+		public EditLibraryHandlerWrapper(){
+			super(EditLibraryHandler.class);
+		}
 	}
 
 }

@@ -4,7 +4,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.wcs.smart.entity.ui.typelist.EntityTypeListView"
+            class="org.wcs.smart.entity.ui.typelist.EntityTypeListView$EntityTypeListViewWrapper"
             icon="images/icons/obj16/entitytype.png"
             id="org.wcs.smart.entity.typelist"
             name="%entitytype.view.name"
@@ -104,12 +104,16 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.entity.perspective"
+                  commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/entitytype.png"
                   label="%viewentities.command.name"
                   mnemonic="%showentities.command.mnemonic"
                   style="push"
                   tooltip="%showentities.command.tooltip">
+               <parameter
+                     name="org.wcs.smart.observation.perspective.show.focusview"
+                     value="org.wcs.smart.entity.typelist">
+               </parameter>
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -124,10 +128,16 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
-               commandId="org.wcs.smart.entity.perspective"
+               commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/entitytype.png"
+               label="%viewentities.command.name"
+               mnemonic="%showentities.command.mnemonic"
                style="push"
                tooltip="%openentities.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.observation.perspective.show.focusview"
+                  value="org.wcs.smart.entity.typelist">
+            </parameter>
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -211,14 +221,20 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
-               commandId="org.wcs.smart.entity.perspective"
+               commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/obj16/entitytype.png"
+               label="%viewentities.command.name"
                style="push"
                tooltip="%openentities.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.entity.ccaa.EntityTypePerspective">
+            </parameter>
             <visibleWhen
                   checkEnabled="false">
                <not>
                   <test
+                        forcePluginActivation="true"
                         property="org.wcs.smart.caSingle">
                   </test>
                </not>
@@ -232,11 +248,16 @@
                id="org.wcs.smart.menu.ccaa.entity"
                label="%entity.menu.label">
             <command
-                  commandId="org.wcs.smart.entity.perspective"
+                  commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/obj16/entitytype.png"
+                  label="%viewentities.command.name"
                   mnemonic="%showentities.command.mnemonic"
                   style="push"
                   tooltip="%showentities.command.tooltip">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.entity.ccaa.EntityTypePerspective">
+               </parameter>
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -289,10 +310,6 @@
             name="%newentitycommand.name">
       </command>
       <command
-            id="org.wcs.smart.entity.perspective"
-            name="%viewentities.command.name">
-      </command>
-      <command
             id="org.wcs.smart.entitytype.delete"
             name="%deleteentities.command.name">
       </command>
@@ -312,7 +329,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.entity.ui.NewEntityHandler"
+            class="org.wcs.smart.entity.ui.NewEntityHandler$NewEntityHandlerWrapper"
             commandId="org.wcs.smart.entitytype.new">
          <activeWhen>
             <and>
@@ -328,11 +345,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.entity.ui.ViewEntityHandler"
-            commandId="org.wcs.smart.entity.perspective">
-      </handler>
-      <handler
-            class="org.wcs.smart.entity.ui.DeleteEntityTypeHandler"
+            class="org.wcs.smart.entity.ui.DeleteEntityTypeHandler$DeleteEntityTypeHandlerWrapper"
             commandId="org.wcs.smart.entitytype.delete">
          <activeWhen>
             <and>
@@ -365,7 +378,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.entity.ui.OpenFilterDialogHandler"
+            class="org.wcs.smart.entity.ui.OpenFilterDialogHandler$OpenFilterDialogHandlerWrapper"
             commandId="org.wcs.smart.entity.entitytypefilter">
          <activeWhen>
             <test
@@ -375,7 +388,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.entity.ui.ExportEntityTypeHandler"
+            class="org.wcs.smart.entity.ui.ExportEntityTypeHandler$ExportEntityTypeHandlerWrapper"
             commandId="org.wcs.smart.entitytype.export">
          <activeWhen>
             <test
@@ -385,7 +398,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.entity.ui.ImportEntityTypeHandler"
+            class="org.wcs.smart.entity.ui.ImportEntityTypeHandler$ImportEntityTypeHandlerWrapper"
             commandId="org.wcs.smart.entitytype.import">
          <activeWhen>
             <and>
@@ -449,10 +462,6 @@
             icon="images/icons/etool16/newentitytype.png">
       </image>
       <image
-            commandId="org.wcs.smart.entity.perspective"
-            icon="images/icons/obj16/entitytype.png">
-      </image>
-      <image
             commandId="org.wcs.smart.entity.entitytypefilter"
             icon="images/icons/etool16/filterentitytype.png">
       </image>
@@ -476,7 +485,7 @@
       </editor>
    </extension>
    <extension
-         point="net.refractions.udig.catalog.ServiceExtension">
+         point="org.locationtech.udig.catalog.ServiceExtension">
       <service
             class="org.wcs.smart.entity.map.FixedEntityServiceExtension"
             id="org.wcs.smart.udig.catalog.FixedEntityService"

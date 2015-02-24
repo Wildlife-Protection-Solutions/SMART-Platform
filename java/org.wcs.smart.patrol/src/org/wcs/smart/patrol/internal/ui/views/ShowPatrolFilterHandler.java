@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Displays patrol filter dialog for patrol list view.
@@ -33,13 +34,19 @@ import org.eclipse.ui.handlers.HandlerUtil;
  * @author Emily
  *
  */
-public class ShowPatrolFilterHandler extends AbstractHandler {
+public class ShowPatrolFilterHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		PatrolListView view = (PatrolListView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(PatrolListView.ID);
-		PatrolFilterDialog pfd = new PatrolFilterDialog(HandlerUtil.getActiveShell(event), view);
+	
+	@Execute
+	public void execute(Shell activeShell,EPartService partService) throws ExecutionException {
+		PatrolListView view = (PatrolListView) E3Utils.getSourceObject(partService.findPart(PatrolListView.ID));
+		PatrolFilterDialog pfd = new PatrolFilterDialog(activeShell, view);
 		pfd.open();
-		return null;
+	}
+	
+	public static class ShowPatrolFilterHandlerWrapper extends DIHandler<ShowPatrolFilterHandler>{
+		public ShowPatrolFilterHandlerWrapper(){
+			super(ShowPatrolFilterHandler.class);
+		}
 	}
 }

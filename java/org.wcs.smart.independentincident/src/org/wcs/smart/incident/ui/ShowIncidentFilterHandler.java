@@ -21,11 +21,11 @@
  */
 package org.wcs.smart.incident.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Displays incident filter dialog for incident list view.
@@ -33,13 +33,19 @@ import org.eclipse.ui.handlers.HandlerUtil;
  * @author Emily
  *
  */
-public class ShowIncidentFilterHandler extends AbstractHandler {
+public class ShowIncidentFilterHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IndIncidentListView view = (IndIncidentListView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IndIncidentListView.ID);
-		IncidentFilterDialog pfd = new IncidentFilterDialog(HandlerUtil.getActiveShell(event), view);
+	@Execute
+	public void execute(Shell activeShell, EPartService pService){
+		IndIncidentListView view = (IndIncidentListView) E3Utils.getSourceObject(pService.findPart(IndIncidentListView.ID));
+		if (view == null) return;
+		IncidentFilterDialog pfd = new IncidentFilterDialog(activeShell, view);
 		pfd.open();
-		return null;
+	}
+	
+	public static class ShowIncidentFilterHandlerWrapper extends DIHandler<ShowIncidentFilterHandler>{
+		public ShowIncidentFilterHandlerWrapper(){
+			super(ShowIncidentFilterHandler.class);
+		}
 	}
 }

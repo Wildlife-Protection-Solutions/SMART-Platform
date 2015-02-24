@@ -23,15 +23,16 @@ package org.wcs.smart.er.ui.handlers;
 
 import java.util.Iterator;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Survey;
@@ -49,19 +50,13 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
  * @author Emily
  *
  */
-public class EditSurveyElementHandler extends AbstractHandler {
+public class EditSurveyElementHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection a = HandlerUtil.getCurrentSelection(event);
-		if (!(a instanceof StructuredSelection)){
-			return null;
-		}
-		
-		Shell parent = HandlerUtil.getActiveShell(event);
-		
-		StructuredSelection selection = (StructuredSelection)a;
-		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, Shell parent){
+		if (selection == null || !(selection instanceof StructuredSelection)) return ;
+			
+		for (Iterator<?> iterator = ((StructuredSelection)selection).iterator(); iterator.hasNext();) {
 			Object node = (Object) iterator.next();
 			if (node instanceof SurveyListTreeNode){
 				SurveyListTreeNode treeNode = (SurveyListTreeNode) node;
@@ -74,8 +69,6 @@ public class EditSurveyElementHandler extends AbstractHandler {
 				editSurveyDesign(parent, (SurveyDesignEditorInput)node);
 			}
 		}
-		
-		return null;
 	}
 
 	/**
@@ -118,11 +111,17 @@ public class EditSurveyElementHandler extends AbstractHandler {
 	 * @param parentShell
 	 * @param in
 	 */
-	public static final void editSurveyDesign(Shell parentShell, SurveyDesignEditorInput in){
+	private static final void editSurveyDesign(Shell parentShell, SurveyDesignEditorInput in){
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(in, SurveyDesignEditor.ID);
 		} catch (PartInitException e) {
 			EcologicalRecordsPlugIn.displayLog(Messages.EditSurveyElementHandler_DesignError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+		}
+	}
+	
+	public static class EditSurveyElementHandlerWrapper extends DIHandler<EditSurveyElementHandler>{
+		public EditSurveyElementHandlerWrapper(){
+			super(EditSurveyElementHandler.class);
 		}
 	}
 }

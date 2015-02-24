@@ -100,7 +100,7 @@ public class PatrolImporter extends SmartImporter {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.PatrolImporter_Save_Error, e);
+					SmartPlugIn.displayLog(Messages.PatrolImporter_Save_Error, e);
 				}
 			});
 			return null;

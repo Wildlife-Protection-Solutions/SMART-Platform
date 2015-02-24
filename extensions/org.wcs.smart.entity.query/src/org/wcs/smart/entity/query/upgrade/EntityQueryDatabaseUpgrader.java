@@ -43,33 +43,40 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
-	public void upgrade(Session s, IProgressMonitor monitor) {
-		Map<String, String> versions = UpgradeEngine.getVersions(s);
-		if (versions == null) {
-			//we don't know what is happening with database
-			//it is some kind of error or wrong database version
-			return;
-		}
-		final String currentVersion = versions.get(EntityQueryPlugIn.PLUGIN_ID);
-		if (currentVersion == null) {
-			//Entity doesn't present in this configuration
-			//we need to perform install database support for the plug-in
-			
-			//this will install and upgrade to current version
-			monitor.subTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask);
-			OnInstallAction install = new OnInstallAction();
-			install.execute(null);
-		}else{
-			try{
-				upgrade(currentVersion, s);
-			}catch (final Throwable t){
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						EntityQueryPlugIn.displayLog(MessageFormat.format(Messages.EntityQueryDatabaseUpgrader_QueryUpdateError, new Object[]{currentVersion, EntityQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$
-					}
-				});
+	public void upgrade(IProgressMonitor monitor) {
+		Map<String, String> versions = null;
+		Session s = HibernateManager.openSession();
+		try{
+			versions = UpgradeEngine.getVersions(s);
+		
+			if (versions == null) {
+				//we don't know what is happening with database
+				//it is some kind of error or wrong database version
+				return;
 			}
+			final String currentVersion = versions.get(EntityQueryPlugIn.PLUGIN_ID);
+			if (currentVersion == null) {
+				//Entity doesn't present in this configuration
+				//we need to perform install database support for the plug-in
+			
+				//this will install and upgrade to current version
+				monitor.subTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask);
+				OnInstallAction install = new OnInstallAction();
+				install.execute(null);
+			}else{
+				try{
+					upgrade(currentVersion, s);
+				}catch (final Throwable t){
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							EntityQueryPlugIn.displayLog(MessageFormat.format(Messages.EntityQueryDatabaseUpgrader_QueryUpdateError, new Object[]{currentVersion, EntityQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$
+						}
+					});
+				}
+			}
+		}finally{
+			s.close();
 		}
 		
 	}

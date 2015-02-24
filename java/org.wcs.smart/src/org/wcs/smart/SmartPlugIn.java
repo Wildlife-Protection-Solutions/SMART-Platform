@@ -24,10 +24,6 @@ package org.wcs.smart;
 import java.text.MessageFormat;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.IResolve;
-import net.refractions.udig.catalog.IService;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobManager;
@@ -38,10 +34,12 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IService;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -61,6 +59,17 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static SmartPlugIn plugin;
 	
+    /**
+     * Identifies the error overlay image.
+     */
+    public final static String IMG_DEC_FIELD_ERROR = "IMG_DEC_FIELD_ERROR"; //$NON-NLS-1$
+
+    /**
+     * Identifies the warning overlay image.
+     */
+    public final static String IMG_DEC_FIELD_WARNING = "IMG_DEC_FIELD_WARNING"; //$NON-NLS-1$
+
+    
 	/**
 	 * dialog setting key for csv file delimiter
 	 */
@@ -142,7 +151,16 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	/**
 	 * Image descriptor for map  icon
 	 */
+	public static final String STYLE_ICON = "org.wsc.smart.STYLE_ICON"; //$NON-NLS-1$
+	
+	/**
+	 * Image descriptor for map  icon
+	 */
 	public static final String DELETE_ICON = "org.wsc.smart.DELETE_ICON"; //$NON-NLS-1$
+	/**
+	 * Image descriptor for map  icon
+	 */
+	public static final String RENAME_ICON = "org.wsc.smart.RENAME_ICON"; //$NON-NLS-1$
 	
 	/**
 	 * Cross CA Icon
@@ -207,24 +225,14 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		try{
 			SmartStartUp.initDb();
 		}catch (final Exception ex){	
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);		
-				}});
-			
+			SmartPlugIn.displayLog(ex.getMessage(), ex);		
 			exit = true;
 		}
 		if (!exit){
 			try{
 				SmartStartUp.connectToDb();	
 			}catch (final Exception ex){
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), ex.getMessage(), ex);		
-					}});
-				
+				SmartPlugIn.displayLog(ex.getMessage(), ex);		
 				exit= true;
 			}
 		}
@@ -327,6 +335,13 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	     reg.put(CROSSCA_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/eview16/crossca.png")); //$NON-NLS-1$
 	     
 	     reg.put(DELETE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/etool16/delete.png")); //$NON-NLS-1$
+	     
+	     reg.put(IMG_DEC_FIELD_ERROR, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/error_ovr.png")); //$NON-NLS-1$
+	     reg.put(IMG_DEC_FIELD_WARNING, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/ovr16/warning_ovr.png")); //$NON-NLS-1$
+	     reg.put(STYLE_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/style.png")); //$NON-NLS-1$
+	     reg.put(RENAME_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/pencil.png")); //$NON-NLS-1$
+	     
+	     
 	}
 	
 	/**
@@ -361,25 +376,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	public static void logInfo(String message){
 		getDefault().getLog().log(new Status(IStatus.OK, PLUGIN_ID, IStatus.INFO, message, null));
 	}
-	
 
-	
-	/**
-	 * Displays an error message to the user and logs the
-	 * message.
-	 * 
-	 * @param message  Error message to display
-	 * @param t exception to log
-	 */
-	public static void displayLog(Shell currentShell, String message, Throwable t){
-		log(message, t);
-		if (currentShell == null){
-			if (Display.getCurrent() != null && Display.getDefault().getActiveShell() != null){
-				currentShell = Display.getDefault().getActiveShell();
-			}
-		}
-		MessageDialog.openError(currentShell, Messages.SmartPlugIn_Error_Dialog_Title, message);
-	}
 
 	/**
 	 * Displays an error message to the user and logs the message.
@@ -409,5 +406,4 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.SmartPlugIn_Error_Dialog_Title, message);
 		System.exit(1);
 	}
-
 }

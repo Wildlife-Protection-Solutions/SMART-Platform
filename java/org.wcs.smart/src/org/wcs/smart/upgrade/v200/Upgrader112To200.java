@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -43,8 +44,10 @@ import org.wcs.smart.upgrade.UpgradeEngine;
  */
 public class Upgrader112To200 implements IDatabaseUpgrader {
 
-	public void upgrade(Session s, IProgressMonitor monitor) {
+	public void upgrade(IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader112To200_SubTask_Name);
+		Session s = HibernateManager.openSession();
+		try{
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -55,7 +58,7 @@ public class Upgrader112To200 implements IDatabaseUpgrader {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.Upgrader112To200_Error, e);
+							SmartPlugIn.displayLog(Messages.Upgrader112To200_Error, e);
 						}
 					});
 				} finally {
@@ -63,6 +66,9 @@ public class Upgrader112To200 implements IDatabaseUpgrader {
 				}
 			}
 		});
+		}finally{
+			s.close();
+		}
 	}
 
 	private static void upgrade112To200(Connection c) throws Exception {

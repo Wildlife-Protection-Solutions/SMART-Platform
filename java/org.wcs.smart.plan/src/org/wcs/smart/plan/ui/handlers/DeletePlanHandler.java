@@ -27,18 +27,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import javax.inject.Named;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.internal.Messages;
@@ -53,21 +54,17 @@ import org.wcs.smart.plan.ui.editor.PlanEditorInput;
  * @author jeffloun
  * @since 1.0.0
  */
-public class DeletePlanHandler extends AbstractHandler {
+public class DeletePlanHandler{ 
 
-	public DeletePlanHandler() {}
+	@Execute
+	public void execute(Shell activeShell, @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
-		final IStructuredSelection lastSelection = (IStructuredSelection) HandlerUtil.getCurrentSelection(event);
-		
-		if (lastSelection == null) {
-			return null;
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection )) {
+			return;
 		}
 		List<byte[]> toDelete = new ArrayList<byte[]>();
 		
-		for (Iterator<?> iterator = lastSelection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
 			Object selected = iterator.next();
 			byte[] planUuid = null;
 			if (selected instanceof Plan) {
@@ -80,7 +77,7 @@ public class DeletePlanHandler extends AbstractHandler {
 			}
 		}
 		
-		MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+		MessageDialog dialog = new MessageDialog(activeShell,
 				Messages.DeletePlanHandler_Confirmation_Message,
 				null,
 				MessageFormat.format(Messages.DeletePlanHandler_Confirmation_Warning, new Object[]{toDelete.size()}),
@@ -91,7 +88,6 @@ public class DeletePlanHandler extends AbstractHandler {
 			DeletePlanJob deleteJob = new DeletePlanJob(toDelete);
 			deleteJob.schedule();
 		}
-		return null;
 	}
 
 	/**
@@ -124,5 +120,10 @@ public class DeletePlanHandler extends AbstractHandler {
             return Status.OK_STATUS;
         }
     }
-	
+
+    public static class DeletePlanHandlerWrapper extends DIHandler<DeletePlanHandler>{
+    	public DeletePlanHandlerWrapper(){
+    		super(DeletePlanHandler.class);
+    	}
+    }
 }

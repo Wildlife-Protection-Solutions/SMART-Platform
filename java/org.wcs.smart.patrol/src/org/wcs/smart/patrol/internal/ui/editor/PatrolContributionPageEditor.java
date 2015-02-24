@@ -34,7 +34,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -62,7 +61,7 @@ import org.wcs.smart.patrol.ui.PatrolEditor;
 public class PatrolContributionPageEditor extends EditorPart{
 
 	private PatrolEditor editor = null;
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	/**
 	 * Creates new page
@@ -107,7 +106,7 @@ public class PatrolContributionPageEditor extends EditorPart{
 
 	@Override
 	public void createPartControl(Composite parent) {
-		
+		toolkit = new FormToolkit(parent.getDisplay());
 		ScrolledForm main = toolkit.createScrolledForm(parent);
 		
 		main.getBody().setLayout(new GridLayout(1, false));

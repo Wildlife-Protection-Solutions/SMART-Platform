@@ -31,10 +31,8 @@ import java.io.OutputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 
@@ -123,7 +121,7 @@ public class ReportPlan {
 	 * Edits the plan template
 	 * @param event
 	 */
-	public static void editTemplate(ExecutionEvent event){
+	public static void editTemplate(){
 		try{
 			//copy the default template to the template location if 
 			//it doesn't already exist
@@ -139,7 +137,7 @@ public class ReportPlan {
 				}
 			}
 			
-			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench().showPerspective(PlanReportPerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
+			PlatformUI.getWorkbench().showPerspective(PlanReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			ReportPlanEditorInput input = new ReportPlanEditorInput(getCustomPlanTemplateLocation());
 			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){

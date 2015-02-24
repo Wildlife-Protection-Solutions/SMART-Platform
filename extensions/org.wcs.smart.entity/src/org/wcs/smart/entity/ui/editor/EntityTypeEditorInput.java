@@ -41,6 +41,10 @@ public class EntityTypeEditorInput implements IEditorInput {
 	private String key;
 	private String name;
 	
+	public EntityTypeEditorInput(byte[] uuid){
+		this.uuid = uuid;
+	}
+	
 	/**
 	 * Creates a new input
 	 * 
@@ -87,6 +91,7 @@ public class EntityTypeEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
+		if (name == null) return ""; //$NON-NLS-1$
 		return name ;
 	}
 

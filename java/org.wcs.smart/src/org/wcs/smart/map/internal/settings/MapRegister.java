@@ -24,9 +24,8 @@ package org.wcs.smart.map.internal.settings;
 import java.net.URI;
 import java.util.List;
 
-import net.refractions.udig.ui.palette.ColourScheme;
-
 import org.geotools.brewer.color.BrewerPalette;
+import org.locationtech.udig.ui.palette.ColourScheme;
 
 
 /**

@@ -58,13 +58,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -115,8 +114,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param parent
 	 * @param title
 	 */
-	public PatrolTypePropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.PatrolTypePropertyPage_Dialog_Title);
+	public PatrolTypePropertyPage(Shell parent) {
+		super(parent, Messages.PatrolTypePropertyPage_Dialog_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
@@ -597,7 +596,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 							} 
 							if(matches > 0){
 								//invalid agency name, don't update it.
-								MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_TYPE_DIALOG_TITLE, Messages.PatrolTypePropertyPage_Error_DuplicateTransportOption);
+								MessageDialog.openError(getShell(), INVALID_TYPE_DIALOG_TITLE, Messages.PatrolTypePropertyPage_Error_DuplicateTransportOption);
 								setChangesMade(false);
 							}else{
 								ttype.updateName(languageViewer.getCurrentSelection(), ((String)value).trim());
@@ -608,7 +607,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 							}
 						}else{
 							//invalid agency name, don't update it.
-							MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_TYPE_DIALOG_TITLE, 
+							MessageDialog.openError(getShell(), INVALID_TYPE_DIALOG_TITLE, 
 									MessageFormat.format(Messages.PatrolTypePropertyPage_Error_InvalidTransportType, new Object[]{SmartUtils.RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, PatrolType.MAX_TRANSPORT_NAME_LENGTH}));
 							setChangesMade(false);
 						}				
@@ -647,8 +646,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 				
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), 
-					MessageFormat.format(Messages.PatrolTypePropertyPage_Error_DeletingTransport + " " + ex.getLocalizedMessage(), new Object[]{ ttype.getName()}), ex); //$NON-NLS-1$
+			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.PatrolTypePropertyPage_Error_DeletingTransport + " " + ex.getLocalizedMessage(), new Object[]{ ttype.getName()}), ex); //$NON-NLS-1$
 		}	
 		
 		transportTblViewer.refresh();

@@ -42,7 +42,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.SmartPlugIn;
@@ -67,16 +66,16 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public abstract class AttachmentComposite<T extends ISmartAttachment> extends Composite {
 
 	private TableViewer tblAttachments;
+	
 	private ArrayList<T> attachments = new ArrayList<T>();
 	private List<ISmartAttachment> other = new ArrayList<ISmartAttachment>();
-	
 	private List<ISmartAttachment> all = new ArrayList<ISmartAttachment>();
 	
 	private Button btnRemove;
 	private Button btnOpen;
-
-	private List<IAttachmentsChangeListener> attachmentsChangeListeners = new ArrayList<IAttachmentsChangeListener>();
 	
+	private List<IAttachmentsChangeListener> attachmentsChangeListeners = new ArrayList<IAttachmentsChangeListener>();
+
 	public AttachmentComposite(Composite parent, int style) {
 		super(parent, style);
 		createControls();
@@ -153,7 +152,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 				for (int i = 0; i < fd.getFileNames().length; i ++){
 					File f = new File(fd.getFilterPath() + File.separator +  fd.getFileNames()[i]);
 					if (!f.exists()){
-						SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), MessageFormat.format(Messages.AttachmentComposite_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
+						SmartPlugIn.displayLog(MessageFormat.format(Messages.AttachmentComposite_Error_FileNotFound, new Object[]{f.getAbsolutePath()}), null);
 						return;
 					}
 					T wpa = createNewAttachement();
@@ -231,7 +230,7 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 	public List<T> getAttchments() {
 		return this.attachments;
 	}
-
+	
 	public void addAttachmentsChangeListener(IAttachmentsChangeListener listener) {
 		attachmentsChangeListeners.add(listener);
 	}
@@ -245,5 +244,4 @@ public abstract class AttachmentComposite<T extends ISmartAttachment> extends Co
 			listener.attachmentsChanged();
 		}
 	}
-	
 }

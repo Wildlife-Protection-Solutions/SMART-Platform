@@ -26,18 +26,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
@@ -57,33 +54,28 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  * @since 1.0.0
  */
-public class ExportIncidentHandler extends AbstractHandler {
+public class ExportIncidentHandler {
 
 	
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(final Shell activeShell){
 
-		Shell shell = HandlerUtil.getActiveShell(event);
-		
-		MultiIncidentExportDialog dialog = new MultiIncidentExportDialog(shell);
+		MultiIncidentExportDialog dialog = new MultiIncidentExportDialog(activeShell);
 		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
+			return;
 		}
 		
 		final List<byte[]> incidents = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
 		if (incidents.size() == 0){
-			return null;
+			return;
 		}
 		if (!dir.exists() || !dir.isDirectory()){
-			return null;
+			return;
 		}
 		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
@@ -123,9 +115,9 @@ public class ExportIncidentHandler extends AbstractHandler {
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()){
-						displayInfo(Messages.ExportIncidentHandler_CancelledDialogTitle, MessageFormat.format(Messages.ExportIncidentHandler_CancelledMessage, new Object[]{exportCnt,dir.toString(),incidents.size()}));
+						displayInfo(activeShell, Messages.ExportIncidentHandler_CancelledDialogTitle, MessageFormat.format(Messages.ExportIncidentHandler_CancelledMessage, new Object[]{exportCnt,dir.toString(),incidents.size()}));
 					}else{
-						displayInfo(Messages.ExportIncidentHandler_ComnpleteDialogTitle, MessageFormat.format(Messages.ExportIncidentHandler_CompleteMessage, new Object[]{exportCnt,dir.toString(),incidents.size()}));
+						displayInfo(activeShell, Messages.ExportIncidentHandler_ComnpleteDialogTitle, MessageFormat.format(Messages.ExportIncidentHandler_CompleteMessage, new Object[]{exportCnt,dir.toString(),incidents.size()}));
 					}
 				}
 
@@ -134,19 +126,21 @@ public class ExportIncidentHandler extends AbstractHandler {
 			IncidentPlugIn.displayLog(
 					Messages.ExportIncidentHandler_Error + e.getLocalizedMessage(), e);
 		}
-
-		return null;
-
 	}
 	
 
-	private void displayInfo(final String title, final String message) {
-		Display.getDefault().syncExec(new Runnable() {
+	private void displayInfo(final Shell shell, final String title, final String message) {
+		shell.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				MessageDialog.openInformation(Display.getDefault()
-						.getActiveShell(), title, message);
+				MessageDialog.openInformation(shell, title, message);
 			}
 		});
+	}
+	
+	public static class ExportIncidentHandlerWrapper extends DIHandler<ExportIncidentHandler>{
+		public ExportIncidentHandlerWrapper(){
+			super(ExportIncidentHandler.class);
+		}
 	}
 }

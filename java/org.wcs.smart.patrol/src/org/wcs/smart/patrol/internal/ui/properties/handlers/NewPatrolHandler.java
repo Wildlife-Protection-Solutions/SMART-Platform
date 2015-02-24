@@ -23,17 +23,21 @@ package org.wcs.smart.patrol.internal.ui.properties.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.internal.ui.ShowPatrolPersepctiveHandler;
 import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
+import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
 
 /**
  * Handler to display new patrol wizard.
@@ -41,19 +45,19 @@ import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
  * @author Emily
  *
  */
-public class NewPatrolHandler extends ShowPatrolPersepctiveHandler {
+public class NewPatrolHandler {
 
 	private WizardDialog dialog = null;
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(final Shell activeShell, IEclipseContext context)  {
 		//open the correct perspective/view
-		super.execute(event);
+		(new ShowFieldDataPerspective()).execute(PatrolListView.ID, context.get(EModelService.class), context.get(EPartService.class));
 		
 		//Show Create Patrol Wizard
 		final CreatePatrolWizard wizard = new CreatePatrolWizard();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(
-				HandlerUtil.getActiveShell(event));
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
+
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
 
@@ -61,8 +65,7 @@ public class NewPatrolHandler extends ShowPatrolPersepctiveHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.setTaskName(Messages.NewPatrolHandler_Progress_DisplayingWizard);
-					dialog = new WizardDialog(
-							HandlerUtil.getActiveShell(event), wizard);
+					dialog = new WizardDialog(activeShell, wizard);
 
 				}
 			});
@@ -74,8 +77,12 @@ public class NewPatrolHandler extends ShowPatrolPersepctiveHandler {
 		if (dialog != null) {
 			dialog.open();
 		}
-
-		return null;
+	}
+	
+	public static class NewPatrolHandlerWrapper extends DIHandler<NewPatrolHandler>{
+		public NewPatrolHandlerWrapper(){
+			super(NewPatrolHandler.class);
+		}
 	}
 
 }

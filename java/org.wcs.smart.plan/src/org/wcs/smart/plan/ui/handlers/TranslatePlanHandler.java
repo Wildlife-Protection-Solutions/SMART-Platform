@@ -21,11 +21,15 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanEventManager;
@@ -42,10 +46,11 @@ import org.wcs.smart.ui.TranslateNamesHandler;
 public class TranslatePlanHandler extends TranslateNamesHandler {
 
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection)) {
-			return null;
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, Shell activeShell) throws ExecutionException {
+
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((StructuredSelection)thisSelection).isEmpty() ) {
+			return ;
 		}
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
@@ -63,11 +68,15 @@ public class TranslatePlanHandler extends TranslateNamesHandler {
 		}
 		
 		if (plan != null) {
-			translateItem(plan, event);
+			translateItem(plan, activeShell);
 			PlanEventManager.getInstance().planChanged(0, plan);
 		}
-		
-		return null;
+	}
+	
+	public static class TranslatePlanHandlerWrapper extends DIHandler<TranslatePlanHandler>{
+		public TranslatePlanHandlerWrapper(){
+			super(TranslatePlanHandler.class);
+		}
 	}
 	
 }

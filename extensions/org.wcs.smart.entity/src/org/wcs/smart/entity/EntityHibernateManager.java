@@ -118,6 +118,7 @@ public class EntityHibernateManager {
 			q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 			q.setParameter("stat", EntityType.Status.ACTIVE); //$NON-NLS-1$
 			
+			@SuppressWarnings("unchecked")
 			List<EntityType> items = q.list();
 			for (EntityType t : items){
 				t.getDmAttribute().getName();
@@ -143,6 +144,7 @@ public class EntityHibernateManager {
 		}
 		Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca "); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
 		List<EntityType> items = q.list();
 		return items;
 	}

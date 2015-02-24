@@ -188,7 +188,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 		lblNewLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,false, 1, 1));
 		lblNewLabel.setText(Messages.StationListPropertyPage_LanguageLabel);
 
-		cmbLanguage = new LanguageViewer(container, SWT.NONE,currentCa);
+		cmbLanguage = new LanguageViewer(container, SWT.NONE, currentCa);
 		cmbLanguage.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
 		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -364,7 +364,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 				
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.StationListPropertyPage_Error_CouldNotDelete + s.getName() + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.StationListPropertyPage_Error_CouldNotDelete + s.getName() + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 		}	
 		
 		tableViewer.refresh();
@@ -576,8 +576,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			return true;
 		} catch (RuntimeException ex) {
 			tx.rollback();
-			SmartPlugIn.displayLog(getShell(),
-					Messages.StationListPropertyPage_Error_Saving + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.StationListPropertyPage_Error_Saving + ex.getLocalizedMessage(), ex);
 			s.close();
 		}
 		return false;

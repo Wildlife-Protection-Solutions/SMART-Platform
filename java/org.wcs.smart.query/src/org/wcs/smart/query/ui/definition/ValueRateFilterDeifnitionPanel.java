@@ -23,6 +23,10 @@ package org.wcs.smart.query.ui.definition;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.MouseAdapter;
@@ -63,6 +67,8 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 	
 	protected BasicFilterDefintionPanel valueFilter = null;
 	protected BasicFilterDefintionPanel rateFilter = null;
+	
+	@Inject protected IEclipseContext localContext;
 	
 	private QueryProxy currentQuery;
 	private BasicFilterDefintionPanel currentTarget = null;
@@ -219,10 +225,12 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 		lblSep.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 
 		//filter panels
-		valueFilter = createFilterPanel(PanelType.VALUE);		
+		valueFilter = createFilterPanel(PanelType.VALUE);	
+		ContextInjectionFactory.inject(valueFilter, localContext);
 		valueFilter.createComposite(left);
 		
 		rateFilter = createFilterPanel(PanelType.RATE);
+		ContextInjectionFactory.inject(rateFilter, localContext);
 		rateFilter.createComposite(right);
 		
 		valueFilter.addDropTargetPanel(rateFilter);
@@ -234,7 +242,7 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 		return main;
 	}
 	
-	protected abstract BasicFilterDefintionPanel createFilterPanel(PanelType type );
+	protected abstract BasicFilterDefintionPanel createFilterPanel( PanelType type );
 	
 	
 	/**

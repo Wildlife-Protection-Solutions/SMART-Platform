@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.report.internal.ui.viewer;
 
-
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.text.MessageFormat;
 import java.util.HashMap;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
@@ -35,6 +38,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.browser.Browser;
@@ -44,11 +51,7 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IViewSite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
@@ -64,18 +67,18 @@ import org.wcs.smart.report.model.Report;
  * @author egouge
  * @since 1.0.0
  */
-public class ReportView extends ViewPart implements IReportListener{
+public class ReportView implements IReportListener{
 
 	/**
 	 * Report view id
 	 */
 	public static final String ID = "org.wcs.smart.birt.ReportView"; //$NON-NLS-1$
 	
-	
 	private Browser browser;
-
 	private Report report;
 	private HashMap<String, Object> selectedParams;
+
+	@Inject private MPart part;
 
 	Job reportRunner = new Job(Messages.ReportView_PreviewReportJobName){
 		
@@ -100,6 +103,9 @@ public class ReportView extends ViewPart implements IReportListener{
 					}finally{
 						task.close();
 					}
+					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
+					if (browser.isDisposed()) return Status.CANCEL_STATUS;
+					
 					browser.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
@@ -118,15 +124,15 @@ public class ReportView extends ViewPart implements IReportListener{
 		return Status.OK_STATUS;
 	}};
 	
-	@Override
+	@PreDestroy
 	public void dispose(){
-		super.dispose();
 		ReportEventManager.getInstance().removeReportListener(this);
 	}
 	
 
-	@Override
+	@PostConstruct
 	public void createPartControl(Composite parent) {
+		ReportEventManager.getInstance().addReportListener(this);
 		
 		parent.setLayout(new GridLayout());
 	
@@ -142,23 +148,18 @@ public class ReportView extends ViewPart implements IReportListener{
 				final Shell shell = new Shell( SWT.SHELL_TRIM | Window.getDefaultOrientation( ) );
 				shell.setLayout( new FillLayout( ) );
 				Browser browser = new Browser( shell, SWT.NONE );
-				//initialize( Display.getCurrent( ), browser );
 				event.browser = browser;
 				shell.open( );
 			}
-		} );
+		});
 	}
 
-	@Override
+	@Focus
 	public void setFocus() {
 		browser.setFocus();
 	}
 	
-	@Override
-	public void init(IViewSite site) throws PartInitException {
-		super.init(site);
-		ReportEventManager.getInstance().addReportListener(this);
-	}
+	
 	
 	/**
 	 * 
@@ -181,7 +182,9 @@ public class ReportView extends ViewPart implements IReportListener{
 	}
 		
 	/**
-	 * Sets the report to display in the review and runs the report.
+	 * Sets the report to display in the review and runs the report; without 
+	 * changing the report parameters.
+	 * 
 	 * @param report
 	 */
 	public void setReport(Report report){
@@ -206,7 +209,7 @@ public class ReportView extends ViewPart implements IReportListener{
 	 * 
 	 */
 	private void updateName() {
-		setPartName(report.getName());
+		part.setLabel(report.getName());
 	}
 	
 	private void previewReport(boolean refreshParameters) throws Exception {
@@ -246,10 +249,10 @@ public class ReportView extends ViewPart implements IReportListener{
 	public void reportEvent(Object o, EventType eventType) {
 		if (eventType == EventType.REPORT_DELETED){
 			if (this.report.equals(o)){
-				Display.getDefault().asyncExec(new Runnable(){
+				browser.getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
-						ReportView.this.getSite().getPage().hideView(ReportView.this);
+						part.getContext().get(EPartService.class).hidePart(ReportView.this.part, true);
 					}
 					
 				});
@@ -258,5 +261,10 @@ public class ReportView extends ViewPart implements IReportListener{
 		}
 	}
 
+	public static class ReportViewWrapper extends DIViewPart<ReportView>{
+		public ReportViewWrapper(){
+			super(ReportView.class);
+		}
+	}
 }
 

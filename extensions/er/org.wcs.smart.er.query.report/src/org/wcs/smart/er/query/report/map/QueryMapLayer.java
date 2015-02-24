@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.query.report.map;
 
-import net.refractions.udig.catalog.IService;
+import org.locationtech.udig.catalog.IService;
 
 import org.wcs.smart.er.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.er.query.model.MissionQueryType;

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.internal.ca.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -28,8 +30,6 @@ import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.internal.Messages;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Agencies can be deleted if they are not associated with any

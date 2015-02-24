@@ -44,8 +44,8 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
+import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 import org.wcs.smart.upgrade.UpgradeEngine;
@@ -124,8 +124,7 @@ public class DerbyRestoreEngine {
 			}
 			return true;
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(currentShell,
-					Messages.DerbyRestoreEngine_UserValidationError, ex);
+			SmartPlugIn.displayLog(Messages.DerbyRestoreEngine_UserValidationError, ex);
 			return false;
 		} finally {
 			session.close();

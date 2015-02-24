@@ -46,9 +46,9 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
@@ -131,8 +131,8 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
     
     private ControlDecoration maxPhotoCountDecoration;
 	
-	public CyberTrackerPropertiesDialog() {
-		super(Display.getCurrent().getActiveShell(), Messages.CyberTrackerPropertiesDialog_Title);
+	public CyberTrackerPropertiesDialog(Shell shell) {
+		super(shell, Messages.CyberTrackerPropertiesDialog_Title);
 		Session session = HibernateManager.openSession();
 		try {
 			ctProperties = CyberTrackerHibernateManager.getProperties(session);
@@ -1083,7 +1083,7 @@ public class CyberTrackerPropertiesDialog extends AbstractPropertyJHeaderDialog 
 			setChangesMade(false);
 			return true;
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(getShell(), Messages.CyberTrackerPropertiesDialog_Save_Error, e);
+			SmartPlugIn.displayLog(Messages.CyberTrackerPropertiesDialog_Save_Error, e);
 			return false;
 		}finally {
 			session.close();

@@ -36,17 +36,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
-
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnViewer;
@@ -82,7 +79,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -90,6 +86,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
@@ -237,7 +234,7 @@ public class PatrolLegDayInputComposite {
 		if (data.getWaypoints() == null){
 			data.setWaypoints(new ArrayList<PatrolWaypoint>());
 		}
-		WritableList inputList = new WritableList(data.getWaypoints(), PatrolWaypoint.class);
+		List<PatrolWaypoint> inputList = new ArrayList<PatrolWaypoint>(data.getWaypoints());
 		observationTable.setInput(inputList);
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -371,8 +368,8 @@ public class PatrolLegDayInputComposite {
 					}
 				}catch (Exception ex){
 					restMinutes.setText(String.valueOf(oldValue));
-					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_Error_DialogTitle, Messages.PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage1);
-					Display.getCurrent().asyncExec(new Runnable() {
+					MessageDialog.openWarning(restMinutes.getShell(), Messages.PatrolLegDayInputComposite_Error_DialogTitle, Messages.PatrolLegDayInputComposite_InvalidRestMinutes_DialogMessage1);
+					restMinutes.getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
 							restMinutes.setFocus();
@@ -403,7 +400,7 @@ public class PatrolLegDayInputComposite {
 		
 		FontData fd = okayFont.getFontData()[0];
 		fd.setStyle(SWT.BOLD);
-		errorFont = new Font(Display.getDefault(), fd);
+		errorFont = new Font(lblTotalHours.getDisplay(), fd);
 		
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.widthHint = 30;
@@ -433,7 +430,7 @@ public class PatrolLegDayInputComposite {
 		viewTrackPoints.addHyperlinkListener(new HyperlinkAdapter(){
 			public void linkActivated(HyperlinkEvent e) {
 				//showImportWizard();
-				PatrolTrackPointDialog tpd = new PatrolTrackPointDialog(Display.getCurrent().getActiveShell(), patrolLegDate.getTrack());
+				PatrolTrackPointDialog tpd = new PatrolTrackPointDialog(viewTrackPoints.getShell(), patrolLegDate.getTrack());
 				tpd.open();
 				ApplicationGIS.getToolManager().setCurrentEditor(editor.getPatrolEditor());
 			}
@@ -544,7 +541,7 @@ public class PatrolLegDayInputComposite {
 	}
 	
 	private void moveSelectedWaypoints(){
-		MoveWaypointDialog dialog = new MoveWaypointDialog(Display.getCurrent().getActiveShell(), patrolLegDate.getPatrolLeg().getPatrol());
+		MoveWaypointDialog dialog = new MoveWaypointDialog(mainComposite.getShell(), patrolLegDate.getPatrolLeg().getPatrol());
 		if (dialog.open() != Window.OK ){
 			return ;
 		}
@@ -595,8 +592,7 @@ public class PatrolLegDayInputComposite {
 			
 			@Override
 			public void done(IJobChangeEvent event) {
-				Display.getDefault().syncExec(new Runnable(){
-
+				mainComposite.getDisplay().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, moveTo);
@@ -612,7 +608,7 @@ public class PatrolLegDayInputComposite {
 	
 	
 	private void deleteSelectedWaypoints() {
-		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle, Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage);
+		boolean doDel = MessageDialog.openConfirm(mainComposite.getShell(), Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogTitle, Messages.PatrolLegDayInputComposite_DeleteWaypoint_DialogMessage);
 		if (!doDel){
 			return;
 		}
@@ -633,8 +629,7 @@ public class PatrolLegDayInputComposite {
 			@Override
 			public void done(IJobChangeEvent event) {
 				//once the job is completed we can fire this event
-				Display.getDefault().syncExec(new Runnable() {
-					
+				mainComposite.getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
 						PatrolEventManager.getInstance().patrolChanged(PatrolEventManager.PATROL_WAYPOINTS, patrolLegDate);			}
@@ -703,11 +698,11 @@ public class PatrolLegDayInputComposite {
 		lblTotalHours.setText(PatrolEditor.formatTimeRange(time));
 		if (time < 0){
 			lblTotalHours.setFont(errorFont);
-			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+			lblTotalHours.setForeground(lblTotalHours.getDisplay().getSystemColor(SWT.COLOR_RED));
 			lblTotalHours.setToolTipText(Messages.PatrolLegDayInputComposite_Error_StartTimeError_Tooltip);
 		}else{
 			lblTotalHours.setFont(okayFont);
-			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+			lblTotalHours.setForeground(lblTotalHours.getDisplay().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
 			lblTotalHours.setToolTipText(null);
 		}
 		
@@ -728,7 +723,7 @@ public class PatrolLegDayInputComposite {
 		observationTable.getTable().setLayoutData(gd);
 		observationTable.getTable().setLinesVisible(true);
 		observationTable.getTable().setHeaderVisible(true);
-		observationTable.setContentProvider(new ObservableListContentProvider());
+		observationTable.setContentProvider(ArrayContentProvider.getInstance());
 		
 		TableViewerFocusCellManager focusCellManager = new TableViewerFocusCellManager(observationTable, new FocusCellHighlighter(observationTable){});
 		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(observationTable) {
@@ -1027,9 +1022,9 @@ public class PatrolLegDayInputComposite {
 		AddWaypointDialog add;
 	
 		if(x == 0 && y == 0){
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), editor.getPatrolEditor().getAvailableProjections());
+			add = new AddWaypointDialog(mainComposite.getShell(), editor.getPatrolEditor().getAvailableProjections());
 		}else{
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), y, x, id+1, editor.getPatrolEditor().getAvailableProjections());
+			add = new AddWaypointDialog(mainComposite.getShell(), y, x, id+1, editor.getPatrolEditor().getAvailableProjections());
 		}
 		if (add.open() == Window.OK){
 			PatrolWaypoint wp = add.getWaypoint();

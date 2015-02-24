@@ -21,18 +21,10 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.plan.internal.Messages;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
 
 
@@ -43,39 +35,19 @@ import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
  * @author jeffloun
  *
  */
-public class NewPlanHandler extends AbstractHandler {
+public class NewPlanHandler {
 
-	private WizardDialog dialog = null;
-
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-
+	@Execute
+	public void execute(Shell activeShell){
 		//Show Create Patrol Wizard
 		final CreatePlanWizard wizard = new CreatePlanWizard();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(
-				HandlerUtil.getActiveShell(event));
-		try {
-			pmd.run(false, false, new IRunnableWithProgress() {
-
-				@Override
-				public void run(IProgressMonitor monitor)
-						throws InvocationTargetException, InterruptedException {
-					monitor.setTaskName(Messages.NewPlanHandler_LoadWizard_TaskName);
-					dialog = new WizardDialog(
-							HandlerUtil.getActiveShell(event), wizard);
-
-				}
-			});
-		} catch (Exception ex) {
-			dialog = null;
-			SmartPatrolPlugIn.displayLog(Messages.NewPlanHandler_LoadWizard_Error
-					+ ex.getMessage(), ex);
-		}
-		if (dialog != null) {
-			dialog.open();
-		}
-
-		return null;
+		WizardDialog dialog = new WizardDialog(activeShell, wizard);
+		dialog.open();
 	}
 
+	public static class NewPlanHandlerWrapper extends DIHandler<NewPlanHandler>{
+		public NewPlanHandlerWrapper(){
+			super(NewPlanHandler.class);
+		}
+	}
 }

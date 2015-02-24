@@ -26,18 +26,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
@@ -58,14 +55,14 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class ExportIntelligenceHandler extends AbstractHandler {
+public class ExportIntelligenceHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell shell = HandlerUtil.getActiveShell(event);
-		MultiIntelligenceExportDialog dialog = new MultiIntelligenceExportDialog(shell);
+	@Execute
+	public void execute(final Shell activeShell) {
+		
+		MultiIntelligenceExportDialog dialog = new MultiIntelligenceExportDialog(activeShell);
 		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
+			return;
 		}
 		
 		final List<byte[]> ids = dialog.getObjectUuids();
@@ -73,10 +70,10 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 		final File dir = new File(dialog.getDirectory());
 
 		if (ids.size() == 0 || !dir.exists() || !dir.isDirectory()){
-			return null;
+			return;
 		}
 		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
@@ -99,7 +96,7 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 								intel.getReceivedDate();
 								name = intel.getName();
 							} catch (Exception ex) {
-								displayLogError(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_Error, SmartUtils.encodeHex(uuid)), ex);
+								IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_Error, SmartUtils.encodeHex(uuid)), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
@@ -113,14 +110,14 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 
 							exportCnt++;
 						} catch (Exception ex) {
-							displayLogError(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_Error , name != null ? name : SmartUtils.encodeHex(uuid)) + "\n" +  ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+							IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_Error , name != null ? name : SmartUtils.encodeHex(uuid)) + "\n" +  ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()){
-						displayInfo(Messages.ExportIntelligenceHandler_ExportCancelledDialogTitle, MessageFormat.format(Messages.ExportIntelligenceHandler_Completed_Message1, new Object[]{exportCnt,dir.toString(), ids.size()}));
+						displayInfo(activeShell, Messages.ExportIntelligenceHandler_ExportCancelledDialogTitle, MessageFormat.format(Messages.ExportIntelligenceHandler_Completed_Message1, new Object[]{exportCnt,dir.toString(), ids.size()}));
 					}else{
-						displayInfo(Messages.MultiIntelligenceExportDialog_Title1, MessageFormat.format(Messages.ExportIntelligenceHandler_Completed_Message1, new Object[]{exportCnt,dir.toString(), ids.size()}));
+						displayInfo(activeShell, Messages.MultiIntelligenceExportDialog_Title1, MessageFormat.format(Messages.ExportIntelligenceHandler_Completed_Message1, new Object[]{exportCnt,dir.toString(), ids.size()}));
 					}
 				}
 
@@ -128,26 +125,21 @@ public class ExportIntelligenceHandler extends AbstractHandler {
 		} catch (Exception e) {
 			IntelligencePlugIn.displayLog(Messages.ExportIntelligenceHandler_Failed_Error_Message + e.getLocalizedMessage(), e);
 		}
-		
-		return null;
 	}
 
-	private void displayInfo(final String title, final String message) {
-		Display.getDefault().syncExec(new Runnable() {
+	private void displayInfo(final Shell activeShell, final String title, final String message) {
+		activeShell.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(), title, message);
+				MessageDialog.openInformation(activeShell, title, message);
 			}
 		});
 	}
 
-	private void displayLogError(final String error, final Exception ex) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				IntelligencePlugIn.displayLog(error, ex);
-			}
-		});
-	}
 	
+	public static class ExportIntelligenceHandlerWrapper extends DIHandler<ExportIntelligenceHandler>{
+		public ExportIntelligenceHandlerWrapper(){
+			super(ExportIntelligenceHandler.class);
+		}
+	}
 }

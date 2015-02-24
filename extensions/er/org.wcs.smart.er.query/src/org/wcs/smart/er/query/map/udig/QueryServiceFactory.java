@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.er.query.map.udig;
 
-import net.refractions.udig.catalog.IService;
-
+import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;

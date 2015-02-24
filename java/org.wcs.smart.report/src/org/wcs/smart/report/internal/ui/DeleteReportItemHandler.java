@@ -26,18 +26,19 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
+import javax.inject.Named;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
@@ -53,28 +54,24 @@ import org.wcs.smart.report.model.ReportFolder;
  * @author egouge
  * @since 1.0.0
  */
-public class DeleteReportItemHandler extends AbstractHandler implements IHandler {
+public class DeleteReportItemHandler {
 
 	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, Shell activeShell){
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty() ){
+			return;
 		}
-		
-		
 		final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
 		Collections.reverse(selection);
 		
-		
 		if (selection.size() == 1 && (selection.get(0) instanceof Report) ){
 			Report r = ((Report)selection.get(0)) ;
-			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
+			if (!MessageDialog.openConfirm(activeShell, 
 					Messages.DeleteReportItemHandler_Confirm_DialogTitle, 
 					MessageFormat.format(Messages.DeleteReportItemHandler_Confirm_DialogMessage,
 					new Object[]{"'"+ r.getName() + " [" + r.getId()  + "]'"})  )){ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				return null;
+				return;
 			}
 		}else{
 			int reportCnt = 0;
@@ -96,8 +93,8 @@ public class DeleteReportItemHandler extends AbstractHandler implements IHandler
 			message += "?"; //$NON-NLS-1$
 			message = MessageFormat.format(message, new Object[]{reportCnt, folderCnt});
 			if (reportCnt > 0){
-				if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteReportItemHandler_Confirm_DialogTitleB, message )){
-					return null;
+				if (!MessageDialog.openConfirm(activeShell, Messages.DeleteReportItemHandler_Confirm_DialogTitleB, message )){
+					return;
 				}	
 			}
 		}
@@ -132,6 +129,11 @@ public class DeleteReportItemHandler extends AbstractHandler implements IHandler
 			}
 		};
 		job.schedule();
-		return null;
+	}
+	
+	public static class DeleteReportItemHandlerWrapper extends DIHandler<DeleteReportItemHandler>{
+		public DeleteReportItemHandlerWrapper(){
+			super(DeleteReportItemHandler.class);
+		}
 	}
 }

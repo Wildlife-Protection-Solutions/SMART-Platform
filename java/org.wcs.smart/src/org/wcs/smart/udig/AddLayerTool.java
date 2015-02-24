@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.udig;
 
-import net.refractions.udig.project.ui.internal.wizard.MapImport;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
-
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.udig.project.ui.internal.wizard.MapImport;
+import org.locationtech.udig.project.ui.tool.AbstractActionTool;
 
 /**
  * Add layer tool for map.

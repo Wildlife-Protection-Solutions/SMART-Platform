@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.Comparator;
@@ -54,8 +55,6 @@ import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
-
-import com.ibm.icu.text.Collator;
 
 /**
  * Property page for displaying basemaps, picking a deafult
@@ -266,7 +265,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			getSession().getTransaction().commit();
 			setChangesMade(false);
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.BasemapPropertyPage_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		getSession().beginTransaction();

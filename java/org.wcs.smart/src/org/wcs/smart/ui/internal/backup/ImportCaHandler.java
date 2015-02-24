@@ -100,15 +100,14 @@ public class ImportCaHandler {
 						shell.getDisplay().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(shell,Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);
+								SmartPlugIn.displayLog(Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);
 							}});
 					}
 
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(shell,
-					Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.ImportCaHandler_ImportFailed_Message + ex.getLocalizedMessage(), ex);
 		}
 		return;
 	}

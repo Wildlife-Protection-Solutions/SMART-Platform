@@ -27,13 +27,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ParameterCollecter;
@@ -46,22 +48,19 @@ import org.wcs.smart.report.model.Report;
  * @author Emily
  *
  */
-public class RunReportHandler extends AbstractHandler  {
+public class RunReportHandler {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
-	@Override
-	public Object execute(ExecutionEvent event)
-			throws ExecutionException {
-		
-		
-		ISelection s = HandlerUtil.getCurrentSelection(event);
-		if (!(s instanceof StructuredSelection)){
-			return null;
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, 
+			Shell activeShell, IEclipseContext context){
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty() ){
+			return;
 		}
 		
-		IStructuredSelection ss = (IStructuredSelection)s;
+		IStructuredSelection ss = (IStructuredSelection)thisSelection;
 		List<Report> reportsToRun = new ArrayList<Report>();
 		for (Iterator<?> iterator = ss.iterator(); iterator.hasNext();) {
 			Object type = (Object) iterator.next();
@@ -71,27 +70,27 @@ public class RunReportHandler extends AbstractHandler  {
 		}
 		if (reportsToRun.size() == 0){
 			//nothing to run
-			return null;
+			return;
 		}
 		HashMap<String, Object> reportParamseters = null;
 		try{
 			ParameterCollecter param = new ParameterCollecter();
 			reportParamseters = param.getParameters(reportsToRun.toArray(new Report[reportsToRun.size()]));
-			if (reportParamseters == null){
-				//cancel pressed
-				return null;
-			}
+			if (reportParamseters == null) return;
 		}catch (Exception ex){
 			ReportPlugIn.displayLog(Messages.RunReportHandler_ParametersError  + ex.getLocalizedMessage(), ex);
-			return null;
+			return;
 		}
-		
 		
 		for (Report r : reportsToRun){
-			ReportManager.viewReport(r, reportParamseters);
+			ReportManager.viewReport(r, reportParamseters, context);
 		}
-		
-		return null;
+	}
+	
+	public static class RunReportHandlerWrapper extends DIHandler<RunReportHandler>{
+		public RunReportHandlerWrapper(){
+			super(RunReportHandler.class);
+		}
 	}
 
 }

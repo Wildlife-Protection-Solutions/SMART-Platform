@@ -21,12 +21,11 @@
  */
 package org.wcs.smart;
 
-import net.refractions.udig.catalog.internal.ui.CatalogView;
-import net.refractions.udig.project.ui.internal.LayersView;
-
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.locationtech.udig.catalog.internal.ui.CatalogView;
+import org.locationtech.udig.project.ui.internal.LayersView;
 import org.wcs.smart.ui.map.MapView;
 
 /**

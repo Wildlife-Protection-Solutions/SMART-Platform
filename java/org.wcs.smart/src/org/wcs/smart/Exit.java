@@ -21,9 +21,8 @@
  */
 package org.wcs.smart;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -31,12 +30,17 @@ import org.eclipse.ui.PlatformUI;
  * @author egouge
  *
  */
-public class Exit extends AbstractHandler {
+public class Exit {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(){
 		PlatformUI.getWorkbench().close();
-		return null;
 	}
 
+	// E3
+	public static class ExitWrapper extends DIHandler<Exit> {
+		public ExitWrapper() {
+			super(Exit.class);
+		}
+	}
 }

@@ -21,6 +21,16 @@
  */
 package org.wcs.smart.ui;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.Persist;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ControlAdapter;
@@ -30,18 +40,17 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
-import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -56,31 +65,35 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
-public class ConservationAreaListView extends ViewPart {
+public class ConservationAreaListView {
 
 	public static final String ID = "org.wcs.smart.query.conservationAreaList"; //$NON-NLS-1$
 	
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit = null;
 	private Label lblDefault = null;
 	private Font boldFont = null;
 	
 	private Composite caComp = null;
-	private Composite parent = null;
 	private Composite main = null;
 	private ScrolledComposite scroll = null;
+	
+	@Inject private EPartService partService;
+	@Inject private IEventBroker eventManager;
 	
 	public ConservationAreaListView() {
 	}
 
-	@Override
+	@PreDestroy
 	public void dispose(){
-		super.dispose();
 		toolkit.dispose();
 	}
 	
-	@Override
-	public void createPartControl(Composite parent) {
-		this.parent = parent;
+	@PostConstruct
+	public void createPartControl(final Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		
 		scroll = new ScrolledComposite(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 		toolkit.adapt(scroll);
@@ -98,17 +111,26 @@ public class ConservationAreaListView extends ViewPart {
 			@Override
 			public void linkActivated(HyperlinkEvent e) {
 				
-				SelectCaDialog dialog = new SelectCaDialog(getSite().getShell());
+				SelectCaDialog dialog = new SelectCaDialog(parent.getShell());
 				if (dialog.open() == SelectCaDialog.OK){
 					
-					//close all active editors 
-					if (!PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().closeAllEditors(true)){
+					//close all active editors
+					if (!partService.saveAll(true)){
 						return;
+					}
+					for (MPart p : partService.getParts()){
+						if (p.getObject() instanceof Persist){
+							//we want to remove this when we hide it
+							p.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
+							partService.hidePart(p);
+						}
 					}
 					
 					ConservationAreaConfiguration newConfig = dialog.getNewConfiguration();
-
 					SmartDB.setConservationAreaConfiguration(newConfig);
+					eventManager.send(SmartDB.CCAA_CONFIGURATION_MODIFIED, newConfig);
+					
+					
 					//the data model has changed
 					DataModelManager.getInstance().fireChangeListeners();
 					initCas();
@@ -154,7 +176,7 @@ public class ConservationAreaListView extends ViewPart {
 		});
 	}
 
-	@Override
+	@Focus
 	public void setFocus() {
 		lblDefault.setFocus();
 	}
@@ -190,6 +212,13 @@ public class ConservationAreaListView extends ViewPart {
 		caComp.layout();
 		main.layout();
 		scroll.setMinSize(main.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		parent.layout(true, true);
+		scroll.getParent().layout(true, true);
+
+	}
+	
+	public static class ConservationAreaListViewWrapper extends DIViewPart<ConservationAreaListView>{
+		public ConservationAreaListViewWrapper(){
+			super(ConservationAreaListView.class);
+		}
 	}
 }

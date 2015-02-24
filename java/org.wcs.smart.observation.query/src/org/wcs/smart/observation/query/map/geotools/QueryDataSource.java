@@ -139,14 +139,10 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @return
 	 */
 	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
-		
 		StringBuilder sb = new StringBuilder();
-		sb.append("fid:String"); //$NON-NLS-1$
+		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
 		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
-		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
-		
 		return sb.toString();
-		
 	}
 	
 }

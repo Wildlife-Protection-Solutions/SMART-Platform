@@ -33,16 +33,15 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.catalog.URLUtils;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -68,22 +67,23 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.xml.SurveyDesignToXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -92,29 +92,30 @@ import org.wcs.smart.util.SmartUtils;
 *
 */
 
-public class SurveyDesignExportHandler extends AbstractHandler {
+public class SurveyDesignExportHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SurveyDesign sd = null;
+	@Execute
+	public void execute(Shell activeShell, EPartService pService){
 		
-		if (HandlerUtil.getActiveEditor(event) != null){
-			IEditorInput input = HandlerUtil.getActiveEditor(event).getEditorInput();
-			if (input != null && input instanceof SurveyDesignEditorInput){
+		SurveyDesign sd = null;
+		MPart p = pService.getActivePart();
+		if (p.getElementId().equals(SurveyDesignEditor.ID)){
+			IEditorInput input = ((SurveyDesignEditor)E3Utils.getSourceObject(p)).getEditorInput();
+			if (input != null){
 				sd = new SurveyDesign();
 				sd.setUuid(((SurveyDesignEditorInput)input).getUuid());
 			}
 		}
 		
-		ExportSurveyDesignDialog dialog = new ExportSurveyDesignDialog(HandlerUtil.getActiveShell(event), sd);
+		ExportSurveyDesignDialog dialog = new ExportSurveyDesignDialog(activeShell, sd);
 		if (dialog.open() != Window.OK){
-			return null;
+			return;
 		}
 			
 		final File exportDir = dialog.getDirectory();
 		final List<SurveyDesignEditorInput> types = dialog.getTypes();
 		
-		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
 				
@@ -190,7 +191,6 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 		}catch (Exception ex){
 			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 		}
-		return null;
 	}
 	
 	class ExportSurveyDesignDialog extends TitleAreaDialog{
@@ -356,7 +356,7 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 						s.getTransaction().rollback();
 						s.close();
 					}
-					Display.getDefault().syncExec(new Runnable(){
+					getShell().getDisplay().syncExec(new Runnable(){
 
 						@Override
 						public void run() {
@@ -380,5 +380,11 @@ public class SurveyDesignExportHandler extends AbstractHandler {
 			return true;
 		}
 		
+	}
+	
+	public static class SurveyDesignExportHandlerWrapper extends DIHandler<SurveyDesignExportHandler>{
+		public SurveyDesignExportHandlerWrapper(){
+			super(SurveyDesignExportHandler.class);
+		}
 	}
 }

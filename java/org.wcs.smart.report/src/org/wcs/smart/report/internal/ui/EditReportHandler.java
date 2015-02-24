@@ -21,13 +21,12 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 
@@ -37,19 +36,23 @@ import org.wcs.smart.report.model.Report;
  * @author egouge
  * @since 1.0.0
  */
-public class EditReportHandler extends AbstractHandler implements IHandler {
+public class EditReportHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection){
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty() ){
+			return;
 		}
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();		
 		if (obj instanceof Report) {
 			ReportManager.editReport((Report) obj);	
 		}
-		return null;
+	}
+
+	public static class EditReportHandlerWrapper extends DIHandler<EditReportHandler>{
+		public EditReportHandlerWrapper(){
+			super(EditReportHandler.class);
+		}
 	}
 }

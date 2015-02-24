@@ -33,8 +33,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -146,7 +144,6 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		}
 		sortList(employeeList);
 		sortList(employeeListA);
-		WritableList selectedEmployees = new WritableList(employeeListA, Employee.class);
 		
 		Composite patrolIdComp = new Composite(parent, SWT.NONE);
 		patrolIdComp.setLayout(new GridLayout(2, false));
@@ -170,8 +167,8 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		emplList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)emplList.getTable().getLayoutData()).heightHint = 100;
 		emplList.setLabelProvider(new EmployeeLabelProvider());
-		emplList.setContentProvider(new ObservableListContentProvider());
-		emplList.setInput(new WritableList(employeeList, Employee.class));
+		emplList.setContentProvider(ArrayContentProvider.getInstance());
+		emplList.setInput(employeeList);
 		
 		Composite right = new Composite(compEmployees, SWT.NONE);
 		right.setLayout(new GridLayout(2, false));
@@ -183,15 +180,15 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
 		lbl.setText(Messages.EditPatrolLegDialog_Members_Label);
 		
-		createEmployeeButtonPanelAndTable(right, selectedEmployees, emplList);
+		createEmployeeButtonPanelAndTable(right, employeeListA, emplList);
 		
 		Composite leaderComp = new Composite(right, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		groupALeader = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupALeader_Label, selectedEmployees, editLeg.getLeader().getMember());
+		groupALeader = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupALeader_Label, employeeListA, editLeg.getLeader().getMember());
 		if (editLeg.getPatrol().hasPilot()){
-			groupAPilot = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupAPilot_Label, selectedEmployees, editLeg.getPilot().getMember());
+			groupAPilot = createLeaderPilot(leaderComp, Messages.EditPatrolLegDialog_GroupAPilot_Label, employeeListA, editLeg.getPilot().getMember());
 		}
 		
 		setMessage(Messages.EditPatrolLegDialog_DialogMessage);
@@ -203,12 +200,12 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	/*
 	 * Create a combo viewer for selecting patrol leader/pilot
 	 */
-	private ComboViewer createLeaderPilot(Composite parent, String name, WritableList employeeList, Employee defaultValue){
+	private ComboViewer createLeaderPilot(Composite parent, String name, List<Employee> employeeList, Employee defaultValue){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(name);
 		ComboViewer cmb = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmb.setLabelProvider(new EmployeeLabelProvider());
-		cmb.setContentProvider(new ObservableListContentProvider());
+		cmb.setContentProvider(ArrayContentProvider.getInstance());
 		cmb.setInput(employeeList);
 		cmb.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
 		
@@ -221,7 +218,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	/*
 	 * Create table viewer for patrol members list
 	 */
-	private TableViewer createEmployeeButtonPanelAndTable(Composite parent, WritableList list, final TableViewer employeeTableViewer){
+	private TableViewer createEmployeeButtonPanelAndTable(Composite parent, List<Employee> list, final TableViewer employeeTableViewer){
 		
 		Composite btn = new Composite(parent, SWT.NONE);
 		btn.setLayout(new GridLayout(1, false));
@@ -237,7 +234,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		
 		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		groupList.setLabelProvider(new EmployeeLabelProvider());
-		groupList.setContentProvider(new ObservableListContentProvider());
+		groupList.setContentProvider(ArrayContentProvider.getInstance());
 		groupList.setInput(list);
 		groupList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)groupList.getTable().getLayoutData()).heightHint = 100;

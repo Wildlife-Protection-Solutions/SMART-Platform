@@ -21,35 +21,43 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for renaming report or report folders.
  * @author egouge
  * @since 1.0.0
  */
-public class RenameReportItem extends AbstractHandler implements IHandler {
+public class RenameReportItem  {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ReportListView view = (ReportListView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(ReportListView.ID);
-		
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, 
+			EPartService pService){
+		MPart viewPart = pService.findPart(ReportListView.ID);
+		if (viewPart == null) return;
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty() ){
+			return;
 		}
 		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
 		if (o instanceof ReportFolder || o instanceof Report ){
-			view.editElement(o);
+			((ReportListView)E3Utils.getSourceObject(viewPart)).editElement(o);
 		}
-		return null;
+	}
+		
+	public static class RenameReportItemWrapper extends DIHandler<RenameReportItem>{
+		public RenameReportItemWrapper(){
+			super(RenameReportItem.class);
+		}
 	}
 }

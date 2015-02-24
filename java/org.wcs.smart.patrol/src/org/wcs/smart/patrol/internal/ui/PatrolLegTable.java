@@ -113,6 +113,7 @@ public class PatrolLegTable {
 	 * Sets the table viewer input and updates column width.
 	 * @param legs list of patrol legs
 	 */
+	@SuppressWarnings("unchecked")
 	public void setInput(ArrayList<PatrolLeg> legs){
 		patrolLegViewer.setInput(legs);
 		

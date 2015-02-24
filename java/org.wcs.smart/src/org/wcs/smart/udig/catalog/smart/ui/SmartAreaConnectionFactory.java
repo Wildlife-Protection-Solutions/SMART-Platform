@@ -4,8 +4,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.Map;
 
-import net.refractions.udig.catalog.ui.UDIGConnectionFactory;
-
+import org.locationtech.udig.catalog.ui.UDIGConnectionFactory;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 

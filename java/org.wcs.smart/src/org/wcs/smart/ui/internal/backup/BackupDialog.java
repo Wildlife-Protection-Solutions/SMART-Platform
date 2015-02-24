@@ -23,6 +23,7 @@ package org.wcs.smart.ui.internal.backup;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.DialogSettings;
@@ -45,8 +46,6 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.internal.Messages;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Dialog for displaying system

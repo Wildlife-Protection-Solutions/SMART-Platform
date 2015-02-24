@@ -31,7 +31,9 @@ import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.EditingSupport;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -48,6 +50,7 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -91,6 +94,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 	
 	private Button btnEnable;
 	private Button btnAddSubNodes;
+	private Button btnAdd;
+	private Button btnRemove;
 	
 	public EditTreeDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session currentSession) {
 		super(parentShell);
@@ -110,49 +115,51 @@ public class EditTreeDialog extends TitleAreaDialog {
 		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 
 		Composite left = new Composite(comp, SWT.NONE);
-		GridLayout lgl = new GridLayout();
-		lgl.marginHeight = lgl.marginWidth = 0;
-		left.setLayout(lgl);
+		left.setLayout( new GridLayout());
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		org.eclipse.swt.widgets.Label dmLabel = new org.eclipse.swt.widgets.Label(left, SWT.NONE);
 		dmLabel.setText(Messages.EditTreeDialog_DataModelValues);
 		
-		dmTreeViewer = createDmTreeViewer(left);
-
 		btnAddSubNodes = new Button(left, SWT.CHECK);
 		btnAddSubNodes.setText(Messages.EditTreeDialog_AutoAddSubnodes);
 		btnAddSubNodes.setSelection(true);
-
-		Button btnAddConf = new Button(left, SWT.PUSH);
-		btnAddConf.setText(Messages.EditTreeDialog_AddToConfTree);
-		btnAddConf.addSelectionListener(new SelectionAdapter() {
+		
+		dmTreeViewer = createDmTreeViewer(left);
+		((TreeViewer)dmTreeViewer).addDoubleClickListener(new IDoubleClickListener() {
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void doubleClick(DoubleClickEvent event) {
 				addToConfigurableTree();
 			}
 		});
-		btnAddConf.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER,false, false));
 		
 		Composite middle = new Composite(comp, SWT.NONE);
-		GridLayout gl = new GridLayout();
-		gl.marginHeight = gl.marginWidth = 0;
-		middle.setLayout(gl);
+		middle.setLayout(new GridLayout());
 		middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		org.eclipse.swt.widgets.Label cmLabel = new org.eclipse.swt.widgets.Label(middle, SWT.NONE);
 		cmLabel.setText(Messages.EditTreeDialog_ConfigurableModelValues);
-
-		itemViewer = createItemViewer(middle);
 		
-		Composite btnPanel = new Composite(middle, SWT.NONE);
-		GridLayout gla = new GridLayout(3, false);
-		gla.marginHeight = gla.marginWidth = 0;
-		btnPanel.setLayout(gla);
-		btnPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-
-		Button btnAddGrp = new Button(btnPanel, SWT.PUSH);
+		Composite btnComp = new Composite(middle, SWT.NONE);
+		btnComp.setLayout(new GridLayout(4, true));
+		btnComp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
+		
+		btnAdd = new Button(btnComp, SWT.PUSH);
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnAdd.setEnabled(false);
+		btnAdd.setText("Add Node");
+		btnAdd.setToolTipText("add node to configurable model");
+		btnAdd.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				addToConfigurableTree();
+			}
+		});
+				
+		Button btnAddGrp = new Button(btnComp, SWT.PUSH);
+		btnAddGrp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAddGrp.setText(Messages.EditTreeDialog_AddGroup);
+		btnAddGrp.setToolTipText("create new group node");
 		btnAddGrp.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -160,12 +167,22 @@ public class EditTreeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		btnEnable = new Button(btnPanel, SWT.PUSH);
-		GridData gd = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
-		gd.verticalIndent = 2;
-		gd.horizontalIndent = 2;
-		btnEnable.setLayoutData(gd);
+		btnRemove = new Button(btnComp, SWT.PUSH);
+		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
+		btnRemove.setToolTipText("remove node from configurable model");
+		btnRemove.setEnabled(false);
+		btnRemove.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				deleteItems();
+			}
+		});
+		
+		btnEnable = new Button(btnComp, SWT.PUSH);
+		btnEnable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+		btnEnable.setToolTipText("enable/diable tree node");
 		btnEnable.setEnabled(false);
 		btnEnable.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -187,23 +204,29 @@ public class EditTreeDialog extends TitleAreaDialog {
 				updateEnableButtonText();
 			}
 		});
-		super.setButtonLayoutData(btnEnable);
-
-		Button btnDelete = new Button(btnPanel, SWT.PUSH);
-		btnDelete.setText(Messages.EditTreeDialog_Delete);
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteItems();
-			}
-		});
+		//super.setButtonLayoutData(btnEnable);
 		
+		itemViewer = createItemViewer(middle);
+		
+		Composite btnPanel = new Composite(middle, SWT.NONE);
+		GridLayout gla = new GridLayout(3, false);
+		gla.marginHeight = gla.marginWidth = 0;
+		btnPanel.setLayout(gla);
+		btnPanel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
+
 		createNameTable(comp);
 		
-		comp.setWeights(new int[]{30,30,40});
+		comp.setWeights(new int[]{28,41,31});
 		itemViewer.refresh();
 		
+		
 		return parent;
+	}
+	
+	@Override
+	public Point getInitialSize(){
+		Point size = super.getInitialSize();
+		return new Point(Math.min(size.x, 800), size.y);
 	}
 
 	protected void deleteItems() {
@@ -299,20 +322,24 @@ public class EditTreeDialog extends TitleAreaDialog {
 		tree.setContentProvider(new AttributeTreeContentProvider(true, false));
 		tree.setLabelProvider(new AttributeTreeLabelProvider());
 		tree.setInput(attribute.getAttribute());
-//		tree.addSelectionChangedListener(new ISelectionChangedListener() {
-//			
-//			@Override
-//			public void selectionChanged(SelectionChangedEvent event) {
-//				Object x = ((StructuredSelection)tree.getSelection()).getFirstElement();
-//				AttributeTreeNode currentNode = null;
-//				CmAttributeTreeNode currentCmNode = null;
-//				if (x instanceof AttributeTreeNode){
-//					currentNode = (AttributeTreeNode) x;
-//					currentCmNode = getConfiguredNode(x);
-//				}
-//				EditTreeDialog.this.setCurrentSelection(currentNode, currentCmNode);
-//			}
-//		});
+		tree.addSelectionChangedListener(new ISelectionChangedListener() {
+			
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				boolean isEmpty = tree.getSelection().isEmpty();
+				if (isEmpty){
+					btnAdd.setEnabled(false);
+					return;
+				}
+				btnAdd.setEnabled(false);
+				for (Iterator<?> it = ((IStructuredSelection)tree.getSelection()).iterator(); it.hasNext();){
+					if (it.next() instanceof AttributeTreeNode){
+						btnAdd.setEnabled(true);
+						return;
+					}
+				}
+			}
+		});
 		tree.expandToLevel(2);
 		
 		return tree;
@@ -496,6 +523,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		
 		nameTable.getTable().setEnabled(cmNode != null);
 		btnEnable.setEnabled(cmNode != null);
+		btnRemove.setEnabled(cmNode != null);
 		updateEnableButtonText();
 	}
 

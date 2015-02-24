@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.samplingunit.load;
 
 import java.io.File;
+import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,8 +31,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.data.DataStore;
+import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureReader;
-import org.geotools.data.shapefile.ng.ShapefileDataStore;
+import org.geotools.data.shapefile.ShapefileDataStore;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
@@ -72,11 +76,14 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 	public String[] getFieldNames(File f, Map<String, Object> options)
 			throws Exception {
 		ArrayList<String> attributes = new ArrayList<String>();
-		ShapefileDataStore store = new ShapefileDataStore(f.toURI().toURL());
+		
+		Map<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(ShapefileDataStoreFactory.URLP.key, f.toURI().toURL());
+		DataStore store = DataStoreFinder.getDataStore(params);
 		
 		try{
 			SamplingUnit.GeometryType suType = (GeometryType) options.get(TYPE_KEY);
-			SimpleFeatureType type = store.getSchema();
+			SimpleFeatureType type = store.getSchema(store.getTypeNames()[0]);
 			
 			//validate geometry types
 			boolean error = false;

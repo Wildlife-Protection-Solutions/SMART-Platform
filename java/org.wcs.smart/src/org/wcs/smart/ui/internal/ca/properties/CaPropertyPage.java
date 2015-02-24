@@ -282,7 +282,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		}catch (RuntimeException ex){
 			tx.rollback();
 			session.close();
-			SmartPlugIn.displayLog(getShell(),Messages.CaPropertyPage_Error_SavingChanages + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.CaPropertyPage_Error_SavingChanages + ex.getLocalizedMessage(), ex);
 		}
 		return false;
 	}

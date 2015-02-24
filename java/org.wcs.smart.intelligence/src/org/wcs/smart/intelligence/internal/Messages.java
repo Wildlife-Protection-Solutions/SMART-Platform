@@ -538,6 +538,8 @@ public class Messages extends NLS {
 
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
+	public static String OpenIntelligenceHandler_PlanEditor;
+
 	public static String PasswordInputDialog_Password;
 
 	public static String PasswordInputDialog_Title;
@@ -638,7 +640,7 @@ public class Messages extends NLS {
 
 	public static String SourceTypesPropertyDialog_Message;
 
-	public static String SourceTypesPropertyDialog_PatrolKeyInfo;
+	public static String SourceTypesPropertyDialog_PatrolKeyInfo1;
 
 	public static String SourceTypesPropertyDialog_SaveError;
 

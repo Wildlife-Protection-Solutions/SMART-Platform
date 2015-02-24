@@ -21,9 +21,8 @@
  */
 package org.wcs.smart.udig;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
-
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.tool.AbstractActionTool;
 import org.wcs.smart.map.internal.LoadBasemapHandler;
 
 /**
@@ -33,18 +32,18 @@ import org.wcs.smart.map.internal.LoadBasemapHandler;
  */
 public class SetBasemapTool extends AbstractActionTool{
 
-	public static final String ID = "org.wcs.smart.map.setBasemap"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.map.setbasemap"; //$NON-NLS-1$
 	
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.tool.ActionTool#run()
+	 * @see org.locationtech.udig.project.ui.tool.ActionTool#run()
 	 */
 	@Override
 	public void run() {
-		LoadBasemapHandler.loadBasemap((Map) getContext().getMap());
+		LoadBasemapHandler.loadBasemap((Map) getContext().getMap(), getContext().getViewportPane().getControl().getShell());
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.tool.Tool#dispose()
+	 * @see org.locationtech.udig.project.ui.tool.Tool#dispose()
 	 */
 	@Override
 	public void dispose() {

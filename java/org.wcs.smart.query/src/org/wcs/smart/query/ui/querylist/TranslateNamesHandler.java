@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -45,12 +48,13 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  */
 public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandler {
 
-	
+	@Execute
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection,
+			@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
+		
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty()){
+			return;
 		}
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
@@ -71,14 +75,13 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 			}
 		}else if  (o instanceof NamedItem){
 			toUpdate = (NamedItem)o;
-			
 		}
 		
 		if (toUpdate == null){
-			return null;
+			return;
 		}
 		
-		super.translateItem(toUpdate, event);
+		super.translateItem(toUpdate, activeShell);
 		
 		if (toUpdate instanceof Query){
 			((QueryEditorInput)o).setQueryName(toUpdate.getName());
@@ -87,6 +90,12 @@ public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandle
 			QueryEventManager.getInstance().fireFolderRenamed((QueryFolder)toUpdate);
 		}
 		
-		return null;
+		return;
+	}
+	
+	public static class TranslateNamesHandlerWrapper extends DIHandler<TranslateNamesHandler>{
+		public TranslateNamesHandlerWrapper(){
+			super(TranslateNamesHandler.class);
+		}
 	}
 }

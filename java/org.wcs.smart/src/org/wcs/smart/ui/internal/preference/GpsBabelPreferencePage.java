@@ -103,7 +103,6 @@ public class GpsBabelPreferencePage extends PreferencePage implements
 					SmartProperties.PROP_GPS_BABEL, newLocation);
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(
-					getShell(),
 					Messages.GpsBabelPreferencePage_CouldNotUpdate
 							+ ex.getMessage(), ex);
 			return false;

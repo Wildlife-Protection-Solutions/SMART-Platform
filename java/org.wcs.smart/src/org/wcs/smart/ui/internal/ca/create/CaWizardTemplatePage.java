@@ -175,8 +175,7 @@ public class CaWizardTemplatePage  extends CaWizardPage  {
 							lstCa.setInput(cas);
 							lstCa.getCombo().select(0);
 						} else {
-							SmartPlugIn.displayLog(currentShell,
-									lerror.getMessage(), lerror);
+							SmartPlugIn.displayLog(lerror.getMessage(), lerror);
 						}
 
 					}

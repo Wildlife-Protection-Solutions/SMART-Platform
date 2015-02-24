@@ -23,8 +23,6 @@ package org.wcs.smart;
 
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
-import org.wcs.smart.ui.ConservationAreaListView;
-import org.wcs.smart.ui.CrossCaAnalysisIntroView;
 /**
  * Default perspective for cross-ca analysis.  
  * 
@@ -39,9 +37,6 @@ public class DefaultCrossCaPerspective implements IPerspectiveFactory {
 	@Override
 	public void createInitialLayout(IPageLayout layout) {
 		layout.setEditorAreaVisible(false);
-
-		layout.addView( ConservationAreaListView.ID, IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA); 
-		layout.getViewLayout(CrossCaAnalysisIntroView.ID).setCloseable(false);
 	}
 
 }

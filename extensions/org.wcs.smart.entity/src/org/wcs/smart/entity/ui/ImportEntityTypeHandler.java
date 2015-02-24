@@ -30,10 +30,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -54,8 +54,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.DataModelManager;
@@ -64,41 +62,30 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
-import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 import org.wcs.smart.entity.xml.EntityTypeFromXmlConverter;
 import org.wcs.smart.entity.xml.EntityTypeXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
  * Handler for importing entity types.
  * @author Emily
  *
  */
-public class ImportEntityTypeHandler extends AbstractHandler {
+public class ImportEntityTypeHandler{
 
-	private String errorMessage = null;
-	private Exception exception = null;
-	private EntityType newType = null;
-	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
+	@Execute
+	public void execute(Shell activeShell, final IEclipseContext context){
+		ImportEntityTypeDialog dialog = new ImportEntityTypeDialog(activeShell);
+		if (dialog.open() != Window.OK) return;
 		
-		ImportEntityTypeDialog dialog = new ImportEntityTypeDialog(HandlerUtil.getActiveShell(event));
-		if (dialog.open() != Window.OK){
-			return null;
-		}
 			
 		final File importFile = dialog.getFile();
 	
-		errorMessage = null;
-		exception = null;
-		newType = null;
-		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+		final Object[] returnInfo = new Object[3]; //0 = errormessage; 1 = exception; 2 = newType
+		
+		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
 				
@@ -117,8 +104,8 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 							fin.close();
 						}
 					}catch (Exception ex){
-						errorMessage = Messages.ImportEntityTypeHandler_XmlError;
-						exception = ex;
+						returnInfo[0] = Messages.ImportEntityTypeHandler_XmlError;
+						returnInfo[1] = ex;
 						return;
 					}
 					monitor.worked(50);
@@ -132,7 +119,7 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 						//ensure key doesn't already exist
 						List<?> types = session.createCriteria(EntityType.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("keyId", et.getKeyId())).list(); //$NON-NLS-1$ //$NON-NLS-2$
 						if (types.size() > 0){
-							errorMessage = MessageFormat.format(Messages.ImportEntityTypeHandler_ErrorDuplicateKey, new Object[]{et.getKeyId()});
+							returnInfo[0] = MessageFormat.format(Messages.ImportEntityTypeHandler_ErrorDuplicateKey, new Object[]{et.getKeyId()});
 							return;
 						}
 						
@@ -174,43 +161,39 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 							}
 							session.saveOrUpdate(et);
 							session.getTransaction().commit();
-							newType = et;
+							returnInfo[2] = et;
 						}catch (Exception ex){
 							session.getTransaction().rollback();
 							throw ex;
 						}
 						
 					}catch(ParseException parse){
-						errorMessage = parse.getMessage();
-						exception = parse;
+						returnInfo[0] = parse.getMessage();  
+						returnInfo[1] = parse;
 						return;
 					}catch(Exception ex){
-						errorMessage = Messages.ImportEntityTypeHandler_ImportError + "\n\n" + ex.getMessage(); //$NON-NLS-1$
-						exception = ex;
+						returnInfo[0] = Messages.ImportEntityTypeHandler_ImportError + "\n\n" + ex.getMessage(); //$NON-NLS-1$  
+						returnInfo[1] = ex;
 						return;
 					}finally{
 						session.close();
 					}
 					
 					
-					if (newType != null){
+					if (returnInfo[2] != null){
 						pmd.getShell().getDisplay().syncExec(new Runnable(){
 
 							@Override
 							public void run() {
+								EntityType newType = (EntityType) returnInfo[2];
+								
 								//fire events
 								EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_ADDED, newType);
 								//fire data model modified events
 								DataModelManager.getInstance().fireChangeListeners();
 								
-								//open 
-								EntityTypeEditorInput input = new EntityTypeEditorInput(newType.getUuid(), newType.getKeyId(), newType.getName());
-								FieldDataPerspective.openPerspective(EntityTypeListView.ID);
-								try {
-									PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityTypeEditor.ID);
-								} catch (Throwable t) {
-									EntityPlugIn.displayLog(t.getLocalizedMessage(), t);
-								}
+								//open
+								(new OpenEntityTypeHandler()).openEntityType(new EntityTypeEditorInput(newType.getUuid(), newType.getKeyId(), newType.getName()));
 						}});
 					}
 				}
@@ -220,14 +203,9 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 			}
 		
 		
-		if (errorMessage != null || exception != null){
-			EntityPlugIn.displayLog(errorMessage != null ? errorMessage : exception.getMessage(), exception);
-			return null;
+		if (returnInfo[0] != null || returnInfo[1] != null){
+			EntityPlugIn.displayLog(returnInfo[0] != null ? (String)returnInfo[0]: ((Throwable)returnInfo[1]).getMessage(), (Throwable)returnInfo[1]);
 		}
-		
-		
-		
-		return null;
 	}
 	
 	class ImportEntityTypeDialog extends TitleAreaDialog{
@@ -323,5 +301,11 @@ public class ImportEntityTypeHandler extends AbstractHandler {
 			return p;
 		}
 		
+	}
+	
+	public static class ImportEntityTypeHandlerWrapper extends DIHandler<ImportEntityTypeHandler>{
+		public ImportEntityTypeHandlerWrapper(){
+			super(ImportEntityTypeHandler.class);
+		}
 	}
 }

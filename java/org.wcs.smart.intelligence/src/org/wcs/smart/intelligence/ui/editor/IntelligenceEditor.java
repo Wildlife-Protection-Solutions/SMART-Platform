@@ -23,15 +23,14 @@ package org.wcs.smart.intelligence.ui.editor;
 
 import java.util.Arrays;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
@@ -65,8 +64,10 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 			byte[] uuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
 			if (Arrays.equals(source.getUuid(), uuid)) {
 				intelligence = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
+				setPartName(getIntelligence().getName());
 				summaryPage.initValues();
 				mapPage.refresh();
+				
 			}
 		}
 	};

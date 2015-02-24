@@ -44,7 +44,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -148,7 +147,7 @@ public class ImportSurveyDesignDesignsPage extends WizardPage{
 					s.getTransaction().rollback();
 					s.close();
 				}
-				Display.getDefault().asyncExec(new Runnable(){
+				getShell().getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						if ( tblEntities.getTable().isDisposed() ) return;

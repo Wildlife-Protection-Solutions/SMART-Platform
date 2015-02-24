@@ -2,12 +2,6 @@ package org.wcs.smart.ui.map;
 
 import java.text.NumberFormat;
 
-import net.refractions.udig.project.IMap;
-import net.refractions.udig.project.internal.commands.SetScaleCommand;
-import net.refractions.udig.project.render.IViewportModelListener;
-import net.refractions.udig.project.render.ViewportModelEvent;
-import net.refractions.udig.project.render.ViewportModelEvent.EventType;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
@@ -27,9 +21,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.PlatformUI;
+import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.internal.commands.SetScaleCommand;
+import org.locationtech.udig.project.render.IViewportModelListener;
+import org.locationtech.udig.project.render.ViewportModelEvent;
+import org.locationtech.udig.project.render.ViewportModelEvent.EventType;
 
 /**
- * Adapted from net.refractions.udig.project.ui.controls.ScaleRatioLabel
+ * Adapted from org.locationtech.udig.project.ui.controls.ScaleRatioLabel
  * 
  * @author egouge
  *

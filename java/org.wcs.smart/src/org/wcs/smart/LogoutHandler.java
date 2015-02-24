@@ -21,9 +21,8 @@
  */
 package org.wcs.smart;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -34,15 +33,21 @@ import org.eclipse.ui.PlatformUI;
  * @author Emily
  * @since 1.0.0
  */
-public class LogoutHandler extends AbstractHandler {
+public class LogoutHandler {
 
 	/**
 	 * Restarts the application.
 	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute()  {
 		PlatformUI.getWorkbench().restart();
-		return null;
+	}
+	
+	// E3
+	public static class LogoutHandlerWrapper extends DIHandler<LogoutHandler> {
+		public LogoutHandlerWrapper() {
+			super(LogoutHandler.class);
+		}
 	}
 
 }

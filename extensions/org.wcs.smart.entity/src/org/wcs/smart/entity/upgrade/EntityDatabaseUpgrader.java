@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.updatesite.OnInstallAction;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -40,8 +41,14 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class EntityDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
-	public void upgrade(Session s, IProgressMonitor monitor) {
-		Map<String, String> versions = UpgradeEngine.getVersions(s);
+	public void upgrade(IProgressMonitor monitor) {
+		Map<String, String> versions = null;
+		Session s = HibernateManager.openSession();
+		try{
+			versions = UpgradeEngine.getVersions(s);
+		}finally{
+			s.close();
+		}
 		if (versions == null) {
 			//we don't know what is happening with database
 			//it is some kind of error or wrong database version

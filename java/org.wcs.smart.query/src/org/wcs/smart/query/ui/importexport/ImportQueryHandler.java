@@ -21,50 +21,36 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
  * Handler that displays the query import wizard dialog.
  * @author Emily
  * @since 1.0.0
  */
-public class ImportQueryHandler extends AbstractHandler {
+public class ImportQueryHandler {
 
-	/**
-	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell parent = HandlerUtil.getActiveShell(event);
+	@Execute
+	public void execute(Shell activeShell, IEclipseContext context) {
+		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), context.get(EModelService.class), context.get(MWindow.class));
 		
-		try {
-			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
-			if (!activeId.equals(QueryPlugIn.getActivePerspectiveId())){
-				//show query persepective
-				HandlerUtil
-				.getActiveWorkbenchWindow(event)
-				.getWorkbench()
-				.showPerspective(QueryPlugIn.getActivePerspectiveId(),
-						HandlerUtil.getActiveWorkbenchWindow(event));	
-			}
-			
-		} catch (WorkbenchException e) {
-			QueryPlugIn
-					.displayLog(Messages.ImportQueryHandler_ErrorOpeningPerspective, e);
-		}
 		
 		ImportQueryWizard wizard = new ImportQueryWizard();
-		WizardDialog wd = new WizardDialog(parent, wizard);
+		WizardDialog wd = new WizardDialog(activeShell, wizard);
 		wd.open();
-		return null;
 	}
 
+	public static class ImportQueryHandlerWrapper extends DIHandler<ImportQueryHandler>{
+		public ImportQueryHandlerWrapper(){
+			super(ImportQueryHandler.class);
+		}
+	}
 }

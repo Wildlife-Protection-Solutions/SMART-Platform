@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.plan.ui.PlanFilterDialog;
 import org.wcs.smart.plan.ui.perspective.PlanListView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for displaying the plan filter dialog 
@@ -35,18 +36,21 @@ import org.wcs.smart.plan.ui.perspective.PlanListView;
  * @author Emily
  *
  */
-public class ShowPlanFilter extends AbstractHandler {
+public class ShowPlanFilter {
 
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(EPartService pService, Shell activeShell){
 		//Show Plan Filter
-		
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		
-		if (part.getSite().getId().equals(PlanListView.ID)){
-			PlanListView view = ((PlanListView)part);
-			PlanFilterDialog dialog = new PlanFilterDialog(HandlerUtil.getActiveShell(event), view);
-			dialog.open();
+		MPart part = pService.findPart(PlanListView.ID);
+		if (part == null) return;
+
+		PlanFilterDialog dialog = new PlanFilterDialog(activeShell, ((PlanListView)E3Utils.getSourceObject(part)));
+		dialog.open();
+	}
+	
+	public static class ShowPlanFilterWrapper extends DIHandler<ShowPlanFilter>{
+		public ShowPlanFilterWrapper(){
+			super(ShowPlanFilter.class);
 		}
-		return null;
 	}
 }

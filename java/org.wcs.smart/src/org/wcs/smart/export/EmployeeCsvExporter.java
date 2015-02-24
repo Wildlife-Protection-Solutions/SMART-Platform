@@ -23,8 +23,8 @@ package org.wcs.smart.export;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -40,7 +40,6 @@ import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
-import com.ibm.icu.text.SimpleDateFormat;
 
 /**
  * Exporter for exporting agencies and ranks data to csv file.
@@ -52,11 +51,9 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 
 	@Override
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
-		CSVWriter writer = null;
-		try {
-			writer = new CSVWriter(
+		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR)){
 			if (headers) {
 				// WriteHeaders
 				//String[] headerCols = {"ID", "Given Name", "Family Name", "Birth Date", "Gender", "Start Employement Date", "End Employement Date", "Agency", "Rank"};
@@ -94,17 +91,8 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 				
 				writer.writeNext(data);
 			}
-			
-			writer.close();
 			return true;
 		} catch (Exception ex) {
-			try {
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (IOException e) {
-				return false;
-			}
 			return false;
 		}
 	}

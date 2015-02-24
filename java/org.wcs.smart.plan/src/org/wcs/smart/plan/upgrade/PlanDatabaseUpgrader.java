@@ -25,6 +25,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.updatesite.OnInstallAction;
@@ -43,8 +44,14 @@ public class PlanDatabaseUpgrader implements IDatabaseUpgrader {
 	 * @see org.wcs.smart.upgrade.IDatabaseUpgrader#upgrade(org.hibernate.Session, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void upgrade(Session s, IProgressMonitor monitor) {
-		Map<String, String> versions = UpgradeEngine.getVersions(s);
+	public void upgrade(IProgressMonitor monitor) {
+		Map<String, String> versions = null;
+		Session s = HibernateManager.openSession();
+		try{
+			versions = UpgradeEngine.getVersions(s);
+		}finally{
+			s.close();
+		}
 		if (versions == null) {
 			//we don't know what is happening with database
 			//it is some kind of error or wrong database version

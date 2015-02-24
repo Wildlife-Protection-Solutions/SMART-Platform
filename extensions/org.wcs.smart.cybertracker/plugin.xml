@@ -78,15 +78,15 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.cybertracker.handler.CyberTrackerExportHandler"
+            class="org.wcs.smart.cybertracker.handler.CyberTrackerExportHandler$CyberTrackerExportHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.export">
       </handler>
       <handler
-            class="org.wcs.smart.cybertracker.handler.CyberTrackerImportHandler"
+            class="org.wcs.smart.cybertracker.handler.CyberTrackerImportHandler$CyberTrackerImportHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.import">
       </handler>
       <handler
-            class="org.wcs.smart.cybertracker.handler.CyberTrackerPropertiesHandler"
+            class="org.wcs.smart.cybertracker.handler.CyberTrackerPropertiesHandler$CyberTrackerPropertiesHandlerWrapper"
             commandId="org.wcs.smart.cybertracker.properties">
       </handler>
    </extension>

@@ -19,34 +19,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.plan.ui.handlers;
+package org.wcs.smart.util;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.plan.SmartPlanPlugIn;
-import org.wcs.smart.plan.internal.Messages;
-import org.wcs.smart.plan.ui.perspective.PlanPerspective;
-
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.ui.internal.e4.compatibility.CompatibilityPart;
 
 /**
- * Handler that display the Plan perspective.
- * 
- * @author jeffloun
- * @since 1.0.0
+ * Simple utility methods for e4/e3 compatibility layer
+ * @author Emily
+ *
  */
-public class ShowPlanPersepctiveHandler extends AbstractHandler {
+//E3
+public class E3Utils {
 
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		//Open Plan Perspective
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench()
-					.showPerspective(PlanPerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
-		} catch (WorkbenchException e) {
-			SmartPlanPlugIn.displayLog(Messages.ShowPlanPersepctiveHandler_Load_Error, e);
+	/**
+	 * Gets the source object for a part.  This goes one level before the compatibilitypart of
+	 * parts which are part of the compatibility layer; and gets components of DIViewParts.
+	 * @param part
+	 * @return
+	 */
+	public static Object getSourceObject(MPart part) {
+		if (part == null)
+			return null;
+		Object x = part.getObject();
+		if (x == null)
+			return null;
+		if (x instanceof CompatibilityPart) {
+			x = ((CompatibilityPart) x).getPart();
 		}
-		return null;
+		if (x instanceof DIViewPart){
+			x = ((DIViewPart<?>)x).getComponent();
+		}
+		return x;
 	}
 }

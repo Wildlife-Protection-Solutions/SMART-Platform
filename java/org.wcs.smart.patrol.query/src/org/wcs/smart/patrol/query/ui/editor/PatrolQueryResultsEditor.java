@@ -25,10 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -43,6 +39,9 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
@@ -127,6 +126,16 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 					isDirty = lIsDirty;
 					firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 				}
+			}else if (object != null && object instanceof QueryEditorInput 
+					&& ((QueryEditorInput)object).getUuid().equals(getQuery().getUuid()) 
+					&& eventType == IQueryListener.QUERY_DELETED){
+				//close part
+				getSite().getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						getSite().getWorkbenchWindow().getActivePage().closeEditor(PatrolQueryResultsEditor.this, false);					
+					}});
+				
 			}
 
 		}
@@ -175,7 +184,6 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 					}
 				});
 			}
-			
 			return Status.OK_STATUS;
 		}};
 		
@@ -237,13 +245,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	 * @return the query
 	 */
 	public Query getQuery(){
-		try {
-			loadQueryLoad.join();	//wait for the query loading job if applicable
-		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_CouldNotLoadQueryError + e.getLocalizedMessage(), e);
-		}
-		
-		return this.query.getQuery();
+		return getQueryProxy().getQuery();
 	}
 
 	/**
@@ -389,7 +391,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getMap()
 	 */
 	@Override
 	public Map getMap() {
@@ -400,7 +402,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#openContextMenu()
 	 */
 	@Override
 	public void openContextMenu() {
@@ -409,7 +411,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
 	 */
 	@Override
 	public void setFont(Control textArea) {
@@ -418,7 +420,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setSelectionProvider(org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider)
 	 */
 	@Override
 	public void setSelectionProvider(
@@ -428,7 +430,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {
@@ -460,6 +462,11 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 	}
 	
 	public QueryProxy getQueryProxy(){
+		try {
+			loadQueryLoad.join();	//wait for the query loading job if applicable
+		} catch (InterruptedException e) {
+			QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_CouldNotLoadQueryError + e.getLocalizedMessage(), e);
+		}
 		return this.query;
 	}
 	

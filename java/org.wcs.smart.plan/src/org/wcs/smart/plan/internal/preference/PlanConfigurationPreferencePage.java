@@ -148,8 +148,7 @@ public class PlanConfigurationPreferencePage extends PreferencePage implements I
 		try {
 			SmartPlanPlugIn.getDefault().getPreferenceStore().setValue(SmartPlanPlugIn.SYSPROP_PLAN_DISTANCE_TO_COMPLETE, newValue);
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(),
-					Messages.PlanConfigurationPreferencePage_CannotUpdate_Error + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(Messages.PlanConfigurationPreferencePage_CannotUpdate_Error + ex.getMessage(), ex);
 			return false;
 		}
 		

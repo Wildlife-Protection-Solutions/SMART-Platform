@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.map.internal.settings;
 
-import net.refractions.udig.project.internal.StyleEntry;
+import org.locationtech.udig.project.internal.StyleEntry;
 
 
 /**

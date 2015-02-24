@@ -8,9 +8,9 @@ Require-Bundle: org.wcs.smart,
  org.wcs.smart.query,
  org.eclipse.ui.forms,
  org.wcs.smart.patrol,
- net.refractions.udig.catalog.rasterings;bundle-version="1.2.0"
+ org.locationtech.udig.catalog.rasterings;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.patrol.query,
  org.wcs.smart.patrol.query.engine,
  org.wcs.smart.patrol.query.map.udig,

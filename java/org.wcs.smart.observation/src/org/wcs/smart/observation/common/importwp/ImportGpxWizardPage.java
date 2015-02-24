@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -68,7 +67,7 @@ public class ImportGpxWizardPage extends ImportOptionsWizardPage {
 	private Button btnAdd;
 
 	private ListViewer lstFiles;
-	private WritableList files = new WritableList();
+	private List<String> files = new ArrayList<String>();
 	
 	private ImportWpSelectWizardPage nextPage = null;
 	/**
@@ -187,10 +186,8 @@ public class ImportGpxWizardPage extends ImportOptionsWizardPage {
 	 * 
 	 * @return list of files selected by the user
 	 */
-	@SuppressWarnings("unchecked")
 	public List<String> getFiles(){
-		List<String> fs = new ArrayList<String>();
-		fs.addAll(files);
+		List<String> fs = new ArrayList<String>(files);
 		return fs;
 	}
 

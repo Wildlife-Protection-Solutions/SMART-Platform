@@ -14,6 +14,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.ui.internal.ca.properties.ProjectionPropertyDialog;
 
 /**
@@ -30,4 +31,10 @@ public class ShowProjectionsPageHandler extends ShowPropertyPageHandler {
 		super(ProjectionPropertyDialog.class);
 	}
 
+	// E3
+	public static class ShowProjectionsPageHandlerWrapper extends DIHandler<ShowProjectionsPageHandler> {
+		public ShowProjectionsPageHandlerWrapper() {
+			super(ShowProjectionsPageHandler.class);
+		}
+	}
 }

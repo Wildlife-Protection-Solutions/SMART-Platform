@@ -409,7 +409,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 				try{
 					addedElements.add(dm.addExistingAttribute((Attribute) checked[i], cat));
 				}catch (Exception ex){
-					SmartPlugIn.displayLog(getShell(), ex.getMessage(), ex);
+					SmartPlugIn.displayLog(ex.getMessage(), ex);
 				}
 			}
 		}

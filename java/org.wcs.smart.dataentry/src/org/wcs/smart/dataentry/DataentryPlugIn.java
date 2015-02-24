@@ -45,6 +45,7 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 	
 	private DataModelItemListener deleteListener = new DataModelItemListener();
 	private DataModelListener dmListener = new DataModelListener();
+	
 	/**
 	 * The constructor
 	 */

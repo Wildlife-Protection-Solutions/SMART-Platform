@@ -24,15 +24,14 @@ package org.wcs.smart.plan.report;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.project.internal.StyleBlackboard;
-
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.patrol.query.model.PatrolQuery;

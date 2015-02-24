@@ -22,18 +22,22 @@
 package org.wcs.smart.query.common.importexport;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-
-import net.refractions.udig.catalog.URLUtils;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
+import org.geotools.data.DefaultTransaction;
 import org.geotools.data.FeatureStore;
-import org.geotools.data.shapefile.ShapefileDataStore;
-import org.geotools.data.shapefile.indexed.IndexedShapefileDataStore;
+import org.geotools.data.FileDataStoreFactorySpi;
+import org.geotools.data.FileDataStoreFinder;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
+import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -54,7 +58,7 @@ import org.wcs.smart.query.model.Query;
  */
 public abstract class ShapeQueryExporter extends SimpleQueryExporter implements IQueryExporter{
 
-    protected ShapefileDataStore shapefile = null;    
+    protected DataStore shapefile = null;    
     protected ArrayList<SimpleFeature> features = null;
     protected Query query;
    
@@ -72,8 +76,14 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@Override
 	protected void init() throws Exception {
 		URL shpFileURL = URLUtils.fileToURL(this.outputFile);
-        shapefile = new IndexedShapefileDataStore(shpFileURL);
+		
+		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
+        Map<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(ShapefileDataStoreFactory.URLP.key, shpFileURL);
+		
+		shapefile = factory.createNewDataStore(params);
 		SimpleFeatureType type = createSchema(this.query.getType());
+		
 		shapefile.createSchema(type);
 		features = new ArrayList<SimpleFeature>();
 	}
@@ -92,8 +102,12 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	@SuppressWarnings("unchecked")
 	@Override
 	protected void finish() throws Exception {
-		FeatureStore<SimpleFeatureType, SimpleFeature> fs = (FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource();
+		FeatureStore<SimpleFeatureType, SimpleFeature> fs = 
+				(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
+		fs.setTransaction(new DefaultTransaction());
 		fs.addFeatures( DataUtilities.collection(features) );
+		fs.getTransaction().commit();
+		
 		shapefile.dispose();
 		
 	}

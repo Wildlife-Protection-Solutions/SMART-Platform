@@ -57,14 +57,12 @@ public class QueryResultItemFeature {
 	public static SimpleFeature createObservationFeature(EntityQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
 		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
-		
+		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
+		data[1] = it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$
 		for (int i = 0; i < columns.size(); i ++){
-			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
-		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
-		
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 		
 	}
 }

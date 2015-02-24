@@ -32,8 +32,8 @@ import org.eclipse.ui.WorkbenchException;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.udig.style.StyleManager;
 
-import net.refractions.udig.project.internal.StyleBlackboard;
-import net.refractions.udig.project.internal.StyleEntry;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.StyleEntry;
 
 /**
  * Class for queries which can be styled.

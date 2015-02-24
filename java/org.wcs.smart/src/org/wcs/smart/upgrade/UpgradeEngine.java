@@ -54,103 +54,122 @@ public class UpgradeEngine {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param monitor progress monitor
+	 * @param currentVersions map from plugin id to database version for the existing database
+	 * @throws Exception
+	 */
 	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
 		monitor.setTaskName(Messages.UpgradeEngine_UpgradeTask);
+		
+		
+		final boolean[] isOk = {false};
+		String lnewDbVersion = null;
+		String lexpectedDbVersion = null;
+		Map<String, String> backupVersions = null;
+		
 		Session s = HibernateManager.openSession();
 		try {
-			final String version = getSmartVersion(s);
-			final boolean[] isOk = {false};
-			final String currentDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
-			if (!currentDbVersion.equals(version)) {
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						isOk[0] = MessageDialog.openQuestion(
-								Display.getDefault().getActiveShell(),
-								Messages.UpgradeEngine_Confirm_Title,
-								MessageFormat.format(Messages.UpgradeEngine_Confirm_Message, version, currentDbVersion));
-					}
-				});
-				if (!isOk[0]) {
-					throw new Exception(Messages.UpgradeEngine_IncompatibleVersion);
-				}
-				
-				UpgradeFromVersion fromVersion = null;
-				for (UpgradeFromVersion v : UpgradeFromVersion.values()){
-					if (v.versionString.equals(version)){
-						fromVersion = v;
-					}
-				}
-				
-				if (fromVersion == null) {
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							MessageDialog.openError(
-									Display.getDefault().getActiveShell(),
-									Messages.UpgradeEngine_Error_Title,
-									MessageFormat.format(Messages.UpgradeEngine_Error_Message, version));
-						}
-					});
-					return;
-				}
-				
-				//find the index of the current from version; then
-				//run all upgrades from that index to upgrade to the 
-				//current version
-				int startIndex = 0;
-				for (int i = 0; i < UpgradeFromVersion.values().length; i++){
-					if (fromVersion == UpgradeFromVersion.values()[i]){
-						startIndex = i ;
-						break;
-					}
-				}
-				for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++){
-					UpgradeFromVersion v = UpgradeFromVersion.values()[i];
-					IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
-					upgrader.upgrade(s, monitor);
-				}
-				
-			}
-			
-			if (currentVersions != null) {
-				Map<String, String> backupVersions = getVersions(s);
-				String problems = ""; //$NON-NLS-1$
-				for (String curPlugin : currentVersions.keySet()) {
-					if (backupVersions.containsKey(curPlugin)) {
-						String curV = currentVersions.get(curPlugin);
-						String backV = backupVersions.get(curPlugin); 
-						if (!curV.equals(backV)) {
-							problems += MessageFormat.format(Messages.UpgradeEngine_Plugin_WrongVersion, curPlugin, backV, curV) + "\n"; //$NON-NLS-1$
-						}
-					} else {
-						problems += MessageFormat.format(Messages.UpgradeEngine_Plugin_Missing, curPlugin) + "\n"; //$NON-NLS-1$
-					}
-				}
-				if (!problems.isEmpty()) {
-					final String msg = problems;
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							MessageDialog.openWarning(
-									Display.getDefault().getActiveShell(),
-									Messages.UpgradeEngine_Confirm_Title,
-									MessageFormat.format(Messages.UpgradeEngine_Plugin_UpgradeMessage, msg));
-						}
-					});
-					
-				}
-			}
-			
-			List<IDatabaseUpgrader> extensions = getExtensions();
-			for (IDatabaseUpgrader upgrader : extensions) {
-				upgrader.upgrade(s, monitor);
-			}
-			monitor.subTask(""); //$NON-NLS-1$
-			
+			lnewDbVersion = getSmartVersion(s);
+			lexpectedDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
+			backupVersions = getVersions(s);
 		} finally {
 			s.close();
 		}
+		final String newDbVersion = lnewDbVersion;
+		final String expectedDbVersion = lexpectedDbVersion;
+
+		/* validate the core version; upgrade as required */
+		if (!expectedDbVersion.equals(newDbVersion)) {
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					isOk[0] = MessageDialog.openQuestion(
+							Display.getDefault().getActiveShell(),
+							Messages.UpgradeEngine_Confirm_Title,
+							MessageFormat.format(Messages.UpgradeEngine_Confirm_Message, newDbVersion, expectedDbVersion));
+				}
+			});
+			if (!isOk[0]) {
+				throw new Exception(Messages.UpgradeEngine_IncompatibleVersion);
+			}
+		
+			UpgradeFromVersion fromVersion = null;
+			for (UpgradeFromVersion v : UpgradeFromVersion.values()){
+				if (v.versionString.equals(newDbVersion)){
+					fromVersion = v;
+				}
+			}
+			
+			if (fromVersion == null) {
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(
+								Display.getDefault().getActiveShell(),
+								Messages.UpgradeEngine_Error_Title,
+								MessageFormat.format(Messages.UpgradeEngine_Error_Message, newDbVersion));
+					}
+				});
+				return;
+			}
+			
+			//find the index of the current from version; then
+			//run all upgrades from that index to upgrade to the 
+			//current version
+			//assumes we are upgrading to the latest version
+			int startIndex = 0;
+			for (int i = 0; i < UpgradeFromVersion.values().length; i++){
+				if (fromVersion == UpgradeFromVersion.values()[i]){
+					startIndex = i ;
+					break;
+				}
+			}
+			for (int i = startIndex; i < UpgradeFromVersion.values().length; i ++){
+				UpgradeFromVersion v = UpgradeFromVersion.values()[i];
+				IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
+				upgrader.upgrade(monitor);
+			}
+				
+		}
+		
+		/* validate & update plugins */
+		if (currentVersions != null) {
+			
+			String problems = ""; //$NON-NLS-1$
+			for (String curPlugin : currentVersions.keySet()) {
+				if (backupVersions.containsKey(curPlugin)) {
+					String curV = currentVersions.get(curPlugin);
+					String backV = backupVersions.get(curPlugin); 
+					if (!curV.equals(backV)) {
+						problems += MessageFormat.format(Messages.UpgradeEngine_Plugin_WrongVersion, curPlugin, backV, curV) + "\n"; //$NON-NLS-1$
+					}
+				} else {
+					problems += MessageFormat.format(Messages.UpgradeEngine_Plugin_Missing, curPlugin) + "\n"; //$NON-NLS-1$
+				}
+			}
+			if (!problems.isEmpty()) {
+				final String msg = problems;
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openWarning(
+								Display.getDefault().getActiveShell(),
+								Messages.UpgradeEngine_Confirm_Title,
+								MessageFormat.format(Messages.UpgradeEngine_Plugin_UpgradeMessage, msg));
+					}
+				});
+				
+			}
+		}
+			
+		/* additional upgrade options */
+		List<IDatabaseUpgrader> extensions = getExtensions();
+		for (IDatabaseUpgrader upgrader : extensions) {
+			upgrader.upgrade(monitor);
+		}
+		monitor.subTask(""); //$NON-NLS-1$
 	}
 
 	public static String getSmartVersion(Session s) {

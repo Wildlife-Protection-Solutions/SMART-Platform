@@ -220,6 +220,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		SashForm comp = new SashForm(thisparent, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
 		Composite leftPanel = new Composite(comp, SWT.NONE);
 		leftPanel.setLayout(new GridLayout(1, false));
 		
@@ -455,13 +456,13 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(pmd.getShell(),Messages.DataModelPropertyPage_Error_XmlExport, ex);
+								SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
 							}});
 					}
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(),Messages.DataModelPropertyPage_Error_XmlExport, ex);
+			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_XmlExport, ex);
 		}
 	}
 	
@@ -474,7 +475,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	protected boolean performSave() {
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		final Shell errorShell = getShell();
 		final Session s = getSession();
 		try {
 			pmd.run(false, false, new IRunnableWithProgress() {
@@ -502,7 +502,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			}catch (Exception ex2){}
 			currentTransaction = null;
 			s.close();
-			SmartPlugIn.displayLog(errorShell,Messages.DataModelPropertyPage_Error_SavingDataModel + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_SavingDataModel + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		return true;
@@ -536,7 +536,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		try {
 			dialog.run(true, true, runnable);		
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Unknown + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_Unknown + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			try{
 				if (currentTransaction != null && currentTransaction.isActive()){
 					currentTransaction.rollback();
@@ -752,7 +752,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					}
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getParentShell(), Messages.DataModelPropertyPage_CannotEditoCategory + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
+				SmartPlugIn.displayLog(Messages.DataModelPropertyPage_CannotEditoCategory + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
 				return;
 			}
 			
@@ -778,7 +778,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					}
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getParentShell(), Messages.DataModelPropertyPage_CannotEditAttribute + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
+				SmartPlugIn.displayLog(Messages.DataModelPropertyPage_CannotEditAttribute + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
 				return;
 			}
 
@@ -809,7 +809,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					getSession().flush();
 				}});
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), Messages.DataModelPropertyPage_Error_Edit + ex.getLocalizedMessage(), ex);
+				SmartPlugIn.displayLog(Messages.DataModelPropertyPage_Error_Edit + ex.getLocalizedMessage(), ex);
 			}
 			
 		}
@@ -862,7 +862,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				DataModelManager.getInstance().fireAddListener(session, att);
 				session.saveOrUpdate(att);
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), ex.getMessage(), ex);
+				SmartPlugIn.displayLog(ex.getMessage(), ex);
 			}
 			viewer.setExpandedState(parent, true);
 			refreshTree();

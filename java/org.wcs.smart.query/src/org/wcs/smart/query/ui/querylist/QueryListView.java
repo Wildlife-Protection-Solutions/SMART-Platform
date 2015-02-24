@@ -23,10 +23,20 @@ package org.wcs.smart.query.ui.querylist;
 
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
@@ -41,22 +51,20 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
 import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.EditorPart;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
+import org.osgi.service.event.Event;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * View that displays saved queries to the user.
@@ -64,54 +72,13 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryListView extends ViewPart {
+public class QueryListView {
 
-	public static final String ID = "org.wcs.smart.query.QueryListView"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.query.parts.itemlist"; //$NON-NLS-1$
 
-	
 	private TreeViewer queryList;
 	
-	/* listener to update query definition when window changes */
-	private IPartListener2 editorListener = new IPartListener2() {
-		
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			IWorkbenchPart part = partRef.getPart(false);
-			if ( IQueryEditor.class.isAssignableFrom( part.getClass() ) ){
-				IStructuredSelection selection = new StructuredSelection(((EditorPart)part).getEditorInput());
-				queryList.setSelection(selection);
-				focusCellManager.getFocusCell();
-			}
-		}
-	};
+	private @Inject IMenuService mService;
 	
 	/*
 	 * Listener for changes to the source data provided by
@@ -142,7 +109,7 @@ public class QueryListView extends ViewPart {
 			data.put(QueryListContentProvider.QUERY_KEY, SavedQueryTree.getInstance().getQueries());
 			data.put(QueryListContentProvider.FOLDER_KEY, SavedQueryTree.getInstance().getFolders());
 			
-			getSite().getShell().getDisplay().asyncExec(new Runnable(){
+			queryList.getControl().getDisplay().asyncExec(new Runnable(){
 
 				@Override
 				public void run() {
@@ -158,11 +125,25 @@ public class QueryListView extends ViewPart {
 	private TreeViewerFocusCellManager focusCellManager;
 		
 	public QueryListView(){
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
 	}
 	
-	@Override
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+//		if (activePart.getElementId().equals(PatrolEditor.ID)){ //this doesn't work as it returns compatibility id; not editor id
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof IQueryEditor){
+			queryList.setSelection(new StructuredSelection(((IQueryEditor)lpart).getInputInternal()));
+			focusCellManager.getFocusCell();
+		}
+	}
+	
+	@PostConstruct
 	public void createPartControl(Composite parent) {
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth  = 0;
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		
 		GridLayout gl = new GridLayout(1, false);
@@ -181,7 +162,7 @@ public class QueryListView extends ViewPart {
 			public void doubleClick(DoubleClickEvent event) {
 				Object x = ((IStructuredSelection)queryList.getSelection()).getFirstElement();
 				if (x != null && x instanceof QueryEditorInput){
-					OpenQueryHandler.openQuery((QueryEditorInput)x);
+					(new OpenQueryHandler()).openQuery((QueryEditorInput)x);
 				}
 			}
 		});
@@ -195,9 +176,6 @@ public class QueryListView extends ViewPart {
 			
 			protected boolean isEditorActivationEvent(
 					ColumnViewerEditorActivationEvent event) {
-//				return event.eventType == ColumnViewerEditorActivationEvent.TRAVERSAL
-//						return event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION
-//						|| (event.eventType == ColumnViewerEditorActivationEvent.KEY_PRESSED && event.keyCode == SWT.CR)
 						return event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
 			}
 		};		
@@ -208,10 +186,9 @@ public class QueryListView extends ViewPart {
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		mService.populateContributionManager(menuManager, "popup:" + ID ); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(queryList.getControl());
 		queryList.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager,  queryList);
-		getSite().setSelectionProvider(queryList);
 		
 		
 		SavedQueryTree.getInstance().addListener(listener);
@@ -225,28 +202,35 @@ public class QueryListView extends ViewPart {
 					queryList.refresh();
 				}
 			}
-			
-		
 		});
 		
 	}
-	
 	
 	public void editElement(Object obj){
 		queryList.editElement(obj, 0);
 	}
 
-	@Override
+	@PreDestroy
 	public void dispose(){
-		super.dispose();
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(editorListener);
 		SavedQueryTree.getInstance().removeListener(listener);
 		listener = null;
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		queryList.getControl().setFocus();
 	}
 
+	public static class QueryListViewWrapper extends DIViewPart<QueryListView>{
+		public QueryListViewWrapper(){
+			super(QueryListView.class);
+		}
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			
+			getSite().setSelectionProvider(getComponent().queryList);
+		}
+	}
 }

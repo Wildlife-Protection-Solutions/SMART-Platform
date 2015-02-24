@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-import javax.xml.transform.SourceLocator;
-
 /**
  * List that is linked with original list but contains only elements 
  * that match given criteria. All operations performed on filtered list

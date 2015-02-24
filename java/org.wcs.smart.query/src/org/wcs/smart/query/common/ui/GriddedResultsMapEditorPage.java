@@ -28,21 +28,21 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.project.ILayer;
-import net.refractions.udig.project.ILayerListener;
-import net.refractions.udig.project.LayerEvent;
-import net.refractions.udig.project.LayerEvent.EventType;
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.StyleBlackboard;
-import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
-import net.refractions.udig.project.internal.commands.AddLayersCommand;
-import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
-import net.refractions.udig.project.internal.commands.DeleteLayerCommand;
-import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.ILayerListener;
+import org.locationtech.udig.project.LayerEvent;
+import org.locationtech.udig.project.LayerEvent.EventType;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
+import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
+import org.locationtech.udig.project.internal.commands.DeleteLayerCommand;
+import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,7 +52,6 @@ import org.eclipse.jface.dialogs.IPageChangedListener;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangedEvent;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -99,7 +98,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 		private void updateStyle(ILayer layer) throws IOException{
 			StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
 			sq.updateStyle(RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
-			Display.getDefault().syncExec(new Runnable(){
+			getSite().getShell().getDisplay().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					parentEditor.setDirty(true);

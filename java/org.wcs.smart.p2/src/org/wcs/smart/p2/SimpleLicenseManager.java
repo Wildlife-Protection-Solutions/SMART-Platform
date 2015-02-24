@@ -13,6 +13,7 @@ package org.wcs.smart.p2;
 
 import java.util.HashSet;
 import java.util.StringTokenizer;
+
 import org.eclipse.equinox.p2.core.IAgentLocation;
 import org.eclipse.equinox.p2.engine.IProfileRegistry;
 import org.eclipse.equinox.p2.engine.ProfileScope;

@@ -21,10 +21,10 @@
  */
 package org.wcs.smart.cybertracker.handler;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
 
 /**
@@ -33,13 +33,17 @@ import org.wcs.smart.cybertracker.properties.CyberTrackerPropertiesDialog;
  * @author elitvin
  * @since 1.0.0
  */
-public class CyberTrackerPropertiesHandler extends AbstractHandler {
+public class CyberTrackerPropertiesHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Dialog dialog = new CyberTrackerPropertiesDialog();
+	@Execute
+	public void execute (Shell shell){
+		Dialog dialog = new CyberTrackerPropertiesDialog(shell);
 		dialog.open();
-		return null;
 	}
 
+	public static class CyberTrackerPropertiesHandlerWrapper extends DIHandler<CyberTrackerPropertiesHandler>{
+		public CyberTrackerPropertiesHandlerWrapper(){
+			super (CyberTrackerPropertiesHandler.class);
+		}
+	}
 }

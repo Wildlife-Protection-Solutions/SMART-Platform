@@ -35,8 +35,6 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -45,8 +43,7 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
-import org.wcs.smart.patrol.ui.PatrolEditor;
-import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 
 /**
  * Wizard to create a new patrol.
@@ -262,17 +259,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 		// fire events
 		PatrolEventManager.getInstance().patrolAdded(getPatrol());
 		// open in editor
-		PatrolEditorInput input = new PatrolEditorInput(this.patrol.getUuid(),
-				this.patrol.getId(), this.patrol.getPatrolType(),
-				this.patrol.getStartDate(), this.patrol.getEndDate());
-
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-					.getActivePage().openEditor(input, PatrolEditor.ID);
-		} catch (PartInitException e) {
-			throw new RuntimeException(e);
-		}
-
+		(new OpenPatrolHandler()).openPatrol(this.patrol.getUuid());
 		return ret;
 	}
 

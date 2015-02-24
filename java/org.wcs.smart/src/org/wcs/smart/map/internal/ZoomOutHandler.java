@@ -21,26 +21,29 @@
  */
 package org.wcs.smart.map.internal;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.ui.map.MapView;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 
 /**
  * Zoom Out Handler
  * @author Emily
  *
  */
-public class ZoomOutHandler extends AbstractHandler{
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		if (part instanceof MapView){
-			MapView view = (MapView)part;
-			view.setTool("net.refractions.udig.tool.default.ZoomOut"); //$NON-NLS-1$
-		} 
-		return null;
+public class ZoomOutHandler{
+	
+	@Execute
+	public void execute() {
+		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy(
+				"org.locationtech.udig.tool.default.ZoomOut").run();
+
+	}
+
+	// E3
+	public static class ZoomOutHandlerWrapper extends DIHandler<ZoomOutHandler> {
+		public ZoomOutHandlerWrapper() {
+			super(ZoomOutHandler.class);
+		}
 	}
 }

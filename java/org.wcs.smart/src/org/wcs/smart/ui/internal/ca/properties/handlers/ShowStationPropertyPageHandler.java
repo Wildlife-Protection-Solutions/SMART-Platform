@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
 
 /**
@@ -34,5 +35,10 @@ public class ShowStationPropertyPageHandler extends ShowPropertyPageHandler {
 	public ShowStationPropertyPageHandler() {
 		super(StationListPropertyPage.class);
 	}
-
+	// E3
+	public static class ShowStationPropertyPageHandlerWrapper extends DIHandler<ShowStationPropertyPageHandler> {
+		public ShowStationPropertyPageHandlerWrapper() {
+			super(ShowStationPropertyPageHandler.class);
+		}
+	}
 }

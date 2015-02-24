@@ -88,7 +88,7 @@ public class RemoveEntityJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, Messages.RemoveEntityJob_Error, e);
+					SmartPlugIn.displayLog(Messages.RemoveEntityJob_Error, e);
 				}
 			});
 			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.RemoveEntityJob_UninstallError + e.getLocalizedMessage(), e); 

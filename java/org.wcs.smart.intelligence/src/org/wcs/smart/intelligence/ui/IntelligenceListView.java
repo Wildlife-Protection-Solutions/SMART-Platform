@@ -25,10 +25,24 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -38,29 +52,27 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.osgi.service.event.Event;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
+import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * A viewer where users can view all intelligence items.
@@ -68,17 +80,17 @@ import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
  * @author elitvin
  * @since 1.0.0
  */
-public class IntelligenceListView extends ViewPart implements IIntelligenceFilteringView {
+public class IntelligenceListView implements IIntelligenceFilteringView {
 
 	public static final String ID = "org.wcs.smart.intelligence.IntelligenceListView"; //$NON-NLS-1$
 
 	private TableViewer intelligenceListViewer;
 	private Job updateJob = new UpdateIntelligenceListIdJob();
 	private IntelligenceViewFilter filter = new IntelligenceViewFilter();
+
+	@Inject private MPart part;
+	@Inject private IMenuService menuService;
 	
-
-	private IPartListener2 partListener = new IntelligencePartListener();
-
 	/**
 	 * listener for intelligence change events.
 	 */
@@ -89,26 +101,29 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 		}
 	};
 	
-	/**
-	 * Default constructor
-	 */
-	public IntelligenceListView() {
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof IntelligenceEditor){
+			intelligenceListViewer.setSelection(new StructuredSelection(((IntelligenceEditor)lpart).getEditorInput()));
+		}
 	}
-
+	
+	@PreDestroy
 	public void dispose() {		
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_ADDED, intelligenceListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
 		IntelligenceEventManager.getInstance().removeListener(EventType.INTELLIGENCE_DELETED, intelligenceListener);
-		super.dispose();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
-	 */
-	@Override
+
+	@PostConstruct
 	public void createPartControl(Composite parent) {
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -139,24 +154,20 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				IntelligenceEditorInput input = (IntelligenceEditorInput)((IStructuredSelection)intelligenceListViewer.getSelection()).getFirstElement();
-				if (input != null){
-					try {
-						IWorkbenchPage page = getSite().getPage();
-						page.openEditor(input, IntelligenceEditor.ID);						
-					} catch (Throwable t) {
-						IntelligencePlugIn.displayLog(t.getLocalizedMessage(), t);
-					}
-				}
+				if (input == null) return;
 				
+				IEclipseContext localCtx = EclipseContextFactory.create();
+				localCtx.set(OpenIntelligenceHandler.INTELLUUID_PARAM, input.getUuid());
+				localCtx.setParent(part.getContext());
+				ContextInjectionFactory.invoke(new OpenIntelligenceHandler(), Execute.class, localCtx);
 			}
 		});
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.intelligence.IntelligenceListView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(intelligenceListViewer.getControl());
-		intelligenceListViewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager,  intelligenceListViewer);
-		getSite().setSelectionProvider(intelligenceListViewer);
+		intelligenceListViewer.getControl().setMenu(menu);	
 	}
 
 	/**
@@ -167,10 +178,7 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 		updateJob.schedule();		
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
-	 */
-	@Override
+	@Focus
 	public void setFocus() {
 		intelligenceListViewer.getControl().setFocus();
 
@@ -249,38 +257,18 @@ public class IntelligenceListView extends ViewPart implements IIntelligenceFilte
 		}
    	
     }
+
     
-    private class IntelligencePartListener implements IPartListener2 {
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef.getId().equals(IntelligenceEditor.ID)){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof IntelligenceEditor){
-					intelligenceListViewer.setSelection(new StructuredSelection( ((IntelligenceEditor) part).getEditorInput()));
-				}
-			}
+	public static class IntelligenceListViewWrapper extends DIViewPart<IntelligenceListView>{
+		public IntelligenceListViewWrapper(){
+			super(IntelligenceListView.class);
 		}
-    }
-    
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			
+			getSite().setSelectionProvider(	((IntelligenceListView)getComponent()).intelligenceListViewer);
+		}
+	}
 }

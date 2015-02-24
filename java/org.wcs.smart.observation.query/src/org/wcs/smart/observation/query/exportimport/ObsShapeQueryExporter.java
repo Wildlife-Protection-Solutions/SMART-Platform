@@ -57,7 +57,7 @@ public class ObsShapeQueryExporter extends ShapeQueryExporter{
 
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
-		return QueryResultItemFeature.createObservationFeature((ObservationQueryResultItem) it, queryColumns, shapefile.getSchema());
+		return QueryResultItemFeature.createObservationFeature((ObservationQueryResultItem) it, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 	}
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{

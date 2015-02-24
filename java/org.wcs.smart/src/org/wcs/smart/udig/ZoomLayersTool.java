@@ -21,12 +21,11 @@
  */
 package org.wcs.smart.udig;
 
-import net.refractions.udig.project.IMap;
-import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
+import org.locationtech.udig.project.ui.tool.AbstractActionTool;
 
 /**
  * Zoom tool for map.

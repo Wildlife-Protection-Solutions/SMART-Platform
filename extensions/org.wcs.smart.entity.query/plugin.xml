@@ -162,14 +162,14 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery?before=org.wcs.smart.query.createunknown.separator2">
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
          <menu
                icon="images/icons/obj16/entitytype.png"
                id="org.wcs.smart.menu.query.createquery.entityqueries"
                label="%entityquery.menu.name"
                tooltip="%new.entityqueries.tooltip">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_observation_query.png"
                   label="%new.observation.query.name"
                   style="pulldown"
@@ -180,7 +180,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_waypoint_query.png"
                   label="%new.incident.query.name"
                   style="push"
@@ -191,7 +191,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_summary_query.png"
                   label="%new.summary.query.name"
                   style="push"
@@ -202,7 +202,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_gridded_query.png"
                   label="%new.gridded.query.name"
                   style="push"
@@ -223,7 +223,7 @@
                label="%entityquery.menu.name"
                tooltip="%new.entityqueries.tooltip">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_observation_query.png"
                   label="%new.observation.query.name"
                   style="pulldown"
@@ -234,7 +234,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_waypoint_query.png"
                   label="%new.incident.query.name"
                   style="push"
@@ -245,7 +245,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_summary_query.png"
                   label="%new.summary.query.name"
                   style="push"
@@ -256,7 +256,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/entity_gridded_query.png"
                   label="%new.gridded.query.name"
                   style="push"

@@ -26,13 +26,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.refractions.udig.core.MinMaxScaleCalculator;
-import net.refractions.udig.project.ILayer;
-import net.refractions.udig.project.render.AbstractRenderMetrics;
-import net.refractions.udig.project.render.IRenderContext;
-import net.refractions.udig.project.render.IRenderMetricsFactory;
-import net.refractions.udig.style.sld.SLDContent;
-import net.refractions.udig.ui.graphics.SLDs;
+import org.locationtech.udig.core.MinMaxScaleCalculator;
+import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.render.AbstractRenderMetrics;
+import org.locationtech.udig.project.render.IRenderContext;
+import org.locationtech.udig.project.render.IRenderMetricsFactory;
+import org.locationtech.udig.style.sld.SLDContent;
+import org.locationtech.udig.ui.graphics.SLDs;
 
 import org.geotools.styling.Style;
 import org.geotools.util.Range;
@@ -74,7 +74,7 @@ public class SmartMemoryCoverageMetrics extends AbstractRenderMetrics {
     }
 
     /**
-     * @see net.refractions.udig.project.render.RenderMetrics#getRenderContext()
+     * @see org.locationtech.udig.project.render.RenderMetrics#getRenderContext()
      */
     @Override
     public IRenderContext getRenderContext() {
@@ -82,7 +82,7 @@ public class SmartMemoryCoverageMetrics extends AbstractRenderMetrics {
     }
 
     /**
-     * @see net.refractions.udig.project.render.IRenderMetrics#getRenderMetricsFactory()
+     * @see org.locationtech.udig.project.render.IRenderMetrics#getRenderMetricsFactory()
      */
     @Override
     public IRenderMetricsFactory getRenderMetricsFactory() {

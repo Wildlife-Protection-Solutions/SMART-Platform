@@ -54,7 +54,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -303,7 +302,7 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 		if (boldLabelFont == null){
 			FontData fd = lbl.getFont().getFontData()[0];
 			fd.setStyle(SWT.BOLD);
-			boldLabelFont = new Font(Display.getDefault(), fd);
+			boldLabelFont = new Font(lbl.getDisplay(), fd);
 		}
 		return boldLabelFont;
 	}

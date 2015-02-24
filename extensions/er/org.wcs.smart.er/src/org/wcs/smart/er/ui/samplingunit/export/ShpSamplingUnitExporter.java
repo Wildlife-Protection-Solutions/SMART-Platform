@@ -22,18 +22,22 @@
 package org.wcs.smart.er.ui.samplingunit.export;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
-import net.refractions.udig.catalog.URLUtils;
-
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureStore;
-import org.geotools.data.shapefile.indexed.IndexedShapefileDataStore;
+import org.geotools.data.FileDataStoreFactorySpi;
+import org.geotools.data.FileDataStoreFinder;
+import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureSource;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
@@ -76,12 +80,19 @@ public class ShpSamplingUnitExporter implements ISamplingUnitExporter{
 		String typeName = type.name();
 		
 		URL shpFileURL = URLUtils.fileToURL(f);
-        IndexedShapefileDataStore shapefile = new IndexedShapefileDataStore(shpFileURL);
+		
+		FileDataStoreFactorySpi factory = FileDataStoreFinder.getDataStoreFactory("shp"); //$NON-NLS-1$
+        Map<String, Serializable> params = new HashMap<String, Serializable>();
+		params.put(ShapefileDataStoreFactory.URLP.key, shpFileURL);
+		
+		DataStore shapefile = factory.createNewDataStore(params);
+		
+        
         SamplingUnitDataSource dataSource = new SamplingUnitDataSource(sd);
         SimpleFeatureSource fs = dataSource.getFeatureSource(typeName);
         shapefile.createSchema(dataSource.getSchema(typeName));
 		FeatureStore<SimpleFeatureType, SimpleFeature> nfs = 
-				(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource();
+				(FeatureStore<SimpleFeatureType, SimpleFeature>) shapefile.getFeatureSource(shapefile.getTypeNames()[0]);
 		nfs.addFeatures( DataUtilities.collection(fs.getFeatures()) );
 		
 		shapefile.dispose();

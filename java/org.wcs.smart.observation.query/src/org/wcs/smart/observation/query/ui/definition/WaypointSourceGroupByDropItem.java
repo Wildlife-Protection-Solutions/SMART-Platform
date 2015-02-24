@@ -31,7 +31,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -146,13 +145,13 @@ public class WaypointSourceGroupByDropItem extends DropItem implements IGroupByD
 		link.setText(Messages.WaypointSourceGroupByDropItem_FiltersLabel);
 		FontData fd = (link.getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
-		smallerFont = new Font(Display.getCurrent(), fd);
+		smallerFont = new Font(link.getDisplay(), fd);
 		link.setFont(smallerFont);
 		link.setLayoutData(new GridData(SWT.BOTTOM, SWT.RIGHT, false, false));
 		link.addListener(SWT.MouseUp, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				GroupByFilterDialog dialog = new GroupByFilterDialog(Display.getDefault().getActiveShell());
+				GroupByFilterDialog dialog = new GroupByFilterDialog(link.getShell());
 				dialog.setGroupByItem(WaypointSourceGroupByDropItem.this, selectedItems);
 				int ret = dialog.open();
 				if (ret == IDialogConstants.OK_ID){

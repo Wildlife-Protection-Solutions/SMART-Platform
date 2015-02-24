@@ -57,7 +57,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
@@ -145,7 +144,7 @@ public class PatrolSummaryEditor extends EditorPart {
 
 	private PatrolEditor editor;
 	private TableViewer tblPatrolData;
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	private boolean isMulti = false;
 	
@@ -191,6 +190,7 @@ public class PatrolSummaryEditor extends EditorPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.setBorderStyle(SWT.BORDER);
 
 		outline = toolkit.createComposite(parent);
@@ -633,7 +633,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			}
 		}
 		
-		Display.getDefault().syncExec(new Runnable(){
+		tblPatrolData.getTable().getDisplay().syncExec(new Runnable(){
 			@Override
 			public void run() {
 				//update dates

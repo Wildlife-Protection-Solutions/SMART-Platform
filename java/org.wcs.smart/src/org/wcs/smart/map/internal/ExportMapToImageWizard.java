@@ -31,13 +31,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import net.refractions.udig.catalog.URLUtils;
-import net.refractions.udig.project.IMap;
-import net.refractions.udig.project.render.RenderException;
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.ApplicationGIS.DrawMapParameter;
-import net.refractions.udig.project.ui.SelectionStyle;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -49,6 +42,12 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.ui.IExportWizard;
 import org.eclipse.ui.IWorkbench;
+import org.locationtech.udig.catalog.URLUtils;
+import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.render.RenderException;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.ApplicationGIS.DrawMapParameter;
+import org.locationtech.udig.project.ui.SelectionStyle;
 import org.opengis.referencing.operation.TransformException;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;

@@ -24,8 +24,8 @@ package org.wcs.smart.patrol.internal.ui.importwp;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 
-import org.wcs.smart.observation.common.importwp.ImportOptionsWizardPage;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
+import org.wcs.smart.observation.common.importwp.ImportOptionsWizardPage;
 import org.wcs.smart.patrol.internal.Messages;
 
 /**

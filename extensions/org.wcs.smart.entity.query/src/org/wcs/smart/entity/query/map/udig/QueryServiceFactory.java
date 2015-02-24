@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.entity.query.map.udig;
 
-import net.refractions.udig.catalog.IService;
-
+import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;

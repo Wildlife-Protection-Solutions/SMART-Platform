@@ -24,7 +24,6 @@ package org.wcs.smart.query.common.ui;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -44,7 +43,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 
 	private QueryResultsEditor parentEditor;
 	private QueryEditorTableContent content ;
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	/**
 	 * Creates new editor page
@@ -148,6 +147,7 @@ public class QueryResultsTablePage  extends EditorPart  {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		GridLayout layout = new GridLayout(1, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;

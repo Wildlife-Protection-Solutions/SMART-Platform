@@ -25,34 +25,39 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.IPartListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISourceProviderListener;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.services.ISourceProviderService;
-import org.wcs.smart.query.QueryPlugIn;
+import org.osgi.service.event.Event;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
-import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.QuerySourceProvider;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
-import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * A view for building query definition.
@@ -60,12 +65,12 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryDefView extends ViewPart {
+public class QueryDefView  {
 
 	/**
 	 * View identifier
 	 */
-	public static final String ID = "org.wcs.smart.query.ui.QueryDefView"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.query.parts.definition"; //$NON-NLS-1$
 	
 	private QueryProxy current = null;	
 
@@ -75,72 +80,45 @@ public class QueryDefView extends ViewPart {
 	private QueryDefPanel currentPanel;
 	private HashMap<IQueryType, QueryDefPanel> definitionPanels = new HashMap<IQueryType, QueryDefPanel>();
 	
+	@Inject private MPart part;
+	
 	/* listener to update query definition when window changes */
-	private IPartListener2 editorListener = new IPartListener2() {
+	private IPartListener editorListener = new IPartListener() {
 		
 		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {
-			IWorkbenchPart part = partRef.getPart(false);
-			if (part instanceof IQueryEditor){
-				((IQueryEditor) part).validate();
-				QueryProxy q =((IQueryEditor)part).getQueryProxy();
-				if (q != current){
-					setQuery(q);
+		public void partVisible(MPart part) {
+			Object lpart = E3Utils.getSourceObject(part);
+			if (lpart instanceof IQueryEditor){
+				IQueryEditor qpart = (IQueryEditor)lpart;
+				if (qpart.getQueryProxy() != current){
+					setQuery(qpart.getQueryProxy());
 				}
 			}
 		}
 		
 		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {
-		}
+		public void partHidden(MPart part) {}
 		
 		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {
-		}
+		public void partDeactivated(MPart part) {}
 		
 		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {
-		}
+		public void partBroughtToTop(MPart part) {}
 		
 		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {
-			try{
-				IEditorReference[] editors = partRef.getPage().getEditorReferences();
-				boolean hasQueryEditor= false;
-				for (int i = 0; i < editors.length; i ++){
-					if (QueryEditorInput.class.isAssignableFrom(editors[i].getEditorInput().getClass() )){
-						hasQueryEditor = true;
-						break;
-					}
-				}
-				if (!hasQueryEditor){
-					setQuery(null);	
-				}
-			}catch (Exception ex){
-				QueryPlugIn.displayLog(Messages.QueryDefView_CloseError + ex.getLocalizedMessage(), ex);
-			}
-		}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			IWorkbenchPart part = partRef.getPart(false);
-			if (part instanceof IQueryEditor){
-				((IQueryEditor) part).validate();
-				QueryProxy q =((IQueryEditor)part).getQueryProxy();
-				if (q != current){
-					setQuery(q);
+		public void partActivated(MPart part) {
+			Object lpart = E3Utils.getSourceObject(part);
+			if (lpart instanceof IQueryEditor){
+				IQueryEditor qpart = (IQueryEditor)lpart;
+				qpart.validate();
+				if (qpart.getQueryProxy() != current){
+					setQuery(qpart.getQueryProxy());
 				}
 			}
 		}
 	};
+
+	
 
 	/**
 	 * These events are fired when the query needs to be refreshed; perhaps a 
@@ -169,25 +147,43 @@ public class QueryDefView extends ViewPart {
 		}
 	};
 
+
 	/**
 	 * Creates new query definition view.
 	 */
 	public QueryDefView() {
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
-		QueryEventManager.getInstance().addListener(queryRefreshed);
-		
-		
-		
+			
+	}
+	
+	public MPart getPart(){
+		return part;
+	}
+	
+	@Inject
+	@Optional
+	private void getClosed(@UIEventTopic(UIEvents.UIElement.TOPIC_WIDGET) Event e) {
+		if (e.getProperty(UIEvents.EventTags.NEW_VALUE) == null){
+			Object element = e.getProperty(UIEvents.EventTags.ELEMENT);
+			if (element == null) return;
+			if (!(element instanceof MPart)) return;
+			
+			Object src = E3Utils.getSourceObject((MPart)element); 
+			if (src instanceof IQueryEditor){
+				if (((IQueryEditor)src).getQueryProxy().getQuery().equals(current.getQuery())){
+					//closing the current active part
+					setQuery(null);
+				}
+			}
+		}
 	}
 	
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
 	 */
-	@Override
-	public void dispose() {
-		super.dispose();
+	@PreDestroy
+	public void dispose(EPartService pService) {
 		if (editorListener != null){
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(editorListener);
+			pService.removePartListener(editorListener);
 		}
 		for (QueryDefPanel pnl : definitionPanels.values()){
 			pnl.dispose();
@@ -240,8 +236,11 @@ public class QueryDefView extends ViewPart {
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
-	@Override
-	public void createPartControl(Composite parent) {
+	@PostConstruct
+	public void createPartControl(Composite parent, EPartService pService) {
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		stackComp = new Composite(parent, SWT.NONE);
 		
 		StackLayout layout = new StackLayout();
@@ -255,13 +254,16 @@ public class QueryDefView extends ViewPart {
 		((StackLayout)stackComp.getLayout()).topControl = emptyComp;
 	
 		addSourceListener();
+		
+		pService.addPartListener(editorListener);
+		QueryEventManager.getInstance().addListener(queryRefreshed);
 	}
 	
 	private QuerySourceProvider getSourceProvider(){
-	
-		ISourceProviderService service = (ISourceProviderService) getSite().getService(ISourceProviderService.class);
-		return (QuerySourceProvider) service.getSourceProvider(QuerySourceProvider.DEFINITION_ITEMS);
+		return part.getContext().get(QuerySourceProvider.class);
 	}
+	
+	
 	private void addSourceListener() {
 	
 		
@@ -387,7 +389,7 @@ public class QueryDefView extends ViewPart {
 		return this.current;
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		stackComp.setFocus();
 	}
@@ -396,4 +398,11 @@ public class QueryDefView extends ViewPart {
 		QueryEventManager.getInstance().fireQueryDefinitionModified(current.getQuery());
 	}
 	
+	
+	
+	public static class QueryDefViewWrapper extends DIViewPart<QueryDefView>{
+		public QueryDefViewWrapper(){
+			super(QueryDefView.class);
+		}
+	}
 }

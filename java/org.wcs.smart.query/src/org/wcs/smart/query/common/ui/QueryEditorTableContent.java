@@ -30,7 +30,6 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
@@ -118,8 +117,7 @@ public class QueryEditorTableContent {
 	 * @param items new results; null if query cancelled and nothing to display
 	 */
 	public void setTableData(final IPagedQueryResultSet items) {
-		
-		Display.getDefault().asyncExec(new Runnable() {
+		tableComp.getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if (tableComp.isDisposed()){

@@ -126,7 +126,7 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_RenameButton;
 	public static String TreeAttributeInfoComposite_UseCustomConfiguration;
 	public static String TreeAttributeInfoComposite_valueLabel;
-	public static String TreeAttributeInfoComposite_WarnMessage;
+	public static String TreeAttributeInfoComposite_WarnMessage1;
 	public static String TreeAttributeInfoComposite_WarnTitle;
 	static {
 		// initialize resource bundle

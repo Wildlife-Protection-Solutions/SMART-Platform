@@ -24,14 +24,13 @@ package org.wcs.smart.ui.map.location.tool;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.refractions.udig.project.internal.render.ViewportModel;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
-import net.refractions.udig.project.ui.render.displayAdapter.ViewportPane;
-import net.refractions.udig.project.ui.tool.AbstractModalTool;
-
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.udig.project.internal.render.ViewportModel;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import org.locationtech.udig.project.ui.render.displayAdapter.ViewportPane;
+import org.locationtech.udig.project.ui.tool.AbstractModalTool;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
@@ -69,7 +68,7 @@ public class SelectionTool extends AbstractModalTool {
 				Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 				fireListeners(p.getX(), p.getY());
 			} catch (Exception exception) {
-				SmartPlugIn.displayLog(null, "Error while selecting a point. Point conversion failed", exception); //$NON-NLS-1$
+				SmartPlugIn.displayLog("Error while selecting a point. Point conversion failed", exception); //$NON-NLS-1$
 			}
 		} else {
 			//assume that we are in lat long coordinate system

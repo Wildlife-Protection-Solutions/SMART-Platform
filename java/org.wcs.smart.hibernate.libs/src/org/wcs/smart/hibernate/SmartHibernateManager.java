@@ -55,7 +55,9 @@ public class SmartHibernateManager {
 	private static String databaseLocation = ""; //$NON-NLS-1$
 	
 	public static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
-	 
+	//TODO: perhaps this can be replaced with
+	//hibernate.current_session_context_class=thread
+	//hibernate.transaction.factory_class=JDBCTransactionFactory
 	
 	/**
 	 * Sets the database connection parameters.

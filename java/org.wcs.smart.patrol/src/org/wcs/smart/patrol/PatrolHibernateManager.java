@@ -93,6 +93,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param onlyActive <code>true</code> if only active status should be loaded; <code>false</code> returns all stations 
 	 * @return list of stations
 	 */
+	@SuppressWarnings("unchecked")
 	private static List<Team> getTeams(ConservationArea ca, Session s, boolean onlyActive){
 		List<Team> list = null;
 		Criteria query = s.createCriteria(Team.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
@@ -133,6 +134,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param onlyActive <code>true</code> if only active mandates should be retured, <code>false</code> for all 
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	private static List<PatrolMandate> getMandates(ConservationArea ca, Session s, boolean onlyActive){
 		List<PatrolMandate> list = null;
 		Criteria query = s.createCriteria(PatrolMandate.class).add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
@@ -153,9 +155,13 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param type patrol type 
 	 * @return list of active transportation types for the given patrol type
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
 		List<PatrolTransportType> types = null;
-		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).add(Restrictions.eq("isActive", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		types = s.createCriteria(PatrolTransportType.class)
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("patrolType", type)) //$NON-NLS-1$
+				.add(Restrictions.eq("isActive", true)).list(); //$NON-NLS-1$ 
 		return types;
 		
 	}
@@ -169,6 +175,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * 
 	 * @return list of active transportation types for the given patrol type
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PatrolTransportType> getActivePatrolTransporationTypes(ConservationArea ca, Session s){
 		List<PatrolTransportType> types = null;
 		String query = "SELECT p FROM PatrolTransportType p, PatrolType patroltype where patroltype.id.type = p.patrolType and p.isActive = 'true' and patroltype.isActive ='true' and p.conservationArea=:ca and patroltype.id.conservationArea = :ca2"; //'true' = derby fix //$NON-NLS-1$
@@ -189,9 +196,12 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param type patrol type 
 	 * @return list of transportation types for the given patrol type
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PatrolTransportType> getPatrolTransporationTypes(ConservationArea ca, Session s, PatrolType.Type type){
 		List<PatrolTransportType> types = null;
-		types = s.createCriteria(PatrolTransportType.class).add(Restrictions.eq("conservationArea", ca)).add(Restrictions.eq("patrolType", type)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		types = s.createCriteria(PatrolTransportType.class)
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("patrolType", type)).list(); //$NON-NLS-1$ 
 		return types;
 	}
 	
@@ -219,6 +229,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param s active session
 	 * @return list of active patrol types
 	 */
+	@SuppressWarnings("unchecked")
 	public static List<PatrolType> getActivePatrolTypes(ConservationArea ca, Session s){
 		Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca)); //$NON-NLS-1$
 		query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
@@ -232,11 +243,13 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @param onlyActive <code>true</code> if only active patrol types are to be returned, <code>false</code> otherwise
 	 * @return list of patrol types
 	 */
+	@SuppressWarnings("unchecked")
 	private static List<PatrolType> getPatrolTypes(ConservationArea ca, Session s, boolean onlyActive){
 		s.beginTransaction();
 		List<PatrolType> types = null;
 		try{
-			Criteria query = s.createCriteria(PatrolType.class).add(Restrictions.eq("id.conservationArea", ca)); //$NON-NLS-1$
+			Criteria query = s.createCriteria(PatrolType.class)
+					.add(Restrictions.eq("id.conservationArea", ca)); //$NON-NLS-1$
 			if (onlyActive){
 				query.add(Restrictions.eq("isActive", true)); //$NON-NLS-1$
 			}

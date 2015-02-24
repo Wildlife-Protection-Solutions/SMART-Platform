@@ -21,12 +21,12 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.wcs.smart.er.ui.SurveyDesignListView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Shows filter for survey list.
@@ -34,19 +34,18 @@ import org.wcs.smart.er.ui.SurveyDesignListView;
  * @author Emily
  *
  */
-public class FilterSurveyListItemsHandler  extends AbstractHandler {
+public class FilterSurveyListItemsHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		if (!(part instanceof SurveyDesignListView)){
-			return null;
-			
-		}
-		SurveyDesignListView view = (SurveyDesignListView) part;
-		view.showFilterDialog();
-		
-		return null;
+	@Execute
+	public void execute(EPartService pService){
+		MPart p = pService.findPart(SurveyDesignListView.ID);
+		if (p == null) return;		
+		((SurveyDesignListView)E3Utils.getSourceObject(p)).showFilterDialog();
 	}
 
+	public static class FilterSurveyListItemsHandlerWrapper extends DIHandler<FilterSurveyListItemsHandler>{
+		public FilterSurveyListItemsHandlerWrapper(){
+			super(FilterSurveyListItemsHandler.class);
+		}
+	}
 }

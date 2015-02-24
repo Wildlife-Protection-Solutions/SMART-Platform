@@ -25,7 +25,7 @@ import java.awt.Color;
 import java.net.URI;
 import java.util.List;
 
-import net.refractions.udig.ui.palette.ColourScheme;
+import org.locationtech.udig.ui.palette.ColourScheme;
 
 /**
  * Maintains the layer's data set by the user which will be serialized

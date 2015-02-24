@@ -490,7 +490,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			valueAggSql.append("sum(distance)"); //$NON-NLS-1$
 			
 			if (!usedTables.contains(MissionTrack.class)) {
-				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(" join "); //$NON-NLS-1$
 				fromSql.append(tableNamePrefix(MissionTrack.class));
 				fromSql.append( " on temp.mission_day_uuid = "); //$NON-NLS-1$ 
 				fromSql.append(tablePrefix(MissionTrack.class));
@@ -519,7 +519,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			
 			if (!hasAreaGroupBy){
 				
-				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(" join "); //$NON-NLS-1$
 				fromSql.append(tableNamePrefix(MissionDay.class));
 				fromSql.append(" on temp.mission_day_uuid = "); //$NON-NLS-1$
 				fromSql.append(tablePrefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$
@@ -555,13 +555,13 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		}else if (valueItem.getValueItem() == ValueItem.MANHOURS_COUNT){
 			selectSql.append("temp.mission_day_uuid as uniqueid, "); //$NON-NLS-1$
 			
-			fromSql.append(" left join "); //$NON-NLS-1$
+			fromSql.append(" join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(MissionMember.class));
 			fromSql.append(" on temp.mission_uuid = "); //$NON-NLS-1$
 			fromSql.append(tablePrefix(MissionMember.class) + ".mission_uuid "); //$NON-NLS-1$
 			
 			if (!hasAreaGroupBy){     
-				fromSql.append(" left join "); //$NON-NLS-1$
+				fromSql.append(" join "); //$NON-NLS-1$
 				fromSql.append(tableNamePrefix(MissionDay.class));
 				fromSql.append(" on temp.mission_day_uuid = "); //$NON-NLS-1$
 				fromSql.append(tablePrefix(MissionDay.class) + ".uuid "); //$NON-NLS-1$
@@ -769,7 +769,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
-			sql.append("left join "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeListItem.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeListItem.class));
@@ -860,7 +860,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
-			sql.append("left join "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeTreeNode.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeTreeNode.class));
@@ -1145,14 +1145,14 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
 
 					if (!waypointAdd) {
-						fromSql.append(" left join "); //$NON-NLS-1$
+						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Waypoint.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(Waypoint.class));
 						fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 						waypointAdd = true;
 					}
-					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
@@ -1180,7 +1180,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					areaGroupByPrefix.add(areaPrefix);
 					
 					if (!usedTables.contains(MissionTrack.class)) {
-						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(MissionTrack.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(MissionTrack.class));
@@ -1188,7 +1188,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						fromSql.append( tablePrefix(MissionTrack.class) + ".mission_day_uuid"); //$NON-NLS-1$
 						usedTables.add(MissionTrack.class);
 					}
-					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
@@ -1259,7 +1259,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			}else if (gb instanceof SamplingUnitAttributeGroupBy){
 				if (value instanceof MissionValueItem){
 					if (!usedTables.contains(MissionTrack.class)) {
-						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(MissionTrack.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(MissionTrack.class));
@@ -1318,7 +1318,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				if (value instanceof MissionValueItem){
 
 					if (!usedTables.contains(MissionTrack.class)) {
-						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(MissionTrack.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(MissionTrack.class));

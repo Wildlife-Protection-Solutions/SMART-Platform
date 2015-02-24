@@ -25,9 +25,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.core.expressions.IEvaluationContext;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.AbstractSourceProvider;
 import org.eclipse.ui.ISources;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.model.IQueryType;
 
 /**
@@ -58,6 +61,12 @@ public class QuerySourceProvider extends AbstractSourceProvider {
 		data.put(DEFINITION_ITEMS, IEvaluationContext.UNDEFINED_VARIABLE);
 		data.put(QUERY_VALID, IEvaluationContext.UNDEFINED_VARIABLE);
 		data.put(QUERY_DATE_VALID, IEvaluationContext.UNDEFINED_VARIABLE);
+		
+		//add this to the context so we can get this from the context elsewhere
+		//should be addon if we convert to pure e4
+		IEclipseContext parentContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		ContextInjectionFactory.inject(this, parentContext);
+		parentContext.set(QuerySourceProvider.class, this);
 	}
 	/**
 	 * @see org.eclipse.ui.ISourceProvider#dispose()
@@ -130,4 +139,15 @@ public class QuerySourceProvider extends AbstractSourceProvider {
 		return new String[]{DEFINITION_ITEMS, QUERY_VALID, QUERY_DATE_VALID, DEFINITION_PANEL_ID, QUERY_TYPE};
 	}
 
+	/**
+	 * This is a helper function for e3 to e4 bridge that finds the provider in
+	 * the root eclise context using platformui
+	 * 
+	 * @return
+	 */
+	public static QuerySourceProvider getSourceProviderFromContext(){
+		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		QuerySourceProvider provider = (QuerySourceProvider) (ctx.get(QuerySourceProvider.class));
+		return provider;
+	}
 }

@@ -26,13 +26,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.render.IViewportModelListener;
-import net.refractions.udig.project.render.ViewportModelEvent;
-import net.refractions.udig.project.render.ViewportModelEvent.EventType;
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.tool.Tool;
-
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -62,6 +55,12 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.render.IViewportModelListener;
+import org.locationtech.udig.project.render.ViewportModelEvent;
+import org.locationtech.udig.project.render.ViewportModelEvent.EventType;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.tool.Tool;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
@@ -336,7 +335,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 			Double result = Double.valueOf(value);
 			return result;
 		} catch (NumberFormatException e) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), errorMessage, null);
+			SmartPlugIn.displayLog(errorMessage, null);
 		}
 		return null;
 
@@ -371,7 +370,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 			Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
 			return (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(null, Messages.LocationSelectComposite_PointConversion_Error, e);
+			SmartPlugIn.displayLog(Messages.LocationSelectComposite_PointConversion_Error, e);
 		}
 		return null;
 		

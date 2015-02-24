@@ -19,38 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.ui.internal;
+package org.wcs.smart.e4;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.DefaultCrossCaPerspective;
-import org.wcs.smart.DefaultPerspective;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.internal.Messages;
+import org.eclipse.e4.ui.internal.workbench.swt.AbstractPartRenderer;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.workbench.renderers.swt.WorkbenchRendererFactory;
 
-public class ShowDefaultMapPerspective extends AbstractHandler {
+/**
+ * Customized render factory for stack renderer.
+ * @author Emily
+ *
+ */
+public class SmartRenderFactory extends WorkbenchRendererFactory {
+
+	private SmartStackRenderer stackRenderer;
+
+	// private RenderedToolBarRenderer renderedToolbarRenderer;
 
 	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		//Open Patrol Perspective
-		try {
-			String prespectiveId = DefaultPerspective.ID;
-			
-			if (SmartDB.isMultipleAnalysis()){
-				prespectiveId = DefaultCrossCaPerspective.ID;
+	public AbstractPartRenderer getRenderer(MUIElement uiElement, Object parent) {
+		if (uiElement instanceof MPartStack) {
+			if (stackRenderer == null) {
+				stackRenderer = new SmartStackRenderer();
+				initRenderer(stackRenderer);
 			}
-			HandlerUtil
-					.getActiveWorkbenchWindow(event)
-					.getWorkbench()
-					.showPerspective(prespectiveId,HandlerUtil.getActiveWorkbenchWindow(event));
-		} catch (WorkbenchException e) {
-			SmartPlugIn.displayLog(HandlerUtil.getActiveWorkbenchWindow(event).getShell(),  Messages.ShowDefaultMapPerspective_Error_LoadingPerspective, e);
+			return stackRenderer;
 		}
-		return null;
+		return super.getRenderer(uiElement, parent);
 	}
-
 }

@@ -6,14 +6,14 @@ Bundle-Version: 3.1.0
 Bundle-Activator: org.wcs.smart.entity.EntityPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.eclipse.ui.forms,
- net.refractions.udig.style.sld,
+ org.locationtech.udig.style.sld,
  org.wcs.smart.observation,
  org.wcs.smart.query,
  org.wcs.smart.report.birt.query,
  org.wcs.smart.report.birt.map,
- org.wcs.smart.p2,
- org.eclipse.help;bundle-version="3.5.100"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+ org.eclipse.help,
+ org.wcs.smart.p2
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.entity,
  org.wcs.smart.entity.event,

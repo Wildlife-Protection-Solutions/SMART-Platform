@@ -26,9 +26,9 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.io.IOException;
 
-import net.refractions.udig.project.internal.StyleBlackboard;
-import net.refractions.udig.project.render.RenderException;
-import net.refractions.udig.render.internal.gridcoverage.basic.MemoryGridCoverageRenderer;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.render.RenderException;
+import org.locationtech.udig.render.internal.gridcoverage.basic.MemoryGridCoverageRenderer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
@@ -84,8 +84,8 @@ public class SmartMemoryGridCoverageRenderer extends MemoryGridCoverageRenderer 
 			double cellYSize = bounds.getHeight() / numYCells;
 
 			graphics.setColor(SLD.lineColor(ls));
-			graphics.setStroke(new BasicStroke(SLD.lineWidth(ls)));
-
+			graphics.setStroke(new BasicStroke(SLD.lineWidth(ls), 0, 0, 1, SLD.lineDash(ls), 0));
+			
 			for (int i = 0; i <= numXCells; i++) {
 				Coordinate start = new Coordinate(bounds.getMinimum(0) + i * cellXSize, bounds.getMinimum(1));
 				Coordinate end = new Coordinate(bounds.getMinimum(0) + i * cellXSize, bounds.getMaximum(1));

@@ -22,7 +22,6 @@
 package org.wcs.smart.intelligence.upgrade;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.updatesite.OnInstallAction;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -36,7 +35,7 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
 public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
-	public void upgrade(Session s, IProgressMonitor monitor) {
+	public void upgrade(IProgressMonitor monitor) {
 		monitor.subTask(Messages.IntelligenceDatabaseUpgrader_UpgradeTask);
 		OnInstallAction install = new OnInstallAction();
 		install.execute(null);

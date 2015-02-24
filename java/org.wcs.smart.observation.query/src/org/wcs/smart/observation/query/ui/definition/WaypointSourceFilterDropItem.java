@@ -39,7 +39,6 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.observation.WaypointSourceEngine;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -166,7 +165,7 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 		
 		FontData fd = (listViewer.getCombo().getFont().getFontData()[0]);
 		fd.setHeight(fd.getHeight() - 1);
-		smallerFont = new Font(Display.getCurrent(), fd);
+		smallerFont = new Font(listViewer.getControl().getDisplay(), fd);
 		listViewer.getCombo().setFont(smallerFont);
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.setLabelProvider(new LabelProvider(){

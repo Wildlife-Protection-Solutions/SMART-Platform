@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -43,7 +44,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Conservation area data model.
@@ -100,7 +100,7 @@ public class DataModel {
 						aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list(); //$NON-NLS-1$
 						s.getTransaction().rollback();
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(null, Messages.DataModel_Error_LoadAggregations, ex);
+						SmartPlugIn.displayLog(Messages.DataModel_Error_LoadAggregations, ex);
 					}finally{
 						s.close();
 					}
@@ -112,7 +112,7 @@ public class DataModel {
 			try{
 				loadAttributesJob.join();
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(null, Messages.DataModel_Error_LoadAggregations, ex);
+				SmartPlugIn.displayLog(Messages.DataModel_Error_LoadAggregations, ex);
 			}
 			
 		}

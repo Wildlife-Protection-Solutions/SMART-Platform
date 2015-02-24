@@ -19,33 +19,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.ui.handlers;
+package org.wcs.smart.ui.map;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
-import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.intelligence.ui.IntelligencePerspective;
+import java.util.HashMap;
+
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.SmartStyle;
 
 /**
- * Handler that display the intelligence perspective.
+ * Label provider for SmartStyle.  Has the ability to set and cache glyphs for images.
  * 
- * @author elitvin
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public class ShowIntelligencePersepctiveHandler extends AbstractHandler {
+public class SmartStyleLabelProvider extends LabelProvider {
 
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		//Open Intelligence Perspective
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench()
-					.showPerspective(IntelligencePerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
-		} catch (WorkbenchException e) {
-			IntelligencePlugIn.displayLog(Messages.ShowIntelligencePersepctiveHandler_Error, e);
+	private HashMap<SmartStyle, Image> images = new HashMap<SmartStyle, Image>();
+	
+	@Override
+	public String getText(Object element) {
+		if (element instanceof SmartStyle) {
+			return ((SmartStyle) element).getName();
 		}
-		return null;
+		return super.getText(element);
+	}
+
+	@Override
+	public Image getImage(Object element) {
+		
+		if (element instanceof SmartStyle){
+			Image img = images.get(element);
+			if (img != null) return img;
+		}
+		return SmartPlugIn.getDefault().getImageRegistry()
+				.get(SmartPlugIn.STYLE_ICON);
+	}
+	
+	/**
+	 * Set the glyph for a given smart style.  Can be set to null to clear glyph.
+	 * 
+	 * @param ss
+	 * @param img
+	 */
+	public void setGlyph(SmartStyle ss, Image img){
+		images.put(ss, img);
 	}
 }

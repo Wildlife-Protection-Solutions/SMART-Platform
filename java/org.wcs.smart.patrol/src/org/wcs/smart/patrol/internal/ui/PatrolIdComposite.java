@@ -33,7 +33,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -61,8 +60,6 @@ public class PatrolIdComposite extends PatrolItemComposite {
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
 	 */
 	public Composite createComponent(Composite parent, int style) {
-
-		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		main.setLayout(new GridLayout(1, false));
@@ -114,7 +111,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		
 		boolean isDup = PatrolHibernateManager.isDuplicateId(newPatrolId, p.getConservationArea(), session);
 		if (isDup){
-			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
+			if (!MessageDialog.openQuestion(txtPatrolId.getDisplay().getActiveShell(), 
 					Messages.PatrolIdComposite_WarningDialogTitle, 
 					MessageFormat.format(Messages.PatrolIdComposite_DuplicateIdWarning, new Object[]{newPatrolId}))){
 				return false;

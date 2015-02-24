@@ -21,120 +21,100 @@
  */
 package org.wcs.smart;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IPartListener;
-import org.eclipse.ui.IPerspectiveDescriptor;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.part.EditorPart;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.advanced.MArea;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.IPresentationEngine;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 
 /**
- * A Editor/Perspective tracker.
- * 
- * <p>This maps editors to perspectives.<p>
- * <p>Editors are mapped to the active perspective
- * when the editor is opened.</p>
- * <p>Also tracks the current active editor for the
- * given perspective.</p>
+ * Tracks part events; when a part is opened it adds the 
+ * current perspective to the tags.  This allows to track
+ * what parts were opened in what perspective.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class PerspectiveEditorTracker implements IPartListener {
+public class PerspectiveEditorTracker implements EventHandler {
 
-	private HashMap<String, ArrayList<IEditorReference>> perspectiveEditors = new HashMap<String, ArrayList<IEditorReference>>();
-	private HashMap<String, IEditorReference> lastActiveEditors = new HashMap<String, IEditorReference>();
+	private static final String PID_KEY = "smart.perspectiveid";
 	
-	/**
-	 * Finds all editors associated with the given perspective 
-	 * @param perspectiveId the perspective 
-	 * @return list of editor references associated with the given perspective
-	 */
-	public ArrayList<IEditorReference> getEditorForPerspective(String perspectiveId){
-		return perspectiveEditors.get(perspectiveId);
-	}
-	
-	/**
-	 * @param perspectiveId
-	 * @return the last adtive editor for the given perspective
-	 */
-	public IEditorReference getLastActiveEditor(String perspectiveId){
-		return lastActiveEditors.get(perspectiveId);
-	}
-	
-	/**
-	 * Sets the last active editor for the given perspective 
-	 * @param perspectiveId the perspective id
-	 * @param editor the editor reference
-	 */
-	public void setLastActiveEditor(String perspectiveId, IEditorReference editor){
-		lastActiveEditors.put(perspectiveId, editor);
-	}
-	
-	public void partActivated(IWorkbenchPart part) {
-	}
+	@Inject private EModelService mService;
 
-	public void partBroughtToTop(IWorkbenchPart part) {
-	}
+	@Inject private MApplication app;
 
-	public void partClosed(IWorkbenchPart part) {
-		if (part instanceof EditorPart) {
-			IWorkbenchPage page = part.getSite().getPage();
-			boolean found = false;
-			IPerspectiveDescriptor activePerspective = page.getPerspective();
-			ArrayList<IEditorReference> editors = perspectiveEditors.get(activePerspective.getId());
-			if (editors != null) {
-				for (IEditorReference ref : editors){
-					if (ref.getPart(false) == part){
-						editors.remove(ref);
-						found = true;
-						break;
-					}
-				}
+	private MArea editorArea = null;
+
+	@Inject
+	public void appStart(@Optional @UIEventTopic(UIEvents.UILifeCycle.APP_STARTUP_COMPLETE) Event event, IEclipseContext context) {
+		if (event == null) return;
+//		//find editor stack area
+		List<MArea> areas2 = mService.findElements(app, "org.eclipse.ui.editorss", MArea.class,null);
+		if (areas2.size() > 0){
+			editorArea = areas2.get(0);
+			editorArea.getTags().add(IPresentationEngine.NO_AUTO_COLLAPSE);
+		}
+	}
+	
+	@Inject
+	public void handleEvent(@Optional @UIEventTopic(UIEvents.UIElement.TOPIC_WIDGET) Event event) {
+		if (event == null) return;
+		
+		Object x = event.getProperty(UIEvents.EventTags.ELEMENT);
+		if (x instanceof MPart){
+			if (!((MPart) x).getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){
+				return;
 			}
-			if (!found){
-				//check other perspective; this cause occurs when an editor is closed
-				//programmatically from another perspective (closing plan template editor from the
-				//plan perspective).
-				for (ArrayList<IEditorReference> allEditors : perspectiveEditors.values()){
-					for (IEditorReference ref : allEditors){
-						if (ref.getPart(false) == part){
-							allEditors.remove(ref);
-							break;
-						}
-					}
-					
+			MWindow window = ((MPart)x).getContext().get(MWindow.class);
+			if (window == null) return;
+
+			String id = mService.getActivePerspective(window).getElementId();
+			Object y = event.getProperty(UIEvents.EventTags.WIDGET);
+			if (y != null){
+				if (!((MPart)x).getTags().contains(PID_KEY)){
+					((MPart) x).getTags().add(PID_KEY);
+					((MPart) x).getTags().add(id);
 				}
 			}
 		}
 	}
-
-	public void partDeactivated(IWorkbenchPart part) {
-	}
-
-	public void partOpened(IWorkbenchPart part) {
-		if (part instanceof EditorPart) {
-			EditorPart editor = (EditorPart) part;
-			IWorkbenchPage page = part.getSite().getPage();
-			IEditorInput editorInput = editor.getEditorInput();
-			IPerspectiveDescriptor activePerspective = page.getPerspective();
-
-			// Find the editor reference that relates to this editor input
-			IEditorReference[] editorRefs = page.findEditors(editorInput, null, IWorkbenchPage.MATCH_INPUT);
-
-			if (editorRefs.length > 0) {
-				ArrayList<IEditorReference> editors = perspectiveEditors.get(activePerspective.getId());
-				if (editors == null){
-					editors = new ArrayList<IEditorReference>();
-					perspectiveEditors.put(activePerspective.getId(), editors);
-				}
-				editors.add(editorRefs[0]);
-			}
+	
+	
+	/**
+	 * Gets the last active part in the editor stack
+	 * @return
+	 */
+	public MStackElement getActivePart(){
+		if (editorArea == null) return null;
+		MStackElement lastPart = ((MPartStack)editorArea.getChildren().get(0)).getSelectedElement();
+		if (lastPart != null && lastPart.isVisible()){
+			return lastPart;
 		}
+		return null;
+	}
+	
+	public void selectStackElement(MPart activate){
+		if (editorArea == null) return;
+		if (!((MPartStack)editorArea.getChildren().get(0)).getTags().contains(IPresentationEngine.NO_AUTO_COLLAPSE)){
+			((MPartStack)editorArea.getChildren().get(0)).getTags().add(IPresentationEngine.NO_AUTO_COLLAPSE);
+		}
+		
+		((MPartStack)editorArea.getChildren().get(0)).setSelectedElement(null);
+		if (activate != null && activate.getWidget() == null) return;
+		((MPartStack)editorArea.getChildren().get(0)).setSelectedElement(activate);
 	}
 
 }

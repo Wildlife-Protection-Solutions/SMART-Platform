@@ -27,15 +27,12 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.job.SaveIntelligenceJob;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
-import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
+import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
 
 /**
@@ -95,15 +92,8 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
         	IntelligenceEventManager.getInstance().intelligenceAdded(intelligence);
         	
     		// open in editor
-    		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getName(), intelligence.getReceivedDate());
-    		try {
-    			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-    					.getActivePage().openEditor(input, IntelligenceEditor.ID);
-    		} catch (PartInitException e) {
-    			throw new RuntimeException(e);
-    		}
-        	
-        	return true;
+        	(new OpenIntelligenceHandler()).openIntelligence(intelligence.getUuid());
+    		return true;
     	}
 		return false;
     }

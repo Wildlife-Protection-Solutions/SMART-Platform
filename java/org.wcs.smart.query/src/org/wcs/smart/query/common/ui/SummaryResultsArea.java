@@ -29,7 +29,6 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -62,7 +61,7 @@ public class SummaryResultsArea extends Composite{
 		super(parentArea, SWT.NONE);
 		this.editor = parentEditor;
 		
-		toolkit = new FormToolkit(Display.getCurrent());
+		toolkit = new FormToolkit(parentArea.getDisplay());
 		super.addDisposeListener(new DisposeListener() {
 			
 			@Override
@@ -135,7 +134,7 @@ public class SummaryResultsArea extends Composite{
 	 * @param results
 	 */
 	public void updateAndShowTable(final SummaryQueryResult results){
-		Display.getDefault().asyncExec(new Runnable(){
+		tableComp.getDisplay().asyncExec(new Runnable(){
 			@Override
 			public void run() {
 				if (results == null){

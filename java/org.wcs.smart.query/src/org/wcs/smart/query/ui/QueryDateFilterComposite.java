@@ -38,10 +38,7 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -202,7 +199,7 @@ public class QueryDateFilterComposite extends Composite {
 		});
 		lbl1 = new Label(main, SWT.NONE);
 		lbl1.setText(Messages.QueryDateFilterComposite_BetweenLabel);
-		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
+		dtStart = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
 		Listener validateListener = new Listener(){
 			@Override
 			public void handleEvent(Event event) {
@@ -212,7 +209,7 @@ public class QueryDateFilterComposite extends Composite {
 		dtStart.addListener(SWT.Selection, validateListener);
 		lbl2 = new Label(main, SWT.NONE);
 		lbl2.setText(Messages.QueryDateFilterComposite_AndLabel);
-		dtEnd = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
+		dtEnd = new DateTime(main, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
 		dtEnd.addListener(SWT.Selection, validateListener);
 		
 		cdEndDate = new ControlDecoration(dtEnd, SWT.RIGHT | SWT.TOP);
@@ -273,12 +270,7 @@ public class QueryDateFilterComposite extends Composite {
 			cdEndDate.hide();
 		}
 		
-		
-		IWorkbenchPart part = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart();
-		if (part != null){
-			QuerySourceProvider provider = (QuerySourceProvider) ((ISourceProviderService)part.getSite().getService(ISourceProviderService.class)).getSourceProvider(QuerySourceProvider.QUERY_DATE_VALID);
-			provider.setQueryDateValid(error == null, error);
-		}
+		QuerySourceProvider.getSourceProviderFromContext().setQueryDateValid(error == null, error);
 	}
 	
 }

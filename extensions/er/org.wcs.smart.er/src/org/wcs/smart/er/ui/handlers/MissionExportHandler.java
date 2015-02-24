@@ -26,18 +26,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
@@ -53,27 +50,21 @@ import org.wcs.smart.util.SmartUtils;
 *
 */
 
-public class MissionExportHandler extends AbstractHandler {
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
-		Shell shell = HandlerUtil.getActiveShell(event);
+public class MissionExportHandler{
+	
+	@Execute
+	public void execute(final Shell shell){
 		
 		MultiMissionExportDialog dialog = new MultiMissionExportDialog(shell);
-		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
-		}
-		
+		if (dialog.open() != IDialogConstants.OK_ID) return;
+
 		final List<byte[]> missions = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
-		if (missions.size() == 0){
-			return null;
-		}
-		if (!dir.exists() || !dir.isDirectory()){
-			return null;
-		}
-		
+		if (missions.size() == 0) return;
+			
+		if (!dir.exists() || !dir.isDirectory()) return;
+			
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
@@ -96,7 +87,7 @@ public class MissionExportHandler extends AbstractHandler {
 								m = (Mission) s.load(Mission.class, puuid);
 								id = m.getId();
 							} catch (Exception ex) {
-								displayLogError(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
+								EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
@@ -109,14 +100,14 @@ public class MissionExportHandler extends AbstractHandler {
 							MissionExporter.exportMission(m, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							displayLogError(MessageFormat.format("Error exporting Missions: {0}", new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+							EcologicalRecordsPlugIn.displayLog(MessageFormat.format("Error exporting Missions: {0}", new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 						monitor.worked(1);
 					}
 					if (monitor.isCanceled()){
-						displayInfo(Messages.MissionExportHandler_5, MessageFormat.format(Messages.MissionExportHandler_6, new Object[]{exportCnt,dir.toString(),missions.size()}));
+						displayInfo(shell, Messages.MissionExportHandler_5, MessageFormat.format(Messages.MissionExportHandler_6, new Object[]{exportCnt,dir.toString(),missions.size()}));
 					}else{
-						displayInfo(Messages.MissionExportHandler_7, MessageFormat.format(Messages.MissionExportHandler_8, new Object[]{exportCnt,dir.toString(),missions.size()}));
+						displayInfo(shell, Messages.MissionExportHandler_7, MessageFormat.format(Messages.MissionExportHandler_8, new Object[]{exportCnt,dir.toString(),missions.size()}));
 					}
 				}
 
@@ -125,29 +116,21 @@ public class MissionExportHandler extends AbstractHandler {
 			EcologicalRecordsPlugIn.displayLog(
 					Messages.MissionExportHandler_9 + e.getLocalizedMessage(), e);
 		}
-
-		return null;
-
 	}
 
-	private void displayInfo(final String title, final String message) {
-		Display.getDefault().syncExec(new Runnable() {
+	private void displayInfo(final Shell shell, final String title, final String message) {
+		shell.getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
-				MessageDialog.openInformation(Display.getDefault()
-						.getActiveShell(), title, message);
+				MessageDialog.openInformation(shell, title, message);
 			}
 		});
 	}
 
-	private void displayLogError(final String error, final Exception ex) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				EcologicalRecordsPlugIn.displayLog(error, ex);
-			}
-		});
 
+	public static class MissionExportHandlerWrapper extends DIHandler<MissionExportHandler>{
+		public MissionExportHandlerWrapper(){
+			super(MissionExportHandler.class);
+		}
 	}
-
-	}
+}

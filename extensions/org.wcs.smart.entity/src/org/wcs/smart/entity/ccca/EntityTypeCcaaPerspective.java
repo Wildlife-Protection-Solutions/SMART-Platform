@@ -44,7 +44,7 @@ public class EntityTypeCcaaPerspective implements IPerspectiveFactory {
 		//right side - filters and layer manager
 		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.entity.folder1", IPageLayout.LEFT, 0.2f, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		folder1.addView(ConservationAreaListView.ID);
-		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
+		folder1.addView("org.locationtech.udig.project.ui.layerManager"); //$NON-NLS-1$
 		
 		layout.addView(EntityTypeListView.ID, IPageLayout.BOTTOM, 0.3f, ConservationAreaListView.ID);
 		

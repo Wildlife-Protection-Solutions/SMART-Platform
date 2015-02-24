@@ -27,16 +27,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
@@ -54,37 +53,34 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public class DeleteItemHandler extends AbstractHandler {
+public class DeleteItemHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() 
-				|| !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object activeSelection, Shell activeShell) {
+		if (activeSelection == null || !(activeSelection instanceof IStructuredSelection)){
+			return;
 		}
-		
 		//iterator in reverse order to try to remove leaf items before parent items
 		@SuppressWarnings("unchecked")
-		final List<Object> selection= ((IStructuredSelection)thisSelection).toList();
+		final List<Object> selection= ((IStructuredSelection)activeSelection).toList();
 		Collections.reverse(selection);
 		
 		
 		if (selection.size() == 1 && (selection.get(0) instanceof QueryEditorInput) ){
 			QueryEditorInput query = ((QueryEditorInput)selection.get(0)) ;
-			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), 
+			if (!MessageDialog.openConfirm(activeShell, 
 					Messages.DeleteItemHandler_Confirm_DialogTitle, 
 					MessageFormat.format(
 							Messages.DeleteItemHandler_ConfirmMessage,  new Object[]{ query.getName() + " [" + query.getId() + "]"}))){ //$NON-NLS-1$ //$NON-NLS-2$
 			
-				return null;
+				return;
 			}
 		}else{
 	
 			String message = Messages.DeleteItemHandler_ConfirmDelete;
 			message = MessageFormat.format(message, new Object[]{selection.size()});
-			if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteItemHandler_ConfirmDeleteTitle, message )){
-				return null;
+			if (!MessageDialog.openConfirm(activeShell, Messages.DeleteItemHandler_ConfirmDeleteTitle, message )){
+				return ;
 			}	
 			
 		}
@@ -94,26 +90,19 @@ public class DeleteItemHandler extends AbstractHandler {
 			if (o instanceof QueryFolder){
 				deleteFolder((QueryFolder)o);
 			}else if (o instanceof Query){
-				deleteQuery((Query)o, event);
+				deleteQuery((Query)o, activeShell);
 			}else if (o instanceof QueryEditorInput){
-				deleteQuery((QueryEditorInput)o, event);
+				deleteQuery((QueryEditorInput)o, activeShell);
 			}	
 		}
-		return null;
 	}
 
-	private void deleteQuery(Query o, ExecutionEvent event) {
-		deleteQuery(new QueryEditorInput(o), event);
+	private void deleteQuery(Query o, Shell shell) {
+		deleteQuery(new QueryEditorInput(o), shell);
 	}
 	
 	
-	private void deleteQuery(QueryEditorInput o, ExecutionEvent event) {
-		/**
-		 * Get the current window here for linux bug:
-		 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=242246
-		 */
-		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);
-		
+	private void deleteQuery(QueryEditorInput o, Shell activeShell) {	
 		//need to save and refresh query list view
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
@@ -136,26 +125,8 @@ public class DeleteItemHandler extends AbstractHandler {
 			s.close();
 		}
 		QueryEventManager.getInstance().fireQueryDeleted(o);
-		
-		// close the editor
-		try {
-			if (window != null) {
-				final IWorkbenchPage page = window.getActivePage();
-				if (page != null) {
-					IEditorReference[] refs = page.getEditorReferences();
-					for (int i = 0; i < refs.length; i++) {
-						if (refs[i].getEditorInput().equals(o)) {
-							page.closeEditor(refs[i].getEditor(false), false);
-						}
-					}
-				}
-			}
-		} catch (Exception ex) {
-			QueryPlugIn.displayLog(
-					Messages.DeleteItemHandler_ErrorClosingEditor + ex.getLocalizedMessage(), ex);
-		}
-		
 	}
+	
 	private void deleteFolder(QueryFolder folder) {
 		if (folder.isRootFolder()){
 			//cannot delete root folders
@@ -195,6 +166,12 @@ public class DeleteItemHandler extends AbstractHandler {
 			s.close();
 		}
 		QueryEventManager.getInstance().fireFolderDeleted(folder);
+	}
+	
+	public static class DeleteItemHandlerWrapper extends DIHandler<DeleteItemHandler>{
+		public DeleteItemHandlerWrapper(){
+			super(DeleteItemHandler.class);
+		}
 	}
 
 }

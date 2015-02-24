@@ -31,16 +31,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.project.BlackboardEvent;
-import net.refractions.udig.project.IBlackboard;
-import net.refractions.udig.project.IBlackboardListener;
-import net.refractions.udig.project.IStyleBlackboard;
-import net.refractions.udig.project.internal.ProjectFactory;
-import net.refractions.udig.project.internal.StyleBlackboard;
-import net.refractions.udig.style.sld.IEditorPageContainer;
-import net.refractions.udig.style.sld.IStyleEditorPageContainer;
-import net.refractions.udig.style.sld.editor.StyleEditorPage;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -64,8 +54,16 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.udig.project.BlackboardEvent;
+import org.locationtech.udig.project.IBlackboard;
+import org.locationtech.udig.project.IBlackboardListener;
+import org.locationtech.udig.project.IStyleBlackboard;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.style.sld.IEditorPageContainer;
+import org.locationtech.udig.style.sld.IStyleEditorPageContainer;
+import org.locationtech.udig.style.sld.editor.StyleEditorPage;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.SmartStyle;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -130,11 +128,11 @@ public class SmartSavedStylePage extends StyleEditorPage implements SelectionLis
 			
 			@Override
 			public void blackBoardChanged(BlackboardEvent event) {
-				if (listenOtherStyles){
-					if(getStyleBlackboard() != null){
-						getStyleBlackboard().remove(SmartLayerStyle.STYLE_ID);
-					}
-				}	
+//				if (listenOtherStyles){
+//					if(getStyleBlackboard() != null){
+//						getStyleBlackboard().remove(SmartLayerStyle.STYLE_ID);
+//					}
+//				}	
 			}
 		});
 		
@@ -164,7 +162,7 @@ public class SmartSavedStylePage extends StyleEditorPage implements SelectionLis
 	@Override
 	public boolean performApply() {
 		if (cmbViewer.getSelection().isEmpty()){
-			getStyleBlackboard().remove(SmartLayerStyle.STYLE_ID);
+//			getStyleBlackboard().remove(SmartLayerStyle.STYLE_ID);
 			return true;
 		}else{
 			Object style = ((IStructuredSelection)cmbViewer.getSelection()).getFirstElement();
@@ -177,13 +175,13 @@ public class SmartSavedStylePage extends StyleEditorPage implements SelectionLis
 					for (String key : parsed.keySet()){
 						getStyleBlackboard().put(key, parsed.get(key));
 					}
-					getStyleBlackboard().put(SmartLayerStyle.STYLE_ID, ((SmartStyle) style).getUuid());
+//					getStyleBlackboard().put(SmartLayerStyle.STYLE_ID, ((SmartStyle) style).getUuid());
 				} catch (Exception ex) {
 					SmartPlugIn.log(MessageFormat.format(Messages.SmartSavedStylePage_ApplyError, ex.getMessage()), ex);
 					return false;
 				}
 			}else{
-				getStyleBlackboard().remove(SmartLayerStyle.STYLE_ID);	
+//				getStyleBlackboard().remove(SmartLayerStyle.STYLE_ID);	
 			}
 		}
 		return true;
@@ -339,7 +337,7 @@ public class SmartSavedStylePage extends StyleEditorPage implements SelectionLis
 	 */
 	private void updateSelection(){
 		currentUuid = null;
-		currentUuid = (byte[]) getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
+//		currentUuid = (byte[]) getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
 		
 		if (currentUuid == null){
 			cmbViewer.setSelection(new StructuredSelection(NOT_SELECTED));
@@ -374,7 +372,7 @@ public class SmartSavedStylePage extends StyleEditorPage implements SelectionLis
 		for (String key : getStyleBlackboard().keySet()){
 			sb.put(key, getStyleBlackboard().get(key));
 		}
-		sb.remove(SmartLayerStyle.STYLE_ID);
+//		sb.remove(SmartLayerStyle.STYLE_ID);
 		
 		String stringStyle = null;
 		try {

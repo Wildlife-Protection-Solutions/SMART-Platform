@@ -31,7 +31,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.wcs.smart.query.internal.Messages;
@@ -127,8 +126,7 @@ public class ItemTreeNodeTree extends Composite {
 
 		FilteredTree fTree = new FilteredTree(this, SWT.H_SCROLL | SWT.V_SCROLL
 				| SWT.MULTI, patternFilter, true);
-		fTree.setBackground(Display.getDefault()
-				.getSystemColor(SWT.COLOR_WHITE));
+		fTree.setBackground(fTree.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		filterTreeViewer = fTree.getViewer();
 		filterTreeViewer.getTree().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));

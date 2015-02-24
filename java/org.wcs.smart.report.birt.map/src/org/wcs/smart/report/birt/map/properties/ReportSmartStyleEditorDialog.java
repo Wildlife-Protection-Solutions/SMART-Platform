@@ -21,11 +21,6 @@
  */
 package org.wcs.smart.report.birt.map.properties;
 
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.style.sld.IStyleEditorPageContainer;
-import net.refractions.udig.style.sld.editor.EditorPageManager;
-import net.refractions.udig.style.sld.editor.StyleEditorDialog;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -33,13 +28,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.util.NullProgressListener;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.style.sld.IStyleEditorPageContainer;
+import org.locationtech.udig.style.sld.editor.EditorPageManager;
 import org.opengis.util.ProgressListener;
 import org.wcs.smart.report.birt.map.internal.Messages;
+import org.wcs.smart.ui.map.SmartStyleEditorDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -47,35 +47,25 @@ import org.wcs.smart.ui.properties.DialogConstants;
  * report map style editor.  In this case we have removed the apply button,
  * and ensured the ok and cancel buttons set the return code of the window. 
  */
-public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleEditorPageContainer {
+public class ReportSmartStyleEditorDialog extends SmartStyleEditorDialog implements IStyleEditorPageContainer {
     
-	  public static final SmartStyleEditorDialog createSmartStyleDialog( Shell shell, final String pageId,Layer selectedLayer, EditorPageManager manager ) {
-	        final SmartStyleEditorDialog dialog;
+	  public static final ReportSmartStyleEditorDialog createSmartStyleDialog( Shell shell, final String pageId,Layer selectedLayer, EditorPageManager manager ) {
+	        
+		ReportSmartStyleEditorDialog dialog = new ReportSmartStyleEditorDialog(shell, manager);
+		dialog.setSelectedLayer(selectedLayer);
+		dialog.create();
+		dialog.setSelectedNode(pageId);
+		dialog.findNodeMatching(pageId);
 
-	        Shell parentShell = shell;
-	        if (parentShell == null) {
-	            // Determine a decent parent shell.
-	            final IWorkbench workbench = PlatformUI.getWorkbench();
-	            final IWorkbenchWindow workbenchWindow = workbench.getActiveWorkbenchWindow();
-	            if (workbenchWindow != null) {
-	                parentShell = workbenchWindow.getShell();
-	            } else {
-	                parentShell = null;
-	            }
-	        }
-
-	        dialog = new SmartStyleEditorDialog(parentShell, manager);
-	        dialog.setSelectedNode(pageId);
-	        dialog.setSelectedLayer(selectedLayer);
-	        dialog.create();
-	        dialog.getShell().setText(Messages.SmartStyleEditorDialog_Title); 
-	        dialog.filteredTree.getFilterCombo().setEnabled(true); // allow filtering
-
-	        if (pageId != null) {
-	            dialog.findNodeMatching(pageId);
-	        }
-	        return dialog;
-	    }
+		dialog.getShell().setText(Messages.SmartStyleEditorDialog_Title);
+		// dialog.filteredTree.getFilterCombo().setEnabled(true); // allow
+		// filtering
+		//
+		// if (pageId != null) {
+		// dialog.findNodeMatching(pageId);
+		// }
+		return dialog;
+	}
 
 	  
     
@@ -86,7 +76,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleE
      * @param parentShell the parent shell
      * @param manager the preference manager
      */
-    protected SmartStyleEditorDialog( Shell parentShell, EditorPageManager manager ) {
+    protected ReportSmartStyleEditorDialog( Shell parentShell, EditorPageManager manager ) {
         super(parentShell, manager);
     }
 
@@ -108,9 +98,6 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleE
         composite.setLayoutData(data);
         composite.setFont(parent.getFont());
 
-        // add import/export buttons
-        addImportExportButtons(composite);
-
         // add apply/revert/close buttons
         addOkCancelRevertApplyButtons(parent, composite);
 
@@ -131,66 +118,45 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements IStyleE
         compRight.setLayoutData(data);
         compRight.setFont(parent.getFont());
 
-        StyleEditorButtonListener listener = new StyleEditorButtonListener(this);
+        Button saveButton = createButton(compRight, SAVE_ID, DialogConstants.SAVE_TEXT, false); 
+        saveButton.setEnabled(false);
+        saveButton.addListener(SWT.Selection, this);
+        
+       
         
         Button revertButton = createButton(compRight, REVERT_ID, Messages.SmartStyleEditorDialog_RevertButton, false); 
         revertButton.setEnabled(false);
-        revertButton.addListener(SWT.Selection, listener);
-        
-        Button applyButton = createButton(compRight, APPLY_ID, Messages.SmartStyleEditorDialog_ApplyButton, false); 
-        applyButton.setEnabled(false);
-        applyButton.addListener(SWT.Selection, new StyleEditorButtonListener(this));
+        revertButton.addListener(SWT.Selection, this);
+        new Label(compRight, SWT.NONE);
+        new Label(compRight, SWT.NONE);
         
         Button closeButton = createButton(compRight, CANCEL_ID,
                 IDialogConstants.CANCEL_LABEL, false); 
         closeButton.setEnabled(true);
-        closeButton.addListener(SWT.Selection, listener);
+        closeButton.addListener(SWT.Selection, this);
         
         Button okButton = createButton(compRight, OK_ID,
                 IDialogConstants.OK_LABEL, false); 
         okButton.setEnabled(true);
-        okButton.addListener(SWT.Selection, listener);
+        okButton.addListener(SWT.Selection, this);
         
-        layout.numColumns=2;
+        layout.numColumns=3;
     }
 
     protected void setReturnCode(int code){
     	super.setReturnCode(code);
     }
     
-    private void addImportExportButtons( Composite composite ) {
-        GridLayout layout;
-        Composite compLeft = new Composite(composite, SWT.NONE);
-        layout = new GridLayout(0, true); // columns are incremented by createButton
-        layout.marginWidth = 0;
-        layout.marginHeight = 0;
-        layout.horizontalSpacing = convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-        layout.verticalSpacing = convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
-        compLeft.setLayout(layout);
-        compLeft.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
-
-        Button importButton = createButton(compLeft, IMPORT_ID,
-                DialogConstants.IMPORT_BUTTON_TEXT, false); 
-        importButton.setEnabled(false);
-        importButton.addListener(SWT.Selection, new StyleEditorButtonListener(this));
-        Button exportButton = createButton(compLeft, EXPORT_ID,
-        		DialogConstants.EXPORT_BUTTON_TEXT, false); 
-        exportButton.setEnabled(false);
-        exportButton.addListener(SWT.Selection, new StyleEditorButtonListener(this));
-    }
     
     @Override
     public void setExitButtonState() {
-    	getButton(APPLY_ID).setEnabled(true);
     }
     
     @Override
     public void updateButtons() {
-        getButton(IMPORT_ID).setEnabled(true);
-        getButton(EXPORT_ID).setEnabled(true);
         getButton(REVERT_ID).setEnabled(true);
-        getButton(APPLY_ID).setEnabled(true);
         getButton(OK_ID).setEnabled(true);
         getButton(CANCEL_ID).setEnabled(true);
+        getButton(SAVE_ID).setEnabled(true);
     }
 }

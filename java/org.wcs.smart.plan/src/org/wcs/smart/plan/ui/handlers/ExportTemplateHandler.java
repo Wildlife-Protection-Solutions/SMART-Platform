@@ -25,15 +25,14 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
@@ -44,12 +43,12 @@ import org.wcs.smart.plan.report.ReportPlan;
  * @author Emily
  *
  */
-public class ExportTemplateHandler extends AbstractHandler {
+public class ExportTemplateHandler  {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(Shell activeShell){
 		
-		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event), SWT.SAVE);
+		FileDialog fd = new FileDialog(activeShell, SWT.SAVE);
 		fd.setFilterNames(new String[]{Messages.ExportTemplateHandler_ReportDesignFileName, Messages.ExportTemplateHandler_AllFiles});
 		fd.setFilterExtensions(new String[]{"*.rptdesign", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setText(Messages.ExportTemplateHandler_ExportDialogTitle);
@@ -57,11 +56,11 @@ public class ExportTemplateHandler extends AbstractHandler {
 		fd.setOverwrite(true);
 		String exportFile = fd.open();
 		if (exportFile == null){
-			return null;
+			return;
 		}
 		final File outFile = new File(exportFile);
 		//zip up the contents of the rptlibrary
-		ProgressMonitorDialog outputDialog = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+		ProgressMonitorDialog outputDialog = new ProgressMonitorDialog(activeShell);
 		try{
 			outputDialog.run(true, false, new IRunnableWithProgress() {
 				@Override
@@ -77,7 +76,12 @@ public class ExportTemplateHandler extends AbstractHandler {
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.ExportTemplateHandler_ErrorExportingTemplate + ex.getMessage(), ex);
 		}
-		return null;
 	}
 
+	public static class ExportTemplateHandlerWrapper extends DIHandler<ExportTemplateHandler>{
+		public ExportTemplateHandlerWrapper(){
+			super(ExportTemplateHandler.class);
+		}
+	}
 }
+

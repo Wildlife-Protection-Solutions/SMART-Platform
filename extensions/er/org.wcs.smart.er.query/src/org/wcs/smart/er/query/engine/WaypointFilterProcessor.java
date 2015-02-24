@@ -26,7 +26,6 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -694,11 +693,14 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			if (lfilter.getOperator() == Operator.STR_CONTAINS || 
 					lfilter.getOperator() == Operator.STR_NOTCONTAINS){
 				sql.append(" '%"); //$NON-NLS-1$
-				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				//TODO: escapge sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append(lfilter.getValue().toString().toLowerCase());
 				sql.append("%' "); //$NON-NLS-1$
 			}else if (lfilter.getOperator() == Operator.STR_EQUALS){
 				sql.append(" '"); //$NON-NLS-1$
-				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				//TODO: escape
+				//sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append(lfilter.getValue().toString().toLowerCase());
 				sql.append("'"); //$NON-NLS-1$
 			}
 			
@@ -709,7 +711,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}else{
 				sql.append(prefix(MissionAttributeListItem.class));
 				sql.append(".keyid = '"); //$NON-NLS-1$
-				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+				//TODO: escape
+				//sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+				sql.append(lfilter.getValue().toString());
 				sql.append("'");  //$NON-NLS-1$
 			}
 		}
@@ -799,11 +803,15 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				if (lfilter.getOperator() == Operator.STR_CONTAINS || 
 						lfilter.getOperator() == Operator.STR_NOTCONTAINS){
 					sql.append(" '%"); //$NON-NLS-1$
-					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+					//TODO: escape
+//					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+					sql.append(lfilter.getValue().toString().toLowerCase());
 					sql.append("%' "); //$NON-NLS-1$
 				}else if (lfilter.getOperator() == Operator.STR_EQUALS){
 					sql.append(" '"); //$NON-NLS-1$
-					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+					//TODO: escape
+					//sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+					sql.append(lfilter.getValue().toString().toLowerCase());
 					sql.append("'"); //$NON-NLS-1$
 				}
 			}else if (lfilter.getAttributeType() == AttributeType.LIST){
@@ -813,7 +821,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				}else{
 					sql.append(prefix(SamplingUnitAttributeListItem.class));
 					sql.append(".keyid = '"); //$NON-NLS-1$
-					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+					//TODO: escape
+//					sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+					sql.append(lfilter.getValue().toString());
 					sql.append("'");  //$NON-NLS-1$
 				}
 			}
@@ -885,11 +895,15 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			if (lfilter.getOperator() == Operator.STR_CONTAINS || 
 					lfilter.getOperator() == Operator.STR_NOTCONTAINS){
 				sql.append(" '%"); //$NON-NLS-1$
-				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				//TODO: escape
+				//sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append(lfilter.getValue().toString().toLowerCase());
 				sql.append("%' "); //$NON-NLS-1$
 			}else if (lfilter.getOperator() == Operator.STR_EQUALS){
 				sql.append(" '"); //$NON-NLS-1$
-				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				//TODO: escape
+//				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString().toLowerCase()));
+				sql.append(lfilter.getValue().toString().toLowerCase());
 				sql.append("'"); //$NON-NLS-1$
 			}
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
@@ -899,7 +913,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}else{
 				sql.append(prefix(SamplingUnitAttributeListItem.class));
 				sql.append(".keyid = '"); //$NON-NLS-1$
-				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+				//TODO: escape
+//				sql.append(StringEscapeUtils.escapeSql(lfilter.getValue().toString()));
+				sql.append(lfilter.getValue().toString());
 				sql.append("'");  //$NON-NLS-1$
 			}
 		}

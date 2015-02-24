@@ -34,11 +34,10 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
@@ -49,14 +48,12 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
-import org.wcs.smart.er.ui.SurveyDesignListView;
-import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
+import org.wcs.smart.er.ui.handlers.EditSurveyElementHandler;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.xml.SurveyDesignFromXmlConverter;
 import org.wcs.smart.er.xml.SurveyDesignXMLManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
 
 /**
  * Wizard to import survey designs.
@@ -218,10 +215,10 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 			//	ensure key doesn't already exist
 			if (designExists(session, sd.getKeyId())){
 				final String msg = MessageFormat.format(Messages.SurveyDesignImportHandler_4, new Object[]{sd.getKeyId()});
-				Display.getDefault().syncExec(new Runnable(){
+				getShell().getDisplay().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.EcologicalRecordsPlugIn_ErrorDialogTitle, msg);
+						MessageDialog.openError(getShell(), Messages.EcologicalRecordsPlugIn_ErrorDialogTitle, msg);
 					}
 				});
 				return false;
@@ -266,26 +263,23 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 	private void reportResult(int successCount, int totalCount, SurveyDesign lastDesign) {
 		if (totalCount > 1) {
 			final String message = MessageFormat.format(Messages.ImportSurveyDesignWizard_Report_Message, successCount, totalCount);
-			Display.getDefault().syncExec(new Runnable(){
+			getShell().getDisplay().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.ImportSurveyDesignWizard_Report_Title, message);
+					MessageDialog.openInformation(getShell(), Messages.ImportSurveyDesignWizard_Report_Title, message);
 				}				
 			});
 		} else if (lastDesign != null) {
 			//open editor
 			final SurveyDesignEditorInput input = new SurveyDesignEditorInput(lastDesign.getName(), lastDesign.getUuid(), lastDesign.getKeyId(), lastDesign.getState());
-			Display.getDefault().syncExec(new Runnable(){
+			getShell().getDisplay().syncExec(new Runnable(){
 				@Override
-				public void run() {
-					try {
-						FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
-						PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, SurveyDesignEditor.ID);
-					} catch (Exception e) {
-						EcologicalRecordsPlugIn.log(e.getMessage(), e);
-					}
-				}				
+				public void run() {		
+					(new EditSurveyElementHandler()).execute(new StructuredSelection(input), getShell());		
+				}
+				
 			});
+			
 		}
 	}
 	

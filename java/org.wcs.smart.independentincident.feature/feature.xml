@@ -5,7 +5,7 @@
       version="3.1.0"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart"
-      license-feature="org.wcs.smart.smart_feature">
+      license-feature="org.wcs.smart.smart.feature">
 
    <description>
       Allows for the addition of incidents that are not associated with any other form of data entry (eg not associated with patrols).

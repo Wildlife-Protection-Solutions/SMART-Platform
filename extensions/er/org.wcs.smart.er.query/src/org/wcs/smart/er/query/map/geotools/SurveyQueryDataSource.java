@@ -165,28 +165,26 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	
 	public static String getWaypointFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		StringBuilder sb = new StringBuilder();
-		sb.append("fid:String"); //$NON-NLS-1$
+		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
 		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
-		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
 	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		StringBuilder sb = new StringBuilder();
-		sb.append("fid:String"); //$NON-NLS-1$
+		sb.append("the_geom:MultiLineString:srid=4326,fid:String"); //$NON-NLS-1$
 		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
-		sb.append(",geom:MultiLineString:srid=4326"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
 	public static String getMissionTrackFeatureSchemaDef(){
 		StringBuilder sb = new StringBuilder();
+		sb.append("geom:MultiLineString:srid=4326,"); //$NON-NLS-1$
 		sb.append("fid:String,"); //$NON-NLS-1$
 		sb.append("id:String,"); //$NON-NLS-1$
 		sb.append("start:Date,"); //$NON-NLS-1$
 		sb.append("end:Date,"); //$NON-NLS-1$
-		sb.append("comment:String,"); //$NON-NLS-1$
-		sb.append("geom:MultiLineString:srid=4326"); //$NON-NLS-1$
+		sb.append("comment:String"); //$NON-NLS-1$
 		return sb.toString();
 	}
 	

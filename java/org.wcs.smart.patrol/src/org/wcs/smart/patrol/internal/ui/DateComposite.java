@@ -33,9 +33,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -73,7 +72,7 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		lbl.setText(Messages.DateComposite_StartDate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
 		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
 		
@@ -81,11 +80,11 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 		lbl.setText(Messages.DateComposite_EndDate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG| SWT.DATE);
 		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)dtEndDate.getLayoutData()).horizontalIndent = 10;
 		cdEndDate = new ControlDecoration(lbl, SWT.RIGHT);
-		cdEndDate.setImage(PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_DEC_FIELD_WARNING));
+		cdEndDate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMG_DEC_FIELD_WARNING));
 		cdEndDate.hide();
 		
 		dtEndDate.addSelectionListener(this);

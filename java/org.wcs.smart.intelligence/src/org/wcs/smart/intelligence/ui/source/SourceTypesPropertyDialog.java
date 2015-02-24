@@ -66,10 +66,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -124,8 +124,8 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		}
 	};
 	
-	public SourceTypesPropertyDialog() {
-		super(Display.getCurrent().getActiveShell(), Messages.SourceTypesPropertyDialog_Title);
+	public SourceTypesPropertyDialog(Shell shell) {
+		super(shell, Messages.SourceTypesPropertyDialog_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
@@ -267,7 +267,8 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 		Label lblinfo = new Label(container, SWT.WRAP | SWT.NONE);
 		lblinfo.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		((GridData)lblinfo.getLayoutData()).widthHint = 250;
-		lblinfo.setText(MessageFormat.format(Messages.SourceTypesPropertyDialog_PatrolKeyInfo, new Object[]{IntelligenceSource.PATROL_KEY}));
+		lblinfo.setText(MessageFormat.format(Messages.SourceTypesPropertyDialog_PatrolKeyInfo1,
+				new Object[]{IntelligenceSource.PATROL_KEY, IntelligenceSource.INFORMANT_KEY}));
 		
 		setTitle(Messages.SourceTypesPropertyDialog_Title);
 		setMessage(Messages.SourceTypesPropertyDialog_Message);
@@ -476,7 +477,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 			if (!findLangValue(type, mnd).equals(newValue)){
 				String error = validate(type, mnd, newValue);
 				if (error != null){
-					MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.SourceTypesPropertyDialog_InvalidName, error);
+					MessageDialog.openError(getShell(), Messages.SourceTypesPropertyDialog_InvalidName, error);
 				}else{
 					
 					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());

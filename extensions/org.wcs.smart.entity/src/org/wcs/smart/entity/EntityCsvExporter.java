@@ -88,11 +88,10 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		
 		
 		
-		CSVWriter writer = null;
-		try {
-			writer = new CSVWriter(
+		
+		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR)){
 			
 			List<Entity> stations = getEntities(session, activeOnly);
 
@@ -150,17 +149,9 @@ public class EntityCsvExporter implements ICsvDataExporter {
 				
 				writer.writeNext(csvout);
 			}
-			writer.close();
 			return true;
 		} catch (IOException ex) {
-			try {
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (IOException e) {
-				return false;
-			}
-			throw ex;
+			return false;
 		}
 	}
 

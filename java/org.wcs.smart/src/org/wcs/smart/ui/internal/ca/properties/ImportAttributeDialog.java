@@ -270,7 +270,7 @@ public class ImportAttributeDialog extends TitleAreaDialog {
 		try {
 			processor.readDataModel(file);
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(null, Messages.ImportAttributeDialog_ErrorReadingFile, e);
+			SmartPlugIn.displayLog(Messages.ImportAttributeDialog_ErrorReadingFile, e);
 			return;
 		}
 		//validate file

@@ -247,7 +247,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_UtmZone;
 	public static String CyberTrackerPropertiesDialog_UtmZone_Tooltip;
 	public static String CyberTrackerPropertiesDialog_UtmZoneInvalid;
-	public static String CybertrackerTemplateCloner_TaskName;
+	public static String CybertrackerTemplateCloner_CloningCtOptions;
 	public static String DataModelWrapper_Dropdown_Label;
 	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;

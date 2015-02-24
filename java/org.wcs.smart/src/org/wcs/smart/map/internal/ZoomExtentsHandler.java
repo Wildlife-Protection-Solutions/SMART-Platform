@@ -21,35 +21,31 @@
  */
 package org.wcs.smart.map.internal;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.wcs.smart.ui.map.MapView;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 
 /**
  * Zoom extents handler
  * @author egouge
  * @since 1.0.0
  */
-public class ZoomExtentsHandler extends AbstractHandler {
+public class ZoomExtentsHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		if (part instanceof MapView){
-			MapView view = (MapView)part;
-			Map map = view.getMap();
-			ReferencedEnvelope bounds = map.getBounds(new NullProgressMonitor());
-			map.sendCommandASync(new SetViewportBBoxCommand(bounds));
-		}
-		return null;
+	@Execute
+	public void execute() {
+		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy(
+				"org.locationtech.udig.tools.ZoomExtent").run();
+
 	}
+
+	// E3
+	public static class ZoomExtentsHandlerWrapper extends DIHandler<ZoomExtentsHandler> {
+		public ZoomExtentsHandlerWrapper() {
+			super(ZoomExtentsHandler.class);
+		}
+	}
+	
 
 }

@@ -23,16 +23,15 @@ package org.wcs.smart.dataentry.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -48,21 +47,19 @@ import org.wcs.smart.ui.internal.ca.properties.handlers.ShowDataModelPropertyPag
  * @author elitvin
  * @since 1.0.0
  */
-public class ShowConfigurableModelHandler extends AbstractHandler {
+public class ShowConfigurableModelHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final Shell shell = HandlerUtil.getActiveShell(event);
-		DataModelProgressMonitorDialog pd = new DataModelProgressMonitorDialog(shell);
+	@Execute
+	public void execute(Shell activeShell) throws ExecutionException {
+		DataModelProgressMonitorDialog pd = new DataModelProgressMonitorDialog(activeShell);
 		pd.run();
-		if (pd.isEmptyDataModel() && MessageDialog.openQuestion(shell, Messages.ShowConfigurableModelHandler_NoDmDialog_Title, Messages.ShowConfigurableModelHandler_NoDmDialog_Message)) {
+		if (pd.isEmptyDataModel() && MessageDialog.openQuestion(activeShell, Messages.ShowConfigurableModelHandler_NoDmDialog_Title, Messages.ShowConfigurableModelHandler_NoDmDialog_Message)) {
 			ShowDataModelPropertyPageHandler handler = new ShowDataModelPropertyPageHandler();
-			return handler.execute(event);
+			handler.execute(activeShell);
 		} else {
-			Dialog dialog = new ConfigurableModelPropertyDialog(shell);
+			Dialog dialog = new ConfigurableModelPropertyDialog(activeShell);
 			dialog.open();
 		}
-		return null;
 	}
 
 	/*
@@ -87,7 +84,7 @@ public class ShowConfigurableModelHandler extends AbstractHandler {
 						dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
 					}});
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog(getShell(), Messages.ShowConfigurableModelHandler_LoadDataModel_Error, ex);
+				SmartPlugIn.displayLog(Messages.ShowConfigurableModelHandler_LoadDataModel_Error, ex);
 			} finally {
 				if (session.getTransaction().isActive()) {
 					session.getTransaction().rollback();
@@ -101,4 +98,10 @@ public class ShowConfigurableModelHandler extends AbstractHandler {
 		}
 	}
 	
+	//E3
+	public static class ShowConfigurableModelHandlerWrapper extends DIHandler<ShowConfigurableModelHandler>{
+		public ShowConfigurableModelHandlerWrapper(){
+			super(ShowConfigurableModelHandler.class);
+		}
+	}
 }

@@ -21,16 +21,13 @@
  */
 package org.wcs.smart.common.control;
 
-
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -123,7 +120,7 @@ public class MultipleSelectComposite<T> extends Composite {
 		labelSelected = new Label(this, SWT.NONE);
 
 		itemsListViewer = new TableViewer(this, SWT.MULTI | SWT.BORDER);
-		itemsListViewer.setContentProvider(new ObservableListContentProvider());
+		itemsListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		itemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		itemsListViewer.setInput(allItems);
 		((GridData)itemsListViewer.getControl().getLayoutData()).widthHint = 100;
@@ -166,7 +163,7 @@ public class MultipleSelectComposite<T> extends Composite {
 		});
 
 		selectedItemsListViewer = new TableViewer(this, SWT.MULTI | SWT.BORDER);
-		selectedItemsListViewer.setContentProvider(new ObservableListContentProvider());
+		selectedItemsListViewer.setContentProvider(ArrayContentProvider.getInstance());
 		selectedItemsListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		selectedItemsListViewer.setInput(selectedItems);
 		((GridData)selectedItemsListViewer.getControl().getLayoutData()).widthHint = 100;
@@ -272,10 +269,10 @@ public class MultipleSelectComposite<T> extends Composite {
 		this.selectedItems.addAll(current);
 		sortList(this.selectedItems);
 
-		itemsListViewer.setInput(new WritableList(this.allItems, Object.class));
+		itemsListViewer.setInput(this.allItems);
 		itemsListViewer.refresh();
 
-		selectedItemsListViewer.setInput(new WritableList(this.selectedItems, Object.class));
+		selectedItemsListViewer.setInput(this.selectedItems);
 		selectedItemsListViewer.refresh();
 
 		fireChangeListeners();
@@ -307,9 +304,9 @@ public class MultipleSelectComposite<T> extends Composite {
 		labelSelected.setText(text);
 	}
 	
-	public WritableList getSelectedItems() {
-		WritableList list = (WritableList) this.selectedItemsListViewer.getInput();
-		return list != null ? list : new WritableList();
+	public List<T> getSelectedItems() {
+		List list = (List) this.selectedItemsListViewer.getInput();
+		return list != null ? list : Collections.EMPTY_LIST;
 	}
 	
 	/**

@@ -59,7 +59,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -372,7 +371,7 @@ public class CTPatrolTableContainer extends Composite {
 								File currentFile = files[i];
 								if (!currentFile.exists()){
 									final File fcurrentFile = currentFile;
-									Display.getDefault().syncExec(new Runnable(){
+									getShell().getDisplay().syncExec(new Runnable(){
 										@Override
 										public void run() {
 											MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title,MessageFormat.format( Messages.CyberTrackerImportDialog_Error_Message, new Object[]{fcurrentFile.toString()}));
@@ -421,7 +420,7 @@ public class CTPatrolTableContainer extends Composite {
 		if (patrolImporter == null)
 			patrolImporter = new PatrolImporter();
 		final List<Patrol> addedList = new ArrayList<Patrol>();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell().getDisplay().getActiveShell());
 		try {
 			final StructuredSelection selection = (StructuredSelection) viewer.getSelection();
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -469,7 +468,7 @@ public class CTPatrolTableContainer extends Composite {
 		if (legImporter == null)
 			legImporter = new PatrolLegImporter();
 
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try {
 			final StructuredSelection selection = (StructuredSelection) viewer.getSelection();
 			final Patrol patrol = selectorDialog.getSelectedPatrol();
@@ -504,7 +503,7 @@ public class CTPatrolTableContainer extends Composite {
 	}
 
 	private void handleRemove() {
-		boolean isOk = MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.CTPatrolTableContainer_DeleteWarn_Title, Messages.CTPatrolTableContainer_DeleteWarn_Message);
+		boolean isOk = MessageDialog.openQuestion(getShell(), Messages.CTPatrolTableContainer_DeleteWarn_Title, Messages.CTPatrolTableContainer_DeleteWarn_Message);
 		if (isOk) {
 			IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
 			if (!sel.isEmpty()) {
@@ -526,7 +525,7 @@ public class CTPatrolTableContainer extends Composite {
 	}
 
 	private File[] selectFile() {
-		CyberTrackerFileImportDialog fileDialog = new CyberTrackerFileImportDialog();
+		CyberTrackerFileImportDialog fileDialog = new CyberTrackerFileImportDialog(getShell());
 		if (fileDialog.open() == IDialogConstants.OK_ID)
 			return fileDialog.getSelectedFiles();
 		return null;
@@ -542,7 +541,7 @@ public class CTPatrolTableContainer extends Composite {
 	}
 	
 	private void refreshViewer() {
-		Display.getDefault().syncExec(new Runnable() {
+		getShell().getDisplay().syncExec(new Runnable() {
 			@Override
 			public void run() {
 				viewer.refresh();

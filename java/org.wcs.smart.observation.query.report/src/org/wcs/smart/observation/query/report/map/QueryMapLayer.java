@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.observation.query.report.map;
 
-import net.refractions.udig.catalog.IService;
+import org.locationtech.udig.catalog.IService;
 
 import org.wcs.smart.observation.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;

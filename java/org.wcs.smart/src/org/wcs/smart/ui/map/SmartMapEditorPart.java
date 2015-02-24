@@ -30,27 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.internal.ui.IDropTargetProvider;
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.ProjectFactory;
-import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
-import net.refractions.udig.project.internal.render.RenderPackage;
-import net.refractions.udig.project.internal.render.ViewportModel;
-import net.refractions.udig.project.ui.AnimationUpdater;
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.commands.IDrawCommand;
-import net.refractions.udig.project.ui.internal.FeatureAnimation;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.internal.commands.draw.DrawFeatureCommand;
-import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
-import net.refractions.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-import net.refractions.udig.project.ui.tool.IToolManager;
-import net.refractions.udig.project.ui.viewers.MapViewer;
-import net.refractions.udig.ui.IBlockingSelection;
-import net.refractions.udig.ui.UDIGDragDropUtilities;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
@@ -82,6 +61,26 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.locationtech.udig.internal.ui.IDropTargetProvider;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
+import org.locationtech.udig.project.internal.render.RenderPackage;
+import org.locationtech.udig.project.internal.render.ViewportModel;
+import org.locationtech.udig.project.ui.AnimationUpdater;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.commands.IDrawCommand;
+import org.locationtech.udig.project.ui.internal.FeatureAnimation;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.internal.commands.draw.DrawFeatureCommand;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.locationtech.udig.project.ui.tool.IToolManager;
+import org.locationtech.udig.project.ui.viewers.MapViewer;
+import org.locationtech.udig.ui.IBlockingSelection;
+import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
@@ -275,7 +274,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         
 		tools = new MapToolComposite();
 		tools.createComposite(composite);
-		tools.selectTool("net.refractions.udig.tools.Pan"); //$NON-NLS-1$
+		tools.selectTool("org.locationtech.udig.tools.Pan"); //$NON-NLS-1$
 		
         Composite infoArea = new Composite(parent, SWT.NONE);
         GridLayout gl = new GridLayout(5, false);
@@ -315,7 +314,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
 						getMap().sendCommandASync(command);
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getSite().getShell(), ERROR_SETTING_MAP_PROJECTION + ex.getLocalizedMessage(), ex);
+						SmartPlugIn.displayLog(ERROR_SETTING_MAP_PROJECTION + ex.getLocalizedMessage(), ex);
 					}	
 				}
 			}
@@ -403,18 +402,23 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
     public void dispose() {
         super.dispose();
         deregisterFeatureFlasher();
+        getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
+        
+        this.partlistener = null;
+        this.selectFeatureListener = null;
         
         if (mapViewer != null && mapViewer.getViewport() != null && getMap() != null) {
         	mapViewer.getViewport().removePaneListener(getMap().getViewportModelInternal());
         }
         
         getMap().getViewportModelInternal().setInitialized(false);
+        mapViewer.getRenderManager().disableRendering();
         mapViewer.getRenderManager().stopRendering();
-        mapViewer.getRenderManager().dispose();
+       	mapViewer.getRenderManager().dispose();
+
         mapViewer.dispose();
-        getSite().getWorkbenchWindow().getPartService().removePartListener(partlistener);
-        partlistener = null;
-        this.selectFeatureListener = null;
+        
+        
     }
 
     public void openContextMenu() {
@@ -445,7 +449,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {

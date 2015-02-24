@@ -17,6 +17,7 @@ public class Messages extends NLS {
 	public static String SurveySamplingUnitTable_LongDisplayName;
 	public static String SurveySamplingUnitTable_StateColumnLabel;
 	public static String SurveySummaryQueryResultSetMetadata_QueryJobName;
+	public static String SurveySamplingUnitTable_LengthKmColumnLabel;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

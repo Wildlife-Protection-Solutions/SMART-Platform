@@ -111,7 +111,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		cmbDatesOps.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		lblStart = new Label(param, SWT.NONE);
 		lblStart.setText(Messages.SmartDateParameterComponent_StartDateLabel);
-		startPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
+		startPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
 		
 		SimpleDateFormat sdf = new SimpleDateFormat(ReportParameterDialog.SIMPLE_DATE_FORMAT);
 		String x = settings.get(SmartReportParameters.PARAM_START_DATE_KEY);
@@ -128,7 +128,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		
 		lblEnd = new Label(param, SWT.NONE);
 		lblEnd.setText(Messages.SmartDateParameterComponent_EndDateLabel);
-		endPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
+		endPicker = new DateTime(param, SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER | SWT.DATE);
 		x = settings.get(SmartReportParameters.PARAM_END_DATE_KEY);
 		if (x != null){
 			try{

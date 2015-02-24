@@ -29,18 +29,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IncidentEventManager;
@@ -54,25 +51,18 @@ import org.wcs.smart.observation.model.Waypoint;
  * @author Emily
  * @since 1.0.0
  */
-public class ImportIncidentHandler extends AbstractHandler {
+public class ImportIncidentHandler {
 
 	private static final String INCIDENT_NO_IMPORTED = Messages.ImportIncidentHandler_ImportError;
 
-
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final IWorkbench activeWorkbench = HandlerUtil
-				.getActiveWorkbenchWindow(event).getWorkbench();
-
-		XmlImportDialog dialog = new XmlImportDialog(Display.getCurrent().getActiveShell(),
+	@Execute
+	public void execute(Shell activeShell){
+				XmlImportDialog dialog = new XmlImportDialog(activeShell,
 				Messages.ImportIncidentHandler_DialogTitle,
 				Messages.ImportIncidentHandler_DialogMessage1,
 				Messages.ImportIncidentHandler_DialogMessage2);
 		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
+			return;
 		}
 
 		List<String> files = dialog.getFileNames();
@@ -80,21 +70,18 @@ public class ImportIncidentHandler extends AbstractHandler {
 		if (files.size() == 1){
 			File file = new File(files.get(0));
 			if (!file.exists()) {
-				MessageDialog.openError(Display.getCurrent().getActiveShell(),
+				MessageDialog.openError(activeShell,
 						Messages.ImportIncidentHandler_ErrorDialog, MessageFormat.format(Messages.ImportIncidentHandler_LocationNotFoundError,  new Object[]{file.toString()}));
-				return null;
+				return;
 			}			
-			importFiles(activeWorkbench, files);
-		
+			importFiles(activeShell, files);
 		}else if (files.size() > 0){
-			importFiles(activeWorkbench, files);
+			importFiles(activeShell, files);
 		}
-		return null;
 	}
 
-	public void importFiles(final IWorkbench activeWorkbench, final List<String> files){
-		final Display display = Display.getCurrent();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
+	public void importFiles(final Shell shell, final List<String> files){
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
@@ -115,7 +102,6 @@ public class ImportIncidentHandler extends AbstractHandler {
 						}
 					});
 					
-					
 					monitor.beginTask(Messages.ImportIncidentHandler_LoadingProgress, files.size());
 					IProgressMonitor nullPm = new NullProgressMonitor();
 						
@@ -134,10 +120,10 @@ public class ImportIncidentHandler extends AbstractHandler {
 							IncidentPlugIn.displayLog(MessageFormat.format(Messages.ImportIncidentHandler_FileError, new Object[]{file.toString()}) + ex.getLocalizedMessage(), ex);
 						}
 						if (monitor.isCanceled()){
-							display.syncExec(new Runnable() {
+							shell.getDisplay().syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIncidentHandler_CancelledDialogTitle, Messages.ImportIncidentHandler_CancelledDialogMessage);									
+									MessageDialog.openInformation(shell, Messages.ImportIncidentHandler_CancelledDialogTitle, Messages.ImportIncidentHandler_CancelledDialogMessage);									
 								}
 							});
 							
@@ -149,6 +135,12 @@ public class ImportIncidentHandler extends AbstractHandler {
 		} catch (Exception e) {
 			IncidentPlugIn.displayLog(
 					INCIDENT_NO_IMPORTED + e.getLocalizedMessage(), e);
+		}
+	}
+	
+	public static class ImportIncidentHandlerWrapper extends DIHandler<ImportIncidentHandler>{
+		public ImportIncidentHandlerWrapper(){
+			super(ImportIncidentHandler.class);
 		}
 	}
 }

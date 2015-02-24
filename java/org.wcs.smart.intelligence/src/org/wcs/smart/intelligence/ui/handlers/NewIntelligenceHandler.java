@@ -21,21 +21,15 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.intelligence.internal.Messages;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 import org.wcs.smart.intelligence.ui.wizard.NewIntelligenceWizard;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
  * Handler for handling "Create New Intelligence" command
@@ -43,44 +37,25 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
  * @author elitvin
  *
  */
-public class NewIntelligenceHandler extends AbstractHandler {
+public class NewIntelligenceHandler {
 
-    private WizardDialog dialog = null;
-    
-    /* (non-Javadoc)
-     * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-     */
-    @Override
-    public Object execute(final ExecutionEvent event) throws ExecutionException {
-		//Open Intelligence Perspective
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench()
-					.showPerspective(IntelligencePerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
-		} catch (WorkbenchException e) {
-			SmartPatrolPlugIn.displayLog(Messages.IntelligenceHandler_LoadPerspective_Error, e);
+	@Execute
+	public void execute(Shell activeShell, EModelService mService,
+			MWindow window) {
+
+		// Open Intelligence Perspective
+		(new ShowPerspectiveHandler()).execute(IntelligencePerspective.ID,mService, window);
+
+		// Show Create New Intelligence Wizard
+		final NewIntelligenceWizard wizard = new NewIntelligenceWizard();
+		WizardDialog dialog = new WizardDialog(activeShell, wizard);
+		dialog.open();
+	}
+
+	public static class NewIntelligenceHandlerWrapper extends
+			DIHandler<NewIntelligenceHandler> {
+		public NewIntelligenceHandlerWrapper() {
+			super(NewIntelligenceHandler.class);
 		}
-
-		//Show Create New Intelligence Wizard
-       final NewIntelligenceWizard wizard = new NewIntelligenceWizard();
-        ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
-        try {
-                pmd.run(false, false, new IRunnableWithProgress() {
-                    @Override
-                    public void run(IProgressMonitor monitor) 
-                            throws InvocationTargetException, InterruptedException {
-                                monitor.setTaskName(Messages.IntelligenceHandler_TaskName);
-                                dialog = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
-
-                    }
-                });
-        } catch (Exception ex) {
-            dialog = null;
-            SmartPatrolPlugIn.displayLog(Messages.IntelligenceHandler_LoadingErrorMessage + ex.getMessage(), ex);
-        }
-        if (dialog != null) {
-            dialog.open();
-        }
-        return null;
-    }
-
+	}
 }

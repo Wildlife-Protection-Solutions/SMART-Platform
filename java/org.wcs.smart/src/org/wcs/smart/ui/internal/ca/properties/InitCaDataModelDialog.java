@@ -197,8 +197,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 									dm = converter.convert(f, ca, true);
 								} catch (Exception ex) {
 									SmartPlugIn
-											.displayLog(getShell(),
-													Messages.InitCaDataModelDialog_Error_CouldNotReadXml + "\n\n" + ex.getMessage(), //$NON-NLS-1$
+											.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotReadXml + "\n\n" + ex.getMessage(), //$NON-NLS-1$
 													ex);
 									dm = null;
 								}
@@ -208,8 +207,7 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 
 						lblFileName.setText(f.getAbsolutePath());
 					} catch (Exception ex) {
-						SmartPlugIn.displayLog(getShell(),
-								Messages.InitCaDataModelDialog_Error_CouldNotReadXml +"\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+						SmartPlugIn.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotReadXml +"\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 						dm = null;
 					}
 				}
@@ -369,9 +367,9 @@ public class InitCaDataModelDialog extends TitleAreaDialog {
 			});
 			return true;
 		} catch (InvocationTargetException ex) {
-			SmartPlugIn.displayLog(getShell(),Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getCause().getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getCause().getLocalizedMessage(), ex);
 		}catch(Exception ex){
-			SmartPlugIn.displayLog(getShell(),Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getCause(), ex);
+			SmartPlugIn.displayLog(Messages.InitCaDataModelDialog_Error_CouldNotSaveDm + ex.getCause(), ex);
 		}
 		return false;
 	}

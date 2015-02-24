@@ -46,7 +46,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -109,7 +108,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 		btnFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnFilter.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PatrolFilterDialog pfd = new PatrolFilterDialog(Display.getDefault().getActiveShell(), PatrolFilteredComboViewer.this);
+				PatrolFilterDialog pfd = new PatrolFilterDialog(getShell(), PatrolFilteredComboViewer.this);
 				pfd.open();
 			}
 
@@ -205,7 +204,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
                 return Status.OK_STATUS;
             }
             final List<Patrol> data = loadPatrolIds();
-            Display.getDefault().asyncExec(new Runnable(){
+            getDisplay().asyncExec(new Runnable(){
                 @Override
                 public void run() {
                     if (viewer.getControl().isDisposed()){

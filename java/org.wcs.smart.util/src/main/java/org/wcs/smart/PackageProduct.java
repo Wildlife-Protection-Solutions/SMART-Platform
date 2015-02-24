@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 public class PackageProduct {
 
 	public static final String VERSION = "3.2.0";
-	public static final String RC = "em";
+	public static final String RC = "a1";
 	
 	public static final String GPS_BABEL = "C:\\data\\SMART\\Exports\\dependencies\\GPSBabel";
 	
@@ -25,7 +25,9 @@ public class PackageProduct {
 	public static final String APP_NAME = "smart";
 	public static final String UPDATESITE_DIRNAME = "updatesite";
 	
-	public static final String UPDATE_SITE_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java\\org.wcs.smart.updatesite";
+//	public static final String UPDATE_SITE_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java\\org.wcs.smart.updatesite";
+	public static final String UPDATE_SITE_DIR = "C:\\data\\SMART\\Source\\Eclipse4\\source\\java\\org.wcs.smart.updatesite";
+	
 	public static final String[] UPDATE_SITE_FILES = new String[]{"features", "plugins", "artifacts.jar", "content.jar"};
 	
 	public static File UPDATE_ZIP_FILE = new File(new File(UPDATE_SITE_DIR), "site_" + VERSION + ".v1.zip");
@@ -184,11 +186,12 @@ public class PackageProduct {
 	}
 	
 	public static void main(String[] args) throws Exception{
-//			zipWindows();
-//			copyToNetworkWindows();
+
+//		packageUpdateSize();
 		
-		packageUpdateSize();
-		processWindows();
+//		processWindows();
+//		zipWindows();
+		copyToNetworkWindows();
 //
 //		processMac();
 //		zipMac();

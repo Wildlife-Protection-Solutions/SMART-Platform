@@ -35,7 +35,6 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -187,7 +186,7 @@ public class AreaTreeNode implements IItemTreeNode{
 						session.getTransaction().rollback();
 						session.close();
 					}
-					Display.getDefault().asyncExec(new Runnable() {
+					viewer.getControl().getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
 							//TODO: figure out how to only refresh this node which is a wrapped object

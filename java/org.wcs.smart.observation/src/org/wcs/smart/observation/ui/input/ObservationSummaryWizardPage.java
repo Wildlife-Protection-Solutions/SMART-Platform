@@ -49,7 +49,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -113,7 +112,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			employeeViewer = new ComboViewer(
 				new Combo(observerComp,SWT.FLAT | SWT.BORDER | SWT.DROP_DOWN | SWT.READ_ONLY));
 			employeeViewer.setContentProvider(ArrayContentProvider.getInstance());
-			employeeViewer.getControl().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+			employeeViewer.getControl().setBackground(observerComp.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 			employeeViewer.setLabelProvider(new LabelProvider(){
 				@Override
 				public String getText(Object element){
@@ -181,7 +180,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 			if (boldFont == null){
 				FontData boldFontData= lbl.getFont().getFontData()[0];
 				boldFontData.setStyle(SWT.BOLD); 
-				boldFont = new Font(Display.getCurrent(), boldFontData);
+				boldFont = new Font(lbl.getDisplay(), boldFontData);
 			}
 			lbl.setFont(boldFont);
 			lbl.setText(SmartUtils.formatStringForLabel(c.getFullCategoryName()));

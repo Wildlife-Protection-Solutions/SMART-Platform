@@ -149,7 +149,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					try{
 						initModel = opDialog.getDefaultConfigurableModel();
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_CreateCmModelErrorMessage + ex.getLocalizedMessage(), ex);
+						SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_CreateCmModelErrorMessage + ex.getLocalizedMessage(), ex);
 						return;
 					}
 					if (initModel == null){
@@ -293,7 +293,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		try {
 			modelList = DataentryHibernateManager.getConfigurableModels(s);
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
+			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
 		} finally {
 			s.getTransaction().rollback();
 			s.close();
@@ -370,13 +370,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(pmd.getShell(), Messages.ConfigurableModelPropertyDialog_ExportError, ex);
+								SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_ExportError, ex);
 							}});
 					}
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_ExportError, ex);
+			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_ExportError, ex);
 		}
 	}
 
@@ -412,7 +412,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 							Display.getDefault().syncExec(new Runnable() {
 								@Override
 								public void run() {
-									SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+									SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 								}
 							});
 						}
@@ -420,7 +420,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 
 				});
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_Import_Error + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}				
 	}

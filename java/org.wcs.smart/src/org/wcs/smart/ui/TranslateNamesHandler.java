@@ -21,12 +21,16 @@
  */
 package org.wcs.smart.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.NamedItem;
@@ -39,42 +43,45 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  *
  */
-public class TranslateNamesHandler extends AbstractHandler {
+public class TranslateNamesHandler {
 
+	@Inject ESelectionService selection;
 	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, Shell activeShell) throws ExecutionException {
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty()){
+			return;
 		}
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
 		final Object o = obj;
 		if (o instanceof NamedItem ){
-			translateItem((NamedItem) o, event);
+			translateItem((NamedItem) o, activeShell);
 		}
-		
-		
-		return null;
 	}
 	
-	protected void translateItem(NamedItem toUpdate, ExecutionEvent event){
+	protected void translateItem(NamedItem toUpdate, Shell activeShell){
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			s.saveOrUpdate(toUpdate);
-			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(HandlerUtil.getActiveShell(event), 
-				toUpdate);
+			TranslateSimpleListItemDialog dialog = new TranslateSimpleListItemDialog(activeShell, toUpdate);
 			if (dialog.open() == TranslateSimpleListItemDialog.OK){
 				s.getTransaction().commit();
 			}else{
 				s.getTransaction().rollback();
 			}
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(HandlerUtil.getActiveShell(event), Messages.TranslateNamesHandler_Error_TranslatingName, ex);
+			SmartPlugIn.displayLog(Messages.TranslateNamesHandler_Error_TranslatingName, ex);
 		}finally{
 			s.close();
+		}
+	}
+	
+	// E3
+	public static class TranslateNamesHandlerWrapper extends DIHandler<TranslateNamesHandler> {
+		public TranslateNamesHandlerWrapper() {
+			super(TranslateNamesHandler.class);
 		}
 	}
 }

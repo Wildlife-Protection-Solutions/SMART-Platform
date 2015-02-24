@@ -141,8 +141,13 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 				Session s = HibernateManager.openSession();
 				try{
 					SurveyDesign lDesign = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
-					
-					sb.append("fid:String,id:String"); //$NON-NLS-1$
+					sb.append("the_geom:"); //$NON-NLS-1$
+					if (typeName.equals(GeometryType.PLOT.name())){
+						sb.append("Point:srid=4326"); //$NON-NLS-1$
+					}else if (typeName.equals(GeometryType.TRANSECT.name())){
+						sb.append("LineString:srid=4326"); //$NON-NLS-1$
+					}
+					sb.append(",fid:String,id:String"); //$NON-NLS-1$
 					HashSet<String> names = new HashSet<String>();
 					for (SurveyDesignSamplingUnitAttribute sua : lDesign.getSamplingUnitAttributes()){
 					
@@ -169,12 +174,7 @@ public class SamplingUnitDataSource extends AbstractDataStore{
 							sb.append("String"); //$NON-NLS-1$
 						}
 					}
-					sb.append(",geom:"); //$NON-NLS-1$
-					if (typeName.equals(GeometryType.PLOT.name())){
-						sb.append("Point:srid=4326"); //$NON-NLS-1$
-					}else if (typeName.equals(GeometryType.TRANSECT.name())){
-						sb.append("LineString:srid=4326"); //$NON-NLS-1$
-					}
+					
 				}finally{
 					s.close();
 				}

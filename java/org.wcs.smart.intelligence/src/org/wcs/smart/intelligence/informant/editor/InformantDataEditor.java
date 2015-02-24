@@ -39,6 +39,8 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -77,6 +79,7 @@ import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
+import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 
 /**
@@ -175,37 +178,47 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		upperCmp.setLayout(layout);
 		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		btnLogin = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
+		Composite btnComp = toolkit.createComposite(upperCmp);
+		btnComp.setLayout(new GridLayout(4, true));
+		((GridLayout)btnComp.getLayout()).marginWidth = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight = 0;
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		btnLogin = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
 		btnLogin.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performLoginOrLogout();
 			}
 		});
+		btnLogin.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
-		btnAdd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Add, SWT.PUSH);
+		btnAdd = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Add, SWT.PUSH);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performAdd();
 			}
 		});
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
-		btnEdit = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
+		btnEdit = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performEdit();
 			}
 		});
-
-		btnDelete = toolkit.createButton(upperCmp, Messages.InformantDataEditor_Button_Delete, SWT.PUSH);
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		btnDelete = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Delete, SWT.PUSH);
 		btnDelete.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				performDelete();
 			}
 		});
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
 		btnChangePwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_ChangePassword, SWT.PUSH);
 		btnChangePwd.addSelectionListener(new SelectionAdapter() {
@@ -255,8 +268,14 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 				updateButtons();
 			}
 		});
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				performEdit();
+			}
+		});
 		
-		toolkit.createLabel(main, Messages.InformantDataEditor_Note);
+		toolkit.createLabel(main, MessageFormat.format(Messages.InformantDataEditor_Note, IntelligenceSource.INFORMANT_KEY));
 		
 		loadData();
 		informantSorter.setSortColumn(viewer.getTable().getColumn(0));
@@ -274,7 +293,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 				if (column.getWidth() > 0) {
 					securedColumnsMap.put(column, column.getWidth());
 					column.setWidth(0);
-					column.setResizable(true);
+					column.setResizable(false);
 				}				
 			}
 		}

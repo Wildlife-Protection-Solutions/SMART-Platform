@@ -27,12 +27,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.internal.StyleBlackboard;
-
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.plan.map.geotools.PlanTargetDataSourceFactory;
 import org.wcs.smart.plan.map.udig.PlanTargetService;
 import org.wcs.smart.plan.report.oda.PlanTargetQuery;

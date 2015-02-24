@@ -19,26 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.incident.ui;
+package org.wcs.smart.e4;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.eclipse.e4.ui.model.application.ui.MElementContainer;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
+import org.eclipse.e4.ui.workbench.renderers.swt.StackRenderer;
 
 /**
- * View incident handler.  Opens the field data perspective
- * with the incident list on top.
+ * Customized stack renderer for editor perspective switcher.
+ * 
  * @author Emily
  *
  */
-public class ViewIncidentHandler extends AbstractHandler implements IHandler {
-
+public class SmartStackRenderer extends StackRenderer {
+	
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		FieldDataPerspective.openPerspective(IndIncidentListView.ID);
-		return null;
+	public void childRendered(
+			final MElementContainer<MUIElement> parentElement,
+			MUIElement element) {
+		if (!element.isVisible()) return;
+		super.childRendered(parentElement, element);
 	}
-
 }

@@ -23,14 +23,13 @@ package org.wcs.smart.er.map.samplingunit;
 
 import java.io.IOException;
 
-import net.refractions.udig.catalog.IGeoResourceInfo;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.opengis.feature.Feature;
 import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;

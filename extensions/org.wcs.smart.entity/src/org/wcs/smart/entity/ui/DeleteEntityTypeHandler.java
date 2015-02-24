@@ -27,18 +27,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import javax.inject.Named;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -59,27 +62,24 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
-public class DeleteEntityTypeHandler extends AbstractHandler {
+public class DeleteEntityTypeHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(final Shell activeShell, @Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection){
 		
-		final IStructuredSelection lastSelection = (IStructuredSelection) HandlerUtil.getCurrentSelection(event);
-		if (lastSelection.size() == 0){
-			return null;	//nothing to delete
+		if (selection == null || !(selection instanceof IStructuredSelection) || ((IStructuredSelection)selection).isEmpty()){
+			return;
 		}
 		
 		final List<EntityTypeEditorInput> toDelete = new ArrayList<EntityTypeEditorInput>();
-		for (Iterator<?> iterator = lastSelection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)selection).iterator(); iterator.hasNext();) {
 			Object x = iterator.next();
 			if (x instanceof EntityTypeEditorInput){
 				toDelete.add((EntityTypeEditorInput)x);
 			}
 		}
 		
-		if (toDelete.size() == 0){
-			return null;
-		}
+		if (toDelete.size() == 0) return;
 		
 		//confirm delete
 		StringBuilder sb = new StringBuilder();
@@ -90,12 +90,12 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteEntityTypeHandler_ConfirmDeleteTitle, 
+		if (!MessageDialog.openConfirm(activeShell, Messages.DeleteEntityTypeHandler_ConfirmDeleteTitle, 
 				MessageFormat.format(Messages.DeleteEntityTypeHandler_ConfirmDeleteMessage, new Object[]{sb.toString()}))){
-			return null;
+			return; 
 		}
 		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try{
 		pmd.run(true, false, new IRunnableWithProgress() {
 			
@@ -106,7 +106,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 				monitor.beginTask(Messages.DeleteEntityTypeHandler_DeleteProgress, toDelete.size());
 				for (EntityTypeEditorInput type : toDelete){
 					monitor.subTask(MessageFormat.format(Messages.DeleteEntityTypeHandler_DeleteTypeProgress, new Object[]{type.getName()}));
-					delete(type);
+					delete(activeShell, type);
 					monitor.worked(1);
 				}		
 			}
@@ -114,11 +114,9 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 		}catch (Exception ex){
 			EntityPlugIn.log(ex.getMessage(), ex);
 		}
-		
-		return null;
 	}
 
-	private void delete(EntityTypeEditorInput type){
+	private void delete(Shell activeShell, EntityTypeEditorInput type){
 		
 		//check for observations whose value matches
 		//the attribute associated with this entity
@@ -145,7 +143,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 			}
 			if (errorMessage != null){
 				session.getTransaction().rollback();
-				displayMessage(errorMessage);
+				displayMessage(activeShell, errorMessage);
 				return;
 			}
 				
@@ -256,7 +254,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 						}else{
 							//we cannot delete so rollback and exit
 							session.getTransaction().rollback();
-							displayCannotDelete(entity);
+							displayCannotDelete(activeShell, entity);
 							return;
 						}
 					}
@@ -266,7 +264,7 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 				}else{
 					//we cannot delete so we want to rollback and not delete anything
 					session.getTransaction().rollback();
-					displayCannotDelete(entity);
+					displayCannotDelete(activeShell, entity);
 					return;
 				}
 			}
@@ -299,22 +297,28 @@ public class DeleteEntityTypeHandler extends AbstractHandler {
 		
 	}
 	
-	private void displayCannotDelete(final EntityType entity){
-		Display.getDefault().syncExec(new Runnable(){
+	private void displayCannotDelete(final Shell shell, final EntityType entity){
+		shell.getDisplay().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+				MessageDialog.openInformation(shell,
 						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, MessageFormat.format(Messages.DeleteEntityTypeHandler_TypeDeleteError, new Object[]{entity.getName()})); 
 			}});
 	}
 	
-	private void displayMessage(final String message){
-		Display.getDefault().syncExec(new Runnable(){
+	private void displayMessage(final Shell shell, final String message){
+		shell.getDisplay().syncExec(new Runnable(){
 			@Override
 			public void run() {
-				MessageDialog.openInformation(Display.getDefault().getActiveShell(),
+				MessageDialog.openInformation(shell,
 						Messages.DeleteEntityTypeHandler_DeleteDialogTitle, 
 						message); 
 			}});
+	}
+	
+	public static class DeleteEntityTypeHandlerWrapper extends DIHandler<DeleteEntityTypeHandler>{
+		public DeleteEntityTypeHandlerWrapper(){
+			super(DeleteEntityTypeHandler.class);
+		}
 	}
 }

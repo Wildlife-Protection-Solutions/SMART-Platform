@@ -136,9 +136,10 @@ public class QueryDataSource extends AbstractDataStore{
 		
 		StringBuilder sb = new StringBuilder();
 		
-		sb.append("fid:String"); //$NON-NLS-1$
+		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$
+		sb.append(",fid:String"); //$NON-NLS-1$
 		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
-		sb.append(",geom:Point:srid=4326"); //$NON-NLS-1$
+		
 		
 		return sb.toString();
 		

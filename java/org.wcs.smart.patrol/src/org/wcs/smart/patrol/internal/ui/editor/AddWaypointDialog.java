@@ -43,11 +43,11 @@ import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
@@ -117,7 +117,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			newWaypoint.getWaypoint().setX(p.getX());
 			newWaypoint.getWaypoint().setY(p.getY());
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.AddWaypointDialog_Error_SavingWaypoint + ex.getLocalizedMessage(), ex);
+			SmartPatrolPlugIn.displayLog(Messages.AddWaypointDialog_Error_SavingWaypoint + ex.getLocalizedMessage(), ex);
 			return;
 		}
 		super.okPressed();

@@ -23,8 +23,8 @@ package org.wcs.smart.report.birt.map;
 
 import java.util.List;
 
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.StyleBlackboard;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;

@@ -21,11 +21,9 @@
  */
 package org.wcs.smart.cybertracker.handler;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
 
 /**
@@ -38,14 +36,17 @@ import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
  * @author elitvin
  * @since 1.0.0
  */
-public class CyberTrackerExportHandler extends AbstractHandler {
+public class CyberTrackerExportHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell shell = HandlerUtil.getActiveShell(event);
-		CyberTrackerExportDialog dialog = new CyberTrackerExportDialog(shell);
+	@Execute
+	public void execute (Shell activeShell){
+		CyberTrackerExportDialog dialog = new CyberTrackerExportDialog(activeShell);
 		dialog.open();
-		return null;
 	}	
 
+	public static class CyberTrackerExportHandlerWrapper extends DIHandler<CyberTrackerExportHandler>{
+		public CyberTrackerExportHandlerWrapper(){
+			super(CyberTrackerExportHandler.class);
+		}
+	}
 }

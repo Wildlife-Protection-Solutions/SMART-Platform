@@ -23,8 +23,18 @@ package org.wcs.smart.query.ui.itempanel;
 
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -32,8 +42,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISourceProviderListener;
-import org.eclipse.ui.part.ViewPart;
-import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.event.QueryDataModelModifiedListener;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
@@ -51,25 +59,25 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  * @author Emily
  * @since 1.0.0
  */
-public class QueryItemView extends ViewPart {
+public class QueryItemView implements ISourceProviderListener {
 
-	public static final String ID ="org.wcs.smart.query.ui.QueryItemView"; //$NON-NLS-1$
+	public static final String ID ="org.wcs.smart.query.parts.filter"; //$NON-NLS-1$
 
 	private Composite main;
-	
 	private Label defaultFilter;
+	
 	private QueryDataModelModifiedListener dmListener;
 	
+	@Inject private QuerySourceProvider srcProvider;
+	@Inject private MPart part;
+	
 	public QueryItemView() {
-		dmListener = new QueryDataModelModifiedListener();
 	}
 
-	/**
-	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
-	 */
-	@Override
+	@PostConstruct
 	public void createPartControl(Composite parent) {
-		
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
 		Composite outer = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout(1, false);
 		layout.horizontalSpacing = 2;
@@ -88,36 +96,38 @@ public class QueryItemView extends ViewPart {
 		defaultFilter = new Label(main, SWT.NONE);
 		defaultFilter.setText(Messages.QueryFilterView_ErrorNoFilterOptions1);
 
-		ISourceProviderService service = (ISourceProviderService)getSite().getService(ISourceProviderService.class);
-		final QuerySourceProvider provider = (QuerySourceProvider) service.getSourceProvider(QuerySourceProvider.DEFINITION_PANEL_ID);
-		provider.addSourceProviderListener(new ISourceProviderListener() {
-			
-			@Override
-			public void sourceChanged(int sourcePriority, String sourceName,
-					Object sourceValue) {
-				if (sourceName.equals(QuerySourceProvider.DEFINITION_PANEL_ID)){
-					
-					IQueryItemPanel panel = DefinitionPanelManager.getInstance().getQueryItemPanel((String)sourceValue, 
-							(IQueryType)provider.getCurrentState().get(QuerySourceProvider.QUERY_TYPE));
-					
-					if (panel != null){
-						Composite pnlComp = panel.getComposite(main);
-						pnlComp.setData(panel);
-						((StackLayout)main.getLayout()).topControl = pnlComp;
-					}else{
-						((StackLayout)main.getLayout()).topControl = defaultFilter;
-					}
-					main.layout();
-				}
-			}
-			
-			@SuppressWarnings("rawtypes")
-			@Override
-			public void sourceChanged(int sourcePriority, Map sourceValuesByName) {				
-			}
-		});
+		ContextInjectionFactory.make(QueryDataModelModifiedListener.class, part.getContext());
+		srcProvider.addSourceProviderListener(this);
 	}
 
+	@Override
+	public void sourceChanged(int sourcePriority, String sourceName,
+			Object sourceValue) {
+		if (sourceName.equals(QuerySourceProvider.DEFINITION_PANEL_ID)){
+			
+			IQueryItemPanel panel = part.getContext()
+					.get(DefinitionPanelManager.class)
+					.getQueryItemPanel((String)sourceValue, 
+							(IQueryType)srcProvider.getCurrentState().get(QuerySourceProvider.QUERY_TYPE));
+			
+			if (panel != null){
+				Composite pnlComp = panel.getComposite(main);
+				pnlComp.setData(panel);
+				((StackLayout)main.getLayout()).topControl = pnlComp;
+			}else{
+				((StackLayout)main.getLayout()).topControl = defaultFilter;
+			}
+			main.layout();
+			
+			part.getContext().get(EPartService.class).bringToTop(part);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@Override
+	public void sourceChanged(int sourcePriority, Map sourceValuesByName) {				
+	}
+	
 	/**
 	 * Refreshes all item panels that have been loaded into the view
 	 */
@@ -137,18 +147,23 @@ public class QueryItemView extends ViewPart {
 		
 	}
 	
-	@Override
+	@PreDestroy
 	public void dispose(){
 		if (dmListener != null){
 			dmListener.dispose();
 		}
-		super.dispose();
+		srcProvider.removeSourceProviderListener(this);
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		main.setFocus();
 	}
 
 
+	public static class QueryItemViewWrapper extends DIViewPart<QueryItemView>{
+		public QueryItemViewWrapper(){
+			super(QueryItemView.class);
+		}
+	}
 }

@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.intelligence.ui.source.SourceTypesPropertyDialog;
 
 /**
@@ -32,13 +32,17 @@ import org.wcs.smart.intelligence.ui.source.SourceTypesPropertyDialog;
  * @author elitvin
  * @since 3.0.0
  */
-public class EditIntelligenceSourceHandler extends AbstractHandler {
+public class EditIntelligenceSourceHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SourceTypesPropertyDialog dialog = new SourceTypesPropertyDialog();
+	@Execute
+	public void execute(Shell activeShell){
+		SourceTypesPropertyDialog dialog = new SourceTypesPropertyDialog(activeShell);
 		dialog.open();
-		return null;
 	}
 
+	public static class EditIntelligenceSourceHandlerWrapper extends DIHandler<EditIntelligenceSourceHandler>{
+		public EditIntelligenceSourceHandlerWrapper(){
+			super(EditIntelligenceSourceHandler.class);
+		}
+	}
 }

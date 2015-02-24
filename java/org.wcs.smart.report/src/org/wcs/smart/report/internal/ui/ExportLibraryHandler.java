@@ -25,17 +25,16 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
@@ -47,26 +46,24 @@ import org.wcs.smart.util.ZipUtil;
  * @author egouge
  *
  */
-public class ExportLibraryHandler extends AbstractHandler {
+public class ExportLibraryHandler {
 
 	private static final String ERROR_MSG = Messages.ExportLibraryHandler_Error_ExportingLibrary;
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(final Shell activeShell){
 		
-		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event));
+		FileDialog fd = new FileDialog(activeShell, SWT.SAVE);
 		fd.setFilterNames(new String[]{Messages.ExportLibraryHandler_ZipFilterName, Messages.ExportLibraryHandler_AllFilesFilterName});
 		fd.setFilterExtensions(new String[]{"*.zip", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setText(Messages.ExportLibraryHandler_LocationLabel);
 		fd.setFileName(SmartDB.getCurrentConservationArea().getId() + "_ReportLibrary.zip"); //$NON-NLS-1$
 		fd.setOverwrite(true);
 		final String exportFile = fd.open();
-		if (exportFile == null){
-			return null;
-		}
+		if (exportFile == null) return;
 		
 		//zip up the contents of the rptlibrary
-		ProgressMonitorDialog outputDialog = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+		ProgressMonitorDialog outputDialog = new ProgressMonitorDialog(activeShell);
 		try{
 		outputDialog.run(true, false, new IRunnableWithProgress() {
 			@Override
@@ -75,10 +72,10 @@ public class ExportLibraryHandler extends AbstractHandler {
 				File dirToZip = SmartBirtLibrary.getInstance().getLibraryLocation();
 				try {
 					ZipUtil.createZip(new File[]{dirToZip}, new File(exportFile), new NullProgressMonitor());
-					Display.getDefault().syncExec(new Runnable(){
+					activeShell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.ExportLibraryHandler_ExportDialogTitle, Messages.ExportLibraryHandler_ExportOk);		
+							MessageDialog.openInformation(activeShell, Messages.ExportLibraryHandler_ExportDialogTitle, Messages.ExportLibraryHandler_ExportOk);		
 						}});
 				} catch (IOException ex) {
 					ReportPlugIn.displayLog(ERROR_MSG + ex.getLocalizedMessage(), ex);
@@ -88,7 +85,12 @@ public class ExportLibraryHandler extends AbstractHandler {
 		}catch (Exception ex){
 			ReportPlugIn.displayLog(ERROR_MSG, ex);
 		}
-		return null;
+	}
+	
+	public static class ExportLibraryHandlerWrapper extends DIHandler<ExportLibraryHandler>{
+		public ExportLibraryHandlerWrapper(){
+			super(ExportLibraryHandler.class);
+		}
 	}
 
 }

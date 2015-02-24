@@ -28,10 +28,10 @@ import java.net.URL;
 
 import javax.xml.transform.TransformerException;
 
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.StyleContent;
-import net.refractions.udig.style.sld.SLDPlugin;
-import net.refractions.udig.ui.graphics.SLDs;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.StyleContent;
+import org.locationtech.udig.style.sld.SLDPlugin;
+import org.locationtech.udig.ui.graphics.SLDs;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IMemento;

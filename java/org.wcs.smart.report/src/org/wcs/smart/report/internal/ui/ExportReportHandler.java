@@ -26,15 +26,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Named;
+
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IExportFormat;
 import org.wcs.smart.report.export.IReportExporter;
@@ -50,13 +56,15 @@ import org.wcs.smart.report.model.Report;
  * @author egouge
  * @since 1.0.0
  */
-public class ExportReportHandler extends AbstractHandler implements IHandler {
+public class ExportReportHandler {
 
+	private static final String MULTIPLE_PARAM = "org.wcs.smart.report.export.parameter.isMultiple"; //$NON-NLS-1$
 	private static final String ERROR_MSG = Messages.ExportReportHandler_ExportError;
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, 
+			@Optional @Named(MULTIPLE_PARAM)String multipleParam, Shell activeShell){
+		
 		List<Report> selectedReports = new ArrayList<Report>();
 		
 		// find all selected reports
@@ -69,16 +77,16 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 			}
 		}
 		boolean isMultiple = !(selectedReports.size() == 1);
-		String parameter = event.getParameter("org.wcs.smart.report.export.parameter.isMultiple"); //$NON-NLS-1$
-		if (parameter != null && parameter.equalsIgnoreCase("true")){ //$NON-NLS-1$
+		
+		if (multipleParam != null && multipleParam.equalsIgnoreCase("true")){ //$NON-NLS-1$
 			//this is from the main report->export reports menu item; we want users to pick reports
 			isMultiple = true;
 		}
 		
 		//get export location information
-		ExportReportDialog dia = new ExportReportDialog(HandlerUtil.getActiveShell(event), selectedReports, isMultiple);
+		ExportReportDialog dia = new ExportReportDialog(activeShell, selectedReports, isMultiple);
 		if (dia.open() != Window.OK){
-			return null;
+			return ;
 		}
 		
 		selectedReports = dia.getSelectedReports();
@@ -114,8 +122,29 @@ public class ExportReportHandler extends AbstractHandler implements IHandler {
 				ReportPlugIn.displayLog(ERROR_MSG + e.getLocalizedMessage(), e);
 			}
 		}
+	}
+	
+	public static class ExportReportHandlerWrapper extends AbstractHandler {
+
+		private ExportReportHandler component;
+
+		public ExportReportHandlerWrapper() {
+			IEclipseContext context = getActiveContext();
+			component = ContextInjectionFactory.make(ExportReportHandler.class, context);
+		}
+
+		private static IEclipseContext getActiveContext() {
+			IEclipseContext parentContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			return parentContext.getActiveLeaf();
+		}
 		
-		
-		return null;
+		@Override
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			//Default di handler does not add parameters into context
+			IEclipseContext ctx = getActiveContext();
+			ctx.set(MULTIPLE_PARAM, event.getParameter(MULTIPLE_PARAM));
+			return ContextInjectionFactory.invoke(component, Execute.class, ctx);
+		}
+
 	}
 }

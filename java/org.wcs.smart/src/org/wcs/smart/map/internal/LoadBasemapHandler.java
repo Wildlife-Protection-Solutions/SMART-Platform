@@ -21,44 +21,39 @@
  */
 package org.wcs.smart.map.internal;
 
-import net.refractions.udig.project.internal.Map;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
+import org.locationtech.udig.project.internal.Map;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.ui.internal.LoadBasemapDialog;
-import org.wcs.smart.ui.map.MapView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Load basemap handler
  * @author egouge
  * @since 1.0.0
  */
-public class LoadBasemapHandler extends AbstractHandler {
-
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		if (part instanceof MapView){
-			MapView view = (MapView)part;
-			final Map map = view.getMap();
-			if(map == null) return null;
-		
-			loadBasemap(map);
+public class LoadBasemapHandler {
+	
+	@Execute
+	public void execute(MPart activePart, Shell activeShell){
+		Object x = E3Utils.getSourceObject(activePart);
+		if (x instanceof IAdaptable){
+			Map map = (Map) ((IAdaptable) x).getAdapter(Map.class);
+			if (map != null){
+				loadBasemap(map, activeShell);
+			}
 		}
-		return null;
 	}
 	
 	/**
@@ -67,14 +62,14 @@ public class LoadBasemapHandler extends AbstractHandler {
 	 * 
 	 * @param map
 	 */
-	public static void loadBasemap(final Map map){
+	public static void loadBasemap(final Map map, final Shell currentShell){
 		final BasemapDefinition[] def =  new BasemapDefinition[]{null};
 		
-		Display.getDefault().syncExec(new Runnable(){
-
+		currentShell.getDisplay().syncExec(new Runnable(){
+			
 			@Override
 			public void run() {
-				final LoadBasemapDialog dialog = new LoadBasemapDialog(Display.getDefault().getActiveShell());
+				final LoadBasemapDialog dialog = new LoadBasemapDialog(currentShell);
 				if (dialog.open() != IDialogConstants.OK_ID){
 					return ;
 				}
@@ -95,5 +90,12 @@ public class LoadBasemapHandler extends AbstractHandler {
 			}
 		};
 		loadMap.schedule();
+	}
+	
+	public static class LoadBasemapHandlerWrapper extends DIHandler<LoadBasemapHandler>{
+		public LoadBasemapHandlerWrapper() {
+			super(LoadBasemapHandler.class);
+		}
+		
 	}
 }

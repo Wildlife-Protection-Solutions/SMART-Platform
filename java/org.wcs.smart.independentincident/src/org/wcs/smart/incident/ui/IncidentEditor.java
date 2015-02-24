@@ -24,16 +24,15 @@ package org.wcs.smart.incident.ui;
 import java.text.MessageFormat;
 import java.util.Arrays;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -142,6 +141,8 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		
 		summaryEditor.initData(incident);
 		mapPage.updatePointsLayer();
+		
+		super.setPartName(MessageFormat.format(Messages.IncidentEditorInput_EditorName, new Object[]{String.valueOf(getIncident().getId())}));
 	}
 	/**
 	 * 
@@ -199,8 +200,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	 */
 	@Override
 	protected void createPages() {
-		IncidentEditorInput input = ((IncidentEditorInput) getEditorInput());
-		super.setPartName(input.getName());
+		super.setPartName(MessageFormat.format(Messages.IncidentEditorInput_EditorName, new Object[]{String.valueOf(getIncident().getId())}));
 		showBusy(true);
 		try {
 			
@@ -269,7 +269,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getMap()
 	 */
 	@Override
 	public Map getMap() {
@@ -280,7 +280,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#openContextMenu()
 	 */
 	@Override
 	public void openContextMenu() {
@@ -289,7 +289,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
 	 */
 	@Override
 	public void setFont(Control textArea) {
@@ -298,7 +298,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setSelectionProvider(org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider)
 	 */
 	@Override
 	public void setSelectionProvider(
@@ -308,7 +308,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {

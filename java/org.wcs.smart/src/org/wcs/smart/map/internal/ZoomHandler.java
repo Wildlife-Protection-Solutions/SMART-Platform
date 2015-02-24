@@ -21,30 +21,30 @@
  */
 package org.wcs.smart.map.internal;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.ui.map.MapView;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 
 /**
  * Zoom handler
  * @author egouge
  * @since 1.0.0
  */
-public class ZoomHandler extends AbstractHandler {
+public class ZoomHandler {
 
-	public static String ZoomToolId = "net.refractions.udig.tools.Zoom"; //$NON-NLS-1$
+	public static String ZoomToolId = "org.locationtech.udig.tools.Zoom"; //$NON-NLS-1$
 	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		if (part instanceof MapView){
-			MapView view = (MapView)part;
-			view.setTool(ZoomToolId);
-		} 
-		return null;
+	@Execute
+	public void execute() {
+		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy(ZoomToolId).run();
+	}
+
+	// E3
+	public static class ZoomHandlerWrapper extends DIHandler<ZoomHandler> {
+		public ZoomHandlerWrapper() {
+			super(ZoomHandler.class);
+		}
 	}
 
 }

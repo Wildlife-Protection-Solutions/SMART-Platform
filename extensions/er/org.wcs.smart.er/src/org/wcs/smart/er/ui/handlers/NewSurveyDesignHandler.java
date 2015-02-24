@@ -21,36 +21,39 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.wizard.NewSurveyDesignWizard;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * Handler for creating new survey design.
  * @author Emily
  *
  */
-public class NewSurveyDesignHandler extends AbstractHandler {
+public class NewSurveyDesignHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		SurveyDesign sd = showNewDesignWizard(HandlerUtil.getActiveShell(event));
-		if (sd == null){
-			return null;
-		}
+	@Execute
+	public void execute(Shell activeShell, IEclipseContext ctx){
 		
-		FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
-		EditSurveyElementHandler.editSurveyDesign(HandlerUtil.getActiveShell(event), new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState()));
+		SurveyDesign sd = showNewDesignWizard(activeShell);
+		if (sd == null) return;
 		
-		return null;
+		ctx.set(ShowFieldDataPerspective.FOCUS_VIEW, SurveyDesignListView.ID);
+		ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
+
+		ctx.set(IServiceConstants.ACTIVE_SELECTION, new StructuredSelection(
+				new SurveyDesignEditorInput(sd.getName(), sd.getUuid(), sd.getKeyId(), sd.getState())));
+		ContextInjectionFactory.invoke(new EditSurveyElementHandler(), Execute.class, ctx);
 	}
 	
 	public static SurveyDesign showNewDesignWizard(Shell parent){
@@ -63,4 +66,9 @@ public class NewSurveyDesignHandler extends AbstractHandler {
 		}
 	}
 
+	public static class NewSurveyDesignHandlerWrapper extends DIHandler<NewSurveyDesignHandler>{
+		public NewSurveyDesignHandlerWrapper(){
+			super(NewSurveyDesignHandler.class);
+		}
+	}
 }

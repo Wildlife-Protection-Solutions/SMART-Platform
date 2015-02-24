@@ -27,7 +27,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISaveablePart2;
@@ -47,7 +46,7 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 
 	public static final String ID = "org.wcs.smart.cybertracker.CyberTrackerImportEditor"; //$NON-NLS-1$
 
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	private CTPatrolTableContainer tableContainer;
 	
 	@Override
@@ -58,6 +57,7 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		Form form = toolkit.createForm(parent);
 		form.setText(Messages.CyberTrackerImportEditor_ImportDataFormTitle);
 		GridLayout layout = new GridLayout();

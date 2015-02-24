@@ -156,7 +156,7 @@ public class AddEntityJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, Messages.AddEntityJob_Error, e);
+					SmartPlugIn.displayLog(Messages.AddEntityJob_Error, e);
 				}
 			});
 			return new Status(IStatus.ERROR, EntityPlugIn.PLUGIN_ID, 1, Messages.AddEntityJob_InstallError2 + e.getLocalizedMessage(),e);

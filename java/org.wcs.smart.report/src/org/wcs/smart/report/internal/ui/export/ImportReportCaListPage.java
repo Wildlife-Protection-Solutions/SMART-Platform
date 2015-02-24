@@ -42,7 +42,6 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -269,8 +268,7 @@ public class ImportReportCaListPage extends WizardPage {
 				s.getTransaction().rollback();
 				s.close();
 			}
-			
-			Display.getDefault().syncExec(new Runnable(){
+			getShell().getDisplay().syncExec(new Runnable(){
 
 				@Override
 				public void run() {

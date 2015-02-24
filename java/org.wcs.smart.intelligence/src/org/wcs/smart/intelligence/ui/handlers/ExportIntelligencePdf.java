@@ -21,14 +21,23 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
+import javax.inject.Named;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.intelligence.report.ReportIntelligence;
+import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for exporting intelligence to pdf files.
@@ -36,26 +45,55 @@ import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
  * @author elitvin
  * @since 3.0.0
  */
-public class ExportIntelligencePdf extends AbstractHandler {
+public class ExportIntelligencePdf {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	private final static String ISEDITOR_PARAM = "org.wcs.smart.intelligence.exportpdf.editor"; //$NON-NLS-1$
+	
+	@Execute
+	public void execute(MPart activePart, 
+			@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection,
+			@Optional @Named(ISEDITOR_PARAM) String isEditor){
+		
 		IntelligenceEditorInput in = null;
-		if (event.getCommand().getId().equals("org.wcs.smart.intelligence.exportPdfEditor")){ //$NON-NLS-1$
-			IEditorInput ein = HandlerUtil.getActiveEditor(event).getEditorInput();
-			if (ein instanceof IntelligenceEditorInput){
-				in = (IntelligenceEditorInput) ein;
+		
+		if (isEditor != null && isEditor.equalsIgnoreCase("true")){ //$NON-NLS-1$
+			Object x = E3Utils.getSourceObject(activePart);
+			if (x instanceof IntelligenceEditor){
+				in = (IntelligenceEditorInput) ((IntelligenceEditor)x).getEditorInput();
 			}
 		}else{
-			final IStructuredSelection lastSelection = (IStructuredSelection) HandlerUtil.getCurrentSelection(event);
-			if (lastSelection != null && lastSelection.getFirstElement() instanceof IntelligenceEditorInput){
+			if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty()) return;
+			final IStructuredSelection lastSelection = (IStructuredSelection) thisSelection;
+			if (lastSelection.getFirstElement() instanceof IntelligenceEditorInput){
 				in = (IntelligenceEditorInput) lastSelection.getFirstElement();	
 			}			
 		}
 		if (in != null){
 			ReportIntelligence.export(in.getUuid());
 		}
-		return null;
 	}
-	
+
+	public static class ExportIntelligencePdffWrapper extends AbstractHandler {
+
+		private ExportIntelligencePdf component;
+
+		public ExportIntelligencePdffWrapper() {
+			IEclipseContext context = getActiveContext();
+			component = ContextInjectionFactory.make(ExportIntelligencePdf.class, context);
+		}
+
+		private static IEclipseContext getActiveContext() {
+			IEclipseContext parentContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			return parentContext.getActiveLeaf();
+		}
+		
+		@Override
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			//Default di handler does not add parameters into context
+			IEclipseContext ctx = getActiveContext();
+			ctx.set(ISEDITOR_PARAM, event.getParameter(ISEDITOR_PARAM));
+			return ContextInjectionFactory.invoke(component, Execute.class, ctx);
+		}
+
+	}
 }

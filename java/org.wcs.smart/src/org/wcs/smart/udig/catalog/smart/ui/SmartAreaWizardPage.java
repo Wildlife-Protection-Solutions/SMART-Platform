@@ -11,19 +11,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.catalog.ui.AbstractUDIGImportPage;
-import net.refractions.udig.catalog.ui.UDIGConnectionPage;
-import net.refractions.udig.catalog.ui.workflow.Listener;
-import net.refractions.udig.catalog.ui.workflow.State;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.ui.AbstractUDIGImportPage;
+import org.locationtech.udig.catalog.ui.UDIGConnectionPage;
+import org.locationtech.udig.catalog.ui.workflow.Listener;
+import org.locationtech.udig.catalog.ui.workflow.State;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -107,7 +106,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
             return ids;
            
         }catch (Exception ex){
-        	SmartPlugIn.displayLog(getShell(), Messages.SmartAreaWizardPage_Error_LoadingSmartResources, ex);
+        	SmartPlugIn.displayLog(Messages.SmartAreaWizardPage_Error_LoadingSmartResources, ex);
         }
         return Collections.emptySet();
     }
@@ -118,7 +117,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
         state.getWorkflow().addListener(this);
     }
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.catalog.ui.workflow.Listener#forward(net.refractions.udig.catalog.ui.workflow.State, net.refractions.udig.catalog.ui.workflow.State)
+	 * @see org.locationtech.udig.catalog.ui.workflow.Listener#forward(org.locationtech.udig.catalog.ui.workflow.State, org.locationtech.udig.catalog.ui.workflow.State)
 	 */
 	@Override
 	public void forward(State current, State prev) {
@@ -128,7 +127,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.catalog.ui.workflow.Listener#backward(net.refractions.udig.catalog.ui.workflow.State, net.refractions.udig.catalog.ui.workflow.State)
+	 * @see org.locationtech.udig.catalog.ui.workflow.Listener#backward(org.locationtech.udig.catalog.ui.workflow.State, org.locationtech.udig.catalog.ui.workflow.State)
 	 */
 	@Override
     public void backward( State current, State next ) {
@@ -139,7 +138,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
     }
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.catalog.ui.workflow.Listener#statePassed(net.refractions.udig.catalog.ui.workflow.State)
+	 * @see org.locationtech.udig.catalog.ui.workflow.Listener#statePassed(org.locationtech.udig.catalog.ui.workflow.State)
 	 */
 	@Override
 	public void statePassed(State state) {
@@ -147,7 +146,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.catalog.ui.workflow.Listener#stateFailed(net.refractions.udig.catalog.ui.workflow.State)
+	 * @see org.locationtech.udig.catalog.ui.workflow.Listener#stateFailed(org.locationtech.udig.catalog.ui.workflow.State)
 	 */
 	@Override
 	public void stateFailed(State state) {
@@ -155,7 +154,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.catalog.ui.workflow.Listener#started(net.refractions.udig.catalog.ui.workflow.State)
+	 * @see org.locationtech.udig.catalog.ui.workflow.Listener#started(org.locationtech.udig.catalog.ui.workflow.State)
 	 */
 	@Override
 	public void started(State first) {
@@ -163,7 +162,7 @@ public class SmartAreaWizardPage extends AbstractUDIGImportPage implements
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.catalog.ui.workflow.Listener#finished(net.refractions.udig.catalog.ui.workflow.State)
+	 * @see org.locationtech.udig.catalog.ui.workflow.Listener#finished(org.locationtech.udig.catalog.ui.workflow.State)
 	 */
 	@Override
 	public void finished(State last) {

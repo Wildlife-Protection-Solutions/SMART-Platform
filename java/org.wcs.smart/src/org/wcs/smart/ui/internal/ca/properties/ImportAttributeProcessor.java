@@ -97,7 +97,7 @@ public class ImportAttributeProcessor {
 				readDefaultFile();
 			}
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(null, Messages.ImportAttributeProcessor_ErrorReadingXml + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.ImportAttributeProcessor_ErrorReadingXml + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return;
 		}
 		
@@ -149,7 +149,7 @@ public class ImportAttributeProcessor {
 	 */
 	public boolean validateInputFile(){
 		if (matchedAttribute == null){
-			SmartPlugIn.displayLog(null, MessageFormat.format(Messages.ImportAttributeProcessor_NoAttributeFound, new Object[]{attribute.getKeyId()}), null);
+			SmartPlugIn.displayLog(MessageFormat.format(Messages.ImportAttributeProcessor_NoAttributeFound, new Object[]{attribute.getKeyId()}), null);
 			return false;
 		}
 		
@@ -201,7 +201,7 @@ public class ImportAttributeProcessor {
 		}
 		File f = new File(selectedFile);
 		if (!f.exists()){
-			SmartPlugIn.displayLog(null, Messages.ImportAttributeProcessor_FileNotFoundError, new Exception("File: " + f.toString() + " does not exist."));  //$NON-NLS-1$//$NON-NLS-2$
+			SmartPlugIn.displayLog(Messages.ImportAttributeProcessor_FileNotFoundError, new Exception("File: " + f.toString() + " does not exist."));  //$NON-NLS-1$//$NON-NLS-2$
 			return null;
 		}
 		return f;

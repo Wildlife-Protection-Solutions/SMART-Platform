@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.er.query.ui.panels.definition;
 
+import javax.inject.Inject;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -64,6 +65,7 @@ public class GriddedDefinitionPanel extends
 	
 	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
 	
+	@Inject private DefinitionPanelManager pnlManager; 
 	
 	public GriddedDefinitionPanel() {
 		super();
@@ -105,7 +107,7 @@ public class GriddedDefinitionPanel extends
 		Composite leftMain = new Composite(outer, SWT.NONE);
 		leftMain.setLayout(new GridLayout(3, false));
 		leftMain.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		leftMain.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		leftMain.setBackground(outer.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		createSurveyDef(leftMain);
 		
@@ -117,13 +119,13 @@ public class GriddedDefinitionPanel extends
 	protected void createSurveyDef(final Composite parent){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(Messages.GriddedDefinitionPanel_Label);
-		lbl.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		lbl.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		
 		surveyDesignLabel = new Link(parent, SWT.NONE);
 		surveyDesignLabel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		surveyDesignLabel.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		surveyDesignLabel.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		surveyDesignLabel.addSelectionListener(new SelectionAdapter() {
 
 			@Override
@@ -181,7 +183,7 @@ public class GriddedDefinitionPanel extends
 		}
 		
 		//update associated item panel
-		IQueryItemPanel pnl = DefinitionPanelManager.getInstance().getQueryItemPanel(getId(), currentQuery.getQuery().getType());
+		IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQuery().getType());
 		if (pnl instanceof ISurveyPanel){
 			((ISurveyPanel) pnl).refreshPanel(currentDesign);
 		}

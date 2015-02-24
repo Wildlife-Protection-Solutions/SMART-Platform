@@ -31,16 +31,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import net.refractions.udig.project.internal.command.navigation.ZoomExtentCommand;
-import net.refractions.udig.project.internal.commands.AddLayersCommand;
-import net.refractions.udig.project.internal.commands.selection.SelectCommand;
-import net.refractions.udig.project.render.IViewportModelListener;
-import net.refractions.udig.project.render.ViewportModelEvent;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -69,7 +59,6 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.ToolBar;
@@ -80,6 +69,15 @@ import org.eclipse.ui.part.MultiPageEditorPart;
 import org.geotools.factory.CommonFactoryFinder;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
+import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
+import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.commands.selection.SelectCommand;
+import org.locationtech.udig.project.render.IViewportModelListener;
+import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -279,7 +277,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			final List<SamplingUnit> sus = units;
 			final String name = sd.getName() + ": " + Messages.SamplingUnitEditorPage_SamplingUnitLabel; //$NON-NLS-1$
 			final List<SurveyDesignSamplingUnitAttribute> lattributes = attributes;
-			Display.getDefault().asyncExec(new Runnable(){
+			getSite().getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					form.setText(name);
@@ -541,7 +539,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 								DeleteManager.canDelete(delete, s);
 								s.delete(delete);
 							}catch (final Exception ex){
-								Display.getDefault().syncExec(new Runnable(){
+								getSite().getShell().getDisplay().syncExec(new Runnable(){
 									@Override
 									public void run() {
 										EcologicalRecordsPlugIn.log(null, ex);

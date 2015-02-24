@@ -84,7 +84,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         dtFromLabel = new Label(dateComposite, SWT.NONE);
         dtFromLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        dtFromDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+        dtFromDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
         dtFromDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtFromDate.getLayoutData()).horizontalIndent = 10;
         dtFromDate.addSelectionListener(new SelectionAdapter() {
@@ -99,7 +99,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         dtToLabel.setText(Messages.IntelligenceDates_To_Label);
         dtToLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        dtToDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+        dtToDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
         dtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtToDate.getLayoutData()).horizontalIndent = 10;
         dtToDate.addSelectionListener(new SelectionAdapter() {

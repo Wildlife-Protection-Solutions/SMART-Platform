@@ -63,7 +63,7 @@ public class IntelligenceReceivedComposite extends IntelligenceComposite {
         lbl.setText(Messages.IntelligenceReceived_ReceivedDate_Label);
         lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
-        dtReceivedDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+        dtReceivedDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
         dtReceivedDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtReceivedDate.getLayoutData()).horizontalIndent = 10;
         dtReceivedDate.addSelectionListener(new SelectionAdapter() {

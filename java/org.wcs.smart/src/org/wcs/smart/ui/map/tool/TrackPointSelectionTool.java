@@ -24,12 +24,11 @@ package org.wcs.smart.ui.map.tool;
 import java.awt.Point;
 import java.awt.Rectangle;
 
-import net.refractions.udig.project.ui.commands.SelectionBoxCommand;
-import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
-import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.project.ui.tool.SimpleTool;
-
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.udig.project.ui.commands.SelectionBoxCommand;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import org.locationtech.udig.project.ui.tool.ModalTool;
+import org.locationtech.udig.project.ui.tool.SimpleTool;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -52,7 +51,7 @@ public class TrackPointSelectionTool  extends SimpleTool implements ModalTool {
 
 	private boolean selecting;
 
-	private net.refractions.udig.project.ui.commands.SelectionBoxCommand shapeCommand;
+	private org.locationtech.udig.project.ui.commands.SelectionBoxCommand shapeCommand;
 
     private PointSelectionListener listener;
     
@@ -73,7 +72,7 @@ public class TrackPointSelectionTool  extends SimpleTool implements ModalTool {
 	}
     
 	/**
-	 * @see net.refractions.udig.project.ui.tool.SimpleTool#onMouseDragged(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
+	 * @see org.locationtech.udig.project.ui.tool.SimpleTool#onMouseDragged(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
 	 */
 	protected void onMouseDragged(MapMouseEvent e) {
 		Point end = e.getPoint();
@@ -84,7 +83,7 @@ public class TrackPointSelectionTool  extends SimpleTool implements ModalTool {
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.tool.AbstractTool#mousePressed(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
+	 * @see org.locationtech.udig.project.ui.tool.AbstractTool#mousePressed(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
 	 */
 	public void onMousePressed(MapMouseEvent e) {
 		shapeCommand = new SelectionBoxCommand();
@@ -100,7 +99,7 @@ public class TrackPointSelectionTool  extends SimpleTool implements ModalTool {
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.tool.AbstractTool#mouseReleased(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
+	 * @see org.locationtech.udig.project.ui.tool.AbstractTool#mouseReleased(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
 	 */
 	public void onMouseReleased(MapMouseEvent e) {
 		if (selecting) {

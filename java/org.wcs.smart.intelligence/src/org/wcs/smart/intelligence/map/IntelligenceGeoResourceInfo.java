@@ -23,11 +23,10 @@ package org.wcs.smart.intelligence.map;
 
 import java.io.IOException;
 
-import net.refractions.udig.catalog.IGeoResourceInfo;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.FeatureSource;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.udig.catalog.IGeoResourceInfo;
 import org.opengis.feature.Feature;
 import org.opengis.feature.FeatureVisitor;
 import org.opengis.feature.simple.SimpleFeature;

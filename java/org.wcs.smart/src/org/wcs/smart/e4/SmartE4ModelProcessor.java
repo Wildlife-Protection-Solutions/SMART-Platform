@@ -19,26 +19,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.ui.handlers;
+package org.wcs.smart.e4;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.wcs.smart.er.ui.SurveyDesignListView;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.ui.model.application.MAddon;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 
 /**
- * Handler for displaying survey design list.
- * 
+ * Model processor to change the cleanup addon
  * @author Emily
  *
  */
-public class ShowSurveyHandler extends AbstractHandler {
+public class SmartE4ModelProcessor {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
-		return null;
+	@Inject IEclipseContext context;
+	
+	@Inject EModelService modelService;
+	
+	@Execute
+	public void execute(){
+		
+		//replace the existing cleanup addon with our own
+        MApplication app = context.get(MApplication.class);
+        for (MAddon a : app.getAddons()){
+        	if (a.getElementId().equals("Cleanup Addon")){
+        		a.setContributorURI("platform:/plugin/org.wcs.smart");
+        		a.setContributionURI("bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartCleanUpAddon");
+        		break;
+        	}
+        }
+      
+
 	}
 
 }

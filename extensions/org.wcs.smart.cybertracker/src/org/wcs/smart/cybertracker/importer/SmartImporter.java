@@ -168,7 +168,7 @@ public class SmartImporter {
 					Display.getDefault().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.SmartImporter_Transport_Load_Error, e);
+							SmartPlugIn.displayLog(Messages.SmartImporter_Transport_Load_Error, e);
 						}
 					});
 				}

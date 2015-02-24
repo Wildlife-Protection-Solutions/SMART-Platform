@@ -23,10 +23,9 @@ package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -36,7 +35,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -135,6 +133,16 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 					isDirty = lIsDirty;
 					firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 				}
+			}else if (object != null && object instanceof QueryEditorInput 
+					&& ((QueryEditorInput)object).getUuid().equals(getQuery().getUuid()) 
+					&& eventType == IQueryListener.QUERY_DELETED){
+				//close part
+				getSite().getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						getSite().getWorkbenchWindow().getActivePage().closeEditor(QueryResultsEditor.this, false);					
+					}});
+				
 			}
 
 		}
@@ -170,7 +178,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			
 			
 			if (page1 != null){
-				Display.getDefault().asyncExec(new Runnable() {
+				getSite().getShell().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						page1.initPage();
@@ -246,13 +254,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	 * @return the query
 	 */
 	public Query getQuery(){
-		try {
-			loadQueryLoad.join();	//wait for the query loading job if applicable
-		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog(Messages.QueryResultsEditor_Error_CouldNotLoad + e.getLocalizedMessage(), e);
-		}
-		
-		return this.query.getQuery();
+		return getQueryProxy().getQuery();
 	}
 
 	/**
@@ -319,7 +321,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 					SimpleQuery q = getQueryInternal();
 					q.getQueryColumns();
 					
-					Display.getDefault().syncExec(new Runnable(){
+					getSite().getShell().getDisplay().syncExec(new Runnable(){
 
 						@Override
 						public void run() {
@@ -428,7 +430,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getMap()
 	 */
 	@Override
 	public Map getMap() {
@@ -439,7 +441,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#openContextMenu()
 	 */
 	@Override
 	public void openContextMenu() {
@@ -448,7 +450,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
 	 */
 	@Override
 	public void setFont(Control textArea) {
@@ -457,7 +459,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setSelectionProvider(org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider)
 	 */
 	@Override
 	public void setSelectionProvider(
@@ -467,7 +469,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {
@@ -493,6 +495,11 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 	}
 	
 	public QueryProxy getQueryProxy(){
+		try {
+			loadQueryLoad.join();	//wait for the query loading job if applicable
+		} catch (InterruptedException e) {
+			QueryPlugIn.displayLog(Messages.QueryResultsEditor_Error_CouldNotLoad + e.getLocalizedMessage(), e);
+		}
 		return this.query;
 	}
 	
@@ -506,7 +513,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				final Session session = HibernateManager.openSession();
 				session.beginTransaction();
 				try {
-					Display.getDefault().syncExec(new Runnable() {
+					getSite().getShell().getDisplay().syncExec(new Runnable() {
 						@Override
 						public void run() {
 							try {

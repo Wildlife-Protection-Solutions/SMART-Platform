@@ -23,15 +23,18 @@ package org.wcs.smart.er.ui.handlers;
 
 import java.util.Iterator;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -40,7 +43,7 @@ import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.mision.wizard.NewMissionWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * Handler for creating new missions.
@@ -48,16 +51,15 @@ import org.wcs.smart.observation.ui.FieldDataPerspective;
  * @author Emily
  *
  */
-public class NewMissionHandler extends AbstractHandler {
+public class NewMissionHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, 
+			IEclipseContext ctx,
+			Shell activeShell){
 		//search for a parent
 		byte[] parentDesign = null;
 		byte[] parentSurvey = null;
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		if (selection != null && selection instanceof StructuredSelection){
 			IStructuredSelection sselection = (IStructuredSelection)selection;
 			
@@ -82,15 +84,15 @@ public class NewMissionHandler extends AbstractHandler {
 		}
 		
 	
-		Mission m = newMission(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
+		Mission m = newMission(activeShell, parentDesign, parentSurvey);
 		if (m == null) {
-			return null;
+			return ;
 		}
 		
-		FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
-		EditSurveyElementHandler.editMission(HandlerUtil.getActiveShell(event), m.getUuid(), m.getId());
+		ctx.set(ShowFieldDataPerspective.FOCUS_VIEW, SurveyDesignListView.ID);
+		ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
 		
-		return null;
+		EditSurveyElementHandler.editMission(activeShell, m.getUuid(), m.getId());
 	}
 	
 	public static Mission newMission(Shell parent, byte[] parentDesign, byte[] parentSurvey){
@@ -100,6 +102,12 @@ public class NewMissionHandler extends AbstractHandler {
 			return newWizard.getNewMission();
 		}else{
 			return null;
+		}
+	}
+	
+	public static class NewMissionHandlerWrapper extends DIHandler<NewMissionHandler>{
+		public NewMissionHandlerWrapper(){
+			super(NewMissionHandler.class);
 		}
 	}
 }

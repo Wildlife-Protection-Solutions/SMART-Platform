@@ -23,6 +23,8 @@ package org.wcs.smart.er.query.ui.panels.definition;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -69,6 +71,8 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	private boolean includeFilterTypeOp = true;
 	
 	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
+	
+	@Inject private DefinitionPanelManager pnlManager;
 	
 	/**
 	 * Creates a new drop target panel.
@@ -262,21 +266,17 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 		}
 	}
 
-
-
 	@Override
 	public void refreshPanel(SurveyDesign newDesign) {
 		this.currentDesign = newDesign;
 		
 		updateDesignLabel();
-		
 		for (DropItem di : super.items) {
 			if (di instanceof ISurveyDesignDropItem) {
 				((ISurveyDesignDropItem) di).setSurveyDesign(currentDesign);
 			}
 		}
-		
-		IQueryItemPanel pnl = DefinitionPanelManager.getInstance().getQueryItemPanel(getId(), currentQuery.getQuery().getType());
+		IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQuery().getType());
 		if (pnl instanceof ISurveyPanel){
 			((ISurveyPanel) pnl).refreshPanel(currentDesign);
 		}

@@ -54,8 +54,7 @@ public class IntelligenceDbUpgrader30To32 implements IIntelligenceUpgrader {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), 
-									Messages.IntelligenceDbUpgrader30To32_ErrorMessage, e);
+							SmartPlugIn.displayLog(Messages.IntelligenceDbUpgrader30To32_ErrorMessage, e);
 						}
 					});
 					result[0] = false;

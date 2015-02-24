@@ -21,14 +21,16 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.intelligence.ui.IntelligenceFilterDialog;
 import org.wcs.smart.intelligence.ui.IntelligenceListView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for "Show Intelligence Filter" command.
@@ -37,20 +39,27 @@ import org.wcs.smart.intelligence.ui.IntelligenceListView;
  * @author elitvin
  * @since 1.0.0
  */
-public class ShowIntelligenceFilterHandler extends AbstractHandler {
+public class ShowIntelligenceFilterHandler {
 
-	public ShowIntelligenceFilterHandler() {}
-
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IntelligenceListView view = (IntelligenceListView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(IntelligenceListView.ID);
+	@Execute
+	public void execute(EPartService pService, Shell activeShell) throws ExecutionException {
+		MPart p = pService.findPart(IntelligenceListView.ID);
+		if (p == null) return;
 		
-		IntelligenceFilterDialog filterDialog = new IntelligenceFilterDialog(HandlerUtil.getActiveShell(event), view);
+		IntelligenceListView view = (IntelligenceListView) E3Utils.getSourceObject(p);
+		
+		
+		IntelligenceFilterDialog filterDialog = new IntelligenceFilterDialog(activeShell, view);
 		int ret = filterDialog.open();
 		if (ret == Dialog.OK) {
 			view.updateContent();
 		}
-		return null;
+	}
+	
+	public static class ShowIntelligenceFilterHandlerWrapper extends DIHandler<ShowIntelligenceFilterHandler>{
+		public ShowIntelligenceFilterHandlerWrapper(){
+			super(ShowIntelligenceFilterHandler.class);
+		}
 	}
 
 }

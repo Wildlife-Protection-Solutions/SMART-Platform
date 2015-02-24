@@ -44,7 +44,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.common.gpx.GpxType;
 import org.wcs.smart.observation.common.gpx.TrkType;
@@ -177,14 +176,14 @@ public class GPSDataImport {
 				Object o = un.unmarshal(gpxFile);
 				type = (GpxType) ((JAXBElement<?>) o).getValue();
 			} catch (Exception ex) {
-				displayLog(MessageFormat.format(
+				ObservationPlugIn.displayLog(MessageFormat.format(
 						Messages.GPSDataImport_WaypointError_CouldNotReadFile,
 						new Object[]{gpxFile.getAbsolutePath()}) + "\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				continue;
 			}
 		
 			if (type == null){
-				displayLog(MessageFormat.format(Messages.GPSDataImport_WaypointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
+				ObservationPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_WaypointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
 				continue;
 			}
 			monitor.subTask(Messages.GPSDataImport_Progress_ParsingWaypoints);
@@ -194,15 +193,7 @@ public class GPSDataImport {
 		
 		return waypoints;
 	}
-	
-	private static void displayLog(final String message, final Exception ex){
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
-			public void run() {
-				ObservationPlugIn.displayLog(message, ex);
-			}});
-	}
-	
+
 	/**
 	 * Reads track points from a gpx file.
 	 * 
@@ -224,12 +215,12 @@ public class GPSDataImport {
 				Object o = un.unmarshal(gpxFile);
 				type = (GpxType) ((JAXBElement<?>) o).getValue();
 			} catch (Exception ex) {
-				displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotRead, new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
+				ObservationPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotRead, new Object[]{gpxFile.getAbsolutePath()}) + ex.getLocalizedMessage(), ex);
 				continue;
 			}
 
 			if (type == null) {
-				displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
+				ObservationPlugIn.displayLog(MessageFormat.format(Messages.GPSDataImport_TrackPointError_CouldNotParse, new Object[]{gpxFile.getAbsolutePath()}), null);
 				continue;
 			}
 

@@ -14,8 +14,10 @@
    </configIni>
 
    <launcherArgs>
-      <vmArgs>-Xmx1024M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -XX:MaxPermSize=250M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass</vmArgs>
-      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true</vmArgsMac>
+      <vmArgs>-Xmx1024M -Dosgi.parentClassloader=ext -Dorg.eclipse.emf.ecore.plugin.EcorePlugin.doNotLoadResourcesPlugin=true  -XX:MaxPermSize=250M -XX:+UnlockDiagnosticVMOptions -XX:+UnsyncloadClass
+      </vmArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts -Djava.awt.headless=true
+      </vmArgsMac>
    </launcherArgs>
 
    <windowImages i16="/org.wcs.smart/images/icons/smart16.gif" i32="/org.wcs.smart/images/icons/smart32.gif" i48="/org.wcs.smart/images/icons/smart48.gif" i64="/org.wcs.smart/images/icons/smart64.gif" i128="/org.wcs.smart/images/icons/smart128.gif"/>
@@ -115,7 +117,9 @@ limitations under the License.
 
    <features>
       <feature id="org.eclipse.rcp"/>
-      <feature id="org.wcs.smart.smart_feature"/>
+      <feature id="org.wcs.smart.smart.feature" version="3.1.0"/>
+      <feature id="org.eclipse.emf.ecore"/>
+      <feature id="org.eclipse.emf.common"/>
    </features>
 
    <configurations>

@@ -21,9 +21,8 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.plan.report.ReportPlan;
 
 /**
@@ -32,12 +31,17 @@ import org.wcs.smart.plan.report.ReportPlan;
  * @since 2.0.0
  *
  */
-public class EditPlanTemplate extends AbstractHandler {
+public class EditPlanTemplate {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ReportPlan.editTemplate(event);
-		return null;
+	@Execute
+	public void execute(){
+		ReportPlan.editTemplate();
+	}
+	
+	public static class EditPlanTemplateWrapper extends DIHandler<EditPlanTemplate>{
+		public EditPlanTemplateWrapper(){
+			super(EditPlanTemplate.class);
+		}
 	}
 
 }

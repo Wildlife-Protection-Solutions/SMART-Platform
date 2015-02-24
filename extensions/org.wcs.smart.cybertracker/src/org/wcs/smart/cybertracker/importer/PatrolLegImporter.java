@@ -145,7 +145,7 @@ public class PatrolLegImporter extends SmartImporter {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.PatrolLegImporter_ErrorDialog_Message, e);
+					SmartPlugIn.displayLog(Messages.PatrolLegImporter_ErrorDialog_Message, e);
 				}
 			});
 			return false;

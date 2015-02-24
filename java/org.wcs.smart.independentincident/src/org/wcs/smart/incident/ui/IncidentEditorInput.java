@@ -44,6 +44,10 @@ public class IncidentEditorInput implements IEditorInput {
 	private byte[] uuid;
 	private Date dateTime;
 	
+	public IncidentEditorInput(byte[] uuid){
+		this.uuid = uuid;
+	}
+	
 	public IncidentEditorInput(byte[] uuid, int id, Date dateTime){
 		this.id = id;
 		this.uuid = uuid;

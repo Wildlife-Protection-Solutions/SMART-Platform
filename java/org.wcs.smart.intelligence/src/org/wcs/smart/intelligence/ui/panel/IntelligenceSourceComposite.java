@@ -42,7 +42,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -137,7 +136,7 @@ public class IntelligenceSourceComposite extends IntelligenceComposite {
         sourceLabel.setText(Messages.IntelligenceSourceComposite_NoSources_Error);
 
         ControlDecoration labelDecoration = new ControlDecoration(sourceLabel, SWT.LEFT);
-        labelDecoration.setImage(new Image(Display.getDefault(), Display.getDefault().getSystemImage(SWT.ICON_ERROR).getImageData().scaledTo(NO_SOURCE_ERR_IMAGE_SIZE, NO_SOURCE_ERR_IMAGE_SIZE)));
+        labelDecoration.setImage(new Image(sourceLabel.getDisplay(), sourceLabel.getDisplay().getSystemImage(SWT.ICON_ERROR).getImageData().scaledTo(NO_SOURCE_ERR_IMAGE_SIZE, NO_SOURCE_ERR_IMAGE_SIZE)));
 	}
 
 	private void createControls() {

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.ui.map.tool;
 
-import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 
 /**
  * Wrapper around pan tool for using tool in dialog box.
@@ -29,7 +29,7 @@ import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
  * @author Emily
  *
  */
-public class PanTool extends net.refractions.udig.tools.internal.PanTool {
+public class PanTool extends org.locationtech.udig.tools.internal.PanTool {
 
 	public static final String ID = "org.wcs.smart.ui.map.tool.PanTool"; //$NON-NLS-1$
 	
@@ -39,7 +39,7 @@ public class PanTool extends net.refractions.udig.tools.internal.PanTool {
 
 	
     /**
-     * @see net.refractions.udig.project.ui.tool.AbstractTool#mouseReleased(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
+     * @see org.locationtech.udig.project.ui.tool.AbstractTool#mouseReleased(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
      */
     public void mouseReleased( MapMouseEvent e ) {
      	super.mouseReleased(e);

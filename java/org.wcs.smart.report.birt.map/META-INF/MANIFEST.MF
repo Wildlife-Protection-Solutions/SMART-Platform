@@ -11,12 +11,13 @@ Require-Bundle: org.eclipse.birt.report.designer.ui;visibility:=reexport,
  org.eclipse.ui.forms,
  org.eclipse.jface.databinding;visibility:=reexport,
  org.eclipse.core.databinding;visibility:=reexport,
- eu.udig.style.advanced;bundle-version="1.0.2",
- net.refractions.udig.style.sld,
- net.refractions.udig.mapgraphic,
+ org.locationtech.udig.style.sld,
+ org.locationtech.udig.style.advanced,
+ org.locationtech.udig.mapgraphic,
  org.wcs.smart.report,
  org.wcs.smart;visibility:=reexport
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart
 Export-Package: org.wcs.smart.report.birt.map
+Import-Package: org.locationtech.udig.style.sld

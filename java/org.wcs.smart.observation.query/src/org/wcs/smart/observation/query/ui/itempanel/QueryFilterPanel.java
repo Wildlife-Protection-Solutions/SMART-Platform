@@ -41,7 +41,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -95,7 +94,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 			//clear areas from content provider & refresh tree
 			if (areaTreeNode != null){
 				areaTreeNode.clearAreas();
-				Display.getDefault().syncExec(new Runnable(){
+				main.getDisplay().syncExec(new Runnable(){
 					@Override
 					public void run() {
 						filterTreeViewer.refresh();
@@ -204,7 +203,7 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 				}
 			}
 			
-			Display.getDefault().asyncExec(new Runnable(){
+			main.getDisplay().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					filterTreeViewer.setInput(input);

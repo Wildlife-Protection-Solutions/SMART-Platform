@@ -264,7 +264,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			}
 		} catch (Exception ex) {
 			
-			SmartPlugIn.displayLog(null, Messages.InteractiveSplashHandler_Error_LoginFailed, ex);
+			SmartPlugIn.displayLog(Messages.InteractiveSplashHandler_Error_LoginFailed, ex);
 		}finally{
 			if (!fAuthenticated){
 				enableControls(true);

@@ -131,7 +131,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			newWaypoint.getWaypoint().setX(p.getX());
 			newWaypoint.getWaypoint().setY(p.getY());
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.AddWaypointDialog_SaveError + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.AddWaypointDialog_SaveError + ex.getLocalizedMessage(), ex);
 			return;
 		}
 		super.okPressed();

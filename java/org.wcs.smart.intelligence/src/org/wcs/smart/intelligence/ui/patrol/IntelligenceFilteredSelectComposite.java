@@ -33,7 +33,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.MultipleSelectComposite;
@@ -86,7 +85,7 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
 		btnFilter.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnFilter.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				IntelligenceFilterDialog dailog = new IntelligenceFilterDialog(Display.getDefault().getActiveShell(), IntelligenceFilteredSelectComposite.this);
+				IntelligenceFilterDialog dailog = new IntelligenceFilterDialog(getShell(), IntelligenceFilteredSelectComposite.this);
 				dailog.open();
 			}
 
@@ -107,7 +106,6 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
 		return filter;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void updateContent() {
 		availableList = loadIntelligences();

@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.intelligence.map;
 
-import net.refractions.udig.catalog.IServiceInfo;
-
+import org.locationtech.udig.catalog.IServiceInfo;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 

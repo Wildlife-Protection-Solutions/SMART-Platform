@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.er.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.er.ui.SurveyDesignListView;
 import org.wcs.smart.er.ui.surveydesign.importing.ImportSurveyDesignWizard;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * Handler for importing entity types.
@@ -34,16 +37,21 @@ import org.wcs.smart.er.ui.surveydesign.importing.ImportSurveyDesignWizard;
  *
  */
 
-public class SurveyDesignImportHandler extends AbstractHandler {
+public class SurveyDesignImportHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
+	@Execute
+	public void execute(Shell activeShell, IEclipseContext ctx){
+		ctx.set(ShowFieldDataPerspective.FOCUS_VIEW, SurveyDesignListView.ID);
+		ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
+		
 		ImportSurveyDesignWizard wizard = new ImportSurveyDesignWizard();
-		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
+		WizardDialog wd = new WizardDialog(activeShell, wizard);
 		wd.open();
-
-		return null;
 	}
 	
+	public static class SurveyDesignImportHandlerWrapper extends DIHandler<SurveyDesignImportHandler>{
+		public SurveyDesignImportHandlerWrapper(){
+			super(SurveyDesignImportHandler.class);
+		}
+	}
 }

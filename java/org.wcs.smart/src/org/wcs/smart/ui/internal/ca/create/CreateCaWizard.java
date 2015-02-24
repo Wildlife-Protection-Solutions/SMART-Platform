@@ -100,7 +100,7 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 				HibernateManager.saveNewConservationArea(newCa);
 				completedOK = true;
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_Error_CreateCaError + ex.getLocalizedMessage(), ex);
+				SmartPlugIn.displayLog(Messages.CreateCaWizard_Error_CreateCaError + ex.getLocalizedMessage(), ex);
 			}
 		}else{
 			final ConservationAreaClonerEngine engine = new ConservationAreaClonerEngine(templateCa, newCa);
@@ -118,7 +118,7 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 							getShell().getDisplay().syncExec(new Runnable(){
 								@Override
 								public void run() {
-									SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_ErrorCopyInfo + ex.getLocalizedMessage(), ex);
+									SmartPlugIn.displayLog(Messages.CreateCaWizard_ErrorCopyInfo + ex.getLocalizedMessage(), ex);
 								}
 							});
 							
@@ -127,7 +127,7 @@ public class CreateCaWizard extends Wizard implements IPageChangingListener {
 					}
 				});
 			} catch (Exception e) {
-				SmartPlugIn.displayLog(getShell(), Messages.CreateCaWizard_ErrorCreateFromTemplate, e);
+				SmartPlugIn.displayLog(Messages.CreateCaWizard_ErrorCreateFromTemplate, e);
 			}
 			completedOK= true;
 			

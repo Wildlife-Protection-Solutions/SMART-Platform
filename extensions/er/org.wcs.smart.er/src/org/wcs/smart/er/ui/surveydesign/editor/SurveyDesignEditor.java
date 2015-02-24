@@ -23,22 +23,20 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 
 import java.util.Arrays;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
-import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -67,7 +65,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 				if (Arrays.equals(source.getUuid(), uuid)) {
 					surveyDesign = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
 					getSurveyDesign();
-					Display.getDefault().asyncExec(new Runnable(){
+					getSite().getShell().getDisplay().asyncExec(new Runnable(){
 						@Override
 						public void run() {
 							summaryPage.initValues();

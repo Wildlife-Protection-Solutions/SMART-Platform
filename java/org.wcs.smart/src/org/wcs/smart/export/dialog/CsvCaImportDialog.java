@@ -159,9 +159,9 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 		try {
 			dialog.run(true, true, loadCaRunnable);
 		} catch (InvocationTargetException e) {
-			SmartPlugIn.displayLog(getShell(), Messages.CsvCaImportDialog_LoadCa_Fail_Error, e);
+			SmartPlugIn.displayLog(Messages.CsvCaImportDialog_LoadCa_Fail_Error, e);
 		} catch (InterruptedException e) {
-			SmartPlugIn.displayLog(getShell(), Messages.CsvCaImportDialog_LoadCa_Interrupted_Error, e);
+			SmartPlugIn.displayLog(Messages.CsvCaImportDialog_LoadCa_Interrupted_Error, e);
 		}
 		return loadCaRunnable.getAreas();
 	}

@@ -29,10 +29,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,12 +41,14 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.CombinedSelectionProvider;
@@ -64,10 +62,10 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
@@ -156,7 +154,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 								getMission(); //to avoid nested transactions exception
 								final boolean datesChanged = !SmartUtils.isSameDate(lastDates[0], missionDates[0])|| !SmartUtils.isSameDate(lastDates[1], missionDates[1]);
 								
-								Display.getDefault().syncExec(new Runnable(){
+								getSite().getShell().getDisplay().syncExec(new Runnable(){
 									@Override
 									public void run() {
 										setPartName(getMission().getId());
@@ -469,7 +467,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 	
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getMap()
 	 */
 	@Override
 	public Map getMap() {
@@ -480,7 +478,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#openContextMenu()
 	 */
 	@Override
 	public void openContextMenu() {
@@ -489,7 +487,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
 	 */
 	@Override
 	public void setFont(Control textArea) {
@@ -498,7 +496,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setSelectionProvider(org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider)
 	 */
 	@Override
 	public void setSelectionProvider(
@@ -508,7 +506,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {

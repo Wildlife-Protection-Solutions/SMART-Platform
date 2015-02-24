@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal;
 
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -57,7 +58,6 @@ import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.util.SmartUtils;
 
-import com.ibm.icu.text.Collator;
 
 /**
  * Dialog for saving basemaps.
@@ -104,6 +104,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 	 */
 	@Override
 	protected Composite createDialogArea(Composite parent) {
+		parent = (Composite) super.createDialogArea(parent);
 		getShell().setText(Messages.SaveBasemapDialog_Title);
 		setTitle(Messages.SaveBasemapDialog_Title);
 		setMessage(Messages.SaveBasemapDialog_Message);

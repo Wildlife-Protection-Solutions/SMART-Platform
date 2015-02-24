@@ -283,7 +283,7 @@ public class QueryTypeManager {
 					for (IConfigurationElement def : defs){
 						String id = def.getAttribute("id"); //$NON-NLS-1$
 
-						if (DefinitionPanelManager.getInstance().isValid(id)){
+						if (DefinitionPanelManager.isValid(id)){
 							wrapper.definitionPanels.add(id);
 					
 							String pid = def.getAttribute("itemPanelId"); //$NON-NLS-1$

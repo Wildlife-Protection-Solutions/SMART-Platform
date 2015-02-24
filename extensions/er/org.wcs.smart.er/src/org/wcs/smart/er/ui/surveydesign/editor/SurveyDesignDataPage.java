@@ -57,7 +57,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -109,7 +108,7 @@ public class SurveyDesignDataPage extends EditorPart {
 	};
 	
 	private Form form;
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	private SurveyDesignEditor parentEditor;
 	
@@ -138,6 +137,7 @@ public class SurveyDesignDataPage extends EditorPart {
 	
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.setBorderStyle(SWT.BORDER);
 
 		form = toolkit.createForm(parent);
@@ -554,7 +554,7 @@ public class SurveyDesignDataPage extends EditorPart {
 			}
 
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-			Display.getDefault().asyncExec(new Runnable(){
+			form.getDisplay().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					if (dataViewer == null || dataViewer.getTree().isDisposed()) return;

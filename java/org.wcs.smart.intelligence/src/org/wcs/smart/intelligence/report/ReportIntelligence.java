@@ -29,10 +29,8 @@ import java.io.OutputStream;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 
@@ -101,7 +99,7 @@ public class ReportIntelligence {
 	 * Edits the plan template
 	 * @param event
 	 */
-	public static void editTemplate(ExecutionEvent event){
+	public static void editTemplate(){
 		try{
 			//copy the default template to the template location if 
 			//it doesn't already exist
@@ -117,7 +115,8 @@ public class ReportIntelligence {
 				}
 			}
 			
-			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench().showPerspective(IntelligenceReportPerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
+			
+			PlatformUI.getWorkbench().showPerspective(IntelligenceReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			ReportIntelligenceEditorInput input = new ReportIntelligenceEditorInput(getCustomTemplateLocation());
 			templateEditor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IReportEditorContants.DESIGN_EDITOR_ID);
 		}catch (Exception ex){

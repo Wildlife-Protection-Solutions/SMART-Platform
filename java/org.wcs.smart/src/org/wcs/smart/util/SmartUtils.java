@@ -41,12 +41,11 @@ import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import net.refractions.udig.catalog.URLUtils;
-
 import org.apache.commons.collections.comparators.NullComparator;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -321,7 +320,6 @@ public class SmartUtils {
 				public void run() {
 					SmartPlugIn
 					.displayLog(
-							null,
 							Messages.SmartUtils_Error_CouldNotCreateDir + dir.getAbsolutePath(),
 							ex);
 				}});
@@ -342,8 +340,7 @@ public class SmartUtils {
 			FileUtils.copyFile(from, to);
 			return true;
 		} catch (IOException e) {
-			SmartPlugIn.displayLog(null,
-					MessageFormat.format(
+			SmartPlugIn.displayLog(MessageFormat.format(
 					Messages.SmartUtils_Error_CouldNotCopy,
 					new Object[]{from.getAbsolutePath(), to.getAbsolutePath()}), e);
 		}
@@ -698,6 +695,10 @@ public class SmartUtils {
 			smartName = "object"; //$NON-NLS-1$
 		}
 		return smartName;
+	}
+	
+	public static String replaceAll(String toReplace, String search, String replace){
+		return toReplace.replaceAll(search, replace);
 	}
 	
 }

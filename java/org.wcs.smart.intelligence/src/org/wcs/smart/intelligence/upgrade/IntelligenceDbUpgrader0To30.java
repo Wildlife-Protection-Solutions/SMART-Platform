@@ -69,7 +69,7 @@ public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, e);
+					SmartPlugIn.displayLog(Messages.AddIntelligenceJob_Error, e);
 				}
 			});
 			return false;
@@ -104,7 +104,7 @@ public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog(null, Messages.AddIntelligenceJob_Error, ex);
+					SmartPlugIn.displayLog(Messages.AddIntelligenceJob_Error, ex);
 				}
 			});
 			return false;

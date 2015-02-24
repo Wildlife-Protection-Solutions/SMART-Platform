@@ -23,17 +23,17 @@ package org.wcs.smart.report.internal.ui;
 
 import java.util.HashSet;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
+import javax.inject.Named;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -49,14 +49,12 @@ import org.wcs.smart.report.model.RootReportFolder;
  * @author egouge
  * @since 1.0.0
  */
-public class NewFolderHandler extends AbstractHandler implements IHandler {
+public class NewFolderHandler {
 
-	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection){
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty() ){
+			return;
 		}
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
@@ -117,8 +115,11 @@ public class NewFolderHandler extends AbstractHandler implements IHandler {
 			};
 			job.schedule();
 		}
-		
-		
-		return null;
+	}
+	
+	public static class NewFolderHandlerWrapper extends DIHandler<NewFolderHandler>{
+		public NewFolderHandlerWrapper(){
+			super(NewFolderHandler.class);
+		}
 	}
 }

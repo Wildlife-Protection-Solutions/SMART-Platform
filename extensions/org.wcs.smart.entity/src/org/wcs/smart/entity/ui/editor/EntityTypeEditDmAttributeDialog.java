@@ -209,7 +209,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 						}
 					}
 				}catch (Exception ex){
-					SmartPlugIn.displayLog(getParentShell(), Messages.EntityTypeEditDmAttributeDialog_CannotEditError + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
+					SmartPlugIn.displayLog(Messages.EntityTypeEditDmAttributeDialog_CannotEditError + "\n\n" + ex.getMessage(), ex);  //$NON-NLS-1$
 					return;
 				}
 				
@@ -218,7 +218,9 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 				try{
 					openSession.saveOrUpdate(((EntityAttribute)item).getDmAttribute());
 					
-					List<Attribute> atts = openSession.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
+					@SuppressWarnings("unchecked")
+					List<Attribute> atts = openSession.createCriteria(Attribute.class)
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 					
 					AddAttributeDialog2 d2 = new AddAttributeDialog2(getShell(),
 							((EntityAttribute)item).getDmAttribute(),
