@@ -581,7 +581,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 			setChangesMade(false);
 			return true;
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(),Messages.AgencyRankPropertyPage_Error_Save + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_Save + ex.getLocalizedMessage(), ex);
 			tx.rollback();
 			s.close();			
 		}
@@ -635,7 +635,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 					agencies.remove(type);
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
+				SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_DeleteAgency + type.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 			
 			
@@ -687,7 +687,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 			}
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.AgencyRankPropertyPage_Error_DeleteRank + r.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.AgencyRankPropertyPage_Error_DeleteRank + r.getName() + ".\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 		
 		

@@ -29,13 +29,13 @@
       <perspective
             class="org.wcs.smart.query.ui.QueryPerspective"
             icon="images/icons/view16/querypatrol.gif"
-            id="org.wcs.smart.query.SmartQueryPerspective"
+            id="org.wcs.smart.query.persepectives.single"
             name="%query.perspective.name">
       </perspective>
       <perspective
             class="org.wcs.smart.query.ui.MultiCaQueryPerspective"
             icon="images/icons/view16/querypatrol.gif"
-            id="org.wcs.smart.query.SmartMultiCaQueryPerspective"
+            id="org.wcs.smart.query.persepectives.multi"
             name="%multieca.perspective.name">
       </perspective>
    </extension>
@@ -86,24 +86,24 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="false"
-            class="org.wcs.smart.query.ui.definition.QueryDefView"
+            class="org.wcs.smart.query.ui.definition.QueryDefView$QueryDefViewWrapper"
             icon="images/icons/view16/querypatrol.gif"
-            id="org.wcs.smart.query.ui.QueryDefView"
+            id="org.wcs.smart.query.parts.definition"
             name="%querydef.view.name"
             restorable="true">
       </view>
       <view
             allowMultiple="false"
-            class="org.wcs.smart.query.ui.itempanel.QueryItemView"
+            class="org.wcs.smart.query.ui.itempanel.QueryItemView$QueryItemViewWrapper"
             icon="images/icons/view16/query_filter_op.png"
-            id="org.wcs.smart.query.ui.QueryItemView"
+            id="org.wcs.smart.query.parts.filter"
             name="%queryfilter.view.name"
             restorable="false">
       </view>
       <view
-            class="org.wcs.smart.query.ui.querylist.QueryListView"
+            class="org.wcs.smart.query.ui.querylist.QueryListView$QueryListViewWrapper"
             icon="images/icons/view16/query_list.png"
-            id="org.wcs.smart.query.QueryListView"
+            id="org.wcs.smart.query.parts.itemlist"
             name="%querylist.view.name"
             restorable="true">
       </view>
@@ -114,30 +114,80 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspective.fielddata">
          <command
-               commandId="org.wcs.smart.query.QueryPerspective"
+               commandId="org.wcs.smart.command.showperspective"
+               icon="images/icons/view16/querypatrol.gif"
+               id="org.wcs.smart.query.menu.view"
+               label="%perspectivetoolbar.showquery.command.label"
+               style="push"
+               tooltip="%perspectivetoolbar.showquery.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.query.persepectives.single">
+            </parameter>
+            <visibleWhen
+                  checkEnabled="false">
+               <and>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </and>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/querypatrol.gif"
                label="%perspectivetoolbar.showquery.command.label"
                style="push"
                tooltip="%perspectivetoolbar.showquery.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.query.persepectives.multi">
+            </parameter>
             <visibleWhen
                   checkEnabled="false">
-               <or>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-                  <test
-                        forcePluginActivation="true"
-                        property="org.wcs.smart.smartAdminUser"
-                        value="analyst">
-                  </test>
-               </or>
+               <and>
+                  <not>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.caSingle">
+                     </test>
+                  </not>
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="analyst">
+                     </test>
+                  </or>
+               </and>
             </visibleWhen>
          </command>
       </menuContribution>
@@ -147,7 +197,7 @@
          <toolbar
                id="org.wcs.smart.query.queryToolbar">
             <command
-                  commandId="org.wcs.smart.query.exportQuery"
+                  commandId="org.wcs.smart.query.export"
                   label="%queryToolbar.exportquery.command.label"
                   style="push"
                   tooltip="%queryToolbar.exportquery.command.tooltip">
@@ -157,10 +207,10 @@
                         variable="activeWorkbenchWindow.activePerspective">
                      <or>
                         <equals
-                              value="org.wcs.smart.query.SmartQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.single">
                         </equals>
                         <equals
-                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.multi">
                         </equals>
                      </or>
                   </with>
@@ -176,10 +226,10 @@
                         variable="activeWorkbenchWindow.activePerspective">
                      <or>
                         <equals
-                              value="org.wcs.smart.query.SmartQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.single">
                         </equals>
                         <equals
-                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.multi">
                         </equals>
                      </or>
                   </with>
@@ -195,10 +245,10 @@
                         variable="activeWorkbenchWindow.activePerspective">
                      <or>
                         <equals
-                              value="org.wcs.smart.query.SmartQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.single">
                         </equals>
                         <equals
-                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.multi">
                         </equals>
                      </or>
                   </with>
@@ -208,7 +258,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.query.ui.QueryDefView">
+            locationURI="toolbar:org.wcs.smart.query.parts.definition">
          <command
                commandId="org.eclipse.ui.file.save"
                label="%querydefview.toolbar.save.command.label"
@@ -219,23 +269,23 @@
                      variable="activeWorkbenchWindow.activePerspective">
                   <or>
                      <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
+                           value="org.wcs.smart.query.persepectives.single">
                      </equals>
                      <equals
-                           value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                           value="org.wcs.smart.query.persepectives.multi">
                      </equals>
                   </or>
                </with>
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.query.clearQueryDefinition"
+               commandId="org.wcs.smart.query.querydef.clear"
                icon="images/icons/etool16/clear.png"
                style="push"
                tooltip="%querydefview.toolbar.clear.command.tooltip">
          </command>
          <command
-               commandId="org.wcs.smart.query.runQuery"
+               commandId="org.wcs.smart.query.run"
                icon="images/icons/etool16/bullet_go.png"
                label="%querydefview.toolbar.run.command.label"
                style="push"
@@ -244,9 +294,9 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="popup:org.wcs.smart.query.QueryListView">
+            locationURI="popup:org.wcs.smart.query.parts.itemlist">
          <command
-               commandId="org.wcs.smart.query.AddFolder"
+               commandId="org.wcs.smart.query.folder.add"
                icon="images/icons/etool16/folder_add.png"
                label="%querylistview.popup.newfolder.command.label"
                mnemonic="%querylistview.popup.newfolder.command.mnemonic"
@@ -268,7 +318,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.query.openQuery"
+               commandId="org.wcs.smart.query.open"
                label="%querylistview.popup.openquery.command.label"
                mnemonic="%querylistview.popup.openquery.command.mnemonic"
                style="push"
@@ -287,7 +337,7 @@
                visible="true">
          </separator>
          <command
-               commandId="org.wcs.smart.query.renameFolder"
+               commandId="org.wcs.smart.query.folder.rename"
                label="%querylistview.popup.rename.command.label"
                mnemonic="%querylistview.popup.rename.command.mnemonic"
                style="push"
@@ -333,7 +383,7 @@
                visible="true">
          </separator>
          <command
-               commandId="org.wcs.smart.query.DeleteItem"
+               commandId="org.wcs.smart.query.deleteitem"
                label="%querylistview.popup.delete.command.label"
                mnemonic="%querylistview.popup.delete.command.mnemonic"
                style="push"
@@ -367,7 +417,7 @@
                   label="%menu.query.menu.newquery.name"
                   mnemonic="%menu.query.menu.newquery.mnemonic">
                <command
-                     commandId="org.wcs.smart.query.createUnknownQuery"
+                     commandId="org.wcs.smart.query.create.unknown"
                      id="org.wcs.smart.query.wizard"
                      label="%querywizard.command.label"
                      style="push"
@@ -387,14 +437,14 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.query.exportQuery"
+                  commandId="org.wcs.smart.query.export"
                   label="%menu.query.exportquery.command.label"
                   mnemonic="%menu.query.exportquery.command.mnemonic"
                   style="push"
                   tooltip="%menu.query.exportquery.command.tooltip">
             </command>
             <command
-                  commandId="org.wcs.smart.query.importQuery"
+                  commandId="org.wcs.smart.query.import"
                   icon="images/icons/etool16/importquery.png"
                   label="%menu.query.importquery.command.label"
                   mnemonic="%menu.query.importquery.command.mnemonic"
@@ -442,30 +492,79 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.query.QueryPerspective"
+                  commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/view16/querypatrol.gif"
                   label="%perspectivetoolbar.showquery.command.label"
                   style="push"
                   tooltip="%perspectivetoolbar.showquery.command.tooltip">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.query.persepectives.single">
+               </parameter>
                <visibleWhen
                      checkEnabled="false">
-                  <or>
+                  <and>
                      <test
                            forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="admin">
+                           property="org.wcs.smart.caSingle">
                      </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="manager">
-                     </test>
-                     <test
-                           forcePluginActivation="true"
-                           property="org.wcs.smart.smartAdminUser"
-                           value="analyst">
-                     </test>
-                  </or>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                     </or>
+                  </and>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="org.wcs.smart.command.showperspective"
+                  icon="images/icons/view16/querypatrol.gif"
+                  label="%perspectivetoolbar.showquery.command.label"
+                  style="push"
+                  tooltip="%perspectivetoolbar.showquery.command.tooltip">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.query.persepectives.multi">
+               </parameter>
+               <visibleWhen
+                     checkEnabled="false">
+                  <and>
+                     <not>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.caSingle">
+                        </test>
+                     </not>
+                     <or>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="admin">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="manager">
+                        </test>
+                        <test
+                              forcePluginActivation="true"
+                              property="org.wcs.smart.smartAdminUser"
+                              value="analyst">
+                        </test>
+                     </or>
+                  </and>
                </visibleWhen>
             </command>
          </menu>
@@ -487,7 +586,7 @@
                <with
                      variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.SmartQueryPerspective">
+                        value="org.wcs.smart.query.persepectives.single">
                   </equals>
                </with>
             </visibleWhen>
@@ -502,7 +601,7 @@
                <with
                      variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.SmartQueryPerspective">
+                        value="org.wcs.smart.query.persepectives.single">
                   </equals>
                </with>
             </visibleWhen>
@@ -518,7 +617,7 @@
                <with
                      variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.SmartQueryPerspective">
+                        value="org.wcs.smart.query.persepectives.single">
                   </equals>
                </with>
             </visibleWhen>
@@ -530,15 +629,15 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.query.QueryListView">
+            locationURI="toolbar:org.wcs.smart.query.parts.itemlist">
          <command
-               commandId="org.wcs.smart.query.DeleteItem"
+               commandId="org.wcs.smart.query.deleteitem"
                label="%querylist.toolbar.delete.command.label"
                style="push"
                tooltip="%querylist.toolbar.delete.command.tooltip">
          </command>
          <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
+               commandId="org.wcs.smart.query.create.unknown"
                id="org.wcs.smart.query.createQuery"
                label="%queryToolbar.createquery.command.label"
                style="pulldown"
@@ -575,10 +674,10 @@
                         variable="activeWorkbenchWindow.activePerspective">
                      <or>
                         <equals
-                              value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.multi">
                         </equals>
                         <equals
-                              value="org.wcs.smart.query.SmartQueryPerspective">
+                              value="org.wcs.smart.query.persepectives.single">
                         </equals>
                      </or>
                   </with>
@@ -588,10 +687,10 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create?before=org.wcs.smart.toolbar.create.query">
+            locationURI="toolbar:org.wcs.smart.toolbar.create">
          <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
-               id="org.wcs.smart.query.createQuery"
+               commandId="org.wcs.smart.query.create.unknown"
+               id="org.wcs.smart.query.toolbar.menu.create"
                label="%queryToolbar.createquery.command.label"
                style="pulldown"
                tooltip="%queryToolbar.createquery.command.toolbar">
@@ -616,9 +715,9 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery">
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create">
          <command
-               commandId="org.wcs.smart.query.createUnknownQuery"
+               commandId="org.wcs.smart.query.create.unknown"
                id="org.wcs.smart.query.createunknown.wizard"
                label="%querywizoard.command.label.0"
                style="push">
@@ -649,7 +748,7 @@
                <with
                      variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        value="org.wcs.smart.query.persepectives.multi">
                   </equals>
                </with>
             </visibleWhen>
@@ -664,7 +763,7 @@
                <with
                      variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        value="org.wcs.smart.query.persepectives.multi">
                   </equals>
                </with>
             </visibleWhen>
@@ -680,7 +779,7 @@
                <with
                      variable="activeWorkbenchWindow.activePerspective">
                   <equals
-                        value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                        value="org.wcs.smart.query.persepectives.multi">
                   </equals>
                </with>
             </visibleWhen>
@@ -694,54 +793,50 @@
    <extension
          point="org.eclipse.ui.commandImages">
       <image
-            commandId="org.wcs.smart.query.DeleteItem"
+            commandId="org.wcs.smart.query.deleteitem"
             icon="images/icons/etool16/delete.png">
       </image>
       <image
-            commandId="org.wcs.smart.query.exportQuery"
+            commandId="org.wcs.smart.query.export"
             icon="images/icons/etool16/exportquery.png">
       </image>
       <image
-            commandId="org.wcs.smart.query.createUnknownQuery"
+            commandId="org.wcs.smart.query.create.unknown"
             icon="images/icons/etool16/addquery.png">
       </image>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="org.wcs.smart.query.QueryPerspective"
-            name="%showqueryperspective.command.name">
-      </command>
-      <command
-            id="org.wcs.smart.query.clearQueryDefinition"
+            id="org.wcs.smart.query.querydef.clear"
             name="%clearquerydef.command.name">
       </command>
       <command
-            id="org.wcs.smart.query.runQuery"
+            id="org.wcs.smart.query.run"
             name="%runquery.command.name">
       </command>
       <command
-            id="org.wcs.smart.query.exportQuery"
+            id="org.wcs.smart.query.export"
             name="%exportquery.command.name">
       </command>
       <command
-            id="org.wcs.smart.query.DeleteItem"
+            id="org.wcs.smart.query.deleteitem"
             name="%deletequeryorfolder.command.name">
       </command>
       <command
-            id="org.wcs.smart.query.AddFolder"
+            id="org.wcs.smart.query.folder.add"
             name="%addsubfolder.command.name">
       </command>
       <command
-            id="org.wcs.smart.query.renameFolder"
+            id="org.wcs.smart.query.folder.rename"
             name="%renamequeryfolder.command.name">
       </command>
       <command
-            id="org.wcs.smart.query.importQuery"
+            id="org.wcs.smart.query.import"
             name="%importquery.command.name">
       </command>
       <command
-            id="org.wcs.smart.query.createUnknownQuery"
+            id="org.wcs.smart.query.create.unknown"
             name="%createunknowquery.command.name">
          <commandParameter
                id="org.wcs.smart.query.type"
@@ -750,7 +845,7 @@
          </commandParameter>
       </command>
       <command
-            id="org.wcs.smart.query.openQuery"
+            id="org.wcs.smart.query.open"
             name="%openquery.command.name">
       </command>
       <command
@@ -760,23 +855,19 @@
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
-      <handler
-            class="org.wcs.smart.query.ui.ShowQueryPersepctiveHandler"
-            commandId="org.wcs.smart.query.QueryPerspective">
-      </handler>
-      <handler
-            class="org.wcs.smart.query.ui.ClearQueryHandler"
-            commandId="org.wcs.smart.query.clearQueryDefinition">
+     <handler
+            class="org.wcs.smart.query.ui.ClearQueryHandler$ClearQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.querydef.clear">
          <enabledWhen>
             <and>
                <with
                      variable="activeWorkbenchWindow.activePerspective">
                   <or>
                      <equals
-                           value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                           value="org.wcs.smart.query.persepectives.multi">
                      </equals>
                      <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
+                           value="org.wcs.smart.query.persepectives.single">
                      </equals>
                   </or>
                </with>
@@ -784,8 +875,8 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.RunQueryHandler"
-            commandId="org.wcs.smart.query.runQuery">
+            class="org.wcs.smart.query.ui.RunQueryHandler$RunQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.run">
          <enabledWhen>
             <and>
                <with
@@ -804,10 +895,10 @@
                      variable="activeWorkbenchWindow.activePerspective">
                   <or>
                      <equals
-                           value="org.wcs.smart.query.SmartQueryPerspective">
+                           value="org.wcs.smart.query.persepectives.single">
                      </equals>
                      <equals
-                           value="org.wcs.smart.query.SmartMultiCaQueryPerspective">
+                           value="org.wcs.smart.query.persepectives.multi">
                      </equals>
                   </or>
                </with>
@@ -821,12 +912,12 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.importexport.ExportQueryHandler"
-            commandId="org.wcs.smart.query.exportQuery">
+            class="org.wcs.smart.query.ui.importexport.ExportQueryHandler$ExportQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.export">
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.querylist.DeleteItemHandler"
-            commandId="org.wcs.smart.query.DeleteItem">
+            class="org.wcs.smart.query.ui.querylist.DeleteItemHandler$DeleteItemHandlerWrapper"
+            commandId="org.wcs.smart.query.deleteitem">
          <enabledWhen>
             <with
                   variable="selection">
@@ -842,8 +933,8 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.querylist.AddFolderHandler"
-            commandId="org.wcs.smart.query.AddFolder">
+            class="org.wcs.smart.query.ui.querylist.AddFolderHandler$AddFolderHandlerWrapper"
+            commandId="org.wcs.smart.query.folder.add">
          <activeWhen>
             <with
                   variable="selection">
@@ -859,8 +950,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.querylist.RenameHandler"
-            commandId="org.wcs.smart.query.renameFolder">
+            class="org.wcs.smart.query.ui.querylist.RenameHandler$RenameHandlerWrapper"
+            commandId="org.wcs.smart.query.folder.rename">
          <enabledWhen>
             <with
                   variable="selection">
@@ -876,19 +967,19 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.importexport.ImportQueryHandler"
-            commandId="org.wcs.smart.query.importQuery">
+            class="org.wcs.smart.query.ui.importexport.ImportQueryHandler$ImportQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.import">
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.CreateUnknownQueryHandler"
-            commandId="org.wcs.smart.query.createUnknownQuery">
+            class="org.wcs.smart.query.ui.CreateUnknownQueryHandler$CreateUnknownQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.create.unknown">
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.querylist.OpenQueryHandler"
-            commandId="org.wcs.smart.query.openQuery">
+            class="org.wcs.smart.query.ui.querylist.OpenQueryHandler$OpenQueryHandlerWrapper"
+            commandId="org.wcs.smart.query.open">
       </handler>
       <handler
-            class="org.wcs.smart.query.ui.querylist.TranslateNamesHandler"
+            class="org.wcs.smart.query.ui.querylist.TranslateNamesHandler$TranslateNamesHandlerWrapper"
             commandId="org.wcs.smart.query.translate">
       </handler>
    </extension>
@@ -937,7 +1028,7 @@
       </Exporter>
    </extension>
    <extension
-         point="net.refractions.udig.project.renderer">
+         point="org.locationtech.udig.project.renderer">
       <renderer
             class="org.wcs.smart.query.udig.render.SmartMemoryGridCoverageMetricsFactory"
             id="org.wcs.smart.udig.render.SmartGridRenderer"
@@ -945,17 +1036,17 @@
       </renderer>
    </extension>
    <extension
-         point="net.refractions.udig.style.styleConfigurator">
+         point="org.locationtech.udig.style.styleConfigurator">
       <styleConfigurator
             class="org.wcs.smart.query.udig.render.SmartGridCellStyleConfigurator"
             id="gridcell"
             label="Grid Cell Border"
             requires="org.wcs.smart.query.common.model.udig.RasterService"
-            styleId="net.refractions.udig.style.sld">
+            styleId="org.locationtech.udig.style.sld">
       </styleConfigurator>
    </extension>
    <extension
-         point="net.refractions.udig.project.style">
+         point="org.locationtech.udig.project.style">
       <style
             class="org.wcs.smart.query.udig.render.SmartGridCellStyleContent"
             id="org.wcs.smart.query.grid.style.border"

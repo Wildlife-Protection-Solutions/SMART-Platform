@@ -37,27 +37,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.ICatalog;
-import net.refractions.udig.catalog.ID;
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IResolve;
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.core.internal.CorePlugin;
-import net.refractions.udig.project.ILayer;
-import net.refractions.udig.project.StyleContent;
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.ProjectFactory;
-import net.refractions.udig.project.internal.ProjectPackage;
-import net.refractions.udig.project.internal.StyleBlackboard;
-import net.refractions.udig.project.internal.StyleEntry;
-import net.refractions.udig.project.internal.commands.AddLayersCommand;
-import net.refractions.udig.project.internal.commands.ChangeCRSCommand;
-import net.refractions.udig.project.internal.commands.DeleteLayersCommand;
-import net.refractions.udig.project.internal.render.impl.RenderManagerImpl;
-import net.refractions.udig.ui.palette.ColourScheme;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -75,6 +54,26 @@ import org.geotools.referencing.CRS;
 import org.geotools.referencing.ReferencingFactoryFinder;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ICatalog;
+import org.locationtech.udig.catalog.ID;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.core.internal.CorePlugin;
+import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.StyleContent;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.ProjectPackage;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.StyleEntry;
+import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
+import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
+import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
+import org.locationtech.udig.ui.palette.ColourScheme;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.BasemapDefinition;
@@ -817,7 +816,7 @@ public class MapSettings {
 		for (LayerRegister basemapLayer : userMap.getLayerList()) {
 			URI uri = basemapLayer.getURI();
 			if (uri.getScheme().equals(SMARTBM_FILE_PROTOCOL)){
-				//TODO: verify that this layer is not used in any other basemaps
+				//verify that this layer is not used in any other basemaps
 				List<?> others = activeSession.createCriteria(BasemapDefinition.class)
 						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 						.add(Restrictions.ilike("mapDef", "%" + uri.toString() + "%")) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

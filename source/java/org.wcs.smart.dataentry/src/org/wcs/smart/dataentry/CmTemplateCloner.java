@@ -22,6 +22,8 @@
 package org.wcs.smart.dataentry;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -110,14 +112,49 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 	private void cloneCmAttributeTreeItems(ConfigurableModel sourceCm, ConfigurableModel clonedCm) throws Exception{
 		@SuppressWarnings("unchecked")
 		List<CmAttributeTreeNode> itemsToClone = engine.getSession().createCriteria(CmAttributeTreeNode.class).add(Restrictions.eq("configurableModel", sourceCm)).list(); //$NON-NLS-1$
-		for (CmAttributeTreeNode listItem : itemsToClone){
+		
+		HashMap<CmAttributeTreeNode, CmAttributeTreeNode> templateToClone = new HashMap<CmAttributeTreeNode, CmAttributeTreeNode>();
+		HashMap<CmAttributeTreeNode, CmAttributeTreeNode> cloneTotemplate = new HashMap<CmAttributeTreeNode, CmAttributeTreeNode>();
+		
+		for (CmAttributeTreeNode treeItem : itemsToClone){
 			CmAttributeTreeNode clone = new CmAttributeTreeNode();
 			clone.setConfigurableModel(clonedCm);
-			engine.copyLabels(listItem, clone);
-			clone.setIsActive(listItem.getIsActive());
-			clone.setDmTreeNode(findNewAttributeTreeNode(listItem.getDmTreeNode()));
+			engine.copyLabels(treeItem, clone);
+			clone.setIsActive(treeItem.getIsActive());
+			clone.setNodeOrder(treeItem.getNodeOrder());
+			if (treeItem.getDmTreeNode() != null){
+				clone.setDmTreeNode(findNewAttributeTreeNode(treeItem.getDmTreeNode()));
+			}else{
+				clone.setDmTreeNode(null);
+			}
+			if (treeItem.getDmAttribute() != null){
+				clone.setDmAttribute(findNewAttribute(treeItem.getDmAttribute()));
+			}else{
+				clone.setDmAttribute(null);
+			}
+			clone.setAttribute((CmAttribute)engine.getNewConservationItem(treeItem.getAttribute()));
+			clone.setChildren(new ArrayList<CmAttributeTreeNode>());
 			engine.getSession().saveOrUpdate(clone);
+			
+			//at this point we don't necessarily have the
+			//parent cloned; so we need to set up
+			//the parent after we clone all items
+			templateToClone.put(treeItem, clone);
+			cloneTotemplate.put(clone, treeItem);
 		}
+		
+		//configure parents
+		for(CmAttributeTreeNode treenode : cloneTotemplate.keySet()){
+			CmAttributeTreeNode templateNode = cloneTotemplate.get(treenode);
+			if (templateNode != null && templateNode.getParent() != null){
+				CmAttributeTreeNode cparent = templateToClone.get(templateNode.getParent());
+				if (cparent != null){
+					treenode.setParent(cparent);
+					cparent.getChildren().add(treenode);
+				}
+			}
+		}
+		
 		engine.getSession().flush();
 	}
 
@@ -135,13 +172,16 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		}else{
 			clonedNode.setCategory(null);
 		}
-		
+		engine.copyLabels(toCopy, clonedNode);
 		for (CmAttribute att : toCopy.getCmAttributes()){
 			CmAttribute clonedAtt = cloneAttribute(att);
 			clonedAtt.setNode(clonedNode);
 			clonedNode.getCmAttributes().add(clonedAtt);
+			
+			engine.getSession().flush();
+			engine.addConservationItemMapping(att, clonedAtt);
 		}
-		engine.copyLabels(toCopy, clonedNode);
+		
 		
 		//add to parent
 		if (clonedParent != null){

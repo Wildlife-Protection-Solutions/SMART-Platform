@@ -26,10 +26,9 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.catalog.ServiceExtension;
-import net.refractions.udig.core.internal.CorePlugin;
-
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.ServiceExtension;
+import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -48,7 +47,7 @@ public class QueryServiceExtension implements ServiceExtension {
    
 	
     /**
-     * @see net.refractions.udig.catalog.ServiceExtension#createService(java.net.URL, java.util.Map)
+     * @see org.locationtech.udig.catalog.ServiceExtension#createService(java.net.URL, java.util.Map)
      */
     @Override
 	public IService createService(URL id, Map<String, Serializable> params) {
@@ -65,7 +64,7 @@ public class QueryServiceExtension implements ServiceExtension {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.ServiceExtension#createParams(java.net.URL)
+	 * @see org.locationtech.udig.catalog.ServiceExtension#createParams(java.net.URL)
 	 */
 	@Override
 	public Map<String, Serializable> createParams(URL url) {	

@@ -26,12 +26,11 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.ServiceExtension;
+import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.util.SmartUtils;
-
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.catalog.ServiceExtension;
-import net.refractions.udig.core.internal.CorePlugin;
 
 /**
  * Udig service extension for mission points.

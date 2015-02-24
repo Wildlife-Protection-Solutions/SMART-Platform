@@ -1,5 +1,6 @@
 package org.wcs.smart.ca;
 
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.regex.Pattern;
 
@@ -11,7 +12,6 @@ import javax.persistence.InheritanceType;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.internal.Messages;
 
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * An object that contains both a uuid, keyid and a 

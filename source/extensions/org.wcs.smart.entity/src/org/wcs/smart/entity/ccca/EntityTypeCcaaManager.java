@@ -24,12 +24,11 @@ package org.wcs.smart.entity.ccca;
 import java.net.URL;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.ID;
-import net.refractions.udig.catalog.IService;
-
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ID;
+import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.entity.event.EntityEventManager;
@@ -139,6 +138,7 @@ public class EntityTypeCcaaManager {
 		Query q = session.createQuery("FROM Entity e WHERE e.entityType.keyId = :keyId and e.entityType.conservationArea in (:ca)"); //$NON-NLS-1$
 		q.setParameter("keyId", entityTypeKey); //$NON-NLS-1$
 		q.setParameterList("ca", SmartDB.getConservationAreaConfiguration().getConservationAreas()); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
 		List<Entity> allEntities = q.list();	
 		return allEntities;
 	}

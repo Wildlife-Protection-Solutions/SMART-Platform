@@ -30,22 +30,17 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
-import org.wcs.smart.plan.ui.editor.PlanEditor;
-import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.plan.ui.handlers.OpenPlanHandler;
 import org.wcs.smart.plan.ui.panel.PlanUtil;
-import org.wcs.smart.plan.ui.perspective.PlanPerspective;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -235,15 +230,7 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		PlanEventManager.getInstance().planAdded(getPlan());
 		
 		//Open Plan Perspective and the plan you just created.
-		try {
-
-			PlanEditorInput input = new PlanEditorInput(p.getUuid(), p.getLabel(), p.getType());
-
-			PlatformUI.getWorkbench().showPerspective(PlanPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PlanEditor.ID);
-		} catch (WorkbenchException e) {
-			SmartPatrolPlugIn.displayLog(Messages.CreatePlanWizard_LoadPerspective_Error, e);
-		}
+		(new OpenPlanHandler()).openPlan(p.getUuid());
 		return saved;
 	}
 

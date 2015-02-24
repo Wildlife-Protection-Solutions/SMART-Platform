@@ -89,13 +89,13 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery?after=org.wcs.smart.query.createunknown.separator">
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?after=org.wcs.smart.query.createunknown.separator">
          <menu
                id="org.wcs.smart.query.createquery.alldata"
                label="%menu.query.alldata.name"
                tooltip="%menu.query.alldata.tooltip">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/observation_query.png"
                   label="%command.label.newobservation"
                   style="pulldown"
@@ -106,7 +106,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/waypoint_query.png"
                   label="%command.label.newincident"
                   style="push"
@@ -117,7 +117,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/summary_query.png"
                   label="%command.label.newsummary"
                   style="push"
@@ -128,7 +128,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/gridded_query.png"
                   label="%command.label.newgrid"
                   style="push"
@@ -148,7 +148,7 @@
                label="%menu.query.alldata.name"
                tooltip="%menu.query.alldata.tooltip">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/observation_query.png"
                   label="%command.label.newobservation"
                   style="pulldown"
@@ -159,7 +159,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/waypoint_query.png"
                   label="%command.label.newincident"
                   style="push"
@@ -170,7 +170,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/summary_query.png"
                   label="%command.label.newsummary"
                   style="push"
@@ -181,7 +181,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/gridded_query.png"
                   label="%command.label.newgrid"
                   style="push"

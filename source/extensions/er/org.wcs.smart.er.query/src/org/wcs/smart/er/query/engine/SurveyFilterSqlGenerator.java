@@ -25,7 +25,6 @@ package org.wcs.smart.er.query.engine;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -279,8 +278,10 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 
 		}else if (filter.getAttributeType() == AttributeType.TEXT){
 			String queryStr = ""; //$NON-NLS-1$
-			String val = StringEscapeUtils.escapeSql((String)filter.getValue());
-
+			//TODO: Escape
+			//String val = StringEscapeUtils.escapeSql((String)filter.getValue());
+			String val = (String) filter.getValue();
+			
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " '%" + val.toLowerCase() + "%' )";	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -345,7 +346,9 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		} else if (filter.getAttributeType() == AttributeType.TEXT) {
 			String queryStr = ""; //$NON-NLS-1$
 
-			String val = StringEscapeUtils.escapeSql((String) filter.getValue());
+			//TODO: Escape
+//			String val = StringEscapeUtils.escapeSql((String) filter.getValue());
+			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS
 					|| filter.getOperator() == Operator.STR_NOTCONTAINS) {
 				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " '%" + val.toLowerCase() + "%' )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	

@@ -47,7 +47,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -94,8 +93,10 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	private Date patrolEndDate;
 	private boolean canEditDates = false;
 	
-	private Link lnkEditDate;
 	private Session session;
+	
+	private Link lnkEditDate;
+	private Composite main;
 	
 
 	/**
@@ -114,11 +115,11 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	public Point getInitialSize(){
 		try{
-			int width = (int) (Display.getDefault().getActiveShell().getBounds().width * 0.6);
+			int width = (int) (getShell().getBounds().width * 0.6);
 			if (width < 500){
 				width = 500;
 			}
-			int height = (int) (Display.getDefault().getActiveShell().getBounds().height * 0.6);
+			int height = (int) (getShell().getBounds().height * 0.6);
 			if (height < 350){
 				height = 350;
 			}
@@ -132,7 +133,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	@Override
 	public Composite createComponent(Composite parent, int style) {
-		Composite main = new Composite(parent, SWT.NONE);
+		main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		main.setLayout(new GridLayout(1, false));
 		
@@ -249,7 +250,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				PatrolLeg toEdit = (PatrolLeg)((IStructuredSelection)patrolLegViewer.getSelection()).getFirstElement();
-				EditPatrolLegDialog patrolLegDialog = new EditPatrolLegDialog(Display.getDefault().getActiveShell(), toEdit, allEmployes, typeOps, patrolStartDate, patrolEndDate);
+				EditPatrolLegDialog patrolLegDialog = new EditPatrolLegDialog(getShell(), toEdit, allEmployes, typeOps, patrolStartDate, patrolEndDate);
 				if (patrolLegDialog.open() == Window.OK){
 					sortAndRefresh();
 					fireChangeListeners();
@@ -279,7 +280,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	}
 
 	private Shell getShell(){
-		return Display.getDefault().getActiveShell();
+		return main.getShell();
 	}
 
 	private void sortAndRefresh(){

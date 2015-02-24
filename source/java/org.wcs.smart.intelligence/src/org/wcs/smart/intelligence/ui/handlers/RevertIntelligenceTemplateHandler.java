@@ -23,11 +23,12 @@ package org.wcs.smart.intelligence.ui.handlers;
 
 import java.io.File;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.report.IntelligenceReportPerspective;
 import org.wcs.smart.intelligence.report.ReportIntelligence;
@@ -38,29 +39,34 @@ import org.wcs.smart.intelligence.report.ReportIntelligence;
  * @author elitvin
  * @since 3.0.0
  */
-public class RevertIntelligenceTemplateHandler extends AbstractHandler {
+public class RevertIntelligenceTemplateHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		boolean revert = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.RevertIntelligenceTemplateHandler_ConfirmDialog_Title, Messages.RevertIntelligenceTemplateHandler_ConfirmDialog_Message);
-		if (revert){
-			File customTemplate = ReportIntelligence.getCustomTemplateLocation();
-			if (customTemplate != null){
-				
-				boolean open = ReportIntelligence.closeTemplateEditor();
+	@Execute
+	public void execute(Shell activeShell,  EModelService modelService, MWindow activeWindow){
+		boolean revert = MessageDialog.openConfirm(activeShell, Messages.RevertIntelligenceTemplateHandler_ConfirmDialog_Title, Messages.RevertIntelligenceTemplateHandler_ConfirmDialog_Message);
+		if (!revert) return;
+		
+		File customTemplate = ReportIntelligence.getCustomTemplateLocation();
+		if (customTemplate == null) return;
 
-				//delete
-				if (!ReportIntelligence.getCustomTemplateLocation().delete()){
-					MessageDialog.openError(HandlerUtil.getActiveShell(event), Messages.RevertIntelligenceTemplateHandler_Error, Messages.RevertIntelligenceTemplateHandler_CannotRevert_Error);
-				}
-				
-				//re-open
-				if (open && HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getPerspective().getId().equals(IntelligenceReportPerspective.ID) ){
-					ReportIntelligence.editTemplate(event);
-				}
-			}
+		boolean open = ReportIntelligence.closeTemplateEditor();
+
+		//delete
+		if (!ReportIntelligence.getCustomTemplateLocation().delete()){
+			MessageDialog.openError(activeShell, Messages.RevertIntelligenceTemplateHandler_Error, Messages.RevertIntelligenceTemplateHandler_CannotRevert_Error);
 		}
-		return null;
+				
+		//re-open
+		if (open && 
+				modelService.getActivePerspective(activeWindow).getElementId().equals(IntelligenceReportPerspective.ID)){
+			ReportIntelligence.editTemplate();
+		}
+	}
+	
+	public static class RevertIntelligenceTemplateHandlerWrapper extends DIHandler<RevertIntelligenceTemplateHandler>{
+		public RevertIntelligenceTemplateHandlerWrapper(){
+			super(RevertIntelligenceTemplateHandler.class);
+		}
 	}
 
 }

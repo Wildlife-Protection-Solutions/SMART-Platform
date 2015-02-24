@@ -30,7 +30,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.IImportEngine;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
@@ -136,7 +135,7 @@ public class PatrolImportGpsDataWizard extends ImportGpsDataWizard {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), e.getMessage(), e);
+								SmartPatrolPlugIn.displayLog(e.getMessage(), e);
 							}
 							
 						});

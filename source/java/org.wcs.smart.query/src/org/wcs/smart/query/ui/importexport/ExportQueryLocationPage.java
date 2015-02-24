@@ -24,7 +24,7 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.util.HashMap;
 
-import net.refractions.udig.catalog.URLUtils;
+import org.locationtech.udig.catalog.URLUtils;
 
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;

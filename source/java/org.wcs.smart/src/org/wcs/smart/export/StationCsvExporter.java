@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 package org.wcs.smart.export;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -55,12 +56,12 @@ public class StationCsvExporter implements ICsvDataExporter {
 
 	@Override
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
-		CSVWriter writer = null;
-		try {
+		
+		
 			List<Language> languages = new ArrayList<Language>(ca.getLanguages());
-			writer = new CSVWriter(
+		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
 			List<Station> stations = getStations(ca, session);
 
 			// WriteHeaders
@@ -81,16 +82,8 @@ public class StationCsvExporter implements ICsvDataExporter {
 				writer.writeNext(csvout);
 				
 			}
-			writer.close();
 			return true;
 		} catch (IOException ex) {
-			try {
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (IOException e) {
-				return false;
-			}
 			return false;
 		}
 	}

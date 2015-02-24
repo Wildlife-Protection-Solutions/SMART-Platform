@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -49,7 +50,6 @@ import org.wcs.smart.ui.OptionSelectionDialog;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Importer for importing agencies and ranks data.  This importer

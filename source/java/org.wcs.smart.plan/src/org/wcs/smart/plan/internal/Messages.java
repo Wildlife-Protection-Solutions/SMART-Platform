@@ -79,6 +79,7 @@ public class Messages extends NLS {
 	public static String NumericPlanTargetPropertyPage_TargetName_Label;
 	public static String NumericPlanTargetPropertyPage_TargetType_Label;
 	public static String NumericPlanTargetPropertyPage_TargetValue_Label;
+	public static String OpenPlanHandler_PlanError;
 	public static String ParentIdPlanWizardPage_Message;
 	public static String ParentIdPlanWizardPage_PageName;
 	public static String PatrolPlanComposite_Filter_Link;

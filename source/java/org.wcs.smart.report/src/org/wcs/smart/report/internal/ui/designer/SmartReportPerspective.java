@@ -69,31 +69,7 @@ public class SmartReportPerspective implements IPerspectiveFactory {
 	 */
 	public void createInitialLayout(IPageLayout layout) {
 		defineLayout(layout);
-		// defineActions( layout );
 	}
-
-	// /**
-	// * Defines the Actions
-	// */
-	// private void defineActions( IPageLayout layout )
-	// {
-	// // Add "new wizards".
-	//		layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");//$NON-NLS-1$
-	// layout.addNewWizardShortcut( NEW_REPORT_ID );
-	// layout.addNewWizardShortcut( NEW_TEMPLATE_ID );
-	//
-	// // Add "show views".
-	// layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
-	// layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
-	// layout.addShowViewShortcut(PaletteView.ID);
-	// layout.addShowViewShortcut(AttributeView.ID);
-	// layout.addShowViewShortcut(DataView.ID);
-	// layout.addShowViewShortcut(LibraryExplorerView.ID);
-	// layout.addShowViewShortcut(IPageLayout.ID_PROP_SHEET);
-	// layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
-	//
-	// layout.addPerspectiveShortcut(BIRT_REPORT_PERSPECTIVE);
-	// }
 
 	/**
 	 * Defines the initial layout for a page.

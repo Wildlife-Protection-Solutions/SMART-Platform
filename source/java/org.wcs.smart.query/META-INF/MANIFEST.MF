@@ -6,14 +6,13 @@ Bundle-Version: 3.1.0
 Bundle-Activator: org.wcs.smart.query.QueryPlugIn
 Require-Bundle: org.wcs.smart,
  org.eclipse.ui.forms,
- net.refractions.udig.catalog.rasterings;visibility:=reexport,
+ org.locationtech.udig.catalog.rasterings;visibility:=reexport,
  org.wcs.smart.observation,
- net.refractions.udig.style.sld,
- net.refractions.udig.render.gridcoverage.basic;bundle-version="1.2.0",
- net.refractions.udig.style;bundle-version="1.2.0",
- org.apache.commons.lang
+ org.locationtech.udig.style.sld,
+ org.locationtech.udig.render.gridcoverage.basic;bundle-version="1.2.0",
+ org.locationtech.udig.style;bundle-version="1.2.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.query,
  org.wcs.smart.query.common.engine,
  org.wcs.smart.query.common.engine.visitors,

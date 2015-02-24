@@ -1,88 +1,30 @@
 package org.wcs.smart.report.internal.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.report.ReportPlugIn;
-import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.export.ImportReportWizard;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 
-public class ImportReportHandler extends AbstractHandler {
+public class ImportReportHandler  {
 
-	private static final String ERROR_MSG = Messages.ImportReportHandler_Error_ImportingReport;
-
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		try {
-			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
-			if (!activeId.equals(ReportViewerPerspective.ID)){
-				//show report perspective 
-				HandlerUtil
-				.getActiveWorkbenchWindow(event)
-				.getWorkbench()
-				.showPerspective(ReportViewerPerspective.ID,
-						HandlerUtil.getActiveWorkbenchWindow(event));	
-			}
-			
-		} catch (WorkbenchException e) {
-			ReportPlugIn
-					.displayLog(Messages.ImportReportHandler_Error_LoadingPerspective, e);
-		}
+	@Execute
+	public void execute(Shell activeShell, EModelService mService, MWindow activeWindow){
 		
-		final Shell parent = HandlerUtil.getActiveShell(event);
+		(new ShowPerspectiveHandler()).execute(ReportViewerPerspective.ID, mService, activeWindow);
+		
 		ImportReportWizard wizard = new ImportReportWizard();
-		WizardDialog dialog = new WizardDialog(parent, wizard);
+		WizardDialog dialog = new WizardDialog(activeShell, wizard);
 		dialog.open();
-		
-//		
-//		FileDialog fd = new FileDialog(parent);
-//		fd.setFilterNames(new String[]{Messages.ImportReportHandler_ZipFileFilterName, Messages.ImportReportHandler_AllFilesFilterName});
-//		fd.setFilterExtensions(new String[]{"*.zip", "*.*"});  //$NON-NLS-1$//$NON-NLS-2$
-//		fd.setText(Messages.ImportReportHandler_SelectReportLabel);
-//		String file = fd.open();
-//		if (file == null){
-//			return null;
-//		}
-//		
-//		final File reportFile = new File(file);
-//		if (!reportFile.exists()){
-//			MessageDialog.openError(parent, Messages.ImportReportHandler_Error_DialogTitle, 
-//					MessageFormat.format(Messages.ImportReportHandler_Error_FileNotFound, new Object[]{ reportFile.getAbsolutePath()}));
-//			return null;
-//		}
-//		
-//		ProgressMonitorDialog pmd = new ProgressMonitorDialog(parent);
-//		try {
-//			pmd.run(true, false, new IRunnableWithProgress() {
-//				
-//				@Override
-//				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-//						InterruptedException {
-//					ImportReportEngine importer = new ImportReportEngine();
-//					try{
-//						if (importer.importReport(reportFile)){
-//							Display.getDefault().syncExec(new Runnable(){
-//								@Override
-//								public void run() {
-//									MessageDialog.openInformation(parent, Messages.ImportReportHandler_ImportOk_DialogTitle, Messages.ImportReportHandler_ImportOk);
-//								}});
-//						}
-//					}catch (Exception ex){
-//						ReportPlugIn.displayLog(ERROR_MSG + ex.getLocalizedMessage(), ex);
-//					}
-//					
-//				}
-//			});
-//		} catch (Exception ex) {
-//			ReportPlugIn.displayLog(ERROR_MSG + ex.getLocalizedMessage(), ex);
-//		}
-		
-		
-		return null;
+	}
+	
+	public static class ImportReportHandlerWrapper extends DIHandler<ImportReportHandler>{
+		public ImportReportHandlerWrapper(){
+			super(ImportReportHandler.class);
+		}
 	}
 
 }

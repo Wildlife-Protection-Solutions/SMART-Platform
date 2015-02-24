@@ -184,14 +184,14 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery?before=org.wcs.smart.query.createunknown.separator2">
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
          <menu
                icon="images/icons/obj16/patrol.png"
                id="org.wcs.smart.query.createquery.patrolquery"
                label="%patrolquery.menu.label"
                tooltip="%patrolquery.menu.tooltip">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/observation_query.png"
                   label="%querytoolbar.createquery.menu.newobservationquery.command.label"
                   style="pulldown"
@@ -202,7 +202,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/waypoint_query.png"
                   label="%querytoolbar.newincident.command.label"
                   style="push"
@@ -213,7 +213,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/patrol_query.png"
                   label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
                   style="push"
@@ -224,7 +224,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/summary_query.png"
                   label="%querytoolbar.createquery.menu.newsummaryquery.command.label"
                   style="push"
@@ -235,7 +235,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/gridded_query.png"
                   label="%querytoolbar.createquery.menu.newgridsummary.command.label"
                   style="push"
@@ -256,7 +256,7 @@
                label="%patrolquery1.menu.label"
                tooltip="%patrolquery1.menu.tooltip">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/observation_query.png"
                   label="%querytoolbar.createquery.menu.newobservationquery.command.label"
                   style="pulldown"
@@ -267,7 +267,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/waypoint_query.png"
                   label="%querytoolbar.newincident.command.label"
                   style="push"
@@ -278,7 +278,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/patrol_query.png"
                   label="%querytoolbar.createquery.menu.newpatrolquery.command.label"
                   style="push"
@@ -289,7 +289,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/summary_query.png"
                   label="%querytoolbar.createquery.menu.newsummaryquery.command.label"
                   style="push"
@@ -300,7 +300,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/gridded_query.png"
                   label="%querytoolbar.createquery.menu.newgridsummary.command.label"
                   style="push"

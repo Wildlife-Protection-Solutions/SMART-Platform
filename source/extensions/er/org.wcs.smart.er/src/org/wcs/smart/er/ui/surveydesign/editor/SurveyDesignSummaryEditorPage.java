@@ -37,7 +37,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -83,7 +82,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	private TableViewer missionPropertiesList;
 	private TableViewer propertiesList;
 	
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	private SurveyDesignEditor parentEditor;
 	
@@ -93,6 +92,7 @@ public class SurveyDesignSummaryEditorPage extends EditorPart {
 	
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.setBorderStyle(SWT.BORDER);
 		form = toolkit.createForm(parent);
 		form.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));

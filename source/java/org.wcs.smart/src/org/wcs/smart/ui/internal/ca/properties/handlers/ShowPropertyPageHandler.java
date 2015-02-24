@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.ui.internal.ca.properties.AgencyRankPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.AreaPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
@@ -40,7 +41,7 @@ import org.wcs.smart.ui.internal.ca.properties.StationListPropertyPage;
  * 
  * @since 1.0.0
  */
-public class ShowPropertyPageHandler extends AbstractHandler {
+public class ShowPropertyPageHandler {
 
 	private Class<? extends Dialog> page = null;
 	
@@ -48,29 +49,26 @@ public class ShowPropertyPageHandler extends AbstractHandler {
 		this.page = page;
 	}
 	
-	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		Shell parentShell = HandlerUtil.getActiveShell(event);
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
 		Dialog dialog = null;
 		if (page.equals(CaPropertyPage.class)){
-			dialog = new CaPropertyPage(parentShell);
+			dialog = new CaPropertyPage(activeShell);
 		}else if (page.equals(StationListPropertyPage.class)){
-			dialog = new StationListPropertyPage(parentShell);
+			dialog = new StationListPropertyPage(activeShell);
 		}else if (page.equals(AgencyRankPropertyPage.class)){
-			dialog = new AgencyRankPropertyPage(parentShell);
+			dialog = new AgencyRankPropertyPage(activeShell);
 		}else if (page.equals(EmployeePropertyPage.class)){
-			dialog = new EmployeePropertyPage(parentShell);
+			dialog = new EmployeePropertyPage(activeShell);
 		}else if (page.equals(AreaPropertyPage.class)){
-			dialog = new AreaPropertyPage(parentShell);
+			dialog = new AreaPropertyPage(activeShell);
 		}else if (page.equals(BasemapPropertyPage.class)){
-			dialog = new BasemapPropertyPage(parentShell);
+			dialog = new BasemapPropertyPage(activeShell);
 		}else if (page.equals(ProjectionPropertyDialog.class)){
-			dialog = new ProjectionPropertyDialog(parentShell);
+			dialog = new ProjectionPropertyDialog(activeShell);
 		}
 		if (dialog != null){
 			dialog.open();
 		}
-		return null;
 	}
 }

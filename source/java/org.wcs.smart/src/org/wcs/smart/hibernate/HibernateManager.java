@@ -291,7 +291,7 @@ public class HibernateManager extends SmartHibernateManager{
 		}catch (Exception ex){
 			tx.rollback();
 			session.close();
-			SmartPlugIn.displayLog(null, Messages.HibernateManager_Error_ValidatingUserId, ex);
+			SmartPlugIn.displayLog(Messages.HibernateManager_Error_ValidatingUserId, ex);
 		}
 		return false;
 	}
@@ -613,7 +613,7 @@ public class HibernateManager extends SmartHibernateManager{
 			DataModel dm = new DataModel(ca, rootCategories, attribute);
 			return dm;
 		}catch (final Exception ex){
-			SmartPlugIn.displayLog(null, Messages.HibernateManager_Error_LoadingDataModel, ex);
+			SmartPlugIn.displayLog(Messages.HibernateManager_Error_LoadingDataModel, ex);
 			if (s.getTransaction().isActive()){
 				s.getTransaction().rollback();
 			}

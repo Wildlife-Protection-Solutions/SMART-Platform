@@ -27,7 +27,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 
-import net.refractions.udig.catalog.URLUtils;
+import org.locationtech.udig.catalog.URLUtils;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;

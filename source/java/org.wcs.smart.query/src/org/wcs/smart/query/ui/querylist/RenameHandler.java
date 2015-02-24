@@ -21,36 +21,40 @@
  */
 package org.wcs.smart.query.ui.querylist;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Rename folder handler for the query list view
  * @author Emily
  * @since 1.0.0
  */
-public class RenameHandler extends AbstractHandler{
+public class RenameHandler {
 
-	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		QueryListView view = (QueryListView) HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().findView(QueryListView.ID);
+	@Execute
+	public void execute(@Optional @Named("selection") IStructuredSelection thisSelection, EPartService pService) {
+		if (thisSelection == null) return;
 		
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
-		}
+		MPart listPart = pService.findPart(QueryListView.ID);
 		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
 		if (o instanceof QueryFolder || o instanceof QueryEditorInput){
-			view.editElement(o);
+			((QueryListView)E3Utils.getSourceObject(listPart)).editElement(o);
 		}
-		return null;
+		return;
 	}
 
+	public static class RenameHandlerWrapper extends DIHandler<RenameHandler>{
+		public RenameHandlerWrapper(){
+			super(RenameHandler.class);
+		}
+	}
 }

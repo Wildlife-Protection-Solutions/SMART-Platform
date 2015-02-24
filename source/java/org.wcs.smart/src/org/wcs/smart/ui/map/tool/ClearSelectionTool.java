@@ -21,11 +21,10 @@
  */
 package org.wcs.smart.ui.map.tool;
 
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.tool.AbstractActionTool;
 import org.opengis.filter.Filter;
-
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.tool.AbstractActionTool;
 
 /**
  * Clear map selection tool.

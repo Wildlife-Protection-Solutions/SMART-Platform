@@ -47,7 +47,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPartConstants;
 import org.hibernate.Session;
 import org.wcs.smart.birt.ui.IReportEditorManager;
@@ -270,7 +269,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 					}
 					
 					//open new editor and close me
-					Display.getDefault().syncExec(new Runnable(){
+					editor.getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							ReportManager.editReport(copy);
@@ -356,7 +355,7 @@ public class ReportEditorManager implements IReportEditorManager,IReportListener
 		if (eventType == EventType.REPORT_DELETED){
 			if (getEditorInputLocal().getReport().equals(o)){
 				//close me; I have been deleted
-				Display.getDefault().asyncExec(new Runnable(){
+				editor.getSite().getShell().getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						editor.getSite().getPage().closeEditor(editor, false);

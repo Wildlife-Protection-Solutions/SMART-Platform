@@ -22,7 +22,6 @@
 package org.wcs.smart.upgrade;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
 
 /**
  * Interface that can be implemented to perform upgrade operations
@@ -33,6 +32,6 @@ import org.hibernate.Session;
  */
 public interface IDatabaseUpgrader {
 
-	public void upgrade(Session s, IProgressMonitor monitor);
+	public void upgrade(IProgressMonitor monitor);
 	
 }

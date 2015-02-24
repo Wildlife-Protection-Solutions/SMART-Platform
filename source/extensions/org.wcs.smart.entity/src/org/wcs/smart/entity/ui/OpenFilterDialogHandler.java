@@ -21,13 +21,14 @@
  */
 package org.wcs.smart.entity.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.entity.ui.typelist.EntityTypeFilterDialog;
 import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for displaying filter dialog, for entity type list view.
@@ -35,16 +36,21 @@ import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
  * @author Emily
  *
  */
-public class OpenFilterDialogHandler extends AbstractHandler {
+public class OpenFilterDialogHandler {
 
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
+	@Execute
+	public void execute(Shell activeShell, EPartService pService){
+		MPart part = pService.findPart(EntityTypeListView.ID);
+		if (part == null) return;
 		
-		if (part.getSite().getId().equals(EntityTypeListView.ID)){
-			EntityTypeListView view = ((EntityTypeListView)part);
-			EntityTypeFilterDialog dialog = new EntityTypeFilterDialog(HandlerUtil.getActiveShell(event), view);
-			dialog.open();
+		EntityTypeListView view = (EntityTypeListView) E3Utils.getSourceObject(part);
+		EntityTypeFilterDialog dialog = new EntityTypeFilterDialog(activeShell, view);
+		dialog.open();
+	}
+	
+	public static class OpenFilterDialogHandlerWrapper extends DIHandler<OpenFilterDialogHandler>{
+		public OpenFilterDialogHandlerWrapper(){
+			super(OpenFilterDialogHandler.class);
 		}
-		return null;
 	}
 }

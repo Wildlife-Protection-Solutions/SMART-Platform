@@ -21,9 +21,8 @@
  */
 package org.wcs.smart.patrol.udig.catalog;
 
-import net.refractions.udig.catalog.IServiceInfo;
-
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.locationtech.udig.catalog.IServiceInfo;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 

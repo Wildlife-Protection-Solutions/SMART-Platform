@@ -98,9 +98,9 @@ public class SurveyFilter {
 
 	/**
 	 * 
-	 * @return patrol type filters
+	 * @return survey state filter or null if all or custom list selected
 	 */
-	public SurveyDesign.State getSurveyStateFilters(){
+	public SurveyDesign.State getSurveyStateFilter(){
 		return this.state;
 	}
 	
@@ -202,7 +202,11 @@ public class SurveyFilter {
 				and = false;
 			}
 			or = true;
-			str.append( " sd.keyId in (:keys) "); //$NON-NLS-1$
+			if ( surveyDesignKeys.length == 0){
+				str.append(" sd.keyId = ''  "); //$NON-NLS-1$
+			}else{
+				str.append( " sd.keyId in (:keys) "); //$NON-NLS-1$
+			}
 		}
 		
 		if (stringComparator != null && surveyNameFilter != null){
@@ -239,7 +243,7 @@ public class SurveyFilter {
 			
 		if (state != null ){
 			query.setParameter("states", this.state); //$NON-NLS-1$
-		}else if (state == null && surveyDesignKeys != null){
+		}else if (state == null && surveyDesignKeys != null && surveyDesignKeys.length > 0){
 			query.setParameterList("keys", surveyDesignKeys); //$NON-NLS-1$
 		}
 		

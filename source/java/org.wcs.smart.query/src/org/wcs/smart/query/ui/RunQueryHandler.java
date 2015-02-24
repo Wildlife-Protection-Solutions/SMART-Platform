@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.query.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.wcs.smart.query.ui.definition.QueryDefView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for the run query command that run the query.
@@ -33,18 +34,21 @@ import org.wcs.smart.query.ui.definition.QueryDefView;
  * @author Emily
  * @since 1.0.0
  */
-public class RunQueryHandler extends AbstractHandler {
+public class RunQueryHandler {
 
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		QueryDefView view = (QueryDefView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
+	@Execute
+	public void execute(EPartService partService) {
+		MPart prt = partService.findPart(QueryDefView.ID);
+		QueryDefView view = (QueryDefView) E3Utils.getSourceObject(prt);
 		if (view != null){
 			view.runQuery();
 		}
-		return null;
+	}
+	
+	public static class RunQueryHandlerWrapper extends DIHandler<RunQueryHandler>{
+		public RunQueryHandlerWrapper(){
+			super(RunQueryHandler.class);
+		}
 	}
 
 }

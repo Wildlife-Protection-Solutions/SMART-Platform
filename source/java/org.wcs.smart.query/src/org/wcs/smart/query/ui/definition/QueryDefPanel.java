@@ -159,8 +159,7 @@ public class QueryDefPanel {
 					Messages.QueryDefPanel_QueryTypeNotSupported,
 					new Object[] { queryType.getGuiName() }));
 		} else if (panelIds.length == 1) {
-			IDefinitionPanel pnl = DefinitionPanelManager.getInstance()
-					.createDefinitionPanel(panelIds[0]);
+			IDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[0]);
 
 			Composite c = pnl.createComposite(main);
 			dropPanels.add(pnl);
@@ -175,8 +174,7 @@ public class QueryDefPanel {
 			for (int i = 0; i < panelIds.length; i++) {
 				TabItem item = new TabItem(tf, SWT.NONE);
 
-				IDefinitionPanel pnl = DefinitionPanelManager.getInstance()
-						.createDefinitionPanel(panelIds[i]);
+				IDefinitionPanel pnl = parentView.getPart().getContext().get(DefinitionPanelManager.class).createDefinitionPanel(panelIds[i]);
 				if (pnl != null) {
 					item.setText(pnl.getGuiName());
 					Composite comp = pnl.createComposite(tf);
@@ -221,7 +219,7 @@ public class QueryDefPanel {
 	public void setQueryDefinitionPanel(String panelId){
 		currentPanel = panelId;
 		
-		ISourceProviderService service = (ISourceProviderService)parentView.getSite().getService(ISourceProviderService.class);
+		ISourceProviderService service = (ISourceProviderService)parentView.getPart().getContext().get(ISourceProviderService.class);
 		final QuerySourceProvider provider = (QuerySourceProvider) service.getSourceProvider(QuerySourceProvider.DEFINITION_PANEL_ID);
 		provider.setQueryDefinitionPanelId(panelId, queryType);
 	}

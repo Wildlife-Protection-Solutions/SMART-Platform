@@ -124,9 +124,9 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("fid:String"); //$NON-NLS-1$
+		sb.append("the_geom:MultiLineString:srid=4326"); //$NON-NLS-1$
+		sb.append(",fid:String"); //$NON-NLS-1$
 		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
-		sb.append(",geom:MultiLineString:srid=4326"); //$NON-NLS-1$
 		
 		return sb.toString();
 	}

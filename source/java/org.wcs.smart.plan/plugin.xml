@@ -40,8 +40,13 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.plan.exportPdfEditor"
+                  commandId="org.wcs.smart.plan.exportPdf"
+                  label="%exportpdf1command.name"
                   style="push">
+               <parameter
+                     name="org.wcs.smart.plan.exportpdf.editor"
+                     value="true">
+               </parameter>
             </command>
             <menu
                   label="%plantemplate.menu.label">
@@ -88,11 +93,15 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.plan.ShowPlanPerspective"
+                  commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/view16/plan.png"
                   label="%plan.menu.command.label.viewplans"
                   style="push"
                   tooltip="%plan.menu.command.tooltip.viewplans">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.plan.planPerspective">
+               </parameter>
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -105,9 +114,9 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?before=org.wcs.smart.intelligence.ShowIntelligencePersepctive">
+            locationURI="toolbar:org.wcs.smart.perspectives?endof=org.wcs.smart.perspectivesSeperator">
          <command
-               commandId="org.wcs.smart.plan.ShowPlanPerspective"
+               commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/view16/plan.png"
                label="%smart.toolbar.command.label.viewplans"
                style="push"
@@ -119,6 +128,10 @@
                      property="org.wcs.smart.caSingle">
                </test>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.plan.planPerspective">
+            </parameter>
          </command>
       </menuContribution>
 
@@ -249,8 +262,9 @@
          <toolbar
                id="org.wcs.smart.plan.toolbar">
             <command
-                  commandId="org.wcs.smart.plan.exportPdfEditor"
-                  style="push">
+                  commandId="org.wcs.smart.plan.exportPdf"
+                  style="push"
+                  tooltip="%exportpdf.command.tooltip.0">
                <visibleWhen
                      checkEnabled="false">
                   <with
@@ -260,6 +274,10 @@
                      </equals>
                   </with>
                </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.plan.exportpdf.editor"
+                     value="true">
+               </parameter>
             </command>
             <command
                   commandId="org.eclipse.ui.file.save"
@@ -299,7 +317,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.plan.exportPdfEditor"
+               commandId="org.wcs.smart.plan.exportPdf"
                label="%command.label.exportPlanToPDF"
                style="push"
                tooltip="%exportpdf.command.tooltip.0">
@@ -312,6 +330,10 @@
                   </equals>
                </with>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.plan.exportpdf.editor"
+                  value="true">
+            </parameter>
          </command>
          <command
                commandId="org.eclipse.ui.file.save"
@@ -370,7 +392,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.plan.ui.handlers.NewPlanHandler"
+            class="org.wcs.smart.plan.ui.handlers.NewPlanHandler$NewPlanHandlerWrapper"
             commandId="org.wcs.smart.plan.NewPlan">
          <activeWhen>
             <test
@@ -380,17 +402,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.ShowPlanPersepctiveHandler"
-            commandId="org.wcs.smart.plan.ShowPlanPerspective">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.plan.ui.handlers.ShowPlanFilter"
+            class="org.wcs.smart.plan.ui.handlers.ShowPlanFilter$ShowPlanFilterWrapper"
             commandId="org.wcs.smart.plan.ShowPlanFilter">
          <activeWhen>
             <test
@@ -400,7 +412,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.DeletePlanHandler"
+            class="org.wcs.smart.plan.ui.handlers.DeletePlanHandler$DeletePlanHandlerWrapper"
             commandId="org.wcs.smart.plan.DeletePlan">
          <activeWhen>
             <test
@@ -410,7 +422,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.TranslatePlanHandler"
+            class="org.wcs.smart.plan.ui.handlers.TranslatePlanHandler$TranslatePlanHandlerWrapper"
             commandId="org.wcs.smart.plan.translate">
          <activeWhen>
             <test
@@ -420,7 +432,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.RevertPlanTemplate"
+            class="org.wcs.smart.plan.ui.handlers.RevertPlanTemplate$RevertPlanTemplateWrapper"
             commandId="org.wcs.smart.plan.revertTemplate">
          <activeWhen>
             <test
@@ -438,7 +450,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.EditPlanTemplate"
+            class="org.wcs.smart.plan.ui.handlers.EditPlanTemplate$EditPlanTemplateWrapper"
             commandId="org.wcs.smart.plan.editTemplate">
          <activeWhen>
             <test
@@ -448,7 +460,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.ExportPlanPdf"
+            class="org.wcs.smart.plan.ui.handlers.ExportPlanPdf$ExportPlanPdfWrapper"
             commandId="org.wcs.smart.plan.exportPdf">
          <activeWhen>
             <test
@@ -468,25 +480,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.ExportPlanPdf"
-            commandId="org.wcs.smart.plan.exportPdfEditor">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
-         <enabledWhen>
-            <with
-                  variable="activeEditorId">
-               <equals
-                     value="org.wcs.smart.plan.ui.editor.PlanEditor">
-               </equals>
-            </with>
-         </enabledWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.plan.ui.handlers.ExportTemplateHandler"
+            class="org.wcs.smart.plan.ui.handlers.ExportTemplateHandler$ExportTemplateHandlerWrapper"
             commandId="org.wcs.smart.plan.exportTemplate">
          <activeWhen>
             <test
@@ -504,7 +498,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.plan.ui.handlers.ImportTemplateHandler"
+            class="org.wcs.smart.plan.ui.handlers.ImportTemplateHandler$ImportTemplateHandlerWrapper"
             commandId="org.wcs.smart.plan.importTemplate">
          <activeWhen>
             <test
@@ -529,10 +523,6 @@
             name="%command.label.newplan2">
       </command>
       <command
-            id="org.wcs.smart.plan.ShowPlanPerspective"
-            name="%command.name.showplans">
-      </command>
-      <command
             id="org.wcs.smart.plan.ShowPlanFilter"
             name="%command.name.showfilter">
       </command>
@@ -547,10 +537,11 @@
       <command
             id="org.wcs.smart.plan.exportPdf"
             name="%exportpdf1command.name">
-      </command>
-      <command
-            id="org.wcs.smart.plan.exportPdfEditor"
-            name="%exportpdf2.command.name">
+         <commandParameter
+               id="org.wcs.smart.plan.exportpdf.editor"
+               name="Editor Export"
+               optional="true">
+         </commandParameter>
       </command>
       <command
             id="org.wcs.smart.plan.revertTemplate"
@@ -627,7 +618,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.wcs.smart.plan.ui.perspective.PlanListView"
+            class="org.wcs.smart.plan.ui.perspective.PlanListView$PlanListViewWrapper"
             icon="images/icons/view16/plan.png"
             id="org.wcs.smart.plan.PlanListView"
             name="%planlistview.view.name"
@@ -656,10 +647,6 @@
       </image>
       <image
             commandId="org.wcs.smart.plan.exportPdf"
-            icon="images/icons/etool16/printpdf.png">
-      </image>
-      <image
-            commandId="org.wcs.smart.plan.exportPdfEditor"
             icon="images/icons/etool16/printpdf.png">
       </image>
    </extension>

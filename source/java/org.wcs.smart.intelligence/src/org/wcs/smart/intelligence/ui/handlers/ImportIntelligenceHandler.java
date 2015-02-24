@@ -26,18 +26,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
@@ -51,30 +48,25 @@ import org.wcs.smart.intelligence.xml.IntelligenceImporter;
  * @author elitvin
  * @since 1.0.0
  */
-public class ImportIntelligenceHandler extends AbstractHandler {
+public class ImportIntelligenceHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final IWorkbench activeWorkbench = HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench();
+	@Execute
+	public void execute(Shell activeShell){
 
-		XmlImportDialog dialog = new XmlImportDialog(Display.getCurrent().getActiveShell(),
+		XmlImportDialog dialog = new XmlImportDialog(activeShell,
 				Messages.ImportIntelligenceHandler_Dialog_Title,
 				Messages.ImportIntelligenceHandler_Dialog_Text,
 				Messages.ImportIntelligenceHandler_Dialog_Message);
 		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
+			return;
 		}
 
 		List<String> files = dialog.getFileNames();
-		importFiles(activeWorkbench, files);
-		
-		return null;
+		importFiles(activeShell, files);
 	}
 
-	private void importFiles(final IWorkbench activeWorkbench, final List<String> files) {
-		final Display display = Display.getCurrent();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
-		
+	private void importFiles(final Shell shell, final List<String> files) {
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);		
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
@@ -99,10 +91,10 @@ public class ImportIntelligenceHandler extends AbstractHandler {
 						}
 						if (monitor.isCanceled()){
 							final int fimported = imported;
-							display.syncExec(new Runnable() {
+							shell.getDisplay().syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIntelligenceHandler_CancelInfoDialog_Title,
+									MessageDialog.openInformation(shell, Messages.ImportIntelligenceHandler_CancelInfoDialog_Title,
 											MessageFormat.format(Messages.ImportIntelligenceHandler_CancelledMessage,fimported, files.size() ));									
 								}
 							});
@@ -111,10 +103,10 @@ public class ImportIntelligenceHandler extends AbstractHandler {
 					}
 					
 					final int iimported = imported;
-					display.syncExec(new Runnable() {
+					shell.getDisplay().syncExec(new Runnable() {
 						@Override
 						public void run() {
-							MessageDialog.openInformation(display.getActiveShell(), Messages.ImportIntelligenceHandler_CompleteTitle, MessageFormat.format(Messages.ImportIntelligenceHandler_CompleteMessage, iimported, files.size()));									
+							MessageDialog.openInformation(shell, Messages.ImportIntelligenceHandler_CompleteTitle, MessageFormat.format(Messages.ImportIntelligenceHandler_CompleteMessage, iimported, files.size()));									
 						}
 					});
 			
@@ -125,4 +117,9 @@ public class ImportIntelligenceHandler extends AbstractHandler {
 		}
 	}
 
+	public static class ImportIntelligenceHandlerWrapper extends DIHandler<ImportIntelligenceHandler>{
+		public ImportIntelligenceHandlerWrapper(){
+			super(ImportIntelligenceHandler.class);
+		}
+	}
 }

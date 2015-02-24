@@ -5,10 +5,6 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="org.wcs.smart.report.ShowReportViewer"
-            name="%showreportviewer.command.name">
-      </command>
-      <command
             id="org.wcs.smart.report.editReport"
             name="%editreport.command.name">
       </command>
@@ -65,11 +61,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.report.internal.ui.ShowReportViewerPerspectiveHandler"
-            commandId="org.wcs.smart.report.ShowReportViewer">
-      </handler>
-      <handler
-            class="org.wcs.smart.report.internal.ui.EditReportHandler"
+            class="org.wcs.smart.report.internal.ui.EditReportHandler$EditReportHandlerWrapper"
             commandId="org.wcs.smart.report.editReport">
          <enabledWhen>
             <with
@@ -86,15 +78,15 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.NewFolderHandler"
+            class="org.wcs.smart.report.internal.ui.NewFolderHandler$NewFolderHandlerWrapper"
             commandId="org.wcs.smart.report.newFolder">
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.RenameReportItem"
+            class="org.wcs.smart.report.internal.ui.RenameReportItem$RenameReportItemWrapper"
             commandId="org.wcs.smart.report.renameReportItem">
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.DeleteReportItemHandler"
+            class="org.wcs.smart.report.internal.ui.DeleteReportItemHandler$DeleteReportItemHandlerWrapper"
             commandId="org.wcs.smart.report.deleteReportItem">
          <enabledWhen>
             <with
@@ -111,11 +103,11 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.NewReportHandler"
+            class="org.wcs.smart.report.internal.ui.NewReportHandler$NewReportHandlerWrapper"
             commandId="org.wcs.smart.report.newReport">
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.RunReportHandler"
+            class="org.wcs.smart.report.internal.ui.RunReportHandler$RunReportHandlerWrapper"
             commandId="org.wcs.smart.report.runReport">
          <enabledWhen>
             <with
@@ -131,15 +123,15 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.ExportReportHandler"
+            class="org.wcs.smart.report.internal.ui.ExportReportHandler$ExportReportHandlerWrapper"
             commandId="org.wcs.smart.report.exportReport">
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.ImportReportHandler"
+            class="org.wcs.smart.report.internal.ui.ImportReportHandler$ImportReportHandlerWrapper"
             commandId="org.wcs.smart.report.importReport">
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.ImportLibraryHandler"
+            class="org.wcs.smart.report.internal.ui.ImportLibraryHandler$ImportLibraryHandlerWrapper"
             commandId="org.wcs.smart.report.importLibrary">
          <enabledWhen>
             <and>
@@ -165,7 +157,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.ExportLibraryHandler"
+            class="org.wcs.smart.report.internal.ui.ExportLibraryHandler$ExportLibraryHandlerWrapper"
             commandId="org.wcs.smart.report.exportLibrary">
          <enabledWhen>
             <and>
@@ -191,7 +183,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.EditLibraryHandler"
+            class="org.wcs.smart.report.internal.ui.EditLibraryHandler$EditLibraryHandlerWrapper"
             commandId="org.wcs.smart.report.editLibrary">
          <enabledWhen>
             <and>
@@ -217,7 +209,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.report.internal.ui.TranslateNamesHandler"
+            class="org.wcs.smart.report.internal.ui.TranslateNamesHandler$TranslateNamesHandlerWrapper"
             commandId="org.wcs.smart.report.translateItem">
       </handler>
    </extension>
@@ -225,9 +217,9 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.QueryPerspective">
+            locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.query.menu.view">
          <command
-               commandId="org.wcs.smart.report.ShowReportViewer"
+               commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/etool16/report_view.png"
                label="%showreportperspective.menu.label"
                mnemonic="%showreportperspective.menu.mnemonic"
@@ -253,6 +245,10 @@
                   </test>
                </or>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.report.ReportViewerPerspective">
+            </parameter>
          </command>
       </menuContribution>
       <menuContribution
@@ -636,7 +632,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.report.ShowReportViewer"
+                  commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/etool16/report_view.png"
                   label="%showreportperspective.menu.label"
                   mnemonic="%showreportperspective.menu.mnemonic"
@@ -662,12 +658,16 @@
                      </test>
                   </or>
                </visibleWhen>
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.report.ReportViewerPerspective">
+               </parameter>
             </command>
          </menu>
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.wcs.smart.toolbar.create?after=org.wcs.smart.query.createQuery">
+            locationURI="toolbar:org.wcs.smart.toolbar.create?after=org.wcs.smart.query.toolbar.menu.create">
          <command
                commandId="org.wcs.smart.report.newReport"
                label="%reportlist.toolbar.newreport.command.name"
@@ -733,7 +733,7 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="false"
-            class="org.wcs.smart.report.internal.ui.ReportListView"
+            class="org.wcs.smart.report.internal.ui.ReportListView$ReportListViewWrapper"
             icon="images/icons/obj16/report.png"
             id="org.wcs.smart.report.ReportListView"
             name="%reportlist.view.name"
@@ -741,7 +741,7 @@
       </view>
       <view
             allowMultiple="true"
-            class="org.wcs.smart.report.internal.ui.viewer.ReportView"
+            class="org.wcs.smart.report.internal.ui.viewer.ReportView$ReportViewWrapper"
             icon="images/icons/obj16/report.png"
             id="org.wcs.smart.birt.ReportView"
             name="%report.view.name"

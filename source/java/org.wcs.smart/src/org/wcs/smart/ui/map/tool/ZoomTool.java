@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.ui.map.tool;
 
-import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
-import net.refractions.udig.tools.internal.Zoom;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import org.locationtech.udig.tools.internal.Zoom;
 
 /**
  * Wrapper around zoom tool for using tool in dialog box.

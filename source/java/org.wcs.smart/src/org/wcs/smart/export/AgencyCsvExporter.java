@@ -63,13 +63,13 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 
 	@Override
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
-		CSVWriter writer = null;
-		try {
-			this.ca = ca;
-			languages = new ArrayList<Language>(ca.getLanguages());
-			writer = new CSVWriter(
+		this.ca = ca;
+		languages = new ArrayList<Language>(ca.getLanguages());
+
+		try (
+			CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+					delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
 			List<Agency> agencies = getAgencies(session);
 
 			// WriteHeaders
@@ -105,16 +105,8 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 					}
 				}
 			}
-			writer.close();
 			return true;
 		} catch (IOException ex) {
-			try {
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (IOException e) {
-				return false;
-			}
 			return false;
 		}
 	}

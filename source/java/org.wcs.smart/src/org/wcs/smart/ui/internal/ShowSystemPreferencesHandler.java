@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.ui.internal;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ui.internal.preference.SmartPreferenceDialog;
 
 /**
@@ -33,13 +36,18 @@ import org.wcs.smart.ui.internal.preference.SmartPreferenceDialog;
  * @author egouge
  *
  */
-public class ShowSystemPreferencesHandler extends AbstractHandler {
+public class ShowSystemPreferencesHandler{
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		SmartPreferenceDialog dialog = new SmartPreferenceDialog(HandlerUtil.getActiveShell(event));
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
+		SmartPreferenceDialog dialog = new SmartPreferenceDialog(activeShell);
 		dialog.open();
-		return null;
 	}
-
+	
+	// E3
+	public static class ShowSystemPreferencesHandlerWrapper extends DIHandler<ShowSystemPreferencesHandler> {
+		public ShowSystemPreferencesHandlerWrapper() {
+			super(ShowSystemPreferencesHandler.class);
+		}
+	}
 }

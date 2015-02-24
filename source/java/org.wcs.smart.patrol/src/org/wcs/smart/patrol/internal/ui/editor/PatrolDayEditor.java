@@ -36,7 +36,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
@@ -76,7 +75,7 @@ public class PatrolDayEditor extends EditorPart {
 	
 	private PatrolLegDayInputComposite[] children ;
 	private ScrolledForm frmSummary; 
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	
 	public PatrolDayEditor(PatrolEditor editor) {
@@ -106,6 +105,7 @@ public class PatrolDayEditor extends EditorPart {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		
 		Session session = HibernateManager.openSession();	
 		ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);

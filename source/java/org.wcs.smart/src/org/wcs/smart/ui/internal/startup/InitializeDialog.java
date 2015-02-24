@@ -174,7 +174,7 @@ public abstract class InitializeDialog  extends Dialog {
 			}
 			close();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.InitializeDialog_Error_SystemRestore + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.InitializeDialog_Error_SystemRestore + ex.getLocalizedMessage(), ex);
 		}
 	}
 	
@@ -188,7 +188,7 @@ public abstract class InitializeDialog  extends Dialog {
 			super.setReturnCode(OK);
 			close();
 		}catch(Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.InitializeDialog_Error_ImportCa + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.InitializeDialog_Error_ImportCa + ex.getLocalizedMessage(), ex);
 		}
 	}
 	

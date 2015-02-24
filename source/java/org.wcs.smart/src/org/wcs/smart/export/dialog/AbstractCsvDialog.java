@@ -189,7 +189,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 				return false;
 			}
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), config.getFailMessage() + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(config.getFailMessage() + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 	}
@@ -243,7 +243,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 				getShell().getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						SmartPlugIn.displayLog(getShell(), Messages.AbstractCsvDialog_Fail_Error + SmartUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
+						SmartPlugIn.displayLog(Messages.AbstractCsvDialog_Fail_Error + SmartUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
 					}						
 				});
 			} finally {

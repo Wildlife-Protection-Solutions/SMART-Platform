@@ -21,9 +21,23 @@
  */
 package org.wcs.smart.report.internal.ui;
 
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.advanced.MPerspective;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.workbench.IPresentationEngine;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+import org.eclipse.ui.PlatformUI;
+import org.osgi.service.event.Event;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.ui.ConservationAreaListView;
@@ -37,6 +51,7 @@ public class ReportViewerPerspective  implements IPerspectiveFactory {
 
 	public static final String ID = "org.wcs.smart.report.ReportViewerPerspective"; //$NON-NLS-1$
 
+	public static final String VIEWER_AREA_ID = "org.wcs.smart.report.viewer"; //$NON-NLS-1$
 	/**
 	 * Constructs a new Default layout engine.
 	 */
@@ -62,6 +77,9 @@ public class ReportViewerPerspective  implements IPerspectiveFactory {
 	 */
 	public void createInitialLayout(IPageLayout layout) {
 		defineLayout(layout);
+		
+		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		ContextInjectionFactory.inject(this, ctx);
 	}
 
 	/**
@@ -73,11 +91,44 @@ public class ReportViewerPerspective  implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(false);
 		
 		layout.addView(ReportListView.ID, IPageLayout.LEFT, (float)0.26, editorArea);
-		IFolderLayout reportsArea = layout.createFolder("reportsArea", IPageLayout.RIGHT, 0.26f, ReportListView.ID); //$NON-NLS-1$
+		layout.getViewLayout(ReportListView.ID).setCloseable(false);
+		
+		IFolderLayout reportsArea = layout.createFolder(VIEWER_AREA_ID, IPageLayout.RIGHT, 0.26f, ReportListView.ID);
 		reportsArea.addPlaceholder(ReportView.ID + ":*"); //$NON-NLS-1$
+		
 		
 		if (SmartDB.isMultipleAnalysis()){
 			layout.addView(ConservationAreaListView.ID, IPageLayout.TOP, 0.3f, ReportListView.ID);
+		}
+	}
+	
+	@Inject
+	@Optional
+	private void perspectiveOpened(@UIEventTopic(UIEvents.UILifeCycle.PERSPECTIVE_OPENED) Event event, IEclipseContext ctx){
+		if ( ((MPerspective)event.getProperty(UIEvents.EventTags.ELEMENT)).getElementId().equals(ID)){
+			updateTags(ctx);
+		}
+	}
+	
+	@Inject
+	@Optional
+	private void perspectiveReset(@UIEventTopic(UIEvents.UILifeCycle.PERSPECTIVE_RESET) Event event, IEclipseContext ctx){
+		if ( ((MPerspective)event.getProperty(UIEvents.EventTags.ELEMENT)).getElementId().equals(ID)){
+			updateTags(ctx);
+		}
+	}
+	
+	/**
+	 * ensure the viewer area is always visible
+	 * @param ctx
+	 */
+	private void updateTags(IEclipseContext ctx){
+		MApplication app = ctx.get(MApplication.class);
+		EModelService mService = ctx.get(EModelService.class);
+		MPartStack stack = (MPartStack) mService.find(ReportViewerPerspective.VIEWER_AREA_ID, app);
+		if (stack != null && !stack.getTags().contains(IPresentationEngine.NO_AUTO_COLLAPSE)){
+			stack.getTags().add(IPresentationEngine.NO_AUTO_COLLAPSE);
+			stack.setToBeRendered(true);
 		}
 	}
 }

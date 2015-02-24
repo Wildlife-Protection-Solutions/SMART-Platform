@@ -114,15 +114,14 @@ public class RestoreHandler {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(shell,Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
+								SmartPlugIn.displayLog(Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
 							}});
 					}
 				}
 				
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(shell,
-					Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.RestoreHandler_ReportFailed_Message + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		return ok[0];

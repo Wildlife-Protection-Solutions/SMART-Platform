@@ -116,7 +116,7 @@ public class AutoBackupEngine {
 							final String error = MessageFormat.format(Messages.AutoBackupEngine_MakeDirectoryFailed, new Object[]{ex.getLocalizedMessage()});
 							shell.getDisplay().syncExec(new Runnable(){
 							    public void run (){
-							    	SmartPlugIn.displayLog(shell, error, ex);
+							    	SmartPlugIn.displayLog(error, ex);
 							        
 							}
 							});
@@ -143,16 +143,14 @@ public class AutoBackupEngine {
 
 						}
 					}catch (Exception ex){
-						SmartPlugIn.displayLog(shell,
-								Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
+						SmartPlugIn.displayLog(Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
 					}
 				}
 			}
 
 		});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(shell,
-					Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.AutoBackupEngine_AutoBackupFailed_Error + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		properties.setProperty(PROP_LASTBACKUP,String.valueOf((new java.util.Date()).getTime() / 1000)); //use seconds
@@ -259,7 +257,7 @@ public class AutoBackupEngine {
 			}
 			return true;
 		} catch (IOException e) {
-			SmartPlugIn.displayLog(null, Messages.AutoBackupEngine_ErrorWirtingPropFile + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.AutoBackupEngine_ErrorWirtingPropFile + "\n\n" + e.getLocalizedMessage(), e); //$NON-NLS-1$
 			return false;
 		}
 	}

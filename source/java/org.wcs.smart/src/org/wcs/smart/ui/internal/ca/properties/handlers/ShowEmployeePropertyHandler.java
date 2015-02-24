@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.ui.internal.ca.properties.EmployeePropertyPage;
 
 /**
@@ -38,4 +39,10 @@ public class ShowEmployeePropertyHandler  extends ShowPropertyPageHandler {
 		super(EmployeePropertyPage.class);
 	}
 
+	// E3
+	public static class ShowEmployeePropertyHandlerWrapper extends DIHandler<ShowEmployeePropertyHandler> {
+		public ShowEmployeePropertyHandlerWrapper() {
+			super(ShowEmployeePropertyHandler.class);
+		}
+	}
 }

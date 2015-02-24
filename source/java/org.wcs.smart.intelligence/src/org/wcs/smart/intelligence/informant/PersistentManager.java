@@ -60,7 +60,6 @@ public class PersistentManager {
 					@Override
 					public void run() {
 						SmartPlugIn.displayLog(
-								null,
 								Messages.PersistentManager_FileCreateError,
 								e);
 					}});

@@ -4,7 +4,7 @@
       label="SMART P2 Feature"
       version="3.1.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart_feature">
+      license-feature="org.wcs.smart.smart.feature">
 
    <description>
       Provides the p2 requirements for the SMART Update site.
@@ -22,6 +22,37 @@
          id="org.eclipse.equinox.p2.core.feature"
          version="0.0.0"/>
 
+   <includes
+         id="org.eclipse.ecf.core.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.ecf.filetransfer.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.ecf.core.ssl.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.ecf.filetransfer.httpclient4.ssl.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.ecf.filetransfer.ssl.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.eclipse.ecf.filetransfer.httpclient4.feature"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.wcs.smart.p2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
    <plugin
          id="org.eclipse.equinox.p2.ui"
          download-size="0"
@@ -37,7 +68,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.p2"
+         id="org.eclipse.equinox.concurrent"
          download-size="0"
          install-size="0"
          version="0.0.0"

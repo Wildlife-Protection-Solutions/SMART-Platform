@@ -447,7 +447,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(null, Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
+								SmartPlugIn.displayLog(Messages.EmployeePropertyPage_Error_CannotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), ex);			 //$NON-NLS-1$
 								
 							}});
 						
@@ -455,7 +455,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(null, e.getLocalizedMessage(), e);
+			SmartPlugIn.displayLog(e.getLocalizedMessage(), e);
 		}
 		
 		

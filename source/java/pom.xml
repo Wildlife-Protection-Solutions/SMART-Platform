@@ -13,6 +13,7 @@
 		<module>org.wcs.smart.hibernate.libs</module>
 		<module>org.wcs.smart.patrol</module>
 		<module>org.wcs.smart.query</module>
+		<module>org.wcs.smart.observation</module>
 	</modules>
 	
 	

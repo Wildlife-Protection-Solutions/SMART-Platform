@@ -118,12 +118,8 @@ public class EntityCsvImporter {
 	 */
 	private String[] readHeaders() throws Exception{
 	
-		InputStreamReader reader = new InputStreamReader(new FileInputStream(importFile), "UTF-8"); //$NON-NLS-1$
-		try{
-			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
+		try(CSVReader csvReader = new CSVReader(new InputStreamReader(new FileInputStream(importFile), "UTF-8"), configuration.getDelimiter())){ //$NON-NLS-1$
 			return csvReader.readNext();
-		}finally{
-			reader.close();
 		}
 	}
 	
@@ -146,20 +142,18 @@ public class EntityCsvImporter {
 		
 		int totalCount = -1;
 		// read all to get the total count
-		InputStreamReader reader = new InputStreamReader(new FileInputStream(importFile), "UTF-8"); //$NON-NLS-1$
-		try{
-			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter());
+		try(CSVReader csvReader = new CSVReader(
+				new InputStreamReader(new FileInputStream(importFile), "UTF-8"), configuration.getDelimiter())){ //$NON-NLS-1$
+
 			totalCount = csvReader.readAll().size();
-			csvReader.close();
-		}finally{
-			reader.close();
 		}
 		
 		List<EntityAttributeSelfReference> selfReferenceItems = new ArrayList<EntityAttributeSelfReference>();
-		reader = new InputStreamReader(new FileInputStream(importFile), "UTF-8"); //$NON-NLS-1$
-		try{
-			int lineCount = 0;
-			CSVReader csvReader = new CSVReader(reader, configuration.getDelimiter()); 
+		
+		int lineCount = 0;
+		try(CSVReader csvReader = new CSVReader(
+				new InputStreamReader(new FileInputStream(importFile), "UTF-8"), configuration.getDelimiter())){  //$NON-NLS-1$
+			
 			if (configuration.getSkipHeader()){
 				csvReader.readNext();
 				lineCount ++;
@@ -305,9 +299,6 @@ public class EntityCsvImporter {
 					return false;
 				}
 			}
-			csvReader.close();
-		}finally{
-			reader.close();
 		}
 		
 		//update all self reference attributes

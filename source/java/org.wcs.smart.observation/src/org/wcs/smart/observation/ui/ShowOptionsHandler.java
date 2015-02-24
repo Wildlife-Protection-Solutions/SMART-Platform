@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.observation.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.swt.widgets.Shell;
 
 /**
  * Handler for displaying patrol options dialog.
@@ -31,13 +31,18 @@ import org.eclipse.core.commands.ExecutionException;
  * @author Emily
  * @since 1.0.0
  */
-public class ShowOptionsHandler extends AbstractHandler {
+public class ShowOptionsHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ObservationOptionsPropertyPage dialog = new ObservationOptionsPropertyPage();
+	@Execute
+	public void execute(Shell activeShell) {
+		ObservationOptionsPropertyPage dialog = new ObservationOptionsPropertyPage(activeShell);
 		dialog.open();
-		
-		return null;
+		return;
+	}
+	
+	public static class ShowOptionsHandlerWrapper extends DIHandler<ShowOptionsHandler>{
+		public ShowOptionsHandlerWrapper(){
+			super(ShowOptionsHandler.class);
+		}
 	}
 }

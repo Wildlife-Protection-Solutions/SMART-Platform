@@ -24,18 +24,69 @@
       </application>
    </extension>
    <extension
+         id="smartapp"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.wcs.smart"
+            name="SMART">
+         <property
+               name="windowImages"
+               value="images/icons/smart16.gif,images/icons/smart32.gif,images/icons/smart48.gif,images/icons/smart64.gif,images/icons/smart128.gif">
+         </property>
+         <property
+               name="preferenceCustomization"
+               value="smart_customization.ini">
+         </property>
+         <property
+               name="appName"
+               value="SMART">
+         </property>
+         <property
+               name="aboutText"
+               value="%aboutText">
+         </property>
+         <property
+               name="aboutImage"
+               value="images/nl/en/about.png">
+         </property>
+         <property
+               name="rendererFactoryUri"
+               value="bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartRenderFactory">
+         </property>
+         <property
+               name="persistState"
+               value="false">
+         </property>
+         <property
+               name="applicationCSS"
+               value="platform:/plugin/org.wcs.smart/css/smart.css">
+         </property>
+         <property
+               name="applicationCSSResources"
+               value="platform:/plugin/org.eclipse.ui.themes/images/">
+         </property>
+  <!--<property
+        name="applicationXMI"
+        value="org.wcs.smart/LegacyIDE.e4xmi">
+  </property>-->
+      </product>
+   </extension>
+   <extension
+         point="org.eclipse.ui.splashHandlers">
+      <splashHandler
+            class="org.wcs.smart.splashHandlers.InteractiveSplashHandler"
+            id="org.wcs.smart.splashHandlers.interactive">
+      </splashHandler>
+      <splashHandlerProductBinding
+            productId="org.wcs.smart.smartapp"
+            splashId="org.wcs.smart.splashHandlers.interactive">
+      </splashHandlerProductBinding>
+   </extension>
+   <extension
          point="org.eclipse.ui.views">
       <view
-            allowMultiple="true"
-            class="org.wcs.smart.ui.map.MapView"
-            icon="images/icons/eview16/map.png"
-            id="org.wcs.smart.ui.map.MapView"
-            name="%mapview.name"
-            restorable="false">
-      </view>
-      <view
             allowMultiple="false"
-            class="org.wcs.smart.ui.CrossCaAnalysisIntroView"
+            class="org.wcs.smart.ui.CrossCaAnalysisIntroView$CrossCaAnalysisIntroViewWrapper"
             icon="images/icons/eview16/crossca.png"
             id="org.wcs.smart.crossCaView"
             name="%crossca.view.name"
@@ -43,11 +94,19 @@
       </view>
       <view
             allowMultiple="false"
-            class="org.wcs.smart.ui.ConservationAreaListView"
+            class="org.wcs.smart.ui.ConservationAreaListView$ConservationAreaListViewWrapper"
             icon="images/icons/eview16/crossca.png"
             id="org.wcs.smart.query.conservationAreaList"
             name="%calist.view.name"
             restorable="false">
+      </view>
+      <view
+            allowMultiple="true"
+            class="org.wcs.smart.ui.map.MapViewWrapper"
+            icon="images/icons/eview16/map.png"
+            id="org.wcs.smart.ui.map.MapView"
+            name="%mapview.name"
+            restorable="true">
       </view>
    </extension>
    <extension
@@ -66,6 +125,58 @@
       </perspective>
    </extension>
    <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="org.wcs.smart.DefaultCrossCaPerspective">
+         <view
+               closeable="false"
+               id="org.wcs.smart.query.conservationAreaList"
+               minimized="false"
+               moveable="true"
+               relationship="left"
+               relative="org.eclipse.ui.editorss"
+               showTitle="true"
+               standalone="false"
+               visible="true">
+         </view>
+         <view
+               closeable="false"
+               id="org.wcs.smart.crossCaView"
+               minimized="false"
+               moveable="true"
+               ratio=".2"
+               relationship="right"
+               relative="org.wcs.smart.query.conservationAreaList"
+               showTitle="true"
+               standalone="true"
+               visible="true">
+         </view>
+         <view
+               closeable="false"
+               id="org.wcs.smart.ui.map.MapView"
+               minimized="false"
+               moveable="true"
+               relationship="stack"
+               relative="org.wcs.smart.crossCaView"
+               showTitle="true"
+               standalone="true"
+               visible="true">
+         </view>
+         <view
+               closeable="false"
+               id="org.locationtech.udig.project.ui.layerManager"
+               minimized="false"
+               moveable="true"
+               ratio=".7"
+               relationship="bottom"
+               relative="org.wcs.smart.query.conservationAreaList"
+               showTitle="true"
+               standalone="true"
+               visible="true">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
@@ -75,7 +186,7 @@
                label="%file.menu.label"
                mnemonic="%file.menu.mnemonic">
             <command
-                  commandId="org.wcs.smart.exportCa"
+                  commandId="org.wcs.smart.command.ca.export"
                   label="%exportca.command.label"
                   mnemonic="%exportca.command.mnemonic"
                   style="push"
@@ -97,7 +208,7 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="org.wcs.smart.backup"
+                  commandId="org.wcs.smart.command.backup"
                   icon="images/icons/etool16/backup.png"
                   label="%backup.command.label"
                   mnemonic="%backup.command.mnemonic"
@@ -105,7 +216,7 @@
                   tooltip="%backup.command.tooltip">
             </command>
             <command
-                  commandId="org.wcs.smart.changeUserPassword"
+                  commandId="org.wcs.smart.command.changeuser"
                   icon="images/icons/etool16/changepass.png"
                   id="org.wcs.menu.file.changeuserpassword"
                   label="%changeuserpass.command.label"
@@ -118,7 +229,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.systemPref"
+                  commandId="org.wcs.smart.command.systempref"
                   label="%systempref.command.label"
                   mnemonic="%systempref.command.mnemonic"
                   style="push"
@@ -149,7 +260,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.logout"
+                  commandId="org.wcs.smart.command.logout"
                   id="org.wcs.menu.file.logout"
                   label="%logout.command.label"
                   mnemonic="%logoutcommand.mnemonic"
@@ -157,7 +268,7 @@
                   tooltip="%logout.command.tooltip">
             </command>
             <command
-                  commandId="org.wcs.smart.exit"
+                  commandId="org.wcs.smart.command.exit"
                   id="org.wcs.menu.file.exit"
                   label="%exit.command.label"
                   mnemonic="%exit.command.mnemonic"
@@ -177,7 +288,7 @@
                label="%file.menu.label"
                mnemonic="%file.menu.mnemonic">
             <command
-                  commandId="org.wcs.smart.systemPref"
+                  commandId="org.wcs.smart.command.systempref"
                   label="%systempref.command.label"
                   mnemonic="%systempref.command.mnemonic"
                   style="push"
@@ -188,12 +299,12 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.showBasemaps"
+                  commandId="org.wcs.smart.command.ca.basemaps.show"
                   label="%basemaps.command.label"
                   style="push">
             </command>
             <command
-                  commandId="org.wcs.smart.ca.showProjection"
+                  commandId="org.wcs.smart.command.ca.projections.show"
                   label="%manageprojections.command.label"
                   style="push"
                   tooltip="%manageprojections.command.tooltip">
@@ -219,7 +330,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.logout"
+                  commandId="org.wcs.smart.command.logout"
                   id="org.wcs.menu.file.logout"
                   label="%logout.command.label"
                   mnemonic="%logoutcommand.mnemonic"
@@ -227,7 +338,7 @@
                   tooltip="%logout.command.tooltip">
             </command>
             <command
-                  commandId="org.wcs.smart.exit"
+                  commandId="org.wcs.smart.command.exit"
                   id="org.wcs.menu.file.exit"
                   label="%exit.command.label"
                   mnemonic="%exit.command.mnemonic"
@@ -249,7 +360,7 @@
                label="%ca.menu.label"
                mnemonic="%ca.menu.mnemonic">
             <command
-                  commandId="org.wcs.smart.ca.showProperties"
+                  commandId="org.wcs.smart.command.ca.properties.show"
                   label="%caprop.command.label"
                   mnemonic="%caprop.command.mnemonic"
                   style="push">
@@ -259,47 +370,47 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.ca.showAgencyPropertyPage"
+                  commandId="org.wcs.smart.command.ca.agency.show"
                   label="%agencyrank.command.label"
                   mnemonic="%agencyrank.command.mnemonic"
                   style="push">
             </command>
             <command
-                  commandId="org.wcs.smart.ca.showEmployees"
+                  commandId="org.wcs.smart.command.ca.employees.show"
                   icon="images/icons/etool16/user.png"
                   label="%employeelist.command.label"
                   mnemonic="%employeelist.command.mnemonic"
                   style="push">
             </command>
             <command
-                  commandId="org.wcs.smart.ca.showStations"
+                  commandId="org.wcs.smart.command.ca.stations.show"
                   icon="images/icons/etool16/station.png"
                   label="%stationlist.command.label"
                   mnemonic="%stationlist.command.mnemonic"
                   style="push">
             </command>
             <command
-                  commandId="org.wcs.smart.ca.showProjection"
+                  commandId="org.wcs.smart.command.ca.projections.show"
                   label="%manageprojections.command.label"
                   mnemonic="%manageprojections.command.mnemonic"
                   style="push"
                   tooltip="%manageprojections.command.tooltip">
             </command>
             <command
-                  commandId="org.wcs.smart.ca.showArea"
+                  commandId="org.wcs.smart.command.ca.areas.show"
                   icon="images/icons/etool16/area_polygon.png"
                   label="%boundaries.command.label"
                   mnemonic="%boundaries.command.mnemonic"
                   style="push">
             </command>
             <command
-                  commandId="org.wcs.smart.showBasemaps"
+                  commandId="org.wcs.smart.command.ca.basemaps.show"
                   label="%basemaps.command.label"
                   mnemonic="%basemaps.command.mnemonic"
                   style="push">
             </command>
             <command
-                  commandId="org.wcs.smart.ca.showDataModel"
+                  commandId="org.wcs.smart.command.ca.datamodel.show"
                   icon="images/icons/etool16/data_model.png"
                   label="%datamodel.command.label"
                   mnemonic="%datamodel.command.mnemonic"
@@ -310,7 +421,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.ca.delete"
+                  commandId="org.wcs.smart.command.ca.delete"
                   icon="images/icons/etool16/delete.png"
                   label="%deleteca.command.label"
                   mnemonic="%deleteca.command.mnemonic"
@@ -350,23 +461,27 @@
             locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
                id="org.wcs.smart.perspectives">
-            <separator
-                  name="org.wcs.smart.perspectivesSeperator"
-                  visible="false">
-            </separator>
             <command
-                  commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective"
+                  commandId="org.wcs.smart.command.showperspective"
                   icon="images/icons/etool16/map.png"
                   label="%showmapperspective.command.label"
                   style="push"
                   tooltip="%showmapperspective.command.tooltip">
+               <parameter
+                     name="org.wcs.smart.perspectiveid"
+                     value="org.wcs.smart.DefaultPerspective">
+               </parameter>
             </command>
+            <separator
+                  name="org.wcs.smart.perspectivesSeperator"
+                  visible="false">
+            </separator>
             <separator
                   name="org.wcs.smart.resetSeparator"
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.ui.internal.ResetPerspective"
+                  commandId="org.wcs.smart.command.resetperspective"
                   icon="images/icons/etool16/arrow_refresh.png"
                   label="%resetwindows.command.label"
                   style="push"
@@ -376,7 +491,7 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
-            locationURI="toolbar:org.eclipse.ui.trim.command2">
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
          <toolbar
                id="org.wcs.smart.userNameInfo">
             <control
@@ -388,7 +503,7 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.ui.map.MapView">
          <command
-               commandId="org.wcs.smart.map.saveMap"
+               commandId="org.wcs.smart.command.ca.basemaps.save"
                icon="images/icons/elcl16/save_map.png"
                label="%savebasemap.command.name"
                style="push"
@@ -403,7 +518,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.map.loadBasemap"
+               commandId="org.wcs.smart.command.map.selectbasemap"
                icon="images/icons/elcl16/load_map.png"
                label="%selectbasemap.command.label"
                style="push"
@@ -414,35 +529,35 @@
                visible="true">
          </separator>
          <command
-               commandId="org.wcs.smart.map.pan"
+               commandId="org.wcs.smart.command.map.pan"
                icon="images/icons/elcl16/pan_tool.png"
                label="%pan.command.label"
                style="radio"
                tooltip="%pan.command.tooltip">
          </command>
          <command
-               commandId="org.wcs.smart.map.zoom"
+               commandId="org.wcs.smart.command.map.zoom"
                icon="images/icons/elcl16/zoom_tool.png"
                label="%zoom.command.label"
                style="radio"
                tooltip="%zoom.command.tooltip">
          </command>
          <command
-               commandId="org.wcs.smart.map.zoomOut"
+               commandId="org.wcs.smart.command.map.zoomout"
                icon="images/icons/elcl16/zoom_out_co.gif"
                label="%zoomout.command.label"
                style="push"
                tooltip="%zoomout.command.tooltip">
          </command>
          <command
-               commandId="org.wcs.smart.map.zoomIn"
+               commandId="org.wcs.smart.command.map.zoomin"
                icon="images/icons/elcl16/zoom_in_co.gif"
                label="%zoomin.command.label"
                style="push"
                tooltip="%zoomin.command.tooltip">
          </command>
          <command
-               commandId="org.wcs.smart.map.zoomExtents"
+               commandId="org.wcs.smart.command.map.zoomextents"
                icon="images/icons/elcl16/zoom_layers.png"
                label="%zoomextents.command.label"
                style="push"
@@ -453,7 +568,7 @@
                visible="true">
          </separator>
          <command
-               commandId="org.wcs.smart.map.addLayer"
+               commandId="org.wcs.smart.command.map.addlayer"
                icon="images/icons/elcl16/layer_add.png"
                label="%addlayer.command.label"
                style="push"
@@ -478,165 +593,164 @@
             </separator>
          </toolbar>
       </menuContribution>
-   </extension>
-   <extension
-         id="smartapp"
-         point="org.eclipse.core.runtime.products">
-      <product
-            application="org.wcs.smart"
-            name="SMART">
-         <property
-               name="windowImages"
-               value="images/icons/smart16.gif,images/icons/smart32.gif,images/icons/smart48.gif,images/icons/smart64.gif,images/icons/smart128.gif">
-         </property>
-         <property
-               name="preferenceCustomization"
-               value="smart_customization.ini">
-         </property>
-         <property
-               name="appName"
-               value="SMART">
-         </property>
-         <property
-               name="aboutText"
-               value="%aboutText">
-         </property>
-         <property
-               name="aboutImage"
-               value="images/nl/en/about.png">
-         </property>
-      </product>
-   </extension>
-   <extension
-         point="org.eclipse.ui.splashHandlers">
-      <splashHandler
-            class="org.wcs.smart.splashHandlers.InteractiveSplashHandler"
-            id="org.wcs.smart.splashHandlers.interactive">
-      </splashHandler>
-      <splashHandlerProductBinding
-            productId="org.wcs.smart.smartapp"
-            splashId="org.wcs.smart.splashHandlers.interactive">
-      </splashHandlerProductBinding>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.locationtech.udig.project.ui.layerManager">
+         <command
+               commandId="org.wcs.smart.command.map.style"
+               icon="images/icons/obj16/style.png"
+               label="Style"
+               style="push"
+               tooltip="Changes the style of the selected layer.">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="popup:org.locationtech.udig.project.ui.layerManager?after=separator1">
+         <command
+               commandId="org.wcs.smart.command.map.style"
+               icon="images/icons/obj16/style.png"
+               label="Change Style..."
+               mnemonic="S"
+               style="push"
+               tooltip="Changes the style of the selected layer.">
+         </command>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
-            id="org.wcs.smart.ca.showProperties"
+            id="org.wcs.smart.command.ca.properties.show"
             name="%caprop.command.name">
       </command>
       <command
-            id="org.wcs.smart.logout"
+            id="org.wcs.smart.command.logout"
             name="%logout.command.name">
       </command>
       <command
-            id="org.wcs.smart.exit"
+            id="org.wcs.smart.command.exit"
             name="%exit.command.name">
       </command>
       <command
-            id="org.wcs.smart.ca.showStations"
+            id="org.wcs.smart.command.ca.stations.show"
             name="%stationlist.command.name">
       </command>
       <command
-            id="org.wcs.smart.ca.showEmployees"
+            id="org.wcs.smart.command.ca.employees.show"
             name="%employeelist.command.name">
       </command>
       <command
-            id="org.wcs.smart.ca.showAgencyPropertyPage"
+            id="org.wcs.smart.command.ca.agency.show"
             name="%agencyrank.command.name">
       </command>
       <command
-            id="org.wcs.smart.ca.showDataModel"
+            id="org.wcs.smart.command.ca.datamodel.show"
             name="%datamodel.command.name">
       </command>
       <command
-            id="org.wcs.smart.ca.showArea"
+            id="org.wcs.smart.command.ca.areas.show"
             name="%boundaries.command.name">
       </command>
       <command
-            id="org.wcs.smart.ui.internal.ShowDefaultPerspective"
-            name="%showmapperspective.command.name">
-      </command>
-      <command
-            defaultHandler="org.eclipse.ui.internal.handlers.ResetPerspectiveHandler"
-            id="org.wcs.smart.ui.internal.ResetPerspective"
+            id="org.wcs.smart.command.resetperspective"
             name="%resetwindows.command.name">
       </command>
       <command
-            id="org.wcs.smart.ca.delete"
+            id="org.wcs.smart.command.ca.delete"
             name="%deleteca.command.name">
       </command>
       <command
-            id="org.wcs.smart.changeUserPassword"
+            id="org.wcs.smart.command.changeuser"
             name="%changeuserpass.command.name">
       </command>
       <command
-            id="org.wcs.smart.backup"
+            id="org.wcs.smart.command.backup"
             name="%backup.command.name">
       </command>
       <command
-            id="org.wcs.smart.exportCa"
+            id="org.wcs.smart.command.ca.export"
             name="%exportca.command.name">
       </command>
       <command
-            id="org.wcs.smart.showBasemaps"
+            id="org.wcs.smart.command.ca.basemaps.show"
             name="%basemaps.command.name">
       </command>
       <command
-            id="org.wcs.smart.map.saveMap"
+            id="org.wcs.smart.command.ca.basemaps.save"
             name="%savebasemap.command.name">
       </command>
       <command
-            category="org.wcs.smart.map.commands"
-            id="org.wcs.smart.map.pan"
+            categoryId="org.wcs.smart.command.category.maptools"
+            id="org.wcs.smart.command.map.pan"
             name="%pan.command.name">
       </command>
       <command
-            category="org.wcs.smart.map.commands"
-            id="org.wcs.smart.map.zoom"
+            categoryId="org.wcs.smart.command.category.maptools"
+            id="org.wcs.smart.command.map.zoom"
             name="%zoom.command.name">
       </command>
       <command
-            id="org.wcs.smart.map.zoomExtents"
+            id="org.wcs.smart.command.map.zoomextents"
             name="%zoomextents.command.name">
       </command>
       <command
-            id="org.wcs.smart.map.addLayer"
+            id="org.wcs.smart.command.map.addlayer"
             name="%addlayer.command.name">
       </command>
       <command
-            id="org.wcs.smart.map.loadBasemap"
+            id="org.wcs.smart.command.map.selectbasemap"
             name="%selectbasemap.command.name">
       </command>
-      <category
-            id="org.wcs.smart.map.commands"
-            name="%maptools.category.name">
-      </category>
       <command
-            id="org.wcs.smart.map.zoomIn"
+            id="org.wcs.smart.command.map.zoomin"
             name="%zoomin.command.name">
       </command>
       <command
-            id="org.wcs.smart.map.zoomOut"
+            id="org.wcs.smart.command.map.zoomout"
             name="%zoomout.command.name">
       </command>
       <command
-            id="org.wcs.smart.ca.showProjection"
+            id="org.wcs.smart.command.ca.projections.show"
             name="%manageprojections.command.name">
       </command>
       <command
-            id="org.wcs.smart.systemPref"
+            id="org.wcs.smart.command.systempref"
             name="%systempref.command.name">
       </command>
       <command
-            id="org.wcs.smart.translateItem"
+            id="org.wcs.smart.command.translateitem"
             name="%tranlsate.command.name">
       </command>
+      <category
+            id="org.wcs.smart.command.category.maptools"
+            name="%maptools.category.name">
+      </category>
+      <command
+            id="org.wcs.smart.command.showperspective"
+            name="Show Perspective">
+         <commandParameter
+               id="org.wcs.smart.perspectiveid"
+               name="Perspective Id"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            id="org.wcs.smart.command.map.style"
+            name="Style">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.command.ca.basemaps.show"
+            icon="images/icons/etool16/map.png">
+      </image>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowCaPropertyHandler"
-            commandId="org.wcs.smart.ca.showProperties">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowCaPropertyHandler$ShowCaPropertyHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.properties.show">
          <enabledWhen>
             <test
                   forcePluginActivation="true"
@@ -645,16 +759,16 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.LogoutHandler"
-            commandId="org.wcs.smart.logout">
+            class="org.wcs.smart.LogoutHandler$LogoutHandlerWrapper"
+            commandId="org.wcs.smart.command.logout">
       </handler>
       <handler
-            class="org.wcs.smart.Exit"
-            commandId="org.wcs.smart.exit">
+            class="org.wcs.smart.Exit$ExitWrapper"
+            commandId="org.wcs.smart.command.exit">
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowStationPropertyPageHandler"
-            commandId="org.wcs.smart.ca.showStations">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowStationPropertyPageHandler$ShowStationPropertyPageHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.stations.show">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -663,8 +777,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowEmployeePropertyHandler"
-            commandId="org.wcs.smart.ca.showEmployees">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowEmployeePropertyHandler$ShowEmployeePropertyHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.employees.show">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -673,8 +787,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowAgencyPropertyPageHandler"
-            commandId="org.wcs.smart.ca.showAgencyPropertyPage">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowAgencyPropertyPageHandler$ShowAgencyPropertyPageHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.agency.show">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -683,8 +797,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowDataModelPropertyPageHandler"
-            commandId="org.wcs.smart.ca.showDataModel">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowDataModelPropertyPageHandler$ShowDataModelPropertyPageHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.datamodel.show">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -693,8 +807,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowAreaPropertyPageHandler"
-            commandId="org.wcs.smart.ca.showArea">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowAreaPropertyPageHandler$ShowAreaPropertyPageHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.areas.show">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -703,12 +817,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ShowDefaultMapPerspective"
-            commandId="org.wcs.smart.ui.internal.ShowDefaultPerspective">
-      </handler>
-      <handler
-            class="org.wcs.smart.ui.internal.DeleteConservationArea"
-            commandId="org.wcs.smart.ca.delete">
+            class="org.wcs.smart.ui.internal.DeleteConservationArea$DeleteConservationAreaWrapper"
+            commandId="org.wcs.smart.command.ca.delete">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -717,8 +827,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ChangeUserNameHandler"
-            commandId="org.wcs.smart.changeUserPassword">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ChangeUserNameHandler$ChangeUserNameHandlerWrapper"
+            commandId="org.wcs.smart.command.changeuser">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -727,12 +837,12 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.backup.BackupHandler"
-            commandId="org.wcs.smart.backup">
+            class="org.wcs.smart.ui.internal.backup.BackupHandler$BackupHandlerWrapper"
+            commandId="org.wcs.smart.command.backup">
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.backup.ExportCaHandler"
-            commandId="org.wcs.smart.exportCa">
+            class="org.wcs.smart.ui.internal.backup.ExportCaHandler$ExportCaHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.export">
          <activeWhen>
             <test
                   forcePluginActivation="true"
@@ -741,52 +851,76 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowBasemapHandler"
-            commandId="org.wcs.smart.showBasemaps">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowBasemapHandler$ShowBasemapHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.basemaps.show">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.SaveMapHandler"
-            commandId="org.wcs.smart.map.saveMap">
+            class="org.wcs.smart.map.internal.SaveMapHandler$SaveMapHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.basemaps.save">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.PanMapHandler"
-            commandId="org.wcs.smart.map.pan">
+            class="org.wcs.smart.map.internal.PanMapHandler$PanMapHandlerWrapper"
+            commandId="org.wcs.smart.command.map.pan">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.ZoomHandler"
-            commandId="org.wcs.smart.map.zoom">
+            class="org.wcs.smart.map.internal.ZoomHandler$ZoomHandlerWrapper"
+            commandId="org.wcs.smart.command.map.zoom">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.AddLayerHandler"
-            commandId="org.wcs.smart.map.addLayer">
+            class="org.wcs.smart.map.internal.AddLayerHandler$AddLayerHandlerWrapper"
+            commandId="org.wcs.smart.command.map.addlayer">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.ZoomExtentsHandler"
-            commandId="org.wcs.smart.map.zoomExtents">
+            class="org.wcs.smart.map.internal.ZoomExtentsHandler$ZoomExtentsHandlerWrapper"
+            commandId="org.wcs.smart.command.map.zoomextents">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.LoadBasemapHandler"
-            commandId="org.wcs.smart.map.loadBasemap">
+            class="org.wcs.smart.map.internal.LoadBasemapHandler$LoadBasemapHandlerWrapper"
+            commandId="org.wcs.smart.command.map.selectbasemap">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.ZoomInHandler"
-            commandId="org.wcs.smart.map.zoomIn">
+            class="org.wcs.smart.map.internal.ZoomInHandler$ZoomInHandlerWrapper"
+            commandId="org.wcs.smart.command.map.zoomin">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.ZoomOutHandler"
-            commandId="org.wcs.smart.map.zoomOut">
+            class="org.wcs.smart.map.internal.ZoomOutHandler$ZoomOutHandlerWrapper"
+            commandId="org.wcs.smart.command.map.zoomout">
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowProjectionsPageHandler"
-            commandId="org.wcs.smart.ca.showProjection">
+            class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowProjectionsPageHandler$ShowProjectionsPageHandlerWrapper"
+            commandId="org.wcs.smart.command.ca.projections.show">
       </handler>
       <handler
-            class="org.wcs.smart.ui.internal.ShowSystemPreferencesHandler"
-            commandId="org.wcs.smart.systemPref">
+            class="org.wcs.smart.ui.internal.ShowSystemPreferencesHandler$ShowSystemPreferencesHandlerWrapper"
+            commandId="org.wcs.smart.command.systempref">
       </handler>
       <handler
-            class="org.wcs.smart.ui.TranslateNamesHandler"
-            commandId="org.wcs.smart.translateItem">
+            class="org.wcs.smart.ui.TranslateNamesHandler$TranslateNamesHandlerWrapper"
+            commandId="org.wcs.smart.command.translateitem">
+      </handler>
+      <handler
+            class="org.eclipse.ui.internal.handlers.ResetPerspectiveHandler"
+            commandId="org.wcs.smart.command.resetperspective">
+      </handler>
+      <handler
+            class="org.wcs.smart.ui.ShowPerspectiveHandler$ShowPerspectiveHandlerWrapper"
+            commandId="org.wcs.smart.command.showperspective">
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.ShowStyleDialogHandler$ShowStyleDialogHandlerWrapper"
+            commandId="org.wcs.smart.command.map.style">
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <instanceof
+                        value="org.locationtech.udig.project.internal.Layer">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -807,7 +941,7 @@
       </propertyTester>
    </extension>
    <extension
-         point="net.refractions.udig.catalog.ServiceExtension">
+         point="org.locationtech.udig.catalog.ServiceExtension">
       <service
             class="org.wcs.smart.udig.catalog.smart.SmartServiceExtension"
             id="org.wcs.smart.udig.catalog.smartService"
@@ -815,7 +949,7 @@
       </service>
    </extension>
    <extension
-         point="net.refractions.udig.catalog.ui.connectionFactory">
+         point="org.locationtech.udig.catalog.ui.connectionFactory">
       <factory
             class="org.wcs.smart.udig.catalog.smart.ui.SmartAreaConnectionFactory"
             id="org.wcs.smart.udig.catalog.smart.smartarea">
@@ -904,7 +1038,7 @@
       </class>
    </extension>
    <extension
-         point="net.refractions.udig.project.ui.tool">
+         point="org.locationtech.udig.project.ui.tool">
       <category
             id="org.wcs.smart.udig.maptools">
       </category>
@@ -1117,51 +1251,10 @@
             name="%autobackup.preferencepage.name">
       </page>
       <page
-            class="net.refractions.udig.project.ui.preferences.RenderPreferences"
+            class="org.locationtech.udig.project.ui.preferences.RenderPreferences"
             id="org.wcs.smart.udig.preferenced.render"
             name="%prefpage.render.name">
       </page>
-   </extension>
-   <extension
-         point="org.eclipse.ui.perspectiveExtensions">
-      <perspectiveExtension
-            targetID="org.wcs.smart.DefaultCrossCaPerspective">
-         <view
-               closeable="false"
-               id="org.wcs.smart.crossCaView"
-               minimized="false"
-               moveable="true"
-               ratio=".2"
-               relationship="right"
-               relative="org.wcs.smart.query.conservationAreaList"
-               showTitle="true"
-               standalone="true"
-               visible="true">
-         </view>
-         <view
-               closeable="false"
-               id="org.wcs.smart.ui.map.MapView"
-               minimized="false"
-               moveable="true"
-               relationship="stack"
-               relative="org.wcs.smart.crossCaView"
-               showTitle="true"
-               standalone="true"
-               visible="true">
-         </view>
-         <view
-               closeable="false"
-               id="net.refractions.udig.project.ui.layerManager"
-               minimized="false"
-               moveable="true"
-               ratio=".7"
-               relationship="bottom"
-               relative="org.wcs.smart.query.conservationAreaList"
-               showTitle="true"
-               standalone="true"
-               visible="true">
-         </view>
-      </perspectiveExtension>
    </extension>
    <extension
          point="org.eclipse.ui.exportWizards">
@@ -1183,20 +1276,13 @@
       </templateCloner>
    </extension>
    <extension
-         point="org.eclipse.ui.commandImages">
-      <image
-            commandId="org.wcs.smart.showBasemaps"
-            icon="images/icons/etool16/map.png">
-      </image>
-   </extension>
-   <extension
          point="org.wcs.smart.ca.filestoredir">
       <FilestoreDirectory
             directory="maps">
       </FilestoreDirectory>
    </extension>
    <extension
-         point="net.refractions.udig.project.layerInterceptor">
+         point="org.locationtech.udig.project.layerInterceptor">
       <layerAdded
             class="org.wcs.smart.udig.style.SmartLayerStyleInterceptor"
             id="org.wcs.smart.layerAdded1"
@@ -1204,7 +1290,7 @@
       </layerAdded>
    </extension>
    <extension
-         point="net.refractions.udig.project.style">
+         point="org.locationtech.udig.project.style">
       <style
             class="org.wcs.smart.udig.style.SmartLayerStyle"
             id="org.wcs.smart.udig.savedStyle"
@@ -1212,13 +1298,13 @@
       </style>
    </extension>
    <extension
-         point="net.refractions.udig.style.sld.StyleEditorPage">
-      <StyleEditorPage
-            class="org.wcs.smart.udig.SmartSavedStylePage"
-            contentType="net.refractions.udig.project.ILayer"
-            id="org.wcs.smart.udig.savedStyle"
-            label="SMART Saved Styles">
-      </StyleEditorPage>
+         id="id2"
+         point="org.eclipse.e4.workbench.model">
+      <processor
+            apply="always"
+            beforefragment="true"
+            class="org.wcs.smart.e4.SmartE4ModelProcessor">
+      </processor>
    </extension>
 
 </plugin>

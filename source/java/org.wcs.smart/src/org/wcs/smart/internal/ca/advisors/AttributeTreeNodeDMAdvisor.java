@@ -21,12 +21,13 @@
  */
 package org.wcs.smart.internal.ca.advisors;
 
+import java.text.MessageFormat;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.internal.Messages;
 
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Advisor for deleting nodes

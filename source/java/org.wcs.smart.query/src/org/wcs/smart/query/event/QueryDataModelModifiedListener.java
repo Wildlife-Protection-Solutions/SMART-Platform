@@ -21,18 +21,16 @@
  */
 package org.wcs.smart.query.event;
 
-import java.util.ArrayList;
-import java.util.List;
+import javax.inject.Inject;
 
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
 import org.wcs.smart.query.ui.itempanel.QueryItemView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * A listener that deals with update the
@@ -45,66 +43,14 @@ import org.wcs.smart.query.ui.itempanel.QueryItemView;
  */
 public class QueryDataModelModifiedListener implements IDataModelListener {
 
-	private List<IQueryEditor> editors = new ArrayList<IQueryEditor>();
-	private QueryItemView itemView = null;
-	
-	IPartListener2 partListener = new IPartListener2() {
-		
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {
-			IWorkbenchPart part = partRef.getPart(false);
-			if (part instanceof IQueryEditor){
-				editors.add((IQueryEditor)part);
-			}else if (part instanceof QueryItemView){
-				itemView = (QueryItemView) part;
-			}
-		}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {
-			IWorkbenchPart part = partRef.getPart(false);
-			if (part instanceof IQueryEditor){
-				editors.remove((IQueryEditor)part);
-			}else if (part instanceof QueryItemView){
-				itemView = null;
-			}
-			
-		}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-		}
-	};
-	
+	@Inject private EPartService pService;
 	
 	public QueryDataModelModifiedListener() {
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
 		DataModelManager.getInstance().addChangeListener(this);
 	}
 	
 	public void dispose(){
 		DataModelManager.getInstance().removeChangeListener(this);
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
 	}
 	
 
@@ -113,12 +59,16 @@ public class QueryDataModelModifiedListener implements IDataModelListener {
 		// clear the current data model
 		QueryDataModelManager.getInstance().clearDataModel();
 		
-		for (IQueryEditor e : editors){
-			e.reparseQuery();
+		
+		for (MPart p : pService.getParts()){
+			Object t = E3Utils.getSourceObject(p);
+			if (t instanceof IQueryEditor){
+				((IQueryEditor) t).reparseQuery();
+			}
 		}
-		if (itemView != null){
-			itemView.refresh();
-		}
+		
+		MPart part = pService.findPart(QueryItemView.ID);
+		((QueryItemView)E3Utils.getSourceObject(part)).refresh();
 
 	}
 

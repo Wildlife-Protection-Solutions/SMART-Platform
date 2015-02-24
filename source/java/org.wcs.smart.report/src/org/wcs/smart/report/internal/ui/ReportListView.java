@@ -21,9 +21,19 @@
  */
 package org.wcs.smart.report.internal.ui;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
@@ -38,16 +48,14 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
 import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
+import org.osgi.service.event.Event;
 import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
@@ -60,6 +68,7 @@ import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.report.ui.LazyReportContentProvider;
 import org.wcs.smart.report.ui.ReportLabelProvider;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * View that displays saved queries to the user.
@@ -67,60 +76,14 @@ import org.wcs.smart.report.ui.ReportLabelProvider;
  * @author Emily
  * @since 1.0.0
  */
-public class ReportListView extends ViewPart {
+public class ReportListView {
 
 	public static final String ID = "org.wcs.smart.report.ReportListView"; //$NON-NLS-1$
 
-	
 	private TreeViewer reportList;
 	
-	/* listener to update query definition when window changes */
-	private IPartListener2 editorListener = new IPartListener2() {
-		
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {
-		}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef.getId().equals(ReportView.ID)){
-				
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part != null && part instanceof ReportView){
-					if (((ReportView)part).getReport() != null){
-						IStructuredSelection selection = new StructuredSelection(((ReportView)part).getReport());
-						reportList.setSelection(selection);
-					}
-				}
-				
-				
-			}
-		}
-	};
+	@Inject private MPart part;
+	@Inject private IMenuService menuService;
 	
 	/*
 	 * listener for report chaning events
@@ -136,15 +99,16 @@ public class ReportListView extends ViewPart {
 	 * Creates a new view
 	 */
 	public ReportListView(){
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(editorListener);
 	}
 
 	/*
 	 * Updates the tree when an object is modified
 	 */
 	private void refreshTree(final Object o, final EventType type){
+		Display d = part.getContext().get(Display.class);
+//		Display d = reportList.getControl().getShell().getDisplay();
 		if (type == EventType.REPORT_UPDATED || type == EventType.FOLDER_UPDATED){
-			Display.getDefault().syncExec(new Runnable(){
+			d.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					reportList.update(o, null);
@@ -157,7 +121,7 @@ public class ReportListView extends ViewPart {
 				}
 			});
 		}else if (type == EventType.REPORT_ADDED || type == EventType.REPORT_DELETED){
-			Display.getDefault().syncExec(new Runnable(){
+			d.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					ReportFolder rf = ((Report)o).getFolder();
@@ -172,7 +136,7 @@ public class ReportListView extends ViewPart {
 				}
 			});
 		}else if (type == EventType.FOLDER_ADDED || type == EventType.FOLDER_DELETED){
-			Display.getDefault().syncExec(new Runnable(){
+			d.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					ReportFolder rf = (ReportFolder)o;
@@ -200,7 +164,7 @@ public class ReportListView extends ViewPart {
 				}
 			});
 		}else{
-			Display.getDefault().syncExec(new Runnable(){
+			d.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					reportList.refresh();	
@@ -209,8 +173,11 @@ public class ReportListView extends ViewPart {
 		}
 	}
 	
-	@Override
+	@PostConstruct
 	public void createPartControl(Composite parent) {
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		
 		GridLayout gl = new GridLayout(1, false);
@@ -253,20 +220,17 @@ public class ReportListView extends ViewPart {
 				}
 				Object x = selection.getFirstElement();
 				if (x instanceof Report){
-					ReportManager.viewReport((Report) x);
+					ReportManager.viewReport((Report) x, part.getContext());
 				}
 				
 			}
 		});
 		
-		
-		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.report.ReportListView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(reportList.getControl());
-		reportList.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager,  reportList);
-		getSite().setSelectionProvider(reportList);
+		reportList.getControl().setMenu(menu);	
 		
 		reportList.expandToLevel(2);
 		ReportEventManager.getInstance().addReportListener(listener);
@@ -280,16 +244,36 @@ public class ReportListView extends ViewPart {
 		reportList.editElement(obj, 0);
 	}
 
-	@Override
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof ReportView && ((ReportView)lpart).getReport() != null){
+			reportList.setSelection(new StructuredSelection(((ReportView)lpart).getReport()));
+		}
+	}
+	
+	@PreDestroy
 	public void dispose(){
-		super.dispose();
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(editorListener);
 		ReportEventManager.getInstance().removeReportListener(listener);
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		reportList.getControl().setFocus();
 	}
 
+	public static class ReportListViewWrapper extends DIViewPart<ReportListView>{
+		public ReportListViewWrapper(){
+			super(ReportListView.class);
+		}
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			
+			getSite().setSelectionProvider(	((ReportListView)getComponent()).reportList );
+		}
+	}
 }

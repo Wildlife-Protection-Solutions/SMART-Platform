@@ -128,8 +128,18 @@ public abstract class ImportGpsDataWizard extends Wizard implements IPageChangin
 		setCanFinish(false);
 	}
 
+	/**
+	 * Get supported import engines
+	 * @return
+	 */
 	public abstract IImportEngine[] getEngines(); 
 
+	/**
+	 * Execute on finish
+	 * @return
+	 */
+	public abstract boolean processFinish();
+	
 	@Override
 	public boolean performFinish() {
 		if (lastPage == null){
@@ -141,102 +151,8 @@ public abstract class ImportGpsDataWizard extends Wizard implements IPageChangin
 		return processFinish();
 	}
 	
-	public abstract boolean processFinish();
 	
-//	/**
-//	 * 
-//	 */
-//	@Override
-//	public boolean performFinish() {
-//		if (lastPage == null){
-//			return false;
-//		}
-//		if (!lastPage.beforeMoveNext(null)){
-//			return false;
-//		}
-//	
-//		//valid overwrite if importing tracks
-//		if (type == ImportType.TRACK){
-//			if (currentOption == ImportOption.DATE || currentOption == ImportOption.SELECT){
-//				if (currentDay.getTrack() != null){
-//					//warn user
-//					if (!MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, Messages.PatrolLegDayInputComposite_SetTrackDialog_Message)){
-//						return false;
-//					}
-//				}
-//			}
-//			if (currentOption == ImportOption.ALL){
-//				boolean warn = false;
-//				for(PatrolLeg l : currentDay.getPatrolLeg().getPatrol().getLegs()){
-//					for(PatrolLegDay d : l.getPatrolLegDays()){
-//						if (d.getTrack() != null){
-//							warn = true;
-//							break;
-//						}
-//					}
-//					if (warn) break;
-//				}
-//				
-//				if (warn){
-//					//warn user
-//					if (!MessageDialog.openConfirm(getShell(), IMPORT_DIALOG_TITLE, Messages.ImportGpsDataWizard_TrackWarningOverwriteNew)){
-//						return false;
-//					}
-//				}
-//			}
-//		}
-//		
-//		final String[] successMessage =  new String[]{null};
-//		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-//		
-//		try {
-//			pmd.run(true, false, new IRunnableWithProgress() {
-//				@Override
-//				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-//						InterruptedException {
-//					try {
-//						if (getImportOption() == ImportOption.DATE || getImportOption() == ImportOption.ALL){
-//							importedData = engine.getWaypoints(getImportOption(), type, getCurrentDate().getDate(), monitor);
-//						}
-//						
-//						if (importedData != null && importedData.size() == 0){
-//							//nothing found
-//							Display.getDefault().syncExec(new Runnable(){
-//
-//								@Override
-//								public void run() {
-//									MessageDialog.openWarning(getShell(), IMPORT_DIALOG_TITLE, MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{getType().guiName, getType().guiName}));
-//								}});
-//							return;
-//						}
-//						
-//						String message = engine.updatePatrol(getImportOption(), getType(), getCurrentDate().getPatrolLeg().getPatrol(), getCurrentDate(), importedData, monitor);
-//						successMessage[0] = message;
-//					} catch (final Exception e) {
-//						Display.getDefault().syncExec(new Runnable(){
-//							@Override
-//							public void run() {
-//								SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), e.getMessage(), e);
-//							}
-//							
-//						});
-//						successMessage[0] = null;
-//					}
-//				}
-//			});
-//		} catch (Exception ex) {
-//			ObservationPlugIn.displayLog(GPX_FILE_ERROR + ex.getLocalizedMessage(), ex);
-//			return false;
-//		}
-//		if(successMessage[0] != null){
-//			MessageDialog.openInformation(getShell(), IMPORT_DIALOG_TITLE, Messages.ImportGpsDataWizard_ImportCompleteMessage + " " + successMessage[0]); //$NON-NLS-1$
-//			return true;
-//		}else{
-//			return false;
-//		}
-//	}
-
-
+	
 	/**
 	 * @see org.eclipse.jface.dialogs.IPageChangingListener#handlePageChanging(org.eclipse.jface.dialogs.PageChangingEvent)
 	 */

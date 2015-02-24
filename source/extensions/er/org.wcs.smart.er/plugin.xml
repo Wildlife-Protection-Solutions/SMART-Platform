@@ -108,7 +108,7 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.wcs.smart.er.ui.SurveyDesignListView"
+            class="org.wcs.smart.er.ui.SurveyDesignListView$SurveyDesignListViewWrapper"
             icon="images/icons/obj16/survey.png"
             id="org.wcs.smart.er.surveyDesignListView"
             name="%survey.view.name"
@@ -330,12 +330,16 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.er.showsurveys"
+                  commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/survey.png"
                   label="%survey.view.command.label"
                   mnemonic="x"
                   style="push"
                   tooltip="%survey.view.command.tooltip">
+               <parameter
+                     name="org.wcs.smart.observation.perspective.show.focusview"
+                     value="org.wcs.smart.er.surveyDesignListView">
+               </parameter>
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -442,11 +446,16 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
-               commandId="org.wcs.smart.er.showsurveys"
+               commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/survey.png"
-               label="%survey.view.command.label1"
+               label="%survey.view.command.label"
+               mnemonic="x"
                style="push"
-               tooltip="%survey.view.command.tooltip1">
+               tooltip="%survey.view.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.observation.perspective.show.focusview"
+                  value="org.wcs.smart.er.surveyDesignListView">
+            </parameter>
             <visibleWhen
                   checkEnabled="false">
                <test
@@ -558,11 +567,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.er.ui.handlers.ShowSurveyHandler"
-            commandId="org.wcs.smart.er.showsurveys">
-      </handler>
-      <handler
-            class="org.wcs.smart.er.ui.handlers.DeleteSurveyElementHandler"
+            class="org.wcs.smart.er.ui.handlers.DeleteSurveyElementHandler$DeleteSurveyElementHandlerWrapper"
             commandId="org.wcs.smart.er.delete">
          <activeWhen>
             <and>
@@ -605,7 +610,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler"
+            class="org.wcs.smart.er.ui.handlers.NewSurveyDesignHandler$NewSurveyDesignHandlerWrapper"
             commandId="org.wcs.smart.er.surveydesign.new">
          <enabledWhen>
             <and>
@@ -630,7 +635,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.NewSurveyHandler"
+            class="org.wcs.smart.er.ui.handlers.NewSurveyHandler$NewSurveyHandlerWrapper"
             commandId="org.wcs.smart.er.survey.new">
          <enabledWhen>
             <and>
@@ -655,7 +660,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.NewMissionHandler"
+            class="org.wcs.smart.er.ui.handlers.NewMissionHandler$NewMissionHandlerWrapper"
             commandId="org.wcs.smart.er.mission.new">
          <enabledWhen>
             <and>
@@ -680,7 +685,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.ShowMissionAttributesHandler"
+            class="org.wcs.smart.er.ui.handlers.ShowMissionAttributesHandler$ShowMissionAttributesHandlerWrapper"
             commandId="org.wcs.smart.er.missionattributes.show">
          <enabledWhen>
             <and>
@@ -701,7 +706,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.ShowSamplingUnitAttributesHandler"
+            class="org.wcs.smart.er.ui.handlers.ShowSamplingUnitAttributesHandler$ShowSamplingUnitAttributesHandlerWrapper"
             commandId="org.wcs.smart.er.su.show">
          <enabledWhen>
             <and>
@@ -722,11 +727,11 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.FilterSurveyListItemsHandler"
+            class="org.wcs.smart.er.ui.handlers.FilterSurveyListItemsHandler$FilterSurveyListItemsHandlerWrapper"
             commandId="org.wcs.smart.er.filter">
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.EditSurveyElementHandler"
+            class="org.wcs.smart.er.ui.handlers.EditSurveyElementHandler$EditSurveyElementHandlerWrapper"
             commandId="org.wcs.smart.er.editItem">
          <enabledWhen>
             <and>
@@ -790,7 +795,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.SurveyDesignExportHandler"
+            class="org.wcs.smart.er.ui.handlers.SurveyDesignExportHandler$SurveyDesignExportHandlerWrapper"
             commandId="org.wcs.smart.er.surveydesignexport">
          <enabledWhen>
             <and>
@@ -811,7 +816,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.SurveyDesignImportHandler"
+            class="org.wcs.smart.er.ui.handlers.SurveyDesignImportHandler$SurveyDesignImportHandlerWrapper"
             commandId="org.wcs.smart.er.surveydesignimport">
          <enabledWhen>
             <and>
@@ -832,7 +837,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.MissionExportHandler"
+            class="org.wcs.smart.er.ui.handlers.MissionExportHandler$MissionExportHandlerWrapper"
             commandId="org.wcs.smart.er.missionExportHandler">
          <enabledWhen>
             <and>
@@ -857,16 +862,12 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.er.ui.handlers.MissionImportHandler"
+            class="org.wcs.smart.er.ui.handlers.MissionImportHandler$MissionImportHandlerWrapper"
             commandId="org.wcs.smart.er.missionImportHandler">
       </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
-      <command
-            id="org.wcs.smart.er.showsurveys"
-            name="%survey.view.command.label2">
-      </command>
       <command
             id="org.wcs.smart.er.surveydesign.new"
             name="%surveydesign.create.command.name">
@@ -1022,7 +1023,7 @@
       </DeleteAdvisor>
    </extension>
    <extension
-         point="net.refractions.udig.catalog.ServiceExtension">
+         point="org.locationtech.udig.catalog.ServiceExtension">
       <service
             class="org.wcs.smart.er.map.samplingunit.SamplingUnitServiceExtension"
             id="org.wcs.smart.udig.er.catalog.SmartSamplingUnitService"
@@ -1049,7 +1050,7 @@
       </FilestoreDirectory>
    </extension>
    <extension
-         point="net.refractions.udig.project.ui.tool">
+         point="org.locationtech.udig.project.ui.tool">
       <modalTool
             categoryId="org.wcs.smart.udig.maptools"
             class="org.wcs.smart.er.ui.mision.udig.SplitTool"

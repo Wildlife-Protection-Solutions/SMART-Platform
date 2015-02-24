@@ -24,10 +24,9 @@ package org.wcs.smart.ui.internal.backup;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -37,7 +36,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.DisplayAccess;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.backup.DerbyBackupEngine;
 import org.wcs.smart.internal.Messages;
@@ -48,17 +46,16 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  * @since 1.0.0
  */
-public class BackupHandler extends AbstractHandler {
+public class BackupHandler {
 
 	private int backupState = 0;
 	private File backupFile = null;
 	/**
 	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		executeBackup(HandlerUtil.getActiveShell(event), true);
-		return null;
+	@Execute
+	public void execute(Shell activeShell) {
+		executeBackup(activeShell, true);
 	}
 
 	/**
@@ -122,8 +119,7 @@ public class BackupHandler extends AbstractHandler {
 				}
 			});
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(shell,
-					Messages.BackupHandler_Error_BackupError + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.BackupHandler_Error_BackupError + ex.getLocalizedMessage(), ex);
 		}
 		
 		if (backupState == 1){
@@ -146,5 +142,12 @@ public class BackupHandler extends AbstractHandler {
 	
 	public boolean backupOk(){
 		return backupState == 1;
+	}
+	
+	// E3
+	public static class BackupHandlerWrapper extends DIHandler<BackupHandler> {
+		public BackupHandlerWrapper() {
+			super(BackupHandler.class);
+		}
 	}
 }

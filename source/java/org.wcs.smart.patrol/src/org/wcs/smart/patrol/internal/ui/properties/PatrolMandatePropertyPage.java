@@ -66,10 +66,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -130,8 +130,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	/**
 	 * Creates new page
 	 */
-	public PatrolMandatePropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.PatrolMandatePropertyPage_Dialog_Title);
+	public PatrolMandatePropertyPage(Shell parentShell) {
+		super(parentShell, Messages.PatrolMandatePropertyPage_Dialog_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 	}
 
@@ -450,7 +450,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			if (!findLangValue(type, mnd).equals(newValue)){
 				String error = validate(type, mnd, newValue);
 				if (error != null){
-					MessageDialog.openError(Display.getDefault().getActiveShell(), INVALID_NAME_DIALOG_TITLE, error);
+					MessageDialog.openError(getShell(), INVALID_NAME_DIALOG_TITLE, error);
 				}else{
 					
 					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());

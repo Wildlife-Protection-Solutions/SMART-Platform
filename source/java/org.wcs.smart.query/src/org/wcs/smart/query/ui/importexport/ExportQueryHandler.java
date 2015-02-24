@@ -25,19 +25,19 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for the export query button.
@@ -45,25 +45,21 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public class ExportQueryHandler extends AbstractHandler implements IHandler {
+public class ExportQueryHandler {
 
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final IEditorPart editor = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActiveEditor();
+	@Execute
+	public void execute(MPart activePart, Shell activeShell, @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
 		Query query = null;
-		if (editor instanceof IQueryEditor){
-			query = ((IQueryEditor) editor).getQueryProxy().getQuery();
+		Object src = E3Utils.getSourceObject(activePart);
+		if (src instanceof IQueryEditor){
+			query = ((IQueryEditor)src).getQueryProxy().getQuery();
 		}
 		
 		List<QueryEditorInput> selectedQueries = null;
 		if (query == null){
 			selectedQueries =  new ArrayList<QueryEditorInput>();
-			ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
 			// find all selected reports
-			if (thisSelection != null){
+			if (thisSelection != null && thisSelection instanceof IStructuredSelection){
 				for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
 					Object type = (Object) iterator.next();
 					if (type instanceof QueryEditorInput){
@@ -73,10 +69,13 @@ public class ExportQueryHandler extends AbstractHandler implements IHandler {
 			}
 		}
 		ExportQueryWizard wizard = new ExportQueryWizard(query, selectedQueries);
-		WizardDialog wd = new WizardDialog(HandlerUtil.getActiveShell(event), wizard);
+		WizardDialog wd = new WizardDialog(activeShell, wizard);
 		wd.open();
-		
-		return null;
 	}
 
+	public static class ExportQueryHandlerWrapper extends DIHandler<ExportQueryHandler>{
+		public ExportQueryHandlerWrapper(){
+			super(ExportQueryHandler.class);
+		}
+	}
 }

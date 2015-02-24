@@ -21,20 +21,29 @@
  */
 package org.wcs.smart.query.ui;
 
+import javax.inject.Named;
+
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.newwizard.NewQueryWizard;
 import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
  * Query handler that prompt the user for the type of query they
@@ -42,56 +51,36 @@ import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
  * @author egouge
  *
  */
-public class CreateUnknownQueryHandler extends AbstractHandler {
+public class CreateUnknownQueryHandler {
 
 	private static final String QUERY_TYPE_KEY = "org.wcs.smart.query.type"; //$NON-NLS-1$
 	
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		showQueryPerspective(event);
-		String qType = event.getParameter(QUERY_TYPE_KEY);
-		if (qType != null){
-			IQueryType type = QueryTypeManager.getInstance().findQueryType(qType);
+	@Execute
+	public void execute(@Optional @Named(QUERY_TYPE_KEY) String queryType, Shell activeShell, IEclipseContext context){
+		
+		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), context.get(EModelService.class), context.get(MWindow.class));
+		
+		if (queryType != null){
+			IQueryType type = QueryTypeManager.getInstance().findQueryType(queryType);
 			if (type != null){
 				createQuery(type);
-				return null;
+				return;
 			}
 		}
-		createUnknownQuery(event);
+		createUnknownQuery(activeShell);
 		
-		return null;
-	}
-
-	private void showQueryPerspective(final ExecutionEvent event){
-		try {
-			String activeId = HandlerUtil.getActivePart(event).getSite().getPage().getPerspective().getId();
-			
-			String perspectiveId = QueryPlugIn.getActivePerspectiveId();
-			if (!activeId.equals(perspectiveId)){
-				//show query perspective
-				HandlerUtil
-				.getActiveWorkbenchWindow(event)
-				.getWorkbench()
-				.showPerspective(perspectiveId,
-						HandlerUtil.getActiveWorkbenchWindow(event));	
-			}
-			
-		} catch (WorkbenchException e) {
-			QueryPlugIn
-					.displayLog(Messages.CreateUnknownQueryHandler_ErrorLoadingQueryView, e);
-		}
-	}
-	private void createQuery(IQueryType qtype){
-		/* open editor for query type */
-		OpenQueryHandler.openQuery(new QueryEditorInput(qtype));
 	}
 
 	
-	private void createUnknownQuery(final ExecutionEvent event){
+	
+	private void createQuery(IQueryType qtype){
+		(new OpenQueryHandler()).execute(new StructuredSelection(new QueryEditorInput(qtype)));
+	}
+
+	
+	private void createUnknownQuery(Shell activeShell){
 		NewQueryWizard w = new NewQueryWizard();
-		WizardDialog d = new WizardDialog(HandlerUtil.getActiveShell(event), w);
+		WizardDialog d = new WizardDialog(activeShell, w);
 		d.setMinimumPageSize(650,200);
 		
 		if (d.open() != IDialogConstants.OK_ID){
@@ -102,6 +91,30 @@ public class CreateUnknownQueryHandler extends AbstractHandler {
 			return ;
 		}
 		createQuery(type);
+	}
+	
+	public static class CreateUnknownQueryHandlerWrapper extends AbstractHandler {
+
+		private CreateUnknownQueryHandler component;
+
+		public CreateUnknownQueryHandlerWrapper() {
+			IEclipseContext context = getActiveContext();
+			component = ContextInjectionFactory.make(CreateUnknownQueryHandler.class, context);
+		}
+
+		private static IEclipseContext getActiveContext() {
+			IEclipseContext parentContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			return parentContext.getActiveLeaf();
+		}
+		
+		@Override
+		public Object execute(ExecutionEvent event) throws ExecutionException {
+			//Default di handler does not add parameters into context
+			IEclipseContext ctx = getActiveContext();
+			ctx.set(QUERY_TYPE_KEY, event.getParameter(QUERY_TYPE_KEY));
+			return ContextInjectionFactory.invoke(component, Execute.class, ctx);
+		}
+
 	}
 }
 

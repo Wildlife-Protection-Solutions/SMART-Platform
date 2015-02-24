@@ -10,10 +10,7 @@
 package org.wcs.smart.query.udig.render;
 
 import java.awt.Color;
-
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.style.IStyleConfigurator;
-import net.refractions.udig.ui.ColorEditor;
+import java.util.Arrays;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,6 +18,7 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -34,6 +32,9 @@ import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
 import org.geotools.styling.Symbolizer;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.style.IStyleConfigurator;
+import org.locationtech.udig.ui.ColorEditor;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
@@ -47,11 +48,36 @@ import org.wcs.smart.query.internal.Messages;
  */
 public class SmartGridCellStyleConfigurator extends IStyleConfigurator implements SelectionListener {
 
+	
+	private enum LineStyle{
+		LINE_SOLID(Messages.SmartGridCellStyleConfigurator_linestyle_solid, null),
+		LINE_DASH(Messages.SmartGridCellStyleConfigurator_linestyle_dash, new float[]{7, 2}),
+		LINE_DASHDOT(Messages.SmartGridCellStyleConfigurator_linestyle_dashdot, new float[]{7, 2, 2, 2}),
+		LINE_DASHDOTDOT(Messages.SmartGridCellStyleConfigurator_linestyle_dashdotdot, new float[]{7, 2, 2, 2, 2, 2}),
+		LINE_DOT(Messages.SmartGridCellStyleConfigurator_linestyle_dot, new float[]{2, 2});
+		
+		String localName;
+		float[] dashArray;
+		
+		LineStyle (String name, float[] dashArray){
+			this.localName = name;
+			this.dashArray = dashArray;
+		}
+	}
+    
+	private static final String[] LINE_STYLES = new String[] { 
+		LineStyle.LINE_SOLID.localName,
+		LineStyle.LINE_DASH.localName,
+		LineStyle.LINE_DASHDOT.localName,
+		LineStyle.LINE_DASHDOTDOT.localName,
+		LineStyle.LINE_DOT.localName};
+	
 	private Button btnCheck;
 	
 	private Composite cStyle;
 	private ColorEditor btnColor;
 	private Spinner cmbSize;
+	private Combo cmbLineStyle;
 	
 	private Style style;
 	private FilterFactory ff = CommonFactoryFinder.getFilterFactory();
@@ -90,10 +116,15 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
         cmbSize.setMinimum(0);
         cmbSize.setMaximum(100);
         cmbSize.setSelection(1);
-        
+    
+        l = new Label(cStyle, SWT.NONE);
+        l.setText(Messages.SmartGridCellStyleConfigurator_LineStyleLabel);
+        l.setToolTipText(Messages.SmartGridCellStyleConfigurator_LineStyleTooltip);
+        cmbLineStyle = new Combo(cStyle, SWT.DROP_DOWN);
+        cmbLineStyle.setItems(LINE_STYLES);
+        cmbLineStyle.select(0); 
+   	
         btnCheck.addSelectionListener(this);
-        btnColor.getButton().addSelectionListener(this);
-        cmbSize.addSelectionListener(this);
         
         cStyle.setEnabled(false);
         for (Control c : cStyle.getChildren()){
@@ -103,6 +134,7 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
     
 	@Override
 	public void preApply() {
+		updateStyle();
 	}
 	
 	
@@ -139,14 +171,22 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
         	
         	btnColor.setColor(SLD.lineColor(gridSymbolizer));
         	cmbSize.setSelection(SLD.lineWidth(gridSymbolizer));
+        	
+        	String text = getLineStyle(SLD.lineDash(gridSymbolizer));
+        	boolean found = false;
+        	for (int i = 0; i < cmbLineStyle.getItemCount(); i++){
+        		if (cmbLineStyle.getItem(i).equalsIgnoreCase(text)){
+        			found = true;
+        		}
+        	}
+        	if (!found) cmbLineStyle.add(text);
+        	cmbLineStyle.setText(text);
         }
         updateEnabledState();
     }
     
-    
-    @Override
-	public void widgetSelected(SelectionEvent e) {
-		if (btnCheck.getSelection()){
+    private void updateStyle(){
+    	if (btnCheck.getSelection()){
 			if (gridSymbolizer == null){
 				gridSymbolizer = sf.createLineSymbolizer();
 				gridSymbolizer.setStroke(sf.createStroke(ConstantExpression.color(Color.BLACK), ff.literal(1)));
@@ -158,6 +198,7 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 			}
 			gridSymbolizer.getStroke().setWidth(ff.literal(cmbSize.getSelection()));
 			gridSymbolizer.getStroke().setColor(ConstantExpression.color(btnColor.getColor()));
+			gridSymbolizer.getStroke().setDashArray(getDashArray());
 			
 			getStyleBlackboard().put(SmartGridCellStyleContent.STYLE_ID, style);	
 		}else{			
@@ -166,6 +207,11 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 		}
 		
 		updateEnabledState();
+    }
+    
+    @Override
+	public void widgetSelected(SelectionEvent e) {
+		updateStyle();
 		
 	}
 
@@ -181,4 +227,46 @@ public class SmartGridCellStyleConfigurator extends IStyleConfigurator implement
 	public void widgetDefaultSelected(SelectionEvent e) {
 	}
 
+	private float[] getDashArray(){
+		String text = cmbLineStyle.getText();
+		for (LineStyle ls: LineStyle.values()){
+			if (ls.localName.equals(text)){
+				return ls.dashArray;
+			}
+		}
+		//try to parse an array of floats
+		String bits[] = text.split(","); //$NON-NLS-1$
+		float[] dash = new float[bits.length];
+		try{
+			for (int i = 0; i < bits.length; i ++){
+				dash[i] = Float.valueOf(bits[i]);
+			}
+			return dash;
+		}catch (Exception ex){
+			//TODO:
+			ex.printStackTrace();
+		}
+		return LineStyle.LINE_SOLID.dashArray;
+	}
+	
+	private String getLineStyle(float[] dashArray){
+		if (dashArray == null) return LineStyle.LINE_SOLID.localName;
+		for (LineStyle ls : LineStyle.values()){
+			if (ls.dashArray != null && ls.dashArray.length != dashArray.length) continue;
+			if (Arrays.equals(dashArray, ls.dashArray)){
+				return ls.localName;
+			};
+		}
+		if (dashArray.length > 0){
+			StringBuilder sb = new StringBuilder();
+			for (float f : dashArray){
+				sb.append(f);
+				sb.append(","); //$NON-NLS-1$
+			}
+			sb.deleteCharAt(sb.length()-1);
+			return sb.toString();
+		}
+		
+		return LineStyle.LINE_SOLID.localName;
+	}
 }

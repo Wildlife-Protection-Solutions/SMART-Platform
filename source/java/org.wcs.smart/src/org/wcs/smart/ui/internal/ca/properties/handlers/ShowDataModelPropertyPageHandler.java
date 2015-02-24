@@ -23,14 +23,17 @@ package org.wcs.smart.ui.internal.ca.properties.handlers;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
@@ -46,23 +49,17 @@ import org.wcs.smart.ui.internal.ca.properties.InitCaDataModelDialog;
  * @author Emily
  * @since 1.0.0
  */
-public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
-	/**
-	 * @param page
-	 */
-	public ShowDataModelPropertyPageHandler() {
-		super(DataModelPropertyPage.class);
-	}
-	DataModelPropertyPage dialog = null;
-	Session loadedSession = null;
+public class ShowDataModelPropertyPageHandler {
 	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	private DataModelPropertyPage dialog = null;
+	private Session loadedSession = null;
+	
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
 
-		final Shell parentShell = HandlerUtil.getActiveShell(event);
-		dialog = new DataModelPropertyPage( parentShell );
+		dialog = new DataModelPropertyPage( activeShell );
 		
-		DataModelProgressMonitorDialog ppd = new DataModelProgressMonitorDialog(parentShell);
+		DataModelProgressMonitorDialog ppd = new DataModelProgressMonitorDialog(activeShell);
 		try {
 			ppd.run();
 		} catch (Exception ex) {
@@ -70,17 +67,17 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 				loadedSession.getTransaction().rollback();
 			}
 			loadedSession.close();
-			SmartPlugIn.displayLog(parentShell, Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
-			return null;
+			SmartPlugIn.displayLog(Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
+			return;
 		}
 		
 		DataModel dataModel = ppd.dm;
 		if ( dataModel == null || dataModel.getCategories() == null || dataModel.getCategories().size() == 0 ){
 			//no datamodel; ask user to init
-			InitCaDataModelDialog dd = new InitCaDataModelDialog(parentShell, loadedSession);
+			InitCaDataModelDialog dd = new InitCaDataModelDialog(activeShell, loadedSession);
 			if (dd.open() == Window.CANCEL){
 				loadedSession.close();
-				return null;
+				return;
 			}
 			
 			//re-load datamodel
@@ -91,8 +88,8 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 					loadedSession.getTransaction().rollback();
 				}
 				loadedSession.close();
-				SmartPlugIn.displayLog(parentShell, Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
-				return null;
+				SmartPlugIn.displayLog(Messages.ShowDataModelPropertyPageHandler_Error_CouldNotLoadDataModel, ex);
+				return;
 			}
 			
 			dataModel = ppd.dm;
@@ -100,14 +97,13 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 		dialog.setDataModel(dataModel);
 		dialog.open();
 		
-		return null;
+		return;
 	}
 
 	/*
 	 * progress monitor dialog for loading data model.
 	 */
 	class DataModelProgressMonitorDialog extends ProgressMonitorDialog {
-
 		protected DataModel dm;
 		
 		public DataModelProgressMonitorDialog(Shell shell) {
@@ -131,4 +127,10 @@ public class ShowDataModelPropertyPageHandler extends ShowPropertyPageHandler {
 		}
 	}
 
+	// E3
+	public static class ShowDataModelPropertyPageHandlerWrapper extends DIHandler<ShowDataModelPropertyPageHandler> {
+		public ShowDataModelPropertyPageHandlerWrapper() {
+			super(ShowDataModelPropertyPageHandler.class);
+		}
+	}
 }

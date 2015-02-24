@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.report.query.map;
 
-import net.refractions.udig.catalog.IService;
+import org.locationtech.udig.catalog.IService;
 
 import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;

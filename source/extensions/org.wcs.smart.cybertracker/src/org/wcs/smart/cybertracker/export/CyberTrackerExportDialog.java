@@ -61,7 +61,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -138,9 +137,9 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 
 			FontData fd = warnLabel.getFont().getFontData()[0];
 			fd.setStyle(SWT.BOLD);
-			final Font boldFont = new Font(Display.getCurrent(), fd);
+			final Font boldFont = new Font(warnLabel.getDisplay(), fd);
 			warnLabel.setFont(boldFont);
-			warnLabel.setForeground(Display.getCurrent().getSystemColor(SWT.COLOR_DARK_RED));
+			warnLabel.setForeground(warnLabel.getDisplay().getSystemColor(SWT.COLOR_DARK_RED));
 			warnLabel.addDisposeListener(new DisposeListener() {
 				
 				@Override
@@ -436,6 +435,11 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, message, e);
 			return message;
 		}
+		if (version == null){
+			String message = MessageFormat.format(Messages.CyberTrackerExportDialog_Error_CT_NotFound, ICyberTrackerConstants.DISPLAY_MIN_VERSION);
+			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, message, null);
+			return message;
+		}
 		String[] parts = version.split("\\."); //$NON-NLS-1$
 		String[] reqParts = ICyberTrackerConstants.INSTALL_MIN_VERSION.split("\\."); //$NON-NLS-1$
 		//create a display version from the current version
@@ -497,7 +501,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			modelList.addAll(DataentryHibernateManager.getConfigurableModels(s));
 			dataModel = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.CyberTrackerExportDialog_LoadConfModels_Error, ex);
+			SmartPlugIn.displayLog(Messages.CyberTrackerExportDialog_LoadConfModels_Error, ex);
 		} finally {
 			s.getTransaction().rollback();
 			s.close();

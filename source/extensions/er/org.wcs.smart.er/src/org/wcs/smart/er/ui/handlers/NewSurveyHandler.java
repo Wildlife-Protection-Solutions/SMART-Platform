@@ -23,15 +23,18 @@ package org.wcs.smart.er.ui.handlers;
 
 import java.util.Iterator;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignListView;
@@ -39,7 +42,7 @@ import org.wcs.smart.er.ui.SurveyListTreeNode;
 import org.wcs.smart.er.ui.SurveyListTreeNode.Type;
 import org.wcs.smart.er.ui.survey.wizard.NewSurveyWizard;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * New survey handler.
@@ -47,15 +50,16 @@ import org.wcs.smart.observation.ui.FieldDataPerspective;
  * @author Emily
  *
  */
-public class NewSurveyHandler extends AbstractHandler {
+public class NewSurveyHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, 
+			Shell activeShell,
+			IEclipseContext ctx){
 		
 		//search for a parent
 		byte[] parentDesign = null;
 		byte[] parentSurvey = null;
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
 		if (selection != null && selection instanceof StructuredSelection){
 			IStructuredSelection sselection = (IStructuredSelection)selection;
 			
@@ -79,12 +83,11 @@ public class NewSurveyHandler extends AbstractHandler {
 			}
 		}
 		
-		Survey newSurvey = newSurvey(HandlerUtil.getActiveShell(event), parentDesign, parentSurvey);
+		Survey newSurvey = newSurvey(activeShell, parentDesign, parentSurvey);
 		if (newSurvey != null){
-			FieldDataPerspective.openPerspective(SurveyDesignListView.ID);
+			ctx.set(ShowFieldDataPerspective.FOCUS_VIEW, SurveyDesignListView.ID);
+			ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
 		}
-		
-		return null;
 	}
 	
 	/**
@@ -102,5 +105,11 @@ public class NewSurveyHandler extends AbstractHandler {
 			return newWizard.getNewSurvey();
 		}
 		return null;
+	}
+	
+	public static class NewSurveyHandlerWrapper extends DIHandler<NewSurveyHandler>{
+		public NewSurveyHandlerWrapper(){
+			super(NewSurveyHandler.class);
+		}
 	}
 }

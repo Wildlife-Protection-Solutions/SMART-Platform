@@ -145,12 +145,16 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.patrol.PatrolPerspective"
+                  commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/etool16/patrol.png"
                   label="%showpatrolperspective.command.label"
                   mnemonic="%showpatrolperspectivecommand.mnemonic"
                   style="push"
                   tooltip="%showpatrolperspectivecommand.tooltip">
+               <parameter
+                     name="org.wcs.smart.observation.perspective.show.focusview"
+                     value="org.wcs.smart.patrol.ui.PatrolListView">
+               </parameter>
             </command>
             <visibleWhen
                   checkEnabled="false">
@@ -304,7 +308,7 @@
             allPopups="false"
             locationURI="toolbar:org.wcs.smart.perspectives?after=org.wcs.smart.perspective.fielddata">
          <command
-               commandId="org.wcs.smart.patrol.PatrolPerspective"
+               commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/etool16/patrol.png"
                label="%showpatrolperspective.command.label"
                mnemonic="%showpatrolperspectivecommand.mnemonic"
@@ -317,6 +321,10 @@
                      property="org.wcs.smart.caSingle">
                </test>
             </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.observation.perspective.show.focusview"
+                  value="org.wcs.smart.patrol.ui.PatrolListView">
+            </parameter>
          </command>
       </menuContribution>
    </extension>
@@ -366,7 +374,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTypeHandler"
+            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTypeHandler$ShowPatrolTypeHandlerWrapper"
             commandId="org.wcs.smart.patrol.patrolTypes">
          <activeWhen>
             <and>
@@ -382,7 +390,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolMandateHandler"
+            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolMandateHandler$ShowPatrolMandateHandlerWrapper"
             commandId="org.wcs.smart.patrol.patrolMandate">
          <activeWhen>
             <and>
@@ -398,7 +406,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTeamsHandler"
+            class="org.wcs.smart.patrol.internal.ui.properties.handlers.ShowPatrolTeamsHandler$ShowPatrolTeamsHandlerWrapper"
             commandId="org.wcs.smart.patrol.teamList">
          <activeWhen>
             <and>
@@ -414,7 +422,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.NewPatrolHandler"
+            class="org.wcs.smart.patrol.internal.ui.properties.handlers.NewPatrolHandler$NewPatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.newPatrol">
          <activeWhen>
             <and>
@@ -440,17 +448,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.ShowPatrolPersepctiveHandler"
-            commandId="org.wcs.smart.patrol.PatrolPerspective">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
-      </handler>
-      <handler
-            class="org.wcs.smart.patrol.xml.export.ExportPatrolHandler"
+            class="org.wcs.smart.patrol.xml.export.ExportPatrolHandler$ExportPatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.exportPatrol">
          <activeWhen>
             <and>
@@ -476,7 +474,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.xml.in.ImportPatrolHandler"
+            class="org.wcs.smart.patrol.xml.in.ImportPatrolHandler$ImportPatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.importPatrol">
          <activeWhen>
             <and>
@@ -502,7 +500,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.views.ShowPatrolFilterHandler"
+            class="org.wcs.smart.patrol.internal.ui.views.ShowPatrolFilterHandler$ShowPatrolFilterHandlerWrapper"
             commandId="org.wcs.smart.patrol.view.ShowPatrolFilter">
          <activeWhen>
             <test
@@ -512,7 +510,7 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.views.DeletePatrolHandler"
+            class="org.wcs.smart.patrol.internal.ui.views.DeletePatrolHandler$DeletePatrolHandlerWrapper"
             commandId="org.wcs.smart.patrol.view.DeletePatrol">
          <activeWhen>
             <and>
@@ -550,7 +548,7 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.wcs.smart.patrol.internal.ui.properties.handlers.PartolScreenOptionsMetaHandler"
+            class="org.wcs.smart.patrol.internal.ui.properties.handlers.PartolScreenOptionsMetaHandler$PatrolScreenOptionsMetaHandlerWrapper"
             commandId="org.wcs.smart.patrol.patrolScreens">
       </handler>
    </extension>
@@ -604,7 +602,7 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="false"
-            class="org.wcs.smart.patrol.internal.ui.views.PatrolListView"
+            class="org.wcs.smart.patrol.internal.ui.views.PatrolListView$PatrolListViewWrapper"
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolListView"
             name="%patrollist.view.name"
@@ -618,22 +616,6 @@
             icon="images/icons/view16/patrol.png"
             id="org.wcs.smart.patrol.ui.PatrolEditor"
             name="%patrol.editor.name">
-      </editor>
-      <editor
-            class="org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor"
-            id="org.wcs.smart.patrol.ui.PatrolSummaryEditor"
-            name="%patrolsummary.editor.name">
-      </editor>
-      <editor
-            class="org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditor"
-            id="org.wcs.smart.patrol.ui.PatrolDayEditor"
-            name="%patrolday.editor.name">
-      </editor>
-      <editor
-            class="org.wcs.smart.patrol.internal.ui.editor.PatrolMapPageEditor"
-            default="false"
-            id="org.wcs.smart.patrol.ui.PatrolMapEditor"
-            name="%patrolmap.editor.name">
       </editor>
    </extension>
    <extension

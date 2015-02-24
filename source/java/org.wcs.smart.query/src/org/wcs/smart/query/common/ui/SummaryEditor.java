@@ -33,7 +33,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.IEditorInput;
@@ -81,7 +80,7 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
 public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 
 	private QueryProxy query;
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	private boolean isDirty = false;
 	private IAreaModifiedListener areaListener = null;
@@ -111,6 +110,16 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 					isDirty = lIsDirty;
 					firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 				}
+			}else if (object != null && object instanceof QueryEditorInput 
+					&& ((QueryEditorInput)object).getUuid().equals(getQuery().getUuid()) 
+					&& eventType == IQueryListener.QUERY_DELETED){
+				//close part
+				getSite().getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						getSite().getWorkbenchWindow().getActivePage().closeEditor(SummaryEditor.this, false);					
+					}});
+				
 			}
 
 		}
@@ -256,14 +265,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 	 * @return the query
 	 */
 	public Query getQuery() {
-		try {
-			loadQueryLoad.join(); // wait for the query loading job if
-									// applicable
-		} catch (InterruptedException e) {
-			QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorParsingQuery + e.getLocalizedMessage(), e);
-		}
-
-		return this.query.getQuery();
+		return getQueryProxy().getQuery();
 	}
 
 	/**
@@ -374,6 +376,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 	 */
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
 		toolkit.paintBordersFor(container);
@@ -470,6 +473,11 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 	
 	@Override
 	public QueryProxy getQueryProxy(){
+		try {
+			loadQueryLoad.join(); // wait for the query loading job applicable
+		} catch (InterruptedException e) {
+			QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorParsingQuery + e.getLocalizedMessage(), e);
+		}
 		return this.query;
 	}
 	
@@ -483,7 +491,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor {
 				final Session session = HibernateManager.openSession();
 				session.beginTransaction();
 				try{
-					Display.getDefault().syncExec(new Runnable(){
+					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							try{

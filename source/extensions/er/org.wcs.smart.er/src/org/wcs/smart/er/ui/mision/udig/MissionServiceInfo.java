@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.er.ui.mision.udig;
 
-import net.refractions.udig.catalog.IServiceInfo;
-
+import org.locationtech.udig.catalog.IServiceInfo;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 

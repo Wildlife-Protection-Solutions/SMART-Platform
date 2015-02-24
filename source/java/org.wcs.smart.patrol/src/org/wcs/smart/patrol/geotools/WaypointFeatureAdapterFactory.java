@@ -35,6 +35,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Object getAdapter(Object adaptableObject, Class adapterType) {
 		if (adapterType == Waypoint.class) {
@@ -60,6 +61,7 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 		return null;
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	public Class[] getAdapterList() {
 		return new Class[]{Waypoint.class};

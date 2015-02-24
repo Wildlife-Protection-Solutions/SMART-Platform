@@ -26,18 +26,17 @@ import java.awt.Rectangle;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.commands.SelectionBoxCommand;
-import net.refractions.udig.project.ui.render.displayAdapter.MapMouseEvent;
-import net.refractions.udig.project.ui.tool.ModalTool;
-import net.refractions.udig.project.ui.tool.SimpleTool;
-import net.refractions.udig.tool.info.internal.InfoView2;
-
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.commands.SelectionBoxCommand;
+import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
+import org.locationtech.udig.project.ui.tool.ModalTool;
+import org.locationtech.udig.project.ui.tool.SimpleTool;
+import org.locationtech.udig.tool.info.internal.InfoView2;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -58,7 +57,7 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 
 	private boolean selecting;
 
-	net.refractions.udig.project.ui.commands.SelectionBoxCommand shapeCommand;
+	org.locationtech.udig.project.ui.commands.SelectionBoxCommand shapeCommand;
 
     Set<String> selectedFids = new HashSet<String>();
     
@@ -70,7 +69,7 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 	}
     
 	/**
-	 * @see net.refractions.udig.project.ui.tool.SimpleTool#onMouseDragged(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
+	 * @see org.locationtech.udig.project.ui.tool.SimpleTool#onMouseDragged(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
 	 */
 	protected void onMouseDragged(MapMouseEvent e) {
 		Point end = e.getPoint();
@@ -81,7 +80,7 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.tool.AbstractTool#mousePressed(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
+	 * @see org.locationtech.udig.project.ui.tool.AbstractTool#mousePressed(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
 	 */
 	public void onMousePressed(MapMouseEvent e) {
 		shapeCommand = new SelectionBoxCommand();
@@ -97,7 +96,7 @@ public class BBoxInfoTool extends SimpleTool implements ModalTool {
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.tool.AbstractTool#mouseReleased(net.refractions.udig.project.render.displayAdapter.MapMouseEvent)
+	 * @see org.locationtech.udig.project.ui.tool.AbstractTool#mouseReleased(org.locationtech.udig.project.render.displayAdapter.MapMouseEvent)
 	 */
 	public void onMouseReleased(MapMouseEvent e) {
 		if (selecting) {

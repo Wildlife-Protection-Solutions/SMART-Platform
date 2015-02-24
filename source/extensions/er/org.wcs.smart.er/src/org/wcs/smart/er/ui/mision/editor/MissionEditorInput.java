@@ -69,6 +69,7 @@ public class MissionEditorInput implements IEditorInput {
 
 	@Override
 	public String getName() {
+		if (name == null) return ""; //$NON-NLS-1$
 		return this.name; 
 	}
 

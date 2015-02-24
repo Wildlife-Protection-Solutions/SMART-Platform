@@ -28,10 +28,21 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -49,18 +60,16 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Session;
+import org.osgi.service.event.Event;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
@@ -78,13 +87,14 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * View for listing survey designs and associated surveys and missions. 
  * @author Emily
  *
  */
-public class SurveyDesignListView extends ViewPart implements IDoubleClickListener, IUpdatableView{
+public class SurveyDesignListView implements IDoubleClickListener, IUpdatableView{
 
 	public static final String ID = "org.wcs.smart.er.surveyDesignListView"; //$NON-NLS-1$
 
@@ -96,71 +106,47 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 	
 	private TabFolder bar;
 	
-	private IPartListener2 partListener = new IPartListener2() {
-		
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef.getId().equals(SurveyDesignEditor.ID)){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof SurveyDesignEditor){
-					designViewer.setSelection(new StructuredSelection( ((SurveyDesignEditor) part).getEditorInput() ));
-					getSite().getPage().bringToTop(getSite().getPart());
-				}
-			}else if (partRef.getId().equals(MissionEditor.ID)){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof MissionEditor){
-					lstViewer.setSelection(new StructuredSelection(
-							new SurveyListTreeNode(null, ((MissionEditorInput)((MissionEditor) part).getEditorInput()).getUuid(), Type.MISSION)));
-					getSite().getPage().bringToTop(getSite().getPart());
-				}
-				
-			}
-			
-		}
-	};
+	@Inject private MPart localPart;
+	@Inject private IMenuService menuService;
+	
+	
 	
 	private ISurveyEventListener listener = new ISurveyEventListener(){
 		@Override
 		public void event(Object o) {
 			refreshJob.schedule();
 		}};
+	
+	@PreDestroy
+	public void dispose() {
+	}
+	
+	
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		Object src = E3Utils.getSourceObject(activePart);
+		if (src instanceof SurveyDesignEditor){
+			designViewer.setSelection(new StructuredSelection( ((SurveyDesignEditor) E3Utils.getSourceObject(activePart)).getEditorInput() ));
+			bar.setSelection(1);
+			pService.bringToTop(localPart);
+		}else if (src instanceof MissionEditor){
+			byte[] missionUuid = ((MissionEditorInput)((MissionEditor)src).getEditorInput()).getUuid();
+			lstViewer.setSelection(new StructuredSelection(new SurveyListTreeNode(null, missionUuid, Type.MISSION)));
+			bar.setSelection(0);
+			pService.bringToTop(localPart);
+		}
+	}
+	
+	@PostConstruct
+	public void createPartControl(Composite parent) {
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
 		
-		
-	public SurveyDesignListView(){
 		filter = new SurveyFilter();
 		designFilter = new SurveyDesignFilter();
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
-	}
-	
-	public void dispose() {		
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);		
-		super.dispose();
-	}
-	
-	
-	@Override
-	public void createPartControl(Composite parent) {
+		
 		bar = new TabFolder(parent, SWT.NONE);
 
 		lstViewer = new TreeViewer(bar, SWT.NONE);
@@ -196,56 +182,17 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_ADDED, listener);
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_DELETED, listener);
 		SurveyEventHandler.getInstance().addListener(EventType.MISSION_MODIFIED, listener);
-
-		
-		getSite().setSelectionProvider(new ISelectionProvider() {
-			
-			private HashMap<ISelectionChangedListener, SelectionListener> barListeners = new HashMap<ISelectionChangedListener, SelectionListener>();
-			@Override
-			public void setSelection(ISelection selection) {
-				getActiveViewer().setSelection(selection);		
-			}
-			
-			@Override
-			public void removeSelectionChangedListener(
-					ISelectionChangedListener listener) {
-				lstViewer.removeSelectionChangedListener(listener);
-				designViewer.removeSelectionChangedListener(listener);
-				bar.removeSelectionListener(barListeners.get(listener));
-			}
-			
-			@Override
-			public ISelection getSelection() {
-				return getActiveViewer().getSelection();
-			}
-			
-			@Override
-			public void addSelectionChangedListener(final ISelectionChangedListener listener) {
-				lstViewer.addSelectionChangedListener(listener);
-				designViewer.addSelectionChangedListener(listener);
-
-				SelectionAdapter newAdapter = new SelectionAdapter() {
-					@Override
-					public void widgetSelected(SelectionEvent e) {
-						listener.selectionChanged(new SelectionChangedEvent(getActiveViewer(), getActiveViewer().getSelection()));
-					}
-				};
-				bar.addSelectionListener(newAdapter);
-				barListeners.put(listener, newAdapter);
-			}
-		});
-		
-		/* menu */
+				
+		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.er.surveyDesignListView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(bar);
 		bar.setMenu(menu);
 		lstViewer.getControl().setMenu(menu);
 		designViewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager, lstViewer);
-		getSite().registerContextMenu(menuManager, designViewer);
 	}
 
-	@Override
+	@Focus
 	public void setFocus() {
 		lstViewer.getControl().setFocus();
 	}
@@ -287,7 +234,7 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 				s.close();
 			}
 			
-			Display.getDefault().asyncExec(new Runnable(){
+			getShell().getDisplay().asyncExec(new Runnable(){
 
 				@Override
 				public void run() {
@@ -313,14 +260,14 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 				SurveyListTreeNode node = (SurveyListTreeNode)selection;
 				switch (node.getType()) {
 					case SURVEY:
-						EditSurveyElementHandler.editSurvey(getSite().getShell(), node.getUuid());
+						EditSurveyElementHandler.editSurvey(getShell(), node.getUuid());
 						break;
 					case MISSION:
-						EditSurveyElementHandler.editMission(getSite().getShell(), node.getUuid(), node.getLabel());
+						EditSurveyElementHandler.editMission(getShell(), node.getUuid(), node.getLabel());
 						break;
 				}
 			}else if (selection instanceof SurveyDesignEditorInput){
-				EditSurveyElementHandler.editSurveyDesign(getSite().getShell(), (SurveyDesignEditorInput) selection);
+				(new EditSurveyElementHandler()).execute(new StructuredSelection(selection), getShell());
 			}
 		}
 	}
@@ -340,11 +287,68 @@ public class SurveyDesignListView extends ViewPart implements IDoubleClickListen
 	
 	public void showFilterDialog(){
 		if (bar.getSelectionIndex() == 0){
-			SurveyFilterDialog dialog = new SurveyFilterDialog(getSite().getShell(), this, filter);
+			SurveyFilterDialog dialog = new SurveyFilterDialog(getShell(), this, filter);
 			dialog.open();
 		}else{
-			SurveyDesignFilterDialog dialog = new SurveyDesignFilterDialog(getSite().getShell(), this, designFilter);
+			SurveyDesignFilterDialog dialog = new SurveyDesignFilterDialog(getShell(), this, designFilter);
 			dialog.open();
+		}
+	}
+	
+	private Shell getShell(){
+		return localPart.getContext().get(Shell.class);
+	}
+	
+	
+	
+	public static class SurveyDesignListViewWrapper extends DIViewPart<SurveyDesignListView>{
+		public SurveyDesignListViewWrapper(){
+			super(SurveyDesignListView.class);
+		}
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			
+			getSite().setSelectionProvider(new ISelectionProvider() {
+				
+				private HashMap<ISelectionChangedListener, SelectionListener> barListeners = new HashMap<ISelectionChangedListener, SelectionListener>();
+
+				@Override
+				public void setSelection(ISelection selection) {
+					((SurveyDesignListView)getComponent()).getActiveViewer().setSelection(selection);		
+				}
+				
+				@Override
+				public void removeSelectionChangedListener(
+						ISelectionChangedListener listener) {
+					if (((SurveyDesignListView)getComponent()).bar != null && !((SurveyDesignListView)getComponent()).bar.isDisposed()){
+						((SurveyDesignListView)getComponent()).lstViewer.removeSelectionChangedListener(listener);
+						((SurveyDesignListView)getComponent()).designViewer.removeSelectionChangedListener(listener);
+						((SurveyDesignListView)getComponent()).bar.removeSelectionListener(barListeners.get(listener));
+					}
+				}
+				
+				@Override
+				public ISelection getSelection() {
+					return ((SurveyDesignListView)getComponent()).getActiveViewer().getSelection();
+				}
+				
+				@Override
+				public void addSelectionChangedListener(final ISelectionChangedListener listener) {
+					((SurveyDesignListView)getComponent()).lstViewer.addSelectionChangedListener(listener);
+					((SurveyDesignListView)getComponent()).designViewer.addSelectionChangedListener(listener);
+
+					SelectionAdapter newAdapter = new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							listener.selectionChanged(new SelectionChangedEvent(((SurveyDesignListView)getComponent()).getActiveViewer(), ((SurveyDesignListView)getComponent()).getActiveViewer().getSelection()));
+						}
+					};
+					((SurveyDesignListView)getComponent()).bar.addSelectionListener(newAdapter);
+					barListeners.put(listener, newAdapter);
+				}
+			});
 		}
 	}
 }

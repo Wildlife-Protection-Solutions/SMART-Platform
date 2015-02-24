@@ -21,11 +21,12 @@
  */
 package org.wcs.smart.query.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.wcs.smart.query.ui.definition.QueryDefView;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Handler for the clear query command.
@@ -33,18 +34,20 @@ import org.wcs.smart.query.ui.definition.QueryDefView;
  * @author Emily
  * @since 1.0.0
  */
-public class ClearQueryHandler extends AbstractHandler {
+public class ClearQueryHandler {
 
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {		
-		QueryDefView view = (QueryDefView) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(QueryDefView.ID);
-		if(view != null){
+	@Execute
+	public void execute(EPartService pService){		
+		MPart prt = pService.findPart(QueryDefView.ID);
+		QueryDefView view = (QueryDefView) E3Utils.getSourceObject(prt);
+		if (view != null){
 			view.clearQuery();
 		}
-		return null;
 	}
 
+	public static class ClearQueryHandlerWrapper extends DIHandler<ClearQueryHandler>{
+		public ClearQueryHandlerWrapper(){
+			super(ClearQueryHandler.class);
+		}
+	}
 }

@@ -21,11 +21,12 @@
  */
 package org.wcs.smart;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.HashMap;
 
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PerspectiveAdapter;
@@ -39,56 +40,55 @@ import org.eclipse.ui.PerspectiveAdapter;
  */
 public class PerspectiveEditorListener extends PerspectiveAdapter {
 
+	private EPartService partService;
+	
 	private PerspectiveEditorTracker tracker;
-
+	
+	private HashMap<String, MPart> lastActive = new HashMap<String, MPart>();
 	/**
 	 * Create new listener
 	 * @param tracker the perspective editor tracker
 	 */
-	public PerspectiveEditorListener(
-			PerspectiveEditorTracker tracker) {
+	public PerspectiveEditorListener( PerspectiveEditorTracker tracker, EPartService partService) {
 		this.tracker = tracker;
+		this.partService = partService;
 	}
 
+	
 	@Override
 	public void perspectiveActivated(IWorkbenchPage page,
 			IPerspectiveDescriptor perspectiveDescriptor) {
-		
-		super.perspectiveActivated(page, perspectiveDescriptor);
-		// Hide all the editors
-		IEditorReference[] editors = page.getEditorReferences();
-		for (int i = 0; i < editors.length; i++) {
-			page.hideEditor(editors[i]);
+		//super.perspectiveActivated(page, perspectiveDescriptor);
+			
+		Collection<MPart> allParts  = null;
+		try{
+			allParts = partService.getParts();
+		}catch (Exception ex){
+			return;
 		}
-
-		// Show the editors associated with this perspective
-		ArrayList<IEditorReference> editorRefs = tracker.getEditorForPerspective(perspectiveDescriptor.getId());
-		if (editorRefs != null) {
-			for (Iterator<IEditorReference> it = editorRefs.iterator(); it.hasNext();) {
-				IEditorReference editorInput = it.next();				
-				page.showEditor(editorInput);
-			}
-
-			// Send the last active editor to the top
-			IEditorReference lastActiveRef = tracker.getLastActiveEditor(perspectiveDescriptor.getId());
-			if (lastActiveRef != null){
-				page.bringToTop(lastActiveRef.getPart(true));
+		for (MPart p : allParts){
+			if (p.getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){
+				if (p.getTags().contains(perspectiveDescriptor.getId())){
+					//this is set to make the close others/close all/close menu work
+					p.setCloseable(true);	
+					p.setVisible(true);
+				}else{
+					p.setVisible(false);
+					p.setCloseable(false);
+				}
 			}
 		}
+		tracker.selectStackElement(lastActive.get(perspectiveDescriptor.getId()));
 	}
 
+	@Override
 	public void perspectiveDeactivated(IWorkbenchPage page,
 			IPerspectiveDescriptor perspective) {
-		IEditorPart activeEditor = page.getActiveEditor();
-		if (activeEditor != null) {
-			// Find the editor reference that relates to this editor input
-			IEditorReference[] editorRefs = page.findEditors(
-					activeEditor.getEditorInput(), null,
-					IWorkbenchPage.MATCH_INPUT);
-			if (editorRefs.length > 0) {
-				tracker.setLastActiveEditor(
-						perspective.getId(), editorRefs[0]);
-			}
+		MStackElement ele = tracker.getActivePart();
+		if (ele == null){
+			lastActive.put(perspective.getId(), null);
+		}else{
+			lastActive.put(perspective.getId(), (MPart)ele);
 		}
 	}
 }

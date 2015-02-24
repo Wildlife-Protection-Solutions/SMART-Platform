@@ -21,16 +21,17 @@
  */
 package org.wcs.smart.cybertracker.handler;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.cybertracker.importer.CyberTrackerImportEditor;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
@@ -39,10 +40,11 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
  * @author elitvin
  * @since 1.0.0
  */
-public class CyberTrackerImportHandler extends AbstractHandler {
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		FieldDataPerspective.openPerspective("org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
+public class CyberTrackerImportHandler {
+
+	@Execute
+	public void execute(EModelService mService, EPartService pService){
+		(new ShowFieldDataPerspective()).execute("org.wcs.smart.patrol.ui.PatrolListView", mService, pService); //$NON-NLS-1$
 		
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
@@ -50,7 +52,6 @@ public class CyberTrackerImportHandler extends AbstractHandler {
 		} catch (Throwable t) {
 			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
-		return null;
 	}
 
 	private class CTImportEditorInput implements IEditorInput {
@@ -96,4 +97,9 @@ public class CyberTrackerImportHandler extends AbstractHandler {
 		}
 	}
 	
+	public static class CyberTrackerImportHandlerWrapper extends DIHandler<CyberTrackerImportHandler>{
+		public CyberTrackerImportHandlerWrapper(){
+			super(CyberTrackerImportHandler.class);
+		}
+	}
 }

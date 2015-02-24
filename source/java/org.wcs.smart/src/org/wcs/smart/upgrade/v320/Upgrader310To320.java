@@ -22,6 +22,7 @@
 package org.wcs.smart.upgrade.v320;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,6 +30,9 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 
@@ -42,21 +46,25 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	
 	private CmUpgrader310To320 cmUpgrader = new CmUpgrader310To320();
 	
-	public void upgrade(Session s, IProgressMonitor monitor) {
+	private String dbUrl = null;
+	
+	public void upgrade(IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
+		Session s = HibernateManager.openSession();
+		try{
 		cmUpgrader.reset(s);
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				try {
+					dbUrl = c.getMetaData().getURL();
 					c.setAutoCommit(false);
 					upgrade(c);
 				} catch (final Exception e) {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), 
-									Messages.Upgrader310To320_ErrorMessage, e);
+							SmartPlugIn.displayLog(Messages.Upgrader310To320_ErrorMessage, e);
 						}
 					});
 				} finally {
@@ -64,6 +72,20 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				}
 			}
 		});
+		}finally{
+			s.close();
+		}
+		
+		/* do a hard derby upgrade */ 
+		try{
+			//disconnect 
+			HibernateManager.endSessionFactory(true);
+			//perform hard upgrade
+			DriverManager.getConnection(dbUrl + ";create=false;upgrade=true;user=" + DbUser.ADMIN.getUserName() + ";password=" + DbUser.ADMIN.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$ 
+			DerbyHibernateExtensions.shutDown(true);
+		}catch(Exception ex){
+			SmartPlugIn.log("Could not perform hard derby upgrade.", ex); //$NON-NLS-1$
+		}
 	}
 
 	private void upgrade(Connection c) throws Exception {
@@ -84,6 +106,10 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				"GRANT ALL PRIVILEGES ON smart.map_styles to manager", //$NON-NLS-1$
 				"GRANT ALL PRIVILEGES ON smart.map_styles to analyst", //$NON-NLS-1$
 
+				//for the move from the net.refractions.udig namespace to the org.locationtech.udig namespace
+				"CREATE FUNCTION REPLACEALL(STR LONG VARCHAR, OLD LONG VARCHAR, NEW LONG VARCHAR) RETURNS LONG VARCHAR LANGUAGE JAVA DETERMINISTIC EXTERNAL NAME 'org.wcs.smart.util.SmartUtils.replaceAll' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT", //$NON-NLS-1$
+				"update smart.saved_maps set map_def = replaceall(map_def, 'net.refractions.udig', 'org.locationtech.udig')", //$NON-NLS-1$
+
 				"alter table smart.cm_attribute_tree_node add column cm_attribute_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
 				"alter table smart.cm_attribute_tree_node add column dm_attribute_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
 				"alter table smart.cm_attribute_tree_node add column parent_uuid CHAR(16) FOR BIT DATA", //$NON-NLS-1$
@@ -94,7 +120,6 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_parent_uuid_fk FOREIGN KEY (PARENT_UUID) REFERENCES smart.cm_attribute_tree_node (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
 				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_cm_attribute_uuid_fk FOREIGN KEY (CM_ATTRIBUTE_UUID) REFERENCES smart.cm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
 				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_dm_attribute_uuid_fk FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES smart.dm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE" //$NON-NLS-1$
-				
 		};
 		
 		for (String s : sql){

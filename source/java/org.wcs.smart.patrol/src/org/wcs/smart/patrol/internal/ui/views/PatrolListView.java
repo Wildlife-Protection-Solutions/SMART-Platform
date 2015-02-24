@@ -26,10 +26,26 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -40,30 +56,27 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.osgi.service.event.Event;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * A viewer where users can view all patrols by a specified filter.
@@ -72,49 +85,15 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
  * @author Emily
  *
  */
-public class PatrolListView extends ViewPart implements IPatrolFilteringView {
+public class PatrolListView implements IPatrolFilteringView {
 
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolListView"; //$NON-NLS-1$
 	private TableViewer patrolListViewer;
 	private PatrolViewFilter filter = new PatrolViewFilter();
 	private Object[] loadingInput = new Object[]{Messages.PatrolListView_LoadingLabel};
 	
-	
-	private IPartListener2 partListener = new IPartListener2() {
-		
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef.getId().equals(PatrolEditor.ID)){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof PatrolEditor){
-					patrolListViewer.setSelection(new StructuredSelection(  ((PatrolEditor) part).getEditorInput() ));
-					getSite().getPage().bringToTop(getSite().getPart());
-				}
-			}
-			
-		}
-	};
+	@Inject private IMenuService menuService;
+	@Inject private MPart localPart;
 	
 	/*
 	 * Job that updates the patrol list based on the current filter
@@ -123,7 +102,7 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			monitor.beginTask(Messages.PatrolListView_Progress_LoadingPatrols, 1);
-			Display.getDefault().syncExec(new Runnable() {
+			patrolListViewer.getTable().getDisplay().syncExec(new Runnable() {
 				@Override
 				public void run() {
 					patrolListViewer.setInput(loadingInput);
@@ -144,7 +123,8 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 				}
 				
 				monitor.internalWorked(0.5);
-				Display.getDefault().asyncExec(new Runnable() {
+				if (patrolListViewer.getTable().isDisposed()) return Status.CANCEL_STATUS;
+				patrolListViewer.getTable().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						patrolListViewer.setInput(input);
@@ -166,7 +146,6 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 		@Override
 		public void eventFired(int type, Object source) {
 			updateContent(1000);
-
 		}
 	};
 
@@ -175,16 +154,27 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 	 * Creates a new vies
 	 */
 	public PatrolListView() {
-		
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
 	}
 
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+//		if (activePart.getElementId().equals(PatrolEditor.ID)){ //this doesn't work as it returns compatibility id; not editor id
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof PatrolEditor){
+			PatrolEditorInput pi = new PatrolEditorInput(	((PatrolEditor)lpart).getPatrol().getUuid(), null, null, null, null);	
+			patrolListViewer.setSelection(new StructuredSelection(pi));
+			pService.bringToTop(localPart);
+		}
+	}
+	
+	
+	@PreDestroy
 	public void dispose() {		
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_ADDED, patrolListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_MODIFIED, patrolListener);
-		super.dispose();
 	}
 
 	/**
@@ -195,8 +185,12 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 		return this.filter;
 	}
 
-	@Override
-	public void createPartControl(Composite parent) {
+	@PostConstruct
+	public void createPartControl(Composite parent, final MApplication application) {
+		
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -247,26 +241,22 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 				if (!(selection instanceof PatrolEditorInput)){
 					return;
 				}
+				
 				PatrolEditorInput p = (PatrolEditorInput)selection;
 				if (p != null){
-					IWorkbenchPage page = null;
-					try {
-						page = getSite().getPage();
-						page.openEditor(p, PatrolEditor.ID);						
-					} catch (Throwable t) {
-						SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
-					}
-				}
-				
+					IEclipseContext localCtx = EclipseContextFactory.create();
+					localCtx.set("patroluuid", p.getUuid()); //$NON-NLS-1$
+					localCtx.setParent(localPart.getContext());
+					ContextInjectionFactory.invoke(new OpenPatrolHandler(), Execute.class, localCtx);
+				}				
 			}
 		});
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(patrolListViewer.getControl());
-		patrolListViewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager,  patrolListViewer);
-		getSite().setSelectionProvider(patrolListViewer);
+		patrolListViewer.getControl().setMenu(menu);		
 	}
 
 	/**
@@ -283,8 +273,21 @@ public class PatrolListView extends ViewPart implements IPatrolFilteringView {
 		updateJob.schedule(delay);		
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		patrolListViewer.getControl().setFocus();
+	}
+	
+	public static class PatrolListViewWrapper extends DIViewPart<PatrolListView>{
+		public PatrolListViewWrapper(){
+			super(PatrolListView.class);
+		}
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			
+			getSite().setSelectionProvider(	((PatrolListView)getComponent()).patrolListViewer );
+		}
 	}
 }

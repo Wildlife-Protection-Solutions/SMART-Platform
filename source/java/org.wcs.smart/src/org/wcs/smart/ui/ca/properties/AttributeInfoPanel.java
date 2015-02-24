@@ -30,9 +30,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -131,8 +129,10 @@ public class AttributeInfoPanel extends Composite {
 	private ArrayList<IValidationListener> listeners = new ArrayList<IValidationListener>();
 	private Button btnDisableListItem;
 	private Button btnDeleteListItem;
+	private Button btnMoveUp;
+	private Button btnMoveDown;
 	
-	private WritableList attributeList = new WritableList();
+	private List<NamedKeyItem> attributeList = new ArrayList<NamedKeyItem>();
 	
 	private AttributeTree attTree = null;
 	private Session currentSession = null;
@@ -312,7 +312,7 @@ public class AttributeInfoPanel extends Composite {
 		((GridData)list.getLayoutData()).heightHint = 100;
 		((GridData)list.getLayoutData()).widthHint = 100;
 
-		lstAttributeList.setContentProvider(new ObservableListContentProvider());
+		lstAttributeList.setContentProvider(ArrayContentProvider.getInstance());
 		lstAttributeList.setInput(attributeList);
 		if (canEdit){
 			cdAttList = createDecoration(lstAttributeList.getControl());
@@ -341,7 +341,6 @@ public class AttributeInfoPanel extends Composite {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					AttributeListItem it = new AttributeListItem();
-					@SuppressWarnings("unchecked")
 					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList, 
 							SmartDB.getCurrentConservationArea().getDefaultLanguage());
 					int ret = dd.open();
@@ -363,8 +362,6 @@ public class AttributeInfoPanel extends Composite {
 				public void widgetSelected(SelectionEvent e) {
 					AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
 					if (it == null) return;
-					@SuppressWarnings("unchecked")
-					
 					AttributeItemDialog dd = new AttributeItemDialog(getShell(), it, attributeList,   nameKeyValues.langViewer.getCurrentSelection());
 					int ret = dd.open();
 					if (ret == Window.CANCEL){
@@ -440,6 +437,52 @@ public class AttributeInfoPanel extends Composite {
 			});
 			btnDeleteListItem.setEnabled(false);
 			
+			btnMoveUp = new Button(buttonPanel, SWT.NONE);
+			btnMoveUp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+			btnMoveUp.setText(Messages.AttributeInfoPanel_MoveUpBtn);
+			btnMoveUp.setEnabled(false);
+			btnMoveUp.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					final AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
+					
+					int index = attributeList.indexOf(it);
+					if (index < 0) return;
+					index --;
+					if (index < 0) return;
+					attributeList.remove(it);
+					attributeList.add(index, it);
+					for (int i = 0; i < attributeList.size(); i++){
+						((AttributeListItem)attributeList.get(i)).setListOrder(i);
+					}
+					lstAttributeList.refresh();
+					
+				}
+			});
+			
+			btnMoveDown = new Button(buttonPanel, SWT.NONE);
+			btnMoveDown.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 1, 1));
+			btnMoveDown.setText(Messages.AttributeInfoPanel_MoveDownBtn);
+			btnMoveDown.setEnabled(false);
+			btnMoveDown.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					final AttributeListItem it = (AttributeListItem)((IStructuredSelection)lstAttributeList.getSelection()).getFirstElement();
+					
+					int index = attributeList.indexOf(it);
+					if (index < 0) return;
+					index ++;
+					if (index == attributeList.size()) return;
+					
+					attributeList.remove(it);
+					attributeList.add(index, it);
+					for (int i = 0; i < attributeList.size(); i++){
+						((AttributeListItem)attributeList.get(i)).setListOrder(i);
+					}
+					lstAttributeList.refresh();
+				}
+			});
+			
 			lstAttributeList.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
 				public void selectionChanged(SelectionChangedEvent event) {
@@ -447,6 +490,8 @@ public class AttributeInfoPanel extends Composite {
 					btnDisableListItem.setEnabled(it != null);
 					btnDeleteListItem.setEnabled(it != null);
 					btnEditList.setEnabled(it != null);
+					btnMoveDown.setEnabled(it != null);
+					btnMoveUp.setEnabled(it != null);
 					if (it != null && it.getIsActive()){
 						btnDisableListItem.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					}else{
@@ -498,7 +543,7 @@ public class AttributeInfoPanel extends Composite {
 					if (selection == null){
 						return false;
 					}
-					Object obj = selection.getFirstElement();
+					AttributeListItem obj = (AttributeListItem) selection.getFirstElement();
 					
 					AttributeListItem target = (AttributeListItem)getCurrentTarget();
 					if (target.equals(obj)){
@@ -506,7 +551,13 @@ public class AttributeInfoPanel extends Composite {
 					}
 					int index = attributeList.indexOf(obj);
 					int toIndex = attributeList.indexOf(target);
-					attributeList.move(index, toIndex);
+					
+					if (index == -1 || toIndex == -1) return false;
+					attributeList.remove(obj);
+					attributeList.add(toIndex, obj);
+					for (int i = 0; i < attributeList.size(); i++){
+						((AttributeListItem)attributeList.get(i)).setListOrder(i);
+					}
 				
 					return true;
 				}
@@ -568,7 +619,7 @@ public class AttributeInfoPanel extends Composite {
 		try {
 			dialog.run(true, true, runnable);		
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(getShell(), Messages.AttributeInfoPanel_Error_Message, ex);
+			SmartPlugIn.displayLog(Messages.AttributeInfoPanel_Error_Message, ex);
 		}
 	}
 	
@@ -782,7 +833,7 @@ public class AttributeInfoPanel extends Composite {
 					items.add(clone);
 				}
 				
-				attributeList = new WritableList(items,AttributeListItem.class);
+				attributeList = new ArrayList<NamedKeyItem>(items);
 				lstAttributeList.setInput(attributeList);
 
 			} else if (att.getType().equals(Attribute.AttributeType.TREE)) {
@@ -919,7 +970,7 @@ public class AttributeInfoPanel extends Composite {
 						try{
 							DataModelManager.getInstance().fireDeleteListener(session, oldItem);
 						}catch (Exception ex){
-							SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.AttributeInfoPanel_ListModificationError + ex.getMessage(), ex); 
+							SmartPlugIn.displayLog(Messages.AttributeInfoPanel_ListModificationError + ex.getMessage(), ex); 
 							return;
 						}
 						oldItem.setAttribute(null);
@@ -999,7 +1050,7 @@ public class AttributeInfoPanel extends Composite {
 						}
 					});
 				} catch (Exception ex) {
-					SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.AttributeInfoPanel_SaveErrorMessage, ex);
+					SmartPlugIn.displayLog(Messages.AttributeInfoPanel_SaveErrorMessage, ex);
 				}
 				
 			}

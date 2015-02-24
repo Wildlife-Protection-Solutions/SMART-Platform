@@ -125,6 +125,8 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_ListModificationError;
 	public static String AttributeInfoPanel_Max_Label;
 	public static String AttributeInfoPanel_Min_Label;
+	public static String AttributeInfoPanel_MoveDownBtn;
+	public static String AttributeInfoPanel_MoveUpBtn;
 	public static String AttributeInfoPanel_Regex_Label;
 	public static String AttributeInfoPanel_Required_Label;
 	public static String AttributeInfoPanel_SaveErrorMessage;

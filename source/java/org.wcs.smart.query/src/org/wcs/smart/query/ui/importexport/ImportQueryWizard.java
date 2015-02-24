@@ -200,7 +200,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				//open query in editor if only importing a single query
 				if (queries.size() == 1 && firstQuery != null){
 					QueryEditorInput qi = new QueryEditorInput(firstQuery);
-					OpenQueryHandler.openQuery(qi);
+					(new OpenQueryHandler()).openQuery(qi);
 				}else{
 					MessageDialog.openInformation(getShell(), Messages.ImportQueryWizard_ImportCompleteTitle, MessageFormat.format(Messages.ImportQueryWizard_ImportCompleteMessage, new Object[]{importCnt, queries.size()}));
 				}
@@ -245,7 +245,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 				//open query in editor if only importing a single query
 				if (files.size() == 1 && firstQuery != null){
 					QueryEditorInput qi = new QueryEditorInput(firstQuery);
-					OpenQueryHandler.openQuery(qi);
+					(new OpenQueryHandler()).openQuery(qi);
 				}else{
 					MessageDialog.openInformation(getShell(), Messages.ImportQueryWizard_ImportCompleteTitle, MessageFormat.format(Messages.ImportQueryWizard_ImportCompleteMessage, new Object[]{importCnt, files.size()}));
 				}

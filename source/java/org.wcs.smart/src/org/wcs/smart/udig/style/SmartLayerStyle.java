@@ -27,11 +27,10 @@ import java.net.URL;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IMemento;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.StyleContent;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.util.SmartUtils;
-
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.StyleContent;
 
 /**
  * For tracking a SMART Saved style.  This style stores the uuid

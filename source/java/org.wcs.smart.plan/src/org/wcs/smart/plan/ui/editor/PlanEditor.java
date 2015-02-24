@@ -26,10 +26,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -41,24 +37,25 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
 import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanEventManager;
-import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
+import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
@@ -262,19 +259,8 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	}
 	
 	public void openPatrol(PatrolEditorInput p){
-		FieldDataPerspective.openPerspective("org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
-		try{
-			PatrolEditorInput input = new PatrolEditorInput(p.getUuid(), p.getPatrolId(), null, null, null);
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PatrolEditor.ID);
-		
-		} catch (Exception e1) {
-			SmartPlanPlugIn.displayLog(
-					Messages.PlanEditor_CannotOpenFile_Error
-							+ e1.getLocalizedMessage(), e1);
-		}
+		(new OpenPatrolHandler()).openPatrol(p.getUuid());
 	}
-
-	
 
 	/**
 	 * 
@@ -370,7 +356,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	private void initEditor(){
 		summaryPage.initValues();	//loads the plan
 		setPartName(plan.getLabel());
-		setTitleImage(((PlanEditorInput)getEditorInput()).getImageDescriptor().createImage());
+		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().getDescriptor(plan.getType().getIconKey()).createImage());
 		computePlanTargetStatus();
 	}
 	

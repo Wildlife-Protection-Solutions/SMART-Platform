@@ -29,27 +29,25 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.ui.PatrolEditor;
-import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 
 /**
  * Command handler for importing patrol data from xml file.
@@ -57,21 +55,15 @@ import org.wcs.smart.patrol.ui.PatrolEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public class ImportPatrolHandler extends AbstractHandler {
+public class ImportPatrolHandler {
 
 	private static final String PATROL_NOT_IMPORTED_ERROR_MSG = Messages.ImportPatrolHandler_PatrolNotImported_Error;
 
-
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final IWorkbench activeWorkbench = HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench();
-
-		PatrolXmlImportDialog dialog = new PatrolXmlImportDialog();
+	@Execute
+	public void execute(Shell activeShell, IEclipseContext context){
+		PatrolXmlImportDialog dialog = new PatrolXmlImportDialog(activeShell);
 		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
+			return;
 		}
 
 		List<String> files = dialog.getFileNames();
@@ -80,29 +72,28 @@ public class ImportPatrolHandler extends AbstractHandler {
 		if (files.size() == 1){
 			File file = new File(files.get(0));
 			if (!file.exists()) {
-				MessageDialog.openError(Display.getCurrent().getActiveShell(),
+				MessageDialog.openError(activeShell,
 						Messages.ImportPatrolHandler_ErrorDialog_Title, MessageFormat.format(Messages.ImportPatrolHandler_Error_DirectoryNotFound,  new Object[]{file.toString()}));
-				return null;
+				return;
 			}			
-			importFile(activeWorkbench, file, config);
+			importFile(activeShell, file, config, context);
 		
 		}else if (files.size() > 0){
-			importFiles(activeWorkbench, files, config);
+			importFiles(activeShell, files, config);
 		}
 		
 		if (config.isIgnoreWarnings()) {
-			reportCombinedWarnings(config); 
+			reportCombinedWarnings(activeShell, config); 
 		}
-
-		return null;
+		return;
 	}
 
-	private void reportCombinedWarnings(ImportConfig config) {
+	private void reportCombinedWarnings(Shell activeShell, ImportConfig config) {
 		CombinedReportBuilder reportBuilder = new CombinedReportBuilder();
 		String message = reportBuilder.buildReport(config.getWarnings(), config.getWarningFiles());	
 		
 		ReportDialog dialog = new ReportDialog(
-				Display.getDefault().getActiveShell(),
+				activeShell,
 				Messages.CombinerReportDialog_Title,
 				Messages.CombinerReportDialog_Message,
 				message);
@@ -110,9 +101,8 @@ public class ImportPatrolHandler extends AbstractHandler {
 
 	}
 
-	public void importFiles(final IWorkbench activeWorkbench, final List<String> files, final ImportConfig config){
-		final Display display = Display.getCurrent();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
+	public void importFiles(final Shell shell, final List<String> files, final ImportConfig config){
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
@@ -154,10 +144,10 @@ public class ImportPatrolHandler extends AbstractHandler {
 						}
 						if (monitor.isCanceled()){
 							final int aimported = imported;
-							display.syncExec(new Runnable() {
+							shell.getDisplay().syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), Messages.ImportPatrolHandler_Cancelled_DialogTitle, MessageFormat.format(Messages.ImportPatrolHandler_Cancelled_DialogMessage1, aimported, files.size()));									
+									MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_Cancelled_DialogTitle, MessageFormat.format(Messages.ImportPatrolHandler_Cancelled_DialogMessage1, aimported, files.size()));									
 								}
 							});
 							
@@ -165,10 +155,10 @@ public class ImportPatrolHandler extends AbstractHandler {
 						}
 					}
 					final int iimported = imported;
-					display.syncExec(new Runnable(){
+					shell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(display.getActiveShell(), Messages.ImportPatrolHandler_MessageTitle, MessageFormat.format(Messages.ImportPatrolHandler_CompleteMessage, iimported, files.size()));
+							MessageDialog.openInformation(shell, Messages.ImportPatrolHandler_MessageTitle, MessageFormat.format(Messages.ImportPatrolHandler_CompleteMessage, iimported, files.size()));
 							
 						}});
 				}
@@ -180,46 +170,34 @@ public class ImportPatrolHandler extends AbstractHandler {
 	}
 	
 	
-	public void importFile(final IWorkbench activeWorkbench, final File file, final ImportConfig config) {
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display
-				.getCurrent().getActiveShell());
+	public void importFile(final Shell shell, final File file, final ImportConfig config, final IEclipseContext context) {
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					try {
-						Patrol p = PatrolImporter.importPatrol(file, config, monitor);
+						final Patrol p = PatrolImporter.importPatrol(file, config, monitor);
 						if (p != null) {
-							PatrolEventManager.getInstance().patrolAdded(p);
-							final PatrolEditorInput input = new PatrolEditorInput(
-									p.getUuid(), p.getId(), p
-											.getPatrolType(), p
-											.getStartDate(), p.getEndDate());
-							
-							Display.getDefault().asyncExec(new Runnable() {
+							PatrolEventManager.getInstance().patrolAdded(p);						
+							shell.getDisplay().asyncExec(new Runnable() {
 								@Override
 								public void run() {
-									FieldDataPerspective.openPerspective(PatrolListView.ID);
-									try {
-										PlatformUI
-												.getWorkbench()
-												.getActiveWorkbenchWindow()
-												.getActivePage()
-												.openEditor(input,
-														PatrolEditor.ID);
-									} catch (Exception ex) {
-										SmartPatrolPlugIn
-												.log("Error loading imported patrol.", //$NON-NLS-1$
-														ex);
-									}
+									IEclipseContext ctx = EclipseContextFactory.create();
+									ctx.set(ShowFieldDataPerspective.FOCUS_VIEW, PatrolListView.ID);
+									ctx.setParent(context);
+									ctx.set(OpenPatrolHandler.UUID_PARAM, p.getUuid());
+									
+									ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
+									ContextInjectionFactory.invoke(new OpenPatrolHandler(), Execute.class, ctx);
 								}
 							});
 								
 							
 						}
 					} catch (final Exception e) {
-						Display.getDefault().syncExec(new Runnable(){
+						shell.getDisplay().syncExec(new Runnable(){
 							@Override
 							public void run() {
 								SmartPatrolPlugIn.displayLog(PATROL_NOT_IMPORTED_ERROR_MSG+ e.getLocalizedMessage(), e);
@@ -231,6 +209,13 @@ public class ImportPatrolHandler extends AbstractHandler {
 		} catch (Exception e) {
 			SmartPatrolPlugIn.displayLog(
 					PATROL_NOT_IMPORTED_ERROR_MSG + e.getLocalizedMessage(), e);
+		}
+	}
+	
+	//E3
+	public static class ImportPatrolHandlerWrapper extends DIHandler<ImportPatrolHandler>{
+		public ImportPatrolHandlerWrapper(){
+			super(ImportPatrolHandler.class);
 		}
 	}
 	

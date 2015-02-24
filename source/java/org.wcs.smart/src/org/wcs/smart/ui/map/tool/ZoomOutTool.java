@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.ui.map.tool;
 
-import net.refractions.udig.project.render.IViewportModelListener;
-import net.refractions.udig.project.render.ViewportModelEvent;
-import net.refractions.udig.tools.internal.ZoomOut;
+import org.locationtech.udig.project.render.IViewportModelListener;
+import org.locationtech.udig.project.render.ViewportModelEvent;
+import org.locationtech.udig.tools.internal.ZoomOut;
 
 /**
  * Extension of zoom out tool that will work in

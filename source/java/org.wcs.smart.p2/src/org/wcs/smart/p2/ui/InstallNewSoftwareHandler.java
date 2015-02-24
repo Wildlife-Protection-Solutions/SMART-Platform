@@ -31,7 +31,6 @@
  */
 package org.wcs.smart.p2.ui;
 
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.equinox.p2.ui.LoadMetadataRepositoryJob;
 import org.eclipse.ui.IWorkbench;

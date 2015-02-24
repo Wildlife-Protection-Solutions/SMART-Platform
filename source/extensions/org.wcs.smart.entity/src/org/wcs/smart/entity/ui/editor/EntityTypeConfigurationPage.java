@@ -310,6 +310,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 						Query q = s.createQuery("SELECT keyId FROM EntityType where conservationArea = :ca and uuid != :uuid"); //$NON-NLS-1$
 						q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 						q.setParameter("uuid", et.getUuid()); //$NON-NLS-1$
+						@SuppressWarnings("unchecked")
 						List<String> items = q.list();
 						List<NamedKeyItem> siblings = new ArrayList<NamedKeyItem>();
 						for (String i : items){

@@ -15,5 +15,5 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.report,
  org.wcs.smart.er
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

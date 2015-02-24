@@ -99,7 +99,7 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			names[i++] = Messages.SurveySamplingUnitTable_IDColumnLabel;
 			names[i++] = Messages.SurveySamplingUnitTable_StateColumnLabel;
 			if (type == GeometryType.TRANSECT){
-				names[i++] = "Length (km)";	
+				names[i++] = Messages.SurveySamplingUnitTable_LengthKmColumnLabel;	
 			}
 			for (SurveyDesignSamplingUnitAttribute sua : sd.getSamplingUnitAttributes()){
 				names[i++] = sua.getSamplingUnitAttribute().getName();

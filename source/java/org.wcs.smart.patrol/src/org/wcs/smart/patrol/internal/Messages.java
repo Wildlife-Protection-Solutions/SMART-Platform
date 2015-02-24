@@ -172,6 +172,7 @@ public class Messages extends NLS {
 	public static String ObjectiveComposite_Objective_Label;
 	public static String ObjectiveComposite_PatrolObjectiveTooLongError;
 	public static String ObjectiveComposite_Title;
+	public static String OpenPatrolHandler_OpenPatrolError;
 	public static String Patrol_SystemGenerateId_Name;
 	public static String PatrolArmedWizardPage_PageMessage;
 	public static String PatrolArmedWizardPage_Title;

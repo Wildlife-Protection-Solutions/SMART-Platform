@@ -61,9 +61,9 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
 		if (queryType.getKey().equals(PatrolQueryType.KEY)){
-			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema());
+			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 		}else{
-			return QueryResultItemFeature.createObservationFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema());
+			return QueryResultItemFeature.createObservationFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 		}
 	}
 	

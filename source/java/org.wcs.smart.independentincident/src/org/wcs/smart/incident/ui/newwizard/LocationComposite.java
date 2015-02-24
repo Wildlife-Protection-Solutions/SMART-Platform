@@ -36,7 +36,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
@@ -255,7 +254,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 
 	
 	private void selectOnMap(){
-		MapDialog md = new MapDialog(Display.getCurrent().getActiveShell());
+		MapDialog md = new MapDialog(txtX.getShell());
 		
 		try{
 			Coordinate z = getPoint();

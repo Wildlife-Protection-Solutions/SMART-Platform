@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.observation.query.map.udig;
 
-import net.refractions.udig.catalog.IServiceInfo;
-
+import org.locationtech.udig.catalog.IServiceInfo;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;

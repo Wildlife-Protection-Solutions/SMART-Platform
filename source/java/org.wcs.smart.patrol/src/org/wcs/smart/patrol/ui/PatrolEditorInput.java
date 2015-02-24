@@ -53,6 +53,14 @@ public class PatrolEditorInput implements IEditorInput {
 	private Date endDate;
 	
 	/**
+	 * Creates a new input from the uuid only.
+	 * @param uuid
+	 */
+	public PatrolEditorInput(byte[] uuid){
+		this.patrolUuid = uuid;
+	}
+	
+	/**
 	 * Create new input.
 	 * 
 	 * @param uuid

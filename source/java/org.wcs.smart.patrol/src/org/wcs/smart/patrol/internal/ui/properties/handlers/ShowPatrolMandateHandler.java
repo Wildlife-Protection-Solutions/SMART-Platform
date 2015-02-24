@@ -21,21 +21,27 @@
  */
 package org.wcs.smart.patrol.internal.ui.properties.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.internal.ui.properties.PatrolMandatePropertyPage;
 /**
  * Handler for displaying patrol mandate dialog.
  * @author Emily
  *
  */
-public class ShowPatrolMandateHandler extends AbstractHandler {
+public class ShowPatrolMandateHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		PatrolMandatePropertyPage dialog = new PatrolMandatePropertyPage();
+	@Execute
+	public void execute(Shell activeShell) throws ExecutionException {
+		PatrolMandatePropertyPage dialog = new PatrolMandatePropertyPage(activeShell);
 		dialog.open();
-		return null;
+	}
+	
+	public static class ShowPatrolMandateHandlerWrapper extends DIHandler<ShowPatrolMandateHandler>{
+		public ShowPatrolMandateHandlerWrapper(){
+			super(ShowPatrolMandateHandler.class);
+		}
 	}
 }

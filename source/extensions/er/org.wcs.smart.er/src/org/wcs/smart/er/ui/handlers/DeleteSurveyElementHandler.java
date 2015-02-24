@@ -28,24 +28,27 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Named;
+
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
-import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.SurveyPermissionManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -67,19 +70,16 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class DeleteSurveyElementHandler extends AbstractHandler {
+public class DeleteSurveyElementHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection a = HandlerUtil.getCurrentSelection(event);
-		if (!(a instanceof StructuredSelection)){
-			return null;
-		}
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, Shell activeShell){
+		if (selection == null || !(selection instanceof StructuredSelection)) return;
+		
 		
 		final List<SurveyListTreeNode> nodes = new ArrayList<SurveyListTreeNode>();
 		final List<SurveyDesignEditorInput> designs = new ArrayList<SurveyDesignEditorInput>();
-		StructuredSelection selection = (StructuredSelection)a;
-		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)selection).iterator(); iterator.hasNext();) {
 			Object delete = (Object) iterator.next();
 			if (delete instanceof SurveyListTreeNode){
 				nodes.add((SurveyListTreeNode)delete);
@@ -97,11 +97,11 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 			warn.append("\n\n"); //$NON-NLS-1$
 			warn.append(Messages.DeleteSurveyElementHandler_ConfirmDelete3);
 		
-			if (!MessageDialog.openQuestion(HandlerUtil.getActiveShell(event), Messages.DeleteSurveyElementHandler_DeleteDialogTitle, MessageFormat.format(warn.toString(), new Object[]{nodes.size()}))){
-				return null;
+			if (!MessageDialog.openQuestion(activeShell, Messages.DeleteSurveyElementHandler_DeleteDialogTitle, MessageFormat.format(warn.toString(), new Object[]{nodes.size()}))){
+				return;
 			}
 		
-			ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 			try {
 				pmd.run(true, false, new IRunnableWithProgress() {
 				
@@ -134,11 +134,11 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 			warn.append("\n\n"); //$NON-NLS-1$
 			warn.append(Messages.DeleteSurveyElementHandler_Confirm6);
 		
-			if (!MessageDialog.openQuestion(HandlerUtil.getActiveShell(event), Messages.DeleteSurveyElementHandler_DeleteDialogTitle, MessageFormat.format(warn.toString(), new Object[]{designs.size()}))){
-				return null;
+			if (!MessageDialog.openQuestion(activeShell, Messages.DeleteSurveyElementHandler_DeleteDialogTitle, MessageFormat.format(warn.toString(), new Object[]{designs.size()}))){
+				return;
 			}
 			
-			ProgressMonitorDialog pmd = new ProgressMonitorDialog(HandlerUtil.getActiveShell(event));
+			ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 			try {
 				pmd.run(true, false, new IRunnableWithProgress() {
 				
@@ -163,9 +163,6 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 				EcologicalRecordsPlugIn.displayLog(Messages.DeleteSurveyElementHandler_DeleteError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			}
 		}
-		
-		
-		return null;
 	}
 	
 	private void deleteItem(SurveyListTreeNode element, Session session){
@@ -423,4 +420,9 @@ public class DeleteSurveyElementHandler extends AbstractHandler {
 		
 	}
 
+	public static class DeleteSurveyElementHandlerWrapper extends DIHandler<DeleteSurveyElementHandler>{
+		public DeleteSurveyElementHandlerWrapper(){
+			super(DeleteSurveyElementHandler.class);
+		}
+	}
 }

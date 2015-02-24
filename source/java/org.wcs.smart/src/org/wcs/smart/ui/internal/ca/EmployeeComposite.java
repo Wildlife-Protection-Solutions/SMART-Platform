@@ -148,7 +148,7 @@ public class EmployeeComposite extends Composite {
 		
 		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":"); //$NON-NLS-1$
 		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
-				| SWT.LONG, dateValidate);
+				| SWT.LONG | SWT.DATE, dateValidate);
 		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;
 		dtEmploymentStart.setLayoutData(data);
@@ -169,14 +169,14 @@ public class EmployeeComposite extends Composite {
 			
 			createLabelField(this, Employee.EMPLOYEMENT_ENDDATE + ":"); //$NON-NLS-1$
 			dtEmploymentEnd = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
-					| SWT.LONG, dateValidate);
+					| SWT.LONG | SWT.DATE, dateValidate);
 			data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 			data.horizontalIndent = 8;
 			dtEmploymentEnd.setLayoutData(data);
 
 		}
 		createLabelField(this, Employee.BIRTHDATE + ":"); //$NON-NLS-1$
-		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG, dateValidate);
+		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG | SWT.DATE, dateValidate);
 		//default the date to something other than today.
 		dtBirthDate.setYear(1950);
 		dtBirthDate.setMonth(0);

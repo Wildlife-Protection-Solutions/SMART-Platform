@@ -25,8 +25,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.ui.CRSChooserDialog;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -48,6 +46,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.geotools.referencing.CRS;
 import org.hibernate.Transaction;
+import org.locationtech.udig.ui.CRSChooserDialog;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
@@ -180,7 +179,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 		try{
 			currentTransaction.commit();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.ProjectionPropertyDialog_Error_CouldNotSave + ex.getLocalizedMessage(), ex);
 			return false;
 		}
 		ConservationAreaManager.getInstance().fireProjectionListModified();
@@ -224,7 +223,7 @@ public class ProjectionPropertyDialog extends AbstractPropertyJHeaderDialog impl
 				projections.add(prj);
 				listModified();
 			}else{
-				SmartPlugIn.displayLog(getShell(), Messages.ProjectionPropertyDialog_ProjectionParseError,null);				
+				SmartPlugIn.displayLog(Messages.ProjectionPropertyDialog_ProjectionParseError,null);				
 			}
 		}
 	}

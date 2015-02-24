@@ -24,10 +24,21 @@ package org.wcs.smart.entity.ui.typelist;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -36,32 +47,30 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.osgi.service.event.Event;
 import org.wcs.smart.entity.EntityHibernateManager;
-import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityTypeFilter;
 import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
+import org.wcs.smart.entity.ui.OpenEntityTypeHandler;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * View containing a list of supported entity types.
@@ -69,7 +78,7 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public class EntityTypeListView extends ViewPart implements IEntityTypeFilteringView{
+public class EntityTypeListView implements IEntityTypeFilteringView{
 	
 	public static final String ID = "org.wcs.smart.entity.typelist"; //$NON-NLS-1$
 	private TableViewer entityListViewer;
@@ -77,42 +86,8 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 
 	private Object[] loadingInput = new Object[]{Messages.EntityTypeListView_LoadingLabel};
 	
-	
-	private IPartListener2 partListener = new IPartListener2() {
-		
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef.getId().equals(EntityTypeEditor.ID)){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof EntityTypeEditor){
-					entityListViewer.setSelection(new StructuredSelection(  ((EntityTypeEditor) part).getEditorInput() ));
-					getSite().getPage().bringToTop(getSite().getPart());
-				}
-			}
-			
-		}
-	};
+	@Inject private IMenuService menuService;
+	@Inject private MPart localPart;
 	
 	/*
 	 * Job that updates the patrol list based on the current filter
@@ -186,18 +161,26 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 			}
 		}
 	};
-		
-	/**
-	 * Creates a new vies
-	 */
-	public EntityTypeListView() {
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
-	}
+	
 
-	public void dispose() {		
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);		
+	/**
+	 * activated events
+	 * @param partEvent
+	 */
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof EntityTypeEditor){
+			entityListViewer.setSelection(new StructuredSelection(((EntityTypeEditor)lpart).getEditorInput()));
+			pService.bringToTop(localPart);
+		}
+	}
+	
+	@PreDestroy
+	public void dispose() {				
 		EntityEventManager.getInstance().removeListener(entityListener);
-		super.dispose();
 	}
 
 	/**
@@ -208,8 +191,11 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 		return this.filter;
 	}
 
-	@Override
+	@PostConstruct
 	public void createPartControl(Composite parent) {
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -239,16 +225,7 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 					return;
 				}
 				EntityTypeEditorInput p = (EntityTypeEditorInput)selection;
-				if (p != null){
-					IWorkbenchPage page = null;
-					try {
-						page = getSite().getPage();
-						page.openEditor(p, EntityTypeEditor.ID);						
-					} catch (Throwable t) {
-						EntityPlugIn.displayLog(t.getLocalizedMessage(), t);
-					}
-				}
-				
+				(new OpenEntityTypeHandler()).openEntityType(p);
 			}
 		});
 		
@@ -256,10 +233,9 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.entity.typelist"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(entityListViewer.getControl());
-		entityListViewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager,  entityListViewer);
-		getSite().setSelectionProvider(entityListViewer);
+		entityListViewer.getControl().setMenu(menu);	
 	}
 
 	/**
@@ -276,8 +252,21 @@ public class EntityTypeListView extends ViewPart implements IEntityTypeFiltering
 		updateJob.schedule(delay);		
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		entityListViewer.getControl().setFocus();
+	}
+	
+	public static class EntityTypeListViewWrapper extends DIViewPart<EntityTypeListView>{
+		public EntityTypeListViewWrapper(){
+			super(EntityTypeListView.class);
+		}
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			
+			getSite().setSelectionProvider(	((EntityTypeListView)getComponent()).entityListViewer);
+		}
 	}
 }

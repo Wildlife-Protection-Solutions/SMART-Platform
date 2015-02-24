@@ -23,15 +23,15 @@ package org.wcs.smart.ui.internal;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -50,34 +50,34 @@ import org.wcs.smart.ui.UserNamePasswordDialog;
  * @author Emily
  *
  */
-public class DeleteConservationArea extends AbstractHandler {
+public class DeleteConservationArea {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(final Shell activeShell) throws ExecutionException {
 		
 		//ensure the user has permission
 		if (SmartDB.getCurrentEmployee().getSmartUserLevel() != SmartUserLevel.ADMIN){
-			MessageDialog.openInformation(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Delete_DialogTitle, Messages.DeleteConservationArea_Error_Permission);
-			return null;
+			MessageDialog.openInformation(activeShell, Messages.DeleteConservationArea_Delete_DialogTitle, Messages.DeleteConservationArea_Error_Permission);
+			return;
 		}
 		
-		if (!MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Delete_DialogTitle, Messages.DeleteConservationArea_Confirm_Delete)){
-			return null;
+		if (!MessageDialog.openConfirm(activeShell, Messages.DeleteConservationArea_Delete_DialogTitle, Messages.DeleteConservationArea_Confirm_Delete)){
+			return;
 		}
 		
-		UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(),
+		UserNamePasswordDialog dialog = new UserNamePasswordDialog(activeShell,
 				Messages.DeleteConservationArea_UserNameConfirmation_DialogTitle,
 				Messages.DeleteConservationArea_UserNameConfirmation_DialogMessage,
 				Messages.DeleteConservationArea_UserNameConfirmation_DialogButton);
 		if (dialog.open() == Window.CANCEL){
-			return null;
+			return;
 		}
 		
 		if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
 			&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)){
 			
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Error_DialogTitle, Messages.DeleteConservationArea_Error_Username_DialogMessage);
-			return null;
+			MessageDialog.openError(activeShell, Messages.DeleteConservationArea_Error_DialogTitle, Messages.DeleteConservationArea_Error_Username_DialogMessage);
+			return;
 		}
 		
 		
@@ -90,7 +90,7 @@ public class DeleteConservationArea extends AbstractHandler {
 			}
 		}
 		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try{
 		pmd.run(true, false, new IRunnableWithProgress() {
 			
@@ -103,10 +103,10 @@ public class DeleteConservationArea extends AbstractHandler {
 				try{
 					ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor);
 				}catch (final Exception ex){
-					Display.getDefault().syncExec(new Runnable(){
+					activeShell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Error_DeleteError, ex);
+							SmartPlugIn.displayLog(Messages.DeleteConservationArea_Error_DeleteError, ex);
 						}
 						
 					});
@@ -116,11 +116,15 @@ public class DeleteConservationArea extends AbstractHandler {
 			}
 		});
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(Display.getCurrent().getActiveShell(), Messages.DeleteConservationArea_Error_DeleteJobError, ex);
+			SmartPlugIn.displayLog( Messages.DeleteConservationArea_Error_DeleteJobError, ex);
 		}
-		
-		
-		return null;
+		return;
 	}
 
+	// E3
+	public static class DeleteConservationAreaWrapper extends DIHandler<DeleteConservationArea> {
+		public DeleteConservationAreaWrapper() {
+			super(DeleteConservationArea.class);
+		}
+	}
 }

@@ -59,7 +59,7 @@ public class DatastoreImporter implements ICaDataImporter {
 			importFileStore(engine.getImportDataDirectory(), engine.getConservationAreaUuid(), monitor);
 			monitor.worked(1);
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(null, Messages.CaImporter_Error_FilestoreNotImported1 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.CaImporter_Error_FilestoreNotImported1 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 		}finally{
 			monitor.done();
 		}

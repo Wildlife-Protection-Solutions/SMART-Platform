@@ -23,11 +23,12 @@ package org.wcs.smart.plan.ui.handlers;
 
 import java.io.File;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.report.PlanReportPerspective;
 import org.wcs.smart.plan.report.ReportPlan;
@@ -38,29 +39,36 @@ import org.wcs.smart.plan.report.ReportPlan;
  * @since 2.0.0
  *
  */
-public class RevertPlanTemplate extends AbstractHandler {
+public class RevertPlanTemplate {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		boolean revert = MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.RevertPlanTemplate_ConfirmDialogTitle, Messages.RevertPlanTemplate_OverwriteTemplateWarningMessage);
-		if (revert){
-			File customTemplate = ReportPlan.getCustomPlanTemplateLocation();
-			if (customTemplate != null){
-				
-				boolean open = ReportPlan.closeTemplateEditor();
+	@Execute
+	public void execute(Shell activeShell, EModelService modelService, MWindow activeWindow) {
+		boolean revert = MessageDialog.openConfirm(activeShell, 
+				Messages.RevertPlanTemplate_ConfirmDialogTitle, 
+				Messages.RevertPlanTemplate_OverwriteTemplateWarningMessage);
+		if (!revert) return;
 
-				//delete
-				if (!ReportPlan.getCustomPlanTemplateLocation().delete()){
-					MessageDialog.openError(HandlerUtil.getActiveShell(event), Messages.RevertPlanTemplate_Error, Messages.RevertPlanTemplate_ErrorRevertingTemplate);
-				}
-				
-				//re-open
-				if (open && HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getPerspective().getId().equals(PlanReportPerspective.ID) ){
-					ReportPlan.editTemplate(event);
-				}
-			}
+		File customTemplate = ReportPlan.getCustomPlanTemplateLocation();
+		if (customTemplate == null) return;
+		
+		boolean open = ReportPlan.closeTemplateEditor();
+		//delete
+		if (!ReportPlan.getCustomPlanTemplateLocation().delete()){
+			MessageDialog.openError(activeShell, 
+					Messages.RevertPlanTemplate_Error, 
+					Messages.RevertPlanTemplate_ErrorRevertingTemplate);
+		}				
+		//re-open
+		if (open && 
+				modelService.getActivePerspective(activeWindow).getElementId().equals(PlanReportPerspective.ID)){
+			ReportPlan.editTemplate();
 		}
-		return null;
 	}
 
+	
+	public static class RevertPlanTemplateWrapper extends DIHandler<RevertPlanTemplate>{
+		public RevertPlanTemplateWrapper(){
+			super(RevertPlanTemplate.class);
+		}
+	}
 }

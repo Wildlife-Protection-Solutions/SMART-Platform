@@ -21,25 +21,27 @@
  */
 package org.wcs.smart.map.internal;
 
-import net.refractions.udig.project.ui.internal.wizard.MapImport;
-
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.locationtech.udig.project.ui.internal.wizard.MapImport;
 
 /**
  * Add layer handler
  * @author egouge
  * @since 1.0.0
  */
-public class AddLayerHandler extends AbstractHandler {
+public class AddLayerHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
+	@Execute
+	public void execute() {
 		MapImport mapImport = new MapImport();
 		mapImport.getDialog().open();
-		return null;
 	}
 
+	// E3
+	public static class AddLayerHandlerWrapper extends DIHandler<AddLayerHandler> {
+		public AddLayerHandlerWrapper() {
+			super(AddLayerHandler.class);
+		}
+	}
 }

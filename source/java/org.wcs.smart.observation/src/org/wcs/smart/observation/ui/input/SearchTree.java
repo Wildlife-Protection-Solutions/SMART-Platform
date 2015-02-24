@@ -68,7 +68,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -836,7 +835,7 @@ public class SearchTree extends Composite {
 				if (e.detail == SWT.TRAVERSE_RETURN) {
 					e.doit = false;
 					if (getActiveViewer().getTree().getItemCount() == 0) {
-						Display.getCurrent().beep();
+						filterText.getDisplay().beep();
 					} else {
 						addSelectionToList();
 

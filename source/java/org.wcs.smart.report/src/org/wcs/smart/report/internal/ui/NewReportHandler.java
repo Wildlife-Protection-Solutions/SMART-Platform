@@ -25,6 +25,8 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.inject.Named;
+
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.model.api.DataSourceHandle;
 import org.eclipse.birt.report.model.api.DesignElementHandle;
@@ -33,19 +35,17 @@ import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ParameterGroupHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -64,35 +64,29 @@ import org.wcs.smart.report.model.RootReportFolder;
  * @author egouge
  * @since 1.0.0
  */
-public class NewReportHandler extends AbstractHandler implements IHandler {
+public class NewReportHandler {
 
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		Object selection = null;
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			selection = null;
-		}else{
-			selection = ((IStructuredSelection)thisSelection).getFirstElement();
-			if (!(selection instanceof ReportFolder || selection instanceof RootReportFolder)){
-				selection = null;
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, final Shell activeShell){
+		Object value = null;
+		
+		if (thisSelection != null && thisSelection instanceof IStructuredSelection&& !((IStructuredSelection)thisSelection).isEmpty() ){
+			Object first = ((IStructuredSelection)thisSelection).getFirstElement();
+			if (first instanceof ReportFolder || first instanceof RootReportFolder){
+				value = first;
 			}
 		}
 		
 		final File smartLibrary = SmartBirtLibrary.getInstance().getLibraryFile();
 		if (!smartLibrary.exists()) {
-			// TODO: I don't think we need to throw ane xception here - perhaps
-			// just
-			// an error dialog instead.
+			// TODO: I don't think we need to throw an exception here 
+			// perhaps just an error dialog instead
 			throw new IllegalStateException(Messages.NewReportHandler_Error_NoLibrary);
 		}
 
 		// display dialog
-		CreateReportDialog dialog = new CreateReportDialog(
-				HandlerUtil.getActiveShell(event), selection);
-		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
-		}
+		CreateReportDialog dialog = new CreateReportDialog(activeShell, value);
+		if (dialog.open() != IDialogConstants.OK_ID) return;
 
 		String reportName = dialog.getReportName();
 
@@ -219,7 +213,7 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 				
 				//edit report perspective
 				if (canEdit){
-					Display.getDefault().asyncExec(new Runnable() {
+					activeShell.getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
 							ReportManager.editReport(report);
@@ -235,10 +229,12 @@ public class NewReportHandler extends AbstractHandler implements IHandler {
 
 		};
 		createReportJob.schedule();
-
-		return null;
 	}
 
 	
-	
+	public static class NewReportHandlerWrapper extends DIHandler<NewReportHandler>{
+		public NewReportHandlerWrapper(){
+			super(NewReportHandler.class);
+		}
+	}
 }

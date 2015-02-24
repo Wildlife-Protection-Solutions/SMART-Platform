@@ -24,12 +24,6 @@ package org.wcs.smart.ui.map;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.internal.tool.display.ToolManager;
-import net.refractions.udig.project.ui.internal.tool.display.ToolProxy;
-import net.refractions.udig.project.ui.tool.IToolManager;
-import net.refractions.udig.project.ui.tool.ModalTool;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -38,6 +32,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolProxy;
+import org.locationtech.udig.project.ui.tool.IToolManager;
+import org.locationtech.udig.project.ui.tool.ModalTool;
 import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.tool.BBoxInfoTool;
 
@@ -55,10 +54,10 @@ public class MapToolComposite {
 	//a active or viewable map.
 	//see: https://locationtech.org/mhonarc/lists/udig-dev/msg22172.html
 	public static final String UDIG_ZOOM_EXTENT_ID = "org.wcs.smart.udig.ZoomExtents"; //$NON-NLS-1$
-	public static final String UDIG_PAN_ID = "net.refractions.udig.tools.Pan"; //$NON-NLS-1$
-	public static final String UDIG_ZOOM_ID = "net.refractions.udig.tools.Zoom"; //$NON-NLS-1$
-	public static final String UDIG_ZOOM_IN_ID = "net.refractions.udig.tool.default.ZoomIn"; //$NON-NLS-1$
-	public static final String UDIG_ZOOM_OUT_ID = "net.refractions.udig.tool.default.ZoomOut"; //$NON-NLS-1$
+	public static final String UDIG_PAN_ID = "org.locationtech.udig.tools.Pan"; //$NON-NLS-1$
+	public static final String UDIG_ZOOM_ID = "org.locationtech.udig.tools.Zoom"; //$NON-NLS-1$
+	public static final String UDIG_ZOOM_IN_ID = "org.locationtech.udig.tool.default.ZoomIn"; //$NON-NLS-1$
+	public static final String UDIG_ZOOM_OUT_ID = "org.locationtech.udig.tool.default.ZoomOut"; //$NON-NLS-1$
 	
 	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer",  //$NON-NLS-1$
 			SetBasemapTool.ID, 

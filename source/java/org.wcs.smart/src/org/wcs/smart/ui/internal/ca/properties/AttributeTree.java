@@ -159,8 +159,7 @@ public class AttributeTree {
 					}
 				});
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog(Display.getDefault().getActiveShell(),
-						Messages.AttributeTree_LoadErrorMessage, ex);
+				SmartPlugIn.displayLog(Messages.AttributeTree_LoadErrorMessage, ex);
 			}
 		}
 		
@@ -477,7 +476,7 @@ public class AttributeTree {
 		try {
 			dialog.run(true, true, runnable);		
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog(viewer.getTree().getShell(), Messages.AttributeTree_GenericError, ex);
+			SmartPlugIn.displayLog(Messages.AttributeTree_GenericError, ex);
 		}
 	}
 	

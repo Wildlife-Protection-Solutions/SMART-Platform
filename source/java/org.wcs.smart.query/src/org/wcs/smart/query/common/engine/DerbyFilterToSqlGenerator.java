@@ -21,12 +21,10 @@
  */
 package org.wcs.smart.query.common.engine;
 
-
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -144,7 +142,8 @@ public class DerbyFilterToSqlGenerator {
 			String queryStr = ""; //$NON-NLS-1$
 			//TODO: look into escape % & _ as these are wild card characters
 			// SELECT a FROM tabA WHERE a LIKE '%=_' ESCAPE '='  (must specify escape character)
-			String val = StringEscapeUtils.escapeSql((String)filter.getValue());
+			//String val = StringEscapeUtils.escapeSql((String)filter.getValue());
+			String val = (String)filter.getValue();
 			
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){

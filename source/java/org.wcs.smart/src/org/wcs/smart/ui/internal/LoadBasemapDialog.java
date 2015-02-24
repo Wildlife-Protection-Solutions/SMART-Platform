@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal;
 
+import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -52,7 +53,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
 
-import com.ibm.icu.text.Collator;
 
 /**
  * Dialog for selecting basemap

@@ -64,17 +64,13 @@ public class SurveyResultItemFeature {
 	 * @return created feature 
 	 */
 	public static SimpleFeature createObservationFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
-		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
-		
+		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
+		data[1] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		for (int i = 0; i < columns.size(); i ++){
-			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
-		data[data.length -1] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
-		
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
-		
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 	
 	/**
@@ -88,21 +84,17 @@ public class SurveyResultItemFeature {
 	 * @return created feature 
 	 */
 	public static SimpleFeature createTrackFeature(SurveyQueryResultItem it, List<QueryColumn> columns, SimpleFeatureType  ftype){
-		
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		for (int i = 0; i < columns.size(); i ++){
-			data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
-		}
-		
 		Geometry g = null;
 		if (it.getTracks() != null && it.getTracks().size() > 0){
 			g = gf.createMultiLineString(it.getTracks().toArray(new LineString[it.getTracks().size()]));
 		}
-		data[data.length -1] = g;
-		
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		data[0] = g;
+		data[1] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
+		for (int i = 0; i < columns.size(); i ++){
+			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+		}
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 	
 	/**
@@ -118,19 +110,18 @@ public class SurveyResultItemFeature {
 	public static SimpleFeature createTrackFeature(MissionTrackResultItem it, Session session,
 			List<QueryColumn> columns, SimpleFeatureType ftype){
 		Object[] data = new Object[columns.size() + 2];
-		data[0] = it.getMissionId() + "." + SmartUtils.encodeHex(it.getTrackUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		MissionTrack mt = (MissionTrack) session.load(MissionTrack.class, it.getTrackUuid());
+		data[0] = mt.getLineString();
+		data[1] = it.getMissionId() + "." + SmartUtils.encodeHex(it.getTrackUuid()); //$NON-NLS-1$ 
 		
 		for (int i = 0; i < columns.size(); i ++){
 			if (i == 3){
-//				data[i+1] = null;
-				data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+				data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 			}else{
-				data[i+1] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+				data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 			}
 		}
-		MissionTrack mt = (MissionTrack) session.load(MissionTrack.class, it.getTrackUuid());
-		data[data.length -1] = mt.getLineString();
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 	
 	/**

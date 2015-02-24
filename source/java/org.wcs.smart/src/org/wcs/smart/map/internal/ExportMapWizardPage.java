@@ -32,15 +32,6 @@ import java.util.List;
 import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageWriterSpi;
 
-import net.refractions.udig.project.IMap;
-import net.refractions.udig.project.ui.ApplicationGIS;
-import net.refractions.udig.project.ui.BoundsStrategy;
-import net.refractions.udig.project.ui.wizard.export.image.ExportMapToImageWizard;
-import net.refractions.udig.project.ui.wizard.export.image.GeotiffImageExportFormat;
-import net.refractions.udig.project.ui.wizard.export.image.ImageExportFormat;
-import net.refractions.udig.project.ui.wizard.export.image.PDFImageExportFormat;
-import net.refractions.udig.project.ui.wizard.export.image.WorldImageExportFormat;
-
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -68,6 +59,14 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 import org.eclipse.swt.widgets.Text;
+import org.locationtech.udig.project.IMap;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.BoundsStrategy;
+import org.locationtech.udig.project.ui.wizard.export.image.ExportMapToImageWizard;
+import org.locationtech.udig.project.ui.wizard.export.image.GeotiffImageExportFormat;
+import org.locationtech.udig.project.ui.wizard.export.image.ImageExportFormat;
+import org.locationtech.udig.project.ui.wizard.export.image.PDFImageExportFormat;
+import org.locationtech.udig.project.ui.wizard.export.image.WorldImageExportFormat;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
 /**

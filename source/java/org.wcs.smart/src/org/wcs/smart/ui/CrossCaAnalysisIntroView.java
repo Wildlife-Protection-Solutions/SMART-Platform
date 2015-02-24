@@ -21,21 +21,28 @@
  */
 package org.wcs.smart.ui;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.eclipse.ui.part.ViewPart;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.hibernate.IConservationAreaConfigurationListener;
+import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
@@ -44,36 +51,36 @@ import org.wcs.smart.internal.Messages;
  * @author Emily
  *
  */
-public class CrossCaAnalysisIntroView extends ViewPart {
+public class CrossCaAnalysisIntroView {
 
 	public static final String ID = "org.wcs.smart.crossCaView"; //$NON-NLS-1$
 	
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit = null;
 	private Label lblHeader = null;
 	private Font boldFont = null;
 	
 	private Composite caList = null;
 	
-	private IConservationAreaConfigurationListener changeListener = new IConservationAreaConfigurationListener() {
-		@Override
-		public void configurationChanged() {
-			updateCas();
-			
-		}
-	};
 	public CrossCaAnalysisIntroView() {
-		SmartDB.addConfigurationChangeListener(changeListener);
 	}
 
-	@Override
+	@PreDestroy
 	public void dispose(){
-		super.dispose();
 		toolkit.dispose();
-		SmartDB.removeConfigurationChangeListener(changeListener);
 	}
 	
-	@Override
+	@Inject
+	@Optional
+	private void configurationChanged(@UIEventTopic(SmartDB.CCAA_CONFIGURATION_MODIFIED) ConservationAreaConfiguration newConfig){
+		updateCas();
+	}
+	
+	@PostConstruct
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		Composite main = toolkit.createComposite(parent);
 		
 		main.setLayout(new GridLayout(1, false));
@@ -81,7 +88,7 @@ public class CrossCaAnalysisIntroView extends ViewPart {
 		
 		FontData fd = lblHeader.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(Display.getCurrent(), fd);
+		boldFont = new Font(lblHeader.getDisplay(), fd);
 		lblHeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblHeader.getLayoutData()).widthHint = 100;
 		lblHeader.setFont(boldFont);
@@ -105,7 +112,7 @@ public class CrossCaAnalysisIntroView extends ViewPart {
 		
 	}
 
-	@Override
+	@Focus
 	public void setFocus() {
 		lblHeader.setFocus();
 	}
@@ -129,4 +136,9 @@ public class CrossCaAnalysisIntroView extends ViewPart {
 		
 	}
 
+	public static class CrossCaAnalysisIntroViewWrapper extends DIViewPart<CrossCaAnalysisIntroView>{
+		public CrossCaAnalysisIntroViewWrapper(){
+			super(CrossCaAnalysisIntroView.class);
+		}
+	}
 }

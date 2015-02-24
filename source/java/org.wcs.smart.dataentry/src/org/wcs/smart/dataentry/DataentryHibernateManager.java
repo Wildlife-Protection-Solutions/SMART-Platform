@@ -23,7 +23,6 @@ package org.wcs.smart.dataentry;
 
 import java.util.List;
 
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -154,7 +153,7 @@ public class DataentryHibernateManager extends HibernateManager {
 			return true;
 		} catch (Exception ex) {
 			session.getTransaction().rollback();
-			SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), Messages.DataentryHibernateManager_ConfigurableModel_Save_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+			SmartPlugIn.displayLog(Messages.DataentryHibernateManager_ConfigurableModel_Save_Error + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return false;
 		}
 	}

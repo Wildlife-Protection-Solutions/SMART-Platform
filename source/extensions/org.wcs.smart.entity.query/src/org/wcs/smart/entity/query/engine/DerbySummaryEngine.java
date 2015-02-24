@@ -528,7 +528,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
-			sql.append("left join "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeListItem.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeListItem.class));
@@ -619,7 +619,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
-			sql.append("left join "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeTreeNode.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeTreeNode.class));
@@ -828,14 +828,14 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
 
 					if (!waypointAdd) {
-						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Waypoint.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(Waypoint.class));
 						fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 						waypointAdd = true;
 					}
-					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
@@ -859,7 +859,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				groupByInnerSql.append(".ca_uuid as cauuid_" + itemcnt); //$NON-NLS-1$
 				groupBySql.append("cauuid_" + itemcnt); //$NON-NLS-1$
 				if (!waypointAdd) {
-					fromSql.append("left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(Waypoint.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(Waypoint.class));
@@ -890,7 +890,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				}
 				
 				if (!waypointAdd) {
-					fromSql.append("left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNamePrefix(Waypoint.class));
 					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 					waypointAdd = true;
@@ -1047,7 +1047,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				groupBySql.append(categoryKey);
 					
 				if (!waypointAdd) {
-					fromSql.append("left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNamePrefix(Waypoint.class));
 					fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 					waypointAdd = true;

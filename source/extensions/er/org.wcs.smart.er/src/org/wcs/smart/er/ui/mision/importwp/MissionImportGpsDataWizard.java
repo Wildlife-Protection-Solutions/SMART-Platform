@@ -94,13 +94,7 @@ public class MissionImportGpsDataWizard extends ImportGpsDataWizard {
 						String message = engine.updateSourceObject(getImportOption(), getType(), missionDay, getImportedData(), monitor);
 						successMessage[0] = message;
 					} catch (final Exception e) {
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								SmartPlugIn.displayLog(Display.getDefault().getActiveShell(), e.getMessage(), e);
-							}
-							
-						});
+						SmartPlugIn.displayLog(e.getMessage(), e);
 						successMessage[0] = null;
 					}
 				}

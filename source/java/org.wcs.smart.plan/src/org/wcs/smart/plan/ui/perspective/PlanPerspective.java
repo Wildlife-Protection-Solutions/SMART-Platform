@@ -42,8 +42,8 @@ public class PlanPerspective implements IPerspectiveFactory {
 		layout.getViewLayout(PlanListView.ID).setCloseable(false);
 
 		IFolderLayout folder1 = layout.createFolder("org.wcs.smart.plan.planFolder", IPageLayout.BOTTOM, 0.6f, PlanListView.ID); //$NON-NLS-1$
-		folder1.addView("net.refractions.udig.project.ui.layerManager"); //$NON-NLS-1$
-		folder1.addPlaceholder("net.refractions.udig.tool.info.infoView"); //$NON-NLS-1$
+		folder1.addView("org.locationtech.udig.project.ui.layerManager"); //$NON-NLS-1$
+		folder1.addPlaceholder("org.locationtech.udig.tool.info.infoView"); //$NON-NLS-1$
 	}
 
 }

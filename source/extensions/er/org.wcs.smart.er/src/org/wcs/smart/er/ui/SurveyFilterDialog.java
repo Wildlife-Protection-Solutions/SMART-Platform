@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.swt.SWT;
@@ -40,7 +41,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
@@ -113,6 +113,10 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				keys[i++] = ((SurveyDesignEditorInput)cc).getSurveyDesignKey();
 			}
 			filter.setSurveyDesignKeyFilters(keys);
+			
+			if (keys.length == 0){
+				MessageDialog.openWarning(getParentShell(), Messages.SurveyFilterDialog_WarnTitle, Messages.SurveyFilterDialog_WarnInfo); 
+			}
 		}
 		
 		filter.setDateFilter(dateComp.getDateFilterForModel(), dateComp.getStartDateForModel(), dateComp.getEndDateForModel());
@@ -124,7 +128,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 	 */
 	@Override
 	protected void updateControlsValues(){
-		State state = filter.getSurveyStateFilters();
+		State state = filter.getSurveyStateFilter();
 		
 		opActive.setSelection(false);
 		opInactive.setSelection(false);
@@ -147,11 +151,13 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		
 		dateComp.applyState(filter.getDateFilter(), filter.getStartDate(), filter.getEndDate());
 		nameFilter.applyState(filter.getSurveyNameComparator(), filter.getSurveyNameFilter(), surveyField);
+		updateDesignEnabled();
 	}
 	
 	private void initDesignSelection(){
-		if (filter.getSurveyStateFilters() == null && filter.getDesignKeys() != null){
+		if (filter.getSurveyStateFilter() == null && filter.getDesignKeys() != null){
 			lstDesigns.setAllChecked(false);
+			
 			Object x = lstDesigns.getInput();
 			if (x instanceof List){
 				List<?> items = (List<?>) x;
@@ -206,7 +212,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		g = new Group(main, SWT.DEFAULT);
 		g.setText(Messages.SurveyFilterDialog_DesignGroup);
 		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 
 		Composite tmp = new Composite(g, SWT.NONE);
@@ -275,8 +281,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				s.close();
 			}
 			
-			Display.getDefault().asyncExec(new Runnable(){
-
+			getShell().getDisplay().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					lstDesigns.setInput(all);

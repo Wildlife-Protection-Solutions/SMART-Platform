@@ -42,7 +42,7 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -95,8 +95,8 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 
 	private Map<ScreenOptionMeta, Composite> screenComposites;
 	
-	public PatrolMetaConfigDialog() {
-		super(Display.getDefault().getActiveShell(), Messages.PatrolMetaConfigDialog_ShellTitle);
+	public PatrolMetaConfigDialog(Shell shell) {
+		super(shell, Messages.PatrolMetaConfigDialog_ShellTitle);
 		initData();
 	}
 

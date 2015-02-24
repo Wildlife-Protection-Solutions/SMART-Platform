@@ -23,9 +23,12 @@ package org.wcs.smart.intelligence.ui.editor;
 
 import java.text.DateFormat;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
-
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -36,12 +39,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
@@ -52,6 +53,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
+import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -59,22 +61,17 @@ import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
-import org.wcs.smart.intelligence.informant.InformantEditorInput;
-import org.wcs.smart.intelligence.informant.editor.InformantDataEditor;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.ui.handlers.ShowInformantDataHandler;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.ui.PatrolEditor;
-import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
 /**
  * Ingeliigence editor summary page
  * @author Emily
@@ -95,7 +92,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	private TableViewer attachmentsList;
 	private Label txtCreator;
 
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit ;
 	
 	private IntelligenceEditor parentEditor;
 	
@@ -129,6 +126,8 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(getSite().getShell().getDisplay());
+		
 		toolkit.setBorderStyle(SWT.BORDER);
 		Composite container = toolkit.createComposite(parent, SWT.NONE);
 
@@ -350,18 +349,8 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	}
 
 	private void openPatrol(Patrol p){
-		try {
-			if (p == null) {
-				return;
-			}
-			
-			FieldDataPerspective.openPerspective("org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
-			PatrolEditorInput input = new PatrolEditorInput(p.getUuid(), p.getId(), null, null, null);
-			
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, PatrolEditor.ID);
-		} catch (Exception e1) {
-			IntelligencePlugIn.displayLog(Messages.IntelligenceEditor_FailOpenPatrol_Error +SmartUtils.LINE_SEPARATOR + e1.getLocalizedMessage(), e1);
-		}
+		if (p == null) return;
+		(new OpenPatrolHandler()).openPatrol(p.getUuid());
 	}
 
 	protected void openInformant(Informant i) {
@@ -369,12 +358,13 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 			return;
 		}
 		try {
-			IEditorPart editorPart = PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-				.getActivePage().openEditor(new InformantEditorInput(), InformantDataEditor.ID);
-			if (editorPart instanceof InformantDataEditor) {
-				InformantDataEditor editor = (InformantDataEditor) editorPart;
-				editor.setSelection(i);
-			}
+			IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+			IEclipseContext local = EclipseContextFactory.create();
+			local.setParent(context.get(EPartService.class).getActivePart().getContext());
+			local.set(Informant.class, i);
+			
+			ContextInjectionFactory.invoke(new ShowInformantDataHandler(), Execute.class, local);
+			
 		} catch (Throwable t) {
 			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}

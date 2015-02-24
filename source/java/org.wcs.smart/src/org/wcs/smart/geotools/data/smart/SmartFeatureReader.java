@@ -49,10 +49,16 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	private Session session = null;
 	private ScrollableResults itemCursor = null;
 		
+	private boolean createTransaction = false;
+	
 	public SmartFeatureReader(ConservationArea ca,
 			AreaType type,SimpleFeatureType ftype) {
 		this.session = HibernateManager.openSession();
-		this.session.beginTransaction();
+		if (!session.getTransaction().isActive()){
+			this.session.beginTransaction();
+			createTransaction = true;
+		}
+		
 		itemCursor = session.createCriteria(Area.class)
 				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
 				.add(Restrictions.eq("type", type)).setReadOnly(true).setCacheable(false).scroll(ScrollMode.FORWARD_ONLY); //$NON-NLS-1$
@@ -68,8 +74,13 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public void close() throws IOException {
 		itemCursor.close();
-		session.getTransaction().rollback();
-		session.close();
+		if (createTransaction){
+			//we created this session/transaction so we need to cleanup
+			//otherwise somebody else created it and we are just using it; so
+			//donot cleanup
+			session.getTransaction().rollback();
+			session.close();
+		}
 	}
 
 	/* (non-Javadoc)
@@ -94,15 +105,15 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException,
 			NoSuchElementException {
-		//		String spec = "uuid:String,id:String,key:String,geom:MultiPolygon:srid=4326";
+		//		String spec = "geom:MultiPolygon:srid=4326,uuid:String,id:String,key:String";
 		Area a = (Area)itemCursor.get(0);
 		String fid = ftype.getTypeName() + "." + a.getKeyId(); //$NON-NLS-1$
 		Object values[] = new Object[5];
-		values[0] = fid;
-		values[1] = a.getName();
-		values[2] = a.getKeyId();
-		values[3] = SmartUtils.encodeHex(a.getUuid());
-		values[4] = a.getGeometry();
+		values[0] = a.getGeometry();
+		values[1] = fid;
+		values[2] = a.getName();
+		values[3] = a.getKeyId();
+		values[4] = SmartUtils.encodeHex(a.getUuid());
 		
 		return SimpleFeatureBuilder.build(ftype, values, fid);
 	}

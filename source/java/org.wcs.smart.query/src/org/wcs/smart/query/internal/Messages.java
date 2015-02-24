@@ -471,6 +471,13 @@ public class Messages extends NLS {
 	public static String SimpleQueryDefinitionImporter_InvalidPatrolType;
 	public static String SmartGridCellStyleConfigurator_CellBorderLabel;
 	public static String SmartGridCellStyleConfigurator_ColorLabel;
+	public static String SmartGridCellStyleConfigurator_linestyle_dash;
+	public static String SmartGridCellStyleConfigurator_linestyle_dashdot;
+	public static String SmartGridCellStyleConfigurator_linestyle_dashdotdot;
+	public static String SmartGridCellStyleConfigurator_linestyle_dot;
+	public static String SmartGridCellStyleConfigurator_linestyle_solid;
+	public static String SmartGridCellStyleConfigurator_LineStyleLabel;
+	public static String SmartGridCellStyleConfigurator_LineStyleTooltip;
 	public static String SmartGridCellStyleConfigurator_SizeLabel;
 	static {
 		// initialize resource bundle

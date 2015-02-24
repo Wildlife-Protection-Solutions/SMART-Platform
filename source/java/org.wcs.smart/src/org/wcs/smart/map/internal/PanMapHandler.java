@@ -21,12 +21,10 @@
  */
 package org.wcs.smart.map.internal;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.handlers.HandlerUtil;
-import org.wcs.smart.ui.map.MapView;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 
 
 /**
@@ -35,21 +33,20 @@ import org.wcs.smart.ui.map.MapView;
  * @author Emily
  * @since 1.0.0
  */
-public class PanMapHandler extends AbstractHandler {
-	private String PanToolId = "net.refractions.udig.tools.Pan"; //$NON-NLS-1$
+public class PanMapHandler {
+	private static final String PANTOOL_ID = "org.locationtech.udig.tools.Pan"; //$NON-NLS-1$
 	
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		IWorkbenchPart part = HandlerUtil.getActivePart(event);
-		if (part instanceof MapView){
-			MapView view = (MapView)part;
-			view.setTool(PanToolId);
-		} 
-		return null;
+	@Execute
+	public void execute() {
+		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy(PANTOOL_ID).run();
+
 	}
 
+	// E3
+	public static class PanMapHandlerWrapper extends DIHandler<PanMapHandler> {
+		public PanMapHandlerWrapper() {
+			super(PanMapHandler.class);
+		}
+	}
 }

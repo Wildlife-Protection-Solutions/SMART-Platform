@@ -49,6 +49,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.ui.MultiCaQueryPerspective;
 import org.wcs.smart.query.ui.QueryPerspective;
+import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -210,6 +211,7 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		cleanUp.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		cleanUp.schedule();
 		
+		DefinitionPanelManager.createInstance();
 	}
 
 	

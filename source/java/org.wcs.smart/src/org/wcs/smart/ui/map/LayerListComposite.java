@@ -25,16 +25,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.refractions.udig.internal.ui.IDropTargetProvider;
-import net.refractions.udig.project.internal.ContextModel;
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.ProjectPackage;
-import net.refractions.udig.project.ui.AdapterFactoryLabelProviderDecorator;
-import net.refractions.udig.project.ui.internal.ProjectExplorer;
-import net.refractions.udig.project.ui.internal.ViewerLayerSorter;
-import net.refractions.udig.ui.UDIGDragDropUtilities;
-
 import org.eclipse.emf.common.notify.Adapter;
 import org.eclipse.emf.common.notify.Notification;
 import org.eclipse.emf.common.notify.impl.AdapterImpl;
@@ -52,6 +42,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.udig.internal.ui.IDropTargetProvider;
+import org.locationtech.udig.project.internal.ContextModel;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectPackage;
+import org.locationtech.udig.project.ui.AdapterFactoryLabelProviderDecorator;
+import org.locationtech.udig.project.ui.internal.ProjectExplorer;
+import org.locationtech.udig.project.ui.internal.ViewerLayerSorter;
+import org.locationtech.udig.ui.UDIGDragDropUtilities;
 
 /**
  * A viewer simple composite that lists all the layers on 

@@ -30,7 +30,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -118,7 +117,7 @@ public class EmployeeLeaderPilotComposite extends PatrolItemComposite{
 		}catch(Exception ex){
 			session.getTransaction().rollback();
 			session.close();
-			SmartPlugIn.displayLog(null, Messages.EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees + ex.getLocalizedMessage(), ex);			
+			SmartPatrolPlugIn.displayLog(Messages.EmployeeLeaderPilotComposite_Error_CouldNotLoadEmployees + ex.getLocalizedMessage(), ex);			
 		}
 		leaderPilotComp.setEmployeeList(empListComposite.getSelectedItems(),p);
 		empListComposite.addSelectionChangedListener(new IListChanged<Employee>() {

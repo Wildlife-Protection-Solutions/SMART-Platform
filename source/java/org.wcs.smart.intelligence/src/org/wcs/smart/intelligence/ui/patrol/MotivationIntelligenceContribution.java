@@ -43,9 +43,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -59,8 +56,7 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
-import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
-import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
+import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -218,16 +214,13 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	
 	private void openEditor(Intelligence intelligence) {
 		Assert.isNotNull(intelligence);
-		IntelligenceEditorInput input = new IntelligenceEditorInput(intelligence.getUuid(), intelligence.getName(), intelligence.getReceivedDate());
 		try {
-			IWorkbench wb = PlatformUI.getWorkbench();
-			IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
-			wb.showPerspective(IntelligencePerspective.ID, win);
-			IWorkbenchPage page = win.getActivePage();
-			page.openEditor(input, IntelligenceEditor.ID);						
+			PlatformUI.getWorkbench().showPerspective(IntelligencePerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 		} catch (Throwable t) {
 			IntelligencePlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
+		(new OpenIntelligenceHandler()).openIntelligence(intelligence.getUuid());
+
 	}
 	
 }

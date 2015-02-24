@@ -9,11 +9,11 @@ Require-Bundle: org.eclipse.equinox.p2.ui,
  org.wcs.smart,
  org.eclipse.equinox.p2.core,
  org.eclipse.equinox.p2.engine;visibility:=reexport,
- org.eclipse.equinox.p2.metadata,
- org.eclipse.equinox.p2.operations
+ org.eclipse.equinox.p2.operations,
+ org.eclipse.equinox.p2.metadata
 Bundle-ActivationPolicy: lazy
 Service-Component: OSGI-INF/policy_component.xml, OSGI-INF/licenseManager_component.xml
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.p2,
  org.wcs.smart.p2.common.updatesite,
  org.wcs.smart.p2.ui

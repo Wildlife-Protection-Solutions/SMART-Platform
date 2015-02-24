@@ -23,14 +23,11 @@ package org.wcs.smart.patrol.internal.ui;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.ObservableList;
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -87,7 +84,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		
 		patrolLeaderViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
 		patrolLeaderViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		patrolLeaderViewer.setContentProvider(new ObservableListContentProvider());
+		patrolLeaderViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolLeaderViewer.setLabelProvider(new EmployeeLabelProvider());
 		patrolLeaderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -103,7 +100,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			
 		patrolPilotViewer = new ComboViewer(center, SWT.DROP_DOWN | SWT.READ_ONLY);
 		patrolPilotViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		patrolPilotViewer.setContentProvider(new ObservableListContentProvider());
+		patrolPilotViewer.setContentProvider(ArrayContentProvider.getInstance());
 		patrolPilotViewer.setLabelProvider(new EmployeeLabelProvider());
 		patrolPilotViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -149,9 +146,8 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 			public int compare(PatrolLegMember o1, PatrolLegMember o2) {
 				return Collator.getInstance().compare(o1.getMember().getFullLabel(), o2.getMember().getFullLabel());
 			}});
-		WritableList wr = new WritableList((Collection<PatrolLegMember>)sortedList, PatrolLegMember.class);
-		
-		patrolLeaderViewer.setInput(wr);
+		List<PatrolLegMember> wrinput = new ArrayList<PatrolLegMember>(sortedList);
+		patrolLeaderViewer.setInput(wrinput);
 
 		if (patrolLeg.getLeader() != null){
 			patrolLeaderViewer.setSelection(new StructuredSelection(patrolLeg.getLeader()));
@@ -162,7 +158,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		lblPilot.setVisible(patrolLeg.getPatrol().hasPilot());
 		patrolPilotViewer.getControl().setVisible(patrolLeg.getPatrol().hasPilot());
 		if (patrolLeg.getPatrol().hasPilot()){
-			patrolPilotViewer.setInput(wr);
+			patrolPilotViewer.setInput(wrinput);
 			if (patrolLeg.getPilot() != null){
 				patrolPilotViewer.setSelection(new StructuredSelection(patrolLeg.getPilot()));
 			}else{
@@ -188,7 +184,7 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 	 * @param list list of Employees.  This is an observable list of employees associated with the patrol.
 	 * @param patrol the patrol to select default values from
 	 */
-	public void setEmployeeList(ObservableList list, Patrol patrol){
+	public void setEmployeeList(List<Employee> list, Patrol patrol){
 		//leader list
 		patrolLeaderViewer.setInput(list);		
 		if (patrol.getFirstLeg().getLeader() != null){

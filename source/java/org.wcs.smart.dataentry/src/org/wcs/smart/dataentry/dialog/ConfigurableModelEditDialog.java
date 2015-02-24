@@ -285,7 +285,7 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 			session.saveOrUpdate(model);
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
+			SmartPlugIn.displayLog(Messages.ConfigurableModelEditDialog_SaveError  + ex.getMessage(), ex);
 		}
 		
 		//start a new transaction

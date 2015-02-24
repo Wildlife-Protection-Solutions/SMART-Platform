@@ -3,21 +3,21 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Smart Hibernate Library PlugIn
 Bundle-SymbolicName: org.wcs.smart.hibernate.libs;singleton:=true
 Bundle-Version: 3.1.0
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: global
 Bundle-ClassPath: .,
  lib/antlr-2.7.7.jar,
- lib/derby-10.10.1.1.jar,
  lib/dom4j-1.6.1.jar,
  lib/ehcache-core-2.4.3.jar,
- lib/hibernate-commons-annotations-4.0.2.Final.jar,
- lib/hibernate-core-4.2.6.Final.jar,
- lib/hibernate-ehcache-4.2.6.Final.jar,
+ lib/derby-10.11.1.1.jar,
+ lib/derbytools-10.11.1.1.jar,
+ lib/hibernate-core-4.2.18.Final.jar,
+ lib/hibernate-ehcache-4.2.18.Final.jar,
  lib/hibernate-jpa-2.0-api-1.0.1.Final.jar,
- lib/javassist-3.15.0-GA.jar,
+ lib/javassist-3.18.1-GA.jar,
  lib/jboss-logging-3.1.0.GA.jar,
  lib/jboss-transaction-api_1.1_spec-1.0.1.Final.jar,
- lib/derbytools-10.10.1.1.jar
+ lib/hibernate-commons-annotations-4.0.2.Final.jar
 Export-Package: antlr,
  antlr.ASdebug,
  antlr.actions.cpp,
@@ -259,6 +259,7 @@ Export-Package: antlr,
  org.hibernate.cfg.annotations,
  org.hibernate.cfg.annotations.reflection,
  org.hibernate.cfg.beanvalidation,
+ org.hibernate.cfg.naming,
  org.hibernate.classic,
  org.hibernate.collection.internal,
  org.hibernate.collection.spi,
@@ -407,7 +408,6 @@ Export-Package: antlr,
  org.hibernate.type.descriptor.java,
  org.hibernate.type.descriptor.sql,
  org.hibernate.usertype,
- org.jboss.logging,
  org.wcs.smart.hibernate
 Require-Bundle: org.eclipse.core.runtime;bundle-version="3.7.0"
 Bundle-Vendor: org.wcs.smart

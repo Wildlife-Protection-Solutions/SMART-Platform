@@ -86,6 +86,7 @@ public class IntelligenceEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
+		if (shortName == null) return ""; //$NON-NLS-1$
 		return shortName;
 	}
 

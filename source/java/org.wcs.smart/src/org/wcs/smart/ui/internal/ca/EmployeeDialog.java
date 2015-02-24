@@ -205,7 +205,7 @@ public class EmployeeDialog extends Dialog {
 					if (error != null){
 						tx.rollback();
 						session.refresh(toUpdate);
-						SmartPlugIn.displayLog(getShell(), error, null);
+						SmartPlugIn.displayLog(error, null);
 						return false;
 					}
 				}
@@ -216,7 +216,7 @@ public class EmployeeDialog extends Dialog {
 			}catch (RuntimeException ex){
 				tx.rollback();
 				session.close();
-				SmartPlugIn.displayLog(getShell(),Messages.EmployeeDialog_Error_SaveError + ex.getLocalizedMessage(), ex);
+				SmartPlugIn.displayLog(Messages.EmployeeDialog_Error_SaveError + ex.getLocalizedMessage(), ex);
 				return false;
 			}
 		}

@@ -23,13 +23,13 @@ package org.wcs.smart.query.ui.querylist;
 
 import java.util.Iterator;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -41,14 +41,13 @@ import org.wcs.smart.query.ui.editor.QueryEditorInput;
  * @author Emily
  * @since 1.0.0
  */
-public class OpenQueryHandler extends AbstractHandler {
+public class OpenQueryHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) 
+				|| ((IStructuredSelection)thisSelection).isEmpty() ){
+			return;
 		}
 		for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
 			Object o = (Object) iterator.next();
@@ -56,7 +55,6 @@ public class OpenQueryHandler extends AbstractHandler {
 				openQuery((QueryEditorInput) o);
 			}	
 		}
-		return null;
 		
 	}
 	
@@ -66,7 +64,7 @@ public class OpenQueryHandler extends AbstractHandler {
 	 * 
 	 * @param input
 	 */
-	public static void openQuery(QueryEditorInput input){
+	public void openQuery(QueryEditorInput input){
 		try {
 			if (SmartDB.isMultipleAnalysis()){
 				//ensure data model is loaded; otherwise end up with deadlocking issues
@@ -79,4 +77,9 @@ public class OpenQueryHandler extends AbstractHandler {
 		}
 	}
 
+	public static class OpenQueryHandlerWrapper extends DIHandler<OpenQueryHandler>{
+		public OpenQueryHandlerWrapper(){
+			super(OpenQueryHandler.class);
+		}
+	}
 }

@@ -23,13 +23,12 @@ package org.wcs.smart.map.internal.settings;
 
 import java.util.HashMap;
 
-import net.refractions.udig.core.internal.ExtensionPointProcessor;
-import net.refractions.udig.core.internal.ExtensionPointUtil;
-import net.refractions.udig.project.StyleContent;
-import net.refractions.udig.project.internal.ProjectPlugin;
-
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtension;
+import org.locationtech.udig.core.internal.ExtensionPointProcessor;
+import org.locationtech.udig.core.internal.ExtensionPointUtil;
+import org.locationtech.udig.project.StyleContent;
+import org.locationtech.udig.project.internal.ProjectPlugin;
 
 /**
  * This class is responsible to create and maintian the set of {@link SyleContent}.

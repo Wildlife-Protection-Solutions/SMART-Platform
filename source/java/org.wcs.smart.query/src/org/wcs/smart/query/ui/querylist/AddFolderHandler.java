@@ -24,12 +24,13 @@ package org.wcs.smart.query.ui.querylist;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -46,26 +47,20 @@ import org.wcs.smart.query.model.QueryFolder;
  * @author Emily
  * @since 1.0.0
  */
-public class AddFolderHandler extends AbstractHandler {
+public class AddFolderHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object currentSelection)  {
+		if (currentSelection == null || !(currentSelection instanceof IStructuredSelection)){
+			return ;
 		}
-		
-		Object o = ((IStructuredSelection)thisSelection).getFirstElement();
+		Object o = ((IStructuredSelection)currentSelection).getFirstElement();
 		if (o instanceof QueryFolder){
 			QueryFolder newFolder = addQueryFolder((QueryFolder)o);
 			if (newFolder != null){
 				QueryEventManager.getInstance().fireFolderAdded(newFolder);
 			}
 		}
-		
-		return null;
-		
 	}
 	
 	public static QueryFolder addQueryFolder(QueryFolder parent){
@@ -112,4 +107,9 @@ public class AddFolderHandler extends AbstractHandler {
 
 	}
 
+	public static class AddFolderHandlerWrapper extends DIHandler<AddFolderHandler>{
+		public AddFolderHandlerWrapper(){
+			super(AddFolderHandler.class);
+		}
+	}
 }

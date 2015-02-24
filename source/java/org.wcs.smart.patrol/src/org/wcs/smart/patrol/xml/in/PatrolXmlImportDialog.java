@@ -29,8 +29,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.patrol.internal.Messages;
 
@@ -44,8 +44,8 @@ public class PatrolXmlImportDialog extends XmlImportDialog {
 	
 	private ImportConfig config = new ImportConfig();
 
-	public PatrolXmlImportDialog() {
-		super(Display.getCurrent().getActiveShell(),
+	public PatrolXmlImportDialog(Shell parentShell) {
+		super(parentShell,
 				Messages.ImportPatrolDialog_DialogTitle,
 				Messages.ImportPatrolDialog_DialogText,
 				Messages.ImportPatrolDialog_DialogMessage);

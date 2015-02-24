@@ -25,16 +25,12 @@ import java.io.File;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.IResolve;
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.catalog.internal.ui.actions.ResetService;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -60,6 +56,10 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.internal.ui.actions.ResetService;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.operation.MathTransform;
@@ -76,7 +76,6 @@ import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
-import com.ibm.icu.text.MessageFormat;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.io.WKBWriter;
 
@@ -289,7 +288,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			q.executeUpdate();
 			getSession().getTransaction().commit();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(),Messages.AreaPropertyPage_Error_DeletingArea, ex);
+			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_DeletingArea, ex);
 			getSession().close();
 		}
 		
@@ -350,7 +349,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 			url = new File(path
 					+ System.getProperty("file.separator") + filenames).toURI().toURL(); //$NON-NLS-1$
 		} catch (Throwable e) {
-			SmartPlugIn.displayLog(getShell(),"Cannot determine file selected.", e); //$NON-NLS-1$
+			SmartPlugIn.displayLog("Cannot determine file selected.", e); //$NON-NLS-1$
 		}
 
 		if (url == null) {
@@ -380,7 +379,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog(ppd.getShell(),Messages.AreaPropertyPage_Error_ReadingFile, ex);
+								SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_ReadingFile, ex);
 								
 							}});
 						
@@ -487,7 +486,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 				}
 			});
 		} catch (Exception e) {
-			SmartPlugIn.displayLog(getShell(),Messages.AreaPropertyPage_Error_UpdatingAreas, e);
+			SmartPlugIn.displayLog(Messages.AreaPropertyPage_Error_UpdatingAreas, e);
 		}
 	}
 	

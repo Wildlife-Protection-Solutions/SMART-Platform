@@ -34,12 +34,12 @@ package org.wcs.smart.report.birt.map.properties;
 import java.io.File;
 import java.text.MessageFormat;
 
-import net.refractions.udig.project.internal.SetDefaultStyleProcessor;
-import net.refractions.udig.style.internal.StyleLayer;
-import net.refractions.udig.style.sld.editor.ExportSLD;
-import net.refractions.udig.style.sld.editor.ImportSLD;
-import net.refractions.udig.style.sld.editor.StyleEditorDialog;
-import net.refractions.udig.ui.graphics.SLDs;
+import org.locationtech.udig.project.internal.SetDefaultStyleProcessor;
+import org.locationtech.udig.style.internal.StyleLayer;
+import org.locationtech.udig.style.sld.editor.ExportSLD;
+import org.locationtech.udig.style.sld.editor.ImportSLD;
+import org.locationtech.udig.style.sld.editor.StyleEditorDialog;
+import org.locationtech.udig.ui.graphics.SLDs;
 
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
@@ -57,12 +57,12 @@ import org.wcs.smart.report.birt.map.internal.Messages;
 class StyleEditorButtonListener implements Listener {
 
     /** StyleEditorButtonListener styleEditorDialog field */
-    private final SmartStyleEditorDialog styleEditorDialog;
+    private final ReportSmartStyleEditorDialog styleEditorDialog;
 
     /**
      * @param styleEditorDialog
      */
-    StyleEditorButtonListener( SmartStyleEditorDialog styleEditorDialog ) {
+    StyleEditorButtonListener( ReportSmartStyleEditorDialog styleEditorDialog ) {
         this.styleEditorDialog = styleEditorDialog;
     }
 

@@ -11,12 +11,11 @@ Require-Bundle: org.eclipse.ui,
  org.wcs.smart.query,
  org.wcs.smart,
  org.wcs.smart.observation,
- org.apache.commons.lang,
  org.eclipse.ui.forms,
  org.wcs.smart.p2,
  org.wcs.smart.dataentry;bundle-version="3.1.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.er.query.engine,
  org.wcs.smart.er.query.filter,
  org.wcs.smart.er.query.map.udig,

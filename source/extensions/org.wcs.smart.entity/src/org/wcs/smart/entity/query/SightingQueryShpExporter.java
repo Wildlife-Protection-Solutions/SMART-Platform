@@ -50,7 +50,7 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType)
 			throws Exception {
-		return EntityQueryDataSourceFeatureReader.createSightingResult((SightingResultItem)it, queryColumns, shapefile.getSchema());
+		return EntityQueryDataSourceFeatureReader.createSightingResult((SightingResultItem)it, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 	}
 
 	@Override

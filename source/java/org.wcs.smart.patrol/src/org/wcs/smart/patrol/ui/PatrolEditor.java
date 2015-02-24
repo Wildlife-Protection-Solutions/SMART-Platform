@@ -28,10 +28,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -41,9 +37,11 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.control.CombinedSelectionProvider;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -91,12 +89,9 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	
 	private Patrol patrol = null;
 	private ObservationOptions ops = null;
-	
 	private PatrolSummaryEditor summaryEditor;
 	private PatrolMapPageEditor mapPage;
-	
 	private Projection[] projections;
-	
 	private CombinedSelectionProvider selectionProvider = new CombinedSelectionProvider();
 	
 	private IPatrolEventListener saveListener = new IPatrolEventListener() {
@@ -124,7 +119,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 							}finally{
 								s.close();
 							}
-							Display.getDefault().syncExec(new Runnable(){
+							getSite().getShell().getDisplay().syncExec(new Runnable(){
 								@Override
 								public void run() {
 									createDayPages();
@@ -150,7 +145,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		public void eventFired(int attributeChanged, Object source) {
 			if ( ((Patrol)source ).equals(PatrolEditor.this.patrol)  ){
 				//close this editor
-				PatrolEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
+				getSite().getShell().getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						PatrolEditor.this.getEditorSite().getWorkbenchWindow().getActivePage().closeEditor(PatrolEditor.this, false);					
@@ -202,7 +197,6 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		super.dispose();
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_SAVED, saveListener);
 		PatrolEventManager.getInstance().removeListener(EventType.PATROL_DELETED, patrolDeleteListener);
-
 	}
 
 	public ObservationOptions getOptions(){
@@ -240,18 +234,14 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	public void updatePartName(){
-		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + input.getPatrolId());
+		super.setPartName(Messages.PatrolEditor_EditorName_Prefix + getPatrol().getId());
 	}
 	
 	
 	@Override
 	protected void createPages() {
-		PatrolEditorInput input = ((PatrolEditorInput) getEditorInput());
-		super.setPartName(input.getName());
 		showBusy(true);
 		try {
-			
 			getPatrol();
 			
 			summaryEditor = new PatrolSummaryEditor(this);
@@ -293,6 +283,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 		}finally{
 			showBusy(false);
 		}
+		updatePartName();
 	}
 	
 	public CombinedSelectionProvider getSelectionProvider(){
@@ -525,7 +516,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getMap()
 	 */
 	@Override
 	public Map getMap() {
@@ -536,7 +527,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#openContextMenu()
 	 */
 	@Override
 	public void openContextMenu() {
@@ -545,7 +536,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
 	 */
 	@Override
 	public void setFont(Control textArea) {
@@ -554,7 +545,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setSelectionProvider(org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider)
 	 */
 	@Override
 	public void setSelectionProvider(
@@ -564,7 +555,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	}
 
 	/* (non-Javadoc)
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {

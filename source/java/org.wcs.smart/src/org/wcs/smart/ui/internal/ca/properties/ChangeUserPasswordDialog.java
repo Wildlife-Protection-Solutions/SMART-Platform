@@ -162,9 +162,7 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 						getSession().getTransaction().commit();
 					} catch (Exception ex) {
 						toUpdate.setSmartUserId(old);
-						SmartPlugIn.displayLog(
-								ChangeUserPasswordDialog.this.getShell(),
-								Messages.ChangeUserPasswordDialog_Error_CouldNoUpdateUser + ex.getLocalizedMessage(), ex);
+						SmartPlugIn.displayLog(Messages.ChangeUserPasswordDialog_Error_CouldNoUpdateUser + ex.getLocalizedMessage(), ex);
 						getSession().close();
 					}
 					
@@ -319,9 +317,7 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 					return true;
 				} catch (Exception ex) {
 					toUpdate.setSmartPassword(old);	//reset password
-					SmartPlugIn.displayLog(
-							ChangeUserPasswordDialog.this.getShell(),
-							Messages.ChangeUserPasswordDialog_Error_CouldNotUpdatePass + ex.getLocalizedMessage(), ex);
+					SmartPlugIn.displayLog(Messages.ChangeUserPasswordDialog_Error_CouldNotUpdatePass + ex.getLocalizedMessage(), ex);
 					getSession().close();
 				}	
 			}else{

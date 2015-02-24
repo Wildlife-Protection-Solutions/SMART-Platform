@@ -125,14 +125,14 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.query.createQuery?before=org.wcs.smart.query.createunknown.separator2">
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
          <menu
                icon="images/icons/obj16/survey.png"
                id="org.wcs.smart.query.createquery.surveyquery"
                label="%surveyquery.menu.label"
                tooltip="%surveyquery.menu.tooltip">
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_observation_query.png"
                   label="%surveyquery.observation.command.label"
                   style="pulldown"
@@ -143,7 +143,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_waypoint_query.png"
                   label="%surveyquery.incident.command.label"
                   style="push"
@@ -154,7 +154,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_missiontrack_query.png"
                   label="%surveyquery.track.command.label"
                   style="push"
@@ -165,7 +165,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_mission_query.png"
                   label="%surveyquery.mission.command.label"
                   style="push"
@@ -176,7 +176,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_summary_query.png"
                   label="%surveyquery.summary.command.label"
                   style="push"
@@ -187,7 +187,7 @@
                </parameter>
             </command>
             <command
-                  commandId="org.wcs.smart.query.createUnknownQuery"
+                  commandId="org.wcs.smart.query.create.unknown"
                   icon="images/icons/obj16/survey_gridded_query.png"
                   label="%surveyquery.grid.command.label"
                   style="push"

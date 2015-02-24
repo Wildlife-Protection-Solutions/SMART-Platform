@@ -142,6 +142,7 @@ public class Messages extends NLS {
 	public static String MultiIncidentExportDialog_NothingToExport;
 	public static String NewIncidentWizard_SaveError;
 	public static String NewIncidentWizard_WizardTitle;
+	public static String OpenIncidentHandler_IncidentOpenError;
 	public static String XmlToIncident_AttachmentNotImported;
 	public static String XmlToIncident_AttributeNotFound;
 	public static String XmlToIncident_CategoryNotFound;

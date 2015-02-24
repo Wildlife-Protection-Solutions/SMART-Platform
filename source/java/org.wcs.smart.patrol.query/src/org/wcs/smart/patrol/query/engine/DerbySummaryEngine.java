@@ -174,26 +174,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		allGroupByParts = new GroupByPart(all);
 		
 		valuePart = query.getQueryDefinition().getValuePart();
-		
-		
-		
-//		
-//		final Set<AreaFilter.AreaFilterGeometryType> areaTypes = new HashSet<AreaFilter.AreaFilterGeometryType>();
-//		if (hasAreaFilter.hasAreaFilter()){
-//			for (IValueItem item : query.getQueryDefinition().getValuePart().getValueItems()){
-//				if (item instanceof PatrolValueItem){
-//					areaTypes.add(AreaFilter.AreaFilterGeometryType.TRACK);
-//				}else{
-//					areaTypes.add(AreaFilter.AreaFilterGeometryType.WAYPOINT);
-//				}
-//			}
-//		}else{
-//			//it doesn't matter; just pick one here for ease of use
-//			areaTypes.add(AreaFilter.AreaFilterGeometryType.TRACK);
-//		}
-//		
-//		
-//		
+			
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -518,7 +499,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				  it instanceof CategoryValueItem){
 			dataTable = getFilterTable(isValueItem, AreaFilterGeometryType.WAYPOINT, caFilter, c, monitor);
 		}else if (it instanceof CombinedValueItem){
-			//TODO: what to do here?
+			//don't do anything here - each value is dealt with separatly in the getCombindValue function
 		}
 			
 		String cacheKey = it.asString() + "_" + groupBy.asString() + "_" + dataTable; //$NON-NLS-1$ //$NON-NLS-2$
@@ -589,7 +570,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		valueAggSql.append(getAggFieldName(patrolItem, hasAreaGroupBy));
 
 		if (patrolItem.getOption().getOptionClass().equals(Track.class) && !hasAreaGroupBy){
-			fromSql.append(" left join "); //$NON-NLS-1$
+//			fromSql.append(" left join "); //$NON-NLS-1$
+			fromSql.append(" join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(Track.class));
 			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$ 
 			fromSql.append(tablePrefix(Track.class));
@@ -792,7 +774,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
-			sql.append("left join "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeListItem.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeListItem.class));
@@ -883,7 +865,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(".attribute_uuid = "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
 			sql.append(".uuid "); //$NON-NLS-1$
-			sql.append("left join "); //$NON-NLS-1$
+			sql.append(" join "); //$NON-NLS-1$
 			sql.append(tableNamePrefix(AttributeTreeNode.class));
 			sql.append(" on "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeTreeNode.class));
@@ -1171,14 +1153,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 							.append(areaPrefix + ".keyid" + " as " + key); //$NON-NLS-1$ //$NON-NLS-2$
 
 					if (!waypointAdd) {
-						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Waypoint.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(Waypoint.class));
 						fromSql.append(" on temp.wp_uuid = " + tablePrefix(Waypoint.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 						waypointAdd = true;
 					}
-					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
@@ -1206,14 +1188,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					areaGroupByPrefix.add(areaPrefix);
 					
 					if (!trackAdd) {
-						fromSql.append("left join "); //$NON-NLS-1$
+						fromSql.append(" join "); //$NON-NLS-1$
 						fromSql.append(tableNames.get(Track.class));
 						fromSql.append(" "); //$NON-NLS-1$
 						fromSql.append(tablePrefix(Track.class));
 						fromSql.append(" on temp.pld_uuid = " + tablePrefix(Track.class) + ".patrol_leg_day_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 						trackAdd = true;
 					}
-					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(Area.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(areaPrefix);
@@ -1240,14 +1222,14 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				
 				if (((PatrolGroupBy)gb).getOption() == PatrolQueryOption.EMPLOYEE){
-					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(PatrolLegMember.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(PatrolLegMember.class));
 					fromSql.append(" on temp.pl_uuid = " + tablePrefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (((PatrolGroupBy)gb).getOption().getType() == PatrolQueryOptionType.KEY){
 					PatrolQueryOption op = ((PatrolGroupBy)gb).getOption();
-					fromSql.append(" left join "); //$NON-NLS-1$
+					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(op.getSourceClass()));
 					fromSql.append(" on temp."); //$NON-NLS-1$
 					fromSql.append(getUuidFieldName(op));

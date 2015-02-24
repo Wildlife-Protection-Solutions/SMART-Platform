@@ -703,6 +703,10 @@ public class Messages extends NLS {
 	public static String SurveyFilterDialog_StateOnlyLabel;
 	public static String SurveyFilterDialog_SurveyIdFieldLabel;
 	public static String SurveyFilterDialog_Title;
+	public static String SurveyFilterDialog_WarnInfo;
+
+	public static String SurveyFilterDialog_WarnTitle;
+
 	public static String SurveyIdPage_IdError;
 	public static String SurveyIdPage_IdLabel;
 	public static String SurveyIdPage_Message;

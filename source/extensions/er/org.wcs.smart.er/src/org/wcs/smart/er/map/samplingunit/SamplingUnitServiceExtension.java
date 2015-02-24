@@ -26,15 +26,14 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.catalog.ServiceExtension;
-import net.refractions.udig.core.internal.CorePlugin;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.catalog.ServiceExtension;
+import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -62,7 +61,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	private static final String PROTOCOL = "smart"; //$NON-NLS-1$
 	
     /**
-     * @see net.refractions.udig.catalog.ServiceExtension#createService(java.net.URL, java.util.Map)
+     * @see org.locationtech.udig.catalog.ServiceExtension#createService(java.net.URL, java.util.Map)
      */
     @Override
 	public IService createService(URL id, Map<String, Serializable> params) {
@@ -105,7 +104,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.ServiceExtension#createParams(java.net.URL)
+	 * @see org.locationtech.udig.catalog.ServiceExtension#createParams(java.net.URL)
 	 */
 	@Override
 	public Map<String, Serializable> createParams(URL url) {	

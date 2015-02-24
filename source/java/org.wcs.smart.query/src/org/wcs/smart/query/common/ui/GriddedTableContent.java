@@ -32,7 +32,6 @@ import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -120,7 +119,7 @@ public class GriddedTableContent {
 	 */
 	public void setTableData(final Collection<GridResultItem> items, final IProgressMonitor monitor) {
 		
-		Display.getDefault().asyncExec(new Runnable() {
+		editor.getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
 				if (tableComp.isDisposed()){

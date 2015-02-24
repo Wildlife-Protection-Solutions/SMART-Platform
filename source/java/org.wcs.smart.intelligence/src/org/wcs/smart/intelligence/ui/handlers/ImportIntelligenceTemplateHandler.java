@@ -25,13 +25,14 @@ import java.io.File;
 import java.text.MessageFormat;
 
 import org.apache.commons.io.FileUtils;
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -44,16 +45,15 @@ import org.wcs.smart.intelligence.report.ReportIntelligence;
  * @author elitvin
  * @since 3.0.0
  */
-public class ImportIntelligenceTemplateHandler extends AbstractHandler {
+public class ImportIntelligenceTemplateHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		if (! MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.ImportIntelligenceTemplateHandler_ConfirmDialog_Title, Messages.ImportIntelligenceTemplateHandler_ConfirmDialog_Message)){
-			return false;
+	@Execute
+	public void execute(Shell activeShell, EModelService modelService, MWindow activeWindow) {
+		if (! MessageDialog.openConfirm(activeShell, Messages.ImportIntelligenceTemplateHandler_ConfirmDialog_Title, Messages.ImportIntelligenceTemplateHandler_ConfirmDialog_Message)){
+			return;
 		}
 		
-	
-		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event), SWT.OPEN);
+		FileDialog fd = new FileDialog(activeShell, SWT.OPEN);
 		fd.setFilterNames(new String[]{Messages.ImportIntelligenceTemplateHandler_ReportDesignFile, Messages.ImportIntelligenceTemplateHandler_AllFiles});
 		fd.setFilterExtensions(new String[]{"*.rptdesign", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setText(Messages.ImportIntelligenceTemplateHandler_Dialog_Title);
@@ -61,13 +61,15 @@ public class ImportIntelligenceTemplateHandler extends AbstractHandler {
 		fd.setOverwrite(true);
 		String exportFile = fd.open();
 		if (exportFile == null){
-			return null;
+			return;
 		}
+		
 		final File inFile = new File(exportFile);
 		if (!inFile.exists()){
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), Messages.ImportIntelligenceTemplateHandler_Error, MessageFormat.format(Messages.ImportIntelligenceTemplateHandler_FileNotExist_Error, exportFile));
-			return null;
+			MessageDialog.openError(activeShell, Messages.ImportIntelligenceTemplateHandler_Error, MessageFormat.format(Messages.ImportIntelligenceTemplateHandler_FileNotExist_Error, exportFile));
+			return;
 		}
+		
 		try{
 			boolean open = ReportIntelligence.closeTemplateEditor();
 
@@ -75,14 +77,19 @@ public class ImportIntelligenceTemplateHandler extends AbstractHandler {
 			FileUtils.copyFile(inFile, f);
 
 			//re-open
-			if (open && HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getPerspective().getId().equals(IntelligenceReportPerspective.ID) ){
-				ReportIntelligence.editTemplate(event);
+			if (open && 
+					modelService.getActivePerspective(activeWindow).getElementId().equals(IntelligenceReportPerspective.ID)){
+				ReportIntelligence.editTemplate();
 			}
 
 		}catch (Exception ex){
 			IntelligencePlugIn.displayLog(Messages.ImportIntelligenceTemplateHandler_Import_Error + ex.getMessage(), ex);
 		}
-		return null;
 	}
 
+	public static class ImportIntelligenceTemplateHandlerWrapper extends DIHandler<ImportIntelligenceTemplateHandler>{
+		public ImportIntelligenceTemplateHandlerWrapper(){
+			super(ImportIntelligenceTemplateHandler.class);
+		}
+	}
 }

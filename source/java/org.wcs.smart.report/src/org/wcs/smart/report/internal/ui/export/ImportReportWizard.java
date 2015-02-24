@@ -40,7 +40,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.internal.ReportDefintionExporter;
@@ -159,14 +158,14 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 				
 				if (monitor.isCanceled()){
 					final int cnt = importCnt;
-					Display.getDefault().syncExec(new Runnable(){
+					getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_CancelledTitle, MessageFormat.format(Messages.ImportReportWizard_CancelledMessage, new Object[]{cnt, reports.size()}));
 						}});					
 				}else{
 					final int cnt = importCnt;
-					Display.getDefault().syncExec(new Runnable(){
+					getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_ImportComplete, MessageFormat.format(Messages.ImportReportWizard_completeMsg, new Object[]{cnt, reports.size()}));
@@ -206,14 +205,14 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 
 				if (monitor.isCanceled()){
 					final int cnt = importCnt;
-					Display.getDefault().syncExec(new Runnable(){
+					getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_CancelledTitle, MessageFormat.format(Messages.ImportReportWizard_CancelledMessage, new Object[]{cnt, files.size()}));
 						}});					
 				}else{
 					final int cnt = importCnt;
-					Display.getDefault().syncExec(new Runnable(){
+					getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							MessageDialog.openInformation(getShell(), Messages.ImportReportWizard_ImportComplete1, MessageFormat.format(Messages.ImportReportWizard_completeMsg1, new Object[]{cnt, files.size()}));
@@ -275,7 +274,7 @@ class ConfirmInputDialog extends InputDialog{
 		((GridData)this.getText().getLayoutData()).heightHint = 200;
 		((GridData)this.getText().getLayoutData()).widthHint = 500;
 		this.getText().setEditable(false);
-		this.getText().setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
+		this.getText().setBackground(getText().getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
 		return res;
 	}

@@ -29,7 +29,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.common.control.XmlImportDialog;
 import org.wcs.smart.er.internal.Messages;
 
@@ -44,8 +44,8 @@ public class MissionImportDialog extends XmlImportDialog {
 	
 	private boolean keepIDs = true;
 
-	public MissionImportDialog() {
-		super(Display.getCurrent().getActiveShell(),
+	public MissionImportDialog(Shell parentShell) {
+		super(parentShell,
 				Messages.MissionImportDialog_0,
 				Messages.MissionImportDialog_1,
 				Messages.MissionImportDialog_2);

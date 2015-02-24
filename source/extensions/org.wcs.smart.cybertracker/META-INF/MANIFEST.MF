@@ -10,7 +10,7 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.patrol,
  org.wcs.smart.p2
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.cybertracker.model,
  org.wcs.smart.cybertracker.updatesite
 Bundle-Vendor: org.wcs.smart

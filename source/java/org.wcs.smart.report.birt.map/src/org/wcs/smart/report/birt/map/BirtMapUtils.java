@@ -27,12 +27,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import net.refractions.udig.project.internal.ProjectFactory;
-import net.refractions.udig.project.internal.StyleBlackboard;
-import net.refractions.udig.style.sld.SLDContent;
-import net.refractions.udig.ui.graphics.Glyph;
-import net.refractions.udig.ui.graphics.SLDs;
-
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
@@ -44,16 +38,13 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.XMLMemento;
-import org.geotools.styling.FeatureTypeStyle;
-import org.geotools.styling.LineSymbolizer;
-import org.geotools.styling.PointSymbolizer;
-import org.geotools.styling.PolygonSymbolizer;
-import org.geotools.styling.RasterSymbolizer;
-import org.geotools.styling.Rule;
 import org.geotools.styling.Style;
-import org.geotools.styling.Symbolizer;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.udig.style.StyleManager;
+import org.wcs.smart.util.MapStyleUtil;
 
 /**
  * Utilities to support the BIRT Smart map item generation. 
@@ -70,7 +61,7 @@ public class BirtMapUtils {
 		Style glyphStyle = (Style) sb.get(SLDContent.ID);
 		if (glyphStyle == null) return null;
 		
-		return createImage(glyphStyle);	
+		return MapStyleUtil.createImage(glyphStyle);	
 	}
 	
 	public static StyleBlackboard parseStyleString(String styleString){
@@ -231,56 +222,5 @@ public class BirtMapUtils {
 		}
 		
 		return layerExtensions;
-	}
-	
-	
-	
-	private static Image createImage(Style sld) {
-		Rule r = getRule(sld);
-		if (r == null) {
-			return null;
-		}
-		if (r.symbolizers().size() == 0) {
-			return null;
-		}
-
-		Symbolizer sym = r.symbolizers().get(0);
-		if (PointSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.point(r).createImage();
-		} else if (LineSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.line(r).createImage();
-		} else if (PolygonSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.polygon(r).createImage();
-		} else if (RasterSymbolizer.class.isAssignableFrom(sym.getClass())) {
-			return Glyph.grid(null, null, null, null).createImage();
-		}
-		return null;
-	}
-
-	private static Rule getRule(Style sld) {
-		Rule rule = null;
-		int size = 0;
-
-		for (FeatureTypeStyle style : sld.featureTypeStyles()) {
-			for (Rule potentialRule : style.rules()) {
-				if (potentialRule != null) {
-					Symbolizer[] symbs = potentialRule.getSymbolizers();
-					for (int m = 0; m < symbs.length; m++) {
-						if (symbs[m] instanceof PointSymbolizer) {
-							int newSize = SLDs.pointSize((PointSymbolizer) symbs[m]);
-							if (newSize > 16 && size != 0) {
-								// return with previous rule
-								return rule;
-							}
-							size = newSize;
-							rule = potentialRule;
-						} else {
-							return potentialRule;
-						}
-					}
-				}
-			}
-		}
-		return rule;
 	}
 }

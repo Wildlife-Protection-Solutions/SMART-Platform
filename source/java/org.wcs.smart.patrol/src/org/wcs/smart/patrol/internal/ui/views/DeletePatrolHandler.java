@@ -6,31 +6,33 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.PatrolManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
-public class DeletePatrolHandler extends AbstractHandler {
+public class DeletePatrolHandler {
 	
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(ESelectionService selectionService, final Shell activeShell){
 		
-		final IStructuredSelection lastSelection = (IStructuredSelection) HandlerUtil.getCurrentSelection(event);
+		Object selobj = selectionService.getSelection();
+		if (!(selobj instanceof IStructuredSelection)) return;
+		
+		final IStructuredSelection lastSelection = (IStructuredSelection) selobj;
 		if (lastSelection.size() == 0){
-			return null;	//nothing to delete
+			return;	//nothing to delete
 		}
 		
 		final List<PatrolEditorInput> toDelete = new ArrayList<PatrolEditorInput>();
@@ -59,10 +61,10 @@ public class DeletePatrolHandler extends AbstractHandler {
 			}
 			message = MessageFormat.format(Messages.DeletePatrolHandler_MultiDeleteConfirmation + "\n\n" + sb.toString(), new Object[]{toDelete.size()}); //$NON-NLS-1$
 		}else{
-			return null;
+			return;
 		}
 		
-		MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+		MessageDialog dialog = new MessageDialog(activeShell,
 				Messages.DeletePatrolHandler_ConfirmDeletePatrol_DialogTitle,
 				null,
 				message,
@@ -70,11 +72,11 @@ public class DeletePatrolHandler extends AbstractHandler {
 				new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 1);
 				
 		if (dialog.open() != MessageDialog.OK){
-			return null;
+			return;
 		}
 			
 		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getCurrent().getActiveShell());
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
@@ -101,11 +103,10 @@ public class DeletePatrolHandler extends AbstractHandler {
 						message = MessageFormat.format(Messages.DeletePatrolHandler_DeleteErrorMessage, new Object[]{deleted, toDelete.size()});
 					}
 					final String dMessage = message;
-					Display.getDefault().syncExec(new Runnable(){
+					activeShell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(Display
-									.getCurrent().getActiveShell(),
+							MessageDialog.openInformation(activeShell,
 									Messages.DeletePatrolHandler_DeletePatrol_DialogTitle,
 									dMessage);
 						}});
@@ -117,8 +118,13 @@ public class DeletePatrolHandler extends AbstractHandler {
 					Messages.DeletePatrolHandler_Error_CouldNotDeletePatrol,
 					ex);
 		}
-		
-		return null;
+		return;
 	}
 
+	//E3
+	public static class DeletePatrolHandlerWrapper extends DIHandler<DeletePatrolHandler>{
+		public DeletePatrolHandlerWrapper(){
+			super(DeletePatrolHandler.class);
+		}
+	}
 }

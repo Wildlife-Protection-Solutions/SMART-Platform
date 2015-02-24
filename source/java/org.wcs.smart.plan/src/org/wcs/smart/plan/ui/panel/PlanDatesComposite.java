@@ -81,7 +81,7 @@ public class PlanDatesComposite extends PlanComposite {
 		lbl.setText(Messages.PlanDatesComposite_StartDate);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		dtStartDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+		dtStartDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
 		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
 		
@@ -89,7 +89,7 @@ public class PlanDatesComposite extends PlanComposite {
 		lbl.setText(Messages.PlanDatesComposite_EndDate);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		dtEndDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG);
+		dtEndDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
 		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		((GridData)dtEndDate.getLayoutData()).horizontalIndent = 10;
 		

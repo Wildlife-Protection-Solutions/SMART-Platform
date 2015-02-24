@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.entity.ui;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.entity.internal.Messages;
@@ -34,35 +36,37 @@ import org.wcs.smart.entity.ui.newwizard.NewEntityTypeWizard;
 import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.observation.ui.FieldDataPerspective;
+import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 
 /**
  * Create new entity type handler
  * @author Emily
  *
  */
-public class NewEntityHandler extends AbstractHandler {
+public class NewEntityHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
+	@Execute
+	public void execute(Shell activeShell, IEclipseContext ctx){
 		//check if data model is configured before continuing
 		Session s = HibernateManager.openSession();
 		try{
 			DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), s);
 			if (dm == null || dm.getCategories().size() == 0){
-				MessageDialog.openInformation(HandlerUtil.getActiveShell(event), Messages.NewEntityHandler_DialogTitle, Messages.NewEntityHandler_DataModelNotInitialized);
-				return null;
+				MessageDialog.openInformation(activeShell, Messages.NewEntityHandler_DialogTitle, Messages.NewEntityHandler_DataModelNotInitialized);
 			}
 		}finally{
 			s.close();
 		}
 		
-		WizardDialog newEntityDialog = new WizardDialog(HandlerUtil.getActiveShell(event), new NewEntityTypeWizard());
+		WizardDialog newEntityDialog = new WizardDialog(activeShell, new NewEntityTypeWizard());
 		newEntityDialog.open();
-		
-		FieldDataPerspective.openPerspective(EntityTypeListView.ID);
-		return null;
+
+		(new ShowFieldDataPerspective()).execute(EntityTypeListView.ID, ctx.get(EModelService.class), ctx.get(EPartService.class));
 	}
 
+	public static class NewEntityHandlerWrapper extends DIHandler<NewEntityHandler>{
+		public NewEntityHandlerWrapper(){
+			super(NewEntityHandler.class);
+		}
+	}
 }

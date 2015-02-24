@@ -26,13 +26,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import javax.inject.Named;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -47,14 +49,13 @@ import org.wcs.smart.observation.model.Waypoint;
  * @author Emily
  *
  */
-public class DeleteIncidentHandler extends AbstractHandler{
+public class DeleteIncidentHandler{
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection selection = HandlerUtil.getCurrentSelection(event);
+	@Execute
+	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, Shell activeShell){
 		
-		if (!(selection instanceof IStructuredSelection)){
-			return null;
+		if (selection == null || !(selection instanceof IStructuredSelection)){
+			return ;
 		}
 		IStructuredSelection sel = (IStructuredSelection) selection;
 		List<IncidentEditorInput> toDelete = new ArrayList<IncidentEditorInput>();
@@ -70,10 +71,10 @@ public class DeleteIncidentHandler extends AbstractHandler{
 		}
 		if (toDelete.size() == 0){
 			//nothing to delete
-			return null;
+			return;
 		}
-		if (!MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.DeleteIncidentHandler_ConfirmLabel, MessageFormat.format(Messages.DeleteIncidentHandler_ConfirmMessage, new Object[]{toDelete.size()}))){
-			return null;
+		if (!MessageDialog.openConfirm(activeShell, Messages.DeleteIncidentHandler_ConfirmLabel, MessageFormat.format(Messages.DeleteIncidentHandler_ConfirmMessage, new Object[]{toDelete.size()}))){
+			return;
 		}
 				
 		Session s = HibernateManager.openSession();
@@ -103,6 +104,12 @@ public class DeleteIncidentHandler extends AbstractHandler{
 			}
 		}
 	
-		return null;
+		return;
+	}
+	
+	public static class DeleteIncidentHandlerWrapper extends DIHandler<DeleteIncidentHandler>{
+		public DeleteIncidentHandlerWrapper(){
+			super(DeleteIncidentHandler.class);
+		}
 	}
 }

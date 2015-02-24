@@ -51,7 +51,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
@@ -106,7 +105,7 @@ public class IncidentSummaryPage extends EditorPart {
 
 	private IncidentEditor editor;
 
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	private Text txtComments;
 	private Text txtIncidentId;
@@ -239,6 +238,7 @@ public class IncidentSummaryPage extends EditorPart {
 	}
 	@Override
 	public void createPartControl(Composite parent) {
+		toolkit = new FormToolkit(parent.getDisplay());
 		toolkit.setBorderStyle(SWT.BORDER);
 		
 		Form frmSummary = toolkit.createForm(parent);

@@ -24,15 +24,14 @@ package org.wcs.smart;
 import java.io.IOException;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.IResolve;
-import net.refractions.udig.catalog.IService;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.ui.application.IWorkbenchConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchAdvisor;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IResolve;
+import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -44,9 +43,6 @@ public class SmartWorkbenchAdvisor extends WorkbenchAdvisor {
 	@Override
 	public void initialize(IWorkbenchConfigurer configurer) {
 		super.initialize(configurer);
-
-		// don't save and restore workbench state
-		configurer.setSaveAndRestore(false);
 	}
 
 	public WorkbenchWindowAdvisor createWorkbenchWindowAdvisor(

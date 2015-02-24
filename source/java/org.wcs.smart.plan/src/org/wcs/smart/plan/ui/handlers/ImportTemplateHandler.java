@@ -24,13 +24,14 @@ package org.wcs.smart.plan.ui.handlers;
 import java.io.File;
 import java.text.MessageFormat;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
@@ -42,16 +43,18 @@ import org.wcs.smart.plan.report.ReportPlan;
  * @author Emily
  *
  */
-public class ImportTemplateHandler extends AbstractHandler {
+public class ImportTemplateHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		if (! MessageDialog.openConfirm(HandlerUtil.getActiveShell(event), Messages.ImportTemplateHandler_ConfirmDialogTitle, Messages.ImportTemplateHandler_ConfirmImport)){
-			return false;
+	@Execute
+	public void execute(Shell activeShell, EModelService modelService, MWindow activeWindow){
+		if (! MessageDialog.openConfirm(activeShell, 
+				Messages.ImportTemplateHandler_ConfirmDialogTitle, 
+				Messages.ImportTemplateHandler_ConfirmImport)){
+			return ;
 		}
 		
 	
-		FileDialog fd = new FileDialog(HandlerUtil.getActiveShell(event), SWT.OPEN);
+		FileDialog fd = new FileDialog(activeShell, SWT.OPEN);
 		fd.setFilterNames(new String[]{Messages.ImportTemplateHandler_DesignFileName, Messages.ImportTemplateHandler_AllFiles});
 		fd.setFilterExtensions(new String[]{"*.rptdesign", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fd.setText(Messages.ImportTemplateHandler_ImportDialogTitle);
@@ -59,27 +62,31 @@ public class ImportTemplateHandler extends AbstractHandler {
 		fd.setOverwrite(true);
 		String exportFile = fd.open();
 		if (exportFile == null){
-			return null;
+			return ;
 		}
 		final File inFile = new File(exportFile);
 		if (!inFile.exists()){
-			MessageDialog.openError(HandlerUtil.getActiveShell(event), Messages.ImportTemplateHandler_ErrordialogTitle, MessageFormat.format(Messages.ImportTemplateHandler_FileDoesNotExist, new Object[]{exportFile}));
-			return null;
+			MessageDialog.openError(activeShell, Messages.ImportTemplateHandler_ErrordialogTitle, 
+					MessageFormat.format(Messages.ImportTemplateHandler_FileDoesNotExist, 
+							new Object[]{exportFile}));
+			return ;
 		}
 		try{
 			boolean open = ReportPlan.closeTemplateEditor();
-
 			ReportPlan.importPlanTemplate(inFile);
-
 			//re-open
-			if (open && HandlerUtil.getActiveWorkbenchWindow(event).getActivePage().getPerspective().getId().equals(PlanReportPerspective.ID) ){
-				ReportPlan.editTemplate(event);
+			if (open && 
+					modelService.getActivePerspective(activeWindow).getElementId().equals(PlanReportPerspective.ID)){
+				ReportPlan.editTemplate();
 			}
-
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.ImportTemplateHandler_ErrorMessage + ex.getMessage(), ex);
 		}
-		return null;
 	}
 
+	public static class ImportTemplateHandlerWrapper extends DIHandler<ImportTemplateHandler>{
+		public ImportTemplateHandlerWrapper(){
+			super(ImportTemplateHandler.class);
+		}
+	}
 }

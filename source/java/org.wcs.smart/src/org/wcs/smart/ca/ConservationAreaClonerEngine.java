@@ -22,6 +22,7 @@
 package org.wcs.smart.ca;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,7 +50,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
 
-import com.ibm.icu.text.MessageFormat;
 /**
  * Engine for manging the creation of a conservation area using another conservation
  * area as a template.
@@ -321,7 +321,7 @@ public class ConservationAreaClonerEngine {
 				try{
 					FileUtils.forceDelete(f);
 				}catch(Exception ex2){
-					SmartPlugIn.displayLog(null, MessageFormat.format(Messages.ConservationAreaClonerEngine_ErrorCleanUpRequired, new Object[]{f.toString()}), ex2);
+					SmartPlugIn.displayLog( MessageFormat.format(Messages.ConservationAreaClonerEngine_ErrorCleanUpRequired, new Object[]{f.toString()}), ex2);
 				}
 			}
 			throw ex;

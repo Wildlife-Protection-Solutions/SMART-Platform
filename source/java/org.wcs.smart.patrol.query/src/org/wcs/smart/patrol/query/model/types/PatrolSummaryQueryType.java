@@ -25,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -38,7 +40,11 @@ import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSummaryEditor;
@@ -49,6 +55,11 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.query.model.summary.AttributeGroupBy;
+import org.wcs.smart.query.model.summary.CategoryGroupBy;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -206,7 +217,9 @@ public class PatrolSummaryQueryType implements IQueryType {
 		InputStream is = new ByteArrayInputStream(queryString.getBytes());
 		try{
 			Parser parser = new Parser(is);
-			parser.SumQuery();
+			SumQueryDefinition def = parser.SumQuery();
+			
+			validateQueryParts(def);
 		}catch (Exception ex){
 			return ex.getMessage();
 		}finally{
@@ -225,6 +238,58 @@ public class PatrolSummaryQueryType implements IQueryType {
 				PatrolEndDateField.INSTANCE};
 	}
 	
+	
+	/**
+	 * Validates the query parts.  Assumes the query
+	 * definition is formed from a valid string.
+	 * <p>
+	 * This validates the items in the query.
+	 * </p>
+	 * 
+	 * @param def the summary query definition
+	 * @return error string or null if query validates okay
+	 */
+	private void validateQueryParts(SumQueryDefinition def) throws Exception{
+		List<IGroupBy> groupBys = new ArrayList<IGroupBy>();
+		if (def.getRowGroupByPart() != null){
+			groupBys.addAll(def.getRowGroupByPart().getGroupBys());
+		}
+		if (def.getColumnGroupByPart().getGroupBys() != null){
+			groupBys.addAll(def.getColumnGroupByPart().getGroupBys());
+		}
+		
+		for (IValueItem valueIt : def.getValuePart().getValueItems()){
+			if (valueIt instanceof PatrolValueItem){
+				PatrolValueItem pIt = (PatrolValueItem) valueIt;
+				if (pIt.getOption() == PatrolValueOption.NUM_NIGHTS){
+					//cannot group by patrol leader, patrol memeber, time period, or transport
+					for (IGroupBy groupBy : groupBys){
+						if (groupBy instanceof CategoryGroupBy ){
+							throw new Exception(
+									MessageFormat.format(
+									Messages.SummaryQuery_CannotGroupByCategory, new Object[]{pIt.getOption().getGuiName()}));
+									
+						}else if (groupBy instanceof AttributeGroupBy){
+							throw new Exception(MessageFormat.format(
+									Messages.SummaryQuery_CannotGroupByAttribute, new Object[]{pIt.getOption().getGuiName()}));
+						}
+					}
+				}else if (pIt.getOption() == PatrolValueOption.MAN_DAYS ||
+						pIt.getOption() == PatrolValueOption.MAN_HOURS || 
+						pIt.getOption() == PatrolValueOption.NUM_MEMBERS ){
+					
+					for (IGroupBy groupBy : groupBys){
+						if (groupBy instanceof PatrolGroupBy){
+							if (((PatrolGroupBy)groupBy).getOption() == PatrolQueryOption.EMPLOYEE){
+								throw new Exception( MessageFormat.format(
+										Messages.SummaryQuery_GroupByError3 , new Object[]{pIt.getOption().getGuiName(), ((PatrolGroupBy)groupBy).getOption().getGuiName()}));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 	
 	@Override
 	public URL getDescription() {

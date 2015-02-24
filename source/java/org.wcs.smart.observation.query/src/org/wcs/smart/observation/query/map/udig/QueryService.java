@@ -30,14 +30,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IServiceInfo;
-import net.refractions.udig.ui.UDIGDisplaySafeLock;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.geotools.data.DataStore;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IServiceInfo;
+import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.observation.query.map.geotools.QueryDataSource;
 import org.wcs.smart.observation.query.map.geotools.QueryDataSourceFactory;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
@@ -116,7 +115,7 @@ public class QueryService extends IQueryService {
 	
 	
 	/**
-	 * @see net.refractions.udig.catalog.IResolve#getStatus()
+	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
 	 */
 	@Override
 	public Status getStatus() {
@@ -124,7 +123,7 @@ public class QueryService extends IQueryService {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IResolve#getMessage()
+	 * @see org.locationtech.udig.catalog.IResolve#getMessage()
 	 */
 	@Override
 	public Throwable getMessage() {
@@ -132,7 +131,7 @@ public class QueryService extends IQueryService {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IResolve#getIdentifier()
+	 * @see org.locationtech.udig.catalog.IResolve#getIdentifier()
 	 */
 	@Override
 	public URL getIdentifier() {
@@ -142,7 +141,7 @@ public class QueryService extends IQueryService {
 	/**
 	 * 
 	 * @see
-	 * net.refractions.udig.catalog.IService#resources(org.eclipse.core.runtime
+	 * org.locationtech.udig.catalog.IService#resources(org.eclipse.core.runtime
 	 * .IProgressMonitor)
 	 */
 	@Override
@@ -165,7 +164,7 @@ public class QueryService extends IQueryService {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IService#createInfo(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.locationtech.udig.catalog.IService#createInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
 	protected IServiceInfo createInfo(IProgressMonitor monitor)
@@ -174,7 +173,7 @@ public class QueryService extends IQueryService {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IService#getConnectionParams()
+	 * @see org.locationtech.udig.catalog.IService#getConnectionParams()
 	 */
 	@Override
 	public Map<String, Serializable> getConnectionParams() {
@@ -182,7 +181,7 @@ public class QueryService extends IQueryService {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IService#dispose(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.locationtech.udig.catalog.IService#dispose(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
 	public void dispose( IProgressMonitor monitor ) {

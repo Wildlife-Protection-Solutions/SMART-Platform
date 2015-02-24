@@ -67,12 +67,12 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
 		if (queryType.getKey().equals(MissionQueryType.KEY)){
-			return SurveyResultItemFeature.createTrackFeature((SurveyQueryResultItem)it,  queryColumns, shapefile.getSchema());
+			return SurveyResultItemFeature.createTrackFeature((SurveyQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 		}else if ( query.getType().getKey().equals(SurveyObservationQueryType.KEY) ||
 				    query.getType().getKey().equals(SurveyWaypointQueryType.KEY)){
-			return SurveyResultItemFeature.createObservationFeature((SurveyQueryResultItem)it, queryColumns, shapefile.getSchema());
+			return SurveyResultItemFeature.createObservationFeature((SurveyQueryResultItem)it, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 		}else if (query.getType().getKey().equals(MissionTrackQueryType.KEY)){
-			return SurveyResultItemFeature.createTrackFeature((MissionTrackResultItem)it, session, queryColumns, shapefile.getSchema());
+			return SurveyResultItemFeature.createTrackFeature((MissionTrackResultItem)it, session, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 		}
 		return null;
 	}

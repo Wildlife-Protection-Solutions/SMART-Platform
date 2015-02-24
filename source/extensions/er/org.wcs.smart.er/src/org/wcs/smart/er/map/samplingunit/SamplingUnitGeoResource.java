@@ -26,11 +26,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IGeoResourceInfo;
-import net.refractions.udig.catalog.IService;
-import net.refractions.udig.core.internal.CorePlugin;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
@@ -47,12 +42,16 @@ import org.geotools.styling.Rule;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IGeoResourceInfo;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.core.internal.CorePlugin;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SamplingUnit.GeometryType;
+import org.wcs.smart.er.model.SurveyDesign;
 
 /**
  * Georesource for a sampling unit.
@@ -93,7 +92,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 	}
 	
 	/**
-	 * @see net.refractions.udig.catalog.IResolve#getStatus()
+	 * @see org.locationtech.udig.catalog.IResolve#getStatus()
 	 */
 	@Override
 	public Status getStatus() {
@@ -101,7 +100,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IResolve#getMessage()
+	 * @see org.locationtech.udig.catalog.IResolve#getMessage()
 	 */
 	@Override
 	public Throwable getMessage() {
@@ -109,7 +108,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IGeoResource#createInfo(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.locationtech.udig.catalog.IGeoResource#createInfo(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
 	protected IGeoResourceInfo createInfo(IProgressMonitor monitor)
@@ -118,7 +117,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 	}
 
 	/**
-	 * @see net.refractions.udig.catalog.IGeoResource#getIdentifier()
+	 * @see org.locationtech.udig.catalog.IGeoResource#getIdentifier()
 	 */
 	@Override
 	public URL getIdentifier() {
@@ -126,7 +125,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 	}
 	
 	/**
-	 * @see net.refractions.udig.catalog.IGeoResource#canResolve(java.lang.Class)
+	 * @see org.locationtech.udig.catalog.IGeoResource#canResolve(java.lang.Class)
 	 */
 	@Override
 	public <T> boolean canResolve( Class<T> adaptee ) {
@@ -145,7 +144,7 @@ public class SamplingUnitGeoResource extends IGeoResource {
 	}
 
     /**
-     * @see net.refractions.udig.catalog.IGeoResource#resolve(java.lang.Class, org.eclipse.core.runtime.IProgressMonitor)
+     * @see org.locationtech.udig.catalog.IGeoResource#resolve(java.lang.Class, org.eclipse.core.runtime.IProgressMonitor)
      */
 	@Override
 	public <T> T resolve(Class<T> adaptee, IProgressMonitor monitor)

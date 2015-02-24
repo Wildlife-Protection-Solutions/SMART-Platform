@@ -23,7 +23,6 @@ package org.wcs.smart.report.manger;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,19 +31,21 @@ import java.util.Set;
 
 import org.eclipse.birt.report.designer.core.model.SessionHandleAdapter;
 import org.eclipse.birt.report.designer.data.ui.dataset.DataSetUIUtil;
-import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSourceHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -53,12 +54,14 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.internal.Messages;
+import org.wcs.smart.report.internal.ui.ReportViewerPerspective;
 import org.wcs.smart.report.internal.ui.designer.SmartReportPerspective;
 import org.wcs.smart.report.internal.ui.viewer.ReportView;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
 import org.wcs.smart.report.ui.SmartReportEditorInput;
+import org.wcs.smart.util.E3Utils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -204,7 +207,7 @@ public class ReportManager {
 				IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 				window.getWorkbench().showPerspective(SmartReportPerspective.ID,window);
 				
-				ReportEditorInput ri = new SmartReportEditorInput(r);
+				SmartReportEditorInput ri = new SmartReportEditorInput(r);
 				
 				IEditorPart part = window.getActivePage().findEditor(ri);
 				if (part == null){
@@ -257,17 +260,9 @@ public class ReportManager {
 	 * Opens the given report the view perspective and runs the report.
 	 * @param report
 	 */
-	public static void viewReport(final Report report){
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				try {
-					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
-					((ReportView)view).setReport(report);
-				} catch (PartInitException e) {
-					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReport, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);
-				}				
-			}});
+	public static void viewReport (Report report, IEclipseContext context){
+		MPart part = createReportViewer(report, context);
+		((ReportView)E3Utils.getSourceObject(part)).setReport(report);
 	}
 	
 	/**
@@ -275,17 +270,32 @@ public class ReportManager {
 	 * the parameters provided.
 	 * @param report
 	 */
-	public static void viewReport(final Report report, final HashMap<String, Object> reportParameters){
-		Display.getDefault().asyncExec(new Runnable(){
-			@Override
-			public void run() {
-				try {
-					IViewPart view = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().showView(ReportView.ID,SmartUtils.encodeHex(report.getUuid()),IWorkbenchPage.VIEW_ACTIVATE );
-					((ReportView)view).setReport(report, reportParameters);
-				} catch (PartInitException e) {
-					ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportManager_Error_OpeningReportA, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);
-				}				
-			}});
+	public static void viewReport(final Report report, final HashMap<String, Object> reportParameters, IEclipseContext context){
+		MPart part = createReportViewer(report, context);
+		((ReportView)E3Utils.getSourceObject(part)).setReport(report,reportParameters);
+	}
+	
+	private static MPart createReportViewer(Report report, IEclipseContext context){
+		EPartService partService = context.get(EPartService.class);
+		
+		MPart existing = partService.findPart(ReportView.ID + ":" + SmartUtils.encodeHex(report.getUuid())); //$NON-NLS-1$
+		if (existing != null){
+			return existing;
+		}
+		
+		MApplication app = context.get(MApplication.class);
+		EModelService mService = context.get(EModelService.class);
+		
+		MPart part = partService.createPart(ReportView.ID);
+		part.setVisible(true);
+		part.setCloseable(true);
+		part.setElementId(ReportView.ID + ":" + SmartUtils.encodeHex(report.getUuid())); //$NON-NLS-1$
+		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
+		
+		MPartStack stack = (MPartStack) mService.find(ReportViewerPerspective.VIEWER_AREA_ID, app);
+		stack.getChildren().add(part);
+		partService.showPart(part, PartState.ACTIVATE);
+		return part;
 	}
 	
 	

@@ -98,6 +98,7 @@ public class PlanEditorInput implements IEditorInput {
 	 */
 	@Override
 	public String getName() {
+		if (label == null) return ""; //$NON-NLS-1$
 		return label;
 	}
 

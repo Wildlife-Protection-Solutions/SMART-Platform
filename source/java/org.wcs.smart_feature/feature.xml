@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
-      id="org.wcs.smart.smart_feature"
+      id="org.wcs.smart.smart.feature"
       label="SMART Feature"
       version="3.1.0"
       provider-name="org.wcs.smart">
@@ -85,15 +85,19 @@ limitations under the License.
    </license>
 
    <includes
-         id="org.wcs.smart.birtfeature"
-         version="0.0.0"/>
-
-   <includes
          id="org.eclipse.help"
          version="0.0.0"/>
 
    <includes
-         id="org.wcs.smart.udig-feature"
+         id="org.wcs.smart.udig.feature"
+         version="0.0.0"/>
+
+   <includes
+         id="javax.media.jai_imageio-feature"
+         version="0.0.0"/>
+
+   <includes
+         id="org.wcs.smart.birtfeature"
          version="0.0.0"/>
 
    <includes
@@ -102,48 +106,6 @@ limitations under the License.
 
    <plugin
          id="org.wcs.smart.hibernate.libs"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.patrol"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.query"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.reporttable"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.report"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.help"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.report.birt.map"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -179,7 +141,27 @@ limitations under the License.
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.report.birt.query"
+         id="org.eclipse.e4.ui.css.swt.theme"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ui.themes"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.e4.tools.compat"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.e4.tools.services"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -200,14 +182,7 @@ limitations under the License.
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.patrol.query"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.wcs.smart.patrol.query.report"
+         id="org.wcs.smart.help"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -229,6 +204,69 @@ limitations under the License.
 
    <plugin
          id="org.wcs.smart.observation.query.report"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.p2"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.patrol"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.patrol.query"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.patrol.query.report"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.query"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.report"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.report.birt.map"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.report.birt.query"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.reporttable"
          download-size="0"
          install-size="0"
          version="0.0.0"

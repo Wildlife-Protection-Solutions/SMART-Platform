@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ui.internal.ca.properties.ChangeUserPasswordDialog;
 
 /**
@@ -34,13 +37,18 @@ import org.wcs.smart.ui.internal.ca.properties.ChangeUserPasswordDialog;
  * @author Emily
  * @since 1.0.0
  */
-public class ChangeUserNameHandler extends AbstractHandler {
+public class ChangeUserNameHandler{
 
-		@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ChangeUserPasswordDialog dialog = new ChangeUserPasswordDialog(HandlerUtil.getActiveShell(event));
+	@Execute
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
+		ChangeUserPasswordDialog dialog = new ChangeUserPasswordDialog(activeShell);
 		dialog.open();
-		return null;
 	}
 
+	// E3
+	public static class ChangeUserNameHandlerWrapper extends DIHandler<ChangeUserNameHandler> {
+		public ChangeUserNameHandlerWrapper() {
+			super(ChangeUserNameHandler.class);
+		}
+	}
 }

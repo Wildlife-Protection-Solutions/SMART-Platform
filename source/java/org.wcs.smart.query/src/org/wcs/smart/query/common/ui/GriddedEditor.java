@@ -25,10 +25,6 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider;
-
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -37,12 +33,14 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
@@ -105,6 +103,16 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 					isDirty = lIsDirty;
 					firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 				}
+			}else if (object != null && object instanceof QueryEditorInput 
+					&& ((QueryEditorInput)object).getUuid().equals(getQuery().getUuid()) 
+					&& eventType == IQueryListener.QUERY_DELETED){
+				//close part
+				getSite().getShell().getDisplay().asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						getSite().getWorkbenchWindow().getActivePage().closeEditor(GriddedEditor.this, false);					
+					}});
+				
 			}
 			
 		}
@@ -142,7 +150,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 			
 			
 			if (resultPage != null){
-				Display.getDefault().asyncExec(new Runnable() {
+				getSite().getShell().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						resultPage.setQuery();
@@ -263,20 +271,20 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	}
 	
 	public QueryProxy getQueryProxy(){
-		return query;
-	}
-	
-	/**
-	 * @return the query
-	 */
-	public Query getQuery(){
 		try {
 			loadQueryLoad.join();	//wait for the query loading job if applicable
 		} catch (InterruptedException e) {
 			QueryPlugIn.displayLog(Messages.GriddedEditor_ErrorLoadingQuery + e.getLocalizedMessage(), e);
 		}
 		
-		return this.query.getQuery();
+		return this.query;
+	}
+	
+	/**
+	 * @return the query
+	 */
+	public Query getQuery(){
+		return getQueryProxy().getQuery();
 	}
 
 	/**
@@ -426,7 +434,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getMap()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getMap()
 	 */
 	@Override
 	public Map getMap() {
@@ -437,7 +445,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#openContextMenu()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#openContextMenu()
 	 */
 	@Override
 	public void openContextMenu() {
@@ -446,7 +454,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setFont(org.eclipse.swt.widgets.Control)
 	 */
 	@Override
 	public void setFont(Control textArea) {
@@ -455,7 +463,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#setSelectionProvider(net.refractions.udig.project.ui.tool.IMapEditorSelectionProvider)
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#setSelectionProvider(org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider)
 	 */
 	@Override
 	public void setSelectionProvider(
@@ -465,7 +473,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 	}
 
 	/**
-	 * @see net.refractions.udig.project.ui.internal.MapPart#getStatusLineManager()
+	 * @see org.locationtech.udig.project.ui.internal.MapPart#getStatusLineManager()
 	 */
 	@Override
 	public IStatusLineManager getStatusLineManager() {
@@ -501,7 +509,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 				final Session session = HibernateManager.openSession();
 				session.beginTransaction();
 				try{
-					Display.getDefault().syncExec(new Runnable(){
+					getSite().getShell().getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
 							try{

@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.er.query.upgrade;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
@@ -41,19 +43,41 @@ import org.wcs.smart.upgrade.UpgradeEngine;
 public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
-	public void upgrade(Session s, IProgressMonitor monitor) {
-		Map<String, String> versions = UpgradeEngine.getVersions(s);
-		if (versions == null) {
-			//we don't know what is happening with database
-			//it is some kind of error or wrong database version
-			return;
-		}
-		if (versions.get(ERQueryPlugIn.PLUGIN_ID) == null) {
-			//Ecological Records Query isn't present in this configuration
-			//we need to perform install database to support the plug-in
-			monitor.subTask(Messages.ERDatabaseUpgrader_Info);
-			OnInstallAction install = new OnInstallAction();
-			install.execute(null);
+	public void upgrade(IProgressMonitor monitor) {
+		Map<String, String> versions = null;
+		Session s = HibernateManager.openSession();
+		try{
+			versions = UpgradeEngine.getVersions(s);
+		
+			if (versions == null) {
+				//we don't know what is happening with database
+				//it is some kind of error or wrong database version
+				return;
+			}
+			final String currentVersion = versions.get(ERQueryPlugIn.PLUGIN_ID);
+			if (currentVersion == null) {
+				//Entity doesn't present in this configuration
+				//we need to perform install database support for the plug-in
+			
+				//this will install and upgrade to current version
+				monitor.subTask(Messages.ERDatabaseUpgrader_Info);
+				OnInstallAction install = new OnInstallAction();
+				install.execute(null);
+			}else{
+				try{
+					upgrade(currentVersion, s);
+				}catch (final Throwable t){
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							ERQueryPlugIn.displayLog(MessageFormat.format(
+									"Error upgrading the ecological records query plugin from version {0} to version {1}.", new Object[]{currentVersion, ERQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$
+						}
+					});
+				}
+			}
+		}finally{
+			s.close();
 		}
 	}
 	

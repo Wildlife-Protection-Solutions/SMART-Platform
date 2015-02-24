@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.ui.internal.ca.properties.handlers;
 
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.wcs.smart.ui.internal.ca.properties.BasemapPropertyPage;
 
 /**
@@ -36,5 +37,10 @@ public class ShowBasemapHandler extends ShowPropertyPageHandler {
 	public ShowBasemapHandler() {
 		super(BasemapPropertyPage.class);
 	}
-
+	// E3
+	public static class ShowBasemapHandlerWrapper extends DIHandler<ShowBasemapHandler> {
+		public ShowBasemapHandlerWrapper() {
+			super(ShowBasemapHandler.class);
+		}
+	}
 }

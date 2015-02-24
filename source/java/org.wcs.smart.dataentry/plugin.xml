@@ -31,7 +31,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.menu.ca?after=org.wcs.smart.ca.showDataModel">
+            locationURI="menu:org.wcs.smart.menu.ca?after=org.wcs.smart.command.ca.datamodel.show">
          <command
                commandId="org.wcs.smart.dataentry.showConfigurableModel"
                label="%cm.command.label"
@@ -49,7 +49,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.wcs.smart.dataentry.handlers.ShowConfigurableModelHandler"
+            class="org.wcs.smart.dataentry.handlers.ShowConfigurableModelHandler$ShowConfigurableModelHandlerWrapper"
             commandId="org.wcs.smart.dataentry.showConfigurableModel">
       </handler>
    </extension>

@@ -224,33 +224,40 @@ public class CaImporter {
 	 */
 	private byte[] validateConservationAreaInfo(File dir, Session session) throws Exception{
 		File caInfo = new File(dir, CaExporter.CA_INFO_FILENAME);
+		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
 		
 		BufferedReader reader = new BufferedReader(new FileReader(caInfo));
-		String cauuid = reader.readLine();
-		if (cauuid == null){
-			throw new Exception(Messages.CaImporter_Error_NoCaIdentifierFound);
-		}
-		String id = reader.readLine();
-		String name = reader.readLine();
-		reader.readLine();	//description;
-		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
-		String line = reader.readLine();
-		if (line != null){
-			dbVersion = line;
-		}
-		session.beginTransaction();
 		byte[] uuid = null;
+		
 		try{
-			uuid = SmartUtils.decodeHex(cauuid);
-			long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
-			if (cnt != 0){				
-				throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
+			String cauuid = reader.readLine();
+			if (cauuid == null){
+				throw new Exception(Messages.CaImporter_Error_NoCaIdentifierFound);
 			}
+			String id = reader.readLine();
+			String name = reader.readLine();
+			reader.readLine();	//description;
 			
+			String line = reader.readLine();
+			if (line != null){
+				dbVersion = line;
+			}	
+			session.beginTransaction();
+			try{
+				uuid = SmartUtils.decodeHex(cauuid);
+				long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
+				if (cnt != 0){				
+					throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
+				}
+			
+			}finally{
+			
+				reader.close();
+			}
 		}finally{
-			session.getTransaction().commit();
 			reader.close();
 		}
+		
 		/*validate backup file version */
 		String smartDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY); 
 		if (!dbVersion.equals(smartDbVersion)){

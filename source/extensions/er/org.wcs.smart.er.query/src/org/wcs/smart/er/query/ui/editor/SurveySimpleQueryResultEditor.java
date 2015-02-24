@@ -21,12 +21,11 @@
  */
 package org.wcs.smart.er.query.ui.editor;
 
-import net.refractions.udig.project.internal.Map;
-
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
+import org.locationtech.udig.project.internal.Map;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;

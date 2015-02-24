@@ -36,8 +36,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import net.refractions.udig.project.ui.ApplicationGIS;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
@@ -81,7 +79,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
@@ -90,6 +87,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
+import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
@@ -277,8 +275,8 @@ public class MissionDayComposite {
 					}
 				}catch (Exception ex){
 					restMinutes.setText(String.valueOf(oldValue));
-					MessageDialog.openWarning(Display.getCurrent().getActiveShell(), Messages.MissionDayComposite_Error, Messages.MissionDayComposite_InvalidRestMinutes);
-					Display.getCurrent().asyncExec(new Runnable() {
+					MessageDialog.openWarning(mainComposite.getShell(), Messages.MissionDayComposite_Error, Messages.MissionDayComposite_InvalidRestMinutes);
+					mainComposite.getDisplay().asyncExec(new Runnable() {
 						@Override
 						public void run() {
 							restMinutes.setFocus();
@@ -308,7 +306,7 @@ public class MissionDayComposite {
 		
 		FontData fd = okayFont.getFontData()[0];
 		fd.setStyle(SWT.BOLD);
-		errorFont = new Font(Display.getDefault(), fd);
+		errorFont = new Font(lblTotalHours.getDisplay(), fd);
 		
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.widthHint = 30;
@@ -758,11 +756,11 @@ public class MissionDayComposite {
 		lblTotalHours.setText(MissionEditor.formatTimeRange(time));
 		if (time < 0){
 			lblTotalHours.setFont(errorFont);
-			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_RED));
+			lblTotalHours.setForeground(lblTotalHours.getDisplay().getSystemColor(SWT.COLOR_RED));
 			lblTotalHours.setToolTipText(Messages.MissionDayComposite_startBeforeEnd);
 		}else{
 			lblTotalHours.setFont(okayFont);
-			lblTotalHours.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+			lblTotalHours.setForeground(lblTotalHours.getDisplay().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
 			lblTotalHours.setToolTipText(null);
 		}
 	}
@@ -803,11 +801,11 @@ public class MissionDayComposite {
 		AddWaypointDialog add;
 	
 		if(lastWp == null){
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), 
+			add = new AddWaypointDialog(mainComposite.getShell(), 
 					editor.getMissionEditor().getAvailableProjections(),
 					editor.getMissionEditor().getSamplingUnits());
 		}else{
-			add = new AddWaypointDialog(Display.getCurrent().getActiveShell(), lastWp,
+			add = new AddWaypointDialog(mainComposite.getShell(), lastWp,
 					editor.getMissionEditor().getAvailableProjections(),
 					editor.getMissionEditor().getSamplingUnits());
 		}
@@ -825,7 +823,7 @@ public class MissionDayComposite {
 	}
 
 	protected void deleteSelectedWaypoints() {
-		boolean doDel = MessageDialog.openConfirm(Display.getCurrent().getActiveShell(), Messages.MissionDayComposite_DeleteDialog_Title, Messages.MissionDayComposite_DeleteDialog_Message);
+		boolean doDel = MessageDialog.openConfirm(mainComposite.getShell(), Messages.MissionDayComposite_DeleteDialog_Title, Messages.MissionDayComposite_DeleteDialog_Message);
 		if (!doDel){
 			return;
 		}
@@ -846,7 +844,7 @@ public class MissionDayComposite {
 			@Override
 			public void done(IJobChangeEvent event) {
 				//once the job is completed we can fire this event
-				Display.getDefault().syncExec(new Runnable() {
+				mainComposite.getDisplay().syncExec(new Runnable() {
 					
 					@Override
 					public void run() {
@@ -858,7 +856,7 @@ public class MissionDayComposite {
 	}
 
 	protected void moveSelectedWaypoints() {
-		MoveWaypointDialog dialog = new MoveWaypointDialog(Display.getCurrent().getActiveShell(), missionDay);
+		MoveWaypointDialog dialog = new MoveWaypointDialog(mainComposite.getShell(), missionDay);
 		if (dialog.open() == Window.OK) {
 			IStructuredSelection selection = ((IStructuredSelection)observationTable.getSelection());
 			

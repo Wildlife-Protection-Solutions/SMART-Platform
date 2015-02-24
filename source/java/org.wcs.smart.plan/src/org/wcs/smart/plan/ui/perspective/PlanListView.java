@@ -21,31 +21,44 @@
  */
 package org.wcs.smart.plan.ui.perspective;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
+import org.osgi.service.event.Event;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanEventManager.EventType;
 import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
-import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.IPlanFilterItem;
 import org.wcs.smart.plan.ui.LoadPlanJob;
 import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
+import org.wcs.smart.plan.ui.handlers.OpenPlanHandler;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * A viewer where users can view all plans.
@@ -53,7 +66,7 @@ import org.wcs.smart.plan.ui.tree.PlanViewer;
  * @author jeffloun
  * @since 1.0.0
  */
-public class PlanListView extends ViewPart implements IPlanFilterItem {
+public class PlanListView implements IPlanFilterItem {
 
 	public static final String ID = "org.wcs.smart.plan.PlanListView"; //$NON-NLS-1$
 
@@ -61,7 +74,9 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 	private PlanFilter currentFilter;
 	private LoadPlanJob updateJob;
 	
-
+	@Inject private MPart part;
+	@Inject private IMenuService menuService;
+	
 	/**
 	 * listener for Plan change events.
 	 */
@@ -72,38 +87,6 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 		}
 	};
 	
-	 IPartListener2 partListener = new IPartListener2(){
-			@Override
-			public void partVisible(IWorkbenchPartReference partRef) {}
-			
-			@Override
-			public void partOpened(IWorkbenchPartReference partRef) {}
-			
-			@Override
-			public void partInputChanged(IWorkbenchPartReference partRef) {}
-			
-			@Override
-			public void partHidden(IWorkbenchPartReference partRef) {}
-			
-			@Override
-			public void partDeactivated(IWorkbenchPartReference partRef) {}
-			
-			@Override
-			public void partClosed(IWorkbenchPartReference partRef) {}
-			
-			@Override
-			public void partBroughtToTop(IWorkbenchPartReference partRef) {}
-			
-			@Override
-			public void partActivated(IWorkbenchPartReference partRef) {
-				if (partRef.getId().equals(PlanEditor.ID)){
-					IWorkbenchPart part = partRef.getPart(false);
-					if (part instanceof PlanEditor){
-						planViewer.setSelection(((PlanEditor) part).getEditorInput());
-					}
-				}
-			}
-	    };
 	
 	/**
 	 * Default constructor
@@ -113,20 +96,20 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 	}
 	
 
+	@PreDestroy
 	public void dispose() {		
-		getSite().getWorkbenchWindow().getPartService().removePartListener(partListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_ADDED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_MODIFIED, planListener);
 		PlanEventManager.getInstance().removeListener(EventType.PLAN_DELETED, planListener);
-		super.dispose();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
-	@Override
+	@PostConstruct
 	public void createPartControl(Composite parent) {
-		
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -154,12 +137,10 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 				//Load the plan into the main view window.
 				PlanEditorInput input = (PlanEditorInput) planViewer.getSelectedPlan();
 				if (input != null){
-					try {
-						IWorkbenchPage page = getSite().getPage();
-						page.openEditor(input, PlanEditor.ID);						
-					} catch (Throwable t) {
-						SmartPlanPlugIn.displayLog(t.getLocalizedMessage(), t);
-					}
+					IEclipseContext localCtx = EclipseContextFactory.create();
+					localCtx.set(OpenPlanHandler.PLANUUID_PARAM, input.getUuid());
+					localCtx.setParent(part.getContext());
+					ContextInjectionFactory.invoke(new OpenPlanHandler(), Execute.class, localCtx);
 				}
 				
 			}
@@ -169,15 +150,21 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 				
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.plan.PlanListView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(planViewer.getViewer().getControl());
-		planViewer.getViewer().getControl().setMenu(menu);
-		
-		getSite().registerContextMenu(menuManager,  planViewer.getViewer());
-		getSite().setSelectionProvider(planViewer.getViewer());
-		getSite().getWorkbenchWindow().getPartService().addPartListener(partListener);
+		planViewer.getViewer().getControl().setMenu(menu);	
 	}
 
-
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof PlanEditor){
+			planViewer.setSelection(((PlanEditor)lpart).getEditorInput());
+		}
+	}
+	
 	
 	/**
 	 * Refreshes the Plan list
@@ -187,10 +174,7 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 		updateJob.schedule();
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.ui.part.WorkbenchPart#setFocus()
-	 */
-	@Override
+	@Focus
 	public void setFocus() {
 		planViewer.getViewer().getControl().setFocus();
 
@@ -201,4 +185,16 @@ public class PlanListView extends ViewPart implements IPlanFilterItem {
 		return this.currentFilter;
 	}
     
+	public static class PlanListViewWrapper extends DIViewPart<PlanListView>{
+		public PlanListViewWrapper(){
+			super(PlanListView.class);
+		}
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			
+			getSite().setSelectionProvider(	((PlanListView)getComponent()).planViewer.getViewer() );
+		}
+	}
 }

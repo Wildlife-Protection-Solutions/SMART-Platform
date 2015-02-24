@@ -5,7 +5,8 @@
       version="3.1.0"
       provider-name="org.wcs.smart"
       plugin="org.wcs.smart.entity"
-      license-feature="org.wcs.smart.smart_feature">
+      license-feature="org.wcs.smart.smart.feature"
+      license-feature-version="3.1.0">
 
    <description>
       Provides additional features for tracking individual entities

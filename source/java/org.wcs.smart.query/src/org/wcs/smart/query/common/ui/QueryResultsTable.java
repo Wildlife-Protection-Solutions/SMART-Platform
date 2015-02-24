@@ -33,7 +33,6 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -104,7 +103,7 @@ public abstract class QueryResultsTable {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// in display thread update table
-				Display.getDefault().asyncExec(new Runnable() {
+				table.getControl().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						if (table.getTable().isDisposed()){
@@ -131,7 +130,7 @@ public abstract class QueryResultsTable {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				// in display thread update table
-				Display.getDefault().asyncExec(new Runnable() {
+				table.getControl().getDisplay().asyncExec(new Runnable() {
 					@Override
 					public void run() {
 						if (table.getTable().isDisposed()){

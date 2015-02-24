@@ -33,8 +33,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.databinding.observable.list.WritableList;
-import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -133,6 +131,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	/**
 	 * @see org.eclipse.jface.dialogs.TitleAreaDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
@@ -163,8 +162,8 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		final TableViewer emplList = new TableViewer(compEmployees, SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI);
 		emplList.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		emplList.setLabelProvider(new EmployeeLabelProvider());
-		emplList.setContentProvider(new ObservableListContentProvider());
-		emplList.setInput(new WritableList(employees, Employee.class));
+		emplList.setContentProvider(ArrayContentProvider.getInstance());
+		emplList.setInput(employees);
 		
 		Composite right = new Composite(compEmployees, SWT.NONE);
 		right.setLayout(new GridLayout(1, false));
@@ -195,9 +194,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		
-		groupALeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupALeader_Label, (WritableList)groupAEmployees.getInput());
+		groupALeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupALeader_Label, (List<Employee>)groupAEmployees.getInput());
 		if (existingLeg.getPatrol().hasPilot()){
-			groupAPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupAPilot_Label, (WritableList)groupAEmployees.getInput());
+			groupAPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupAPilot_Label, (List<Employee>)groupAEmployees.getInput());
 		}
 		sc.setMinSize(gA.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
@@ -222,9 +221,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		leaderComp = new Composite(gB, SWT.NONE);
 		leaderComp.setLayout(new GridLayout(2, false));
 		leaderComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
-		groupBLeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBLeader_Label, (WritableList)groupBEmployees.getInput());
+		groupBLeader = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBLeader_Label, (List<Employee>)groupBEmployees.getInput());
 		if (existingLeg.getPatrol().hasPilot()){
-			groupBPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBPilot_Label, (WritableList)groupBEmployees.getInput());
+			groupBPilot = createLeaderPilot(leaderComp, Messages.PatrolLegSplitDialog_GroupBPilot_Label, (List<Employee>)groupBEmployees.getInput());
 		}
 		sc.setMinSize(gB.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		
@@ -237,12 +236,12 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 	/*
 	 * create a leader or pilot combo viewer
 	 */
-	private ComboViewer createLeaderPilot(Composite parent, String name, WritableList employeeList){
+	private ComboViewer createLeaderPilot(Composite parent, String name, List<Employee> employeeList){
 		Label lbl = new Label(parent, SWT.NONE);
 		lbl.setText(name);
 		ComboViewer cmbLeader = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbLeader.setLabelProvider(new EmployeeLabelProvider());
-		cmbLeader.setContentProvider(new ObservableListContentProvider());
+		cmbLeader.setContentProvider(ArrayContentProvider.getInstance());
 		cmbLeader.setInput(employeeList);
 		cmbLeader.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cmbLeader.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -271,8 +270,8 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		
 		final TableViewer groupList = new TableViewer(parent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		groupList.setLabelProvider(new EmployeeLabelProvider());
-		groupList.setContentProvider(new ObservableListContentProvider());
-		groupList.setInput(new WritableList(input, Employee.class));
+		groupList.setContentProvider(ArrayContentProvider.getInstance());
+		groupList.setInput(input);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
 		groupList.getTable().setLayoutData(gd);
 		

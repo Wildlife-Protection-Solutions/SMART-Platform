@@ -40,7 +40,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -272,13 +271,13 @@ public class SummaryResultTable extends Composite {
 		
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, false, true, 1, 2);
 		comp.setLayoutData(gd);
-		comp.setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR));
+		comp.setBackground(comp.getDisplay().getSystemColor(TABLE_HEADER_COLOR));
 		leftTable = new TableViewer(comp, SWT.VIRTUAL | SWT.SINGLE | SWT.FULL_SELECTION | SWT.NO_SCROLL );
 		leftTable.getTable().setHeaderVisible(false);
 		leftTable.getTable().setLinesVisible(true);
 		leftTable.getTable().setLocation(0, 0);
 		
-		leftTable.getTable().setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR));
+		leftTable.getTable().setBackground(comp.getDisplay().getSystemColor(TABLE_HEADER_COLOR));
 		for (int i = 0; i < results.getRowHeaders().size(); i++){
 			TableViewerColumn tvc = new TableViewerColumn(leftTable, SWT.NONE);
 			tvc.getColumn().setWidth(DEFAULT_COL_SIZE);
@@ -348,7 +347,7 @@ public class SummaryResultTable extends Composite {
 			}
 		});
 		
-		topTable.getTable().setBackground(Display.getDefault().getSystemColor(TABLE_HEADER_COLOR));
+		topTable.getTable().setBackground(topTableComp.getDisplay().getSystemColor(TABLE_HEADER_COLOR));
 		
 		for (int i = 0; i < results.getNumDataColumns(); i ++){
 			TableViewerColumn tvc = new TableViewerColumn(topTable, SWT.NONE);
@@ -485,8 +484,7 @@ public class SummaryResultTable extends Composite {
 					cell.setText(header.getName());
 
 					if (header.isValue()) {
-						cell.setBackground(Display.getDefault().getSystemColor(
-								TABLE_HEADER_COLOR_2));
+						cell.setBackground(mainTable.getControl().getDisplay().getSystemColor(TABLE_HEADER_COLOR_2));
 					} else {
 
 					}

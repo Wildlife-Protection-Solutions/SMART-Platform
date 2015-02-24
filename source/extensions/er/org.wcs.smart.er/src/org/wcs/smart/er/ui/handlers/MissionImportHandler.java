@@ -29,18 +29,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.internal.Messages;
@@ -54,44 +51,34 @@ import org.wcs.smart.er.xml.MissionImporter;
  * @author Jeff
  * @since 4.0.0
  */
-public class MissionImportHandler extends AbstractHandler {
+public class MissionImportHandler {
 	private static final String MISSION_NOT_IMPORTED_ERROR_MSG = Messages.MissionImportHandler_0;
 
 
-	/**
-	 * @see org.eclipse.core.commands.AbstractHandler#execute(org.eclipse.core.commands.ExecutionEvent)
-	 */
-	@Override
-	public Object execute(final ExecutionEvent event) throws ExecutionException {
-		final IWorkbench activeWorkbench = HandlerUtil
-				.getActiveWorkbenchWindow(event).getWorkbench();
-
-		MissionImportDialog dialog = new MissionImportDialog();
-		if (dialog.open() != IDialogConstants.OK_ID) {
-			return null;
-		}
+	@Execute
+	public void execute(final Shell activeShell){
+		
+		MissionImportDialog dialog = new MissionImportDialog(activeShell);
+		if (dialog.open() != IDialogConstants.OK_ID) return;
 
 		List<String> files = dialog.getFileNames();
 		
 		if (files.size() == 1){
 			File file = new File(files.get(0));
 			if (!file.exists()) {
-				MessageDialog.openError(Display.getCurrent().getActiveShell(),
+				MessageDialog.openError(activeShell,
 						Messages.MissionImportHandler_1 , MessageFormat.format(Messages.MissionImportHandler_2,  new Object[]{file.toString()}));
-				return null;
+				return;
 			}			
-			importFile(activeWorkbench, file, dialog.isKeepIDs());
+			importFile(activeShell, file, dialog.isKeepIDs());
 		
 		}else if (files.size() > 0){
-			importFiles(activeWorkbench, files, dialog.isKeepIDs());
+			importFiles(activeShell, files, dialog.isKeepIDs());
 		}
-		return null;
 	}
 
-	public void importFiles(final IWorkbench activeWorkbench, final List<String> files, final boolean keepIDs){
-		final Display display = Display.getCurrent();
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(display.getActiveShell());
-		
+	public void importFiles(final Shell shell, final List<String> files, final boolean keepIDs){
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, true, new IRunnableWithProgress() {
 				@Override
@@ -132,10 +119,10 @@ public class MissionImportHandler extends AbstractHandler {
 						}
 						if (monitor.isCanceled()){
 							final int aimported = imported;
-							display.syncExec(new Runnable() {
+							shell.getDisplay().syncExec(new Runnable() {
 								@Override
 								public void run() {
-									MessageDialog.openInformation(display.getActiveShell(), Messages.MissionImportHandler_6, MessageFormat.format(Messages.MissionImportHandler_7, aimported, files.size()));									
+									MessageDialog.openInformation(shell, Messages.MissionImportHandler_6, MessageFormat.format(Messages.MissionImportHandler_7, aimported, files.size()));									
 								}
 							});
 							
@@ -143,10 +130,10 @@ public class MissionImportHandler extends AbstractHandler {
 						}
 					}
 					final int iimported = imported;
-					display.syncExec(new Runnable(){
+					shell.getDisplay().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							MessageDialog.openInformation(display.getActiveShell(), Messages.MissionImportHandler_8, MessageFormat.format(Messages.MissionImportHandler_9, iimported, files.size()));
+							MessageDialog.openInformation(shell, Messages.MissionImportHandler_8, MessageFormat.format(Messages.MissionImportHandler_9, iimported, files.size()));
 							
 						}});
 				}
@@ -158,9 +145,8 @@ public class MissionImportHandler extends AbstractHandler {
 	}
 	
 	
-	public void importFile(final IWorkbench activeWorkbench, final File file, final boolean keepIDs) {
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display
-				.getCurrent().getActiveShell());
+	public void importFile(final Shell shell, final File file, final boolean keepIDs) {
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
@@ -199,11 +185,7 @@ public class MissionImportHandler extends AbstractHandler {
 							
 						}
 					} catch (final Exception e) {
-						Display.getDefault().syncExec(new Runnable(){
-							@Override
-							public void run() {
-								EcologicalRecordsPlugIn.displayLog(MISSION_NOT_IMPORTED_ERROR_MSG + e.getLocalizedMessage(), e);
-							}});
+						EcologicalRecordsPlugIn.displayLog(MISSION_NOT_IMPORTED_ERROR_MSG + e.getLocalizedMessage(), e);
 					}
 
 				}
@@ -211,6 +193,12 @@ public class MissionImportHandler extends AbstractHandler {
 		} catch (Exception e) {
 			EcologicalRecordsPlugIn.displayLog(
 					MISSION_NOT_IMPORTED_ERROR_MSG  + e.getLocalizedMessage(), e);
+		}
+	}
+	
+	public static class MissionImportHandlerWrapper extends DIHandler<MissionImportHandler>{
+		public MissionImportHandlerWrapper(){
+			super(MissionImportHandler.class);
 		}
 	}
 }

@@ -27,6 +27,9 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
@@ -49,54 +52,24 @@ import org.wcs.smart.query.ui.model.IDefinitionPanel;
  *
  */
 public class DefinitionPanelManager {
-	
-	
-	private static DefinitionPanelManager instance = null;
-	
+
 	private HashMap<String, IQueryItemPanel> filterPanels = new HashMap<String, IQueryItemPanel>();
-	
+	private IEclipseContext localContext;
+
 	private DefinitionPanelManager(){
-		
+		localContext = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		localContext.set(DefinitionPanelManager.class, this);
 	}
+	
 	/**
-	 * Gets the definition panel manager
+	 * Creates the definition panel manager for the current
+	 * eclipse context; should only be called once
 	 * @return
 	 */
-	public static DefinitionPanelManager getInstance(){
-		if (instance == null){
-			instance = new DefinitionPanelManager();
-		}
-		return instance;
+	public static void createInstance(){
+		new DefinitionPanelManager();
 	}
 
-	/**
-	 * Creates a new definition panel with the given panel id.
-	 * 
-	 * @param panelId
-	 * @return
-	 */
-	public IDefinitionPanel createDefinitionPanel(String panelId){
-		String isValidAttribute = "isSingleCa"; //$NON-NLS-1$
-		if (SmartDB.isMultipleAnalysis()){
-			isValidAttribute ="isMultiCa"; //$NON-NLS-1$
-		}
-		IConfigurationElement[] config = Platform.getExtensionRegistry()
-				.getConfigurationElementsFor(IDefinitionPanel.PANEL_EXTENSION_ID);
-		for (IConfigurationElement e : config) {
-			String id = e.getAttribute("id"); //$NON-NLS-1$
-			Boolean isValid = Boolean.valueOf(e.getAttribute(isValidAttribute));
-			 			            
-			if (isValid && id.equals(panelId)){
-				try {
-					return (IDefinitionPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
-				} catch (CoreException ex) {
-					QueryPlugIn.log(MessageFormat.format(Messages.DefinitionPanelManager_QueryEditingPanelError, new Object[]{panelId}), ex);
-				}
-			}
-		}
-		return null;
-	}
-	
 	/**
 	 * Determines if the given panel id is valid for the current
 	 * system configuration 
@@ -104,7 +77,7 @@ public class DefinitionPanelManager {
 	 * @param panelId the definition panel
 	 * @return <code>true</code> if panel applicable, <code>false</code> otherwise
 	 */
-	public boolean isValid(String panelId){
+	public static boolean isValid(String panelId){
 		String isValidAttribute = "isSingleCa"; //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			isValidAttribute ="isMultiCa"; //$NON-NLS-1$
@@ -121,6 +94,35 @@ public class DefinitionPanelManager {
 			 			
 	}
 	
+	/**
+	 * Creates a new definition panel with the given panel id.
+	 * 
+	 * @param panelId
+	 * @return
+	 */
+	public IDefinitionPanel createDefinitionPanel(String panelId){
+		String isValidAttribute = "isSingleCa"; //$NON-NLS-1$
+		if (SmartDB.isMultipleAnalysis()){
+			isValidAttribute ="isMultiCa"; //$NON-NLS-1$
+		}
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IDefinitionPanel.PANEL_EXTENSION_ID);
+		for (IConfigurationElement e : config) {
+			String id = e.getAttribute("id"); //$NON-NLS-1$
+			Boolean isValid = Boolean.valueOf(e.getAttribute(isValidAttribute));
+			 			            
+			if (isValid && id.equals(panelId)){
+				try {
+					IDefinitionPanel pnl = (IDefinitionPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
+					ContextInjectionFactory.inject(pnl, localContext);
+					return pnl;
+				} catch (CoreException ex) {
+					QueryPlugIn.log(MessageFormat.format(Messages.DefinitionPanelManager_QueryEditingPanelError, new Object[]{panelId}), ex);
+				}
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Find the query item panel that is associated with the given definition panel id
 	 * for the given query type.
@@ -150,7 +152,9 @@ public class DefinitionPanelManager {
 			String id = e.getAttribute("id"); //$NON-NLS-1$
 			if (id.equals(panelId)){
 				try {
-					return (IQueryItemPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
+					IQueryItemPanel pnl = (IQueryItemPanel)e.createExecutableExtension("panel"); //$NON-NLS-1$
+					ContextInjectionFactory.inject(pnl, localContext);
+					return pnl;
 				} catch (CoreException ex) {
 					QueryPlugIn.log(MessageFormat.format(Messages.DefinitionPanelManager_QueryItemPanelError, new Object[]{panelId}), ex);
 				}

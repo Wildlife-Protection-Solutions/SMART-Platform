@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
@@ -50,6 +52,9 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 
 	public static String ID = "org.wcs.smart.er.survey.definition.filter.valuerate"; //$NON-NLS-1$
 	
+	@Inject private DefinitionPanelManager pnlManager; 
+	
+	
 	public SimpleValueRateFilterPanel() {
 		super();
 	}
@@ -70,15 +75,12 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 			@Override
 			public void refreshPanel(SurveyDesign currentDesign) {
 				super.refreshPanel(currentDesign);
-
-				IQueryItemPanel pnl = DefinitionPanelManager.getInstance().getQueryItemPanel(SimpleValueRateFilterPanel.ID, getQuery().getType());
+				IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQuery().getType());
 				if (pnl instanceof ISurveyPanel){
 					((ISurveyPanel) pnl).refreshPanel(currentDesign);
 				}
 			}
 		};
-		
-		
 	}
 	
 	

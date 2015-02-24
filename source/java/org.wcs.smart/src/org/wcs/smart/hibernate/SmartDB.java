@@ -22,7 +22,6 @@
 package org.wcs.smart.hibernate;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -49,6 +48,9 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartDB {
 
+	public static final String CCAA_CONFIGURATION_MODIFIED = "CCAA/MODIFIED";
+			
+			
 	/**
 	 * Database table that contains the plugins and associated versions
 	 * associated with the current database schema
@@ -99,7 +101,7 @@ public class SmartDB {
 	private static ConservationAreaConfiguration caConfig = null;
 	
 	private static Language currentLanguage = null;
-	private static List<IConservationAreaConfigurationListener> changeListeners;
+	
 	/**
 	 * 
 	 * @return the current database user
@@ -208,17 +210,14 @@ public class SmartDB {
 		}
 		return caConfig;
 	}
+	
+	
 	/**
 	 * Sets the configuration for cross conservation area analysis
 	 * @param selectedCa
 	 */
 	public static void setConservationAreaConfiguration(ConservationAreaConfiguration configuration){
 		caConfig = configuration;
-		if (changeListeners != null){
-			for (IConservationAreaConfigurationListener listener: changeListeners){
-				listener.configurationChanged();
-			}
-		}
 	}
 	
 	/**
@@ -269,28 +268,6 @@ public class SmartDB {
 			}
 		}
 		return currentLanguage;
-		
-	}
-	
-	/**
-	 * Adds a configuration change listener.
-	 * @param listener
-	 */
-	public static void addConfigurationChangeListener(IConservationAreaConfigurationListener listener){
-		if (changeListeners == null){
-			changeListeners = new ArrayList<IConservationAreaConfigurationListener>();
-		}
-		changeListeners.add(listener);
-	}
-	
-	/**
-	 * Removes a configuration change listener.
-	 * @param listener
-	 */
-	public static void removeConfigurationChangeListener(IConservationAreaConfigurationListener listener){
-		if (changeListeners != null){
-			changeListeners.remove(listener);
-		}
 		
 	}
 	

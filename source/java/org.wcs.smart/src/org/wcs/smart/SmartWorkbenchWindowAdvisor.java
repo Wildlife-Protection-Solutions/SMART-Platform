@@ -21,16 +21,17 @@
  */
 package org.wcs.smart;
 
-import net.refractions.udig.project.ui.internal.LayersView;
-import net.refractions.udig.project.ui.internal.MapPart;
-import net.refractions.udig.tool.info.internal.InfoView2;
-import net.refractions.udig.ui.UDIGDragDropUtilities;
-
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.ContextInjectionFactory;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
+import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.preference.IPreferenceNode;
 import org.eclipse.jface.preference.PreferenceManager;
 import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IPartService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchListener;
@@ -40,11 +41,13 @@ import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
+import org.locationtech.udig.project.ui.internal.LayersView;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.tool.info.internal.InfoView2;
+import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.wcs.smart.backup.AutoBackupEngine;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.ui.map.LoadDefaultLayersJob;
-import org.wcs.smart.ui.map.MapView;
 
 /**
  * Smart Workbench Window Advisor.
@@ -60,7 +63,6 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 	public static final String SHUTDOWN_JOB_FAMILY = "org.wcs.smart.shut.job.family"; //$NON-NLS-1$
 	
 	private IPartListener2 partListener = null;
-
 	private PerspectiveEditorTracker perspectiveTracker = null;
 	private PerspectiveEditorListener perspectiveListener = null;
 	
@@ -95,19 +97,17 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 	};
 	
     public SmartWorkbenchWindowAdvisor(IWorkbenchWindowConfigurer configurer) {
-        super(configurer);
-        
-        perspectiveTracker = new PerspectiveEditorTracker();
-        perspectiveListener = new PerspectiveEditorListener(perspectiveTracker);
-        
+        super(configurer);        
     }
 
     public void dispose(){
     	super.dispose();
+    	
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
-    	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(perspectiveTracker);
-    	//getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().removeWorkbenchListener(shutdownListener);
+    	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().removeWorkbenchListener(shutdownListener);
     	super.getWindowConfigurer().getWindow().removePerspectiveListener(perspectiveListener);
+    	
+    	perspectiveTracker = null;
     }
     
     public ActionBarAdvisor createActionBarAdvisor(IActionBarConfigurer configurer) {
@@ -123,10 +123,12 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
         configurer.setShowProgressIndicator(true);
         
         // setup perspective tracker
-        IPartService service = (IPartService) configurer.getWindow().getService(IPartService.class);
-        service.addPartListener(perspectiveTracker);
-        configurer.getWindow().addPerspectiveListener(perspectiveListener);
+        IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+        perspectiveTracker = ContextInjectionFactory.make(PerspectiveEditorTracker.class, ctx);
 
+        perspectiveListener = new PerspectiveEditorListener(perspectiveTracker, ctx.get(EPartService.class));
+        configurer.getWindow().addPerspectiveListener(perspectiveListener);
+        
         // setup drag and drop support 
         UDIGDragDropUtilities.registerUDigDND(configurer);
     }
@@ -136,7 +138,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().addWorkbenchListener(shutdownListener);
         //assign title to window
         getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getNameLabel()); //$NON-NLS-1$
-        
+
         /* -- setup part listener for layer view legend */
     	partListener = new IPartListener2() {
     		@Override
@@ -188,16 +190,36 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			}
 		};
     	PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
+
     	
-        /* --- Add initial layers to map --- */
-    	final MapView view = (MapView)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().findView(MapView.ID);
-    	if (view != null){
-    		LoadDefaultLayersJob job = new LoadDefaultLayersJob(view.getMap(), true);
-    		job.schedule();
-    	}
-    	
-    	
+		// reconfigure the location of the user name control
+		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench()
+				.getService(IEclipseContext.class);
+		EModelService modelService = ctx.get(EModelService.class);
+		MTrimBar element = (MTrimBar) modelService.find("org.eclipse.ui.main.toolbar", ctx.get(MApplication.class));
+		int src = -1;
+		int trg = -1;
+		for (int i = 0; i < element.getChildren().size(); i++) {
+			if (element.getChildren().get(i).getElementId()
+					.equals("org.wcs.smart.userNameInfo")) {
+				src = i;
+			} else if (element.getChildren().get(i).getElementId()
+					.equals("PerspectiveSpacer")) {
+				trg = i;
+			}
+		}
+		if (src != -1 && trg != -1 && trg > src) {
+			MTrimElement e = element.getChildren().get(src);
+			element.getChildren().remove(src);
+			element.getChildren().add(trg, e);
+		}
+		
+//		//this gets hidden by some visibility changes events that I don't have control over;
+//		//so instead we ensure it is visible here.
+		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class));
+		statusBar.setVisible(true);	
     }
+    
     
     public void postWindowCreate() {
     	super.postWindowCreate();
@@ -209,7 +231,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     		if (!node.getId().contains("smart")){ //$NON-NLS-1$
     			pm.remove(node.getId());
     		}
-    	}    	
+    	}
     }    
 
 }

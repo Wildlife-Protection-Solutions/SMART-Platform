@@ -224,11 +224,11 @@ public class DateFilterComposite extends Composite {
 		lblStartDateBetween.setText(Messages.DateFilterComposite_ContainsDate_Label_A);
 		
 		
-		dtStart = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
+		dtStart = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
 		dtStart.addListener(SWT.Selection, validateListener );
 		lblStartDateAnd = new Label(comp, SWT.NONE);
 		lblStartDateAnd.setText(Messages.DateFilterComposite_ContainsDate_Label_B);
-		dtEnd = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER);
+		dtEnd = new DateTime(comp, SWT.MEDIUM | SWT.DROP_DOWN | SWT.BORDER | SWT.DATE);
 		dtEnd.addListener(SWT.Selection, validateListener );
 		
 		btnFilterDate.addSelectionListener(new SelectionAdapter() {

@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,8 +47,6 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.OptionSelectionDialog;
 
 import au.com.bytecode.opencsv.CSVReader;
-
-import com.ibm.icu.text.MessageFormat;
 
 /**
  * Importer for importing stations.  This importer

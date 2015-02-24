@@ -29,7 +29,10 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
-import net.refractions.udig.project.AdaptableFeature;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -37,7 +40,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -46,16 +52,13 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.ScrolledForm;
-import org.eclipse.ui.part.ViewPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.AdaptableFeature;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.ISmartAttachment;
@@ -79,10 +82,10 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  *
  */
-public class WaypointInfoView extends ViewPart implements ISelectionListener {
+public class WaypointInfoView {
 
 	public static final String ID = "org.wcs.smart.observation.waypointInfo"; //$NON-NLS-1$
-	private final FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit = null;
 
 	private Label lblWaypointId;
 	private Label lblDateTime;
@@ -91,7 +94,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	private ScrolledForm infoSection = null;
 
 	private byte[] selectedWaypointUuid;
-		
+	
 	//listener for modifications to waypoints
 	private IWaypointEventListener waypointListener = new IWaypointEventListener() {
 		@Override
@@ -189,7 +192,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			final List<Label> attributeValuesLabels = new ArrayList<Label>();
 			
 			// update ui with observation information 
-			Display.getDefault().syncExec(new Runnable(){
+			infoSection.getDisplay().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					if (lblWaypointId.isDisposed())
@@ -291,7 +294,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 			if (monitor.isCanceled()) return Status.CANCEL_STATUS;
 			if (thumbnails.size() > 0 || obsThumbs.size() > 0){
 				//update thumbnails
-				Display.getDefault().asyncExec(new Runnable(){
+				infoSection.getDisplay().asyncExec(new Runnable(){
 					@Override
 					public void run() {
 						if (lblWaypointId.isDisposed()) return ;
@@ -377,15 +380,12 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
 	 */
-	@Override
+	@PreDestroy
 	public void dispose(){
-		super.dispose();
-		
 		toolkit.dispose();
 		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_DELETED, waypointListener);
 		WaypointEventManager.getInstance().removeListener(EventType.WAYPOINT_MODIFIED, waypointListener);
 				
-		getSite().getPage().removeSelectionListener(this);
 		if (boldFont != null && !boldFont.isDisposed()){
 			boldFont.dispose();
 			boldFont = null;
@@ -395,9 +395,9 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	/**
 	 * @see org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
-	@Override
+	@PostConstruct
 	public void createPartControl(Composite parent) {
-		getSite().getPage().addSelectionListener(this);
+		toolkit = new FormToolkit(parent.getDisplay());
 		
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginWidth = gl.marginHeight = 0;
@@ -434,7 +434,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		l.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		FontData fd = l.getFont().getFontData()[0];
 		fd.setStyle(SWT.BOLD);
-		boldFont = new Font(getViewSite().getShell().getDisplay(), fd);
+		boldFont = new Font(parent.getDisplay(), fd);
 		//l.setFont(boldFont);
 		
 		lblWaypointId = toolkit.createLabel(header, ""); //$NON-NLS-1$
@@ -468,6 +468,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	 */
 	private void clearContents(){
 		selectedWaypointUuid = null;
+		if (infoSection == null) return;
 		for (Control c : infoSection.getBody().getChildren()) {
 			c.dispose();
 		}
@@ -476,7 +477,7 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 		lblDateTime.setText(""); //$NON-NLS-1$
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		lblWaypointId.setFocus();
 	}
@@ -484,16 +485,16 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 	/**
 	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 */
-	@Override
-	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (selection.isEmpty()) {
+	@Inject
+	public void selectionChanged(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) IStructuredSelection selection){
+		if (selection == null || selection.isEmpty()) {
 			return;
 		}
 		if (!(selection instanceof IStructuredSelection)) {
 			return;
 		}
-		IStructuredSelection ss = (IStructuredSelection) selection;
-		Object o = ss.getFirstElement();
+		
+		Object o = selection.getFirstElement();
 		
 		Waypoint wp = null;
 		if (o instanceof Waypoint) {
@@ -574,6 +575,12 @@ public class WaypointInfoView extends ViewPart implements ISelectionListener {
 				Composite parent = toolkit.createComposite(this);
 				t.createThumbnail(parent);
 			}
+		}
+	}
+	
+	public static class WaypointInfoViewWrapper extends DIViewPart<WaypointInfoView>{
+		public WaypointInfoViewWrapper(){
+			super(WaypointInfoView.class);
 		}
 	}
 }

@@ -37,7 +37,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.TableColumn;
@@ -65,6 +64,7 @@ public class AttributeTable {
 
 	private static final String ATTACHMENT_COLUMN_NAME=Messages.AttributeTable_AttachmentsColumnName;
 
+	private static Color darkRed = null;
 	/**
 	 * Creates a new attribute table.
 	 * 
@@ -76,6 +76,7 @@ public class AttributeTable {
 			Composite parent, 
 			Category currentCategory){
 		
+		darkRed = parent.getDisplay().getSystemColor(SWT.COLOR_DARK_RED);
 		ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 		currentCategory.getAllAttribute(attributes, true);
 		
@@ -85,7 +86,7 @@ public class AttributeTable {
 		attributeTable.getTable().setHeaderVisible(true);
 		attributeTable.setLabelProvider(new AttributeTableLabelProvider(attributes));
 		//TableViewerColumn column  = null;
-		GC gc = new GC(Display.getDefault().getActiveShell());
+		GC gc = new GC(parent.getShell());
 		try{
 			gc.setFont(attributeTable.getTable().getFont());
 			for (int i = 0; i < attributes.size(); i ++){
@@ -203,7 +204,7 @@ public class AttributeTable {
 		@Override
 		public Color getForeground(Object element, int columnIndex) {
 			if (this.editingObservation != null && this.editingObservation == element){
-				return Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED);
+				return darkRed;
 			}
 			return null;
 		}

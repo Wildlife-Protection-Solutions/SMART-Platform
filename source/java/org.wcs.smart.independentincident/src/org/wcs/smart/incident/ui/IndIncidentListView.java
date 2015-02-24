@@ -26,10 +26,21 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.inject.Inject;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.di.Focus;
+import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -40,32 +51,30 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.ui.IPartListener2;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.IWorkbenchPartReference;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.osgi.service.event.Event;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Incident list view.
  * @author Emily
  *
  */
-public class IndIncidentListView extends ViewPart implements IIncidentFilteringView {
+public class IndIncidentListView implements IIncidentFilteringView {
 
 	public static final String ID = "org.wcs.smart.observation.ui.incidientView"; //$NON-NLS-1$
 	
@@ -74,43 +83,9 @@ public class IndIncidentListView extends ViewPart implements IIncidentFilteringV
 	
 	private Object[] loadingInput = new Object[]{Messages.IndIncidentListView_LoadingLabel};
 	
-	
-	private IPartListener2 partListener = new IPartListener2() {
+	@Inject private IMenuService menuService;
+	@Inject private MPart localPart;
 		
-		@Override
-		public void partVisible(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partOpened(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partInputChanged(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partHidden(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partDeactivated(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partClosed(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partBroughtToTop(IWorkbenchPartReference partRef) {}
-		
-		@Override
-		public void partActivated(IWorkbenchPartReference partRef) {
-			if (partRef.getId().equals(IncidentEditor.ID)){
-				IWorkbenchPart part = partRef.getPart(false);
-				if (part instanceof IncidentEditor){
-					incidentListViewer.setSelection(new StructuredSelection(  ((IncidentEditor) part).getEditorInput() ));
-					getSite().getPage().bringToTop(getSite().getPart());
-				}
-			}
-			
-		}
-	};
-	
 	private IIncidentListener ilistener = new IIncidentListener() {
 		
 		@Override
@@ -161,31 +136,29 @@ public class IndIncidentListView extends ViewPart implements IIncidentFilteringV
 		}
 	};
 	
-	/**
-	 * Creates a new vies
-	 */
-	public IndIncidentListView() {
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().addPartListener(partListener);
-		
-		IncidentEventManager.getInstance().addListener(ilistener);
-	}
 
+	@Inject
+	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){
+		if (partEvent == null) return;
+		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		Object lpart = E3Utils.getSourceObject(activePart);
+		if (lpart instanceof IncidentEditor){
+			incidentListViewer.setSelection(new StructuredSelection(((IncidentEditor)lpart).getEditorInput()));
+			pService.bringToTop(localPart);
+		}
+	}
+	
+	@PreDestroy
 	public void dispose() {		
-		PlatformUI.getWorkbench().getActiveWorkbenchWindow().getPartService().removePartListener(partListener);
 		IncidentEventManager.getInstance().removeListener(ilistener);
-		super.dispose();
 	}
 
-//	/**
-//	 * 
-//	 * @return the current filter
-//	 */
-//	public PatrolViewFilter getFilter() {
-//		return this.filter;
-//	}
 
-	@Override
+	@PostConstruct
 	public void createPartControl(Composite parent) {
+		((FillLayout)parent.getLayout()).marginHeight = 0;
+		((FillLayout)parent.getLayout()).marginWidth = 0;
+		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
@@ -222,39 +195,25 @@ public class IndIncidentListView extends ViewPart implements IIncidentFilteringV
 		incidentListViewer.setInput(loadingInput);
 		incidentListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		updateContent();
-//		
-//		PatrolEventManager.getInstance().addListener(EventType.PATROL_ADDED, patrolListener);
-//		PatrolEventManager.getInstance().addListener(EventType.PATROL_DELETED, patrolListener);
-//		PatrolEventManager.getInstance().addListener(EventType.PATROL_MODIFIED, patrolListener);
+		
+		IncidentEventManager.getInstance().addListener(ilistener);
 		
 		incidentListViewer.addDoubleClickListener(new IDoubleClickListener() {
 			
 			@Override
 			public void doubleClick(DoubleClickEvent event) {
 				Object selection = ((IStructuredSelection)incidentListViewer.getSelection()).getFirstElement();;
-				if (!(selection instanceof IncidentEditorInput)){
-					return;
-				}
-				IncidentEditorInput p = (IncidentEditorInput)selection;
-				if (p != null){
-					IWorkbenchPage page = null;
-					try {
-						page = getSite().getPage();
-						page.openEditor(p, IncidentEditor.ID);							
-					} catch (Throwable t) {
-						IncidentPlugIn.displayLog(t.getLocalizedMessage(), t);
-					}
-				}
-				
+				if (!(selection instanceof IncidentEditorInput)) return;
+				(new OpenIncidentHandler()).openIncident(((IncidentEditorInput)selection).getUuid());
 			}
 		});
 		
 		/* add right click context menu */
+		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
+		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.observation.ui.incidientView"); //$NON-NLS-1$
 		Menu menu = menuManager.createContextMenu(incidentListViewer.getControl());
-		incidentListViewer.getControl().setMenu(menu);
-		getSite().registerContextMenu(menuManager,  incidentListViewer);
-		getSite().setSelectionProvider(incidentListViewer);
+		incidentListViewer.getControl().setMenu(menu);	
 	}
 	
 	public IncidentFilter getFilter(){
@@ -275,8 +234,20 @@ public class IndIncidentListView extends ViewPart implements IIncidentFilteringV
 		updateJob.schedule(delay);		
 	}
 	
-	@Override
+	@Focus
 	public void setFocus() {
 		incidentListViewer.getControl().setFocus();
+	}
+	
+	public static class IndIncidentListViewWrapper extends DIViewPart<IndIncidentListView>{
+		public IndIncidentListViewWrapper(){
+			super(IndIncidentListView.class);
+		}
+		
+		@Override
+		public void createPartControl(Composite parent){
+			super.createPartControl(parent);
+			getSite().setSelectionProvider(	((IndIncidentListView)getComponent()).incidentListViewer);
+		}
 	}
 }

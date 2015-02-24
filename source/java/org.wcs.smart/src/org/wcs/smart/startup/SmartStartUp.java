@@ -28,7 +28,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.derby.impl.jdbc.EmbedSQLException;
+
+import org.apache.derby.iapi.error.StandardException;
+//import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -151,12 +153,15 @@ public class SmartStartUp {
 	 * applications trying to open the same database connection.
 	 */
 	private static boolean checkAlreadyRunning(Throwable ex){
-		if (ex instanceof EmbedSQLException){
-			EmbedSQLException sqlex = (EmbedSQLException) ex;
-			if (sqlex.getSQLState().equalsIgnoreCase("XSDB6") && sqlex.getErrorCode() == 45000){ //$NON-NLS-1$
-				return true;
+		Throwable t = ex;
+		while(t != null){
+			if (t instanceof StandardException){
+				StandardException se = (StandardException)t;
+				if (se.getSQLState().equalsIgnoreCase("XSDB6") && se.getErrorCode() == 45000){ //$NON-NLS-1$
+					return true;
+				}
 			}
-			
+			t = t.getCause();
 		}
 		if (ex.getCause() == null){
 			return false;
@@ -241,8 +246,7 @@ public class SmartStartUp {
 					return true;
 				}
 			} catch (Exception ex) {
-				SmartPlugIn.displayLog(null,
-						Messages.SmartStartUp_Error_LoginError, ex);
+				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
 				return false;
 			}
 		}else{
@@ -262,7 +266,7 @@ public class SmartStartUp {
 				HibernateManager.openSession();
 				return true;
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(null, Messages.SmartStartUp_Error_LoginError, ex);
+				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
 			}
 		}
 		return false;

@@ -24,13 +24,13 @@ package org.wcs.smart.report.birt.map.properties;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.project.internal.Layer;
-import net.refractions.udig.project.internal.Map;
-import net.refractions.udig.project.internal.ProjectFactory;
-import net.refractions.udig.project.internal.StyleBlackboard;
-import net.refractions.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -112,7 +112,9 @@ public class StyleCellEditor extends DialogCellEditor {
 							
 							if (sb != null){
 								layer.getStyleBlackboard().clear();
-								layer.getStyleBlackboard().addAll(sb);
+								if (sb.getContent() != null){
+									layer.getStyleBlackboard().addAll(sb);
+								}
 							}
 						}
 					} catch (Exception ex) {

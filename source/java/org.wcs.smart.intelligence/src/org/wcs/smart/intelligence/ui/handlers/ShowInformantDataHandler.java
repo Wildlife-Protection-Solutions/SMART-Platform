@@ -21,17 +21,18 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.WorkbenchException;
-import org.eclipse.ui.handlers.HandlerUtil;
 import org.wcs.smart.intelligence.informant.InformantEditorInput;
 import org.wcs.smart.intelligence.informant.editor.InformantDataEditor;
-import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
  * Handler to open Informant Data editor
@@ -39,25 +40,30 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
  * @author elitvin
  * @since 3.2.0
  */
-public class ShowInformantDataHandler extends AbstractHandler {
+public class ShowInformantDataHandler {
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
+	@Execute
+	public void execute(EModelService mService, MWindow window, @Optional Informant toEdit){
 		//Open Intelligence Perspective
-		try {
-			HandlerUtil.getActiveWorkbenchWindow(event).getWorkbench()
-					.showPerspective(IntelligencePerspective.ID, HandlerUtil.getActiveWorkbenchWindow(event));
-		} catch (WorkbenchException e) {
-			SmartPatrolPlugIn.displayLog(Messages.IntelligenceHandler_LoadPerspective_Error, e);
-		}
+		
+		(new ShowPerspectiveHandler()).execute(IntelligencePerspective.ID, mService, window);
 		
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
-				.getActivePage().openEditor(new InformantEditorInput(), InformantDataEditor.ID);						
+			InformantDataEditor editor = (InformantDataEditor) PlatformUI.getWorkbench().getActiveWorkbenchWindow()
+				.getActivePage().openEditor(new InformantEditorInput(), InformantDataEditor.ID);
+			
+			if (editor != null && toEdit != null){
+				editor.setSelection(toEdit);
+			}
 		} catch (Throwable t) {
 			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
-		return null;
 	}
+
 	
+	public static class ShowInformantDataHandlerWrapper extends DIHandler<ShowInformantDataHandler>{
+		public ShowInformantDataHandlerWrapper(){
+			super(ShowInformantDataHandler.class);
+		}
+	}
 }

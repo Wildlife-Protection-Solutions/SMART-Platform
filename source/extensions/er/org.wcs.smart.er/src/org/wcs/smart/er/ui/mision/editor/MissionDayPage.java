@@ -30,7 +30,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
@@ -51,7 +50,7 @@ public class MissionDayPage extends EditorPart {
 	private Date date;
 	
 	private ScrolledForm frmSummary; 
-	private FormToolkit toolkit = new FormToolkit(Display.getCurrent());
+	private FormToolkit toolkit;
 	
 	private MissionDayComposite dayComposite;
 	
@@ -86,7 +85,8 @@ public class MissionDayPage extends EditorPart {
 
 	@Override
 	public void createPartControl(Composite parent) {
-
+		toolkit = new FormToolkit(parent.getDisplay());
+		
 		frmSummary = toolkit.createScrolledForm(parent);
 
 		String errorMsg = editor.canEdit();

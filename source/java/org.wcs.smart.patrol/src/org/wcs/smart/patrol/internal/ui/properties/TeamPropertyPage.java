@@ -68,10 +68,10 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
@@ -79,7 +79,6 @@ import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.BinaryType;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -109,6 +108,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	private Button btnDisable;
 	private Button btnDelete;
 	private Button btnEditKey;
+	private Composite container;
 	
 	private static NullComparator nullStringComparator = new NullComparator();
 	
@@ -141,8 +141,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param parent
 	 * @param title
 	 */
-	public TeamPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.TeamPropertyPage_Dialog_Title);
+	public TeamPropertyPage(Shell parent) {
+		super(parent, Messages.TeamPropertyPage_Dialog_Title);
 		this.currentCa = SmartDB.getCurrentConservationArea();
 		
 		/* get mandates */
@@ -203,7 +203,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				return Collator.getInstance().compare(a,b);
 			}});
 		
-		Composite container = new Composite(parent, SWT.NONE);
+		container = new Composite(parent, SWT.NONE);
 		container.setLayout(new GridLayout(3, false));
 
 		Label lblNewLabel = new Label(container, SWT.NONE);
@@ -372,8 +372,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 				
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(getShell(),
-					MessageFormat.format(Messages.TeamPropertyPage_Error_DeletingTeam + "\n\n" + ex.getLocalizedMessage(), new Object[]{team.getName()}), ex); //$NON-NLS-1$
+			SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.TeamPropertyPage_Error_DeletingTeam + "\n\n" + ex.getLocalizedMessage(), new Object[]{team.getName()}), ex); //$NON-NLS-1$
 		}
 		tableViewer.refresh();
 	}
@@ -727,9 +726,9 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		 
 		public Color getForeground(Object element){
 			 if (((Team)element).getIsActive()){
-				 return Display.getDefault().getSystemColor(SWT.COLOR_BLACK);
+				 return container.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 			 }else{
-				 return Display.getDefault().getSystemColor(SWT.COLOR_GRAY);
+				 return container.getDisplay().getSystemColor(SWT.COLOR_GRAY);
 			 }
 		 }
 		

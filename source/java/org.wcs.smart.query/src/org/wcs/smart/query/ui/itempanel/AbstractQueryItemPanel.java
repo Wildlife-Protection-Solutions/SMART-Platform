@@ -21,10 +21,9 @@
  */
 package org.wcs.smart.query.ui.itempanel;
 
+import javax.inject.Inject;
+
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IWorkbenchPartSite;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.services.ISourceProviderService;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.QuerySourceProvider;
 
@@ -37,13 +36,12 @@ public abstract class AbstractQueryItemPanel implements IQueryItemPanel{
 	
 	protected static final String LOADING_TEXT = Messages.QueryFilterView_LoadingLabel;
 	
+	private @Inject QuerySourceProvider provider;
 	/**
 	 * Sets the current selection.
 	 */
 	public void addQueryItem(IStructuredSelection currentSelection)
 	{
-		IWorkbenchPartSite site = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().getActivePart().getSite();
-		QuerySourceProvider provider = (QuerySourceProvider) ((ISourceProviderService)site.getService(ISourceProviderService.class)).getSourceProvider(QuerySourceProvider.DEFINITION_ITEMS);
 		provider.setQueryDefinitionSelection(currentSelection, getId());
 	}
 

@@ -5,7 +5,7 @@ Bundle-SymbolicName: org.wcs.smart.intelligence;singleton:=true
 Bundle-Version: 3.2.0
 Bundle-Activator: org.wcs.smart.intelligence.IntelligencePlugIn
 Require-Bundle: org.eclipse.ui.forms,
- net.refractions.udig.style.sld,
+ org.locationtech.udig.style.sld,
  org.eclipse.birt.report.designer.ui.editors,
  org.eclipse.datatools.connectivity.oda.design.ui,
  org.wcs.smart.patrol,
@@ -16,7 +16,7 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.p2,
  org.wcs.smart
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.wcs.smart.intelligence.model,
  org.wcs.smart.intelligence.updatesite
 Bundle-Vendor: org.wcs.smart

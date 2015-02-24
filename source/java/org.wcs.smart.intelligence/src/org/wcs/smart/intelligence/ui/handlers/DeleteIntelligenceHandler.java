@@ -25,18 +25,20 @@ import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.AbstractHandler;
-import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
+import javax.inject.Named;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -50,27 +52,23 @@ import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
  * @author elitvin
  * @since 1.0.0
  */
-public class DeleteIntelligenceHandler extends AbstractHandler {
+public class DeleteIntelligenceHandler {
 
-	public DeleteIntelligenceHandler() {}
+	@Execute
+	public void execute (@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object lastSelection, final Shell activeShell){
 
-	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-
-		final IStructuredSelection lastSelection = (IStructuredSelection) HandlerUtil.getCurrentSelection(event);
-		
-		if (lastSelection == null) {
-			return null;
+		if (lastSelection == null || !(lastSelection instanceof IStructuredSelection)) {
+			return;
 		}
 		
-		for (Iterator<?> iterator = lastSelection.iterator(); iterator.hasNext();) {
+		for (Iterator<?> iterator = ((IStructuredSelection)lastSelection).iterator(); iterator.hasNext();) {
 			Object selected = iterator.next();
 			if (selected instanceof IntelligenceEditorInput) {
 				final IntelligenceEditorInput editorInput = (IntelligenceEditorInput) selected;
-				Display.getDefault().syncExec(new Runnable() {
+				activeShell.getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+						MessageDialog dialog = new MessageDialog(activeShell,
 								Messages.DeleteIntelligenceHandler_ConfirmationDialog_Title,
 								null,
 								MessageFormat.format(Messages.DeleteIntelligenceHandler_ConfirmationDialog_Message, editorInput.getName()),
@@ -88,7 +86,7 @@ public class DeleteIntelligenceHandler extends AbstractHandler {
 						if (items== null || items.isEmpty()) {
 							return true;
 						}
-						MessageDialog dialog = new MessageDialog(Display.getCurrent().getActiveShell(),
+						MessageDialog dialog = new MessageDialog(activeShell,
 								Messages.DeleteIntelligenceHandler_ConfirmationDialog_Title,
 								null,
 								MessageFormat.format(Messages.DeleteIntelligenceHandler_ConfirmationDialog_PatrolChanges_Message, items.toString(), editorInput.getName()),
@@ -101,7 +99,7 @@ public class DeleteIntelligenceHandler extends AbstractHandler {
 				});
 			}
 		}
-		return null;
+		return;
 	}
 
 	/**
@@ -132,4 +130,9 @@ public class DeleteIntelligenceHandler extends AbstractHandler {
         }
     }
 	
+    public static class DeleteIntelligenceHandlerWrapper extends DIHandler<DeleteIntelligenceHandler>{
+    	public DeleteIntelligenceHandlerWrapper(){
+    		super(DeleteIntelligenceHandler.class);
+    	}
+    }
 }

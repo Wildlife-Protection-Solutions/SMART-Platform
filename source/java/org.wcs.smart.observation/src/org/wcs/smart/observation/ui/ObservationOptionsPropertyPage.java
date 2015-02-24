@@ -47,12 +47,11 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -86,8 +85,8 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 	 * @param parent
 	 * @param title
 	 */
-	public ObservationOptionsPropertyPage() {
-		super(Display.getCurrent().getActiveShell(), Messages.PatrolOptionsPropertyPage_DialogTitle);
+	public ObservationOptionsPropertyPage(Shell parent) {
+		super(parent, Messages.PatrolOptionsPropertyPage_DialogTitle);
 		patrolOption = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), getSession());
 	}
 	
@@ -225,7 +224,7 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 				projectionViewer.setSelection(new StructuredSelection(selection));
 			}
 		}catch (final Exception ex){
-			SmartPlugIn.displayLog(getShell(), Messages.ObservationOptionsPropertyPage_Projection_LoadError + ex.getLocalizedMessage(), ex);							
+			ObservationPlugIn.displayLog(Messages.ObservationOptionsPropertyPage_Projection_LoadError + ex.getLocalizedMessage(), ex);							
 		}finally{
 			s.getTransaction().rollback();
 			s.close();

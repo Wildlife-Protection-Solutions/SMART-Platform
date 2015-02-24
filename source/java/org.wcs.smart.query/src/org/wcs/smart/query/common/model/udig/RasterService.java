@@ -33,16 +33,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.refractions.udig.catalog.CatalogPlugin;
-import net.refractions.udig.catalog.ICatalog;
-import net.refractions.udig.catalog.IGeoResource;
-import net.refractions.udig.catalog.IServiceInfo;
-import net.refractions.udig.catalog.rasterings.AbstractRasterGeoResource;
-import net.refractions.udig.catalog.rasterings.AbstractRasterGeoResourceInfo;
-import net.refractions.udig.catalog.rasterings.AbstractRasterService;
-import net.refractions.udig.catalog.rasterings.AbstractRasterServiceInfo;
-import net.refractions.udig.core.internal.CorePlugin;
-import net.refractions.udig.style.sld.SLDContent;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.ICatalog;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IServiceInfo;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResource;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterGeoResourceInfo;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterService;
+import org.locationtech.udig.catalog.rasterings.AbstractRasterServiceInfo;
+import org.locationtech.udig.core.internal.CorePlugin;
+import org.locationtech.udig.style.sld.SLDContent;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -366,7 +366,7 @@ public class RasterService extends AbstractRasterService {
 	
 	
 	/**
-	 * @see net.refractions.udig.catalog.rasterings.AbstractRasterService#resources(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.locationtech.udig.catalog.rasterings.AbstractRasterService#resources(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public synchronized List<AbstractRasterGeoResource> resources(IProgressMonitor monitor) {
 		if (this.geoResources != null) {

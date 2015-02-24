@@ -42,8 +42,6 @@ import javax.print.attribute.PrintRequestAttributeSet;
 import javax.print.attribute.standard.Copies;
 import javax.print.attribute.standard.SheetCollate;
 
-import net.refractions.udig.catalog.URLUtils;
-
 import org.eclipse.birt.report.engine.api.EmitterInfo;
 import org.eclipse.birt.report.engine.api.IRenderOption;
 import org.eclipse.birt.report.engine.api.IReportEngine;
@@ -61,6 +59,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.printing.PrintDialog;
 import org.eclipse.swt.printing.PrinterData;
 import org.eclipse.swt.widgets.Display;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.ui.ReportEngineManager;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.export.IExportFormat;

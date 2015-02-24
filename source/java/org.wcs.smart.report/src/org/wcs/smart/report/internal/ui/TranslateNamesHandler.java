@@ -21,11 +21,14 @@
  */
 package org.wcs.smart.report.internal.ui;
 
-import org.eclipse.core.commands.ExecutionEvent;
+import javax.inject.Named;
+
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -37,26 +40,29 @@ import org.wcs.smart.report.model.ReportFolder;
  *
  */
 public class TranslateNamesHandler extends org.wcs.smart.ui.TranslateNamesHandler {
-
 	
+	@Execute
 	@Override
-	public Object execute(ExecutionEvent event) throws ExecutionException {
-		ISelection thisSelection = HandlerUtil.getCurrentSelection(event);
-		if (thisSelection == null || thisSelection.isEmpty() || !(thisSelection instanceof IStructuredSelection) ){
-			return null;
+	public void execute(@Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection, Shell activeShell) throws ExecutionException {
+		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty()){
+			return;
 		}
 		
 		Object obj = ((IStructuredSelection)thisSelection).getFirstElement();
 		final Object o = obj;
 		
-		super.execute(event);
+		super.execute(thisSelection, activeShell);
 		
 		if (o instanceof Report){
 			ReportEventManager.getInstance().fireReportUpdated((Report)o);
 		}else if (o instanceof ReportFolder){
 			ReportEventManager.getInstance().fireReportFolderModified((ReportFolder)o);
 		}
-		
-		return null;
+	}
+	
+	public static class TranslateNamesHandlerWrapper extends DIHandler<TranslateNamesHandler> {
+		public TranslateNamesHandlerWrapper() {
+			super(TranslateNamesHandler.class);
+		}
 	}
 }
