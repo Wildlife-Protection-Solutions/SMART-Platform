@@ -161,7 +161,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		composite.updateValues(ca);
 		
 		if (ca.getDefaultLanguage() != null){
-			lstViewer.setSelection(new StructuredSelection(ca.getDefaultLanguage()));
+			lstViewer.setSelection(new StructuredSelection(SmartUtils.stringToLocale(ca.getDefaultLanguage().getCode())));
 			lstViewer.getControl().setEnabled(false);
 		}else{
 			lstViewer.getControl().setEnabled(true);
