@@ -26,6 +26,7 @@ import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -38,7 +39,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -73,7 +75,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.UIPlugin;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
@@ -96,7 +97,6 @@ import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.TranslateNamesHandler;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.MapStyleUtil;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -111,11 +111,12 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
     public final static int SAVE_ID = 39;
     
 	private static final String[] LOADING = new String[]{Messages.SmartSavedStylePage_LoadingText};
-	private static final String NOT_SELECTED = "Custom";
+	private static final String NOT_SELECTED = Messages.SmartStyleEditorDialog_CustomStyleLabel;
 	
 	private TableViewer lstSmart;
 	private Job loadStylesJob;
 	private SmartStyle lastSelectedSs;
+	private byte[] currentLayerSs;
 
 	/**
 	 * Image descriptor for enabled clear button.
@@ -161,7 +162,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 	 */
 	@Override
     protected Control createTreeAreaContents(Composite parent) {
-		getShell().setText("Style Editor");
+		getShell().setText(Messages.SmartStyleEditorDialog_ShellTitle);
 		
 		Composite outer = new Composite(parent, SWT.NONE);
 		outer.setLayout(new GridLayout());
@@ -171,7 +172,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		// -- SMART Saved Styles area --
 		Group smartArea = new Group(outer, SWT.DEFAULT);
 		smartArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
-		smartArea.setText("SMART Saved Styles");
+		smartArea.setText(Messages.SmartStyleEditorDialog_SaveStylesLabel);
 		smartArea.setLayout(new GridLayout());
 		smartArea.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridLayout)smartArea.getLayout()).marginHeight = 0;
@@ -184,7 +185,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 	
 		ToolItem save = new ToolItem(comptool, SWT.FLAT);
 		save.setImage(JFaceResources.getImage(SAVE_ICON));
-		save.setToolTipText("save current configuration as a style");
+		save.setToolTipText(Messages.SmartStyleEditorDialog_saveTooltip);
 		save.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -194,7 +195,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		
 		ToolItem manage = new ToolItem(comptool, SWT.FLAT);
 		manage.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DELETE_ICON));
-		manage.setToolTipText("delete selected styles");
+		manage.setToolTipText(Messages.SmartStyleEditorDialog_deleteTooltip);
 		manage.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -203,15 +204,11 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		});
 		ToolItem rename = new ToolItem(comptool, SWT.FLAT);
 		rename.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.RENAME_ICON));
-		rename.setToolTipText("rename selected style");
+		rename.setToolTipText(Messages.SmartStyleEditorDialog_renameTooltip);
 		rename.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				try {
-					(new TranslateNamesHandler()).execute(lstSmart.getSelection(), getShell());
-				} catch (ExecutionException e1) {
-					SmartPlugIn.displayLog("Error renaming items", e1);
-				}
+				renameStyle();
 			}
 		});
 		
@@ -223,12 +220,11 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			@Override
 			public String getText(Object element){
 				String value = super.getText(element);
-				
-				byte[] uuid = (byte[]) getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
+				byte[] uuid = currentLayerSs;
 				if (uuid != null && element instanceof SmartStyle && Arrays.equals(((SmartStyle)element).getUuid(), uuid)){
-						return value + "**";
+						return value + "**"; //$NON-NLS-1$
 				}else if ((uuid == null || uuid.length == 0) && element == NOT_SELECTED){
-					return value + "**";
+					return value + "**"; //$NON-NLS-1$
 				}
 				return value;
 			}
@@ -240,10 +236,25 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			}
 		});
 		
+		MenuManager mm = new MenuManager();
+		mm.add(new Action(DialogConstants.DELETE_BUTTON_TEXT, SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.DELETE_ICON)) {
+			@Override
+			public void run(){
+				deleteStyle();
+			}
+		});
+		mm.add(new Action(Messages.SmartStyleEditorDialog_RenameButton, SmartPlugIn.getDefault().getImageRegistry().getDescriptor(SmartPlugIn.RENAME_ICON)) {
+			@Override
+			public void run(){
+				renameStyle();
+			}
+		});
+		lstSmart.getControl().setMenu(mm.createContextMenu(lstSmart.getControl()));
+		
 		
 		// -- Custom style configuration area --
 		Group leftArea = new Group(outer, SWT.DEFAULT);
-		leftArea.setText("Custom Style Configuration");
+		leftArea.setText(Messages.SmartStyleEditorDialog_CustomConfigLabel);
 		leftArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		leftArea.setFont(parent.getFont());
 		GridLayout leftLayout = new GridLayout();
@@ -292,7 +303,17 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		});
 		loadStylesJob.schedule();
 		
+		currentLayerSs = (byte[]) getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
 		return leftArea;
+	}
+	
+	private void renameStyle(){
+		try {
+			(new TranslateNamesHandler()).execute(lstSmart.getSelection(), getShell());
+			lstSmart.refresh();
+		} catch (ExecutionException e1) {
+			SmartPlugIn.displayLog(Messages.SmartStyleEditorDialog_renameError, e1);
+		}
 	}
 	
 	private void updateStyleSelectionToMatchBlackboard(){
@@ -302,7 +323,13 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		}else{
 			SmartStyle temp = new SmartStyle();
 			temp.setUuid(existingStyleUuid);
-			lstSmart.setSelection(new StructuredSelection(temp));
+			
+			if ( ((Collection<?>)lstSmart.getInput()).contains(temp) ){
+				lstSmart.setSelection(new StructuredSelection(temp));
+			}else{
+				//this style uuid no longer exists
+				lstSmart.setSelection(new StructuredSelection(NOT_SELECTED));
+			}
 		}
 	}
 	
@@ -324,9 +351,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 				//clear blackboard and apply style
 				sb.clear();
 				StyleBlackboard parsed = StyleManager.INSTANCE.fromString(((SmartStyle) style).getStyleString());
-				for (String key : parsed.keySet()){
-					sb.put(key, parsed.get(key));
-				}
+				sb.addAll(parsed);
 				sb.put(SmartLayerStyle.STYLE_ID, ((SmartStyle) style).getUuid());
 			} catch (Exception ex) {
 				SmartPlugIn.log(MessageFormat.format(Messages.SmartSavedStylePage_ApplyError, ex.getMessage()), ex);
@@ -362,11 +387,11 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
         saveButton.setEnabled(false);
         saveButton.addListener(SWT.Selection, this);
         
-        Button revertButton = createButton(compRight, REVERT_ID, "Revert", false); 
+        Button revertButton = createButton(compRight, REVERT_ID, Messages.SmartStyleEditorDialog_RevertButton, false); 
         revertButton.setEnabled(false);
         revertButton.addListener(SWT.Selection, this);
         
-        Button applyButton = createButton(compRight, APPLY_ID, "Apply", false); 
+        Button applyButton = createButton(compRight, APPLY_ID, Messages.SmartStyleEditorDialog_ApplyButton, false); 
         applyButton.setEnabled(false);
         applyButton.addListener(SWT.Selection, this);
                 
@@ -489,7 +514,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 							SmartPlugIn.displayLog(MessageFormat.format(Messages.SmartSavedStylePage_SaveError3, fex.getMessage()), fex);
 							return;
 						}
-						setMessage(MessageFormat.format("Saved style: ''{0}''", toSave.getName()), IMessageProvider.INFORMATION);
+						setMessage(MessageFormat.format(Messages.SmartStyleEditorDialog_SavedStyle, toSave.getName()), IMessageProvider.INFORMATION);
 						
 						try{
 							//update glyph
@@ -497,7 +522,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 							StyleBlackboard parsed = StyleManager.INSTANCE.fromString(toSave.getStyleString());
 							Style sld = (Style)parsed.get(SLDContent.ID);
 							if (sld != null){
-								((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(toSave, MapStyleUtil.createImage(sld));
+								((SmartStyleLabelProvider)lstSmart.getLabelProvider()).setGlyph(toSave, StyleManager.INSTANCE.createImage(sld));
 							}
 						}catch (Exception ex){
 							
@@ -524,6 +549,8 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
     private boolean doApply() {
     	
     	SmartStyle currentSelectedStyle = null;
+    	currentLayerSs = null;
+    	
     	IStructuredSelection sel = (IStructuredSelection) lstSmart.getSelection();
     	if (!sel.isEmpty() && sel.getFirstElement() instanceof SmartStyle){
     		currentSelectedStyle = (SmartStyle) sel.getFirstElement();
@@ -536,7 +563,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
         }
         if (getCurrentPage().performApply()) {
             setExitButtonState();
-            getSelectedLayer().apply();
+           
             
             Object selection = NOT_SELECTED;
             //compare the blackboards of the current style with the applied style
@@ -546,9 +573,11 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
             	try{
             		StyleBlackboard z = StyleManager.INSTANCE.fromString(currentSelectedStyle.getStyleString());
             		StyleBlackboard y = getSelectedLayer().getStyleBlackboard();
+            		
             		if (blackboardsEqual(z,y)){
             			setSmartLayerStyle(currentSelectedStyle);
             			selection = currentSelectedStyle;
+            			currentLayerSs = currentSelectedStyle.getUuid();
             		}else{
             			setSmartLayerStyle(null);
             		}
@@ -556,6 +585,9 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
             		SmartPlugIn.log(ex.getMessage(), ex);
             	}
             }
+            
+            getSelectedLayer().apply();
+            
             lstSmart.setSelection(new StructuredSelection(selection));
             lstSmart.refresh();
             return true;
@@ -615,20 +647,20 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			}
 		}
 		if (toDelete.size() == 0){
-			setMessage("Nothing selected to delete", IMessageProvider.ERROR);
+			setMessage(Messages.SmartStyleEditorDialog_NothingToDelete, IMessageProvider.ERROR);
 			return;
 		}
 		
 		StringBuilder sb = new StringBuilder(0);
 		for (SmartStyle ss : toDelete){
-			sb.append("'");
+			sb.append("'"); //$NON-NLS-1$
 			sb.append(ss.getName());
-			sb.append("',");
+			sb.append("',"); //$NON-NLS-1$
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		
-		if (!MessageDialog.openQuestion(getShell(), "Delete Styles", 
-				MessageFormat.format("Are you sure you want to delete the styles: {0}?  This action cannot be undone.", sb.toString() ))){
+		if (!MessageDialog.openQuestion(getShell(), Messages.SmartStyleEditorDialog_DeleteShell, 
+				MessageFormat.format(Messages.SmartStyleEditorDialog_DeleteMessage, sb.toString() ))){
 			return;
 		}
 		
@@ -648,7 +680,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 
 						@Override
 						public void run() {
-							setMessage(MessageFormat.format("{0} styles deleted", toDelete.size()), IMessageProvider.INFORMATION);
+							setMessage(MessageFormat.format(Messages.SmartStyleEditorDialog_DeleteCompleteMessage, toDelete.size()), IMessageProvider.INFORMATION);
 						}});
 
 				}catch (Exception ex){
@@ -674,7 +706,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
     /*
      * job loads smart style glyphs
      */
-    private Job configureIcons = new Job("loading icons"){
+    private Job configureIcons = new Job(Messages.SmartStyleEditorDialog_LoadingIconJobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -693,8 +725,8 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 							getShell().getDisplay().syncExec(new Runnable(){
 								@Override
 								public void run() {
-									lprovider.setGlyph(ss, MapStyleUtil.createImage(lsld));
-									lstSmart.refresh(ss);
+									lprovider.setGlyph(ss, StyleManager.INSTANCE.createImage(lsld));
+									if (!lstSmart.getControl().isDisposed()) lstSmart.refresh(ss);
 								}});
 							
 						}
@@ -731,6 +763,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			this.addNoneOp = addNoneOp;
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Object> items = Collections.emptyList();
@@ -804,9 +837,9 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		@Override
 		protected Control createDialogArea(Composite parent) {
 			parent = (Composite) super.createDialogArea(parent);
-			getShell().setText("Save Style");
-			setTitle("Save SMART Style");
-			setMessage("Save the current style configuration for reuse.");
+			getShell().setText(Messages.SmartStyleEditorDialog_SaveShell);
+			setTitle(Messages.SmartStyleEditorDialog_SaveTitle);
+			setMessage(Messages.SmartStyleEditorDialog_SaveMessage);
 
 			Composite main = new Composite(parent, SWT.NONE);
 
@@ -829,7 +862,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			
 			btnCreateNew = new Button(main, SWT.RADIO);
 			btnCreateNew.setSelection(false);
-			btnCreateNew.setText("Save as a new style");
+			btnCreateNew.setText(Messages.SmartStyleEditorDialog_SaveAsNewOp);
 			btnCreateNew.addSelectionListener(enableListener);
 			
 			Composite compNew = new Composite(main, SWT.NONE);
@@ -837,7 +870,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			lblCreateNew = new Label(compNew, SWT.NONE);
 			
 			Language defaultLanguage = SmartDB.getCurrentConservationArea().getDefaultLanguage();
-			lblCreateNew.setText("Style Name " + " [" + defaultLanguage.getCode() + "]:"); 
+			lblCreateNew.setText(Messages.SmartStyleEditorDialog_StyleNameLabel + " [" + defaultLanguage.getCode() + "]:");   //$NON-NLS-1$//$NON-NLS-2$
 			lblCreateNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			
 			txtName = new Text(compNew, SWT.BORDER);
@@ -853,7 +886,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			compNew.setLayoutData(gd);
 
 			Button btnTranslate = new Button(compNew, SWT.PUSH);
-			btnTranslate.setText("Translate...");
+			btnTranslate.setText(Messages.SmartStyleEditorDialog_TranslateButton);
 			btnTranslate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			btnTranslate.addSelectionListener(new SelectionAdapter(){
 				@Override
@@ -870,13 +903,13 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			
 			btnOverwrite = new Button(main, SWT.RADIO);
 			btnOverwrite.setSelection(false);
-			btnOverwrite.setText("Overwrite existing style");
+			btnOverwrite.setText(Messages.SmartStyleEditorDialog_OverwriteOp);
 			btnOverwrite.addSelectionListener(enableListener);
 			
 			Composite compList = new Composite(main, SWT.NONE);
 			compList.setLayout(new GridLayout(2, false));
 			lblOverwrite = new Label(compList, SWT.NONE);
-			lblOverwrite.setText("Style:");
+			lblOverwrite.setText(Messages.SmartStyleEditorDialog_StyleLabel);
 			lblOverwrite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			
 			cmbStyles = new ComboViewer(compList, SWT.DROP_DOWN | SWT.READ_ONLY );

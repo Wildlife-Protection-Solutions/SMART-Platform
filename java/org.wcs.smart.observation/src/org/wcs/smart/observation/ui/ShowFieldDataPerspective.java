@@ -18,7 +18,7 @@ import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 public class ShowFieldDataPerspective {
 
-	public static final String FOCUS_VIEW = "org.wcs.smart.observation.perspective.show.focusview";
+	public static final String FOCUS_VIEW = "org.wcs.smart.observation.perspective.show.focusview"; //$NON-NLS-1$
 	
 	@Execute
 	public void execute(@Optional @Named(FOCUS_VIEW) String focusView,

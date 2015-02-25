@@ -46,9 +46,9 @@ public class SmartE4ModelProcessor {
 		//replace the existing cleanup addon with our own
         MApplication app = context.get(MApplication.class);
         for (MAddon a : app.getAddons()){
-        	if (a.getElementId().equals("Cleanup Addon")){
-        		a.setContributorURI("platform:/plugin/org.wcs.smart");
-        		a.setContributionURI("bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartCleanUpAddon");
+        	if (a.getElementId().equals("Cleanup Addon")){ //$NON-NLS-1$
+        		a.setContributorURI("platform:/plugin/org.wcs.smart"); //$NON-NLS-1$
+        		a.setContributionURI("bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartCleanUpAddon"); //$NON-NLS-1$
         		break;
         	}
         }

@@ -50,7 +50,7 @@ import org.osgi.service.event.EventHandler;
  */
 public class PerspectiveEditorTracker implements EventHandler {
 
-	private static final String PID_KEY = "smart.perspectiveid";
+	private static final String PID_KEY = "smart.perspectiveid"; //$NON-NLS-1$
 	
 	@Inject private EModelService mService;
 
@@ -62,7 +62,7 @@ public class PerspectiveEditorTracker implements EventHandler {
 	public void appStart(@Optional @UIEventTopic(UIEvents.UILifeCycle.APP_STARTUP_COMPLETE) Event event, IEclipseContext context) {
 		if (event == null) return;
 //		//find editor stack area
-		List<MArea> areas2 = mService.findElements(app, "org.eclipse.ui.editorss", MArea.class,null);
+		List<MArea> areas2 = mService.findElements(app, "org.eclipse.ui.editorss", MArea.class,null); //$NON-NLS-1$
 		if (areas2.size() > 0){
 			editorArea = areas2.get(0);
 			editorArea.getTags().add(IPresentationEngine.NO_AUTO_COLLAPSE);
@@ -75,7 +75,7 @@ public class PerspectiveEditorTracker implements EventHandler {
 		
 		Object x = event.getProperty(UIEvents.EventTags.ELEMENT);
 		if (x instanceof MPart){
-			if (!((MPart) x).getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){
+			if (!((MPart) x).getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){ //$NON-NLS-1$
 				return;
 			}
 			MWindow window = ((MPart)x).getContext().get(MWindow.class);

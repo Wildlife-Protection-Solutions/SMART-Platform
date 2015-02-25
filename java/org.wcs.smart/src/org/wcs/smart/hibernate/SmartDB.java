@@ -48,8 +48,10 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartDB {
 
-	public static final String CCAA_CONFIGURATION_MODIFIED = "CCAA/MODIFIED";
-			
+	/**
+	 * CCaa configuration modified event string
+	 */
+	public static final String CCAA_CONFIGURATION_MODIFIED = "CCAA/MODIFIED"; //$NON-NLS-1$
 			
 	/**
 	 * Database table that contains the plugins and associated versions

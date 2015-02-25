@@ -21,26 +21,17 @@
  */
 package org.wcs.smart.report.birt.map.properties;
 
-import java.lang.reflect.Field;
 import java.util.Iterator;
 
-import org.locationtech.udig.catalog.IGeoResource;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.StyleEntry;
-import org.locationtech.udig.style.advanced.editorpages.SimpleLineEditorPage;
-import org.locationtech.udig.style.advanced.editorpages.SimplePointEditorPage;
-import org.locationtech.udig.style.advanced.editorpages.SimplePolygonEditorPage;
-import org.locationtech.udig.style.sld.SLD;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
-import org.opengis.coverage.grid.GridCoverage;
-import org.wcs.smart.util.MapStyleUtil;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-import org.geotools.coverage.grid.GridCoverage2D;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * 
@@ -71,22 +62,15 @@ public class SmartOpenStyleEditorAction {
     public void run( ) {
         Shell shell = Display.getDefault().getActiveShell();
         
-        String pageId = MapStyleUtil.findInitialStylePageId(selectedLayer);
-        final EditorPageManager manager = MapStyleUtil.createEditorPageManager(selectedLayer);
+        String pageId = StyleManager.INSTANCE.findInitialStylePageId(selectedLayer);
+        final EditorPageManager manager = StyleManager.INSTANCE.createEditorPageManager(selectedLayer);
 
         ReportSmartStyleEditorDialog dialog = ReportSmartStyleEditorDialog.createSmartStyleDialog(shell, pageId, selectedLayer, manager);
 
         if (dialog.open() == Window.OK){
         	updatedBlackboard = ProjectFactory.eINSTANCE.createStyleBlackboard();
-        	updatedBlackboard.clear();
-        	//add styles
-            for( Iterator< ? > itr = dialog.getSelectedLayer().getStyleBlackboard().getContent().iterator(); itr.hasNext(); ) {
-                StyleEntry entry = (StyleEntry) itr.next();
-                if (entry.getStyle() != null) {
-                	//this is key; we do this to ensure the style is correctly applied
-                    updatedBlackboard.put(entry.getID(), entry.getStyle());
-                }
-            }
+        	updatedBlackboard.clear();      	
+        	updatedBlackboard.addAll(dialog.getSelectedLayer().getStyleBlackboard());
         }
     }
     

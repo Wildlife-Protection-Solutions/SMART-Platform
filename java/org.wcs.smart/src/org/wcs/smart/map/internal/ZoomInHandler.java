@@ -37,7 +37,7 @@ public class ZoomInHandler {
 	@Execute
 	public void execute() {
 		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy(
-				"org.locationtech.udig.tool.default.ZoomIn").run();
+				"org.locationtech.udig.tool.default.ZoomIn").run(); //$NON-NLS-1$
 
 	}
 

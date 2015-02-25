@@ -23,13 +23,19 @@ package org.wcs.smart.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
+import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
+import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.udig.style.SmartLayerStyle;
+import org.wcs.smart.udig.style.StyleManager;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Template cloner that copies query data 
@@ -90,5 +96,32 @@ public class QueryTemplateCloner implements
 			clone.getChildren().add(clonedKid);
 		}
 		return clone;
+	}
+	
+	public static String updateStyleString(ConservationAreaClonerEngine engine, String queryString){
+		if (queryString == null || queryString.length() == 0) return queryString;
+		
+		try{
+			Map<String, StyleBlackboard> blackboardMap = StyleManager.INSTANCE.fromStringMap(queryString);
+			for (StyleBlackboard blackboard : blackboardMap.values()){
+				if (blackboard.contains(SmartLayerStyle.STYLE_ID)){
+					byte[] uuid = (byte[])blackboard.get(SmartLayerStyle.STYLE_ID);
+					if (uuid != null && uuid.length == 16){
+						UuidItem newStyleUuid = engine.getNewConservationItem(uuid);
+						if (newStyleUuid == null){
+							blackboard.remove(SmartLayerStyle.STYLE_ID);
+						}else{
+							blackboard.put(SmartLayerStyle.STYLE_ID, newStyleUuid.getUuid());
+						}
+					}else{
+						blackboard.remove(SmartLayerStyle.STYLE_ID);
+					}
+				}
+			}
+			return StyleManager.INSTANCE.asString(blackboardMap);
+		}catch (Exception ex){
+			QueryPlugIn.log(ex.getMessage(), ex);
+		}
+		return queryString;
 	}
 }

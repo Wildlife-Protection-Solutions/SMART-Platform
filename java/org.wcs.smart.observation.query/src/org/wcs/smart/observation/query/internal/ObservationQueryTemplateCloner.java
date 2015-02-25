@@ -40,6 +40,7 @@ import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
 import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.filter.QueryFilter;
@@ -98,6 +99,7 @@ public class ObservationQueryTemplateCloner implements
 			clone.setIsShared(query.getIsShared());
 			clone.setOwner(newEmployee);
 			clone.setQuery(cloneGriddedQueryDefinition(query.getQuery(), engine));
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -156,6 +158,7 @@ public class ObservationQueryTemplateCloner implements
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -186,6 +189,7 @@ public class ObservationQueryTemplateCloner implements
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);

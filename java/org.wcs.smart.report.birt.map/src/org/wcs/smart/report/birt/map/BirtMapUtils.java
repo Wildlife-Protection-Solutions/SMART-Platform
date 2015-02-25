@@ -44,7 +44,6 @@ import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.udig.style.StyleManager;
-import org.wcs.smart.util.MapStyleUtil;
 
 /**
  * Utilities to support the BIRT Smart map item generation. 
@@ -61,7 +60,7 @@ public class BirtMapUtils {
 		Style glyphStyle = (Style) sb.get(SLDContent.ID);
 		if (glyphStyle == null) return null;
 		
-		return MapStyleUtil.createImage(glyphStyle);	
+		return StyleManager.INSTANCE.createImage(glyphStyle);	
 	}
 	
 	public static StyleBlackboard parseStyleString(String styleString){
