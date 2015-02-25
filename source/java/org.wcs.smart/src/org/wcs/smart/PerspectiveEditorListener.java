@@ -67,7 +67,7 @@ public class PerspectiveEditorListener extends PerspectiveAdapter {
 			return;
 		}
 		for (MPart p : allParts){
-			if (p.getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){
+			if (p.getElementId().equals("org.eclipse.e4.ui.compatibility.editor")){ //$NON-NLS-1$
 				if (p.getTags().contains(perspectiveDescriptor.getId())){
 					//this is set to make the close others/close all/close menu work
 					p.setCloseable(true);	

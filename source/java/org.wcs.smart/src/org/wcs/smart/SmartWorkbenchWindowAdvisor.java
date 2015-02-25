@@ -196,15 +196,15 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench()
 				.getService(IEclipseContext.class);
 		EModelService modelService = ctx.get(EModelService.class);
-		MTrimBar element = (MTrimBar) modelService.find("org.eclipse.ui.main.toolbar", ctx.get(MApplication.class));
+		MTrimBar element = (MTrimBar) modelService.find("org.eclipse.ui.main.toolbar", ctx.get(MApplication.class)); //$NON-NLS-1$
 		int src = -1;
 		int trg = -1;
 		for (int i = 0; i < element.getChildren().size(); i++) {
 			if (element.getChildren().get(i).getElementId()
-					.equals("org.wcs.smart.userNameInfo")) {
+					.equals("org.wcs.smart.userNameInfo")) { //$NON-NLS-1$
 				src = i;
 			} else if (element.getChildren().get(i).getElementId()
-					.equals("PerspectiveSpacer")) {
+					.equals("PerspectiveSpacer")) { //$NON-NLS-1$
 				trg = i;
 			}
 		}
@@ -216,7 +216,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 		
 //		//this gets hidden by some visibility changes events that I don't have control over;
 //		//so instead we ensure it is visible here.
-		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class));
+		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class)); //$NON-NLS-1$
 		statusBar.setVisible(true);	
     }
     

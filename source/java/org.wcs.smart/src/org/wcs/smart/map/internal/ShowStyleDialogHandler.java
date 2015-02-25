@@ -21,21 +21,17 @@
  */
 package org.wcs.smart.map.internal;
 
-import java.lang.reflect.Field;
-
 import javax.inject.Named;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.locationtech.udig.project.internal.Layer;
-import org.locationtech.udig.style.sld.SLD;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
+import org.wcs.smart.udig.style.StyleManager;
 import org.wcs.smart.ui.map.SmartStyleEditorDialog;
-import org.wcs.smart.util.MapStyleUtil;
 
 /**
  * Show style dialog handler.
@@ -59,13 +55,13 @@ public class ShowStyleDialogHandler {
 
 		Layer selectedLayer = (Layer) ((IStructuredSelection) currentSelection).getFirstElement();
 
-		String pageId = MapStyleUtil.findInitialStylePageId(selectedLayer);
-	    EditorPageManager manager = MapStyleUtil.createEditorPageManager(selectedLayer);
+		String pageId = StyleManager.INSTANCE.findInitialStylePageId(selectedLayer);
+	    EditorPageManager manager = StyleManager.INSTANCE.createEditorPageManager(selectedLayer);
 
 		SmartStyleEditorDialog dialog = new SmartStyleEditorDialog(activeShell,manager);
+		dialog.setSelectedNode(pageId);
 		dialog.setSelectedLayer(selectedLayer);
 		dialog.create();
-		dialog.setCurrentPageId(pageId);
 		dialog.open();
 	}
 

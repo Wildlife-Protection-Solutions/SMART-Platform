@@ -36,7 +36,7 @@ public class ZoomOutHandler{
 	@Execute
 	public void execute() {
 		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy(
-				"org.locationtech.udig.tool.default.ZoomOut").run();
+				"org.locationtech.udig.tool.default.ZoomOut").run(); //$NON-NLS-1$
 
 	}
 

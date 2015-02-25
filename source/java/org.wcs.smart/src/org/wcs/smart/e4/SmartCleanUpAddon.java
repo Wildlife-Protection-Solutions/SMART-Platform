@@ -233,7 +233,7 @@ public class SmartCleanUpAddon {
 						parent.setVisible(true);
 				}
 			} else {
-				Shell limbo = (Shell) app.getContext().get("limbo");
+				Shell limbo = (Shell) app.getContext().get("limbo"); //$NON-NLS-1$
 
 				// Reparent the control to 'limbo'
 				Composite curParent = ctrl.getParent();
@@ -269,9 +269,9 @@ public class SmartCleanUpAddon {
 
 	private boolean canHidePart(MElementContainer<MUIElement> parent){
 		//for SMART we always want the status bar visible
-		if (parent.getElementId() != null && parent.getElementId().equals("org.eclipse.ui.trim.status")) return false;
+		if (parent.getElementId() != null && parent.getElementId().equals("org.eclipse.ui.trim.status")) return false; //$NON-NLS-1$
 		//for SMART we always want the editor area visible
-		if (parent.getParent() != null	&& parent.getParent().getElementId().equals("org.eclipse.ui.editorss")) return false;
+		if (parent.getParent() != null	&& parent.getParent().getElementId().equals("org.eclipse.ui.editorss")) return false; //$NON-NLS-1$
 		return true;
 	}
 	@Inject

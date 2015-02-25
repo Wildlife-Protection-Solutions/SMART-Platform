@@ -30,9 +30,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.geotools.util.NullProgressListener;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.style.sld.IStyleEditorPageContainer;
@@ -56,14 +53,7 @@ public class ReportSmartStyleEditorDialog extends SmartStyleEditorDialog impleme
 		dialog.create();
 		dialog.setSelectedNode(pageId);
 		dialog.findNodeMatching(pageId);
-
-		dialog.getShell().setText(Messages.SmartStyleEditorDialog_Title);
-		// dialog.filteredTree.getFilterCombo().setEnabled(true); // allow
-		// filtering
-		//
-		// if (pageId != null) {
-		// dialog.findNodeMatching(pageId);
-		// }
+		dialog.getShell().setText(Messages.SmartStyleEditorDialog_Title); 
 		return dialog;
 	}
 

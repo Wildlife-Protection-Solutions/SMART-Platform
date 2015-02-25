@@ -147,8 +147,8 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnAdd = new Button(btnComp, SWT.PUSH);
 		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAdd.setEnabled(false);
-		btnAdd.setText("Add Node");
-		btnAdd.setToolTipText("add node to configurable model");
+		btnAdd.setText(Messages.EditTreeDialog_AddNodeButton);
+		btnAdd.setToolTipText(Messages.EditTreeDialog_AddNodeTooltip);
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -159,7 +159,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		Button btnAddGrp = new Button(btnComp, SWT.PUSH);
 		btnAddGrp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnAddGrp.setText(Messages.EditTreeDialog_AddGroup);
-		btnAddGrp.setToolTipText("create new group node");
+		btnAddGrp.setToolTipText(Messages.EditTreeDialog_NewGroupTooltip);
 		btnAddGrp.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -170,7 +170,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnRemove = new Button(btnComp, SWT.PUSH);
 		btnRemove.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnRemove.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnRemove.setToolTipText("remove node from configurable model");
+		btnRemove.setToolTipText(Messages.EditTreeDialog_DeleteTooltip);
 		btnRemove.setEnabled(false);
 		btnRemove.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -182,7 +182,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		btnEnable = new Button(btnComp, SWT.PUSH);
 		btnEnable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnEnable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-		btnEnable.setToolTipText("enable/diable tree node");
+		btnEnable.setToolTipText(Messages.EditTreeDialog_EnableTooltip);
 		btnEnable.setEnabled(false);
 		btnEnable.addSelectionListener(new SelectionAdapter() {
 			@Override

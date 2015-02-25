@@ -44,6 +44,7 @@ import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.filter.QueryFilter;
@@ -117,6 +118,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setOwner(newEmployee);
 			clone.setQuery(cloneGriddedQueryDefinition(query.getQuery(), engine));
 			clone.setSurveyDesign(query.getSurveyDesign());
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -182,8 +184,8 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
-			
 			clone.setSurveyDesign(query.getSurveyDesign());
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -218,6 +220,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
 			clone.setSurveyDesign(query.getSurveyDesign());
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -252,6 +255,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
 			clone.setSurveyDesign(query.getSurveyDesign());
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -286,6 +290,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneMissionTrackQueryFilter(query.getQueryFilter(), engine));
 			clone.setSurveyDesign(query.getSurveyDesign());
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);

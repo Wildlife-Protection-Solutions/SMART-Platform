@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -114,6 +115,7 @@ public class PatrolQueryTemplateCloner implements
 			clone.setIsShared(query.getIsShared());
 			clone.setOwner(newEmployee);
 			clone.setQuery(cloneGriddedQueryDefinition(query.getQuery(), engine));
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -171,6 +173,7 @@ public class PatrolQueryTemplateCloner implements
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -201,6 +204,7 @@ public class PatrolQueryTemplateCloner implements
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);
@@ -231,6 +235,7 @@ public class PatrolQueryTemplateCloner implements
 			clone.setOwner(newEmployee);
 			clone.setVisibleColumns(query.getVisibleColumns());
 			clone.setQueryFilter(cloneQueryFilter(query.getQueryFilter(), engine));
+			clone.setStyle(QueryTemplateCloner.updateStyleString(engine, query.getStyle()));
 			
 			engine.getSession().save(clone);
 			engine.addConservationItemMapping(query, clone);

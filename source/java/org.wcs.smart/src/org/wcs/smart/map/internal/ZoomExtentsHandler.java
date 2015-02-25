@@ -36,7 +36,7 @@ public class ZoomExtentsHandler {
 	@Execute
 	public void execute() {
 		((ToolManager) ApplicationGIS.getToolManager()).findToolProxy(
-				"org.locationtech.udig.tools.ZoomExtent").run();
+				"org.locationtech.udig.tools.ZoomExtent").run(); //$NON-NLS-1$
 
 	}
 
