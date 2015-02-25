@@ -319,17 +319,18 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 	private void updateStyleSelectionToMatchBlackboard(){
 		byte[] existingStyleUuid = (byte[]) getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
 		if (existingStyleUuid == null || existingStyleUuid.length == 0){
-			lstSmart.setSelection(new StructuredSelection(NOT_SELECTED));
+			lstSmart.setSelection(new StructuredSelection(NOT_SELECTED), true);
 		}else{
 			SmartStyle temp = new SmartStyle();
 			temp.setUuid(existingStyleUuid);
 			
 			if ( ((Collection<?>)lstSmart.getInput()).contains(temp) ){
-				lstSmart.setSelection(new StructuredSelection(temp));
+				lstSmart.setSelection(new StructuredSelection(temp), true);
 			}else{
 				//this style uuid no longer exists
-				lstSmart.setSelection(new StructuredSelection(NOT_SELECTED));
+				lstSmart.setSelection(new StructuredSelection(NOT_SELECTED), true);
 			}
+			
 		}
 	}
 	
@@ -338,7 +339,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 	 * smart style
 	 */
 	protected void updateBlackboard(){
-		setMessage(null);
+//		setMessage(null);
 		lastSelectedSs = null;
 		
 		if (lstSmart.getSelection().isEmpty()) return;
@@ -420,13 +421,13 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
         
         switch( buttonId ) {
         case StyleEditorDialog.APPLY_ID:
-            doApply();
+            doApply(true);
             break;
         case StyleEditorDialog.REVERT_ID:
             doRevert();
             break;
         case StyleEditorDialog.OK_ID:
-            if( doApply() ){
+            if( doApply(true) ){
                 close();
             }
             break;
@@ -460,7 +461,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
     	
     	newStyle = nameDialog.getStyleToUpdate();
     	
-    	doApply();
+    	doApply(false);
     	//get the current blackboard and remove the Smart Layer Style id
 		IStyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
 		for (String key : getSelectedLayer().getStyleBlackboard().keySet()){
@@ -494,17 +495,15 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 				try {
 					s.saveOrUpdate(toSave);
 					s.getTransaction().commit();
-					setSmartLayerStyle(toSave);
-
 				} catch (Exception ex1) {
 					ex = ex1;
 					s.getTransaction().rollback();
-				
-					
 				} finally {
 					s.close();
 				}
-				
+				if (ex == null){
+					setSmartLayerStyle(toSave);
+				}
 				final Exception fex = ex;
 				getShell().getDisplay().syncExec(new Runnable(){
 
@@ -546,10 +545,10 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
     }
     
     
-    private boolean doApply() {
+    private boolean doApply(boolean updateLayer) {
     	
     	SmartStyle currentSelectedStyle = null;
-    	currentLayerSs = null;
+    	if(updateLayer) currentLayerSs = null;
     	
     	IStructuredSelection sel = (IStructuredSelection) lstSmart.getSelection();
     	if (!sel.isEmpty() && sel.getFirstElement() instanceof SmartStyle){
@@ -577,7 +576,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
             		if (blackboardsEqual(z,y)){
             			setSmartLayerStyle(currentSelectedStyle);
             			selection = currentSelectedStyle;
-            			currentLayerSs = currentSelectedStyle.getUuid();
+            			if (updateLayer) currentLayerSs = currentSelectedStyle.getUuid();
             		}else{
             			setSmartLayerStyle(null);
             		}
@@ -586,10 +585,12 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
             	}
             }
             
-            getSelectedLayer().apply();
+            if (updateLayer){
+            	getSelectedLayer().apply();
             
-            lstSmart.setSelection(new StructuredSelection(selection));
-            lstSmart.refresh();
+            	lstSmart.setSelection(new StructuredSelection(selection));
+            	lstSmart.refresh();
+            }
             return true;
         }
         
