@@ -47,7 +47,7 @@ import org.wcs.smart.internal.Messages;
  * adds a layer listener to each layer, the runs only the first time the layer
  * style blackboard is set.  When setting the layer style blackboard if the SMART
  * saved style id exists on the blackboard, then the style is loaded from the database
- * and applyed to the layer.
+ * and applied to the layer.
  * 
  * @author Emily
  *

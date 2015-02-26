@@ -106,31 +106,29 @@ public class StyleManager {
 	 */
 	public String asString(Map<String, StyleBlackboard> styles) throws IOException{
 		StringWriter sw = new StringWriter();
-		JsonWriter writer = new JsonWriter(sw);
-	
-		writer.beginArray();
-		for (Entry<String, StyleBlackboard> entry : styles.entrySet()){
-			writer.beginObject();
-			writer.name("resourceId").value(entry.getKey()); //$NON-NLS-1$
-			writer.endObject();
+		
+		try(JsonWriter writer = new JsonWriter(sw)){
 			writer.beginArray();
-			for (StyleEntry se : entry.getValue().getContent()){
-				if (se.getStyle() == null) continue;
-				String key = se.getID();
-				String value = se.getMemento();
+			for (Entry<String, StyleBlackboard> entry : styles.entrySet()){
 				writer.beginObject();
-				writer.name(ID_KEY).value(key);
-				writer.name(VALUE_KEY).value(value); 
+				writer.name("resourceId").value(entry.getKey()); //$NON-NLS-1$
 				writer.endObject();
+				writer.beginArray();
+				for (StyleEntry se : entry.getValue().getContent()){
+					if (se.getStyle() == null) continue;
+					String key = se.getID();
+					String value = se.getMemento();
+					writer.beginObject();
+					writer.name(ID_KEY).value(key);
+					writer.name(VALUE_KEY).value(value); 
+					writer.endObject();
+				}
+				writer.endArray();
 			}
 			writer.endArray();
-			
+			String value = sw.toString();
+			return value;
 		}
-		writer.endArray();
-		
-		String value = sw.toString();
-		writer.close();
-		return value;
 		
 	}
 	
@@ -147,52 +145,51 @@ public class StyleManager {
 		
 		HashMap<String, StyleBlackboard> maps = new HashMap<String, StyleBlackboard>();
 		
-		JsonReader reader = new JsonReader(new StringReader(string));
-		
-		reader.beginArray();
-		while(reader.hasNext()){
-			StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
-			reader.beginObject();
-			reader.hasNext();
-			reader.nextName(); //will always be resourceId
-			String resourceId = reader.nextString();
-			reader.endObject();
-			
+		try(JsonReader reader = new JsonReader(new StringReader(string))){
 			reader.beginArray();
 			while(reader.hasNext()){
-			
-				String styleId = null;
-				String value = null;
-			
+				StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
 				reader.beginObject();
-				while(reader.hasNext()){
-					String name = reader.nextName();
-					if (name.equals(ID_KEY)){ 
-						styleId = reader.nextString();
-					}else if (name.equals(VALUE_KEY)){ 
-						value = reader.nextString();
-					}else{
-						reader.skipValue();
-					}
-				}
+				reader.hasNext();
+				reader.nextName(); //will always be resourceId
+				String resourceId = reader.nextString();
 				reader.endObject();
-				if (styleId != null && value != null){
-					StyleContent sc = loadStyleContent(styleId);
-					XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
-					if (sc != null){
-						Object style = sc.load(memento);
-						if (style != null){
-							sb.put(styleId, style);
+			
+				reader.beginArray();
+				while(reader.hasNext()){
+			
+					String styleId = null;
+					String value = null;
+			
+					reader.beginObject();
+					while(reader.hasNext()){
+						String name = reader.nextName();
+						if (name.equals(ID_KEY)){ 
+							styleId = reader.nextString();
+						}else if (name.equals(VALUE_KEY)){ 
+							value = reader.nextString();
+						}else{
+							reader.skipValue();
+						}
+					}
+					reader.endObject();
+					if (styleId != null && value != null){
+						StyleContent sc = loadStyleContent(styleId);
+						XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
+						if (sc != null){
+							Object style = sc.load(memento);
+							if (style != null){
+								sb.put(styleId, style);
+							}
 						}
 					}
 				}
+				maps.put(resourceId, sb);
+				reader.endArray();
 			}
-			maps.put(resourceId, sb);
 			reader.endArray();
+			return maps;
 		}
-		reader.endArray();
-		reader.close();
-		return maps;
 	}
 	
 	/**
@@ -204,23 +201,24 @@ public class StyleManager {
 	 */
 	public String asString(StyleBlackboard style) throws IOException{
 		StringWriter sw = new StringWriter();
-		JsonWriter writer = new JsonWriter(sw);
-		writer.beginArray();
-		for (StyleEntry se : style.getContent()){
-			if (se.getStyle() == null) continue;
-			String key = se.getID();
-			String value = se.getMemento();
-			if (value != null){
-				writer.beginObject();
-				writer.name(ID_KEY).value(key); 
-				writer.name(VALUE_KEY).value(value); 
-				writer.endObject();
+		try(JsonWriter writer = new JsonWriter(sw)){
+			writer.beginArray();
+			for (StyleEntry se : style.getContent()){
+				if (se.getStyle() == null) continue;
+				String key = se.getID();
+				String value = se.getMemento();
+				if (value != null){
+					writer.beginObject();
+					writer.name(ID_KEY).value(key); 
+					writer.name(VALUE_KEY).value(value); 
+					writer.endObject();
+				}
 			}
+			writer.endArray();
+			String value = sw.toString();
+	
+			return value;
 		}
-		writer.endArray();
-		String value = sw.toString();
-		writer.close();
-		return value;
 	}
 	
 	/**
@@ -234,51 +232,51 @@ public class StyleManager {
 	 */
 	public StyleBlackboard fromString(String string) throws IOException, WorkbenchException{
 		StyleBlackboard sb = ProjectFactory.eINSTANCE.createStyleBlackboard();
-		JsonReader reader = new JsonReader(new StringReader(string));
+		try(JsonReader reader = new JsonReader(new StringReader(string))){
 		
-		reader.beginArray();
-		while(reader.hasNext()){
-			
-			String styleId = null;
-			String value = null;
-			
-			reader.beginObject();
+			reader.beginArray();
 			while(reader.hasNext()){
-				String name = reader.nextName();
-				if (name.equals(ID_KEY)){ 
-					styleId = reader.nextString();
-				}else if (name.equals(VALUE_KEY)){
-					if (reader.peek() != JsonToken.NULL){
-						value = reader.nextString();
+				
+				String styleId = null;
+				String value = null;
+				
+				reader.beginObject();
+				while(reader.hasNext()){
+					String name = reader.nextName();
+					if (name.equals(ID_KEY)){ 
+						styleId = reader.nextString();
+					}else if (name.equals(VALUE_KEY)){
+						if (reader.peek() != JsonToken.NULL){
+							value = reader.nextString();
+						}else{
+							reader.nextNull();
+						}
 					}else{
-						reader.nextNull();
+						reader.skipValue();
 					}
-				}else{
-					reader.skipValue();
+				}
+				reader.endObject();
+				if (styleId != null && value != null){
+					StyleContent sc = loadStyleContent(styleId);
+					 XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
+					 if (sc != null){
+						 Object style = sc.load(memento);
+						 sb.put(styleId, style);
+					 }
+					
+					 
 				}
 			}
-			reader.endObject();
-			if (styleId != null && value != null){
-				StyleContent sc = loadStyleContent(styleId);
-				 XMLMemento memento = XMLMemento.createReadRoot(new StringReader(value));
-				 if (sc != null){
-					 Object style = sc.load(memento);
-					 sb.put(styleId, style);
-				 }
-				
-				 
-			}
+			reader.endArray();
+			return sb;
 		}
-		reader.endArray();
-		reader.close();
-		return sb;
 	}
 	
 	/**
      * Creates the  {@link SyleContent} for the required style 
      * @param styleId
      */
-    private StyleContent loadStyleContent( final String styleId ) {
+    public StyleContent loadStyleContent( final String styleId ) {
     	final StyleContent[] st = new StyleContent[1];
         ExtensionPointProcessor p = new ExtensionPointProcessor(){
             boolean found = false;
