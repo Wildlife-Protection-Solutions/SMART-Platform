@@ -11,7 +11,6 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.ui.ShowPerspectiveHandler;
@@ -22,11 +21,15 @@ public class ShowFieldDataPerspective {
 	
 	@Execute
 	public void execute(@Optional @Named(FOCUS_VIEW) String focusView,
-			EModelService mService, EPartService pService){
+			MWindow currentWindow){
 
-		(new ShowPerspectiveHandler()).execute(FieldDataPerspective.ID, mService, pService.getActivePart().getContext().get(MWindow.class));
+		//show field data perspective
+		(new ShowPerspectiveHandler()).execute(FieldDataPerspective.ID, currentWindow);
 		
 		if (focusView == null) return;
+		
+		//active requested part
+		EPartService pService = ((EPartService)currentWindow.getContext().get(EPartService.class));
 		MPart activate = pService.findPart(focusView);
 		if (activate == null) return;
 		pService.bringToTop(activate);

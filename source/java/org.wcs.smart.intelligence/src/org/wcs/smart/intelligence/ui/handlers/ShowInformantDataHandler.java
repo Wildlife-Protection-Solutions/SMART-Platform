@@ -46,7 +46,7 @@ public class ShowInformantDataHandler {
 	public void execute(EModelService mService, MWindow window, @Optional Informant toEdit){
 		//Open Intelligence Perspective
 		
-		(new ShowPerspectiveHandler()).execute(IntelligencePerspective.ID, mService, window);
+		(new ShowPerspectiveHandler()).execute(IntelligencePerspective.ID, window);
 		
 		try {
 			InformantDataEditor editor = (InformantDataEditor) PlatformUI.getWorkbench().getActiveWorkbenchWindow()

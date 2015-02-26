@@ -43,6 +43,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -72,6 +73,7 @@ import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
 import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -90,6 +92,7 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 
 	@Inject private MPart part;
 	@Inject private IMenuService menuService;
+	@Inject private ESelectionService selService;
 	
 	/**
 	 * listener for intelligence change events.
@@ -162,6 +165,7 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 				ContextInjectionFactory.invoke(new OpenIntelligenceHandler(), Execute.class, localCtx);
 			}
 		});
+		intelligenceListViewer.addSelectionChangedListener(new ViewerSelectionListener(selService));
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
@@ -262,13 +266,6 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 	public static class IntelligenceListViewWrapper extends DIViewPart<IntelligenceListView>{
 		public IntelligenceListViewWrapper(){
 			super(IntelligenceListView.class);
-		}
-		
-		@Override
-		public void createPartControl(Composite parent){
-			super.createPartControl(parent);
-			
-			getSite().setSelectionProvider(	((IntelligenceListView)getComponent()).intelligenceListViewer);
 		}
 	}
 }

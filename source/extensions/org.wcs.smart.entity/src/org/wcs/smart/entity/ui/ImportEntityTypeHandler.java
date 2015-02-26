@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -62,7 +63,6 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.entity.xml.EntityTypeFromXmlConverter;
 import org.wcs.smart.entity.xml.EntityTypeXmlManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -82,7 +82,7 @@ public class ImportEntityTypeHandler{
 		
 			
 		final File importFile = dialog.getFile();
-	
+		final MWindow activeWindow = context.get(MWindow.class);
 		final Object[] returnInfo = new Object[3]; //0 = errormessage; 1 = exception; 2 = newType
 		
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
@@ -96,13 +96,8 @@ public class ImportEntityTypeHandler{
 					
 					monitor.subTask(Messages.ImportEntityTypeHandler_ImportProgress2);
 					org.wcs.smart.entity.xml.model.EntityType xmlEntityType = null;
-					try{
-						FileInputStream fin = new FileInputStream(importFile);
-						try{
-							xmlEntityType = EntityTypeXmlManager.readDataModel(fin);
-						}finally{
-							fin.close();
-						}
+					try(FileInputStream fin = new FileInputStream(importFile)){
+						xmlEntityType = EntityTypeXmlManager.readDataModel(fin);
 					}catch (Exception ex){
 						returnInfo[0] = Messages.ImportEntityTypeHandler_XmlError;
 						returnInfo[1] = ex;
@@ -193,7 +188,7 @@ public class ImportEntityTypeHandler{
 								DataModelManager.getInstance().fireChangeListeners();
 								
 								//open
-								(new OpenEntityTypeHandler()).openEntityType(new EntityTypeEditorInput(newType.getUuid(), newType.getKeyId(), newType.getName()));
+								(new OpenEntityTypeHandler()).openEntityType(newType, activeWindow);
 						}});
 					}
 				}

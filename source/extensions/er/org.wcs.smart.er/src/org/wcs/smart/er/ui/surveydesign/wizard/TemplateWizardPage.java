@@ -67,6 +67,8 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 	private Map<ConservationArea, List<SurveyDesign>> ca2designs;
 	private ComboViewer cmbDesigns ;
 	private Button chCopySu;
+	private Label caLabel;
+	private Label designLabel;
 	
 	private List<SamplingUnit> newSamplingUnits = null;
 	
@@ -112,9 +114,10 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		templeteCmp.setLayoutData(gd);
 		templeteCmp.setLayout(new GridLayout(2, false));
 		
-		Label caLabel = new Label(templeteCmp, SWT.NONE);
+		caLabel = new Label(templeteCmp, SWT.NONE);
 		caLabel.setText(Messages.TemplateWizardPage_ConservationArea);
-
+		caLabel.setEnabled(false);
+		
 		cmbCa = new ComboViewer(templeteCmp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbCa.setContentProvider(ArrayContentProvider.getInstance());
 		cmbCa.setLabelProvider(new ConservationAreaLabelProvider());
@@ -130,8 +133,9 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		cmbCa.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbCa.getControl().setEnabled(false);
 
-		Label designLabel = new Label(templeteCmp, SWT.NONE);
+		designLabel = new Label(templeteCmp, SWT.NONE);
 		designLabel.setText(Messages.TemplateWizardPage_SurveyDesign);
+		designLabel.setEnabled(false);
 		
 		cmbDesigns = new ComboViewer(templeteCmp, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbDesigns.setContentProvider(ArrayContentProvider.getInstance());
@@ -220,6 +224,9 @@ public class TemplateWizardPage extends WizardPage implements SelectionListener 
 		cmbCa.getControl().setEnabled(opTemplate.getSelection());
 		cmbDesigns.getControl().setEnabled(opTemplate.getSelection());
 		chCopySu.setEnabled(opTemplate.getSelection());
+		
+		caLabel.setEnabled(opTemplate.getSelection());
+		designLabel.setEnabled(opTemplate.getSelection());
 		
 		getContainer().updateButtons();
 	}

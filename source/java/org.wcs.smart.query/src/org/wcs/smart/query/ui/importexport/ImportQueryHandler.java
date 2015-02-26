@@ -25,7 +25,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.QueryPlugIn;
@@ -40,7 +39,8 @@ public class ImportQueryHandler {
 
 	@Execute
 	public void execute(Shell activeShell, IEclipseContext context) {
-		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), context.get(EModelService.class), context.get(MWindow.class));
+		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), 
+				context.get(MWindow.class));
 		
 		
 		ImportQueryWizard wizard = new ImportQueryWizard();

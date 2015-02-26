@@ -23,11 +23,9 @@ package org.wcs.smart.plan.ui.handlers;
 
 import javax.inject.Named;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -49,12 +47,11 @@ public class OpenPlanHandler {
 	public static final String PLANUUID_PARAM = "planuuid"; //$NON-NLS-1$
 	
 	@Execute
-	public void openPlan(@Optional @Named(PLANUUID_PARAM) byte[] planUuid){
+	public void openPlan(@Optional @Named(PLANUUID_PARAM) byte[] planUuid,
+			MWindow activeWindow){
 		if (planUuid == null) return;
 		
-		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(IEclipseContext.class);
-		(new ShowPerspectiveHandler()).execute(PlanPerspective.ID, 
-				context.get(EModelService.class), context.get(MWindow.class));
+		(new ShowPerspectiveHandler()).execute(PlanPerspective.ID, activeWindow);
 		
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();

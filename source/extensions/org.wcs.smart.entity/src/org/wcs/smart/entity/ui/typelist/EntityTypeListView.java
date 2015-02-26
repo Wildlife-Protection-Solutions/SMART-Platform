@@ -37,8 +37,10 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -70,6 +72,7 @@ import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -88,6 +91,7 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 	
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
+	@Inject private ESelectionService selService;
 	
 	/*
 	 * Job that updates the patrol list based on the current filter
@@ -225,10 +229,10 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 					return;
 				}
 				EntityTypeEditorInput p = (EntityTypeEditorInput)selection;
-				(new OpenEntityTypeHandler()).openEntityType(p);
+				(new OpenEntityTypeHandler()).openEntityType(p, localPart.getContext().get(MWindow.class));
 			}
 		});
-		
+		entityListViewer.addSelectionChangedListener(new ViewerSelectionListener(selService));
 		EntityEventManager.getInstance().addListener(entityListener);
 		
 		/* add right click context menu */
@@ -260,13 +264,6 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 	public static class EntityTypeListViewWrapper extends DIViewPart<EntityTypeListView>{
 		public EntityTypeListViewWrapper(){
 			super(EntityTypeListView.class);
-		}
-		
-		@Override
-		public void createPartControl(Composite parent){
-			super.createPartControl(parent);
-			
-			getSite().setSelectionProvider(	((EntityTypeListView)getComponent()).entityListViewer);
 		}
 	}
 }

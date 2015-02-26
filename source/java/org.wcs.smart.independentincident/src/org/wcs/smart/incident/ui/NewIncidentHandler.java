@@ -21,11 +21,10 @@
  */
 package org.wcs.smart.incident.ui;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.incident.ui.newwizard.NewIncidentWizard;
@@ -39,10 +38,14 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 public class NewIncidentHandler {
 
 	@Execute
-	public void execute(Shell activeShell, IEclipseContext context){
-		(new ShowFieldDataPerspective()).execute(IndIncidentListView.ID, context.get(EModelService.class), context.get(EPartService.class));
-		WizardDialog wd = new WizardDialog(activeShell, new NewIncidentWizard());
-		wd.open();
+	public void execute(Shell activeShell, MWindow activeWindow){
+		(new ShowFieldDataPerspective()).execute(IndIncidentListView.ID, activeWindow);
+		
+		NewIncidentWizard wizard = new NewIncidentWizard();
+		WizardDialog wd = new WizardDialog(activeShell, wizard);
+		if (wd.open() == Window.OK){
+			(new OpenIncidentHandler()).openIncident(wizard.getNewIncident().getUuid(), activeWindow);
+		}
 	}
 
 	public static class NewIncidentHandlerWrapper extends DIHandler<NewIncidentHandler>{

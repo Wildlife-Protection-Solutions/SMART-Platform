@@ -46,12 +46,15 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
@@ -76,6 +79,7 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -94,7 +98,7 @@ public class PatrolListView implements IPatrolFilteringView {
 	
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
-	
+	@Inject private ESelectionService selService;
 	/*
 	 * Job that updates the patrol list based on the current filter
 	 */
@@ -252,6 +256,8 @@ public class PatrolListView implements IPatrolFilteringView {
 			}
 		});
 		
+		patrolListViewer.addSelectionChangedListener(new ViewerSelectionListener(selService));
+		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
 		menuService.populateContributionManager(menuManager, "popup:org.wcs.smart.patrol.ui.PatrolListView"); //$NON-NLS-1$
@@ -281,13 +287,6 @@ public class PatrolListView implements IPatrolFilteringView {
 	public static class PatrolListViewWrapper extends DIViewPart<PatrolListView>{
 		public PatrolListViewWrapper(){
 			super(PatrolListView.class);
-		}
-		
-		@Override
-		public void createPartControl(Composite parent){
-			super.createPartControl(parent);
-			
-			getSite().setSelectionProvider(	((PatrolListView)getComponent()).patrolListViewer );
 		}
 	}
 }

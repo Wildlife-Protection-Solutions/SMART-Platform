@@ -23,8 +23,7 @@ package org.wcs.smart.cybertracker.handler;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
@@ -43,8 +42,9 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 public class CyberTrackerImportHandler {
 
 	@Execute
-	public void execute(EModelService mService, EPartService pService){
-		(new ShowFieldDataPerspective()).execute("org.wcs.smart.patrol.ui.PatrolListView", mService, pService); //$NON-NLS-1$
+	public void execute(MWindow activeWindow){
+		(new ShowFieldDataPerspective()).execute(
+				"org.wcs.smart.patrol.ui.PatrolListView", activeWindow); //$NON-NLS-1$
 		
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow()

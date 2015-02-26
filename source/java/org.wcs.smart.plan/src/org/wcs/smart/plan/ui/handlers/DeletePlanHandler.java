@@ -76,6 +76,7 @@ public class DeletePlanHandler{
 				toDelete.add(planUuid);
 			}
 		}
+		if (toDelete.size() == 0) return;
 		
 		MessageDialog dialog = new MessageDialog(activeShell,
 				Messages.DeletePlanHandler_Confirmation_Message,

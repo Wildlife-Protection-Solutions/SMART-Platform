@@ -406,6 +406,40 @@
       </menuContribution>
       <menuContribution
             allPopups="false"
+            locationURI="toolbar:org.wcs.smart.query.parts.itemlist">
+         <command
+               commandId="org.wcs.smart.query.deleteitem"
+               label="%querylist.toolbar.delete.command.label"
+               style="push"
+               tooltip="%querylist.toolbar.delete.command.tooltip">
+         </command>
+         <command
+               commandId="org.wcs.smart.query.create.unknown"
+               id="org.wcs.smart.query.toolbar.menu.create"
+               label="%queryToolbar.createquery.command.label"
+               style="pulldown"
+               tooltip="%queryToolbar.createquery.command.toolbar">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+               </or>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.fielddata">
          <menu
                id="org.wcs.smart.menu.query"
@@ -626,40 +660,6 @@
                name="org.wcs.smart.query.separator3"
                visible="true">
          </separator>
-      </menuContribution>
-      <menuContribution
-            allPopups="false"
-            locationURI="toolbar:org.wcs.smart.query.parts.itemlist">
-         <command
-               commandId="org.wcs.smart.query.deleteitem"
-               label="%querylist.toolbar.delete.command.label"
-               style="push"
-               tooltip="%querylist.toolbar.delete.command.tooltip">
-         </command>
-         <command
-               commandId="org.wcs.smart.query.create.unknown"
-               id="org.wcs.smart.query.createQuery"
-               label="%queryToolbar.createquery.command.label"
-               style="pulldown"
-               tooltip="%queryToolbar.createquery.command.toolbar">
-            <visibleWhen
-                  checkEnabled="false">
-               <or>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="admin">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="analyst">
-                  </test>
-                  <test
-                        property="org.wcs.smart.smartAdminUser"
-                        value="manager">
-                  </test>
-               </or>
-            </visibleWhen>
-         </command>
       </menuContribution>
       <menuContribution
             allPopups="false"

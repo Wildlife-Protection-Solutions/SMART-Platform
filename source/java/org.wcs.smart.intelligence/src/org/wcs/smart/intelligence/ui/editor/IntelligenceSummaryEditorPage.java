@@ -28,6 +28,7 @@ import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -350,7 +351,8 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 
 	private void openPatrol(Patrol p){
 		if (p == null) return;
-		(new OpenPatrolHandler()).openPatrol(p.getUuid());
+		MWindow activeWindow = ((IEclipseContext)getSite().getService(IEclipseContext.class)).get(MWindow.class);
+		(new OpenPatrolHandler()).openPatrol(p.getUuid(), activeWindow);
 	}
 
 	protected void openInformant(Informant i) {

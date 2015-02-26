@@ -29,8 +29,6 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
@@ -39,8 +37,6 @@ import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.EntityType.Status;
-import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
-import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -69,6 +65,10 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		session = HibernateManager.openSession();
 	}
 
+	public EntityType getNewType(){
+		return this.newType;
+	}
+	
 	@Override
 	public boolean performFinish() {
 		//update the last page
@@ -90,13 +90,6 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_ADDED, newType);
 		DataModelManager.getInstance().fireChangeListeners();	//we have added a new attribute to the data model
 		
-		// open in editor
-		EntityTypeEditorInput input = new EntityTypeEditorInput(this.newType.getUuid(),this.newType.getKeyId(), this.newType.getName());
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, EntityTypeEditor.ID);
-		} catch (PartInitException e) {
-			EntityPlugIn.displayLog(e.getMessage(), e);
-		}
 		return true;
 	}
 	

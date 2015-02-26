@@ -34,6 +34,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
@@ -68,6 +69,7 @@ import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.report.ui.LazyReportContentProvider;
 import org.wcs.smart.report.ui.ReportLabelProvider;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -84,6 +86,7 @@ public class ReportListView {
 	
 	@Inject private MPart part;
 	@Inject private IMenuService menuService;
+	@Inject private ESelectionService selService;
 	
 	/*
 	 * listener for report chaning events
@@ -225,6 +228,7 @@ public class ReportListView {
 				
 			}
 		});
+		reportList.addSelectionChangedListener(new ViewerSelectionListener(selService));
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
@@ -267,13 +271,6 @@ public class ReportListView {
 	public static class ReportListViewWrapper extends DIViewPart<ReportListView>{
 		public ReportListViewWrapper(){
 			super(ReportListView.class);
-		}
-		
-		@Override
-		public void createPartControl(Composite parent){
-			super.createPartControl(parent);
-			
-			getSite().setSelectionProvider(	((ReportListView)getComponent()).reportList );
 		}
 	}
 }

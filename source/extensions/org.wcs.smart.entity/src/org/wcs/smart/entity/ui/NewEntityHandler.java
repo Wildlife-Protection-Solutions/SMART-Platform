@@ -21,12 +21,11 @@
  */
 package org.wcs.smart.entity.ui;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
@@ -46,7 +45,7 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
 public class NewEntityHandler {
 
 	@Execute
-	public void execute(Shell activeShell, IEclipseContext ctx){
+	public void execute(Shell activeShell, MWindow activeWindow){
 		//check if data model is configured before continuing
 		Session s = HibernateManager.openSession();
 		try{
@@ -57,11 +56,15 @@ public class NewEntityHandler {
 		}finally{
 			s.close();
 		}
-		
-		WizardDialog newEntityDialog = new WizardDialog(activeShell, new NewEntityTypeWizard());
-		newEntityDialog.open();
+		NewEntityTypeWizard wizard = new NewEntityTypeWizard();
+		WizardDialog newEntityDialog = new WizardDialog(activeShell, wizard);
+		if (newEntityDialog.open() == Window.OK){
+			(new ShowFieldDataPerspective()).execute(EntityTypeListView.ID, activeWindow);
+			// open in editor
+			(new OpenEntityTypeHandler()).openEntityType(wizard.getNewType(), activeWindow);
+		}
 
-		(new ShowFieldDataPerspective()).execute(EntityTypeListView.ID, ctx.get(EModelService.class), ctx.get(EPartService.class));
+		
 	}
 
 	public static class NewEntityHandlerWrapper extends DIHandler<NewEntityHandler>{

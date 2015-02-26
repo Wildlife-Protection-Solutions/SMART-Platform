@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -43,23 +42,16 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -87,6 +79,7 @@ import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditor;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -108,7 +101,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	
 	@Inject private MPart localPart;
 	@Inject private IMenuService menuService;
-	
+	@Inject private ESelectionService selService; 
 	
 	
 	private ISurveyEventListener listener = new ISurveyEventListener(){
@@ -190,6 +183,11 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		bar.setMenu(menu);
 		lstViewer.getControl().setMenu(menu);
 		designViewer.getControl().setMenu(menu);
+		
+		
+		ViewerSelectionListener sel = new ViewerSelectionListener(selService);
+		lstViewer.addSelectionChangedListener(sel);
+		designViewer.addSelectionChangedListener(sel);
 	}
 
 	@Focus
@@ -276,15 +274,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	public void updateContent() {
 		refresh();
 	}
-	
-	private Viewer getActiveViewer(){
-		if(bar.getSelectionIndex() == 0){
-			return lstViewer;
-		}else{
-			return designViewer;
-		}
-	}
-	
+		
 	public void showFilterDialog(){
 		if (bar.getSelectionIndex() == 0){
 			SurveyFilterDialog dialog = new SurveyFilterDialog(getShell(), this, filter);
@@ -306,49 +296,5 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 			super(SurveyDesignListView.class);
 		}
 		
-		@Override
-		public void createPartControl(Composite parent){
-			super.createPartControl(parent);
-			
-			getSite().setSelectionProvider(new ISelectionProvider() {
-				
-				private HashMap<ISelectionChangedListener, SelectionListener> barListeners = new HashMap<ISelectionChangedListener, SelectionListener>();
-
-				@Override
-				public void setSelection(ISelection selection) {
-					((SurveyDesignListView)getComponent()).getActiveViewer().setSelection(selection);		
-				}
-				
-				@Override
-				public void removeSelectionChangedListener(
-						ISelectionChangedListener listener) {
-					if (((SurveyDesignListView)getComponent()).bar != null && !((SurveyDesignListView)getComponent()).bar.isDisposed()){
-						((SurveyDesignListView)getComponent()).lstViewer.removeSelectionChangedListener(listener);
-						((SurveyDesignListView)getComponent()).designViewer.removeSelectionChangedListener(listener);
-						((SurveyDesignListView)getComponent()).bar.removeSelectionListener(barListeners.get(listener));
-					}
-				}
-				
-				@Override
-				public ISelection getSelection() {
-					return ((SurveyDesignListView)getComponent()).getActiveViewer().getSelection();
-				}
-				
-				@Override
-				public void addSelectionChangedListener(final ISelectionChangedListener listener) {
-					((SurveyDesignListView)getComponent()).lstViewer.addSelectionChangedListener(listener);
-					((SurveyDesignListView)getComponent()).designViewer.addSelectionChangedListener(listener);
-
-					SelectionAdapter newAdapter = new SelectionAdapter() {
-						@Override
-						public void widgetSelected(SelectionEvent e) {
-							listener.selectionChanged(new SelectionChangedEvent(((SurveyDesignListView)getComponent()).getActiveViewer(), ((SurveyDesignListView)getComponent()).getActiveViewer().getSelection()));
-						}
-					};
-					((SurveyDesignListView)getComponent()).bar.addSelectionListener(newAdapter);
-					barListeners.put(listener, newAdapter);
-				}
-			});
-		}
 	}
 }

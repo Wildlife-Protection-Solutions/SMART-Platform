@@ -32,7 +32,6 @@ import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.job.SaveIntelligenceJob;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
 import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelType;
 
 /**
@@ -90,9 +89,6 @@ public class NewIntelligenceWizard extends Wizard implements IPageChangingListen
     	if (Status.OK_STATUS.equals(saveIntelligenceJob.getResult())) {
     		// fire events
         	IntelligenceEventManager.getInstance().intelligenceAdded(intelligence);
-        	
-    		// open in editor
-        	(new OpenIntelligenceHandler()).openIntelligence(intelligence.getUuid());
     		return true;
     	}
 		return false;
