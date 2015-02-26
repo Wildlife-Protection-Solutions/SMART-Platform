@@ -46,10 +46,10 @@ public class ShowPerspectiveHandler {
 
 	public static final String PERSPECTIVE_ID_PARAM = "org.wcs.smart.perspectiveid"; //$NON-NLS-1$
 	@Execute
-	public void execute(@Optional @Named(PERSPECTIVE_ID_PARAM) String perspectiveId,
-			EModelService mService, MWindow window){
+	public void execute(@Optional @Named(PERSPECTIVE_ID_PARAM) String perspectiveId, MWindow window){
 		if (perspectiveId == null) return;
 		
+		EModelService mService = window.getContext().get(EModelService.class);
 		String activeId = mService.getActivePerspective(window).getElementId();		
 		if (!activeId.equals(perspectiveId)){
 			try {

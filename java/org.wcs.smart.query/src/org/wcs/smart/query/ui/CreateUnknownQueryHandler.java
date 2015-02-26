@@ -31,7 +31,6 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -58,7 +57,8 @@ public class CreateUnknownQueryHandler {
 	@Execute
 	public void execute(@Optional @Named(QUERY_TYPE_KEY) String queryType, Shell activeShell, IEclipseContext context){
 		
-		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), context.get(EModelService.class), context.get(MWindow.class));
+		(new ShowPerspectiveHandler()).execute(QueryPlugIn.getActivePerspectiveId(), 
+				context.get(MWindow.class));
 		
 		if (queryType != null){
 			IQueryType type = QueryTypeManager.getInstance().findQueryType(queryType);

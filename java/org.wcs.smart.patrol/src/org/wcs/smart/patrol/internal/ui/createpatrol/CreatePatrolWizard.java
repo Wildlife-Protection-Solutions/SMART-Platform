@@ -43,7 +43,6 @@ import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
-import org.wcs.smart.patrol.ui.OpenPatrolHandler;
 
 /**
  * Wizard to create a new patrol.
@@ -62,7 +61,6 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 
 	private boolean canFinish = false;
 	private IWizardPage lastPage = null;
-
 
 	/**
 	 * Creates a new wizard.
@@ -258,8 +256,7 @@ public class CreatePatrolWizard extends Wizard implements IPageChangingListener 
 
 		// fire events
 		PatrolEventManager.getInstance().patrolAdded(getPatrol());
-		// open in editor
-		(new OpenPatrolHandler()).openPatrol(this.patrol.getUuid());
+		
 		return ret;
 	}
 

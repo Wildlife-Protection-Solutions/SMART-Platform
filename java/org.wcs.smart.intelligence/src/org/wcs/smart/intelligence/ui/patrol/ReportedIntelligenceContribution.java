@@ -29,6 +29,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -261,12 +263,8 @@ public class ReportedIntelligenceContribution implements IPatrolEditorContributi
 	
 	private void openEditor(Intelligence intelligence) {
 		Assert.isNotNull(intelligence);
-		try {
-			PlatformUI.getWorkbench().showPerspective(IntelligencePerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-		} catch (Throwable t) {
-			IntelligencePlugIn.displayLog(t.getLocalizedMessage(), t);
-		}
-		(new OpenIntelligenceHandler()).openIntelligence(intelligence.getUuid());
+		(new OpenIntelligenceHandler()).openIntelligence(intelligence.getUuid(),
+				((IEclipseContext)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(IEclipseContext.class)).get(MWindow.class));
 
 	}
 	

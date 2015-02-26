@@ -29,8 +29,6 @@ import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
@@ -40,8 +38,6 @@ import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
-import org.wcs.smart.incident.ui.IncidentEditor;
-import org.wcs.smart.incident.ui.IncidentEditorInput;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
@@ -86,6 +82,10 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		
 	}
 
+	public Waypoint getNewIncident(){
+		return newIncident;
+	}
+	
 	@Override
 	public boolean performFinish() {
 		//update the last page
@@ -108,14 +108,6 @@ public class NewIncidentWizard extends Wizard implements IPageChangingListener {
 		
 		// fire events
 		IncidentEventManager.getInstance().fireEvent(IncidentEventManager.INCIDENT_ADDED, newIncident);
-		
-		// open in editor
-		IncidentEditorInput input = new IncidentEditorInput(this.newIncident.getUuid(),this.newIncident.getId(), this.newIncident.getDateTime());
-		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(input, IncidentEditor.ID);
-		} catch (PartInitException e) {
-			throw new RuntimeException(e);
-		}
 		return true;
 	}
 	

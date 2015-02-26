@@ -39,8 +39,10 @@ import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -67,6 +69,7 @@ import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -85,6 +88,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 	
 	@Inject private IMenuService menuService;
 	@Inject private MPart localPart;
+	@Inject private ESelectionService selService;
 		
 	private IIncidentListener ilistener = new IIncidentListener() {
 		
@@ -204,9 +208,11 @@ public class IndIncidentListView implements IIncidentFilteringView {
 			public void doubleClick(DoubleClickEvent event) {
 				Object selection = ((IStructuredSelection)incidentListViewer.getSelection()).getFirstElement();;
 				if (!(selection instanceof IncidentEditorInput)) return;
-				(new OpenIncidentHandler()).openIncident(((IncidentEditorInput)selection).getUuid());
+				(new OpenIncidentHandler()).openIncident(((IncidentEditorInput)selection).getUuid(),
+						localPart.getContext().get(MWindow.class));
 			}
 		});
+		incidentListViewer.addSelectionChangedListener(new ViewerSelectionListener(selService));
 		
 		/* add right click context menu */
 		/* add right click context menu */
@@ -247,7 +253,6 @@ public class IndIncidentListView implements IIncidentFilteringView {
 		@Override
 		public void createPartControl(Composite parent){
 			super.createPartControl(parent);
-			getSite().setSelectionProvider(	((IndIncidentListView)getComponent()).incidentListViewer);
 		}
 	}
 }

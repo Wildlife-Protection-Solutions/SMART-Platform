@@ -23,11 +23,9 @@ package org.wcs.smart.intelligence.ui.handlers;
 
 import javax.inject.Named;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -48,16 +46,15 @@ public class OpenIntelligenceHandler {
 
 	public static final String INTELLUUID_PARAM = "intelligenceuuid"; //$NON-NLS-1$
 	@Execute
-	public void openIntelligence(@Optional @Named(INTELLUUID_PARAM) byte[] planUuid){
-		if (planUuid == null) return;
+	public void openIntelligence(@Optional @Named(INTELLUUID_PARAM) byte[] intellUuid,
+			MWindow activeWindow){
+		if (intellUuid == null) return;
 		
-		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(IEclipseContext.class);
-		(new ShowPerspectiveHandler()).execute(IntelligencePerspective.ID, 
-				context.get(EModelService.class), context.get(MWindow.class));
+		(new ShowPerspectiveHandler()).execute(IntelligencePerspective.ID, activeWindow);
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			IWorkbenchPage page = window.getActivePage();
-			page.openEditor(new IntelligenceEditorInput(planUuid, null, null), IntelligenceEditor.ID);
+			page.openEditor(new IntelligenceEditorInput(intellUuid, null, null), IntelligenceEditor.ID);
 		} catch (PartInitException e) {
 			SmartPatrolPlugIn.displayLog(Messages.OpenIntelligenceHandler_PlanEditor + e.getLocalizedMessage(), e);
 		}

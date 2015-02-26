@@ -23,6 +23,8 @@ package org.wcs.smart.plan.ui.handlers;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
@@ -38,11 +40,13 @@ import org.wcs.smart.plan.ui.newPlanWizard.CreatePlanWizard;
 public class NewPlanHandler {
 
 	@Execute
-	public void execute(Shell activeShell){
+	public void execute(Shell activeShell, MWindow activeWindow){
 		//Show Create Patrol Wizard
 		final CreatePlanWizard wizard = new CreatePlanWizard();
 		WizardDialog dialog = new WizardDialog(activeShell, wizard);
-		dialog.open();
+		if (dialog.open() == Window.OK){
+			(new OpenPlanHandler()).openPlan(wizard.getPlan().getUuid(), activeWindow);
+		}
 	}
 
 	public static class NewPlanHandlerWrapper extends DIHandler<NewPlanHandler>{

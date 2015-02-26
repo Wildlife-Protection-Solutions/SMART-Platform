@@ -31,6 +31,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -259,7 +261,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	}
 	
 	public void openPatrol(PatrolEditorInput p){
-		(new OpenPatrolHandler()).openPatrol(p.getUuid());
+		(new OpenPatrolHandler()).openPatrol(p.getUuid(), ((IEclipseContext)getSite().getService(IEclipseContext.class)).get(MWindow.class));
 	}
 
 	/**

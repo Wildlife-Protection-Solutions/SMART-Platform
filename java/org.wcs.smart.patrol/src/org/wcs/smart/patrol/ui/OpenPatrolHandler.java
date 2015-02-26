@@ -23,11 +23,9 @@ package org.wcs.smart.patrol.ui;
 
 import javax.inject.Named;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -47,13 +45,12 @@ public class OpenPatrolHandler {
 	public static final String UUID_PARAM = "patroluuid"; //$NON-NLS-1$
 	
 	@Execute
-	public void openPatrol(@Optional @Named(UUID_PARAM) byte[] patrolUuid){
+	public void openPatrol(@Optional @Named(UUID_PARAM) byte[] patrolUuid,
+			MWindow activeWindow){
+		
 		if (patrolUuid == null) return;
 		
-		//get the context here as this is not pure e4
-		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		(new ShowFieldDataPerspective()).execute(PatrolListView.ID, 
-				context.get(EModelService.class), context.get(EPartService.class));
+		(new ShowFieldDataPerspective()).execute(PatrolListView.ID,activeWindow);
 		
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();

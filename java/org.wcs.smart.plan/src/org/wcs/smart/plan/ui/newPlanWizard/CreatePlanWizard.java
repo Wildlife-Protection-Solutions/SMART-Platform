@@ -39,7 +39,6 @@ import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
-import org.wcs.smart.plan.ui.handlers.OpenPlanHandler;
 import org.wcs.smart.plan.ui.panel.PlanUtil;
 import org.wcs.smart.util.SmartUtils;
 
@@ -229,8 +228,6 @@ public class CreatePlanWizard extends Wizard implements IPageChangingListener {
 		 // fire events
 		PlanEventManager.getInstance().planAdded(getPlan());
 		
-		//Open Plan Perspective and the plan you just created.
-		(new OpenPlanHandler()).openPlan(p.getUuid());
 		return saved;
 	}
 

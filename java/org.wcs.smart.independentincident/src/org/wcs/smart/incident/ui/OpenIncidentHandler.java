@@ -23,11 +23,9 @@ package org.wcs.smart.incident.ui;
 
 import javax.inject.Named;
 
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
@@ -45,13 +43,12 @@ public class OpenIncidentHandler {
 
 	public static final String UUID_PARAM = "incidentUuid"; //$NON-NLS-1$
 	@Execute
-	public void openIncident(@Optional @Named(UUID_PARAM) byte[] incidentUuid){
+	public void openIncident(@Optional @Named(UUID_PARAM) byte[] incidentUuid,
+			MWindow activeWindow){
 		if (incidentUuid == null) return;
 		
 		//get the context here as this is not pure e4
-		IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-		(new ShowFieldDataPerspective()).execute(IndIncidentListView.ID, 
-				context.get(EModelService.class), context.get(EPartService.class));
+		(new ShowFieldDataPerspective()).execute(IndIncidentListView.ID, activeWindow);
 		
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();

@@ -21,23 +21,21 @@
  */
 package org.wcs.smart.entity.ui;
 
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
-import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.ccca.EntityTypeCcaaPerspective;
+import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
+import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
-import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
  * Open entity type handler
@@ -47,19 +45,14 @@ import org.wcs.smart.ui.ShowPerspectiveHandler;
 public class OpenEntityTypeHandler {
 
 	@Execute
-	public void openEntityType(@Optional EntityTypeEditorInput entityType){
+	public void openEntityType(@Optional EntityTypeEditorInput entityType, MWindow activeWindow){
 		if (entityType == null) return;
 		
 		//get the context here as this is not pure e4
 		if (!SmartDB.isMultipleAnalysis()){
-			IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-			ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, context);
+			(new ShowFieldDataPerspective()).execute(EntityTypeListView.ID, activeWindow);
 		}else{
-			IEclipseContext context = (IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
-			IEclipseContext local = EclipseContextFactory.create();
-			local.set(ShowPerspectiveHandler.PERSPECTIVE_ID_PARAM, EntityTypeCcaaPerspective.ID);
-			local.setParent(context.get(EPartService.class).getActivePart().getContext());
-			ContextInjectionFactory.invoke(new ShowPerspectiveHandler(), Execute.class, local);
+			(new ShowFieldDataPerspective()).execute(EntityTypeCcaaPerspective.ID, activeWindow);
 		}
 				
 		try {
@@ -69,5 +62,10 @@ public class OpenEntityTypeHandler {
 		} catch (PartInitException t) {
 			EntityPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
+	}
+	
+	public void openEntityType(EntityType entityType, MWindow activeWindow){
+		EntityTypeEditorInput in = new EntityTypeEditorInput(entityType.getUuid(), entityType.getKeyId(), entityType.getName());
+		openEntityType(in, activeWindow);
 	}
 }

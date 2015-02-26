@@ -420,6 +420,18 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <instanceof
+                        value="org.wcs.smart.plan.ui.editor.PlanEditorInput">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.plan.ui.handlers.TranslatePlanHandler$TranslatePlanHandlerWrapper"

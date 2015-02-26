@@ -37,6 +37,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
@@ -64,6 +65,7 @@ import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.editor.IQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -79,6 +81,7 @@ public class QueryListView {
 	private TreeViewer queryList;
 	
 	private @Inject IMenuService mService;
+	private @Inject ESelectionService selService;
 	
 	/*
 	 * Listener for changes to the source data provided by
@@ -166,7 +169,7 @@ public class QueryListView {
 				}
 			}
 		});
-		
+		queryList.addSelectionChangedListener(new ViewerSelectionListener(selService));
 		queryList.setCellEditors(new CellEditor[] { new TextCellEditor(queryList.getTree()) });
 		queryList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
 		queryList.setCellModifier(new NameCellEditor(queryList));
@@ -224,13 +227,6 @@ public class QueryListView {
 	public static class QueryListViewWrapper extends DIViewPart<QueryListView>{
 		public QueryListViewWrapper(){
 			super(QueryListView.class);
-		}
-		
-		@Override
-		public void createPartControl(Composite parent){
-			super.createPartControl(parent);
-			
-			getSite().setSelectionProvider(getComponent().queryList);
 		}
 	}
 }

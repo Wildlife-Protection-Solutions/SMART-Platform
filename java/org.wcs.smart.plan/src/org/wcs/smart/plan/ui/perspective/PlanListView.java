@@ -35,6 +35,7 @@ import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -58,6 +59,7 @@ import org.wcs.smart.plan.ui.editor.PlanEditor;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.plan.ui.handlers.OpenPlanHandler;
 import org.wcs.smart.plan.ui.tree.PlanViewer;
+import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -76,6 +78,7 @@ public class PlanListView implements IPlanFilterItem {
 	
 	@Inject private MPart part;
 	@Inject private IMenuService menuService;
+	@Inject private ESelectionService selService;
 	
 	/**
 	 * listener for Plan change events.
@@ -145,6 +148,7 @@ public class PlanListView implements IPlanFilterItem {
 				
 			}
 		});
+		control.addSelectionChangedListener(new ViewerSelectionListener(selService));
 		updateJob = new LoadPlanJob(planViewer, currentFilter);
 		updateJob.schedule();
 				
@@ -188,13 +192,6 @@ public class PlanListView implements IPlanFilterItem {
 	public static class PlanListViewWrapper extends DIViewPart<PlanListView>{
 		public PlanListViewWrapper(){
 			super(PlanListView.class);
-		}
-		
-		@Override
-		public void createPartControl(Composite parent){
-			super.createPartControl(parent);
-			
-			getSite().setSelectionProvider(	((PlanListView)getComponent()).planViewer.getViewer() );
 		}
 	}
 }

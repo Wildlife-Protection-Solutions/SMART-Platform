@@ -534,6 +534,18 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     ifEmpty="false"
+                     operator="or">
+                  <instanceof
+                        value="org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.intelligence.ui.handlers.ShowIntelligenceFilterHandler$ShowIntelligenceFilterHandlerWrapper"

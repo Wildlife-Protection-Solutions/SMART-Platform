@@ -29,16 +29,23 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -52,10 +59,8 @@ import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.intelligence.ui.IntelligencePerspective;
 import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.IPatrolEditorContribution;
@@ -75,6 +80,7 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	private Composite main;
 	private Label label;
 	private TableViewer tableViewer;
+	private Button btnOpen;
 
 	private List<Intelligence> intelligenceList;
 	
@@ -94,12 +100,14 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 						tableViewer.getControl().setVisible(false);
 						((GridData)tableViewer.getControl().getLayoutData()).heightHint = 0;
 						((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = false;
+						btnOpen.setVisible(false);
 					} else {
 						label.setText(Messages.MotivationIntelligenceContribution_Motivated_Label);
 						tableViewer.getControl().setVisible(true);
 						tableViewer.setInput(intelligenceList.toArray());
 						((GridData)tableViewer.getControl().getLayoutData()).heightHint = 75;
 						((GridData)tableViewer.getControl().getLayoutData()).grabExcessVerticalSpace = true;
+						btnOpen.setVisible(true);
 					}
 					main.getParent().getParent().layout(true,true);
 				}});
@@ -126,12 +134,14 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	@Override
 	public Composite createControl(FormToolkit toolkit, Composite parent, boolean canEdit) {
 		main = toolkit.createComposite(parent, SWT.NONE);
-		main.setLayout(new GridLayout((canEdit?2:1), false));
+		main.setLayout(new GridLayout(2, false));
 		
 		label = toolkit.createLabel(main, ""); //$NON-NLS-1$
 		if (canEdit){
 			Hyperlink lnk = createEditLink(toolkit, main);
-			lnk.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false,1,2));
+			lnk.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		}else{
+			label.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2,1));
 		}
 		
 		Table reportedTable = toolkit.createTable(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
@@ -145,8 +155,24 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 				openCurrentItem();
 			}
 		});
+		tableViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent event) {
+				btnOpen.setEnabled(!tableViewer.getSelection().isEmpty());
+			}
+		});
 		tableViewer.setInput(new Object[]{Messages.MotivationIntelligenceContribution_LoadingText});
-
+		
+		btnOpen = toolkit.createButton(main, Messages.ReportedIntelligenceContribution_Open_Button, SWT.PUSH);
+		btnOpen.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		btnOpen.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				openCurrentItem();
+			}
+		});
+		btnOpen.setEnabled(false);
+		
 		//listeners
 		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_MODIFIED, intelligenceListener);
 		IntelligenceEventManager.getInstance().addListener(EventType.INTELLIGENCE_DELETED, intelligenceListener);
@@ -214,13 +240,10 @@ public class MotivationIntelligenceContribution implements IPatrolEditorContribu
 	
 	private void openEditor(Intelligence intelligence) {
 		Assert.isNotNull(intelligence);
-		try {
-			PlatformUI.getWorkbench().showPerspective(IntelligencePerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
-		} catch (Throwable t) {
-			IntelligencePlugIn.displayLog(t.getLocalizedMessage(), t);
-		}
-		(new OpenIntelligenceHandler()).openIntelligence(intelligence.getUuid());
-
+		
+		(new OpenIntelligenceHandler()).openIntelligence(
+				intelligence.getUuid(), 
+				((IEclipseContext)PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(IEclipseContext.class)).get(MWindow.class));
 	}
 	
 }
