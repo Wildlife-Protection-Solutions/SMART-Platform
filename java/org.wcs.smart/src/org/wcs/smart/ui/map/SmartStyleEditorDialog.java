@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.map;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -75,11 +76,13 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.XMLMemento;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.geotools.styling.Style;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.project.IStyleBlackboard;
+import org.locationtech.udig.project.StyleContent;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.StyleEntry;
@@ -292,11 +295,19 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 					first = false;
 				}
 				
+				if (currentLayerSs != null){
+					SmartStyle temp = new SmartStyle();
+					temp.setUuid(currentLayerSs);
+					if (!((Collection<?>)lstSmart.getInput()).contains(temp)){
+						currentLayerSs = null;
+					}
+				}
 				//select the correct style from the list
 				getShell().getDisplay().asyncExec(new Runnable(){
 
 					@Override
 					public void run() {
+						lstSmart.refresh();
 						updateStyleSelectionToMatchBlackboard();
 					}});
 			}
@@ -612,8 +623,37 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
     			}
     		}
     		if (fnd == null) return false;
+    		if (se.getID().equals(SLDContent.ID)){
+    			//we have problems here with the names changing per layer but nothing else changing
+    			//since we don't really care about the name we don't want to compare the name
+    			((Style) se.getStyle()).setName("SMART"); //$NON-NLS-1$
+    			((Style) fnd.getStyle()).setName("SMART"); //$NON-NLS-1$
+    			
+    			//update memento
+    			StyleContent sldContent = StyleManager.INSTANCE.loadStyleContent(SLDContent.ID);
+    			try{
+					XMLMemento memento = XMLMemento.createWriteRoot("styleEntry"); //$NON-NLS-1$
+					sldContent.save(memento, se.getStyle());
+					try(StringWriter writer = new StringWriter()){
+						memento.save(writer);
+						se.setMemento(writer.getBuffer().toString());
+					}
+					
+					memento = XMLMemento.createWriteRoot("styleEntry"); //$NON-NLS-1$
+					sldContent.save(memento, fnd.getStyle());
+					try(StringWriter writer = new StringWriter()){
+						memento.save(writer);
+						fnd.setMemento(writer.getBuffer().toString());
+					}
+					
+    			}catch (Exception ex){
+    				ex.printStackTrace();
+    				return false;
+    			}
+    		}
     		
     		if (!se.getMemento().equals(fnd.getMemento())) return false;
+    		
     	}
     	return true;
     }
