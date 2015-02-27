@@ -219,11 +219,10 @@ public class AttributeGroupBy implements IGroupBy {
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (att.getType() == AttributeType.LIST){
 			if (filterHkeys != null) {
-				for (AttributeListItem it : att.getAttributeList()) {
-					for (int i = 0; i < filterHkeys.length; i++) {
-						if (filterHkeys[i].equals(it.getKeyId())) {
-							items.add(new ListItem(null, it.getName(), it
-									.getKeyId()));
+				for (AttributeListItem it : QueryDataModelManager.getInstance().getAttributeListItems(att, session)) {
+					for (String key : filterHkeys){
+						if (key.equals(it.getKeyId())){
+							items.add(new ListItem(null, it.getName(), it.getKeyId()));
 							break;
 						}
 					}
