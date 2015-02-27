@@ -90,7 +90,7 @@ public class RestoreDialog extends TitleAreaDialog {
 		lbl.setText(Messages.RestoreDialog_FileNameLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		txtRestorefile = new Text(main, SWT.DEFAULT);
+		txtRestorefile = new Text(main, SWT.SINGLE | SWT.BORDER);
 		txtRestorefile.setEditable(true);
 		txtRestorefile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		int width = txtRestorefile.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;

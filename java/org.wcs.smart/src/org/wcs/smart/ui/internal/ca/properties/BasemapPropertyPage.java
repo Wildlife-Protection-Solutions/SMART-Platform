@@ -137,7 +137,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 		Composite left = new Composite(comp, SWT.NONE);
 		left.setLayout(new GridLayout(1, false));
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		langViewer = new LanguageViewer(left, SWT.DEFAULT, SmartDB.getCurrentConservationArea());
+		langViewer = new LanguageViewer(left, SWT.NONE, SmartDB.getCurrentConservationArea());
 		langViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			
@@ -147,7 +147,7 @@ public class BasemapPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 		
-		lstBasemaps = new ListViewer(left, SWT.SINGLE | SWT.DEFAULT | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+		lstBasemaps = new ListViewer(left, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)lstBasemaps.getList().getLayoutData()).heightHint = 50;
 		((GridData)lstBasemaps.getList().getLayoutData()).widthHint = 100;

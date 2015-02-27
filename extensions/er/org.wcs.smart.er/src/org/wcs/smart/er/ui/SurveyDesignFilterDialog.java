@@ -110,7 +110,7 @@ public class SurveyDesignFilterDialog extends SmartFilterDialog {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group g = new Group(main, SWT.DEFAULT);
+		Group g = new Group(main, SWT.NONE);
 		g.setText(Messages.SurveyDesignFilterDialog_StateLabel);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
