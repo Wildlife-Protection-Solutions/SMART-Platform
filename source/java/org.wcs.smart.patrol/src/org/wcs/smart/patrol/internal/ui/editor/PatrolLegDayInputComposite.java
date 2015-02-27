@@ -234,8 +234,7 @@ public class PatrolLegDayInputComposite {
 		if (data.getWaypoints() == null){
 			data.setWaypoints(new ArrayList<PatrolWaypoint>());
 		}
-		List<PatrolWaypoint> inputList = new ArrayList<PatrolWaypoint>(data.getWaypoints());
-		observationTable.setInput(inputList);
+		observationTable.setInput(data.getWaypoints());
 		observationTable.addSelectionChangedListener(new ISelectionChangedListener() {
 			
 			@Override
