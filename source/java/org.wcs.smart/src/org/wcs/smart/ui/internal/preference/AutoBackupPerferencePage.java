@@ -243,7 +243,7 @@ public class AutoBackupPerferencePage extends PreferencePage implements
 		backup.setLayout(new GridLayout(2, false));
 		
 		
-		txtBackupDir = new Text(backup, SWT.DEFAULT);
+		txtBackupDir = new Text(backup, SWT.BORDER | SWT.SINGLE);
 		File temp = new File(System.getProperty("user.dir")); //$NON-NLS-1$
 		String loc = temp.getParent() + File.separatorChar + "SMART_Backups"; //$NON-NLS-1$
 		File b = new File(loc);

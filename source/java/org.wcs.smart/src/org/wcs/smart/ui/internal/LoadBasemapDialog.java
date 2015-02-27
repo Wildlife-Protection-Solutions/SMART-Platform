@@ -117,7 +117,7 @@ public class LoadBasemapDialog extends TitleAreaDialog {
 			}
 		};
 		
-		lstBasemaps = new ListViewer(main, SWT.DEFAULT | SWT.BORDER | SWT.SINGLE );
+		lstBasemaps = new ListViewer(main, SWT.BORDER | SWT.SINGLE );
 		lstBasemaps.setLabelProvider(new BasemapLabelProvider());
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());

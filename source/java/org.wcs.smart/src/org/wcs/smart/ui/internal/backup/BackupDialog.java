@@ -119,7 +119,7 @@ public class BackupDialog extends TitleAreaDialog {
 		lbl.setText(Messages.BackupDialog_FileLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
-		txtBackupFile = new Text(main, SWT.DEFAULT);
+		txtBackupFile = new Text(main, SWT.SINGLE | SWT.BORDER);
 		String set = localSettings.get(fileNameKey);
 		if (set == null || set.trim().isEmpty()){
 			txtBackupFile.setText(this.defaultFileName);

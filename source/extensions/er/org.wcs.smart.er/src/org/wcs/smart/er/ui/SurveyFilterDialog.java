@@ -185,7 +185,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Group g = new Group(main, SWT.DEFAULT);
+		Group g = new Group(main, SWT.NONE);
 		g.setText(Messages.SurveyFilterDialog_DatesGroup);
 		g.setLayout(new GridLayout());
 		((GridLayout)g.getLayout()).marginWidth = 0;
@@ -194,7 +194,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		dateComp = new DateFilterComposite(g, SWT.NONE, this);
 		
 		
-		g = new Group(main, SWT.DEFAULT);
+		g = new Group(main, SWT.NONE);
 		g.setText(Messages.SurveyFilterDialog_IdGroup);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -209,7 +209,7 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 				updateDesignEnabled();	
 			}
 		};
-		g = new Group(main, SWT.DEFAULT);
+		g = new Group(main, SWT.NONE);
 		g.setText(Messages.SurveyFilterDialog_DesignGroup);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));

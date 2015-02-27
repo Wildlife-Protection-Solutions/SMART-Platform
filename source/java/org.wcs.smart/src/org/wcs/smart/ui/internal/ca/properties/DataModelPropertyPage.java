@@ -224,7 +224,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Composite leftPanel = new Composite(comp, SWT.NONE);
 		leftPanel.setLayout(new GridLayout(1, false));
 		
-		cmbLanguage = new LanguageViewer(leftPanel, SWT.DEFAULT, currentCa);
+		cmbLanguage = new LanguageViewer(leftPanel, SWT.NONE, currentCa);
 		cmbLanguage.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		cmbLanguage.addSelectionChangedListener(new ISelectionChangedListener() {
 			

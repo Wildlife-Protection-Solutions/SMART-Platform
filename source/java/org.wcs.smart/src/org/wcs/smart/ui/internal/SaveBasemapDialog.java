@@ -179,7 +179,7 @@ public class SaveBasemapDialog  extends TitleAreaDialog {
 		lblOverwrite.setText(Messages.SaveBasemapDialog_OverwiteLabel);
 		lblOverwrite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
-		lstBasemaps = new ListViewer(compList, SWT.DEFAULT | SWT.BORDER | SWT.SINGLE );
+		lstBasemaps = new ListViewer(compList, SWT.BORDER | SWT.SINGLE );
 		lstBasemaps.setLabelProvider(new BasemapLabelProvider());
 		lstBasemaps.getList().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		lstBasemaps.setContentProvider(ArrayContentProvider.getInstance());

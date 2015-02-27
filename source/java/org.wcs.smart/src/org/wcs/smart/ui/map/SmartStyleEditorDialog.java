@@ -173,7 +173,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		outer.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 
 		// -- SMART Saved Styles area --
-		Group smartArea = new Group(outer, SWT.DEFAULT);
+		Group smartArea = new Group(outer, SWT.NONE);
 		smartArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		smartArea.setText(Messages.SmartStyleEditorDialog_SaveStylesLabel);
 		smartArea.setLayout(new GridLayout());
@@ -256,7 +256,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		
 		
 		// -- Custom style configuration area --
-		Group leftArea = new Group(outer, SWT.DEFAULT);
+		Group leftArea = new Group(outer, SWT.NONE);
 		leftArea.setText(Messages.SmartStyleEditorDialog_CustomConfigLabel);
 		leftArea.setBackground(parent.getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND));
 		leftArea.setFont(parent.getFont());
