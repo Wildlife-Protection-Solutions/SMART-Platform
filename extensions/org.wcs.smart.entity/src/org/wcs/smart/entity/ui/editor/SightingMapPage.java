@@ -38,12 +38,9 @@ import org.locationtech.udig.catalog.ID;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.internal.Layer;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayerCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayerCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.map.EntityQueryService;
@@ -68,7 +65,6 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 	private EntityQueryService queryService;
 	
 	private EntityTypeEditor parentEditor;
-	private IViewportModelListener initListener = null; 
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
 	private Job addLayerJob = new Job(Messages.SightingMapPage_AddEntityLayerJobName) {
@@ -206,19 +202,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 		addPointLayers();
 		
 		//add initial zoom to extents command
-		initListener = new IViewportModelListener() {
-			@Override
-			public void changed(ViewportModelEvent event) {
-				if (getMap() != null) {
-					getMap().getViewportModel()
-							.removeViewportModelListener(initListener);
-					getMap().sendCommandASync(new ZoomExtentCommand());
-				}
-
-			}
-		};
-		getMap().getViewportModel().addViewportModelListener(
-				initListener);
+		addInitialZoomFunction();
 	}
 
 	/**

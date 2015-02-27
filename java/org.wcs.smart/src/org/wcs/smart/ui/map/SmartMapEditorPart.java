@@ -65,9 +65,12 @@ import org.locationtech.udig.internal.ui.IDropTargetProvider;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.render.RenderPackage;
 import org.locationtech.udig.project.internal.render.ViewportModel;
+import org.locationtech.udig.project.render.IViewportModelListener;
+import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.locationtech.udig.project.ui.AnimationUpdater;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.commands.IDrawCommand;
@@ -530,5 +533,26 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
             return anim;
         }
     }
+	
+	protected void addInitialZoomFunction(){
+		getParentEditor().addPageChangedListener(new IPageChangedListener() {
+			@Override
+			public void pageChanged(PageChangedEvent event) {
+				if (event.getSelectedPage() == SmartMapEditorPart.this){
+					getParentEditor().removePageChangedListener(this);
+		
+					getMap().getViewportModel().addViewportModelListener(new IViewportModelListener() {
+						
+						@Override
+						public void changed(ViewportModelEvent event) {
+							getMap().getViewportModel().removeViewportModelListener(this);
+							getMap().sendCommandSync(new ZoomExtentCommand());
+						}
+					});
+				}
+				
+			}
+		});
+	}
 
 }

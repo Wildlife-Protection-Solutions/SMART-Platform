@@ -40,10 +40,7 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.internal.Layer;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
@@ -75,8 +72,6 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	private FeatureStore<SimpleFeatureType,SimpleFeature> store;
 	private Layer pointLayer = null;
 	private IGeoResource pointResource;
-	
-	private IViewportModelListener initListener;
 	
 	/**
 	 * Creates a new map page
@@ -151,18 +146,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 			};
 			getMap().sendCommandASync(command);
 			
-			//zoom to extent when map displayed
-			initListener = new IViewportModelListener() {
-				@Override
-				public void changed(ViewportModelEvent event) {
-					if (getMap() != null){
-						getMap().getViewportModel().removeViewportModelListener(initListener);
-						getMap().sendCommandASync(new ZoomExtentCommand());
-					}
-					
-				}
-			};
-    		getMap().getViewportModel().addViewportModelListener(initListener);
+			addInitialZoomFunction();
 			
         } catch (Exception exception) {
 			IncidentPlugIn.displayLog(Messages.IncidentMapPage_Error1, exception);

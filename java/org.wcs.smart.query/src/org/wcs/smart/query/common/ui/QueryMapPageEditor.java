@@ -25,21 +25,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.project.ILayer;
-import org.locationtech.udig.project.ILayerListener;
-import org.locationtech.udig.project.LayerEvent;
-import org.locationtech.udig.project.LayerEvent.EventType;
-import org.locationtech.udig.project.internal.Layer;
-import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
-import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -49,6 +34,17 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.project.ILayer;
+import org.locationtech.udig.project.ILayerListener;
+import org.locationtech.udig.project.LayerEvent;
+import org.locationtech.udig.project.LayerEvent.EventType;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.commands.AddLayersCommand;
+import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
@@ -71,7 +67,6 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	private IMapQueryEditor parentEditor;
 	private IQueryService queryService = null;
 	private LoadDefaultLayersJob loadDefaultLayers = null;
-	private IViewportModelListener initListener ;
 	
 	private ILayerListener styleListener = new ILayerListener() {
 		
@@ -234,14 +229,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 
 		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), true);
 		loadDefaultLayers.schedule();
-		initListener = new IViewportModelListener() {
-			@Override
-			public void changed(ViewportModelEvent event) {
-				getMap().getViewportModel().removeViewportModelListener(initListener);
-				getMap().sendCommandASync(new ZoomExtentCommand());
-			}
-		};
-		getMap().getViewportModel().addViewportModelListener(initListener); 
+		addInitialZoomFunction();
 	}
 
     

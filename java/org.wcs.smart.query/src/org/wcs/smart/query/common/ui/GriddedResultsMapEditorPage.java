@@ -276,18 +276,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 		}
 		super.init(site, input);
 
-		final IPageChangedListener initZoom = new IPageChangedListener() {
-
-			@Override
-			public void pageChanged(PageChangedEvent event) {
-				if (event.getSelectedPage() == GriddedResultsMapEditorPage.this) {
-					getMap().sendCommandASync(new ZoomExtentCommand());
-					parentEditor.removePageChangedListener(this);
-				}
-
-			}
-		};
-		parentEditor.addPageChangedListener(initZoom);
+		addInitialZoomFunction();
 	}
 
 	/**
