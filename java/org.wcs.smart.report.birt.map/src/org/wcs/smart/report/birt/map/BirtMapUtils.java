@@ -183,6 +183,7 @@ public class BirtMapUtils {
 	 * @return
 	 */
 	private static int getDimensionInPx(DimensionValue dv, int dpi){
+		if(dv == null) return 50;	//deafult map size to 50 px
 		int value = 0;
 		if (dv.getUnits().equals(DesignChoiceConstants.UNITS_PX)){
 			value = (int)dv.getMeasure();

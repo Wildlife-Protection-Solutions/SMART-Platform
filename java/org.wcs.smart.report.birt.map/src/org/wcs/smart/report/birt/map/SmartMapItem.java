@@ -28,7 +28,6 @@ import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
 import org.eclipse.birt.report.model.api.activity.SemanticException;
 import org.eclipse.birt.report.model.api.extension.ReportItem;
-import org.eclipse.birt.report.model.api.metadata.DimensionValue;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -104,21 +103,8 @@ public class SmartMapItem extends ReportItem {
 	 */
 	public SmartMapItem(ExtendedItemHandle item) {		
 		this.handle = item;
-		DimensionValue dm = (DimensionValue)handle.getWidth().getValue();
-		if (dm == null || dm.getMeasure() == 0){
-			try{
-				handle.setWidth("50px"); //$NON-NLS-1$
-			}catch (Exception ex){
-				ex.printStackTrace();
-			}
-		}
-		dm = (DimensionValue)handle.getHeight().getValue();
-		if (dm == null || dm.getMeasure() == 0){
-			try{
-				handle.setHeight("50px"); //$NON-NLS-1$
-			}catch (Exception ex){}
-		}
 	}
+
 
 	/**
 	 * @return the basemap layer name
