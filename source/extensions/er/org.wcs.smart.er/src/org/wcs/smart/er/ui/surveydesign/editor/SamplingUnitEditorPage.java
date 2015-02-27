@@ -73,11 +73,8 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.command.navigation.SetViewportBBoxCommand;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.selection.SelectCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.ca.advisors.DeleteManager;
@@ -125,7 +122,6 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 	private LoadDefaultLayersJob loadDefaultLayers;
 	
 	private SamplingUnitService suService;
-	private IViewportModelListener initListener;
 	
 	private List<Layer> suLayers = null;
 		
@@ -176,20 +172,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 	    		
 	    		suLayers = command.getLayers();
 	    		
-	    		initListener = new IViewportModelListener() {
-					@Override
-					public void changed(ViewportModelEvent event) {
-						if (getMap() != null){
-							getMap().getViewportModel().removeViewportModelListener(initListener);
-							getMap().sendCommandASync(new ZoomExtentCommand());
-						}
-						
-					}
-				};
-				if (monitor.isCanceled() || getMap() == null){
-					return Status.OK_STATUS;
-				}
-	    		getMap().getViewportModel().addViewportModelListener(initListener);
+	    		addInitialZoomFunction();
 				
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, Messages.SamplingUnitEditorPage_UnknownError, IStatus.ERROR, Messages.SamplingUnitEditorPage_UnknownErrorDescription, e);

@@ -35,10 +35,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.map.IntelligenceService;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -60,7 +57,6 @@ public class IntelligenceEditorMapPage extends SmartMapEditorPart {
 	
 	
 	private Job addLayerJob = new Job(Messages.IntelligenceEditorMapPage_AddLayerJobName) {
-		private IViewportModelListener initListener;	
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			intelService = new IntelligenceService(parentEditor.getIntelligence());
@@ -69,20 +65,9 @@ public class IntelligenceEditorMapPage extends SmartMapEditorPart {
 				List<IGeoResource> layers = (List<IGeoResource>) intelService.resources(monitor);
 	    		
 	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
-	    		getMap().sendCommandASync(command);
-    		
-	    		initListener = new IViewportModelListener() {
-					@Override
-					public void changed(ViewportModelEvent event) {
-						if (getMap() != null){
-							getMap().getViewportModel().removeViewportModelListener(initListener);
-							getMap().sendCommandASync(new ZoomExtentCommand());
-						}
-						
-					}
-				};
-	    		getMap().getViewportModel().addViewportModelListener(initListener);
-				
+	    		getMap().sendCommandSync(command);	     
+	    		
+	    		addInitialZoomFunction();
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, e.getLocalizedMessage(), IStatus.ERROR,Messages.IntelligenceEditorMapPage_ErrorLoadingMaps, e);
 			}

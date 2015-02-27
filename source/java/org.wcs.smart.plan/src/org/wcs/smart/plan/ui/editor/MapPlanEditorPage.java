@@ -49,10 +49,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.project.command.AbstractCommand;
 import org.locationtech.udig.project.command.UndoableMapCommand;
 import org.locationtech.udig.project.internal.Layer;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -160,8 +157,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 	 */
 	private Job addLayerJob = new Job(Messages.MapPlanEditorPage_PlanJobName) {
 		
-		private IViewportModelListener initListener;
-		
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 	    	try {
@@ -179,18 +174,6 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		    		}
 		    		AddPlanningLayers command = new AddPlanningLayers(layers);
 		    		getMap().sendCommandASync(command);
-		    		
-		    		initListener = new IViewportModelListener() {
-						@Override
-						public void changed(ViewportModelEvent event) {
-							if (getMap() != null){
-								getMap().getViewportModel().removeViewportModelListener(initListener);
-								getMap().sendCommandASync(new ZoomExtentCommand());
-							}
-							
-						}
-					};
-		    		getMap().getViewportModel().addViewportModelListener(initListener);
 				}
 				
 			} catch (Exception e) {
@@ -314,6 +297,8 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 		loadDefaultLayers.schedule();	
 		
 		addLayerJob.schedule();
+		
+		addInitialZoomFunction();
 	}
 	
 	/**

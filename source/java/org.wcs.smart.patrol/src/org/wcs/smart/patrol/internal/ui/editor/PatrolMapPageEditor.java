@@ -35,10 +35,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -63,8 +60,7 @@ import org.wcs.smart.util.JobUtil;
 public class PatrolMapPageEditor extends SmartMapEditorPart {
 	public static final String ID = "org.wcs.smart.patrol.ui.PatrolMapEditor"; //$NON-NLS-1$
 	
-	private PatrolEditor parentEditor;
-	private IViewportModelListener initListener = null; 
+	private PatrolEditor parentEditor; 
 	
 	private PatrolService patrolService = null;
 	private LoadDefaultLayersJob loadDefaultLayers;
@@ -81,17 +77,7 @@ public class PatrolMapPageEditor extends SmartMapEditorPart {
 	    		AddLayersCommand command = new AddLayersCommand(layers, 0);
 	    		getMap().sendCommandASync(command);
     		
-	    		initListener = new IViewportModelListener() {
-					@Override
-					public void changed(ViewportModelEvent event) {
-						if (getMap() != null){
-							getMap().getViewportModel().removeViewportModelListener(initListener);
-							getMap().sendCommandASync(new ZoomExtentCommand());
-						}
-						
-					}
-				};
-	    		getMap().getViewportModel().addViewportModelListener(initListener);
+	    		addInitialZoomFunction();
 				
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, Messages.PatrolMapPageEditor_UnknownError, IStatus.ERROR, Messages.PatrolMapPageEditor_Error_LoadingMapPage, e);

@@ -32,10 +32,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-import org.locationtech.udig.project.render.IViewportModelListener;
-import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.map.samplingunit.SamplingUnitGeoResource;
@@ -64,8 +61,6 @@ public class MissionMapPage extends SmartMapEditorPart {
 	
 	private Job addLayerJob = new Job(Messages.MissionMapPage_AddLayersJob_Title) {
 		
-		private IViewportModelListener initListener;
-		
 		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -91,17 +86,7 @@ public class MissionMapPage extends SmartMapEditorPart {
 	    		AddLayersCommand command = new AddLayersCommand(allLayers, 0);
 	    		getMap().sendCommandASync(command);
     		
-	    		initListener = new IViewportModelListener() {
-					@Override
-					public void changed(ViewportModelEvent event) {
-						if (getMap() != null){
-							getMap().getViewportModel().removeViewportModelListener(initListener);
-							getMap().sendCommandASync(new ZoomExtentCommand());
-						}
-						
-					}
-				};
-	    		getMap().getViewportModel().addViewportModelListener(initListener);
+	    		addInitialZoomFunction();
 				
 			} catch (IOException e) {
 				return new Status(IStatus.ERROR, "unknown", IStatus.ERROR, Messages.MissionMapPage_AddLayersJob_Error, e); //$NON-NLS-1$
