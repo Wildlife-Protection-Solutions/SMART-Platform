@@ -384,7 +384,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 					return super.getText(element);
 				}
 			});
-			tLayout.setColumnData(dayColumn.getColumn(), new ColumnWeightData(size[i]));
+			((TableColumnLayout)dataTableComp.getLayout()).setColumnData(dayColumn.getColumn(), new ColumnWeightData(size[i]));
 		}
 		
 		
