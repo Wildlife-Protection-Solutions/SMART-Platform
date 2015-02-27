@@ -84,17 +84,23 @@ public class CmXmlToSmartImporter {
 	
 	private List<String> warnings;
 
+	/**
+	 * 
+	 * @param xmlFile
+	 * @param monitor
+	 * @return null if error or monitor cancelled
+	 * @throws Exception
+	 */
 	public ConfigurableModel importXml(File xmlFile, IProgressMonitor monitor) throws Exception {
 		monitor.beginTask(Messages.CmXmlToSmartImporter_ImportingFromXml, 3);
 		org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xmlCm = null;
-		FileInputStream in = new FileInputStream(xmlFile);
-		try {
+		
+		try (FileInputStream in = new FileInputStream(xmlFile)){
 			monitor.subTask(Messages.CmXmlToSmartImporter_Reading);
 			xmlCm = CmXmlManager.readDataModel(in);
 			monitor.worked(1);
-		} finally {
-			in.close();
 		}
+		if (monitor.isCanceled()) return null;
 		if (xmlCm == null) {
 			throw new Exception(Messages.CmXmlToSmartImporter_ReadFile_Error);
 		}
@@ -126,10 +132,13 @@ public class CmXmlToSmartImporter {
 			updateNames(cm, xmlCm.getName());
 			
 			cm.setNodes(processCmNodes(xmlCm.getNodes().getNode(), cm, null, monitor));
+			
+			if (monitor.isCanceled()) return null;
+			
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingTreeNodes);
 			if (xmlCm.getDefaultTrees() != null) {
 				//tree mapping was introduced in 3.2.0, previous version were using different mapping
-				cm.setDefaultTrees(processCmTreeNodes(cm, null, null, xmlCm.getDefaultTrees().getTreeNode()));
+				cm.setDefaultTrees(processCmTreeNodes(cm, null, null, xmlCm.getDefaultTrees().getTreeNode(), monitor));
 			} else if (xmlCm.getTreeNodes() != null) {
 				//if we are here than we are importing data from version less than 3.2
 				//need to perform additional data conversion
@@ -191,7 +200,8 @@ public class CmXmlToSmartImporter {
 		}
 	}
 
-	private List<CmAttributeTreeNode> processCmTreeNodes(ConfigurableModel cm, CmAttribute cmAttribute, CmAttributeTreeNode parent, List<TreeNodeType> xmlNodes) {
+	private List<CmAttributeTreeNode> processCmTreeNodes(ConfigurableModel cm, CmAttribute cmAttribute, CmAttributeTreeNode parent, List<TreeNodeType> xmlNodes, IProgressMonitor monitor) {
+		if (monitor.isCanceled()) return null;
 		List<CmAttributeTreeNode> result = new ArrayList<CmAttributeTreeNode>();
 		for (TreeNodeType xmlNode : xmlNodes) {
 			CmAttributeTreeNode node = new CmAttributeTreeNode();
@@ -210,7 +220,8 @@ public class CmXmlToSmartImporter {
 			}
 			node.setParent(parent);
 			node.setNodeOrder(result.size());
-			node.setChildren(processCmTreeNodes(cm, cmAttribute, node, xmlNode.getChildren()));
+			node.setChildren(processCmTreeNodes(cm, cmAttribute, node, xmlNode.getChildren(), monitor));
+			if (monitor.isCanceled()) return null;
 			result.add(node);
 		}
 		return result;
@@ -259,14 +270,15 @@ public class CmXmlToSmartImporter {
 			cmNode.setNodeOrder(i);
 			cmNode.setParent(parent);
 			cmNode.setChildren(processCmNodes(xmlNode.getNode(), cm, cmNode, monitor));
-			cmNode.setCmAttributes(processAttributes(xmlNode.getAttribute(), cmNode));
+			cmNode.setCmAttributes(processAttributes(xmlNode.getAttribute(), cmNode, monitor));
 			
 			result.add(cmNode);
+			if (monitor.isCanceled()) return null;
 		}
 		return result;
 	}
 	
-	private List<CmAttribute> processAttributes(List<AttributeType> xmlAttrList, CmNode parent) {
+	private List<CmAttribute> processAttributes(List<AttributeType> xmlAttrList, CmNode parent, IProgressMonitor monitor) {
 
 		List<CmAttribute> result = new ArrayList<CmAttribute>();
 		
@@ -279,9 +291,10 @@ public class CmXmlToSmartImporter {
 			cmAttr.setAttribute(fetchAttribute(xmlAttr.getAttributeKey()));
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
-			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode()));
+			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode(), monitor));
 
 			result.add(cmAttr);
+			if (monitor.isCanceled()) return null;
 		}
 		return result;
 	}

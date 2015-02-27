@@ -111,7 +111,11 @@ public class CmSmartToXmlConverter {
 			TreeNodeType xmlNode = new TreeNodeType();
 			setNames(xmlNode.getName(), cmNode.getNames(), llookup);
 			xmlNode.setIsActive(cmNode.getIsActive());
-			xmlNode.setKeyRef(cmNode.getDmTreeNode().getKeyId());
+			if (cmNode.getDmTreeNode() == null){
+				xmlNode.setKeyRef(null);
+			}else{
+				xmlNode.setKeyRef(cmNode.getDmTreeNode().getKeyId());
+			}
 			Attribute dmAttribute = cmNode.getDmAttribute();
 			if (dmAttribute != null) {
 				xmlNode.setAttributeKey(dmAttribute.getKeyId());

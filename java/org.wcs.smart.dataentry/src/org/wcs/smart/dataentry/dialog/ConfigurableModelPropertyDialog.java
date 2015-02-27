@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
@@ -320,10 +321,15 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 	}
 
 	private void exportXml(){
+		final ConfigurableModel cm = (ConfigurableModel) ((IStructuredSelection) modelListViewer.getSelection()).getFirstElement();
+		if (cm == null){
+			return;
+		}
+		
 		FileDialog fd = new FileDialog(this.getShell(), SWT.SAVE);
 		fd.setFilterNames(new String[]{Messages.ConfigurableModelPropertyDialog_XmlFile});
 		fd.setFilterExtensions(new String[]{"*.xml"});; //$NON-NLS-1$
-		
+		fd.setFileName(URLUtils.cleanFilename(cm.getName()));
 		String file = fd.open();
 		if (file == null){
 			//nothing selected
@@ -336,10 +342,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				return;
 			}
 		}
-		final ConfigurableModel cm = (ConfigurableModel) ((IStructuredSelection) modelListViewer.getSelection()).getFirstElement();
-		if (cm == null){
-			return;
-		}
+		
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -391,7 +394,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 			final File f = new File(file);
 			try {
 				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-				pmd.run(true, false, new IRunnableWithProgress() {
+				pmd.run(true, true, new IRunnableWithProgress() {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						try {
