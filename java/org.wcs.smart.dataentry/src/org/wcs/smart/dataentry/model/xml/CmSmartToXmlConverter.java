@@ -72,22 +72,26 @@ public class CmSmartToXmlConverter {
 		session.beginTransaction();
 		try {
 			cm = DataentryHibernateManager.getFullConfigurableModel(cm.getUuid(), session);
+			if (monitor.isCanceled()) return null;
 			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessLanguages);
 			HashMap<String, Language> llookup = processLanguages(cm, xml);
 			setNames(xml.getName(), cm.getNames(), llookup);
 			monitor.worked(1);
+			if (monitor.isCanceled()) return null;
 			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
 			processListItems(cm, xml, llookup, session);
 			monitor.worked(1);
-
+			if (monitor.isCanceled()) return null;
+			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
 			processCmNodes(cm, xml, llookup, session, monitor);
 			monitor.worked(1);
-
+			if (monitor.isCanceled()) return null;
+			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
-			processDefaultTreeNodes(cm, xml, llookup);
+			processDefaultTreeNodes(cm, xml, llookup, monitor);
 			monitor.worked(1);
 		} finally {
 			session.getTransaction().rollback();
@@ -98,15 +102,16 @@ public class CmSmartToXmlConverter {
 
 	private static void processDefaultTreeNodes(ConfigurableModel cm,
 			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup) {
+			HashMap<String, Language> llookup, IProgressMonitor monitor) {
 
 		AttributeCmTreeNodeTypeList defTree = new AttributeCmTreeNodeTypeList();
 		xml.setDefaultTrees(defTree);
-		processCmTreeNodes(cm.getDefaultTrees(), defTree.getTreeNode(), llookup);
+		processCmTreeNodes(cm.getDefaultTrees(), defTree.getTreeNode(), llookup, monitor);
 	}
 
 	private static void processCmTreeNodes(List<CmAttributeTreeNode> cmList,
-			List<TreeNodeType> xmlList, HashMap<String, Language> llookup) {
+			List<TreeNodeType> xmlList, HashMap<String, Language> llookup, IProgressMonitor monitor) {
+		if(monitor.isCanceled()) return;
 		for (CmAttributeTreeNode cmNode : cmList) {
 			TreeNodeType xmlNode = new TreeNodeType();
 			setNames(xmlNode.getName(), cmNode.getNames(), llookup);
@@ -120,7 +125,7 @@ public class CmSmartToXmlConverter {
 			if (dmAttribute != null) {
 				xmlNode.setAttributeKey(dmAttribute.getKeyId());
 			}
-			processCmTreeNodes(cmNode.getChildren(), xmlNode.getChildren(), llookup);
+			processCmTreeNodes(cmNode.getChildren(), xmlNode.getChildren(), llookup, monitor);
 			xmlList.add(xmlNode);
 		}
 	}
@@ -206,7 +211,7 @@ public class CmSmartToXmlConverter {
 					}
 					at.getOption().add(aot);
 				}
-				processCmTreeNodes(ca.getTree(), at.getTreeNode(), llookup);
+				processCmTreeNodes(ca.getTree(), at.getTreeNode(), llookup, monitor);
 				nt.getAttribute().add(at);
 			}
 		}
@@ -214,6 +219,7 @@ public class CmSmartToXmlConverter {
 		if (node.getChildren() != null) {
 			for (CmNode cn : node.getChildren()) {
 				processCmNode(cn, nt.getNode(), llookup, session, monitor);
+				if (monitor.isCanceled()) return;
 			}
 		}
 		xmlNodes.add(nt);

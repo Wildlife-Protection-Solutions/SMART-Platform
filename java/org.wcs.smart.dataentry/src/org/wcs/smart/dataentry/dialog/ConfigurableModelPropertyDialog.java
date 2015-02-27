@@ -345,7 +345,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		
 		final ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
-			pmd.run(true, false, new IRunnableWithProgress() {
+			pmd.run(true, true, new IRunnableWithProgress() {
 
 				@Override
 				public void run(IProgressMonitor monitor)
@@ -356,11 +356,10 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 						org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml = CmSmartToXmlConverter.convert(cm, monitor);
 						
 						monitor.subTask(Messages.ConfigurableModelPropertyDialog_Writing);
-						FileOutputStream fout = new FileOutputStream(f);
-						try{
+						if (xml == null || monitor.isCanceled()) return;
+						
+						try(FileOutputStream fout = new FileOutputStream(f)){
 							CmXmlManager.writeDataModel(xml, fout);
-						}finally{
-							fout.close();
 						}
 						monitor.done();
 						Display.getDefault().syncExec(new Runnable(){
