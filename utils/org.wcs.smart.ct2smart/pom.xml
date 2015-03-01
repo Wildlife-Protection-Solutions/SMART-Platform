@@ -11,7 +11,7 @@
 	<properties>
 		<package.dir>${project.build.directory}/../Target/${project.name}.${project.version}</package.dir>
 		<package.dir.lib>${project.build.directory}/../Target/${project.name}.${project.version}/lib</package.dir.lib>
-		<geotools.version>9.0-M0</geotools.version>
+		<geotools.version>11.2</geotools.version>
 	</properties>
 
 	<!-- for swt -->
