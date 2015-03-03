@@ -220,7 +220,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		txtDescription.setEditable(false);
 		txtDescription.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 		((GridData)txtDescription.getLayoutData()).heightHint=80;
-//		((GridData)txtDescription.getLayoutData()).widthHint=100;
+		((GridData)txtDescription.getLayoutData()).widthHint=100;
 		Hyperlink descLink = createEditLink(toolkit, content, PanelType.DESCRIPTION); 
 		descLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
