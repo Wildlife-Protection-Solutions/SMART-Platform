@@ -117,6 +117,7 @@ public class QueryEditorTableContent {
 	 * @param items new results; null if query cancelled and nothing to display
 	 */
 	public void setTableData(final IPagedQueryResultSet items) {
+		if (tableComp.isDisposed()) return;
 		tableComp.getDisplay().asyncExec(new Runnable() {
 			@Override
 			public void run() {
