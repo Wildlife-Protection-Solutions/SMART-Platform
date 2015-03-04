@@ -23,15 +23,24 @@ package org.wcs.smart.intelligence.informant.editor;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.ui.UserNamePasswordDialog;
 
 /**
  * Dialog to input user password.
@@ -69,6 +78,20 @@ public class PasswordInputDialog extends Dialog {
 		
 		txtPassword = new Text(composite, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		((GridData)txtPassword.getLayoutData()).widthHint = 200;
+		
+		Link lnkForgotPwd = new Link(composite, SWT.NONE);
+		lnkForgotPwd.setText("<a>" + Messages.PasswordInputDialog_forgotpasslink + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
+		lnkForgotPwd.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false,2,1));
+		lnkForgotPwd.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (handleForgotPassword()){
+					password = null;
+					close();
+				}
+			}
+		});
 
 		super.getShell().setText(Messages.PasswordInputDialog_Title);
 		return parent;
@@ -92,4 +115,32 @@ public class PasswordInputDialog extends Dialog {
 	public char[] getPassword() {
 		return password;
 	}
+	
+	private boolean handleForgotPassword(){
+		if (MessageDialog.openQuestion(getShell(), Messages.InformantDataEditor_ResetDialog_Title,
+				Messages.InformantDataEditor_ResetDialog_Message)) {
+			//user need to enter login/password to remove secure data
+			UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(),
+					Messages.InformantDataEditor_UserNameConfirmation_Title,
+					Messages.InformantDataEditor_UserNameConfirmation_Message,
+					Messages.InformantDataEditor_UserNameConfirmation_Button);
+			if (dialog.open() == Window.CANCEL) {
+				return false;
+			}
+			
+			if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
+				&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)) {
+				
+				MessageDialog.openError(Display.getCurrent().getActiveShell(), 
+						Messages.InformantDataEditor_ConfirmationError_Title, 
+						Messages.InformantDataEditor_ConfirmationError_Message);
+				return false;
+			}
+			
+			IntelligenceHibernateManager.clearInformantsEncrptedData();
+			return true;
+		}
+		return false;
+	}
+	
 }
