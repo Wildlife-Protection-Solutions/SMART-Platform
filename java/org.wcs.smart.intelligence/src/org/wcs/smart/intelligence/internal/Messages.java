@@ -176,6 +176,8 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_ChangePassword_Error;
 
+	public static String InformantDataEditor_columnstooltip;
+
 	public static String InformantDataEditor_ConfirmationError_Message;
 
 	public static String InformantDataEditor_ConfirmationError_Title;
@@ -186,13 +188,23 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_DeleteInformant;
 
+	public static String InformantDataEditor_deletetooltip;
+
+	public static String InformantDataEditor_edittooltip;
+
 	public static String InformantDataEditor_ForgotPassword;
+
+	public static String InformantDataEditor_logintooltip;
 
 	public static String InformantDataEditor_LogoutDialog_Message;
 
 	public static String InformantDataEditor_LogoutDialog_Title;
 
+	public static String InformantDataEditor_newtooltip;
+
 	public static String InformantDataEditor_Note;
+
+	public static String InformantDataEditor_passtooltip;
 
 	public static String InformantDataEditor_ResetDialog_Message;
 
@@ -539,6 +551,8 @@ public class Messages extends NLS {
 	public static String NewIntelligenceWizard_SaveIntelligenceJob_Title;
 
 	public static String OpenIntelligenceHandler_PlanEditor;
+
+	public static String PasswordInputDialog_forgotpasslink;
 
 	public static String PasswordInputDialog_Password;
 

@@ -61,6 +61,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISaveablePart2;
+import org.eclipse.ui.IWorkbenchPartConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
@@ -80,7 +81,6 @@ import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
-import org.wcs.smart.ui.UserNamePasswordDialog;
 
 /**
  * Editor for viewing informant application data.
@@ -92,6 +92,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 	
 	public static final String ID = "org.wcs.smart.intelligence.informant.InformantDataEditor"; //$NON-NLS-1$
 
+	private static final String LOGINTOOLTIP = Messages.InformantDataEditor_logintooltip;
 	/**
 	 * Secured informant columns
 	 * 
@@ -140,11 +141,12 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 	private InformantSorter informantSorter;
 	
 	private Composite upperCmp;
-	private Button btnLogin;
+	private Composite linkComp;
+	private Hyperlink btnLogin;
 	private Button btnEdit;
 	private Button btnAdd;
 	private Button btnDelete;
-	private Button btnChangePwd;
+	private Hyperlink btnChangePwd;
 	private Button btnShow;
 	
 	private Map<TableColumn, Integer> securedColumnsMap = new HashMap<TableColumn, Integer>();
@@ -172,63 +174,32 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		main.setLayout(layout);
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
-		upperCmp = toolkit.createComposite(main);
-		layout = new GridLayout(7, false);
-		//layout.marginHeight = layout.marginWidth = layout.horizontalSpacing = 0;
-		upperCmp.setLayout(layout);
-		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Composite btnComp = toolkit.createComposite(upperCmp);
-		btnComp.setLayout(new GridLayout(4, true));
-		((GridLayout)btnComp.getLayout()).marginWidth = 0;
-		((GridLayout)btnComp.getLayout()).marginHeight = 0;
-		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
-		btnLogin = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
-		btnLogin.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
+		/* login/logout security */
+		linkComp = toolkit.createComposite(main);
+		linkComp.setLayout(new GridLayout(3, false));
+		((GridLayout)linkComp.getLayout()).marginTop = 0;
+		((GridLayout)linkComp.getLayout()).marginBottom = 5;
+		((GridLayout)linkComp.getLayout()).marginWidth = 0;
+		linkComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		btnLogin = toolkit.createHyperlink(linkComp, Messages.InformantDataEditor_Button_SetPassword, SWT.PUSH);
+		btnLogin.addHyperlinkListener(new HyperlinkAdapter(){
+			public void linkActivated(HyperlinkEvent e) {
 				performLoginOrLogout();
 			}
 		});
+		
 		btnLogin.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnLogin.setToolTipText(LOGINTOOLTIP);
 
-		btnAdd = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Add, SWT.PUSH);
-		btnAdd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performAdd();
-			}
-		});
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
-		btnEdit = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
-		btnEdit.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performEdit();
-			}
-		});
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
-		btnDelete = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Delete, SWT.PUSH);
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				performDelete();
-			}
-		});
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-
-		btnChangePwd = toolkit.createButton(upperCmp, Messages.InformantDataEditor_ChangePassword, SWT.PUSH);
-		btnChangePwd.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
+		btnChangePwd = toolkit.createHyperlink(linkComp, Messages.InformantDataEditor_ChangePassword, SWT.PUSH);
+		btnChangePwd.setToolTipText(Messages.InformantDataEditor_passtooltip);
+		btnChangePwd.addHyperlinkListener(new HyperlinkAdapter(){
+			public void linkActivated(HyperlinkEvent e) {
 				performChangePassword();
 			}
 		});
 		
-		btnShow = toolkit.createButton(upperCmp, Messages.InformantDataEditor_ShowCoulumns, SWT.CHECK);
+		btnShow = toolkit.createButton(linkComp, Messages.InformantDataEditor_ShowCoulumns, SWT.CHECK);
 		btnShow.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
 		btnShow.setSelection(true);
 		btnShow.addSelectionListener(new SelectionAdapter() {
@@ -237,16 +208,57 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 				showSecuredColumns(btnShow.getSelection());
 			}
 		});
+		btnShow.setToolTipText(Messages.InformantDataEditor_columnstooltip);
 		
-		Hyperlink lnkForgotPwd = toolkit.createHyperlink(upperCmp, Messages.InformantDataEditor_ForgotPassword, SWT.WRAP);
-		lnkForgotPwd.setLayoutData(new GridData(SWT.RIGHT, SWT.BOTTOM, true, false));
-		lnkForgotPwd.addHyperlinkListener(new HyperlinkAdapter() {
+		
+		/* add edit delete */
+		upperCmp = toolkit.createComposite(main);
+		layout = new GridLayout(1, false);
+		layout.marginWidth = layout.marginHeight = 0;
+		upperCmp.setLayout(layout);
+		upperCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Composite btnComp = toolkit.createComposite(upperCmp);
+		btnComp.setLayout(new GridLayout(3, true));
+		((GridLayout)btnComp.getLayout()).marginWidth = 0;
+		((GridLayout)btnComp.getLayout()).marginHeight = 0;
+		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		int sizeHint = 80;
+		btnAdd = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Add, SWT.PUSH);
+		btnAdd.setToolTipText(Messages.InformantDataEditor_newtooltip);
+		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
-			public void linkActivated(HyperlinkEvent e) {
-				handleForgotPassword();
+			public void widgetSelected(SelectionEvent e) {
+				performAdd();
 			}
 		});
-
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)btnAdd.getLayoutData()).widthHint = sizeHint;
+		
+		btnEdit = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Edit, SWT.PUSH);
+		btnEdit.setToolTipText(Messages.InformantDataEditor_edittooltip);
+		btnEdit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performEdit();
+			}
+		});
+		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)btnEdit.getLayoutData()).widthHint = sizeHint;
+		
+		btnDelete = toolkit.createButton(btnComp, Messages.InformantDataEditor_Button_Delete, SWT.PUSH);
+		btnDelete.setToolTipText(Messages.InformantDataEditor_deletetooltip);
+		btnDelete.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				performDelete();
+			}
+		});
+		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)btnDelete.getLayoutData()).widthHint = sizeHint;
+		
+		
 		
 		viewer = new TableViewer(main, SWT.BORDER | SWT.VIRTUAL | SWT.FULL_SELECTION | SWT.MULTI);
 		toolkit.paintBordersFor(viewer.getTable());
@@ -309,17 +321,22 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 //		btnAdd.setEnabled(isDecrypted || (!isDecrypted && isPasswordSet && isEmptyInput));
 		btnEdit.setEnabled(selection != null && !selection.isEmpty());
 		btnDelete.setEnabled(selection != null && !selection.isEmpty());
+		btnLogin.setToolTipText(null);
 		if (isEmptyInput) {
 			btnLogin.setText(isPasswordSet ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_SetPassword);
 			btnShow.setVisible(isPasswordSet);
 			btnChangePwd.setVisible(isPasswordSet);
 		} else {
 			btnLogin.setText(hasDecrypted ? Messages.InformantDataEditor_Button_Logout : Messages.InformantDataEditor_Button_Login);
+			if (!hasDecrypted){
+				btnLogin.setToolTipText(LOGINTOOLTIP);
+			}
 			btnShow.setVisible(hasDecrypted);
 			btnChangePwd.setVisible(hasDecrypted);
 		}
 		showSecuredColumns(btnShow.getVisible() && btnShow.getSelection());
 		upperCmp.layout();
+		linkComp.layout();
 	}
 
 	private boolean isEmptySecureInput() {
@@ -349,30 +366,6 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		}
 		viewer.setInput(informantList);
 	}
-
-	protected void handleForgotPassword() {
-		if (MessageDialog.openQuestion(getSite().getShell(), Messages.InformantDataEditor_ResetDialog_Title, Messages.InformantDataEditor_ResetDialog_Message)) {
-			//user need to enter login/password to remove secure data
-			UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(),
-					Messages.InformantDataEditor_UserNameConfirmation_Title,
-					Messages.InformantDataEditor_UserNameConfirmation_Message,
-					Messages.InformantDataEditor_UserNameConfirmation_Button);
-			if (dialog.open() == Window.CANCEL) {
-				return;
-			}
-			
-			if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
-				&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)) {
-				
-				MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.InformantDataEditor_ConfirmationError_Title, Messages.InformantDataEditor_ConfirmationError_Message);
-				return;
-			}
-			
-			IntelligenceHibernateManager.clearInformantsEncrptedData();
-			loadData();
-			updateButtons();
-		}
-	}
 	
 	protected void performLoginOrLogout() {
 		boolean isEmptyInput = isEmptySecureInput();
@@ -386,7 +379,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 			if (InformantAesManager.getInstance().containsDecrypted()) {
 				performLogout();
 			} else {
-				performLogin();
+				performLogin(0);
 			}
 		}
 	}
@@ -400,16 +393,27 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		}
 	}
 
-	private void performLogin() {
+	private void performLogin(int attempts) {
 		PasswordInputDialog dialog = new PasswordInputDialog(getSite().getShell());
 		if (dialog.open() == Window.OK) {
-			InformantAesManager manager = InformantAesManager.getInstance();
-			manager.setPassword(dialog.getPassword());
-			viewer.refresh();
-			if (manager.isPasswordSet() && !manager.containsDecrypted()) {
-				MessageDialog.openError(getSite().getShell(), Messages.InformantDataEditor_WrongPassword_Title, Messages.InformantDataEditor_WrongPassword_Message);
+			if (dialog.getPassword() == null){
+				loadData();
+				updateButtons();
+			}else{
+				InformantAesManager manager = InformantAesManager.getInstance();
+				manager.setPassword(dialog.getPassword());
+				viewer.refresh();
+				if (manager.isPasswordSet() && !manager.containsDecrypted()) {
+					MessageDialog.openError(getSite().getShell(), Messages.InformantDataEditor_WrongPassword_Title, Messages.InformantDataEditor_WrongPassword_Message);
+					if (attempts < 10){
+						//try to login again
+						performLogin(attempts + 1);
+					}
+					return;
+				}
+				updateButtons();
 			}
-			updateButtons();
+			firePropertyChange(IWorkbenchPartConstants.PROP_DIRTY);
 		}
 	}
 	
