@@ -126,9 +126,9 @@ public class StyleManager {
 				writer.endArray();
 			}
 			writer.endArray();
-			String value = sw.toString();
-			return value;
 		}
+		String value = sw.toString();
+		return value;
 		
 	}
 	
