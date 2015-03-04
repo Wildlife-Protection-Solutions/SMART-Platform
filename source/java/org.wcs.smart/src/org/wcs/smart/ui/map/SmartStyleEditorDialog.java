@@ -120,6 +120,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 	private Job loadStylesJob;
 	private SmartStyle lastSelectedSs;
 	private byte[] currentLayerSs;
+	private boolean firstSelectionEvents = true;
 
 	/**
 	 * Image descriptor for enabled clear button.
@@ -235,6 +236,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		lstSmart.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
+				if (!firstSelectionEvents) return;
 				updateBlackboard();
 			}
 		});
@@ -598,8 +600,12 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
             
             if (updateLayer){
             	getSelectedLayer().apply();
-            
-            	lstSmart.setSelection(new StructuredSelection(selection));
+            	try{
+            		firstSelectionEvents = false;
+            		lstSmart.setSelection(new StructuredSelection(selection));
+            	}finally{
+            		firstSelectionEvents = true;	
+            	}
             	lstSmart.refresh();
             }
             return true;
