@@ -1,0 +1,83 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+	<xs:complexType name="MappedAttributeValue">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="i" use="optional" />
+				<xs:attribute type="xs:string" name="n" use="optional" />
+				<xs:attribute type="xs:string" name="mapTo" use="optional" />
+				<xs:attribute type="xs:boolean" name="ignore" use="optional" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:simpleType name="MappedAttributeType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="IGNORE" />
+			<xs:enumeration value="TEXT" />
+			<xs:enumeration value="NUMERIC" />
+			<xs:enumeration value="BOOL" />
+			<xs:enumeration value="REF" />
+			<xs:enumeration value="REF_BOOL" />
+			<xs:enumeration value="CATEGORY" />
+			<xs:enumeration value="META_DATE" />
+			<xs:enumeration value="META_TIME" />
+			<xs:enumeration value="META_LAT" />
+			<xs:enumeration value="META_LON" />
+			<xs:enumeration value="META_MEMBERS" />
+			<xs:enumeration value="META_MANDATE" />
+			<xs:enumeration value="META_COMMENT" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="ExtraAttribute">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="attributeKey" use="optional" />
+				<xs:attribute type="xs:string" name="valueKey" use="optional" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="MappedAttribute">
+		<xs:sequence>
+			<xs:element name="MappedAttributeValue" type="MappedAttributeValue" maxOccurs="unbounded" minOccurs="0" />
+			<xs:element name="ExtraAttribute" type="ExtraAttribute" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute type="MappedAttributeType" name="type" use="optional" />
+		<xs:attribute type="xs:string" name="i" use="optional" />
+		<xs:attribute type="xs:string" name="n" use="optional" />
+		<xs:attribute type="xs:string" name="mapTo" use="optional" />
+		<xs:attribute type="xs:string" name="categoryKey" use="optional" />
+	</xs:complexType>
+
+	<xs:complexType name="CategoryMap">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="ai" use="optional" />
+				<xs:attribute type="xs:string" name="an" use="optional" />
+				<xs:attribute type="xs:string" name="vi" use="optional" />
+				<xs:attribute type="xs:string" name="vn" use="optional" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
+	<xs:complexType name="MappedCategory">
+		<xs:sequence>
+			<xs:element name="CategoryMap" type="CategoryMap" maxOccurs="unbounded" minOccurs="0" />
+			<xs:element name="ExtraAttribute" type="ExtraAttribute" maxOccurs="unbounded" minOccurs="0" />
+		</xs:sequence>
+		<xs:attribute type="xs:string" name="categoryKey" use="optional" />
+		<xs:attribute type="xs:boolean" name="ignore" use="optional" />
+	</xs:complexType>
+
+  <xs:element name="SmartMapping">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="MappedAttribute" type="MappedAttribute" maxOccurs="unbounded" minOccurs="0" />
+        <xs:element name="MappedCategory" type="MappedCategory" maxOccurs="unbounded" minOccurs="0" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
+
