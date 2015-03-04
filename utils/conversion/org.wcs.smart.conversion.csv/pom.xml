@@ -1,0 +1,60 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.wcs.smart.conversion.csv</groupId>
+	<artifactId>Csv2Smart</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.0</version>
+	<name>Csv2Smart</name>
+
+	<!-- for swt -->
+	<!-- see http://vzurczak.wordpress.com/2012/08/23/using-swt-and-jface-with-maven-in-non-osgi-projects/ -->
+	<repositories>
+		<repository>
+			<id>swt-repo</id>
+			<url>https://swt-repo.googlecode.com/svn/repo/</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<sourceDirectory>src/</sourceDirectory>
+	</build>
+
+	<dependencies>
+		<!-- SWT -->
+		<dependency>
+			<groupId>org.eclipse.swt</groupId>
+			<artifactId>org.eclipse.swt.win32.win32.x86_64</artifactId>
+			<version>3.7.2</version>
+		</dependency>
+		<!-- JFace + Eclipse's JFace extensions -->
+		<dependency>
+			<groupId>org.eclipse.ui</groupId>
+			<artifactId>org.eclipse.ui.workbench</artifactId>
+			<version>3.7.1.v20120104-1859</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.core</groupId>
+			<artifactId>org.eclipse.core.jobs</artifactId>
+			<version>3.5.100</version>
+		</dependency>
+		
+		<dependency>
+        	<groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
+            <version>10.11.1.1</version>
+		</dependency>
+        <dependency>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <version>1.12</version>
+        </dependency>
+        <dependency>
+            <groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+            <version>11.2</version>
+        </dependency>
+	</dependencies>
+</project>
