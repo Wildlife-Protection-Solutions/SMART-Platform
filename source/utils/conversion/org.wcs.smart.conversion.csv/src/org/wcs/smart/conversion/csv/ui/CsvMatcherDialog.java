@@ -22,7 +22,12 @@
 package org.wcs.smart.conversion.csv.ui;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
+import java.text.MessageFormat;
+import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
@@ -32,12 +37,17 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.conversion.csv.tool.Csv2DbLoader;
+import org.wcs.smart.conversion.csv.tool.MappingValidator;
 import org.wcs.smart.conversion.csv.tool.MatchFileBuilder;
+import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.SmartMapping;
+import org.wcs.smart.conversion.tool.MatchSession;
+import org.wcs.smart.conversion.ui.ReportDialog;
 import org.wcs.smart.conversion.ui.XmlFileComposite;
 import org.wcs.smart.conversion.util.ConnectionUtil;
 import org.wcs.smart.conversion.util.FileUtil;
@@ -52,6 +62,8 @@ public class CsvMatcherDialog extends Composite {
 	
 	private CsvFileComposite csvNewRaw;
 	private XmlFileComposite xmlNewDatamodel;
+	
+	private XmlFileComposite xmlResumeMapping;
 
 	public CsvMatcherDialog(Shell shell) {
 		super(shell, SWT.NONE);
@@ -100,25 +112,33 @@ public class CsvMatcherDialog extends Composite {
 		resumeGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		resumeGroup.setLayout(new GridLayout(1, false));
 
-//		xmlResumeMapping = new XmlFileComposite(resumeGroup);
-//		xmlResumeMapping.setLabelText("Data Matching XML: ");
-//
-//		xmlResumeDatamodel = new XmlFileComposite(resumeGroup);
-//		xmlResumeDatamodel.setLabelText("SMART Datamodel XML:");
-		
+		xmlResumeMapping = new XmlFileComposite(resumeGroup);
+		xmlResumeMapping.setLabelText("Data Matching XML: ");
+
+		Button btnValidate = new Button(resumeGroup, SWT.PUSH);
+		btnValidate.setText("Validate mapping");
+		btnValidate.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
+		btnValidate.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				validateMapping();
+			}
+		});
+
 		Button btnResume = new Button(resumeGroup, SWT.PUSH);
-		btnResume.setText("Resume Session");
+		btnResume.setText("Resume");
 		btnResume.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
 		btnResume.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-//				resumeSession();
+//				validateMapping();
 			}
 		});
-
+		
 		//TODO: remove after testing is complete
 		csvNewRaw.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\csv2smart\\Afi_gorrila.CSV");
-//		xmlResumeDatamodel.setFileName("d:\\dev\\data\\mist\\datamodel.xml");
+		xmlNewDatamodel.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\V2_nigeria data model.xml");
+		xmlResumeMapping.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\csv2smart\\mapping4_in.xml");
 	}
 
 	protected void loadCsv() {
@@ -150,7 +170,7 @@ public class CsvMatcherDialog extends Composite {
 			MatchFileBuilder matchBuilder = new MatchFileBuilder();
 			SmartMapping csv2Smart = matchBuilder.create(c);
 			
-			FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+			FileDialog dlg = new FileDialog(getShell(), SWT.SAVE);
 			dlg.setFilterNames(new String[] {"XML file"});
 			dlg.setFilterExtensions(new String[] {"*.xml"}); //$NON-NLS-1$
 			String fn = dlg.open();
@@ -161,7 +181,7 @@ public class CsvMatcherDialog extends Composite {
 				try {
 					FileUtil.write(new File(fn), csv2Smart);
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
 					e.printStackTrace();
 				}
 			}
@@ -170,4 +190,26 @@ public class CsvMatcherDialog extends Composite {
 		}
 	}
 	
+	protected void validateMapping() {
+		MatchSession session = new MatchSession();
+		try {
+			session.setSmartMapping(FileUtil.loadSmartMapping(xmlResumeMapping.getFile()));
+			session.setDataModel(FileUtil.loadDataModel(xmlNewDatamodel.getFile()));
+			session.setConnection(ConnectionUtil.getConnection());
+			
+			DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
+			MappingValidator validator = new MappingValidator();
+			List<String> errors = validator.validate(session.getSmartMapping(), dmLookup);
+			if (errors.isEmpty()) {
+				MessageDialog.openInformation(getShell(), "Validation results", "No errors found.");
+			} else {
+				ReportDialog report = new ReportDialog(getShell(), "Validation results", MessageFormat.format("{0} errors found during validation:", errors.size()), errors);
+				report.open();
+			}
+		} catch (JAXBException | IOException e) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
+			e.printStackTrace();
+		}
+	}
+
 }
