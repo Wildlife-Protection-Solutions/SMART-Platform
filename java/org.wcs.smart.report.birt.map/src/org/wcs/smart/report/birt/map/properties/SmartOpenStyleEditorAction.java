@@ -21,15 +21,12 @@
  */
 package org.wcs.smart.report.birt.map.properties;
 
-import java.util.Iterator;
-
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.locationtech.udig.project.internal.Layer;
 import org.locationtech.udig.project.internal.ProjectFactory;
 import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.locationtech.udig.project.internal.StyleEntry;
 import org.locationtech.udig.style.sld.editor.EditorPageManager;
 import org.wcs.smart.udig.style.StyleManager;
 

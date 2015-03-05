@@ -131,12 +131,7 @@ public class ReportSmartStyleEditorDialog extends SmartStyleEditorDialog impleme
         okButton.addListener(SWT.Selection, this);
         
         layout.numColumns=3;
-    }
-
-    protected void setReturnCode(int code){
-    	super.setReturnCode(code);
-    }
-    
+    }  
     
     @Override
     public void setExitButtonState() {

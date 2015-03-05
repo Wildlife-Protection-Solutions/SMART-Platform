@@ -441,10 +441,12 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
             break;
         case StyleEditorDialog.OK_ID:
             if( doApply(true) ){
+            	setReturnCode(OK);
                 close();
             }
             break;
         case StyleEditorDialog.CANCEL_ID:
+        	setReturnCode(CANCEL);
             close();
             break;
         case SAVE_ID:
