@@ -124,7 +124,7 @@ public class CsvMatcherDialog extends Composite {
 		xmlDatamodel.setLabelText("SMART Datamodel XML:");
 		
 		xmlMapping = new XmlUpdateFileComposite(generateGroup);
-		xmlMapping.setLabelText("Data Matching XML: ");
+		xmlMapping.setLabelText("Data Mapping XML: ");
 
 		btnValidateMap = new Button(generateGroup, SWT.PUSH);
 		btnValidateMap.setText("Validate mapping");
@@ -157,8 +157,8 @@ public class CsvMatcherDialog extends Composite {
 		});
 		
 		//TODO: remove after testing is complete
-		xmlDatamodel.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\V2_nigeria data model.xml");
-		xmlMapping.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\csv2smart\\mapping4_in.xml");
+//		xmlDatamodel.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\V2_nigeria data model.xml");
+//		xmlMapping.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\csv2smart\\mapping4_in.xml");
 
 		updateState();
 	}
