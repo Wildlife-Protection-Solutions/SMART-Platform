@@ -283,7 +283,7 @@ public class CsvMatcherDialog extends Composite {
 	private int getDbRowCount() {
 		Connection c = ConnectionUtil.getConnection();
 		try {
-			ResultSet rs = c.createStatement().executeQuery("select count(*) from csv_to_smart.csv");
+			ResultSet rs = c.createStatement().executeQuery("select count(*) from csv_to_smart.csv"); //$NON-NLS-1$
 			if (rs.next()) {
 				return rs.getInt(1);
 			}
@@ -300,6 +300,8 @@ public class CsvMatcherDialog extends Composite {
 		
 		btnGenMap.setEnabled(dbRecordsCount > 0);
 		btnValidateMap.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
+		btnGenMeta.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
+		btnGenPatrol.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 	}
 	
 	private class XmlUpdateFileComposite extends XmlFileComposite {
