@@ -111,9 +111,8 @@ public class SmartLayerStyleInterceptor implements LayerInterceptor {
 				
 				if (styleString[0] != null) {
 					StyleBlackboard sb = StyleManager.INSTANCE.fromString(styleString[0]);
-					layer.getStyleBlackboard().clear();
-					layer.getStyleBlackboard().addAll(sb);
-					layer.getStyleBlackboard().put(SmartLayerStyle.STYLE_ID, styleUuid);
+					sb.put(SmartLayerStyle.STYLE_ID,  styleUuid);
+					((Layer)layer).setStyleBlackboard(sb);
 				}
 			} catch (Exception ex) {
 				SmartPlugIn.log(Messages.SmartLayerStyleInterceptor_StyleError + ex.getMessage(), ex);
