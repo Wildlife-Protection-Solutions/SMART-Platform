@@ -23,6 +23,10 @@ package org.wcs.smart.conversion.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @author elitvin
@@ -45,7 +49,19 @@ public class ConnectionUtil {
 			Connection conn = DriverManager.getConnection(dbURL, "smart_admin", "smart_derby"); //$NON-NLS-1$ //$NON-NLS-2$
 			return conn;
 		} catch (Exception ex) {
-			throw new RuntimeException("Could connect to database: " + ex.getMessage(), ex); //$NON-NLS-1$
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not connect to database. See console or log for details.");
+			throw new RuntimeException("Could not connect to database: " + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+	}
+
+	public static void closeConnection() {
+		if (connection != null) {
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	

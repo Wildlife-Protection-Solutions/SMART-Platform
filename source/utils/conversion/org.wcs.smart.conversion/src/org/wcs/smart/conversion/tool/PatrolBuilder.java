@@ -33,8 +33,6 @@ import org.wcs.smart.conversion.model.MappedCategory;
 import org.wcs.smart.conversion.tag.TagA;
 import org.wcs.smart.conversion.tag.TagS;
 import org.wcs.smart.conversion.tag.TagT;
-import org.wcs.smart.conversion.tool.MatchSession;
-import org.wcs.smart.conversion.tool.TeamMembersParser;
 import org.wcs.smart.conversion.util.CoordinateUtil;
 import org.wcs.smart.conversion.util.Ct2AttributeTypeUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
@@ -56,6 +54,7 @@ public class PatrolBuilder {
 	
 	private static final String LANGUAGE_CODE = "en";
 
+	private static final DateFormat df_dot = new SimpleDateFormat("dd.MM.yyyy"); //$NON-NLS-1$
 	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
 	
 	private MatchSession session;
@@ -203,7 +202,7 @@ public class PatrolBuilder {
 						break;
 					}
 					case META_DATE:
-						wpDate = df.parse(a.getV());
+						wpDate = parseDate(a.getV());
 						xmlDate = toXmlDate(wpDate);
 						break;
 					case META_TIME: {
@@ -479,7 +478,7 @@ public class PatrolBuilder {
 		Time time;
 		double x, y;
 		for (TagT t : tList) {
-			date = df.parse(t.getDate());
+			date = parseDate(t.getDate());
 			time = Time.valueOf(t.getTime());
 			y = Double.valueOf(t.getLatitude());
 			x = Double.valueOf(t.getLongitude());
@@ -512,6 +511,18 @@ public class PatrolBuilder {
 			System.err.println("ERROR: No category defined for following items: " + info);
 		}
 		return c;
+	}
+
+	private Date parseDate(String dateStr) throws ParseException {
+		if (dateStr == null || dateStr.isEmpty()) {
+			return null;
+		} else if (dateStr.matches("[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{4}")) { //$NON-NLS-1$
+			return df_dot.parse(dateStr);
+		} else if (dateStr.matches("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}")) { //$NON-NLS-1$
+			return df.parse(dateStr);
+		}
+		System.err.println("Cannot parse date: " + dateStr);
+		throw new ParseException(dateStr, 0);
 	}
 	
 	//copy from SmartUtil

@@ -24,6 +24,8 @@ package org.wcs.smart.conversion.csv.ui;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -37,11 +39,15 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.conversion.csv.tool.Csv2DbLoader;
+import org.wcs.smart.conversion.csv.tool.CsvMetaExtractor;
+import org.wcs.smart.conversion.csv.tool.CsvPatrolExtractor;
 import org.wcs.smart.conversion.csv.tool.MappingValidator;
 import org.wcs.smart.conversion.csv.tool.MatchFileBuilder;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
@@ -60,10 +66,16 @@ import org.wcs.smart.conversion.util.FileUtil;
  */
 public class CsvMatcherDialog extends Composite {
 	
-	private CsvFileComposite csvNewRaw;
-	private XmlFileComposite xmlNewDatamodel;
+	private Label dbLabel;
+	private int dbRecordsCount = 0;
 	
-	private XmlFileComposite xmlResumeMapping;
+	private XmlFileComposite xmlDatamodel;
+	private XmlFileComposite xmlMapping;
+	
+	private Button btnGenMap;
+	private Button btnValidateMap;
+	private Button btnGenMeta;
+	private Button btnGenPatrol;
 
 	public CsvMatcherDialog(Shell shell) {
 		super(shell, SWT.NONE);
@@ -76,90 +88,97 @@ public class CsvMatcherDialog extends Composite {
 
 		this.setSize(840, 640);
 
-		Group fullGroup = new Group(this, SWT.NONE);
-		fullGroup.setText("New matching session");
-		fullGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
-		fullGroup.setLayout(new GridLayout(1, false));
-
-		csvNewRaw = new CsvFileComposite(fullGroup);
-		csvNewRaw.setLabelText("CSV File: ");
-
-		xmlNewDatamodel = new XmlFileComposite(fullGroup);
-		xmlNewDatamodel.setLabelText("SMART Datamodel XML:");
+		Group dataGroup = new Group(this, SWT.NONE);
+		dataGroup.setText("CSV data configuration");
+		dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		dataGroup.setLayout(new GridLayout(1, false));
 		
-		Button btnStart = new Button(fullGroup, SWT.PUSH);
-		btnStart.setText("Load CSV");
-		btnStart.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
-		btnStart.addSelectionListener(new SelectionAdapter() {
+		dbLabel = new Label(dataGroup, SWT.NONE);
+		
+		Button btnLoadCsv = new Button(dataGroup, SWT.PUSH);
+		btnLoadCsv.setText("Load data from CSV");
+		btnLoadCsv.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnLoadCsv.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				loadCsv();
 			}
 		});
 
-		Button btnMap = new Button(fullGroup, SWT.PUSH);
-		btnMap.setText("Create mapping");
-		btnMap.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
-		btnMap.addSelectionListener(new SelectionAdapter() {
+		btnGenMap = new Button(dataGroup, SWT.PUSH);
+		btnGenMap.setText("Generate mapping template");
+		btnGenMap.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnGenMap.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				createMapping();
 			}
 		});
 		
-		Group resumeGroup = new Group(this, SWT.NONE);
-		resumeGroup.setText("Previous matching session");
-		resumeGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
-		resumeGroup.setLayout(new GridLayout(1, false));
+		Group generateGroup = new Group(this, SWT.NONE);
+		generateGroup.setText("Patrol generation");
+		generateGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
+		generateGroup.setLayout(new GridLayout(1, false));
 
-		xmlResumeMapping = new XmlFileComposite(resumeGroup);
-		xmlResumeMapping.setLabelText("Data Matching XML: ");
+		xmlDatamodel = new XmlUpdateFileComposite(generateGroup);
+		xmlDatamodel.setLabelText("SMART Datamodel XML:");
+		
+		xmlMapping = new XmlUpdateFileComposite(generateGroup);
+		xmlMapping.setLabelText("Data Matching XML: ");
 
-		Button btnValidate = new Button(resumeGroup, SWT.PUSH);
-		btnValidate.setText("Validate mapping");
-		btnValidate.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
-		btnValidate.addSelectionListener(new SelectionAdapter() {
+		btnValidateMap = new Button(generateGroup, SWT.PUSH);
+		btnValidateMap.setText("Validate mapping");
+		btnValidateMap.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnValidateMap.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				validateMapping();
 			}
 		});
 
-		Button btnResume = new Button(resumeGroup, SWT.PUSH);
-		btnResume.setText("Resume");
-		btnResume.setLayoutData(new GridData(SWT.END, SWT.TOP, false, false));
-		btnResume.addSelectionListener(new SelectionAdapter() {
+		btnGenMeta = new Button(generateGroup, SWT.PUSH);
+		btnGenMeta.setText("Generate metadata");
+		btnGenMeta.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnGenMeta.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-//				validateMapping();
+				generateMeta();
+			}
+		});
+
+		btnGenPatrol = new Button(generateGroup, SWT.PUSH);
+		btnGenPatrol.setText("Generate patrols");
+		btnGenPatrol.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnGenPatrol.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				generatePatrols();
 			}
 		});
 		
 		//TODO: remove after testing is complete
-		csvNewRaw.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\csv2smart\\Afi_gorrila.CSV");
-		xmlNewDatamodel.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\V2_nigeria data model.xml");
-		xmlResumeMapping.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\csv2smart\\mapping4_in.xml");
+		xmlDatamodel.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\V2_nigeria data model.xml");
+		xmlMapping.setFileName("e:\\SMART\\CT Conversion - Data From Rich\\csv2smart\\mapping4_in.xml");
+
+		updateState();
 	}
 
 	protected void loadCsv() {
-		try {
-			Connection c = ConnectionUtil.getConnection();
-			
-			Csv2DbLoader loader = new Csv2DbLoader();
-			loader.load(csvNewRaw.getFile(), c);
-
-//			MatchFileBuilder matchBuilder = new MatchFileBuilder();
-//			SmartMapping csv2Smart = matchBuilder.create(c);
-//			
-//			MatchSession session = new MatchSession();
-//			session.setCt2Smart(ct2Smart);
-//			session.setDataModel(FileUtil.loadDataModel(xmlNewDatamodel.getFile()));
-//			
-//			launch(session);
-			
-			MessageDialog.openInformation(getShell(), "Info", "Data from CSV loaded successfully");
-		} catch (Exception e) {
-			e.printStackTrace();
+		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+		dlg.setFilterNames(new String[] {"CSV file"});
+		dlg.setFilterExtensions(new String[] {"*.csv"});
+		String fn = dlg.open();
+		if (fn != null) {
+			try {
+				Connection c = ConnectionUtil.getConnection();
+				Csv2DbLoader loader = new Csv2DbLoader();
+				loader.load(new File(fn), c);
+				updateState();
+				MessageDialog.openInformation(getShell(), "Info", "Data from CSV loaded successfully");
+			} catch (Exception e) {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -186,15 +205,16 @@ public class CsvMatcherDialog extends Composite {
 				}
 			}
 		} catch (Exception e) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
 			e.printStackTrace();
 		}
 	}
 	
 	protected void validateMapping() {
-		MatchSession session = new MatchSession();
 		try {
-			session.setSmartMapping(FileUtil.loadSmartMapping(xmlResumeMapping.getFile()));
-			session.setDataModel(FileUtil.loadDataModel(xmlNewDatamodel.getFile()));
+			MatchSession session = new MatchSession();
+			session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
+			session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
 			session.setConnection(ConnectionUtil.getConnection());
 			
 			DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
@@ -212,4 +232,87 @@ public class CsvMatcherDialog extends Composite {
 		}
 	}
 
+	protected void generatePatrols() {
+		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		String f = dd.open();
+		if (f != null) {
+			try {
+				MatchSession session = new MatchSession();
+				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
+				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
+				session.setConnection(ConnectionUtil.getConnection());
+
+				DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
+				
+				CsvPatrolExtractor exporter = new CsvPatrolExtractor(session.getConnection());
+				exporter.extract(f, session, dmLookup);
+				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
+			} catch (Exception e) {
+				MessageDialog.openError(getShell(), "Patrol generation", "Errors occured while patrol generation. See console for details.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected void generateMeta() {
+		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		String f = dd.open();
+		if (f != null) {
+			try {
+				MatchSession session = new MatchSession();
+				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
+				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
+				session.setConnection(ConnectionUtil.getConnection());
+
+				boolean isOk = true;
+				CsvMetaExtractor metaExtractor = new CsvMetaExtractor(session);
+				isOk = metaExtractor.exportMembers(new File(f + "\\" + "members.csv")) && isOk;
+				isOk = metaExtractor.exportMandates(new File(f + "\\" + "mandates.csv")) && isOk;
+				if (isOk) {
+					MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
+				} else {
+					MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation. See console for details.");
+				}
+			} catch (Exception e) {
+				MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation session creation. See console for details.");
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private int getDbRowCount() {
+		Connection c = ConnectionUtil.getConnection();
+		try {
+			ResultSet rs = c.createStatement().executeQuery("select count(*) from csv_to_smart.csv");
+			if (rs.next()) {
+				return rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} 
+		return 0;
+	}
+	
+	private void updateState() {
+		dbRecordsCount = getDbRowCount();
+		dbLabel.setText(MessageFormat.format("Database contains {0} records", dbRecordsCount));
+		dbLabel.getParent().layout(true);
+		
+		btnGenMap.setEnabled(dbRecordsCount > 0);
+		btnValidateMap.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
+	}
+	
+	private class XmlUpdateFileComposite extends XmlFileComposite {
+
+		public XmlUpdateFileComposite(Composite parent) {
+			super(parent);
+			setEditable(false);
+		}
+		
+		@Override
+		public void newFileSelected(String fn) {
+			super.newFileSelected(fn);
+			updateState();
+		}
+	}
 }
