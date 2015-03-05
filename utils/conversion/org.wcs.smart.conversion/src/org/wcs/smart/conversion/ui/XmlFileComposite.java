@@ -62,7 +62,6 @@ public class XmlFileComposite extends Composite {
 		((GridData)open.getLayoutData()).heightHint = 10;
 	    open.setText("...");
 	    open.addSelectionListener(new SelectionAdapter() {
-		
 	    	@Override
 	    	public void widgetSelected(SelectionEvent e) {
 	    		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
@@ -70,21 +69,31 @@ public class XmlFileComposite extends Composite {
 	    		dlg.setFilterExtensions(new String[] {"*.xml"});
 	    		String fn = dlg.open();
 	    		if (fn != null) {
-	    			fileName.setText(fn);
+	    			newFileSelected(fn);
 	    		}
 	    	}
 	    });
 	    
 	}
+
+	public void newFileSelected(String fn) {
+		fileName.setText(fn);
+	}
 	
 	public void setLabelText(String text) {
 		label.setText(text);
 	}
+
+	public void setEditable(boolean editable) {
+		fileName.setEditable(editable);
+	}
+	
+	public boolean isEmpty() {
+		return fileName == null || fileName.getText() == null || fileName.getText().isEmpty();
+	}
 	
 	public File getFile() {
-		if (fileName == null || fileName.getText() == null || fileName.getText().isEmpty())
-			return null;
-		return new File(fileName.getText());
+		return isEmpty() ? null : new File(fileName.getText());
 	}
 	
 	public void setFileName(String text) {

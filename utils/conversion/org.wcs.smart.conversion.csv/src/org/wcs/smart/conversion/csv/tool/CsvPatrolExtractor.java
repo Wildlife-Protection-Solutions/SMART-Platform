@@ -72,7 +72,7 @@ public class CsvPatrolExtractor {
 	public void extract(String folder, MatchSession session, DataModelLookup dmLookup) throws Exception {
 		PatrolBuilder builder = new PatrolBuilder(session, dmLookup);
 		
-		String[] uniqueId = new String[] {"Date", "Unit_ID", "DeviceId"};
+		String[] uniqueId = new String[] {"Date", "Unit_ID"};
 		String[] columnNames = getCsvColumns(uniqueId);
 		String[] uniqueValues = new String[uniqueId.length];
 		ResultSet rs = getUniqueGroups(columnNames);

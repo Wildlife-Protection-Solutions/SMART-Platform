@@ -28,6 +28,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.conversion.csv.ui.CsvMatcherDialog;
+import org.wcs.smart.conversion.util.ConnectionUtil;
 
 /**
  * Launcher for CSV to SMART matching tool
@@ -60,6 +61,6 @@ public class Csv2SmartMatcher {
 			if (!display.readAndDispatch ()) display.sleep ();
 		}
 		display.dispose();
-		
+		ConnectionUtil.closeConnection();
 	}
 }
