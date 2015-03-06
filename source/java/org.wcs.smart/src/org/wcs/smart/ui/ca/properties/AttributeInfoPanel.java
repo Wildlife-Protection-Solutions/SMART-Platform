@@ -845,6 +845,7 @@ public class AttributeInfoPanel extends Composite {
 		
 		if(attTree != null){
 			attTree.setInput(att, currentSession);
+			attTree.refresh(currentDisplayLang);
 		}
 		selectOption();
 		
