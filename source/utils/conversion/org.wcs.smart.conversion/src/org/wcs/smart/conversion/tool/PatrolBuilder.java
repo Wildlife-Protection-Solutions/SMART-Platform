@@ -234,7 +234,7 @@ public class PatrolBuilder {
 						String v = a.getV();
 						for (MappedAttributeValue val : cta.getMappedAttributeValue()) {
 							if (v.equals(val.getI())) {
-								v = val.getN();
+								v = Ct2AttributeTypeUtil.getN(val);
 								break;
 							}
 						}
@@ -502,10 +502,10 @@ public class PatrolBuilder {
 		if (c == null) {
 			String info = "";
 			for (Ct2AttributeValuePair pair : data) {
-				info += "\nattribute: " + pair.attribute.getN() + " " + pair.attribute.getI();
+				info += "\nattribute: " + Ct2AttributeTypeUtil.getN(pair.attribute) + " " + pair.attribute.getI();
 				MappedAttribute value = lookup.findAttribute(pair.value);
 				info += "  value: ";
-				info += value != null ? value.getN() : "null";
+				info += value != null ? Ct2AttributeTypeUtil.getN(value) : "null";
 				info += " " + pair.value;
 			}
 			System.err.println("ERROR: No category defined for following items: " + info);

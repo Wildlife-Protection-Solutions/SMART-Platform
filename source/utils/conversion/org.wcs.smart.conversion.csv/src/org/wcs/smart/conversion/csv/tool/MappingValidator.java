@@ -62,13 +62,13 @@ public class MappingValidator {
 			
 			String key = cta.getMapTo();
 			if (key == null || key.isEmpty()) {
-				errors.add(MessageFormat.format("No mapping is specified for attribute \"{0}\"", cta.getN()));
+				errors.add(MessageFormat.format("No mapping is specified for attribute \"{0}\"", Ct2AttributeTypeUtil.getN(cta)));
 				continue;
 			}
 
 			AttributeType a = lookup.getAttribute(key);
 			if (a == null) {
-				errors.add(MessageFormat.format("Attribute \"{0}\" is mapped to key \"{1}\" which do not exist in datamodel", cta.getN(), key));
+				errors.add(MessageFormat.format("Attribute \"{0}\" is mapped to key \"{1}\" which do not exist in datamodel", Ct2AttributeTypeUtil.getN(cta), key));
 				continue;
 			}
 			
@@ -79,12 +79,12 @@ public class MappingValidator {
 				}
 				String vkey = ctv.getMapTo();
 				if (vkey == null || vkey.isEmpty()) {
-					errors.add(MessageFormat.format("No mapping is specified for attribute value \"{0}\" in attribute \"{1}\"", ctv.getN(), cta.getN()));
+					errors.add(MessageFormat.format("No mapping is specified for attribute value \"{0}\" in attribute \"{1}\"", Ct2AttributeTypeUtil.getN(ctv), Ct2AttributeTypeUtil.getN(cta)));
 					continue;
 				}
 				
 				if (!valueKeysSet.contains(vkey)) {
-					errors.add(MessageFormat.format("Attribute value \"{0}\" in attribute \"{1}\" has mapped to key \"{2}\" which do not exist in datamodel", ctv.getN(), cta.getN(), vkey));
+					errors.add(MessageFormat.format("Attribute value \"{0}\" in attribute \"{1}\" has mapped to key \"{2}\" which do not exist in datamodel", Ct2AttributeTypeUtil.getN(ctv), Ct2AttributeTypeUtil.getN(cta), vkey));
 					continue;
 				}
 			}
@@ -94,12 +94,12 @@ public class MappingValidator {
 				//attributed is mapped to specific category -> check if it exists in datamodel in this category
 				CategoryType c = lookup.getCategory(catKey);
 				if (c == null) {
-					errors.add(MessageFormat.format("Attribute \"{0}\" with key \"{1}\" is mapped to category \"{2}\" which do not exist in datamodel", cta.getN(), cta.getMapTo(), catKey));
+					errors.add(MessageFormat.format("Attribute \"{0}\" with key \"{1}\" is mapped to category \"{2}\" which do not exist in datamodel", Ct2AttributeTypeUtil.getN(cta), cta.getMapTo(), catKey));
 					continue;
 				}
 				Set<String> dmKeys = getInnerAttributeKeys(c, lookup);
 				if (!dmKeys.contains(cta.getMapTo())) {
-					errors.add(MessageFormat.format("Attribute \"{0}\" with key \"{1}\" is mapped to category \"{2}\" but this category has no reference for this attribute in datamodel", cta.getN(), cta.getMapTo(), catKey));
+					errors.add(MessageFormat.format("Attribute \"{0}\" with key \"{1}\" is mapped to category \"{2}\" but this category has no reference for this attribute in datamodel", Ct2AttributeTypeUtil.getN(cta), cta.getMapTo(), catKey));
 					continue;
 				}
 
@@ -207,7 +207,7 @@ public class MappingValidator {
 	private String pairsToString(MappedCategory ctc) {
 		StringBuilder sb = new StringBuilder();
 		for (CategoryMap m : ctc.getCategoryMap()) {
-			sb.append(m.getAn()).append("=").append(m.getVn()).append(" | "); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append(Ct2AttributeTypeUtil.getAn(m)).append("=").append(Ct2AttributeTypeUtil.getVn(m)).append(" | "); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return sb.toString();
 	}
