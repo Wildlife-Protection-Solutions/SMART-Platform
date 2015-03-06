@@ -52,19 +52,19 @@ import com.vividsolutions.jts.io.WKBWriter;
 
 public class PatrolBuilder {
 	
-	private static final String LANGUAGE_CODE = "en";
+	private static final String LANGUAGE_CODE = "en"; //$NON-NLS-1$
 
 	private static final DateFormat df_dot = new SimpleDateFormat("dd.MM.yyyy"); //$NON-NLS-1$
 	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
 	
-	private MatchSession session;
+//	private MatchSession session;
 	private Ct2SmartLookup lookup;
 	private DataModelLookup dmLookup;
 	private TeamMembersParser membersParser = new TeamMembersParser();
 //	private ElementsLookup elLookup;
 
 	public PatrolBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
-		this.session = session;
+//		this.session = session;
 		this.dmLookup = dmLookup;
 		lookup = new Ct2SmartLookup(session.getSmartMapping());
 //		elLookup = new ElementsLookup(session.getConnection());
@@ -267,6 +267,7 @@ public class PatrolBuilder {
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
 					case IGNORE:
+					case META_PATROL:
 						break;
 				}
 				
