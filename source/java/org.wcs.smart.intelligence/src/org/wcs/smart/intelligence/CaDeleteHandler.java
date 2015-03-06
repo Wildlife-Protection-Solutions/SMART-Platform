@@ -49,6 +49,8 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 		monitor.subTask(Messages.CaDeleteHandler_DeletingIntelligences);
 		deleteIntelligences(ca, session);
 		deleteIntelligenceSource(ca, session);
+		
+		deleteInformantData(ca, session);
 	}
 
 	private void deleteIntelligences(ConservationArea ca, Session session) throws Exception{
@@ -56,7 +58,6 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 	}
-	
 
 	private void deleteIntelligenceSource(ConservationArea ca, Session session) throws Exception{
 		Query q = session.createQuery("delete from IntelligenceSource where conservationArea = :ca"); //$NON-NLS-1$
@@ -64,4 +65,9 @@ public class CaDeleteHandler implements ICaDeleteHandler {
 		q.executeUpdate();
 	}
 	
+	private void deleteInformantData(ConservationArea ca, Session session) throws Exception {
+		Query q = session.createQuery("delete from Informant where conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+	}
 }
