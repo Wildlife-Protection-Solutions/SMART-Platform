@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.ui;
 
 import java.text.MessageFormat;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.fieldassist.ControlDecoration;
@@ -208,18 +209,20 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			final Object[] ps = HibernateManager.getCaProjectionList(s).toArray();
-			projectionViewer.setInput(ps);
-			Projection selection = null;
+			List<Object> ps = (List<Object>)(List<?>)HibernateManager.getCaProjectionList(s);
+			
+			Object selection = null;
 			for (Object x : ps) {
 				if (x instanceof Projection && x.equals(patrolOption.getViewProjection())) {
 					selection = (Projection) x;
 					break;
 				}
 			}
-			if (selection == null && ps.length > 0) {
-				selection = (Projection) ps[0];
-			}	
+			if (selection == null || ps.size() == 0) {
+				selection = Messages.ObservationOptionsPropertyPage_NotSetOption;
+				ps.add(0, (Object)selection);
+			}
+			projectionViewer.setInput(ps);
 			if (selection != null){
 				projectionViewer.setSelection(new StructuredSelection(selection));
 			}
@@ -319,6 +322,8 @@ public class ObservationOptionsPropertyPage extends AbstractPropertyJHeaderDialo
 		Object prjSelection = ((IStructuredSelection)projectionViewer.getSelection()).getFirstElement();
 		if (prjSelection instanceof Projection) {
 			patrolOption.setViewProjection((Projection)prjSelection);
+		}else{
+			patrolOption.setViewProjection(null);
 		}
 		
 		Session s = getSession();

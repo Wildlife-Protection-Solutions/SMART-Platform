@@ -166,6 +166,8 @@ public class Messages extends NLS {
 
 	public static String ObservationCloner_TaskName;
 
+	public static String ObservationOptionsPropertyPage_NotSetOption;
+
 	public static String ObservationOptionsPropertyPage_ObserverDescription;
 
 	public static String ObservationOptionsPropertyPage_ObserverLabel;
