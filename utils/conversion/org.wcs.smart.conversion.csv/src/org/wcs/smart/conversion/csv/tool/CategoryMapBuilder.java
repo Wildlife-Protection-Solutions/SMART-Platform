@@ -66,9 +66,9 @@ public class CategoryMapBuilder {
 					MappedAttribute a = attributes.get(i);
 					CategoryMap cmap = new CategoryMap();
 					cmap.setAi(a.getI());
-					cmap.setAn(a.getN());
+//					cmap.setAn(Ct2AttributeTypeUtil.getN(a));
 					cmap.setVi(value);
-					cmap.setVn(value);
+//					cmap.setVn(value);
 //					cmap.setVn(elLookup.getN(value));
 					ct.getCategoryMap().add(cmap);
 				}
