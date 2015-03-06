@@ -26,11 +26,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.wcs.smart.conversion.csv.lookup.AttributeLookup;
 import org.wcs.smart.conversion.lookup.AttributeTreeKeyLookup;
@@ -56,6 +58,9 @@ public class MappingValidator {
 	
 	public List<String> validate(SmartMapping ct2Smart, DataModelLookup lookup) {
 		List<String> errors = new ArrayList<String>();
+		
+		errors.addAll(validateAllMapped(ct2Smart));
+		
 		for (MappedAttribute cta : ct2Smart.getMappedAttribute()) {
 			if (!Ct2AttributeTypeUtil.canMap(cta.getType()))
 				continue;
@@ -141,6 +146,28 @@ public class MappingValidator {
 				errors.add(MessageFormat.format("Category \"{0}\" in datamodel do not contain attribute with key \"{1}\" while correspondent data exist in mapping file", ctc.getCategoryKey(), a.getMapTo()));
 			}
 			
+		}
+		return errors;
+	}
+
+	private List<String> validateAllMapped(SmartMapping ct2Smart) {
+		List<String> errors = new ArrayList<String>();
+		try {
+			Set<String> aSet = new TreeSet<>();
+			for (MappedAttribute attr : ct2Smart.getMappedAttribute()) {
+				aSet.add(attr.getI());
+			}
+			Connection c = ConnectionUtil.getConnection();
+			ResultSet rs = c.createStatement().executeQuery("select n from csv_to_smart.attributes");
+			while (rs.next()) {
+				String a = rs.getString(1);
+				if (!aSet.contains(a)) {
+					errors.add(MessageFormat.format("Attribute ''{0}'' present in loaded csv file but do not have correspodence in mapping file", a));
+				}
+			}
+		} catch (SQLException e) {
+			errors.add("Unable to validate that all attributes are mapped due to SQLException. See console or log for details");
+			e.printStackTrace();
 		}
 		return errors;
 	}
