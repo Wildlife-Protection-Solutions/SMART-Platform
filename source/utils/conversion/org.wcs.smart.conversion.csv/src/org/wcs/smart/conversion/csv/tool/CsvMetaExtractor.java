@@ -17,7 +17,6 @@ import org.wcs.smart.conversion.tool.MatchSession;
 import org.wcs.smart.conversion.tool.PatrolBuilder;
 import org.wcs.smart.conversion.tool.TeamMembersParser;
 import org.wcs.smart.patrol.xml.model.PatrolMemberType;
-import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -70,7 +69,7 @@ public class CsvMetaExtractor {
 		try {
 			writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					',', '"',SmartUtils.LINE_SEPARATOR); 
+					',', '"',System.getProperty("line.separator"));  //$NON-NLS-1$
 
 			// WriteHeaders
 			String[] headerColumns = new String[] {"ID","GIVEN NAME","FAMILY NAME","BIRTHDATE","GENDER","START EMPLOYMENT","END EMPLOYMENT","AGENCY","RANK"};
@@ -133,7 +132,7 @@ public class CsvMetaExtractor {
 		try {
 			writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					',', '"',SmartUtils.LINE_SEPARATOR); 
+					',', '"',System.getProperty("line.separator"));  //$NON-NLS-1$
 
 			//for each row write one record
 			for (String m : mandates) {
