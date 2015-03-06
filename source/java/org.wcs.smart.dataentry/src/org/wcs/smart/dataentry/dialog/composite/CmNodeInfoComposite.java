@@ -111,6 +111,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 		label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmNodeInfoComposite_PhotoAllowed);
+		label.setToolTipText(Messages.CmNodeInfoComposite_photoOptionTooltip);
 		btnPhoto = new Button(container, SWT.CHECK);
 		btnPhoto.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -124,6 +125,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		
 		label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmNodeInfoComposite_PhotoRequired);
+		label.setToolTipText(Messages.CmNodeInfoComposite_photoRequiredTooltip);
 		btnPhotoRequired = new Button(container, SWT.CHECK);
 		btnPhotoRequired.addSelectionListener(new SelectionAdapter() {
 			@Override

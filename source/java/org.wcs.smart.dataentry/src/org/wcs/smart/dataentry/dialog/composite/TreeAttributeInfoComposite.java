@@ -45,6 +45,7 @@ import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.ui.properties.TreeEditorField;
 
@@ -76,11 +77,17 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	@Override
 	protected void createTypeSpecificControls(Composite container) {
 		createIsVisibleControl(container);
-		createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, Messages.CmAttributeInfoComposite_Option_FlattenTree, ""); //$NON-NLS-1$
+		createBooleanControl(container, CmAttributeOption.ID_FLATTEN_TREE, 
+				Messages.CmAttributeInfoComposite_Option_FlattenTree, "", Messages.TreeAttributeInfoComposite_listOpTooltip); //$NON-NLS-1$
 		createDefaultControl(container);
-		createTreeControl(container);	
+		
+		Label lblValues = new Label(container, SWT.NONE);
+		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		lblValues.setText(Messages.TreeAttributeInfoComposite_valueLabel);
+		
 		createIsCustomConfigControl(container);
-		createRenameButton(container);
+		createTreeControl(container);
+		createEditTreeButton(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -113,6 +120,8 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		btnIsCustomConfig = new Button(parent, SWT.CHECK);
 		btnIsCustomConfig.setText(Messages.TreeAttributeInfoComposite_UseCustomConfiguration);
 		btnIsCustomConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		btnIsCustomConfig.setToolTipText(Messages.TreeAttributeInfoComposite_customTreeOp);
+		
 		btnIsCustomConfig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -123,6 +132,17 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 					getSession().saveOrUpdate(getSourceObject());
 				}
 				option.setBooleanValue(btnIsCustomConfig.getSelection());
+				
+				if (!btnIsCustomConfig.getSelection()){
+					//we need to remove any configuration created 
+					for (CmAttributeTreeNode toDelete : getSourceObject().getTree()){
+						toDelete.setAttribute(null);
+						getSession().delete(toDelete);
+					}
+					getSourceObject().getTree().clear();
+					getSession().flush();
+				}
+				
 				attributeTreeViewer.setInput(getSourceObject());
 				attributeTreeViewer.expandToLevel(2);
 				attributeTreeViewer.refresh();
@@ -134,7 +154,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createDefaultControl(Composite container) {
 		Label label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
-		
+		label.setToolTipText(Messages.TreeAttributeInfoComposite_deafultValueTooltip);
 		
 		defaultValueTreeField = new TreeEditorField(){
 			public void createComposite(Composite parent) {
@@ -188,9 +208,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		fireModelChanged();
 	}
 	private void createTreeControl(Composite container) {
-		Label lblValues = new Label(container, SWT.NONE);
-		lblValues.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		lblValues.setText(Messages.TreeAttributeInfoComposite_valueLabel);
+		
 		
 		attributeTreeViewer = new TreeViewer(container);
 		attributeTreeViewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
@@ -198,7 +216,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		attributeTreeViewer.setContentProvider(new CmAttributeTreeContentProvider(false, false));
 	}
 	
-	private void createRenameButton(Composite container) {
+	private void createEditTreeButton(Composite container) {
 		Button btnRename = new Button(container, SWT.PUSH);
 		btnRename.setText(Messages.TreeAttributeInfoComposite_RenameButton);
 		btnRename.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false,2,1));

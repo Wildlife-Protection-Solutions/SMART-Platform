@@ -40,6 +40,7 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	private List<AttributeTreeNode> rootNodes;
 	private boolean active;
 	private boolean showRoot;
+	private String singleInput;
 
 	/**
 	 * 
@@ -77,6 +78,8 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		this.rootNodes = null;
+		this.singleInput = null;
 		if (newInput instanceof Attribute){
 			if (active){
 				rootNodes = ((Attribute) newInput).getActiveTreeNodes();
@@ -85,6 +88,8 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 			}
 		}else if (newInput instanceof List){
 			this.rootNodes = (List<AttributeTreeNode>) newInput;
+		}else if (newInput instanceof String){
+			singleInput = (String)newInput;
 		}
 	}
 
@@ -93,6 +98,7 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	 */
 	@Override
 	public Object[] getElements(Object inputElement) {
+		if (singleInput != null) return new Object[]{singleInput};
 		if (showRoot){
 			return new RootNode[]{root};
 		}else{

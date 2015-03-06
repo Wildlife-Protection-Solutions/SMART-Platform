@@ -67,6 +67,8 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 	private Text createTextNumberControl(Composite parent, final String optionId, String labelText) {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(labelText);
+		label.setToolTipText(Messages.NumericAttributeInfoComposite_defaultTooltip);
+		
 		final Text text = new Text(parent, SWT.BORDER);
 		text.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		final boolean[] internalChange = {false}; //indicate if text was changed by user or by calling setter
@@ -164,6 +166,8 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createNumericListControl(Composite parent) {
 		final Label label = new Label(parent, SWT.NONE);
 		label.setText(Messages.CmAttributeInfoComposite_Option_Numeric);
+		label.setToolTipText(Messages.NumericAttributeInfoComposite_numericOpTooltip);
+		
 		final Button btnBool = new Button(parent, SWT.CHECK);
 		btnBool.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -184,12 +188,20 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 				CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_NUMERIC);
 				btnBool.setVisible(option != null);
 				label.setVisible(option != null);
+				
 				btnBool.setEnabled(isEnabled);
 				if (option != null && isEnabled) {
 					btnBool.setSelection(option.getBooleanValue());
 				} else {
 					btnBool.setSelection(false);
 				}
+				
+				if (isEnabled){
+					btnBool.setText(""); //$NON-NLS-1$
+				}else{
+					btnBool.setText(Messages.NumericAttributeInfoComposite_previousInfo);
+				}
+				btnBool.getParent().layout();
 			}
 		});
 	}

@@ -99,8 +99,21 @@ public class NameKeyComposite {
 	public void updateFields(NamedKeyItem item){
 		for (Iterator<Entry<Language,String>> iterator = values.entrySet().iterator(); iterator.hasNext();) {
 			Entry<Language, String> type = iterator.next();
-			if (type.getValue() != null){
+			if (type.getValue() != null && type.getValue().trim().length() > 0){
 				item.updateName(type.getKey(), type.getValue());
+			}else{
+				//we want to remove this label as long as it's not default
+				if (!type.getKey().isDefault()){
+					org.wcs.smart.ca.Label toRemove = null;
+					for (org.wcs.smart.ca.Label l : item.getNames() ){
+						if (l.getLanguage().equals(type.getKey())){
+							toRemove = l;
+						}
+					}
+					if (toRemove != null){
+						item.getNames().remove(toRemove);
+					}
+				}
 			}
 			if (type.getKey().equals(SmartDB.getCurrentLanguage())){
 				item.setName(type.getValue());

@@ -57,6 +57,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
@@ -86,7 +87,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 	protected Session currentSession;
 	
 	private Viewer dmTreeViewer;
-	private Viewer itemViewer;
+	private TreeViewer itemViewer;
 	private TableViewer nameTable;
 
 	private NamedItem dmNode;
@@ -114,12 +115,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 		SashForm comp = new SashForm(parent, SWT.HORIZONTAL);
 		comp.setLayoutData(new GridData(SWT.FILL,SWT.FILL, true, true));
 
-		Composite left = new Composite(comp, SWT.NONE);
+		Group left = new Group(comp, SWT.NONE);
 		left.setLayout( new GridLayout());
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		org.eclipse.swt.widgets.Label dmLabel = new org.eclipse.swt.widgets.Label(left, SWT.NONE);
-		dmLabel.setText(Messages.EditTreeDialog_DataModelValues);
+		left.setText(Messages.EditTreeDialog_DataModelValues);
 		
 		btnAddSubNodes = new Button(left, SWT.CHECK);
 		btnAddSubNodes.setText(Messages.EditTreeDialog_AutoAddSubnodes);
@@ -133,12 +132,10 @@ public class EditTreeDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Composite middle = new Composite(comp, SWT.NONE);
+		Group middle = new Group(comp, SWT.NONE);
 		middle.setLayout(new GridLayout());
 		middle.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
-		org.eclipse.swt.widgets.Label cmLabel = new org.eclipse.swt.widgets.Label(middle, SWT.NONE);
-		cmLabel.setText(Messages.EditTreeDialog_ConfigurableModelValues);
+		middle.setText(Messages.EditTreeDialog_ConfigurableModelValues);
 		
 		Composite btnComp = new Composite(middle, SWT.NONE);
 		btnComp.setLayout(new GridLayout(4, true));
@@ -217,9 +214,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		createNameTable(comp);
 		
 		comp.setWeights(new int[]{28,41,31});
-		itemViewer.refresh();
-		
-		
+		itemViewer.refresh();		
 		return parent;
 	}
 	
@@ -261,6 +256,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		currentSession.saveOrUpdate(cmTreeNode);
 		currentSession.flush();
 		itemViewer.refresh();
+		itemViewer.expandToLevel(cmTreeNode, 1);
 	}
 
 	protected void addToConfigurableTree() {
@@ -271,6 +267,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		}
 		currentSession.flush();
 		itemViewer.refresh();
+		itemViewer.expandToLevel(parent, 1);
 	}
 
 	private void addCmTreeNode(AttributeTreeNode dmTreeNode, CmAttributeTreeNode parent, boolean addSubNodes) {
@@ -345,7 +342,7 @@ public class EditTreeDialog extends TitleAreaDialog {
 		return tree;
 	}
 	
-	protected Viewer createItemViewer(Composite parent) {
+	protected TreeViewer createItemViewer(Composite parent) {
 		final TreeViewer tree = new TreeViewer(parent, SWT.MULTI | SWT.BORDER);
 		tree.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tree.getTree().getLayoutData()).heightHint = 300;

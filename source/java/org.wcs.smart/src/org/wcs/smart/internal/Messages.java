@@ -151,6 +151,7 @@ public class Messages extends NLS {
 	public static String AttributeTree_ImportButtonTooltip;
 	public static String AttributeTree_LoadAttributeTreeMessage;
 	public static String AttributeTree_LoadErrorMessage;
+	public static String AttributeTree_Loading;
 	public static String AttributeTreeLabelProvider_RootNode_Label;
 	public static String AttributeTreeNodeDMAdvisor_Error_NotTreeNode;
 	public static String AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;

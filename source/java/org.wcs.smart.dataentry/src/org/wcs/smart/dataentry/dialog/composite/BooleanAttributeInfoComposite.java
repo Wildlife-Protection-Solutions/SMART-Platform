@@ -90,6 +90,7 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createDefaultControl(Composite container) {
 		Label label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
+		label.setToolTipText(Messages.BooleanAttributeInfoComposite_defaultValueTooltip);
 		
 		defaultViewer = new ComboViewer(container, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		defaultViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

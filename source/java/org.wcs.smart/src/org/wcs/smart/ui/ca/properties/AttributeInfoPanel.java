@@ -319,9 +319,6 @@ public class AttributeInfoPanel extends Composite {
 		}
 		lstAttributeList.setLabelProvider(new AttributeListLabelProvider());
 		
-		if (!canEdit){
-			lstAttributeList.getTable().setEnabled(false);
-		}
 		if (canEdit){
 			nameKeyValues.langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				@Override
@@ -574,7 +571,7 @@ public class AttributeInfoPanel extends Composite {
 		
 		
 		if (canEdit){
-			attTree = new AttributeTree();
+			attTree = new AttributeTree(true);
 			Composite tree = attTree.createTree(treeComposite);
 			cdAttTree = createDecoration(tree);
 			attTree.setListener(new AttributeTree.AttributeTreeChangeListener() {
@@ -583,6 +580,7 @@ public class AttributeInfoPanel extends Composite {
 					validate();	
 				}
 			});
+
 			nameKeyValues.langViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 				
 				@Override
@@ -591,6 +589,10 @@ public class AttributeInfoPanel extends Composite {
 				}
 			});
 			attTree.refresh(nameKeyValues.langViewer.getCurrentSelection());
+		}else{
+			attTree = new AttributeTree(false);
+			attTree.createTree(treeComposite);
+			attTree.refresh(currentDisplayLang);
 		}
 
 		/*   Boolean Attribute Options */
@@ -701,8 +703,7 @@ public class AttributeInfoPanel extends Composite {
 			cdMaxValue.hide();
 			cdAttList.hide();
 			if (this.attTree != null){
-				if (this.attTree.getRootNodes().size() == 0){
-//				if (this.attTree.getAttribute().getTree() == null || this.attTree.getAttribute().getTree().size() == 0){
+				if (this.attTree.getRootNodes() == null || this.attTree.getRootNodes().size() == 0){
 					cdAttTree.setDescriptionText(Messages.AttributeInfoPanel_Error_OneTreeNodeRequired);
 					cdAttTree.show();
 					error = false;
