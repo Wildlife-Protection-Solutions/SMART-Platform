@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.wcs.smart.conversion.lookup.DataModelLookup;
+import org.wcs.smart.conversion.model.MappedAttribute;
+import org.wcs.smart.conversion.model.SmartMapping;
 import org.wcs.smart.conversion.tag.TagA;
 import org.wcs.smart.conversion.tag.TagE;
 import org.wcs.smart.conversion.tag.TagS;
@@ -72,20 +74,18 @@ public class CsvPatrolExtractor {
 	public void extract(String folder, MatchSession session, DataModelLookup dmLookup) throws Exception {
 		PatrolBuilder builder = new PatrolBuilder(session, dmLookup);
 		
-		String[] uniqueId = new String[] {"Date", "Unit_ID"};
+		String[] uniqueId = getUniqueIds(session.getSmartMapping());
 		String[] columnNames = getCsvColumns(uniqueId);
 		String[] uniqueValues = new String[uniqueId.length];
 		ResultSet rs = getUniqueGroups(columnNames);
 		while (rs.next()) {
-//			StringBuilder sb = new StringBuilder();
 			for (int i = 0; i < uniqueValues.length; i++) {
 				uniqueValues[i] = rs.getString(i+1);
-//				sb.append(uniqueValues[i]).append("  ");
 			}
 //			System.out.println("Extracting patrol for: " + sb);
 			List<TagS> sList = extractS(columnNames, uniqueValues);
 //			List<TagT> tList = extractT(uniqueValues[2], uniqueValues[0]);
-			String id = uniqueValues[1] + '-' + uniqueValues[0].replace('/', '-');
+			String id = buildPatrolId(uniqueValues);
 			PatrolType p = builder.createPatrol(sList, null, id);
 			
 			FileUtil.write(new File(folder + "\\" + p.getId() + ".xml"), p); //$NON-NLS-1$ //$NON-NLS-2$
@@ -93,17 +93,39 @@ public class CsvPatrolExtractor {
 		rs.close();
 
 	}
+
+	private String buildPatrolId(String[] uniqueValues) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = uniqueValues.length-1; i >= 0; i--) {
+			sb.append(uniqueValues[i].replace('/', '-'));
+			if (i > 0) {
+				sb.append('-');
+			}
+		}
+		return sb.toString();
+	}
+
+
+	public String[] getUniqueIds(SmartMapping mapping) {
+		List<String> result = new ArrayList<>();
+		for (MappedAttribute a : mapping.getMappedAttribute()) {
+			switch (a.getType()) {
+			case META_DATE:
+				result.add(0, a.getI());
+				break;
+			case META_PATROL:
+				result.add(a.getI());
+				break;
+			default:
+				break;
+			}
+		}
+		return result.toArray(new String[result.size()]);
+	}
 	
-	public String[] getCsvColumns(String... n) throws SQLException {
+	//Transforms from ["Data", "Unit"] to ["a2", "a15"].
+	public String[] getCsvColumns(String... n) {
 		String[] columns = new String[n.length];
-//		PreparedStatement ps = c.prepareStatement("select id from ct_to_smart.attributes where n = ?"); //$NON-NLS-1$
-//		for (int i = 0; i < n.length; i++) {
-//			ps.setString(1, n[i]);
-//			ResultSet rs = ps.executeQuery();
-//			rs.next();
-//			columns[i] = "a" + rs.getString(1); //$NON-NLS-1$
-//			rs.close();
-//		}
 		for (int i = 0; i < n.length; i++) {
 			columns[i] = n2Col.get(n[i]);
 		}
