@@ -45,11 +45,11 @@ public class CsvMetaExtractor {
 		for (MappedAttribute cta : mapping.getMappedAttribute()) {
 			if (MappedAttributeType.META_MEMBERS.equals(cta.getType())) {
 				try {
-					ResultSet rs = c.createStatement().executeQuery("select id from ct_to_smart.ATTRIBUTES where i = '" + cta.getI() + "'");  //$NON-NLS-1$//$NON-NLS-2$
+					ResultSet rs = c.createStatement().executeQuery("select id from csv_to_smart.ATTRIBUTES where n = '" + cta.getI() + "'");  //$NON-NLS-1$//$NON-NLS-2$
 					//NOTE: rs MUST be of size 1
 					while (rs.next()) {
 						String id = rs.getString(1);
-						ResultSet dataSet = c.createStatement().executeQuery("select distinct a"+id+" from ct_to_smart.CSV"); //$NON-NLS-1$ //$NON-NLS-2$
+						ResultSet dataSet = c.createStatement().executeQuery("select distinct a"+id+" from csv_to_smart.CSV"); //$NON-NLS-1$ //$NON-NLS-2$
 						while (dataSet.next()) {
 							String str = dataSet.getString(1);
 							if (str != null) {
