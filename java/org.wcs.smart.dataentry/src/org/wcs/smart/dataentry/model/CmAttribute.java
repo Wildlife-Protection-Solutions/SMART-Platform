@@ -99,7 +99,9 @@ public class CmAttribute extends NamedItem {
 	}
 
 	/**
-	 * Only valid for tree attributes.
+	 * Only valid for tree attributes.  Only returns nodes
+	 * if a customized tree configuration is used for this attribute.
+	 * 
 	 * @return  set of root tree nodes
 	 */
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
@@ -116,11 +118,21 @@ public class CmAttribute extends NamedItem {
 		this.rootTreeNodes = tree;
 	}
 
+	/**
+	 * 
+	 * @return the nodes for the custom tree or the default tree depending on
+	 * if a custom tree is configured for this node or not
+	 */
 	@Transient
 	public List<CmAttributeTreeNode> getCurrentTree() {
 		return isUseCustomConfig() ? getTree() : getDefaultTree();
 	}
 	
+	/**
+	 * Gets the default model (defined for the entire cm) for the 
+	 * tree attribute
+	 * @return
+	 */
 	@Transient
 	public List<CmAttributeTreeNode> getDefaultTree() {
 		return node.getModel().getDefaultTrees(attribute);

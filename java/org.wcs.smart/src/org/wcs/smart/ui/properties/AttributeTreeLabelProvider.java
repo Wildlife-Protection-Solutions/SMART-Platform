@@ -93,7 +93,7 @@ public  class AttributeTreeLabelProvider extends LabelProvider implements IColor
 				return obj.getName();
 			}
 		}
-		return ""; //$NON-NLS-1$
+		return super.getText(element);
 	}
 
 	@Override

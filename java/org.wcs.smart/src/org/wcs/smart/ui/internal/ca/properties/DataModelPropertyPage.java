@@ -261,7 +261,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		viewer.setContentProvider(new DataModelContentProvider());
 		viewer.setLabelProvider(new DataModelLabelProvider(getLanguage()));
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true,true);
-		gd.heightHint = 300;
+		gd.heightHint = 200;
 		viewer.getTree().setLayoutData(gd);
 		viewer.setAutoExpandLevel(3);
 		

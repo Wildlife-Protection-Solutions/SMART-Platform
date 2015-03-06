@@ -28,7 +28,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -55,6 +58,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.hibernate.Session;
@@ -80,13 +84,19 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public class AttributeTree {
 
+	private static final String LOADING = Messages.AttributeTree_Loading;
 	private TreeViewer viewer = null;
 	private AttributeTreeChangeListener listener = null;
 	private Session currentSession = null;
-	
+	private boolean isEditable = false;
 	private Attribute attribute;
 	
 	private List<AttributeTreeNode> deletedNodes = new ArrayList<AttributeTreeNode>();
+	
+	
+	public AttributeTree(boolean isEditable){
+		this.isEditable = isEditable;
+	}
 	/**
 	 * Sets the listener fired when modifications occur.  
 	 * @param listener
@@ -130,41 +140,50 @@ public class AttributeTree {
 	 * @param attribute
 	 * @param currentSession current hibernate session
 	 */
-	public void setInput(Attribute attribute, Session currentSession){
+	public void setInput(Attribute attribute, final Session currentSession){
 		this.currentSession = currentSession;
 		this.attribute = attribute;
 		final List<AttributeTreeNode> clonedroots = new ArrayList<AttributeTreeNode>();
 		if (attribute.getTree() != null) {
-			ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display
-					.getDefault().getActiveShell());
-			try {
-				pmd.run(true, false, new IRunnableWithProgress() {
+			viewer.setInput(LOADING);
+			refreshTree();
+			final Shell currentShell = viewer.getTree().getShell();
+			Job j = new Job(Messages.AttributeTree_LoadAttributeTreeMessage){
 
-					@Override
-					public void run(IProgressMonitor monitor)
-							throws InvocationTargetException,
-							InterruptedException {
-						monitor.setTaskName(Messages.AttributeTree_LoadAttributeTreeMessage);
-
-						for (AttributeTreeNode node : AttributeTree.this.attribute.getTree()) {
-							AttributeTreeNode cloned = node.clone(
-									AttributeTree.this.attribute.getConservationArea(),
-									AttributeTree.this.attribute.getConservationArea(), 
-									null,
-									AttributeTree.this.attribute.getConservationArea().getDefaultLanguage().getCode(),
-									null, true);
-							clonedroots.add(cloned);
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					monitor.setTaskName(Messages.AttributeTree_LoadAttributeTreeMessage);
+					for (AttributeTreeNode node : AttributeTree.this.attribute.getTree()) {
+						try{
+						AttributeTreeNode cloned = node.clone(
+								AttributeTree.this.attribute.getConservationArea(),
+								AttributeTree.this.attribute.getConservationArea(), 
+								null,
+								AttributeTree.this.attribute.getConservationArea().getDefaultLanguage().getCode(),
+								null, true);
+						clonedroots.add(cloned);
+						}catch (Exception ex){
+							if (!currentSession.isOpen() || monitor.isCanceled()){
+								return Status.CANCEL_STATUS;
+							}
+							throw ex;
 						}
-
 					}
-				});
-			} catch (Exception ex) {
-				SmartPlugIn.displayLog(Messages.AttributeTree_LoadErrorMessage, ex);
-			}
+					if (currentShell.isDisposed()) return Status.CANCEL_STATUS;
+					currentShell.getDisplay().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							if (viewer.getControl().isDisposed()) return;
+							
+							viewer.setInput(clonedroots);
+							refreshTree();
+							fireChangeListener();
+						}});	
+					return Status.OK_STATUS;
+				}				
+			};
+			j.schedule();
 		}
-		
-		viewer.setInput(clonedroots);
-		refreshTree();
 	}
 
 	/**
@@ -173,7 +192,11 @@ public class AttributeTree {
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AttributeTreeNode> getRootNodes(){
-		return (List<AttributeTreeNode>)viewer.getInput();
+		if (viewer.getInput() instanceof List){
+			return (List<AttributeTreeNode>)viewer.getInput();
+		}else{
+			return null;
+		}
 	}
 	
 
@@ -189,189 +212,192 @@ public class AttributeTree {
 		
 		Composite comp = new Composite(parent, SWT.NONE);
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		comp.setLayout(new GridLayout(2, false));
+		comp.setLayout(new GridLayout(isEditable ? 2 : 1, false));
 		
-		PatternFilter patternFilter = new PatternFilter(){			
-			protected boolean isChildMatch(Viewer viewer, Object element) {
-				Object parent = ((AttributeTreeContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
-				if (parent != null) {
-					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
-				}
-				return false;
-			}
-
-			@Override
-			protected boolean isLeafMatch(Viewer viewer, Object element) {
-				String labelText = ((AttributeTreeLabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
-				if (labelText == null) {
+		if (isEditable){
+			PatternFilter patternFilter = new PatternFilter(){			
+				protected boolean isChildMatch(Viewer viewer, Object element) {
+					Object parent = ((AttributeTreeContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
+					if (parent != null) {
+						return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
+					}
 					return false;
 				}
-				return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
-			}
-			
-		};
-		FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true);
+	
+				@Override
+				protected boolean isLeafMatch(Viewer viewer, Object element) {
+					String labelText = ((AttributeTreeLabelProvider) ((TreeViewer) viewer).getLabelProvider()).getText(element);
+					if (labelText == null) {
+						return false;
+					}
+					return (wordMatches(labelText) ? true : isChildMatch(viewer,element));
+				}
+				
+			};
+			FilteredTree fTree = new FilteredTree(comp, SWT.MULTI | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, patternFilter, true);
+			viewer = fTree.getViewer();
+		}else{
+			viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
+		}
 		
-		//viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-		viewer = fTree.getViewer();
-		viewer.setContentProvider(new AttributeTreeContentProvider( ));
+		viewer.setContentProvider(new AttributeTreeContentProvider(false, false));
 		viewer.setLabelProvider(new AttributeTreeLabelProvider());
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		((GridData)viewer.getTree().getLayoutData()).heightHint = 80;
 		((GridData)viewer.getTree().getLayoutData()).widthHint = 100;
 		viewer.setAutoExpandLevel(2);
-		viewer.setInput(new Attribute());
+		viewer.setInput(LOADING);
 		
-		
-		int operations = DND.DROP_MOVE;
-		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
-		viewer.addDragSupport(operations, transferTypes , new AttributeTreeDragListener(viewer));
-		viewer.addDropSupport(operations, transferTypes, new AttributeTreeDropListener(viewer));
-		
-		Composite buttonPanel = new Composite(comp, SWT.NONE);
-		buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		buttonPanel.setLayout(new GridLayout(1, false));
-		
-		final Button btnAdd = new Button(buttonPanel, SWT.NONE);
-		btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
-		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAdd.setEnabled(false);
-		btnAdd.setToolTipText(Messages.AttributeTree_AddButton_Tooltip);
-		btnAdd.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				addItem(SmartDB.getCurrentConservationArea().getDefaultLanguage());
-			}
-		});
-
-		final Button btnEdit = new Button(buttonPanel, SWT.NONE);
-		btnEdit.setEnabled(false);
-		btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
-		btnEdit.setToolTipText(Messages.AttributeTree_EditButton_Tooltip);
-		btnEdit.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				editItem(viewer, ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage() );
-			}
-		});
-		
-		final Button btnImport = new Button(buttonPanel, SWT.NONE);
-		btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnImport.setText(Messages.AttributeTree_ImportButtonText);
-		btnImport.setToolTipText(Messages.AttributeTree_ImportButtonTooltip);
-		btnImport.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				ImportAttributeProcessor processor = new ImportAttributeProcessor(attribute, getRootNodes());
-				processor.importAttribute();
-				viewer.setInput(getRootNodes());
-				fireChangeListener();
-				viewer.expandToLevel(2);
-			}
-		});
-		
-		Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		final Button btnDisable = new Button(buttonPanel, SWT.NONE);
-		btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-		btnDisable.setToolTipText(Messages.AttributeTree_DisableButton_ToolTip);
-		btnDisable.setEnabled(false);
-		btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnDisable.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				disableItem(viewer, !btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT));
-				
-				if (btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
-					btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
-				}else{
-					btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+		if (isEditable){
+			int operations = DND.DROP_MOVE;
+			Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+			viewer.addDragSupport(operations, transferTypes , new AttributeTreeDragListener(viewer));
+			viewer.addDropSupport(operations, transferTypes, new AttributeTreeDropListener(viewer));
+			
+			Composite buttonPanel = new Composite(comp, SWT.NONE);
+			buttonPanel.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			buttonPanel.setLayout(new GridLayout(1, false));
+			
+			final Button btnAdd = new Button(buttonPanel, SWT.NONE);
+			btnAdd.setText(DialogConstants.ADD_BUTTON_TEXT);
+			btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnAdd.setEnabled(false);
+			btnAdd.setToolTipText(Messages.AttributeTree_AddButton_Tooltip);
+			btnAdd.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					addItem(SmartDB.getCurrentConservationArea().getDefaultLanguage());
 				}
-			}
-		});
+			});
 	
-		final Button btnDisableAll = new Button(buttonPanel, SWT.NONE);
-		btnDisableAll.setText(DialogConstants.DISABLEALL_BUTTON_TEXT);
-		btnDisableAll.setToolTipText(Messages.AttributeTree_DisableAll_Tooltip);
-		btnDisableAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnDisableAll.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				for (AttributeTreeNode node : getRootNodes()){
-					disableNode(node, false);
+			final Button btnEdit = new Button(buttonPanel, SWT.NONE);
+			btnEdit.setEnabled(false);
+			btnEdit.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnEdit.setText(DialogConstants.EDIT_BUTTON_TEXT);
+			btnEdit.setToolTipText(Messages.AttributeTree_EditButton_Tooltip);
+			btnEdit.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					editItem(viewer, ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage() );
 				}
-				viewer.refresh();
-				fireChangeListener();
-				viewer.setSelection(viewer.getSelection());
-			}
-		});
-		
-		
-		final Button btnEnableeAll = new Button(buttonPanel, SWT.NONE);
-		btnEnableeAll.setText(DialogConstants.ENABLEALL_BUTTON_TEXT); 
-		btnEnableeAll.setToolTipText(Messages.AttributeTree_EnableAll_Tooltip);
-		btnEnableeAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnEnableeAll.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				for (AttributeTreeNode node : getRootNodes()){
-					enableAll(node);
+			});
+			
+			final Button btnImport = new Button(buttonPanel, SWT.NONE);
+			btnImport.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnImport.setText(Messages.AttributeTree_ImportButtonText);
+			btnImport.setToolTipText(Messages.AttributeTree_ImportButtonTooltip);
+			btnImport.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					ImportAttributeProcessor processor = new ImportAttributeProcessor(attribute, getRootNodes());
+					processor.importAttribute();
+					viewer.setInput(getRootNodes());
+					fireChangeListener();
+					viewer.expandToLevel(2);
 				}
-				viewer.refresh();
-				fireChangeListener();
-				viewer.setSelection(viewer.getSelection());
-			}
-		});
-		
-		
-		lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		final Button btnDelete = new Button(buttonPanel, SWT.NONE);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setEnabled(false);
-		btnDelete.setToolTipText(Messages.AttributeTree_Delete_Tooltip);
-		btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnDelete.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteNodes();	
-			}
-		});
-		
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				if (viewer.getSelection().isEmpty()){
-					btnAdd.setEnabled(false);
-					btnEdit.setEnabled(false);
-					btnDisable.setEnabled(false);
-					btnDelete.setEnabled(false);
-					return;
-				}
-				Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-				if (x instanceof AttributeTreeContentProvider.RootNode){
-					btnEdit.setEnabled(false);
-					btnDisable.setEnabled(false);
-					btnDelete.setEnabled(false);
-					btnAdd.setEnabled(true);
-				}else if (x instanceof AttributeTreeNode){
-					btnEdit.setEnabled(true);
-					btnDisable.setEnabled(true);
-					btnDelete.setEnabled(true);
-					btnAdd.setEnabled(true);
-					if (((AttributeTreeNode)x).getIsActive()){
-						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
-					}else{
+			});
+			
+			Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			final Button btnDisable = new Button(buttonPanel, SWT.NONE);
+			btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+			btnDisable.setToolTipText(Messages.AttributeTree_DisableButton_ToolTip);
+			btnDisable.setEnabled(false);
+			btnDisable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnDisable.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					disableItem(viewer, !btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT));
+					
+					if (btnDisable.getText().equals(DialogConstants.DISABLE_BUTTON_TEXT)){
 						btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+					}else{
+						btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
 					}
 				}
-				
-			}
-		});
+			});
 		
+			final Button btnDisableAll = new Button(buttonPanel, SWT.NONE);
+			btnDisableAll.setText(DialogConstants.DISABLEALL_BUTTON_TEXT);
+			btnDisableAll.setToolTipText(Messages.AttributeTree_DisableAll_Tooltip);
+			btnDisableAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnDisableAll.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					for (AttributeTreeNode node : getRootNodes()){
+						disableNode(node, false);
+					}
+					viewer.refresh();
+					fireChangeListener();
+					viewer.setSelection(viewer.getSelection());
+				}
+			});
+			
+			
+			final Button btnEnableeAll = new Button(buttonPanel, SWT.NONE);
+			btnEnableeAll.setText(DialogConstants.ENABLEALL_BUTTON_TEXT); 
+			btnEnableeAll.setToolTipText(Messages.AttributeTree_EnableAll_Tooltip);
+			btnEnableeAll.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnEnableeAll.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					for (AttributeTreeNode node : getRootNodes()){
+						enableAll(node);
+					}
+					viewer.refresh();
+					fireChangeListener();
+					viewer.setSelection(viewer.getSelection());
+				}
+			});
+			
+			
+			lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
+			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			final Button btnDelete = new Button(buttonPanel, SWT.NONE);
+			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			btnDelete.setEnabled(false);
+			btnDelete.setToolTipText(Messages.AttributeTree_Delete_Tooltip);
+			btnDelete.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnDelete.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteNodes();	
+				}
+			});
+			
+			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				@Override
+				public void selectionChanged(SelectionChangedEvent event) {
+					if (viewer.getSelection().isEmpty()){
+						btnAdd.setEnabled(false);
+						btnEdit.setEnabled(false);
+						btnDisable.setEnabled(false);
+						btnDelete.setEnabled(false);
+						return;
+					}
+					Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
+					if (x instanceof AttributeTreeContentProvider.RootNode){
+						btnEdit.setEnabled(false);
+						btnDisable.setEnabled(false);
+						btnDelete.setEnabled(false);
+						btnAdd.setEnabled(true);
+					}else if (x instanceof AttributeTreeNode){
+						btnEdit.setEnabled(true);
+						btnDisable.setEnabled(true);
+						btnDelete.setEnabled(true);
+						btnAdd.setEnabled(true);
+						if (((AttributeTreeNode)x).getIsActive()){
+							btnDisable.setText(DialogConstants.DISABLE_BUTTON_TEXT);
+						}else{
+							btnDisable.setText(DialogConstants.ENABLE_BUTTON_TEXT);
+						}
+					}
+					
+				}
+			});
+		}
 		return comp;
 	}
 	

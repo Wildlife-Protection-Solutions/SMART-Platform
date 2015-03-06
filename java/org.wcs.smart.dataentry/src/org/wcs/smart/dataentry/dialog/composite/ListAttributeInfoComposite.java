@@ -107,6 +107,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createMultiselectControl(Composite parent) {
 		lblMulti = new Label(parent, SWT.NONE);
 		lblMulti.setText(Messages.CmAttributeInfoComposite_Option_Multiselect);
+		lblMulti.setToolTipText(Messages.ListAttributeInfoComposite_multiSelectTooltip);
 		btnMulti = new Button(parent, SWT.CHECK);
 		btnMulti.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -146,6 +147,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createDefaultControl(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
 		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
+		label.setToolTipText(Messages.ListAttributeInfoComposite_defaultTooltip);
 		
 		defaultViewer = new ComboViewer(parent, SWT.READ_ONLY);
 		defaultViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
@@ -204,14 +206,12 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private void createListControl(Composite parent) {
 		Label label = new Label(parent, SWT.NONE);
 		label.setText(Messages.ListAttributeInfoComposite_Values);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
 
 		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
-		listViewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		
 		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession(), getModel()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
-		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		listViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
 
 		new Label(parent, SWT.NONE);
 		
