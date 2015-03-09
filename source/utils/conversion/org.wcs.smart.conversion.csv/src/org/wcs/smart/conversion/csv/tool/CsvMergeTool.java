@@ -55,7 +55,6 @@ public class CsvMergeTool {
 	public List<String> merge(File file, Connection c) throws SQLException, UnsupportedEncodingException, FileNotFoundException, IOException {
 		List<String> messages = new ArrayList<String>();
 		
-		
 		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), DELIMETER)) { //$NON-NLS-1$
 			boolean autoCommit = c.getAutoCommit();
 			c.setAutoCommit(false);
@@ -138,9 +137,13 @@ public class CsvMergeTool {
 			//reading data
 			String[] data;
 			Map<String, String> colName2Data = new HashMap<>();
-			int count = 1;
+			int insertCount = 0;
+			int updateCount = 0;
+			int mergeCount = 0;
+			int insertId = lastCsvId;
+			int fileRow = 0;
 			while( (data = reader.readNext()) != null ) {
-				
+				fileRow++;
 				for (int i = 0; i < colNames.length; i++) {
 					colName2Data.put(colNames[i], data[i]);
 				}
@@ -152,31 +155,58 @@ public class CsvMergeTool {
 				//check if we merge or add new row
 				if (rs.next()) {
 					//we have id that matched by unique columns, this means we need to merge current data row with given row
-					int id = rs.getInt(1);
-					for (int i = 0; i < colNames.length; i++) {
-						stCsvUpdate.setString(i+1, colName2Data.get(colNames[i]));
-					}
-					stCsvUpdate.setInt(colNames.length+1, id);
-					stCsvUpdate.executeUpdate();
+					StringBuilder sbMsgIds = new StringBuilder();
+					do {
+						int id = rs.getInt(1);
+						if (sbMsgIds.length() > 0) {
+							sbMsgIds.append(", "); //$NON-NLS-1$
+						}
+						sbMsgIds.append(id);
+						for (int i = 0; i < colNames.length; i++) {
+							stCsvUpdate.setString(i+1, colName2Data.get(colNames[i]));
+						}
+						stCsvUpdate.setInt(colNames.length+1, id);
+						stCsvUpdate.executeUpdate();
+						updateCount++;
+						
+						if (id > lastCsvId) {
+							StringBuilder sb = new StringBuilder();
+							for (String col : uniqueColumns) {
+								if (sb.length() > 0) {
+									sb.append(", ");
+								}
+								sb.append(col);
+								sb.append("=");
+								sb.append(colName2Data.get(col));
+							}
+							messages.add("Row " + fileRow + " overrides one of the prevoius rows. Following value combination is not unique in given csv: " + sb);
+						}
+					} while (rs.next());
+					mergeCount++;
+					messages.add("Row " + fileRow + " was merged with row " + sbMsgIds);
 				} else {
 					//no id that matched by unique columns, this means we need to add new row for current data
-					lastCsvId++;
-					stCsvInsert.setInt(1, lastCsvId);
+					insertId++;
+					stCsvInsert.setInt(1, insertId);
 					for (int i = 0; i < colNames.length; i++) {
 						stCsvInsert.setString(i+2, colName2Data.get(colNames[i]));
 					}
 					stCsvInsert.executeUpdate();
+					insertCount++;
+					messages.add("Row " + fileRow + " was inserted");
 				}
 				
 				rs.close();
-				if (count % 256 == 0) {
+				if ((insertCount + updateCount) % 256 == 0) {
 					c.commit();
 				}
-				count++;
 			}		
 			
 			c.commit();
 			c.setAutoCommit(autoCommit);
+			messages.add("Rows inserted: " + insertCount);
+			messages.add("Rows merged: " + mergeCount);
+			messages.add("Updates count: " + updateCount);
 		}
 		
 		return messages;
