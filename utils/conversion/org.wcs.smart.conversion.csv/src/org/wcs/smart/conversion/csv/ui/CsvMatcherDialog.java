@@ -215,9 +215,10 @@ public class CsvMatcherDialog extends Composite {
 			try {
 				Connection c = ConnectionUtil.getConnection();
 				CsvMergeTool  mergeTool = new CsvMergeTool();
-				mergeTool.merge(new File(fn), c);
+				List<String> messages = mergeTool.merge(new File(fn), c);
+				ReportDialog report = new ReportDialog(getShell(), "Merge results", MessageFormat.format("{0} message(s) reported during merge:", messages.size()), messages);
+				report.open();
 				updateState();
-				MessageDialog.openInformation(getShell(), "Info", "Data from CSV merged successfully");
 			} catch (Exception e) {
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
 				e.printStackTrace();
