@@ -46,6 +46,8 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.conversion.csv.tool.Csv2DbLoader;
+import org.wcs.smart.conversion.csv.tool.CsvExportTool;
+import org.wcs.smart.conversion.csv.tool.CsvMergeTool;
 import org.wcs.smart.conversion.csv.tool.CsvMetaExtractor;
 import org.wcs.smart.conversion.csv.tool.CsvPatrolExtractor;
 import org.wcs.smart.conversion.csv.tool.MappingValidator;
@@ -72,6 +74,8 @@ public class CsvMatcherDialog extends Composite {
 	private XmlFileComposite xmlDatamodel;
 	private XmlFileComposite xmlMapping;
 	
+	private Button btnMergeCsv;
+	private Button btnExportCsv;
 	private Button btnGenMap;
 	private Button btnValidateMap;
 	private Button btnGenMeta;
@@ -105,6 +109,26 @@ public class CsvMatcherDialog extends Composite {
 			}
 		});
 
+		btnMergeCsv = new Button(dataGroup, SWT.PUSH);
+		btnMergeCsv.setText("Merge database with CSV");
+		btnMergeCsv.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnMergeCsv.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				mergeCsv();
+			}
+		});
+		
+		btnExportCsv = new Button(dataGroup, SWT.PUSH);
+		btnExportCsv.setText("Export database to CSV");
+		btnExportCsv.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnExportCsv.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				exportCsv();
+			}
+		});
+		
 		btnGenMap = new Button(dataGroup, SWT.PUSH);
 		btnGenMap.setText("Generate mapping template");
 		btnGenMap.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
@@ -182,6 +206,43 @@ public class CsvMatcherDialog extends Composite {
 		}
 	}
 
+	protected void mergeCsv() {
+		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
+		dlg.setFilterNames(new String[] {"CSV file"});
+		dlg.setFilterExtensions(new String[] {"*.csv"});
+		String fn = dlg.open();
+		if (fn != null) {
+			try {
+				Connection c = ConnectionUtil.getConnection();
+				CsvMergeTool  mergeTool = new CsvMergeTool();
+				mergeTool.merge(new File(fn), c);
+				updateState();
+				MessageDialog.openInformation(getShell(), "Info", "Data from CSV merged successfully");
+			} catch (Exception e) {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected void exportCsv() {
+		FileDialog dlg = new FileDialog(getShell(), SWT.SAVE);
+		dlg.setFilterNames(new String[] {"CSV file"});
+		dlg.setFilterExtensions(new String[] {"*.csv"});
+		String fn = dlg.open();
+		if (fn != null) {
+			try {
+				Connection c = ConnectionUtil.getConnection();
+				CsvExportTool  exportTool = new CsvExportTool();
+				exportTool.export(new File(fn), c);
+				MessageDialog.openInformation(getShell(), "Info", "Data exported successfully");
+			} catch (Exception e) {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	protected void createMapping() {
 		try {
 			Connection c = ConnectionUtil.getConnection();
@@ -299,6 +360,8 @@ public class CsvMatcherDialog extends Composite {
 		dbLabel.getParent().layout(true);
 		
 		btnGenMap.setEnabled(dbRecordsCount > 0);
+		btnMergeCsv.setEnabled(dbRecordsCount > 0);
+		btnExportCsv.setEnabled(dbRecordsCount > 0);
 		btnValidateMap.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 		btnGenMeta.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 		btnGenPatrol.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
