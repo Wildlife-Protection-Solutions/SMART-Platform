@@ -37,6 +37,7 @@ public class Messages extends NLS {
 	public static String AttributeListGroupByDropItem_FiltersLinkLabel;
 	public static String AttributeListGroupByDropItem_IncludedTooltip;
 	public static String AttributeTreeDropItem_LoadingListItemJobName;
+	public static String AttributeTreeDropItem_LoadingText;
 	public static String AttributeTreeGroupByDropItem_AllLabel;
 	public static String AttributeTreeGroupByDropItem_ErrorLoadingTreeItems;
 	public static String AttributeTreeGroupByDropItem_FiltersLink;

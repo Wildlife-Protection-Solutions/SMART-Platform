@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.ui.model.impl;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,6 +56,8 @@ import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
+import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
+import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
 
 /**
  * Attribute tree drop item
@@ -62,11 +65,14 @@ import org.wcs.smart.query.ui.model.IFilterDropItem;
  * @since 1.0.0
  */
 public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
+
+	private static AttributeTreeLabelProvider lProvider = null;
+	private final static AttributeTreeContentProvider cProvider = new AttributeTreeContentProvider(true, false);
 	
 	protected String text;
 	protected String key;
-	private Label lblAttribute;
-	private Label lblitem;
+	protected Label lblAttribute;
+	protected Label lblitem;
 
 	private Font smallerFont;
 	private Font smallerFont2;
@@ -74,8 +80,9 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 	
 	private Attribute attribute = null;
 	private List<AttributeTreeNode> roots = null;
-	private AttributeTreeNode currentSelection = null;
-	
+	protected AttributeTreeNode currentSelection = null;
+	private Object input = Collections.singletonList(Messages.AttributeTreeDropItem_LoadingText);
+	private TreeDropDownViewer treeviewer;
 	/*
 	 * Job to load the attribute list options
 	 */
@@ -93,6 +100,23 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 			}finally{
 				s.getTransaction().rollback();
 				s.close();
+			}
+			
+			input = roots;
+			Display d = AttributeTreeDropItem.this.getWidget().getDisplay();
+			if (d != null && !d.isDisposed()){
+				d.asyncExec(new Runnable(){
+					@Override
+					public void run() {
+						if (treeviewer == null || 
+								treeviewer.getTreeViewer().getControl().isDisposed()){
+							return;
+						}
+						treeviewer.getTreeViewer().setInput(roots);
+						treeviewer.getTreeViewer().refresh();
+					}
+					
+				});
 			}
 			return Status.OK_STATUS;
 		}
@@ -219,36 +243,7 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				try {
-					loadItemsJobs.join();
-				} catch (InterruptedException ex) {
-					QueryPlugIn.log("error waiting for load items job", ex); //$NON-NLS-1$
-				}
-				 TreeDropDownViewer treeviewer = getTreeEditor();
-				 if (treeviewer == null){
-					 return;
-				 }
-				treeviewer.setAttribute(roots);
-				treeviewer.positionAndShow(AttributeTreeDropItem.this.getWidget(), new ISelectionListener(){
-
-					@Override
-					public void selectionChanged(IWorkbenchPart part,
-							ISelection selection) {
-						if (selection != null && !selection.isEmpty()){
-							currentSelection = (AttributeTreeNode) ((IStructuredSelection) selection).getFirstElement();
-						}
-						if (!lblitem.isDisposed()){
-							if (currentSelection != null){
-								lblitem.setText( formatStringForLabel(currentSelection.getName()));
-							}else{
-								lblitem.setText(""); //$NON-NLS-1$
-							}
-						}
-						getTargetPanel().redraw();
-						AttributeTreeDropItem.this.queryChanged();
-					}});
-				
-				
+				showTree();
 			}
 		});
 		
@@ -259,10 +254,47 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 		}
 		
 		lblAttribute.setText(formatStringForLabel(this.text + " = ")); //$NON-NLS-1$
+		loadAttributes();
+	}
+	
+	protected void loadAttributes(){
 		loadItemsJobs.schedule();
 	}
 	
-	private TreeDropDownViewer getTreeEditor(){
+	protected void showTree(){
+		
+		treeviewer = getTreeEditor();
+		if (treeviewer == null){
+			 return;
+		}
+		
+		treeviewer.getTreeViewer().setContentProvider(cProvider);
+		if (lProvider == null){
+			lProvider = new AttributeTreeLabelProvider();
+		}
+		treeviewer.getTreeViewer().setLabelProvider(lProvider);
+		treeviewer.getTreeViewer().setInput(input);	
+		
+		treeviewer.positionAndShow(AttributeTreeDropItem.this.getWidget(), new ISelectionListener(){
+			@Override
+			public void selectionChanged(IWorkbenchPart part,
+					ISelection selection) {
+				if (selection != null && !selection.isEmpty()){
+					currentSelection = (AttributeTreeNode) ((IStructuredSelection) selection).getFirstElement();
+				}
+				if (!lblitem.isDisposed()){
+					if (currentSelection != null){
+						lblitem.setText( formatStringForLabel(currentSelection.getName()));
+					}else{
+						lblitem.setText(""); //$NON-NLS-1$
+					}
+				}
+				getTargetPanel().redraw();
+				AttributeTreeDropItem.this.queryChanged();
+			}});
+	}
+
+	protected TreeDropDownViewer getTreeEditor(){
 		IDefinitionPanel pnl = getTargetPanel();
 		if (pnl instanceof BasicFilterDefintionPanel){
 			return ((BasicFilterDefintionPanel)pnl).getTreeEditor();

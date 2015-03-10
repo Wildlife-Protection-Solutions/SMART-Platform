@@ -282,7 +282,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 					}else if (att.getType() == AttributeType.TREE){
 						//for this version we are just going to treat this like the attribute from the datamodel;
 						//in the next version (with fully customized trees) we'll look at displaying the custom tree here.
-						di[0] = new AttributeTreeDropItem(new CategoryAttribute(c,att));
+//						di[0] = new AttributeTreeDropItem(new CategoryAttribute(c,att));
+						di[0] = new CmAttributeTreeDropItem(node, new CategoryAttribute(c, att));
 					}
 				}finally{
 					s.close();

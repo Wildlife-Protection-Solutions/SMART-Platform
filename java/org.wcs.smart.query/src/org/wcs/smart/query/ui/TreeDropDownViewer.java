@@ -108,6 +108,10 @@ public class TreeDropDownViewer {
 		attributeTreeViewer.refresh();
 	}
 	
+	public TreeViewer getTreeViewer(){
+		return this.attributeTreeViewer;
+	}
+	
 	private void createComposite(Composite parent){
 		
 		patternFilter = new PatternFilter() {
@@ -163,7 +167,10 @@ public class TreeDropDownViewer {
 		Rectangle r = obj.getBounds();
 		Point pnt = obj.getParent().toDisplay(r.x, r.y);
 		
-		main.setBounds(pnt.x + 25, pnt.y + r.height, 200, 150);
+		int width = r.width - 25;
+		if (width < 200) width = 200;
+		if (width > 500) width = 500;		
+		main.setBounds(pnt.x + 25, pnt.y + r.height, width, 150);
 		main.setVisible(true);
 		
 		attributeTreeViewer.getTree().setFocus();
