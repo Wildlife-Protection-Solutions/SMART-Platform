@@ -7,6 +7,10 @@ public class Messages extends NLS {
 	public static String AddERQueryJob_InstallError;
 	public static String AddERQueryJob_JobName;
 	public static String CmAttributeListDropItem_loadModelAttributeJobName;
+	public static String CmAttributeTreeDropItem_ErrorDialog;
+	public static String CmAttributeTreeDropItem_ErrorMessage;
+	public static String CmAttributeTreeDropItem_LoadingJobName;
+	public static String CmAttributeTreeDropItem_LoadingString;
 	public static String CmCategoryAttributeFilter_invalidCatAttribute;
 	public static String ConfigurableModelTreeNode_ConfigurableModelLabel;
 	public static String DerbyGridEngine_CalcValueProgresss;
