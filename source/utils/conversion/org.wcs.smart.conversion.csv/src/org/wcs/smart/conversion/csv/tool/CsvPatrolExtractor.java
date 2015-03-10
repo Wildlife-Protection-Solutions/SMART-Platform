@@ -87,6 +87,8 @@ public class CsvPatrolExtractor {
 //			List<TagT> tList = extractT(uniqueValues[2], uniqueValues[0]);
 			String id = buildPatrolId(uniqueValues);
 			PatrolType p = builder.createPatrol(sList, null, id);
+			builder.buildTracksFromWp(p);
+//			builder.removeEmptyWayoints(p);
 			
 			FileUtil.write(new File(folder + "\\" + p.getId() + ".xml"), p); //$NON-NLS-1$ //$NON-NLS-2$
 		}
