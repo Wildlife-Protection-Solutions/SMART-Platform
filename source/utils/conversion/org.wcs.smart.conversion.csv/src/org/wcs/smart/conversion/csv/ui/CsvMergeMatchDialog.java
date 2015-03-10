@@ -33,8 +33,11 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -53,8 +56,11 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 	private List<String> unmatched;
 
 	private List<String> result = new ArrayList<>();
+	private boolean isCreateOption = true;
 	
 	private CheckboxTableViewer tableViewer;
+	private Button btnCreateRow;
+	private Button btnMergeRow;
 
 	public CsvMergeMatchDialog(Shell parentShell, List<String> matched, List<String> unmatched) {
 		super(parentShell);
@@ -70,10 +76,37 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		Label info = new Label(main, SWT.NONE);
-		info.setText("Select columns that identify unique record (this colunms exist in both csv files):");
 
+		Label noteExist = new Label(main, SWT.NONE);
+		noteExist.setText("Following columns already exist in loaded data:\n"+ReportDialog.join(matched, "\n"));
+		
+		Label separator = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label noteAdded = new Label(main, SWT.NONE);
+		noteAdded.setText("Following columns exist only in merged file and will be added to loaded data:\n"+ReportDialog.join(unmatched, "\n"));
+
+		separator = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		btnCreateRow = new Button(main, SWT.RADIO);
+		btnCreateRow.setText("Create new row for each merged record");
+		btnCreateRow.setSelection(true);
+		btnCreateRow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				tableViewer.getTable().setEnabled(false);
+			}
+		});
+		
+		btnMergeRow = new Button(main, SWT.RADIO);
+		btnMergeRow.setText("Merge with existing rows if specific column values are identical (this colunms exist in both csv files)");
+		btnMergeRow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				tableViewer.getTable().setEnabled(true);
+			}
+		});
 		
 		tableViewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.MULTI);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -83,28 +116,28 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 			
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (tableViewer.getSelection().isEmpty()){
+				if (tableViewer.getSelection().isEmpty()) {
 					return;
 				}
-				if (e.keyCode == SWT.SPACE){
+				if (e.keyCode == SWT.SPACE) {
 					IStructuredSelection selection = ((IStructuredSelection)tableViewer.getSelection());
 					selection.getFirstElement();
-					boolean value = tableViewer.getChecked(   selection.getFirstElement() );
+					boolean value = tableViewer.getChecked(selection.getFirstElement());
 					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
-						Object tp = (Object) iterator.next();
+						Object tp = iterator.next();
 						tableViewer.setChecked(tp, !value);
 					}
 					e.doit = false;
-							
 				}
-				
 			}
 		});
 		tableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		tableViewer.setInput(matched);
-		
-		Label note = new Label(main, SWT.NONE);
-		note.setText("Following columns exist only in merged file and will be added to loaded data:\n"+ReportDialog.join(unmatched, "\n"));
+		tableViewer.getTable().setEnabled(false);
+
+		getShell().setText("Merge options");
+		setTitle("Merge options");
+		setMessage("Select an option and parameters for merge process");
 		
 		return composite;
 	}
@@ -121,6 +154,7 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		result.clear();
 		if (buttonId == IDialogConstants.OK_ID) {
+			isCreateOption = btnCreateRow.getSelection();
 			for (Object s : tableViewer.getCheckedElements()) {
 				result.add((String) s);
 			}
@@ -131,4 +165,9 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 	public List<String> getSelection() {
 		return result;
 	}
+	
+	public boolean isCreateOption() {
+		return isCreateOption;
+	}
+	
 }

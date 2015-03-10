@@ -79,15 +79,18 @@ public class CsvMergeTool {
 			}
 			CsvMergeMatchDialog dialog = new CsvMergeMatchDialog(Display.getDefault().getActiveShell(), matched, unmatched);
 			if (dialog.open() != Window.OK) {
+				c.commit();
+				c.setAutoCommit(autoCommit);
 				messages.add("Merge process was aborted by user.");
 				return messages;
 			}
-			
+
+			boolean isCreateOption = dialog.isCreateOption();
 			List<String> uniqueColumns = dialog.getSelection();
-			
+
+			//add columns that are not matched
 			PreparedStatement stAttribute = c.prepareStatement("insert into csv_to_smart.attributes (id, n) values (?, ?)"); //$NON-NLS-1$
 			int shift = n2Column.size()+1;
-			
 			for (int i = 0; i < unmatched.size(); i++) {
 				stAttribute.setInt(1, i+shift);
 				stAttribute.setString(2, unmatched.get(i));
@@ -103,36 +106,10 @@ public class CsvMergeTool {
 			int lastCsvId = rs.getInt(1);
 			rs.close();
 
-			
-			StringBuilder sbId = new StringBuilder();
-			for (String col : uniqueColumns) {
-				if (sbId.length() > 0) {
-					sbId.append(" and "); //$NON-NLS-1$
-				}
-				sbId.append("a"); //$NON-NLS-1$
-				sbId.append(n2Column.get(col));
-				sbId.append("=?"); //$NON-NLS-1$
-			}
-			PreparedStatement stFetchId = c.prepareStatement("select id from csv_to_smart.csv where " + sbId); //$NON-NLS-1$
-
-			StringBuilder sbInsertCol = new StringBuilder();
-			StringBuilder sbInsertVal = new StringBuilder();
-			StringBuilder sbUpdate = new StringBuilder();
-			for (String col : colNames) {
-				sbInsertCol.append(", a"); //$NON-NLS-1$
-				sbInsertCol.append(n2Column.get(col));
-
-				sbInsertVal.append(", ?"); //$NON-NLS-1$
-				
-				if (sbUpdate.length() > 0) {
-					sbUpdate.append(", "); //$NON-NLS-1$
-				}
-				sbUpdate.append("a"); //$NON-NLS-1$
-				sbUpdate.append(n2Column.get(col));
-				sbUpdate.append("=?"); //$NON-NLS-1$
-			}
-			PreparedStatement stCsvInsert = c.prepareStatement("insert into csv_to_smart.csv (id" + sbInsertCol + ") values (?" + sbInsertVal + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			PreparedStatement stCsvUpdate = c.prepareStatement("update csv_to_smart.csv set " + sbUpdate + " where id=?"); //$NON-NLS-1$ //$NON-NLS-2$
+			//prepare statements
+			PreparedStatement stFetchId = isCreateOption ? null : getFetchMatchIdStatement(c, uniqueColumns, n2Column);
+			PreparedStatement stCsvInsert = getInsertStatement(c, colNames, n2Column);
+			PreparedStatement stCsvUpdate = isCreateOption ? null : getUpdateStatement(c, colNames, n2Column);
 			
 			//reading data
 			String[] data;
@@ -142,18 +119,21 @@ public class CsvMergeTool {
 			int mergeCount = 0;
 			int insertId = lastCsvId;
 			int fileRow = 0;
+			rs = null;
 			while( (data = reader.readNext()) != null ) {
 				fileRow++;
 				for (int i = 0; i < colNames.length; i++) {
 					colName2Data.put(colNames[i], data[i]);
 				}
 
-				for (int i = 0; i < uniqueColumns.size(); i++) {
-					stFetchId.setString(i+1, colName2Data.get(uniqueColumns.get(i)));
+				if (!isCreateOption) {
+					for (int i = 0; i < uniqueColumns.size(); i++) {
+						stFetchId.setString(i+1, colName2Data.get(uniqueColumns.get(i)));
+					}
+					rs = stFetchId.executeQuery();
 				}
-				rs = stFetchId.executeQuery();
 				//check if we merge or add new row
-				if (rs.next()) {
+				if (rs != null && rs.next()) {
 					//we have id that matched by unique columns, this means we need to merge current data row with given row
 					StringBuilder sbMsgIds = new StringBuilder();
 					do {
@@ -196,21 +176,67 @@ public class CsvMergeTool {
 					messages.add("Row " + fileRow + " was inserted");
 				}
 				
-				rs.close();
+				if (rs != null) {
+					rs.close();
+				}
+				
 				if ((insertCount + updateCount) % 256 == 0) {
 					c.commit();
 				}
 			}		
 			
+			if (stFetchId != null) stFetchId.close();
+			stCsvInsert.close();
+			if (stCsvUpdate != null) stCsvUpdate.close();
+			
 			c.commit();
 			c.setAutoCommit(autoCommit);
+			
 			messages.add("Rows inserted: " + insertCount);
-			messages.add("Rows merged: " + mergeCount);
-			messages.add("Updates count: " + updateCount);
+			if (!isCreateOption) {
+				messages.add("Rows merged: " + mergeCount);
+				messages.add("Updates count: " + updateCount);
+			}
 		}
 		
 		return messages;
-		
 	}
 
+	private PreparedStatement getFetchMatchIdStatement(Connection c, List<String> uniqueColumns, Map<String, Integer> n2Column) throws SQLException {
+		StringBuilder sbId = new StringBuilder();
+		for (String col : uniqueColumns) {
+			if (sbId.length() > 0) {
+				sbId.append(" and "); //$NON-NLS-1$
+			}
+			sbId.append("a"); //$NON-NLS-1$
+			sbId.append(n2Column.get(col));
+			sbId.append("=?"); //$NON-NLS-1$
+		}
+		return c.prepareStatement("select id from csv_to_smart.csv where " + sbId); //$NON-NLS-1$
+	}
+
+	private PreparedStatement getInsertStatement(Connection c, String[] colNames, Map<String, Integer> n2Column) throws SQLException {
+		StringBuilder sbInsertCol = new StringBuilder();
+		StringBuilder sbInsertVal = new StringBuilder();
+		for (String col : colNames) {
+			sbInsertCol.append(", a"); //$NON-NLS-1$
+			sbInsertCol.append(n2Column.get(col));
+
+			sbInsertVal.append(", ?"); //$NON-NLS-1$
+		}
+		return c.prepareStatement("insert into csv_to_smart.csv (id" + sbInsertCol + ") values (?" + sbInsertVal + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
+
+	private PreparedStatement getUpdateStatement(Connection c, String[] colNames, Map<String, Integer> n2Column) throws SQLException {
+		StringBuilder sbUpdate = new StringBuilder();
+		for (String col : colNames) {
+			if (sbUpdate.length() > 0) {
+				sbUpdate.append(", "); //$NON-NLS-1$
+			}
+			sbUpdate.append("a"); //$NON-NLS-1$
+			sbUpdate.append(n2Column.get(col));
+			sbUpdate.append("=?"); //$NON-NLS-1$
+		}
+		return c.prepareStatement("update csv_to_smart.csv set " + sbUpdate + " where id=?"); //$NON-NLS-1$ //$NON-NLS-2$
+	}
 }
