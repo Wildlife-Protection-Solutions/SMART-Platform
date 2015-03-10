@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -167,12 +168,12 @@ public class PatrolBuilder {
 					case NUMERIC: {
 						try {
 							WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
-							obs.getAttributes().add(obsAttr);
 							obsAttr.setAttributeKey(cta.getMapTo());
 							obsAttr.setDValue(Double.valueOf(a.getV()));
+							obs.getAttributes().add(obsAttr);
 						} catch (NumberFormatException e) {
-							System.err.println("Failed to convert to double. Attribute: " + a.getN() + " value: " + a.getV());
-							throw e;
+							System.err.println("Failed to convert to double. Attribute: " + a.getN() + " value: '" + a.getV() + "'. Attribute skipped.");
+							//throw e;
 						}
 						break;
 					}
@@ -488,6 +489,46 @@ public class PatrolBuilder {
 		return CoordinateUtil.buildLineString(coordinates);
 	}
 
+	public void buildTracksFromWp(PatrolType p) throws ParseException {
+		for (PatrolLegType leg : p.getLegs()) {
+			for (PatrolLegDayType legDay : leg.getDays()) {
+				List<Coordinate> coordinates = new ArrayList<Coordinate>();
+				XMLGregorianCalendar date = legDay.getDate();
+				XMLGregorianCalendar time;
+				double x, y;
+				for (WaypointType wp : legDay.getWaypoints()) {
+					time = wp.getTime();
+					y = Double.valueOf(wp.getY());
+					x = Double.valueOf(wp.getX());
+					coordinates.add(new Coordinate(x, y, combine(date, time).getTime()));
+				}
+				LineString line = CoordinateUtil.buildLineString(coordinates);
+				
+				TrackType track = null;
+				if (line != null) {
+					track = new TrackType();
+					track.setDistance(distanceInMeters(line) / 1000.0);
+					WKBWriter writer = new WKBWriter(3);
+					track.setGeom(encodeHex(writer.write(line)));
+				}
+				legDay.setTrack(track);
+			}
+		}
+	}
+
+	public void removeEmptyWayoints(PatrolType p) throws ParseException {
+		for (PatrolLegType leg : p.getLegs()) {
+			for (PatrolLegDayType legDay : leg.getDays()) {
+				for (Iterator<WaypointType> i = legDay.getWaypoints().iterator(); i.hasNext();) {
+					WaypointType wp = i.next();
+					if (wp.getObservations().isEmpty()) {
+						i.remove();
+					}
+				}
+			}
+		}
+	}
+	
 	private MappedCategory getDefaultCategory(TagS s) {
 		List<Ct2AttributeValuePair> data = new ArrayList<Ct2AttributeValuePair>();
 		for (TagA a : s) {
@@ -559,8 +600,14 @@ public class PatrolBuilder {
 		return xgc;
 	}
 
+	private static Date combine(XMLGregorianCalendar xmlDate, XMLGregorianCalendar xmlTime) {
+		Date date = xmlDate != null ? xmlDate.toGregorianCalendar().getTime() : null;
+		Date time = xmlTime != null ? xmlTime.toGregorianCalendar().getTime() : null;
+		return combine(date, time);
+	}
+	
 	//copy from SmartImporter
-	private static Date combine(Date date, Time time) {
+	private static Date combine(Date date, Date time) {
 		if (date == null)
 			return time;
 		if (time == null)
