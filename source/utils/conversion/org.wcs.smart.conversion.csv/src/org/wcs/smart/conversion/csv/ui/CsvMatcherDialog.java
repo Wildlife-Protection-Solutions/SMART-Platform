@@ -22,7 +22,9 @@
 package org.wcs.smart.conversion.csv.ui;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,6 +57,7 @@ import org.wcs.smart.conversion.csv.tool.MatchFileBuilder;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.SmartMapping;
 import org.wcs.smart.conversion.tool.MatchSession;
+import org.wcs.smart.conversion.ui.MultiOutputStream;
 import org.wcs.smart.conversion.ui.ReportDialog;
 import org.wcs.smart.conversion.ui.XmlFileComposite;
 import org.wcs.smart.conversion.util.ConnectionUtil;
@@ -298,7 +301,19 @@ public class CsvMatcherDialog extends Composite {
 		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
 		String f = dd.open();
 		if (f != null) {
+			PrintStream originalOut = System.out;
+			PrintStream originalErr = System.err;
+
 			try {
+				FileOutputStream fout = new FileOutputStream(f + "\\warnings.log");
+				FileOutputStream ferr = new FileOutputStream(f + "\\errors.log");
+				
+				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
+				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
+				
+				System.setOut(new PrintStream(multiOut));
+				System.setErr(new PrintStream(multiErr));
+
 				MatchSession session = new MatchSession();
 				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
 				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
@@ -308,10 +323,16 @@ public class CsvMatcherDialog extends Composite {
 				
 				CsvPatrolExtractor exporter = new CsvPatrolExtractor(session.getConnection());
 				exporter.extract(f, session, dmLookup);
+				System.setOut(originalOut);
+				System.setErr(originalErr);
+				fout.close();
+				ferr.close();
 				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
 			} catch (Exception e) {
 				MessageDialog.openError(getShell(), "Patrol generation", "Errors occured while patrol generation. See console for details.");
 				e.printStackTrace();
+				System.setOut(originalOut);
+				System.setErr(originalErr);
 			}
 		}
 	}
