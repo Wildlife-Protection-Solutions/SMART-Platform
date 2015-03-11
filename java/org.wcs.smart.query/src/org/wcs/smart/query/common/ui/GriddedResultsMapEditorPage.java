@@ -288,7 +288,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
 		loadDefaultLayers.schedule();
 	}
 

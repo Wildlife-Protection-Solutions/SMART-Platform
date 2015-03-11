@@ -93,7 +93,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
-		LoadDefaultLayersJob loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		LoadDefaultLayersJob loadDefaultLayers = new LoadDefaultLayersJob(getMap());
 		loadDefaultLayers.schedule();
 		
 		addPointsLayer();

@@ -35,7 +35,6 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.IMap;
 import org.locationtech.udig.project.internal.Map;
-import org.locationtech.udig.project.internal.command.navigation.ZoomExtentCommand;
 import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
@@ -62,7 +61,6 @@ public class LoadDefaultLayersJob extends Job{
 
 	private static final String JOB_NAME = Messages.LoadDefaultLayersJob_JobName;
 	private IMap map;
-	private boolean zoom;
 	private byte[] basemapUuid = null;
 	
 	/**
@@ -71,12 +69,9 @@ public class LoadDefaultLayersJob extends Job{
 	 * or the default SMART basemap.
 	 * 
 	 * @param map the map to apply the default basemap too
-	 * @param zoom if should zoom to extents after loading basemap
 	 */
-	public LoadDefaultLayersJob(IMap map, boolean zoom){
-		super(JOB_NAME);
-		this.map = map;
-		this.zoom = zoom;
+	public LoadDefaultLayersJob(IMap map){
+		this(map, null);
 	}
 	
 	/**
@@ -87,13 +82,11 @@ public class LoadDefaultLayersJob extends Job{
 	 *   the the smart basemap<br>
 	 *   
 	 * @param map
-	 * @param zoom
 	 * @param basemapUuid
 	 */
-	public LoadDefaultLayersJob(IMap map, boolean zoom, byte[] basemapUuid){
+	public LoadDefaultLayersJob(IMap map, byte[] basemapUuid){
 		super(JOB_NAME);
 		this.map = map;
-		this.zoom = zoom;
 		this.basemapUuid = basemapUuid;
 	}
 	
@@ -146,10 +139,6 @@ public class LoadDefaultLayersJob extends Job{
     				}
     				
     			}
-    			if (zoom){
-					if (monitor.isCanceled()) return Status.CANCEL_STATUS;
-					map.sendCommandASync(new ZoomExtentCommand());
-				}
 			} catch (IOException e) {
 				SmartPlugIn.log(Messages.LoadDefaultLayersJob_Error_AddingLayers, e);
 			}

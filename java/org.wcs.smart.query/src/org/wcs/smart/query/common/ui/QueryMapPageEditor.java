@@ -227,7 +227,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), true);
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
 		loadDefaultLayers.schedule();
 		addInitialZoomFunction();
 	}

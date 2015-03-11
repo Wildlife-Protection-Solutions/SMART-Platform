@@ -73,6 +73,7 @@ import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.locationtech.udig.project.internal.commands.ChangeCRSCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.locationtech.udig.project.internal.render.impl.RenderManagerImpl;
+import org.locationtech.udig.project.internal.render.impl.ViewportModelImpl;
 import org.locationtech.udig.ui.palette.ColourScheme;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
@@ -301,7 +302,6 @@ public class MapSettings {
 	 * @param currentMap the displayed map
 	 */
 	public synchronized void applyTo(Map currentMap) {
-		
 		//turn off map events
 		currentMap.eSetDeliver(false);
 		if (((RenderManagerImpl)currentMap.getRenderManager()) != null){
@@ -449,6 +449,7 @@ public class MapSettings {
 			}
 
 			// turn back on events
+			((ViewportModelImpl)currentMap.getViewportModel()).zoomToExtent();
 		} finally {
 			currentMap.eSetDeliver(true);
 			if (((RenderManagerImpl) currentMap.getRenderManager()) != null) {
@@ -468,9 +469,6 @@ public class MapSettings {
 			}
 		} catch (Exception ex) {
 			ex.printStackTrace();
-		}
-		if (currentMap.getRenderManager() != null) {
-			currentMap.getRenderManager().refresh(null);
 		}
 
 	}
@@ -558,7 +556,7 @@ public class MapSettings {
 				for (IService service : newServices) {
 		            catalog.add(service);
 				}
-				resolveList = catalog.find(new ID(urlWithoutFragment), monitor);
+				resolveList = catalog.find(new ID(url), monitor);
 				assert !resolveList.isEmpty();
 			} 
 			// the service for the url exist then gets the resource

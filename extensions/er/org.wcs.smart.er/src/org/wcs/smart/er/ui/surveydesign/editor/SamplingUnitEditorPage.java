@@ -773,7 +773,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		if (loadDefaultLayers != null){
 			loadDefaultLayers.cancel();			
 		}
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
 		loadDefaultLayers.schedule();
 		
 		if (suService == null){

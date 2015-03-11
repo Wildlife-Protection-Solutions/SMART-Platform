@@ -146,7 +146,7 @@ public class MapView implements IDropTargetProvider, MapPart, IAdaptable {
         
         partService.addPartListener(listener);
         
-        LoadDefaultLayersJob job = new LoadDefaultLayersJob(getMap(), true);
+        LoadDefaultLayersJob job = new LoadDefaultLayersJob(getMap());
 		job.schedule();
     }
 

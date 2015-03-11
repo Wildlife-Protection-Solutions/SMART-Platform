@@ -112,7 +112,7 @@ public class IntelligenceEditorMapPage extends SmartMapEditorPart {
 		if (loadDefaultLayersJob != null){
 			loadDefaultLayersJob.cancel();			
 		}
-		loadDefaultLayersJob = new LoadDefaultLayersJob(getMap(), false);
+		loadDefaultLayersJob = new LoadDefaultLayersJob(getMap());
 		loadDefaultLayersJob.schedule();
 	}
 	
