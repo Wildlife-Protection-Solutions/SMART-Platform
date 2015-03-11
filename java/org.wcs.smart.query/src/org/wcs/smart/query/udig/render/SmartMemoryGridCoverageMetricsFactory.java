@@ -27,7 +27,6 @@ import org.locationtech.udig.project.render.ICompositeRenderContext;
 import org.locationtech.udig.project.render.IRenderContext;
 import org.locationtech.udig.project.render.IRenderMetricsFactory;
 import org.locationtech.udig.project.render.IRenderer;
-
 import org.wcs.smart.query.common.model.udig.RasterService;
 
 

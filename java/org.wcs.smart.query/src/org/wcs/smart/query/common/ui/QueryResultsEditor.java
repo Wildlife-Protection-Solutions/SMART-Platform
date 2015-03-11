@@ -23,9 +23,6 @@ package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
 
-import org.locationtech.udig.project.internal.Map;
-import org.locationtech.udig.project.ui.internal.MapPart;
-import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -40,6 +37,9 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;

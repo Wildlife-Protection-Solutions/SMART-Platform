@@ -24,8 +24,6 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.util.HashMap;
 
-import org.locationtech.udig.catalog.URLUtils;
-
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -40,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.export.dialog.DelimiterCombo;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.importexport.IQueryExporter;

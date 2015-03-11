@@ -88,7 +88,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.IValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
-import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;

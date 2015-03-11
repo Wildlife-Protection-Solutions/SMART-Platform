@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.report.map;
 
 import org.locationtech.udig.catalog.IService;
-
 import org.wcs.smart.er.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;

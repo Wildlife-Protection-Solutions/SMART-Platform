@@ -23,11 +23,10 @@ package org.wcs.smart.report.birt.map;
 
 import java.util.List;
 
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.internal.StyleBlackboard;
-
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.StyleBlackboard;
 
 /**
  * This provides a presentation link between any BIRT datasethandle

@@ -28,11 +28,6 @@ import java.net.URL;
 
 import javax.xml.transform.TransformerException;
 
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.StyleContent;
-import org.locationtech.udig.style.sld.SLDPlugin;
-import org.locationtech.udig.ui.graphics.SLDs;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IMemento;
 import org.geotools.factory.CommonFactoryFinder;
@@ -40,6 +35,10 @@ import org.geotools.factory.GeoTools;
 import org.geotools.styling.SLDParser;
 import org.geotools.styling.SLDTransformer;
 import org.geotools.styling.StyleFactory;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.StyleContent;
+import org.locationtech.udig.style.sld.SLDPlugin;
+import org.locationtech.udig.ui.graphics.SLDs;
 import org.opengis.style.Style;
 
 public class SmartGridCellStyleContent extends StyleContent {

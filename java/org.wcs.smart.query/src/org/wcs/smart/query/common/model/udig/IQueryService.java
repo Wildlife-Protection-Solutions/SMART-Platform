@@ -23,9 +23,8 @@ package org.wcs.smart.query.common.model.udig;
 
 import java.io.IOException;
 
-import org.locationtech.udig.catalog.IService;
-
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.locationtech.udig.catalog.IService;
 
 /**
  * Smart query service

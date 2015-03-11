@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.geotools.styling.Style;
+import org.geotools.util.Range;
 import org.locationtech.udig.core.MinMaxScaleCalculator;
 import org.locationtech.udig.project.ILayer;
 import org.locationtech.udig.project.render.AbstractRenderMetrics;
@@ -33,9 +35,6 @@ import org.locationtech.udig.project.render.IRenderContext;
 import org.locationtech.udig.project.render.IRenderMetricsFactory;
 import org.locationtech.udig.style.sld.SLDContent;
 import org.locationtech.udig.ui.graphics.SLDs;
-
-import org.geotools.styling.Style;
-import org.geotools.util.Range;
 
 /**
  * Creates a Metrics object for the smart gridcoverage renderer
