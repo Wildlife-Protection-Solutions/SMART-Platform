@@ -29,11 +29,10 @@ import javax.persistence.Entity;
 import javax.persistence.Transient;
 
 import org.eclipse.ui.WorkbenchException;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.udig.style.StyleManager;
-
 import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.locationtech.udig.project.internal.StyleEntry;
+import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.udig.style.StyleManager;
 
 /**
  * Class for queries which can be styled.

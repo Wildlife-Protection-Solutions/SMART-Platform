@@ -35,7 +35,6 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.udig.style.SmartLayerStyle;
 import org.wcs.smart.udig.style.StyleManager;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Template cloner that copies query data 

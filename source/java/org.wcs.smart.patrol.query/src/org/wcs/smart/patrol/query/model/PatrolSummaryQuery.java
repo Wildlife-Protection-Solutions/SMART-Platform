@@ -23,9 +23,6 @@ package org.wcs.smart.patrol.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -36,21 +33,12 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.engine.DerbySummaryEngine;
-import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
-import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.summary.AttributeGroupBy;
-import org.wcs.smart.query.model.summary.CategoryGroupBy;
-import org.wcs.smart.query.model.summary.IGroupBy;
-import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
 
 /**

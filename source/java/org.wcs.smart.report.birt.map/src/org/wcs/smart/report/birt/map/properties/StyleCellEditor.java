@@ -24,14 +24,6 @@ package org.wcs.smart.report.birt.map.properties;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.locationtech.udig.catalog.CatalogPlugin;
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.project.internal.Layer;
-import org.locationtech.udig.project.internal.Map;
-import org.locationtech.udig.project.internal.ProjectFactory;
-import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.locationtech.udig.project.internal.commands.AddLayersCommand;
-
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,6 +34,13 @@ import org.eclipse.jface.viewers.DialogCellEditor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.locationtech.udig.catalog.CatalogPlugin;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.project.internal.Layer;
+import org.locationtech.udig.project.internal.Map;
+import org.locationtech.udig.project.internal.ProjectFactory;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.internal.commands.AddLayersCommand;
 import org.wcs.smart.report.birt.map.BirtMapUtils;
 import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;

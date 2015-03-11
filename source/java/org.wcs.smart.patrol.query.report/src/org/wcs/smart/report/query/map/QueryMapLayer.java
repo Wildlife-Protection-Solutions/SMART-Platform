@@ -22,7 +22,6 @@
 package org.wcs.smart.report.query.map;
 
 import org.locationtech.udig.catalog.IService;
-
 import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;

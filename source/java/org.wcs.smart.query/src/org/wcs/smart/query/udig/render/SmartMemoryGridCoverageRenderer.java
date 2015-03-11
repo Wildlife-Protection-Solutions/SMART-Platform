@@ -26,15 +26,14 @@ import java.awt.Graphics2D;
 import java.awt.Point;
 import java.io.IOException;
 
-import org.locationtech.udig.project.internal.StyleBlackboard;
-import org.locationtech.udig.project.render.RenderException;
-import org.locationtech.udig.render.internal.gridcoverage.basic.MemoryGridCoverageRenderer;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.styling.LineSymbolizer;
 import org.geotools.styling.SLD;
 import org.geotools.styling.Style;
+import org.locationtech.udig.project.internal.StyleBlackboard;
+import org.locationtech.udig.project.render.RenderException;
+import org.locationtech.udig.render.internal.gridcoverage.basic.MemoryGridCoverageRenderer;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridGeometry;
 import org.wcs.smart.query.QueryPlugIn;

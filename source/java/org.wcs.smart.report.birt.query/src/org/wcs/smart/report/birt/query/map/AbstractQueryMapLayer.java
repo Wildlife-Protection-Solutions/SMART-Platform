@@ -26,15 +26,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.locationtech.udig.catalog.IGeoResource;
-import org.locationtech.udig.catalog.IService;
-import org.locationtech.udig.project.internal.StyleBlackboard;
-
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
 import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.IGeoResource;
+import org.locationtech.udig.catalog.IService;
+import org.locationtech.udig.project.internal.StyleBlackboard;
 import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;

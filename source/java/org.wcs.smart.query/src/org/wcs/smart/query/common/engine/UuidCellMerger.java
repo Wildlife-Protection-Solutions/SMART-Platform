@@ -23,8 +23,6 @@ package org.wcs.smart.query.common.engine;
 
 import java.util.HashSet;
 
-import org.wcs.smart.query.common.engine.ICellMerger;
-
 /**
  * Merges together hashsets of objects.  Returns a count of the 
  * number of unique items.

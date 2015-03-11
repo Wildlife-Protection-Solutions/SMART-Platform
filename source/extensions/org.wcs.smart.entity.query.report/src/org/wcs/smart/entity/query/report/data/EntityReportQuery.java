@@ -44,7 +44,6 @@ import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
 import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
 import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
 import org.wcs.smart.entity.query.report.internal.Messages;
-
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;

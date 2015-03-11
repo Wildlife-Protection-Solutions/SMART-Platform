@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.query.report.map;
 
 import org.locationtech.udig.catalog.IService;
-
 import org.wcs.smart.entity.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
 import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;

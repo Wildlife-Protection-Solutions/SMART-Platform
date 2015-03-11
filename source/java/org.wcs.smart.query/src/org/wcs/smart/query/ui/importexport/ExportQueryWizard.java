@@ -27,8 +27,6 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 
-import org.locationtech.udig.catalog.URLUtils;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,6 +39,7 @@ import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
