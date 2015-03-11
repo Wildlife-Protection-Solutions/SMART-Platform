@@ -85,6 +85,14 @@ public class NameKeyComposite {
 
 	/**
 	 * 
+	 * @return the current key
+	 */
+	public String getCurrentKey(){
+		return this.txtKey.getText();
+	}
+	
+	/**
+	 * 
 	 * @return the current selected language
 	 */
 	public Language getSelectedLanguage(){
