@@ -191,15 +191,7 @@ public class AttributeInfoPanel extends Composite {
 				validate();	
 			}
 		});
-		
-		nameKeyValues.txtKey.addListener(SWT.Modify, new Listener(){
-			@Override
-			public void handleEvent(Event event) {
-				if (AttributeInfoPanel.this.attTree != null){
-					AttributeInfoPanel.this.attTree.updateAttributeKey(nameKeyValues.txtKey.getText());
-				}
-			}});
-		
+
 		/* required */
 		Label lblRequired = new Label(this, SWT.NONE);
 		lblRequired.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
@@ -571,7 +563,7 @@ public class AttributeInfoPanel extends Composite {
 		
 		
 		if (canEdit){
-			attTree = new AttributeTree(true);
+			attTree = new AttributeTree(AttributeInfoPanel.this, true);
 			Composite tree = attTree.createTree(treeComposite);
 			cdAttTree = createDecoration(tree);
 			attTree.setListener(new AttributeTree.AttributeTreeChangeListener() {
@@ -590,7 +582,7 @@ public class AttributeInfoPanel extends Composite {
 			});
 			attTree.refresh(nameKeyValues.langViewer.getCurrentSelection());
 		}else{
-			attTree = new AttributeTree(false);
+			attTree = new AttributeTree(AttributeInfoPanel.this, false);
 			attTree.createTree(treeComposite);
 			attTree.refresh(currentDisplayLang);
 		}
@@ -612,6 +604,10 @@ public class AttributeInfoPanel extends Composite {
 		}
 	}
 
+	public NameKeyComposite getNameKeyComposite(){
+		return this.nameKeyValues;
+	}
+	
 	/**
 	 * Run a taks in a progress monitor
 	 * @param runnable

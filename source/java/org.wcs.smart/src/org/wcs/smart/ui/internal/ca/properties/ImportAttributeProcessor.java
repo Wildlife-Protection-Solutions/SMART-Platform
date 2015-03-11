@@ -68,8 +68,11 @@ public class ImportAttributeProcessor {
 	private AttributeType matchedAttribute;
 	private List<AttributeTreeNode> workingRoots = null;
 	private String defaultLangCode = null;
+	private String currentKey = null;
 	
-	public ImportAttributeProcessor(Attribute attribute, List<AttributeTreeNode> workingRootNodes){
+	public ImportAttributeProcessor(String currentKey, Attribute attribute, 
+			List<AttributeTreeNode> workingRootNodes){
+		this.currentKey = currentKey;
 		this.attribute = attribute;
 		this.workingRoots = workingRootNodes;
 	}
@@ -149,7 +152,7 @@ public class ImportAttributeProcessor {
 	 */
 	public boolean validateInputFile(){
 		if (matchedAttribute == null){
-			SmartPlugIn.displayLog(MessageFormat.format(Messages.ImportAttributeProcessor_NoAttributeFound, new Object[]{attribute.getKeyId()}), null);
+			SmartPlugIn.displayLog(MessageFormat.format(Messages.ImportAttributeProcessor_NoAttributeFound, new Object[]{currentKey}), null);
 			return false;
 		}
 		
@@ -303,7 +306,7 @@ public class ImportAttributeProcessor {
 	 * @return
 	 */
 	private String getAttributeFile(){
-		return "/" + SmartProperties.PROPERTIES_DIR + "/" + attribute.getKeyId() + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return "/" + SmartProperties.PROPERTIES_DIR + "/" + currentKey + ".xml"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 	
 	
@@ -347,7 +350,7 @@ public class ImportAttributeProcessor {
 			throw new Exception("Data model is null."); //$NON-NLS-1$
 		}
 		for (AttributeType type : xmlDataModel.getAttributes().getAttributes()){
-			if (type.getKey().equals(attribute.getKeyId())){
+			if (type.getKey().equals(currentKey)){
 				matchedAttribute = type;
 				break;
 			}

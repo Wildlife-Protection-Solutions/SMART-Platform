@@ -70,6 +70,7 @@ import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.ca.properties.AttributeInfoPanel;
 import org.wcs.smart.ui.ca.properties.AttributeItemDialog;
 import org.wcs.smart.ui.properties.AttributeTreeContentProvider;
 import org.wcs.smart.ui.properties.AttributeTreeLabelProvider;
@@ -90,12 +91,14 @@ public class AttributeTree {
 	private Session currentSession = null;
 	private boolean isEditable = false;
 	private Attribute attribute;
+	private AttributeInfoPanel info;
 	
 	private List<AttributeTreeNode> deletedNodes = new ArrayList<AttributeTreeNode>();
 	
 	
-	public AttributeTree(boolean isEditable){
+	public AttributeTree(AttributeInfoPanel info, boolean isEditable){
 		this.isEditable = isEditable;
+		this.info = info;
 	}
 	/**
 	 * Sets the listener fired when modifications occur.  
@@ -289,7 +292,8 @@ public class AttributeTree {
 			btnImport.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e){
-					ImportAttributeProcessor processor = new ImportAttributeProcessor(attribute, getRootNodes());
+					ImportAttributeProcessor processor = new ImportAttributeProcessor(info.getNameKeyComposite().getCurrentKey(),  
+							attribute, getRootNodes());
 					processor.importAttribute();
 					viewer.setInput(getRootNodes());
 					fireChangeListener();
