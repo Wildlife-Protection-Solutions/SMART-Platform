@@ -109,11 +109,9 @@ public class Messages extends NLS {
 	public static String EditTreeDialog_AddGroup;
 	public static String EditTreeDialog_AddNodeButton;
 	public static String EditTreeDialog_AddNodeTooltip;
-	public static String EditTreeDialog_AddToConfTree;
 	public static String EditTreeDialog_AutoAddSubnodes;
 	public static String EditTreeDialog_ConfigurableModelValues;
 	public static String EditTreeDialog_DataModelValues;
-	public static String EditTreeDialog_Delete;
 	public static String EditTreeDialog_DeleteTooltip;
 	public static String EditTreeDialog_EnableTooltip;
 	public static String EditTreeDialog_MessageCustom;

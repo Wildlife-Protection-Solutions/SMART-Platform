@@ -373,7 +373,6 @@ public class Messages extends NLS {
 	public static String TypeComposite_CompositeDescription;
 	public static String TypeComposite_CompositeName;
 	public static String TypeComposite_TypeLabel;
-	public static String ViewEntityHandler_OpenError;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

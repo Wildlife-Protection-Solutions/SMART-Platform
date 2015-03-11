@@ -6,7 +6,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.entity.query.internal.messages"; //$NON-NLS-1$
 	public static String AddEntityQueryJob_AddQueryTablesJobName;
 	public static String AddEntityQueryJob_InstallError;
-	public static String AddEntityQueryJob_InstallError2;
 	public static String AddEntityQueryJob_Progress1;
 	public static String ConservationAreaTreeNode_Name;
 	public static String DerbyEntityObservationEngine_ObserverProgress;

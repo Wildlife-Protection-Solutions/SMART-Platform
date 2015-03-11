@@ -304,7 +304,6 @@ public class Messages extends NLS {
 	public static String MissionDayComposite_ImportWizardError;
 	public static String MissionDayComposite_InvalidHours;
 	public static String MissionDayComposite_InvalidRestMinutes;
-	public static String MissionDayComposite_Link_Edit;
 	public static String MissionDayComposite_LoadingWizard;
 	public static String MissionDayComposite_MoveWaypoint;
 	public static String MissionDayComposite_None;

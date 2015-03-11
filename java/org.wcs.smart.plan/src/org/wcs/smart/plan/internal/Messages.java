@@ -18,7 +18,6 @@ public class Messages extends NLS {
 	public static String ConvertedPlanExtraData_NoPlanReference;
 	public static String ConvertedPlanExtraData_PlanNotFound;
 	public static String CreatePlanWizard_InvalidDateRange_Message;
-	public static String CreatePlanWizard_LoadPerspective_Error;
 	public static String CreatePlanWizard_Title;
 	public static String DatesPlanWizardPage_Message;
 	public static String DatesPlanWizardPage_PageName;
@@ -61,8 +60,6 @@ public class Messages extends NLS {
 	public static String NewPatrolPlanWizardPage_ErrorDialog_Title;
 	public static String NewPatrolPlanWizardPage_Message;
 	public static String NewPatrolPlanWizardPage_Title;
-	public static String NewPlanHandler_LoadWizard_Error;
-	public static String NewPlanHandler_LoadWizard_TaskName;
 	public static String NumericPlanTarget_CategoryName;
 	public static String NumericPlanTarget_days;
 	public static String NumericPlanTarget_GuiName;
@@ -127,7 +124,6 @@ public class Messages extends NLS {
 	public static String PlanDatesComposite_Title;
 	public static String PlanDatesComposite_StartDate;
 	public static String PlanDatesComposite_StartDate_Range_Parent_Error;
-	public static String PlanEditor_CannotOpenFile_Error;
 	public static String PlanEditor_ChildPatrolLabel;
 	public static String PlanEditor_ChildPlanTarges_Label;
 	public static String PlanEditor_Description_Label;
@@ -248,7 +244,6 @@ public class Messages extends NLS {
 	public static String RevertPlanTemplate_Error;
 	public static String RevertPlanTemplate_ErrorRevertingTemplate;
 	public static String RevertPlanTemplate_OverwriteTemplateWarningMessage;
-	public static String ShowPlanPersepctiveHandler_Load_Error;
 	public static String SmartPlanConnection_UnsupportedDataset;
 	public static String SmartPlanDatasetMetadata_DatasetName;
 	public static String SmartPlanDataSourceWizardPage_DataSourceNotConfigurable;

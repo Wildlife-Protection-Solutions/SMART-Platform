@@ -103,8 +103,6 @@ public class Messages extends NLS {
 	public static String ImportReportFolderPage_FolderLabel;
 	public static String ImportReportFolderPage_Message;
 	public static String ImportReportFolderPage_Title;
-	public static String ImportReportHandler_Error_ImportingReport;
-	public static String ImportReportHandler_Error_LoadingPerspective;
 	public static String ImportReportSourcePage_Message;
 	public static String ImportReportSourcePage_opCa;
 	public static String ImportReportSourcePage_opFile;
@@ -168,8 +166,6 @@ public class Messages extends NLS {
 	public static String ReportManager_Deleteok_ReportFileNotRemovedB;
 	public static String ReportManager_Error_ChildFoldersExist;
 	public static String ReportManager_Error_ChildReportsExist;
-	public static String ReportManager_Error_OpeningReport;
-	public static String ReportManager_Error_OpeningReportA;
 	public static String ReportManager_GeneratingFileError;
 	public static String ReportManager_ReportOk_OpenEerror;
 	public static String ReportParameterDialog_ContinueButton;

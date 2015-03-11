@@ -29,7 +29,6 @@ public class Messages extends NLS {
 	public static String DerbySummaryEngine_Progress_CreatingObservationTable;
 	public static String DerbySummaryEngine_Progress_CreatingTempTable;
 	public static String DerbySummaryEngine_Progress_LoadingHeaders;
-	public static String DerbySummaryEngine_Progress_ProcessingValue;
 	public static String DerbySummaryEngine_Progress_RunningQuery;
 	public static String FilterValidator_PatrolFilter_EmployeeError;
 	public static String FilterValidator_PatrolFilter_UnqiueIdMatchingError;
@@ -102,11 +101,6 @@ public class Messages extends NLS {
 	public static String PatrolQueryEditorTableContent_PatrolQueryLabel;
 	public static String PatrolQueryEditorTableContent_QueryPropertiesLabel;
 	public static String PatrolQueryEditorTableContent_RunQueryLink;
-	public static String PatrolQueryMapPage_AddLayersJobName;
-	public static String PatrolQueryMapPage_ErrorLoadingPage;
-	public static String PatrolQueryMapPage_ErrorRefreshing;
-	public static String PatrolQueryMapPage_RefreshJobName;
-	public static String PatrolQueryMapPage_UnknownStatus;
 	public static String PatrolQueryOptions_CaGroupByOptionName;
 	public static String PatrolQueryOptions_DateOp_Last30;
 	public static String PatrolQueryOptions_DateOpAll;
