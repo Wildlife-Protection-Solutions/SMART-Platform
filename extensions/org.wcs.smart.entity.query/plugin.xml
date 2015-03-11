@@ -125,7 +125,7 @@
          point="org.wcs.smart.ca.templateCloner">
       <templateCloner
             class="org.wcs.smart.entity.query.internal.EntityQueryTemplateCloner"
-            id="org.wcs.smart.entity.query.Cloner">
+            id="org.wcs.smart.query.entity.Cloner">
          <require
                id="org.wcs.smart.QueryCloner">
          </require>

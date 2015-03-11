@@ -278,9 +278,12 @@
          point="org.wcs.smart.ca.templateCloner">
       <templateCloner
             class="org.wcs.smart.er.query.internal.SurveyQueryCloner"
-            id="org.wcs.smart.er.query.SurveyQueryCloner">
+            id="org.wcs.smart.query.er.SurveyQueryCloner">
          <require
                id="org.wcs.smart.er.SurveyCloner">
+         </require>
+         <require
+               id="org.wcs.smart.QueryCloner">
          </require>
       </templateCloner>
    </extension>
