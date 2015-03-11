@@ -196,7 +196,7 @@ public class SightingMapPage extends SmartMapEditorPart implements IEntityTypeEd
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
-		loadDefaultLayers = new LoadDefaultLayersJob(getMap(), true);
+		loadDefaultLayers = new LoadDefaultLayersJob(getMap());
 		loadDefaultLayers.schedule();
 		
 		addPointLayers();

@@ -175,7 +175,7 @@ public class MapComposite extends Composite implements MapPart {
 		tools.selectTool(PanTool.ID);
 
 		addPointsLayer();
-		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap(), true, null);
+		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap());
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		defaultLayer.addJobChangeListener(new JobChangeAdapter() {

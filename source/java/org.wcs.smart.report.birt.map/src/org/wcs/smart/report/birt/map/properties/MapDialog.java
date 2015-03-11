@@ -163,7 +163,7 @@ public class MapDialog extends Dialog implements MapPart{
         map.getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		map.getViewportModelInternal().setCRS(Area.AREA_CRS);
 		
-		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, bounds == null, this.basemapUuid);
+		LoadDefaultLayersJob layer = new LoadDefaultLayersJob(map, this.basemapUuid);
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		layer.addJobChangeListener(new JobChangeAdapter() {

@@ -548,7 +548,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		
 		
 		
-		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap(), false, null);
+		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap());
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		defaultLayer.addJobChangeListener(new JobChangeAdapter() {

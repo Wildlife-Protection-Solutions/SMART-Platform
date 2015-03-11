@@ -522,8 +522,7 @@ public class TracksComposite extends Composite implements MapPart{
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
 		
-		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap(),
-				true, null);
+		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap());
 		// we need to do this because this map is in a dialog box and
 		// events does work correctly
 		defaultLayer.addJobChangeListener(new JobChangeAdapter() {
