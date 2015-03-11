@@ -192,8 +192,6 @@ public class Messages extends NLS {
 
 	public static String InformantDataEditor_edittooltip;
 
-	public static String InformantDataEditor_ForgotPassword;
-
 	public static String InformantDataEditor_logintooltip;
 
 	public static String InformantDataEditor_LogoutDialog_Message;
@@ -336,8 +334,6 @@ public class Messages extends NLS {
 
 	public static String IntelligenceEditor_ErrorCreatingPages;
 
-	public static String IntelligenceEditor_FailOpenPatrol_Error;
-
 	public static String IntelligenceEditor_MapPageName;
 
 	public static String IntelligenceEditor_NoValue;
@@ -389,12 +385,6 @@ public class Messages extends NLS {
 	public static String IntelligenceGroupByPatrolContribution_MotivatedByIntelligenceLabel;
 
 	public static String IntelligenceGroupByPatrolContribution_NotMotivatedByIntelligenceLabel;
-
-	public static String IntelligenceHandler_LoadingErrorMessage;
-
-	public static String IntelligenceHandler_LoadPerspective_Error;
-
-    public static String IntelligenceHandler_TaskName;
 
 	public static String IntelligenceHibernateManager_DeleteInformant;
 
@@ -627,8 +617,6 @@ public class Messages extends NLS {
 	public static String SetPasswordDialog_PolicyUnmatched;
 
 	public static String SetPasswordDialog_Title;
-
-	public static String ShowIntelligencePersepctiveHandler_Error;
 
 	public static String SmartIntelligenceConnection_UnsupportedDataset;
 

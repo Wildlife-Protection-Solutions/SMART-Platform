@@ -21,7 +21,6 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_ClearBoundsLink;
 	public static String SmartLayersPage_ClearStyleButton;
 	public static String SmartLayersPage_cleartooltip;
-	public static String SmartLayersPage_CRSLabel;
 	public static String SmartLayersPage_DefaultBasemapLabel;
 	public static String SmartLayersPage_DefaultStyleLabel;
 	public static String SmartLayersPage_Error_NoDatasets;
@@ -51,12 +50,9 @@ public class Messages extends NLS {
 	public static String StyleCellEditor_CreateMapLayerJobName;
 	public static String StyleCellEditor_Error_CouldNotCreateStyleEditor;
 	public static String StyleCellEditor_Error_CouldNotOpenStyleDialog;
-	public static String StyleEditorButtonListener_UnableToImportSld;
 	public static String SmartMapItem_Name;
 	public static String SmartMapItemCloner_CloneError;
 	public static String SmartMapItemCloner_CloningReportItem;
-	
-	public static String SmartStyleEditorDialog_ApplyButton;
 	public static String SmartStyleEditorDialog_RevertButton;
 	public static String SmartStyleEditorDialog_Title;
 

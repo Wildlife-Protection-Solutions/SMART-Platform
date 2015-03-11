@@ -4,7 +4,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
-	public static String AddERQueryJob_InstallError;
 	public static String AddERQueryJob_JobName;
 	public static String CmAttributeListDropItem_loadModelAttributeJobName;
 	public static String CmAttributeTreeDropItem_ErrorDialog;

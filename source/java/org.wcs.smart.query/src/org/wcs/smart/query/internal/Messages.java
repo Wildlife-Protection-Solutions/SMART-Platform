@@ -81,7 +81,6 @@ public class Messages extends NLS {
 	public static String ConservationAreaGroupByDropItem_FiltersLabel;
 	public static String ConservationAreaGroupByDropItem_IncludedLabel;
 	public static String ConservationAreaGroupByDropItem_Name;
-	public static String CreateUnknownQueryHandler_ErrorLoadingQueryView;
 	public static String DataModelTreeNode_DataModelFiltersLabel;
 	public static String DataModelTreeNode_DmGroupByLabel;
 	public static String DataModelTreeNode_DmValuesLabel;
@@ -96,7 +95,6 @@ public class Messages extends NLS {
 	public static String DeleteItemHandler_ConfirmDelete;
 	public static String DeleteItemHandler_ConfirmDeleteTitle;
 	public static String DeleteItemHandler_ConfirmMessage;
-	public static String DeleteItemHandler_ErrorClosingEditor;
 	public static String DeleteItemHandler_ErrorDeleteFolder;
 	public static String DeleteItemHandler_ErrorDeletingQueryB;
 	public static String DeleteItemHandler_ErrorQueryNotFound;
@@ -210,7 +208,6 @@ public class Messages extends NLS {
 	public static String ImportQueryFolderPage_FolderLabel;
 	public static String ImportQueryFolderPage_PageMessage;
 	public static String ImportQueryFolderPage_PageTitle;
-	public static String ImportQueryHandler_ErrorOpeningPerspective;
 	public static String ImportQuerySourcePage_Message;
 	public static String ImportQuerySourcePage_OpImportCa;
 	public static String ImportQuerySourcePage_OpImportFile;
@@ -276,7 +273,6 @@ public class Messages extends NLS {
 	public static String QueryDateFilterComposite_InvalidDate;
 	public static String QueryDefinitionValidator_AggregationNotSupported;
 	public static String QueryDefPanel_QueryTypeNotSupported;
-	public static String QueryDefView_CloseError;
 	public static String QueryEditorUtils_BlankNameError;
 	public static String QueryEditorUtils_CopyOfLabel;
 	public static String QueryEditorUtils_CreateNewButton;
@@ -339,7 +335,6 @@ public class Messages extends NLS {
 	public static String SaveQueryDialog_NameLabel;
 	public static String SaveQueryDialog_NewDialogMessage;
 	public static String SaveQueryDialog_PageTitle;
-	public static String ShowQueryPersepctiveHandler_QueryPerspectiveError;
 	public static String SummaryDataModelContentProvider_AttributesCategoryLabel;
 	public static String SummaryDataModelContentProvider_AttributesValueLabel;
 	public static String SummaryDataModelContentProvider_CategoryGroupByLabel;
