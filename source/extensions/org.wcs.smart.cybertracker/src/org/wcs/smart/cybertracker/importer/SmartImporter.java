@@ -87,6 +87,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 public class SmartImporter {
 	
 	private static final int WARN_WP_TIME_FRAME = 10; //in minutes
+	
+	private DateFormat fnDateFormat = new SimpleDateFormat("yyyy_MM_dd"); //$NON-NLS-1$
 
 	private List<String> warnings = new ArrayList<String>();
 
@@ -280,7 +282,8 @@ public class SmartImporter {
 		
 		Waypoint wp = findOrAddWaypoint(legDay, s, eMap);
 		addObservations(wp, s, eMap, session);
-		addAttachments(wp, s, eMap);
+		String prefix = fnDateFormat.format(legDay.getDate()) + "_Leg_"+leg.getId(); //$NON-NLS-1$
+		addAttachments(wp, s, eMap, prefix);
 	}
 
 	protected void addObservations(Waypoint wp, S s, Map<String, E> eMap, Session session) {
@@ -618,7 +621,7 @@ public class SmartImporter {
 		}
 	}
 
-	private void addAttachments(Waypoint wp, S s, Map<String, E> eMap) {
+	private void addAttachments(Waypoint wp, S s, Map<String, E> eMap, String namePrefix) {
 		String mediaFolder = null;
 		try {
 			mediaFolder = PdaUtil.getCTMediaFolder();
@@ -639,15 +642,21 @@ public class SmartImporter {
 				if (wp.getAttachments() == null) {
 					wp.setAttachments(new ArrayList<WaypointAttachment>());
 				}
+
+				//create user friendly file name
+				int index = a.getV().lastIndexOf('.');
+				String ext = index >= 0 ? a.getV().substring(index) : ""; //$NON-NLS-1$
+				String fileName = namePrefix+"_Waypoint_"+wp.getId()+ext; //$NON-NLS-1$
+				
 				WaypointAttachment attachment = new WaypointAttachment();
 				attachment.setWaypoint(wp);
-				attachment.setFilename(a.getV());
+				attachment.setFilename(fileName);
 				attachment.setCopyFromLocation(file);
 				wp.getAttachments().add(attachment);
 			}
 		}
 	}
-	
+
 	/**
 	 * Displays warnings dialog if warnings present and returns if user choose to proceed with import
 	 * @return
