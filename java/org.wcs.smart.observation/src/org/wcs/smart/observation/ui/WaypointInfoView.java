@@ -113,7 +113,7 @@ public class WaypointInfoView {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			if (infoSection.isDisposed()) return Status.OK_STATUS;
+			if (infoSection == null || infoSection.isDisposed()) return Status.OK_STATUS;
 			
 			final List<Thumbnail> thumbnails = new ArrayList<Thumbnail>();
 			
