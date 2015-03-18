@@ -372,7 +372,7 @@ public class CTPatrolTableContainer extends Composite {
 								File currentFile = files[i];
 								if (!currentFile.exists()){
 									final File fcurrentFile = currentFile;
-									getShell().getDisplay().syncExec(new Runnable(){
+									Display.getDefault().syncExec(new Runnable(){
 										@Override
 										public void run() {
 											MessageDialog.openError(getShell(), Messages.CyberTrackerImportDialog_Error_Title,MessageFormat.format( Messages.CyberTrackerImportDialog_Error_Message, new Object[]{fcurrentFile.toString()}));
