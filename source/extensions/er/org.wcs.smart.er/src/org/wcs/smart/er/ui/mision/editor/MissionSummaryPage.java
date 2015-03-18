@@ -328,6 +328,8 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		
 		Composite dataTableComp = toolkit.createComposite(dataProp);
 		dataTableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 5, 1));
+		((GridData)dataTableComp.getLayoutData()).heightHint = 150;
+		
 		dataTableComp.setLayout(new TableColumnLayout());
 		
 		dataTable = new TableViewer(dataTableComp, SWT.BORDER | SWT.FULL_SELECTION);
