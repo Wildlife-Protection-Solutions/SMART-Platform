@@ -522,6 +522,7 @@ public class PatrolBuilder {
 				for (Iterator<WaypointType> i = legDay.getWaypoints().iterator(); i.hasNext();) {
 					WaypointType wp = i.next();
 					if (wp.getObservations().isEmpty()) {
+						System.out.println(MessageFormat.format("INFO: Patrol ''{0}'' waypoint ''{1}'' was removed from generated xml because no observation data recorded for this waypoint.", p.getId(), wp.getId()));
 						i.remove();
 					}
 				}
