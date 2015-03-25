@@ -1,19 +1,14 @@
 package org.wcs.smart.i18n;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
@@ -22,12 +17,17 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 public class Sumaryi18n {
 
 	public enum Language {
-		ENGLISH("en", "English"), SPANISH("es", "Spanish"), FRENCH("fr",
-				"French"), RUSSIAN("ru", "Russian"), THAI("th", "Thai"), CHINESE(
-				"zh", "Chinese"), VIETNAMESE("vi", "Vietnamese"), MALAY("ms",
-				"Malay"), LAOS("lo", "Laos"),
-
-		HINDI("hi", "Hindi"), INDONESIAN("in", "Indonesian"), // should be id
+		ENGLISH("en", "English"),
+		SPANISH("es", "Spanish"),
+		FRENCH("fr", "French"),
+		RUSSIAN("ru", "Russian"),
+		THAI("th", "Thai"),
+		CHINESE("zh", "Chinese"),
+		VIETNAMESE("vi", "Vietnamese"),
+		MALAY("ms", "Malay"),
+		LAOS("lo", "Laos"),
+		HINDI("hi", "Hindi"),
+		INDONESIAN("in", "Indonesian"), // should be id
 		KHMER("km", "Khmer");
 
 		String code;
@@ -40,15 +40,15 @@ public class Sumaryi18n {
 	}
 
 	public static final String[] IN_DIRS = {
-			"C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java",
-			"C:\\data\\SMART\\Source\\Version1\\trunk\\source\\extensions",
-			"C:\\data\\SMART\\Source\\Version1\\trunk\\source\\extensions\\er" 
+			"C:\\data\\SMART\\Source\\trunk\\source\\java",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er"
 		};
 
 	public static final String[] TRANS_DIRS = {
-			"C:\\data\\SMART\\Source\\Version1\\trunk\\source\\translations",
-			"C:\\data\\SMART\\Source\\Version1\\trunk\\source\\extensions",
-			"C:\\data\\SMART\\Source\\Version1\\trunk\\source\\extensions\\er\\translations" 
+			"C:\\data\\SMART\\Source\\trunk\\source\\translations",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
+			"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations" 
 		};
 
 	public static final String LINE_SEP = "\n";

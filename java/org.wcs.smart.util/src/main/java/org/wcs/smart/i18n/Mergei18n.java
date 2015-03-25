@@ -30,12 +30,14 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 @SuppressWarnings("nls")
 public class Mergei18n {
 
-//    public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\java";
-//    public static final String TRANS_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\translations\\";
+    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
+    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er"};
     
-    public static final String IN_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\extensions";
-    public static final String TRANS_DIR = "C:\\data\\SMART\\Source\\Version1\\trunk\\source\\";
-
+    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",
+    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
+		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations"};
+	
     public static final String LINE_SEP = "\n";
 
     public static final String NATIVE2ASCII = "C:\\Java\\jdk1.6.0_38\\bin\\native2ascii.exe";
@@ -48,7 +50,7 @@ public class Mergei18n {
      * @return
      * @throws Exception
      */
-    public File[] findFiles(String srcDir) throws Exception {
+    public File[] findFiles(String srcDir, String transDir) throws Exception {
         File src = new File(srcDir);
 
         IOFileFilter filter = new IOFileFilter() {
@@ -87,7 +89,7 @@ public class Mergei18n {
         int i = 1;
         for (File f : files) {
             System.out.println("Processing: " +f.getAbsolutePath() + "  " + (i++) + "/" + files.size() );
-            processFile(f);
+            processFile(f, transDir);
         }
 
         return files.toArray(new File[files.size()]);
@@ -97,8 +99,8 @@ public class Mergei18n {
      * Processes a base file, looking for matching i18n files
      * and merging matched files.
      */
-    private void processFile(File f) throws Exception {
-        File transDir = new File(TRANS_DIR);
+    private void processFile(File f, String stransDir) throws Exception {
+        File transDir = new File(stransDir);
 
         int index = f.getCanonicalPath().indexOf("org.wcs.smart");
         String pluginName = f.getCanonicalPath().substring(index);
@@ -110,7 +112,7 @@ public class Mergei18n {
 
         List<File> filesList = new ArrayList<File>();
 
-        final String matchDir = pluginName + ".nl";  /*ADD _XX if you want to search for a specific language */
+        final String matchDir = pluginName + ".nl_es";  /*ADD _XX if you want to search for a specific language */
         for (File flangDir : transDir.listFiles()){
 
 
@@ -158,10 +160,10 @@ public class Mergei18n {
 
         for (Entry<String, String> e : source.entrySet()){
             if (!target.containsKey(e.getKey())){
-               // System.out.println("add: " + e.getKey());
+                System.out.println("add: " + e.getKey());
 //                target.put(e.getKey(), e.getValue());
-                //target.put(e.getKey(), "**NEW**" + e.getValue());
-                //changes = true;
+//                target.put(e.getKey(), "**NEW**" + e.getValue());
+                changes = true;
             }
         }
 
@@ -241,7 +243,9 @@ public class Mergei18n {
     public static void main(String args[]) {
         Mergei18n util = new Mergei18n();
         try{
-            util.findFiles(IN_DIR);
+        	for (int i = 0; i < IN_DIR.length; i ++){
+        		util.findFiles(IN_DIR[i], TRANS_DIR[i]);
+        	}
         }catch (Exception ex){
             ex.printStackTrace();
         }
