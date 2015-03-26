@@ -156,15 +156,41 @@ public class AttributeTree {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					monitor.setTaskName(Messages.AttributeTree_LoadAttributeTreeMessage);
+					
+					
+					if (!isEditable){
+						//not editable so we can access the root nodes directly
+						List<AttributeTreeNode> roots = AttributeTree.this.attribute.getTree();
+						for (AttributeTreeNode n : roots){
+							n.getNames().size();
+							for (AttributeTreeNode kid : n.getChildren()){
+								kid.getNames().size();
+							}
+						}
+						//not editable lets show the loaded roots
+						if (currentShell.isDisposed()) return Status.CANCEL_STATUS;
+						currentShell.getDisplay().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								if (viewer.getControl().isDisposed()) return;
+								
+								viewer.setInput(AttributeTree.this.attribute.getTree());
+								refreshTree();
+								fireChangeListener();
+							}});	
+						return Status.OK_STATUS;
+					}
+					
+					//editable we need to clone so we can cancel any changes
 					for (AttributeTreeNode node : AttributeTree.this.attribute.getTree()) {
 						try{
-						AttributeTreeNode cloned = node.clone(
+							AttributeTreeNode cloned = node.clone(
 								AttributeTree.this.attribute.getConservationArea(),
 								AttributeTree.this.attribute.getConservationArea(), 
 								null,
 								AttributeTree.this.attribute.getConservationArea().getDefaultLanguage().getCode(),
 								null, true);
-						clonedroots.add(cloned);
+							clonedroots.add(cloned);
 						}catch (Exception ex){
 							if (!currentSession.isOpen() || monitor.isCanceled()){
 								return Status.CANCEL_STATUS;

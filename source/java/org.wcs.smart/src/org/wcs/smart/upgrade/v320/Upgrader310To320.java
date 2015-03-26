@@ -24,17 +24,28 @@ package org.wcs.smart.upgrade.v320;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.HibernateException;
+import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.util.SmartUtils;
 
 /**
  * Upgrades from database version 310 to 320.
@@ -48,9 +59,9 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	
 	private String dbUrl = null;
 	
-	public void upgrade(IProgressMonitor monitor) {
+	public void upgrade(final IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
-		Session s = HibernateManager.openSession();
+		final Session s = HibernateManager.openSession();
 		try{
 		cmUpgrader.reset(s);
 		s.doWork(new Work() {
@@ -59,7 +70,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				try {
 					dbUrl = c.getMetaData().getURL();
 					c.setAutoCommit(false);
-					upgrade(c);
+					upgrade(c, s, monitor);
 				} catch (final Exception e) {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
@@ -88,7 +99,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		}
 	}
 
-	private void upgrade(Connection c) throws Exception {
+	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		
 		String[] sql = new String[]{
 				"alter table smart.obs_waypoint_query add column style long varchar", //$NON-NLS-1$
@@ -119,7 +130,20 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				"alter table smart.cm_attribute_tree_node alter column DM_TREE_NODE_UUID NULL", //$NON-NLS-1$
 				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_parent_uuid_fk FOREIGN KEY (PARENT_UUID) REFERENCES smart.cm_attribute_tree_node (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
 				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_cm_attribute_uuid_fk FOREIGN KEY (CM_ATTRIBUTE_UUID) REFERENCES smart.cm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
-				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_dm_attribute_uuid_fk FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES smart.dm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE" //$NON-NLS-1$
+				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_dm_attribute_uuid_fk FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES smart.dm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
+		
+				//fix constraint cascade options; we have to use the restrict for deleting data model elements; but this must be done after waypoint ca cascade delete foreign key constraint 
+				"ALTER TABLE smart.wp_observation_attributes DROP CONSTRAINT observation_attribute_att_uuid_fk", //$NON-NLS-1$
+				"ALTER TABLE smart.wp_observation_attributes DROP CONSTRAINT observation_attribute_att_list_uuid_fk", //$NON-NLS-1$
+				"ALTER TABLE smart.wp_observation_attributes DROP CONSTRAINT observation_attribute_att_tree_uuid_fk", //$NON-NLS-1$
+				"ALTER TABLE smart.wp_observation DROP CONSTRAINT observation_category_uuid_fk", //$NON-NLS-1$
+				"ALTER TABLE smart.waypoint DROP CONSTRAINT waypoint_ca_uuid_fk", //$NON-NLS-1$
+
+				"ALTER TABLE smart.wp_observation_attributes ADD CONSTRAINT observation_attribute_att_uuid_fk FOREIGN KEY (ATTRIBUTE_UUID) REFERENCES smart.dm_attribute (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT", //$NON-NLS-1$
+				"ALTER TABLE smart.wp_observation_attributes ADD CONSTRAINT observation_attribute_att_list_uuid_fk FOREIGN KEY (LIST_ELEMENT_UUID) REFERENCES smart.dm_attribute_list (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT", //$NON-NLS-1$
+				"ALTER TABLE smart.wp_observation_attributes ADD CONSTRAINT observation_attribute_att_tree_uuid_fk FOREIGN KEY (TREE_NODE_UUID) REFERENCES smart.dm_attribute_tree (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT", //$NON-NLS-1$
+				"ALTER TABLE smart.wp_observation ADD CONSTRAINT observation_category_uuid_fk FOREIGN KEY (CATEGORY_UUID) REFERENCES smart.dm_category (UUID) ON UPDATE RESTRICT ON DELETE RESTRICT", //$NON-NLS-1$
+				"ALTER TABLE smart.waypoint ADD CONSTRAINT waypoint_ca_uuid_fk FOREIGN KEY (CA_UUID) REFERENCES smart.conservation_area (UUID) ON UPDATE RESTRICT ON DELETE CASCADE" //$NON-NLS-1$
 		};
 		
 		for (String s : sql){
@@ -128,6 +152,10 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		
 		cmUpgrader.upgrade(c);
 		
+		/* Species Cleanup - ticket #1118 */
+		cleanUpSpecies(session, monitor);
+		
+		
 		/* VERSION UDATE */ 
 		String ssql = "update smart.db_version set version = '3.2.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
 		c.createStatement().execute(ssql);
@@ -135,5 +163,84 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		c.commit();
 	}
 
+	private static void cleanUpSpecies(Session session, IProgressMonitor monitor){
+		List<?> data = session.createCriteria(Attribute.class)
+				.add(Restrictions.eq("keyId", "species")) //$NON-NLS-1$ //$NON-NLS-2$
+				.list();
+		
+		//no species
+		if (data.size() == 0) return;
+		
+		//for each species attribute
+		for (int i = 0; i < data.size(); i ++){
+			Attribute species = (Attribute) data.get(i);
+		
+			//	i) More than 50 species in the database AND
+			//	ii) More than 30% of the species are unused
+			
+			Long numSpecies = (Long)session.createCriteria(AttributeTreeNode.class)
+					.add(Restrictions.eq("attribute", species)) //$NON-NLS-1$
+					.setProjection(Projections.rowCount())
+					.uniqueResult();
+		
+			Query q = session.createQuery(
+				"SELECT count(distinct poa.attributeTreeNode) FROM WaypointObservationAttribute poa WHERE poa.attributeTreeNode.attribute = :attribute "); //$NON-NLS-1$
+			q.setParameter("attribute", species); //$NON-NLS-1$
+			Long numSpeciesUsed = (Long)q.uniqueResult();
+			
+			if (numSpecies < 50 || ((numSpecies - numSpeciesUsed) / ((float)numSpecies)) < .3){
+				return;
+			}
+			
+			//we have more than 50 species and more than 30% of them are not used
+			//remove all the unused ones
+			
+			monitor.setTaskName(msg);
+			List<Integer> status = new ArrayList<Integer>();
+			status.add(0);
+			status.add(numSpecies.intValue());
+			for (AttributeTreeNode n : species.getTree()){
+				processTreeNode(n, session, monitor, status);
+			}
+		}
+		session.flush();
+	}
+	
+	private static String msg = "Removing unused species ... this may take some time please be patient";
+	
+	private static boolean processTreeNode(AttributeTreeNode node, Session session, IProgressMonitor monitor, List<Integer> status){
+		boolean kids = true;
+		monitor.setTaskName(msg + "(" + status.get(0) + " / " + status.get(1) + ")");
+		status.set(0, status.get(0) + 1);
+		List<AttributeTreeNode> kidsToProcess = new ArrayList<AttributeTreeNode>(node.getChildren());
+		for (AttributeTreeNode n : kidsToProcess){
+			if (!processTreeNode(n, session, monitor, status)){
+				kids = false;
+			}
+		}
+		//not all kids could be removed so we cannot remove any parent
+		if (!kids) return false;
+		
+		boolean canDelete = true;
+		try{
+			canDelete = DeleteManager.canDelete(node, session);
+		}catch (Exception ex){
+			//cannot delete me
+			return false;
+		}
+		if (!canDelete) return false;
+		
+		//delete me
+		if (node.getParent() != null){
+			node.getParent().getChildren().remove(node);
+			node.getParent().getActiveChildren().remove(node);
+		}else{
+			node.getAttribute().getTree().remove(node);
+		}
+		node.setParent(null);
+		session.delete(node);
+		session.flush();
+		return true;
+	}
 	
 }
