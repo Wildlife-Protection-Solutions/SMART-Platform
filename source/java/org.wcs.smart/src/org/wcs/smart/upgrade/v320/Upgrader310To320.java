@@ -29,13 +29,14 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
-import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -45,7 +46,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Upgrades from database version 310 to 320.
@@ -63,26 +63,33 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
 		final Session s = HibernateManager.openSession();
 		try{
-		cmUpgrader.reset(s);
-		s.doWork(new Work() {
-			@Override
-			public void execute(Connection c) throws SQLException {
-				try {
-					dbUrl = c.getMetaData().getURL();
-					c.setAutoCommit(false);
-					upgrade(c, s, monitor);
-				} catch (final Exception e) {
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.Upgrader310To320_ErrorMessage, e);
-						}
-					});
-				} finally {
-					c.setAutoCommit(true);
+			
+			/* Species Cleanup - ticket #1118 */
+			s.beginTransaction();
+			cleanUpSpecies(s, monitor);
+			s.getTransaction().commit();
+			
+			cmUpgrader.reset(s);
+			
+			s.doWork(new Work() {
+				@Override
+				public void execute(Connection c) throws SQLException {
+					try {
+						dbUrl = c.getMetaData().getURL();
+						c.setAutoCommit(false);
+						upgrade(c, s, monitor);
+					} catch (final Exception e) {
+						Display.getDefault().syncExec(new Runnable(){
+							@Override
+							public void run() {
+								SmartPlugIn.displayLog(Messages.Upgrader310To320_ErrorMessage, e);
+							}
+						});
+					} finally {
+						c.setAutoCommit(true);
+					}
 				}
-			}
-		});
+			});
 		}finally{
 			s.close();
 		}
@@ -100,7 +107,6 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	}
 
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
-		
 		String[] sql = new String[]{
 				"alter table smart.obs_waypoint_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.obs_observation_query add column style long varchar", //$NON-NLS-1$
@@ -149,13 +155,9 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		for (String s : sql){
 			c.createStatement().execute(s);
 		}
-		
+
 		cmUpgrader.upgrade(c);
-		
-		/* Species Cleanup - ticket #1118 */
-		cleanUpSpecies(session, monitor);
-		
-		
+				
 		/* VERSION UDATE */ 
 		String ssql = "update smart.db_version set version = '3.2.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
 		c.createStatement().execute(ssql);
@@ -166,6 +168,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	private static void cleanUpSpecies(Session session, IProgressMonitor monitor){
 		List<?> data = session.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", "species")) //$NON-NLS-1$ //$NON-NLS-2$
+//				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 				.list();
 		
 		//no species
@@ -195,11 +198,12 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 			//we have more than 50 species and more than 30% of them are not used
 			//remove all the unused ones
 			
-			monitor.setTaskName(msg);
+			monitor.subTask(msg);
 			List<Integer> status = new ArrayList<Integer>();
 			status.add(0);
 			status.add(numSpecies.intValue());
-			for (AttributeTreeNode n : species.getTree()){
+			List<AttributeTreeNode> roots = new ArrayList<AttributeTreeNode>(species.getTree());
+			for (AttributeTreeNode n : roots){
 				processTreeNode(n, session, monitor, status);
 			}
 		}
@@ -210,7 +214,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	
 	private static boolean processTreeNode(AttributeTreeNode node, Session session, IProgressMonitor monitor, List<Integer> status){
 		boolean kids = true;
-		monitor.setTaskName(msg + "(" + status.get(0) + " / " + status.get(1) + ")");
+		monitor.subTask(msg + " (" + status.get(0) + " / " + status.get(1) + ")");
 		status.set(0, status.get(0) + 1);
 		List<AttributeTreeNode> kidsToProcess = new ArrayList<AttributeTreeNode>(node.getChildren());
 		for (AttributeTreeNode n : kidsToProcess){
@@ -225,10 +229,16 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		try{
 			canDelete = DeleteManager.canDelete(node, session);
 		}catch (Exception ex){
+			ex.printStackTrace();
 			//cannot delete me
 			return false;
 		}
 		if (!canDelete) return false;
+		
+		//remove any configurable model lablel (cm nodes will deleted through cascade) 
+		Query q= session.createQuery("DELETE FROM Label WHERE id.element IN (SELECT uuid FROM CmAttributeTreeNode WHERE dmTreeNode = :node)"); //$NON-NLS-1$
+		q.setParameter("node", node); //$NON-NLS-1$
+		q.executeUpdate();
 		
 		//delete me
 		if (node.getParent() != null){
@@ -238,6 +248,13 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 			node.getAttribute().getTree().remove(node);
 		}
 		node.setParent(null);
+		//delete labels
+		for (Label l : node.getNames()){
+			session.delete(l);
+		}
+		node.getNames().clear();
+		
+		
 		session.delete(node);
 		session.flush();
 		return true;
