@@ -168,7 +168,6 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 	private static void cleanUpSpecies(Session session, IProgressMonitor monitor){
 		List<?> data = session.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", "species")) //$NON-NLS-1$ //$NON-NLS-2$
-//				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 				.list();
 		
 		//no species
