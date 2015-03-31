@@ -24,6 +24,7 @@ package org.wcs.smart.upgrade.v320;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,13 +37,11 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -69,6 +68,7 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 			cleanUpSpecies(s, monitor);
 			s.getTransaction().commit();
 			
+			monitor.subTask(Messages.Upgrader310To320_ProgressMessage + ": " + Messages.Upgrader310To320_upgradingDBMsg); //$NON-NLS-1$
 			cmUpgrader.reset(s);
 			
 			s.doWork(new Work() {
@@ -197,28 +197,29 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 			
 			//we have more than 50 species and more than 30% of them are not used
 			//remove all the unused ones
-			
+	
+			String msg = MessageFormat.format(Messages.Upgrader310To320_SpeciesUpgradeMsg, species.getConservationArea().getId());
 			monitor.subTask(msg);
 			List<Integer> status = new ArrayList<Integer>();
 			status.add(0);
 			status.add(numSpecies.intValue());
 			List<AttributeTreeNode> roots = new ArrayList<AttributeTreeNode>(species.getTree());
 			for (AttributeTreeNode n : roots){
-				processTreeNode(n, session, monitor, status);
+				processTreeNode(n, session, monitor, status, msg);
 			}
 		}
 		session.flush();
 	}
 	
-	private static String msg = "Removing unused species ... this may take some time please be patient";
 	
-	private static boolean processTreeNode(AttributeTreeNode node, Session session, IProgressMonitor monitor, List<Integer> status){
+	
+	private static boolean processTreeNode(AttributeTreeNode node, Session session, IProgressMonitor monitor, List<Integer> status, String msg){
 		boolean kids = true;
-		monitor.subTask(msg + " (" + status.get(0) + " / " + status.get(1) + ")");
+		monitor.subTask(msg + " (" + status.get(0) + " / " + status.get(1) + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		status.set(0, status.get(0) + 1);
 		List<AttributeTreeNode> kidsToProcess = new ArrayList<AttributeTreeNode>(node.getChildren());
 		for (AttributeTreeNode n : kidsToProcess){
-			if (!processTreeNode(n, session, monitor, status)){
+			if (!processTreeNode(n, session, monitor, status, msg)){
 				kids = false;
 			}
 		}
