@@ -66,11 +66,10 @@ public class EmptyDayFinder implements IDataProcessor {
 	public void processFile(File in, File out) throws Exception{
 		PatrolType pt = DataUtils.readPatrol(in);
 		findEmptyLegDays(pt);
-		DataUtils.writePatrol(out, pt);
 	}
 	
 	
 	public static void main(String args[]){
-		DataUtils.processConfiguration(args, new EmptyDayFinder());
+		DataUtils.processConfiguration(args, new EmptyDayFinder(), false);
 	}
 }

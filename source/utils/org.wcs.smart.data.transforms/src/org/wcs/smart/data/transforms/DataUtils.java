@@ -40,7 +40,7 @@ public class DataUtils {
 	}
 	
 	public static void processConfiguration(String args[], IDataProcessor processor, boolean printInfo){
-		if (args.length != 2){
+		if (args.length < 2){
 			System.out.println("Invalid usage.  Must provide both input and output file");
 			System.exit(1);
 		}
