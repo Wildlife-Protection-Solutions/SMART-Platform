@@ -440,6 +440,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceListView_Loading_Label;
 
+	public static String IntelligenceListView_SearchJobName;
+
 	public static String IntelligenceListView_UpdateJob_LoadTask_Name;
 
 	public static String IntelligenceListView_UpdateJob_Title;

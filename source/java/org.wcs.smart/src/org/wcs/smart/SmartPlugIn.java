@@ -311,6 +311,7 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	 */
 	@Override
 	 protected void initializeImageRegistry(ImageRegistry reg) {
+		super.initializeImageRegistry(reg);
 	     reg.put(CATEGORY_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/category_obj.gif")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_TEXT_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_text.png")); //$NON-NLS-1$
 	     reg.put(ATTRIBUTE_NUMBER_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/attribute_number.png")); //$NON-NLS-1$
