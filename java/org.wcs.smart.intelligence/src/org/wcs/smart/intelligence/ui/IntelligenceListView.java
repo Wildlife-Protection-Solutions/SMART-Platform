@@ -64,6 +64,7 @@ import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
+import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
@@ -73,6 +74,7 @@ import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditor;
 import org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput;
 import org.wcs.smart.intelligence.ui.handlers.OpenIntelligenceHandler;
+import org.wcs.smart.ui.SearchTextBox;
 import org.wcs.smart.ui.ViewerSelectionListener;
 import org.wcs.smart.util.E3Utils;
 
@@ -131,12 +133,34 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		GridLayout layout = new GridLayout(1, false);
-		layout.horizontalSpacing = 0;
-		layout.verticalSpacing = 0;
-		layout.marginWidth = 0;
-		layout.marginHeight = 0;
 		main.setLayout(layout);
+		main.setBackground(main.getDisplay().getSystemColor(SWT.COLOR_WHITE));
 		
+		final SearchTextBox searchBox = new SearchTextBox(main, SWT.NONE){
+			@Override
+			protected Composite getFocusControl(){
+				return intelligenceListViewer.getTable();
+			}
+		};
+		searchBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		searchBox.setRefreshJob(new Job(Messages.IntelligenceListView_SearchJobName){
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				if (searchBox == null || searchBox.isDisposed()) return Status.CANCEL_STATUS;
+				searchBox.getDisplay().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						String txt = searchBox.getFilterString();
+						if (txt == null){
+							getFilter().setNameFilter(null,  null);
+						}else{
+							getFilter().setNameFilter(StringComparison.CONTAINS, txt);
+						}
+					}});				
+				updateContent();
+				return Status.OK_STATUS;
+			}});
 		intelligenceListViewer = new TableViewer(main, SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		Table list = intelligenceListViewer.getTable();
 		list.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
