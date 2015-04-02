@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
+         <menu
+               id="org.wcs.smart.intelligence.query.createquery"
+               label="Intelligence Queries">
+            <command
+                  commandId="org.wcs.smart.query.create.unknown"
+                  icon="images/icons/obj16/intelligence_summary.png"
+                  label="Intelligence Summary Query"
+                  style="push"
+                  tooltip="new query that summaries intelligence data">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="intelligencesummary">
+               </parameter>
+            </command>
+            <command
+                  commandId="org.wcs.smart.query.create.unknown"
+                  icon="images/icons/obj16/intelligence_record.png"
+                  label="Intelligence Record Query"
+                  style="push"
+                  tooltip="queries intelligence records">
+               <parameter
+                     name="org.wcs.smart.query.type"
+                     value="intelligencerecord">
+               </parameter>
+            </command>
+         </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
+         <menu
+               id="org.wcs.smart.intelligence.query.createquery"
+               label="Intelligence Queries">
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryType">
+      <QueryCategory
+            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Intelligence Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Queries the intelligence records.&lt;/p&gt;&lt;/p&gt;"
+            id="org.wcs.smart.intelligence.query"
+            name="Intelligence Queries">
+      </QueryCategory>
+      <QueryType
+            QueryCategory="org.wcs.smart.intelligence.query"
+            class="org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType">
+      </QueryType>
+      <QueryType
+            QueryCategory="org.wcs.smart.intelligence.query"
+            class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType">
+      </QueryType>
+   </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="org.wcs.smart.intelligence.query.ui.IntelligenceSummaryEditor"
+            default="false"
+            id="org.wcs.smart.intelligence.query.summary.editor"
+            name="Intelligence Summary Query Editor">
+      </editor>
+      <editor
+            class="org.wcs.smart.intelligence.query.ui.IntelligenceRecordEditor"
+            default="false"
+            id="org.wcs.smart.intelligence.query.record.editor"
+            name="Intelligence Record Query Editor">
+      </editor>
+   </extension>
+
+</plugin>
