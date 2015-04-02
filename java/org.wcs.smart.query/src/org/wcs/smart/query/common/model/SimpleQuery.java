@@ -40,7 +40,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 /**
  * 
  * A simple query contains exactly one
- * queryFilter, one Conservation Area files,
+ * queryFilter, one Conservation Area filter,
  * one DateFiler and one set of drop items.
  * 
  *  <p>All query results  

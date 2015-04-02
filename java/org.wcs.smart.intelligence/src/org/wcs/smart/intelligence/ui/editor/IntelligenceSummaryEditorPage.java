@@ -290,8 +290,11 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		txtShortName.setText(intel.getName());
 		txtDescription.setText(intel.getDescription());
 		txtFromDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getFromDate()));
-		value = intel.getToDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(intel.getToDate()) : txtFromDate.getText();
+		value = intel.getToDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(intel.getToDate()) : "";
 		txtToDate.setText(value);
+		if (intel.getToDate() == null){
+			txtToDate.setEnabled(false);
+		}
 		pointsList.setInput(intel.getPoints().toArray());
 		attachmentsList.setInput(intel.getAttachments().toArray());
 	}

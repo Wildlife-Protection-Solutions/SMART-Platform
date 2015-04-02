@@ -48,7 +48,7 @@ public class SummaryResultsArea extends Composite{
 	private Composite stackComposite;
 	private ProgressAreaComposite progressComp ;
 	private Composite runQueryComp;
-	private SummaryEditor editor;
+	private ISummaryEditor editor;
 	private Composite tableComp ;
 	private SummaryResultTable resultsTable;
 	
@@ -57,7 +57,7 @@ public class SummaryResultsArea extends Composite{
 	
 	
 	
-	public SummaryResultsArea(Composite parentArea, SummaryEditor parentEditor){
+	public SummaryResultsArea(Composite parentArea, ISummaryEditor parentEditor){
 		super(parentArea, SWT.NONE);
 		this.editor = parentEditor;
 		
