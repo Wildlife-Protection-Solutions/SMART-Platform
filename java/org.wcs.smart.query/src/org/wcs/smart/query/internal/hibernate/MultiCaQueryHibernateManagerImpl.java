@@ -125,6 +125,11 @@ public class MultiCaQueryHibernateManagerImpl extends
 	
 		for(IQueryType type: QueryTypeManager.getInstance().getSupportedQueryTypes()){
 
+			if (session.getSessionFactory().getClassMetadata(type.getHibernateClass()) == null){
+				//query is not mapped to hibernate class so skip it
+				continue;
+			}
+			
 			@SuppressWarnings("unchecked")
 			List<org.wcs.smart.query.model.Query> objects = session.createCriteria(type.getHibernateClass())
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
