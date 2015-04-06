@@ -80,22 +80,28 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
+		Label lblExist = new Label(main, SWT.NONE);
+		lblExist.setText("Following columns already exist in loaded data:");
+		
 		Text noteExist = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
 		GridData gdExist = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gdExist.heightHint = 200;
 		noteExist.setLayoutData(gdExist);
 		noteExist.setEditable(false);
-		noteExist.setText("Following columns already exist in loaded data:\n"+ReportDialog.join(matched, "\n"));
+		noteExist.setText(ReportDialog.join(matched, "\n"));
 		
 		Label separator = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		Label lblAdded = new Label(main, SWT.NONE);
+		lblAdded.setText("Following columns exist only in merged file and will be added to loaded data:");
 		
 		Text noteAdded = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
 		GridData gdAdd = new GridData(SWT.FILL, SWT.FILL, true, false);
 		gdAdd.heightHint = 200;
 		noteAdded.setLayoutData(gdAdd);
 		noteAdded.setEditable(false);
-		noteAdded.setText("Following columns exist only in merged file and will be added to loaded data:\n"+ReportDialog.join(unmatched, "\n"));
+		noteAdded.setText(ReportDialog.join(unmatched, "\n"));
 
 		separator = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
