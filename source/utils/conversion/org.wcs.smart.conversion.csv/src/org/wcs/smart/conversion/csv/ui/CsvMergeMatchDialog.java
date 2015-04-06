@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -197,6 +198,12 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 	}
 
 	protected void buttonPressed(int buttonId) {
+		//validation
+		if (btnMergeRow.getSelection() && tableViewer.getCheckedElements().length == 0) {
+			MessageDialog.openError(getShell(), "Invalid configuration", "You have to select at least one column to be used for records matching.");
+			return;
+		}
+		
 		result.clear();
 		if (buttonId == IDialogConstants.OK_ID) {
 			isCreateOption = btnCreateRow.getSelection();
