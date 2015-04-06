@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.conversion.ui.ReportDialog;
 
 /**
@@ -61,6 +62,8 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 	private CheckboxTableViewer tableViewer;
 	private Button btnCreateRow;
 	private Button btnMergeRow;
+	private Button btnSelectAll;
+	private Button btnDeselectAll;
 
 	public CsvMergeMatchDialog(Shell parentShell, List<String> matched, List<String> unmatched) {
 		super(parentShell);
@@ -77,13 +80,21 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
-		Label noteExist = new Label(main, SWT.NONE);
+		Text noteExist = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+		GridData gdExist = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gdExist.heightHint = 200;
+		noteExist.setLayoutData(gdExist);
+		noteExist.setEditable(false);
 		noteExist.setText("Following columns already exist in loaded data:\n"+ReportDialog.join(matched, "\n"));
 		
 		Label separator = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label noteAdded = new Label(main, SWT.NONE);
+		Text noteAdded = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
+		GridData gdAdd = new GridData(SWT.FILL, SWT.FILL, true, false);
+		gdAdd.heightHint = 200;
+		noteAdded.setLayoutData(gdAdd);
+		noteAdded.setEditable(false);
 		noteAdded.setText("Following columns exist only in merged file and will be added to loaded data:\n"+ReportDialog.join(unmatched, "\n"));
 
 		separator = new Label(main, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -96,6 +107,8 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				tableViewer.getTable().setEnabled(false);
+				btnSelectAll.setEnabled(false);
+				btnDeselectAll.setEnabled(false);
 			}
 		});
 		
@@ -105,6 +118,8 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				tableViewer.getTable().setEnabled(true);
+				btnSelectAll.setEnabled(true);
+				btnDeselectAll.setEnabled(true);
 			}
 		});
 		
@@ -135,6 +150,30 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		tableViewer.setInput(matched);
 		tableViewer.getTable().setEnabled(false);
 
+		Composite btnCmp = new Composite(composite, SWT.NONE);
+		btnCmp.setLayout(new GridLayout(2, false));
+		btnCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
+		btnSelectAll = new Button(btnCmp, SWT.PUSH);
+		btnSelectAll.setText("Select All");
+		btnSelectAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				tableViewer.setAllChecked(true);
+			}
+		});
+		btnSelectAll.setEnabled(false);
+
+		btnDeselectAll = new Button(btnCmp, SWT.PUSH);
+		btnDeselectAll.setText("Deselect All");
+		btnDeselectAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				tableViewer.setAllChecked(false);
+			}
+		});
+		btnDeselectAll.setEnabled(false);
+		
 		getShell().setText("Merge options");
 		setTitle("Merge options");
 		setMessage("Select an option and parameters for merge process");
