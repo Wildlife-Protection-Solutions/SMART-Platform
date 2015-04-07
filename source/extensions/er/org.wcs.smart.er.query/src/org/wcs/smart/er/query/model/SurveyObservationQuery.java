@@ -166,12 +166,12 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 		if(queryFilter != null){
 			return queryFilter;
 		}
-		InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes());
-		Parser parser = new Parser(is);
-		QueryFilter myQuery = parser.QueryFilter();
-		is.close();
-		queryFilter = myQuery;
-		return myQuery;
+		try(InputStream is = new ByteArrayInputStream(strQueryFilter.getBytes())){
+			Parser parser = new Parser(is);
+			QueryFilter myQuery = parser.QueryFilter();
+			queryFilter = myQuery;
+			return myQuery;
+		}
 	}
 	
 	

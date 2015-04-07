@@ -301,7 +301,7 @@ public class DerbyFilterToSqlGenerator {
 	 * @return
 	 * @throws SQLException
 	 */
-	public String asSql(Operator op) throws SQLException{
+	public static String asSql(Operator op) throws SQLException{
 		if (op == Operator.EQUALS){
 			return "="; //$NON-NLS-1$
 		}else if (op == Operator.LESSTHAN){

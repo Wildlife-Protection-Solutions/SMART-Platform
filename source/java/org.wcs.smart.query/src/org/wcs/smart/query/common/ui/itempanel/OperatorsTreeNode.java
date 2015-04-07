@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.query.common.ui.itempanel;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -87,7 +88,11 @@ public class OperatorsTreeNode implements IItemTreeNode{
 
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			this.ops = (List<Operator>) newInput;
+			if (newInput instanceof List){
+				this.ops = (List<Operator>) newInput;
+			}else if (newInput instanceof Operator[]){
+				this.ops = Arrays.asList(((Operator[])newInput));
+			}
 		}
 
 		@Override
