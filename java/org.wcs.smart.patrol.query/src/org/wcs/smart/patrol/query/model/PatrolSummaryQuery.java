@@ -62,11 +62,11 @@ public class PatrolSummaryQuery extends SummaryQuery {
 		if (getQuery() == null || getQuery().length() == 0){
 			return null;
 		}
-		InputStream is = new ByteArrayInputStream(getQuery().getBytes());
-		Parser parser = new Parser(is);
-		SumQueryDefinition myQuery = parser.SumQuery();
-		is.close();
-		return myQuery;
+		try(InputStream is = new ByteArrayInputStream(getQuery().getBytes())){
+			Parser parser = new Parser(is);
+			SumQueryDefinition myQuery = parser.SumQuery();
+			return myQuery;
+		}
 	}
 
 
