@@ -15,6 +15,12 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_ReceivedDateCol;
 	public static String FixedQueryColumn_SourceColumn;
 	public static String FixedQueryColumn_ToDateColumn;
+	public static String IntelligenceFilter_InvalidFilterOption;
+	public static String IntelligenceFilterOption_DescriptionOption;
+	public static String IntelligenceFilterOption_InformationIdOption;
+	public static String IntelligenceFilterOption_NameOption;
+	public static String IntelligenceFilterOption_PatrolIdOption;
+	public static String IntelligenceFilterOption_SoureOption;
 	public static String IntelligenceQueryFactory_DefaultNameRecord;
 	public static String IntelligenceQueryFactory_DefaultNameSummary;
 	public static String IntelligenceRecordQueryType_QueryTypeName;
@@ -23,6 +29,10 @@ public class Messages extends NLS {
 	public static String IntelligenceSummaryEditor_InvalidQueryMessage;
 	public static String IntelligenceSummaryEditor_queryJobName;
 	public static String IntelligenceSummaryQueryType_TypeName;
+	public static String ListFilterDropItem_Loading;
+	public static String ListFilterDropItem_loadingListJobName;
+	public static String QueryItemPanel_AddToQueryButton;
+	public static String QueryItemPanel_IntelligenceNodeName;
 	public static String RecievedDateFilter_ReceivedDateFilterName;
 	public static String SummaryIntelligenceQueryEngine_FollowedUpHeaderLongName;
 	public static String SummaryIntelligenceQueryEngine_FollowedUpHeaderShortName;
@@ -30,6 +40,8 @@ public class Messages extends NLS {
 	public static String SummaryIntelligenceQueryEngine_NotFollowedUpHeaderLongName;
 	public static String SummaryIntelligenceQueryEngine_NumberRecordLongName;
 	public static String SummaryIntelligenceQueryEngine_NumberRecordShortName;
+	public static String TextListFilterDropItem_JobName;
+	public static String TextListFilterDropItem_Loading;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

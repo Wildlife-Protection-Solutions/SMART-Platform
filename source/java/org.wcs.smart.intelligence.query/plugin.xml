@@ -56,6 +56,10 @@
       <QueryType
             QueryCategory="org.wcs.smart.intelligence.query"
             class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType">
+         <DefinitionPanel
+               id="org.wcs.smart.intelligence.query.record.definition"
+               itemPanelId="org.wcs.smart.intelligence.query.record.items">
+         </DefinitionPanel>
       </QueryType>
    </extension>
    <extension
@@ -72,6 +76,22 @@
             id="org.wcs.smart.intelligence.query.record.editor"
             name="Intelligence Record Query Editor">
       </editor>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryItemPanel">
+      <QueryItemPanel
+            id="org.wcs.smart.intelligence.query.record.items"
+            panel="org.wcs.smart.intelligence.query.ui.QueryItemPanel">
+      </QueryItemPanel>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.queryDefinitionPanel">
+      <QueryDefinitionPanel
+            id="org.wcs.smart.intelligence.query.record.definition"
+            isMultiCa="true"
+            isSingleCa="true"
+            panel="org.wcs.smart.intelligence.query.ui.DefinitionPanel">
+      </QueryDefinitionPanel>
    </extension>
 
 </plugin>

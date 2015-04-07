@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
@@ -29,10 +31,14 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.internal.Messages;
+import org.wcs.smart.intelligence.query.parser.Parser;
+import org.wcs.smart.intelligence.query.ui.DefinitionPanel;
 import org.wcs.smart.intelligence.query.ui.IntelligenceRecordEditor;
+import org.wcs.smart.intelligence.query.ui.dropitem.IntelligenceDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.ui.definition.ConservationAreaFilterPanel;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 
@@ -83,21 +89,52 @@ public class IntelligenceRecordQueryType implements IQueryType {
 
 	@Override
 	public IDropItemFactory getDropItemFactory() {
-		//TODO:
-		return null;
+		return IntelligenceDropItemFactory.INSTANCE;
 	}
 
 	@Override
 	public void updateQueryDefinition(Query query,
 			List<IDefinitionPanel> components) {
-		//TODO:
+		for (IDefinitionPanel def : components){
+			if (def.getId().equals(DefinitionPanel.ID)){
+				((IntelligenceRecordQuery)query).setQueryFilter(def.getQueryPart());
+			}else if (def.getId().equals(ConservationAreaFilterPanel.ID)){
+				((IntelligenceRecordQuery)query).setConservationAreaFilter(def.getQueryPart());
+			}
+		}
 	}
 
 	@Override
 	public String validateQuery(List<IDefinitionPanel> components) {
-		//TODO:
+		String filters= ""; //$NON-NLS-1$
+		
+		// validate each panel
+		for (IDefinitionPanel p : components){
+			String panelError = p.validate();
+			if (panelError != null){
+				return panelError;
+			}
+			
+			if (p.getId().equals(DefinitionPanel.ID)){
+				filters = p.getQueryPart();
+			}
+			
+		}
+		
+		//validate query
+		String queryString = filters;
+		if (queryString.isEmpty()) return null;
+		
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+			Parser parser = new Parser(is);
+			parser.IntelligenceFilter();
+		}catch (Exception ex){
+			ex.printStackTrace();
+			return ex.getMessage();
+		}
 		return null;
 	}
+	
 
 	@Override
 	public URL getDescription() {

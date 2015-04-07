@@ -36,13 +36,20 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
-import org.wcs.smart.intelligence.model.PatrolIntelligence;
+import org.wcs.smart.intelligence.query.filter.IntelligenceFilter;
+import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
+import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
+import org.wcs.smart.query.model.filter.BooleanExpression;
+import org.wcs.smart.query.model.filter.BracketFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.NotExpression;
+import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -57,13 +64,14 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	static {
 		tablePrefix.put(Intelligence.class, "i"); //$NON-NLS-1$
 		tablePrefix.put(Informant.class, "ii"); //$NON-NLS-1$
-		tablePrefix.put(PatrolIntelligence.class, "pi"); //$NON-NLS-1$
 		tablePrefix.put(Patrol.class, "p"); //$NON-NLS-1$
+		tablePrefix.put(IntelligenceSource.class, "iis"); //$NON-NLS-1$
+		
 		
 		tableNames.put(Intelligence.class, "smart.intelligence"); //$NON-NLS-1$
 		tableNames.put(Informant.class, "smart.informant"); //$NON-NLS-1$
-		tableNames.put(PatrolIntelligence.class, "smart.patrol_intelligence"); //$NON-NLS-1$
 		tableNames.put(Patrol.class, "smart.patrol"); //$NON-NLS-1$
+		tableNames.put(IntelligenceSource.class, "smart.intelligence_source"); //$NON-NLS-1$
 	}
 	
 	private DerbyPagedIntellResults results;
@@ -130,16 +138,16 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				sql.append(tableNamePrefix(Informant.class));
 				sql.append(" ON "); //$NON-NLS-1$
 				sql.append(tablePrefix(Intelligence.class) + ".informant_uuid = " + tablePrefix(Informant.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-				
+			
 				sql.append(" LEFT JOIN "); //$NON-NLS-1$
-				sql.append(tableNamePrefix(PatrolIntelligence.class));
+				sql.append(tableNamePrefix(IntelligenceSource.class));
 				sql.append(" ON "); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".uuid = " + tablePrefix(PatrolIntelligence.class) + ".intelligence_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-				
+				sql.append(tablePrefix(Intelligence.class) + ".source_uuid = " + tablePrefix(IntelligenceSource.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+			
 				sql.append(" LEFT JOIN "); //$NON-NLS-1$
 				sql.append(tableNamePrefix(Patrol.class));
 				sql.append(" ON "); //$NON-NLS-1$
-				sql.append(tablePrefix(PatrolIntelligence.class) + ".patrol_uuid = " + tablePrefix(Patrol.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(tablePrefix(Intelligence.class) + ".patrol_uuid = " + tablePrefix(Patrol.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 
 				
 				sql.append(" WHERE "); //$NON-NLS-1$
@@ -151,6 +159,12 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					sql.append(" AND "); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".received_date>= '" + d[0].toString() + "' AND "); //$NON-NLS-1$ //$NON-NLS-2$ 
 					sql.append(tablePrefix(Intelligence.class) + ".received_date <= '" + d[1].toString() + "' "); //$NON-NLS-1$ //$NON-NLS-2$ 
+				}
+				
+				if (query.getQueryFilter().length() > 0){
+					sql.append("AND ( ");
+					filterToSql(query.getFilter().getFilter(), sql);
+					sql.append(" )");
 				}
 				
 				QueryPlugIn.logSql(sql.toString());
@@ -194,6 +208,77 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		return results;
 	
 	}
+	
+	private void filterToSql(IFilter filter, StringBuilder sql) throws SQLException{
+		sql.append(" ");
+		if (filter instanceof IntelligenceFilter){
+			IntelligenceFilter f = (IntelligenceFilter)filter;
+			if (f.getFilterOption() == IntelligenceFilterOption.DESCRIPTION){
+				sql.append(tablePrefix(Intelligence.class) + ".description ");
+				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
+				sql.append("'");
+				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
+					sql.append("%");
+				}
+				//TODO: escape string
+				sql.append(f.getValue());
+				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
+					sql.append("%");
+				}
+				sql.append("'");
+			}else if (f.getFilterOption() == IntelligenceFilterOption.INFORMANTID){
+				sql.append(tablePrefix(Informant.class) + ".id ");
+				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
+				sql.append("'");
+				//TODO: escape string
+				sql.append(f.getValue());
+				sql.append("'");
+			}else if (f.getFilterOption() == IntelligenceFilterOption.PATROLID){
+				sql.append(tablePrefix(Patrol.class) + ".id ");
+				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
+				sql.append("'");
+				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
+					sql.append("%");
+				}
+				//TODO: escape string
+				sql.append(f.getValue());
+				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
+					sql.append("%");
+				}
+				sql.append("'");
+			}else if (f.getFilterOption() == IntelligenceFilterOption.NAME){
+				//needs a join
+				sql.append(tablePrefix(Informant.class) + ".id ");
+				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
+				sql.append("'");
+				//TODO: escape string
+				sql.append(f.getValue());
+				sql.append("'");
+			}else if (f.getFilterOption() == IntelligenceFilterOption.SOURCE){
+				//needs a join?
+				sql.append(tablePrefix(IntelligenceSource.class) + ".keyId ");
+				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
+				sql.append("'");
+				sql.append(f.getValue());	//this is a key so shouldn't require escaping
+				sql.append("'");
+				
+			}
+		}else if (filter instanceof BracketFilter){
+			sql.append("(");
+			filterToSql(((BracketFilter)filter).getFilter(), sql);
+			sql.append(")");
+				
+		}else if (filter instanceof BooleanExpression){
+			filterToSql(((BooleanExpression)filter).getFilter1(), sql);
+			sql.append(DerbyFilterToSqlGenerator.asSql(((BooleanExpression)filter).getOperator()));
+			filterToSql(((BooleanExpression)filter).getFilter2(), sql);
+		}else if (filter instanceof NotExpression){
+			sql.append(DerbyFilterToSqlGenerator.asSql(Operator.NOT));
+			filterToSql(((NotExpression)filter).getFilter(), sql);
+		}
+		sql.append(" ");
+	}
+	
 	
 	/**
 	 * Loads the team object from the session

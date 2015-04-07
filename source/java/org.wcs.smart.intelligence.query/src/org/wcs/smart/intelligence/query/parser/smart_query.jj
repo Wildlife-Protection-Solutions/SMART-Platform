@@ -1,0 +1,134 @@
+ /*=============================================
+SMART Query Engine Language Syntax & Semantic actions 
+=============================================*/options{  LOOKAHEAD= 1;  CHOICE_AMBIGUITY_CHECK = 2;  OTHER_AMBIGUITY_CHECK = 1;  STATIC = false;  DEBUG_PARSER = false;  DEBUG_LOOKAHEAD = false;  DEBUG_TOKEN_MANAGER = false;  ERROR_REPORTING = true;  JAVA_UNICODE_ESCAPE = false;  UNICODE_INPUT = false;  IGNORE_CASE = false;  USER_TOKEN_MANAGER = false;  USER_CHAR_STREAM = false;  BUILD_PARSER = true;  BUILD_TOKEN_MANAGER = true;  SANITY_CHECK = true;  FORCE_LA_CHECK = false;}PARSER_BEGIN(Parser)package org.wcs.smart.intelligence.query.parser;
+import java.util.*;import org.wcs.smart.intelligence.query.filter.*;
+import org.wcs.smart.query.model.filter.*;
+
+public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >}
+
+
+TOKEN :
+{
+  < COMMA : "," >
+| < LESS : "<" >
+| < LESSEQUAL : "<=" >
+| < GREATER : ">" >
+| < GREATEREQUAL : ">=" >
+| < EQUAL : "=" >
+| < NOTEQUAL : "!=" >
+| < NOTEQUAL2 : "<>" >
+| < OPENPAREN : "(" >
+| < CLOSEPAREN : ")" >
+| < SLASH : "/" >
+| < PLUS : "+" >
+| < MINUS : "-" >
+| < CONTAINS : "contains" >
+| < NOT_CONTAINS : "notcontains" >
+| < STREQUALS : "equals" >
+| < BETWEEN : "between" >
+}TOKEN : /* Numeric Constants */{  < NUMBER :
+  	(["-","+"])?< FLOAT >  | (["-","+"])?< FLOAT >    (      [ "e", "E" ] ([ "-", "+" ])? < FLOAT >    )?     >| < #FLOAT :    < INTEGER >  | < INTEGER > ("." < INTEGER >)?  | "." < INTEGER >     >| < #INTEGER : (< DIGIT >)+ >| < #DIGIT : [ "0"-"9" ] >}TOKEN : /* Literal Constants */{  < S_CONST_LITERAL :    "true"  | "false"  | "null" >}
+/* Query Filters */
+TOKEN : 
+{
+ < INTEL_KEY : "name" | "source" | "patrolid" | "description" | "informantid" >
+ | < #LETTER : [ "a"-"z", "A"-"Z" ] >
+ | < #SPECIAL_CHARS : ("." | "_")>
+ }TOKEN :{  < QUOTED_STRING :    "\""    (      (~[ "\"", "\\", "\n", "\r" ])    | ("\\" ~[ "\n", "\r" ])    )*    "\""     >}/* ------------ Expressions ----------------------*/
+
+QueryFilter IntelligenceFilter():
+{
+	IFilter expr = EmptyFilter.INSTANCE;
+}
+{
+	(  
+		expr = ExpressionPart()
+	)
+  	{
+    	return QueryFilter.createFilter(expr);
+  	}
+}
+
+IFilter ExpressionPart():
+{
+  IFilter expr = null;
+  Operator op = null;
+  IFilter expr2 = null;}
+{
+    expr = BooleanPart()
+ 	(
+ 	  op = BooleanOp()
+	  expr2 = BooleanPart()
+	  {
+	    expr = BooleanExpression.create(expr, expr2, op);
+	  }
+
+	)*
+	{
+	  return expr;
+	}}
+
+IFilter BooleanPart() :
+{
+  IFilter filter = null;
+  boolean hasNot = false;
+  }
+{
+	(< K_NOT > {hasNot = true;} )?
+	(
+		filter = StringExpression()
+	|
+		(< OPENPAREN >filter = ExpressionPart()< CLOSEPAREN >)
+		{	  		filter = BracketFilter.createFilter(filter);
+		}
+	)	{
+		if (hasNot){
+	      filter = NotExpression.createNotExpression(filter);	    }
+  		return filter;
+	}}
+
+
+IFilter StringExpression():
+{
+  IFilter filter = null;
+  Operator op = null;
+  String key = null;
+  String value = null;}
+{	(
+		(			< INTEL_KEY > 
+		) 
+		{key = token.image;}
+    	op = StringOp()
+		< QUOTED_STRING >
+		{value = token.image;}
+	)
+	{		filter = IntelligenceFilter.parseIntelligenceFilter(key, op, value);
+  		return filter;
+	}
+}
+
+
+Operator StringOp() :
+{}
+{
+  (
+   < CONTAINS >
+    | < STREQUALS >
+	| < NOT_CONTAINS >
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
+
+Operator BooleanOp() :
+{}
+{
+  (
+   < K_AND >
+  | < K_OR>
+  )
+  {
+    return Operator.parseOperator(token.image);
+  }
+}
