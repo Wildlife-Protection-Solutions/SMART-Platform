@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +35,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.engine.RecordQueryIntelligenceEngine;
 import org.wcs.smart.intelligence.query.internal.IntelligenceQueryColumnCache;
+import org.wcs.smart.intelligence.query.parser.Parser;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
@@ -40,6 +43,7 @@ import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
 /**
@@ -126,8 +130,20 @@ public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 
 	@Override
 	protected QueryFilter parseQueryFilter() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		if (strQueryFilter == null || strQueryFilter.length() == 0){
+			return new QueryFilter(EmptyFilter.INSTANCE);
+		}
+		if(queryFilter != null){
+			return queryFilter;
+		}
+		
+		try(InputStream is = new ByteArrayInputStream(getQueryFilter().getBytes())){
+			Parser parser = new Parser(is);
+			queryFilter = parser.IntelligenceFilter();
+			return queryFilter;
+		}catch (Exception ex){
+			throw ex;
+		}
 	}
 
 	@Override

@@ -17,6 +17,7 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: org.wcs.smart.intelligence.model,
+Export-Package: org.wcs.smart.intelligence,
+ org.wcs.smart.intelligence.model,
  org.wcs.smart.intelligence.updatesite
 Bundle-Vendor: org.wcs.smart
