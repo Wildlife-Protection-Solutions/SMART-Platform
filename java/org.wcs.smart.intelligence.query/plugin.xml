@@ -99,5 +99,12 @@
             class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery">
       </class>
    </extension>
+   <extension
+         point="org.wcs.smart.query.property">
+      <queryproperty
+            propertyName="Query Columns:"
+            propertyProvider="org.wcs.smart.intelligence.query.ui.ColumnQueryPropertyProvider">
+      </queryproperty>
+   </extension>
 
 </plugin>

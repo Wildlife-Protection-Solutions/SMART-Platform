@@ -52,12 +52,12 @@ public class FixedQueryColumn extends QueryColumn {
 		INTEL_SOURCE(Messages.FixedQueryColumn_SourceColumn, ColumnType.STRING, "intel:source"),   //$NON-NLS-1$
 		INTEL_PATROL_SOURCE(Messages.FixedQueryColumn_PatrolColumn, ColumnType.STRING, "intel:patrolid"), //$NON-NLS-1$
 		INTEL_INFORMANT_ID(Messages.FixedQueryColumn_InformantCol, ColumnType.STRING, "intel:informantid"),   //$NON-NLS-1$
-		INTEL_DESCRIPTION(Messages.FixedQueryColumn_DescriptionCol, ColumnType.STRING, "intel:description"),  //$NON-NLS-1$
-		INTEL_LOCATIONS(Messages.FixedQueryColumn_LocationsColumn, ColumnType.STRING, "intel:locations");  //$NON-NLS-1$
+		INTEL_DESCRIPTION(Messages.FixedQueryColumn_DescriptionCol, ColumnType.STRING, "intel:description");  //$NON-NLS-1$
 		
-		private String guiName;
-		private ColumnType type;
-		private String key;
+		public String guiName;
+		public ColumnType type;
+		public String key;
+		
 		private FixedColumns(String name, ColumnType type, String key){
 			this.guiName = name;
 			this.type = type;
@@ -98,7 +98,6 @@ public class FixedQueryColumn extends QueryColumn {
 				case INTEL_DATE_RECIEVED:return DateFormat.getDateInstance().format(r.getReceivedDate());
 				case INTEL_DESCRIPTION:return r.getDescription();
 				case INTEL_INFORMANT_ID: return r.getInformantId();
-				case INTEL_LOCATIONS: return ""; //$NON-NLS-1$
 				case INTEL_NAME: return r.getName();
 				case INTEL_PATROL_SOURCE: return r.getPatrolId();
 				case INTEL_SOURCE: return r.getSource();

@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.map.udig.QueryService;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
 import org.wcs.smart.query.common.model.udig.IQueryService;
@@ -54,8 +55,7 @@ public class IntelligenceRecordEditor extends QueryResultsEditor {
 
 	@Override
 	public IQueryService createQueryService() {
-		// TODO Auto-generated method stub
-		return null;
+		return new QueryService((Query)getQueryInternal());
 	}
 
 	@Override
