@@ -40,7 +40,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
@@ -82,7 +82,7 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				data = PatrolQueryHibernateManager.getInstance().getPatrolIds(s);
+				data = PatrolHibernateManager.getPatrolIds(s);
 				s.getTransaction().rollback();
 			}finally{
 				s.close();

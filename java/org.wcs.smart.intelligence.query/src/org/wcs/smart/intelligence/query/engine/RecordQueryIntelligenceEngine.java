@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -66,12 +67,14 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		tablePrefix.put(Informant.class, "ii"); //$NON-NLS-1$
 		tablePrefix.put(Patrol.class, "p"); //$NON-NLS-1$
 		tablePrefix.put(IntelligenceSource.class, "iis"); //$NON-NLS-1$
+		tablePrefix.put(Label.class, "lbl"); //$NON-NLS-1$
 		
 		
 		tableNames.put(Intelligence.class, "smart.intelligence"); //$NON-NLS-1$
 		tableNames.put(Informant.class, "smart.informant"); //$NON-NLS-1$
 		tableNames.put(Patrol.class, "smart.patrol"); //$NON-NLS-1$
 		tableNames.put(IntelligenceSource.class, "smart.intelligence_source"); //$NON-NLS-1$
+		tableNames.put(Label.class, "smart.i18n_label"); //$NON-NLS-1$
 	}
 	
 	private DerbyPagedIntellResults results;
@@ -162,9 +165,9 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				}
 				
 				if (query.getQueryFilter().length() > 0){
-					sql.append("AND ( ");
+					sql.append("AND ( "); //$NON-NLS-1$
 					filterToSql(query.getFilter().getFilter(), sql);
-					sql.append(" )");
+					sql.append(" )"); //$NON-NLS-1$
 				}
 				
 				QueryPlugIn.logSql(sql.toString());
@@ -210,63 +213,79 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	}
 	
 	private void filterToSql(IFilter filter, StringBuilder sql) throws SQLException{
-		sql.append(" ");
+		sql.append(" "); //$NON-NLS-1$
 		if (filter instanceof IntelligenceFilter){
 			IntelligenceFilter f = (IntelligenceFilter)filter;
 			if (f.getFilterOption() == IntelligenceFilterOption.DESCRIPTION){
-				sql.append(tablePrefix(Intelligence.class) + ".description ");
+				sql.append("LOWER("); //$NON-NLS-1$
+				sql.append(tablePrefix(Intelligence.class) + ".description) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%");
+					sql.append("%"); //$NON-NLS-1$
 				}
 				//TODO: escape string
-				sql.append(f.getValue());
+				sql.append(f.getValue().toLowerCase());
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%");
+					sql.append("%"); //$NON-NLS-1$
 				}
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
 			}else if (f.getFilterOption() == IntelligenceFilterOption.INFORMANTID){
-				sql.append(tablePrefix(Informant.class) + ".id ");
+				sql.append("LOWER("); //$NON-NLS-1$
+				sql.append(tablePrefix(Informant.class) + ".id) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
 				//TODO: escape string
-				sql.append(f.getValue());
-				sql.append("'");
+				sql.append(f.getValue().toLowerCase());
+				sql.append("'"); //$NON-NLS-1$
 			}else if (f.getFilterOption() == IntelligenceFilterOption.PATROLID){
-				sql.append(tablePrefix(Patrol.class) + ".id ");
+				sql.append("LOWER("); //$NON-NLS-1$
+				sql.append(tablePrefix(Patrol.class) + ".id) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%");
+					sql.append("%"); //$NON-NLS-1$
 				}
 				//TODO: escape string
-				sql.append(f.getValue());
+				sql.append(f.getValue().toLowerCase());
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%");
+					sql.append("%"); //$NON-NLS-1$
 				}
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
 			}else if (f.getFilterOption() == IntelligenceFilterOption.NAME){
 				//needs a join
-				sql.append(tablePrefix(Informant.class) + ".id ");
+				sql.append(" EXISTS ( SELECT * FROM "); //$NON-NLS-1$
+				sql.append(tableNamePrefix(Label.class));
+				sql.append(" WHERE "); //$NON-NLS-1$
+				sql.append(tablePrefix(Label.class));
+				sql.append(".element_uuid = "); //$NON-NLS-1$
+				sql.append(tablePrefix(Intelligence.class));
+				sql.append(".uuid and LOWER(value) "); //$NON-NLS-1$
+				
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
+				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
+					sql.append("%"); //$NON-NLS-1$
+				}
 				//TODO: escape string
-				sql.append(f.getValue());
-				sql.append("'");
+				sql.append(f.getValue().toLowerCase());
+				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
+					sql.append("%"); //$NON-NLS-1$
+				}
+				sql.append("') "); //$NON-NLS-1$
 			}else if (f.getFilterOption() == IntelligenceFilterOption.SOURCE){
 				//needs a join?
-				sql.append(tablePrefix(IntelligenceSource.class) + ".keyId ");
+				sql.append(tablePrefix(IntelligenceSource.class) + ".keyId "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
 				sql.append(f.getValue());	//this is a key so shouldn't require escaping
-				sql.append("'");
+				sql.append("'"); //$NON-NLS-1$
 				
 			}
 		}else if (filter instanceof BracketFilter){
-			sql.append("(");
+			sql.append("("); //$NON-NLS-1$
 			filterToSql(((BracketFilter)filter).getFilter(), sql);
-			sql.append(")");
+			sql.append(")"); //$NON-NLS-1$
 				
 		}else if (filter instanceof BooleanExpression){
 			filterToSql(((BooleanExpression)filter).getFilter1(), sql);
@@ -276,7 +295,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 			sql.append(DerbyFilterToSqlGenerator.asSql(Operator.NOT));
 			filterToSql(((NotExpression)filter).getFilter(), sql);
 		}
-		sql.append(" ");
+		sql.append(" "); //$NON-NLS-1$
 	}
 	
 	
