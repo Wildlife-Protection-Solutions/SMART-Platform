@@ -36,14 +36,6 @@ import org.wcs.smart.query.ui.model.ListItem;
 public interface IPatrolQueryHibernateManager {
 	
 	/**
-	 * 
-	 * @param session
-	 * @return all patrol ids for the current conservation area
-	 */
-	public List<String> getPatrolIds(Session session);
-		
-	
-	/**
 	 * Get the patrol mandate object.
 	 * 
 	 * @param session

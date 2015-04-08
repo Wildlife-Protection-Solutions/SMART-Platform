@@ -45,13 +45,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.internal.Messages;
-import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -86,14 +83,9 @@ public class TextListFilterDropItem  extends DropItem{
 			Session s = HibernateManager.openSession();
 			try{
 				 if (filter == IntelligenceFilterOption.PATROLID){
-					//TODO: with lots of patrols this is kind of dumb
-					List<Patrol> temp = s.createCriteria(Patrol.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.addOrder(Order.desc("startDate")) //$NON-NLS-1$
-							.addOrder(Order.asc("id")) //$NON-NLS-1$
-							.list();
-					for (Patrol i : temp){
-						items.add(new ListItem(null, i.getId(), i.getId()));
+					List<String> pids =  PatrolHibernateManager.getPatrolIds(s);
+					for (String i : pids){
+						items.add(new ListItem(null, i, i));
 					}
 				}
 			}finally{

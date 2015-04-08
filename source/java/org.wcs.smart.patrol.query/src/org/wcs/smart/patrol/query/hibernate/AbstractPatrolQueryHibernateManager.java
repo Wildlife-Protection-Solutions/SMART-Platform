@@ -40,22 +40,7 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQueryHibernateManager{
-	
-	/**
-	 * 
-	 * @param session
-	 * @return all patrol ids for the current conservation area
-	 */
-	public List<String> getPatrolIds(Session session){
-		String hql = "Select id FROM Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
-		Query q = session.createQuery(hql);
-		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<String> data = q.list();
-		return data;
-	}
-		
-		
+
 	/**
 	 * Get the patrol mandate object.
 	 * 

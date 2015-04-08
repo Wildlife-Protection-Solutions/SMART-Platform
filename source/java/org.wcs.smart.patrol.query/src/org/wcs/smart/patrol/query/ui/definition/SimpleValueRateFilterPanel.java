@@ -69,10 +69,11 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 		}
 		Session session = null;
 		try{
-			InputStream is = new ByteArrayInputStream(queryString.getBytes());
-			Parser parser = new Parser(is);
-			QueryFilter filterPart = parser.QueryFilter();
-			is.close();
+			QueryFilter filterPart = null;
+			try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+				Parser parser = new Parser(is);
+				filterPart = parser.QueryFilter();
+			}
 		
 			//---- generate drop items for value filter
 			session = HibernateManager.openSession();

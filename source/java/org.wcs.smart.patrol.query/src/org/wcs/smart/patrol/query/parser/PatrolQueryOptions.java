@@ -403,9 +403,9 @@ public class PatrolQueryOptions {
 			case MAN_HOURS_TOTAL:
 			case MAN_DAYS_TOTAL:
 					return false;
-		
+			default:
+					return true;
 		}
-		return true;
 	}
 
 	/**
@@ -717,7 +717,7 @@ public class PatrolQueryOptions {
 		public List<ListItem> getAllActiveValues(Session session){
 			ArrayList<ListItem> items = new ArrayList<ListItem>();
 			if (this == ID){
-				List<String> pids = PatrolQueryHibernateManager.getInstance().getPatrolIds(session);
+				List<String> pids = PatrolHibernateManager.getPatrolIds(session);
 				for (String pid : pids){
 					items.add(new ListItem(null, pid, pid));
 				}

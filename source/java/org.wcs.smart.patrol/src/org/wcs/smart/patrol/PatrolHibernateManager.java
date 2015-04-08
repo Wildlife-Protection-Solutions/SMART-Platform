@@ -36,6 +36,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -446,5 +447,19 @@ public class PatrolHibernateManager extends HibernateManager{
 			options.put(screenOption.getType(), screenOption);
 		}
 		return options;
+	}
+	
+	/**
+	 * 
+	 * @param session
+	 * @return all patrol ids for the current conservation area
+	 */
+	public static List<String> getPatrolIds(Session session){
+		String hql = "Select id FROM Patrol WHERE conservationArea = :ca"; //$NON-NLS-1$
+		Query q = session.createQuery(hql);
+		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<String> data = q.list();
+		return data;
 	}
 }
