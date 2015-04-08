@@ -37,6 +37,7 @@ import org.wcs.smart.ca.Label;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilter;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
@@ -68,6 +69,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		tablePrefix.put(Informant.class, "ii"); //$NON-NLS-1$
 		tablePrefix.put(Patrol.class, "p"); //$NON-NLS-1$
 		tablePrefix.put(IntelligenceSource.class, "iis"); //$NON-NLS-1$
+		tablePrefix.put(IntelligencePoint.class, "iip"); //$NON-NLS-1$
 		tablePrefix.put(Label.class, "lbl"); //$NON-NLS-1$
 		
 		
@@ -75,6 +77,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		tableNames.put(Informant.class, "smart.informant"); //$NON-NLS-1$
 		tableNames.put(Patrol.class, "smart.patrol"); //$NON-NLS-1$
 		tableNames.put(IntelligenceSource.class, "smart.intelligence_source"); //$NON-NLS-1$
+		tableNames.put(IntelligencePoint.class, "smart.intelligence_point"); //$NON-NLS-1$
 		tableNames.put(Label.class, "smart.i18n_label"); //$NON-NLS-1$
 	}
 	

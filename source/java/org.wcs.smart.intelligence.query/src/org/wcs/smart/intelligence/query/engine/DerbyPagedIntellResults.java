@@ -31,6 +31,7 @@ import org.eclipse.swt.SWT;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
@@ -115,7 +116,8 @@ public class DerbyPagedIntellResults extends AbstractPagedQueryResultSet impleme
 	public Envelope getEnvelope(){
 		if (this.bounds == null){
 			Session s = HibernateManager.openSession();
-			final String sql = "SELECT min(wp_x), max(wp_x), min(wp_y), max(wp_y) FROM " + queryTempTable; //$NON-NLS-1$
+			final String sql = "SELECT min(p.x), max(p.x), min(p.y), max(p.y) FROM " //$NON-NLS-1$
+					+ "" + queryTempTable + " t join " + engine.tableName(IntelligencePoint.class) + " p on t.intel_uuid = p.intelligence_uuid"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			s.doWork(new Work(){
 
 				@Override
