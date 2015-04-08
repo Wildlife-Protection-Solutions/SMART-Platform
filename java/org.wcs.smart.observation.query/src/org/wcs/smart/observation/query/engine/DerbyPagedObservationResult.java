@@ -152,8 +152,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 
 				@Override
 				public void execute(Connection c) throws SQLException {
-					ResultSet q = c.createStatement().executeQuery(sql);
-					try{
+					try(ResultSet q = c.createStatement().executeQuery(sql)){
 						q.next();
 						double minx = q.getDouble(1);
 						double maxx = q.getDouble(2);
@@ -161,8 +160,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 						double maxy = q.getDouble(4);
 					
 						bounds = new Envelope(minx, maxx, miny, maxy);
-					}finally{
-						q.close();
 					}
 				}	
 			});
@@ -335,8 +332,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		}
 		attrSql.append(')');
 
-		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
-		try {
+		
+		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
 			for (IResultItem iri : result){
 				ObservationQueryResultItem it  = (ObservationQueryResultItem) iri;
@@ -347,9 +344,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 					}
 				}
 			}
-		} finally {
-			rs.close();
-		}		
+		}
 	}
 	
 	private String buildSortSql() {
