@@ -21,13 +21,22 @@
  */
 package org.wcs.smart.intelligence.query.ui.dropitem;
 
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.Session;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
+import org.wcs.smart.intelligence.query.internal.Messages;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
+import org.wcs.smart.intelligence.query.ui.DefinitionPanel;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 
 /**
  * Drop item factory for ingelligence options.
@@ -67,8 +76,28 @@ public class IntelligenceDropItemFactory implements IDropItemFactory{
 	}
 
 	@Override
-	public void generateDropItems(QueryProxy q, Session session) {
-		// TODO Auto-generated method stub
+	public void generateDropItems(QueryProxy proxy, Session session) {
+		if (proxy.getQuery() instanceof IntelligenceRecordQuery){
+			IFilter queryFilter = ((IntelligenceRecordQuery)proxy.getQuery()).getFilter().getFilter();
+			proxy.setDropItems(DefinitionPanel.ID, asDropItems(queryFilter, session));
+		}
 		
+	}
+	
+	/*
+	 * Converts a filter to a set of drop items
+	 */
+	private List<DropItem> asDropItems(IFilter filter, Session session){
+		List<DropItem> items = new ArrayList<DropItem>();
+		try{
+			DropItem[] filterItems = filter.getDropItems(session);
+			for(DropItem i : filterItems){
+				items.add(i);
+			}
+			
+		}catch (Exception ex){
+			items.add(new ErrorDropItem(MessageFormat.format(Messages.IntelligenceDropItemFactory_ParseError, new Object[]{ex.getMessage()})));
+		}
+		return items;
 	}
 }

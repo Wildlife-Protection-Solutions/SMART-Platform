@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -154,37 +155,57 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 
 				
 				sql.append(" WHERE "); //$NON-NLS-1$
-				sql.append(tablePrefix(ConservationArea.class) + ".uuid IN (" + asString(query.getConservationAreaFilterAsFilter()) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				
+				List<Object> parameterValues = new ArrayList<Object>();
 				
+				// ca filter
+				sql.append(tablePrefix(ConservationArea.class) + ".uuid IN ("); //$NON-NLS-1$
+				for (byte[] ca : query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds()){
+					sql.append("?,"); //$NON-NLS-1$
+					parameterValues.add(ca);
+				}
+				sql.deleteCharAt(sql.length()-1);
+				sql.append(")"); //$NON-NLS-1$
+				
+				//date filter
 				Date[] d = query.getDateFilter().getDateFilterOption().getDates();
 				if (d != null){
 					sql.append(" AND "); //$NON-NLS-1$
-					sql.append(tablePrefix(Intelligence.class) + ".received_date>= '" + d[0].toString() + "' AND "); //$NON-NLS-1$ //$NON-NLS-2$ 
-					sql.append(tablePrefix(Intelligence.class) + ".received_date <= '" + d[1].toString() + "' "); //$NON-NLS-1$ //$NON-NLS-2$ 
+					sql.append(tablePrefix(Intelligence.class) + ".received_date>= ? AND "); //$NON-NLS-1$ 
+					sql.append(tablePrefix(Intelligence.class) + ".received_date <= ? "); //$NON-NLS-1$ 
+					
+					parameterValues.add(d[0].toString());
+					parameterValues.add(d[1].toString());
 				}
 				
+				//query filter
 				if (query.getQueryFilter().length() > 0){
 					sql.append("AND ( "); //$NON-NLS-1$
-					filterToSql(query.getFilter().getFilter(), sql);
+					filterToSql(query.getFilter().getFilter(), sql, parameterValues);
 					sql.append(" )"); //$NON-NLS-1$
 				}
 				
 				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().executeUpdate(sql.toString());
+				try(PreparedStatement psq = c.prepareStatement(sql.toString())){
+					for (int i = 0; i < parameterValues.size(); i ++){
+						psq.setObject(i+1, parameterValues.get(i));
+					}
+					psq.executeUpdate();
+				}
 				
 				/* set the intelligence source name */
 				String s= "SELECT distinct intel_sourceuuid FROM " + queryDataTable; //$NON-NLS-1$
 				QueryPlugIn.logSql(s);
 				try( ResultSet rs = c.createStatement().executeQuery(s)){
-					PreparedStatement ps = c.prepareStatement("UPDATE " + queryDataTable + " SET intel_source = ? where intel_sourceuuid = ?"); //$NON-NLS-1$ //$NON-NLS-2$
-					while(rs.next()){
-						byte[] uuid = rs.getBytes(1);
-						String name = getSourceName(uuid, session);
+					try(PreparedStatement ps = c.prepareStatement("UPDATE " + queryDataTable + " SET intel_source = ? where intel_sourceuuid = ?")){ //$NON-NLS-1$ //$NON-NLS-2$
+						while(rs.next()){
+							byte[] uuid = rs.getBytes(1);
+							String name = getSourceName(uuid, session);
 					
-						ps.setString(1, name);
-						ps.setBytes(2, uuid);
-						ps.executeUpdate();
+							ps.setString(1, name);
+							ps.setBytes(2, uuid);
+							ps.executeUpdate();
+						}
 					}
 				}
 				
@@ -212,7 +233,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	
 	}
 	
-	private void filterToSql(IFilter filter, StringBuilder sql) throws SQLException{
+	private void filterToSql(IFilter filter, StringBuilder sql, List<Object> parameterValues) throws SQLException{
 		sql.append(" "); //$NON-NLS-1$
 		if (filter instanceof IntelligenceFilter){
 			IntelligenceFilter f = (IntelligenceFilter)filter;
@@ -220,38 +241,32 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Intelligence.class) + ".description) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'"); //$NON-NLS-1$
+				sql.append(" ? "); //$NON-NLS-1$
+				
+				String value = f.getValue().toLowerCase();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%"); //$NON-NLS-1$
+					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				//TODO: escape string
-				sql.append(f.getValue().toLowerCase());
-				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%"); //$NON-NLS-1$
-				}
-				sql.append("'"); //$NON-NLS-1$
+				parameterValues.add(value);
+				
 			}else if (f.getFilterOption() == IntelligenceFilterOption.INFORMANTID){
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Informant.class) + ".id) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'"); //$NON-NLS-1$
-				//TODO: escape string
-				sql.append(f.getValue().toLowerCase());
-				sql.append("'"); //$NON-NLS-1$
+				sql.append(" ? "); //$NON-NLS-1$
+				parameterValues.add(f.getValue().toLowerCase());
+				
 			}else if (f.getFilterOption() == IntelligenceFilterOption.PATROLID){
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Patrol.class) + ".id) "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'"); //$NON-NLS-1$
+				sql.append(" ? "); //$NON-NLS-1$
+				
+				String value = f.getValue().toLowerCase();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%"); //$NON-NLS-1$
+					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				//TODO: escape string
-				sql.append(f.getValue().toLowerCase());
-				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%"); //$NON-NLS-1$
-				}
-				sql.append("'"); //$NON-NLS-1$
+				parameterValues.add(value);
 			}else if (f.getFilterOption() == IntelligenceFilterOption.NAME){
 				//needs a join
 				sql.append(" EXISTS ( SELECT * FROM "); //$NON-NLS-1$
@@ -263,37 +278,33 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				sql.append(".uuid and LOWER(value) "); //$NON-NLS-1$
 				
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'"); //$NON-NLS-1$
+				sql.append(" ? )"); //$NON-NLS-1$
+				String value = f.getValue().toLowerCase();
 				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%"); //$NON-NLS-1$
+					value = "%" + value + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				//TODO: escape string
-				sql.append(f.getValue().toLowerCase());
-				if (f.getOperator().equals(Operator.STR_CONTAINS) || f.getOperator().equals(Operator.STR_NOTCONTAINS)){
-					sql.append("%"); //$NON-NLS-1$
-				}
-				sql.append("') "); //$NON-NLS-1$
+				parameterValues.add(value);
 			}else if (f.getFilterOption() == IntelligenceFilterOption.SOURCE){
 				//needs a join?
 				sql.append(tablePrefix(IntelligenceSource.class) + ".keyId "); //$NON-NLS-1$
 				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
-				sql.append("'"); //$NON-NLS-1$
-				sql.append(f.getValue());	//this is a key so shouldn't require escaping
-				sql.append("'"); //$NON-NLS-1$
+				sql.append(" ? "); //$NON-NLS-1$
+				
+				parameterValues.add(f.getValue());
 				
 			}
 		}else if (filter instanceof BracketFilter){
 			sql.append("("); //$NON-NLS-1$
-			filterToSql(((BracketFilter)filter).getFilter(), sql);
+			filterToSql(((BracketFilter)filter).getFilter(), sql, parameterValues);
 			sql.append(")"); //$NON-NLS-1$
 				
 		}else if (filter instanceof BooleanExpression){
-			filterToSql(((BooleanExpression)filter).getFilter1(), sql);
+			filterToSql(((BooleanExpression)filter).getFilter1(), sql, parameterValues);
 			sql.append(DerbyFilterToSqlGenerator.asSql(((BooleanExpression)filter).getOperator()));
-			filterToSql(((BooleanExpression)filter).getFilter2(), sql);
+			filterToSql(((BooleanExpression)filter).getFilter2(), sql, parameterValues);
 		}else if (filter instanceof NotExpression){
 			sql.append(DerbyFilterToSqlGenerator.asSql(Operator.NOT));
-			filterToSql(((NotExpression)filter).getFilter(), sql);
+			filterToSql(((NotExpression)filter).getFilter(), sql, parameterValues);
 		}
 		sql.append(" "); //$NON-NLS-1$
 	}

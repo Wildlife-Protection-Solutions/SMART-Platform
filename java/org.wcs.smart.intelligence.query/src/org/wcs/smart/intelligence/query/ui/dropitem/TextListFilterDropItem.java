@@ -43,7 +43,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
@@ -52,7 +54,6 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Combination List/Text filter option used for 
@@ -66,17 +67,17 @@ public class TextListFilterDropItem  extends DropItem{
 
 	public IntelligenceFilterOption filter;
 
-	private ListItem currentSelection;
+	private String currentSelection;
 	private String currentOp = null;	
 	private Label lblAttribute;
 	protected ComboViewer listViewer;
 	private Combo operators;
 
 	private Font smallerFont;
+	private boolean isInit = false;
 	
 	private Job loadItemsJob = new Job(Messages.TextListFilterDropItem_JobName){
 
-		@SuppressWarnings("unchecked")
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final List<ListItem> items = new ArrayList<ListItem>();
@@ -97,8 +98,15 @@ public class TextListFilterDropItem  extends DropItem{
 				public void run() {
 					if (listViewer.getControl().isDisposed()) return;
 					
-					listViewer.setInput(items);
-					listViewer.refresh();
+					isInit = true;
+					try{
+						listViewer.setInput(items);
+						if (currentSelection != null){
+							listViewer.getCombo().setText(currentSelection);
+						}
+					}finally{
+						isInit = false;
+					}
 				}});
 			return Status.OK_STATUS;
 		}
@@ -142,7 +150,7 @@ public class TextListFilterDropItem  extends DropItem{
 			Object[] initd = (Object[])data;
 			this.currentOp = ((Operator)initd[0]).asSmartValue();
 			try {
-				this.currentSelection = new ListItem(SmartUtils.decodeHex((String)initd[1]), ""); //$NON-NLS-1$
+				this.currentSelection = (String) initd[1]; 
 			} catch (Exception e) {
 				throw new RuntimeException("Invalid uuid '" + initd[1] + "'", e); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -191,19 +199,29 @@ public class TextListFilterDropItem  extends DropItem{
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
 		listViewer.setLabelProvider(ListItem.createLabelProvider());
 		
+		listViewer.setInput(new ListItem[]{new ListItem(Messages.TextListFilterDropItem_Loading)});
+		if (currentSelection != null){
+			listViewer.getCombo().setText(currentSelection);
+		}
+		
+		listViewer.getCombo().addListener(SWT.Modify, new Listener(){
+			@Override
+			public void handleEvent(Event event) {
+				if (isInit) return;
+				queryChanged();
+			}});
 		listViewer.addPostSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				ListItem newSelection = (ListItem) ((IStructuredSelection)listViewer.getSelection()).getFirstElement();
-				ListItem lastSelection = currentSelection;
+				String lastSelection = currentSelection;
 				
-				currentSelection = newSelection;
+				currentSelection = newSelection.getKey();
 				if (! (lastSelection != null && lastSelection.equals(newSelection))){
 					queryChanged();	
 				}
 			}
 		});
-		listViewer.setInput(new ListItem[]{new ListItem(Messages.TextListFilterDropItem_Loading)});
 		
 		GridData gd = new GridData();
 		gd.minimumWidth = 50;

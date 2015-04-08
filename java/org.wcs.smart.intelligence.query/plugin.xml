@@ -93,5 +93,11 @@
             panel="org.wcs.smart.intelligence.query.ui.DefinitionPanel">
       </QueryDefinitionPanel>
    </extension>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery">
+      </class>
+   </extension>
 
 </plugin>
