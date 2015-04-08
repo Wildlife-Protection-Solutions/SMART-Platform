@@ -129,7 +129,6 @@ public class IntelligenceRecordQueryType implements IQueryType {
 			Parser parser = new Parser(is);
 			parser.IntelligenceFilter();
 		}catch (Exception ex){
-			ex.printStackTrace();
 			return ex.getMessage();
 		}
 		return null;

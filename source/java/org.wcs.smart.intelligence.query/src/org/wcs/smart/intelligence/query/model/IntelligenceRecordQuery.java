@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,10 +54,13 @@ import org.wcs.smart.query.model.filter.QueryFilter;
  * @author Emily
  *
  */
+@Entity
+@Table(name="smart.intel_record_query")
 public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 	
 	private List<QueryColumn> queryColumns = null;
 	
+	@Transient
 	@Override
 	public IQueryType getType() {
 		return QueryTypeManager.getInstance().findQueryType(IntelligenceRecordQueryType.KEY);

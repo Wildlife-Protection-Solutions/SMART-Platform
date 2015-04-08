@@ -23,9 +23,12 @@ package org.wcs.smart.intelligence.query;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.intelligence.query.internal.Messages;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -37,6 +40,8 @@ public class IntelligenceQueryPlugIn extends AbstractUIPlugin {
 
 	public static final String INTEL_SUMMARY_ICON = "org.wcs.smart.intelligence.query.summary"; //$NON-NLS-1$
 	public static final String INTEL_RECORD_ICON = "org.wcs.smart.intelligence.query.record"; //$NON-NLS-1$
+	
+	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
 	
 	// The shared instance
 	private static IntelligenceQueryPlugIn plugin;
@@ -95,4 +100,25 @@ public class IntelligenceQueryPlugIn extends AbstractUIPlugin {
 		getDefault().getLog().log(
 				new Status(status, PLUGIN_ID, IStatus.OK, message, t));
 	}
+	
+	/**
+	 * Displays an error message to the user and logs the
+	 * message.
+	 * 
+	 * @param message  Error message to display
+	 * @param t exception to log
+	 */
+	public static void displayLog(final String message, Throwable t){
+		log(message, t);
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				MessageDialog.openError(Display.getDefault().getActiveShell(),
+						Messages.IntelligenceQueryPlugIn_ErrorDialogTitle, message);
+			}
+			
+		});
+		
+	}	
 }
