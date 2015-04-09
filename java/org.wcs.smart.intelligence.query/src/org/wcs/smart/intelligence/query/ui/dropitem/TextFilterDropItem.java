@@ -49,7 +49,7 @@ public class TextFilterDropItem extends DropItem{
 	public IntelligenceFilterOption filter;
 
 	private String currentValue = null;
-	private String currentOp = null;	
+	private Operator currentOp = null;
 	private Label lblAttribute;
 	private Text value;
 	private Combo operators;
@@ -72,7 +72,7 @@ public class TextFilterDropItem extends DropItem{
 	public String asQueryPart() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(filter.getKey());
-		sb.append(currentOp);
+		sb.append(currentOp.asSmartValue());
 		sb.append(" \""); //$NON-NLS-1$
 		sb.append(currentValue);
 		sb.append("\" "); //$NON-NLS-1$
@@ -82,7 +82,7 @@ public class TextFilterDropItem extends DropItem{
 	public void initializeData(Object data) {
 		if (data != null && data instanceof Object[]){
 			Object[] initd = (Object[])data;
-			this.currentOp = ((Operator)initd[0]).asSmartValue();
+			this.currentOp = (Operator)initd[0];
 			this.currentValue = (String)initd[1];
 		}
 	}
@@ -110,10 +110,15 @@ public class TextFilterDropItem extends DropItem{
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (currentOp != null
-						&& currentOp.equals(operators.getText())) {
+						&& currentOp.getGuiValue().equals(operators.getText())) {
 					// no change
 				} else {
-					currentOp = operators.getText();
+					for(Operator i : Operator.STRING_OPS){
+						if (i.getGuiValue().equals(operators.getText())){
+							currentOp = i;
+							break;
+						}
+					}
 					queryChanged();
 				}
 			}
@@ -136,7 +141,7 @@ public class TextFilterDropItem extends DropItem{
 					queryChanged();
 					value.setToolTipText(value.getText());
 					currentValue = value.getText();
-			}
+				}
 			}
 		});
 		
@@ -150,7 +155,7 @@ public class TextFilterDropItem extends DropItem{
 		for (int i = 0; i < options.length; i++) {
 			operators.add(options[i].getGuiValue());
 			if (currentOp != null
-					&& currentOp.equals(options[i].getGuiValue())) {
+					&& currentOp.equals(options[i])) {
 				index = i;
 			}
 		}

@@ -243,7 +243,12 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 			if (f.getFilterOption() == IntelligenceFilterOption.DESCRIPTION){
 				sql.append("LOWER("); //$NON-NLS-1$
 				sql.append(tablePrefix(Intelligence.class) + ".description) "); //$NON-NLS-1$
-				sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
+				if (f.getOperator().equals(Operator.STR_EQUALS)){
+					//description is a long varchar and you cannot do = on longvarchar
+					sql.append(DerbyFilterToSqlGenerator.asSql(Operator.STR_CONTAINS));
+				}else{
+					sql.append(DerbyFilterToSqlGenerator.asSql(f.getOperator()));
+				}
 				sql.append(" ? "); //$NON-NLS-1$
 				
 				String value = f.getValue().toLowerCase();
