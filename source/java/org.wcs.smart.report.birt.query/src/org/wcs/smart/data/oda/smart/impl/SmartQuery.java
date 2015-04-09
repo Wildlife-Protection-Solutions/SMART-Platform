@@ -51,7 +51,7 @@ import com.ibm.icu.text.MessageFormat;
 
 /**
  * Implementation class of IQuery for the SMART ODA runtime driver. <br>
- * This wraps around any smart query (ncluding summaries, patrol, waypoint
+ * This wraps around any smart query (including summaries, patrol, waypoint
  * queries).
  */
 public class SmartQuery implements IQuery {
