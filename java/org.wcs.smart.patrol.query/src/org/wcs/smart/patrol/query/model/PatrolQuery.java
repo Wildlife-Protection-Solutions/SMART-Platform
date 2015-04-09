@@ -90,7 +90,9 @@ public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 				sb.deleteCharAt(sb.length() - 1);
 			}
 			setVisibleColumns(sb.toString());
-		}	
+		}else{
+			setVisibleColumns(null);
+		}
 	}
 	
 	/**
