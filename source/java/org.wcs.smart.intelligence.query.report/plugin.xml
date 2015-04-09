@@ -13,6 +13,10 @@
             class="org.wcs.smart.intelligence.query.report.data.IntelligenceReportQuery"
             queryTypeKey="intelligencerecord">
       </QueryTypeDataset>
+      <QueryTypeDataset
+            class="org.wcs.smart.intelligence.query.report.data.IntelligenceReportQuery"
+            queryTypeKey="intelligencesummary">
+      </QueryTypeDataset>
    </extension>
 
 </plugin>

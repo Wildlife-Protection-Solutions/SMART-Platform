@@ -21,14 +21,20 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.engine.SummaryIntelligenceQueryEngine;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 
 /**
@@ -39,24 +45,42 @@ import org.wcs.smart.query.model.filter.DateFilter;
  * @author Emily
  *
  */
+@Entity
+@Table(name="smart.intel_summary_query")
 public class IntelligenceSummaryQuery extends Query {
 	
-	private DateFilter dateFilter;
-	
+	protected DateFilter dateFilter;
 	
 	public IntelligenceSummaryQuery(){
-		setConservationAreaFilter(new ConservationAreaFilter(true));
 	}
 	
+	@Transient
 	@Override
 	public IQueryType getType() {
 		return QueryTypeManager.getInstance().findQueryType(IntelligenceSummaryQueryType.KEY);
 	}
 
+	@Transient
 	@Override
 	public boolean isDefinitionEqual(Query other) {
 		if (other instanceof IntelligenceSummaryQuery) return true;
 		return false;
+	}
+	
+	/**
+	 * @return the date filter; or null if date filter not set
+	 */
+	@Transient
+	public DateFilter getDateFilter(){
+		return this.dateFilter;
+	}
+	/**
+	 * Sets the date filter 
+	 * @param dateFilter
+	 */
+	@Override
+	public void setDateFilter(DateFilter dateFilter){
+		this.dateFilter = dateFilter;
 	}
 
 	/**
@@ -64,6 +88,8 @@ public class IntelligenceSummaryQuery extends Query {
 	 */
 	@Override
 	public void copyQuery(Query copy) {
+		IntelligenceSummaryQuery q = (IntelligenceSummaryQuery)copy;
+		setConservationAreaFilter(q.getConservationAreaFilter());
 	}
 
 	/**
@@ -71,21 +97,21 @@ public class IntelligenceSummaryQuery extends Query {
 	 */
 	@Override
 	public Query clone() {
-		return null;
+		IntelligenceSummaryQuery q = IntelligenceQueryFactory.createIntelligenceSummaryQuery();
+		q.setUuid(null);
+		q.setId( null );
+		q.setName(getName());
+		q.setConservationArea(getConservationArea());
+		q.setConservationAreaFilter(getConservationAreaFilter());
+		q.setDateFilter(getDateFilter());
+		q.setOwner(SmartDB.getCurrentEmployee());
+		return q;
 	}
 
-	@Override
-	public void setDateFilter(DateFilter filter) {
-		this.dateFilter = filter;
-	}
-	
-	public DateFilter getDateFilter(){
-		return this.dateFilter;
-	}
 
-	
+	@Transient
 	@Override
-	protected Object executeQueryInternal(IProgressMonitor monitor,
+	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor,
 			Session session) throws Exception {
 		Session lsession = session;
 		if (session == null){

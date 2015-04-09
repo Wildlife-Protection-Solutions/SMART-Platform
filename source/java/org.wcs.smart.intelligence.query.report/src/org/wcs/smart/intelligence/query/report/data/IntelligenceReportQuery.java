@@ -33,12 +33,23 @@ import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.data.oda.smart.query.common.EmptyResultSet;
 import org.wcs.smart.data.oda.smart.query.common.PagedQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
+import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
+import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
+import org.wcs.smart.intelligence.query.RecievedDateFilter;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
+import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
-import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
+/**
+ * Wrapper for loading intelligence queries in report.
+ * 
+ * @author Emily
+ *
+ */
 public class IntelligenceReportQuery implements ISmartQuery {
 
 	public IntelligenceReportQuery() {
@@ -54,6 +65,8 @@ public class IntelligenceReportQuery implements ISmartQuery {
 		// attempt to parse query
 		if (smartQuery.getQuery() instanceof SimpleQuery) {
 			((SimpleQuery) smartQuery.getQuery()).getFilter();
+		} else if (smartQuery.getQuery() instanceof IntelligenceSummaryQuery) {
+			
 		}
 	}
 
@@ -73,18 +86,21 @@ public class IntelligenceReportQuery implements ISmartQuery {
 		CustomDateFilter cd = new CustomDateFilter();
 		cd.setDates(startDate, endDate);
 		DateFilter dateFilter = new DateFilter(
-				WaypointDateField.INSTANCE,cd);
+				RecievedDateFilter.INSTANCE,cd);
 
-
-		//the result set
+		smartQuery.getQuery().setDateFilter(dateFilter);
 		
+		//the result set
 		if (smartQuery.getQuery().getType().getKey().equals(IntelligenceRecordQueryType.KEY)){
-			((SimpleQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new PagedQueryResultSet(smartQuery.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
 					connection);
+		} else if (smartQuery.getQuery() instanceof IntelligenceSummaryQuery) {
+			
+			IntelligenceSummaryQuery sumQuery = (IntelligenceSummaryQuery)smartQuery.getQuery();
+			resultSet = new SummaryQueryResultSet(sumQuery,
+					(SummaryQueryResultSetMetadata)getMetaData(smartQuery), connection);
 		}
-		
 		return resultSet;
 	}
 
@@ -93,8 +109,23 @@ public class IntelligenceReportQuery implements ISmartQuery {
 			throws OdaException {
 		if (smartQuery.getQuery().getType().getKey().equals(IntelligenceRecordQueryType.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery.getQuery());
+		}else if (smartQuery.getQuery().getType().getKey().equals(IntelligenceSummaryQueryType.KEY)){
+			return new IntelSummaryQueryResultSetMetadata((IntelligenceSummaryQuery)smartQuery.getQuery());
 		}
-		throw new OdaException("Unsupported query type.");
+		throw new OdaException("Unsupported query type."); //$NON-NLS-1$
 	}
 
+	
+	private class IntelSummaryQueryResultSetMetadata extends SummaryQueryResultSetMetadata{
+
+		public IntelSummaryQueryResultSetMetadata(IntelligenceSummaryQuery query) {
+			super();
+			results = IntelligenceSummaryQueryType.createResultTemplate();
+		}
+
+		protected void parseHeader(SummaryQuery query) {
+			results = IntelligenceSummaryQueryType.createResultTemplate();
+		}
+		
+	}
 }

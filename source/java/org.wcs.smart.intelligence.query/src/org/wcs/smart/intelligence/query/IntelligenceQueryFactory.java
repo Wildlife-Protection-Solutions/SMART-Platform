@@ -42,8 +42,9 @@ public class IntelligenceQueryFactory {
 	 */
 	public static IntelligenceSummaryQuery createIntelligenceSummaryQuery(){
 		IntelligenceSummaryQuery query =  new IntelligenceSummaryQuery();
+		initQuery(query);
 		query.setName(Messages.IntelligenceQueryFactory_DefaultNameSummary);
-		query.setId(""); //$NON-NLS-1$
+		query.setConservationAreaFilter(new ConservationAreaFilter(true));
 		return query;
 	}
 	
