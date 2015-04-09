@@ -127,7 +127,9 @@ public class MissionTrackQuery extends SimpleQuery implements IPagedQuery, ISurv
 				sb.deleteCharAt(sb.length() - 1);
 			}
 			setVisibleColumns(sb.toString());
-		}	
+		}else{
+			setVisibleColumns(null);
+		}
 	}
 	
 	/**

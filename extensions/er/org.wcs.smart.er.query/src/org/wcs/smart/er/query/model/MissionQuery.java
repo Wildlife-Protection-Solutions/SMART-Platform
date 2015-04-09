@@ -127,7 +127,9 @@ public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQue
 				sb.deleteCharAt(sb.length() - 1);
 			}
 			setVisibleColumns(sb.toString());
-		}	
+		}else{
+			setVisibleColumns(null);
+		}
 	}
 	
 	/**
