@@ -30,7 +30,10 @@ import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.ui.IntelligenceSummaryEditor;
+import org.wcs.smart.intelligence.query.ui.dropitem.IntelligenceDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.model.SummaryHeader;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
@@ -83,7 +86,7 @@ public class IntelligenceSummaryQueryType implements IQueryType {
 
 	@Override
 	public IDropItemFactory getDropItemFactory() {
-		return null;
+		return IntelligenceDropItemFactory.INSTANCE;
 	}
 
 	@Override
@@ -101,5 +104,31 @@ public class IntelligenceSummaryQueryType implements IQueryType {
 		IPath path = new Path("src/org/wcs/smart/intelligence/query/model/summary.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, IntelligenceQueryPlugIn.getDefault().getBundle());
 	}
+	
+	
+	public static final String FOLLOW_KEY = "follow"; //$NON-NLS-1$
+	public static final String NOT_FOLLOW_KEY = "notfollow"; //$NON-NLS-1$
+	public static final String NUMBER_KEY = "intellcnt"; //$NON-NLS-1$
+	
+	/**
+	 * Creates the template for the results.  These queries
+	 * have on value (Number of Intelligence) grouped into either
+	 * Followed Up or Not Followed Up.
+	 * 
+	 * @return
+	 */
+	public static SummaryQueryResult createResultTemplate(){
+		SummaryQueryResult results = new SummaryQueryResult();
+		
+		results.addValueHeader(
+				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NumberRecordShortName, Messages.SummaryIntelligenceQueryEngine_NumberRecordLongName, NUMBER_KEY, true));
+		
+		results.addRowHeader(
+				new SummaryHeader[]{new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderShortName, FOLLOW_KEY, false), 
+				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NotFollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_NoFollowedUpHeaderShortName, NOT_FOLLOW_KEY, false)}); 
+
+		return results;
+	}
+	
 
 }

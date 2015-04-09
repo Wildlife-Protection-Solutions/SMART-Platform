@@ -42,10 +42,12 @@ public class RemoveQueryEntityJob extends Job {
 
 	private static String[] SQL = new String[]{
 		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.intel_record_query)", //$NON-NLS-1$
+		"DELETE FROM smart.I18N_LABEL where ELEMENT_UUID in (select uuid from smart.intel_summary_query)", //$NON-NLS-1$
 	};
 	
 	private static String[] TABLES = new String[]{
 		"INTEL_RECORD_QUERY", //$NON-NLS-1$
+		"INTEL_SUMMARY_QUERY", //$NON-NLS-1$
 	};
 	
 	public RemoveQueryEntityJob() {

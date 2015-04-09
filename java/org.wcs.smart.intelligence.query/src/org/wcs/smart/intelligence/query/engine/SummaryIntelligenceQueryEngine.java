@@ -32,9 +32,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
-import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.query.common.model.SummaryHeader;
+import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -46,9 +45,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
  */
 public class SummaryIntelligenceQueryEngine  {
 
-	private static final String FOLLOW_KEY = "follow"; //$NON-NLS-1$
-	private static final String NOT_FOLLOW_KEY = "notfollow"; //$NON-NLS-1$
-	private static final String NUMBER_KEY = "intellcnt"; //$NON-NLS-1$
+
 	
 	
 	public SummaryQueryResult executeQuery( final IntelligenceSummaryQuery query,
@@ -89,14 +86,14 @@ public class SummaryIntelligenceQueryEngine  {
 			}
 			Long notFollowedUpOn = (Long) q.uniqueResult(); 
 		
-			SummaryQueryResult results = createResultTemplate();
+			SummaryQueryResult results = IntelligenceSummaryQueryType.createResultTemplate();
 			
 			HashMap<SummaryResultKey, Double> data = new HashMap<SummaryResultKey, Double>();
 		
-			SummaryResultKey key = new SummaryResultKey(NUMBER_KEY, new String[]{FOLLOW_KEY}); 
+			SummaryResultKey key = new SummaryResultKey(IntelligenceSummaryQueryType.NUMBER_KEY, new String[]{IntelligenceSummaryQueryType.FOLLOW_KEY}); 
 			data.put(key, followedUpOn.doubleValue());
 		
-			key = new SummaryResultKey(NUMBER_KEY, new String[]{NOT_FOLLOW_KEY}); 
+			key = new SummaryResultKey(IntelligenceSummaryQueryType.NUMBER_KEY, new String[]{IntelligenceSummaryQueryType.NOT_FOLLOW_KEY}); 
 			data.put(key, notFollowedUpOn.doubleValue());
 		
 			results.setData(data);
@@ -108,26 +105,7 @@ public class SummaryIntelligenceQueryEngine  {
 		}
 	}
 	
-	/**
-	 * Creates the template for the results.  These queries
-	 * have on value (Number of Intelligence) grouped into either
-	 * Followed Up or Not Followed Up.
-	 * 
-	 * @return
-	 */
-	public static SummaryQueryResult createResultTemplate(){
-		SummaryQueryResult results = new SummaryQueryResult();
-		
-		results.addValueHeader(
-				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NumberRecordShortName, Messages.SummaryIntelligenceQueryEngine_NumberRecordLongName, NUMBER_KEY, true));
-		
-		results.addRowHeader(
-				new SummaryHeader[]{new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderShortName, FOLLOW_KEY, false), 
-				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NotFollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_NoFollowedUpHeaderShortName, NOT_FOLLOW_KEY, false)}); 
 
-		return results;
-	}
-	
 	/**
 	 * Converts conservation area filter ot list of
 	 * conservation areas for query.

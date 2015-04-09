@@ -98,6 +98,9 @@
       <class
             class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery">
       </class>
+      <class
+            class="org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery">
+      </class>
    </extension>
    <extension
          point="org.wcs.smart.query.property">
