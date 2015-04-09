@@ -242,7 +242,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 	 * Creates new query
 	 * @return
 	 */
-	public abstract SummaryQuery createNewQuery();
+	public abstract Query createNewQuery();
 	
 	/**
 	 * Get date filters
@@ -254,13 +254,6 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 		compQueryName.setText(getQuery().getName(), getQuery().getId());
 	}
 
-	/**
-	 * 
-	 * @return the query
-	 */
-	public SummaryQuery getQueryInternal() {
-		return (SummaryQuery)getQuery();
-	}
 	/**
 	 * @return the query
 	 */
@@ -287,7 +280,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 	public void refreshQuery() {
 		runQueryJob.cancel();
 		// update date filter
-		getQueryInternal().setDateFilter(dateFilterComposite.getDateFilter());
+		getQuery().setDateFilter(dateFilterComposite.getDateFilter());
 
 		if (!getQueryProxy().isValid()) {
 			MessageDialog
