@@ -89,7 +89,9 @@ public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 				sb.deleteCharAt(sb.length() - 1);
 			}
 			setVisibleColumns(sb.toString());
-		}	
+		}else{
+			setVisibleColumns(null);
+		}
 	}
 	
 	/**

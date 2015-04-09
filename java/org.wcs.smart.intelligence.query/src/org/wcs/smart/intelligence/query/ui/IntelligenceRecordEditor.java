@@ -81,7 +81,7 @@ public class IntelligenceRecordEditor extends QueryResultsEditor {
 		@Override
 		public String getText(Object element) {
 			if (element instanceof IResultItem){
-				return col.getValue((IResultItem)element);
+				return col.getValueAsString((IResultItem)element);
 			}
 			return super.getText(element);
 		}
