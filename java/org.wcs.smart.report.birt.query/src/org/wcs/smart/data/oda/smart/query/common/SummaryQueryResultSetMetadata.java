@@ -41,6 +41,10 @@ public abstract class SummaryQueryResultSetMetadata implements IResultSetMetaDat
 	private final static String HEADER_COLUMN_KEY = "header"; //$NON-NLS-1$
 	protected SummaryQueryResult results;
 	
+	protected SummaryQueryResultSetMetadata(){
+		results =  new SummaryQueryResult();
+	}
+	
 	/**
 	 * creates a new metadata object for a given query
 	 * @param query
