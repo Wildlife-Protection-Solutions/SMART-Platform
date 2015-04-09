@@ -230,6 +230,8 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					rowCnt = rs.getInt(1);
 				}
 				results = new DerbyPagedIntellResults(queryDataTable, rowCnt, RecordQueryIntelligenceEngine.this, query);
+				
+				c.commit();
 			}
 		});
 		return results;

@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.query.model;
 
 import java.text.DateFormat;
+import java.util.Date;
 
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.query.model.IResultItem;
@@ -83,19 +84,19 @@ public class FixedQueryColumn extends QueryColumn {
 	}
 
 
-	/**
-	 * @see org.wcs.smart.patrol.query.model.observation.QueryColumn#getValue(org.wcs.smart.patrol.query.model.PatrolQueryResultItem)
+
+	/**)
+	 * @see org.wcs.smart.query.model.QueryColumn#getValue(org.wcs.smart.query.model.IResultItem)
 	 */
-	public String getValue(IResultItem queryResultItem) {
-		
+	public Object getValue(IResultItem queryResultItem) {
 		if (queryResultItem instanceof IntelligenceRecordResultItem){
 			IntelligenceRecordResultItem r = (IntelligenceRecordResultItem)queryResultItem;
 			switch(column){
 				case CA_ID: return r.getConservationAreaId();
 				case CA_NAME: return r.getConservationAreaName();
-				case INTEL_DATE_FROM: return r.getFromDate() == null ? "" : DateFormat.getDateInstance().format(r.getFromDate()); //$NON-NLS-1$
-				case INTEL_DATE_TO: return r.getToDate() == null ? "" : DateFormat.getDateInstance().format(r.getToDate()); //$NON-NLS-1$
-				case INTEL_DATE_RECIEVED:return DateFormat.getDateInstance().format(r.getReceivedDate());
+				case INTEL_DATE_FROM: return r.getFromDate();
+				case INTEL_DATE_TO: return r.getToDate();
+				case INTEL_DATE_RECIEVED:return r.getReceivedDate();
 				case INTEL_DESCRIPTION:return r.getDescription();
 				case INTEL_INFORMANT_ID: return r.getInformantId();
 				case INTEL_NAME: return r.getName();
@@ -104,7 +105,19 @@ public class FixedQueryColumn extends QueryColumn {
 					
 			}
 		}
-		return ""; //$NON-NLS-1$
+		return null; 
+	}
+	
+	public String getValueAsString(IResultItem queryResultItem) {
+		Object x = getValue(queryResultItem);
+		if (x == null){
+			return ""; //$NON-NLS-1$
+		}else if (x instanceof String){
+			return (String)x;
+		}else if (x instanceof Date){
+			return DateFormat.getDateInstance().format((Date)x); 
+		}
+		return x.toString();
 	}
 
 	/**
