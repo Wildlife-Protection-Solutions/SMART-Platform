@@ -198,8 +198,8 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 						for (String tableName: getTemporaryTableNames()){
 							try {
 								String sql = "DROP TABLE " + tableName; //$NON-NLS-1$
-								c.createStatement().execute(sql);
 								QueryPlugIn.logSql(sql);
+								c.createStatement().execute(sql);
 							} catch (Exception ex) {
 								// eatme
 								ex.printStackTrace();

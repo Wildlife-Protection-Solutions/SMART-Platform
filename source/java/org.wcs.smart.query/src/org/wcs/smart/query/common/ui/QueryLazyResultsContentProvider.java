@@ -194,6 +194,7 @@ public class QueryLazyResultsContentProvider implements ILazyContentProvider, IQ
 		protected IStatus run(IProgressMonitor monitor) {
 			if (input == null){ return Status.OK_STATUS; }
 			final List<? extends IResultItem> data = input.getData(from, pageSize);
+			if (viewer.getControl().isDisposed()) return Status.CANCEL_STATUS;
 			viewer.getControl().getDisplay().asyncExec(new Runnable() {
 				@Override
 				public void run() {
