@@ -6,5 +6,14 @@ metaRequirements.1.namespace=org.wcs.smart.intelligence
 metaRequirements.1.name=onUninstall
 metaRequirements.1.range=3.2.0
 
-instructions.install=org.wcs.smart.intelligence.onInstall();
-instructions.uninstall=org.wcs.smart.intelligence.onUninstall();
+metaRequirements.2.namespace=org.wcs.smart.intelligence.query
+metaRequirements.2.name=onInstall
+metaRequirements.2.version=3.2.0
+
+metaRequirements.3.namespace=org.wcs.smart.intelligence.query
+metaRequirements.3.name=onUninstall
+metaRequirements.3.version=3.2.0
+
+
+instructions.install=org.wcs.smart.intelligence.onInstall();org.wcs.smart.intelligence.query.onInstall();
+instructions.uninstall=org.wcs.smart.intelligence.onUninstall();org.wcs.smart.intelligence.query.onUninstall();
