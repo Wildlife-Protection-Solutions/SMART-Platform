@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Intelligence Report Query PlugIn
+Bundle-SymbolicName: org.wcs.smart.intelligence.query.report;singleton:=true
+Bundle-Version: 3.2.0
+Bundle-Activator: org.wcs.smart.intelligence.query.report.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.wcs.smart.intelligence.query;bundle-version="1.0.0",
+ org.wcs.smart.birt;bundle-version="3.1.0",
+ org.wcs.smart.report.birt.map;bundle-version="3.1.0",
+ org.wcs.smart.report.birt.query;bundle-version="3.1.0",
+ org.wcs.smart.query;bundle-version="3.1.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy

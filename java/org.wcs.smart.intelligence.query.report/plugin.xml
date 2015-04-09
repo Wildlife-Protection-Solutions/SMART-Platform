@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.report.birt.maplayer">
+      <MapLayer
+            maplayer="org.wcs.smart.intelligence.query.report.map.QueryMapLayer">
+      </MapLayer>
+   </extension>
+   <extension
+         point="org.wcs.smart.report.birt.query.queryDataset">
+      <QueryTypeDataset
+            class="org.wcs.smart.intelligence.query.report.data.IntelligenceReportQuery"
+            queryTypeKey="intelligencerecord">
+      </QueryTypeDataset>
+   </extension>
+
+</plugin>
