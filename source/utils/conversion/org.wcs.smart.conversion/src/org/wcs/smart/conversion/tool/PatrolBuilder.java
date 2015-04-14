@@ -55,8 +55,7 @@ public class PatrolBuilder {
 	
 	private static final String LANGUAGE_CODE = "en"; //$NON-NLS-1$
 
-	private static final DateFormat df_dot = new SimpleDateFormat("dd.MM.yyyy"); //$NON-NLS-1$
-	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
+	private DateParser dateParser = new DateParser();
 	
 //	private MatchSession session;
 	private Ct2SmartLookup lookup;
@@ -203,7 +202,7 @@ public class PatrolBuilder {
 						break;
 					}
 					case META_DATE:
-						wpDate = parseDate(a.getV());
+						wpDate = dateParser.parse(a.getV());
 						xmlDate = toXmlDate(wpDate);
 						break;
 					case META_TIME: {
@@ -480,7 +479,7 @@ public class PatrolBuilder {
 		Time time;
 		double x, y;
 		for (TagT t : tList) {
-			date = parseDate(t.getDate());
+			date = dateParser.parse(t.getDate());
 			time = Time.valueOf(t.getTime());
 			y = Double.valueOf(t.getLatitude());
 			x = Double.valueOf(t.getLongitude());
@@ -556,18 +555,6 @@ public class PatrolBuilder {
 		return c;
 	}
 
-	private Date parseDate(String dateStr) throws ParseException {
-		if (dateStr == null || dateStr.isEmpty()) {
-			return null;
-		} else if (dateStr.matches("[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{4}")) { //$NON-NLS-1$
-			return df_dot.parse(dateStr);
-		} else if (dateStr.matches("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}")) { //$NON-NLS-1$
-			return df.parse(dateStr);
-		}
-		System.err.println("Cannot parse date: " + dateStr);
-		throw new ParseException(dateStr, 0);
-	}
-	
 	//copy from SmartUtil
 	private XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
 		if (d == null) {
