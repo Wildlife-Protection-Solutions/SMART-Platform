@@ -2,14 +2,10 @@ package org.wcs.smart.conversion.tool;
 
 import java.sql.SQLException;
 import java.sql.Time;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,10 +15,8 @@ import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
-import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.geotools.referencing.GeodeticCalculator;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
@@ -36,6 +30,7 @@ import org.wcs.smart.conversion.tag.TagS;
 import org.wcs.smart.conversion.tag.TagT;
 import org.wcs.smart.conversion.util.CoordinateUtil;
 import org.wcs.smart.conversion.util.Ct2AttributeTypeUtil;
+import org.wcs.smart.conversion.util.SmartUtil;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.patrol.xml.model.LabelType;
 import org.wcs.smart.patrol.xml.model.PatrolLegDayType;
@@ -71,15 +66,16 @@ public class PatrolBuilder {
 	}
 
 	public PatrolType createPatrol(List<TagS> sList, List<TagT> tList, String id) throws DatatypeConfigurationException, ParseException {
-			
-		LineString line = createTrack(tList);
+		
+		LineStringBuilder lineBuilder = new LineStringBuilder();
+		LineString line = lineBuilder.createLineString(tList);
 		
 		TrackType track = null;
 		if (line != null) {
 			track = new TrackType();
-			track.setDistance(distanceInMeters(line) / 1000.0);
+			track.setDistance(SmartUtil.distanceInMeters(line) / 1000.0);
 			WKBWriter writer = new WKBWriter(3);
-			track.setGeom(encodeHex(writer.write(line)));
+			track.setGeom(SmartUtil.encodeHex(writer.write(line)));
 		}
 		
 		PatrolType patrol = new PatrolType();
@@ -203,11 +199,11 @@ public class PatrolBuilder {
 					}
 					case META_DATE:
 						wpDate = dateParser.parse(a.getV());
-						xmlDate = toXmlDate(wpDate);
+						xmlDate = SmartUtil.toXmlDate(wpDate);
 						break;
 					case META_TIME: {
 						wpTime = Time.valueOf(a.getV());
-						XMLGregorianCalendar xmlTime = toXmlTime(wpTime);
+						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
 						wp.setTime(xmlTime);
 						if (xmlStartTime != null) {
 							if (xmlTime.compare(xmlStartTime) == DatatypeConstants.LESSER)
@@ -320,7 +316,7 @@ public class PatrolBuilder {
 			
 			if (track != null) {
 				System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
-				Coordinate c = CoordinateUtil.interpolate(line, combine(wpDate, wpTime));
+				Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(wpDate, wpTime));
 				if (c != null) {
 					if (wp.getX() == null)
 						wp.setX(c.x);
@@ -469,25 +465,6 @@ public class PatrolBuilder {
 		return obsAttr;
 	}
 	
-	private LineString createTrack(List<TagT> tList) throws ParseException {
-		if (tList == null) {
-			return null;
-		}
-		
-		List<Coordinate> coordinates = new ArrayList<Coordinate>();
-		Date date;
-		Time time;
-		double x, y;
-		for (TagT t : tList) {
-			date = dateParser.parse(t.getDate());
-			time = Time.valueOf(t.getTime());
-			y = Double.valueOf(t.getLatitude());
-			x = Double.valueOf(t.getLongitude());
-			coordinates.add(new Coordinate(x, y, combine(date, time).getTime()));
-		}
-		return CoordinateUtil.buildLineString(coordinates);
-	}
-
 	public void buildTracksFromWp(PatrolType p) throws ParseException {
 		for (PatrolLegType leg : p.getLegs()) {
 			for (PatrolLegDayType legDay : leg.getDays()) {
@@ -499,16 +476,16 @@ public class PatrolBuilder {
 					time = wp.getTime();
 					y = Double.valueOf(wp.getY());
 					x = Double.valueOf(wp.getX());
-					coordinates.add(new Coordinate(x, y, combine(date, time).getTime()));
+					coordinates.add(new Coordinate(x, y, SmartUtil.combine(date, time).getTime()));
 				}
 				LineString line = CoordinateUtil.buildLineString(coordinates);
 				
 				TrackType track = null;
 				if (line != null) {
 					track = new TrackType();
-					track.setDistance(distanceInMeters(line) / 1000.0);
+					track.setDistance(SmartUtil.distanceInMeters(line) / 1000.0);
 					WKBWriter writer = new WKBWriter(3);
-					track.setGeom(encodeHex(writer.write(line)));
+					track.setGeom(SmartUtil.encodeHex(writer.write(line)));
 				}
 				legDay.setTrack(track);
 			}
@@ -553,89 +530,6 @@ public class PatrolBuilder {
 			System.err.println("ERROR: No category defined for following items: " + info);
 		}
 		return c;
-	}
-
-	//copy from SmartUtil
-	private XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
-		if (d == null) {
-			return null;
-		}
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(d);
-		
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setHour(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMinute(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setSecond(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
-	}
-
-	//copy from PatrolToXmlConverter
-	private XMLGregorianCalendar toXmlTime(Date d) throws DatatypeConfigurationException{
-		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
-		cal.setTime(d);
-		
-		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
-		xgc.setMillisecond(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setTimezone(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setYear(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setMonth(DatatypeConstants.FIELD_UNDEFINED);
-		xgc.setDay(DatatypeConstants.FIELD_UNDEFINED);
-		
-		return xgc;
-	}
-
-	private static Date combine(XMLGregorianCalendar xmlDate, XMLGregorianCalendar xmlTime) {
-		Date date = xmlDate != null ? xmlDate.toGregorianCalendar().getTime() : null;
-		Date time = xmlTime != null ? xmlTime.toGregorianCalendar().getTime() : null;
-		return combine(date, time);
-	}
-	
-	//copy from SmartImporter
-	private static Date combine(Date date, Date time) {
-		if (date == null)
-			return time;
-		if (time == null)
-			return date;
-		Calendar timeCalendar = Calendar.getInstance();
-		timeCalendar.setTime(time);
-		Calendar dateCalendar = Calendar.getInstance();
-		dateCalendar.setTime(date);
-		dateCalendar.add(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
-		dateCalendar.add(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
-		dateCalendar.add(Calendar.SECOND, timeCalendar.get(Calendar.SECOND));
-		return dateCalendar.getTime();
-	}
-
-	//copy from GeometryUtils
-	private static double distanceInMeters(LineString ls) {
-		GeodeticCalculator cal = new GeodeticCalculator();
-		double distance = 0;
-		for (int i = 1; i < ls.getCoordinates().length; i ++){
-			cal.setStartingGeographicPoint(ls.getCoordinateN(i-1).x, ls.getCoordinateN(i-1).y);
-			cal.setDestinationGeographicPoint(ls.getCoordinateN(i).x, ls.getCoordinateN(i).y);
-			
-			distance +=cal.getOrthodromicDistance();
-		}
-		return distance;
-	}
-
-	//copy from SmartUtils
-	private static String encodeHex(byte[] data) {
-		if (data == null) return ""; //$NON-NLS-1$
-		char[] toDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-				'a', 'b', 'c', 'd', 'e', 'f' };
-		int l = data.length;
-		char[] out = new char[l << 1];
-		// two characters form the hex value.
-		for (int i = 0, j = 0; i < l; i++) {
-			out[j++] = toDigits[(0xF0 & data[i]) >>> 4];
-			out[j++] = toDigits[0x0F & data[i]];
-		}
-		return new String(out);
 	}
 
 }
