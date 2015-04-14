@@ -35,12 +35,8 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Creates LineString object from given data
+ * 
  * @author elitvin
  * @since 3.2.0
  */
