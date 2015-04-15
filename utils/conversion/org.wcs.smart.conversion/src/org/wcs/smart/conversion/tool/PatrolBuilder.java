@@ -431,16 +431,16 @@ public class PatrolBuilder extends AbstractBuilder {
 		}
 		String type = dmAttr.getType();
 		switch (dmAttr.getType()) {
-			case "LIST":
-			case "TREE":			
+			case "LIST": //$NON-NLS-1$
+			case "TREE": //$NON-NLS-1$	
 				obsAttr.setItemKey(ea.getValueKey());
 				break;
 	
-			case "TEXT":			
+			case "TEXT": //$NON-NLS-1$
 				obsAttr.setSValue(ea.getValueKey());
 				break;
 	
-			case "NUMERIC":			
+			case "NUMERIC": //$NON-NLS-1$
 				try {
 					obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
 				} catch (NumberFormatException e) {
@@ -449,7 +449,7 @@ public class PatrolBuilder extends AbstractBuilder {
 				}
 				break;
 	
-			case "BOOLEAN":			
+			case "BOOLEAN": //$NON-NLS-1$
 				obsAttr.setBValue("True".equals(ea.getValueKey()));
 				break;
 	
