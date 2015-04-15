@@ -17,8 +17,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.wcs.smart.conversion.lookup.Ct2SmartLookup;
-import org.wcs.smart.conversion.lookup.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.ExtraAttribute;
 import org.wcs.smart.conversion.model.MappedAttribute;
@@ -46,22 +44,19 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBWriter;
 
-public class PatrolBuilder {
-	
-	private static final String LANGUAGE_CODE = "en"; //$NON-NLS-1$
-
-	private DateParser dateParser = new DateParser();
+public class PatrolBuilder extends AbstractBuilder {
 	
 //	private MatchSession session;
-	private Ct2SmartLookup lookup;
-	private DataModelLookup dmLookup;
-	private TeamMembersParser membersParser = new TeamMembersParser();
+//	private Ct2SmartLookup lookup;
+//	private DataModelLookup dmLookup;
+//	private TeamMembersParser membersParser = new TeamMembersParser();
 //	private ElementsLookup elLookup;
 
 	public PatrolBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
+		super(session, dmLookup);
 //		this.session = session;
-		this.dmLookup = dmLookup;
-		lookup = new Ct2SmartLookup(session.getSmartMapping());
+//		this.dmLookup = dmLookup;
+//		lookup = new Ct2SmartLookup(session.getSmartMapping());
 //		elLookup = new ElementsLookup(session.getConnection());
 	}
 
@@ -87,7 +82,7 @@ public class PatrolBuilder {
 		patrol.getLegs().add(leg);
 		leg.setId(String.valueOf(patrol.getLegs().size()));
 		LabelType transportType = new LabelType();
-		transportType.setLanguageCode(LANGUAGE_CODE);
+		transportType.setLanguageCode(getLanguageCode());
 		transportType.setValue("Foot");
 		leg.setTransportType(transportType);
 //		PatrolMemberType member = new PatrolMemberType();
@@ -135,7 +130,7 @@ public class PatrolBuilder {
 			}
 
 			for (TagA a : s) {
-				MappedAttribute cta = lookup.findAttribute(a.getI());
+				MappedAttribute cta = getLookup().findAttribute(a.getI());
 				if (cta == null || cta.getType() == null) {
 					//attribute is unmapped; treat the same as ignore
 					System.out.println("Warning: No mapping for attribute: " + a.getN());
@@ -198,7 +193,7 @@ public class PatrolBuilder {
 						break;
 					}
 					case META_DATE:
-						wpDate = dateParser.parse(a.getV());
+						wpDate = getDateParser().parse(a.getV());
 						xmlDate = SmartUtil.toXmlDate(wpDate);
 						break;
 					case META_TIME: {
@@ -236,7 +231,7 @@ public class PatrolBuilder {
 						}
 						if (mandate == null) {
 							mandate = new LabelType();
-							mandate.setLanguageCode(LANGUAGE_CODE);
+							mandate.setLanguageCode(getLanguageCode());
 							mandate.setValue(v);
 						} else if (!v.equals(mandate.getValue())) {
 							System.out.println("WARN: Two different mandates in one patrol (" + patrol.getId() + "): " + mandate.getValue() + " and " + v);
@@ -244,7 +239,7 @@ public class PatrolBuilder {
 						break;
 					}
 					case META_MEMBERS:
-						members.addAll(membersParser.parseMembers(a.getV()));
+						members.addAll(getMembersParser().parseMembers(a.getV()));
 						break;
 					case META_COMMENT:
 						if (ignoreCategory && obs == defObs) {
@@ -382,12 +377,6 @@ public class PatrolBuilder {
 		return isSame(a1.getItemKey(), a2.getItemKey()) && isSame(a1.getDValue(), a2.getDValue()) && isSame(a1.getSValue(), a2.getSValue());
 	}
 
-	private boolean isSame(Object o1, Object o2) {
-		if (o1 == null) 
-			return o2 == null;
-		return o1.equals(o2);
-	}
-	
 	private boolean isDetailedKeyValue(WaypointObservationAttributeType a1, WaypointObservationAttributeType a2) {
 		if (isSame(a1.getDValue(), a2.getDValue()) && isSame(a1.getSValue(), a2.getSValue())) {
 			String k1 = a1.getItemKey();
@@ -435,7 +424,7 @@ public class PatrolBuilder {
 	private WaypointObservationAttributeType ea2woa(ExtraAttribute ea) {
 		WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
 		obsAttr.setAttributeKey(ea.getAttributeKey());
-		AttributeType dmAttr = dmLookup.getAttribute(ea.getAttributeKey());
+		AttributeType dmAttr = getDmLookup().getAttribute(ea.getAttributeKey());
 		if (dmAttr == null) {
 			System.err.println("ERROR: Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
 			return null;
@@ -513,30 +502,4 @@ public class PatrolBuilder {
 		}
 	}
 	
-	private MappedCategory getDefaultCategory(TagS s) {
-		List<Ct2AttributeValuePair> data = new ArrayList<Ct2AttributeValuePair>();
-		for (TagA a : s) {
-			MappedAttribute cta = lookup.findAttribute(a.getI());
-			if (cta != null && MappedAttributeType.CATEGORY.equals(cta.getType())) {
-				Ct2AttributeValuePair pair = new Ct2AttributeValuePair();
-				pair.attribute = cta;
-				pair.value = a.getV();
-				data.add(pair);
-			}
-		}
-		MappedCategory c = lookup.findCategory(data);
-		if (c == null) {
-			String info = "";
-			for (Ct2AttributeValuePair pair : data) {
-				info += "\nattribute: " + Ct2AttributeTypeUtil.getN(pair.attribute) + " " + pair.attribute.getI();
-				MappedAttribute value = lookup.findAttribute(pair.value);
-				info += "  value: ";
-				info += value != null ? Ct2AttributeTypeUtil.getN(value) : "null";
-				info += " " + pair.value;
-			}
-			System.err.println("ERROR: No category defined for following items: " + info);
-		}
-		return c;
-	}
-
 }
