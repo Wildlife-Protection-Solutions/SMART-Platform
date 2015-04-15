@@ -441,27 +441,34 @@ public class PatrolBuilder {
 			return null;
 		}
 		String type = dmAttr.getType();
-		if ("LIST".equals(type) || "TREE".equals(type)) { //$NON-NLS-1$ //$NON-NLS-2$
-			obsAttr.setItemKey(ea.getValueKey());
-
-		} else if ("TEXT".equals(type)) { //$NON-NLS-1$
-			obsAttr.setSValue(ea.getValueKey());
-
-		} else if ("NUMERIC".equals(type)) { //$NON-NLS-1$
-			try {
-				obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
-			} catch (NumberFormatException e) {
-				System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
+		switch (dmAttr.getType()) {
+			case "LIST":
+			case "TREE":			
+				obsAttr.setItemKey(ea.getValueKey());
+				break;
+	
+			case "TEXT":			
+				obsAttr.setSValue(ea.getValueKey());
+				break;
+	
+			case "NUMERIC":			
+				try {
+					obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
+				} catch (NumberFormatException e) {
+					System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
+					return null;
+				}
+				break;
+	
+			case "BOOLEAN":			
+				obsAttr.setBValue("True".equals(ea.getValueKey()));
+				break;
+	
+			default:
+				System.err.println("ERROR: Unsupported type for extra attribute:" + type);
 				return null;
-			}
-			
-		} else if ("BOOLEAN".equals(type)) { //$NON-NLS-1$
-			obsAttr.setBValue("True".equals(ea.getValueKey()));
-		
-		} else {
-			System.err.println("ERROR: Unsupported type for extra attribute:" + type);
-			return null;
 		}
+
 		return obsAttr;
 	}
 	
