@@ -15,8 +15,8 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.wcs.smart.conversion.model.SmartMapping;
+import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.DataModel;
-import org.wcs.smart.patrol.xml.model.ObjectFactory;
 import org.wcs.smart.patrol.xml.model.PatrolType;
 
 public class FileUtil {
@@ -51,9 +51,20 @@ public class FileUtil {
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
 		
-		ObjectFactory objFactor = new ObjectFactory();
+		org.wcs.smart.patrol.xml.model.ObjectFactory objFactor = new org.wcs.smart.patrol.xml.model.ObjectFactory();
 		
 		JAXBElement<PatrolType> element = objFactor.createPatrol(patrol);
+		marshaller.marshal(element, file);
+	}
+
+	public static void write(File file, MissionType mission) throws JAXBException, IOException{
+		JAXBContext context = JAXBContext.newInstance(MissionType.class);
+		Marshaller marshaller = context.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, new Boolean(true));
+		
+		org.wcs.smart.er.xml.model.missions.ObjectFactory objFactor = new org.wcs.smart.er.xml.model.missions.ObjectFactory();
+		
+		JAXBElement<MissionType> element = objFactor.createMission(mission);
 		marshaller.marshal(element, file);
 	}
 	
