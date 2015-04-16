@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://www.example.org/Mission/" targetNamespace="http://www.example.org/Mission/">
+    <element name="Mission" type="tns:MissionType"></element>
+    
+    <complexType name="MissionType">
+    	<sequence>
+    		<element name="Members" type="tns:MembersType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="Survey" type="tns:SurveyType"></element>
+    		<element name="MissionPropertyValues"
+    			type="tns:MissionPropertyValuesType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		<element name="Days" type="tns:MissionDayType" maxOccurs="unbounded" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="startDate" type="date"></attribute>
+    	<attribute name="endDate" type="date"></attribute>
+    	<attribute name="comment" type="string"></attribute>
+    	<attribute name="surveyId" type="string"></attribute>
+    </complexType>
+
+    <complexType name="MembersType">
+    	<attribute name="Leader" type="boolean"></attribute>
+    	<attribute name="EmployeeId" type="string"></attribute>
+    	<attribute name="givenName" type="string"></attribute>
+    	<attribute name="familyName" type="string"></attribute>
+    </complexType>
+
+    <complexType name="TracksType">
+    	<attribute name="geom" type="hexBinary"></attribute>
+    	<attribute name="trackType" type="string"></attribute>
+    	<attribute name="date" type="date"></attribute>
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="samplingUnitId" type="string"></attribute>
+    </complexType>
+
+    <complexType name="SurveyWaypointsType">
+    	<sequence>
+    		<element name="Waypoints" type="tns:WaypointType"
+    			maxOccurs="1" minOccurs="1">
+    		</element>
+    	</sequence>
+    	<attribute name="samplingUnitId" type="string"></attribute>
+    	<attribute name="missionTrackId" type="string"></attribute>
+    </complexType>
+    <complexType name="WaypointType">
+    	<sequence>
+    		<element name="direction" type="float" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="distance" type="float" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="comment" type="string" maxOccurs="1"
+    			minOccurs="0">
+    		</element>
+    		<element name="attachments" type="string"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="observations"
+    			type="tns:WaypointObservationType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="id" type="int"></attribute>
+    	<attribute name="x" type="double"></attribute>
+    	<attribute name="y" type="double"></attribute>
+    	<attribute name="dateTime" type="dateTime"></attribute>
+    </complexType>
+    <complexType name="WaypointObservationType">
+    	<sequence>
+    		<element name="attributes"
+    			type="tns:WaypointObservationAttributeType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    		<element name="attachments" type="string"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="observer" type="tns:MembersType" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="categoryKey" type="string"></attribute>
+    </complexType>
+    <complexType name="WaypointObservationAttributeType">
+    	<sequence>
+    		<element name="sValue" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="dValue" type="double" maxOccurs="1" minOccurs="0"></element>
+    		<element name="itemKey" type="string" maxOccurs="1" minOccurs="0"></element>
+    		<element name="bValue" type="boolean" maxOccurs="1" minOccurs="0"></element>
+    	</sequence>
+    	<attribute name="attributeKey" type="string"></attribute>
+    </complexType>
+
+    <complexType name="SurveyType">
+    	<attribute name="id" type="string"></attribute>
+    	<attribute name="startDate" type="date"></attribute>
+    	<attribute name="endDate" type="date"></attribute>
+    	<attribute name="surveyDesignKeyId" type="string"></attribute>
+    </complexType>
+
+    <complexType name="MissionPropertyValuesType">
+    	<attribute name="missionAttributeKeyId" type="string"></attribute>
+    	<attribute name="numberValue" type="double"></attribute>
+    	<attribute name="stringValue" type="string"></attribute>
+    	<attribute name="listElementKeyId" type="string"></attribute>
+    </complexType>
+
+    <complexType name="MissionDayType">
+    	<sequence>
+    		<element name="Tracks" type="tns:TracksType"
+    			maxOccurs="unbounded" minOccurs="0">
+    		</element>
+    		<element name="SurveyWaypoints"
+    			type="tns:SurveyWaypointsType" maxOccurs="unbounded"
+    			minOccurs="0">
+    		</element>
+    	</sequence>
+    	<attribute name="date" type="date"></attribute>
+    	<attribute name="startTime" type="time"></attribute>
+    	<attribute name="endTime" type="time"></attribute>
+    	<attribute name="restMinutes" type="int"></attribute>
+    </complexType>
+</schema>
