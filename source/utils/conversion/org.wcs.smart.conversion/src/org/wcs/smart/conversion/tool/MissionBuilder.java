@@ -1,0 +1,481 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.conversion.tool;
+
+import java.sql.SQLException;
+import java.sql.Time;
+import java.text.MessageFormat;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.datatype.DatatypeConstants;
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.wcs.smart.conversion.lookup.DataModelLookup;
+import org.wcs.smart.conversion.model.ExtraAttribute;
+import org.wcs.smart.conversion.model.MappedAttribute;
+import org.wcs.smart.conversion.model.MappedAttributeType;
+import org.wcs.smart.conversion.model.MappedAttributeValue;
+import org.wcs.smart.conversion.model.MappedCategory;
+import org.wcs.smart.conversion.tag.TagA;
+import org.wcs.smart.conversion.tag.TagS;
+import org.wcs.smart.conversion.util.CoordinateUtil;
+import org.wcs.smart.conversion.util.Ct2AttributeTypeUtil;
+import org.wcs.smart.conversion.util.SmartUtil;
+import org.wcs.smart.er.xml.model.missions.MembersType;
+import org.wcs.smart.er.xml.model.missions.MissionDayType;
+import org.wcs.smart.er.xml.model.missions.MissionType;
+import org.wcs.smart.er.xml.model.missions.SurveyWaypointsType;
+import org.wcs.smart.er.xml.model.missions.TracksType;
+import org.wcs.smart.er.xml.model.missions.WaypointObservationAttributeType;
+import org.wcs.smart.er.xml.model.missions.WaypointObservationType;
+import org.wcs.smart.er.xml.model.missions.WaypointType;
+import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.io.WKBWriter;
+
+/**
+ * Builder for mission xmls.
+ * 
+ * @author elitvin
+ * @since 3.2.0
+ */
+public class MissionBuilder extends AbstractBuilder {
+
+	private TeamMembersParser membersParser = new TeamMembersParser();
+
+	public MissionBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
+		super(session, dmLookup);
+	}
+	
+	public MissionType createMission(List<TagS> sList, String id) throws DatatypeConfigurationException, ParseException {
+		
+		MissionType mission = new MissionType();
+		mission.setId(id);
+		
+		
+		MissionDayType misDay = new MissionDayType();
+		mission.getDays().add(misDay);
+
+		XMLGregorianCalendar xmlDate = null;
+		XMLGregorianCalendar xmlStartTime = null;
+		XMLGregorianCalendar xmlEndTime = null;
+		Date wpDate = null;
+		Time wpTime = null;
+		
+		Set<String> members = new HashSet<String>();
+		String comment = ""; //$NON-NLS-1$
+
+		for (TagS s : sList) {
+			SurveyWaypointsType wpType = new SurveyWaypointsType();
+			WaypointType wp = new WaypointType();
+			wpType.setWaypoints(wp);
+			misDay.getSurveyWaypoints().add(wpType);
+			wp.setId(misDay.getSurveyWaypoints().size()); //TODO: what if wp id present in csv?
+
+			MappedCategory defaultCategory = getDefaultCategory(s);
+			boolean ignoreCategory = defaultCategory != null && Boolean.TRUE.equals(defaultCategory.isIgnore());
+			String defaultCategoryKey = defaultCategory != null ? defaultCategory.getCategoryKey() : null;
+			WaypointObservationType defObs = new WaypointObservationType();
+			defObs.setCategoryKey(defaultCategoryKey);
+			for (ExtraAttribute ea : defaultCategory.getExtraAttribute()) {
+				WaypointObservationAttributeType obsAttr = ea2woa(ea);
+				if (obsAttr != null) {
+					defObs.getAttributes().add(obsAttr);
+				}
+			}
+			if (!ignoreCategory) {
+				wp.getObservations().add(defObs);
+			}
+
+			for (TagA a : s) {
+				MappedAttribute cta = getLookup().findAttribute(a.getI());
+				if (cta == null || cta.getType() == null) {
+					//attribute is unmapped; treat the same as ignore
+					System.out.println("Warning: No mapping for attribute: " + a.getN());
+					continue;
+				}
+				WaypointObservationType obs;
+				//determine if we use default observation or special
+				if (cta.getCategoryKey() == null) {
+					obs = defObs;
+				} else {
+					//special cases for not default category
+					obs = new WaypointObservationType();
+					wp.getObservations().add(obs);
+					obs.setCategoryKey(cta.getCategoryKey());
+				}
+
+				switch (cta.getType()) {
+					case BOOL: {
+						WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+						obs.getAttributes().add(obsAttr);
+						obsAttr.setAttributeKey(cta.getMapTo());
+						obsAttr.setBValue("True".equals(a.getV())); //$NON-NLS-1$
+						break;
+					}
+					case NUMERIC: {
+						try {
+							WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+							obsAttr.setAttributeKey(cta.getMapTo());
+							obsAttr.setDValue(Double.valueOf(a.getV()));
+							obs.getAttributes().add(obsAttr);
+						} catch (NumberFormatException e) {
+							System.err.println("Failed to convert to double. Attribute: " + a.getN() + " value: '" + a.getV() + "'. Attribute skipped.");
+							//throw e;
+						}
+						break;
+					}
+					case TEXT: {
+						WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+						obs.getAttributes().add(obsAttr);
+						obsAttr.setAttributeKey(cta.getMapTo());
+						obsAttr.setSValue(a.getV());
+						break;
+					}
+					case REF_BOOL:
+					case REF: {
+						WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+						obsAttr.setAttributeKey(cta.getMapTo());
+						for (MappedAttributeValue val : cta.getMappedAttributeValue()) {
+							if (a.getV().equals(val.getI()) && !Boolean.TRUE.equals(val.isIgnore())) {
+								if (MappedAttributeType.REF.equals(cta.getType())) {
+									obsAttr.setItemKey(val.getMapTo());
+								} else {
+									//REF_BOOL case
+									obsAttr.setBValue("True".equals(val.getMapTo())); //$NON-NLS-1$
+								}
+								obs.getAttributes().add(obsAttr);
+								break;
+							}
+						}
+						break;
+					}
+					case META_DATE:
+						wpDate = getDateParser().parse(a.getV());
+						xmlDate = SmartUtil.toXmlDate(wpDate);
+						wp.setDateTime(SmartUtil.toXmlTime(SmartUtil.combine(wpDate, wpTime)));
+						break;
+					case META_TIME: {
+						wpTime = Time.valueOf(a.getV());
+						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
+						wp.setDateTime(SmartUtil.toXmlTime(SmartUtil.combine(wpDate, wpTime)));
+						if (xmlStartTime != null) {
+							if (xmlTime.compare(xmlStartTime) == DatatypeConstants.LESSER)
+								xmlStartTime = xmlTime;
+						} else {
+							xmlStartTime = xmlTime;
+						}
+						
+						if (xmlEndTime != null) {
+							if (xmlTime.compare(xmlEndTime) == DatatypeConstants.GREATER)
+								xmlEndTime = xmlTime;
+						} else {
+							xmlEndTime = xmlTime;
+						}
+						break;
+					}
+					case META_LON:
+						wp.setX(Double.valueOf(a.getV()));
+						break;
+					case META_LAT:
+						wp.setY(Double.valueOf(a.getV()));
+						break;
+					case META_MANDATE: {
+						System.out.println("WARN: Mandate mapping presents in mission generation, missions do not have mandate");
+						break;
+					}
+					case META_MEMBERS:
+						members.addAll(membersParser.parseMembers(a.getV()));
+						break;
+					case META_COMMENT:
+						if (ignoreCategory && obs == defObs) {
+							break;
+						}
+						if (!comment.isEmpty()) {
+							comment += "\n"; //$NON-NLS-1$
+						}
+						String v = a.getV();
+//						if (CsvMatchFileBuilder.isCtId(v)) {
+//							String vEl = elLookup.getN(v);
+//							if (vEl != null) {
+//								v = vEl;
+//							}
+//						}
+						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
+						break;
+					case IGNORE:
+					case META_PATROL:
+					case CATEGORY:
+						break;
+				}
+				
+				if (Ct2AttributeTypeUtil.canMap(cta.getType())) {
+					for (ExtraAttribute ea : cta.getExtraAttribute()) {
+						WaypointObservationAttributeType obsAttr = ea2woa(ea);
+						if (obsAttr != null) {
+							obs.getAttributes().add(obsAttr);
+						}
+					}
+				}
+			}
+			
+			//validate that we have unique attributes for each observation
+			for (WaypointObservationType obs : wp.getObservations()) {
+				Map<String, WaypointObservationAttributeType> key2Attr = new HashMap<String, WaypointObservationAttributeType>();
+				List<WaypointObservationAttributeType> duplicates = new ArrayList<WaypointObservationAttributeType>();
+				for (WaypointObservationAttributeType attr : obs.getAttributes()) {
+					WaypointObservationAttributeType prevAttr = key2Attr.get(attr.getAttributeKey());
+					if (prevAttr == null) {
+						key2Attr.put(attr.getAttributeKey(), attr);
+					} else {
+						//attr duplicates prevAttr
+						if (isSameValue(attr, prevAttr)) {
+							System.out.println(MessageFormat.format("INFO: Duplicate attributes in mission {0} waypoint {1} with key ''{2}''. Values (item, double, string): {3}, {4}, {5}. Duplicate was dropped out.", mission.getId(), wp.getId(), attr.getAttributeKey(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							duplicates.add(attr);
+						} else if (isDetailedKeyValue(attr, prevAttr)) {
+							System.out.println(MessageFormat.format("INFO: Similar attributes in mission {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Only more detailed value will be used.", mission.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							duplicates.add(attr);
+							if (attr.getItemKey().length() > prevAttr.getItemKey().length()) {
+								prevAttr.setItemKey(attr.getItemKey());
+							}
+						} else {
+							System.out.println(MessageFormat.format("WARN: Two diffent attributes in mission {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Warning will appear on import", mission.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+						}
+						
+					}
+				}
+				obs.getAttributes().removeAll(duplicates);
+			}
+		}
+		
+		//validate/interpolate waypoint coordinates
+		List<SurveyWaypointsType> waypoints = misDay.getSurveyWaypoints();
+		for (int i = 0; i < waypoints.size(); i++) {
+			WaypointType wp = waypoints.get(i).getWaypoints();
+
+			if (wp.getX() != null && wp.getY() != null)
+				continue;
+			
+//			if (track != null) {
+//				System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
+//				Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(wpDate, wpTime));
+//				if (c != null) {
+//					if (wp.getX() == null)
+//						wp.setX(c.x);
+//					if (wp.getY() == null)
+//						wp.setY(c.y);
+//				}
+//			}
+
+			if (wp.getX() == null || wp.getY() == null) {
+				if (i > 0) {
+					System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Using previous waypoint coordinates.", mission.getId(), wp.getId()));
+					WaypointType prevWp = waypoints.get(i-1).getWaypoints();
+					if (wp.getX() == null)
+						wp.setX(prevWp.getX());
+					if (wp.getY() == null)
+						wp.setY(prevWp.getY());
+				} else {
+					System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Checking if there are any waypoints with coordinates in this mission.", mission.getId(), wp.getId()));
+					for (int j = i+1; j < waypoints.size(); j++) {
+						WaypointType nextWp = waypoints.get(j).getWaypoints();
+						if (nextWp.getX() != null && nextWp.getY() != null) {
+							if (wp.getX() == null)
+								wp.setX(nextWp.getX());
+							if (wp.getY() == null)
+								wp.setY(nextWp.getY());
+						}
+					}
+					if (wp.getX() == null || wp.getY() == null) {
+						System.err.println(MessageFormat.format("ERROR: Coordinate problem in mission {0} waypoint {1}. Importing this mission will cause error in SMART.", mission.getId(), wp.getId()));
+						mission.setId("[ERROR-xy]"+mission.getId());
+						break;
+					}			
+				}
+			}
+
+		}
+		
+		for (String fullName : members) {
+			MembersType member = toMember(fullName);
+			mission.getMembers().add(member);
+		}
+		if (!mission.getMembers().isEmpty()) {
+			mission.getMembers().get(0).setLeader(true);
+		}
+
+		mission.setStartDate(xmlDate);
+		mission.setEndDate(xmlDate);
+		mission.setComment(comment);
+
+		misDay.setDate(xmlDate);
+		misDay.setStartTime(xmlStartTime);
+		misDay.setEndTime(xmlEndTime);
+		misDay.setRestMinutes(0);
+		
+		return mission;
+	}
+
+	//adopted copy from PatrolBuilder
+	public static final MembersType toMember(String fullName) {
+		MembersType member = new MembersType();
+		member.setLeader(false);
+		String[] parts = fullName.split(" "); //$NON-NLS-1$
+		switch (parts.length) {
+		case 2:
+			member.setFamilyName(parts[1]);
+			member.setGivenName(parts[0]);
+			break;
+		case 1:
+			member.setFamilyName(parts[0]);
+			member.setGivenName(parts[0]);
+			break;
+
+		default:
+			break;
+		}
+		return member;
+	}
+	
+	//adopted copy from PatrolBuilder
+	private WaypointObservationAttributeType ea2woa(ExtraAttribute ea) {
+		WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
+		obsAttr.setAttributeKey(ea.getAttributeKey());
+		AttributeType dmAttr = getDmLookup().getAttribute(ea.getAttributeKey());
+		if (dmAttr == null) {
+			System.err.println("ERROR: Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
+			return null;
+		}
+		String type = dmAttr.getType();
+		switch (type) {
+			case "LIST": //$NON-NLS-1$
+			case "TREE": //$NON-NLS-1$
+				obsAttr.setItemKey(ea.getValueKey());
+				break;
+	
+			case "TEXT": //$NON-NLS-1$
+				obsAttr.setSValue(ea.getValueKey());
+				break;
+	
+			case "NUMERIC": //$NON-NLS-1$
+				try {
+					obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
+				} catch (NumberFormatException e) {
+					System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
+					return null;
+				}
+				break;
+	
+			case "BOOLEAN": //$NON-NLS-1$
+				obsAttr.setBValue("True".equals(ea.getValueKey()));
+				break;
+	
+			default:
+				System.err.println("ERROR: Unsupported type for extra attribute:" + type);
+				return null;
+		}
+
+		return obsAttr;
+	}
+	
+	//adopted copy from PatrolBuilder
+	private boolean isSameValue(WaypointObservationAttributeType a1, WaypointObservationAttributeType a2) {
+		return isSame(a1.getItemKey(), a2.getItemKey()) && isSame(a1.getDValue(), a2.getDValue()) && isSame(a1.getSValue(), a2.getSValue());
+	}
+
+	//adopted copy from PatrolBuilder
+	private boolean isDetailedKeyValue(WaypointObservationAttributeType a1, WaypointObservationAttributeType a2) {
+		if (isSame(a1.getDValue(), a2.getDValue()) && isSame(a1.getSValue(), a2.getSValue())) {
+			String k1 = a1.getItemKey();
+			String k2 = a2.getItemKey();
+			if (k1 != null && k2 != null) {
+				//<itemKey>biologicalresourceuse.huntingcollectingterrestrialanimals.trapping</itemKey>
+				//<itemKey>biologicalresourceuse.huntingcollectingterrestrialanimals</itemKey>
+				//we need to use more detailed key and drop the other one
+				//valid for trees only
+				String[] parts1 = k1.split("\\."); //$NON-NLS-1$
+				String[] parts2 = k2.split("\\."); //$NON-NLS-1$
+				int size = Math.min(parts1.length, parts2.length);
+				for (int i = 0; i < size; i++) {
+					if (!parts1[i].equals(parts2[i])) {
+						return false;
+					}
+				}
+				return true;
+			}
+		}
+		return false;
+	}
+
+	//adopted copy from PatrolBuilder
+	public void buildTracksFromWp(MissionType mission) throws ParseException {
+		for (MissionDayType misDay : mission.getDays()) {
+			List<Coordinate> coordinates = new ArrayList<Coordinate>();
+			XMLGregorianCalendar date = misDay.getDate();
+			XMLGregorianCalendar time;
+			double x, y;
+			for (SurveyWaypointsType survWp : misDay.getSurveyWaypoints()) {
+				WaypointType wp = survWp.getWaypoints();
+				time = wp.getDateTime();
+				y = Double.valueOf(wp.getY());
+				x = Double.valueOf(wp.getX());
+				coordinates.add(new Coordinate(x, y, SmartUtil.combine(date, time).getTime()));
+			}
+			LineString line = CoordinateUtil.buildLineString(coordinates);
+			
+			TracksType track = null;
+			if (line != null) {
+				track = new TracksType();
+				//we don't know if we need to assign it to any sampling unit so we use "TRACK" instead of "SAMPLING_UNIT"
+				track.setTrackType("TRACK"); //$NON-NLS-1$
+				track.setId("Track");
+				WKBWriter writer = new WKBWriter(3);
+				track.setGeom(writer.write(line));
+			}
+			misDay.getTracks().add(track);
+		}
+	}
+
+	//adopted copy from PatrolBuilder
+	public void removeEmptyWayoints(MissionType mission) throws ParseException {
+		for (MissionDayType misDay : mission.getDays()) {
+			for (Iterator<SurveyWaypointsType> i = misDay.getSurveyWaypoints().iterator(); i.hasNext();) {
+				WaypointType wp = i.next().getWaypoints();
+				if (wp.getObservations().isEmpty()) {
+					System.out.println(MessageFormat.format("INFO: Mission ''{0}'' waypoint ''{1}'' was removed from generated xml because no observation data recorded for this waypoint.", mission.getId(), wp.getId()));
+					i.remove();
+				}
+			}
+		}	}
+	
+}
