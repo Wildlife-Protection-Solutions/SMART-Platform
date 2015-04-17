@@ -89,7 +89,7 @@ public abstract class AbstractCsvExtractor {
 			case META_DATE:
 				result.add(0, a.getI());
 				break;
-			case META_PATROL:
+			case META_OBJECT_ID:
 				result.add(a.getI());
 				break;
 			default:
