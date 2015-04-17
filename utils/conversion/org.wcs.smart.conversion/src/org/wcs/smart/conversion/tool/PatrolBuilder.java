@@ -257,8 +257,11 @@ public class PatrolBuilder extends AbstractBuilder {
 //						}
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
+					case TRANSECT_ID:
+						System.out.println("WARN: Transect mapping presents in patrol generation, patrols do not have transects");
+						break;
 					case IGNORE:
-					case META_PATROL:
+					case META_OBJECT_ID:
 						break;
 				}
 				

@@ -54,7 +54,7 @@ public class MatchFileBuilder {
 		KNOWN_ATTRIBUTES.put("Longitude",MappedAttributeType.META_LON); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("Altitude", MappedAttributeType.IGNORE); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("Accuracy", MappedAttributeType.IGNORE); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.put("Unit_ID",  MappedAttributeType.META_PATROL); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Unit_ID",  MappedAttributeType.META_OBJECT_ID); //$NON-NLS-1$
 	}
 
 	private static Pattern CT_ID_PATTERN = Pattern.compile("\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\}"); //$NON-NLS-1$
