@@ -51,6 +51,7 @@ import org.wcs.smart.conversion.csv.tool.Csv2DbLoader;
 import org.wcs.smart.conversion.csv.tool.CsvExportTool;
 import org.wcs.smart.conversion.csv.tool.CsvMergeTool;
 import org.wcs.smart.conversion.csv.tool.CsvMetaExtractor;
+import org.wcs.smart.conversion.csv.tool.CsvMissionExtractor;
 import org.wcs.smart.conversion.csv.tool.CsvPatrolExtractor;
 import org.wcs.smart.conversion.csv.tool.MappingValidator;
 import org.wcs.smart.conversion.csv.tool.MatchFileBuilder;
@@ -83,6 +84,7 @@ public class CsvMatcherDialog extends Composite {
 	private Button btnValidateMap;
 	private Button btnGenMeta;
 	private Button btnGenPatrol;
+	private Button btnGenMission;
 
 	public CsvMatcherDialog(Shell shell) {
 		super(shell, SWT.NONE);
@@ -180,6 +182,16 @@ public class CsvMatcherDialog extends Composite {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				generatePatrols();
+			}
+		});
+
+		btnGenMission = new Button(generateGroup, SWT.PUSH);
+		btnGenMission.setText("Generate missions");
+		btnGenMission.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnGenMission.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				generateMissions();
 			}
 		});
 		
@@ -297,6 +309,47 @@ public class CsvMatcherDialog extends Composite {
 		}
 	}
 
+	protected void generateMissions() {
+		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		String f = dd.open();
+		if (f != null) {
+			PrintStream originalOut = System.out;
+			PrintStream originalErr = System.err;
+
+			try (
+				FileOutputStream fout = new FileOutputStream(f + "\\warnings.log");
+				FileOutputStream ferr = new FileOutputStream(f + "\\errors.log");
+				) {
+				
+				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
+				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
+				
+				System.setOut(new PrintStream(multiOut));
+				System.setErr(new PrintStream(multiErr));
+
+				MatchSession session = new MatchSession();
+				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
+				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
+				session.setConnection(ConnectionUtil.getConnection());
+
+				DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
+				
+				CsvMissionExtractor exporter = new CsvMissionExtractor(session.getConnection());
+				exporter.extract(f, session, dmLookup);
+				System.setOut(originalOut);
+				System.setErr(originalErr);
+				fout.flush();
+				ferr.flush();
+				MessageDialog.openInformation(getShell(), "Mission generation", "Mission generation sucessfully completed.");
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.setOut(originalOut);
+				System.setErr(originalErr);
+				MessageDialog.openError(getShell(), "Mission generation", "Errors occured while mission generation. See console or log for details.");
+			}
+		}
+	}
+	
 	protected void generatePatrols() {
 		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
 		String f = dd.open();
@@ -304,9 +357,10 @@ public class CsvMatcherDialog extends Composite {
 			PrintStream originalOut = System.out;
 			PrintStream originalErr = System.err;
 
-			try {
+			try (
 				FileOutputStream fout = new FileOutputStream(f + "\\warnings.log");
 				FileOutputStream ferr = new FileOutputStream(f + "\\errors.log");
+				) {
 				
 				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
 				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
@@ -325,14 +379,14 @@ public class CsvMatcherDialog extends Composite {
 				exporter.extract(f, session, dmLookup);
 				System.setOut(originalOut);
 				System.setErr(originalErr);
-				fout.close();
-				ferr.close();
+				fout.flush();
+				ferr.flush();
 				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
 			} catch (Exception e) {
-				MessageDialog.openError(getShell(), "Patrol generation", "Errors occured while patrol generation. See console for details.");
 				e.printStackTrace();
 				System.setOut(originalOut);
 				System.setErr(originalErr);
+				MessageDialog.openError(getShell(), "Patrol generation", "Errors occured while patrol generation. See console or log for details.");
 			}
 		}
 	}
@@ -387,6 +441,7 @@ public class CsvMatcherDialog extends Composite {
 		btnValidateMap.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 		btnGenMeta.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 		btnGenPatrol.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
+		btnGenMission.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 	}
 	
 	private class XmlUpdateFileComposite extends XmlFileComposite {
