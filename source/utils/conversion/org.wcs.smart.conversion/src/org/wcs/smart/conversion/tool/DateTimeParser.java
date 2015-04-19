@@ -61,6 +61,7 @@ public class DateTimeParser {
 		if (timeStr == null || timeStr.isEmpty())
 			return null;
 		try {
+			timeStr = timeStr.replaceAll(";", ":"); //$NON-NLS-1$ //$NON-NLS-2$
 			if (timeStr.matches("[0-9]{1,2}:[0-9]{1,2}")) { //$NON-NLS-1$
 				timeStr += ":00"; //$NON-NLS-1$
 			}

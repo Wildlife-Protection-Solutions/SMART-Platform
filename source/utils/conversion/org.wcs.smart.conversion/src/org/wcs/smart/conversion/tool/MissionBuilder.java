@@ -210,14 +210,14 @@ public class MissionBuilder extends AbstractBuilder {
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setX(Double.valueOf(a.getV()));
 						} else {
-							System.err.println(MessageFormat.format("Empty logitude in mission {0}", mission.getId()));
+							System.out.println(MessageFormat.format("WARN: Empty logitude in mission {0}", mission.getId()));
 						}
 						break;
 					case META_LAT:
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setY(Double.valueOf(a.getV()));
 						} else {
-							System.err.println(MessageFormat.format("Empty latitude in mission {0}", mission.getId()));
+							System.out.println(MessageFormat.format("WARN: Empty latitude in mission {0}", mission.getId()));
 						}
 						break;
 					case META_MANDATE: {
