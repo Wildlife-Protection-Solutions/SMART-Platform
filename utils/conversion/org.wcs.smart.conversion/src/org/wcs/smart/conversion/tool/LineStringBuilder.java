@@ -51,10 +51,10 @@ public class LineStringBuilder {
 		Date date;
 		Time time;
 		double x, y;
-		DateParser dateParser = new DateParser();
+		DateTimeParser dateTimeParser = new DateTimeParser();
 		for (TagT t : tList) {
-			date = dateParser.parse(t.getDate());
-			time = Time.valueOf(t.getTime());
+			date = dateTimeParser.parseDate(t.getDate());
+			time = dateTimeParser.parseTime(t.getTime());
 			y = Double.valueOf(t.getLatitude());
 			x = Double.valueOf(t.getLongitude());
 			coordinates.add(new Coordinate(x, y, SmartUtil.combine(date, time).getTime()));

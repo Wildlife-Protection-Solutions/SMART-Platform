@@ -147,10 +147,12 @@ public class MissionBuilder extends AbstractBuilder {
 						try {
 							WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
 							obsAttr.setAttributeKey(cta.getMapTo());
-							obsAttr.setDValue(Double.valueOf(a.getV()));
-							obs.getAttributes().add(obsAttr);
+							if (a.getV() != null && !a.getV().isEmpty()) {
+								obsAttr.setDValue(Double.valueOf(a.getV()));
+								obs.getAttributes().add(obsAttr);
+							}
 						} catch (NumberFormatException e) {
-							System.err.println("Failed to convert to double. Attribute: " + a.getN() + " value: '" + a.getV() + "'. Attribute skipped.");
+							System.err.println(MessageFormat.format("Failed to convert to double. Attribute: {0}  value: {1} mission_id: {2}. Attribute skipped.", a.getN(), a.getV(), mission.getId()));
 							//throw e;
 						}
 						break;
@@ -181,12 +183,12 @@ public class MissionBuilder extends AbstractBuilder {
 						break;
 					}
 					case META_DATE:
-						wpDate = getDateParser().parse(a.getV());
+						wpDate = getDateTimeParser().parseDate(a.getV());
 						xmlDate = SmartUtil.toXmlDate(wpDate);
 						wp.setDateTime(SmartUtil.toXmlTime(SmartUtil.combine(wpDate, wpTime)));
 						break;
 					case META_TIME: {
-						wpTime = Time.valueOf(a.getV());
+						wpTime = getDateTimeParser().parseTime(a.getV());
 						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
 						wp.setDateTime(SmartUtil.toXmlTime(SmartUtil.combine(wpDate, wpTime)));
 						if (xmlStartTime != null) {
@@ -205,10 +207,18 @@ public class MissionBuilder extends AbstractBuilder {
 						break;
 					}
 					case META_LON:
-						wp.setX(Double.valueOf(a.getV()));
+						if (a.getV() != null && !a.getV().isEmpty()) {
+							wp.setX(Double.valueOf(a.getV()));
+						} else {
+							System.err.println(MessageFormat.format("Empty logitude in mission {0}", mission.getId()));
+						}
 						break;
 					case META_LAT:
-						wp.setY(Double.valueOf(a.getV()));
+						if (a.getV() != null && !a.getV().isEmpty()) {
+							wp.setY(Double.valueOf(a.getV()));
+						} else {
+							System.err.println(MessageFormat.format("Empty latitude in mission {0}", mission.getId()));
+						}
 						break;
 					case META_MANDATE: {
 						System.out.println("WARN: Mandate mapping presents in mission generation, missions do not have mandate");
