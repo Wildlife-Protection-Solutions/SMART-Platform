@@ -234,7 +234,7 @@ public class MissionBuilder extends AbstractBuilder {
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
 					case TRANSECT_ID:
-						//TODO: implement!!!!!!!
+						wpType.setSamplingUnitId(a.getV());
 						break;
 					case IGNORE:
 					case META_OBJECT_ID:
