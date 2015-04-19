@@ -59,7 +59,7 @@ public class MatchFileBuilder {
 
 	private static Pattern CT_ID_PATTERN = Pattern.compile("\\{[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}\\}"); //$NON-NLS-1$
 	private static Pattern BOOLEAN_PATTERN = Pattern.compile("True|False"); //$NON-NLS-1$
-	private static Pattern NUMERIC_PATTERN = Pattern.compile("\\d+?(.\\d)?\\d*+"); //$NON-NLS-1$
+	private static Pattern NUMERIC_PATTERN = Pattern.compile("-?\\d+?(\\.\\d)?\\d*+"); //$NON-NLS-1$
 	
 	public static boolean isCtId(String value) {
 		if (value != null) {
