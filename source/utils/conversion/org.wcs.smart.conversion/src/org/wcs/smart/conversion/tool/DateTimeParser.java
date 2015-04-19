@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.conversion.tool;
 
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * Converts string to date.
@@ -32,21 +34,41 @@ import java.util.Date;
  * @author elitvin
  * @since 3.2.0
  */
-public class DateParser {
+public class DateTimeParser {
 
 	private static final DateFormat df_dot = new SimpleDateFormat("dd.MM.yyyy"); //$NON-NLS-1$
-	private static final DateFormat df = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
+	private static final DateFormat df_ct = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
+	private static final DateFormat df_dash = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
+	private static final DateFormat df_dot_text = new SimpleDateFormat("dd.MMM.yy", Locale.US); //$NON-NLS-1$
 
-	public Date parse(String dateStr) throws ParseException {
+	public Date parseDate(String dateStr) throws ParseException {
 		if (dateStr == null || dateStr.isEmpty()) {
 			return null;
 		} else if (dateStr.matches("[0-9]{1,2}\\.[0-9]{1,2}\\.[0-9]{4}")) { //$NON-NLS-1$
 			return df_dot.parse(dateStr);
 		} else if (dateStr.matches("[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}")) { //$NON-NLS-1$
-			return df.parse(dateStr);
+			return df_ct.parse(dateStr);
+		} else if (dateStr.matches("[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}(\\s.*)*")) { //$NON-NLS-1$
+			return df_dash.parse(dateStr.split(" ")[0]); //$NON-NLS-1$
+		} else if (dateStr.matches("[0-9]{1,2}\\.[a-zA-Z]+\\.[0-9]{2}")) { //$NON-NLS-1$
+			return df_dot_text.parse(dateStr);
 		}
 		System.err.println("Cannot parse date: " + dateStr);
 		throw new ParseException(dateStr, 0);
+	}
+	
+	public Time parseTime(String timeStr) throws ParseException {
+		if (timeStr == null || timeStr.isEmpty())
+			return null;
+		try {
+			if (timeStr.matches("[0-9]{1,2}:[0-9]{1,2}")) { //$NON-NLS-1$
+				timeStr += ":00"; //$NON-NLS-1$
+			}
+			return Time.valueOf(timeStr);
+		} catch (Exception e) {
+			System.err.println("Cannot parse time: " + timeStr);
+			throw e;
+		}
 	}
 	
 }

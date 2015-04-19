@@ -52,7 +52,7 @@ public abstract class AbstractBuilder {
 	private Ct2SmartLookup lookup;
 	private DataModelLookup dmLookup;
 	private TeamMembersParser membersParser = new TeamMembersParser();
-	private DateParser dateParser = new DateParser();
+	private DateTimeParser dateTimeParser = new DateTimeParser();
 
 	public AbstractBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
 		this.dmLookup = dmLookup;
@@ -71,8 +71,8 @@ public abstract class AbstractBuilder {
 		return LANGUAGE_CODE;
 	}
 	
-	public DateParser getDateParser() {
-		return dateParser;
+	public DateTimeParser getDateTimeParser() {
+		return dateTimeParser;
 	}
 	
 	public TeamMembersParser getMembersParser() {
