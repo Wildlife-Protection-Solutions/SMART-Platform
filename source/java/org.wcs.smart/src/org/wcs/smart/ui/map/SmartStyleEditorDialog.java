@@ -919,6 +919,9 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			lblCreateNew = new Label(compNew, SWT.NONE);
 			
 			Language defaultLanguage = SmartDB.getCurrentConservationArea().getDefaultLanguage();
+			if (SmartDB.isMultipleAnalysis()){
+				defaultLanguage = SmartDB.getConservationAreaConfiguration().getLanguage();
+			}
 			lblCreateNew.setText(Messages.SmartStyleEditorDialog_StyleNameLabel + " [" + defaultLanguage.getCode() + "]:");   //$NON-NLS-1$//$NON-NLS-2$
 			lblCreateNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 			
