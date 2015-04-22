@@ -49,7 +49,10 @@ public class SmartE4ModelProcessor {
         	if (a.getElementId().equals("Cleanup Addon")){ //$NON-NLS-1$
         		a.setContributorURI("platform:/plugin/org.wcs.smart"); //$NON-NLS-1$
         		a.setContributionURI("bundleclass://org.wcs.smart/org.wcs.smart.e4.SmartCleanUpAddon"); //$NON-NLS-1$
-        		break;
+        	}
+        	if (a.getElementId().equals("DnD Addon")){ //$NON-NLS-1$
+        		a.setContributorURI("platform:/plugin/org.wcs.smart"); //$NON-NLS-1$
+        		a.setContributionURI("bundleclass://org.wcs.smart/org.wcs.smart.ui.workbench.addons.dndaddon.DnDAddon"); //$NON-NLS-1$
         	}
         }
       
