@@ -271,7 +271,7 @@ public class SmartCleanUpAddon {
 		//for SMART we always want the status bar visible
 		if (parent.getElementId() != null && parent.getElementId().equals("org.eclipse.ui.trim.status")) return false; //$NON-NLS-1$
 		//for SMART we always want the editor area visible
-		if (parent.getParent() != null	&& parent.getParent().getElementId().equals("org.eclipse.ui.editorss")) return false; //$NON-NLS-1$
+		if (parent.getParent() != null	&& ("org.eclipse.ui.editorss".equals(parent.getParent().getElementId()))) return false; //$NON-NLS-1$
 		return true;
 	}
 	@Inject
