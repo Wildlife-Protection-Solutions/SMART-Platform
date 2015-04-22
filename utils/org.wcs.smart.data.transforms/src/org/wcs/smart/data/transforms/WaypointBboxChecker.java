@@ -72,7 +72,7 @@ public class WaypointBboxChecker implements IDataProcessor {
 					LineString ls = (LineString)reader.read(decodeHex(tt.getGeom()));
 					for (Coordinate c : ls.getCoordinates()){
 						if (c.x < xMin || c.x > xMax || c.y < yMin || c.y > yMax){
-							trackErrors.add(day.getDate().toString();
+							trackErrors.add(day.getDate().toString());
 							break;
 						}
 					}
