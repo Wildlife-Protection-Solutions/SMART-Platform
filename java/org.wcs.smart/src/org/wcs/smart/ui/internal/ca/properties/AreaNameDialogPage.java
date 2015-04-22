@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -189,19 +190,8 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		colName.setEditingSupport(new EditingSupport(colName.getViewer()) {
 			@Override
 			protected void setValue(Object element, Object value) {
-				setErrorMessage(null);
 				if (!(((String) value).equals(((Area) element).findName(l)))) {
 					String newId = (String) value;
-					if (newId.length() > Area.NAME_MAX_LENGTH) {
-						setErrorMessage(MessageFormat
-								.format(Messages.AreaNameDialogPage_Warning_NameTruncate1,
-										new Object[] { Area.NAME_MAX_LENGTH }));
-						
-					}
-					if (l.isDefault() && newId.trim().isEmpty()){
-						setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_DefaultNameMissing, new Object[]{l.getDisplayName()}));
-					}
-
 					((Area) element).updateName(l, newId);
 					if (l.isDefault()){
 						((Area)element).setName(newId);
@@ -254,24 +244,6 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 				setErrorMessage(null);
 				if (!( ((String)value).equals(((Area)element).getKeyId()))){
 					String newKey = ((String)value).toLowerCase();
-					//validate that the key is different from all the others
-					//and does not contain weird characters
-					if (!SmartUtils.isSimpleString(newKey, RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Area.KEY_MAX_LENGTH)){
-						setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_Error_InvalidKey, new Object[]{RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc,  Area.KEY_MAX_LENGTH }));
-						return;
-					}else if (newKey.substring(0, 1).matches("[\\p{Nd}_]")){ //$NON-NLS-1$
-						setErrorMessage(Messages.AreaNameDialogPage_Error_InvalidKey2);
-					}else{
-						Object[] data = (Object[]) tableViewer.getInput();
-						for (int i = 0; i < data.length; i ++){
-							if (((Area)data[i]) == element) continue;
-							if (((Area)data[i]).getKeyId().equals(newKey)){
-								setErrorMessage(Messages.AreaNameDialogPage_Error_DuplicateKey);
-								return;
-							}
-						}				
-					}
-					
 					((Area)element).setKeyId(newKey);
 					tableViewer.refresh();
 					setDirty();	
@@ -297,10 +269,51 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 			}
 		});
 	}
+
 	private void setDirty(){
 		dirty = true;
 	}
+	
 	private void validate(){
+		Object[] data = (Object[]) tableViewer.getInput();
+		
+		HashSet<String> keys = new HashSet<String>();
+		setErrorMessage(null);
+		for (int i = 0; i < data.length; i ++){
+			Area area = (Area) data[i];
+			
+			if (keys.contains(area.getKeyId())){
+				setErrorMessage(Messages.AreaNameDialogPage_Error_DuplicateKey);
+				break;
+			}
+			keys.add(area.getKeyId());
+			
+			if (!SmartUtils.isSimpleString(area.getKeyId(), RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX, Area.KEY_MAX_LENGTH)){
+				setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_Error_InvalidKey, new Object[]{RegExLevel.ALLOWED_CHARS_SIMPLE_REGEX.textDesc,  Area.KEY_MAX_LENGTH }));
+				break;
+			}else if (area.getKeyId().substring(0, 1).matches("[\\p{Nd}_]")){ //$NON-NLS-1$
+				setErrorMessage(Messages.AreaNameDialogPage_Error_InvalidKey2);
+				break;
+			}
+			
+			for (org.wcs.smart.ca.Label name : area.getNames()){
+				String newName = name.getValue();
+				if (newName.length() > Area.NAME_MAX_LENGTH) {
+					setErrorMessage(MessageFormat
+							.format(Messages.AreaNameDialogPage_Warning_NameTruncate1,
+									new Object[] { Area.NAME_MAX_LENGTH }));
+					break;
+				}
+				
+				if (name.getLanguage().isDefault() && newName.trim().isEmpty()){
+					setErrorMessage(MessageFormat.format(Messages.AreaNameDialogPage_DefaultNameMissing,
+							new Object[]{name.getLanguage().getDisplayName()}));
+					break;
+				}
+			}
+		}		
+
+		
 		if (getErrorMessage() == null){
 			getButton(IDialogConstants.OK_ID).setEnabled(true);	
 		}else{
