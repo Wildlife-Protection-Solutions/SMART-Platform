@@ -162,13 +162,29 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				List<Object> parameterValues = new ArrayList<Object>();
 				
 				// ca filter
-				sql.append(tablePrefix(ConservationArea.class) + ".uuid IN ("); //$NON-NLS-1$
-				for (byte[] ca : query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds()){
-					sql.append("?,"); //$NON-NLS-1$
-					parameterValues.add(ca);
+				ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
+				if (query.getConservationAreaFilterAsFilter().includeAll()){
+					//include all current conservation areas
+					if (SmartDB.getConservationAreaConfiguration() != null){
+						for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+							localFilters.add(ca.getUuid());
+						}
+					}else{
+						localFilters.add(SmartDB.getCurrentConservationArea().getUuid());
+					}
+				}else{
+					//include only selected conservation areas
+					localFilters.addAll(query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds());
 				}
-				sql.deleteCharAt(sql.length()-1);
-				sql.append(")"); //$NON-NLS-1$
+				if (localFilters.size() > 0){
+					sql.append(tablePrefix(ConservationArea.class) + ".uuid IN ("); //$NON-NLS-1$
+					for (byte[] ca : localFilters){
+						sql.append("?,"); //$NON-NLS-1$
+						parameterValues.add(ca);
+					}
+					sql.deleteCharAt(sql.length()-1);
+					sql.append(")"); //$NON-NLS-1$
+				}
 				
 				//date filter
 				Date[] d = query.getDateFilter().getDateFilterOption().getDates();
@@ -216,7 +232,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " + queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentLanguage().getUuid()) + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				QueryPlugIn.logSql(s);
 				c.createStatement().executeUpdate(s);
-				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " + queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getDefaultLanguage().getUuid()) + "') WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid where " + queryDataTable+ ".intel_uuid = a.element_uuid and b.isdefault) WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				QueryPlugIn.logSql(s);
 				c.createStatement().executeUpdate(s);
 				

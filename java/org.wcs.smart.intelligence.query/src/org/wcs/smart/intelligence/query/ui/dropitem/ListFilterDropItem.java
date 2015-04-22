@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.query.ui.dropitem;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -81,19 +82,40 @@ public class ListFilterDropItem extends DropItem{
 			Session s = HibernateManager.openSession();
 			try{
 				if (filter == IntelligenceFilterOption.INFORMANTID){ 
-					List<Informant> temp = s.createCriteria(Informant.class)
+					List<Informant> temp = null;
+					if (SmartDB.isMultipleAnalysis()){
+						temp = s.createCriteria(Informant.class)
+								.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
+								.addOrder(Order.desc("isActive")) //$NON-NLS-1$
+								.addOrder(Order.asc("id")).list(); //$NON-NLS-1$
+					}else{
+						temp = s.createCriteria(Informant.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.addOrder(Order.desc("isActive")) //$NON-NLS-1$
 							.addOrder(Order.asc("id")).list(); //$NON-NLS-1$
+					}
 					for (Informant i : temp){
 						items.add(new ListItem(null, i.getId(), i.getId()));
 					}
 				}else if (filter == IntelligenceFilterOption.SOURCE){
-					List<IntelligenceSource> temp = s.createCriteria(IntelligenceSource.class)
+					if (SmartDB.isMultipleAnalysis()){
+						List<IntelligenceSource> temp = s.createCriteria(IntelligenceSource.class)
+								.add(Restrictions.in("conservationArea", SmartDB.getConservationAreaConfiguration().getConservationAreas())) //$NON-NLS-1$
+								.addOrder(Order.asc("name")).list(); //$NON-NLS-1$
+						HashSet<String> keys = new HashSet<String>();
+						for (IntelligenceSource i : temp){
+							if (!keys.contains(i.getKeyId())){
+								items.add(new ListItem(null, i.getName(), i.getKeyId()));
+								keys.add(i.getKeyId());
+							}
+						}
+					}else{
+						List<IntelligenceSource> temp = s.createCriteria(IntelligenceSource.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.addOrder(Order.asc("name")).list(); //$NON-NLS-1$
-					for (IntelligenceSource i : temp){
-						items.add(new ListItem(null, i.getName(), i.getKeyId()));
+						for (IntelligenceSource i : temp){
+							items.add(new ListItem(null, i.getName(), i.getKeyId()));
+						}
 					}
 				}
 			}finally{
