@@ -60,6 +60,9 @@
                id="org.wcs.smart.intelligence.query.record.definition"
                itemPanelId="org.wcs.smart.intelligence.query.record.items">
          </DefinitionPanel>
+         <DefinitionPanel
+               id="org.wcs.smart.query.conservationAreaPanel">
+         </DefinitionPanel>
       </QueryType>
    </extension>
    <extension
