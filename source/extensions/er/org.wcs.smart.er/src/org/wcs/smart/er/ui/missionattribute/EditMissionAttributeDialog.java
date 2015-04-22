@@ -407,7 +407,11 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 	 */
 	private void updateAttribute(){
 		nameKeyControls.updateFields(toUpdate);
-		toUpdate.setName(toUpdate.findName(SmartDB.getCurrentLanguage()));
+		String name = toUpdate.findNameNull(SmartDB.getCurrentLanguage());
+		if (name == null){
+			name = toUpdate.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		}
+		toUpdate.setName(name);
 		
 		toUpdate.setType(getType());
 		

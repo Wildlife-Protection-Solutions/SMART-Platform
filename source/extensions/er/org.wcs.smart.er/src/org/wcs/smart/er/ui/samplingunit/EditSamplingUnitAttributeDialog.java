@@ -426,6 +426,12 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 		nameKeyControls.updateFields(toUpdate);
 		toUpdate.setType(getType());
 		
+		String name = toUpdate.findNameNull(SmartDB.getCurrentLanguage());
+		if (name == null){
+			name = toUpdate.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+		}
+		toUpdate.setName(name);
+		
 		if (toUpdate.getType() == AttributeType.LIST){
 			if (toUpdate.getAttributeList() == null){
 				toUpdate.setAttributeList(new ArrayList<SamplingUnitAttributeListItem>());
