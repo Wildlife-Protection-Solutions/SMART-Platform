@@ -71,8 +71,8 @@ public class WaypointBboxChecker implements IDataProcessor {
 				if (tt != null){
 					LineString ls = (LineString)reader.read(decodeHex(tt.getGeom()));
 					for (Coordinate c : ls.getCoordinates()){
-						if (c.x < xMin || c.x > xMax || c.y < xMin || c.y > xMax){
-							trackErrors.add(day.getDate().toString());
+						if (c.x < xMin || c.x > xMax || c.y < yMin || c.y > yMax){
+							trackErrors.add(day.getDate().toString();
 							break;
 						}
 					}
