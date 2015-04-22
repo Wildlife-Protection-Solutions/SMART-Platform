@@ -36,6 +36,7 @@ import org.wcs.smart.entity.ui.editor.EntityTypeEditorInput;
 import org.wcs.smart.entity.ui.typelist.EntityTypeListView;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
+import org.wcs.smart.ui.ShowPerspectiveHandler;
 
 /**
  * Open entity type handler
@@ -50,9 +51,11 @@ public class OpenEntityTypeHandler {
 		
 		//get the context here as this is not pure e4
 		if (!SmartDB.isMultipleAnalysis()){
+			//open field data perspective with entity list activated
 			(new ShowFieldDataPerspective()).execute(EntityTypeListView.ID, activeWindow);
 		}else{
-			(new ShowFieldDataPerspective()).execute(EntityTypeCcaaPerspective.ID, activeWindow);
+			//open entity ccaa perspective
+			(new ShowPerspectiveHandler()).execute(EntityTypeCcaaPerspective.ID, activeWindow);
 		}
 				
 		try {
