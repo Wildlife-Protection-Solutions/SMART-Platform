@@ -108,13 +108,27 @@
                		</plugin>
     		</plugins>
 	</build>
-	
+
+    <repositories>	
+	<repository>
+            <id>geotools-snapshot</id>
+            <name>Geotools Snapshot</name>
+            <url>http://repo.boundlessgeo.com/main/</url>
+    </repository>
+    </repositories>
+    
 	<dependencies>
 		<dependency>
         	<groupId>com.vividsolutions</groupId>
             <artifactId>jts</artifactId>
             <version>1.13</version>
         </dependency>
+        <dependency>
+        	<groupId>org.geotools</groupId>
+            <artifactId>gt-referencing</artifactId>
+            <version>11.3</version>
+        </dependency>
+                
 	</dependencies>
 	
 </project>
