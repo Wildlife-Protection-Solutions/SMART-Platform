@@ -198,7 +198,8 @@ public class MapComposite extends Composite implements MapPart {
 		mapViewer.getViewport().addPaneListener(new IMapDisplayListener() {
 			@Override
 			public void sizeChanged(MapDisplayEvent event) {
-				refreshJob.schedule();
+				refreshJob.cancel();
+				refreshJob.schedule(600);
 			}
 		});
 		mapViewer.getViewport().addMouseWheelListener(new MapMouseWheelListener() {
