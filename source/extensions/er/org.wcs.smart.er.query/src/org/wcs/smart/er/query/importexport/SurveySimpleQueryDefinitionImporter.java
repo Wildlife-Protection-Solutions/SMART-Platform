@@ -64,12 +64,13 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 
 	@Override
 	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
-		InputStream is = new ByteArrayInputStream(queryDef.getBytes());
 		
 		if (qTypeInternal.equals(MissionTrackQueryType.KEY)){
-			Parser parser = new Parser(is);
-			IFilter filter = parser.ExpressionPart();
-			is.close();
+			IFilter filter = null;
+			try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+				Parser parser = new Parser(is);
+				filter = parser.ExpressionPart();
+			}
 			
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
@@ -83,9 +84,11 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 			return filter.asString();
 			
 		}else{
-			Parser parser = new Parser(is);
-			QueryFilter queryFilter = parser.QueryFilter();
-			is.close();
+			QueryFilter queryFilter = null;
+			try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+				Parser parser = new Parser(is);
+				queryFilter = parser.QueryFilter();
+			}
 			
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();

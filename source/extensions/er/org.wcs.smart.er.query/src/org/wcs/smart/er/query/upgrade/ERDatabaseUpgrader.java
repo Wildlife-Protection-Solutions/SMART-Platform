@@ -71,7 +71,7 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 						@Override
 						public void run() {
 							ERQueryPlugIn.displayLog(MessageFormat.format(
-									"Error upgrading the ecological records query plugin from version {0} to version {1}.", new Object[]{currentVersion, ERQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$
+									"Error upgrading the ecological records query plugin from version {0} to version {1}.", new Object[]{currentVersion, ERQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					});
 				}

@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.model;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -132,18 +131,12 @@ public class MissionTrackQueryType implements IQueryType {
 		//validate query
 		String queryString = filter;
 		if (queryString.isEmpty()) return null;
-		InputStream is = new ByteArrayInputStream(queryString.getBytes());
-		try{
+		
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			parser.ExpressionPart();
 		}catch (Throwable ex){
 			return ex.getMessage();
-		}finally{
-			try {
-				is.close();
-			} catch (IOException e) {
-				//eatme
-			}
 		}
 		return null;
 	}

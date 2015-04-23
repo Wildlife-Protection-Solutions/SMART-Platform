@@ -86,22 +86,27 @@ public class CmCategoryAttributeFilter implements IFilter{
 		return new CmCategoryAttributeFilter(cmAttributeUuid, cat, att);
 	}
 	
-//	/**
-//	 * Creates a new list item attribute filter 
-//	 * @param attributeIdentifier the attribute identifier in the form "attribute:t:<hkey>"
-//	 * @param op the list operator
-//	 * @param attributeItemKey the tree item hkey
-//	 * @return
-//	 */
-//	public static CmCategoryAttributeFilter createTreeItemFilter(String catAtributeIdentifier, Operator op, String attributeItemKey){
-//		String bits[] = catAtributeIdentifier.split(":"); //$NON-NLS-1$
-//		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
-//		String attPart = bits[2] + ":" + bits[3] + ":" + bits[4]; //$NON-NLS-1$ //$NON-NLS-2$
-//		
-//		CategoryFilter cat = CategoryFilter.createFilter(catPart);
-//		AttributeFilter att = AttributeFilter.createTreeItemFilter(attPart, op, attributeItemKey);
-//		return new CmCategoryAttributeFilter(cat, att);
-//	}
+	/**
+	 * Creates a new tree item category attribute filter for configurable models 
+	 * @param attributeIdentifier the attribute identifier in the form "category:<DM_KEY>:cmattribute:t:< UUID >:<DM_KEY>>
+	 * @param op the list operator
+	 * @param attributeItemKey the tree item hkey
+	 * @return
+	 */
+	public static CmCategoryAttributeFilter createTreeItemFilter(String catAtributeIdentifier, Operator op, String attributeTreeItemKey){
+		String bits[] = catAtributeIdentifier.split(":"); //$NON-NLS-1$
+		String catPart = bits[0] + ":" + bits[1]; //$NON-NLS-1$
+		String attPart = bits[2] + ":" + bits[3] + ":" + bits[5]; //$NON-NLS-1$ //$NON-NLS-2$
+		byte[] cmAttributeUuid = null;
+		try{
+			cmAttributeUuid = SmartUtils.decodeHex(bits[4]);
+		}catch (Exception ex){
+			//this should never happen if created correctly
+		}
+		CategoryFilter cat = CategoryFilter.createFilter(catPart);
+		AttributeFilter att = AttributeFilter.createTreeItemFilter(attPart, op, attributeTreeItemKey);
+		return new CmCategoryAttributeFilter(cmAttributeUuid, cat, att);
+	}
 	
 	
 	public CmCategoryAttributeFilter(byte[] cmAttribute, CategoryFilter cat, AttributeFilter att){

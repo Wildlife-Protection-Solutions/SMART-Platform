@@ -134,6 +134,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case WAYPOINT_DISTANCE: return item.getWaypointDistance(); 
 				case WAYPOINT_COMMENT: return item.getWaypointComment(); 
 				case WAYPOINT_OBSERVER: return item.getWaypointObserver();
+				default: return null;
 			}
 		}else if (queryResultItem instanceof MissionTrackResultItem){
 			MissionTrackResultItem item = (MissionTrackResultItem)queryResultItem;
@@ -154,6 +155,7 @@ public class SurveyQueryColumn extends QueryColumn {
 				case MISSION_TRACKID: return item.getTrackId();
 				case SAMPLING_UNIT: return item.getSamplingUnitId();
 				case MISSION_TRACKLENGTH: return item.getTrackLength();
+				default: return null;
 			}
 		}
 		return null;
