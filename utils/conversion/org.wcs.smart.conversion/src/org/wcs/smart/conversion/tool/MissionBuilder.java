@@ -52,6 +52,7 @@ import org.wcs.smart.conversion.util.SmartUtil;
 import org.wcs.smart.er.xml.model.missions.MembersType;
 import org.wcs.smart.er.xml.model.missions.MissionDayType;
 import org.wcs.smart.er.xml.model.missions.MissionType;
+import org.wcs.smart.er.xml.model.missions.SurveyType;
 import org.wcs.smart.er.xml.model.missions.SurveyWaypointsType;
 import org.wcs.smart.er.xml.model.missions.TracksType;
 import org.wcs.smart.er.xml.model.missions.WaypointObservationAttributeType;
@@ -81,7 +82,6 @@ public class MissionBuilder extends AbstractBuilder {
 		
 		MissionType mission = new MissionType();
 		mission.setId(id);
-		
 		
 		MissionDayType misDay = new MissionDayType();
 		mission.getDays().add(misDay);
@@ -185,12 +185,12 @@ public class MissionBuilder extends AbstractBuilder {
 					case META_DATE:
 						wpDate = getDateTimeParser().parseDate(a.getV());
 						xmlDate = SmartUtil.toXmlDate(wpDate);
-						wp.setDateTime(SmartUtil.toXmlTime(SmartUtil.combine(wpDate, wpTime)));
+						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(wpDate, wpTime)));
 						break;
 					case META_TIME: {
 						wpTime = getDateTimeParser().parseTime(a.getV());
 						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
-						wp.setDateTime(SmartUtil.toXmlTime(SmartUtil.combine(wpDate, wpTime)));
+						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(wpDate, wpTime)));
 						if (xmlStartTime != null) {
 							if (xmlTime.compare(xmlStartTime) == DatatypeConstants.LESSER)
 								xmlStartTime = xmlTime;
@@ -210,14 +210,14 @@ public class MissionBuilder extends AbstractBuilder {
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setX(Double.valueOf(a.getV()));
 						} else {
-							System.out.println(MessageFormat.format("WARN: Empty logitude in mission {0}", mission.getId()));
+							System.out.println(MessageFormat.format("WARN: Empty logitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
 						}
 						break;
 					case META_LAT:
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setY(Double.valueOf(a.getV()));
 						} else {
-							System.out.println(MessageFormat.format("WARN: Empty latitude in mission {0}", mission.getId()));
+							System.out.println(MessageFormat.format("WARN: Empty latitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
 						}
 						break;
 					case META_MANDATE: {
@@ -337,6 +337,12 @@ public class MissionBuilder extends AbstractBuilder {
 				}
 			}
 
+			
+			if (wp.getDateTime() == null) {
+				System.out.println(MessageFormat.format("WARN: No date/time data present in mission {0} waypoint {1}. Date {2}  and time 00:00 will be used.", mission.getId(), wp.getId(), xmlDate));
+				wp.setDateTime(xmlDate);
+			}
+
 		}
 		
 		for (String fullName : members) {
@@ -351,6 +357,13 @@ public class MissionBuilder extends AbstractBuilder {
 		mission.setEndDate(xmlDate);
 		mission.setComment(comment);
 
+		SurveyType survey = new SurveyType();
+		survey.setId(id);
+		survey.setStartDate(xmlDate);
+		survey.setEndDate(xmlDate);
+		survey.setSurveyDesignKeyId("csvimport");
+		mission.setSurvey(survey);
+		
 		misDay.setDate(xmlDate);
 		misDay.setStartTime(xmlStartTime);
 		misDay.setEndTime(xmlEndTime);
