@@ -46,6 +46,7 @@ TOKEN :
  | <CAT_ATT_BOOL_KEY : "category:"<DM_KEY>":attribute:b:"<DM_KEY>>
  | <CAT_ATT_LIST_KEY : "category:"<DM_KEY>":attribute:l:"<DM_KEY>>
  | <CM_CAT_ATT_LIST_KEY : "category:"<DM_KEY>":cmattribute:l:"< UUID >":"<DM_KEY>>
+ | <CM_CAT_ATT_TREE_KEY : "category:"<DM_KEY>":cmattribute:t:"< UUID >":"<DM_KEY>>
  | <CAT_ATT_TREE_KEY : "category:"<DM_KEY>":attribute:t:"<DM_KEY>>
  | <CAT_ATT_DATE_KEY : "category:"<DM_KEY>":attribute:d:"<DM_KEY>>
  | < DATE_STRING : < DIGIT > < DIGIT > < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT > "-" < DIGIT > < DIGIT >>  | < DM_KEY : (< LETTER >)+(< DIGIT > | < LETTER > | < SPECIAL_CHARS >)* >
@@ -594,6 +595,16 @@ IFilter AttributeExpression():
 	{
 		filter = CategoryAttributeFilter.createTreeItemFilter(key,op,value);
 	}
+	| 
+	/* configurable model category-attribute tree items */
+	(
+		< CM_CAT_ATT_TREE_KEY > {key = token.image;}		    
+		<  EQUAL > {op = Operator.parseOperator(token.image);}
+		< DM_KEY >  {value = token.image;}
+	)
+	{
+		filter = CmCategoryAttributeFilter.createTreeItemFilter(key,op,value);
+	}	
 	| 
 	/* mission attribute list items */
 	(
