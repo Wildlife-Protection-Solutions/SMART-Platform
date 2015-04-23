@@ -275,7 +275,12 @@ public class QueryTypeManager {
 				}
 				
 				if (qType == null){
-					QueryPlugIn.log("Query type " + tmp.getKey() + " not found.", null); //$NON-NLS-1$ //$NON-NLS-2$
+					//only log message here if it makes sense
+					if (SmartDB.isMultipleAnalysis() && tmp.supportsCrossCaQueries()){
+						QueryPlugIn.log("Query type " + tmp.getKey() + " not found.", null); //$NON-NLS-1$ //$NON-NLS-2$
+					}else if (!SmartDB.isMultipleAnalysis() && tmp.supportsSingleCaQueries()){
+						QueryPlugIn.log("Query type " + tmp.getKey() + " not found.", null); //$NON-NLS-1$ //$NON-NLS-2$
+					}
 				}else{
 				
 					QueryTypeWrapper wrapper = new QueryTypeWrapper(qType);
