@@ -231,6 +231,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 		txtComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		txtComment.setEditable(false);
 		((GridData)txtComment.getLayoutData()).widthHint = 100;
+		((GridData)txtComment.getLayoutData()).heightHint = 150;
 		if (canEdit){
 			Hyperlink edit = toolkit.createHyperlink(right, DialogConstants.EDIT_LINK_TEXT, SWT.NONE);
 			edit.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
