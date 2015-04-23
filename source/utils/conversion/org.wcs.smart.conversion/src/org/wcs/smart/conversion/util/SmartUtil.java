@@ -16,6 +16,18 @@ import com.vividsolutions.jts.geom.LineString;
 public class SmartUtil {
 
 	//copy from SmartUtil
+	public static XMLGregorianCalendar toXmlDateTime(Date d) throws DatatypeConfigurationException {
+		if (d == null) {
+			return null;
+		}
+		GregorianCalendar cal = new GregorianCalendar();
+		cal.setTime(d);
+		
+		XMLGregorianCalendar xgc = DatatypeFactory.newInstance().newXMLGregorianCalendar(cal);
+		return xgc;
+	}
+	
+	//copy from SmartUtil
 	public static XMLGregorianCalendar toXmlDate(Date d) throws DatatypeConfigurationException {
 		if (d == null) {
 			return null;
