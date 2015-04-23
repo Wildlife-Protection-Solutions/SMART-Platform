@@ -182,12 +182,12 @@ public class MissionBuilder extends AbstractBuilder {
 						}
 						break;
 					}
-					case META_DATE:
+					case WP_DATE:
 						wpDate = getDateTimeParser().parseDate(a.getV());
 						xmlDate = SmartUtil.toXmlDate(wpDate);
 						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(wpDate, wpTime)));
 						break;
-					case META_TIME: {
+					case WP_TIME: {
 						wpTime = getDateTimeParser().parseTime(a.getV());
 						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
 						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(wpDate, wpTime)));
@@ -206,14 +206,14 @@ public class MissionBuilder extends AbstractBuilder {
 						}
 						break;
 					}
-					case META_LON:
+					case WP_LON:
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setX(Double.valueOf(a.getV()));
 						} else {
 							System.out.println(MessageFormat.format("WARN: Empty logitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
 						}
 						break;
-					case META_LAT:
+					case WP_LAT:
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setY(Double.valueOf(a.getV()));
 						} else {
@@ -243,12 +243,19 @@ public class MissionBuilder extends AbstractBuilder {
 //						}
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
+					case WP_COMMENT:
+						//TODO: impl
+						break;
 					case TRANSECT_ID:
 						wpType.setSamplingUnitId(a.getV());
 						break;
 					case IGNORE:
 					case META_OBJECT_ID:
 					case CATEGORY:
+					case TRANSECT_START_LAT:
+					case TRANSECT_START_LON:
+					case TRANSECT_END_LAT:
+					case TRANSECT_END_LON:
 						break;
 				}
 				

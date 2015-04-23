@@ -48,10 +48,10 @@ public class MatchFileBuilder {
 		KNOWN_ATTRIBUTES = new HashMap<String, MappedAttributeType>();
 		KNOWN_ATTRIBUTES.put("Id",		 MappedAttributeType.IGNORE); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("DeviceId", MappedAttributeType.IGNORE); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.put("Date",	 MappedAttributeType.META_DATE); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.put("Time",	 MappedAttributeType.META_TIME); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.put("Latitude", MappedAttributeType.META_LAT); //$NON-NLS-1$
-		KNOWN_ATTRIBUTES.put("Longitude",MappedAttributeType.META_LON); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Date",	 MappedAttributeType.WP_DATE); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Time",	 MappedAttributeType.WP_TIME); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Latitude", MappedAttributeType.WP_LAT); //$NON-NLS-1$
+		KNOWN_ATTRIBUTES.put("Longitude",MappedAttributeType.WP_LON); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("Altitude", MappedAttributeType.IGNORE); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("Accuracy", MappedAttributeType.IGNORE); //$NON-NLS-1$
 		KNOWN_ATTRIBUTES.put("Unit_ID",  MappedAttributeType.META_OBJECT_ID); //$NON-NLS-1$

@@ -194,11 +194,11 @@ public class PatrolBuilder extends AbstractBuilder {
 						}
 						break;
 					}
-					case META_DATE:
+					case WP_DATE:
 						wpDate = getDateTimeParser().parseDate(a.getV());
 						xmlDate = SmartUtil.toXmlDate(wpDate);
 						break;
-					case META_TIME: {
+					case WP_TIME: {
 						wpTime = getDateTimeParser().parseTime(a.getV());
 						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
 						wp.setTime(xmlTime);
@@ -217,14 +217,14 @@ public class PatrolBuilder extends AbstractBuilder {
 						}
 						break;
 					}
-					case META_LON:
+					case WP_LON:
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setX(Double.valueOf(a.getV()));
 						} else {
 							System.out.println(MessageFormat.format("WARN: Empty logitude in patrol {0} waypint {1}", patrol.getId(), wp.getId()));
 						}
 						break;
-					case META_LAT:
+					case WP_LAT:
 						if (a.getV() != null && !a.getV().isEmpty()) {
 							wp.setY(Double.valueOf(a.getV()));
 						} else {
@@ -267,7 +267,14 @@ public class PatrolBuilder extends AbstractBuilder {
 //						}
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
+					case WP_COMMENT:
+						//TODO: impl
+						break;
 					case TRANSECT_ID:
+					case TRANSECT_START_LAT:
+					case TRANSECT_START_LON:
+					case TRANSECT_END_LAT:
+					case TRANSECT_END_LON:
 						System.out.println("WARN: Transect mapping presents in patrol generation, patrols do not have transects");
 						break;
 					case IGNORE:

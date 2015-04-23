@@ -20,15 +20,20 @@
 			<xs:enumeration value="REF" />
 			<xs:enumeration value="REF_BOOL" />
 			<xs:enumeration value="CATEGORY" />
-			<xs:enumeration value="META_DATE" />
-			<xs:enumeration value="META_TIME" />
-			<xs:enumeration value="META_LAT" />
-			<xs:enumeration value="META_LON" />
+			<xs:enumeration value="WP_DATE" />
+			<xs:enumeration value="WP_TIME" />
+			<xs:enumeration value="WP_LAT" />
+			<xs:enumeration value="WP_LON" />
+			<xs:enumeration value="WP_COMMENT" />
 			<xs:enumeration value="META_MEMBERS" />
 			<xs:enumeration value="META_MANDATE" />
 			<xs:enumeration value="META_COMMENT" />
 			<xs:enumeration value="META_OBJECT_ID" />
 			<xs:enumeration value="TRANSECT_ID" />
+			<xs:enumeration value="TRANSECT_START_LAT" />
+			<xs:enumeration value="TRANSECT_START_LON" />
+			<xs:enumeration value="TRANSECT_END_LAT" />
+			<xs:enumeration value="TRANSECT_END_LON" />
 		</xs:restriction>
 	</xs:simpleType>
 
