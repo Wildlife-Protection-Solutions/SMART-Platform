@@ -58,16 +58,12 @@ public class ZipUtil {
 			File[] directories, 
 			File outputZipFile, 
 			IProgressMonitor monitor) throws IOException{
-		
-		FileOutputStream fOut = null;
-        BufferedOutputStream bOut = null;
-        ZipArchiveOutputStream tOut = null;
- 
+
         
-        try {
-            fOut = new FileOutputStream(outputZipFile);
-            bOut = new BufferedOutputStream(fOut);
-            tOut = new ZipArchiveOutputStream(bOut);
+        try (FileOutputStream fOut = new FileOutputStream(outputZipFile);
+        	 BufferedOutputStream bOut = new BufferedOutputStream(fOut);
+        	ZipArchiveOutputStream tOut = new ZipArchiveOutputStream(bOut);){
+            
             int count = 0;
             for (int i = 0; i < directories.length; i ++){
             	if (directories[i].isDirectory()){
@@ -79,31 +75,12 @@ public class ZipUtil {
             
             monitor.beginTask(Messages.ZipUtil_Progress_CreatingZip, count);
             for (int i = 0; i < directories.length; i ++){
-            	if (directories[i].isDirectory() && directories[i].list().length == 0){
-            		//empty directory; create an empty file as a placeholder
-            		ZipArchiveEntry zipEntry = new ZipArchiveEntry(directories[i].getName()); 
-                    tOut.putArchiveEntry(zipEntry);
-                    //IOUtils.copy(new FileInputStream(path), zOut);
-                    tOut.closeArchiveEntry();
-            	}else{
-            		addFileToZip(tOut,directories[i].getAbsoluteFile(), "", monitor); //$NON-NLS-1$
-            	}
+            	addFileToZip(tOut,directories[i].getAbsoluteFile(), "", monitor); //$NON-NLS-1$
             }
             
-        } finally {
-        	if (tOut != null){
-        		tOut.finish();
-        		tOut.close();
-        	}
-            if (bOut != null){
-            	bOut.close();
-            }
-            if (fOut != null){
-            	fOut.close();
-            }
         }
         return true;
- 
+
 	}
 	
 	/**
@@ -130,11 +107,15 @@ public class ZipUtil {
         if (path.isFile()) {
             ZipArchiveEntry zipEntry = new ZipArchiveEntry(path, entryName); 
             zOut.putArchiveEntry(zipEntry);
-            FileInputStream in = new FileInputStream(path);
-            IOUtils.copy(in, zOut);
-            in.close();
+            try(FileInputStream in = new FileInputStream(path)){
+            	IOUtils.copy(in, zOut);
+            }
             zOut.closeArchiveEntry();
-            
+        }else if (path.isDirectory() && path.list().length == 0){
+        	//empty directory
+    		ZipArchiveEntry zipEntry = new ZipArchiveEntry(entryName + File.separator); 
+            zOut.putArchiveEntry(zipEntry);
+            zOut.closeArchiveEntry();
         } else {
             File[] children = path.listFiles();
             if (children != null) {
@@ -202,9 +183,8 @@ public class ZipUtil {
 					}
 				}
 
-				FileOutputStream fos = null;
-				try {
-					fos = new FileOutputStream(destinationFile);
+				
+				try (FileOutputStream fos = new FileOutputStream(destinationFile)) {
 					int n;
 					InputStream entryContent = archiveFile
 							.getInputStream(zipEntry);
@@ -212,10 +192,6 @@ public class ZipUtil {
 						if (n > 0) {
 							fos.write(buf, 0, n);
 						}
-					}
-				} finally {
-					if (fos != null) {
-						fos.close();
 					}
 				}
 			}
