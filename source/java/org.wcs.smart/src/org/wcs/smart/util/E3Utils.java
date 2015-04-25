@@ -22,6 +22,7 @@
 package org.wcs.smart.util;
 
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
+import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.ui.internal.e4.compatibility.CompatibilityPart;
 
@@ -52,5 +53,31 @@ public class E3Utils {
 			x = ((DIViewPart<?>)x).getComponent();
 		}
 		return x;
+	}
+	
+	/**
+	 * checks the element id against "org.eclipse.e4.ui.compatibility.editor" 
+	 * @param element
+	 * @return
+	 */
+	public static boolean isCompatibilityEditor(MUIElement element){
+		return "org.eclipse.e4.ui.compatibility.editor".equals(element.getElementId()); //$NON-NLS-1$
+	}
+	
+	/**
+	 * determines if the current element is the e3 editor area or any of
+	 * it's parents are the e3 editor area
+	 * @param current
+	 * @return
+	 */
+	public static boolean isEditorArea(MUIElement current){
+		MUIElement parent = current;
+		while(parent != null){
+			if ("org.eclipse.ui.editorss".equals(parent.getElementId())){ //$NON-NLS-1$
+				return true;
+			}
+			parent = parent.getParent();
+		}
+		return false;
 	}
 }

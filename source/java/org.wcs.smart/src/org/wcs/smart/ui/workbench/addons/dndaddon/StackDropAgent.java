@@ -13,7 +13,9 @@ package org.wcs.smart.ui.workbench.addons.dndaddon;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.eclipse.e4.ui.internal.workbench.swt.AbstractPartRenderer;
+import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
@@ -27,6 +29,7 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.util.E3Utils;
 
 /**
  *
@@ -48,6 +51,7 @@ public class StackDropAgent extends DropAgent {
 
 	@Override
 	public boolean canDrop(MUIElement dragElement, DnDInfo info) {
+
 		// We only except stack elements and whole stacks
 		if (!(dragElement instanceof MStackElement) && !(dragElement instanceof MPartStack))
 			return false;
@@ -56,12 +60,15 @@ public class StackDropAgent extends DropAgent {
 		if (!(info.curElement instanceof MPartStack))
 			return false;
 		MPartStack stack = (MPartStack) info.curElement;
-		System.out.println(stack.getElementId());
-		if(dragElement.getElementId().equals("org.eclipse.e4.ui.compatibility.editor") &&
-				!stack.getElementId().equals("org.eclipse.e4.primaryDataStack")){
-			return false;
+		
+		//here we only want to drop editors in the editor area
+		if(E3Utils.isCompatibilityEditor(dragElement)){ 
+			//some parent needs to be org.eclipse.ui.editors
+			if (!E3Utils.isEditorArea(stack)){
+				return false;
+			}
 		}
-		System.out.println(stack.getElementId());
+		
 		if (stack.getTags().contains(IPresentationEngine.STANDALONE))
 			return false;
 

@@ -62,7 +62,7 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	@Override
 	public String toSql(IFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class));
+			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
 		}else if (filter instanceof WaypointSourceFilter){
 			return asSql((WaypointSourceFilter)filter, engine);
 		}
@@ -74,13 +74,12 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 * Waypoint source filter
 	 */
 	protected String asSql(WaypointSourceFilter filter, IQueryEngine engine) throws SQLException{
-
 		StringBuilder sb = new StringBuilder();
 		sb.append(engine.tablePrefix(Waypoint.class));
 		sb.append(".source "); //$NON-NLS-1$
 		sb.append(asSql(filter.getOperator()));
-		//TODO: escape waypoint source key
-		sb.append(" '" + SmartUtils.stripQuotes(filter.getWaypointSourceKey()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
+		sb.append(" ? "); //$NON-NLS-1$
 		return sb.toString();
 	}
 	
@@ -130,7 +129,7 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 * @throws SQLException
 	 */
 	@Override
-	public String asSql(ConservationAreaFilter filter, String caTablePrefix) throws SQLException{
+	public String asSql(ConservationAreaFilter filter, String caTablePrefix, IQueryEngine engine) throws SQLException{
 		ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
 		if (filter.includeAll()){
 			//include all current conservation areas
@@ -157,8 +156,8 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 			if (i != 0){
 				sb.append(","); //$NON-NLS-1$
 			}
-			String uuid = SmartUtils.encodeHex(localFilters.get(i));
-			sb.append("x'" + uuid + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			sb.append("?"); //$NON-NLS-1$
+			engine.addParameterValue(localFilters.get(i));
 		}
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();

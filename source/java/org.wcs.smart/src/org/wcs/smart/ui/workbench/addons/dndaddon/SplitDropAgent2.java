@@ -12,6 +12,7 @@
 package org.wcs.smart.ui.workbench.addons.dndaddon;
 
 import java.util.List;
+
 import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.advanced.MArea;
@@ -31,6 +32,8 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.internal.e4.compatibility.E4Util;
+import org.wcs.smart.util.E3Utils;
 
 /**
  *
@@ -66,6 +69,14 @@ public class SplitDropAgent2 extends DropAgent {
 			return false;
 
 		relToElement = getTargetElement(dragElement, info);
+		
+		//here we only want to drop editors in the editor area
+		if(E3Utils.isCompatibilityEditor(dragElement)){ 
+			//some parent needs to be org.eclipse.ui.editors
+			if (!E3Utils.isEditorArea(relToElement)){
+				return false;
+			}
+		}
 		return relToElement != null;
 	}
 

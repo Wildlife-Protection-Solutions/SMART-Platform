@@ -139,9 +139,9 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		sql.append(buildFromClause());
 		sql.append(" ORDER BY p_id, pl_uuid, pld_uuid "); //$NON-NLS-1$
 		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		
 
-		try {
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			byte[] lastPlUuid = null;
 			byte[] lastPldUuid = null;
 			PatrolQueryResultItem lastItem = null;
@@ -161,8 +161,6 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				lastPlUuid = pluuid;
 				lastPldUuid = plduuid;
 			}
-		} finally {
-			rs.close();
 		}
 		return items;
 	}

@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -201,6 +202,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 
 		StringBuilder sql = new StringBuilder();
 		
+		engine.clearParameters();
 		sql.append("INSERT INTO " + tableName ); //$NON-NLS-1$
 		// ---- SELECT CLAUSE -----
 		sql.append(engine.getTemporaryTableSelectClause(populateObservation));
@@ -263,8 +265,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			    sql.append(filter);
 			}
 		}
+		
 		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		engine.setParameters(ps);
+		ps.executeUpdate();
 	}
 	
 	
@@ -288,6 +293,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		c.createStatement().execute(sql.toString());
 
 		// -- populate table
+		engine.clearParameters();
 		sql = new StringBuilder();
 		sql.append("INSERT INTO "); //$NON-NLS-1$
 		sql.append(waypointTable);
@@ -328,8 +334,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			}
 		}
 
+		
 		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		engine.setParameters(ps);
+		ps.executeUpdate();
 
 		IFilterVisitor attProcessor = new IFilterVisitor() {
 			@Override
@@ -348,6 +357,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		for (Entry<IFilter, String> cols : engine.filterTables.entrySet()){
 			IFilter lfilter = cols.getKey();
 			String colName = cols.getValue();
+			engine.clearParameters();
 			
 			monitor.subTask(Messages.WaypointFilterProcessor_filterProgress + lfilter.asString() );
 			
@@ -431,15 +441,13 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" WHERE "); //$NON-NLS-1$
 			if (catfilter != null){
 				String keyPart = catfilter.getCategoryKey();
+				engine.addParameterValue(keyPart);
+				engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
-				sql.append(".hkey >= '"); //$NON-NLS-1$
-				sql.append(keyPart);
-				sql.append("' and "); //$NON-NLS-1$
+				sql.append(".hkey >= ? and "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
-				sql.append(".hkey < '"); //$NON-NLS-1$
-				sql.append(keyPart.substring(0,  keyPart.length() -1));
-				sql.append( "/') "); //$NON-NLS-1$
+				sql.append(".hkey < ? )"); //$NON-NLS-1$
 			}
 			if (attfilter != null){
 				if (catfilter != null){
@@ -450,9 +458,9 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
 					sql.append(".number_value "); //$NON-NLS-1$
-					sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()));
-					sql.append(((Double)attfilter.getValue()).toString());
-					sql.append(") "); //$NON-NLS-1$
+					sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()));
+					engine.addParameterValue((Double)attfilter.getValue());
+					sql.append("? ) "); //$NON-NLS-1$
 				}else if (attfilter.getAttributeType() == AttributeType.BOOLEAN){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
@@ -464,9 +472,11 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(".string_value) "); //$NON-NLS-1$
 					
 					if (attfilter.getOperator() == Operator.STR_CONTAINS || attfilter.getOperator() == Operator.STR_NOTCONTAINS){
-						sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()) + " '%" + ((String)attfilter.getValue()).toLowerCase() + "%' )"); //$NON-NLS-1$ //$NON-NLS-2$ 	
+						engine.addParameterValue("%" + ((String)attfilter.getValue()).toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+						sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()) + " ? )"); //$NON-NLS-1$  	
 					}else if (attfilter.getOperator() == Operator.STR_EQUALS){
-						sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()) + " '" + ((String)attfilter.getValue()).toLowerCase() + "' )");  //$NON-NLS-1$ //$NON-NLS-2$ 
+						engine.addParameterValue(((String)attfilter.getValue()).toLowerCase());
+						sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()) + " ? )");  //$NON-NLS-1$  
 					}
 				}else if (attfilter.getAttributeType() == AttributeType.LIST){
 					sql.append("("); //$NON-NLS-1$
@@ -476,37 +486,40 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION.getKey())){
 						sql.append (" is not null "); //$NON-NLS-1$
 					}else{
-						sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()));
-						sql.append("'" + ((String)attfilter.getValue()) + "'");  //$NON-NLS-1$  //$NON-NLS-2$
+						engine.addParameterValue((String)attfilter.getValue());
+						sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()));
+						sql.append("?");  //$NON-NLS-1$ 
 					}
 					sql.append(") "); //$NON-NLS-1$
 					
 				}else if (attfilter.getAttributeType() == AttributeType.TREE){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class));
-					sql.append(".hkey >= '" + ((String)attfilter.getValue()) +"' and " );  //$NON-NLS-1$  //$NON-NLS-2$
+					engine.addParameterValue(((String)attfilter.getValue()));
+					sql.append(".hkey >= ? and " );  //$NON-NLS-1$ 
 					sql.append(prefix(AttributeTreeNode.class));
-					sql.append(".hkey < '" + ((String)attfilter.getValue()).substring(0,  ((String)attfilter.getValue()).length() -1) + "/'");  //$NON-NLS-1$  //$NON-NLS-2$
+					engine.addParameterValue(((String)attfilter.getValue()).substring(0,  ((String)attfilter.getValue()).length() -1) + "/"); //$NON-NLS-1$
+					sql.append(".hkey < ? ");  //$NON-NLS-1$  
 					sql.append(") ");  //$NON-NLS-1$
 				}else if (attfilter.getAttributeType() == AttributeType.DATE){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(" DATE ("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
 					sql.append(".string_value ) "); //$NON-NLS-1$
-					sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(attfilter.getOperator()));
-					sql.append(" DATE('"); //$NON-NLS-1$
-					sql.append(attfilter.getValue());
-					sql.append("') "); //$NON-NLS-1$
-					sql.append(ObservationFilterToSqlGenerator.INSTANCE.asSql(Operator.AND));
-					sql.append(" DATE('"); //$NON-NLS-1$
-					sql.append(attfilter.getValue2());
-					sql.append("') "); //$NON-NLS-1$
+					sql.append(ObservationFilterToSqlGenerator.asSql(attfilter.getOperator()));
+					sql.append(" cast(? as date)"); //$NON-NLS-1$
+					engine.addParameterValue(attfilter.getValue());
+					sql.append(ObservationFilterToSqlGenerator.asSql(Operator.AND));
+					sql.append(" cast(? as date)"); //$NON-NLS-1$
+					engine.addParameterValue(attfilter.getValue2());
 					sql.append(") "); //$NON-NLS-1$
 				}
 			}
 			
 			QueryPlugIn.logSql(sql.toString());
-			c.createStatement().execute(sql.toString());
+			ps = c.prepareStatement(sql.toString());
+			engine.setParameters(ps);
+			ps.executeUpdate();
 		}
 	}
 }

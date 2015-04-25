@@ -21,4 +21,6 @@ public interface IQueryEngine {
 	 * @return the table name for the given query
 	 */
 	public String tableName(Class<?> clazz);
+	
+	public void addParameterValue(Object parameter);
 }

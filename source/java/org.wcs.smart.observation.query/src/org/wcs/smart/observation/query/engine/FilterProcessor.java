@@ -22,6 +22,7 @@
 package org.wcs.smart.observation.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -197,6 +198,7 @@ public class FilterProcessor implements IFilterProcessor {
 			boolean populateObservation)
 			throws SQLException {
 
+		engine.clearParameters();
 		StringBuilder sql = new StringBuilder();
 		
 		sql.append("INSERT INTO " + tableName ); //$NON-NLS-1$
@@ -323,8 +325,11 @@ public class FilterProcessor implements IFilterProcessor {
 			    sql.append(" ) "); //$NON-NLS-1$
 			}
 		}
+		
 		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		engine.setParameters(ps);
+		ps.executeUpdate();
 	}
 	
 	
@@ -361,6 +366,7 @@ public class FilterProcessor implements IFilterProcessor {
 		for (AttributeInfo key : keys){
 			monitor.subTask(Messages.DerbyQueryEngine2_Progress_ProcessingAttribute + key.getKey());
 			
+			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
@@ -370,6 +376,8 @@ public class FilterProcessor implements IFilterProcessor {
 			sql.append( ")"); //$NON-NLS-1$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
+			
+			engine.clearParameters();
 			try {
 				// -- populate table
 				sql = new StringBuilder();
@@ -440,7 +448,9 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("'"); //$NON-NLS-1$
 
 				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
+				PreparedStatement ps = c.prepareStatement(sql.toString());
+				engine.setParameters(ps);
+				ps.executeUpdate();
 
 				// - create index
 				sql = new StringBuilder();

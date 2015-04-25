@@ -93,13 +93,11 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
-					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
-					try {
+					
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)) { //$NON-NLS-1$
 						if (rs.next()) { 
 							result.setItemCount(rs.getInt(1));
 						}
-					} finally {
-						rs.close();
 					}
 				}catch (Exception ex){
 					throw new SQLException(ex);
@@ -132,8 +130,8 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
 		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
 		QueryPlugIn.logSql(sql);
-		ResultSet rs = c.createStatement().executeQuery(sql);
-		try {
+		
+		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			int count = 0;
 			while (rs.next()) {
@@ -153,8 +151,6 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 			}
 			statement.executeBatch();
 			
-		} finally {
-			rs.close();
 		}
 	}
 	
@@ -216,7 +212,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 		sql.append(" UNION SELECT DISTINCT plm_pilot FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
 		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		
 		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		
 		String q1 = updateSql + "p_leader = ? where plm_leader = ?"; //$NON-NLS-1$
@@ -226,7 +222,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 		PreparedStatement leaderSt = c.prepareStatement(q1);
 		PreparedStatement pilotSt = c.prepareStatement(q2);
 		int cnt = 0;
-		try {
+		try (ResultSet rs = c.createStatement().executeQuery(sql.toString())){
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				String name = getEmployeeName(uuid, session);
@@ -249,8 +245,6 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 			}
 			pilotSt.executeBatch();
 			leaderSt.executeBatch();
-		} finally {
-			rs.close();
 		}
 		monitor.worked(12);
 		if (monitor.isCanceled()){
