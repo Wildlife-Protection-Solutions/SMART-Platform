@@ -141,9 +141,7 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 				public void execute(Connection c) throws SQLException {
 					WKBReader reader = new WKBReader();
 					Envelope results = null;
-					
-					ResultSet q = c.createStatement().executeQuery(sql);
-					try{
+					try(ResultSet q = c.createStatement().executeQuery(sql)){
 						while(q.next()){
 							byte[] ob = q.getBytes(1);
 							if (ob != null && ob.length > 0){
@@ -157,8 +155,6 @@ public class DerbyPagedMissionResult extends AbstractSurveyPagedResult {
 						}
 					}catch (Exception ex){
 						ERQueryPlugIn.log(ex.getMessage(), ex);
-					}finally{
-						q.close();
 					}
 					bounds = results;
 				}	
