@@ -7,7 +7,10 @@ import java.io.OutputStreamWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.wcs.smart.conversion.model.MappedAttribute;
@@ -65,11 +68,9 @@ public class CsvMetaExtractor {
 			}
 		}
 		
-		CSVWriter writer = null;
-		try {
-			writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					',', '"',System.getProperty("line.separator"));  //$NON-NLS-1$
+		try (CSVWriter writer = new CSVWriter(
+				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+				',', '"',System.getProperty("line.separator"))) {  //$NON-NLS-1$
 
 			// WriteHeaders
 			String[] headerColumns = new String[] {"ID","GIVEN NAME","FAMILY NAME","BIRTHDATE","GENDER","START EMPLOYMENT","END EMPLOYMENT","AGENCY","RANK"};
@@ -89,13 +90,6 @@ public class CsvMetaExtractor {
 			}
 			writer.close();
 		} catch (IOException ex) {
-			try {
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			ex.printStackTrace();
 			return false;
 		}
@@ -108,7 +102,7 @@ public class CsvMetaExtractor {
 		for (MappedAttribute cta : mapping.getMappedAttribute()) {
 			if (MappedAttributeType.META_MANDATE.equals(cta.getType())) {
 				try {
-					ResultSet rs = c.createStatement().executeQuery("select id from csv_to_smart.ATTRIBUTES where i = '" + cta.getI() + "'");  //$NON-NLS-1$//$NON-NLS-2$
+					ResultSet rs = c.createStatement().executeQuery("select id from csv_to_smart.ATTRIBUTES where n = '" + cta.getI() + "'");  //$NON-NLS-1$//$NON-NLS-2$
 					//NOTE: rs MUST be of size 1
 					while (rs.next()) {
 						String id = rs.getString(1);
@@ -128,11 +122,9 @@ public class CsvMetaExtractor {
 			}
 		}
 		
-		CSVWriter writer = null;
-		try {
-			writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					',', '"',System.getProperty("line.separator"));  //$NON-NLS-1$
+		try (CSVWriter writer = new CSVWriter(
+				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+				',', '"',System.getProperty("line.separator"))) {  //$NON-NLS-1$
 
 			//for each row write one record
 			for (String m : mandates) {
@@ -142,17 +134,101 @@ public class CsvMetaExtractor {
 			}
 			writer.close();
 		} catch (IOException ex) {
-			try {
-				if (writer != null) {
-					writer.close();
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			ex.printStackTrace();
 			return false;
 		}
 		return true;
 	}
-	
+
+	public boolean exportTransects(File file) {
+		List<String[]> transectData = new ArrayList<>();
+		
+		//lists below must be of a same size as inner array in transectData
+		List<MappedAttributeType> attributes = new ArrayList<>();
+		List<String> ids = new ArrayList<>();
+		List<String> colNames = new ArrayList<>();
+
+		for (MappedAttribute cta : mapping.getMappedAttribute()) {
+			MappedAttributeType type = cta.getType();
+			if (type == null) {
+				continue;
+			}
+			switch (type) {
+			case TRANSECT_ID:
+			case TRANSECT_START_LAT:
+			case TRANSECT_START_LON:
+			case TRANSECT_END_LAT:
+			case TRANSECT_END_LON: {
+				try {
+					if (attributes.contains(type)) {
+						System.out.println(MessageFormat.format("WARN: More than one mapping present for {0}. Column {1} will be ignored.", type, cta.getI()));
+						break;
+					}
+					attributes.add(type);
+					colNames.add(cta.getN() != null ? cta.getN() : cta.getI());
+					ResultSet rs = c.createStatement().executeQuery("select id from csv_to_smart.ATTRIBUTES where n = '" + cta.getI() + "'");  //$NON-NLS-1$//$NON-NLS-2$
+					//NOTE: rs MUST be of size 1
+					if (rs.next()) {
+						String id = rs.getString(1);
+						ids.add(id);
+					}
+				} catch (SQLException e) {
+					System.err.println("Error extracting transects i=" + cta.getI());
+					e.printStackTrace();
+					return false;
+				}
+				break;
+			}
+			default:
+				break;
+			}
+		}
+		
+		int outSize = attributes.size();
+//		if (outSize == 0) {
+//			//no transects to export
+//			return true;
+//		}
+		
+		try {
+			StringBuilder whatClause = new StringBuilder();
+			for (String id : ids) {
+				if (whatClause.length() > 0) {
+					whatClause.append(", "); //$NON-NLS-1$
+				}
+				whatClause.append("a").append(id); //$NON-NLS-1$
+			}
+			ResultSet dataSet = c.createStatement().executeQuery("select distinct "+whatClause+" from csv_to_smart.CSV"); //$NON-NLS-1$ //$NON-NLS-2$
+			while (dataSet.next()) {
+				String[] data = new String[outSize];
+				for (int i = 0; i < outSize; i++) {
+					data[i] = dataSet.getString(i+1);
+				}
+				transectData.add(data);
+			}
+		} catch (SQLException e) {
+			System.err.println("Error extracting distinct transects data");
+			e.printStackTrace();
+			return false;
+		}
+
+		try (CSVWriter writer = new CSVWriter(
+				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+				',', '"',System.getProperty("line.separator"))) {  //$NON-NLS-1$
+
+			// write headers
+			writer.writeNext(colNames.toArray(new String[colNames.size()]));
+			
+			//for each row write one record
+			for (String[] data : transectData) {
+				writer.writeNext(data);
+			}
+			writer.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+			return false;
+		}
+		return true;
+	}	
+
 }
