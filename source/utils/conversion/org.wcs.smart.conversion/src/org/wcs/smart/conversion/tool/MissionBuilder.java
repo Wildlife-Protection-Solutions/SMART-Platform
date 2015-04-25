@@ -244,7 +244,9 @@ public class MissionBuilder extends AbstractBuilder {
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
 					case WP_COMMENT:
-						//TODO: impl
+						if (a.getV() != null && !a.getV().isEmpty()) {
+							wp.setComment(wp.getComment() != null ? wp.getComment() + "\n" + a.getV() : a.getV()); //$NON-NLS-1$
+						}
 						break;
 					case TRANSECT_ID:
 						wpType.setSamplingUnitId(a.getV());
