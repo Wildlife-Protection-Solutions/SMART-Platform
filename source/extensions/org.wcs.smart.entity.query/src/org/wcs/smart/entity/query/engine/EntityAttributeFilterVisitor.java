@@ -183,7 +183,7 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				tmp.append(".keyId = '" + ff.getEntityAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 				tmp.append(" AND "); //$NON-NLS-1$
 				try{
-					tmp.append(EntityFilterToSqlGenerator.INSTANCE.asSql(catFilter, engine.tablePrefix(EntityType.class)));
+					tmp.append(EntityFilterToSqlGenerator.INSTANCE.asSql(catFilter, engine.tablePrefix(EntityType.class), engine));
 					
 					QueryPlugIn.logSql(tmp.toString());
 					c.createStatement().execute(tmp.toString());

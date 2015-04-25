@@ -846,7 +846,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null){
 						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( EntityFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix));
+						fromSql.append( EntityFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
 					}
 					fromSql.append(" and "); //$NON-NLS-1$
 					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$

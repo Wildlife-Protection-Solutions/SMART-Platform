@@ -518,7 +518,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append(engine.tablePrefix(EntityAttribute.class));
 				sql.append(".keyId = '" + ff.getEntityAttributeKey() + "'");  //$NON-NLS-1$  //$NON-NLS-2$
 				sql.append(" AND "); //$NON-NLS-1$
-				sql.append(EntityFilterToSqlGenerator.INSTANCE.asSql(caFilter, engine.tablePrefix(EntityType.class)));
+				sql.append(EntityFilterToSqlGenerator.INSTANCE.asSql(caFilter, engine.tablePrefix(EntityType.class), engine));
 				sql.append(") foo "); //$NON-NLS-1$
 				sql.append(" on foo.entity_key_id = "); //$NON-NLS-1$
 				sql.append(prefix(AttributeListItem.class) + ".keyid"); //$NON-NLS-1$
