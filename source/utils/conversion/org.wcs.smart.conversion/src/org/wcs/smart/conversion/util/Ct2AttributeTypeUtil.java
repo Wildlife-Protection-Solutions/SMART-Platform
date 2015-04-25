@@ -8,6 +8,7 @@ import org.wcs.smart.conversion.model.MappedAttributeValue;
 public class Ct2AttributeTypeUtil {
 
 	public static final boolean canMap(MappedAttributeType type) {
+		if (type == null) return false;
 		switch (type) {
 			case TEXT:
 			case NUMERIC:

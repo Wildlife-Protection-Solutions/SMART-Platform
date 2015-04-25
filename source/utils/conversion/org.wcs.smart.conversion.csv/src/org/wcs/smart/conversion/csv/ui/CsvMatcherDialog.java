@@ -405,6 +405,7 @@ public class CsvMatcherDialog extends Composite {
 				CsvMetaExtractor metaExtractor = new CsvMetaExtractor(session);
 				isOk = metaExtractor.exportMembers(new File(f + "\\" + "members.csv")) && isOk;
 				isOk = metaExtractor.exportMandates(new File(f + "\\" + "mandates.csv")) && isOk;
+				isOk = metaExtractor.exportTransects(new File(f + "\\" + "transects.csv")) && isOk;
 				if (isOk) {
 					MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
 				} else {
