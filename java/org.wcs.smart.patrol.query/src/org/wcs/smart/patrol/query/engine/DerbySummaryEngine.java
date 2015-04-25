@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -229,54 +230,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 							needsObservationRate = true;
 						}
 					}
-//
-//					
-//					for(AreaFilter.AreaFilterGeometryType type : areaTypes){
-//						for (AreaFilter af : hasAreaFilter.getAreaFilters()){
-//							af.changeGeometryType(type);
-//						}	
-//						String tableName = "";	 //$NON-NLS-1$
-//						if (type == AreaFilter.AreaFilterGeometryType.TRACK){
-//							tableName = valueTrackTable;
-//						}else if (type == AreaFilter.AreaFilterGeometryType.WAYPOINT){
-//							tableName = valueWaypointTable;
-//						}
-//						IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), tableName);
-//						try{
-//							filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
-//						}finally{
-//							filterer.dropTemporaryTables(c);
-//						}
-//					
-//						if (monitor.isCanceled()){
-//							return;
-//						}
-//					
-//						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-//						addCategoryHkey(tableName, allGroupBy, query.getQueryDefinition().getValuePart(), c);
-//					
-//					String vFilter = valueFilter.asString();
-//					String rFilter = rateFilter.asString();
-//					
-//					if (vFilter.equals(rFilter)){
-//						rateTable = valueTable;
-//					}else{
-//						rateTable = createTempTableName();
-//						
-//						
-//						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
-//						try{
-//							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
-//						}finally{
-//							rfilterer.dropTemporaryTables(c);
-//						}
-//						if (monitor.isCanceled()){
-//							return;
-//						}
-//						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-//						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
-//					}
-					
+
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupByParts, query.getQueryDefinition().getValuePart(),
 							query.getConservationAreaFilterAsFilter(),monitor);
@@ -538,6 +492,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			GroupByPart groupBy, 
 			PatrolValueItem patrolItem, ConservationAreaFilter caFilter) throws SQLException{
 		
+		clearParameters();
+		
 		StringBuilder selectSql = new StringBuilder();
 		StringBuilder fromSql = new StringBuilder();
 		
@@ -570,7 +526,6 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		valueAggSql.append(getAggFieldName(patrolItem, hasAreaGroupBy));
 
 		if (patrolItem.getOption().getOptionClass().equals(Track.class) && !hasAreaGroupBy){
-//			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(" join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(Track.class));
 			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$ 
@@ -626,7 +581,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		//do something here with sql
 		QueryPlugIn.logSql(sql.toString());
 		
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		setParameters(ps);
+		ResultSet rs = ps.executeQuery();
 		return createValueResults(rs, groupBy, patrolItem.asString());
 	}
 
@@ -645,6 +602,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			Connection c, Session s, 
 			GroupByPart groupBy, 
 			AttributeValueItem attributeItem, ConservationAreaFilter caFilter) throws SQLException{
+		
+		clearParameters();
 		
 		if (attributeItem.getAttributeType() == AttributeType.NUMERIC) {
 			StringBuilder fromSql = new StringBuilder();
@@ -702,16 +661,12 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(tablePrefix(WaypointObservationAttribute.class));
 			sql.append(".number_value is not null and "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
-			sql.append(".keyid = '"); //$NON-NLS-1$
-			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
+			sql.append(".keyid = ? "); //$NON-NLS-1$
+			addParameterValue(attributeItem.getAttributeKey());
 			if (attributeItem.getCategoryKey() != null) {
-				sql.append(" AND ( foo.cat_hkey >= '"); //$NON-NLS-1$
-				sql.append(attributeItem.getCategoryKey());
-				sql.append("' and "); //$NON-NLS-1$
-				sql.append("foo.cat_hkey < '"); //$NON-NLS-1$
-				sql.append(attributeItem.getCategoryKey().substring(0,
-						attributeItem.getCategoryKey().length() - 1));
-				sql.append("/') "); //$NON-NLS-1$
+				sql.append(" AND ( foo.cat_hkey >= ? and foo.cat_hkey < ?) "); //$NON-NLS-1$
+				addParameterValue(attributeItem.getCategoryKey());
+				addParameterValue(attributeItem.getCategoryKey().substring(0,attributeItem.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
 			}
 			if (groupBySql.length() > 0) {
 				sql.append(" GROUP BY "); //$NON-NLS-1$
@@ -720,8 +675,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 
 			// do something here with sql
 			QueryPlugIn.logSql(sql.toString());
-
-			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+			PreparedStatement ps = c.prepareStatement(sql.toString());
+			setParameters(ps);
+			ResultSet rs = ps.executeQuery();
 
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		} else if (attributeItem.getAttributeType() == AttributeType.LIST) {
@@ -788,20 +744,17 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(tablePrefix(AttributeListItem.class));
 			sql.append(".uuid and "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeListItem.class));
-			sql.append(".keyid = '"); //$NON-NLS-1$
-			sql.append(attributeItem.getItemKey());
-			sql.append("' and "); //$NON-NLS-1$
-		
+			sql.append(".keyid = ? "); //$NON-NLS-1$
+			addParameterValue(attributeItem.getItemKey());
+			sql.append(" and "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
-			sql.append(".keyid = '"); //$NON-NLS-1$
-			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
-			if (attributeItem.getCategoryKey() != null){	
-				sql.append("AND ( temp.cat_hkey >= '"); //$NON-NLS-1$
-				sql.append(attributeItem.getCategoryKey());
-				sql.append("' and "); //$NON-NLS-1$
-				sql.append("temp.cat_hkey < '"); //$NON-NLS-1$
-				sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
-				sql.append("/') "); //$NON-NLS-1$
+			sql.append(".keyid = ? "); //$NON-NLS-1$
+			addParameterValue(attributeItem.getAttributeKey());
+			
+			if (attributeItem.getCategoryKey() != null){
+				sql.append(" AND ( temp.cat_hkey >= ? and temp.cat_hkey < ?) "); //$NON-NLS-1$
+				addParameterValue(attributeItem.getCategoryKey());
+				addParameterValue(attributeItem.getCategoryKey().substring(0,attributeItem.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -812,7 +765,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			//do something here with sql
 			QueryPlugIn.logSql(sql.toString());
 			
-			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+			PreparedStatement ps = c.prepareStatement(sql.toString());
+			setParameters(ps);
+			ResultSet rs = ps.executeQuery();
 
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		} else if (attributeItem.getAttributeType() == AttributeType.TREE) {
@@ -880,25 +835,21 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(".uuid and ("); //$NON-NLS-1$
 			
 			sql.append(tablePrefix(AttributeTreeNode.class));
-			sql.append(".hkey >= '"); //$NON-NLS-1$
-			sql.append(attributeItem.getItemKey());
-			sql.append("' and "); //$NON-NLS-1$
+			sql.append(".hkey >= ? "); //$NON-NLS-1$
+			addParameterValue(attributeItem.getItemKey());
+			sql.append(" and "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeTreeNode.class));
-			sql.append(".hkey < '"); //$NON-NLS-1$
-			sql.append(attributeItem.getItemKey().substring(0, attributeItem.getItemKey().length() -1 ));
-			sql.append("/'  "); //$NON-NLS-1$
+			sql.append(".hkey < ?"); //$NON-NLS-1$
+			addParameterValue(attributeItem.getItemKey().substring(0, attributeItem.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
 			sql.append(") and "); //$NON-NLS-1$
 		
 			sql.append(tablePrefix(Attribute.class));
-			sql.append(".keyid = '"); //$NON-NLS-1$
-			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
+			sql.append(".keyid = ?"); //$NON-NLS-1$
+			addParameterValue(attributeItem.getAttributeKey());
 			if (attributeItem.getCategoryKey() != null){
-				sql.append("AND ( temp.cat_hkey >= '"); //$NON-NLS-1$
-				sql.append(attributeItem.getCategoryKey());
-				sql.append("' and "); //$NON-NLS-1$
-				sql.append("temp.cat_hkey < '"); //$NON-NLS-1$
-				sql.append(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1));
-				sql.append("/') "); //$NON-NLS-1$
+				sql.append(" AND ( temp.cat_hkey >= ? and temp.cat_hkey < ?) "); //$NON-NLS-1$
+				addParameterValue(attributeItem.getCategoryKey());
+				addParameterValue(attributeItem.getCategoryKey().substring(0,attributeItem.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -909,13 +860,12 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			//do something here with sql
 			QueryPlugIn.logSql(sql.toString());
 			
-			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+			PreparedStatement ps = c.prepareStatement(sql.toString());
+			setParameters(ps);
+			ResultSet rs = ps.executeQuery();
 
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		}
-		
-		
-		
 		return null;
 	}
 	
@@ -1056,6 +1006,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			GroupByPart groupBy, 
 			CategoryValueItem categoryItem, ConservationAreaFilter caFilter) throws SQLException{
 		
+		clearParameters();
 		StringBuilder fromSql = new StringBuilder();
 		
 		fromSql.append(dataTable + " temp "); //$NON-NLS-1$
@@ -1097,12 +1048,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			sql.append(" cat_hkey is not null "); //$NON-NLS-1$
 		}else{
 			sql.append(" ("); //$NON-NLS-1$
-			sql.append("cat_hkey >= '"); //$NON-NLS-1$
-			sql.append(categoryItem.getCategoryHKey());
-			sql.append("' and "); //$NON-NLS-1$
-			sql.append("cat_hkey < '"); //$NON-NLS-1$
-			sql.append(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1));
-			sql.append("/') "); //$NON-NLS-1$
+			sql.append("cat_hkey >= ?"); //$NON-NLS-1$
+			addParameterValue(categoryItem.getCategoryHKey());
+			sql.append(" and cat_hkey < ?"); //$NON-NLS-1$
+			addParameterValue(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1) + "/"); //$NON-NLS-1$
+			sql.append(") "); //$NON-NLS-1$
 		}
 		sql.append(") foo"); //$NON-NLS-1$
 		
@@ -1113,8 +1063,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		
 		//do something here with sql
 		QueryPlugIn.logSql(sql.toString());
-		
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		setParameters(ps);
+		ResultSet rs = ps.executeQuery();
 
 		return createValueResults(rs, groupBy, categoryItem.asString());
 	}
@@ -1171,10 +1122,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null){
 						fromSql.append(" and "); //$NON-NLS-1$
-						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix));
+						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
 					}
 					fromSql.append(" and "); //$NON-NLS-1$
-					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+					fromSql.append(areaPrefix + ".area_type = ? "); //$NON-NLS-1$ 
+					addParameterValue(agb.getAreaType().name());
 					
 					groupBySql.append(key);
 				} else {
@@ -1205,10 +1157,11 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					fromSql.append(")"); //$NON-NLS-1$
 					if (caFilter != null ){
 						fromSql.append(" and ");//$NON-NLS-1$
-						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix));
+						fromSql.append( PatrolFilterSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
 					}
 					fromSql.append(" and ");//$NON-NLS-1$
-					fromSql.append(areaPrefix + ".area_type = '" + agb.getAreaType().name() + "'");//$NON-NLS-1$ //$NON-NLS-2$ 
+					fromSql.append(areaPrefix + ".area_type = ?");//$NON-NLS-1$
+					addParameterValue(agb.getAreaType().name());
 					groupBySql.append(key);
 				}
 				
@@ -1281,12 +1234,12 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					fromSql.append(" and (temp.cat_hkey >= '"); //$NON-NLS-1$
-					fromSql.append(catkey);
-					fromSql.append("' and "); //$NON-NLS-1$
-					fromSql.append("temp.cat_hkey < '"); //$NON-NLS-1$
-					fromSql.append(catkey.substring(0, catkey.length() - 1));
-					fromSql.append("/') "); //$NON-NLS-1$
+					fromSql.append(" and (temp.cat_hkey >= ? "); //$NON-NLS-1$
+					addParameterValue(catkey);
+					fromSql.append(" and "); //$NON-NLS-1$
+					fromSql.append("temp.cat_hkey < ?"); //$NON-NLS-1$
+					addParameterValue(catkey.substring(0, catkey.length() - 1) + "/"); //$NON-NLS-1$
+					fromSql.append(") "); //$NON-NLS-1$
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
@@ -1319,9 +1272,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				fromSql.append(tablePrefix(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".uuid AND "); //$NON-NLS-1$
 				fromSql.append(tablePrefix(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
-				fromSql.append(".keyid = '"); //$NON-NLS-1$
-				fromSql.append(((AttributeGroupBy)gb).getAttributeKey());
-				fromSql.append("' "); //$NON-NLS-1$
+				fromSql.append(".keyid = ?"); //$NON-NLS-1$
+				addParameterValue(((AttributeGroupBy)gb).getAttributeKey());
 			}else if (gb instanceof IExtensionGroupBy){
 				IGroupByPatrolContribution cont = PatrolContributionFactory.findGroupByContribution(gb.asString());
 				cont.addGroupBySql(gb, fromSql, 
@@ -1507,8 +1459,9 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			return "p_mandate_uuid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE_KEY:
 			return "pl_transport_uuid"; //$NON-NLS-1$
+		default:
+			return null;
 		}
-		return null;
 	}
 	
 	/**
@@ -1545,9 +1498,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			return tablePrefix.get(PatrolMandate.class) + ".keyid"; //$NON-NLS-1$
 		case PATROL_TRANSPORT_TYPE_KEY:
 			return tablePrefix.get(PatrolTransportType.class) + ".keyid"; //$NON-NLS-1$
+		default:
+			assert false;
+			return ""; //$NON-NLS-1$
 		}
-		assert false;
-		return ""; //$NON-NLS-1$
 	}
 	
 	/**

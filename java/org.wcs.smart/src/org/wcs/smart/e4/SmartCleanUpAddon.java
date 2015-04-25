@@ -176,7 +176,6 @@ public class SmartCleanUpAddon {
 		MUIElement changedObj = (MUIElement) event.getProperty(UIEvents.EventTags.ELEMENT);
 		if (changedObj instanceof MTrimBar || ((Object) changedObj.getParent()) instanceof MToolBar)
 			return;
-
 		if (changedObj.getWidget() instanceof Shell) {
 			((Shell) changedObj.getWidget()).setVisible(changedObj.isVisible());
 		} else if (changedObj.getWidget() instanceof Rectangle) {

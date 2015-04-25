@@ -122,16 +122,13 @@ public class DerbyPagedWaypointResult extends AbstractPagedQueryResultSet {
 			s.doWork(new Work(){
 				@Override
 				public void execute(Connection c) throws SQLException {
-					ResultSet q = c.createStatement().executeQuery(sql);
-					try{
+					try(ResultSet q = c.createStatement().executeQuery(sql)){
 						q.next();
 						double minx = q.getDouble(1);
 						double maxx = q.getDouble(2);
 						double miny = q.getDouble(3);
 						double maxy = q.getDouble(4);
 						bounds = new Envelope(minx, maxx, miny, maxy);
-					}finally{
-						q.close();
 					}
 				}
 			});

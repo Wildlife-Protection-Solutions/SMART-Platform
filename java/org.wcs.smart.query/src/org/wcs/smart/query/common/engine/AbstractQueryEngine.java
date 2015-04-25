@@ -1,7 +1,9 @@
 package org.wcs.smart.query.common.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -21,9 +23,12 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.util.SmartUtils;
 
 public class AbstractQueryEngine implements IQueryEngine {
 
+	protected ArrayList<Object> currentParameters = new ArrayList<Object>();
+	
 	/**
 	 * Maps database tables to a prefix to use in the query.
 	 */
@@ -208,19 +213,26 @@ public class AbstractQueryEngine implements IQueryEngine {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
-//	
-//	/**
-//	 * Creates the filter processor based on the query filter type
-//	 * 
-//	 * @param filterType
-//	 * @param queryDataTable
-//	 * @return
-//	 */
-//	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable){
-//		if (filterType == IFilter.FilterType.OBSERVATION){
-//			return new FilterProcessor(queryDataTable, this);
-//		}else{
-//			return new WaypointFilterProcessor(queryDataTable, this);
-//		}
-//	}
+
+	public void addParameterValue(Object parameter){
+		currentParameters.add(parameter);
+	}
+	
+	public void clearParameters(){
+		currentParameters.clear();
+	}
+	
+	public void setParameters(PreparedStatement ps) throws SQLException{
+		StringBuilder log = new StringBuilder();
+		for (int i = 0; i < currentParameters.size(); i ++){
+			if (currentParameters.get(i) instanceof byte[]){
+				ps.setBytes(i+1, (byte[])currentParameters.get(i));
+				log.append("x'"+ SmartUtils.encodeHex((byte[])currentParameters.get(i)) + ", "); //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				ps.setObject(i+1, currentParameters.get(i));
+				log.append(currentParameters.get(i).toString() + ", "); //$NON-NLS-1$
+			}
+		}
+		QueryPlugIn.logSql(log.toString());
+	}
 }

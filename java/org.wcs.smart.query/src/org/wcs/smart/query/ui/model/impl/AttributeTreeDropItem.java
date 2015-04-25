@@ -103,7 +103,8 @@ public class AttributeTreeDropItem extends DropItem implements IFilterDropItem{
 			}
 			
 			input = roots;
-			Display d = AttributeTreeDropItem.this.getWidget().getDisplay();
+			if(treeviewer == null) return Status.OK_STATUS;
+			Display d = treeviewer.getTreeViewer().getTree().getDisplay();
 			if (d != null && !d.isDisposed()){
 				d.asyncExec(new Runnable(){
 					@Override

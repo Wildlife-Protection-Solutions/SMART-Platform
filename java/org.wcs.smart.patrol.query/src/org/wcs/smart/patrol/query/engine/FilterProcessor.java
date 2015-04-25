@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
@@ -205,6 +206,7 @@ public class FilterProcessor implements IFilterProcessor {
 
 		StringBuilder sql = new StringBuilder();
 		
+		engine.clearParameters();
 		sql.append("INSERT INTO " + tableName ); //$NON-NLS-1$
 		// ---- SELECT CLAUSE -----
 		sql.append(engine.getTemporaryTableSelectClause(populateObservation));
@@ -341,7 +343,9 @@ public class FilterProcessor implements IFilterProcessor {
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
-		c.createStatement().execute(sql.toString());
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		engine.setParameters(ps);
+		ps.executeUpdate();
 	}
 	
 	
@@ -388,6 +392,7 @@ public class FilterProcessor implements IFilterProcessor {
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 			try {
+				engine.clearParameters();
 				// -- populate table
 				sql = new StringBuilder();
 				sql.append("INSERT INTO "); //$NON-NLS-1$
@@ -476,12 +481,13 @@ public class FilterProcessor implements IFilterProcessor {
 					sql.append(" t on t.uuid = " + prefix(WaypointObservationAttribute.class) + ".tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sql.append("WHERE "); //$NON-NLS-1$
-				sql.append(" " + prefix(Attribute.class) + ".keyid = '"); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(key.getKey());
-				sql.append("'"); //$NON-NLS-1$
+				sql.append(" " + prefix(Attribute.class) + ".keyid = ? "); //$NON-NLS-1$ //$NON-NLS-2$
+				engine.addParameterValue(key.getKey());
 
 				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
+				PreparedStatement ps = c.prepareStatement(sql.toString());
+				engine.setParameters(ps);
+				ps.executeUpdate();
 
 				// - create index
 				sql = new StringBuilder();

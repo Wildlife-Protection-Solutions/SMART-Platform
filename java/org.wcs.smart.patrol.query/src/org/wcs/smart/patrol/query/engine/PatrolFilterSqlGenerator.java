@@ -86,7 +86,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (filter instanceof IExtensionFilter){
 			return asSql((IExtensionFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Patrol.class));
+			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Patrol.class), engine);
 		}else{
 			return super.toSql(filter, engine); 
 		}
@@ -172,8 +172,14 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			} else if (option == PatrolQueryOption.PILOT) {
 				x += " is_pilot AND "; //$NON-NLS-1$
 			}
-			String value2 = SmartUtils.stripQuotes((String)filter.getValue());			
-			x += " employee_uuid = x'" + value2 + "')"; //$NON-NLS-1$ //$NON-NLS-2$
+			
+			String value2 = SmartUtils.stripQuotes((String)filter.getValue());
+			try {
+				engine.addParameterValue(SmartUtils.decodeHex(value2));
+			} catch (Exception e) {
+				throw new SQLException(e);
+			}
+			x += " employee_uuid = ?)"; //$NON-NLS-1$ 
 			return x;			
 		}		
 		String prefix = engine.tablePrefix(filter.getPatrolOption().getPatrolAttributeClass());
@@ -184,7 +190,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		
 		if (option.getType() == PatrolQueryOptionType.STRING){
 			if (option == PatrolQueryOption.PATROL_TYPE){
-				String x = prefix + "." + option.getColumnName() + " = '" + SmartUtils.stripQuotes((String)filter.getValue()) + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				engine.addParameterValue(SmartUtils.stripQuotes((String)filter.getValue()) );
+				String x = prefix + "." + option.getColumnName() + " = ?"; //$NON-NLS-1$ //$NON-NLS-2$ 
 				return x;				
 			}else{
 				String value1 = SmartUtils.stripQuotes((String)filter.getValue());
@@ -192,7 +199,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 						filter.getOperator() == Operator.STR_NOTCONTAINS){
 					value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " '" + value1.toLowerCase() + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+				engine.addParameterValue(value1.toLowerCase());
+				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " ? "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				return x;
 			}
 		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
@@ -203,7 +211,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			//uuid
 			try{
 				String value2 = SmartUtils.stripQuotes((String)filter.getValue());
-				String x = prefix + "." + option.getColumnName() + " = x'" + value2 + "'"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				engine.addParameterValue(SmartUtils.decodeHex(value2));
+				String x = prefix + "." + option.getColumnName() + " = ? "; //$NON-NLS-1$ //$NON-NLS-2$ 
 				return x;
 			}catch (Exception ex){
 				throw new IllegalStateException(ex);
@@ -211,7 +220,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			
 		}else if (option.getType() == PatrolQueryOptionType.KEY){
 			String key = SmartUtils.stripQuotes((String)filter.getValue());
-			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = '" + key + "') "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			engine.addParameterValue(key);
+			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			
 		}
 		return ""; //$NON-NLS-1$	
@@ -228,7 +238,12 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		String prefix = engine.tablePrefix(Patrol.class);
 		if (filter.getOperator().equals(Operator.STR_EQUALS)){
 			if (filter.getValue().length() != 0){
-				return prefix + ".uuid = x'" +SmartUtils.stripQuotes(filter.getValue()) + "'"; //$NON-NLS-1$ //$NON-NLS-2$
+				try {
+					engine.addParameterValue(SmartUtils.decodeHex(SmartUtils.stripQuotes(filter.getValue())));
+				} catch (Exception e) {
+					throw new SQLException(e);
+				}
+				return prefix + ".uuid = ? "; //$NON-NLS-1$
 			}else{
 				return "false"; //$NON-NLS-1$
 			}
@@ -266,11 +281,16 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return ""; //$NON-NLS-1$
 		}
 		if (bits.length == 1){
-			f = " ( " +field + " >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){ 
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " <= '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			engine.addParameterValue(bits[0].toString());
+			f = " ( " +field + " >= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$
+		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
+			engine.addParameterValue(bits[0].toString());
+			engine.addParameterValue(bits[1].toString());
+			f = " ( " + field + " >= ? and " + field  + " <= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2){
-			f = " ( " + field + " >= '" + bits[0].toString() + "' and " + field  + " < '" + bits[1].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			engine.addParameterValue(bits[0].toString());
+			engine.addParameterValue(bits[1].toString());
+			f = " ( " + field + " >= ? and " + field  + " < ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 
 		return f;
