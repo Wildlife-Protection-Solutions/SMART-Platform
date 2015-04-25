@@ -31,6 +31,7 @@ package org.wcs.smart.er.query.engine;
  */
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -328,6 +329,8 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			double minX = gridDef.getOriginX();
 			double minY = gridDef.getOriginY();
 			double size = gridDef.getCellSize();
+			
+			clearParameters();
 			StringBuilder sql = new StringBuilder();
 
 			sql.append("SELECT " + strAgg + "(" + strAggValue + ") as value, tile_id"); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$
@@ -349,15 +352,12 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			sql.append( tablePrefix.get(Waypoint.class));
 			sql.append(".x,");  //$NON-NLS-1$
 			sql.append( tablePrefix.get(Waypoint.class));
-			sql.append(".y,'");  //$NON-NLS-1$
-			sql.append(gridDef.getCrs().toWKT().replaceAll("'", "''"));  //$NON-NLS-1$  //$NON-NLS-2$
-			sql.append("',");  //$NON-NLS-1$
-			sql.append(minX);
-			sql.append( ","); //$NON-NLS-1$
-			sql.append( minY);
-			sql.append( ","); //$NON-NLS-1$
-			sql.append(size);
-			sql.append( ") as tile_id"); //$NON-NLS-1$ 
+			sql.append(".y,?,?,?,?) as tile_id");  //$NON-NLS-1$
+			addParameterValue(gridDef.getCrs().toWKT());
+			addParameterValue(minX);
+			addParameterValue(minY);
+			addParameterValue(size);
+			 
 			sql.append(" FROM "); //$NON-NLS-1$
 			sql.append(tableNames.get(WaypointObservation.class));
 			sql.append( " as "); //$NON-NLS-1$
@@ -412,11 +412,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				sql.append(".category_uuid = "); //$NON-NLS-1$
 				sql.append( tablePrefix.get(Category.class));
 				sql.append( ".uuid" ); //$NON-NLS-1$
-				sql.append(" AND Hkey >= '"); //$NON-NLS-1$
-				sql.append(tmp.getCategoryKey());
-				sql.append("' AND Hkey < '"); //$NON-NLS-1$
-				sql.append(tmp.getCategoryKey());
-				sql.append("/'");  //$NON-NLS-1$
+				sql.append(" AND Hkey >= ? and hkey < ? "); //$NON-NLS-1$
+				addParameterValue(tmp.getCategoryKey());
+				addParameterValue(tmp.getCategoryKey().substring(0, tmp.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
 			}
 			
 			if (tmp.getAttributeType() == AttributeType.LIST){
@@ -429,7 +427,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				sql.append( tablePrefix.get(WaypointObservationAttribute.class));
 				sql.append(".list_element_uuid and "); //$NON-NLS-1$
 				sql.append( tablePrefix.get(AttributeListItem.class));
-				sql.append(".keyid = '" + tmp.getItemKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(".keyid = ? "); //$NON-NLS-1$
+				addParameterValue(tmp.getItemKey()); 
+						
 			}else if (tmp.getAttributeType() == AttributeType.TREE){
 				sql.append(" join "); //$NON-NLS-1$
 				sql.append(tableNames.get(AttributeTreeNode.class));
@@ -442,25 +442,23 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 				sql.append(".tree_node_uuid "); //$NON-NLS-1$
 				sql.append(" and ("); //$NON-NLS-1$
 				sql.append(tablePrefix.get(AttributeTreeNode.class));
-				sql.append(".hkey >= '"); //$NON-NLS-1$
-				sql.append(tmp.getItemKey());
-				sql.append("' and "); //$NON-NLS-1$
+				sql.append(".hkey >= ? and "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(AttributeTreeNode.class));
-				sql.append(".hkey < '"); //$NON-NLS-1$
-				sql.append(tmp.getItemKey().substring(0, tmp.getItemKey().length() -1 ));
-				sql.append("/')  "); //$NON-NLS-1$
+				sql.append(".hkey < ?)"); //$NON-NLS-1$
+				addParameterValue(tmp.getItemKey());
+				addParameterValue(tmp.getItemKey().substring(0, tmp.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
 			}
-
-				sql.append(") as foo group by tile_id"); //$NON-NLS-1$
+			sql.append(") as foo group by tile_id"); //$NON-NLS-1$
+			
 			QueryPlugIn.logSql(sql.toString());
-			rs = c.createStatement().executeQuery(sql.toString());
+			PreparedStatement ps = c.prepareStatement(sql.toString());
+			setParameters(ps);
+			rs = ps.executeQuery();
 		}else if(value instanceof CategoryValueItem){
 			CategoryValueItem tmp = (CategoryValueItem)value;
 			strAgg = "count"; //$NON-NLS-1$
 				
-			double minX = gridDef.getOriginX();
-			double minY = gridDef.getOriginY();
-			double size = gridDef.getCellSize();
+			clearParameters();
 			StringBuilder sql = new StringBuilder();
 			sql.append("SELECT "); //$NON-NLS-1$
 			sql.append(strAgg + "(localkey) as value,tile_id"); //$NON-NLS-1$
@@ -471,7 +469,13 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			}else{
 				sql.append(dataTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
 			}
-			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,'" + gridDef.getCrs().toWKT().replaceAll("'", "''") + "'," + minX + "," + minY + "," + size + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
+			sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x," + tablePrefix.get(Waypoint.class) + ".y,"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			sql.append("?, ?, ?, ?) as tile_id"); //$NON-NLS-1$
+			addParameterValue(gridDef.getCrs().toWKT());
+			addParameterValue(gridDef.getOriginX());
+			addParameterValue(gridDef.getOriginY());
+			addParameterValue(gridDef.getCellSize());
+			
 			sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(" JOIN " + dataTable  //$NON-NLS-1$
 					+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$
@@ -485,11 +489,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 					+ ".uuid" //$NON-NLS-1$
 					+ " AND "); //$NON-NLS-1$
 			if (tmp.getCategoryHKey() != null){
-				sql.append("hkey >= '"); //$NON-NLS-1$
-				sql.append(tmp.getCategoryHKey());
-				sql.append("' AND hkey < '"); //$NON-NLS-1$
-				sql.append(tmp.getCategoryHKey().substring(0,  tmp.getCategoryHKey().length()-1));
-				sql.append("/'");  //$NON-NLS-1$
+				sql.append(" Hkey >= ? and hkey < ? "); //$NON-NLS-1$
+				addParameterValue(tmp.getCategoryHKey());
+				addParameterValue(tmp.getCategoryHKey().substring(0, tmp.getCategoryHKey().length() - 1) + "/"); //$NON-NLS-1$
 			}else{
 				sql.append(" hkey is not null "); //$NON-NLS-1$
 			}
@@ -504,7 +506,9 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			sql.append("tile_id"); //$NON-NLS-1$
 			
 			QueryPlugIn.logSql(sql.toString());
-			rs = c.createStatement().executeQuery(sql.toString());
+			PreparedStatement ps = c.prepareStatement(sql.toString());
+			setParameters(ps);
+			rs = ps.executeQuery();
 		}else{
 			throw new SQLException(MessageFormat.format(Messages.DerbyGridEngine_ValueNotSupported, new Object[]{value.asString()}));	
 		}
@@ -559,6 +563,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	private List<GridResultItem> computeMissionTrackNoFilter(Connection c, 
 			GridAnalysisEngine<?> engine, SurveyDesignFilter dsFilter) throws Exception{
 		
+		clearParameters();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT " + tablePrefix.get(MissionTrack.class) + ".geometry as geom "); //$NON-NLS-1$ //$NON-NLS-2$
 		
@@ -589,23 +594,24 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		}
 		
 		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		
-		
-		while(rs.next()){
-			byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
-			if (bytes != null){
-				WKBReader reader = new WKBReader();
-				LineString ls = (LineString) reader.read(bytes);
-				try{
-					engine.rasterizeLinestring(ls);
-				}catch (Exception ex){
-					EcologicalRecordsPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
-					throw ex;
+		PreparedStatement ps = c.prepareStatement(sql.toString());
+		setParameters(ps);
+		try(ResultSet rs = ps.executeQuery()){
+			while(rs.next()){
+				byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
+				if (bytes != null){
+					WKBReader reader = new WKBReader();
+					LineString ls = (LineString) reader.read(bytes);
+					try{
+						engine.rasterizeLinestring(ls);
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
+						throw ex;
+					}
 				}
 			}
 		}
-		rs.close();
+		
 		
 		List<GridResultItem> items = new ArrayList<GridResultItem>();
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {
@@ -796,36 +802,36 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 		
 
 		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		
-		while(rs.next()){
-			byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
-			Object[] data = null;
-			if (dataField != null){
-				data = new Object[dataField.length];
-				for (int i = 0; i < dataField.length; i++){
-					data[i] = rs.getObject("dataField_"+i); //$NON-NLS-1$
-				}
-			}
-			if (bytes != null){
-				WKBReader reader = new WKBReader();
-				LineString ls = (LineString) reader.read(bytes);
-				if (data != null){
-					if (data.length == 1){
-						ls.setUserData(data[0]);		
-					}else{
-						ls.setUserData(data);
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
+			while(rs.next()){
+				byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
+				Object[] data = null;
+				if (dataField != null){
+					data = new Object[dataField.length];
+					for (int i = 0; i < dataField.length; i++){
+						data[i] = rs.getObject("dataField_"+i); //$NON-NLS-1$
 					}
 				}
-				try{
-					engine.rasterizeLinestring(ls);
-				}catch (Exception ex){
-					ERQueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
-					throw ex;
+				if (bytes != null){
+					WKBReader reader = new WKBReader();
+					LineString ls = (LineString) reader.read(bytes);
+					if (data != null){
+						if (data.length == 1){
+							ls.setUserData(data[0]);		
+						}else{
+							ls.setUserData(data);
+						}
+					}
+					try{
+						engine.rasterizeLinestring(ls);
+					}catch (Exception ex){
+						ERQueryPlugIn.log("Error rasterizing linestring: " + ls.toText(), ex); //$NON-NLS-1$
+						throw ex;
+					}
 				}
 			}
 		}
-		rs.close();
 		
 		List<GridResultItem> items = new ArrayList<GridResultItem>();	
 		for (Iterator<Entry<Tile,Double>> iterator = engine.getData().entrySet().iterator(); iterator.hasNext();) {

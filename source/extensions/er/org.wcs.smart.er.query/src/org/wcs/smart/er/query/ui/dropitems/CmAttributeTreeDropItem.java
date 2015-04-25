@@ -111,7 +111,8 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 				s.close();
 			}
 			input = roots;
-			Display d = CmAttributeTreeDropItem.this.getWidget().getDisplay();
+			if (treeviewer == null) return Status.OK_STATUS;
+			Display d = treeviewer.getTreeViewer().getTree().getDisplay();
 			if (d != null && !d.isDisposed()){
 				d.asyncExec(new Runnable(){
 					@Override

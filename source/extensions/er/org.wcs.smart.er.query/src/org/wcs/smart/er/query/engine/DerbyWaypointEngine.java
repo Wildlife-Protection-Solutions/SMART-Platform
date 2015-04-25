@@ -101,13 +101,11 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyWaypointEngine_CountProgress);
 					//setting result size
-					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
-					try {
+					
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)){ //$NON-NLS-1$
 						if (rs.next()) { 
 							result.setItemCount(rs.getInt(1));
 						}
-					} finally {
-						rs.close();
 					}
 					monitor.worked(10);
 					
@@ -143,8 +141,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
 		String sql = "SELECT DISTINCT ca_uuid, " + uuidColumn + " FROM " + queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
 		QueryPlugIn.logSql(sql);
-		ResultSet rs = c.createStatement().executeQuery(sql);
-		try {
+		
+		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			PreparedStatement statement = c.prepareStatement("UPDATE " + queryDataTable + " SET " + nameColumn + " = ? where " + uuidColumn + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			int count = 0;
 			while (rs.next()) {
@@ -164,8 +162,6 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 			}
 			statement.executeBatch();
 			
-		} finally {
-			rs.close();
 		}
 	}
 	
@@ -192,17 +188,18 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append(".list_element_uuid"); //$NON-NLS-1$
 		sql.append(" is not null "); //$NON-NLS-1$
 		
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
 		
-		sql = new StringBuilder();
-		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append( queryDataTable + "_mlist"); //$NON-NLS-1$
-		sql.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
+		
+		StringBuilder sql2 = new StringBuilder();
+		sql2.append("INSERT INTO "); //$NON-NLS-1$
+		sql2.append( queryDataTable + "_mlist"); //$NON-NLS-1$
+		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql2.toString());
+		PreparedStatement statement = c.prepareStatement(sql2.toString());
 		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql.toString());
+		
 		int count = 0;
-		try {
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
@@ -219,9 +216,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			statement.executeBatch();
-		} finally {
-			rs.close();
-		}
+		} 
 	}
 	
 	private void populateAdditionalSuTable(Connection c, Session session) throws SQLException {
@@ -246,18 +241,17 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
 		sql.append(".list_element_uuid"); //$NON-NLS-1$
 		sql.append(" is not null "); //$NON-NLS-1$
+				
+		StringBuilder sql2 = new StringBuilder();
+		sql2.append("INSERT INTO "); //$NON-NLS-1$
+		sql2.append( queryDataTable + "_sulist"); //$NON-NLS-1$
+		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql2.toString());
+		PreparedStatement statement = c.prepareStatement(sql2.toString());
 		
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		
-		sql = new StringBuilder();
-		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append( queryDataTable + "_sulist"); //$NON-NLS-1$
-		sql.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql.toString());
 		int count = 0;
-		try {
+		QueryPlugIn.logSql(sql.toString());
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
@@ -274,8 +268,6 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			statement.executeBatch();
-		} finally {
-			rs.close();
 		}
 	}
 	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
@@ -350,16 +342,15 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(MissionMember.class));
 		sql.append(".is_leader"); //$NON-NLS-1$
 
-		QueryPlugIn.logSql(sql.toString());
-
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		
 		String updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		updateSql += "mission_leader = ? where mission_uuid = ?"; //$NON-NLS-1$
 		QueryPlugIn.logSql(updateSql);
 		PreparedStatement leaderSt = c.prepareStatement(updateSql);
 
 		int cnt = 0;
-		try {
+		QueryPlugIn.logSql(sql.toString());
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				String name = getEmployeeName(uuid, session);
@@ -377,8 +368,6 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			leaderSt.executeBatch();
-		} finally {
-			rs.close();
 		}
 		monitor.worked(1);
 		if (monitor.isCanceled()) {

@@ -107,23 +107,18 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyObservationEngine_progress2);
 					//setting result size
-					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
-					try {
+					
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)) { //$NON-NLS-1$
 						if (rs.next()) { 
 							result.setItemCount(rs.getInt(1));
 						}
-					} finally {
-						rs.close();
 					}
 
 					//setting waypoint count
-					rs = c.createStatement().executeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp"); //$NON-NLS-1$ //$NON-NLS-2$
-					try {
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp")) { //$NON-NLS-1$ //$NON-NLS-2$
 						if (rs.next()) { 
 							result.setWpCount(rs.getInt(1));
 						}
-					} finally {
-						rs.close();
 					}
 					monitor.worked(10);
 					
@@ -159,8 +154,8 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
 		String sql = "SELECT DISTINCT ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
 		QueryPlugIn.logSql(sql);
-		ResultSet rs = c.createStatement().executeQuery(sql);
-		try {
+		
+		try (ResultSet rs = c.createStatement().executeQuery(sql)){
 			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			int count = 0;
 			while (rs.next()) {
@@ -180,8 +175,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 			}
 			statement.executeBatch();
 			
-		} finally {
-			rs.close();
 		}
 	}
 
@@ -203,9 +196,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
 		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
 		QueryPlugIn.logSql(sql);
-		ResultSet rs = c.createStatement().executeQuery(sql);
-		
-		try {
+		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid == null)
@@ -236,8 +227,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				statement.setBytes( depth+1, uuid);
 				statement.executeUpdate();
 			}
-		} finally {
-			rs.close();
 		}
 	}
 	
@@ -303,15 +292,14 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		StringBuilder sqla = new StringBuilder();
 		sqla.append("SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
 		sqla.append(queryDataTable);
-		QueryPlugIn.logSql(sqla.toString());
 
-		ResultSet rs = c.createStatement().executeQuery(sqla.toString());
 		String updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		String q1 = updateSql + "ob_observer = ? where ob_observer_uuid = ?"; //$NON-NLS-1$
 		QueryPlugIn.logSql(q1);
 		PreparedStatement observerSt = c.prepareStatement(q1);
 		int cnt = 0;
-		try {
+		QueryPlugIn.logSql(sqla.toString());
+		try (ResultSet rs = c.createStatement().executeQuery(sqla.toString())){
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				String name = getEmployeeName(uuid, session);
@@ -328,8 +316,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			observerSt.executeBatch();
-		} finally {
-			rs.close();
 		}
 		monitor.worked(1);
 		if (monitor.isCanceled()){
@@ -355,16 +341,15 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(MissionMember.class));
 		sql.append(".is_leader"); //$NON-NLS-1$
 
-		QueryPlugIn.logSql(sql.toString());
-
-		rs = c.createStatement().executeQuery(sql.toString());
 		updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		q1 = updateSql + "mission_leader = ? where mission_uuid = ?"; //$NON-NLS-1$
 		QueryPlugIn.logSql(q1);
 		PreparedStatement leaderSt = c.prepareStatement(q1);
 
 		cnt = 0;
-		try {
+		QueryPlugIn.logSql(sql.toString());
+		
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				String name = getEmployeeName(uuid, session);
@@ -382,8 +367,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			leaderSt.executeBatch();
-		} finally {
-			rs.close();
 		}
 		monitor.worked(1);
 		if (monitor.isCanceled()) {
@@ -462,14 +445,14 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		c.createStatement().execute(sql);
 
 		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql);
 		
-		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql);
+		
+		String sql2 = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql2.toString());
+		PreparedStatement statement = c.prepareStatement(sql2);
 		int count = 0;
-		try {
+		QueryPlugIn.logSql(sql.toString());
+		try(ResultSet rs = c.createStatement().executeQuery(sql)){
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
@@ -486,8 +469,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			statement.executeBatch();
-		} finally {
-			rs.close();
 		}
 	}
 
@@ -513,18 +494,16 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql.append(tablePrefix(MissionPropertyValue.class));
 		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
 		sql.append(" is not null "); //$NON-NLS-1$
-		
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		
-		sql = new StringBuilder();
-		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append( queryDataTable + linkedData.getPostfix());
-		sql.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql.toString());
+
+		StringBuilder sql2 = new StringBuilder();
+		sql2.append("INSERT INTO "); //$NON-NLS-1$
+		sql2.append( queryDataTable + linkedData.getPostfix());
+		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql2.toString());
+		PreparedStatement statement = c.prepareStatement(sql2.toString());
 		int count = 0;
-		try {
+		QueryPlugIn.logSql(sql.toString());
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
@@ -541,8 +520,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			statement.executeBatch();
-		} finally {
-			rs.close();
 		}
 	}
 
@@ -569,17 +546,15 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
 		sql.append(" is not null "); //$NON-NLS-1$
 		
-		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
-		
-		sql = new StringBuilder();
-		sql.append("INSERT INTO "); //$NON-NLS-1$
-		sql.append( queryDataTable + linkedData.getPostfix());
-		sql.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql.toString());
+		StringBuilder sql2 = new StringBuilder();
+		sql2.append("INSERT INTO "); //$NON-NLS-1$
+		sql2.append( queryDataTable + linkedData.getPostfix());
+		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
+		QueryPlugIn.logSql(sql2.toString());
+		PreparedStatement statement = c.prepareStatement(sql2.toString());
 		int count = 0;
-		try {
+		QueryPlugIn.logSql(sql.toString());
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
@@ -596,8 +571,6 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				}
 			}
 			statement.executeBatch();
-		} finally {
-			rs.close();
 		}
 	}
 	
