@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -199,20 +198,18 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				
 				tmp.append(" WHERE "); //$NON-NLS-1$
 				tmp.append(engine.tablePrefix(EntityType.class));
-				tmp.append(".keyId = ? "); //$NON-NLS-1$ 
-				tempEngine.addParameterValue(ff.getEntityKey());
+				String p1 = tempEngine.addParameterValue(ff.getEntityKey());
+				tmp.append(".keyId = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ 
 				tmp.append(" AND "); //$NON-NLS-1$
 				tmp.append(engine.tablePrefix(EntityAttribute.class));
-				tmp.append(".keyId = ? "); //$NON-NLS-1$
-				tempEngine.addParameterValue(ff.getEntityAttributeKey());
+				p1 = tempEngine.addParameterValue(ff.getEntityAttributeKey());
+				tmp.append(".keyId = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+				
 				tmp.append(" AND "); //$NON-NLS-1$
 				try{
 					tmp.append(EntityFilterToSqlGenerator.INSTANCE.asSql(catFilter, engine.tablePrefix(EntityType.class), tempEngine));
-					
 					QueryPlugIn.logSql(tmp.toString());
-					PreparedStatement ps = c.prepareStatement(tmp.toString());
-					tempEngine.setParameters(ps);
-					ps.executeUpdate();
+					tempEngine.parseQueryString(c, tmp.toString()).executeUpdate();
 				}catch (Exception ex){
 					throw new RuntimeException(ex);
 				}

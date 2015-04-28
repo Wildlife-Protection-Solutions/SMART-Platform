@@ -78,8 +78,8 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 		sb.append(engine.tablePrefix(Waypoint.class));
 		sb.append(".source "); //$NON-NLS-1$
 		sb.append(asSql(filter.getOperator()));
-		engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
-		sb.append(" ? "); //$NON-NLS-1$
+		String src = engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
+		sb.append(" " + src + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		return sb.toString();
 	}
 	
@@ -156,8 +156,9 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 			if (i != 0){
 				sb.append(","); //$NON-NLS-1$
 			}
-			sb.append("?"); //$NON-NLS-1$
-			engine.addParameterValue(localFilters.get(i));
+			String p1 = engine.addParameterValue(localFilters.get(i));
+			sb.append(" " + p1); //$NON-NLS-1$
+			
 		}
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();

@@ -163,8 +163,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * Survey design filter
 	 */
 	protected String asSql(SurveyDesignFilter filter, IQueryEngine engine) throws SQLException{
-		engine.addParameterValue(filter.getKey());
-		return engine.tablePrefix(SurveyDesign.class) + ".keyId = ?"; //$NON-NLS-1$
+		String p1 = engine.addParameterValue(filter.getKey());
+		return engine.tablePrefix(SurveyDesign.class) + ".keyId = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/*
@@ -180,8 +180,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		if (filter.isLeader()){
 			sb.append("is_leader AND "); //$NON-NLS-1$
 		}
-		engine.addParameterValue(filter.getUuid());
-		sb.append(" employee_uuid = ? "); //$NON-NLS-1$
+		String p1 = engine.addParameterValue(filter.getUuid());
+		sb.append(" employee_uuid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
 	}
@@ -222,16 +222,17 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			engine.addParameterValue(value1.toLowerCase());
-			String x = "LOWER(" + engine.tablePrefix(Survey.class) + ".id) " + asSql(filter.getOperator()) + " ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			String p1 = engine.addParameterValue(value1.toLowerCase());
+			String x = "LOWER(" + engine.tablePrefix(Survey.class) + ".id) " + asSql(filter.getOperator()) + " " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			return x;
 		}else if (filter.getType() == SurveyFilter.Type.UUID){
 			try{
-				engine.addParameterValue(SmartUtils.decodeHex(filter.getValue()));
+				String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getValue()));
+				return engine.tablePrefix(Survey.class) + ".uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 			}catch (Exception ex){
 				throw new SQLException(ex);
 			}
-			return engine.tablePrefix(Survey.class) + ".uuid = ?"; //$NON-NLS-1$ 
+			 
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -252,12 +253,12 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 						return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid is null AND "  //$NON-NLS-1$ //$NON-NLS-2$
 							+ engine.tablePrefix(MissionTrack.class) + ".uuid is not null )"; //$NON-NLS-1$
 					}else{
-						engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
-						return engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = ?"; //$NON-NLS-1$ 
+						String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+						return engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ 
 					}
 				}else if (filter.getType() == Type.TRACK){
-					engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
-					return engine.tablePrefix(MissionTrack.class) + ".uuid = ?"; //$NON-NLS-1$
+					String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+					return engine.tablePrefix(MissionTrack.class) + ".uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 				}			
 			}else if (filter.getSource() == Source.OBSERVATION){
 				//observation 
@@ -266,12 +267,12 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 						return " (" + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null " //$NON-NLS-1$ //$NON-NLS-2$
 							+ " AND " + engine.tablePrefix(SurveyWaypoint.class) + ".wp_uuid is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
 					}else{
-						engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
-						return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = ? "; //$NON-NLS-1$ 
+						String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+						return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ 
 					}
 				}else if (filter.getType() == Type.TRACK){
-					engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
-					return engine.tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid = ? "; //$NON-NLS-1$
+					String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+					return engine.tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
 		}catch (Exception ex){
@@ -289,8 +290,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return col + "." + ((DerbySurveyQueryEngine)engine).getFilterTablesJoinColum() + " is not null "; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		if (filter.getAttributeType() == AttributeType.NUMERIC){
-			engine.addParameterValue((Double)filter.getValue());
-			return " (sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " ?) ";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue((Double)filter.getValue());
+			return " (sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " " + p1 + ") ";   //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		}else if (filter.getAttributeType() == AttributeType.TEXT){
 			String queryStr = ""; //$NON-NLS-1$
@@ -298,11 +299,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " ? )";	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )";	 //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " ? )";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+				String p1 = engine.addParameterValue(val.toLowerCase());
+				queryStr = "( LOWER(sua.sua_" + filter.getSamplingUnitAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.LIST) {
@@ -310,8 +311,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 				// any option
 				return "( sua.sua_" + filter.getSamplingUnitAttributeKey() + " is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
-				engine.addParameterValue((String) filter.getValue() );
-				return "( sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " ? )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				String p1 = engine.addParameterValue((String) filter.getValue() );
+				return "( sua.sua_" + filter.getSamplingUnitAttributeKey() + " " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 		}else{
 			throw new IllegalStateException("Only numeric and text sampling unit attribute types are supported."); //$NON-NLS-1$
@@ -329,16 +330,17 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			engine.addParameterValue(value1.toLowerCase());
-			String x = "LOWER(" + engine.tablePrefix(Mission.class) + ".id) " + asSql(filter.getOperator()) + " ? "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			String p1 = engine.addParameterValue(value1.toLowerCase());
+			String x = "LOWER(" + engine.tablePrefix(Mission.class) + ".id) " + asSql(filter.getOperator()) + " " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			return x;
 		}else if (filter.getType() == MissionFilter.Type.UUID){
 			try{
-				engine.addParameterValue(SmartUtils.decodeHex(filter.getValue()));
+				String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getValue()));
+				return engine.tablePrefix(Mission.class) + ".uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 			}catch (Exception ex){
 				throw new SQLException (ex);
 			}
-			return engine.tablePrefix(Mission.class) + ".uuid = ? "; //$NON-NLS-1$
+			
 		}
 		return ""; //$NON-NLS-1$
 	}
@@ -365,19 +367,19 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}
 
 		if (filter.getAttributeType() == AttributeType.NUMERIC) {
-			engine.addParameterValue((Double) filter.getValue());
-			return " (mt.ma_" + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " ?) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue((Double) filter.getValue());
+			return " (mt.ma_" + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " " + p1 + ") "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		} else if (filter.getAttributeType() == AttributeType.TEXT) {
 			String queryStr = ""; //$NON-NLS-1$
 
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS
 					|| filter.getOperator() == Operator.STR_NOTCONTAINS) {
-				engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " ? )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 	
+				String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
 			} else if (filter.getOperator() == Operator.STR_EQUALS) {
-				engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " ? )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				String p1 = engine.addParameterValue(val.toLowerCase());
+				queryStr = "( LOWER(mt.ma_" + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 			return queryStr;
 		} else if (filter.getAttributeType() == AttributeType.LIST) {
@@ -385,8 +387,8 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 				// any option
 				return "( mt.ma_" + filter.getAttributeKey() + " is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
-				engine.addParameterValue((String) filter.getValue());
-				return "( mt.ma_" + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " ? )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p1 = engine.addParameterValue((String) filter.getValue());
+				return "( mt.ma_" + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 		}
 		return ""; //$NON-NLS-1$
@@ -424,16 +426,16 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return ""; //$NON-NLS-1$
 		}
 		if (bits.length == 1){
-			engine.addParameterValue(bits[0].toString());
-			f = " ( cast(" + field + " as date) >= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue(bits[0].toString());
+			f = " ( cast(" + field + " as date) >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
-			engine.addParameterValue(bits[0].toString());
-			engine.addParameterValue(bits[1].toString());
-			f = " ( cast(" + field + " as date) >= ? and cast(" + field + " as date) <= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			String p1 = engine.addParameterValue(bits[0].toString());
+			String p2 = engine.addParameterValue(bits[1].toString());
+			f = " ( cast(" + field + " as date) >= " + p1 + " and cast(" + field + " as date) <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 		}else if (bits.length == 2){
-			engine.addParameterValue(bits[0].toString());
-			engine.addParameterValue(bits[1].toString());
-			f = " ( cast(" + field + " as date) >= ? and cast(" + field + " as date) < ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+			String p1 = engine.addParameterValue(bits[0].toString());
+			String p2 = engine.addParameterValue(bits[1].toString());
+			f = " ( cast(" + field + " as date) >= " + p1 + " and cast(" + field + " as date) < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 		}
 
 		return f;

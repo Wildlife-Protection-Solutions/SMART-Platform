@@ -63,16 +63,18 @@ public class AreaFilterVisitor implements IFilterVisitor{
 			if (!addedTableNames.contains(areaTableName)) {
 				addedTableNames.add(areaTableName);
 				
+				String p1 = engine.addParameterValue(ff.getType().name());
+				String p2 = engine.addParameterValue(ff.getKey());
+				
 				sql.append(" left join "); //$NON-NLS-1$
 				sql.append(engine.tableName(Area.class));
 				sql.append(" as "); //$NON-NLS-1$
 				sql.append( areaTableName);
 				sql.append(" on "); //$NON-NLS-1$
 				sql.append( areaTableName +".ca_uuid = " + engine.tablePrefix(Waypoint.class) + ".ca_uuid and "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append( areaTableName +".area_type = ? and "); //$NON-NLS-1$ 
-				engine.addParameterValue(ff.getType().name());
-				sql.append(areaTableName + ".keyid = ? "); //$NON-NLS-1$
-				engine.addParameterValue(ff.getKey());
+				sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$ 
+				sql.append(areaTableName + ".keyid = " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+				
 				
 			}
 		}

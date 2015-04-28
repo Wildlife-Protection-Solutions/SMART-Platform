@@ -175,11 +175,12 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			
 			String value2 = SmartUtils.stripQuotes((String)filter.getValue());
 			try {
-				engine.addParameterValue(SmartUtils.decodeHex(value2));
+				String p1 = engine.addParameterValue(SmartUtils.decodeHex(value2));
+				x += " employee_uuid = " + p1 + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (Exception e) {
 				throw new SQLException(e);
 			}
-			x += " employee_uuid = ?)"; //$NON-NLS-1$ 
+			 
 			return x;			
 		}		
 		String prefix = engine.tablePrefix(filter.getPatrolOption().getPatrolAttributeClass());
@@ -190,8 +191,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		
 		if (option.getType() == PatrolQueryOptionType.STRING){
 			if (option == PatrolQueryOption.PATROL_TYPE){
-				engine.addParameterValue(SmartUtils.stripQuotes((String)filter.getValue()) );
-				String x = prefix + "." + option.getColumnName() + " = ?"; //$NON-NLS-1$ //$NON-NLS-2$ 
+				String p1 = engine.addParameterValue(SmartUtils.stripQuotes((String)filter.getValue()) );
+				String x = prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
 				return x;				
 			}else{
 				String value1 = SmartUtils.stripQuotes((String)filter.getValue());
@@ -199,8 +200,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 						filter.getOperator() == Operator.STR_NOTCONTAINS){
 					value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				engine.addParameterValue(value1.toLowerCase());
-				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " ? "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				String p1 = engine.addParameterValue(value1.toLowerCase());
+				String x = "LOWER(" + prefix + "." + option.getColumnName() + ") " + asSql(filter.getOperator()) + " " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				return x;
 			}
 		}else if (option.getType() == PatrolQueryOptionType.BOOLEAN){
@@ -211,8 +212,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			//uuid
 			try{
 				String value2 = SmartUtils.stripQuotes((String)filter.getValue());
-				engine.addParameterValue(SmartUtils.decodeHex(value2));
-				String x = prefix + "." + option.getColumnName() + " = ? "; //$NON-NLS-1$ //$NON-NLS-2$ 
+				String p1 = engine.addParameterValue(SmartUtils.decodeHex(value2));
+				String x = prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
 				return x;
 			}catch (Exception ex){
 				throw new IllegalStateException(ex);
@@ -220,8 +221,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			
 		}else if (option.getType() == PatrolQueryOptionType.KEY){
 			String key = SmartUtils.stripQuotes((String)filter.getValue());
-			engine.addParameterValue(key);
-			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue(key);
+			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			
 		}
 		return ""; //$NON-NLS-1$	
@@ -239,11 +240,11 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		if (filter.getOperator().equals(Operator.STR_EQUALS)){
 			if (filter.getValue().length() != 0){
 				try {
-					engine.addParameterValue(SmartUtils.decodeHex(SmartUtils.stripQuotes(filter.getValue())));
+					String p1 = engine.addParameterValue(SmartUtils.decodeHex(SmartUtils.stripQuotes(filter.getValue())));
+					return prefix + ".uuid = " + p1; //$NON-NLS-1$
 				} catch (Exception e) {
 					throw new SQLException(e);
 				}
-				return prefix + ".uuid = ? "; //$NON-NLS-1$
 			}else{
 				return "false"; //$NON-NLS-1$
 			}
@@ -281,16 +282,16 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return ""; //$NON-NLS-1$
 		}
 		if (bits.length == 1){
-			engine.addParameterValue(bits[0].toString());
-			f = " ( " +field + " >= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$
+			String p1 = engine.addParameterValue(bits[0].toString());
+			f = " ( " +field + " >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
-			engine.addParameterValue(bits[0].toString());
-			engine.addParameterValue(bits[1].toString());
-			f = " ( " + field + " >= ? and " + field  + " <= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue(bits[0].toString());
+			String p2 = engine.addParameterValue(bits[1].toString());
+			f = " ( " + field + " >= " + p1 + " and " + field  + " <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
-			engine.addParameterValue(bits[0].toString());
-			engine.addParameterValue(bits[1].toString());
-			f = " ( " + field + " >= ? and " + field  + " < ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue(bits[0].toString());
+			String p2 = engine.addParameterValue(bits[1].toString());
+			f = " ( " + field + " >= " + p1 + " and " + field  + " < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 
 		return f;

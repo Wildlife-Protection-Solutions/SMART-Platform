@@ -22,5 +22,13 @@ public interface IQueryEngine {
 	 */
 	public String tableName(Class<?> clazz);
 	
-	public void addParameterValue(Object parameter);
+	/**
+	 * Adds a parameter to the set of parameters for the currently active
+	 * query.  It will return the name of the parameter which should be
+	 * used in the query.  Parameters are named so that query
+	 * strings can be build in any order (the where statement then
+	 * the from statement, then combine); this way the order of the parameters
+	 * don't matter.  @see org.wcs.smart.query.common.engine.NamedPreparedStatement
+	 */
+	public String addParameterValue(Object parameter);
 }
