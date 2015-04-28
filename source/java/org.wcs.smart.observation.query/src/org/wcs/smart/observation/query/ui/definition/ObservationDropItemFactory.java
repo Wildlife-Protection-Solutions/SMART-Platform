@@ -183,7 +183,9 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 					return createAttributeListGroupByDropItem((Attribute) object.getObject());
 				}
 			} else if (object.getObject() instanceof CategoryAttribute) {
-				return createAttributeGroupByDropItem((CategoryAttribute) object.getObject());
+				if ( ((CategoryAttribute)object.getObject()).getAttribute().getType() == AttributeType.LIST ){
+					return createAttributeListGroupByDropItem((CategoryAttribute) object.getObject());
+				}
 			} else if (object.getObject() instanceof AttributeTreeNode) {
 				
 				if (object.getObject2() != null) {

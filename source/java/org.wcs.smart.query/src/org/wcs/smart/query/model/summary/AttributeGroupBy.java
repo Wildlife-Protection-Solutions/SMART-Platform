@@ -271,14 +271,14 @@ public class AttributeGroupBy implements IGroupBy {
 				}
 				category.getFullCategoryName();
 				if (attributeType == AttributeType.LIST) {
-					it = BasicDropItemFactory.INSTANCE.createAttributeGroupByDropItem(new CategoryAttribute(category, attribute));
-				} else {
+					it = BasicDropItemFactory.INSTANCE.createAttributeListGroupByDropItem(new CategoryAttribute(category, attribute));
+				} else if (attributeType == AttributeType.TREE ){
 					it = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute,getTreeLevel(), category);
 				}
 			} else {
 				if (attributeType == AttributeType.LIST) {
 					it = BasicDropItemFactory.INSTANCE.createAttributeListGroupByDropItem(attribute);
-				} else {
+				} else if (attributeType == AttributeType.TREE ) {
 					it = BasicDropItemFactory.INSTANCE.createAttributeTreeNodeGroupByDropItem(attribute,getTreeLevel());
 				}
 			}
