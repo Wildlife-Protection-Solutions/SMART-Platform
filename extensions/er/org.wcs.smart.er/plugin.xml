@@ -1077,5 +1077,11 @@
          </adapter>
       </factory>
    </extension>
-
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="help/toc.xml"
+            primary="false">
+      </toc>
+   </extension>
 </plugin>

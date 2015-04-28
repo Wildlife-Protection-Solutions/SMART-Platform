@@ -72,10 +72,11 @@ public class AreaFilterVisitor implements IFilterVisitor{
 				sql.append(" as "); //$NON-NLS-1$
 				sql.append( areaTableName);
 				sql.append(" on "); //$NON-NLS-1$
-				sql.append( areaTableName +".area_type = '" + ff.getType().name() + "' and "); //$NON-NLS-1$ //$NON-NLS-2$
-				//TODO: escape ff.getKey()
-				String key = ff.getKey();
-				sql.append(areaTableName + ".keyid = '" + key + "' "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append( areaTableName +".area_type = ?  and "); //$NON-NLS-1$
+				engine.addParameterValue(ff.getType().name());
+				sql.append(areaTableName + ".keyid = ? "); //$NON-NLS-1$
+				engine.addParameterValue(ff.getKey());
+				
 				if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && 
 						!usedTables.contains(MissionTrack.class)){
 

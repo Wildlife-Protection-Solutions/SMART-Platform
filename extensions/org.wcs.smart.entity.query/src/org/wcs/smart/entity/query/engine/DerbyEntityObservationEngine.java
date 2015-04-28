@@ -52,7 +52,6 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -99,23 +98,16 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
-					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
-					try {
+					try(ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)) { //$NON-NLS-1$
 						if (rs.next()) { 
 							result.setItemCount(rs.getInt(1));
 						}
-					} finally {
-						rs.close();
 					}
-
 					//setting waypoint count
-					rs = c.createStatement().executeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp"); //$NON-NLS-1$ //$NON-NLS-2$
-					try {
+					try (ResultSet rs = c.createStatement().executeQuery("select count(*) from (SELECT DISTINCT WP_UUID from " + queryDataTable + ") wp")){ //$NON-NLS-1$ //$NON-NLS-2$
 						if (rs.next()) { 
 							result.setWpCount(rs.getInt(1));
 						}
-					} finally {
-						rs.close();
 					}
 					
 				} finally {
@@ -165,9 +157,9 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
 		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
 		QueryPlugIn.logSql(sql);
-		ResultSet rs = c.createStatement().executeQuery(sql);
 		
-		try {
+		
+		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid == null)
@@ -198,8 +190,6 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				statement.setBytes( depth+1, uuid);
 				statement.executeUpdate();
 			}
-		} finally {
-			rs.close();
 		}
 	}
 	
@@ -256,13 +246,13 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		sql.append(queryDataTable);
 		QueryPlugIn.logSql(sql.toString());
 
-		ResultSet rs = c.createStatement().executeQuery(sql.toString());
+		
 		String updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
 		String q1 = updateSql + "ob_observer = ? where ob_observer_uuid = ?"; //$NON-NLS-1$
 		QueryPlugIn.logSql(q1);
 		PreparedStatement observerSt = c.prepareStatement(q1);
 		int cnt = 0;
-		try {
+		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				String name = getEmployeeName(uuid, session);
@@ -279,8 +269,6 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				}
 			}
 			observerSt.executeBatch();
-		} finally {
-			rs.close();
 		}
 		monitor.worked(12);
 		if (monitor.isCanceled()) {
@@ -333,13 +321,13 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
 		
 		QueryPlugIn.logSql(sql.toString());
-		ResultSet rs = c.createStatement().executeQuery(sql);
 		
-		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql);
+		
+		String sql2 = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
+		QueryPlugIn.logSql(sql2.toString());
+		PreparedStatement statement = c.prepareStatement(sql2);
 		int count = 0;
-		try {
+		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
@@ -356,8 +344,6 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				}
 			}
 			statement.executeBatch();
-		} finally {
-			rs.close();
 		}
 	
 		//do the same thing for entity list and tree attributes
@@ -375,6 +361,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		}
 		
 		StringBuilder s = new StringBuilder();
+		clearParameters();
 		s.append("SELECT DISTINCT "); //$NON-NLS-1$
 		s.append(tablePrefix(EntityAttributeValue.class) + "." + linkedData.getUuidColumn()); //$NON-NLS-1$
 		s.append(", "); //$NON-NLS-1$
@@ -393,24 +380,28 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		s.append(tablePrefix(Entity.class ) + ".entity_type_uuid "); //$NON-NLS-1$
 		s.append(" WHERE keyid IN ("); //$NON-NLS-1$
 		for (String et : entityTypes){
-			s.append("'" + et + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+			s.append("?,"); //$NON-NLS-1$
+			addParameterValue(et);
 		}
 		s.deleteCharAt(s.length()-1);
 		s.append(")"); //$NON-NLS-1$
 		s.append(" AND ca_uuid IN ("); //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-				s.append("x'" + SmartUtils.encodeHex(ca.getUuid()) + "',");	 //$NON-NLS-1$ //$NON-NLS-2$
+				s.append("?,");	 //$NON-NLS-1$
+				addParameterValue(ca.getUuid());
 			}
 			s.deleteCharAt(s.length()-1);	
 		}else{
-			s.append("x'" + SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			s.append("?"); //$NON-NLS-1$
+			addParameterValue(SmartDB.getCurrentConservationArea().getUuid());
 		}
 		s.append(")"); //$NON-NLS-1$
 		
 		QueryPlugIn.logSql(s.toString());
-		rs = c.createStatement().executeQuery(s.toString());
-		try {
+		PreparedStatement ps = c.prepareStatement(s.toString());
+		setParameters(ps);
+		try(ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
@@ -427,10 +418,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				}
 			}
 			statement.executeBatch();
-		} finally {
-			rs.close();
-		}
-		
+		}		
 	}
 	
 	/**

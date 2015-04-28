@@ -177,8 +177,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 
 				@Override
 				public void execute(Connection c) throws SQLException {
-					ResultSet q = c.createStatement().executeQuery(sql);
-					try{
+					try(ResultSet q = c.createStatement().executeQuery(sql)){
 						q.next();
 						double minx = q.getDouble(1);
 						double maxx = q.getDouble(2);
@@ -186,8 +185,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 						double maxy = q.getDouble(4);
 					
 						bounds = new Envelope(minx, maxx, miny, maxy);
-					}finally{
-						q.close();
 					}
 				}	
 			});
@@ -362,8 +359,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		}
 		attrSql.append(')');
 
-		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
-		try {
+		try (ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
 			for (IResultItem rii: result){
 				EntityQueryResultItem it = (EntityQueryResultItem) rii;
@@ -374,8 +370,6 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 					}
 				}
 			}
-		} finally {
-			rs.close();
 		}
 		
 		
@@ -411,31 +405,31 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 			sql.append(")"); //$NON-NLS-1$
 			QueryPlugIn.logSql(sql.toString());
 			
-			rs = c.createStatement().executeQuery(sql.toString());
-			while(rs.next()){
-				byte[] obuuid = rs.getBytes(1);
-				String entityKey = rs.getString(2);
-				String entityAttributeKey = rs.getString(3);
-				Object value = null;
-				if (rs.getObject(4) != null){
-					value = rs.getDouble(4);
-				}else if (rs.getObject(5) != null){
-					value = rs.getString(5);
-				}else if (rs.getObject(6) != null){
-					value = rs.getString(6);
-				}else if (rs.getObject(7) != null){
-					value = rs.getString(7);
-				}
+			try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
+				while(rs.next()){
+					byte[] obuuid = rs.getBytes(1);
+					String entityKey = rs.getString(2);
+					String entityAttributeKey = rs.getString(3);
+					Object value = null;
+					if (rs.getObject(4) != null){
+						value = rs.getDouble(4);
+					}else if (rs.getObject(5) != null){
+						value = rs.getString(5);
+					}else if (rs.getObject(6) != null){
+						value = rs.getString(6);
+					}else if (rs.getObject(7) != null){
+						value = rs.getString(7);
+					}
 				
-				for (IResultItem rii : result){
-					EntityQueryResultItem it = (EntityQueryResultItem) rii;
-					if (it.getObservationUuid() != null &&
+					for (IResultItem rii : result){
+						EntityQueryResultItem it = (EntityQueryResultItem) rii;
+						if (it.getObservationUuid() != null &&
 							Arrays.equals(it.getObservationUuid(),obuuid )) {
-						it.addEntityAttribute(entityKey, entityAttributeKey, value);
+							it.addEntityAttribute(entityKey, entityAttributeKey, value);
+						}
 					}
 				}
 			}
-				
 			
 		}
 		
