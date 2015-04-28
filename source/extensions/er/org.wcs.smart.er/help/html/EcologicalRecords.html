@@ -1,16 +1,426 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="windows-1252"?>
+<!--?xml version="1.0" encoding="iso-8859-1"?-->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
   <title>Requirements</title>
   <meta name="generator" content="Amaya, see http://www.w3.org/Amaya/" />
   <link href="smart_help.css" type="text/css" rel="stylesheet" />
 </head>
 
 <body>
-<h1><a id="EcologicalRecords">Ecological Records Plugin</a></h1>
+<h1>Ecological Records Plugin</h1>
 
+<h4><a id="Overview">Overview</a></h4>
+
+<p>The Ecological Records PlugIn add--on is a framework for creating and
+recording systamtic surveys.</p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="terms">Terminology</a></h4>
+
+<p><strong>Survey Design -</strong> This is the template for the survey data
+collection. This includes the survey properties, mission properties, and
+sampling unit definition, but not any data. The data associated with a survey
+design is represented by surveys and missions.</p>
+
+<p><strong>Survey -</strong> A collection of missions that represent a single
+complete set of survey data (visiting all sampling units making required
+observations). A survey may be of any length and may consist of one or more
+missions. Each survey is associated with a survey design.</p>
+
+<p>Users can use the survey/survey design relationship in multiple ways. For
+cases where the survey design may only change slightly over time, a single
+survey design can be created and reused for multiple surveys (the design can be
+updated over time, adding new attributes/sampling units as required). This
+method is preferred if cross-survey querying is required. Users will easily be
+able to query across all surveys with the same design.</p>
+
+<p>A second method would be to create a new survey design for each survey. In
+this case, query options will be limited (for cross survey querying). Users
+will only be able to query across properties that are applicable to all surveys
+(data model, dates, etc.) but NOT survey design specific properties (sampling
+units).</p>
+
+<p><strong>Mission -</strong> Represents the act of going out into the field to
+gather survey information. Missions generally involve a group of members
+visiting one or more sampling units and making a collection of observations.
+Each mission is associated with a survey.</p>
+
+<p style="text-align:justify;line-height:2em;"><strong>Sampling Unit -</strong>
+A sampling unit is a transect or plot where observations are made one or more
+times. Plots may occur along a transect. </p>
+<ul>
+  <li style="text-align:justify;line-height:2em;">A <strong>transect</strong>
+    is a linear feature that may be defined as a Strip or Open transect. Strip
+    transects confine observations to a certain distance from the transect.
+    Open transects have no limits on observations.</li>
+  <li style="text-align:justify;line-height:2em;"><strong>Plots</strong> are
+    point locations with a defined area. The area may be infinite (or
+    undefined). Plots may occur along a transect at fixed intervals.</li>
+</ul>
+
+<p><strong>Sampling Unit Attribute -</strong> An attribute associated with the
+sampling unit. There is one attribute per unit, so a linear sampling unit will
+only have one attribute (instead of one attribute per coordinate).</p>
+
+<p><strong>Configurable Model -</strong> This is a view of a SMART Conservation
+Area data model. Configurable models allow users to reconfigure data models
+into views that are specific for a given survey. Users can add, remove, and
+move items; and provide default values for attributes.</p>
+
+<p>For the purposes of a survey design, users can only select a single
+configurable model. This model should include the items from the data model
+that are of interest for all of the survey design’s purposes and missions.</p>
+
+<p><strong>Incident (Waypoint) -</strong> An incident is a set of one or more
+observations, associated with a date and time, and an explicit geographic
+location.</p>
+
+<p><strong>Observation -</strong> An observation is a direct sighting or sign
+of an entity (animal, plant, habitat, etc.). Each observation consists of a
+data model category and the category’s associated attributes. Therefore, the
+information captured in the observation is directly related to how the data
+model is configured.</p>
+
+<p></p>
+
+<h4><a id="fielddatamenu">Field Data Menu Options</a></h4>
+
+<table border="1">
+  <caption></caption>
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>Menu </strong></td>
+      <td><strong>Description</strong></td>
+    </tr>
+    <tr>
+      <td><img alt="New Mission" src="images/NewMission.jpg" width="110" height="19"
+      /></td>
+      <td>Creates new missions once a Survey Design has been created. The
+        wizard will create a new Survey or provide an option to select a
+        previously created Survey.</td>
+    </tr>
+    <tr>
+      <td><img alt="New Survey" src="images/NewSurvey.jpg" width="110" height="19"
+      /></td>
+      <td>Creates a new Survey</td>
+    </tr>
+    <tr>
+      <td><img alt="New Survey Design" src="images/NewSurveyDesign.jpg" width="134"
+        height="21" /></td>
+      <td>Opens a wizard to create a new Survey Design</td>
+    </tr>
+    <tr>
+      <td><img alt="Export Missions" src="images/ExportMissions.jpg" width="128"
+        height="21" /></td>
+      <td>Exports Missions</td>
+    </tr>
+    <tr>
+      <td><img alt="Import Missions" src="images/ImportMissions.jpg" width="128"
+        height="21" /></td>
+      <td>Import Missions</td>
+    </tr>
+    <tr>
+      <td><img alt="Export Survey Design" src="images/ExportSurveyDesigns.jpg"
+        width="159" height="21" /></td>
+      <td>Exports Survey Designs</td>
+    </tr>
+    <tr>
+      <td><img alt="Import Survey Design" src="images/ImportSurveyDesigns.jpg"
+        width="165" height="21" /></td>
+      <td>Imports a Survey Design</td>
+    </tr>
+    <tr>
+      <td><img alt="Mission properties" src="images/MissionProperties.jpg" width="144"
+        height="19" /></td>
+      <td>A list of all possible mission properties for the Conservation
+      Area</td>
+    </tr>
+    <tr>
+      <td><img alt="Sampling Unit Attributes" src="images/SamplingUnitAttributes.jpg"
+        width="173" height="21" /></td>
+      <td>A list of all possible sampling unit attributes for the Conservation
+        Area</td>
+    </tr>
+    <tr>
+      <td><img alt="View Surveys" src="images/ViewSurveys.jpg" width="103" height="22"
+        /></td>
+      <td>Views all surveys, survey designs and missions</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="createnew">Configuring Ecological Records Plugin</a></h4>
+
+<p>The Eological Records Plugin requires users to configure attribtues and
+create the necessary templates and frameworks before any data collection can
+take place. </p>
+
+<p></p>
+
+<p><strong>Steps in Creating Ecological Records (Surveys)</strong></p>
+<ol>
+  <li>Mission Properties and Sampling Unit Attributes</li>
+  <li>Survey Design and Sampling Units</li>
+  <li>Surveys and Missions</li>
+  <li>Populating Missions</li>
+</ol>
+
+<p></p>
+
+<h4><a id="missionandsu">Mission Properties and Sampling Unit
+Attributes</a></h4>
+
+<p></p>
+
+<p>Any attributes associated with Missions or Sampling Units are generally
+configured before the Survey Designs, Surveys and Missions are created</p>
+
+<p><em style="color:#ff0000">Note: Setting up Mission and Sampling Units are
+not a mandatory requirements. </em></p>
+
+<p>Mission and Sampling Unit attributes are created using the same procedures
+to create data model attributes.</p>
+
+<p></p>
+
+<p><strong>Mission Properties</strong></p>
+
+<p><img alt="Mission Properties" src="images/MissionProperties.png" width="446"
+height="741" /></p>
+
+<p>Mission Property attributes are created in the same way as Data Model
+attributes. </p>
+
+<p>Mission Property attribute data types can be: numeric, text or list</p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="createnewdesign">Surveys Design and Sampling Unit
+Attributes</a></h4>
+
+<p>Survey Designs are the templates that Surveys and Missions depend upon.
+Survey Designs can be linked to multiple Surveys and Missions. Once a Survey
+Design has been created then Surveys and Missions can be developed.</p>
+
+<p>A wizard will guide users through the process of developing a Survey Design.
+</p>
+
+<p></p>
+
+<p><strong>Summary Tab </strong></p>
+
+<p><img alt="Survey Design Summary" src="images/SurveyDesignSummary.jpg" width="769"
+height="844" /></p>
+
+<p></p>
+
+<p><strong>Name</strong> - name of the Survey Design</p>
+
+<p><strong>Start Date</strong> - start date of the Survey Design</p>
+
+<p><strong>End Date</strong> - end date of the Survey Design</p>
+
+<p><strong>Configurable Model</strong> - an option to chose a configurable data
+model instead of the Conservation Area data model</p>
+
+<p><strong>Observation Options</strong> - an option to use extra attributes of
+Distance &amp; Direction and/or Observer</p>
+
+<p><strong>Description</strong> - a description of the Surv ey design</p>
+
+<p><strong>Properties</strong> - additional attributes specifically configured
+for the Survey Design</p>
+
+<p><strong>Status</strong> - surveys designs can be designated as Active or
+Inactive</p>
+
+<p><strong>Key</strong> - the primary key of the survey designs</p>
+
+<p><strong>Mission Properties</strong> - additional properties that will be
+collected by each mission associated with this survey design</p>
+
+<p></p>
+
+<p><strong>Sampling Units Tab</strong></p>
+
+<p>In the Sampling Units tab users can import, export and modify the Sampling
+Units associated with the Survey Design.</p>
+
+<p><img alt="Sampling Units Tab" src="images/SamplingUnitsTab.jpg" width="775"
+height="721" /></p>
+
+<p></p>
+
+<p><strong>Sampling Units</strong></p>
+
+<p><img alt="Sampling Units" src="images/SU_Attributes.jpg" width="525" height="290"
+/></p>
+
+<p></p>
+
+<p>Sampling Unit attributes are created in the same way as Data Model
+attributes. </p>
+
+<p>Sampling Units attribute data types can be: numeric, text or list.</p>
+
+<p></p>
+
+<p></p>
+
+<p><strong>Survey Data Tab</strong></p>
+
+<p><img alt="Survey Data Tab" src="images/SurveyDataTab.jpg" width="791" /></p>
+
+<p>In the survey data tab users can create new Surveys or Missions. Double
+clicking on the Mission will open the mission editor window.</p>
+
+<p></p>
+
+<p></p>
+
+<h4><a id="createnewsurvey">Surveys and Missions</a></h4>
+
+<h5>Creating a new Survey</h5>
+
+<p>A Survey can be created after a Survey Design has been developed. A survey
+consists of a Survey name and a date range.</p>
+
+<h5>Creating a Mission</h5>
+
+<p>A Mission is the final element in the workflow and is assigned to be part of
+a Survey which is then part of a Survey Design.</p>
+
+<p>Survey Design --&gt; Survey --&gt; Mission</p>
+
+<p>A wizard will guide users through the steps needed to create a Mission. Once
+the Mission wizard has completed the next steps are to populate the mission
+with data collected during that mission.</p>
+
+<p></p>
+
+<h4><a id="populatemission">Populating Missions</a></h4>
+
+<p>The Mission editor window shares the same design as the Patrol editor window
+allowing users already familiar with Patrol data entry to populate Missions.</p>
+
+<p></p>
+
+<p><strong>Summary Tab</strong></p>
+
+<p><img alt="Mission Editor" src="images/MissionEditor.jpg" width="791" /></p>
+
+<p></p>
+
+<p><strong>Mission ID -</strong> Name or ID of the Mission</p>
+
+<p><strong>Survey ID - </strong>The Name or ID of the Survey</p>
+
+<p><strong>Members - </strong>Members / Employees of the Conservation Area that
+took part in the Mission</p>
+
+<p><strong>Mission Properties - </strong>Mission properties or attributes
+associated with the Mission</p>
+
+<p><strong>Comments - </strong> Comments or description providing extra
+information about the mission</p>
+
+<p><strong>Start Date - </strong>start date for the Mission</p>
+
+<p><strong>End Date - </strong>end date for the Mission</p>
+
+<p></p>
+
+<p><strong>Date Tabs</strong></p>
+
+<p>Each day of the Mission will have its own tab. The day tab is where the
+survey information will be entered.</p>
+
+<p><img alt="Date Tab" src="images/MissionDateTab.jpg" width="791" /></p>
+
+<p></p>
+
+<p><strong>Start Time</strong> - the start time for the Mission</p>
+
+<p><strong>End Time</strong> - the end time for the Mission</p>
+
+<p><strong>Rest Minutes</strong> - the number of minutes of rest taken by the
+mission members</p>
+
+<p><strong>edit &amp; import</strong> - open the Mission track editor for
+importing and editing GPS track data</p>
+
+<p><strong>Import Waypoints</strong> - imports GPS, GPX or CSV data</p>
+
+<p><strong>Add Waypoint</strong> - allows for a manually created waypoint</p>
+
+<p><strong>Delete Waypoint</strong> - deletes a waypoint</p>
+
+<p><strong>Move Waypoint</strong> - moves the waypoint to another day. It does
+not move the location of the waypoint.</p>
+
+<p></p>
+
+<p></p>
+
+<table border="1">
+  <col />
+  <col />
+  <tbody>
+    <tr>
+      <td><strong>Icon</strong></td>
+      <td><strong>Description</strong></td>
+    </tr>
+    <tr>
+      <td><img alt="import track" src="images/importTrack.jpg" width="45" height="35"
+        /></td>
+      <td style="line-height:1.5em;">Imports new track information directly
+        from a GPS device or from a saved GPX file</td>
+    </tr>
+    <tr>
+      <td><img alt="edit track" src="images/editTrack.jpg" width="29" height="32"
+      /></td>
+      <td style="line-height:1.5em;">Edits the track point information allowing
+        users to edit individual coordinates</td>
+    </tr>
+    <tr>
+      <td><img alt="split track" src="images/splitTrack.jpg" width="30" height="34"
+      /></td>
+      <td style="line-height:1.5em;">Splits the selected track at a selected
+        location</td>
+    </tr>
+    <tr>
+      <td><img alt="merge track" src="images/mergeTrack.jpg" width="42" height="35"
+      /></td>
+      <td style="line-height:1.5em;">Merges two track segments into a single
+        segment</td>
+    </tr>
+    <tr>
+      <td><img alt="delete track" src="images/deleteTrack.jpg" width="42" height="35"
+        /></td>
+      <td style="line-height:1.5em;">Deletes a track or segment of track</td>
+    </tr>
+  </tbody>
+</table>
+
+<p></p>
+
+<p></p>
+
+<p></p>
 </body>
 </html>
