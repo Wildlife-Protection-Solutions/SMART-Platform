@@ -84,13 +84,11 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 					if (monitor.isCanceled()) return;
 					monitor.subTask(Messages.DerbyObservationEngine_Progress_FetchSize);
 					//setting result size
-					ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable); //$NON-NLS-1$
-					try {
+					
+					try (ResultSet rs = c.createStatement().executeQuery("select count(*) from " + queryDataTable)){ //$NON-NLS-1$
 						if (rs.next()) { 
 							result.setItemCount(rs.getInt(1));
 						}
-					} finally {
-						rs.close();
 					}
 				}catch (Exception ex){
 					throw new SQLException(ex);

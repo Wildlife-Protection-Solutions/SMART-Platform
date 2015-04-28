@@ -425,7 +425,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}
 		if (bits.length == 1){
 			engine.addParameterValue(bits[0].toString());
-			f = " ( cast(" + field + " as date) >= '" + bits[0].toString() + "' ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			f = " ( cast(" + field + " as date) >= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
 			engine.addParameterValue(bits[0].toString());
 			engine.addParameterValue(bits[1].toString());

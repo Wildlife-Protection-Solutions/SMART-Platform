@@ -22,10 +22,13 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashSet;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -34,6 +37,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
+import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -116,7 +120,25 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 					throw new RuntimeException(ex);
 				}
 				
-				
+				//temp engine to support query parameters for query
+				DerbyEntityQueryEngine tempEngine = new DerbyEntityQueryEngine() {
+					
+					@Override
+					protected String getTemporaryTableSelectClause(boolean includeObservations) {
+						return null;
+					}
+					
+					@Override
+					protected String getTemporaryTableCreateClause(String tableName) {
+						return null;
+					}
+					
+					@Override
+					protected EntityQueryResultItem asQueryResultItem(ResultSet rs,
+							Session session) throws SQLException {
+						return null;
+					}
+				};
 				tmp = new StringBuilder();
 				tmp.append("INSERT INTO "); //$NON-NLS-1$
 				tmp.append(tmpTable);
@@ -177,16 +199,20 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				
 				tmp.append(" WHERE "); //$NON-NLS-1$
 				tmp.append(engine.tablePrefix(EntityType.class));
-				tmp.append(".keyId = '" + ff.getEntityKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.append(".keyId = ? "); //$NON-NLS-1$ 
+				tempEngine.addParameterValue(ff.getEntityKey());
 				tmp.append(" AND "); //$NON-NLS-1$
 				tmp.append(engine.tablePrefix(EntityAttribute.class));
-				tmp.append(".keyId = '" + ff.getEntityAttributeKey() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+				tmp.append(".keyId = ? "); //$NON-NLS-1$
+				tempEngine.addParameterValue(ff.getEntityAttributeKey());
 				tmp.append(" AND "); //$NON-NLS-1$
 				try{
-					tmp.append(EntityFilterToSqlGenerator.INSTANCE.asSql(catFilter, engine.tablePrefix(EntityType.class), engine));
+					tmp.append(EntityFilterToSqlGenerator.INSTANCE.asSql(catFilter, engine.tablePrefix(EntityType.class), tempEngine));
 					
 					QueryPlugIn.logSql(tmp.toString());
-					c.createStatement().execute(tmp.toString());
+					PreparedStatement ps = c.prepareStatement(tmp.toString());
+					tempEngine.setParameters(ps);
+					ps.executeUpdate();
 				}catch (Exception ex){
 					throw new RuntimeException(ex);
 				}
