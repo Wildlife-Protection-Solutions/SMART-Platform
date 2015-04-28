@@ -283,8 +283,9 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		DerbyFilterToSqlGenerator sqlGenerator = new DerbyFilterToSqlGenerator();
 		
 		//entity type
-		sql.append(tablePrefix(EntityType.class) + ".keyid = ?"); //$NON-NLS-1$
-		addParameterValue(query.getEntityType().getKeyId()); 
+		String p1 = addParameterValue(query.getEntityType().getKeyId());
+		sql.append(tablePrefix(EntityType.class) + ".keyid = " + p1); //$NON-NLS-1$
+		 
 		
 		//ca filter
 		sql.append(" AND "); //$NON-NLS-1$
@@ -302,18 +303,17 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		//entity filter		
 		if (query.getEntityFilter().getType() == EntityFilterType.ALLACTIVE){
+			String p2 = addParameterValue(Entity.Status.ACTIVE.name());
 			sql.append(" AND "); //$NON-NLS-1$
-			sql.append(tablePrefix(Entity.class) + ".status = ?"); //$NON-NLS-1$ 
-			addParameterValue(Entity.Status.ACTIVE.name());
-			
+			sql.append(tablePrefix(Entity.class) + ".status = " + p2); //$NON-NLS-1$
 		}else if (query.getEntityFilter().getType() == EntityFilterType.CUSTOM){
 			if(query.getEntityFilter().getEntities().size() > 0){
 				sql.append(" AND "); //$NON-NLS-1$
 				sql.append(tablePrefix(Entity.class) + ".uuid IN ("); //$NON-NLS-1$
 			
 				for (Entity e : query.getEntityFilter().getEntities()){
-					sql.append("?,"); //$NON-NLS-1$
-					addParameterValue(e.getUuid());
+					String p2 = addParameterValue(e.getUuid());
+					sql.append(p2 + ","); //$NON-NLS-1$
 				}
 				sql.deleteCharAt(sql.length() - 1);
 				sql.append(")"); //$NON-NLS-1$
@@ -325,9 +325,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 	
 	
 		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement ps = c.prepareStatement(sql.toString());
-		setParameters(ps);
-		ps.executeUpdate();
+		parseQueryString(c, sql.toString()).executeUpdate();
 		
 		//create index on entity_uuid
 		sql = new StringBuilder();
@@ -402,14 +400,11 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				sql.append(queryDataTable);
 				sql.append(".entity_uuid AND "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttribute.class));
-				sql.append(".keyid = ?)"); //$NON-NLS-1$
-				addParameterValue(ea.getKeyId()); 
-				
-				
+				p1 = addParameterValue(ea.getKeyId());
+				sql.append(".keyid = " + p1 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				 
 				QueryPlugIn.logSql(sql.toString());
-				ps = c.prepareStatement(sql.toString());
-				setParameters(ps);
-				ps.executeUpdate();
+				parseQueryString(c, sql.toString()).executeUpdate();
 				
 			}else if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN || 
 					ea.getDmAttribute().getType() == AttributeType.NUMERIC){
@@ -426,13 +421,11 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				sql.append(queryDataTable);
 				sql.append(".entity_uuid AND "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttribute.class));
-				sql.append(".keyid = ?)"); //$NON-NLS-1$
-				addParameterValue(ea.getKeyId());
+				p1 = addParameterValue(ea.getKeyId());
+				sql.append(".keyid = " + p1 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 				
 				QueryPlugIn.logSql(sql.toString());
-				ps = c.prepareStatement(sql.toString());
-				setParameters(ps);
-				ps.executeUpdate();
+				parseQueryString(c, sql.toString()).executeUpdate();
 			}else if (ea.getDmAttribute().getType() == AttributeType.LIST ||
 					ea.getDmAttribute().getType() == AttributeType.TREE){
 				
@@ -471,7 +464,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				sql.append(" ( SELECT CASE "); //$NON-NLS-1$
 				
 				QueryPlugIn.logSql(sql2.toString());
-				ps = c.prepareStatement(sql2.toString());
+				PreparedStatement ps = c.prepareStatement(sql2.toString());
 				ps.setObject(1, query.getEntityType().getKeyId());
 				ps.setObject(2, ea.getKeyId());
 				boolean toUpdate = false;
@@ -488,11 +481,11 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 							//tree
 							sql.append(".tree_node_uuid "); //$NON-NLS-1$
 						}
-						sql.append(" = ? "); //$NON-NLS-1$
-						addParameterValue( uuid ); 
+						p1 = addParameterValue( uuid );
+						sql.append(" = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+						p1 = addParameterValue(key);
+						sql.append("THEN cast(" + p1 + " as varchar(" + Label.MAX_LENGTH + ")) " ); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 						
-						sql.append("THEN cast(? as varchar(" + Label.MAX_LENGTH + ")) " ); //$NON-NLS-1$ //$NON-NLS-2$ 
-						addParameterValue(key);
 						toUpdate = true;
 					}
 					
@@ -510,14 +503,13 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				sql.append(queryDataTable);
 				sql.append(".entity_uuid AND "); //$NON-NLS-1$
 				sql.append(tablePrefix(EntityAttribute.class));
-				sql.append(".keyid = ?)"); //$NON-NLS-1$
-				addParameterValue(ea.getKeyId());
+				p1 = addParameterValue(ea.getKeyId());
+				sql.append(".keyid = " + p1 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				
 				
 				if (toUpdate){
 					QueryPlugIn.logSql(sql.toString());
-					ps = c.prepareStatement(sql.toString());
-					setParameters(ps);
-					ps.executeUpdate();
+					parseQueryString(c, sql.toString()).executeUpdate();
 				}
 			}
 		}

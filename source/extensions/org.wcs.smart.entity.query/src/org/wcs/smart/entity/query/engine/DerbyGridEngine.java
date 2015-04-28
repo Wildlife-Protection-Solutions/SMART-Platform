@@ -23,7 +23,6 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -235,11 +234,12 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 				sql.append( tablePrefix.get(Waypoint.class));
 				sql.append(".x,");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
-				sql.append(".y,?, ?, ?, ?) as tile_id ");  //$NON-NLS-1$
-				addParameterValue(gridDef.getCrs().toWKT());
-				addParameterValue(minX);
-				addParameterValue(minY);
-				addParameterValue(size);
+				sql.append(".y,"); //$NON-NLS-1$
+				sql.append(addParameterValue(gridDef.getCrs().toWKT()) + ","); //$NON-NLS-1$
+				sql.append(addParameterValue(minX) + ","); //$NON-NLS-1$
+				sql.append(addParameterValue(minY) + ","); //$NON-NLS-1$
+				sql.append(addParameterValue(size));
+				sql.append(") as tile_id ");  //$NON-NLS-1$
 				sql.append(" FROM "); //$NON-NLS-1$
 				sql.append(tableNames.get(WaypointObservation.class));
 				sql.append( " as "); //$NON-NLS-1$
@@ -272,8 +272,9 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 				sql.append(".attribute_uuid = "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(Attribute.class));
 				sql.append(".uuid"); //$NON-NLS-1$
-				sql.append(" AND keyid = ? "); //$NON-NLS-1$ 
-				addParameterValue(key);
+				String p1 = addParameterValue(key);
+				sql.append(" AND keyid = " + p1); //$NON-NLS-1$ 
+				
 				
 				sql.append(" JOIN "); //$NON-NLS-1$
 				sql.append(tableNames.get(Waypoint.class));
@@ -286,6 +287,9 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 				sql.append(".wp_uuid"); //$NON-NLS-1$
 				
 				if (tmp.getCategoryKey() != null){
+					String p2 = addParameterValue(tmp.getCategoryKey());
+					String p3 = addParameterValue(tmp.getCategoryKey().substring(0, tmp.getCategoryKey().length() -1 ) + "/"); //$NON-NLS-1$
+					
 					sql.append(" JOIN "); //$NON-NLS-1$
 					sql.append(tableNames.get(Category.class));
 					sql.append( " as "); //$NON-NLS-1$
@@ -295,9 +299,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 					sql.append(".category_uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(Category.class));
 					sql.append( ".uuid" ); //$NON-NLS-1$
-					sql.append(" AND Hkey >= ? and Hkey < ? "); //$NON-NLS-1$
-					addParameterValue(tmp.getCategoryKey());
-					addParameterValue(tmp.getCategoryKey().substring(0, tmp.getCategoryKey().length() -1 ) + "/"); //$NON-NLS-1$
+					sql.append(" AND Hkey >= " + p2 + " and Hkey < " + p3 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				
 				if (tmp.getAttributeType() == AttributeType.LIST){
@@ -310,8 +312,9 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 					sql.append( tablePrefix.get(WaypointObservationAttribute.class));
 					sql.append(".list_element_uuid and "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(AttributeListItem.class));
-					sql.append(".keyid = ? "); //$NON-NLS-1$
-					addParameterValue(tmp.getItemKey()); 
+					String p2 = addParameterValue(tmp.getItemKey()); 
+					sql.append(".keyid = " + p2); //$NON-NLS-1$
+					
 				}else if (tmp.getAttributeType() == AttributeType.TREE){
 					sql.append(" join "); //$NON-NLS-1$
 					sql.append(tableNames.get(AttributeTreeNode.class));
@@ -323,19 +326,17 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 					sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 					sql.append(".tree_node_uuid "); //$NON-NLS-1$
 					sql.append(" and ("); //$NON-NLS-1$
+					String p2 = addParameterValue(tmp.getItemKey());
+					String p3 = addParameterValue(tmp.getItemKey().substring(0, tmp.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					sql.append(".hkey >= ? and "); //$NON-NLS-1$
+					sql.append(".hkey >= " + p2 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					sql.append(".hkey < ? )"); //$NON-NLS-1$
-					addParameterValue(tmp.getItemKey());
-					addParameterValue(tmp.getItemKey().substring(0, tmp.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
+					sql.append(".hkey < " + p3 + " )"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 				sql.append(") as foo group by tile_id"); //$NON-NLS-1$
 				QueryPlugIn.logSql(sql.toString());
-				PreparedStatement ps = c.prepareStatement(sql.toString());
-				setParameters(ps);
-				rs = ps.executeQuery();
+				rs = parseQueryString(c, sql.toString()).executeQuery();
 			}else if(value instanceof CategoryValueItem){
 				CategoryValueItem tmp = (CategoryValueItem)value;
 				strAgg = "count"; //$NON-NLS-1$
@@ -353,13 +354,14 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 				}else{
 					sql.append(dataTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
 				}
+				String p1 = addParameterValue(gridDef.getCrs().toWKT());
+				String p2 = addParameterValue(minX);
+				String p3 = addParameterValue(minY);
+				String p4 = addParameterValue(size);
+				
 				sql.append("smart.computeTileId("); //$NON-NLS-1$
 				sql.append(tablePrefix.get(Waypoint.class)+ ".x,"); //$NON-NLS-1$
-				sql.append(tablePrefix.get(Waypoint.class) + ".y,?, ?, ?, ?) as tile_id"); //$NON-NLS-1$
-				addParameterValue(gridDef.getCrs().toWKT());
-				addParameterValue(minX);
-				addParameterValue(minY);
-				addParameterValue(size);
+				sql.append(tablePrefix.get(Waypoint.class) + ".y," + p1 + "," + p2 + "," + p3 + "," + p4 + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(" JOIN " + dataTable  //$NON-NLS-1$
 						+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$
@@ -373,9 +375,10 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 						+ ".uuid" //$NON-NLS-1$
 						+ " AND "); //$NON-NLS-1$
 				if (tmp.getCategoryHKey() != null){
-					sql.append("hkey >= ? and hkey < ? "); //$NON-NLS-1$
-					addParameterValue(tmp.getCategoryHKey());
-					addParameterValue(tmp.getCategoryHKey().substring(0,  tmp.getCategoryHKey().length()-1) + "/"); //$NON-NLS-1$
+					p1 = addParameterValue(tmp.getCategoryHKey());
+					p2 = addParameterValue(tmp.getCategoryHKey().substring(0,  tmp.getCategoryHKey().length()-1) + "/"); //$NON-NLS-1$
+					sql.append("hkey >= " + p1 + " and hkey < " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
 				}else{
 					sql.append(" hkey is not null "); //$NON-NLS-1$
 				}
@@ -390,9 +393,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 				sql.append("tile_id"); //$NON-NLS-1$
 				
 				QueryPlugIn.logSql(sql.toString());
-				PreparedStatement ps = c.prepareStatement(sql.toString());
-				setParameters(ps);
-				rs = ps.executeQuery();
+				rs = parseQueryString(c, sql.toString()).executeQuery();
 			}else{
 				throw new SQLException(Messages.DerbyGridEngine_Error_GridValueNotSupported);	
 			}

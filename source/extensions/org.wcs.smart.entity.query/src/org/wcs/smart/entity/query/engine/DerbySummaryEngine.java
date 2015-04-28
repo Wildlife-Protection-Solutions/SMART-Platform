@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.query.engine;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -458,13 +457,14 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			sql.append(tablePrefix(WaypointObservationAttribute.class));
 			sql.append(".number_value is not null and "); //$NON-NLS-1$
 			sql.append(tablePrefix(Attribute.class));
-			sql.append(".keyid = ? "); //$NON-NLS-1$
-			addParameterValue(attributeItem.getAttributeKey());
+			String p1 = addParameterValue(attributeItem.getAttributeKey());
+			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+			
 			if (attributeItem.getCategoryKey() != null) {
-				sql.append(" AND ( foo.cat_hkey >= ? and foo.cat_hkey < ? )"); //$NON-NLS-1$
-				addParameterValue(attributeItem.getCategoryKey());
-				addParameterValue(attributeItem.getCategoryKey().substring(0,
+				p1 = addParameterValue(attributeItem.getCategoryKey());
+				String p2 = addParameterValue(attributeItem.getCategoryKey().substring(0,
 						attributeItem.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
+				sql.append(" AND ( foo.cat_hkey >= " + p1 + " and foo.cat_hkey < " + p2 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			if (groupBySql.length() > 0) {
 				sql.append(" GROUP BY "); //$NON-NLS-1$
@@ -473,10 +473,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 
 			// do something here with sql
 			QueryPlugIn.logSql(sql.toString());
-			PreparedStatement ps = c.prepareStatement(sql.toString());
-			setParameters(ps);
-			ResultSet rs = ps.executeQuery();
-
+			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		} else if (attributeItem.getAttributeType() == AttributeType.LIST) {
 			StringBuilder fromSql = new StringBuilder();
@@ -542,17 +539,18 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			sql.append(tablePrefix(AttributeListItem.class));
 			sql.append(".uuid and "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeListItem.class));
-			sql.append(".keyid = ? "); //$NON-NLS-1$
-			addParameterValue(attributeItem.getItemKey());
+			String p1 = addParameterValue(attributeItem.getItemKey());
+			sql.append(".keyid = " + p1); //$NON-NLS-1$
 			sql.append(" and "); //$NON-NLS-1$
-		
 			sql.append(tablePrefix(Attribute.class));
-			sql.append(".keyid = ? "); //$NON-NLS-1$
-			addParameterValue(attributeItem.getAttributeKey()); 
+			p1 = addParameterValue(attributeItem.getAttributeKey());
+			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+			 
 			if (attributeItem.getCategoryKey() != null){	
-				sql.append("AND ( temp.cat_hkey >= ? and temp.cat_hkey < ? ) "); //$NON-NLS-1$
-				addParameterValue(attributeItem.getCategoryKey());
-				addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1) + "/"); //$NON-NLS-1$
+				p1 = addParameterValue(attributeItem.getCategoryKey());
+				String p2 = addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1) + "/"); //$NON-NLS-1$
+				sql.append("AND ( temp.cat_hkey >= " + p1 + " and temp.cat_hkey < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -562,9 +560,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			
 			//do something here with sql
 			QueryPlugIn.logSql(sql.toString());
-			PreparedStatement ps = c.prepareStatement(sql.toString());
-			setParameters(ps);
-			ResultSet rs = ps.executeQuery();
+			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		} else if (attributeItem.getAttributeType() == AttributeType.TREE) {
@@ -631,22 +627,23 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".uuid and ("); //$NON-NLS-1$
 			
+			String p1 = addParameterValue(attributeItem.getItemKey());
+			String p2 = addParameterValue(attributeItem.getItemKey().substring(0, attributeItem.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
+			
 			sql.append(tablePrefix(AttributeTreeNode.class));
-			sql.append(".hkey >= ? "); //$NON-NLS-1$
-			addParameterValue(attributeItem.getItemKey());
+			sql.append(".hkey >= " + p1); //$NON-NLS-1$
 			sql.append(" and "); //$NON-NLS-1$
 			sql.append(tablePrefix(AttributeTreeNode.class));
-			sql.append(".hkey < ? "); //$NON-NLS-1$
-			addParameterValue(attributeItem.getItemKey().substring(0, attributeItem.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
+			sql.append(".hkey < " + p2); //$NON-NLS-1$
 			sql.append(") and "); //$NON-NLS-1$
 		
 			sql.append(tablePrefix(Attribute.class));
-			sql.append(".keyid = ? "); //$NON-NLS-1$
-			addParameterValue(attributeItem.getAttributeKey());
+			p1 = addParameterValue(attributeItem.getAttributeKey());
+			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			if (attributeItem.getCategoryKey() != null){
-				sql.append("AND ( temp.cat_hkey >= ? and temp.cat_hkey < ? ) "); //$NON-NLS-1$
-				addParameterValue(attributeItem.getCategoryKey());
-				addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1) + "/"); //$NON-NLS-1$
+				p1 = addParameterValue(attributeItem.getCategoryKey());
+				p2 = addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1) + "/"); //$NON-NLS-1$
+				sql.append("AND ( temp.cat_hkey >= " + p1 + " and temp.cat_hkey < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -656,10 +653,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			
 			//do something here with sql
 			QueryPlugIn.logSql(sql.toString());
-			PreparedStatement ps = c.prepareStatement(sql.toString());
-			setParameters(ps);
-			ResultSet rs = ps.executeQuery();
-			
+			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		}	
 		return null;
@@ -767,9 +761,9 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 		if (hkey == null){
 			sql.append(" cat_hkey is not null "); //$NON-NLS-1$
 		}else{
-			sql.append(" ( cat_hkey >= ? and cat_hkey < ? )"); //$NON-NLS-1$
-			addParameterValue(categoryItem.getCategoryHKey());
-			addParameterValue(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1) + "/"); //$NON-NLS-1$
+			String p1 = addParameterValue(categoryItem.getCategoryHKey());
+			String p2 = addParameterValue(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1) + "/"); //$NON-NLS-1$
+			sql.append(" ( cat_hkey >= " + p1 + " and cat_hkey < " + p2 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		sql.append(") foo"); //$NON-NLS-1$
 		
@@ -780,10 +774,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 		
 		//do something here with sql
 		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement ps = c.prepareStatement(sql.toString());
-		setParameters(ps);
-		ResultSet rs = ps.executeQuery();
-
+		ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 		return createValueResults(rs, groupBy, categoryItem.asString());
 	}
 	
@@ -841,9 +832,8 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 						fromSql.append( EntityFilterToSqlGenerator.INSTANCE.asSql(caFilter, areaPrefix, this));
 					}
 					fromSql.append(" and "); //$NON-NLS-1$
-					fromSql.append(areaPrefix + ".area_type = ? "); //$NON-NLS-1$ 
-					addParameterValue(agb.getAreaType().name());
-					
+					String p1 = addParameterValue(agb.getAreaType().name());
+					fromSql.append(areaPrefix + ".area_type = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 					groupBySql.append(key);
 				} 
 				
@@ -920,9 +910,9 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					fromSql.append(" and (temp.cat_hkey >= ? and temp.cat_hkey < ? ) "); //$NON-NLS-1$
-					addParameterValue(catkey);
-					addParameterValue(catkey.substring(0, catkey.length() - 1) + "/"); //$NON-NLS-1$
+					String p1 = addParameterValue(catkey);
+					String p2 = addParameterValue(catkey.substring(0, catkey.length() - 1) + "/"); //$NON-NLS-1$
+					fromSql.append(" and (temp.cat_hkey >= " + p1 + " and temp.cat_hkey < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
@@ -955,8 +945,8 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 				fromSql.append(tablePrefix(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
 				fromSql.append(".uuid AND "); //$NON-NLS-1$
 				fromSql.append(tablePrefix(Attribute.class) + "_" + itemcnt); //$NON-NLS-1$
-				fromSql.append(".keyid = ? "); //$NON-NLS-1$
-				addParameterValue(((AttributeGroupBy)gb).getAttributeKey());
+				String p1 = addParameterValue(((AttributeGroupBy)gb).getAttributeKey());
+				fromSql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (gb instanceof EntityAttributeGroupBy){
 				EntityAttributeGroupBy egb = (EntityAttributeGroupBy)gb;
 				

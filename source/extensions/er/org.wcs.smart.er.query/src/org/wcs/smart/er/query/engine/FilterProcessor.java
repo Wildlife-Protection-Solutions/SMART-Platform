@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.engine;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -464,9 +463,7 @@ public class FilterProcessor implements IFilterProcessor {
 			}
 		}
 		QueryPlugIn.logSql(sql.toString());
-		PreparedStatement ps = c.prepareStatement(sql.toString());
-		engine.setParameters(ps);
-		ps.executeUpdate();
+		engine.parseQueryString(c, sql.toString()).executeUpdate();
 	}
 	
 	
@@ -613,13 +610,11 @@ public class FilterProcessor implements IFilterProcessor {
 					sql.append(" t on t.uuid = " + prefix(WaypointObservationAttribute.class) + ".tree_node_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sql.append("WHERE "); //$NON-NLS-1$
-				sql.append(" " + prefix(Attribute.class) + ".keyid = ? "); //$NON-NLS-1$ //$NON-NLS-2$
-				engine.addParameterValue(key.getKey());
-
+				String p1 = engine.addParameterValue(key.getKey());
+				sql.append(" " + prefix(Attribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
 				QueryPlugIn.logSql(sql.toString());
-				PreparedStatement ps = c.prepareStatement(sql.toString());
-				engine.setParameters(ps);
-				ps.executeUpdate();
+				engine.parseQueryString(c, sql.toString()).executeUpdate();;
 
 				// - create index
 				sql = new StringBuilder();
@@ -773,14 +768,11 @@ public class FilterProcessor implements IFilterProcessor {
 					sql.append(" l on l.uuid = " + prefix(MissionPropertyValue.class) + ".list_element_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				sql.append("WHERE "); //$NON-NLS-1$
-				sql.append(" " + prefix(MissionAttribute.class) + ".keyid = ? "); //$NON-NLS-1$ //$NON-NLS-2$
-				engine.addParameterValue(key.getKey());
-				
+				String p1 = engine.addParameterValue(key.getKey());
+				sql.append(" " + prefix(MissionAttribute.class) + ".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				QueryPlugIn.logSql(sql.toString());
-				PreparedStatement ps = c.prepareStatement(sql.toString());
-				engine.setParameters(ps);
-				ps.executeUpdate();
+				engine.parseQueryString(c, sql.toString()).executeUpdate();
 
 				// - create index
 				sql = new StringBuilder();
@@ -944,13 +936,11 @@ public class FilterProcessor implements IFilterProcessor {
 				}
 				
 				sql.append("WHERE "); //$NON-NLS-1$
-				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = ?"); //$NON-NLS-1$
-				engine.addParameterValue(key.getKey());
-
+				String p1 = engine.addParameterValue(key.getKey());
+				sql.append(prefix(SamplingUnitAttribute.class) + ".keyid = " + p1); //$NON-NLS-1$
+				
 				QueryPlugIn.logSql(sql.toString());
-				PreparedStatement ps = c.prepareStatement(sql.toString());
-				engine.setParameters(ps);
-				ps.executeUpdate();
+				engine.parseQueryString(c, sql.toString()).executeUpdate();
 
 				// - create index
 				sql = new StringBuilder();

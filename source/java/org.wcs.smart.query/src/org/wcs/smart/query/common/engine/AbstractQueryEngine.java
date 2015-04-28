@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -27,7 +29,7 @@ import org.wcs.smart.util.SmartUtils;
 
 public class AbstractQueryEngine implements IQueryEngine {
 
-	protected ArrayList<Object> currentParameters = new ArrayList<Object>();
+	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
 	
 	/**
 	 * Maps database tables to a prefix to use in the query.
@@ -214,25 +216,33 @@ public class AbstractQueryEngine implements IQueryEngine {
 		c.createStatement().execute(sql.toString());
 	}
 
-	public void addParameterValue(Object parameter){
-		currentParameters.add(parameter);
+	
+	/**
+	 * @see org.wcs.smart.query.common.engine.IQueryEngine#addParameterValue(java.lang.Object)
+	 */
+	public String addParameterValue(Object parameter){
+		String name = ":param_" + currentParameters.size(); //$NON-NLS-1$
+		currentParameters.put(name, parameter);
+		return name;
 	}
 	
 	public void clearParameters(){
 		currentParameters.clear();
 	}
 	
-	public void setParameters(PreparedStatement ps) throws SQLException{
+	public PreparedStatement parseQueryString(Connection connection, String query) throws SQLException{
+		NamedPreparedStatement pp = new NamedPreparedStatement(connection, query);
 		StringBuilder log = new StringBuilder();
-		for (int i = 0; i < currentParameters.size(); i ++){
-			if (currentParameters.get(i) instanceof byte[]){
-				ps.setBytes(i+1, (byte[])currentParameters.get(i));
-				log.append("x'"+ SmartUtils.encodeHex((byte[])currentParameters.get(i)) + ", "); //$NON-NLS-1$ //$NON-NLS-2$
+		for (Entry<String, Object> entry : currentParameters.entrySet()){
+			if (entry.getValue() instanceof byte[]){
+				pp.setBytes(entry.getKey(), (byte[])entry.getValue());
+				log.append("x'"+ SmartUtils.encodeHex((byte[])entry.getValue()) + ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				ps.setObject(i+1, currentParameters.get(i));
-				log.append(currentParameters.get(i).toString() + ", "); //$NON-NLS-1$
+				pp.setObject(entry.getKey(), entry.getValue());
+				log.append(entry.getValue().toString().toString() + ", "); //$NON-NLS-1$
 			}
 		}
 		QueryPlugIn.logSql(log.toString());
+		return pp.getStatement();
 	}
 }

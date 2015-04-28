@@ -80,8 +80,8 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 		sb.append(engine.tablePrefix(Waypoint.class));
 		sb.append(".source "); //$NON-NLS-1$
 		sb.append(asSql(filter.getOperator()));
-		engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
-		sb.append(" ? "); //$NON-NLS-1$
+		String p1 = engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
+		sb.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		return sb.toString();
 	}
 
@@ -98,38 +98,38 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
 			return " (" + tableName + ".value  > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC){
-			engine.addParameterValue((Double)filter.getValue());
-			return " ( " + tableName + ".value " + asSql(filter.getOperator()) + " ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue((Double)filter.getValue());
+			return " ( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}else if (filter.getAttributeType() == AttributeType.TEXT){
 			String queryStr = ""; //$NON-NLS-1$
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " ? )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p1 = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " " + p1 + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " ? )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p1 = engine.addParameterValue(val.toLowerCase());
+				queryStr = "( LOWER(" + tableName + ".value) " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.DATE){
 			String date1 = (String) filter.getValue();
 			String date2 = (String) filter.getValue2();
-			engine.addParameterValue(date1);
-			engine.addParameterValue(date2);
-			return "( " + tableName + ".value is not null AND DATE(" + tableName + ".value) " + " " + asSql(filter.getOperator()) + " CAST(? as DATE) " + asSql(Operator.AND) + " CAST(? as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			String p1 = engine.addParameterValue(date1);
+			String p2 = engine.addParameterValue(date2);
+			return "( " + tableName + ".value is not null AND DATE(" + tableName + ".value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
 			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
 				//any option
 				return "( " + tableName + ".value is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				engine.addParameterValue((String)filter.getValue());
-				return "( " + tableName + ".value " + asSql(filter.getOperator()) + " ? )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p1 = engine.addParameterValue((String)filter.getValue());
+				return "( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 		}else if (filter.getAttributeType() == AttributeType.TREE){
-			engine.addParameterValue((String)filter.getValue());
-			engine.addParameterValue(((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/"); //$NON-NLS-1$
-			return "( " + tableName + ".value >= ? and " + tableName + ".value < ?)";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue((String)filter.getValue());
+			String p2 = engine.addParameterValue(((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/"); //$NON-NLS-1$
+			return "( " + tableName + ".value >= " + p1 + " and " + tableName + ".value < " + p2 + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		return "";  //$NON-NLS-1$
 	}

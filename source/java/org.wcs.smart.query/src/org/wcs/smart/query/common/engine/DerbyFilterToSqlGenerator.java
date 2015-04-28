@@ -97,16 +97,16 @@ public class DerbyFilterToSqlGenerator {
 	 * Observer source filter
 	 */
 	protected String asSql(ObserverFilter filter, IQueryEngine engine) throws SQLException{
-		StringBuilder sb = new StringBuilder();
-		sb.append(engine.tablePrefix(WaypointObservation.class));
-		sb.append(".employee_uuid "); //$NON-NLS-1$
-		sb.append(" =  ? "); //$NON-NLS-1$
 		try {
-			engine.addParameterValue(SmartUtils.decodeHex(filter.getValue()));
+			String param = engine.addParameterValue(SmartUtils.decodeHex(filter.getValue())); 
+			StringBuilder sb = new StringBuilder();
+			sb.append(engine.tablePrefix(WaypointObservation.class));
+			sb.append(".employee_uuid "); //$NON-NLS-1$
+			sb.append(" =  " + param); //$NON-NLS-1$
+			return sb.toString();
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
-		return sb.toString();
 	}
 	
 	/*
@@ -140,38 +140,36 @@ public class DerbyFilterToSqlGenerator {
 		if (filter.getAttributeType() == AttributeType.BOOLEAN){
 			return " (qa." + filter.getAttributeKey() + " > 0.5 ) ";			//$NON-NLS-1$ //$NON-NLS-2$
 		}else if (filter.getAttributeType() == AttributeType.NUMERIC){
-			engine.addParameterValue((Double)filter.getValue());
-			return " (qa." + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			
+			return " (qa." + filter.getAttributeKey() + " " + asSql(filter.getOperator()) + " " + engine.addParameterValue((Double)filter.getValue()) +" ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 		}else if (filter.getAttributeType() == AttributeType.TEXT){
 			String queryStr = ""; //$NON-NLS-1$
 			String val = (String)filter.getValue();
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
-				engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " ? )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 	
+				String param = engine.addParameterValue("%" + val.toLowerCase() + "%"); //$NON-NLS-1$ //$NON-NLS-2$ 
+				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + param + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 	
 			}else if (filter.getOperator() == Operator.STR_EQUALS){
-				engine.addParameterValue(val.toLowerCase());
-				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " ? )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				String param = engine.addParameterValue(val.toLowerCase()); 
+				queryStr = "( LOWER(qa." + filter.getAttributeKey() + ") " + asSql(filter.getOperator()) + " " + param + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.DATE){
-			String date1 = (String) filter.getValue();
-			String date2 = (String) filter.getValue2();
-			engine.addParameterValue(date1);
-			engine.addParameterValue(date2);
-			return "( qa." + filter.getAttributeKey() + " is not null AND DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " CAST(? as DATE) " + asSql(Operator.AND) + " CAST(? as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			String p1 = engine.addParameterValue((String) filter.getValue()); 
+			String p2 = engine.addParameterValue((String) filter.getValue2()); 
+			return "( qa." + filter.getAttributeKey() + " is not null AND DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
 			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
 				//any option
 				return "( qa."+ filter.getAttributeKey()  + " is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				engine.addParameterValue(filter.getValue());
-				return "( qa."+ filter.getAttributeKey()  + " " + asSql(filter.getOperator()) + " ? )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
+				String p = engine.addParameterValue(filter.getValue()); 
+				return "( qa."+ filter.getAttributeKey()  + " " + asSql(filter.getOperator()) + " " + p + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ 
 			}
 		}else if (filter.getAttributeType() == AttributeType.TREE){
-			engine.addParameterValue(filter.getValue());
-			engine.addParameterValue(((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/"); //$NON-NLS-1$
-			return "( qa." + filter.getAttributeKey() + " >= ? and qa." + filter.getAttributeKey() + "< ? )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = engine.addParameterValue(filter.getValue()); 
+			String p2 = engine.addParameterValue(((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/"); //$NON-NLS-1$ 
+			return "( qa." + filter.getAttributeKey() + " >= " + p1 + " and qa." + filter.getAttributeKey() + "< " + p2 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		
 		}
 		return ""; //$NON-NLS-1$
@@ -203,9 +201,9 @@ public class DerbyFilterToSqlGenerator {
 			throw new IllegalStateException(Messages.CategoryFilter_InvalidPrefix);
 		}
 		
-		engine.addParameterValue(keyPart);
-		engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$
-		return "( " + prefix + ".hkey >= ? and " + prefix + ".hkey < ?) "; //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$	
+		String p1 = engine.addParameterValue(keyPart); 
+		String p2 = engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$ 
+		return "( " + prefix + ".hkey >= "+ p1 + " and " + prefix + ".hkey < " + p2 + ") "; //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$	
 	}
 	
 	/*
@@ -257,8 +255,8 @@ public class DerbyFilterToSqlGenerator {
 			if (i != 0){
 				sb.append(","); //$NON-NLS-1$
 			}
-			sb.append("?"); //$NON-NLS-1$
-			engine.addParameterValue(localFilters.get(i));
+			String p = engine.addParameterValue(localFilters.get(i));
+			sb.append(p); 
 		}
 		sb.append(")"); //$NON-NLS-1$
 		return sb.toString();
@@ -287,17 +285,15 @@ public class DerbyFilterToSqlGenerator {
 			return ""; //$NON-NLS-1$
 		}
 
+		String p1 = engine.addParameterValue(bits[0].toString());
 		if (bits.length == 1){
-			engine.addParameterValue(bits[0].toString());
-			f = " ( cast(" + field + " as date) >= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ 
+			f = " ( cast(" + field + " as date) >= " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ 
 		}else if (bits.length == 2 && filter.getDateFilterOption().isEndDateInclusive()){
-			engine.addParameterValue(bits[0].toString());
-			engine.addParameterValue(bits[1].toString());
-			f = " ( cast(" + field + " as date) >= ? and cast(" + field  + " as date) <= ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p2 = engine.addParameterValue(bits[1].toString());
+			f = " ( cast(" + field + " as date) >= "+ p1 + " and cast(" + field  + " as date) <= " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}else if (bits.length == 2){
-			engine.addParameterValue(bits[0].toString());
-			engine.addParameterValue(bits[1].toString());
-			f = " ( cast(" + field + " as date) >= ? and cast(" + field  + " as date) < ? ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p2 = engine.addParameterValue(bits[1].toString());
+			f = " ( cast(" + field + " as date) >= " + p1 + " and cast(" + field  + " as date) < " + p2 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		return f;
 	}

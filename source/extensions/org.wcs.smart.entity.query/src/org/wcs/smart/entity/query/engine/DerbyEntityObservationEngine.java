@@ -380,28 +380,27 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		s.append(tablePrefix(Entity.class ) + ".entity_type_uuid "); //$NON-NLS-1$
 		s.append(" WHERE keyid IN ("); //$NON-NLS-1$
 		for (String et : entityTypes){
-			s.append("?,"); //$NON-NLS-1$
-			addParameterValue(et);
+			String p1 = addParameterValue(et);
+			s.append(p1 + ","); //$NON-NLS-1$
+			
 		}
 		s.deleteCharAt(s.length()-1);
 		s.append(")"); //$NON-NLS-1$
 		s.append(" AND ca_uuid IN ("); //$NON-NLS-1$
 		if (SmartDB.isMultipleAnalysis()){
 			for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-				s.append("?,");	 //$NON-NLS-1$
-				addParameterValue(ca.getUuid());
+				String p1 = addParameterValue(ca.getUuid());
+				s.append(p1 + ",");	 //$NON-NLS-1$
 			}
 			s.deleteCharAt(s.length()-1);	
 		}else{
-			s.append("?"); //$NON-NLS-1$
-			addParameterValue(SmartDB.getCurrentConservationArea().getUuid());
+			String p1 = addParameterValue(SmartDB.getCurrentConservationArea().getUuid());
+			s.append(p1);
 		}
 		s.append(")"); //$NON-NLS-1$
 		
 		QueryPlugIn.logSql(s.toString());
-		PreparedStatement ps = c.prepareStatement(s.toString());
-		setParameters(ps);
-		try(ResultSet rs = ps.executeQuery()) {
+		try(ResultSet rs = parseQueryString(c, s.toString()).executeQuery()) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
