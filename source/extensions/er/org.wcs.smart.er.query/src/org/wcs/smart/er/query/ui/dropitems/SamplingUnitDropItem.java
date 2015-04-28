@@ -80,7 +80,8 @@ public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropI
 	public String getErrorMessage(){
 		if (sd == null){
 			return Messages.SamplingUnitDropItem_DesignRequired;
-		}else if (!sd.equals(su.getSurveyDesign())){
+		}else if (su.getUuid() != null && !sd.equals(su.getSurveyDesign())){
+			//null uuid is none option; which doesn't need sd
 			return Messages.SamplingUnitDropItem_InvalidDesign;
 		}
 		return null;
