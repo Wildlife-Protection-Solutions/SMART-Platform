@@ -21,9 +21,15 @@
  */
 package org.wcs.smart.query.event;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.ui.model.application.MApplication;
+import org.eclipse.e4.ui.model.application.MApplicationElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.IDataModelListener;
@@ -44,6 +50,9 @@ import org.wcs.smart.util.E3Utils;
 public class QueryDataModelModifiedListener implements IDataModelListener {
 
 	@Inject private EPartService pService;
+	@Inject private EModelService mService;
+	@Inject private IEclipseContext currentContext;
+	
 	
 	public QueryDataModelModifiedListener() {
 		DataModelManager.getInstance().addChangeListener(this);
@@ -59,7 +68,6 @@ public class QueryDataModelModifiedListener implements IDataModelListener {
 		// clear the current data model
 		QueryDataModelManager.getInstance().clearDataModel();
 		
-		
 		for (MPart p : pService.getParts()){
 			Object t = E3Utils.getSourceObject(p);
 			if (t instanceof IQueryEditor){
@@ -67,9 +75,20 @@ public class QueryDataModelModifiedListener implements IDataModelListener {
 			}
 		}
 		
-		MPart part = pService.findPart(QueryItemView.ID);
-		((QueryItemView)E3Utils.getSourceObject(part)).refresh();
-
+		//part service does not include parts that are not in the current perspective so we are
+		//going to search the model for our query item view.
+		List<MPart> allParts = mService.findElements(((MApplication)currentContext.get(MApplication.class)),
+				MPart.class,EModelService.IN_ANY_PERSPECTIVE,new org.eclipse.e4.ui.workbench.Selector(){
+					@Override
+					public boolean select(MApplicationElement element) {
+						if (element.getElementId().equals(QueryItemView.ID)){
+							return true;
+						}
+						return false;
+					}});  
+		if (allParts.size() > 0){
+			((QueryItemView)E3Utils.getSourceObject(allParts.get(0))).refresh();	
+		}
 	}
 
 }
