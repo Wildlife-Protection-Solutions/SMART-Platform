@@ -1,5 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <toc label="SMART Ecological Records" link_to="../org.wcs.smart.help/toc.xml#SmartExtensions" topic="help/html/EcologicalRecords.html">
       <topic href="help/html/EcologicalRecords.html" label="Ecological Records Plugin">
+         <topic href="help/html/EcologicalRecords.html#Overview" label="Overview">
+         </topic>
+         <topic href="help/html/EcologicalRecords.html#terms" label="Terminology">
+         </topic>
+         <topic href="help/html/EcologicalRecords.html#terms" label="Field Data Menu Options">
+         </topic>
+         <topic href="help/html/EcologicalRecords.html#createnew" label="Configuring Ecological Records Plugin&lt;">
+         </topic>
+         <topic href="help/html/EcologicalRecords.html#missionandsu" label="Mission Properties and Sampling Unit">
+         </topic>
+         <topic href="help/html/EcologicalRecords.html#createnewdesign" label="Surveys Design and Sampling Unit">
+         </topic>
+         <topic href="help/html/EcologicalRecords.html#createnewsurvey" label="Surveys and Missions">
+         </topic>
+         <topic href="help/html/EcologicalRecords.html#populatemission" label="Populating Missions">
+         </topic>
       </topic>
 </toc>
