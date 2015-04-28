@@ -121,7 +121,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		return new AreaGroupByItem(area);
 	}
 	
-	public DropItem createAttributeGroupByDropItem(CategoryAttribute cat){
+	public DropItem createAttributeListGroupByDropItem(CategoryAttribute cat){
 		return new AttributeListGroupByDropItem(cat);
 	}
 	public DropItem createAttributeTreeNodeGroupByDropItem(Attribute att, int treeLevel, Category cat){
