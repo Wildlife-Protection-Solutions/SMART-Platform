@@ -439,11 +439,8 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						monitor.worked(1);
 						
 						monitor.subTask(Messages.DataModelPropertyPage_Progress_WritingXml);
-						FileOutputStream fout = new FileOutputStream(f);
-						try{
+						try(FileOutputStream fout = new FileOutputStream(f)){
 							XmlSmartDataModelManager.writeDataModel(xml,fout);
-						}finally{
-							fout.close();
 						}
 						monitor.done();
 						Display.getDefault().syncExec(new Runnable(){

@@ -225,11 +225,9 @@ public class CaImporter {
 	private byte[] validateConservationAreaInfo(File dir, Session session) throws Exception{
 		File caInfo = new File(dir, CaExporter.CA_INFO_FILENAME);
 		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
-		
-		BufferedReader reader = new BufferedReader(new FileReader(caInfo));
 		byte[] uuid = null;
 		
-		try{
+		try(BufferedReader reader = new BufferedReader(new FileReader(caInfo))){
 			String cauuid = reader.readLine();
 			if (cauuid == null){
 				throw new Exception(Messages.CaImporter_Error_NoCaIdentifierFound);
@@ -249,13 +247,9 @@ public class CaImporter {
 				if (cnt != 0){				
 					throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));
 				}
-			
-			}finally{
-			
-				reader.close();
+			}finally{	
+				session.getTransaction().rollback();;
 			}
-		}finally{
-			reader.close();
 		}
 		
 		/*validate backup file version */
@@ -290,15 +284,12 @@ public class CaImporter {
 		File caInfo = new File(new File(dir, CaExporter.DATABASE_DIR), PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"); //$NON-NLS-1$
 		
 		HashMap<String, String> versions = new HashMap<String, String>();
-		CSVReader reader = new CSVReader(new FileReader(caInfo));
-		try{
+		try(CSVReader reader = new CSVReader(new FileReader(caInfo))){
 			String[] data= reader.readNext();
 			while(data != null){
 				versions.put(data[0], data[1]);
 				data= reader.readNext();
 			}
-		}finally{
-			reader.close();
 		}
 		
 		session.beginTransaction();
@@ -337,7 +328,6 @@ public class CaImporter {
 			
 		}finally{
 			session.getTransaction().commit();
-			reader.close();
 		}
 		return true;
 	}

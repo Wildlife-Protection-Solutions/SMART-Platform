@@ -286,11 +286,8 @@ public class DataModelXmlToSmartConverter {
 	 * @throws IOException 
 	 */
 	public DataModel convert(File file, ConservationArea targetCa, boolean synchronizeLang) throws JAXBException, ParseException, IOException {
-		FileInputStream is = new FileInputStream(file);
-		try{
+		try(FileInputStream is = new FileInputStream(file)){
 			return convert(is, targetCa, synchronizeLang);
-		}finally{
-			is.close();
 		}
 	}
 	

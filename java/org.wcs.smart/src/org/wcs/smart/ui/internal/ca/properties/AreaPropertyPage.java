@@ -423,8 +423,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 						//find feature store
 						WKBWriter writer = new WKBWriter();
 						
-						SimpleFeatureIterator it = collection.features();
-						try {
+						try(SimpleFeatureIterator it = collection.features()) {
 							int cnt = 0;
 							List<String> currentKeys = new ArrayList<String>();
 							while (it.hasNext()) {
@@ -462,8 +461,6 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 							}
 
 							s.getTransaction().commit();
-						} finally {
-							it.close();
 						}
 
 					} catch (Exception e) {

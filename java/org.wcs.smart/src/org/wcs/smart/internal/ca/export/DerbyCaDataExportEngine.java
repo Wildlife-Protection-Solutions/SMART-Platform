@@ -84,21 +84,20 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeTableDefinitionFile(String tableName, String hibernateClass,
 			String[] columns) throws Exception {
-
 		File columnFile = createFileName(getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
-		BufferedWriter writer = new BufferedWriter(new FileWriter(columnFile));
-		writer.write(tableName);
-		writer.newLine();
-		StringBuilder record = new StringBuilder();
-		
-		for (int i = 0; i < columns.length; i ++){
-			record.append(columns[i]);
-			if (i != columns.length - 1){
-				record.append(","); //$NON-NLS-1$
+		try(BufferedWriter writer = new BufferedWriter(new FileWriter(columnFile))){
+			writer.write(tableName);
+			writer.newLine();
+			StringBuilder record = new StringBuilder();
+			for (int i = 0; i < columns.length; i ++){
+				record.append(columns[i]);
+				if (i != columns.length - 1){
+					record.append(","); //$NON-NLS-1$
+				}
 			}
+			writer.write(record.toString());
+			writer.close();
 		}
-		writer.write(record.toString());
-		writer.close();
 	}
 
 	/**

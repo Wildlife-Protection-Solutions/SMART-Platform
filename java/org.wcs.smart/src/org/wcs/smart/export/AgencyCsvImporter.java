@@ -89,10 +89,8 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 		if (!file.exists()){
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{file.toString()}));
 		}
-
-		CSVReader reader = new CSVReader(
-				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
-		try{
+		
+		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter)){ //$NON-NLS-1$
 			//reading the first line with language codes
 			String[] row = reader.readNext();
 			int size = row.length;
@@ -134,8 +132,6 @@ public class AgencyCsvImporter implements ICsvDataImporter {
 				}
 				//adding ranks end
 			}
-		}finally{
-			reader.close();
 		}
 		if (monitor.isCanceled()) return false;
 		
