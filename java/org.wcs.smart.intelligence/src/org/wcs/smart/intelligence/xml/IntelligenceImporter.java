@@ -107,13 +107,10 @@ public class IntelligenceImporter {
 	 */
 	private static Intelligence importIntelligenceFromFile(File xmlFile, IProgressMonitor monitor) throws Exception{
 		IntelligenceType itype = null;
-		FileInputStream in = new FileInputStream(xmlFile);
-		try{
+		try(FileInputStream in = new FileInputStream(xmlFile)){
 			monitor.subTask(Messages.IntelligenceImporter_ReadingFile);
 			itype = readDataModel(in);
 			monitor.worked(1);
-		}finally{
-			in.close();
 		}
 		if (itype == null){
 			throw new Exception(Messages.IntelligenceImporter_ReadingFile_Error);
@@ -147,15 +144,12 @@ public class IntelligenceImporter {
 		for (int i = 0; i < files.length; i ++){
 			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 			if (f.isFile()){
-				//lets try reading the 
-				FileInputStream in = new FileInputStream(f);
-				try {
+				//lets try reading the
+				try (FileInputStream in = new FileInputStream(f)){
 					itype = readDataModel(in);
 				} catch (Exception ex) {
 					IntelligencePlugIn.log(null, ex);
 					itype = null;
-				} finally {
-					in.close();
 				}
 				if (itype != null){
 					//we've found it!
@@ -334,10 +328,8 @@ public class IntelligenceImporter {
 	 * @throws Exception
 	 */
 	private static File unzip(File zipFile) throws Exception{
-		ZipFile zout = new ZipFile(zipFile);
-		
 		File tempDir = null;
-		try {
+		try(ZipFile zout = new ZipFile(zipFile)) {
 			tempDir = File.createTempFile(zipFile.getName(),
 					Long.toString(System.nanoTime()));
 			tempDir.delete();
@@ -351,17 +343,11 @@ public class IntelligenceImporter {
 				if (entry.isDirectory()){
 					FileUtils.forceMkdir(fout);
 				}else{
-					InputStream is = zout.getInputStream(entry);
-					try{
+					try(InputStream is = zout.getInputStream(entry)){
 						FileUtils.copyInputStreamToFile(is, fout);
-					}finally{
-						is.close();
 					}
 				}
-			}
-			
-		} finally {
-			zout.close();
+			}	
 		}
 		return tempDir;
 	}	

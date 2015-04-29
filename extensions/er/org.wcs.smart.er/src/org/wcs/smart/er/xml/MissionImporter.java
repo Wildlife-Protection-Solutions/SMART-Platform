@@ -117,15 +117,12 @@ public class MissionImporter {
 				f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 			}
 			if (f.isFile()){
-				//lets try reading the 
-				FileInputStream in = new FileInputStream(f);
-				try{
+				//lets try reading the
+				try(FileInputStream in = new FileInputStream(f)){
 					ptype = MissionXmlManager.readDataModel(in);
 				}catch (Exception ex){
 					EcologicalRecordsPlugIn.log(null, ex);
 					ptype = null;
-				}finally{
-					in.close();
 				}
 				if (ptype != null){
 					//we've found it!
@@ -331,10 +328,8 @@ public class MissionImporter {
 	 * @throws Exception
 	 */
 	private static File unzip(File zipFile) throws Exception{
-		ZipFile zout = new ZipFile(zipFile);
-		
 		File tempDir = null;
-		try {
+		try (ZipFile zout = new ZipFile(zipFile)){
 			tempDir = File.createTempFile(zipFile.getName(),
 					Long.toString(System.nanoTime()));
 			tempDir.delete();
@@ -348,17 +343,11 @@ public class MissionImporter {
 				if (entry.isDirectory()){
 					FileUtils.forceMkdir(fout);
 				}else{
-					InputStream is = zout.getInputStream(entry);
-					try{
+					try(InputStream is = zout.getInputStream(entry)){
 						FileUtils.copyInputStreamToFile(is, fout);
-					}finally{
-						is.close();
 					}
 				}
-			}
-			
-		} finally {
-			zout.close();
+			}	
 		}
 		return tempDir;
 	}	

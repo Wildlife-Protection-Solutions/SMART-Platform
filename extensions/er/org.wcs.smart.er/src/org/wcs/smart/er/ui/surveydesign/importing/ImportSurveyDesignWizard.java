@@ -176,11 +176,8 @@ public class ImportSurveyDesignWizard  extends Wizard implements IPageChangingLi
 					for(File file : importFiles){
 						try{
 							monitor.subTask(Messages.SurveyDesignImportHandler_1);
-							FileInputStream fin = new FileInputStream(file);
-							try{
+							try(FileInputStream fin = new FileInputStream(file)){
 								xmlsd = SurveyDesignXMLManager.readDataModel(fin);
-							}finally{
-								fin.close();
 							}
 						}catch (Exception ex){
 							EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.SurveyDesignImportHandler_2, file.getName()), ex);

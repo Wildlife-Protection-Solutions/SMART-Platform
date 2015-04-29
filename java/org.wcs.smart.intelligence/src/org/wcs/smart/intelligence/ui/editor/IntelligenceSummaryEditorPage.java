@@ -290,7 +290,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		txtShortName.setText(intel.getName());
 		txtDescription.setText(intel.getDescription());
 		txtFromDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getFromDate()));
-		value = intel.getToDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(intel.getToDate()) : "";
+		value = intel.getToDate() != null ? DateFormat.getDateInstance(DateFormat.LONG).format(intel.getToDate()) : ""; //$NON-NLS-1$
 		txtToDate.setText(value);
 		if (intel.getToDate() == null){
 			txtToDate.setEnabled(false);

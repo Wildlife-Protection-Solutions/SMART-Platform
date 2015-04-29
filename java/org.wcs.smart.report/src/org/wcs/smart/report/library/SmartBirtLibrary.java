@@ -91,15 +91,9 @@ public class SmartBirtLibrary {
 		}
 		
 		libraryFile = new File(libraryLocation, LIBRARY_FILENAME);
-		if (!libraryFile.exists()){
-			
-			try {
-				InputStream library = ReportPlugIn.class.getClassLoader().getResourceAsStream(DEFAULT_LIBRARY_FILENAME);
-				try{
-					FileUtils.copyInputStreamToFile(library, libraryFile);
-				}finally{
-					library.close();
-				}
+		if (!libraryFile.exists()){			
+			try (InputStream library = ReportPlugIn.class.getClassLoader().getResourceAsStream(DEFAULT_LIBRARY_FILENAME)){
+				FileUtils.copyInputStreamToFile(library, libraryFile);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

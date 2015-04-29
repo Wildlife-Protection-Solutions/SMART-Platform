@@ -100,11 +100,8 @@ public class IncidentExporter {
 	 */
 	private static File exportIncidentWithoutAttachments(WaypointType xml, File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.IncidentExporter_ExportProgress2);
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-		try {
+		try (BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))){
 			IncidentXmlManager.writeIncident(xml, out);
-		} finally {
-			out.close();
 		}
 		monitor.worked(1);
 		return file;
@@ -126,22 +123,18 @@ public class IncidentExporter {
 		monitor.subTask(Messages.IncidentExporter_ExportProgress3);
 		//create zip file
 		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
-		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
-		try {
+		try (ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile))){
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 
 			/* add xml file to zip */
 			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
-			FileInputStream inStream = new FileInputStream(xmlFile);
-
+			
 			byte[] buffer = new byte[1024];
 			int bytesRead;
-			try {
+			try (FileInputStream inStream = new FileInputStream(xmlFile)){
 				while ((bytesRead = inStream.read(buffer)) > 0) {
 					zout.write(buffer, 0, bytesRead);
 				}
-			} finally {
-				inStream.close();
 			}
 			monitor.worked(1);
 
@@ -158,22 +151,12 @@ public class IncidentExporter {
 			for (ISmartAttachment att : all) {
 				File attFile = att.getFullFile();
 				zout.putNextEntry(new ZipEntry(IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
-
-				inStream = new FileInputStream(attFile);
-				try {
+				try(FileInputStream inStream = new FileInputStream(attFile)){
 					while ((bytesRead = inStream.read(buffer)) > 0) {
 						zout.write(buffer, 0, bytesRead);
 					}
-				} finally {
-					inStream.close();
 				}
 			}
-			
-			
-
-		} finally {
-			// close
-			zout.close();
 		}
         monitor.worked(1);
         

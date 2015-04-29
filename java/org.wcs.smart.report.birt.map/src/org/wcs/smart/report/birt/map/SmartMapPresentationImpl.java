@@ -307,10 +307,10 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 	private ByteArrayInputStream writeImage(BufferedImage image) throws IOException{
 		ImageIO.setUseCache(false);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ImageOutputStream ios = ImageIO.createImageOutputStream(baos);
-		ImageIO.write(image, "png", ios); //$NON-NLS-1$
-		ios.flush();
-		ios.close();
+		try(ImageOutputStream ios = ImageIO.createImageOutputStream(baos)){
+			ImageIO.write(image, "png", ios); //$NON-NLS-1$
+			ios.flush();
+		}
 		ByteArrayInputStream bis = new ByteArrayInputStream(
 				baos.toByteArray());
 		return bis;

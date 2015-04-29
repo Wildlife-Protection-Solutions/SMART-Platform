@@ -56,16 +56,14 @@ public class SmartDbProcedure {
 		Connection connection = DriverManager.getConnection("jdbc:default:connection"); //$NON-NLS-1$
 		String sql = "select tbl.TABLENAME, sch.SCHEMANAME from SYS.SYSTABLES tbl inner join SYS.SYSSCHEMAS sch on tbl.SCHEMAID = sch.SCHEMAID WHERE tbl.TABLETYPE = 'T' AND tbl.TABLENAME like 'QUERY_TEMP_%'"; //$NON-NLS-1$
 		Statement statement = connection.createStatement();
-		ResultSet resultSet = statement.executeQuery(sql);
+		
 		List<String> toDrop = new ArrayList<String>();
-		try {
+		try(ResultSet resultSet = statement.executeQuery(sql)) {
 			while (resultSet.next()) {
 				String tableName = resultSet.getString(1);
 				String schemaName = resultSet.getString(2);
 				toDrop.add(schemaName+"."+tableName); //$NON-NLS-1$
 			}			
-		} finally {
-			resultSet.close();
 		}
 		
 		if (!toDrop.isEmpty()) {

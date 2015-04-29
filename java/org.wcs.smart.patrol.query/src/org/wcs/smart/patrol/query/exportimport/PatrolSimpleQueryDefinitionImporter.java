@@ -56,11 +56,13 @@ public class PatrolSimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 
 	@Override
 	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
-		InputStream is = new ByteArrayInputStream(queryDef.getBytes());
+		QueryFilter queryFilter = null;
 		
-		Parser parser = new Parser(is);
-		QueryFilter queryFilter = parser.QueryFilter();
-		is.close();
+		try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+			Parser parser = new Parser(is);
+			queryFilter = parser.QueryFilter();
+		}
+		
 
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();

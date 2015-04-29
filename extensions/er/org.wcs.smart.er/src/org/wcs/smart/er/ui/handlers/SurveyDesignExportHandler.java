@@ -158,15 +158,10 @@ public class SurveyDesignExportHandler {
 									continue;
 								}
 							}
-							try{
-								FileOutputStream fout = new FileOutputStream(exportFile);
-								try{
-									SurveyDesignXMLManager.writeDataModel(SurveyDesignToXmlConverter.toXml(sd, s, new SubProgressMonitor(monitor, 3)),
-										fout);
-									exportedCnt++;
-								}finally{
-									fout.close();
-								}
+							try(FileOutputStream fout = new FileOutputStream(exportFile)){
+								SurveyDesignXMLManager.writeDataModel(SurveyDesignToXmlConverter.toXml(sd, s, new SubProgressMonitor(monitor, 3)),
+									fout);
+								exportedCnt++;
 							}catch (Exception ex){
 								EcologicalRecordsPlugIn.displayLog(
 										MessageFormat.format(Messages.SurveyDesignExportHandler_ExportError, new Object[]{sdei.getName()}) + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$

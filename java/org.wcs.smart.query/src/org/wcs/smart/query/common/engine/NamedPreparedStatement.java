@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.query.common.engine;
 
 import java.sql.Connection;
@@ -10,6 +31,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * <p>This class allows for the use of named parameters in sql queries.</p>
+ * <p>
+ * It was adapted from code found here:
+ * http://www.javaworld.com/article/2077706/core-java/named-parameters-for-preparedstatement.html
+ * </p>
+ * 
+ * @author Emily
+ *
+ */
 public class NamedPreparedStatement {
     
 	/** The statement this object is wrapping. */
@@ -75,10 +106,10 @@ public class NamedPreparedStatement {
                     c='?'; // replace the parameter with a question mark
                     i+=name.length(); // skip past the end if the parameter
 
-                    List<Integer> indexList= indexMap.get(":" + name);
+                    List<Integer> indexList= indexMap.get(":" + name); //$NON-NLS-1$
                     if(indexList==null) {
                         indexList=new ArrayList<Integer>();
-                        indexMap.put(":" + name, indexList);
+                        indexMap.put(":" + name, indexList); //$NON-NLS-1$
                     }
                     indexList.add(new Integer(index));
 
@@ -93,14 +124,14 @@ public class NamedPreparedStatement {
 
     /**
      * Returns the indexes for a parameter.
-     * @param name parameter name
+     * @param name parameter name including the : at the beginning of the name
      * @return parameter indexes
      * @throws IllegalArgumentException if the parameter does not exist
      */
     private Collection<Integer> getIndexes(String name) {
     	List<Integer> indexes = indexMap.get(name);
         if(indexes==null) {
-            throw new IllegalArgumentException("Parameter not found: " + name);
+            throw new IllegalArgumentException("Parameter not found: " + name); //$NON-NLS-1$
         }
         return indexes;
     }

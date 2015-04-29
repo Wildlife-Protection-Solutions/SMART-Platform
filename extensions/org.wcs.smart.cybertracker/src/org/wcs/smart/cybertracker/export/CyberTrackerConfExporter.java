@@ -193,22 +193,18 @@ public class CyberTrackerConfExporter {
 		try {
 			//----------------creating Screens.xml----------------
 			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Screens);
-			BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_SCREENS)); //$NON-NLS-1$
-			try {
+			
+			try (BufferedOutputStream outS = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_SCREENS))){
 				writeDataModel(screens, outS, Screens.class);
-			} finally {
-				outS.close();
 			}
 			monitor.worked(10);
 			
 			//----------------creating Elements.xml----------------
 			monitor.subTask(Messages.CyberTrackerExporter_Progress_Generate_Elements);
 			ElementsUtil.addNodeElements(elements, keyMap, currentLanguage);
-			BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_ELEMENTS)); //$NON-NLS-1$
-			try {
+			
+			try (BufferedOutputStream outE = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_ELEMENTS))){ 
 				writeDataModel(elements, outE, Elements.class);
-			} finally {
-				outE.close();
 			}
 			
 			//----------------creating Reports.xml----------------
@@ -231,13 +227,10 @@ public class CyberTrackerConfExporter {
 			}
 			columnItems.add(ReportsObjectFactory.createColumnItem(newWpResultId.getItemId(), PatrolScreensUtil.RESULT_NEW_WAYPOINT));
 			Reports reports = ReportsObjectFactory.createReports(columnItems);
-			BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()+"\\"+ICyberTrackerConstants.XML_REPORTS)); //$NON-NLS-1$
-			try {
-				writeDataModel(reports, outR, Reports.class);
-			} finally {
-				outR.close();
-			}
 			
+			try (BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_REPORTS))){
+				writeDataModel(reports, outR, Reports.class);
+			}
 		} catch (Exception e) {
 			CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_WriteXMmlFail, e);
 			return null;
@@ -635,7 +628,10 @@ public class CyberTrackerConfExporter {
 			if (defaultValueOption.getBooleanValue() != null)
 				return recordDefaultValue(attribute, defaultValueOption.getBooleanValue().toString());
 			break;
+		default:
+			return null;
 		}
+		
 		return null;
 	}
 

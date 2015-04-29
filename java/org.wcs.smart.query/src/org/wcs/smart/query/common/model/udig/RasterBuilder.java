@@ -182,20 +182,20 @@ final class RasterBuilder {
 			double gridSize, double xmin, double ymax) throws IOException {
 		final File prjFile = new File(new StringBuffer(baseFile).append(".tfw") //$NON-NLS-1$
 				.toString());
-		BufferedWriter out = new BufferedWriter(new FileWriter(prjFile));
-		out.write(String.valueOf(gridSize));
-		out.write(SmartUtils.LINE_SEPARATOR);
-		out.write("0"); //$NON-NLS-1$
-		out.write(SmartUtils.LINE_SEPARATOR);
-		out.write("0"); //$NON-NLS-1$
-		out.write(SmartUtils.LINE_SEPARATOR);
-		out.write(String.valueOf(-gridSize));
-		out.write(SmartUtils.LINE_SEPARATOR);
-		out.write(String.valueOf(xmin));
-		out.write(SmartUtils.LINE_SEPARATOR);
-		out.write(String.valueOf(ymax));
-		out.write(SmartUtils.LINE_SEPARATOR);
-		out.close();
+		try(BufferedWriter out = new BufferedWriter(new FileWriter(prjFile))){
+			out.write(String.valueOf(gridSize));
+			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write("0"); //$NON-NLS-1$
+			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write("0"); //$NON-NLS-1$
+			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(String.valueOf(-gridSize));
+			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(String.valueOf(xmin));
+			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(String.valueOf(ymax));
+			out.write(SmartUtils.LINE_SEPARATOR);
+		}
 
 	}
 	
@@ -211,45 +211,10 @@ final class RasterBuilder {
 			throws IOException {
 		final File prjFile = new File(new StringBuffer(baseFile).append(".prj") //$NON-NLS-1$
 				.toString());
-		BufferedWriter out = new BufferedWriter(new FileWriter(prjFile));
-		out.write(coordinateReferenceSystem.toWKT());
-		out.close();
-
+		try(BufferedWriter out = new BufferedWriter(new FileWriter(prjFile))){
+			out.write(coordinateReferenceSystem.toWKT());
+		}
 	}
-
-
-//	/**
-//	 * Saves the coverate in the file
-//	 * 
-//	 * @param gc
-//	 * @param fileName
-//	 * @return {@link File}
-//	 * 
-//	 * @throws RasterServiceException
-//	 */
-//	private File saveInFile(final GridCoverage2D gc, final String fileName) throws Exception{
-//
-//		WorldImageWriter w = null;
-//		File rasterFile = new File(fileName);
-//		try {
-//		    w = new WorldImageWriter(rasterFile);
-//			Format format = w.getFormat();
-//			final ParameterValueGroup params = format.getWriteParameters();
-//			params.parameter(WorldImageFormat.FORMAT.getName().toString()).setValue("tiff");
-//			final GeneralParameterValue[] gpv = { params.parameter(WorldImageFormat.FORMAT.getName().toString()) };
-//			// writing
-//			w.write(gc,gpv);
-//	        
-//		} catch (Exception e) {
-//    		final String message = "Fail saving raster "+ fileName +". " +e.getMessage();
-//			throw new Exception(message, e);
-//		} finally {
-//			if(w != null) w.dispose();
-//		}		
-//		
-//		return rasterFile;
-//		
-//	}
 
 	/**
 	 * Creates a raster based on the list of values for band 0 

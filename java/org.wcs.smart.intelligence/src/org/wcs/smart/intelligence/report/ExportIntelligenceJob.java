@@ -98,9 +98,7 @@ public class ExportIntelligenceJob extends Job {
 			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
 			final IReportRunnable design = engine.openReportDesign(ReportIntelligence.getIntelligenceTemplate());
-			
-			FileOutputStream fout = new FileOutputStream(outputFile);
-			try{
+			try(FileOutputStream fout = new FileOutputStream(outputFile)){
 				IRenderOption options = new RenderOption();
 				options.setOutputStream(fout);
 				options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
@@ -115,8 +113,6 @@ public class ExportIntelligenceJob extends Job {
 				}finally{
 					task.close();
 				}
-			}finally{
-				fout.close();
 			}
 			
 		}catch (Exception ex){

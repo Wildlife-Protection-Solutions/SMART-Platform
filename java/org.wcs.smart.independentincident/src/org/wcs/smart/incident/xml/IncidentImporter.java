@@ -113,15 +113,12 @@ public class IncidentImporter {
 		for (int i = 0; i < files.length; i ++){
 			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 			if (f.isFile()){
-				//lets try reading the 
-				FileInputStream in = new FileInputStream(f);
-				try{
+				//lets try reading the
+				try(FileInputStream in = new FileInputStream(f)){
 					waypointtype = IncidentXmlManager.readIncident(in);
 				}catch (Exception ex){
 					IncidentPlugIn.log(null, ex);
 					waypointtype = null;
-				}finally{
-					in.close();
 				}
 				if (waypointtype != null){
 					//we've found it!
@@ -160,13 +157,10 @@ public class IncidentImporter {
 	 */
 	private static Waypoint importIncidentFromFile(File xmlFile, IProgressMonitor monitor) throws Exception{
 		WaypointType waypointtype = null;
-		FileInputStream in = new FileInputStream(xmlFile);
-		try{
+		try(FileInputStream in = new FileInputStream(xmlFile)){
 			monitor.subTask(Messages.IncidentImporter_ReadingXmlProgress);
 			waypointtype = IncidentXmlManager.readIncident(in);
 			monitor.worked(1);
-		}finally{
-			in.close();
 		}
 		if (waypointtype == null){
 			throw new Exception(Messages.IncidentImporter_XmlIncidentNotFound);
@@ -299,10 +293,8 @@ public class IncidentImporter {
 	 * @throws Exception
 	 */
 	private static File unzip(File zipFile) throws Exception{
-		ZipFile zout = new ZipFile(zipFile);
-		
 		File tempDir = null;
-		try {
+		try(ZipFile zout = new ZipFile(zipFile)) {
 			tempDir = File.createTempFile(zipFile.getName(),
 					Long.toString(System.nanoTime()));
 			tempDir.delete();
@@ -316,17 +308,11 @@ public class IncidentImporter {
 				if (entry.isDirectory()){
 					FileUtils.forceMkdir(fout);
 				}else{
-					InputStream is = zout.getInputStream(entry);
-					try{
+					try(InputStream is = zout.getInputStream(entry)){
 						FileUtils.copyInputStreamToFile(is, fout);
-					}finally{
-						is.close();
 					}
 				}
-			}
-			
-		} finally {
-			zout.close();
+			}	
 		}
 		return tempDir;
 	}	

@@ -232,7 +232,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " + queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentLanguage().getUuid()) + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				QueryPlugIn.logSql(s);
 				c.createStatement().executeUpdate(s);
-				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid where " + queryDataTable+ ".intel_uuid = a.element_uuid and b.isdefault) WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid where " + queryDataTable+ ".intel_uuid = a.element_uuid and b.isdefault) WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				QueryPlugIn.logSql(s);
 				c.createStatement().executeUpdate(s);
 				

@@ -572,6 +572,10 @@ public class Messages extends NLS {
 
 	public static String PersistentManager_FileCreateError;
 
+	public static String PersistentManager_ReadError;
+
+	public static String PersistentManager_SaveError;
+
 	public static String RemoveIntelligenceJob_Error;
 
 	public static String RemoveIntelligenceJob_Title;

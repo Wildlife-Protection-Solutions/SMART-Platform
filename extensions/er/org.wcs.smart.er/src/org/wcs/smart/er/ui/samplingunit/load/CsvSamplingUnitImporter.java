@@ -67,12 +67,9 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 		Character delim = (Character) options.get(DELIMETER_KEY);
 		String[] headers = new String[0];
 		
-		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
-		try{
+		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue())){ //$NON-NLS-1$
 			//read the first line
 			headers = reader.readNext();
-		}finally{
-			reader.close();
 		}
 		return headers;
 	}
@@ -115,21 +112,19 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 		HashSet<String> existingIds = (HashSet<String>) options.get(EXISTING_IDS_KEY);
 		
 		//read file - getting cnt for progress
-		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
+		
 		int fileCnt = 0;
-		try{
+		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue())){ //$NON-NLS-1$
 			while(reader.readNext() != null){
 				fileCnt++;
 			}
-		}finally{
-			reader.close();
 		}
 		
 		final List<String> warnings = new ArrayList<String>();
 		//read file 
 		monitor.beginTask(MessageFormat.format(Messages.CsvSamplingUnitImporter_Progress1, new Object[]{f.getAbsoluteFile()}), fileCnt);
-		reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue()); //$NON-NLS-1$
-		try{
+		
+		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(f), "UTF-8"), delim.charValue())){ //$NON-NLS-1$
 			//read the first line
 			String[] headers = reader.readNext();
 			monitor.worked(1);
@@ -261,7 +256,6 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 				units.add(su);
 			}
 		}finally{
-			reader.close();
 			monitor.done();
 		}
 		

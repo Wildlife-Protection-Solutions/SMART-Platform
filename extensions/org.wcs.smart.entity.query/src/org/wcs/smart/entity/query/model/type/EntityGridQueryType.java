@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.query.model.type;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -191,18 +190,11 @@ public class EntityGridQueryType implements IQueryType {
 		
 		//validate query
 		String queryString = definition + "|" + filters; //$NON-NLS-1$
-		InputStream is = new ByteArrayInputStream(queryString.getBytes());
-		try{
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			parser.GridQuery();
 		}catch (Exception ex){
 			return ex.getMessage();
-		}finally{
-			try {
-				is.close();
-			} catch (IOException e) {
-				//eatme
-			}
 		}
 		return null;
 	}

@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
+import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.ui.columns.MissionPropertyQueryColumn;
@@ -204,8 +206,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 				@Override
 				public void execute(Connection c) throws SQLException {
-					ResultSet q = c.createStatement().executeQuery(sql);
-					try{
+					try(ResultSet q = c.createStatement().executeQuery(sql)){
 						q.next();
 						double minx = q.getDouble(1);
 						double maxx = q.getDouble(2);
@@ -213,8 +214,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 						double maxy = q.getDouble(4);
 				
 						bounds = new Envelope(minx, maxx, miny, maxy);
-					}finally{
-						q.close();
 					}
 				}	
 			});
@@ -391,7 +390,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					c.createStatement().execute(sql.toString());
 					
 					break;
-
+					default: throw new SQLException(MessageFormat.format(Messages.AbstractSurveyPagedResult_missionAttributeTypeNotSupportedSort, type.name()));
 				}
 			}else if (sortColumn instanceof SamplingUnitAttributeQueryColumn){
 				switch (type) {
@@ -455,6 +454,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					c.createStatement().execute(sql.toString());
 					
 					break;
+					default: throw new SQLException(MessageFormat.format(Messages.AbstractSurveyPagedResult_suAttributeTypeNotSupportedSort, type.name()));
 				}
 			} //end mission attributes
 		}//end sort column
@@ -513,8 +513,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		}
 		attrSql.append(')');
 
-		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
-		try {
+		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
 			for (IResultItem irt : result) {
 				SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
@@ -525,9 +524,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					}
 				}
 			}
-		} finally {
-			rs.close();
-		}		
+		}	
 	}
 	
 	protected void attachMissionProperties(List<IResultItem> result, Connection c, Session session) throws SQLException {
@@ -558,9 +555,8 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			return;
 		}
 		attrSql.append(')');
-
-		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
-		try {
+		
+		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			while(rs.next()){
 				byte[] muuid = rs.getBytes(1);
 				String key = rs.getString(2);
@@ -596,8 +592,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 				}
 				
 			}
-		} finally {
-			rs.close();
 		}		
 	}
 	
@@ -627,8 +621,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		}
 		attrSql.append(')');
 
-		ResultSet rs = c.createStatement().executeQuery(attrSql.toString());
-		try {
+		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			while(rs.next()){
 				byte[] muuid = rs.getBytes(1);
 				String key = rs.getString(2);
@@ -650,8 +643,6 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					}
 				}				
 			}
-		} finally {
-			rs.close();
 		}		
 	}
 	
@@ -744,11 +735,11 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			@Override
 			public void execute(Connection c) throws SQLException {
 				String sql = "SELECT distinct mission_uuid FROM " + queryTempTable; //$NON-NLS-1$
-				ResultSet rs = c.createStatement().executeQuery(sql);
-				while(rs.next()){
-					uuids.add(rs.getBytes(1));
+				try(ResultSet rs = c.createStatement().executeQuery(sql)){
+					while(rs.next()){
+						uuids.add(rs.getBytes(1));
+					}
 				}
-				rs.close();
 			}});
 		
 		return uuids;

@@ -177,10 +177,9 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 				transform = CRS.findMathTransform(store.getSchema().getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS);
 			}
 			String idField = (String) options.get(ID_FIELD_KEY);
-			FeatureReader<SimpleFeatureType, SimpleFeature> reader = store
-					.getFeatureReader();
+			
 			int cnt = 0;
-			try {
+			try(FeatureReader<SimpleFeatureType, SimpleFeature> reader = store.getFeatureReader()) {
 				while (reader.hasNext()) {
 					SimpleFeature sf = reader.next();
 					cnt++;
@@ -278,8 +277,6 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 					units.add(su);
 				}
 				monitor.worked(1);
-			} finally {
-				reader.close();
 			}
 		} finally {
 			store.dispose();

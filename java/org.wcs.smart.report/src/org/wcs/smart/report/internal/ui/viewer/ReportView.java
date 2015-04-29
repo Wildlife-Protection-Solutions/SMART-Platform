@@ -87,9 +87,7 @@ public class ReportView implements IReportListener{
 				IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 				final IReportRunnable design = engine.openReportDesign(report.getFullReportFilename().getAbsolutePath());
 				
-				
-				final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				try{
+				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
 					HTMLRenderOption options = new HTMLRenderOption();
 					options = new HTMLRenderOption( );
 					options.setOutputStream(bos);
@@ -115,8 +113,6 @@ public class ReportView implements IReportListener{
 								throw new IllegalStateException(Messages.ReportView_UTF8NotSupported);
 							}
 						}});
-				}finally{
-					bos.close();
 				}
 		} catch (Exception e) {
 			ReportPlugIn.displayLog(MessageFormat.format(Messages.ReportView_RunReportError1, new Object[]{report.getName()}) + e.getLocalizedMessage(), e);

@@ -295,10 +295,9 @@ public class ImportReportEngine {
 	 */
 	private Report readReportInfo(File f) throws Exception{
 		Properties prop = new Properties();
-		InputStream inStream = new FileInputStream(f);
-		prop.load(inStream);
-		inStream.close();
-		
+		try(InputStream inStream = new FileInputStream(f)){
+			prop.load(inStream);
+		}		
 		Report r = new Report();
 		r.setConservationArea(SmartDB.getCurrentConservationArea());
 		
@@ -440,10 +439,8 @@ public class ImportReportEngine {
 	 * @throws Exception
 	 */
 	private static File unzip(File zipFile) throws Exception{
-		ZipFile zout = new ZipFile(zipFile);
-		
 		File tempDir = null;
-		try {
+		try(ZipFile zout = new ZipFile(zipFile)) {
 			tempDir = File.createTempFile(zipFile.getName(),
 					Long.toString(System.nanoTime()));
 			tempDir.delete();
@@ -457,17 +454,11 @@ public class ImportReportEngine {
 				if (entry.isDirectory()){
 					FileUtils.forceMkdir(fout);
 				}else{
-					InputStream is = zout.getInputStream(entry);
-					try{
+					try(InputStream is = zout.getInputStream(entry)){
 						FileUtils.copyInputStreamToFile(is, fout);
-					}finally{
-						is.close();
 					}
 				}
-			}
-			
-		} finally {
-			zout.close();
+			}	
 		}
 		return tempDir;
 	}
