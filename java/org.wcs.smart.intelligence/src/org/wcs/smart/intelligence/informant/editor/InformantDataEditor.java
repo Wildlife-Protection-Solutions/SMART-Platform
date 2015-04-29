@@ -187,7 +187,6 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 				performLoginOrLogout();
 			}
 		});
-		
 		btnLogin.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnLogin.setToolTipText(LOGINTOOLTIP);
 
@@ -198,9 +197,10 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 				performChangePassword();
 			}
 		});
+		btnChangePwd.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		
 		btnShow = toolkit.createButton(linkComp, Messages.InformantDataEditor_ShowCoulumns, SWT.CHECK);
-		btnShow.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, true, false));
+		btnShow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		btnShow.setSelection(true);
 		btnShow.addSelectionListener(new SelectionAdapter() {
 			@Override

@@ -126,6 +126,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 	@Override
 	public void createPartControl(Composite parent) {
 		FormToolkit toolkit = new FormToolkit(parent.getDisplay());
+		toolkit.setBorderStyle(SWT.BORDER);
 		
 		form = toolkit.createForm(parent);
 		form.getBody().setLayout(new GridLayout());

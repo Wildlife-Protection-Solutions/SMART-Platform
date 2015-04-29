@@ -7,7 +7,7 @@ import org.apache.commons.io.FileUtils;
 public class PackageProduct {
 
 	public static final String VERSION = "3.2.0";
-	public static final String RC = "a6";
+	public static final String RC = "a11";
 	
 	public static final String GPS_BABEL = "C:\\data\\SMART\\Exports\\dependencies\\GPSBabel";
 	
@@ -16,11 +16,13 @@ public class PackageProduct {
 	public static final String WIN32_JRE = "C:\\data\\SMART\\Exports\\dependencies\\jres\\win32\\jre";
 	
 	public static final String LINUX32_JRE = "C:\\data\\SMART\\Exports\\dependencies\\jres\\linux32\\jre";
+	public static final String MAC64_JRE = "C:\\data\\SMART\\Exports\\dependencies\\jres\\macosx64\\jre";
 
 	
 	public static final String BUILD_WIN32 = "C:\\data\\SMART\\Exports\\win32.win32.x86";
 	public static final String BUILD_LINUX32 = "C:\\data\\SMART\\Exports\\linux.gtk.x86";
 	public static final String BUILD_MAC32 = "C:\\data\\SMART\\Exports\\macosx.cocoa.x86";
+	public static final String BUILD_MAC64 = "C:\\data\\SMART\\Exports\\macosx.cocoa.x86_64";
 	
 	public static final String APP_NAME = "smart";
 	public static final String UPDATESITE_DIRNAME = "updatesite";
@@ -133,12 +135,50 @@ public class PackageProduct {
 		FileUtils.copyFileToDirectory(UPDATE_ZIP_FILE, f);
 		//install plugins
 	}
+	public static void processMac64() throws Exception{
+		System.out.println("Processing MACOSX64");
+		File macDir = new File(BUILD_MAC64 + File.separator + APP_NAME);
+
+		//jre
+		File out = new File(macDir, "jre");
+		if (out.exists()){
+			FileUtils.deleteDirectory(out);
+		}
+		FileUtils.copyDirectory(new File(MAC64_JRE), out);
+				
+		//data
+		macDir = new File(BUILD_MAC64 + File.separator + APP_NAME + File.separator + "SMART.app" + File.separator +"Contents" + File.separator + "MacOS");
+		out = new File(macDir, "data");
+		if (out.exists()){
+			FileUtils.deleteDirectory(out);
+		}
+		FileUtils.copyDirectory(new File(DATA), out);
+		
+		//updatesite
+		File f = new File(macDir, UPDATESITE_DIRNAME);
+		if (f.exists()) {
+			FileUtils.deleteDirectory(f);
+		}
+		f.mkdir();
+		FileUtils.copyFileToDirectory(UPDATE_ZIP_FILE, f);
+		//install plugins
+	}
 	
 	public static void zipMac() throws Exception{
 		System.out.println("Zipping MACOSX");
 		File macDir = new File(BUILD_MAC32, APP_NAME);
 		
 		File outFile = new File(BUILD_MAC32, "smart." + VERSION + ".macosx32" + (RC.length() == 0 ? "" : ".") + RC + ".zip" );
+		if (outFile.exists()){
+			outFile.delete();
+		}
+		ZipUtil.createZip(new File[]{macDir}, outFile);
+	}
+	public static void zipMac64() throws Exception{
+		System.out.println("Zipping MACOSX64");
+		File macDir = new File(BUILD_MAC64, APP_NAME);
+		
+		File outFile = new File(BUILD_MAC64, "smart." + VERSION + ".macosx32_64" + (RC.length() == 0 ? "" : ".") + RC + ".zip" );
 		if (outFile.exists()){
 			outFile.delete();
 		}
@@ -178,7 +218,11 @@ public class PackageProduct {
 		File srcFile = new File(BUILD_MAC32, "smart." + VERSION + ".macosx32" + (RC.length() == 0 ? "" : ".") + RC + ".zip" );
 		FileUtils.copyFileToDirectory(srcFile, new File(NETWORK));
 	}
-	
+	public static void copyToNetworkMacosx64() throws Exception{
+		System.out.println("copy to network - mac");
+		File srcFile = new File(BUILD_MAC64, "smart." + VERSION + ".macosx32_64" + (RC.length() == 0 ? "" : ".") + RC + ".zip" );
+		FileUtils.copyFileToDirectory(srcFile, new File(NETWORK));
+	}
 	public static void copyToNetworkWindows() throws Exception{
 		System.out.println("copy to network - windows");
 		File srcFile = new File(BUILD_WIN32, "smart." + VERSION + ".win32" + (RC.length() == 0 ? "" : ".") + RC + ".zip" );
@@ -187,16 +231,19 @@ public class PackageProduct {
 	
 	public static void main(String[] args) throws Exception{
 
-		//packageUpdateSize();
+		packageUpdateSize();
 		
-//		processWindows();		
-		zipWindows();
-		copyToNetworkWindows();
+		//processWindows();		
+//		zipWindows();
+//		copyToNetworkWindows();
 		
 //
 //		processMac();
 //		zipMac();
 //		copyToNetworkMacosx();
+		processMac64();
+		zipMac64();
+		copyToNetworkMacosx64();
 //		
 //		processLinux();
 //		zipLinux();

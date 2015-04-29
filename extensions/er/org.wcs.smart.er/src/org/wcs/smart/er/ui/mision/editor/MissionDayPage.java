@@ -86,6 +86,7 @@ public class MissionDayPage extends EditorPart {
 	@Override
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
+		toolkit.setBorderStyle(SWT.BORDER);
 		
 		frmSummary = toolkit.createScrolledForm(parent);
 
