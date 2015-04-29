@@ -114,10 +114,7 @@ public class CSVImportConfiguration {
 		if( singleDay != null){
 			day0 = SmartUtils.getDatePart(singleDay, false);
 		}
-		
-		
-		CSVReader reader = new CSVReader(new FileReader(filename), getDelimiter() );
-		try{
+		try(CSVReader reader = new CSVReader(new FileReader(filename), getDelimiter())){
 			int counter = 0;
 			if(skipHeaders){
 				counter = 1;
@@ -213,8 +210,6 @@ public class CSVImportConfiguration {
 			}
 		}catch (Exception e) {
 			throw new Exception(Messages.CSVImportConfiguration_12 + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
-		}finally{
-			reader.close();
 		}
 				
 		return allPoints;
