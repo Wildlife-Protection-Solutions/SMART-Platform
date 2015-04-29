@@ -76,6 +76,7 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 	private TreeViewer filterTreeViewer;
 	private AreaTreeNode areaTreeNode;
 	private EntityTypeTreeNode entityNode;
+	private GeneralItem[] generalItems = new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE};
 	
 	/*
 	 * listener for refreshing areas
@@ -133,11 +134,8 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 			}
 		});
 		
-		
-		
-		
 		List<IItemTreeNode> nodes = new ArrayList<IItemTreeNode>();
-		nodes.add(new GeneralTreeNode(Messages.EntityQueryFilterPanel_GeneralItemsLabel, new GeneralItem[]{GeneralItem.WAYPOINT_SOURCE}));
+		nodes.add(new GeneralTreeNode(Messages.EntityQueryFilterPanel_GeneralItemsLabel, generalItems));
 		nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		if (!SmartDB.isMultipleAnalysis()){
 			areaTreeNode = new AreaTreeNode(Messages.QueryFilterPanel_AreaFilters);
@@ -196,7 +194,7 @@ public class EntityQueryFilterPanel extends AbstractQueryItemPanel {
 			
 			input.put(OperatorsTreeNode.KEY, ops);
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
-
+			input.put(GeneralTreeNode.KEY, generalItems);
 			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
