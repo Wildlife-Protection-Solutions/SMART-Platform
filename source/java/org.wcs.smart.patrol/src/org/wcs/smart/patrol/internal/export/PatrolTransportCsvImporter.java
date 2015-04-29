@@ -88,8 +88,8 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 		}
 		
 		ArrayList<PatrolTransportType> types = new ArrayList<PatrolTransportType>();
-		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
-		try{
+		
+		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter)){ //$NON-NLS-1$
 			//reading the first line with language codes
 			String[] headerRow = reader.readNext();
 			List<String> langCodes = getLanguageCodes(headerRow);
@@ -110,8 +110,6 @@ public class PatrolTransportCsvImporter implements ICsvDataImporter {
 				types.add(type);
 				line++;
 			}
-		}finally{
-			reader.close();
 		}
 		if (monitor.isCanceled()) return false;
 		

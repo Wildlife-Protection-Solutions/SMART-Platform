@@ -117,11 +117,8 @@ public class PatrolExporter {
 	 */
 	private static File exportPatrolWithoutAttachments(PatrolType xml, File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.PatrolExporter_Progress_WritingToFile);
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
-		try {
+		try(BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
 			PatrolXmlManager.writeDataModel(xml, out);
-		} finally {
-			out.close();
 		}
 		monitor.worked(1);
 		return file;
@@ -143,22 +140,19 @@ public class PatrolExporter {
 		monitor.subTask(Messages.PatrolExporter_Progress_PackagingResults);
 		//create zip file
 		File zipFile = new File(f.getParent() + File.separator + name + ".zip"); //$NON-NLS-1$
-		ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile));
-		try {
+		
+		try(ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(zipFile))) {
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 
 			/* add xml file to zip */
 			zout.putNextEntry(new ZipEntry(name	+ ".xml")); //$NON-NLS-1$
-			FileInputStream inStream = new FileInputStream(xmlFile);
-
-			byte[] buffer = new byte[1024];
-			int bytesRead;
-			try {
+			
+			try(FileInputStream inStream = new FileInputStream(xmlFile)){
+				byte[] buffer = new byte[1024];
+				int bytesRead;
 				while ((bytesRead = inStream.read(buffer)) > 0) {
 					zout.write(buffer, 0, bytesRead);
 				}
-			} finally {
-				inStream.close();
 			}
 			monitor.worked(1);
 
@@ -182,19 +176,15 @@ public class PatrolExporter {
 				File attFile = att.getFullFile();
 				zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
 
-				inStream = new FileInputStream(attFile);
-				try {
+				
+				try(FileInputStream inStream = new FileInputStream(attFile)) {
+					byte[] buffer = new byte[1024];
+					int bytesRead;
 					while ((bytesRead = inStream.read(buffer)) > 0) {
 						zout.write(buffer, 0, bytesRead);
 					}
-				} finally {
-					inStream.close();
 				}
 			}
-			
-			// close
-		} finally {
-			zout.close();
 		}
         monitor.worked(1);
         

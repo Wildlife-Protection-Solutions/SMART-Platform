@@ -116,14 +116,12 @@ public class PatrolImporter {
 			File f = new File(directory.getAbsoluteFile() + File.separator + files[i]);
 			if (f.isFile()){
 				//lets try reading the 
-				FileInputStream in = new FileInputStream(f);
-				try{
+				
+				try(FileInputStream in = new FileInputStream(f)){
 					ptype = PatrolXmlManager.readDataModel(in);
 				}catch (Exception ex){
 					SmartPatrolPlugIn.log(null, ex);
 					ptype = null;
-				}finally{
-					in.close();
 				}
 				if (ptype != null){
 					//we've found it!
@@ -162,13 +160,10 @@ public class PatrolImporter {
 	 */
 	private static Patrol importPatrolFromFile(File xmlFile, ImportConfig config, IProgressMonitor monitor) throws Exception{
 		PatrolType ptype = null;
-		FileInputStream in = new FileInputStream(xmlFile);
-		try{
+		try(FileInputStream in = new FileInputStream(xmlFile)){
 			monitor.subTask(Messages.PatrolImporter_Progress_ReadingXml);
 			ptype = PatrolXmlManager.readDataModel(in);
 			monitor.worked(1);
-		}finally{
-			in.close();
 		}
 		if (ptype == null){
 			throw new Exception(Messages.PatrolImporter_Error_ReadingPatrolXmlFile);
@@ -322,10 +317,10 @@ public class PatrolImporter {
 	 * @throws Exception
 	 */
 	private static File unzip(File zipFile) throws Exception{
-		ZipFile zout = new ZipFile(zipFile);
+		
 		
 		File tempDir = null;
-		try {
+		try(ZipFile zout = new ZipFile(zipFile)) {
 			tempDir = File.createTempFile(zipFile.getName(),
 					Long.toString(System.nanoTime()));
 			tempDir.delete();
@@ -339,17 +334,11 @@ public class PatrolImporter {
 				if (entry.isDirectory()){
 					FileUtils.forceMkdir(fout);
 				}else{
-					InputStream is = zout.getInputStream(entry);
-					try{
+					try(InputStream is = zout.getInputStream(entry)){
 						FileUtils.copyInputStreamToFile(is, fout);
-					}finally{
-						is.close();
 					}
 				}
-			}
-			
-		} finally {
-			zout.close();
+			}	
 		}
 		return tempDir;
 	}	
