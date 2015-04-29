@@ -56,11 +56,11 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 
 	@Override
 	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
-		InputStream is = new ByteArrayInputStream(queryDef.getBytes());
-		
-		Parser parser = new Parser(is);
-		QueryFilter queryFilter = parser.QueryFilter();
-		is.close();
+		QueryFilter queryFilter = null;
+		try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
+			Parser parser = new Parser(is);
+			queryFilter = parser.QueryFilter();
+		}
 
 		//perform validation
 		Session session = HibernateManager.openSession();

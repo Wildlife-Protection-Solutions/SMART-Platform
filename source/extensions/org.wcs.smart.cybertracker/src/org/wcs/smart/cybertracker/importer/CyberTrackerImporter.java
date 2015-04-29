@@ -155,16 +155,14 @@ public class CyberTrackerImporter {
 	
 	protected List<CyberTrackerPatrol> importXmlFileData(File file, IProgressMonitor monitor) throws Exception {
 		Data data = null;
-		FileInputStream in = new FileInputStream(file);
-		try {
+		
+		try(FileInputStream in = new FileInputStream(file)) {
 			monitor.subTask(MessageFormat.format(Messages.CyberTrackerImporter_Read_Xml, file.getName()));
 			data = readDataModel(in);
 			monitor.worked(1);
 		} catch (Exception e) {
 			CyberTrackerPlugIn.log(e.getMessage(), e);
 			data = null;
-		} finally {
-			in.close();
 		}
 		if (data == null) {
 			throw new Exception(MessageFormat.format(Messages.CyberTrackerImporter_Read_Error, file.getName()));

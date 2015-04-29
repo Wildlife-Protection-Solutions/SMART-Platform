@@ -154,15 +154,10 @@ public class ExportEntityTypeHandler {
 									continue;
 								}
 							}
-							try{
-								FileOutputStream fout = new FileOutputStream(exportFile);
-								try{
-									EntityTypeXmlManager.writeDataModel(EntityTypeToXmlConverter.toXml(et, new SubProgressMonitor(monitor, 3)),
-										fout);
-									exportedCnt++;
-								}finally{
-									fout.close();
-								}
+							try(FileOutputStream fout = new FileOutputStream(exportFile)){
+								EntityTypeXmlManager.writeDataModel(EntityTypeToXmlConverter.toXml(et, new SubProgressMonitor(monitor, 3)),
+									fout);
+								exportedCnt++;
 							}catch (Exception ex){
 								EntityPlugIn.displayLog(Messages.ExportEntityTypeHandler_ExportError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 							}

@@ -216,6 +216,7 @@ public class MissionPropertyValue {
 				text = getAttributeListItem().getName();
 			}
 			break;
+		default: break;
 		// case TREE:
 		// if (getAttributeTreeNode() != null) {
 		// text = getAttributeTreeNode().getName();
@@ -247,8 +248,8 @@ public class MissionPropertyValue {
 			// return getAttributeTreeNode();
 		case DATE:
 			return getDateValue();
+		default: return null;
 		}
-		return null;
 	}
 
 	/**
@@ -282,6 +283,7 @@ public class MissionPropertyValue {
 		// case TREE:
 		// setAttributeTreeNode((AttributeTreeNode) value);
 		// break;
+		default:
 		}
 	}
 

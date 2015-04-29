@@ -133,10 +133,7 @@ public class ExportPlanJob extends Job {
 			IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
 			final IReportRunnable design = engine.openReportDesign(ReportPlan.getPlanTemplate());
-			
-			
-			FileOutputStream fout = new FileOutputStream(outputFile);
-			try{
+			try(FileOutputStream fout = new FileOutputStream(outputFile)){
 				IRenderOption options = new RenderOption();
 				options.setOutputStream(fout);
 				options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
@@ -151,10 +148,7 @@ public class ExportPlanJob extends Job {
 				}finally{
 					task.close();
 				}
-			}finally{
-				fout.close();
 			}
-			
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.ExportPlanJob_ErrorExportingPlan + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 			return Status.CANCEL_STATUS;

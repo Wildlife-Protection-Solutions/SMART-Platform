@@ -103,9 +103,10 @@ public class QueryImportEngine {
 	public org.wcs.smart.query.model.Query importQuery(File file) throws Exception{
 		warnings.clear();
 		
-		InputStream fin = new BufferedInputStream(new FileInputStream(file));
-		Query q = QueryXmlManager.readQueryFile(fin);
-		fin.close();
+		Query q = null;
+		try(InputStream fin = new BufferedInputStream(new FileInputStream(file))){
+			q = QueryXmlManager.readQueryFile(fin);
+		}
 		
 		QueryType qt = q.getQuery();
 		IQueryType lQueryType = QueryTypeManager.getInstance().findQueryType(qt.getQueryType());

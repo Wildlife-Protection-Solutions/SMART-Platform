@@ -287,56 +287,41 @@ public class ExportReportEngine {
 		IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
 		final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
-
-		
-
 		IRenderOption options = new RenderOption();
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try(ByteArrayOutputStream out = new ByteArrayOutputStream()){
 		
-		options.setOutputStream(out);
-		options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
-		IRunAndRenderTask task = engine.createRunAndRenderTask(design);
-		try{
-			task.setRenderOption(options);
-			task.setParameterValues(reportParameters);
-			task.run();
-		}finally{
-			task.close();
-		}
-		
-		PrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
-		pras.add(new Copies(data.copyCount));
-		pras.add(data.collate ? SheetCollate.COLLATED : SheetCollate.UNCOLLATED);
-		
-		
-		InputStream pin = new ByteArrayInputStream(out.toByteArray());
-		out.close();
-		
-		DocPrintJob job = service.createPrintJob();
-		DocFlavor[] supported = service.getSupportedDocFlavors();
-		System.out.println("SUPPORTED---------------"); //$NON-NLS-1$
-		for(int i = 0; i < supported.length; i ++){
-			System.out.println(supported[i]);
-		}
-		System.out.println("SUPPORTED---------------"); //$NON-NLS-1$
-		
-		Doc doc = new SimpleDoc(pin, DocFlavor.INPUT_STREAM.PDF, null);
-		job.print(doc, pras);
-		pin.close();
-		
-		doc.getStreamForBytes().close();
-//		
-//		PdfReader pdfReader = new PdfReader(pin);
-//
-//		PdfStamper pdfStamper = new PdfStamper(pdfReader,out);
-//		pdfStamper.addJavaScript("this.print({bUI: true, bSilent:false});\r");
-//		pdfStamper.close();
-//
-//		pin.close();
-//		Doc doc = new SimpleDoc(arg0, arg1, arg2)
-		
-		
-		
+			options.setOutputStream(out);
+			options.setEmitterID("org.eclipse.birt.report.engine.emitter.pdf"); //$NON-NLS-1$
+			IRunAndRenderTask task = engine.createRunAndRenderTask(design);
+			try{
+				task.setRenderOption(options);
+				task.setParameterValues(reportParameters);
+				task.run();
+			}finally{
+				task.close();
+			}
+			
+			try(InputStream pin = new ByteArrayInputStream(out.toByteArray())){
+				PrintRequestAttributeSet pras = new HashPrintRequestAttributeSet();
+				pras.add(new Copies(data.copyCount));
+				pras.add(data.collate ? SheetCollate.COLLATED : SheetCollate.UNCOLLATED);
+				
+				DocPrintJob job = service.createPrintJob();
+				DocFlavor[] supported = service.getSupportedDocFlavors();
+				System.out.println("SUPPORTED---------------"); //$NON-NLS-1$
+				for(int i = 0; i < supported.length; i ++){
+					System.out.println(supported[i]);
+				}
+				System.out.println("SUPPORTED---------------"); //$NON-NLS-1$
+				
+				Doc doc = new SimpleDoc(pin, DocFlavor.INPUT_STREAM.PDF, null);
+				job.print(doc, pras);
+				pin.close();
+					
+				
+				doc.getStreamForBytes().close();
+			}
+		}		
 	}
 	
 	/**

@@ -82,11 +82,10 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 		}
 		
 		sd = (SurveyDesign) session.load(SurveyDesign.class, sd.getUuid());
-		CSVWriter writer = new CSVWriter(new FileWriter(f), delimiter);
-		try{
+		
+		try(CSVWriter writer = new CSVWriter(new FileWriter(f), delimiter)){
 			exportPlotsAndTransects(type, writer, sd, session, monitor);
 		}finally{
-			writer.close();	
 			monitor.done();
 		}
 	}

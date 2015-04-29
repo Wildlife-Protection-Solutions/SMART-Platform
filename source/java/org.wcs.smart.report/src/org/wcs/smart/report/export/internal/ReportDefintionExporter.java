@@ -76,11 +76,8 @@ public class ReportDefintionExporter implements IReportExporter {
 	 */
 	@Override
 	public void exportReport(File file, Report report, HashMap<String, Object> reportParams, IProgressMonitor monitor) throws Exception {
-		ZipOutputStream zout = null; 
-		zout = new ZipOutputStream(new FileOutputStream(file));
-		
 		monitor.beginTask(Messages.ReportDefintionExporter_Progress_Exporting, 3);
-		try{
+		try(ZipOutputStream zout = new ZipOutputStream(new FileOutputStream(file))){
 			zout.setLevel(Deflater.DEFAULT_COMPRESSION);
 			
 			//export queries
@@ -105,14 +102,7 @@ public class ReportDefintionExporter implements IReportExporter {
 				reportInfo.delete();
 			}
 			monitor.worked(1);
-		}finally{
-			try{
-				zout.close();
-			}catch (Exception ex){
-				ReportPlugIn.log(ex.getMessage(), ex);
-			}
-		}
-		
+		}		
 	}
 	
 	/**
@@ -134,9 +124,9 @@ public class ReportDefintionExporter implements IReportExporter {
 						"name_" + l.getLanguage().getCode(), l.getValue()); //$NON-NLS-1$
 			}
 			prop.setProperty("filename", report.getFilename()); //$NON-NLS-1$
-			FileOutputStream fout = new FileOutputStream(f);
-			prop.store(fout, null);
-			fout.close();
+			try(FileOutputStream fout = new FileOutputStream(f)){
+				prop.store(fout, null);
+			}
 		} finally {
 			s.getTransaction().rollback();
 			s.close();
@@ -227,16 +217,14 @@ public class ReportDefintionExporter implements IReportExporter {
 	 */
 	private void addFile(File f, String name, ZipOutputStream zout) throws Exception{
 		zout.putNextEntry(new ZipEntry(name));
-		FileInputStream inStream = new FileInputStream(f);
+		
 
 		byte[] buffer = new byte[1024];
 		int bytesRead;
-		try {
+		try (FileInputStream inStream = new FileInputStream(f)){
 			while ((bytesRead = inStream.read(buffer)) > 0) {
 				zout.write(buffer, 0, bytesRead);
 			}
-		} finally {
-			inStream.close();
 		}
 	}
 	

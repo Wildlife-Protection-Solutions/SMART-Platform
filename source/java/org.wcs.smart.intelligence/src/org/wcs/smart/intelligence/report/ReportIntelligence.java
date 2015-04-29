@@ -105,16 +105,11 @@ public class ReportIntelligence {
 			//it doesn't already exist
 			if (getCustomTemplateLocation() == null){
 				File f = new File(IntelligencePlugIn.getDefault().getIntelligenceDirectory(), INTELLIGENCE_TEMPLATE);
-				InputStream in = getIntelligenceTemplate();
-				OutputStream out = new FileOutputStream(f);
-				try{
+				try(InputStream in = getIntelligenceTemplate();
+						OutputStream out = new FileOutputStream(f)){
 					IOUtils.copy(in, out);
-				}finally{
-					in.close();
-					out.close();
 				}
 			}
-			
 			
 			PlatformUI.getWorkbench().showPerspective(IntelligenceReportPerspective.ID, PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 			ReportIntelligenceEditorInput input = new ReportIntelligenceEditorInput(getCustomTemplateLocation());

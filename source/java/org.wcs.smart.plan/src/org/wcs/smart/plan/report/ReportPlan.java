@@ -127,13 +127,9 @@ public class ReportPlan {
 			//it doesn't already exist
 			if (getCustomPlanTemplateLocation() == null){
 				File f = new File(SmartPlanPlugIn.getDefault().getPlanDirectory(), PLAN_TEMPLATE);
-				InputStream in = getPlanTemplate();
-				OutputStream out = new FileOutputStream(f);
-				try{
+				try(InputStream in = getPlanTemplate();
+						OutputStream out = new FileOutputStream(f)){
 					IOUtils.copy(in, out);
-				}finally{
-					in.close();
-					out.close();
 				}
 			}
 			

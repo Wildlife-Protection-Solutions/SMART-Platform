@@ -89,8 +89,7 @@ public class RunReportJob extends Job {
 			final IReportRunnable design = engine.openReportDesign(reportFile.getAbsolutePath());
 			
 			IRenderOption options = new RenderOption();
-			FileOutputStream fout = new FileOutputStream(outputFile);
-			try{
+			try(FileOutputStream fout = new FileOutputStream(outputFile)){
 				options.setOutputStream(fout);
 				options.setEmitterID(info.getID());
 				options.setOption(HTMLRenderOption.IMAGE_DIRECTROY, outputFile.getParent());
@@ -103,10 +102,7 @@ public class RunReportJob extends Job {
 				}finally{
 					task.close();
 				}
-			}finally{
-				fout.close();
 			}
-
 		} catch (Exception e) {
 			ReportPlugIn.log("Error exporting report", e); //$NON-NLS-1$
 			return new Status(Status.ERROR, ReportPlugIn.PLUGIN_ID,

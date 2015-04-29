@@ -131,11 +131,8 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 			}
 		}
 		
-		OutputStream fout = new BufferedOutputStream(new FileOutputStream(file));
-		try{
+		try(OutputStream fout = new BufferedOutputStream(new FileOutputStream(file))){
 			QueryXmlManager.writeQuery(wpquery, fout);
-		}finally{
-			fout.close();
 		}		
 	}
 }

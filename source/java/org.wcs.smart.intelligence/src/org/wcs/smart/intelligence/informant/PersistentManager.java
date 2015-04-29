@@ -36,6 +36,7 @@ import java.io.OutputStream;
 
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -66,38 +67,26 @@ public class PersistentManager {
 				return false;
 			}
 		}
-		try {
-			OutputStream fout = new FileOutputStream(file);
+		try(OutputStream fout = new FileOutputStream(file);
 			OutputStream buffer = new BufferedOutputStream(fout);
-			ObjectOutput output = new ObjectOutputStream(buffer);
-			try {
+			ObjectOutput output = new ObjectOutputStream(buffer)){
 				output.writeObject(obj);
 				return true;
-			} finally {
-				output.close();
-			}
+
 		} catch (IOException e) {
-			e.printStackTrace();
-			// TODO: handle exception
+			IntelligencePlugIn.displayLog(Messages.PersistentManager_SaveError + e.getMessage(), e);
 		}
 		return false;
 	}
 
 	public static Object fromFile(File file) {
-		try {
-			InputStream fout = new FileInputStream(file);
+		try (InputStream fout = new FileInputStream(file);
 			InputStream buffer = new BufferedInputStream(fout);
-			ObjectInput input = new ObjectInputStream (buffer);
-			try {
-				return input.readObject();
-			} finally {
-				input.close();
-			}
-		} catch (IOException e) {
-			// TODO: handle exception
+			ObjectInput input = new ObjectInputStream (buffer)){
 
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+			return input.readObject();
+		} catch (Exception e) {
+			IntelligencePlugIn.displayLog(Messages.PersistentManager_ReadError + e.getMessage(), e);
 		}
 		return null;
 	}

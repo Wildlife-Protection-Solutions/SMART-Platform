@@ -91,50 +91,49 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 		}
 		
 		//column headers
-		CSVWriter writer = new CSVWriter(
+		try(CSVWriter writer = new CSVWriter(
 				new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"), //$NON-NLS-1$ 
-				delimiter, '"',SmartUtils.LINE_SEPARATOR); 
+				delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
 		
-		for (int i = 0; i < results.getColumnHeaders().size(); i ++){
+			for (int i = 0; i < results.getColumnHeaders().size(); i ++){
+				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
+			
+				for (int j = 0; j < results.getRowHeaders().size(); j ++){
+					data[j] = ""; //$NON-NLS-1$
+				}
+				for (int k = 0; k < results.getColumnHeaderValues()[i].length; k ++){
+					data[k + results.getRowHeaders().size()]= results.getColumnHeaderValues()[i][k].getName();
+				}
+				
+				writer.writeNext(data);
+			}
+			
+			//value headers
 			String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
-		
 			for (int j = 0; j < results.getRowHeaders().size(); j ++){
 				data[j] = ""; //$NON-NLS-1$
 			}
-			for (int k = 0; k < results.getColumnHeaderValues()[i].length; k ++){
-				data[k + results.getRowHeaders().size()]= results.getColumnHeaderValues()[i][k].getName();
-			}
-			
+			for (int k = 0; k < results.getValueHeaders().size(); k ++){
+				data[k + results.getRowHeaders().size()]= results.getValueHeaders().get(k).getName();
+			}	
 			writer.writeNext(data);
-		}
 		
-		//value headers
-		String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
-		for (int j = 0; j < results.getRowHeaders().size(); j ++){
-			data[j] = ""; //$NON-NLS-1$
-		}
-		for (int k = 0; k < results.getValueHeaders().size(); k ++){
-			data[k + results.getRowHeaders().size()]= results.getValueHeaders().get(k).getName();
-		}	
-		writer.writeNext(data);
-	
-		//row headers & data
-		for (int i = 0; i < results.getNumDataRows(); i ++){
-			data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
-			for (int j = 0; j < results.getRowHeaders().size(); j++){
-				data[j] = results.getRowHeaderValues()[i][j].getName();
-			}
-			for(int k = 0; k < results.getData()[i].length; k ++){
-				if (results.getData()[i][k] == null){
-					data[results.getRowHeaders().size() + k] = null;
-				}else{
-					data[results.getRowHeaders().size() + k] = String.valueOf(results.getData()[i][k]);
+			//row headers & data
+			for (int i = 0; i < results.getNumDataRows(); i ++){
+				data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
+				for (int j = 0; j < results.getRowHeaders().size(); j++){
+					data[j] = results.getRowHeaderValues()[i][j].getName();
 				}
+				for(int k = 0; k < results.getData()[i].length; k ++){
+					if (results.getData()[i][k] == null){
+						data[results.getRowHeaders().size() + k] = null;
+					}else{
+						data[results.getRowHeaders().size() + k] = String.valueOf(results.getData()[i][k]);
+					}
+				}
+				writer.writeNext(data);
 			}
-			writer.writeNext(data);
 		}
-		
-		writer.close();
 
 	}
 	
