@@ -22,7 +22,6 @@
 package org.wcs.smart.observation.query.model.types;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
@@ -178,18 +177,11 @@ public class ObservationWaypointQueryType implements IQueryType {
 		//validate query
 		String queryString = filters;
 		if (queryString.isEmpty()) return null;
-		InputStream is = new ByteArrayInputStream(queryString.getBytes());
-		try{
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			parser.QueryFilter();
 		}catch (Exception ex){
 			return ex.getMessage();
-		}finally{
-			try {
-				is.close();
-			} catch (IOException e) {
-				//eatme
-			}
 		}
 		return null;
 	}

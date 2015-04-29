@@ -67,13 +67,18 @@ public class ObservationValueRateFilterPanel extends ValueRateFilterDeifnitionPa
 		if (queryString == null || queryString.trim().isEmpty()){
 			return;
 		}
+		
+		QueryFilter filterPart  = null;
+		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
+			Parser parser = new Parser(is);
+			filterPart = parser.QueryFilter();
+		}catch (Exception ex){
+			QueryPlugIn.displayLog(Messages.GriddedFilterPanel_CopyError, ex);
+			return;
+		}
+		
 		Session session = null;
 		try{
-			InputStream is = new ByteArrayInputStream(queryString.getBytes());
-			Parser parser = new Parser(is);
-			QueryFilter filterPart = parser.QueryFilter();
-			is.close();
-		
 			//---- generate drop items for value filter
 			session = HibernateManager.openSession();
 			session.beginTransaction();
