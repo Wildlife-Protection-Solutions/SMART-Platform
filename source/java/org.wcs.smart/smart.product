@@ -117,7 +117,7 @@ limitations under the License.
 
    <features>
       <feature id="org.eclipse.rcp"/>
-      <feature id="org.wcs.smart.smart.feature" version="3.1.0"/>
+      <feature id="org.wcs.smart.smart.feature"/>
       <feature id="org.eclipse.emf.ecore"/>
       <feature id="org.eclipse.emf.common"/>
    </features>

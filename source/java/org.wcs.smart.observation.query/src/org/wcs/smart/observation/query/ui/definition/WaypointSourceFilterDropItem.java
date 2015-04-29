@@ -148,13 +148,13 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 		/* -- operator viewer **/
 		opViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.BORDER | SWT.READ_ONLY);
 		opViewer.setContentProvider(ArrayContentProvider.getInstance());
-		opViewer.setInput(new Operator[]{Operator.STR_EQUALS});
 		opViewer.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
 				return ((Operator)element).getGuiValue();
 			}
 		});
+		opViewer.setInput(new Operator[]{Operator.STR_EQUALS});
 		if (currentOperator == null){
 			currentOperator = Operator.STR_EQUALS;
 		}

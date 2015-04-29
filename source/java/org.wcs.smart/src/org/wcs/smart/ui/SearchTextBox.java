@@ -112,7 +112,6 @@ public class SearchTextBox extends Composite {
 		filterLayout.marginWidth= 0;
 		setLayout(filterLayout);
 		
-		// TODO Auto-generated constructor stub
 		createFilterText(this);
 		createClearTextNew(this);
 		if (clearButtonControl != null) {
@@ -334,7 +333,7 @@ public class SearchTextBox extends Composite {
 		}else{
 			filterText.setForeground(filterText.getDisplay().getSystemColor(SWT.COLOR_BLACK));
 		}
-		clearButtonControl.setVisible(!isInit);
+		if (clearButtonControl != null) clearButtonControl.setVisible(!isInit);
 		
 		//run search
 		lastSearchString = getFilterString();

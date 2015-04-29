@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Independent Incident
 Bundle-SymbolicName: org.wcs.smart.independentincident;singleton:=true
-Bundle-Version: 3.1.0
+Bundle-Version: 3.2.0
 Bundle-Activator: org.wcs.smart.incident.IncidentPlugIn
 Bundle-Vendor: org.wcs.smart
 Require-Bundle: org.wcs.smart,

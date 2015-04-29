@@ -39,6 +39,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
@@ -124,8 +125,7 @@ public class GriddedItemPanel extends AbstractQueryItemPanel{
 		protected IStatus run(IProgressMonitor monitor) {
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
-			main.getDisplay().asyncExec(new Runnable(){
-
+			Display.getDefault().asyncExec(new Runnable(){
 				@Override
 				public void run() {
 					filterTreeViewer.setInput(input);
