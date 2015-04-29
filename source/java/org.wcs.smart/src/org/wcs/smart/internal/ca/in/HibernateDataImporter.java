@@ -165,8 +165,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 		//read info in files
 		HashMap<String, List<TableInfo>> map = new HashMap<String, List<TableInfo>>();
 		for (int i = 0; i < files.length; i++){
-			BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])));
-			try{
+			try(BufferedReader reader = new BufferedReader(new FileReader(new File(dataFileDir, files[i])))){
 				String tablename = reader.readLine().toUpperCase();
 				String columns = reader.readLine();
 				String data = files[i].substring(0,files[i].lastIndexOf(".def")); //$NON-NLS-1$
@@ -178,8 +177,6 @@ public class HibernateDataImporter implements ICaDataImporter{
 				}
 				tablefiles.add(new TableInfo(tablename, columns, 
 						new File(dataFileDir,data + ".dat"))); //$NON-NLS-1$
-			}finally{
-				reader.close();
 			}
 		}
 

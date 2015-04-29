@@ -83,11 +83,9 @@ public class StationCsvImporter implements ICsvDataImporter {
 		if (!file.exists()){
 			throw new IOException(MessageFormat.format(Messages.EmployeeCsvImporter_Error_InputFileDoesNotExist1, new Object[]{ file.toString() }));
 		}
-
 		ArrayList<Station> stations = new ArrayList<Station>();
-		CSVReader reader = new CSVReader(
-				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
-		try{
+		try(CSVReader reader = new CSVReader(
+				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter)){ //$NON-NLS-1$
 			//reading the first line with language codes
 			String[] headerRow = reader.readNext();
 			List<String> langCodes = getLanguageCodes(headerRow);
@@ -111,8 +109,6 @@ public class StationCsvImporter implements ICsvDataImporter {
 				stations.add(station);
 				line++;
 			}
-		}finally{
-			reader.close();
 		}
 		if (monitor.isCanceled()) return false;
 		

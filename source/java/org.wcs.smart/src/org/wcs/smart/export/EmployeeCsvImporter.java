@@ -94,9 +94,8 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 		}
 		
 		List<Employee> employees = new ArrayList<Employee>();
-		CSVReader reader = new CSVReader(
-				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter); //$NON-NLS-1$
-		try{
+		try(CSVReader reader = new CSVReader(
+				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter)){ //$NON-NLS-1$
 			int line = 1;
 			if (skipHeader){
 				reader.readNext();
@@ -203,7 +202,6 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 					Agency ag = findAgency(agency, session);
 					if (ag == null){
 						//warning or something here
-	//					throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
 						warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_AgencyNotFound, new Object[]{agency,line}));
 						e.setAgency(null);
 					}else{
@@ -214,7 +212,6 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 						}else{
 							Rank r = findRank(ag, rank);
 							if (r == null){
-	//							throw new Exception(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
 								warnings.add(MessageFormat.format(Messages.EmployeeCsvImporter_Error_RankNotFound, new Object[]{rank, agency,line}));
 								e.setRank(null);
 							}else{
@@ -231,8 +228,6 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 			
 				employees.add(e);
 			}
-		}finally{
-			reader.close();
 		}
 		
 		if (monitor.isCanceled()) return false;

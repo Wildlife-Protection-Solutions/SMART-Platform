@@ -564,8 +564,7 @@ public class SmartUtils {
 	 * @return <code>true</code> if file is zip file, <code>false</code> otherwise
 	 */
 	public static boolean isZip(File file){
-		try{
-			ZipFile zout = new ZipFile(file);
+		try(ZipFile zout = new ZipFile(file)){
 			zout.entries();
 			zout.close();
 			return true;
