@@ -229,7 +229,7 @@ public class AttributeInfoPanel extends Composite {
 			btnAggs[i] = new Button(compAggs, SWT.CHECK);
 			btnAggs[i].setText(aggs.get(i).getGuiName());
 			btnAggs[i].setData(aggs.get(i));
-			if (createNew && i == 0){
+			if (createNew){
 				btnAggs[i].setSelection(true);
 			}
 			btnAggs[i].setEnabled(canEdit);
