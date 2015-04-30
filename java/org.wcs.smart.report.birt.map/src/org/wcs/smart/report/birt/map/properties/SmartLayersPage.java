@@ -610,7 +610,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			ReferencedEnvelope env = mapItem.getMapBounds();
 			txtBounds.setText(env.getCoordinateReferenceSystem().getName().getCode() + ": (" + env.getMinX() + "," + env.getMinY() + "),(" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
-
+		//for mac ui table issue see smart bug 1349
+		tblLayers.getTable().pack();
 	}
 	
 	@Override
