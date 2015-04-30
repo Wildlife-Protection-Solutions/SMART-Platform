@@ -24,6 +24,7 @@ package org.wcs.smart;
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Properties;
+import java.util.List;
 
 /**
  * Tools to support additional locales in addition to 
@@ -42,17 +43,21 @@ public class Localization {
 	 */
 	public static Locale[] getSupportedLocals(){
 		Locale[] defaults = Locale.getAvailableLocales();
-		Locale[] adds = new Locale[0];
+		List<Locale> allLocales = new ArrayList<Locale>();
+		for (Locale d : defaults){
+			if (!d.toString().isEmpty()){
+				allLocales.add(d);
+			}
+		}
 		try{
-			adds = readLocaleSupport();
+			for (Locale l : readLocaleSupport()){
+				allLocales.add(l);
+			}
 		}catch (Exception ex){
 			SmartPlugIn.log("Could not read additional from properties files (properties/locales.properties).", ex); //$NON-NLS-1$
 		}
 		
-		Locale[] all = new Locale[defaults.length + adds.length];
-		System.arraycopy(defaults, 0, all, 0, defaults.length);
-		System.arraycopy(adds, 0, all, defaults.length, adds.length);
-		return all;
+		return allLocales.toArray(new Locale[allLocales.size()]);
 	}
 	
 	private static Locale[] readLocaleSupport() throws Exception{
