@@ -55,14 +55,19 @@ public class DateTimeComposite extends AbstractIncidentComposite {
 
 	@Override
 	public Composite createComposite(Composite parent) {
-		Composite item = new Composite(parent, SWT.NONE);
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout());
+		main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		
+		Composite item = new Composite(main, SWT.NONE);
 		item.setLayout(new GridLayout(2, false));
+		item.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
 		
 		Label l = new Label(item, SWT.NONE);
 		l.setText(Messages.DateTimeComposite_DateLabel);
 		
-		date = new DateTime(item, SWT.DATE | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER );
-		date.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		date = new DateTime(item, SWT.DATE | SWT.DROP_DOWN | SWT.LONG | SWT.BORDER );
+		date.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
 		
 		date.addSelectionListener(new SelectionAdapter() {
         	@Override
@@ -75,7 +80,7 @@ public class DateTimeComposite extends AbstractIncidentComposite {
 		l = new Label(item, SWT.NONE);
 		l.setText(Messages.DateTimeComposite_TimeLabel);
 		time = new DateTime(item, SWT.TIME | SWT.DROP_DOWN | SWT.MEDIUM | SWT.BORDER);
-		time.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		time.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
 		time.addSelectionListener(new SelectionAdapter() {
         	@Override
         	public void widgetSelected(SelectionEvent e) {

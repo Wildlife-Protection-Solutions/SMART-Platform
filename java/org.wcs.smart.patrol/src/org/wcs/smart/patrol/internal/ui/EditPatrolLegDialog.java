@@ -315,7 +315,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		Label lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_LegStartDate_Label);
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
-		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		startDate.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, false, false));
 		startDate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -373,7 +373,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		Label lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.EditPatrolLegDialog_LegEndDate_Label);
 		endDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
-		endDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		endDate.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		endDate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

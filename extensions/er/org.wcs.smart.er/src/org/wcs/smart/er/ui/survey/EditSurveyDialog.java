@@ -174,7 +174,7 @@ public class EditSurveyDialog extends TitleAreaDialog{
 				validate();
 			}
 		};
-		startDate = new DateTime(part, SWT.DATE | SWT.MEDIUM | SWT.DROP_DOWN);
+		startDate = new DateTime(part, SWT.DATE | SWT.LONG | SWT.DROP_DOWN);
 		startDate.addSelectionListener(listener);
 		startDate.setEnabled(canEdit == null);
 		cdStart = createDecoration(startDate);
@@ -182,7 +182,7 @@ public class EditSurveyDialog extends TitleAreaDialog{
 		l = new Label(part, SWT.NONE);
 		l.setText(Messages.EditSurveyDialog_EndLabel);
 		
-		endDate = new DateTime(part, SWT.DATE | SWT.MEDIUM | SWT.DROP_DOWN);
+		endDate = new DateTime(part, SWT.DATE | SWT.LONG | SWT.DROP_DOWN);
 		endDate.addSelectionListener(listener);
 		endDate.setEnabled(canEdit == null);
 		cdEnd = createDecoration(endDate);

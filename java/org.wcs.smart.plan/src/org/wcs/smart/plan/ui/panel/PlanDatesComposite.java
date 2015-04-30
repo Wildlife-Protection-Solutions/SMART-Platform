@@ -74,23 +74,27 @@ public class PlanDatesComposite extends PlanComposite {
 	}
 
 	private void createControls() {
-        this.setLayout(new GridLayout(2, false));
+        this.setLayout(new GridLayout());
         this.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
         
-        Label lbl = new Label(this, SWT.NONE);
+        Composite center = new Composite(this, SWT.NONE);
+        center.setLayout(new GridLayout(2, false));
+        center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+        
+        Label lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.PlanDatesComposite_StartDate);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		dtStartDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
-		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
+		dtStartDate.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
 		
-		lbl = new Label(this, SWT.NONE);
+		lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.PlanDatesComposite_EndDate);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
-		dtEndDate = new DateTime(this, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
-		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
+		dtEndDate.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
 		((GridData)dtEndDate.getLayoutData()).horizontalIndent = 10;
 		
 		cdEndDate = new ControlDecoration(dtEndDate, SWT.LEFT);

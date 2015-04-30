@@ -194,7 +194,7 @@ public class EntitySummaryQueryType implements IQueryType {
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			parser.SumQuery();
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			return ex.getMessage();
 		}
 		return null;

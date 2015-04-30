@@ -218,7 +218,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 			SumQueryDefinition def = parser.SumQuery();
 			
 			validateQueryParts(def);
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			return ex.getMessage();
 		}
 		return null;

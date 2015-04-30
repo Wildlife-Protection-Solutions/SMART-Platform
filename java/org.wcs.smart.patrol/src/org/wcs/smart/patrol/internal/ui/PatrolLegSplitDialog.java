@@ -376,7 +376,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		Label lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.PatrolLegSplitDialog_DateofSplit_Label);
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
-		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		startDate.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
 		startDate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -434,7 +434,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		Label lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.PatrolLegSplitDialog_DateGroupsJoined_Label);
 		endDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
-		endDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		endDate.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
 		endDate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

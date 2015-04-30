@@ -309,6 +309,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 				}				
 			}
 		}
+		viewer.refresh();
 	}
 
 	private void updateButtons() {

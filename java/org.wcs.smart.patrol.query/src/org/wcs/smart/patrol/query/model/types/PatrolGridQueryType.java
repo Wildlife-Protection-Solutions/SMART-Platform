@@ -205,7 +205,7 @@ public class PatrolGridQueryType implements IQueryType {
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			parser.GridQuery();
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			return ex.getMessage();
 		}
 		return null;

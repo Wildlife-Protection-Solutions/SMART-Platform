@@ -80,12 +80,13 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         Composite dateComposite = new Composite(this, SWT.NONE);
         dateComposite.setLayout(new GridLayout(2, false));
         dateComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        ((GridData)dateComposite.getLayoutData()).horizontalIndent = 15;
         
         dtFromLabel = new Label(dateComposite, SWT.NONE);
         dtFromLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         dtFromDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
-        dtFromDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        dtFromDate.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtFromDate.getLayoutData()).horizontalIndent = 10;
         dtFromDate.addSelectionListener(new SelectionAdapter() {
         	@Override
@@ -100,7 +101,7 @@ public class IntelligenceDatesComposite extends IntelligenceComposite {
         dtToLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
         
         dtToDate = new DateTime(dateComposite, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
-        dtToDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
+        dtToDate.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false, 1, 1));
         ((GridData)dtToDate.getLayoutData()).horizontalIndent = 10;
         dtToDate.addSelectionListener(new SelectionAdapter() {
         	@Override

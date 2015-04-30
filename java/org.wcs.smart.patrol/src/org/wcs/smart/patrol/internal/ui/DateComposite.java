@@ -64,33 +64,36 @@ public class DateComposite extends PatrolItemComposite implements SelectionListe
 	 * @see org.wcs.smart.patrol.internal.ui.PatrolItemComposite#createComponent(org.eclipse.swt.widgets.Composite, int)
 	 */
 	public Composite createComponent(Composite parent, int style) {
-		Composite center = new Composite(parent, SWT.NONE);
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		main.setLayout(new GridLayout(1, false));
+		
+		Composite center = new Composite(main, SWT.NONE);
 		center.setLayout(new GridLayout(2, false));
-		center.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		center.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
 		
 		Label lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.DateComposite_StartDate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtStartDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG | SWT.DATE);
-		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)dtStartDate.getLayoutData()).horizontalIndent = 10;
+		dtStartDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		
 		lbl = new Label(center, SWT.NONE);
 		lbl.setText(Messages.DateComposite_EndDate_Label);
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 		
 		dtEndDate = new DateTime(center, SWT.BORDER | SWT.DROP_DOWN | SWT.LONG| SWT.DATE);
-		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
-		((GridData)dtEndDate.getLayoutData()).horizontalIndent = 10;
-		cdEndDate = new ControlDecoration(lbl, SWT.RIGHT);
+		dtEndDate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+
+		cdEndDate = new ControlDecoration(dtEndDate, SWT.RIGHT);
 		cdEndDate.setImage(SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.IMG_DEC_FIELD_WARNING));
 		cdEndDate.hide();
 		
 		dtEndDate.addSelectionListener(this);
 		dtStartDate.addSelectionListener(this);
 		
-		return center;
+		return main;
 	}
 
 
