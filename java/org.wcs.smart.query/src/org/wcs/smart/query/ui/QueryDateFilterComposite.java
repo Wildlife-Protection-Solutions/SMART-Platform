@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -218,7 +219,14 @@ public class QueryDateFilterComposite extends Composite {
 		cdEndDate.setShowHover(true);
 		cdEndDate.hide();
 		
-		cmbFilterOptions.setSelection(new StructuredSelection(filterOps[0]));
+		IDateFilter sel = filterOps[0];
+		for (IDateFilter f : filterOps){
+			if (f.equals(AllDatesFilter.INSTANCE)){
+				sel = f;
+				break;
+			}
+		}
+		cmbFilterOptions.setSelection(new StructuredSelection(sel));
 	}
 
 	
