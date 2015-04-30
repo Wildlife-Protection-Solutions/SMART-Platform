@@ -204,7 +204,7 @@ public class SurveyGridQueryType implements IQueryType {
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			def = parser.GridQuery();
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			return ex.getMessage();
 		}
 		

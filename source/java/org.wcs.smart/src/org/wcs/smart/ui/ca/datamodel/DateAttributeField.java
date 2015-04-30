@@ -85,7 +85,7 @@ public class DateAttributeField implements IAttributeField<Date>{
 		});
 		
 		dtime = new DateTime(dtComp, SWT.DROP_DOWN | SWT.DATE | SWT.MEDIUM);
-		dtime.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		dtime.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
 		
 		dtime.addListener(SWT.Modify, new Listener(){
 			@Override

@@ -210,7 +210,7 @@ public class SurveySummaryQueryType implements IQueryType {
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			def = parser.SumQuery();
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			//ERQueryPlugIn.log(ex.getMessage(), ex);
 			return ex.getMessage();
 		}

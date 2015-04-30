@@ -180,7 +180,7 @@ public class PatrolObservationQueryType implements IQueryType {
 		try(InputStream is = new ByteArrayInputStream(queryString.getBytes())){
 			Parser parser = new Parser(is);
 			parser.QueryFilter();
-		}catch (Exception ex){
+		}catch (Throwable ex){
 			return ex.getMessage();
 		}
 		return null;

@@ -74,7 +74,7 @@ public class DatesComponent implements SelectionListener{
 		if (optional){
 			btnCheckStart = new Button(part, SWT.CHECK);
 		}
-		dtStart = new DateTime(part, SWT.DATE | SWT.DROP_DOWN | SWT.MEDIUM);
+		dtStart = new DateTime(part, SWT.DATE | SWT.DROP_DOWN | SWT.LONG);
 		
 		
 		l = new Label(part, SWT.NONE);
@@ -82,7 +82,7 @@ public class DatesComponent implements SelectionListener{
 		if (optional){
 			btnCheckEnd = new Button(part, SWT.CHECK);
 		}
-		dtEnd = new DateTime(part, SWT.DATE | SWT.DROP_DOWN | SWT.MEDIUM);
+		dtEnd = new DateTime(part, SWT.DATE | SWT.DROP_DOWN | SWT.LONG);
 		
 		cdEnd = createDecoration(dtEnd);
 		cdEnd.hide();

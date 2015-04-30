@@ -125,7 +125,7 @@ public class PatrolLegLeaderChangeDialog extends TitleAreaDialog implements Sele
 		Label lbl = new Label(timecomp, SWT.NONE);
 		lbl.setText(Messages.PatrolLegLeaderChangeDialog_DateChange_Label);
 		startDate = new DateTime(timecomp, SWT.DATE | SWT.DROP_DOWN | SWT.BORDER | SWT.LONG);
-		startDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		startDate.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, false));
 		startDate.addSelectionListener(this);
 		
 		SmartUtils.initDateDateTimeWidget(startDate, existingLeg.getStartDate());
