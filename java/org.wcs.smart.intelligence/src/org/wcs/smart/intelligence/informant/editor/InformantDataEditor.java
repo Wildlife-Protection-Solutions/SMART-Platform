@@ -292,6 +292,9 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		loadData();
 		informantSorter.setSortColumn(viewer.getTable().getColumn(0));
 		updateButtons();
+		
+		viewer.getTable().pack(true);
+		parent.layout();
 	}
 
 	protected void showSecuredColumns(boolean isVisible) {
@@ -403,7 +406,15 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 			}else{
 				InformantAesManager manager = InformantAesManager.getInstance();
 				manager.setPassword(dialog.getPassword());
-				viewer.refresh();
+				
+				//attempt to decode the first informant; this will ensure
+				//the password verification works as expected
+				if (viewer.getInput() instanceof List<?>){
+					List<?> data = (List<?>)viewer.getInput();
+					if (data.size() > 0 && data.get(0) instanceof Informant){
+						manager.get((Informant)data.get(0));
+					}
+				}
 				if (manager.isPasswordSet() && !manager.containsDecrypted()) {
 					MessageDialog.openError(getSite().getShell(), Messages.InformantDataEditor_WrongPassword_Title, Messages.InformantDataEditor_WrongPassword_Message);
 					if (attempts < 10){
