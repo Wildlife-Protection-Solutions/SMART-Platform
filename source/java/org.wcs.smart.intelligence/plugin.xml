@@ -36,7 +36,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.intelligence.exportPdf"
+                  commandId="org.wcs.smart.intelligence.editor.exportPdf"
                   label="%pdf.command.label"
                   style="push">
                <parameter
@@ -344,7 +344,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.intelligence.exportPdf"
+               commandId="org.wcs.smart.intelligence.editor.exportPdf"
                label="%pdf.toolbar.command.label"
                style="push"
                tooltip="%pdf.toolbar.command.tooltip">
@@ -419,7 +419,7 @@
          <toolbar
                id="org.wcs.smart.intelligence.toolbar">
             <command
-                  commandId="org.wcs.smart.intelligence.exportPdf"
+                  commandId="org.wcs.smart.intelligence.editor.exportPdf"
                   label="%pdf.toolbar.command.label"
                   style="push"
                   tooltip="%pdf.toolbar.command.tooltip">
@@ -512,6 +512,15 @@
             id="org.wcs.smart.intelligence.ShowInformant"
             name="%command.showinformant.name">
       </command>
+      <command
+            id="org.wcs.smart.intelligence.editor.exportPdf"
+            name="%pdf.editor.command.name">
+         <commandParameter
+               id="org.wcs.smart.intelligence.exportpdf.editor"
+               name="Editor Export"
+               optional="true">
+         </commandParameter>
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -598,16 +607,6 @@
          </activeWhen>
       </handler>
       <handler
-            class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligencePdf$ExportIntelligencePdffWrapper"
-            commandId="org.wcs.smart.intelligence.exportPdf">
-         <activeWhen>
-            <test
-                  forcePluginActivation="true"
-                  property="org.wcs.smart.caSingle">
-            </test>
-         </activeWhen>
-      </handler>
-      <handler
             class="org.wcs.smart.intelligence.ui.handlers.EditIntelligenceTemplate$EditIntelligenceTemplateWrapper"
             commandId="org.wcs.smart.intelligence.editTemplate">
          <activeWhen>
@@ -680,6 +679,45 @@
                   property="org.wcs.smart.caSingle">
             </test>
          </activeWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligencePdf$ExportIntelligencePdffWrapper"
+            commandId="org.wcs.smart.intelligence.editor.exportPdf">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.intelligence.IntelligenceEditor">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.intelligence.ui.handlers.ExportIntelligencePdf$ExportIntelligencePdffWrapper"
+            commandId="org.wcs.smart.intelligence.exportPdf">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="selection">
+               <iterate
+                     operator="or">
+                  <instanceof
+                        value="org.wcs.smart.intelligence.ui.editor.IntelligenceEditorInput">
+                  </instanceof>
+               </iterate>
+            </with>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -786,6 +824,10 @@
       <image
             commandId="org.wcs.smart.intelligence.ShowInformant"
             icon="images/etool16/informant.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.intelligence.editor.exportPdf"
+            icon="images/etool16/printpdf.png">
       </image>
    </extension>
    <extension
