@@ -54,23 +54,12 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  */
 public class Upgrader310To320 implements IDatabaseUpgrader {
 	
-	private CmUpgrader310To320 cmUpgrader = new CmUpgrader310To320();
-	
 	private String dbUrl = null;
 	
 	public void upgrade(final IProgressMonitor monitor) {
 		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
 		final Session s = HibernateManager.openSession();
 		try{
-			
-			/* Species Cleanup - ticket #1118 */
-			s.beginTransaction();
-			cleanUpSpecies(s, monitor);
-			s.getTransaction().commit();
-			
-			monitor.subTask(Messages.Upgrader310To320_ProgressMessage + ": " + Messages.Upgrader310To320_upgradingDBMsg); //$NON-NLS-1$
-			cmUpgrader.reset(s);
-			
 			s.doWork(new Work() {
 				@Override
 				public void execute(Connection c) throws SQLException {
@@ -155,8 +144,6 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		for (String s : sql){
 			c.createStatement().execute(s);
 		}
-
-		cmUpgrader.upgrade(c);
 				
 		/* VERSION UDATE */ 
 		String ssql = "update smart.db_version set version = '3.2.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
@@ -165,7 +152,33 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		c.commit();
 	}
 
-	private static void cleanUpSpecies(Session session, IProgressMonitor monitor){
+	/**
+	 * Performs the post processing upgrades.  This code has to be
+	 * performed after all other upgrades/install processes to ensure
+	 * all tables are installed in the databases so species delete check
+	 * can be execute without missing tables.
+	 * 
+	 * @param monitor
+	 */
+	public void postProcess(IProgressMonitor monitor) {
+		monitor.subTask(Messages.Upgrader310To320_ProgressMessage);
+		final Session s = HibernateManager.openSession();
+		try{
+			/* Species Cleanup - ticket #1118 */
+			s.beginTransaction();
+			cleanUpSpecies(s, monitor);
+			s.getTransaction().commit();
+				
+			// configurable model trees; do this after the species clean up to 
+			//improve performance
+			monitor.subTask(Messages.Upgrader310To320_ProgressMessage + ": " + Messages.Upgrader310To320_upgradingDBMsg); //$NON-NLS-1$
+			CmUpgrader310To320 cmUpgrader = new CmUpgrader310To320();
+			cmUpgrader.upgrade(s);
+		}finally{
+			s.close();
+		}
+	}
+	public static void cleanUpSpecies(Session session, IProgressMonitor monitor){
 		List<?> data = session.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", "species")) //$NON-NLS-1$ //$NON-NLS-2$
 				.list();

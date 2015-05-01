@@ -6,8 +6,10 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.derby.tools.ij;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -78,7 +80,8 @@ public class UpgradeEngine {
 		final String newDbVersion = lnewDbVersion;
 		final String expectedDbVersion = lexpectedDbVersion;
 
-		/* validate the core version; upgrade as required */
+		Set<IDatabaseUpgrader> upgradersRun = new HashSet<IDatabaseUpgrader>();
+		/* --- validate the core version; upgrade as required --- */
 		if (!expectedDbVersion.equals(newDbVersion)) {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
@@ -128,11 +131,12 @@ public class UpgradeEngine {
 				UpgradeFromVersion v = UpgradeFromVersion.values()[i];
 				IDatabaseUpgrader upgrader = v.upgradeEngine.newInstance();
 				upgrader.upgrade(monitor);
+				upgradersRun.add(upgrader);
 			}
 				
 		}
 		
-		/* validate & update plugins */
+		/* --- validate & update plugins ---*/
 		if (currentVersions != null) {
 			Map<String, String> backupVersions;
 			s = HibernateManager.openSession();
@@ -168,11 +172,20 @@ public class UpgradeEngine {
 			}
 		}
 			
-		/* additional upgrade options */
+		/* --- additional upgrade options --- */
 		List<IDatabaseUpgrader> extensions = getExtensions();
 		for (IDatabaseUpgrader upgrader : extensions) {
 			upgrader.upgrade(monitor);
 		}
+		/* --- post process  --- */
+		//this is done here to ensure all plugin tables that are required
+		//to check delete are installed
+		for (IDatabaseUpgrader up : upgradersRun){
+			if (up instanceof Upgrader310To320){
+				((Upgrader310To320) up).postProcess(monitor);
+			}
+		}
+		
 		monitor.subTask(""); //$NON-NLS-1$
 	}
 

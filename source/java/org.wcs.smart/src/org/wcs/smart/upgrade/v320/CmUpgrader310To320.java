@@ -47,7 +47,9 @@ public class CmUpgrader310To320 {
 	private UUIDGenerator uuidGenerator;
 	
 	public void upgrade(Session s) {
-		reset(s);
+		this.session = s;
+		uuidGenerator = null;
+		
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -56,79 +58,78 @@ public class CmUpgrader310To320 {
 		});
 	}
 	
-	void reset(Session s) {
-		this.session = s;
-		uuidGenerator = null;
-	}
-	
 	void upgrade(Connection c) throws SQLException {
-		ResultSet cm_rs = c.createStatement().executeQuery("select UUID from smart.CONFIGURABLE_MODEL"); //$NON-NLS-1$
-		PreparedStatement ps = c.prepareStatement("select distinct cma.ATTRIBUTE_UUID from smart.CM_ATTRIBUTE cma left join smart.CM_NODE node on cma.NODE_UUID = node.UUID left join smart.DM_ATTRIBUTE dma on cma.ATTRIBUTE_UUID = dma.UUID where dma.ATT_TYPE = 'TREE' and node.CM_UUID = ?"); //$NON-NLS-1$
-		while (cm_rs.next()) {
-			byte[] cm_uuid = cm_rs.getBytes(1);
-			ps.setBytes(1, cm_uuid);
-			ResultSet dma_rs = ps.executeQuery();
-			while (dma_rs.next()) {
-				byte[] dma_uuid = dma_rs.getBytes(1);
-				buildDefaultTree(c, cm_uuid, dma_uuid, null, null);
+		try(ResultSet cm_rs = c.createStatement().executeQuery("select UUID from smart.CONFIGURABLE_MODEL")){ //$NON-NLS-1$
+			PreparedStatement ps = c.prepareStatement("select distinct cma.ATTRIBUTE_UUID from smart.CM_ATTRIBUTE cma left join smart.CM_NODE node on cma.NODE_UUID = node.UUID left join smart.DM_ATTRIBUTE dma on cma.ATTRIBUTE_UUID = dma.UUID where dma.ATT_TYPE = 'TREE' and node.CM_UUID = ?"); //$NON-NLS-1$
+			while (cm_rs.next()) {
+				byte[] cm_uuid = cm_rs.getBytes(1);
+				ps.setBytes(1, cm_uuid);
+				try(ResultSet dma_rs = ps.executeQuery()){
+					while (dma_rs.next()) {
+						byte[] dma_uuid = dma_rs.getBytes(1);
+						buildDefaultTree(c, cm_uuid, dma_uuid, null, null);
+					}
+				}
 			}
-			dma_rs.close();
 		}
-		cm_rs.close();
 	}
 
 	private void buildDefaultTree(Connection c, byte[] cm_uuid, byte[] dma_uuid, byte[] cm_parent_uuid, byte[] dm_parent_uuid) throws SQLException {
-		ResultSet dm_node_rs = null;
+
+		String query;
+		byte[][] params;
 		if (dm_parent_uuid != null) {
-			PreparedStatement ps = c.prepareStatement("select uuid, node_order from smart.DM_ATTRIBUTE_TREE where ATTRIBUTE_UUID = ? and PARENT_UUID = ? and IS_ACTIVE"); //$NON-NLS-1$
-			ps.setBytes(1, dma_uuid);
-			ps.setBytes(2, dm_parent_uuid);
-			dm_node_rs = ps.executeQuery();
+			query = "select uuid, node_order from smart.DM_ATTRIBUTE_TREE where ATTRIBUTE_UUID = ? and PARENT_UUID = ? and IS_ACTIVE"; //$NON-NLS-1$
+			params = new byte[][]{dma_uuid,dm_parent_uuid};
 		} else {
-			PreparedStatement ps = c.prepareStatement("select uuid, node_order from smart.DM_ATTRIBUTE_TREE where ATTRIBUTE_UUID = ? and PARENT_UUID is null and IS_ACTIVE"); //$NON-NLS-1$
-			ps.setBytes(1, dma_uuid);
-			dm_node_rs = ps.executeQuery();
+			query = "select uuid, node_order from smart.DM_ATTRIBUTE_TREE where ATTRIBUTE_UUID = ? and PARENT_UUID is null and IS_ACTIVE"; //$NON-NLS-1$
+			params = new byte[][]{dma_uuid};
 		}
 		
-		PreparedStatement ps = c.prepareStatement("select UUID from smart.cm_attribute_tree_node where CM_UUID = ? and DM_TREE_NODE_UUID = ?"); //$NON-NLS-1$
-		PreparedStatement insert_ps = c.prepareStatement("insert into smart.cm_attribute_tree_node (UUID, CM_UUID, DM_TREE_NODE_UUID, IS_ACTIVE, PARENT_UUID, NODE_ORDER, DM_ATTRIBUTE_UUID) VALUES (?, ?, ?, ?, ?, ?, ?)"); //$NON-NLS-1$
-		PreparedStatement update_ps = c.prepareStatement("update smart.cm_attribute_tree_node set DM_ATTRIBUTE_UUID = ?, PARENT_UUID = ?, NODE_ORDER = ? where UUID = ?"); //$NON-NLS-1$
-		ps.setBytes(1, cm_uuid);
-		while (dm_node_rs.next()) {
-			byte[] cm_node_uuid = null;
-			byte[] dm_node_uuid = dm_node_rs.getBytes(1);
-			int order = dm_node_rs.getInt(2);
-			ps.setBytes(2, dm_node_uuid);
-			ResultSet cm_node_rs = ps.executeQuery();
-			if (cm_node_rs.next()) {
-				//some mapping existed, need to update it
-				cm_node_uuid = cm_node_rs.getBytes(1);
-
-				update_ps.setBytes(1, dma_uuid);
-				update_ps.setBytes(2, cm_parent_uuid);
-				update_ps.setInt(3, order);
-				update_ps.setBytes(4, cm_node_uuid);
-				update_ps.execute();
-			} else {
-				//there is no mapping, need to create it
-				byte[][] obj = new byte[2][];
-				obj[0] = cm_uuid;
-				obj[1] = dm_node_uuid;
-				cm_node_uuid = getNewUuid(obj);
-				
-				insert_ps.setBytes(1, cm_node_uuid);
-				insert_ps.setBytes(2, cm_uuid);
-				insert_ps.setBytes(3, dm_node_uuid);
-				insert_ps.setBoolean(4, true);
-				insert_ps.setBytes(5, cm_parent_uuid);
-				insert_ps.setInt(6, order);
-				insert_ps.setBytes(7, dma_uuid);
-				insert_ps.execute();
-			}
-			cm_node_rs.close();
-			buildDefaultTree(c, cm_uuid, dma_uuid, cm_node_uuid, dm_node_uuid);
+		PreparedStatement psa = c.prepareStatement(query);
+		for (int i = 0; i < params.length; i ++){
+			psa.setBytes(i+1, params[i]);
 		}
-		dm_node_rs.close();
+		try(ResultSet dm_node_rs = psa.executeQuery()){
+			PreparedStatement ps = c.prepareStatement("select UUID from smart.cm_attribute_tree_node where CM_UUID = ? and DM_TREE_NODE_UUID = ?"); //$NON-NLS-1$
+			PreparedStatement insert_ps = c.prepareStatement("insert into smart.cm_attribute_tree_node (UUID, CM_UUID, DM_TREE_NODE_UUID, IS_ACTIVE, PARENT_UUID, NODE_ORDER, DM_ATTRIBUTE_UUID) VALUES (?, ?, ?, ?, ?, ?, ?)"); //$NON-NLS-1$
+			PreparedStatement update_ps = c.prepareStatement("update smart.cm_attribute_tree_node set DM_ATTRIBUTE_UUID = ?, PARENT_UUID = ?, NODE_ORDER = ? where UUID = ?"); //$NON-NLS-1$
+			ps.setBytes(1, cm_uuid);
+			while (dm_node_rs.next()) {
+				byte[] cm_node_uuid = null;
+				byte[] dm_node_uuid = dm_node_rs.getBytes(1);
+				int order = dm_node_rs.getInt(2);
+				ps.setBytes(2, dm_node_uuid);
+				try(ResultSet cm_node_rs = ps.executeQuery()){
+					if (cm_node_rs.next()) {
+						//some mapping existed, need to update it
+						cm_node_uuid = cm_node_rs.getBytes(1);
+	
+						update_ps.setBytes(1, dma_uuid);
+						update_ps.setBytes(2, cm_parent_uuid);
+						update_ps.setInt(3, order);
+						update_ps.setBytes(4, cm_node_uuid);
+						update_ps.execute();
+					} else {
+						//	there is no mapping, need to create it
+						byte[][] obj = new byte[2][];
+						obj[0] = cm_uuid;
+						obj[1] = dm_node_uuid;
+						cm_node_uuid = getNewUuid(obj);
+					
+						insert_ps.setBytes(1, cm_node_uuid);
+						insert_ps.setBytes(2, cm_uuid);
+						insert_ps.setBytes(3, dm_node_uuid);
+						insert_ps.setBoolean(4, true);
+						insert_ps.setBytes(5, cm_parent_uuid);
+						insert_ps.setInt(6, order);
+						insert_ps.setBytes(7, dma_uuid);
+						insert_ps.execute();
+					}
+				}
+				buildDefaultTree(c, cm_uuid, dma_uuid, cm_node_uuid, dm_node_uuid);
+			}
+		}
 	}
 
 	private byte[] getNewUuid(Object object) {
