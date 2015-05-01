@@ -40,7 +40,7 @@
                   visible="true">
             </separator>
             <command
-                  commandId="org.wcs.smart.plan.exportPdf"
+                  commandId="org.wcs.smart.plan.editor.exportPdf"
                   label="%exportpdf1command.name"
                   style="push">
                <parameter
@@ -262,7 +262,7 @@
          <toolbar
                id="org.wcs.smart.plan.toolbar">
             <command
-                  commandId="org.wcs.smart.plan.exportPdf"
+                  commandId="org.wcs.smart.plan.editor.exportPdf"
                   style="push"
                   tooltip="%exportpdf.command.tooltip.0">
                <visibleWhen
@@ -317,7 +317,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.wcs.smart.plan.exportPdf"
+               commandId="org.wcs.smart.plan.editor.exportPdf"
                label="%command.label.exportPlanToPDF"
                style="push"
                tooltip="%exportpdf.command.tooltip.0">
@@ -483,7 +483,8 @@
          <enabledWhen>
             <with
                   variable="selection">
-               <iterate>
+               <iterate
+                     operator="or">
                   <instanceof
                         value="org.wcs.smart.plan.ui.editor.PlanEditorInput">
                   </instanceof>
@@ -527,6 +528,24 @@
             </with>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.plan.ui.handlers.ExportPlanPdf$ExportPlanPdfWrapper"
+            commandId="org.wcs.smart.plan.editor.exportPdf">
+         <activeWhen>
+            <test
+                  forcePluginActivation="true"
+                  property="org.wcs.smart.caSingle">
+            </test>
+         </activeWhen>
+         <enabledWhen>
+            <with
+                  variable="activeEditorId">
+               <equals
+                     value="org.wcs.smart.plan.ui.editor.PlanEditor">
+               </equals>
+            </with>
+         </enabledWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -548,6 +567,15 @@
       </command>
       <command
             id="org.wcs.smart.plan.exportPdf"
+            name="%exportpdf1command.name">
+         <commandParameter
+               id="org.wcs.smart.plan.exportpdf.editor"
+               name="Editor Export"
+               optional="true">
+         </commandParameter>
+      </command>
+      <command
+            id="org.wcs.smart.plan.editor.exportPdf"
             name="%exportpdf1command.name">
          <commandParameter
                id="org.wcs.smart.plan.exportpdf.editor"
@@ -659,6 +687,10 @@
       </image>
       <image
             commandId="org.wcs.smart.plan.exportPdf"
+            icon="images/icons/etool16/printpdf.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.plan.editor.exportPdf"
             icon="images/icons/etool16/printpdf.png">
       </image>
    </extension>
