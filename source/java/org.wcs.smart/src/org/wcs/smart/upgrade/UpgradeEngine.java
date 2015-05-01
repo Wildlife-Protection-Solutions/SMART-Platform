@@ -67,13 +67,11 @@ public class UpgradeEngine {
 		final boolean[] isOk = {false};
 		String lnewDbVersion = null;
 		String lexpectedDbVersion = null;
-		Map<String, String> backupVersions = null;
 		
 		Session s = HibernateManager.openSession();
 		try {
 			lnewDbVersion = getSmartVersion(s);
 			lexpectedDbVersion = SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY);
-			backupVersions = getVersions(s);
 		} finally {
 			s.close();
 		}
@@ -136,7 +134,13 @@ public class UpgradeEngine {
 		
 		/* validate & update plugins */
 		if (currentVersions != null) {
-			
+			Map<String, String> backupVersions;
+			s = HibernateManager.openSession();
+			try {
+				backupVersions = getVersions(s);
+			} finally {
+				s.close();
+			}
 			String problems = ""; //$NON-NLS-1$
 			for (String curPlugin : currentVersions.keySet()) {
 				if (backupVersions.containsKey(curPlugin)) {
@@ -192,7 +196,7 @@ public class UpgradeEngine {
 				versions.put(pluginid, version);
 			}
 		} catch (Exception e) {
-			//most likely it is because of old version which doesn't contain pligin_id column
+			//most likely it is because of old version which doesn't contain plugin_id column
 			return null;
 		}
 		return versions;
