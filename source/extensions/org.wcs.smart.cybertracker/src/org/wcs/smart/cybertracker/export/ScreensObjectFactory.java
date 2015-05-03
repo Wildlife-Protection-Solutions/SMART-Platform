@@ -174,7 +174,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>16</NextId>
+            <NextId>17</NextId>
             <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -194,7 +194,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(16);
+		data.setNextId(17);
 		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
@@ -1037,6 +1037,25 @@ public class ScreensObjectFactory {
 		control.setId(15);
 		control.setTranslateDateId(dateResultElement);
 		control.setTranslateTimeId(timeResultElement);
+		return control;
+	}
+
+	/**
+    <Control>
+	    <Type>{DBDA4351-F047-4AA9-8B87-684CAF7EEFA9}</Type>
+	    <Id>16</Id>
+	    <Align>2</Align>
+	    <Height>90</Height>
+	    <AutoConnect>True</AutoConnect>
+	</Control>
+	 */
+	public Controls.Control createGPSControl16() {
+		Controls.Control control = new Controls.Control();
+		control.setType("{DBDA4351-F047-4AA9-8B87-684CAF7EEFA9}"); //$NON-NLS-1$
+		control.setId(16);
+		control.setAlign(2);
+		control.setHeight(90);
+		control.setAutoConnect("True"); //$NON-NLS-1$
 		return control;
 	}
 	

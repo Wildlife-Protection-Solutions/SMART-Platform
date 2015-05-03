@@ -417,6 +417,9 @@ public class PatrolScreensUtil {
 		String resultDateId = createResultElement(RESULT_PATROL_START_DATE, elements);
 		String resultTimeId = createResultElement(RESULT_PATROL_START_TIME, elements);
 		addStartTimeAttrubute(node, resultDateId, resultTimeId);
+		//if "Use GPS Time" option is enabled than "Snap Date & Time" control needs time from GPS to calculate offset from device time,
+		//but it doesn't launch GPS reading itself, so we need to add "GPS" control (see ticket #1304 for details)
+		addGPSControl(node);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
 		container.resultElements.add(new IdNamePair(resultDateId, RESULT_PATROL_START_DATE));
@@ -711,4 +714,9 @@ public class PatrolScreensUtil {
 		ScreensObjectFactory.addControlToNode(node, dtAttr);
 	}
 	
+	private void addGPSControl(Node node) {
+		Control gpsControl = screensFactory.createGPSControl16();
+		ScreensObjectFactory.addControlToNode(node, gpsControl);
+	}
+
 }
