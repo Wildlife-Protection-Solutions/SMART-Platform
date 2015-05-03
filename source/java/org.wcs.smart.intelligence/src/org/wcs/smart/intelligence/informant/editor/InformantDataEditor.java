@@ -407,12 +407,16 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 				InformantAesManager manager = InformantAesManager.getInstance();
 				manager.setPassword(dialog.getPassword());
 				
-				//attempt to decode the first informant; this will ensure
+				//attempt to decode the informant; this will ensure
 				//the password verification works as expected
 				if (viewer.getInput() instanceof List<?>){
-					List<?> data = (List<?>)viewer.getInput();
-					if (data.size() > 0 && data.get(0) instanceof Informant){
-						manager.get((Informant)data.get(0));
+					List<?> data = (List<?>) viewer.getInput();
+					for (Object object : data) {
+						if (object instanceof Informant) {
+							if (manager.get((Informant)object) != null) {
+								break; //we found and successfully decoded at least one informant
+							}
+						}
 					}
 				}
 				if (manager.isPasswordSet() && !manager.containsDecrypted()) {
