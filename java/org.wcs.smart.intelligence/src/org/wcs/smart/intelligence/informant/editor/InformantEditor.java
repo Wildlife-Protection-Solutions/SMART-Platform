@@ -143,12 +143,13 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 
 	private boolean canEditSecureData() {
 		if (InformantAesManager.getInstance().isPasswordSet()) {
+			if (informant.getEncryptedData() == null || informant.getEncryptedData().isEmpty()) {
+				return true;
+			}
 			if (InformantAesManager.getInstance().isDecrypted(informant)) {
 				return true;
 			}
-			if (informant.getEncryptedData() == null || informant.getEncryptedData().isEmpty()) {
-				return !InformantAesManager.getInstance().containsInvalid();
-			}
+			return !InformantAesManager.getInstance().containsInvalid();
 		}
 		return false;
 	}
