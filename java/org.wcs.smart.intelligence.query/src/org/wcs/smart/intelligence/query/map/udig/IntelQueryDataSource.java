@@ -101,7 +101,7 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		if (type == null){
 			try {
 				if (typeName.equals(INTEL_TYPE)) {
-					type = createIntelligenceRecordSchema();
+					type = createIntelligenceRecordSchema(query.getQueryColumns());
 				} 
 			}catch(SchemaException ex){
 				throw new IOException(Messages.IntelQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
@@ -112,19 +112,23 @@ public class IntelQueryDataSource extends AbstractDataStore{
 	}
 
 	/**
-	 * Creates the simple feature type for the query
+	 * Creates the simple feature type for the intelligence record query
+	 * from list of query columns included in the query.
 	 * 
 	 * @return the simple feature type for the query
 	 * 
 	 * @throws SchemaException
 	 */
-	private SimpleFeatureType createIntelligenceRecordSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + INTEL_TYPE, getFeatureSchemaDef(query.getQueryColumns(), true)); //$NON-NLS-1$
+	public static SimpleFeatureType createIntelligenceRecordSchema(List<QueryColumn> columns) throws SchemaException{
+		SimpleFeatureType type =  DataUtilities.createType("smart." + INTEL_TYPE, getFeatureSchemaDef(columns, true)); //$NON-NLS-1$
 		return type;
 	}
 	
 	
-	public static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
+	/**
+	 * Create feature definition string from query columns.
+	 */
+	private static String getFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$

@@ -109,7 +109,17 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 		}
 	
 		IntelligencePoint ip = subInterator.next();
-		
+		return toSimpleFeature(ftype, currentIntel, ip);
+	}
+	
+	/**
+	 * Creates a simple feature from an intelligence point
+	 * @param ftype feature type
+	 * @param currentIntel intelligence record
+	 * @param ip intelligence point
+	 * @return 
+	 */
+	public static SimpleFeature toSimpleFeature(SimpleFeatureType ftype, IntelligenceRecordResultItem currentIntel, IntelligencePoint ip){
 		int size = FixedQueryColumn.FixedColumns.values().length+2;
 		if (!SmartDB.isMultipleAnalysis()){
 			size = size - 2;
@@ -165,8 +175,6 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 		}
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
-	
-	
 	/**
 	 * @see org.geotools.data.FeatureReader#close()
 	 */
