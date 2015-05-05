@@ -78,9 +78,19 @@
 		<xs:attribute type="xs:boolean" name="ignore" use="optional" />
 	</xs:complexType>
 
+	<xs:complexType name="Param">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute type="xs:string" name="key" use="required" />
+				<xs:attribute type="xs:string" name="val" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+
   <xs:element name="SmartMapping">
     <xs:complexType>
       <xs:sequence>
+        <xs:element name="Param" type="Param" maxOccurs="unbounded" minOccurs="0" />
         <xs:element name="MappedAttribute" type="MappedAttribute" maxOccurs="unbounded" minOccurs="0" />
         <xs:element name="MappedCategory" type="MappedCategory" maxOccurs="unbounded" minOccurs="0" />
       </xs:sequence>
