@@ -133,19 +133,19 @@ public class PlanTargetFeatureReader implements FeatureReader<SimpleFeatureType,
 	private SimpleFeature getPointAsFeature(SpatialPlanTargetPoint point){
 		//
 		Object data[] = new Object[7];
-		data[0] = ftype.getName() + "." + SmartUtils.encodeHex(point.getUuid()); //$NON-NLS-1$
-		data[1] = point.getPlanTarget().getName();
-		data[2] = point.getPlanTarget().getDescription();
+		data[0] = gf.createPoint(new Coordinate(point.getX(), point.getY()));
+		data[1] = ftype.getName() + "." + SmartUtils.encodeHex(point.getUuid()); //$NON-NLS-1$
+		data[2] = point.getPlanTarget().getName();
+		data[3] = point.getPlanTarget().getDescription();
 		if (point.getPlanTarget().getCurrentStatus() != null){
-			data[3] = point.getPlanTarget().getCurrentStatus().getDisplayString();
-			data[4] = point.getPlanTarget().getCurrentStatus().getStatus().key;
+			data[4] = point.getPlanTarget().getCurrentStatus().getDisplayString();
+			data[5] = point.getPlanTarget().getCurrentStatus().getStatus().key;
 		}else{
-			data[3] = PlanTargetStatus.Status.UNKNOWN.guiName;
-			data[4] = PlanTargetStatus.Status.UNKNOWN.key;
+			data[4] = PlanTargetStatus.Status.UNKNOWN.guiName;
+			data[5] = PlanTargetStatus.Status.UNKNOWN.key;
 		}
-		data[5] = point.getPlanTarget().getPlan().getId();
-		data[6] = gf.createPoint(new Coordinate(point.getX(), point.getY()));
-		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
+		data[6] = point.getPlanTarget().getPlan().getId();
+		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
 	
 }

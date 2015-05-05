@@ -91,7 +91,7 @@ public class IntelligenceDataSource extends AbstractDataStore{
 	}
 
 	private SimpleFeatureType createPointSchema() throws SchemaException{
-		String spec = "fid:String,geom:Point:srid=4326"; //$NON-NLS-1$
+		String spec = "the_geom:Point:srid=4326,fid:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType("smart." + INTEL_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}

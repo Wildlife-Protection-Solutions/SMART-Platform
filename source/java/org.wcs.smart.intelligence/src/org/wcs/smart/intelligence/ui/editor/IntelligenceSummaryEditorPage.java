@@ -243,7 +243,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		pointsList.setContentProvider(ArrayContentProvider.getInstance());
 		pointsList.setLabelProvider(new SmartPointLabelProvider());
 		pointsTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		((GridData)pointsTable.getLayoutData()).minimumHeight = 60;
+		((GridData)pointsTable.getLayoutData()).heightHint = 50;
 		Hyperlink locLink = createEditLink(toolkit, content, PanelType.LOCATION);
 		locLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 
@@ -261,7 +261,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 			}
 		});
 		attachTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		((GridData)attachTable.getLayoutData()).minimumHeight = 60;
+		((GridData)attachTable.getLayoutData()).heightHint = 50;
 		Hyperlink attachLink = createEditLink(toolkit, content, PanelType.ATTACHMENTS);
 		attachLink.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		
