@@ -32,6 +32,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.intelligence.report.ReportIntelligence;
@@ -50,16 +51,20 @@ public class ExportIntelligencePdf {
 	private final static String ISEDITOR_PARAM = "org.wcs.smart.intelligence.exportpdf.editor"; //$NON-NLS-1$
 	
 	@Execute
-	public void execute(MPart activePart, 
+	public void execute(EPartService pService, 
 			@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection,
 			@Optional @Named(ISEDITOR_PARAM) String isEditor){
 		
 		IntelligenceEditorInput in = null;
 		
 		if (isEditor != null && isEditor.equalsIgnoreCase("true")){ //$NON-NLS-1$
-			Object x = E3Utils.getSourceObject(activePart);
-			if (x instanceof IntelligenceEditor){
-				in = (IntelligenceEditorInput) ((IntelligenceEditor)x).getEditorInput();
+			for (MPart p : pService.getParts()){
+				if (E3Utils.isCompatibilityEditor(p) &&
+						E3Utils.getSourceObject(p) instanceof IntelligenceEditor &&
+						pService.isPartVisible(p)){
+					in = (IntelligenceEditorInput) ((IntelligenceEditor)E3Utils.getSourceObject(p)).getEditorInput();
+					break;
+				}
 			}
 		}else{
 			if (thisSelection == null || !(thisSelection instanceof IStructuredSelection) || ((IStructuredSelection)thisSelection).isEmpty()) return;
