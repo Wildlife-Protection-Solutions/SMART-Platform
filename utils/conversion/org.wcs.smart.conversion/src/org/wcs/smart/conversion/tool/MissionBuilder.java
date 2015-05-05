@@ -80,6 +80,8 @@ public class MissionBuilder extends AbstractBuilder {
 	
 	public MissionType createMission(List<TagS> sList, String id) throws DatatypeConfigurationException, ParseException {
 		
+		String surveyDesignKey = getParam("surveyDesignKey", "csvimport"); //$NON-NLS-1$ //$NON-NLS-2$
+		
 		MissionType mission = new MissionType();
 		mission.setId(id);
 		
@@ -370,7 +372,7 @@ public class MissionBuilder extends AbstractBuilder {
 		survey.setId(id);
 		survey.setStartDate(xmlDate);
 		survey.setEndDate(xmlDate);
-		survey.setSurveyDesignKeyId("csvimport");
+		survey.setSurveyDesignKeyId(surveyDesignKey);
 		mission.setSurvey(survey);
 		
 		misDay.setDate(xmlDate);
