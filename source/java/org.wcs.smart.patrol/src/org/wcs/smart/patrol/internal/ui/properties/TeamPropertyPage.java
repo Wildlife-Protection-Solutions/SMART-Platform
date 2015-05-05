@@ -123,10 +123,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		KEY(Team.KEY, 1),
 		NAME(Team.NAME, 1),
 		MANDATE(Team.MANDATE,1),
-		DESCRIPTION(Team.DESCRIPTION,2);
+		DESCRIPTION(Team.DESCRIPTION,2),
+		KEY(Team.KEY, 1);
 		
 		String name;
 		int weight;

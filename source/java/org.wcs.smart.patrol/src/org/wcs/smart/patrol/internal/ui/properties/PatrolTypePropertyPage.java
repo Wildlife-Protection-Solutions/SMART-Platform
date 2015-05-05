@@ -271,7 +271,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			@Override
 			public void handleEvent(Event event) {
 				ViewerCell cell = transportTblViewer.getCell(new Point(event.x, event.y));
-				if (cell != null && cell.getColumnIndex() == 1){
+				if (cell != null && cell.getColumnIndex() == 2){
 					editKey();
 				}
 			}
@@ -513,26 +513,6 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 		});
 
-		/* Key Column */
-		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
-		column = viewerColumn.getColumn();
-		column.setText(PatrolTransportType.KEY);
-		column.setResizable(true);
-		column.setMoveable(true);
-
-		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
-		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
-			
-		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
-			@Override
-			public String getText(Object element) {
-				if (element instanceof PatrolTransportType){
-					return ((PatrolTransportType) element).getKeyId();
-				}
-				return super.getText(element);
-			}
-		});
-		
 		
 		/* Transport Type Name Column */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
@@ -616,7 +596,25 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				}					
 			}});
 
-		
+		/* Key Column */
+		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
+		column = viewerColumn.getColumn();
+		column.setText(PatrolTransportType.KEY);
+		column.setResizable(true);
+		column.setMoveable(true);
+
+		layout = (TableColumnLayout) viewer.getTable().getParent().getLayout();
+		layout.setColumnData(column, new ColumnWeightData(1,ColumnWeightData.MINIMUM_WIDTH, true));
+			
+		viewerColumn.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				if (element instanceof PatrolTransportType){
+					return ((PatrolTransportType) element).getKeyId();
+				}
+				return super.getText(element);
+			}
+		});
 	}
 	private HashSet<PatrolTransportType> toDelete = new HashSet<PatrolTransportType>();
 	
