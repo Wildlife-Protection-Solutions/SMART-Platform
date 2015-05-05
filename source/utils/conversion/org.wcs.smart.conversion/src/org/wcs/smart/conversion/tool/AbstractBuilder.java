@@ -23,14 +23,18 @@ package org.wcs.smart.conversion.tool;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup;
-import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup.Ct2AttributeValuePair;
+import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.MappedAttribute;
 import org.wcs.smart.conversion.model.MappedAttributeType;
 import org.wcs.smart.conversion.model.MappedCategory;
+import org.wcs.smart.conversion.model.Param;
+import org.wcs.smart.conversion.model.SmartMapping;
 import org.wcs.smart.conversion.tag.TagA;
 import org.wcs.smart.conversion.tag.TagS;
 import org.wcs.smart.conversion.util.Ct2AttributeTypeUtil;
@@ -53,10 +57,12 @@ public abstract class AbstractBuilder {
 	private DataModelLookup dmLookup;
 	private TeamMembersParser membersParser = new TeamMembersParser();
 	private DateTimeParser dateTimeParser = new DateTimeParser();
+	private Map<String, String> params;
 
 	public AbstractBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
 		this.dmLookup = dmLookup;
 		lookup = new Ct2SmartLookup(session.getSmartMapping());
+		params = extractParams(session.getSmartMapping());
 	}
 
 	protected Ct2SmartLookup getLookup() {
@@ -77,6 +83,15 @@ public abstract class AbstractBuilder {
 	
 	public TeamMembersParser getMembersParser() {
 		return membersParser;
+	}
+	
+	public String getParam(String key) {
+		return params != null ? params.get(key) : null;
+	}
+
+	public String getParam(String key, String defaultValue) {
+		String value = getParam(key);
+		return value != null ? value : defaultValue;
 	}
 	
 	protected MappedCategory getDefaultCategory(TagS s) {
@@ -109,6 +124,14 @@ public abstract class AbstractBuilder {
 		if (o1 == null) 
 			return o2 == null;
 		return o1.equals(o2);
+	}
+
+	private Map<String, String> extractParams(SmartMapping smartMapping) {
+		Map<String, String> map = new HashMap<>();
+		for (Param p : smartMapping.getParam()) {
+			map.put(p.getKey(), p.getVal());
+		}
+		return map;
 	}
 
 }
