@@ -160,5 +160,15 @@
             class="org.wcs.smart.intelligence.query.export.IntelligenceSummaryDefinitionImporter">
       </QueryImporter>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.intelligence.query.export.IntelligenceQueryTemplateCloner"
+            id="org.wcs.smart.query.intelligence.cloner">
+         <require
+               id="org.wcs.smart.QueryCloner">
+         </require>
+      </templateCloner>
+   </extension>
 
 </plugin>
