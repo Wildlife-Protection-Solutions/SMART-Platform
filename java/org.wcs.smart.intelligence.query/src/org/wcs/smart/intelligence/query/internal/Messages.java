@@ -30,6 +30,9 @@ public class Messages extends NLS {
 	public static String IntelligenceQueryFactory_DefaultNameRecord;
 	public static String IntelligenceQueryFactory_DefaultNameSummary;
 	public static String IntelligenceQueryPlugIn_ErrorDialogTitle;
+	public static String IntelligenceQueryTemplateCloner_CloneIntelQuery;
+	public static String IntelligenceQueryTemplateCloner_CloneRecords;
+	public static String IntelligenceQueryTemplateCloner_CloneSummaries;
 	public static String IntelligenceRecordQueryType_QueryTypeName;
 	public static String IntelligenceSummaryCsvExporter_CSVLabel;
 	public static String IntelligenceSummaryCsvExporter_MustRunQuery;
