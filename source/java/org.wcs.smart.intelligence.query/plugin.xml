@@ -136,5 +136,29 @@
             upgrader="org.wcs.smart.intelligence.query.updatesite.IntelligenceQueryDatabaseUpgrader">
       </dbUpgrader>
    </extension>
+   <extension
+         point="org.wcs.smart.query.export.format">
+      <Exporter
+            class="org.wcs.smart.intelligence.query.export.IntelligenceRecordDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.intelligence.query.export.IntelligenceRecordShpExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.intelligence.query.export.IntelligenceSummaryDefinitionExporter">
+      </Exporter>
+      <Exporter
+            class="org.wcs.smart.intelligence.query.export.IntelligenceSummaryCsvExporter">
+      </Exporter>
+   </extension>
+   <extension
+         point="org.wcs.smart.query.import">
+      <QueryImporter
+            class="org.wcs.smart.intelligence.query.export.IntelligenceRecordDefinitionImporter">
+      </QueryImporter>
+      <QueryImporter
+            class="org.wcs.smart.intelligence.query.export.IntelligenceSummaryDefinitionImporter">
+      </QueryImporter>
+   </extension>
 
 </plugin>
