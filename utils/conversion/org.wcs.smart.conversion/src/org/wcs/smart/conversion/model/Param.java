@@ -16,16 +16,16 @@ import javax.xml.bind.annotation.XmlValue;
 
 
 /**
- * <p>Java class for ExtraAttribute complex type.
+ * <p>Java class for Param complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="ExtraAttribute">
+ * &lt;complexType name="Param">
  *   &lt;simpleContent>
  *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="valueKey" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="key" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="val" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/extension>
  *   &lt;/simpleContent>
  * &lt;/complexType>
@@ -34,17 +34,17 @@ import javax.xml.bind.annotation.XmlValue;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "ExtraAttribute", propOrder = {
+@XmlType(name = "Param", propOrder = {
     "value"
 })
-public class ExtraAttribute {
+public class Param {
 
     @XmlValue
     protected String value;
-    @XmlAttribute(name = "attributeKey")
-    protected String attributeKey;
-    @XmlAttribute(name = "valueKey")
-    protected String valueKey;
+    @XmlAttribute(name = "key", required = true)
+    protected String key;
+    @XmlAttribute(name = "val", required = true)
+    protected String val;
 
     /**
      * Gets the value of the value property.
@@ -71,51 +71,51 @@ public class ExtraAttribute {
     }
 
     /**
-     * Gets the value of the attributeKey property.
+     * Gets the value of the key property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getAttributeKey() {
-        return attributeKey;
+    public String getKey() {
+        return key;
     }
 
     /**
-     * Sets the value of the attributeKey property.
+     * Sets the value of the key property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setAttributeKey(String value) {
-        this.attributeKey = value;
+    public void setKey(String value) {
+        this.key = value;
     }
 
     /**
-     * Gets the value of the valueKey property.
+     * Gets the value of the val property.
      * 
      * @return
      *     possible object is
      *     {@link String }
      *     
      */
-    public String getValueKey() {
-        return valueKey;
+    public String getVal() {
+        return val;
     }
 
     /**
-     * Sets the value of the valueKey property.
+     * Sets the value of the val property.
      * 
      * @param value
      *     allowed object is
      *     {@link String }
      *     
      */
-    public void setValueKey(String value) {
-        this.valueKey = value;
+    public void setVal(String value) {
+        this.val = value;
     }
 
 }
