@@ -86,7 +86,9 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	public DerbyPagedIntellResults executeQuery( final IntelligenceRecordQuery query,
 			final Session session, final IProgressMonitor monitor)
 			throws SQLException {
-		
+		if (query.getDateFilter() == null){
+			return null;
+		}
 		final String queryDataTable = createTempTableName();
 		
 		session.doWork(new Work() {

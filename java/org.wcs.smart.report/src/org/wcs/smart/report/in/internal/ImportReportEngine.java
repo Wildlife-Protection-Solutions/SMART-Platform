@@ -360,7 +360,7 @@ public class ImportReportEngine {
 			
 			if (existing.getOwner().equals(SmartDB.getCurrentEmployee()) && !existing.getShared()){
 				
-				final boolean[] overwrite = new boolean[]{false};
+				final int[] overwrite = new int[]{-1};
 				display.syncExec(new Runnable(){
 					@Override
 					public void run() {
@@ -370,14 +370,13 @@ public class ImportReportEngine {
 								MessageFormat.format(
 								OVERWRITEWARNING_DIALOG_MESSAGE, new Object[]{report.getName()}),
 								MessageDialog.QUESTION, 
-								new String[]{OVERWRITEDIALOG_OVERWRITE, OVERWRITEDIALOG_CREATENEW}, 0);
-						if (md.open() == 0){
-							//overwrite
-							overwrite[0] = true;
-						}
+								new String[]{IDialogConstants.CANCEL_LABEL, OVERWRITEDIALOG_OVERWRITE, OVERWRITEDIALOG_CREATENEW}, 1);
+						overwrite[0] = md.open();
 						
 					}});
-				if (overwrite[0]){
+				if (overwrite[0] == 0){
+					return null;
+				}else if (overwrite[0] == 1){
 					return existing;
 				}
 				
@@ -386,7 +385,7 @@ public class ImportReportEngine {
 				if (SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN || 
 						SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER ){
 					
-					final boolean[] overwrite = new boolean[]{false};
+					final int[] overwrite = new int[]{-1};
 					display.syncExec(new Runnable(){
 						@Override
 						public void run() {
@@ -395,13 +394,12 @@ public class ImportReportEngine {
 									null,
 									MessageFormat.format(OVERWRITEWARNING_DIALOG_MESSAGE, new Object[]{report.getName()}),
 									MessageDialog.QUESTION, 
-									new String[]{OVERWRITEDIALOG_OVERWRITE, OVERWRITEDIALOG_CREATENEW}, 0);
-							if (md.open() == 0){
-								//overwrite
-								overwrite[0] = true;
-							}							
+									new String[]{IDialogConstants.CANCEL_LABEL, OVERWRITEDIALOG_OVERWRITE, OVERWRITEDIALOG_CREATENEW}, 1);
+							overwrite[0] = md.open();						
 						}});
-					if (overwrite[0]){
+					if (overwrite[0] == 0){
+						return null;
+					}else if (overwrite[0] == 1){
 						return existing;
 					}
 

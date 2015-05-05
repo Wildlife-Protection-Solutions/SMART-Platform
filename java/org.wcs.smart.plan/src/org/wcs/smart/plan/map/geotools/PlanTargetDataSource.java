@@ -105,7 +105,7 @@ public class PlanTargetDataSource extends AbstractDataStore{
 	}
 	
 	private SimpleFeatureType createPlanTargetSchema() throws SchemaException{
-		String spec = "fid:String,targetName:String,targetSummary:String,targetStatusDescription:String,targetStatus:String,planId:String,geom:Point:srid=4326"; //$NON-NLS-1$
+		String spec = "the_geom:Point:srid=4326,fid:String,targetName:String,targetSummary:String,targetStatusDescription:String,targetStatus:String,planId:String"; //$NON-NLS-1$
 		SimpleFeatureType type =  DataUtilities.createType("smart." + PLAN_TARGET_TYPE, spec); //$NON-NLS-1$
 		return type;
 	}

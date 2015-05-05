@@ -141,8 +141,9 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 						exporter.exportReport(outputFile, report, null, new NullProgressMonitor());//new SubProgressMonitor(monitor, 2));
 						monitor.worked(1);
 						
-						importReport(outputFile, inputFolder);
-						importCnt++;
+						if (importReport(outputFile, inputFolder)){
+							importCnt++;
+						}
 						monitor.worked(1);
 					}catch (Throwable ex){
 						ReportPlugIn.displayLog(MessageFormat.format(Messages.ImportReportWizard_ErrorMsg + "\n\n" + ex.getLocalizedMessage(), new Object[]{report.getName() + " [" + report.getId() + "]"}), ex); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -193,8 +194,9 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 					monitor.subTask(MessageFormat.format(Messages.ImportReportWizard_TaskProgress2, new Object[]{f.getName()}));
 					monitor.worked(1);
 					try{
-						importReport(f, inputFolder);
-						importCnt++;
+						if (importReport(f, inputFolder)){
+							importCnt++;	
+						}
 					}catch (Exception ex){
 						ReportPlugIn.displayLog(MessageFormat.format(Messages.ImportReportWizard_FileError, new Object[]{f.getAbsolutePath()}) + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 					}	
@@ -224,9 +226,9 @@ public class ImportReportWizard extends Wizard implements IPageChangingListener{
 		});
 	}
 	
-	private void importReport(File file, Object reportFolder) throws Exception{
+	private boolean importReport(File file, Object reportFolder) throws Exception{
 		ImportReportEngine importer = new ImportReportEngine();
-		importer.importReport(file, reportFolder);
+		return importer.importReport(file, reportFolder);
 	}
 	
 	/**
