@@ -113,8 +113,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		KEY(PatrolMandate.KEY,1),
-		NAME(PatrolMandate.NAME,2);
+		NAME(PatrolMandate.NAME,2),
+		KEY(PatrolMandate.KEY,1);
 		
 		String name;
 		int size;
