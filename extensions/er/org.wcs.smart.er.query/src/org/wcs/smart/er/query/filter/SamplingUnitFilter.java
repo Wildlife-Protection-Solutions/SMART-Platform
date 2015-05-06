@@ -51,6 +51,15 @@ public class SamplingUnitFilter implements IFilter {
 		NONE.setId(Messages.SamplingUnitFilter_NoneFilterName);
 	}
 	
+	public static Source keyToSource(String key){
+		for (Source s : Source.values()){
+			if (s.queryKey.equals(key)){
+				return s;
+			}
+		}
+		return null;
+	}
+	
 	public static SamplingUnitFilter createSamplingUnitFilter(String key){
 		String[] bits = key.split(":"); //$NON-NLS-1$
 		return new SamplingUnitFilter(bits[3], Type.SAMPLINGUNIT, keyToSource(bits[2]));
@@ -60,9 +69,6 @@ public class SamplingUnitFilter implements IFilter {
 		String[] bits = key.split(":"); //$NON-NLS-1$
 		return new SamplingUnitFilter(bits[3], Type.TRACK, keyToSource(bits[2]));
 	}
-	
-	private String uuid;
-	private Type unitType;
 	
 	public enum Type {SAMPLINGUNIT, TRACK};
 	
@@ -79,16 +85,13 @@ public class SamplingUnitFilter implements IFilter {
 		}
 	};
 	
-	private Source joinTable;
 	
-	public static Source keyToSource(String key){
-		for (Source s : Source.values()){
-			if (s.queryKey.equals(key)){
-				return s;
-			}
-		}
-		return null;
-	}
+	
+
+	
+	private String uuid;
+	private Type unitType;
+	private Source joinTable;
 	
 	
 	public SamplingUnitFilter(String uuid, Type type, Source source){
@@ -119,9 +122,13 @@ public class SamplingUnitFilter implements IFilter {
 	@Override
 	public String asString() {
 		if (unitType == Type.SAMPLINGUNIT){
-			return "s:samplingunit:" + uuid; //$NON-NLS-1$
+			if (isNone()){
+				return "s:samplingunit:" + joinTable.queryKey + ":" + SamplingUnitFilter.NONE_KEY; //$NON-NLS-1$ //$NON-NLS-2$
+			}else{
+				return "s:samplingunit:" + joinTable.queryKey + ":" + uuid; //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}else if (unitType == Type.TRACK){
-			return "s:samplingunittrack:" + uuid; //$NON-NLS-1$
+			return "s:samplingunittrack:" + joinTable.queryKey + ":" + uuid; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}
