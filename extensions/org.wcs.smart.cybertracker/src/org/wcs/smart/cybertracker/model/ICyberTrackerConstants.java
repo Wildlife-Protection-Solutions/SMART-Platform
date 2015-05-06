@@ -33,7 +33,7 @@ public interface ICyberTrackerConstants {
 	 * The version number to use for checking against the CT
 	 * registry version number
 	 */
-	public static final String INSTALL_MIN_VERSION  = "3.00.0374"; //$NON-NLS-1$
+	public static final String INSTALL_MIN_VERSION  = "3.00.0382"; //$NON-NLS-1$
 	/**
 	 * The version number to display if the current
 	 * version CT is not compatible 
@@ -43,7 +43,7 @@ public interface ICyberTrackerConstants {
 	 * number of 3.00.0345 in the windows registry.  This is
 	 * not reflective of the versioning of CT on the downloads page
 	 * (or what the user sees) so rather than displaying the extra
-	 * 0's we use this contanst to display something different. 
+	 * 0's we use this constant to display something different. 
 	 * 
 	 * Q: It looks like in the registry the version is something like 
 	 * 3.00.0366  but in the application the about shows just 3.366
@@ -52,7 +52,7 @@ public interface ICyberTrackerConstants {
 	 * I don't use those digits.  
 	 * 
 	 */
-	public static final String DISPLAY_MIN_VERSION  = "3.374"; //$NON-NLS-1$
+	public static final String DISPLAY_MIN_VERSION  = "3.382"; //$NON-NLS-1$
 	
 	public static final String SMART_CTX_FILENEME = "smart.ctx"; //$NON-NLS-1$
 	public static final String SMART_CTX_DOWNLOAD_FOLDER = "CyberTracker"; //$NON-NLS-1$
