@@ -1040,7 +1040,7 @@
       <styleConfigurator
             class="org.wcs.smart.query.udig.render.SmartGridCellStyleConfigurator"
             id="gridcell"
-            label="Grid Cell Border"
+            label="%styleConfigurator.label"
             requires="org.wcs.smart.query.common.model.udig.RasterService"
             styleId="org.locationtech.udig.style.sld">
       </styleConfigurator>
@@ -1050,7 +1050,7 @@
       <style
             class="org.wcs.smart.query.udig.render.SmartGridCellStyleContent"
             id="org.wcs.smart.query.grid.style.border"
-            name="SMART Grid Border Style">
+            name="%style.name">
       </style>
    </extension>
 

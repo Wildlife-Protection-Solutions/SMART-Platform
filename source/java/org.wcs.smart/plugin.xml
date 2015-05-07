@@ -599,9 +599,9 @@
          <command
                commandId="org.wcs.smart.command.map.style"
                icon="images/icons/obj16/style.png"
-               label="Style"
+               label="%style.command.label"
                style="push"
-               tooltip="Changes the style of the selected layer.">
+               tooltip="%style.command.tooltip">
          </command>
       </menuContribution>
       <menuContribution
@@ -610,10 +610,10 @@
          <command
                commandId="org.wcs.smart.command.map.style"
                icon="images/icons/obj16/style.png"
-               label="Change Style..."
-               mnemonic="S"
+               label="%style.command.label.0"
+               mnemonic="%style.command.mnemonic"
                style="push"
-               tooltip="Changes the style of the selected layer.">
+               tooltip="%style.command.tooltip.0">
          </command>
       </menuContribution>
    </extension>
@@ -727,7 +727,7 @@
       </category>
       <command
             id="org.wcs.smart.command.showperspective"
-            name="Show Perspective">
+            name="%perspective.command.name">
          <commandParameter
                id="org.wcs.smart.perspectiveid"
                name="Perspective Id"
@@ -736,7 +736,7 @@
       </command>
       <command
             id="org.wcs.smart.command.map.style"
-            name="Style">
+            name="%style.command.name">
       </command>
    </extension>
    <extension
@@ -1294,7 +1294,7 @@
       <style
             class="org.wcs.smart.udig.style.SmartLayerStyle"
             id="org.wcs.smart.udig.savedStyle"
-            name="SMART Saved Style">
+            name="%savedstyle.name">
       </style>
    </extension>
    <extension

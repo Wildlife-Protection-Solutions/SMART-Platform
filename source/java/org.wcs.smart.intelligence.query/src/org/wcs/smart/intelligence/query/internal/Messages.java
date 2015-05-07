@@ -13,7 +13,6 @@ public class Messages extends NLS {
 	public static String FixedQueryColumn_DescriptionCol;
 	public static String FixedQueryColumn_FromDateColumn;
 	public static String FixedQueryColumn_InformantCol;
-	public static String FixedQueryColumn_LocationsColumn;
 	public static String FixedQueryColumn_NameCol;
 	public static String FixedQueryColumn_PatrolColumn;
 	public static String FixedQueryColumn_ReceivedDateCol;
@@ -36,10 +35,6 @@ public class Messages extends NLS {
 	public static String IntelligenceRecordQueryType_QueryTypeName;
 	public static String IntelligenceSummaryCsvExporter_CSVLabel;
 	public static String IntelligenceSummaryCsvExporter_MustRunQuery;
-	public static String IntelligenceSummaryEditor_ErrorMsg;
-	public static String IntelligenceSummaryEditor_ErrorTitle;
-	public static String IntelligenceSummaryEditor_InvalidQueryMessage;
-	public static String IntelligenceSummaryEditor_queryJobName;
 	public static String IntelligenceSummaryQueryType_TypeName;
 	public static String IntelQueryDataSource_SchemaError;
 	public static String ListFilterDropItem_Loading;
