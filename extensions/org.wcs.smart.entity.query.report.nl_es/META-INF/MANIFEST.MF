@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Spanish Entity Tracker Report Query Fragment
 Bundle-SymbolicName: org.wcs.smart.entity.query.report.nl_es
-Bundle-Version: 3.1.0
-Fragment-Host: org.wcs.smart.entity.query.report;bundle-version="3.1.0"
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Version: 3.2.0
+Fragment-Host: org.wcs.smart.entity.query.report;bundle-version="3.2.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

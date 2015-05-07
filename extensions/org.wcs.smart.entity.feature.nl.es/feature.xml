@@ -2,10 +2,9 @@
 <feature
       id="org.wcs.smart.entity.feature.nl.es"
       label="SMART Entity Tracker Spanish Language Pack"
-      version="3.1.0"
+      version="3.2.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.1.0">
+      license-feature="org.wcs.smart.smart_feature">
 
    <description>
       The Spanish translations for the Entity Tracker plugin.
