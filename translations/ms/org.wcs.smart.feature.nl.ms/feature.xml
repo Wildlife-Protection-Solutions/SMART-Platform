@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.ms"
       label="SMART Malay Language Pack"
-      version="3.1.0"
+      version="3.2.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.1.0">
+      license-feature-version="3.2.0">
 
    <description>
       Malay language pack for core SMART features.  This includes the BIRT and Eclipse language packs.

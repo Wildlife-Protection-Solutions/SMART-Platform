@@ -2,10 +2,10 @@
 <feature
       id="org.wcs.smart.intelligence.feature.nl.km"
       label="Intelligence Khmer Language Pack"
-      version="3.1.0"
+      version="3.2.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.1.0">
+      license-feature-version="3.2.0">
 
    <description>
       The Khmer translations for the Intelligence plugin.
@@ -17,6 +17,14 @@
 
    <plugin
          id="org.wcs.smart.intelligence.nl_km"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.intelligence.query.nl_km"
          download-size="0"
          install-size="0"
          version="0.0.0"

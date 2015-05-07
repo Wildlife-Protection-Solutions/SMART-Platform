@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<toc label="Ayuda SMART de Inteligencia">
-      <topic href="html/Intelligence.html#Intelligence" label="Perspectiva de Inteligencia">
-         <topic href="html/Intelligence.html#CreateIntel" label="Crear Registros de Inteligencia"> 
-         </topic>
-         <topic href="html/Intelligence.html#QueryIntel" label="Consultar Registros de Inteligencia"> 
-         </topic>
-      </topic>
+<toc label="SMART Intelligence Help" link_to="../org.wcs.smart.help/toc.xml#SmartExtensions" topic="html/Intelligence.html">
+      <topic href="html/Intelligence.html" label="Intelligence Plugin">
+         <topic href="html/Intelligence.html#CreateIntel" label="Creating Intelligence Records">
+         </topic>
+         <topic href="html/Intelligence.html#QueryIntel" label="Quering Intelligence Records">
+         </topic>
+         <topic href="html/Intelligence.html#PrintIntel" label="Printing Intelligence Records">
+         </topic>
+      </topic>
 </toc>
