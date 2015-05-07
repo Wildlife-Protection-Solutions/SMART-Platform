@@ -333,7 +333,7 @@
                   commandId="org.wcs.smart.observation.perspective.show"
                   icon="images/icons/obj16/survey.png"
                   label="%survey.view.command.label"
-                  mnemonic="x"
+                  mnemonic="%view.command.mnemonic"
                   style="push"
                   tooltip="%survey.view.command.tooltip">
                <parameter
@@ -449,7 +449,7 @@
                commandId="org.wcs.smart.observation.perspective.show"
                icon="images/icons/obj16/survey.png"
                label="%survey.view.command.label"
-               mnemonic="x"
+               mnemonic="%view1.command.mnemonic"
                style="push"
                tooltip="%survey.view.command.tooltip">
             <parameter

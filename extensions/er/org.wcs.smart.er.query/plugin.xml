@@ -4,7 +4,7 @@
    <extension
          point="org.wcs.smart.query.queryType">
       <QueryCategory
-            html_description="&lt;p style=&quot;font-family:Verdana; font-size:12px; font-weight:bold;&quot;&gt;Survey Queries&lt;/p&gt;&lt;p style=&quot;font-family:Verdana; font-size:11px&quot;&gt;Query survey data providing survey and mission attributes in addition to data model items as filters and summary options.&lt;/p&gt;"
+            html_description="%QueryCategory.html_description"
             id="org.wcs.smart.er.query.category.survey"
             name="Survey Queries">
       </QueryCategory>
