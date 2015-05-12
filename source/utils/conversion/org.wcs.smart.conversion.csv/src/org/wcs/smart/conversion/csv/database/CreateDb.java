@@ -19,34 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.conversion.csv.lookup;
+package org.wcs.smart.conversion.csv.database;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.HashMap;
-import java.util.Map;
+import java.sql.DriverManager;
 
-public class AttributeLookup {
-	
-	private Map<String, Integer> i2Column;
-	
-	public AttributeLookup(Connection c)  {
-		try {
-			i2Column = new HashMap<String, Integer>();
-			ResultSet rs = c.createStatement().executeQuery(
-					"select n, id from csv_to_smart.attributes"); //$NON-NLS-1$
-			while (rs.next()) {
-				i2Column.put(rs.getString(1), rs.getInt(2));
-			}
-			rs.close();
-		} catch (Exception e) {
-			i2Column = null;
-			e.printStackTrace();
+/**
+ * Create the empyt database used by the conversion tool.
+ * 
+ * This class is called by the maven package script to package 
+ * empty database with product.
+ * 
+ * @author Emily
+ *
+ */
+public class CreateDb {
+	/**
+	 * 
+	 * 
+	 * @param args takes a single argument, the location to create the database
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		String location = args[0];
+		
+		Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+		
+		String connectionString = "jdbc:derby:" + location + ";create=true;user=smart_admin;password=smart_derby;";
+		Connection c = DriverManager.getConnection(connectionString);
+		
+
+		String sql[] = new String[]{
+			"create table csv_to_smart.attributes (id integer not null, n varchar(255), primary key (id))",
+			"create table csv_to_smart.csv(id integer not null, a1 varchar(1024), primary key (id))"
+		};
+	    
+		for (String s : sql){
+			c.createStatement().executeUpdate(s);
 		}
-	}
 
-	public Integer getColumn(String i) {
-		return i2Column.get(i);
+	    c.commit();
+		c.close();
+		
 	}
-	
 }
