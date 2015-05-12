@@ -1,0 +1,161 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<parent>
+		<groupId>org.wcs.smart.conversion.parent</groupId>
+		<artifactId>smart-conversion-parent</artifactId>
+		<version>1.0.0</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+	
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.wcs.smart.conversion.csv</groupId>
+	<artifactId>org.wcs.smart.conversion.csv</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0.0</version>
+	
+	<dependencies>
+		<dependency>
+			<groupId>org.wcs.smart.conversion</groupId>
+			<artifactId>org.wcs.smart.conversion</artifactId>
+			<version>1.0.0</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+	
+	
+	
+	<properties>
+		<package.dir>${project.build.directory}/../package/${project.name}.${version}</package.dir>
+		<package.dir.lib>${package.dir}/lib</package.dir.lib>
+		<package.dir.database>${package.dir}/database/smartdb</package.dir.database>
+	</properties>
+	
+	<build>
+	
+		<plugins>
+		<!-- clean package dir -->
+		<plugin>
+    		<artifactId>maven-clean-plugin</artifactId>
+    		<version>2.6.1</version>
+    		<configuration>
+      		<filesets>
+        		<fileset><directory>${project.build.directory}/../package/</directory></fileset>
+      		</filesets>
+    		</configuration>
+  		</plugin>
+  
+  		<!-- create empty database on package -->
+		<plugin>
+  			<groupId>org.codehaus.mojo</groupId>
+  			<artifactId>exec-maven-plugin</artifactId>
+  			<version>1.2.1</version>
+  			<executions>
+    			<execution>
+    				<phase>package</phase>
+      				<goals><goal>java</goal></goals>
+    			</execution>
+  			</executions>
+  			<configuration>
+    		<mainClass>org.wcs.smart.conversion.csv.database.CreateDb</mainClass>
+    		<arguments>
+      			<argument>${package.dir.database}</argument>
+    		</arguments>
+  		</configuration>
+		</plugin>
+		
+		<!-- copy dependencies on  package -->
+		<plugin>
+      			<groupId>org.apache.maven.plugins</groupId>
+      			<artifactId>maven-jar-plugin</artifactId>
+      			<version>2.3.1</version>
+      			<configuration>
+        			<outputDirectory>${package.dir.lib}</outputDirectory>
+      			</configuration>
+    		</plugin>
+			<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-dependency-plugin</artifactId>
+        		<version>2.1</version>
+        		<executions>
+        			<execution>
+            			<id>copy-dependencies</id>
+            			<phase>package</phase>
+            			<goals>
+            				<goal>copy-dependencies</goal>
+            				</goals>
+            				<configuration>
+            					<outputDirectory>${package.dir.lib}</outputDirectory>
+            			</configuration>
+          			</execution>
+          			<execution>
+            					<id>write-classpath-windows</id>
+            					<phase>package</phase>
+            					<goals>
+              						<goal>build-classpath</goal>
+            					</goals>
+            					<configuration>
+            						<pathSeparator>;</pathSeparator>
+              						<prefix>lib</prefix>
+              						<fileSeparator>/</fileSeparator>
+            						<outputFile>${package.dir}/cp.win</outputFile>
+            					</configuration>
+          				</execution>
+          				
+        			</executions>
+        			
+      			</plugin>
+      			
+      			<!-- create run.bat file and update with all dependencies -->
+      			<plugin>
+           			<groupId>com.google.code.maven-replacer-plugin</groupId>
+           			<artifactId>replacer</artifactId>
+           			<version>1.5.2</version>
+           			<executions>
+               				<execution>
+               					<id>windows</id>
+                   				<phase>package</phase>
+                   				<goals><goal>replace</goal></goals>                   
+                   				<configuration>
+                   				    <file>./org.wcs.smart.conversion.csv/run.bat</file>
+               						<outputFile>${package.dir}/run.bat</outputFile>
+               						<replacements>
+                   						<replacement>
+                       							<token>%CP1%</token>
+                       							<valueFile>${package.dir}/cp.win</valueFile>
+                   						</replacement>  
+                   						<replacement>
+                       							<token>%CP2%</token>
+                       							<value>lib/${project.build.finalName}.jar</value>
+                   						</replacement>      
+                   						
+               						</replacements>
+           					</configuration>
+               				</execution>
+               				
+           			</executions>
+       			</plugin>
+       			<!-- remove temporary files used during build -->
+       			 <plugin>
+    				<artifactId>maven-clean-plugin</artifactId>
+    				<version>2.5</version>
+    				<executions>
+               				<execution>
+               					<id>windows</id>
+               					<phase>package</phase>
+               					<goals><goal>clean</goal></goals>
+               					<configuration>
+               						<excludeDefaultDirectories>true</excludeDefaultDirectories>
+               						<filesets>
+               							<fileset>
+               								<directory>${package.dir}</directory>
+               								<includes><include>cp.*</include></includes>
+               							</fileset>
+               						</filesets>
+               					</configuration>
+               				</execution>
+               			</executions>
+               		</plugin>
+    		</plugins>
+	</build>
+</project>
