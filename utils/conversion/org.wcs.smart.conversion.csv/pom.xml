@@ -32,7 +32,15 @@
 	</properties>
 	
 	<build>
-	
+		<sourceDirectory>src/</sourceDirectory>
+		<resources>
+			<resource>
+				<directory>src/</directory>
+				<includes>
+          			<include>*.gif</include>
+          		</includes>
+			</resource>
+		</resources>
 		<plugins>
 		<!-- clean package dir -->
 		<plugin>
