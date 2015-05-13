@@ -22,6 +22,7 @@
 package org.wcs.smart.conversion.csv;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -45,13 +46,14 @@ public class Csv2SmartMatcher {
 		Point size = shell.computeSize(-1, -1);
         shell.setBounds(120, 50, size.x, size.y);    
 		
-		
 		GridLayout layout = new GridLayout(1, true);
 		shell.setLayout(layout);
 	    
 	    GridData gridData = new GridData(SWT.LEFT,SWT.TOP, false, false);
 	    shell.setLayoutData(gridData);
 		
+	    Image img = new Image(display, ClassLoader.getSystemClassLoader().getSystemResourceAsStream("csvsmart16.gif"));
+	    shell.setImage(img);
 		shell.setText("CSV to SMART - Conversion Tool");
 		new CsvMatcherDialog(shell);
 
