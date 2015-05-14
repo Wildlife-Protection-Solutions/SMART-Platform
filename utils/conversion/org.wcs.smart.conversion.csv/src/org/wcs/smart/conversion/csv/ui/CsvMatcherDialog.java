@@ -86,6 +86,7 @@ public class CsvMatcherDialog extends Composite {
 	private Button btnGenPatrol;
 	private Button btnGenMission;
 
+	private String lastDir = null;
 	public CsvMatcherDialog(Shell shell) {
 		super(shell, SWT.NONE);
 		
@@ -98,7 +99,7 @@ public class CsvMatcherDialog extends Composite {
 		this.setSize(840, 640);
 
 		Group dataGroup = new Group(this, SWT.NONE);
-		dataGroup.setText("CSV data configuration");
+		dataGroup.setText("CSV Data Configuration");
 		dataGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		dataGroup.setLayout(new GridLayout(1, false));
 		
@@ -145,7 +146,7 @@ public class CsvMatcherDialog extends Composite {
 		});
 		
 		Group generateGroup = new Group(this, SWT.NONE);
-		generateGroup.setText("Patrol generation");
+		generateGroup.setText("Patrol && Mission Generation");
 		generateGroup.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, true));
 		generateGroup.setLayout(new GridLayout(1, false));
 
@@ -311,8 +312,11 @@ public class CsvMatcherDialog extends Composite {
 
 	protected void generateMissions() {
 		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		dd.setFilterPath(lastDir);
+
 		String f = dd.open();
 		if (f != null) {
+			lastDir = f;
 			PrintStream originalOut = System.out;
 			PrintStream originalErr = System.err;
 
@@ -352,8 +356,11 @@ public class CsvMatcherDialog extends Composite {
 	
 	protected void generatePatrols() {
 		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		dd.setFilterPath(lastDir);
+		
 		String f = dd.open();
 		if (f != null) {
+			lastDir = f;
 			PrintStream originalOut = System.out;
 			PrintStream originalErr = System.err;
 
@@ -393,8 +400,11 @@ public class CsvMatcherDialog extends Composite {
 
 	protected void generateMeta() {
 		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
+		dd.setFilterPath(lastDir);
+
 		String f = dd.open();
 		if (f != null) {
+			lastDir = f;
 			try {
 				MatchSession session = new MatchSession();
 				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));

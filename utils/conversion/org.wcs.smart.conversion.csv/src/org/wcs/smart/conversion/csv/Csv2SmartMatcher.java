@@ -43,9 +43,6 @@ public class Csv2SmartMatcher {
 		Display display = new Display();
 		Shell shell = new Shell(display);
 		
-		Point size = shell.computeSize(-1, -1);
-        shell.setBounds(120, 50, size.x, size.y);    
-		
 		GridLayout layout = new GridLayout(1, true);
 		shell.setLayout(layout);
 	    
@@ -58,7 +55,12 @@ public class Csv2SmartMatcher {
 		new CsvMatcherDialog(shell);
 
 		shell.pack();
+		
+		Point size = shell.computeSize(-1, -1);
+        shell.setBounds(120, 50, (int)(size.x*1.5), size.y);    
+        
 		shell.open();
+		
 		while (!shell.isDisposed ()) {
 			if (!display.readAndDispatch ()) display.sleep ();
 		}

@@ -206,10 +206,12 @@ public class CsvMetaExtractor {
 		}
 		
 		int outSize = attributes.size();
-//		if (outSize == 0) {
-//			//no transects to export
-//			return true;
-//		}
+		if (ids.size() != 5 ) {
+			//not enough transact information to export.  we need all five  fields
+			//no transects to export
+			System.out.println("WARN: Transect fields not mapped, transects will not be exported.");
+			return true;
+		}
 		
 		try {
 			StringBuilder whatClause = new StringBuilder();

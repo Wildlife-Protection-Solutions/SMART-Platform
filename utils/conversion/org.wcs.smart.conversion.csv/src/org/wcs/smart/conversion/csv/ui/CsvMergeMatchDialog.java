@@ -79,14 +79,14 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite main = new Composite(composite, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Label lblExist = new Label(main, SWT.NONE);
-		lblExist.setText("Following columns already exist in loaded data:");
+		lblExist.setText("The following columns already exist in loaded data:");
 		
 		Text noteExist = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
-		GridData gdExist = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gdExist.heightHint = 200;
+		GridData gdExist = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gdExist.heightHint = 100;
 		noteExist.setLayoutData(gdExist);
 		noteExist.setEditable(false);
 		noteExist.setText(ReportDialog.join(matched, "\n"));
@@ -95,11 +95,11 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Label lblAdded = new Label(main, SWT.NONE);
-		lblAdded.setText("Following columns exist only in merged file and will be added to loaded data:");
+		lblAdded.setText("The following columns exist only in new file and will be added to loaded data:");
 		
 		Text noteAdded = new Text(main, SWT.MULTI | SWT.BORDER | SWT.V_SCROLL);
-		GridData gdAdd = new GridData(SWT.FILL, SWT.FILL, true, false);
-		gdAdd.heightHint = 200;
+		GridData gdAdd = new GridData(SWT.FILL, SWT.FILL, true, true);
+		gdAdd.heightHint = 100;
 		noteAdded.setLayoutData(gdAdd);
 		noteAdded.setEditable(false);
 		noteAdded.setText(ReportDialog.join(unmatched, "\n"));
@@ -108,7 +108,7 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		separator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		btnCreateRow = new Button(main, SWT.RADIO);
-		btnCreateRow.setText("Create new row for each merged record");
+		btnCreateRow.setText("Append - Create new row for each record");
 		btnCreateRow.setSelection(true);
 		btnCreateRow.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -120,7 +120,7 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		});
 		
 		btnMergeRow = new Button(main, SWT.RADIO);
-		btnMergeRow.setText("Merge with existing rows if specific column values are identical (this colunms exist in both csv files)");
+		btnMergeRow.setText("Merge - Merge with existing rows if selected column values are identical");
 		btnMergeRow.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -130,9 +130,13 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 			}
 		});
 		
+		Label l = new Label(main, SWT.NONE);
+		l.setText("(merge colunms must exist in both loaded data and new csv file)");
+		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)l.getLayoutData()).horizontalIndent = 15;
 		tableViewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.MULTI);
 		GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
-		gd.heightHint = 200;
+		gd.heightHint = 100;
 		tableViewer.getControl().setLayoutData(gd);
 		tableViewer.getTable().addKeyListener(new KeyAdapter() {
 			
@@ -199,13 +203,15 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 
 	protected void buttonPressed(int buttonId) {
 		//validation
-		if (btnMergeRow.getSelection() && tableViewer.getCheckedElements().length == 0) {
-			MessageDialog.openError(getShell(), "Invalid configuration", "You have to select at least one column to be used for records matching.");
-			return;
-		}
 		
-		result.clear();
 		if (buttonId == IDialogConstants.OK_ID) {
+			if (btnMergeRow.getSelection() && tableViewer.getCheckedElements().length == 0) {
+				MessageDialog.openError(getShell(), "Invalid configuration", "You have to select at least one column to be used for records matching.");
+				return;
+			}
+			
+			result.clear();
+			
 			isCreateOption = btnCreateRow.getSelection();
 			for (Object s : tableViewer.getCheckedElements()) {
 				result.add((String) s);
@@ -222,4 +228,8 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		return isCreateOption;
 	}
 	
+	@Override
+	public boolean isResizable(){
+		return true;
+	}
 }
