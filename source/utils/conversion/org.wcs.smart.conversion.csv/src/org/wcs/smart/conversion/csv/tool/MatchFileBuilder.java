@@ -121,6 +121,7 @@ public class MatchFileBuilder {
 			MappedAttribute ctAttr = new MappedAttribute();
 			ctAttr.setI(attrName);
 			ctAttr.setN(attrName);
+			ctAttr.setMapTo("");
 			csv2Smart.getMappedAttribute().add(ctAttr);
 			MappedAttributeType type = getKnownType(attrName);
 			if (type != null) {
@@ -137,7 +138,7 @@ public class MatchFileBuilder {
 					MappedAttributeValue ctAttrValue = new MappedAttributeValue();
 					ctAttrValue.setI(s);
 					ctAttrValue.setN(s);
-					ctAttrValue.setMapTo("???");
+					ctAttrValue.setMapTo("");
 					ctAttr.getMappedAttributeValue().add(ctAttrValue);
 				}
 			}
