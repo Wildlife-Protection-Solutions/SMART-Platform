@@ -130,11 +130,14 @@ public class MissionBuilder extends AbstractBuilder {
 				//determine if we use default observation or special
 				if (cta.getCategoryKey() == null) {
 					obs = defObs;
-				} else {
+				} else if (!a.isEmptyV()) {
 					//special cases for not default category
+					//proceed only if the value is not empty
 					obs = new WaypointObservationType();
 					wp.getObservations().add(obs);
 					obs.setCategoryKey(cta.getCategoryKey());
+				} else {
+					continue;
 				}
 
 				switch (cta.getType()) {
@@ -149,7 +152,7 @@ public class MissionBuilder extends AbstractBuilder {
 						try {
 							WaypointObservationAttributeType obsAttr = new WaypointObservationAttributeType();
 							obsAttr.setAttributeKey(cta.getMapTo());
-							if (a.getV() != null && !a.getV().isEmpty()) {
+							if (!a.isEmptyV()) {
 								obsAttr.setDValue(Double.valueOf(a.getV()));
 								obs.getAttributes().add(obsAttr);
 							}
@@ -209,14 +212,14 @@ public class MissionBuilder extends AbstractBuilder {
 						break;
 					}
 					case WP_LON:
-						if (a.getV() != null && !a.getV().isEmpty()) {
+						if (!a.isEmptyV()) {
 							wp.setX(Double.valueOf(a.getV()));
 						} else {
 							System.out.println(MessageFormat.format("WARN: Empty logitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
 						}
 						break;
 					case WP_LAT:
-						if (a.getV() != null && !a.getV().isEmpty()) {
+						if (!a.isEmptyV()) {
 							wp.setY(Double.valueOf(a.getV()));
 						} else {
 							System.out.println(MessageFormat.format("WARN: Empty latitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
@@ -246,7 +249,7 @@ public class MissionBuilder extends AbstractBuilder {
 						comment += "Waypoint ID=" + String.valueOf(wp.getId()) + ": " + a.getN() + " = " + v;
 						break;
 					case WP_COMMENT:
-						if (a.getV() != null && !a.getV().isEmpty()) {
+						if (!a.isEmptyV()) {
 							wp.setComment(wp.getComment() != null ? wp.getComment() + "\n" + a.getV() : a.getV()); //$NON-NLS-1$
 						}
 						break;
@@ -263,7 +266,7 @@ public class MissionBuilder extends AbstractBuilder {
 						break;
 				}
 				
-				if (Ct2AttributeTypeUtil.canMap(cta.getType())) {
+				if (Ct2AttributeTypeUtil.canMap(cta.getType()) && !a.isEmptyV()) {
 					for (ExtraAttribute ea : cta.getExtraAttribute()) {
 						WaypointObservationAttributeType obsAttr = ea2woa(ea);
 						if (obsAttr != null) {

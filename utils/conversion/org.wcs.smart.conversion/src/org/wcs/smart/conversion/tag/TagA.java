@@ -51,5 +51,7 @@ public class TagA  {
 		this.v = v;
 	}
 	
-	
+	public boolean isEmptyV() {
+		return v == null || v.isEmpty();
+	}
 }
