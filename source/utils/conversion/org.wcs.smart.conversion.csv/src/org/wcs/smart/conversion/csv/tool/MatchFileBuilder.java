@@ -120,7 +120,7 @@ public class MatchFileBuilder {
 			System.out.println("Processing: " + attrName);
 			MappedAttribute ctAttr = new MappedAttribute();
 			ctAttr.setI(attrName);
-			ctAttr.setN(attrName);
+//			ctAttr.setN(attrName);
 			ctAttr.setMapTo("");
 			csv2Smart.getMappedAttribute().add(ctAttr);
 			MappedAttributeType type = getKnownType(attrName);
@@ -137,7 +137,7 @@ public class MatchFileBuilder {
 				for (String s : guess.valueSet) {
 					MappedAttributeValue ctAttrValue = new MappedAttributeValue();
 					ctAttrValue.setI(s);
-					ctAttrValue.setN(s);
+//					ctAttrValue.setN(s);
 					ctAttrValue.setMapTo("");
 					ctAttr.getMappedAttributeValue().add(ctAttrValue);
 				}
