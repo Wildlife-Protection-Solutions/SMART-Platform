@@ -22,10 +22,12 @@
 package org.wcs.smart.conversion.csv.tool;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +37,8 @@ import java.util.TreeSet;
 
 import org.wcs.smart.conversion.csv.lookup.AttributeLookup;
 import org.wcs.smart.conversion.lookup.AttributeTreeKeyLookup;
+import org.wcs.smart.conversion.lookup.Ct2SmartLookup;
+import org.wcs.smart.conversion.lookup.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.CategoryMap;
 import org.wcs.smart.conversion.model.MappedAttribute;
@@ -112,6 +116,12 @@ public class MappingValidator {
 
 		AttributeLookup aLookup = new AttributeLookup(ConnectionUtil.getConnection());
 		for (MappedCategory ctc : ct2Smart.getMappedCategory()) {
+			for (CategoryMap ctm : ctc.getCategoryMap()) {
+				if (ctm.getVi() == null || ctm.getVi().isEmpty()) {
+					errors.add("\"vi\" should not be null or empty. Do not declare <CategoryMap> tag if given attribute value is empty or null.");
+					continue;
+				}
+			}
 			if (Boolean.TRUE.equals(ctc.isIgnore())) {
 				continue;
 			}
@@ -145,6 +155,75 @@ public class MappingValidator {
 				errors.add(MessageFormat.format("Category \"{0}\" in datamodel do not contain attribute with key \"{1}\" while correspondent data exist in mapping file", ctc.getCategoryKey(), a.getMapTo()));
 			}
 			
+		}
+		
+		errors.addAll(validateAllMappingsPresent(ct2Smart));
+		return errors;
+	}
+
+	private List<String> validateAllMappingsPresent(SmartMapping ct2Smart) {
+		List<String> errors = new ArrayList<>();
+
+		List<MappedAttribute> categoryAttributes = new ArrayList<>();
+		for (MappedAttribute attr : ct2Smart.getMappedAttribute()) {
+			if (MappedAttributeType.CATEGORY.equals(attr.getType())) {
+				categoryAttributes.add(attr);
+			}
+		}
+
+		try {
+			Connection c = ConnectionUtil.getConnection();
+			//get ids for category attributes
+			HashMap<String, String> n2Col = new HashMap<String, String>();
+			PreparedStatement ps = c.prepareStatement("select id, n from csv_to_smart.attributes"); //$NON-NLS-1$
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				String col = "a" + rs.getString(1); //$NON-NLS-1$
+				n2Col.put(rs.getString(2), col);
+			}
+			rs.close();
+			
+			//extract all possible set of category attribute values
+			StringBuilder sb = new StringBuilder();
+			for (MappedAttribute attr : categoryAttributes) {
+				String col = n2Col.get(attr.getI());
+				if (col != null) {
+					if (sb.length() > 0) {
+						sb.append(", "); //$NON-NLS-1$
+					}
+					sb.append(col);
+				} else {
+					errors.add(MessageFormat.format("Attribute with key ''{0}'' is mapped to category that do not exist in database", Ct2AttributeTypeUtil.getN(attr)));
+				}
+			}
+			if (!errors.isEmpty()) {
+				return errors;
+			}
+			
+			Ct2SmartLookup lookup = new Ct2SmartLookup(ct2Smart);
+			List<Ct2AttributeValuePair> pairs = new ArrayList<>();
+			ps = c.prepareStatement("select distinct "+sb+" from csv_to_smart.csv"); //$NON-NLS-1$ //$NON-NLS-2$
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				pairs.clear();
+				for (int i = 0; i < categoryAttributes.size(); i++) {
+					String v = rs.getString(i+1);
+					if (v != null && !v.isEmpty()) {
+						Ct2AttributeValuePair pair = new Ct2AttributeValuePair();
+						pair.attribute = categoryAttributes.get(i);
+						pair.value = v;
+						pairs.add(pair);
+					}
+				}
+				MappedCategory mc = lookup.findCategory(pairs);
+				if (mc == null) {
+					errors.add(MessageFormat.format("No category mapping is specified for items {0}", Arrays.toString(pairs.toArray())));
+				}
+			}
+			rs.close();
+		} catch (Exception e) {
+			errors.add("Unable to validate that all category mappings present due to SQLException. See console or log for details");
+			e.printStackTrace();
 		}
 		return errors;
 	}

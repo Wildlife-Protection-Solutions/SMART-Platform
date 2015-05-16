@@ -44,12 +44,6 @@ public class Ct2SmartLookup {
 		for (MappedAttribute ct2a : ct2Smart.getMappedAttribute()) {
 			i2attr.put(ct2a.getI(), ct2a);
 		}
-		
-		for (MappedCategory c : ct2Smart.getMappedCategory()) {
-			for (CategoryMap cmap : c.getCategoryMap()) {
-				cmap.getAi();
-			}
-		}
 	}
 
 	public MappedAttribute findAttribute(String i) {
@@ -61,11 +55,13 @@ public class Ct2SmartLookup {
 		for (MappedCategory c : ct2Smart.getMappedCategory()) {
 			if (c.getCategoryMap().size() != data.size())
 				continue;
+			if (c.getCategoryMap().size() == 0)
+				return c; //corner case for empty mapping
 			boolean match = false;
 			for (CategoryMap cmap : c.getCategoryMap()) {
 				match = false;
 				for (Ct2AttributeValuePair pair : data) {
-					if (cmap.getAi().equals(pair.attribute.getI()) && cmap.getVi().equals(pair.value)) {
+					if (isSame(cmap.getAi(), pair.attribute.getI()) && isSame(cmap.getVi(), pair.value)) {
 						match = true;
 						break;
 					}
@@ -80,11 +76,21 @@ public class Ct2SmartLookup {
 		return null;
 	}
 
+	private boolean isSame(Object o1, Object o2) {
+		if (o1 == null) 
+			return o2 == null;
+		return o1.equals(o2);
+	}
 	
 	
 	public static class Ct2AttributeValuePair {
 		public MappedAttribute attribute;
 		public String value;
+		
+		@Override
+		public String toString() {
+			return "ai=\""+attribute.getI()+"\" vi=\""+value+"\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		}
 	}
 	
 }

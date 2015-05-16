@@ -22,7 +22,9 @@
 package org.wcs.smart.conversion.tool;
 
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,15 +39,10 @@ import org.wcs.smart.conversion.model.Param;
 import org.wcs.smart.conversion.model.SmartMapping;
 import org.wcs.smart.conversion.tag.TagA;
 import org.wcs.smart.conversion.tag.TagS;
-import org.wcs.smart.conversion.util.Ct2AttributeTypeUtil;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Generic logic for builders.
+ * 
  * @author elitvin
  * @since 3.2.0
  */
@@ -107,15 +104,7 @@ public abstract class AbstractBuilder {
 		}
 		MappedCategory c = lookup.findCategory(data);
 		if (c == null) {
-			String info = "";
-			for (Ct2AttributeValuePair pair : data) {
-				info += "\nattribute: " + Ct2AttributeTypeUtil.getN(pair.attribute) + " " + pair.attribute.getI();
-				MappedAttribute value = lookup.findAttribute(pair.value);
-				info += "  value: ";
-				info += value != null ? Ct2AttributeTypeUtil.getN(value) : "null";
-				info += " " + pair.value;
-			}
-			System.err.println("ERROR: No category defined for following items: " + info);
+			System.err.println(MessageFormat.format("ERROR: Because no category mapping is specified for items {0} it is imposible to fetch category for row {1}", Arrays.toString(data.toArray()), s));
 		}
 		return c;
 	}

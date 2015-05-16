@@ -141,7 +141,7 @@ public abstract class AbstractCsvExtractor {
 			TagS s = new TagS();
 			for (String column : columns) {
 				String v = rs.getString(column);
-				if (v != null) {
+				if (v != null && !v.isEmpty()) {
 					TagA a = new TagA();
 					TagE e = col2Attr.get(column);
 					a.setI(e.getI());
