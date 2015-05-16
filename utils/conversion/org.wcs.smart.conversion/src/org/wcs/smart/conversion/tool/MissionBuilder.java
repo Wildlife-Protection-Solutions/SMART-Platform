@@ -105,17 +105,16 @@ public class MissionBuilder extends AbstractBuilder {
 			wp.setId(misDay.getSurveyWaypoints().size()); //TODO: what if wp id present in csv?
 
 			MappedCategory defaultCategory = getDefaultCategory(s);
-			boolean ignoreCategory = defaultCategory != null && Boolean.TRUE.equals(defaultCategory.isIgnore());
-			String defaultCategoryKey = defaultCategory != null ? defaultCategory.getCategoryKey() : null;
+			boolean ignoreCategory = defaultCategory == null || Boolean.TRUE.equals(defaultCategory.isIgnore());
 			WaypointObservationType defObs = new WaypointObservationType();
-			defObs.setCategoryKey(defaultCategoryKey);
-			for (ExtraAttribute ea : defaultCategory.getExtraAttribute()) {
-				WaypointObservationAttributeType obsAttr = ea2woa(ea);
-				if (obsAttr != null) {
-					defObs.getAttributes().add(obsAttr);
-				}
-			}
 			if (!ignoreCategory) {
+				defObs.setCategoryKey(defaultCategory.getCategoryKey());
+				for (ExtraAttribute ea : defaultCategory.getExtraAttribute()) {
+					WaypointObservationAttributeType obsAttr = ea2woa(ea);
+					if (obsAttr != null) {
+						defObs.getAttributes().add(obsAttr);
+					}
+				}
 				wp.getObservations().add(defObs);
 			}
 

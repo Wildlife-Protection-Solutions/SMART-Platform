@@ -54,4 +54,9 @@ public class TagA  {
 	public boolean isEmptyV() {
 		return v == null || v.isEmpty();
 	}
+	
+	@Override
+	public String toString() {
+		return "'"+i+"'='"+v+"'";   //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	}
 }
