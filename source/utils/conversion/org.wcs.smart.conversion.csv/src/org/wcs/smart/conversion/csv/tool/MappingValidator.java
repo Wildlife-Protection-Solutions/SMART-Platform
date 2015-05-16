@@ -180,8 +180,7 @@ public class MappingValidator {
 		}
 		StringBuilder catClause = new StringBuilder();
 		for (String catI : catIs) {
-			catClause.append(catClause.length() != 0 ? " and " : "where ");  //$NON-NLS-1$//$NON-NLS-2$
-			catClause.append(" a").append(aLookup.getColumn(catI));  //$NON-NLS-1$
+			catClause.append(" and a").append(aLookup.getColumn(catI));  //$NON-NLS-1$
 			CategoryMap cmap = iCatMap.get(catI);
 			if (cmap != null) {
 				catClause.append("='").append(cmap.getVi()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -192,12 +191,17 @@ public class MappingValidator {
 		
 		for (MappedAttribute cta : attrToMap) {
 			try {
-				ResultSet rs = c.createStatement().executeQuery("select count (distinct a"+aLookup.getColumn(cta.getI())+") from csv_to_smart.csv " + catClause); //$NON-NLS-1$ //$NON-NLS-2$
-				rs.next();
-				if (rs.getInt(1) > 0) {
-					rqAttrsMap.put(cta.getMapTo(), cta);
+				Integer colId = aLookup.getColumn(cta.getI());
+				if (colId != null) {
+					ResultSet rs = c.createStatement().executeQuery("select count (distinct a"+colId+") from csv_to_smart.csv where a"+colId+ " is not null and a"+colId+" <> ''" + catClause); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					rs.next();
+					if (rs.getInt(1) > 0) {
+						rqAttrsMap.put(cta.getMapTo(), cta);
+					}
+					rs.close();
+				} else {
+					System.out.println(MessageFormat.format("WARN: Mapping file contains attribute i=''{0}'' that do not present in database", cta.getI()));
 				}
-				rs.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
