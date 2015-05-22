@@ -37,6 +37,7 @@ import org.locationtech.udig.project.ui.internal.tool.display.ToolManager;
 import org.locationtech.udig.project.ui.internal.tool.display.ToolProxy;
 import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.locationtech.udig.project.ui.tool.ModalTool;
+import org.wcs.smart.udig.AddLayerTool;
 import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.tool.BBoxInfoTool;
 
@@ -59,7 +60,7 @@ public class MapToolComposite {
 	public static final String UDIG_ZOOM_IN_ID = "org.locationtech.udig.tool.default.ZoomIn"; //$NON-NLS-1$
 	public static final String UDIG_ZOOM_OUT_ID = "org.locationtech.udig.tool.default.ZoomOut"; //$NON-NLS-1$
 	
-	private String tools[] = new String[]{"org.wcs.smart.udig.AddLayer",  //$NON-NLS-1$
+	private String tools[] = new String[]{AddLayerTool.ID,  //$NON-NLS-1$
 			SetBasemapTool.ID, 
 			UDIG_ZOOM_EXTENT_ID,
 			UDIG_PAN_ID,

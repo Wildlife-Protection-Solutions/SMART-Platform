@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.udig;
 
+import org.eclipse.swt.widgets.Display;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.tool.AbstractActionTool;
 import org.wcs.smart.map.internal.LoadBasemapHandler;
@@ -32,14 +33,21 @@ import org.wcs.smart.map.internal.LoadBasemapHandler;
  */
 public class SetBasemapTool extends AbstractActionTool{
 
-	public static final String ID = "org.wcs.smart.map.setbasemap"; //$NON-NLS-1$
+	public static final String ID = "org.wcs.smart.map.setBasemap"; //$NON-NLS-1$
 	
 	/* (non-Javadoc)
 	 * @see org.locationtech.udig.project.ui.tool.ActionTool#run()
 	 */
 	@Override
 	public void run() {
-		LoadBasemapHandler.loadBasemap((Map) getContext().getMap(), getContext().getViewportPane().getControl().getShell());
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				LoadBasemapHandler.loadBasemap((Map) getContext().getMap(), Display.getDefault().getActiveShell());
+				
+			}
+		});
+		
 	}
 
 	/* (non-Javadoc)

@@ -449,7 +449,7 @@ public class MapSettings {
 			}
 
 			// turn back on events
-			((ViewportModelImpl)currentMap.getViewportModel()).zoomToExtent();
+		
 		} finally {
 			currentMap.eSetDeliver(true);
 			if (((RenderManagerImpl) currentMap.getRenderManager()) != null) {
@@ -470,7 +470,7 @@ public class MapSettings {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
+		((ViewportModelImpl)currentMap.getViewportModel()).zoomToExtent();
 	}
 
 	/**
