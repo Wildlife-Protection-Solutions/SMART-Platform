@@ -63,28 +63,20 @@ public class LoadBasemapHandler {
 	 * @param map
 	 */
 	public static void loadBasemap(final Map map, final Shell currentShell){
-		final BasemapDefinition[] def =  new BasemapDefinition[]{null};
 		
-		currentShell.getDisplay().syncExec(new Runnable(){
-			
-			@Override
-			public void run() {
-				final LoadBasemapDialog dialog = new LoadBasemapDialog(currentShell);
-				if (dialog.open() != IDialogConstants.OK_ID){
-					return ;
-				}
-
-				def[0] = dialog.getBasemap();
-			}});
-				
-		if (def[0] == null){
+		final LoadBasemapDialog dialog = new LoadBasemapDialog(currentShell);
+		if (dialog.open() != IDialogConstants.OK_ID){
+			return ;
+		}
+		final BasemapDefinition def = dialog.getBasemap();
+		if (def == null){
 			return;
 		}
 		
 		Job loadMap = new Job(Messages.LoadBasemapHandler_JobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				MapSettings settings = MapSettings.getInstance(def[0]); 
+				MapSettings settings = MapSettings.getInstance(def); 
 				settings.applyTo(map);
 				return Status.OK_STATUS;
 			}

@@ -32,7 +32,9 @@ import org.locationtech.udig.project.ui.tool.AbstractActionTool;
  * @since 1.0.0
  */
 public class AddLayerTool extends AbstractActionTool {
-
+	
+	public static final String ID = "org.wcs.smart.udig.AddLayer"; //$NON-NLS-1$
+	
 	public AddLayerTool() {
 	}
 
