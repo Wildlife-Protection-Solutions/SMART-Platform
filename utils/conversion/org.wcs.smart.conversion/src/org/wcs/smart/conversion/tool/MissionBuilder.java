@@ -26,6 +26,8 @@ import java.sql.Time;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,24 +87,16 @@ public class MissionBuilder extends AbstractBuilder {
 		MissionType mission = new MissionType();
 		mission.setId(id);
 		
-		MissionDayType misDay = new MissionDayType();
-		mission.getDays().add(misDay);
-
-		XMLGregorianCalendar xmlDate = null;
-		XMLGregorianCalendar xmlStartTime = null;
-		XMLGregorianCalendar xmlEndTime = null;
-		Date wpDate = null;
-		Time wpTime = null;
-		
 		Set<String> members = new HashSet<String>();
 		String comment = ""; //$NON-NLS-1$
 
+		int wpId = 0;
 		for (TagS s : sList) {
 			SurveyWaypointsType wpType = new SurveyWaypointsType();
 			WaypointType wp = new WaypointType();
 			wpType.setWaypoints(wp);
-			misDay.getSurveyWaypoints().add(wpType);
-			wp.setId(misDay.getSurveyWaypoints().size()); //TODO: what if wp id present in csv?
+			wp.setId(wpId); //TODO: what if wp id present in csv?
+			wpId++;
 
 			MappedCategory defaultCategory = getDefaultCategory(s);
 			boolean ignoreCategory = defaultCategory == null || Boolean.TRUE.equals(defaultCategory.isIgnore());
@@ -118,6 +112,9 @@ public class MissionBuilder extends AbstractBuilder {
 				wp.getObservations().add(defObs);
 			}
 
+			XMLGregorianCalendar xmlDate = null;
+			XMLGregorianCalendar xmlTime = null;
+			
 			for (TagA a : s) {
 				MappedAttribute cta = getLookup().findAttribute(a.getI());
 				if (cta == null || cta.getType() == null) {
@@ -186,28 +183,16 @@ public class MissionBuilder extends AbstractBuilder {
 						}
 						break;
 					}
-					case WP_DATE:
-						wpDate = getDateTimeParser().parseDate(a.getV());
+					case WP_DATE: {
+						Date wpDate = getDateTimeParser().parseDate(a.getV());
 						xmlDate = SmartUtil.toXmlDate(wpDate);
-						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(wpDate, wpTime)));
+						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(xmlDate, xmlTime)));
 						break;
+					}
 					case WP_TIME: {
-						wpTime = getDateTimeParser().parseTime(a.getV());
-						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
-						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(wpDate, wpTime)));
-						if (xmlStartTime != null) {
-							if (xmlTime.compare(xmlStartTime) == DatatypeConstants.LESSER)
-								xmlStartTime = xmlTime;
-						} else {
-							xmlStartTime = xmlTime;
-						}
-						
-						if (xmlEndTime != null) {
-							if (xmlTime.compare(xmlEndTime) == DatatypeConstants.GREATER)
-								xmlEndTime = xmlTime;
-						} else {
-							xmlEndTime = xmlTime;
-						}
+						Time wpTime = getDateTimeParser().parseTime(a.getV());
+						xmlTime = SmartUtil.toXmlTime(wpTime);
+						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(xmlDate, xmlTime)));
 						break;
 					}
 					case WP_LON:
@@ -302,61 +287,74 @@ public class MissionBuilder extends AbstractBuilder {
 				}
 				obs.getAttributes().removeAll(duplicates);
 			}
+			
+			
+			if (xmlDate != null) {
+				MissionDayType misDay = getMissionDay(mission, xmlDate);
+				misDay.getSurveyWaypoints().add(wpType);
+				addTimeRecord(misDay, xmlTime);
+			} else {
+				System.out.println(MessageFormat.format("WARN: No date is defined for one of the rows for mission {0}. Data will be skipped.", mission.getId()));
+			}
+			
 		}
 		
 		//validate/interpolate waypoint coordinates
-		List<SurveyWaypointsType> waypoints = misDay.getSurveyWaypoints();
-		for (int i = 0; i < waypoints.size(); i++) {
-			WaypointType wp = waypoints.get(i).getWaypoints();
+		for (MissionDayType misDay : mission.getDays()) {
+			List<SurveyWaypointsType> waypoints = misDay.getSurveyWaypoints();
+			for (int i = 0; i < waypoints.size(); i++) {
+				WaypointType wp = waypoints.get(i).getWaypoints();
 
-			if (wp.getX() != null && wp.getY() != null)
-				continue;
-			
-//			if (track != null) {
-//				System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
-//				Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(wpDate, wpTime));
-//				if (c != null) {
-//					if (wp.getX() == null)
-//						wp.setX(c.x);
-//					if (wp.getY() == null)
-//						wp.setY(c.y);
+				if (wp.getX() != null && wp.getY() != null)
+					continue;
+				
+//				if (track != null) {
+//					System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
+//					Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(wpDate, wpTime));
+//					if (c != null) {
+//						if (wp.getX() == null)
+//							wp.setX(c.x);
+//						if (wp.getY() == null)
+//							wp.setY(c.y);
+//					}
 //				}
-//			}
 
-			if (wp.getX() == null || wp.getY() == null) {
-				if (i > 0) {
-					System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Using previous waypoint coordinates.", mission.getId(), wp.getId()));
-					WaypointType prevWp = waypoints.get(i-1).getWaypoints();
-					if (wp.getX() == null)
-						wp.setX(prevWp.getX());
-					if (wp.getY() == null)
-						wp.setY(prevWp.getY());
-				} else {
-					System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Checking if there are any waypoints with coordinates in this mission.", mission.getId(), wp.getId()));
-					for (int j = i+1; j < waypoints.size(); j++) {
-						WaypointType nextWp = waypoints.get(j).getWaypoints();
-						if (nextWp.getX() != null && nextWp.getY() != null) {
-							if (wp.getX() == null)
-								wp.setX(nextWp.getX());
-							if (wp.getY() == null)
-								wp.setY(nextWp.getY());
+				if (wp.getX() == null || wp.getY() == null) {
+					if (i > 0) {
+						System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Using previous waypoint coordinates.", mission.getId(), wp.getId()));
+						WaypointType prevWp = waypoints.get(i-1).getWaypoints();
+						if (wp.getX() == null)
+							wp.setX(prevWp.getX());
+						if (wp.getY() == null)
+							wp.setY(prevWp.getY());
+					} else {
+						System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Checking if there are any waypoints with coordinates in this mission.", mission.getId(), wp.getId()));
+						for (int j = i+1; j < waypoints.size(); j++) {
+							WaypointType nextWp = waypoints.get(j).getWaypoints();
+							if (nextWp.getX() != null && nextWp.getY() != null) {
+								if (wp.getX() == null)
+									wp.setX(nextWp.getX());
+								if (wp.getY() == null)
+									wp.setY(nextWp.getY());
+							}
 						}
+						if (wp.getX() == null || wp.getY() == null) {
+							System.err.println(MessageFormat.format("ERROR: Coordinate problem in mission {0} waypoint {1}. Importing this mission will cause error in SMART.", mission.getId(), wp.getId()));
+							mission.setId("[ERROR-xy]"+mission.getId());
+							break;
+						}			
 					}
-					if (wp.getX() == null || wp.getY() == null) {
-						System.err.println(MessageFormat.format("ERROR: Coordinate problem in mission {0} waypoint {1}. Importing this mission will cause error in SMART.", mission.getId(), wp.getId()));
-						mission.setId("[ERROR-xy]"+mission.getId());
-						break;
-					}			
 				}
-			}
 
-			
-			if (wp.getDateTime() == null) {
-				System.out.println(MessageFormat.format("WARN: No date/time data present in mission {0} waypoint {1}. Date {2}  and time 00:00 will be used.", mission.getId(), wp.getId(), xmlDate));
-				wp.setDateTime(xmlDate);
-			}
+				
+				if (wp.getDateTime() == null) {
+					System.out.println(MessageFormat.format("WARN: No date/time data present in mission {0} waypoint {1}. Date {2}  and time 00:00 will be used.", mission.getId(), wp.getId(), misDay.getDate()));
+					wp.setDateTime(misDay.getDate());
+				}
 
+			}
 		}
+		
 		
 		for (String fullName : members) {
 			MembersType member = toMember(fullName);
@@ -366,23 +364,62 @@ public class MissionBuilder extends AbstractBuilder {
 			mission.getMembers().get(0).setLeader(true);
 		}
 
-		mission.setStartDate(xmlDate);
-		mission.setEndDate(xmlDate);
 		mission.setComment(comment);
+
+		Collections.sort(mission.getDays(), new Comparator<MissionDayType>() {
+			@Override
+			public int compare(MissionDayType d1, MissionDayType d2) {
+				return d1.getDate().compare(d2.getDate());
+			}
+		});
+		
+		XMLGregorianCalendar xmlStartTime = mission.getDays().get(0).getDate();
+		XMLGregorianCalendar xmlEndTime = mission.getDays().get(mission.getDays().size()-1).getDate();
+
+		mission.setStartDate(xmlStartTime);
+		mission.setEndDate(xmlEndTime);
 
 		SurveyType survey = new SurveyType();
 		survey.setId(id);
-		survey.setStartDate(xmlDate);
-		survey.setEndDate(xmlDate);
+		survey.setStartDate(xmlStartTime);
+		survey.setEndDate(xmlEndTime);
 		survey.setSurveyDesignKeyId(surveyDesignKey);
 		mission.setSurvey(survey);
-		
-		misDay.setDate(xmlDate);
-		misDay.setStartTime(xmlStartTime);
-		misDay.setEndTime(xmlEndTime);
-		misDay.setRestMinutes(0);
-		
+
 		return mission;
+	}
+
+	private void addTimeRecord(MissionDayType misDay, XMLGregorianCalendar xmlTime) {
+		if (xmlTime == null) {
+			return;
+		}
+		if (misDay.getStartTime() != null) {
+			if (xmlTime.compare(misDay.getStartTime()) == DatatypeConstants.LESSER)
+				misDay.setStartTime(xmlTime);
+		} else {
+			misDay.setStartTime(xmlTime);
+		}
+
+		if (misDay.getEndTime() != null) {
+			if (xmlTime.compare(misDay.getEndTime()) == DatatypeConstants.GREATER)
+				misDay.setEndTime(xmlTime);
+		} else {
+			misDay.setEndTime(xmlTime);
+		}
+	}
+
+	private MissionDayType getMissionDay(MissionType mission, XMLGregorianCalendar xmlDate) {
+		for (MissionDayType misDay : mission.getDays()) {
+			if (xmlDate.compare(misDay.getDate()) == DatatypeConstants.EQUAL) {
+				return misDay;
+			}
+		}
+		//mission day for this date do not exist so wee need to create one
+		MissionDayType misDay = new MissionDayType();
+		mission.getDays().add(misDay);
+		misDay.setRestMinutes(0);
+		misDay.setDate(xmlDate);
+		return misDay;
 	}
 
 	//adopted copy from PatrolBuilder
