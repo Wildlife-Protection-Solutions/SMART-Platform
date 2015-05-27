@@ -68,6 +68,9 @@ public class SmartUtil {
 
 	//copy from PatrolToXmlConverter
 	public static XMLGregorianCalendar toXmlTime(Date d) throws DatatypeConfigurationException{
+		if (d == null) {
+			return null;
+		}
 		GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
 		cal.setTime(d);
 		

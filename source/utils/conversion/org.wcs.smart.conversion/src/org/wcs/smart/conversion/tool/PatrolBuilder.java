@@ -26,6 +26,8 @@ import java.sql.Time;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,34 +108,16 @@ public class PatrolBuilder extends AbstractBuilder {
 		transportType.setLanguageCode(getLanguageCode());
 		transportType.setValue("Foot");
 		leg.setTransportType(transportType);
-//		PatrolMemberType member = new PatrolMemberType();
-//		leg.getMembers().add(member);
-//		member.setIsLeader(true);
-//		member.setIsPilot(false);
-//		member.setEmployeeId("SMART5");
-//		member.setFamilyName("Gordon");
-//		member.setGivenName("Rawlston");
-		
-		PatrolLegDayType legDay = new PatrolLegDayType();
-		leg.getDays().add(legDay);
-		legDay.setTrack(track);
-		legDay.setRestMinutes(0.0);
-
-		XMLGregorianCalendar xmlDate = null;
-		XMLGregorianCalendar xmlStartTime = null;
-		XMLGregorianCalendar xmlEndTime = null;
-		Date wpDate = null;
-		Time wpTime = null;
 		
 		Set<String> members = new HashSet<String>();
 		LabelType mandate = null;
 		String comment = ""; //$NON-NLS-1$
 		
-				
+		int wpId = 0;
 		for (TagS s : sList) {
 			WaypointType wp = new WaypointType();
-			legDay.getWaypoints().add(wp);
-			wp.setId(legDay.getWaypoints().size());
+			wp.setId(wpId);
+			wpId++;
 
 			MappedCategory defaultCategory = getDefaultCategory(s);
 			boolean ignoreCategory = defaultCategory == null || Boolean.TRUE.equals(defaultCategory.isIgnore());
@@ -149,6 +133,9 @@ public class PatrolBuilder extends AbstractBuilder {
 				wp.getObservations().add(defObs);
 			}
 
+			XMLGregorianCalendar xmlDate = null;
+			XMLGregorianCalendar xmlTime = null;
+			
 			for (TagA a : s) {
 				MappedAttribute cta = getLookup().findAttribute(a.getI());
 				if (cta == null || cta.getType() == null) {
@@ -217,27 +204,15 @@ public class PatrolBuilder extends AbstractBuilder {
 						}
 						break;
 					}
-					case WP_DATE:
-						wpDate = getDateTimeParser().parseDate(a.getV());
+					case WP_DATE: {
+						Date wpDate = getDateTimeParser().parseDate(a.getV());
 						xmlDate = SmartUtil.toXmlDate(wpDate);
 						break;
+					}
 					case WP_TIME: {
-						wpTime = getDateTimeParser().parseTime(a.getV());
-						XMLGregorianCalendar xmlTime = SmartUtil.toXmlTime(wpTime);
+						Time wpTime = getDateTimeParser().parseTime(a.getV());
+						xmlTime = SmartUtil.toXmlTime(wpTime);
 						wp.setTime(xmlTime);
-						if (xmlStartTime != null) {
-							if (xmlTime.compare(xmlStartTime) == DatatypeConstants.LESSER)
-								xmlStartTime = xmlTime;
-						} else {
-							xmlStartTime = xmlTime;
-						}
-						
-						if (xmlEndTime != null) {
-							if (xmlTime.compare(xmlEndTime) == DatatypeConstants.GREATER)
-								xmlEndTime = xmlTime;
-						} else {
-							xmlEndTime = xmlTime;
-						}
 						break;
 					}
 					case WP_LON:
@@ -345,55 +320,66 @@ public class PatrolBuilder extends AbstractBuilder {
 				}
 				obs.getAttributes().removeAll(duplicates);
 			}
+			
+			if (xmlDate != null) {
+				PatrolLegDayType legDay = getLegDay(leg, xmlDate);
+				legDay.getWaypoints().add(wp);
+				addTimeRecord(legDay, xmlTime);
+			} else {
+				System.out.println(MessageFormat.format("WARN: No date is defined for one of the rows for patrol {0}. Data will be skipped.", patrol.getId()));
+			}
+			
 		}
 
 		//validate/interpolate waypoint coordinates
-		List<WaypointType> waypoints = legDay.getWaypoints();
-		for (int i = 0; i < waypoints.size(); i++) {
-			WaypointType wp = waypoints.get(i);
+		for (PatrolLegDayType legDay : leg.getDays()) {
+			List<WaypointType> waypoints = legDay.getWaypoints();
+			for (int i = 0; i < waypoints.size(); i++) {
+				WaypointType wp = waypoints.get(i);
 
-			if (wp.getX() != null && wp.getY() != null)
-				continue;
-			
-			if (track != null) {
-				System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
-				Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(wpDate, wpTime));
-				if (c != null) {
-					if (wp.getX() == null)
-						wp.setX(c.x);
-					if (wp.getY() == null)
-						wp.setY(c.y);
-				}
-			}
-
-			if (wp.getX() == null || wp.getY() == null) {
-				if (i > 0) {
-					System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Using previous waypoint coordinates.", patrol.getId(), wp.getId()));
-					WaypointType prevWp = waypoints.get(i-1);
-					if (wp.getX() == null)
-						wp.setX(prevWp.getX());
-					if (wp.getY() == null)
-						wp.setY(prevWp.getY());
-				} else {
-					System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Checking if there are any waypoints with coordinates in this patrol.", patrol.getId(), wp.getId()));
-					for (int j = i+1; j < waypoints.size(); j++) {
-						WaypointType nextWp = waypoints.get(j);
-						if (nextWp.getX() != null && nextWp.getY() != null) {
-							if (wp.getX() == null)
-								wp.setX(nextWp.getX());
-							if (wp.getY() == null)
-								wp.setY(nextWp.getY());
-						}
+				if (wp.getX() != null && wp.getY() != null)
+					continue;
+				
+				if (track != null) {
+					System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
+					Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(legDay.getDate(), wp.getTime()));
+					if (c != null) {
+						if (wp.getX() == null)
+							wp.setX(c.x);
+						if (wp.getY() == null)
+							wp.setY(c.y);
 					}
-					if (wp.getX() == null || wp.getY() == null) {
-						System.err.println(MessageFormat.format("ERROR: Coordinate problem in patrol {0} waypoint {1}. Importing this patrol will cause error in SMART.", patrol.getId(), wp.getId()));
-						patrol.setId("[ERROR-xy]"+patrol.getId());
-						break;
-					}			
+				}
+
+				if (wp.getX() == null || wp.getY() == null) {
+					if (i > 0) {
+						System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Using previous waypoint coordinates.", patrol.getId(), wp.getId()));
+						WaypointType prevWp = waypoints.get(i-1);
+						if (wp.getX() == null)
+							wp.setX(prevWp.getX());
+						if (wp.getY() == null)
+							wp.setY(prevWp.getY());
+					} else {
+						System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Checking if there are any waypoints with coordinates in this patrol.", patrol.getId(), wp.getId()));
+						for (int j = i+1; j < waypoints.size(); j++) {
+							WaypointType nextWp = waypoints.get(j);
+							if (nextWp.getX() != null && nextWp.getY() != null) {
+								if (wp.getX() == null)
+									wp.setX(nextWp.getX());
+								if (wp.getY() == null)
+									wp.setY(nextWp.getY());
+							}
+						}
+						if (wp.getX() == null || wp.getY() == null) {
+							System.err.println(MessageFormat.format("ERROR: Coordinate problem in patrol {0} waypoint {1}. Importing this patrol will cause error in SMART.", patrol.getId(), wp.getId()));
+							patrol.setId("[ERROR-xy]"+patrol.getId());
+							break;
+						}			
+					}
 				}
 			}
-
 		}
+		
 		
 		for (String fullName : members) {
 			PatrolMemberType member = toMember(fullName);
@@ -404,19 +390,58 @@ public class PatrolBuilder extends AbstractBuilder {
 		}
 
 		patrol.setMandate(mandate);
-
-		patrol.setStartDate(xmlDate);
-		patrol.setEndDate(xmlDate);
 		patrol.setComment(comment);
-
-		leg.setStartDate(xmlDate);
-		leg.setEndDate(xmlDate);
-
-		legDay.setDate(xmlDate);
-		legDay.setStartTime(xmlStartTime);
-		legDay.setEndTime(xmlEndTime);
 		
+		Collections.sort(leg.getDays(), new Comparator<PatrolLegDayType>() {
+			@Override
+			public int compare(PatrolLegDayType d1, PatrolLegDayType d2) {
+				return d1.getDate().compare(d2.getDate());
+			}
+		});
+		
+		XMLGregorianCalendar xmlStartTime = leg.getDays().get(0).getDate();
+		XMLGregorianCalendar xmlEndTime = leg.getDays().get(leg.getDays().size()-1).getDate();
+
+		patrol.setStartDate(xmlStartTime);
+		patrol.setEndDate(xmlEndTime);
+
+		leg.setStartDate(xmlStartTime);
+		leg.setEndDate(xmlEndTime);
+
 		return patrol;
+	}
+
+	private void addTimeRecord(PatrolLegDayType legDay, XMLGregorianCalendar xmlTime) {
+		if (xmlTime == null) {
+			return;
+		}
+		if (legDay.getStartTime() != null) {
+			if (xmlTime.compare(legDay.getStartTime()) == DatatypeConstants.LESSER)
+				legDay.setStartTime(xmlTime);
+		} else {
+			legDay.setStartTime(xmlTime);
+		}
+
+		if (legDay.getEndTime() != null) {
+			if (xmlTime.compare(legDay.getEndTime()) == DatatypeConstants.GREATER)
+				legDay.setEndTime(xmlTime);
+		} else {
+			legDay.setEndTime(xmlTime);
+		}
+	}
+
+	private PatrolLegDayType getLegDay(PatrolLegType leg, XMLGregorianCalendar xmlDate) {
+		for (PatrolLegDayType legDay : leg.getDays()) {
+			if (xmlDate.compare(legDay.getDate()) == DatatypeConstants.EQUAL) {
+				return legDay;
+			}
+		}
+		//leg day for this date do not exist so wee need to create one
+		PatrolLegDayType legDay = new PatrolLegDayType();
+		leg.getDays().add(legDay);
+		legDay.setRestMinutes(0.0);
+		legDay.setDate(xmlDate);
+		return legDay;
 	}
 
 	private boolean isSameValue(WaypointObservationAttributeType a1, WaypointObservationAttributeType a2) {
