@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
@@ -49,6 +51,8 @@ import org.wcs.smart.conversion.tag.TagS;
 public abstract class AbstractBuilder {
 
 	private static final String LANGUAGE_CODE = "en"; //$NON-NLS-1$
+	
+	public static final int MAX_DURATION = 40;
 
 	private Ct2SmartLookup lookup;
 	private DataModelLookup dmLookup;
@@ -123,4 +127,12 @@ public abstract class AbstractBuilder {
 		return map;
 	}
 
+	public boolean isValidDateRange(XMLGregorianCalendar from, XMLGregorianCalendar to) {
+		if (from == null || to == null) {
+			return false;
+		}
+		long diff = Math.abs(to.toGregorianCalendar().getTime().getTime() - from.toGregorianCalendar().getTime().getTime());
+		diff = diff / (1000 * 60 * 60 * 24); //now diff is in days
+		return diff < MAX_DURATION;
+	}
 }

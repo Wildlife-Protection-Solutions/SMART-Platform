@@ -373,18 +373,22 @@ public class MissionBuilder extends AbstractBuilder {
 			}
 		});
 		
-		XMLGregorianCalendar xmlStartTime = mission.getDays().get(0).getDate();
-		XMLGregorianCalendar xmlEndTime = mission.getDays().get(mission.getDays().size()-1).getDate();
+		XMLGregorianCalendar xmlStartDate = mission.getDays().get(0).getDate();
+		XMLGregorianCalendar xmlEndDate = mission.getDays().get(mission.getDays().size()-1).getDate();
 
-		mission.setStartDate(xmlStartTime);
-		mission.setEndDate(xmlEndTime);
+		mission.setStartDate(xmlStartDate);
+		mission.setEndDate(xmlEndDate);
 
 		SurveyType survey = new SurveyType();
 		survey.setId(id);
-		survey.setStartDate(xmlStartTime);
-		survey.setEndDate(xmlEndTime);
+		survey.setStartDate(xmlStartDate);
+		survey.setEndDate(xmlEndDate);
 		survey.setSurveyDesignKeyId(surveyDesignKey);
 		mission.setSurvey(survey);
+
+		if (!isValidDateRange(xmlStartDate, xmlEndDate)) {
+			System.out.println(MessageFormat.format("WARN: Mission {0} lasts longer than {1} days.", mission.getId(), MAX_DURATION));
+		}
 
 		return mission;
 	}

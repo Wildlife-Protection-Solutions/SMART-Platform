@@ -399,15 +399,19 @@ public class PatrolBuilder extends AbstractBuilder {
 			}
 		});
 		
-		XMLGregorianCalendar xmlStartTime = leg.getDays().get(0).getDate();
-		XMLGregorianCalendar xmlEndTime = leg.getDays().get(leg.getDays().size()-1).getDate();
+		XMLGregorianCalendar xmlStartDate = leg.getDays().get(0).getDate();
+		XMLGregorianCalendar xmlEndDate = leg.getDays().get(leg.getDays().size()-1).getDate();
 
-		patrol.setStartDate(xmlStartTime);
-		patrol.setEndDate(xmlEndTime);
+		patrol.setStartDate(xmlStartDate);
+		patrol.setEndDate(xmlEndDate);
 
-		leg.setStartDate(xmlStartTime);
-		leg.setEndDate(xmlEndTime);
+		leg.setStartDate(xmlStartDate);
+		leg.setEndDate(xmlEndDate);
 
+		if (!isValidDateRange(xmlStartDate, xmlEndDate)) {
+			System.out.println(MessageFormat.format("WARN: Patrol {0} lasts longer than {1} days.", patrol.getId(), MAX_DURATION));
+		}
+		
 		return patrol;
 	}
 
