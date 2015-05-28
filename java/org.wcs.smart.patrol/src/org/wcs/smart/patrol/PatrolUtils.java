@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -90,12 +91,19 @@ public class PatrolUtils {
 	 * by date/time which should be stored in the z coordinate
 	 * as the the date/time in the current timezone.  This function
 	 * convert the z to GMT time.
+	 * 
 	 * @param coordinates set of coordinates
 	 * @return track
 	 */
 	public static Track convertToTrack(List<Coordinate> coordinates){
 		if (coordinates.size() < 2) {
 			return null;
+		}
+		
+		// copy the list so changes don't affect other parts of the s/w
+		coordinates = new ArrayList<Coordinate>(coordinates);
+		for (int i = 0; i < coordinates.size(); i ++){
+			coordinates.set(i, new Coordinate(coordinates.get(i)));
 		}
 		GeometryFactory gf = new GeometryFactory();
 		Collections.sort(coordinates, new Comparator<Coordinate>() {
@@ -116,7 +124,7 @@ public class PatrolUtils {
 			c2.setTimeZone(Track.ZTIMEZONE);
 			c2.setTimeInMillis(0);
 			c2.set(c1.get(Calendar.YEAR), c1.get(Calendar.MONTH), c1.get(Calendar.DATE), c1.get(Calendar.HOUR_OF_DAY), c1.get(Calendar.MINUTE), c1.get(Calendar.SECOND));
-			
+		
 			c.z = c2.getTime().getTime();
 			
 		}
