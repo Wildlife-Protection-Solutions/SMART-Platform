@@ -86,9 +86,6 @@ public abstract class AbstractCsvExtractor {
 		List<String> result = new ArrayList<>();
 		for (MappedAttribute a : mapping.getMappedAttribute()) {
 			switch (a.getType()) {
-			case WP_DATE:
-				result.add(0, a.getI());
-				break;
 			case META_OBJECT_ID:
 				result.add(a.getI());
 				break;
