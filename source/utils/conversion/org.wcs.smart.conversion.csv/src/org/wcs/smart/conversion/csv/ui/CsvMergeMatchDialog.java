@@ -131,7 +131,7 @@ public class CsvMergeMatchDialog extends TitleAreaDialog {
 		});
 		
 		Label l = new Label(main, SWT.NONE);
-		l.setText("(merge colunms must exist in both loaded data and new csv file)");
+		l.setText("(merge columns must exist in both loaded data and new csv file)");
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)l.getLayoutData()).horizontalIndent = 15;
 		tableViewer = CheckboxTableViewer.newCheckList(main, SWT.BORDER | SWT.MULTI);
