@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -186,9 +188,11 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 		//no species
 		if (data.size() == 0) return;
 		
+		boolean yesToAll = false;
+		
 		//for each species attribute
 		for (int i = 0; i < data.size(); i ++){
-			Attribute species = (Attribute) data.get(i);
+			final Attribute species = (Attribute) data.get(i);
 		
 			//	i) More than 50 species in the database AND
 			//	ii) More than 30% of the species are unused
@@ -204,13 +208,41 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 			Long numSpeciesUsed = (Long)q.uniqueResult();
 			
 			if (numSpecies < 50 || ((numSpecies - numSpeciesUsed) / ((float)numSpecies)) < .3){
-				return;
+				//skip this species attribute and try the next one
+				continue;
+			}
+			
+			final int[] cont = new int[]{-1};
+			if (!yesToAll){
+				Display.getDefault().syncExec(new Runnable(){
+
+					@Override
+					public void run() {
+						//ask the user
+						MessageDialog md = new MessageDialog(
+								Display.getDefault().getActiveShell(),
+								Messages.Upgrader310To320_SpeciesUpgradeTitle,
+								null,
+								MessageFormat.format(Messages.Upgrader310To320_SpeciesUpgradeQuestion, new Object[]{species.getConservationArea().getName()}),
+								MessageDialog.WARNING,
+								new String[]{IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL},
+								0);
+						cont[0] = md.open();
+					}	
+				});
+				if (cont[0] == 2){
+					//skip this species and move to the next one
+					continue;
+				}else if (cont[0] == 1){
+					yesToAll = true;
+				}
 			}
 			
 			//we have more than 50 species and more than 30% of them are not used
 			//remove all the unused ones
 	
-			String msg = MessageFormat.format(Messages.Upgrader310To320_SpeciesUpgradeMsg, species.getConservationArea().getId());
+			String msg = MessageFormat.format(Messages.Upgrader310To320_SpeciesUpgradeMsg, 
+					species.getConservationArea().getId());
 			monitor.subTask(msg);
 			List<Integer> status = new ArrayList<Integer>();
 			status.add(0);

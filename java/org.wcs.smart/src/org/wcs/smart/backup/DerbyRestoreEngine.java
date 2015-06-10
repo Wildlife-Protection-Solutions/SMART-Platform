@@ -139,6 +139,7 @@ public class DerbyRestoreEngine {
 	 * <li> extracts the contents of the backup file to a temporary directory</li>
 	 * <li>ensures that both the database and filestore files exist in the backup file</li>
 	 * <li>shuts down the existing database</li>
+	 * <li>connects to the new database and performs upgrades if required</li>
 	 * <li>moves the existing database and filestore to a temporary location</li>
 	 * <li>copies the database and filestore from the temporary directory to the SMART location</li>
 	 * <li>deletes the temporary directory, copied original database and filestore</li>
@@ -238,8 +239,10 @@ public class DerbyRestoreEngine {
 		
 		
 		try{
-			UpgradeEngine.upgrageSystem(monitor, versions);
+			UpgradeEngine upgrader = new UpgradeEngine();
+			upgrader.upgrageSystem(monitor, versions);
 			validateConfiguration(versions);
+			upgrader.postProcess(monitor);
 		}catch (Exception ex){
 			HibernateManager.endSessionFactory(true);
 			String cleanUpErr = cleanUp(new File[] { temp });
@@ -368,7 +371,7 @@ public class DerbyRestoreEngine {
 		monitor.worked(1);
 
 	}
-
+	
 	/**
 	 * Validates the version of the backup database against what is currently
 	 * in the system.  Throws an exception if there are missing plugins, extra plugins 
