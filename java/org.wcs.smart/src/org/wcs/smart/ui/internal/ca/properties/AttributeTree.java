@@ -147,7 +147,10 @@ public class AttributeTree {
 		this.currentSession = currentSession;
 		this.attribute = attribute;
 		final List<AttributeTreeNode> clonedroots = new ArrayList<AttributeTreeNode>();
-		if (attribute.getTree() != null) {
+		if (attribute.getTree() == null){
+			viewer.setInput(clonedroots);
+			refreshTree();
+		}else{
 			viewer.setInput(LOADING);
 			refreshTree();
 			final Shell currentShell = viewer.getTree().getShell();
@@ -269,7 +272,11 @@ public class AttributeTree {
 			viewer = new TreeViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
 		}
 		
-		viewer.setContentProvider(new AttributeTreeContentProvider(false, false));
+		if (!isEditable){
+			viewer.setContentProvider(new AttributeTreeContentProvider(false, false));
+		}else{
+			viewer.setContentProvider(new AttributeTreeContentProvider(false, true));
+		}
 		viewer.setLabelProvider(new AttributeTreeLabelProvider());
 		viewer.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,true));
 		((GridData)viewer.getTree().getLayoutData()).heightHint = 80;
@@ -614,7 +621,6 @@ public class AttributeTree {
 	 */
 	private void addItem(Language currentLanguage){
 		Object x = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
-		
 		if (x instanceof AttributeTreeContentProvider.RootNode || x instanceof AttributeTreeNode){
 			List<? extends DmObject> siblings = null;
 			AttributeTreeNode parent = null;
