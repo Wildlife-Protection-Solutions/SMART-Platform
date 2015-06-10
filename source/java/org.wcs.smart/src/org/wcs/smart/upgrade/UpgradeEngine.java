@@ -31,9 +31,10 @@ import org.wcs.smart.upgrade.v320.Upgrader310To320;
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
- * and performs this update if required.
+ * and performs this update if required.  
  * 
  * @author elitvin
+ * @author egouge
  * @since 3.0.0
  */
 public class UpgradeEngine {
@@ -56,13 +57,19 @@ public class UpgradeEngine {
 		}
 	}
 	
+	private Set<IDatabaseUpgrader> upgradersRun = new HashSet<IDatabaseUpgrader>();;
+	
+	public UpgradeEngine(){
+		
+	}
+	
 	/**
 	 * 
 	 * @param monitor progress monitor
 	 * @param currentVersions map from plugin id to database version for the existing database
 	 * @throws Exception
 	 */
-	public static void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
+	public void upgrageSystem(IProgressMonitor monitor, Map<String, String> currentVersions) throws Exception {
 		monitor.setTaskName(Messages.UpgradeEngine_UpgradeTask);
 		
 		
@@ -80,7 +87,8 @@ public class UpgradeEngine {
 		final String newDbVersion = lnewDbVersion;
 		final String expectedDbVersion = lexpectedDbVersion;
 
-		Set<IDatabaseUpgrader> upgradersRun = new HashSet<IDatabaseUpgrader>();
+		upgradersRun.clear();
+		
 		/* --- validate the core version; upgrade as required --- */
 		if (!expectedDbVersion.equals(newDbVersion)) {
 			Display.getDefault().syncExec(new Runnable(){
@@ -177,6 +185,18 @@ public class UpgradeEngine {
 		for (IDatabaseUpgrader upgrader : extensions) {
 			upgrader.upgrade(monitor);
 		}
+
+		monitor.subTask(""); //$NON-NLS-1$
+	}
+
+	/**
+	 * Runs any post-processing scripts.  These are to be run
+	 * after the upgrade has occurred and the plugin and plugin version validation
+	 * has completed.
+	 * These should not in any way modify the plugin or plugin version table.
+	 * @param monitor
+	 */
+	public void postProcess(IProgressMonitor monitor){
 		/* --- post process  --- */
 		//this is done here to ensure all plugin tables that are required
 		//to check delete are installed
@@ -185,11 +205,9 @@ public class UpgradeEngine {
 				((Upgrader310To320) up).postProcess(monitor);
 			}
 		}
-		
-		monitor.subTask(""); //$NON-NLS-1$
 	}
 
-	public static String getSmartVersion(Session s) {
+	private String getSmartVersion(Session s) {
 		Map<String, String> versions = getVersions(s);
 		if (versions != null) {
 			return versions.get(SmartPlugIn.PLUGIN_ID);
@@ -199,6 +217,47 @@ public class UpgradeEngine {
 		return version;
 	}
 
+	
+
+	/**
+	 * @return list of {@link IDatabaseUpgrader} extension points
+	 */
+	private List<IDatabaseUpgrader> getExtensions() {
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<IDatabaseUpgrader> items = new ArrayList<IDatabaseUpgrader>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
+			}
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
+		return items;
+	}
+
+	/**
+	 * Runs an file containing a set of sql commands.  
+	 * Note: input stream is closed when complete 
+	 * 
+	 * @param databaseConnection current database connection
+	 * @param updateScript inputstream representing the queries to run
+	 */
+	public static void runScript(Connection databaseConnection, InputStream in) throws Exception{
+		try{
+			ij.runScript(databaseConnection, in, "utf-8", System.out, "utf-8");  //$NON-NLS-1$//$NON-NLS-2$
+		}finally{
+			in.close();
+		}
+	}
+	
+	/**
+	 * Gets all map of the pluginid to pluginversion stored in the 
+	 * plugin versions database table.
+	 * 
+	 * @param s
+	 * @return
+	 */
 	public static Map<String, String> getVersions(Session s) {
 		Map<String, String> versions = new HashMap<String, String>();
 		try {
@@ -214,37 +273,4 @@ public class UpgradeEngine {
 		}
 		return versions;
 	}
-	
-	/**
-	 * Runs an file containing a set of sql commands.  
-	 * Note: input stream is closed when complete 
-	 * 
-	 * @param databaseConnection current database connection
-	 * @param updateScript inputstream representing the queries to run
-	 */
-	public static void runScript(Connection databaseConnection, InputStream in) throws Exception{
-		try{
-			ij.runScript(databaseConnection, in, "utf-8", System.out, "utf-8");  //$NON-NLS-1$//$NON-NLS-2$
-		}finally{
-			in.close();
-		}
-	}
-
-	/**
-	 * @return list of {@link IDatabaseUpgrader} extension points
-	 */
-	private static List<IDatabaseUpgrader> getExtensions() {
-		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		List<IDatabaseUpgrader> items = new ArrayList<IDatabaseUpgrader>();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				items.add((IDatabaseUpgrader)e.createExecutableExtension("upgrader")); //$NON-NLS-1$
-			}
-		}catch (Exception ex){
-			SmartPlugIn.log(ex.getMessage(), ex);
-		}
-		return items;
-	}
-
 }

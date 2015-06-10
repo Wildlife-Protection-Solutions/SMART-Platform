@@ -50,7 +50,8 @@ public class RestoreHandler {
 	 */
 	public boolean execute(final Shell shell) {
 
-		if (!MessageDialog.openConfirm(shell, Messages.RestoreHandler_ConfirmRestore_DialogTitle, Messages.RestoreHandler_ConfirmRestore_DialogMessage )){
+		if (!MessageDialog.openConfirm(shell, Messages.RestoreHandler_ConfirmRestore_DialogTitle,
+				Messages.RestoreHandler_ConfirmRestore_DialogMessage )){
 			return false;
 		}
 		
@@ -73,7 +74,8 @@ public class RestoreHandler {
 			BackupHandler handler = new BackupHandler();
 			handler.executeBackup(shell, false);
 			if (!handler.backupOk()){
-				MessageDialog.openError(shell, Messages.RestoreHandler_Error_DialogTitle, Messages.RestoreHandler_Error_Message);
+				MessageDialog.openError(shell, Messages.RestoreHandler_Error_DialogTitle, 
+						Messages.RestoreHandler_Error_Message);
 			}
 			
 		}else if (ret == 1){
