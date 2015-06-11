@@ -174,7 +174,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>17</NextId>
+            <NextId>18</NextId>
             <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -194,7 +194,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(17);
+		data.setNextId(18);
 		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
@@ -858,6 +858,35 @@ public class ScreensObjectFactory {
 		return control;
 	}
 
+	/**
+	<Controls>
+	    <Control>
+            <Type>{F4D19E36-BC93-4D89-B82B-1A8900710077}</Type>
+            <Id>17</Id>
+            <Align>2</Align>
+            <Left>0</Left>
+            <Top>165</Top>
+            <Width>240</Width>
+            <Height>40</Height>
+	        <Transparent>True</Transparent>
+	        <Caption>???</Caption>
+	    </Control>
+	</Controls>
+	 */
+	public Controls.Control createBottomMemoControl17(String text) {
+		Controls.Control control = new Controls.Control();
+		control.setType("{F4D19E36-BC93-4D89-B82B-1A8900710077}"); //$NON-NLS-1$
+		control.setId(17);
+		control.setAlign(2);
+		control.setLeft(0);
+		control.setTop(165);
+		control.setWidth(240);
+		control.setHeight(40);
+		control.setTransparent("True"); //$NON-NLS-1$
+		control.setCaption(text);
+		return control;
+	}
+	
 	/**
 	<Control>
 	    <Type>{F4D19E36-BC93-4D89-B82B-1A8900710077}</Type>

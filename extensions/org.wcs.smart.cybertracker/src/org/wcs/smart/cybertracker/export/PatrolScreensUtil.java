@@ -409,18 +409,24 @@ public class PatrolScreensUtil {
 	}
 
 	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerProperties ctProps) {
-		String resultId = createResultElement(RESULT_PATROL_ID, elements);
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_ExitCyberTracker);
-		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
-		addUniqueAttrubute(node, resultId);
-		addGpsConfiguration(node, ctProps, 0);
+		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
+		container.screenNodes.add(nodeMain);
+
+		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin);
+		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), Messages.PatrolScreens_Begin_Title, idsBegin, null, true);
+		container.screenNodes.add(nodeBegin);
+		
+		String resultId = createResultElement(RESULT_PATROL_ID, elements);
+		addUniqueAttrubute(nodeBegin, resultId);
+		addGpsConfiguration(nodeBegin, ctProps, 0);
 		String resultDateId = createResultElement(RESULT_PATROL_START_DATE, elements);
 		String resultTimeId = createResultElement(RESULT_PATROL_START_TIME, elements);
-		addStartTimeAttrubute(node, resultDateId, resultTimeId);
+		addStartTimeAttrubute(nodeBegin, resultDateId, resultTimeId);
 		//if "Use GPS Time" option is enabled than "Snap Date & Time" control needs time from GPS to calculate offset from device time,
 		//but it doesn't launch GPS reading itself, so we need to add "GPS" control (see ticket #1304 for details)
-		addGPSControl(node);
-		container.screenNodes.add(node);
+		addGPSControl(nodeBegin);
+		addGPSRequiredWarning(nodeBegin);
 		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
 		container.resultElements.add(new IdNamePair(resultDateId, RESULT_PATROL_START_DATE));
 		container.resultElements.add(new IdNamePair(resultTimeId, RESULT_PATROL_START_TIME));
@@ -430,7 +436,7 @@ public class PatrolScreensUtil {
 		Control control2 = ScreensObjectFactory.getNavigationControl(pwdNode);
 		control2.setShowNext(ICyberTrackerConstants.STR_FALSE);
 		
-		return ids.get(0);
+		return idsBegin.get(0);
 		
 	}
 
@@ -717,6 +723,11 @@ public class PatrolScreensUtil {
 	private void addGPSControl(Node node) {
 		Control gpsControl = screensFactory.createGPSControl16();
 		ScreensObjectFactory.addControlToNode(node, gpsControl);
+	}
+
+	private void addGPSRequiredWarning(Node node) {
+		Control msgControl = screensFactory.createBottomMemoControl17(Messages.PatrolScreens_Begin_GPSRequiredMessage);
+		ScreensObjectFactory.addControlToNode(node, msgControl);
 	}
 
 }

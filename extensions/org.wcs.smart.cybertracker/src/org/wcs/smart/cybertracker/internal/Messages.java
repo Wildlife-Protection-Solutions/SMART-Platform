@@ -271,6 +271,9 @@ public class Messages extends NLS {
 	public static String PatrolLegImporter_TypeError_Title;
 	public static String PatrolLegImporter_Warn_TimeGap_End;
 	public static String PatrolLegImporter_Warn_TimeGap_Start;
+	public static String PatrolScreens_Begin;
+	public static String PatrolScreens_Begin_GPSRequiredMessage;
+	public static String PatrolScreens_Begin_Title;
 	public static String PatrolScreens_Comments;
 	public static String PatrolScreens_Confirm;
 	public static String PatrolScreens_ConfirmMessage;
