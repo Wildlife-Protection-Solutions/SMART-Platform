@@ -412,6 +412,7 @@ public class PatrolScreensUtil {
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_ExitCyberTracker);
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		container.screenNodes.add(nodeMain);
+		addGpsConfiguration(nodeMain, ctProps, 0);
 
 		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin);
 		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), Messages.PatrolScreens_Begin_Title, idsBegin, null, true);
@@ -419,7 +420,6 @@ public class PatrolScreensUtil {
 		
 		String resultId = createResultElement(RESULT_PATROL_ID, elements);
 		addUniqueAttrubute(nodeBegin, resultId);
-		addGpsConfiguration(nodeBegin, ctProps, 0);
 		String resultDateId = createResultElement(RESULT_PATROL_START_DATE, elements);
 		String resultTimeId = createResultElement(RESULT_PATROL_START_TIME, elements);
 		addStartTimeAttrubute(nodeBegin, resultDateId, resultTimeId);
