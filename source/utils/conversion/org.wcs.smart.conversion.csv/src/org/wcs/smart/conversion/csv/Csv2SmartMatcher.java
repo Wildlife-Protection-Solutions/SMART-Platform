@@ -49,7 +49,7 @@ public class Csv2SmartMatcher {
 	    GridData gridData = new GridData(SWT.LEFT,SWT.TOP, false, false);
 	    shell.setLayoutData(gridData);
 		
-	    Image img = new Image(display, ClassLoader.getSystemClassLoader().getSystemResourceAsStream("csvsmart16.gif"));
+		Image img = new Image(display, ClassLoader.getSystemResourceAsStream("csvsmart16.gif"));
 	    shell.setImage(img);
 		shell.setText("CSV to SMART - Conversion Tool (Version 0.2)");
 		new CsvMatcherDialog(shell);
