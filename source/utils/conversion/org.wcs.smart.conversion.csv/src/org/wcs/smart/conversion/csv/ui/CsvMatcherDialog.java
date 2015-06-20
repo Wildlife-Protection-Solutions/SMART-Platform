@@ -81,6 +81,7 @@ public class CsvMatcherDialog extends Composite {
 	private Button btnMergeCsv;
 	private Button btnExportCsv;
 	private Button btnGenMap;
+	private Button btnEditMap;
 	private Button btnValidateMap;
 	private Button btnGenMeta;
 	private Button btnGenPatrol;
@@ -156,6 +157,16 @@ public class CsvMatcherDialog extends Composite {
 		xmlMapping = new XmlUpdateFileComposite(generateGroup);
 		xmlMapping.setLabelText("Data Mapping XML: ");
 
+		btnEditMap = new Button(generateGroup, SWT.PUSH);
+		btnEditMap.setText("Edit mapping");
+		btnEditMap.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnEditMap.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				editMapping();
+			}
+		});
+		
 		btnValidateMap = new Button(generateGroup, SWT.PUSH);
 		btnValidateMap.setText("Validate mapping");
 		btnValidateMap.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
@@ -283,6 +294,21 @@ public class CsvMatcherDialog extends Composite {
 				}
 			}
 		} catch (Exception e) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
+			e.printStackTrace();
+		}
+	}
+
+	protected void editMapping() {
+		try {
+			MatchSession session = new MatchSession();
+			session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
+			session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
+			session.setConnection(ConnectionUtil.getConnection());
+
+			MatcherDialog dialog = new MatcherDialog(getShell(), session);
+			dialog.open();
+		} catch (JAXBException | IOException e) {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
 			e.printStackTrace();
 		}
@@ -449,6 +475,7 @@ public class CsvMatcherDialog extends Composite {
 		btnGenMap.setEnabled(dbRecordsCount > 0);
 		btnMergeCsv.setEnabled(dbRecordsCount > 0);
 		btnExportCsv.setEnabled(dbRecordsCount > 0);
+		btnEditMap.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 		btnValidateMap.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 		btnGenMeta.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
 		btnGenPatrol.setEnabled(dbRecordsCount > 0 && !xmlDatamodel.isEmpty() && !xmlMapping.isEmpty());
