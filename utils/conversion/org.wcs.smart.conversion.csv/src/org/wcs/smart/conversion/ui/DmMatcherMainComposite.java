@@ -290,7 +290,7 @@ public class DmMatcherMainComposite extends Composite {
 	}
 
 	private void createColumns() {
-		TableViewerColumn col = createTableViewerColumn("CyberTracker Attribute", 220);
+		TableViewerColumn col = createTableViewerColumn("Datafile Attribute", 220);
 		col.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {

@@ -113,7 +113,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 				writer = new CSVWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), ',', '"',System.getProperty("line.separator")); //$NON-NLS-1$ //$NON-NLS-2$
 
 				// WriteHeaders
-				String[] headerColumns = new String[] {"CyberTracker Value", "SMART Value", "SMART key", "Ignore"};
+				String[] headerColumns = new String[] {"Datafile Value", "SMART Value", "SMART key", "Ignore"};
 				writer.writeNext(headerColumns);
 
 				//for each row write one record
@@ -149,7 +149,7 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 	}
 	
 	private void createColumns() {
-		TableViewerColumn ctCol = createTableViewerColumn("CyberTracker Value", 250);
+		TableViewerColumn ctCol = createTableViewerColumn("Datafile Value", 250);
 		ColumnLabelProvider ctLabelProvider = new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element) {
