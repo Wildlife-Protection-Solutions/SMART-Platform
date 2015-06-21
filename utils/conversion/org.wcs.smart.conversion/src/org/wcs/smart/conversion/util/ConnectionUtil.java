@@ -59,7 +59,7 @@ public class ConnectionUtil {
 			try {
 				connection.close();
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while closing database connection. See console for details.");
 				e.printStackTrace();
 			}
 		}

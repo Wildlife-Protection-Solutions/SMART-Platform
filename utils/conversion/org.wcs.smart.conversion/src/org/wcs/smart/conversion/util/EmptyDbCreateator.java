@@ -26,12 +26,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Util class for creating empty database.
+ * 
  * @author elitvin
  * @since 3.2.0
  */

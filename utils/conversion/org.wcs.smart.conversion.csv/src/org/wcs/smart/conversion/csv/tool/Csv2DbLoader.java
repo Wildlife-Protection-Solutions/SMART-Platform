@@ -29,6 +29,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
@@ -98,10 +101,8 @@ public class Csv2DbLoader {
 			
 			c.commit();
 			c.setAutoCommit(autoCommit);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (SQLException | IOException e) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while loading file. See console or log for details.");
 			e.printStackTrace();
 		}
 	}
