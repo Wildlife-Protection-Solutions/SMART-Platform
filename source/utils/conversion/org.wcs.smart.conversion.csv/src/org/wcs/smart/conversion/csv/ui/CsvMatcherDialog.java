@@ -22,9 +22,7 @@
 package org.wcs.smart.conversion.csv.ui;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,24 +39,18 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.conversion.csv.handler.ProcessingActionHandler;
 import org.wcs.smart.conversion.csv.tool.Csv2DbLoader;
 import org.wcs.smart.conversion.csv.tool.CsvExportTool;
 import org.wcs.smart.conversion.csv.tool.CsvMergeTool;
-import org.wcs.smart.conversion.csv.tool.CsvMetaExtractor;
-import org.wcs.smart.conversion.csv.tool.CsvMissionExtractor;
-import org.wcs.smart.conversion.csv.tool.CsvPatrolExtractor;
-import org.wcs.smart.conversion.csv.tool.MappingValidator;
 import org.wcs.smart.conversion.csv.tool.MatchFileBuilder;
-import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.SmartMapping;
 import org.wcs.smart.conversion.tool.MatchSession;
-import org.wcs.smart.conversion.ui.MultiOutputStream;
 import org.wcs.smart.conversion.ui.ReportDialog;
 import org.wcs.smart.conversion.ui.XmlFileComposite;
 import org.wcs.smart.conversion.util.ConnectionUtil;
@@ -87,9 +79,20 @@ public class CsvMatcherDialog extends Composite {
 	private Button btnGenPatrol;
 	private Button btnGenMission;
 
-	private String lastDir = null;
+	private ProcessingActionHandler handler;
+	
 	public CsvMatcherDialog(Shell shell) {
 		super(shell, SWT.NONE);
+		handler = new ProcessingActionHandler(getShell()) {
+			@Override
+			protected MatchSession createMatchSession() throws JAXBException, IOException {
+				MatchSession session = new MatchSession();
+				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
+				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
+				session.setConnection(ConnectionUtil.getConnection());
+				return session;
+			}
+		};
 		
 		GridLayout layout = new GridLayout(1, false);
 		this.setLayout(layout);
@@ -173,7 +176,7 @@ public class CsvMatcherDialog extends Composite {
 		btnValidateMap.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				validateMapping();
+				handler.validateMapping();
 			}
 		});
 
@@ -183,7 +186,7 @@ public class CsvMatcherDialog extends Composite {
 		btnGenMeta.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				generateMeta();
+				handler.generateMeta();
 			}
 		});
 
@@ -193,7 +196,7 @@ public class CsvMatcherDialog extends Composite {
 		btnGenPatrol.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				generatePatrols();
+				handler.generatePatrols();
 			}
 		});
 
@@ -203,7 +206,7 @@ public class CsvMatcherDialog extends Composite {
 		btnGenMission.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				generateMissions();
+				handler.generateMissions();
 			}
 		});
 		
@@ -311,146 +314,6 @@ public class CsvMatcherDialog extends Composite {
 		} catch (JAXBException | IOException e) {
 			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
 			e.printStackTrace();
-		}
-	}
-	
-	protected void validateMapping() {
-		try {
-			MatchSession session = new MatchSession();
-			session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
-			session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
-			session.setConnection(ConnectionUtil.getConnection());
-			
-			DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
-			MappingValidator validator = new MappingValidator();
-			List<String> errors = validator.validate(session.getSmartMapping(), dmLookup);
-			if (errors.isEmpty()) {
-				MessageDialog.openInformation(getShell(), "Validation results", "No errors found.");
-			} else {
-				ReportDialog report = new ReportDialog(getShell(), "Validation results", MessageFormat.format("{0} errors found during validation:", errors.size()), errors);
-				report.open();
-			}
-		} catch (JAXBException | IOException e) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
-			e.printStackTrace();
-		}
-	}
-
-	protected void generateMissions() {
-		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
-		dd.setFilterPath(lastDir);
-
-		String f = dd.open();
-		if (f != null) {
-			lastDir = f;
-			PrintStream originalOut = System.out;
-			PrintStream originalErr = System.err;
-
-			try (
-				FileOutputStream fout = new FileOutputStream(f + "\\warnings.log");
-				FileOutputStream ferr = new FileOutputStream(f + "\\errors.log");
-				) {
-				
-				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
-				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
-				
-				System.setOut(new PrintStream(multiOut));
-				System.setErr(new PrintStream(multiErr));
-
-				MatchSession session = new MatchSession();
-				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
-				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
-				session.setConnection(ConnectionUtil.getConnection());
-
-				DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
-				
-				CsvMissionExtractor exporter = new CsvMissionExtractor(session.getConnection());
-				exporter.extract(f, session, dmLookup);
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				fout.flush();
-				ferr.flush();
-				MessageDialog.openInformation(getShell(), "Mission generation", "Mission generation sucessfully completed.");
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				MessageDialog.openError(getShell(), "Mission generation", "Errors occured while mission generation. See console or log for details.");
-			}
-		}
-	}
-	
-	protected void generatePatrols() {
-		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
-		dd.setFilterPath(lastDir);
-		
-		String f = dd.open();
-		if (f != null) {
-			lastDir = f;
-			PrintStream originalOut = System.out;
-			PrintStream originalErr = System.err;
-
-			try (
-				FileOutputStream fout = new FileOutputStream(f + "\\warnings.log");
-				FileOutputStream ferr = new FileOutputStream(f + "\\errors.log");
-				) {
-				
-				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
-				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
-				
-				System.setOut(new PrintStream(multiOut));
-				System.setErr(new PrintStream(multiErr));
-
-				MatchSession session = new MatchSession();
-				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
-				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
-				session.setConnection(ConnectionUtil.getConnection());
-
-				DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
-				
-				CsvPatrolExtractor exporter = new CsvPatrolExtractor(session.getConnection());
-				exporter.extract(f, session, dmLookup);
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				fout.flush();
-				ferr.flush();
-				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				MessageDialog.openError(getShell(), "Patrol generation", "Errors occured while patrol generation. See console or log for details.");
-			}
-		}
-	}
-
-	protected void generateMeta() {
-		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
-		dd.setFilterPath(lastDir);
-
-		String f = dd.open();
-		if (f != null) {
-			lastDir = f;
-			try {
-				MatchSession session = new MatchSession();
-				session.setSmartMapping(FileUtil.loadSmartMapping(xmlMapping.getFile()));
-				session.setDataModel(FileUtil.loadDataModel(xmlDatamodel.getFile()));
-				session.setConnection(ConnectionUtil.getConnection());
-
-				boolean isOk = true;
-				CsvMetaExtractor metaExtractor = new CsvMetaExtractor(session);
-				isOk = metaExtractor.exportMembers(new File(f + "\\" + "members.csv")) && isOk;
-				isOk = metaExtractor.exportMandates(new File(f + "\\" + "mandates.csv")) && isOk;
-				isOk = metaExtractor.exportTransects(new File(f + "\\" + "transects.csv")) && isOk;
-				if (isOk) {
-					MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
-				} else {
-					MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation. See console for details.");
-				}
-			} catch (Exception e) {
-				MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation session creation. See console for details.");
-				e.printStackTrace();
-			}
 		}
 	}
 	
