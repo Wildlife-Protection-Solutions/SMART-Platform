@@ -1,9 +1,11 @@
 package org.wcs.smart.conversion.ui;
 
 import java.io.File;
-import java.text.MessageFormat;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -22,14 +24,12 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
-import org.wcs.smart.conversion.csv.tool.CsvMetaExtractor;
-import org.wcs.smart.conversion.csv.tool.CsvPatrolExtractor;
-import org.wcs.smart.conversion.csv.tool.MappingValidator;
+import org.wcs.smart.conversion.csv.handler.ProcessingActionHandler;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.MappedAttribute;
 import org.wcs.smart.conversion.model.MappedAttributeType;
@@ -65,10 +65,18 @@ public class DmMatcherMainComposite extends Composite {
 	
 	private List<ILanguageChangedListener> langListeners = new ArrayList<ILanguageChangedListener>();
 	
+	private ProcessingActionHandler handler;
+	
 	public DmMatcherMainComposite(Composite c, MatchSession session) {
 		super(c, SWT.NONE);
 		this.session = session;
 		dmLookup = new DataModelLookup(session.getDataModel());
+		handler = new ProcessingActionHandler(getShell()) {
+			@Override
+			protected MatchSession createMatchSession() throws JAXBException, IOException {
+				return DmMatcherMainComposite.this.session;
+			}
+		};
 
 		GridLayout layout = new GridLayout(1, false);
 		this.setLayout(layout);
@@ -98,7 +106,7 @@ public class DmMatcherMainComposite extends Composite {
 		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 
 		Composite buttonsCmp = new Composite(top, SWT.NONE);
-		buttonsCmp.setLayout(new GridLayout(4, false));
+		buttonsCmp.setLayout(new GridLayout(5, false));
 		buttonsCmp.setLayoutData(new GridData(SWT.LEFT, SWT.FILL, true, true));
 		
 		Button btnSave = new Button(buttonsCmp, SWT.PUSH);
@@ -110,37 +118,42 @@ public class DmMatcherMainComposite extends Composite {
 			}
 		});
 		
-		Button btnGenerate = new Button(buttonsCmp, SWT.PUSH);
-		btnGenerate.setText("Generate patrols");
-		btnGenerate.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				generatePatrols();
-			}
-		});
-
-		Button btnMeta = new Button(buttonsCmp, SWT.PUSH);
-		btnMeta.setText("Generate meta");
-		btnMeta.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				generateMeta();
-			}
-		});
-		
 		Button btnValidate = new Button(buttonsCmp, SWT.PUSH);
 		btnValidate.setText("Validate mapping");
 		btnValidate.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				MappingValidator validator = new MappingValidator();
-				List<String> errors = validator.validate(DmMatcherMainComposite.this.session.getSmartMapping(), dmLookup);
-				for (String error : errors) {
-					System.out.println(error);
-				}
-				MessageDialog.openInformation(getShell(), "Mapping validation", MessageFormat.format("Mapping validation completed with {0} errors.", errors.size()));
+				handler.validateMapping();
 			}
 		});
+
+		Button btnMeta = new Button(buttonsCmp, SWT.PUSH);
+		btnMeta.setText("Generate metadata");
+		btnMeta.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handler.generateMeta();
+			}
+		});
+
+		Button btnGenPatrol = new Button(buttonsCmp, SWT.PUSH);
+		btnGenPatrol.setText("Generate patrols");
+		btnGenPatrol.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handler.generatePatrols();
+			}
+		});
+
+		Button btnGenMission = new Button(buttonsCmp, SWT.PUSH);
+		btnGenMission.setText("Generate missions");
+		btnGenMission.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				handler.generateMissions();
+			}
+		});
+		
 		
 		//language selector
 		final Composite langCmp = new Composite(top, SWT.NONE);
@@ -221,41 +234,8 @@ public class DmMatcherMainComposite extends Composite {
 				cleanTool.clean(smartMapping);
 				FileUtil.write(new File(fn), smartMapping);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. Failed to save mapping. See console for details.");
 				e.printStackTrace();
-			}
-		}
-	}
-
-	protected void generatePatrols() {
-		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
-		String f = dd.open();
-		if (f != null) {
-			CsvPatrolExtractor exporter;
-			try {
-				exporter = new CsvPatrolExtractor(session.getConnection());
-				exporter.extract(f, session, dmLookup);
-				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	protected void generateMeta() {
-		DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
-		String f = dd.open();
-		if (f != null) {
-			boolean isOk = true;
-			CsvMetaExtractor metaExtractor = new CsvMetaExtractor(session);
-			isOk = metaExtractor.exportMembers(new File(f + "\\" + "members.csv")) && isOk;
-			isOk = metaExtractor.exportMandates(new File(f + "\\" + "mandates.csv")) && isOk;
-			isOk = metaExtractor.exportTransects(new File(f + "\\" + "transects.csv")) && isOk;
-			if (isOk) {
-				MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
-			} else {
-				MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation. See console for details.");
 			}
 		}
 	}
