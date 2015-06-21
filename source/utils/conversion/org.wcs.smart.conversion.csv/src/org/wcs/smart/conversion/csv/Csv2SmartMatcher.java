@@ -51,7 +51,7 @@ public class Csv2SmartMatcher {
 		
 		Image img = new Image(display, ClassLoader.getSystemResourceAsStream("csvsmart16.gif"));
 	    shell.setImage(img);
-		shell.setText("CSV to SMART - Conversion Tool (Version 0.2)");
+		shell.setText("CSV to SMART - Conversion Tool (Version 0.3)");
 		new CsvMatcherDialog(shell);
 
 		shell.pack();
