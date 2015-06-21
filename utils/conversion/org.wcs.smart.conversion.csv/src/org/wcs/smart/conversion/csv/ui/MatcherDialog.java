@@ -48,4 +48,10 @@ public class MatcherDialog extends Window {
 	protected Control createContents(Composite parent) {
 		return new DmMatcherMainComposite(parent, session);
 	}
+	
+	@Override
+	protected void configureShell(Shell shell) {
+		super.configureShell(shell);
+		shell.setText("Mapping file editor");
+	}
 }
