@@ -113,7 +113,31 @@
         			</executions>
         			
       			</plugin>
-      			
+
+      			<!-- copy folder with icons -->
+		      <plugin>
+		        <artifactId>maven-resources-plugin</artifactId>
+		        <version>2.7</version>
+		        <executions>
+		          <execution>
+		            <id>copy-resources</id>
+		            <phase>package</phase>
+		            <goals>
+		              <goal>copy-resources</goal>
+		            </goals>
+		            <configuration>
+		              <outputDirectory>${package.dir}/icons</outputDirectory>
+		              <resources>          
+		                <resource>
+		                  <directory>icons</directory>
+		                  <filtering>true</filtering>
+		                </resource>
+		              </resources>              
+		            </configuration>            
+		          </execution>
+		        </executions>
+		      </plugin>
+            			
       			<!-- create run.bat file and update with all dependencies -->
       			<plugin>
            			<groupId>com.google.code.maven-replacer-plugin</groupId>
