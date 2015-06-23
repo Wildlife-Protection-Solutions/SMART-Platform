@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.conversion.tool;
 
+import java.util.Iterator;
+
 import org.wcs.smart.conversion.model.CategoryMap;
 import org.wcs.smart.conversion.model.MappedAttribute;
 import org.wcs.smart.conversion.model.MappedAttributeValue;
@@ -48,6 +50,15 @@ public class CleanMappingTool {
 			for (CategoryMap m : c.getCategoryMap()) {
 				m.setAn(null);
 				m.setVn(null);
+			}
+		}
+
+		for (MappedCategory c : mapping.getMappedCategory()) {
+			for (Iterator<CategoryMap> i = c.getCategoryMap().iterator(); i.hasNext();) {
+				CategoryMap m = i.next();
+				if (m.getVi() == null || m.getVi().isEmpty()) {
+					i.remove();
+				}
 			}
 		}
 	}

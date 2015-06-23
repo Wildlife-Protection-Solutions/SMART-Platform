@@ -285,7 +285,7 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 						return Ct2AttributeTypeUtil.getVn(cmap);
 					}
 				}
-				return "<null>";
+				return "";
 			}
 			return super.getText(element);
 		}
