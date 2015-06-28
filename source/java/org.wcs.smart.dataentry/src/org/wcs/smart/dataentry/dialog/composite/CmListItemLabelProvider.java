@@ -56,7 +56,7 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 	public String getText(Object element) {
 		CmAttributeListItem node = getListItem(element);
 		if (node != null){
-			String label =null;
+			String label = null;
 			if (currentLanguage == null){
 				label = node.findNameNull(SmartDB.getCurrentLanguage());
 			}else{
@@ -65,12 +65,17 @@ public class CmListItemLabelProvider extends NamedItemLabelProvider implements I
 			if (label != null){
 				return label;
 			}
+			return super.getText(node.getListItem());
 		}
 		return super.getText(element);
 	}
 
 
 	private CmAttributeListItem getListItem(Object element){
+		if (element instanceof CmAttributeListItem) {
+			return (CmAttributeListItem) element;
+		}
+		
 		if (element instanceof AttributeListItem){
 			List<?> items = session.createCriteria(CmAttributeListItem.class)
 					.add(Restrictions.eq("listItem", ((AttributeListItem) element)))  //$NON-NLS-1$

@@ -60,6 +60,8 @@ public class CmAttribute extends NamedItem {
 	/* for tree type attributes */
 	private List<CmAttributeTreeNode> rootTreeNodes = null;
 	
+	/* for list type attributes */
+	private List<CmAttributeListItem> listItems = null;
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="node_uuid", referencedColumnName="uuid")
@@ -138,6 +140,45 @@ public class CmAttribute extends NamedItem {
 		return node.getModel().getDefaultTrees(attribute);
 	}
 	
+	/**
+	 * Only valid for list attributes.  Only returns items
+	 * if a customized list configuration is used for this attribute.
+	 * 
+	 * @return  set of root tree nodes
+	 */
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="attribute", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@OrderBy(clause = "list_order")
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<CmAttributeListItem> getList() {
+		if (listItems == null) {
+			listItems = new ArrayList<CmAttributeListItem>();
+		}
+		return this.listItems;
+	}
+	public void setList(List<CmAttributeListItem> list){
+		this.listItems = list;
+	}
+
+	/**
+	 * 
+	 * @return the items for the custom list or the default list depending on
+	 * if a custom list is configured for this attribute or not
+	 */
+	@Transient
+	public List<CmAttributeListItem> getCurrentList() {
+		return isUseCustomConfig() ? getList() : getDefaultList();
+	}
+	
+	/**
+	 * Gets the default model (defined for the entire cm) for the 
+	 * list attribute
+	 * @return
+	 */
+	@Transient
+	public List<CmAttributeListItem> getDefaultList() {
+		return node.getModel().getDefaultLists(attribute);
+	}
+
 	@Transient
 	public boolean isVisible() {
 		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_IS_VISIBLE);

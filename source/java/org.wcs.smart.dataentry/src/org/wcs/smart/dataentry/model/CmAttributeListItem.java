@@ -21,12 +21,14 @@
  */
 package org.wcs.smart.dataentry.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 
 /**
@@ -41,6 +43,11 @@ public class CmAttributeListItem extends CmAttributeItem {
 
 	private AttributeListItem listItem;
 	
+	private CmAttribute attribute;
+	private Attribute dmAttribute;
+	private int listOrder;
+
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="list_element_uuid", referencedColumnName="uuid")
 	public AttributeListItem getListItem() {
@@ -50,4 +57,30 @@ public class CmAttributeListItem extends CmAttributeItem {
 		this.listItem = listItem;
 	}
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="cm_attribute_uuid", referencedColumnName="uuid")
+	public CmAttribute getAttribute() {
+		return attribute;
+	}
+	public void setAttribute(CmAttribute attribute) {
+		this.attribute = attribute;
+	}
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="dm_attribute_uuid", referencedColumnName="uuid")
+	public Attribute getDmAttribute() {
+		return dmAttribute;
+	}
+	public void setDmAttribute(Attribute dmAttribute) {
+		this.dmAttribute = dmAttribute;
+	}
+	
+	@Column(name="list_order")
+	public int getListOrder() {
+		return listOrder;
+	}
+	public void setListOrder(int listOrder) {
+		this.listOrder = listOrder;
+	}
+	
 }

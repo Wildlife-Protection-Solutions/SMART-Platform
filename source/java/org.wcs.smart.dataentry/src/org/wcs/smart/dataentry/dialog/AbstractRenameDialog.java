@@ -51,8 +51,8 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.SmartDB;
@@ -65,7 +65,7 @@ import org.wcs.smart.ui.properties.DialogConstants;
  */
 public abstract class AbstractRenameDialog extends TitleAreaDialog{
 
-	protected Attribute attribute;
+	protected CmAttribute attribute;
 	protected ConfigurableModel editModel;
 	protected Session currentSession;
 	
@@ -77,7 +77,7 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	
 	private Button btnEnable;
 	
-	public AbstractRenameDialog(Shell parentShell, Attribute attribute, ConfigurableModel editModel, Session currentSession) {
+	public AbstractRenameDialog(Shell parentShell, CmAttribute attribute, ConfigurableModel editModel, Session currentSession) {
 		super(parentShell);
 		this.attribute = attribute;
 		this.currentSession = currentSession;
@@ -222,11 +222,9 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 						}
 					}
 				}else if(!dmNode.findName(lang).equals(newValue)){
-					
-					if (cmNode == null){
-						cmNode = createNewAlaisItem(dmNode);
+					if (cmNode != null){
+						cmNode.updateName(((Language)element), (String)value);
 					}
-					cmNode.updateName(((Language)element), (String)value);
 				}
 				if (cmNode != null){
 					currentSession.saveOrUpdate(cmNode);
@@ -340,13 +338,6 @@ public abstract class AbstractRenameDialog extends TitleAreaDialog{
 	 * @return
 	 */
 	protected abstract Viewer createItemViewer(Composite parent);
-	
-	/**
-	 * Creates a new alias database object
-	 * @param the current selected data model item
-	 * @return
-	 */
-	protected abstract CmAttributeItem createNewAlaisItem(NamedItem dmItem);
 	
 	/**
 	 * The dialog message
