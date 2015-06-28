@@ -122,6 +122,8 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_defaultTooltip;
 	public static String ListAttributeInfoComposite_MultiselectHint;
 	public static String ListAttributeInfoComposite_multiSelectTooltip;
+	public static String ListAttributeInfoComposite_UseCustomConfiguration;
+	public static String ListAttributeInfoComposite_UseCustomConfigurationTooltip;
 	public static String ListAttributeInfoComposite_Values;
 	public static String ListAttributeInfoComposite_WarnDialogMessage;
 	public static String ListAttributeInfoComposite_WarnDialogTitle;

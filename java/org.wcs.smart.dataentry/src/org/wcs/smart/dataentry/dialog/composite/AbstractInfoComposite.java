@@ -60,6 +60,7 @@ import org.wcs.smart.dataentry.dialog.DatamodelCategorySelectorDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -209,6 +210,9 @@ public abstract class AbstractInfoComposite extends Composite {
 			if (AttributeType.TREE.equals(a.getType())) {
 				ensureDefaultTreeExists(a);
 			}
+			if (AttributeType.LIST.equals(a.getType())) {
+				ensureDefaultListExists(a);
+			}
 		}
 		addToParent(node);
 		session.saveOrUpdate(node);
@@ -221,6 +225,16 @@ public abstract class AbstractInfoComposite extends Composite {
 		if (!existingTrees.contains(a)) {
 			List<CmAttributeTreeNode> defTree = CmDefaultTreesUtil.buildDefaultTree(m, a);
 			m.getDefaultTrees().addAll(defTree);
+			session.saveOrUpdate(m);
+		}
+	}
+
+	private void ensureDefaultListExists(Attribute a) {
+		ConfigurableModel m = getModel();
+		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
+		if (!existingLists.contains(a)) {
+			List<CmAttributeListItem> defList = CmDefaultListsUtil.buildDefaultList(m, a);
+			m.getDefaultLists().addAll(defList);
 			session.saveOrUpdate(m);
 		}
 	}

@@ -57,6 +57,9 @@ public class ConfigurableModel extends NamedItem {
 
 	private List<CmAttributeTreeNode> defaultRootTreeNodes = null;
 	private Map<Attribute, List<CmAttributeTreeNode>> attr2TreeMap = null;
+
+	private List<CmAttributeListItem> defaultListItems = null;
+	private Map<Attribute, List<CmAttributeListItem>> attr2ListMap = null;
     
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
@@ -109,6 +112,38 @@ public class ConfigurableModel extends NamedItem {
 				}
 			};
 			attr2TreeMap.put(attribute, result);
+		}
+		return result;
+	}
+
+	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
+	@Where(clause = "dm_attribute_uuid is not null")
+	@OrderBy(clause = "list_order")
+	@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+	public List<CmAttributeListItem> getDefaultLists() {
+		if (defaultListItems == null) {
+			defaultListItems = new ArrayList<CmAttributeListItem>();
+		}
+		return this.defaultListItems;
+	}
+	public void setDefaultLists(List<CmAttributeListItem> list){
+		this.defaultListItems = list;
+	}
+
+	@Transient
+	public List<CmAttributeListItem> getDefaultLists(final Attribute attribute) {
+		if (attr2ListMap == null) {
+			attr2ListMap = new HashMap<Attribute, List<CmAttributeListItem>>();
+		}
+		List<CmAttributeListItem> result = attr2ListMap.get(attribute);
+		if (result == null) {
+			result = new FilteredSubList<CmAttributeListItem>(getDefaultLists()) {
+				@Override
+				protected boolean matches(CmAttributeListItem t) {
+					return attribute.equals(t.getDmAttribute());
+				}
+			};
+			attr2ListMap.put(attribute, result);
 		}
 		return result;
 	}

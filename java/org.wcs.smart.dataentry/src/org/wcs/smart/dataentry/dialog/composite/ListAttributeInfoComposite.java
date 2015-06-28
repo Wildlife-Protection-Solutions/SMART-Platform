@@ -49,6 +49,7 @@ import org.wcs.smart.dataentry.dialog.RenameListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
+import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -67,6 +68,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 	private Button btnMulti;
 	
 	private ComboViewer defaultViewer;
+	private Button btnIsCustomConfig;
 	
 	private TableViewer listViewer;
 	private Language currentLanguage;
@@ -87,6 +89,11 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		createIsVisibleControl(container);
 		createMultiselectControl(container);
 		createDefaultControl(container);
+		
+		Label label = new Label(container, SWT.NONE);
+		label.setText(Messages.ListAttributeInfoComposite_Values);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
+		createIsCustomConfigControl(container);
 		createListControl(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
@@ -98,6 +105,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (getSourceObject() != lastSelection){
 					updateListControl();
 				}
+				btnIsCustomConfig.setSelection(getSourceObject().isUseCustomConfig());
 				lastSelection = getSourceObject();
 				ListAttributeInfoComposite.this.layout(true, true);
 			}
@@ -202,12 +210,48 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			initializingControl = false;
 		}
 	}	
+
+	private void createIsCustomConfigControl(Composite parent) {
+		btnIsCustomConfig = new Button(parent, SWT.CHECK);
+		btnIsCustomConfig.setText(Messages.ListAttributeInfoComposite_UseCustomConfiguration);
+		btnIsCustomConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		btnIsCustomConfig.setToolTipText(Messages.ListAttributeInfoComposite_UseCustomConfigurationTooltip);
+		
+		btnIsCustomConfig.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_CUSTOM_CONFIG);
+				if (option == null) {
+					option = CmAttributeOptionFactory.createCustomCofigOption(getSourceObject());
+					getSourceObject().getCmAttributeOptions().put(option.getOptionId(), option);
+					getSession().saveOrUpdate(getSourceObject());
+				}
+				option.setBooleanValue(btnIsCustomConfig.getSelection());
+				
+				//we need to remove any configuration created 
+				clearCustomListConfiguration(getSourceObject());
+				if (btnIsCustomConfig.getSelection()){
+					//we need to create custom configuration
+					getSourceObject().getList().addAll(CmDefaultListsUtil.buildCustomList(getModel(), getSourceObject()));
+				}
+				
+				listViewer.setInput(getSourceObject().getCurrentList());
+				listViewer.refresh();
+				fireModelChanged();
+			}
+		});
+	}
+
+	private void clearCustomListConfiguration(CmAttribute a) {
+		for (CmAttributeListItem toDelete : a.getList()){
+			toDelete.setAttribute(null);
+			getSession().delete(toDelete);
+		}
+		getSourceObject().getList().clear();
+		getSession().flush();
+	}
 	
 	private void createListControl(Composite parent) {
-		Label label = new Label(parent, SWT.NONE);
-		label.setText(Messages.ListAttributeInfoComposite_Values);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false, 2, 1));
-
 		listViewer = new TableViewer(parent, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL | SWT.FULL_SELECTION);
 		listViewer.setLabelProvider(new CmListItemLabelProvider(getSession(), getModel()));
 		listViewer.setContentProvider(ArrayContentProvider.getInstance());
@@ -226,7 +270,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 					return;
 				}
 				
-				RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject().getAttribute(), getModel(), getSession());
+				RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject(), getModel(), getSession());
 				dialog.open();
 						
 				updateListControl();
@@ -238,6 +282,6 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private void updateListControl() {
 		((CmListItemLabelProvider)listViewer.getLabelProvider()).setLanguage(currentLanguage);
-		listViewer.setInput(getSourceObject().getAttribute().getActiveListItems());
+		listViewer.setInput(getSourceObject().getCurrentList());
 	}	
 }

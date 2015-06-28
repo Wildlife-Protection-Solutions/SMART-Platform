@@ -39,11 +39,10 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.dataentry.dialog.composite.CmListItemLabelProvider;
 import org.wcs.smart.dataentry.internal.Messages;
-import org.wcs.smart.dataentry.model.CmAttributeItem;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -56,7 +55,7 @@ import org.wcs.smart.dataentry.model.ConfigurableModel;
  */
 public class RenameListDialog extends AbstractRenameDialog {
 
-	public RenameListDialog(Shell parentShell, Attribute attribute,
+	public RenameListDialog(Shell parentShell, CmAttribute attribute,
 			ConfigurableModel editModel, Session currentSession) {
 		super(parentShell, attribute, editModel, currentSession);
 	}
@@ -66,40 +65,34 @@ public class RenameListDialog extends AbstractRenameDialog {
 		tableComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)tableComp.getLayoutData()).heightHint = 300;
 		
-		final TableViewer tree = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
-		tree.setContentProvider(ArrayContentProvider.getInstance());
-		tree.setLabelProvider(new CmListItemLabelProvider(currentSession, editModel));
-		tree.setInput(attribute.getActiveListItems());
+		final TableViewer listViewer = new TableViewer(tableComp, SWT.FULL_SELECTION | SWT.BORDER | SWT.MULTI);
+		listViewer.setContentProvider(ArrayContentProvider.getInstance());
+		listViewer.setLabelProvider(new CmListItemLabelProvider(currentSession, editModel));
+		listViewer.setInput(attribute.getCurrentList());
 		
-		tree.addSelectionChangedListener(new ISelectionChangedListener() {
+		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				Object x = ((StructuredSelection) tree.getSelection()).getFirstElement();
+				Object x = ((StructuredSelection) listViewer.getSelection()).getFirstElement();
 				AttributeListItem currentNode = null;
 				CmAttributeListItem currentCmNode = null;
 				if (x instanceof AttributeListItem) {
 					currentNode = (AttributeListItem) x;
 					currentCmNode = getConfiguredNode(x);
 				}
+				if (x instanceof CmAttributeListItem) {
+					currentCmNode = (CmAttributeListItem) x;
+					currentNode = currentCmNode.getListItem();
+				}
 				RenameListDialog.this.setCurrentSelection(currentNode, currentCmNode);
 			}
 		});
 		
 		TableColumnLayout ll = new TableColumnLayout();
-		ll.setColumnData(new TableColumn(tree.getTable(),SWT.NONE), new ColumnWeightData(100));
+		ll.setColumnData(new TableColumn(listViewer.getTable(),SWT.NONE), new ColumnWeightData(100));
 		tableComp.setLayout(ll);
 		
-		return tree;
-	}
-
-	@Override
-	protected CmAttributeItem createNewAlaisItem(NamedItem dmItem) {
-		CmAttributeListItem currentCmNode = new CmAttributeListItem();
-		currentCmNode.setConfigurableModel(editModel);
-		currentCmNode.setListItem((AttributeListItem) dmItem);
-		currentCmNode.setIsActive(true);
-		return currentCmNode;
-
+		return listViewer;
 	}
 
 	@Override
@@ -108,6 +101,10 @@ public class RenameListDialog extends AbstractRenameDialog {
 	}
 	
 	private CmAttributeListItem getConfiguredNode(Object x){
+		if (x instanceof CmAttributeListItem) {
+			return (CmAttributeListItem) x;
+		}
+		
 		if (x instanceof AttributeListItem) {
 			AttributeListItem tmp = (AttributeListItem) x;
 			List<?> items = currentSession.createCriteria(CmAttributeListItem.class)
@@ -123,11 +120,9 @@ public class RenameListDialog extends AbstractRenameDialog {
 	@Override
 	protected void enableItem(NamedItem dmNode, boolean enable){
 		CmAttributeListItem item = getConfiguredNode(dmNode);
-		if (item == null){
-			item = (CmAttributeListItem) createNewAlaisItem(dmNode);
-			setCurrentSelection(dmNode, item); //we need this in order to update cmNode from parent class
+		if (item != null){
+			item.setIsActive(enable);
+			currentSession.saveOrUpdate(item);
 		}
-		item.setIsActive(enable);
-		currentSession.saveOrUpdate(item);
 	}
 }
