@@ -1043,6 +1043,9 @@ public class Messages extends NLS {
 	public static String Upgrader310To320_SpeciesUpgradeQuestion;
 	public static String Upgrader310To320_SpeciesUpgradeTitle;
 	public static String Upgrader310To320_upgradingDBMsg;
+	public static String Upgrader320To321_Error;
+	public static String Upgrader320To321_ProcessMessage;
+	public static String Upgrader320To321_UpdateDbStructure;
 	public static String UserNameControlContribution_LoggedInLabel_ToolTip;
 	public static String UserNamePasswordDialog_Password_Label;
 	public static String UserNamePasswordDialog_Username_Label;
