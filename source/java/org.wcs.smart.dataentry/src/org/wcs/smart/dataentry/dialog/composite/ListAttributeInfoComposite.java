@@ -266,16 +266,14 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 		btnEdit.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				if (!MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
-					return;
+				if (getSourceObject().isUseCustomConfig() || MessageDialog.openConfirm(getShell(), Messages.ListAttributeInfoComposite_WarnDialogTitle, Messages.ListAttributeInfoComposite_WarnDialogMessage)){
+					RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject(), getModel(), getSession());
+					dialog.open();
+							
+					updateListControl();
+					listViewer.refresh();
+					fireModelChanged();
 				}
-				
-				RenameListDialog dialog = new RenameListDialog(getShell(), getSourceObject(), getModel(), getSession());
-				dialog.open();
-						
-				updateListControl();
-				listViewer.refresh();
-				fireModelChanged();
 			}
 		});
 	}
