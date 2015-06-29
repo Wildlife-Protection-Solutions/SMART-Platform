@@ -95,7 +95,7 @@ public class CyberTrackerConfExporter {
 	private Elements elements;
 	private Map<Attribute, Map<Integer, CyberTrackerId>> attr2resultId = new HashMap<Attribute, Map<Integer, CyberTrackerId>>();
 	private Map<Integer, CyberTrackerId> nodeLevel2resultId = new HashMap<Integer, CyberTrackerId>();
-	private Map<Attribute, ListItemsDataProvider> listAttr2ItemData = new HashMap<Attribute, ListItemsDataProvider>();
+	private Map<CmAttribute, ListItemsDataProvider> listAttr2ItemData = new HashMap<CmAttribute, ListItemsDataProvider>();
 	private Map<CmAttribute, TreeNodeDataProvider> treeAttr2ItemData = new HashMap<CmAttribute, TreeNodeDataProvider>();
 
 	private CyberTrackerId newWpResultId;
@@ -302,7 +302,7 @@ public class CyberTrackerConfExporter {
 			throw new IllegalArgumentException("This operation can be performed only on lists"); //$NON-NLS-1$
 		}
 		
-		List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
+		List<IAttributeListItemProxy> activeItems = getActiveListItems(listAttr);
 		if (activeItems == null || activeItems.isEmpty()) {
 			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
 			throw new IllegalArgumentException("Cannot add a screen without any items to display"); //$NON-NLS-1$
@@ -395,7 +395,7 @@ public class CyberTrackerConfExporter {
 				result.add(mNode);
 				int cutIndex = numAttr == null ? i+1 : i+2;
 				List<CmAttribute> toShow = attrList.subList(cutIndex, attrList.size()); //sublist of everything after multi-select / numeric multi-select
-				List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
+				List<IAttributeListItemProxy> activeItems = getActiveListItems(cmAttr);
 				for (int x = 0; x < multiIds.size(); x++) {
 					result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, addPhoto, photoRequired, " ("+activeItems.get(x).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -887,7 +887,7 @@ public class CyberTrackerConfExporter {
 				switch (attribute.getType()) {
 				case LIST:
 				{
-					List<IAttributeListItemProxy> activeItems = getActiveListItems(attribute);
+					List<IAttributeListItemProxy> activeItems = getActiveListItems(attr);
 					if (activeItems == null || activeItems.isEmpty()) {
 						continue;
 					}
@@ -912,8 +912,8 @@ public class CyberTrackerConfExporter {
 		}
 	}
 
-	private List<IAttributeListItemProxy> getActiveListItems(Attribute attribute) {
-		if (attribute.getType() != AttributeType.LIST)
+	private List<IAttributeListItemProxy> getActiveListItems(CmAttribute attribute) {
+		if (attribute.getAttribute().getType() != AttributeType.LIST)
 			return null;
 		ListItemsDataProvider dataProvider = listAttr2ItemData.get(attribute);
 		if (dataProvider == null) {
