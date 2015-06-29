@@ -25,11 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
+import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
@@ -44,55 +42,23 @@ public class ListItemsDataProvider {
 	private List<IAttributeListItemProxy> data;
 	private Language language;
 	
-	public ListItemsDataProvider(Attribute attribute, ConfigurableModel configurableModel, Language language, Session session) {
+	public ListItemsDataProvider(CmAttribute attribute, ConfigurableModel configurableModel, Language language, Session session) {
 		this.language = language;
 		data = new ArrayList<IAttributeListItemProxy>();
-		for (AttributeListItem dmItem : attribute.getActiveListItems()) {
-			CmAttributeListItem cmItem = getCmListItem(session, dmItem, configurableModel);
+		//wrapping list items
+		for (CmAttributeListItem cmItem : attribute.getCurrentList()) {
 			if (cmItem != null) {
 				if (cmItem.getIsActive()) {
 					data.add(new CmListItemProxy(cmItem));
 				}
-			} else {
-				data.add(new DmListItemProxy(dmItem));
 			}
 		}
-	}
-	
-	private CmAttributeListItem getCmListItem(Session session, AttributeListItem element, ConfigurableModel configurableModel) {
-		if (configurableModel.getUuid() == null)
-			return null;
-		List<?> items = session.createCriteria(CmAttributeListItem.class)
-				.add(Restrictions.eq("listItem", element))  //$NON-NLS-1$
-				.add(Restrictions.eq("configurableModel", configurableModel)).list();  //$NON-NLS-1$
-		if (items.size() > 0) {
-			return (CmAttributeListItem) items.get(0);
-		}
-		return null;
 	}
 	
 	public List<IAttributeListItemProxy> getActiveListItems() {
 		return data;
 	}
 
-	private class DmListItemProxy implements IAttributeListItemProxy {
-		private AttributeListItem item;
-
-		public DmListItemProxy(AttributeListItem item) {
-			this.item = item;
-		}
-
-		@Override
-		public String getName() {
-			return LanguageUtil.getName(item, language);
-		}
-
-		@Override
-		public byte[] getUuid() {
-			return item.getUuid();
-		}
-	}
-	
 	private class CmListItemProxy implements IAttributeListItemProxy {
 		private CmAttributeListItem item;
 
