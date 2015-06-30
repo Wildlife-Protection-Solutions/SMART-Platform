@@ -119,7 +119,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				updateTreeViewer();
+				updateTreeViewer(false);
 				btnEdit.setEnabled(!modelListViewer.getSelection().isEmpty());
 				btnDelete.setEnabled(!modelListViewer.getSelection().isEmpty());
 				btnExport.setEnabled(!modelListViewer.getSelection().isEmpty());
@@ -162,7 +162,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					
 					//refresh list
 					modelListViewer.setInput(getModelsList().toArray());
-					updateTreeViewer();
+					updateTreeViewer(true);
 				}
 			}
 		});
@@ -191,7 +191,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 					}
 				}
 				modelListViewer.setInput(getModelsList().toArray());
-				updateTreeViewer();
+				updateTreeViewer(true);
 			}
 		});		
 		
@@ -248,7 +248,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 				
 				modelListViewer.setInput(getModelsList().toArray());
 				modelTreeViewer.setInput(null);
-				updateTreeViewer();
+				updateTreeViewer(false);
 			}
 		});		
 
@@ -302,13 +302,13 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 		return modelList;
 	}
 	
-	private void updateTreeViewer() {
+	private void updateTreeViewer(boolean wasEdited) {
 		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
 		if (!selection.isEmpty()) {
 			ConfigurableModel cm = (ConfigurableModel) selection.getFirstElement();
 			
 			Object currentCm = modelTreeViewer.getInput();
-			if (currentCm instanceof ConfigurableModel && currentCm.equals(cm)){
+			if (!wasEdited && currentCm instanceof ConfigurableModel && currentCm.equals(cm)){
 				//selecting the currently selected cm
 				return;
 			}
@@ -406,7 +406,7 @@ public class ConfigurableModelPropertyDialog extends AbstractPropertyJHeaderDial
 										MessageDialog.openInformation(getShell(), Messages.ConfigurableModelPropertyDialog_Success_Title, MessageFormat.format(Messages.ConfigurableModelPropertyDialog_Success_Message, cm.findName(SmartDB.getCurrentLanguage())));
 										//refresh list
 										modelListViewer.setInput(getModelsList().toArray());
-										updateTreeViewer();
+										updateTreeViewer(true);
 									}
 								});
 							}
