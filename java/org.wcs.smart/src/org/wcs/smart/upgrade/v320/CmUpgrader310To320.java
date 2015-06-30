@@ -49,16 +49,18 @@ public class CmUpgrader310To320 {
 	public void upgrade(Session s) {
 		this.session = s;
 		uuidGenerator = null;
-		
+
+		s.beginTransaction();
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				upgrade(c);
 			}
 		});
+		s.getTransaction().commit();
 	}
 	
-	void upgrade(Connection c) throws SQLException {
+	private void upgrade(Connection c) throws SQLException {
 		try(ResultSet cm_rs = c.createStatement().executeQuery("select UUID from smart.CONFIGURABLE_MODEL")){ //$NON-NLS-1$
 			PreparedStatement ps = c.prepareStatement("select distinct cma.ATTRIBUTE_UUID from smart.CM_ATTRIBUTE cma left join smart.CM_NODE node on cma.NODE_UUID = node.UUID left join smart.DM_ATTRIBUTE dma on cma.ATTRIBUTE_UUID = dma.UUID where dma.ATT_TYPE = 'TREE' and node.CM_UUID = ?"); //$NON-NLS-1$
 			while (cm_rs.next()) {
