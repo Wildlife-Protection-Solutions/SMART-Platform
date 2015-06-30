@@ -17,17 +17,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for TreeNodeType complex type.
+ * <p>Java class for ListItemType complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="TreeNodeType">
+ * &lt;complexType name="ListItemType">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
  *         &lt;element name="name" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}NameType" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="children" type="{http://www.smartconservationsoftware.org/xml/1.0/dataentry}TreeNodeType" maxOccurs="unbounded" minOccurs="0"/>
  *       &lt;/sequence>
  *       &lt;attribute name="attributeKey" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       &lt;attribute name="keyRef" type="{http://www.w3.org/2001/XMLSchema}string" />
@@ -40,14 +39,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "TreeNodeType", propOrder = {
-    "name",
-    "children"
+@XmlType(name = "ListItemType", propOrder = {
+    "name"
 })
-public class TreeNodeType {
+public class ListItemType {
 
     protected List<NameType> name;
-    protected List<TreeNodeType> children;
     @XmlAttribute(name = "attributeKey")
     protected String attributeKey;
     @XmlAttribute(name = "keyRef")
@@ -82,35 +79,6 @@ public class TreeNodeType {
             name = new ArrayList<NameType>();
         }
         return this.name;
-    }
-
-    /**
-     * Gets the value of the children property.
-     * 
-     * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the children property.
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * <pre>
-     *    getChildren().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link TreeNodeType }
-     * 
-     * 
-     */
-    public List<TreeNodeType> getChildren() {
-        if (children == null) {
-            children = new ArrayList<TreeNodeType>();
-        }
-        return this.children;
     }
 
     /**
