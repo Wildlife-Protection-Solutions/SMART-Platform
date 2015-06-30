@@ -99,12 +99,19 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 			clone.setConfigurableModel(clonedCm);
 			engine.copyLabels(listItem, clone);
 			clone.setIsActive(listItem.getIsActive());
-			AttributeListItem clonedItem = findNewAttributeListItem(listItem.getListItem());
-			if (clonedItem != null){
-				//if null then nothing from the main db was cloned and we don't want to save it
-				clone.setListItem(clonedItem);
-				engine.getSession().saveOrUpdate(clone);
+			clone.setListOrder(listItem.getListOrder());
+			if (listItem.getListItem() != null){
+				clone.setListItem(findNewAttributeListItem(listItem.getListItem()));
+			}else{
+				clone.setListItem(null);
 			}
+			if (listItem.getDmAttribute() != null){
+				clone.setDmAttribute(findNewAttribute(listItem.getDmAttribute()));
+			}else{
+				clone.setDmAttribute(null);
+			}
+			clone.setAttribute((CmAttribute)engine.getNewConservationItem(listItem.getAttribute()));
+			engine.getSession().saveOrUpdate(clone);
 		}
 		engine.getSession().flush();
 	}
