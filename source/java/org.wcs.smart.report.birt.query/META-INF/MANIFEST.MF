@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART Report Query BIRT PlugIn
 Bundle-SymbolicName: org.wcs.smart.report.birt.query;singleton:=true
-Bundle-Version: 3.2.0
+Bundle-Version: 3.2.1
 Bundle-Activator: org.wcs.smart.report.birt.query.Activator
 Require-Bundle: org.wcs.smart,
  org.wcs.smart.query,
