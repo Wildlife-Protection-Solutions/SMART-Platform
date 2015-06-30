@@ -125,6 +125,10 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		btnIsCustomConfig.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
+				if (!btnIsCustomConfig.getSelection() && !MessageDialog.openQuestion(getShell(), Messages.TreeAttributeInfoComposite_UseDefaultWarning_Title, Messages.TreeAttributeInfoComposite_UseDefaultWarning_Message)) {
+					btnIsCustomConfig.setSelection(true);
+					return;
+				}
 				CmAttributeOption option = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_CUSTOM_CONFIG);
 				if (option == null) {
 					option = CmAttributeOptionFactory.createCustomCofigOption(getSourceObject());
