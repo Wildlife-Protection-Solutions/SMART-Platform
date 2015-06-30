@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry.dialog.composite;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -110,4 +111,24 @@ public class CmDefaultListsUtil {
 		return result;
 	}
 	
+	/**
+	 * Upgrades list mapping used in 3.1.0 and previous versions to 3.2.1
+	 * @param oldNodes
+	 * @return
+	 */
+	public static List<CmAttributeListItem> upgradeDefaultLists(ConfigurableModel m, List<CmAttributeListItem> oldNodes) {
+		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
+		Map<AttributeListItem, CmAttributeListItem> preMapping = new HashMap<AttributeListItem, CmAttributeListItem>();
+		for (CmAttributeListItem cmNode : oldNodes) {
+			preMapping.put(cmNode.getListItem(), cmNode);
+		}
+		Set<Attribute> existingLists = CmDefaultListsUtil.getPresentedListAttributes(m);
+		
+		for (Attribute a : existingLists) {
+			List<CmAttributeListItem> defList = buildDefaultList(m, a, preMapping);
+			result.addAll(defList);
+		}
+		
+		return result;
+	}
 }

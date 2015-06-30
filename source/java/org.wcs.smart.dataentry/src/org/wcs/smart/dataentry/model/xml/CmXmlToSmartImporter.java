@@ -44,6 +44,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
+import org.wcs.smart.dataentry.dialog.composite.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.dialog.composite.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -56,6 +57,7 @@ import org.wcs.smart.dataentry.model.xml.generated.AttributeItemType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
+import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
 import org.wcs.smart.dataentry.model.xml.generated.NameType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
@@ -147,7 +149,15 @@ public class CmXmlToSmartImporter {
 			}
 			
 			monitor.subTask(Messages.CmXmlToSmartImporter_ImportingListItems);
-			List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
+			if (xmlCm.getDefaultLists() != null) {
+				//list mapping was introduced in 3.2.1, previous version were using different mapping
+				cm.setDefaultLists(processCmListItems(cm, null, xmlCm.getDefaultLists().getListItem(), monitor));
+			} else if (xmlCm.getListItems() != null) {
+				//if we are here than we are importing data from version less than 3.2
+				//need to perform additional data conversion
+				List<CmAttributeListItem> listItems = processListItems(xmlCm.getListItems().getItem(), cm);
+				cm.setDefaultLists(CmDefaultListsUtil.upgradeDefaultLists(cm, listItems));
+			}
 
 			if (!warnings.isEmpty()) {
 				StringBuilder sb = new StringBuilder();
@@ -178,9 +188,6 @@ public class CmXmlToSmartImporter {
 			
 			monitor.subTask(Messages.CmXmlToSmartImporter_Saving);
 			session.save(cm);
-			for (CmAttributeListItem item : listItems) {
-				session.save(item);
-			}
 			session.getTransaction().commit();
 			return cm;
 			
@@ -223,6 +230,31 @@ public class CmXmlToSmartImporter {
 			node.setChildren(processCmTreeNodes(cm, cmAttribute, node, xmlNode.getChildren(), monitor));
 			if (monitor.isCanceled()) return null;
 			result.add(node);
+		}
+		return result;
+	}
+
+	private List<CmAttributeListItem> processCmListItems(ConfigurableModel cm, CmAttribute cmAttribute, List<ListItemType> xmlNodes, IProgressMonitor monitor) {
+		if (monitor.isCanceled()) return null;
+		List<CmAttributeListItem> result = new ArrayList<CmAttributeListItem>();
+		for (ListItemType xmlNode : xmlNodes) {
+			CmAttributeListItem item = new CmAttributeListItem();
+			item.setConfigurableModel(cm);
+			updateNames(item, xmlNode.getName());
+			item.setIsActive(xmlNode.isIsActive());
+			if (cmAttribute == null) {
+				//this is default mapping and it MUST be provided with datamodel attribute key
+				Attribute dmAttribute = fetchAttribute(xmlNode.getAttributeKey());
+				item.setDmAttribute(dmAttribute);
+				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), dmAttribute));
+			} else {
+				//this is custom mapping and datamodel attribute key MUST be null
+				item.setAttribute(cmAttribute);
+				item.setListItem(fetchAttributeListItem(xmlNode.getKeyRef(), cmAttribute.getAttribute()));
+			}
+			item.setListOrder(result.size());
+			if (monitor.isCanceled()) return null;
+			result.add(item);
 		}
 		return result;
 	}
@@ -292,6 +324,7 @@ public class CmXmlToSmartImporter {
 			cmAttr.setOrder(i);
 			cmAttr.setCmAttributeOptions(processAttributeOptions(xmlAttr.getOption(), cmAttr));
 			cmAttr.setTree(processCmTreeNodes(parent.getModel(), cmAttr, null, xmlAttr.getTreeNode(), monitor));
+			cmAttr.setList(processCmListItems(parent.getModel(), cmAttr, xmlAttr.getListItem(), monitor));
 
 			result.add(cmAttr);
 			if (monitor.isCanceled()) return null;

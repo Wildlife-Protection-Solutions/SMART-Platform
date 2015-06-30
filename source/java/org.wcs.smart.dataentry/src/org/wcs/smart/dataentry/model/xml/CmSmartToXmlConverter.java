@@ -43,13 +43,13 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.xml.generated.AttributeCmListItemTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeCmTreeNodeTypeList;
-import org.wcs.smart.dataentry.model.xml.generated.AttributeItemType;
-import org.wcs.smart.dataentry.model.xml.generated.AttributeListItemTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeOptionType;
 import org.wcs.smart.dataentry.model.xml.generated.AttributeType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageListType;
 import org.wcs.smart.dataentry.model.xml.generated.LanguageType;
+import org.wcs.smart.dataentry.model.xml.generated.ListItemType;
 import org.wcs.smart.dataentry.model.xml.generated.NameType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeTypeList;
@@ -80,19 +80,25 @@ public class CmSmartToXmlConverter {
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
-			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
-			processListItems(cm, xml, llookup, session);
-			monitor.worked(1);
-			if (monitor.isCanceled()) return null;
+//			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
+//			processListItems(cm, xml, llookup, session);
+//			monitor.worked(1);
+//			if (monitor.isCanceled()) return null;
 			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
 			processCmNodes(cm, xml, llookup, session, monitor);
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
+			monitor.subTask("Processing list items");
+			processDefaultListItems(cm, xml, llookup, monitor);
+			monitor.worked(1);
+			if (monitor.isCanceled()) return null;
+
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessTreeNodes);
 			processDefaultTreeNodes(cm, xml, llookup, monitor);
 			monitor.worked(1);
+			if (monitor.isCanceled()) return null;
 		} finally {
 			session.getTransaction().rollback();
 			session.close();
@@ -129,24 +135,34 @@ public class CmSmartToXmlConverter {
 			xmlList.add(xmlNode);
 		}
 	}
-	
-	private static void processListItems(ConfigurableModel cm,
-			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
-			HashMap<String, Language> llookup, Session session) {
 
-		AttributeListItemTypeList items = new AttributeListItemTypeList();
-		xml.setListItems(items);
-		
-		Criteria query = session.createCriteria(CmAttributeListItem.class).add(Restrictions.eq("configurableModel", cm)); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<CmAttributeListItem> dbList = (List<CmAttributeListItem>) query.list();
-		for (CmAttributeListItem dbItem : dbList) {
-			AttributeItemType item = new AttributeItemType();
-			setNames(item.getName(), dbItem.getNames(), llookup);
-			item.setIsActive(dbItem.getIsActive());
-			item.setRefKey(dbItem.getListItem().getKeyId());
-			item.setAttributeKey(dbItem.getListItem().getAttribute().getKeyId());
-			items.getItem().add(item);
+	private static void processDefaultListItems(ConfigurableModel cm,
+			org.wcs.smart.dataentry.model.xml.generated.ConfigurableModel xml,
+			HashMap<String, Language> llookup, IProgressMonitor monitor) {
+
+		AttributeCmListItemTypeList defList = new AttributeCmListItemTypeList();
+		xml.setDefaultLists(defList);
+		processCmListItems(cm.getDefaultLists(), defList.getListItem(), llookup, monitor);
+	}
+	
+	private static void processCmListItems(List<CmAttributeListItem> cmList,
+			List<ListItemType> xmlList,	HashMap<String, Language> llookup, IProgressMonitor monitor) {
+
+		if(monitor.isCanceled()) return;
+		for (CmAttributeListItem cmNode : cmList) {
+			ListItemType xmlNode = new ListItemType();
+			setNames(xmlNode.getName(), cmNode.getNames(), llookup);
+			xmlNode.setIsActive(cmNode.getIsActive());
+			if (cmNode.getListItem() == null){
+				xmlNode.setKeyRef(null);
+			}else{
+				xmlNode.setKeyRef(cmNode.getListItem().getKeyId());
+			}
+			Attribute dmAttribute = cmNode.getDmAttribute();
+			if (dmAttribute != null) {
+				xmlNode.setAttributeKey(dmAttribute.getKeyId());
+			}
+			xmlList.add(xmlNode);
 		}
 	}
 
@@ -211,6 +227,7 @@ public class CmSmartToXmlConverter {
 					}
 					at.getOption().add(aot);
 				}
+				processCmListItems(ca.getList(), at.getListItem(), llookup, monitor);
 				processCmTreeNodes(ca.getTree(), at.getTreeNode(), llookup, monitor);
 				nt.getAttribute().add(at);
 			}
