@@ -124,6 +124,8 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_multiSelectTooltip;
 	public static String ListAttributeInfoComposite_UseCustomConfiguration;
 	public static String ListAttributeInfoComposite_UseCustomConfigurationTooltip;
+	public static String ListAttributeInfoComposite_UseDefaultWarning_Message;
+	public static String ListAttributeInfoComposite_UseDefaultWarning_Title;
 	public static String ListAttributeInfoComposite_Values;
 	public static String ListAttributeInfoComposite_WarnDialogMessage;
 	public static String ListAttributeInfoComposite_WarnDialogTitle;
@@ -142,6 +144,8 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_listOpTooltip;
 	public static String TreeAttributeInfoComposite_RenameButton;
 	public static String TreeAttributeInfoComposite_UseCustomConfiguration;
+	public static String TreeAttributeInfoComposite_UseDefaultWarning_Message;
+	public static String TreeAttributeInfoComposite_UseDefaultWarning_Title;
 	public static String TreeAttributeInfoComposite_valueLabel;
 	public static String TreeAttributeInfoComposite_WarnMessage1;
 	public static String TreeAttributeInfoComposite_WarnTitle;
