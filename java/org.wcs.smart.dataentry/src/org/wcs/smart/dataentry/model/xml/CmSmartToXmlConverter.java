@@ -80,17 +80,12 @@ public class CmSmartToXmlConverter {
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
-//			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
-//			processListItems(cm, xml, llookup, session);
-//			monitor.worked(1);
-//			if (monitor.isCanceled()) return null;
-			
 			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessCmNodes);
 			processCmNodes(cm, xml, llookup, session, monitor);
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
 			
-			monitor.subTask("Processing list items");
+			monitor.subTask(Messages.CmSmartToXmlConverter_ProcessListItems);
 			processDefaultListItems(cm, xml, llookup, monitor);
 			monitor.worked(1);
 			if (monitor.isCanceled()) return null;
