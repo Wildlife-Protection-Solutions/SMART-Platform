@@ -1,10 +1,8 @@
 metaRequirements.0.namespace=org.wcs.smart.cybertracker
 metaRequirements.0.name=onInstall
-metaRequirements.0.range=3.0.0
 
 metaRequirements.1.namespace=org.wcs.smart.cybertracker
 metaRequirements.1.name=onUninstall
-metaRequirements.1.range=3.0.0
 
 instructions.install=org.wcs.smart.cybertracker.onInstall();
 instructions.uninstall=org.wcs.smart.cybertracker.onUninstall();

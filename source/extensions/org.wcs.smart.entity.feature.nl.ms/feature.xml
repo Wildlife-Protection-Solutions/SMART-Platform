@@ -4,7 +4,7 @@
       label="SMART Entity Tracker Malay Language Pack"
       version="3.2.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart_feature">
+      license-feature="org.wcs.smart.smart.feature">
 
    <description>
       The Malay translations for the Entity Tracker plugin.

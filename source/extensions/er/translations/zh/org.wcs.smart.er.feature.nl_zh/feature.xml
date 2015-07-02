@@ -4,7 +4,7 @@
       label="SMART Chinese Records French Chinese Pack"
       version="3.2.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart_feature">
+      license-feature="org.wcs.smart.smart.feature">
 
    <description>
       The Chinese translations for the Ecological Records Chinese plugin.
