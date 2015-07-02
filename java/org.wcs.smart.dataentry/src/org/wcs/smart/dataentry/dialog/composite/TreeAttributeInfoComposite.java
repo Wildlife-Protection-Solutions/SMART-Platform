@@ -123,27 +123,6 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 	}
 
-	private void preLoadTree(final CmAttribute cmAttribute) {
-		final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(getShell());
-		try {
-			//load lazy data in ProgressMonitorDialog (so UI delay will look more user friendly)
-			pmdDialog.run(true, false, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					//we need to load two levels
-					monitor.setTaskName(Messages.TreeAttributeInfoComposite_TreePreLoad_FirstLevel);
-					monitor.beginTask(Messages.TreeAttributeInfoComposite_TreePreLoad_SecondLevel, cmAttribute.getCurrentTree().size());
-					for (CmAttributeTreeNode treeNode : cmAttribute.getCurrentTree()) {
-						treeNode.getChildren().size();
-						monitor.worked(1);
-					}
-					monitor.done();
-				}
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			SmartPlugIn.displayLog(Messages.TreeAttributeInfoComposite_TreePreLoad_Error + e.getLocalizedMessage(), e);
-		}
-	}
-	
 	private void createIsCustomConfigControl(Composite parent) {
 		btnIsCustomConfig = new Button(parent, SWT.CHECK);
 		btnIsCustomConfig.setText(Messages.TreeAttributeInfoComposite_UseCustomConfiguration);
@@ -165,14 +144,9 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				}
 				option.setBooleanValue(btnIsCustomConfig.getSelection());
 				
-				if (!btnIsCustomConfig.getSelection()){
+				if (!btnIsCustomConfig.getSelection()) {
 					//we need to remove any configuration created 
-					for (CmAttributeTreeNode toDelete : getSourceObject().getTree()){
-						toDelete.setAttribute(null);
-						getSession().delete(toDelete);
-					}
-					getSourceObject().getTree().clear();
-					getSession().flush();
+					cleanupCustomTree(getSourceObject());
 				}
 				
 				attributeTreeViewer.setInput(getSourceObject());
@@ -183,6 +157,24 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 	}
 
+	private void preLoadTree(final CmAttribute cmAttribute) {
+		final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(getShell());
+		try {
+			pmdDialog.run(true, false, new TreePreLoadRunnable(cmAttribute));
+		} catch (InvocationTargetException | InterruptedException e) {
+			SmartPlugIn.displayLog(Messages.TreeAttributeInfoComposite_TreePreLoad_Error + e.getLocalizedMessage(), e);
+		}
+	}
+
+	private void cleanupCustomTree(final CmAttribute cmAttribute) {
+		final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(getShell());
+		try {
+			pmdDialog.run(true, false, new TreeCustomConfigCleanupRunnable(cmAttribute, getSession()));
+		} catch (InvocationTargetException | InterruptedException e) {
+			SmartPlugIn.displayLog(Messages.TreeAttributeInfoComposite_Cleanup_Error + e.getLocalizedMessage(), e);
+		}
+	}
+	
 	private void createDefaultControl(Composite container) {
 		Label label = new Label(container, SWT.NONE);
 		label.setText(Messages.CmAttributeInfoComposite_Option_DefaultValue);
@@ -267,5 +259,63 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 		
 	}
-	
+
+	/**
+	 * 	Load lazy tree data
+	 * 
+	 * @author elitvin
+	 * @since 3.2.0
+	 */
+	protected class TreePreLoadRunnable implements IRunnableWithProgress {
+		private final CmAttribute cmAttribute;
+
+		protected TreePreLoadRunnable(CmAttribute cmAttribute) {
+			this.cmAttribute = cmAttribute;
+		}
+		
+		public CmAttribute getCmAttribute() {
+			return cmAttribute;
+		}
+
+		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			//we need to load two levels
+			monitor.setTaskName(Messages.TreeAttributeInfoComposite_TreePreLoad_FirstLevel);
+			monitor.beginTask(Messages.TreeAttributeInfoComposite_TreePreLoad_SecondLevel, cmAttribute.getCurrentTree().size());
+			for (CmAttributeTreeNode treeNode : cmAttribute.getCurrentTree()) {
+				treeNode.getChildren().size();
+				monitor.worked(1);
+			}
+			monitor.done();
+		}
+	}
+
+	/**
+	 * 	Erases current custom tree configuration and load current lazy tree data
+	 *  
+	 * @author elitvin
+	 * @since 3.2.0
+	 */
+	protected class TreeCustomConfigCleanupRunnable extends TreePreLoadRunnable {
+		
+		private final Session session;
+
+		protected TreeCustomConfigCleanupRunnable(CmAttribute cmAttribute, Session session) {
+			super(cmAttribute);
+			this.session = session;
+		}
+
+		@Override
+		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+			monitor.beginTask(Messages.TreeAttributeInfoComposite_Cleanup_Task, getCmAttribute().getTree().size()+1);
+			for (CmAttributeTreeNode toDelete : getCmAttribute().getTree()){
+				toDelete.setAttribute(null);
+				session.delete(toDelete);
+				monitor.worked(1);
+			}
+			getCmAttribute().getTree().clear();
+			session.flush();
+			monitor.worked(1);
+			super.run(monitor);
+		}
+	}
 }
