@@ -143,6 +143,9 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_deafultValueTooltip;
 	public static String TreeAttributeInfoComposite_listOpTooltip;
 	public static String TreeAttributeInfoComposite_RenameButton;
+	public static String TreeAttributeInfoComposite_TreePreLoad_Error;
+	public static String TreeAttributeInfoComposite_TreePreLoad_FirstLevel;
+	public static String TreeAttributeInfoComposite_TreePreLoad_SecondLevel;
 	public static String TreeAttributeInfoComposite_UseCustomConfiguration;
 	public static String TreeAttributeInfoComposite_UseDefaultWarning_Message;
 	public static String TreeAttributeInfoComposite_UseDefaultWarning_Title;

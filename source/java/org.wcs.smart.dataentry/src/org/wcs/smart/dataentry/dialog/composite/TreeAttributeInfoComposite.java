@@ -21,7 +21,12 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
@@ -37,6 +42,7 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider;
@@ -105,6 +111,7 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 				if (getSourceObject() != lastSelection){
 					//tree viewer
 					((CmTreeLabelProvider)attributeTreeViewer.getLabelProvider()).setLanguage(language);
+					preLoadTree(getSourceObject());
 					attributeTreeViewer.setInput(getSourceObject());
 					attributeTreeViewer.expandToLevel(2);
 				}
@@ -116,6 +123,27 @@ public class TreeAttributeInfoComposite extends CmAttributeInfoComposite {
 		});
 	}
 
+	private void preLoadTree(final CmAttribute cmAttribute) {
+		final ProgressMonitorDialog pmdDialog = new ProgressMonitorDialog(getShell());
+		try {
+			//load lazy data in ProgressMonitorDialog (so UI delay will look more user friendly)
+			pmdDialog.run(true, false, new IRunnableWithProgress() {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					//we need to load two levels
+					monitor.setTaskName(Messages.TreeAttributeInfoComposite_TreePreLoad_FirstLevel);
+					monitor.beginTask(Messages.TreeAttributeInfoComposite_TreePreLoad_SecondLevel, cmAttribute.getCurrentTree().size());
+					for (CmAttributeTreeNode treeNode : cmAttribute.getCurrentTree()) {
+						treeNode.getChildren().size();
+						monitor.worked(1);
+					}
+					monitor.done();
+				}
+			});
+		} catch (InvocationTargetException | InterruptedException e) {
+			SmartPlugIn.displayLog(Messages.TreeAttributeInfoComposite_TreePreLoad_Error + e.getLocalizedMessage(), e);
+		}
+	}
+	
 	private void createIsCustomConfigControl(Composite parent) {
 		btnIsCustomConfig = new Button(parent, SWT.CHECK);
 		btnIsCustomConfig.setText(Messages.TreeAttributeInfoComposite_UseCustomConfiguration);
