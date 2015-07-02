@@ -125,18 +125,18 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 						id = String.valueOf(System.nanoTime());
 					}
 					rasterService = new RasterService(query);
-					rasterService.getReader(monitor); // this will create the
-														// raster
-					if (rasterService.getMessage() != null) {
-						QueryPlugIn
-								.displayLog(
-										Messages.GriddedResultsMapEditorPage_ErrorCreatingRaster
-												+ rasterService.getMessage()
-														.getMessage(),
-										rasterService.getMessage());
-						return Status.OK_STATUS;
-					}
 				}
+				rasterService.getReader(monitor); // this will create the raster & validate size
+				if (rasterService.getMessage() != null) {
+					QueryPlugIn
+							.displayLog(
+									Messages.GriddedResultsMapEditorPage_ErrorCreatingRaster
+											+ rasterService.getMessage()
+													.getMessage(),
+									rasterService.getMessage());
+					return Status.OK_STATUS;
+				}
+				
 				List<? extends IGeoResource> rasterResourceList = rasterService
 						.resources(monitor);
 				assert !rasterResourceList.isEmpty();
