@@ -4,8 +4,7 @@
       label="SMART Russian Language Pack"
       version="3.2.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.2.0">
+      license-feature="org.wcs.smart.smart.feature">
 
    <description>
       Russian language pack for core SMART features.  This includes the BIRT and Eclipse language packs.
@@ -1089,14 +1088,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.equinox.launcher.win32.win32.x86.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.equinox.simpleconfigurator.manipulator.nl_ru"
          download-size="0"
          install-size="0"
@@ -1106,22 +1097,6 @@
 
    <plugin
          id="org.eclipse.equinox.simpleconfigurator.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.osgi.compatibility.state.nl_ru"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.swt.win32.win32.x86.nl_ru"
          download-size="0"
          install-size="0"
          version="0.0.0"
