@@ -4,8 +4,7 @@
       label="SMART Hindi Language Pack"
       version="3.2.0"
       provider-name="org.wcs.smart"
-      license-feature="org.wcs.smart.smart_feature"
-      license-feature-version="3.2.0">
+      license-feature="org.wcs.smart.smart.feature">
 
    <description>
       Hindi language pack for core SMART features.  This includes the BIRT and Eclipse language packs.
@@ -792,14 +791,6 @@
 
    <plugin
          id="org.eclipse.equinox.simpleconfigurator.nl_hi"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.osgi.compatibility.state.nl_hi"
          download-size="0"
          install-size="0"
          version="0.0.0"
