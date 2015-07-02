@@ -139,6 +139,8 @@ public class Messages extends NLS {
 	public static String ShowConfigurableModelHandler_NoDmDialog_Message;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Title;
 	public static String TranslatableNameComposite_Button_Translate;
+	public static String TreeAttributeInfoComposite_Cleanup_Error;
+	public static String TreeAttributeInfoComposite_Cleanup_Task;
 	public static String TreeAttributeInfoComposite_customTreeOp;
 	public static String TreeAttributeInfoComposite_deafultValueTooltip;
 	public static String TreeAttributeInfoComposite_listOpTooltip;
