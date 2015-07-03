@@ -4,6 +4,7 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.dataentry.internal.messages"; //$NON-NLS-1$
+	public static String AbstractInfoComposite_AddCategory;
 	public static String AbstractInfoComposite_Button_AddCategory;
 	public static String AbstractInfoComposite_Button_AddGroup;
 	public static String AbstractInfoComposite_DisplayName;
@@ -25,6 +26,7 @@ public class Messages extends NLS {
 	public static String CmNodeInfoComposite_Category;
 	public static String CmNodeInfoComposite_DeleteConfirmation;
 	public static String CmNodeInfoComposite_DeleteDialogTitle;
+	public static String CmNodeInfoComposite_DeletingNode;
 	public static String CmNodeInfoComposite_Key;
 	public static String CmNodeInfoComposite_PhotoAllowed;
 	public static String CmNodeInfoComposite_photoOptionTooltip;
