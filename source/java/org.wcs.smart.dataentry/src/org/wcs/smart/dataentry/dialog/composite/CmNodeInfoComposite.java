@@ -21,10 +21,14 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -161,7 +165,7 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 	@Override
 	protected void handleDeleteNode() {
 		
-		CmNode node = getSourceObject();
+		final CmNode node = getSourceObject();
 		
 		if (!MessageDialog.openConfirm(getShell(), Messages.CmNodeInfoComposite_DeleteDialogTitle, 
 				MessageFormat.format(Messages.CmNodeInfoComposite_DeleteConfirmation, new Object[]{node.getName()}))){
@@ -204,7 +208,24 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 				getModel().removeDefaultLists(a);
 			}
 		}
-		getSession().flush();
+		
+		//this can be slow for large trees; put it in a pmd
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+		pmd.run(true , false, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				monitor.beginTask(MessageFormat.format(Messages.CmNodeInfoComposite_DeletingNode, node.getName()), 1);
+				getSession().flush();
+				monitor.done();
+				
+			}
+		});
+		}catch (Exception ex){
+			throw new RuntimeException(ex);
+		}
 		fireModelChanged();
 	}
 	

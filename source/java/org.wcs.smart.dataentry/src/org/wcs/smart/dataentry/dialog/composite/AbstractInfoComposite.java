@@ -21,15 +21,19 @@
  */
 package org.wcs.smart.dataentry.dialog.composite;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusEvent;
@@ -43,6 +47,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
@@ -173,13 +178,30 @@ public abstract class AbstractInfoComposite extends Composite {
 	 */
 	protected void addDatamodelCategory() {
 		try {
-			
 			DataModel dm = getDataModel();
-			DatamodelCategorySelectorDialog dialog = new DatamodelCategorySelectorDialog(dm);
+			final DatamodelCategorySelectorDialog dialog = new DatamodelCategorySelectorDialog(dm);
 			if (dialog.open() == IDialogConstants.OK_ID) {
-				for (Category c : dialog.getCategories()){
-					addCategory(c);
-				}
+		
+				if (dialog.getCategories().isEmpty()) return;
+				
+				//this can be slow for large trees or many categories; put it in a pmd
+				ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+				pmd.run(true, false, new IRunnableWithProgress() {
+
+					@Override
+					public void run(IProgressMonitor monitor)
+							throws InvocationTargetException,
+							InterruptedException {
+						monitor.beginTask(Messages.AbstractInfoComposite_AddCategory, dialog.getCategories().size());
+						for (Category c : dialog.getCategories()){
+							monitor.subTask(c.getName());
+							addCategory(c);
+							monitor.worked(1);
+						}
+						monitor.done();
+						
+					}
+				});
 			}
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.ConfigurableModelPropertyDialog_LoadModelsListError, ex);
@@ -187,11 +209,12 @@ public abstract class AbstractInfoComposite extends Composite {
 	}
 	
 	private void addCategory(Category category){
-		CmNode node = new CmNode();
+		
+		final CmNode node = new CmNode();
 		node.setModel(getModel());
 		node.setCategory(category);
 		node.setName(category.getName());
-		for (org.wcs.smart.ca.Label label : category.getNames()) { //we need a copy, not the same instance of set
+		for (org.wcs.smart.ca.Label label : category.getNames()) { // we need a copy, not the same instance of set
 			node.updateName(label.getLanguage(), label.getValue());
 		}
 		List<Attribute> attrList = new ArrayList<Attribute>();
@@ -201,11 +224,12 @@ public abstract class AbstractInfoComposite extends Composite {
 			cma.setNode(node);
 			cma.setAttribute(a);
 			cma.setName(a.getName());
-			for (org.wcs.smart.ca.Label label : a.getNames()) { //we need a copy, not the same instance of set
+			for (org.wcs.smart.ca.Label label : a.getNames()) { // we need a copy, not the same instance of set
 				cma.updateName(label.getLanguage(), label.getValue());
 			}
 			cma.setOrder(node.getCmAttributes().size());
-			cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
+			cma.setCmAttributeOptions(CmAttributeOptionFactory
+					.buildDefaultOptions(cma, a.getType()));
 			node.getCmAttributes().add(cma);
 			if (AttributeType.TREE.equals(a.getType())) {
 				ensureDefaultTreeExists(a);
@@ -214,7 +238,13 @@ public abstract class AbstractInfoComposite extends Composite {
 				ensureDefaultListExists(a);
 			}
 		}
-		addToParent(node);
+		//we need to call this part in the main ui thread
+		Display.getDefault().syncExec(new Runnable() {
+			@Override
+			public void run() {
+				addToParent(node);
+			}
+		});
 		session.saveOrUpdate(node);
 		session.flush();
 	}
