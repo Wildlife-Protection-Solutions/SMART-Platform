@@ -23,7 +23,9 @@ package org.wcs.smart.dataentry.dialog;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -100,10 +102,10 @@ public class ConfigurableModelFactory {
 		DataModel dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), session);
 		
 		int catCnt = 0;
-		List<Category> toProcess = new ArrayList<Category>();
+		Queue<Category> toProcess = new LinkedList<Category>();
 		toProcess.addAll(dm.getActiveCategories());
-		while(toProcess.size() > 0){
-			Category c = toProcess.remove(0);
+		while(!toProcess.isEmpty()) {
+			Category c = toProcess.remove();
 			catCnt ++;
 			toProcess.addAll(c.getActiveChildren());
 		}
@@ -168,6 +170,7 @@ public class ConfigurableModelFactory {
 				cma.setOrder(node.getCmAttributes().size());
 				cma.setCmAttributeOptions(CmAttributeOptionFactory.buildDefaultOptions(cma, a.getType()));
 				node.getCmAttributes().add(cma);
+				addAttributeDefaultValues(model, a);
 			}
 			if (parent == null){
 				node.setNodeOrder(model.getNodes().size()+1);
@@ -176,6 +179,20 @@ public class ConfigurableModelFactory {
 				node.setNodeOrder(parent.getChildren().size()+1);
 				parent.getChildren().add(node);
 			}
+		}
+	}
+
+	private static void addAttributeDefaultValues(ConfigurableModel model, Attribute a) {
+		switch(a.getType()) {
+		case LIST:
+			model.addDefaultListItems(a);
+			break;
+		case TREE:
+			model.addDefaultTreeModes(a);
+			break;
+		default:
+			//nothing to add
+			break;
 		}
 	}
 }

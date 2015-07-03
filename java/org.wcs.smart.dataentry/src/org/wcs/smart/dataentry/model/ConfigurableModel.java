@@ -42,6 +42,8 @@ import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.dataentry.dialog.composite.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.dialog.composite.CmDefaultTreesUtil;
 
 
 /**
@@ -115,6 +117,29 @@ public class ConfigurableModel extends NamedItem {
 		}
 		return result;
 	}
+	
+	@Transient
+	public void addDefaultTreeModes(final Attribute attribute) {
+		if (attr2TreeMap == null) {
+			attr2TreeMap = new HashMap<Attribute, List<CmAttributeTreeNode>>();
+		}
+		List<CmAttributeTreeNode> result = attr2TreeMap.get(attribute);
+		if (result == null) {
+			result = new FilteredSubList<CmAttributeTreeNode>(getDefaultTrees()) {
+				@Override
+				protected boolean matches(CmAttributeTreeNode t) {
+					return attribute.equals(t.getDmAttribute());
+				}
+			};
+			if (result.isEmpty()) {
+				//if we are here that this attribute was not added before (no data for it in default trees)
+				result = CmDefaultTreesUtil.buildDefaultTree(this, attribute);
+				getDefaultTrees().addAll(result);
+			} else {
+				attr2TreeMap.put(attribute, result);
+			}
+		}
+	}	
 
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "dm_attribute_uuid is not null")
@@ -148,6 +173,29 @@ public class ConfigurableModel extends NamedItem {
 		return result;
 	}
 
+	@Transient
+	public void addDefaultListItems(final Attribute attribute) {
+		if (attr2ListMap == null) {
+			attr2ListMap = new HashMap<Attribute, List<CmAttributeListItem>>();
+		}
+		List<CmAttributeListItem> result = attr2ListMap.get(attribute);
+		if (result == null) {
+			result = new FilteredSubList<CmAttributeListItem>(getDefaultLists()) {
+				@Override
+				protected boolean matches(CmAttributeListItem t) {
+					return attribute.equals(t.getDmAttribute());
+				}
+			};
+			if (result.isEmpty()) {
+				//if we are here that this attribute was not added before (no data for it in default lists)
+				result = CmDefaultListsUtil.buildDefaultList(this, attribute);
+				getDefaultLists().addAll(result);
+			} else {
+				attr2ListMap.put(attribute, result);
+			}
+		}
+	}
+	
 	@Transient
 	public void removeDefaultTrees(final Attribute attribute) {
 		List<CmAttributeTreeNode> tree = getDefaultTrees(attribute);
