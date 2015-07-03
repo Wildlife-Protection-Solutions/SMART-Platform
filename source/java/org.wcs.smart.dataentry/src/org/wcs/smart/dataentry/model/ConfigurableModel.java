@@ -141,6 +141,13 @@ public class ConfigurableModel extends NamedItem {
 		}
 	}	
 
+	@Transient
+	public void removeDefaultTrees(final Attribute attribute) {
+		List<CmAttributeTreeNode> tree = getDefaultTrees(attribute);
+		tree.clear(); //NOTE: as this is FilteredSubList is will remove given items from original defaultRootTreeNodes list
+		attr2TreeMap.remove(attribute);
+	}
+
 	@OneToMany(fetch=FetchType.LAZY, mappedBy="configurableModel", cascade = {CascadeType.ALL}, orphanRemoval=true)
 	@Where(clause = "dm_attribute_uuid is not null")
 	@OrderBy(clause = "list_order")
@@ -197,10 +204,10 @@ public class ConfigurableModel extends NamedItem {
 	}
 	
 	@Transient
-	public void removeDefaultTrees(final Attribute attribute) {
-		List<CmAttributeTreeNode> tree = getDefaultTrees(attribute);
-		tree.clear(); //NOTE: as this is FilteredSubList is fill remove given items from original defaultRootTreeNodes list
-		attr2TreeMap.remove(attribute);
+	public void removeDefaultLists(final Attribute attribute) {
+		List<CmAttributeListItem> list = getDefaultLists(attribute);
+		list.clear(); //NOTE: as this is FilteredSubList is will remove given items from original defaultRootListItems list
+		attr2ListMap.remove(attribute);
 	}
 	
 	/**
