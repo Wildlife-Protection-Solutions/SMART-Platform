@@ -527,9 +527,11 @@ public class MissionBuilder extends AbstractBuilder {
 			for (SurveyWaypointsType survWp : misDay.getSurveyWaypoints()) {
 				WaypointType wp = survWp.getWaypoints();
 				time = wp.getDateTime();
-				y = Double.valueOf(wp.getY());
-				x = Double.valueOf(wp.getX());
-				coordinates.add(new Coordinate(x, y, SmartUtil.combine(date, time).getTime()));
+				if (wp.getX() != null && wp.getY() != null) {
+					y = Double.valueOf(wp.getY());
+					x = Double.valueOf(wp.getX());
+					coordinates.add(new Coordinate(x, y, SmartUtil.combine(date, time).getTime()));
+				}
 			}
 			LineString line = CoordinateUtil.buildLineString(coordinates);
 			

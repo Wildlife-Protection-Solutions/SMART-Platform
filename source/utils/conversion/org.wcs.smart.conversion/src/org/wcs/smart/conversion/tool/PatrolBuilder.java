@@ -545,9 +545,11 @@ public class PatrolBuilder extends AbstractBuilder {
 				double x, y;
 				for (WaypointType wp : legDay.getWaypoints()) {
 					time = wp.getTime();
-					y = Double.valueOf(wp.getY());
-					x = Double.valueOf(wp.getX());
-					coordinates.add(new Coordinate(x, y, SmartUtil.combine(date, time).getTime()));
+					if (wp.getX() != null && wp.getY() != null) {
+						y = Double.valueOf(wp.getY());
+						x = Double.valueOf(wp.getX());
+						coordinates.add(new Coordinate(x, y, SmartUtil.combine(date, time).getTime()));
+					}
 				}
 				LineString line = CoordinateUtil.buildLineString(coordinates);
 				
