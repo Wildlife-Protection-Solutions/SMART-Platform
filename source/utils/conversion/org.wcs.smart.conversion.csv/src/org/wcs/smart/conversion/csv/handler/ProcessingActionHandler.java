@@ -22,6 +22,7 @@
 package org.wcs.smart.conversion.csv.handler;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -96,10 +97,17 @@ public abstract class ProcessingActionHandler {
 			PrintStream originalOut = System.out;
 			PrintStream originalErr = System.err;
 
-			try (
-				FileOutputStream fout = new FileOutputStream(f + "\\warnings.log");
-				FileOutputStream ferr = new FileOutputStream(f + "\\errors.log");
-				) {
+			FileOutputStream fout = null;
+			FileOutputStream ferr = null;
+			try {
+				fout = new FileOutputStream(f + "\\warnings.log");
+				ferr = new FileOutputStream(f + "\\errors.log");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				MessageDialog.openError(getShell(), "Mission generation", "Unable to create files for logging.");
+			}
+
+			try {
 				
 				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
 				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
@@ -115,13 +123,15 @@ public abstract class ProcessingActionHandler {
 				exporter.extract(f, session, dmLookup);
 				System.setOut(originalOut);
 				System.setErr(originalErr);
-				fout.flush();
-				ferr.flush();
+				flushAndClose(fout);
+				flushAndClose(ferr);
 				MessageDialog.openInformation(getShell(), "Mission generation", "Mission generation sucessfully completed.");
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.setOut(originalOut);
 				System.setErr(originalErr);
+				flushAndClose(fout);
+				flushAndClose(ferr);
 				MessageDialog.openError(getShell(), "Mission generation", "Errors occured while mission generation. See console or log for details.");
 			}
 		}
@@ -137,10 +147,17 @@ public abstract class ProcessingActionHandler {
 			PrintStream originalOut = System.out;
 			PrintStream originalErr = System.err;
 
-			try (
-				FileOutputStream fout = new FileOutputStream(f + "\\warnings.log");
-				FileOutputStream ferr = new FileOutputStream(f + "\\errors.log");
-				) {
+			FileOutputStream fout = null;
+			FileOutputStream ferr = null;
+			try {
+				fout = new FileOutputStream(f + "\\warnings.log");
+				ferr = new FileOutputStream(f + "\\errors.log");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+				MessageDialog.openError(getShell(), "Patrol generation", "Unable to create files for logging.");
+			}
+
+			try {
 				
 				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
 				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
@@ -156,13 +173,15 @@ public abstract class ProcessingActionHandler {
 				exporter.extract(f, session, dmLookup);
 				System.setOut(originalOut);
 				System.setErr(originalErr);
-				fout.flush();
-				ferr.flush();
+				flushAndClose(fout);
+				flushAndClose(ferr);
 				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
 			} catch (Exception e) {
 				e.printStackTrace();
 				System.setOut(originalOut);
 				System.setErr(originalErr);
+				flushAndClose(fout);
+				flushAndClose(ferr);
 				MessageDialog.openError(getShell(), "Patrol generation", "Errors occured while patrol generation. See console or log for details.");
 			}
 		}
@@ -192,6 +211,20 @@ public abstract class ProcessingActionHandler {
 				MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation session creation. See console for details.");
 				e.printStackTrace();
 			}
+		}
+	}
+
+	private void flushAndClose(FileOutputStream stream) {
+		if (stream == null) return;
+		try {
+			stream.flush();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		try {
+			stream.close();
+		} catch (IOException e2) {
+			e2.printStackTrace();
 		}
 	}
 
