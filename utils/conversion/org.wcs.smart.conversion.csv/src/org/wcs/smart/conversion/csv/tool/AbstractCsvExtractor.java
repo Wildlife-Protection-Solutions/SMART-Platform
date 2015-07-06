@@ -96,8 +96,8 @@ public abstract class AbstractCsvExtractor {
 			}
 		}
 		if (result.isEmpty()) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "No 'Object ID' found in mappimg. Mapping must contain at least one object id.");
-			throw new IllegalStateException("No 'Object ID' found in mappimg. Mapping must contain at least one object id.");
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "No 'Object ID' found in mapping. Mapping must contain at least one object id.");
+			throw new IllegalStateException("No 'Object ID' found in mapping. Mapping must contain at least one object id.");
 		}
 		return result.toArray(new String[result.size()]);
 	}
