@@ -287,11 +287,13 @@ public class MappingValidator {
 			iCatMap.put(cmap.getAi(), cmap);
 		}
 		StringBuilder catClause = new StringBuilder();
+		List<String> catClauseValues = new ArrayList<String>();
 		for (String catI : catIs) {
 			catClause.append(" and a").append(aLookup.getColumn(catI));  //$NON-NLS-1$
 			CategoryMap cmap = iCatMap.get(catI);
 			if (cmap != null) {
-				catClause.append("='").append(cmap.getVi()).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+				catClause.append("=?"); //$NON-NLS-1$
+				catClauseValues.add(cmap.getVi());
 			} else {
 				catClause.append(" is null"); //$NON-NLS-1$
 			}
@@ -301,7 +303,11 @@ public class MappingValidator {
 			try {
 				Integer colId = aLookup.getColumn(cta.getI());
 				if (colId != null) {
-					ResultSet rs = c.createStatement().executeQuery("select count (distinct a"+colId+") from csv_to_smart.csv where a"+colId+ " is not null and a"+colId+" <> ''" + catClause); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					PreparedStatement pst = c.prepareStatement("select count (distinct a"+colId+") from csv_to_smart.csv where a"+colId+ " is not null and a"+colId+" <> ''" + catClause); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					for (int i = 0; i < catClauseValues.size(); i++) {
+						pst.setString(i+1, catClauseValues.get(i));
+					}
+					ResultSet rs = pst.executeQuery();
 					rs.next();
 					if (rs.getInt(1) > 0) {
 						rqAttrsMap.put(cta.getMapTo(), cta);
