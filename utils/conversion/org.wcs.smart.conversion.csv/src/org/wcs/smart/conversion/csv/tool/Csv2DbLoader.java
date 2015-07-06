@@ -44,7 +44,7 @@ public class Csv2DbLoader {
 	
 	private char DELIMETER = ',';
 
-	public void load(File file, Connection c) throws SQLException {
+	public void load(File file, Connection c) throws SQLException, IOException {
 		cleanDb(c);
 		parseFile(file, c);
 	}
@@ -60,7 +60,7 @@ public class Csv2DbLoader {
 		c.createStatement().executeUpdate("create table csv_to_smart.csv (id integer not null, primary key (id))"); //$NON-NLS-1$
 	}
 
-	private void parseFile(File file, Connection c) {
+	private void parseFile(File file, Connection c) throws SQLException, IOException {
 		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), DELIMETER)) { //$NON-NLS-1$
 			boolean autoCommit = c.getAutoCommit();
 			c.setAutoCommit(false);
@@ -101,9 +101,6 @@ public class Csv2DbLoader {
 			
 			c.commit();
 			c.setAutoCommit(autoCommit);
-		} catch (SQLException | IOException e) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while loading file. See console or log for details.");
-			e.printStackTrace();
 		}
 	}
 	
