@@ -62,6 +62,8 @@ public class MappingValidator {
 	public List<String> validate(SmartMapping ct2Smart, DataModelLookup lookup) {
 		List<String> errors = new ArrayList<String>();
 		
+		errors.addAll(validateRequiredMetaPresent(ct2Smart));
+
 		errors.addAll(validateAllMapped(ct2Smart));
 		
 		for (MappedAttribute cta : ct2Smart.getMappedAttribute()) {
@@ -158,6 +160,33 @@ public class MappingValidator {
 		}
 		
 		errors.addAll(validateAllMappingsPresent(ct2Smart));
+		return errors;
+	}
+
+	private List<String> validateRequiredMetaPresent(SmartMapping ct2Smart) {
+		boolean date = false;
+		boolean objectId = false;
+		List<String> errors = new ArrayList<>();
+		
+		for (MappedAttribute a : ct2Smart.getMappedAttribute()) {
+			switch (a.getType()) {
+			case META_OBJECT_ID:
+				objectId = true;
+				break;
+			case WP_DATE:
+				date = true;
+				break;
+			default:
+				break;
+			}
+		}
+		
+		if (!date) {
+			errors.add("No 'Date' found in mapping. Mapping must contain a date field.");
+		}
+		if (!objectId) {
+			errors.add("No 'Object ID' found in mapping. Mapping must contain at least one object id field.");
+		}
 		return errors;
 	}
 
