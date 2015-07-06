@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.MappedAttribute;
 import org.wcs.smart.conversion.model.SmartMapping;
@@ -92,6 +94,10 @@ public abstract class AbstractCsvExtractor {
 			default:
 				break;
 			}
+		}
+		if (result.isEmpty()) {
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "No 'Object ID' found in mappimg. Mapping must contain at least one object id.");
+			throw new IllegalStateException("No 'Object ID' found in mappimg. Mapping must contain at least one object id.");
 		}
 		return result.toArray(new String[result.size()]);
 	}
