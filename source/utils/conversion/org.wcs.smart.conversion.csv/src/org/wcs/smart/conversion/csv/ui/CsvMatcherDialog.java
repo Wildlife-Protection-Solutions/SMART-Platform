@@ -230,7 +230,7 @@ public class CsvMatcherDialog extends Composite {
 				updateState();
 				MessageDialog.openInformation(getShell(), "Info", "Data from CSV loaded successfully");
 			} catch (Exception e) {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while loading file. See console or log for more details.\n" + e.toString());
 				e.printStackTrace();
 			}
 		}
