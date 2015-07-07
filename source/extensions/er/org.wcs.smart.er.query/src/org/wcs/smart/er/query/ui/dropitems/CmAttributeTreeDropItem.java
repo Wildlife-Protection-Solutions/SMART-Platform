@@ -33,10 +33,12 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.dataentry.dialog.CmAttributeTreeContentProvider;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -80,7 +82,7 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 	private List<CmAttributeTreeNode> roots = null;
 	private TreeDropDownViewer treeviewer;
 	private Object input = Collections.singletonList(Messages.CmAttributeTreeDropItem_LoadingString);
-	
+	private CmAttributeTreeNode defaultNode = null;
 	/*
 	 * Job to load the attribute list options
 	 */
@@ -103,6 +105,21 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 					}
 					toLoad.addAll(n.getChildren());
 				}
+				if (currentSelection != null){
+					if (attribute.isUseCustomConfig()){
+						defaultNode = (CmAttributeTreeNode) s.createCriteria(CmAttributeTreeNode.class)
+							.add(Restrictions.eq("dmTreeNode", currentSelection))  //$NON-NLS-1$
+							.add(Restrictions.eq("configurableModel", attribute.getNode().getModel())) //$NON-NLS-1$
+							.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
+							.uniqueResult();
+					}else{
+						defaultNode = (CmAttributeTreeNode) s.createCriteria(CmAttributeTreeNode.class)
+								.add(Restrictions.eq("dmTreeNode", currentSelection))  //$NON-NLS-1$
+								.add(Restrictions.eq("configurableModel", attribute.getNode().getModel())) //$NON-NLS-1$
+								.add(Restrictions.eq("dmAttribute", currentSelection.getAttribute())) //$NON-NLS-1$
+								.uniqueResult();
+					}
+				}
 				
 			}catch(Exception ex){
 				QueryPlugIn.log("Could not initialize attribute tree items", ex); //$NON-NLS-1$
@@ -111,22 +128,23 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 				s.close();
 			}
 			input = roots;
-			if (treeviewer == null) return Status.OK_STATUS;
-			Display d = treeviewer.getTreeViewer().getTree().getDisplay();
-			if (d != null && !d.isDisposed()){
-				d.asyncExec(new Runnable(){
-					@Override
-					public void run() {
-						if (treeviewer == null || 
-								treeviewer.getTreeViewer().getControl().isDisposed()){
-							return;
-						}
-						treeviewer.getTreeViewer().setInput(roots);
-						treeviewer.getTreeViewer().refresh();
+			Display.getDefault().asyncExec(new Runnable(){
+				@Override
+				public void run() {
+//					if (defaultNode != null && lblitem != null && !lblitem.isDisposed()){
+//						lblitem.setText( formatStringForLabel(defaultNode.getDefaultName()));
+//					}
+					updateLabel();
+					if (treeviewer == null || 
+							treeviewer.getTreeViewer().getControl().isDisposed()){
+						return;
 					}
+					treeviewer.getTreeViewer().setInput(roots);
+					treeviewer.getTreeViewer().refresh();
+				}
 					
-				});
-			}
+			});
+			
 			
 			return Status.OK_STATUS;
 		}
@@ -185,4 +203,15 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 
 	}
 
+	@Override
+	protected void createComposite(Composite parent) {
+		super.createComposite(parent);
+		updateLabel();
+	}
+	
+	private void updateLabel(){
+		if (defaultNode != null){
+			lblitem.setText( formatStringForLabel(defaultNode.getName().isEmpty() ? defaultNode.getDmTreeNode().getName() : defaultNode.getName()));
+		}
+	}
 }

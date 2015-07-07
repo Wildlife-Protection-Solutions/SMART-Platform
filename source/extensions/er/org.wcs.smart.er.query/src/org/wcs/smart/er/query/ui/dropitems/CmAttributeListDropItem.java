@@ -72,10 +72,20 @@ public class CmAttributeListDropItem extends AttributeListDropItem {
 				try{
 					List<AttributeListItem> litems = QueryDataModelManager.getInstance().getActiveAttributeListItems(CmAttributeListDropItem.this.attribute, s);
 					for (AttributeListItem item : litems){
-						CmAttributeListItem cmItem = (CmAttributeListItem) s.createCriteria(CmAttributeListItem.class)
+						CmAttributeListItem cmItem = null;
+						if (CmAttributeListDropItem.this.cmAttribute.isUseCustomConfig()){
+							cmItem = (CmAttributeListItem) s.createCriteria(CmAttributeListItem.class)
 								.add(Restrictions.eq("listItem", item))  //$NON-NLS-1$
 								.add(Restrictions.eq("configurableModel", CmAttributeListDropItem.this.cmAttribute.getNode().getModel())) //$NON-NLS-1$
+								.add(Restrictions.eq("attribute", CmAttributeListDropItem.this.cmAttribute)) //$NON-NLS-1$
 								.uniqueResult();
+						}else{
+							cmItem = (CmAttributeListItem) s.createCriteria(CmAttributeListItem.class)
+									.add(Restrictions.eq("listItem", item))  //$NON-NLS-1$
+									.add(Restrictions.eq("configurableModel", CmAttributeListDropItem.this.cmAttribute.getNode().getModel())) //$NON-NLS-1$
+									.add(Restrictions.eq("dmAttribute", CmAttributeListDropItem.this.cmAttribute.getAttribute())) //$NON-NLS-1$
+									.uniqueResult();
+						}
 						
 						if (cmItem == null){
 							items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
