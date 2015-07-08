@@ -444,8 +444,8 @@ public class CyberTrackerConfExporter {
 			}
 			case TREE:
 			{
-				if (cmAttr.isFlattenTree()) {
-					List<CyberTrackerId> ids = addFinalTreeNodes(cmAttr);
+				if (cmAttr.isFlattenTree() || isSingleLevelTree(cmAttr)) {
+					List<CyberTrackerId> ids = addFinalTreeNodes(cmAttr, cmAttr.isFlattenTree() ? new NameTreeNodeComparator() : null);
 					List<String> values = ctUtil.listItemIds(ids);
 					String trElements = ctUtil.translateElements(ids);
 					String trLinks = ctUtil.translateLinks(ids, false);
@@ -516,22 +516,16 @@ public class CyberTrackerConfExporter {
 		return id;
 	}
 	
-	private List<CyberTrackerId> addFinalTreeNodes(CmAttribute cmAttr) {
+	private List<CyberTrackerId> addFinalTreeNodes(CmAttribute cmAttr, Comparator<IAttributeTreeNodeProxy> comparator) {
 		List<IAttributeTreeNodeProxy> activeTreeNodes = getActiveTreeNodes(cmAttr);
 		if (activeTreeNodes == null || activeTreeNodes.isEmpty()) {
 			//development validation: this MUST NEVER happen as it is tracked by split(...) logic!!!
 			throw new IllegalArgumentException("Cannot add a flat tree screen without any items to display"); //$NON-NLS-1$
 		}
 		List<IAttributeTreeNodeProxy> finalTreeNodes = listFinalTreeNodes(activeTreeNodes);
-		Collections.sort(finalTreeNodes, new Comparator<IAttributeTreeNodeProxy>() {
-			@Override
-			public int compare(IAttributeTreeNodeProxy arg0, IAttributeTreeNodeProxy arg1) {
-				String n0 = arg0.getName();
-				if (n0 == null)
-					return -1;
-				return n0.compareTo(arg1.getName());
-			}
-		});
+		if (comparator != null) {
+			Collections.sort(finalTreeNodes, comparator);
+		}
 		
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		for (IAttributeTreeNodeProxy treeNode : finalTreeNodes) {
@@ -543,7 +537,7 @@ public class CyberTrackerConfExporter {
 		}
 		return ids;
 	}
-
+	
 	private List<IAttributeTreeNodeProxy> listFinalTreeNodes(List<IAttributeTreeNodeProxy> activeTreeNodes) {
 		List<IAttributeTreeNodeProxy> result = new ArrayList<IAttributeTreeNodeProxy>();
 		for (IAttributeTreeNodeProxy treeNode : activeTreeNodes) {
@@ -807,6 +801,18 @@ public class CyberTrackerConfExporter {
 		return result;
 	}
 
+	private boolean isSingleLevelTree(CmAttribute cmAttr) {
+		boolean isSingleLevel = true;
+		List<IAttributeTreeNodeProxy> children = getActiveTreeNodes(cmAttr);
+		for (IAttributeTreeNodeProxy child : children) {
+			if (child.getActiveChildren() != null && !child.getActiveChildren().isEmpty()) {
+				isSingleLevel = false;
+				break;
+			}
+		}		
+		return isSingleLevel;
+	}
+	
 	/**
 	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
 	 * 
@@ -934,4 +940,14 @@ public class CyberTrackerConfExporter {
 		return dataProvider.getActiveTreeNodes();
 	}
 	
+	private final class NameTreeNodeComparator implements Comparator<IAttributeTreeNodeProxy> {
+		@Override
+		public int compare(IAttributeTreeNodeProxy arg0, IAttributeTreeNodeProxy arg1) {
+			String n0 = arg0.getName();
+			if (n0 == null)
+				return -1;
+			return n0.compareTo(arg1.getName());
+		}
+	}
+
 }
