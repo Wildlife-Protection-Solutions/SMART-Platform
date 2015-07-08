@@ -735,13 +735,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.wcs.smart.help.nl_es"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"/>
-
-   <plugin
          id="org.wcs.smart.report.birt.query.nl_es"
          download-size="0"
          install-size="0"
@@ -926,14 +919,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.excel.nl_es"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.report.engine.emitter.config.html.nl_es"
          download-size="0"
          install-size="0"
@@ -942,39 +927,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.odp.nl_es"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.ods.nl_es"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.pdf.nl_es"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.report.engine.emitter.config.postscript.nl_es"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.ppt.nl_es"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -1164,5 +1117,12 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+
+   <plugin
+         id="org.wcs.smart.help.nl_es"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
 
 </feature>
