@@ -109,7 +109,6 @@ public class ReportListView {
 	 */
 	private void refreshTree(final Object o, final EventType type){
 		Display d = part.getContext().get(Display.class);
-//		Display d = reportList.getControl().getShell().getDisplay();
 		if (type == EventType.REPORT_UPDATED || type == EventType.FOLDER_UPDATED){
 			d.syncExec(new Runnable(){
 				@Override
@@ -120,7 +119,6 @@ public class ReportListView {
 					}else if (o instanceof ReportFolder){
 						reportList.refresh(((ReportFolder)o).getParentFolder());
 					}
-					//reportList.refresh();
 				}
 			});
 		}else if (type == EventType.REPORT_ADDED || type == EventType.REPORT_DELETED){
@@ -252,6 +250,13 @@ public class ReportListView {
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
 		if (partEvent == null) return;
 		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
+		if (activePart.equals(part)){
+			//this is necessary to get the menus to show up correctly if you right click on the current selection
+			//when the focus is not on the current view (run a report, click on the report view, then right click on the report
+			//item in the report list.  Without this, the menu will not display correctly.
+			reportList.setSelection(reportList.getSelection());
+			return;
+		}
 		Object lpart = E3Utils.getSourceObject(activePart);
 		if (lpart instanceof ReportView && ((ReportView)lpart).getReport() != null){
 			reportList.setSelection(new StructuredSelection(((ReportView)lpart).getReport()));

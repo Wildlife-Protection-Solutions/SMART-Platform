@@ -80,6 +80,7 @@ public class QueryListView {
 
 	private TreeViewer queryList;
 	
+	private @Inject MPart part;
 	private @Inject IMenuService mService;
 	private @Inject ESelectionService selService;
 	
@@ -134,7 +135,13 @@ public class QueryListView {
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
 		if (partEvent == null) return;
 		MPart activePart = (MPart) partEvent.getProperty(UIEvents.EventTags.ELEMENT);
-//		if (activePart.getElementId().equals(PatrolEditor.ID)){ //this doesn't work as it returns compatibility id; not editor id
+		if (activePart.equals(part)){
+			//this is necessary to get the menus to show up correctly if you right click on the current selection
+			//when the focus is not on the current view (run a report, click on the report view, then right click on the report
+			//item in the report list.  Without this, the menu will not display correctly.
+			queryList.setSelection(queryList.getSelection());
+			return;
+		}
 		Object lpart = E3Utils.getSourceObject(activePart);
 		if (lpart instanceof IQueryEditor){
 			queryList.setSelection(new StructuredSelection(((IQueryEditor)lpart).getInputInternal()));
