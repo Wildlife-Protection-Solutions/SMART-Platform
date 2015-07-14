@@ -221,9 +221,10 @@
          <command
                commandId="org.wcs.smart.command.showperspective"
                icon="images/icons/etool16/report_view.png"
+               id="org.wcs.smart.query.toolbar.report"
                label="%showreportperspective.menu.label"
                mnemonic="%showreportperspective.menu.mnemonic"
-               style="push"
+               style="pulldown"
                tooltip="%showreportperspective.menu.tooltip">
             <visibleWhen
                   checkEnabled="false">
@@ -690,6 +691,73 @@
                   </test>
                </or>
             </visibleWhen>
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.query.toolbar.report">
+         <command
+               commandId="org.wcs.smart.command.showperspective"
+               icon="images/icons/etool16/report_view.png"
+               label="%showreportperspective.menu.label"
+               mnemonic="%showreportperspective.menu.mnemonic"
+               style="push"
+               tooltip="%showreportperspective.menu.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
+            </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.report.ReportViewerPerspective">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.command.showperspective"
+               icon="images/icons/etool16/report_edit.png"
+               label="%showreportperspective.editor.menu.label"
+               style="push"
+               tooltip="%showreportperspective.editor.menu.tooltip">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.smartAdminUser"
+                        value="analyst">
+                  </test>
+               </or>
+            </visibleWhen>
+            <parameter
+                  name="org.wcs.smart.perspectiveid"
+                  value="org.wcs.smart.report.ReportPerspective">
+            </parameter>
          </command>
       </menuContribution>
    </extension>
