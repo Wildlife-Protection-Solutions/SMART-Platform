@@ -128,6 +128,7 @@ public class ReportView implements IReportListener{
 
 	@PostConstruct
 	public void createPartControl(Composite parent) {
+		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);//remove this view when closed
 		ReportEventManager.getInstance().addReportListener(this);
 		
 		parent.setLayout(new GridLayout());
