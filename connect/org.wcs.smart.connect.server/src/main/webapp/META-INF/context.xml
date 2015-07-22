@@ -1,0 +1,22 @@
+<Context >
+  <Resource name="jdbc/smart"
+            auth="Container"
+            type="javax.sql.DataSource"
+            username="smart"
+            password=""
+            driverClassName="org.postgresql.Driver"
+            url="jdbc:postgresql://turtle:9944/connect"
+            maxActive="20"
+            maxIdle="10"
+            factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"/>
+            
+	<Realm className="org.apache.catalina.realm.LockOutRealm">
+		<Realm className="org.apache.catalina.realm.DataSourceRealm"
+			dataSourceName="jdbc/smart"
+          	userTable="connect.users" userNameCol="username" 
+          	userCredCol="password" userRoleTable="connect.user_roles" roleNameCol="role"
+          	localDataSource="true">
+				<CredentialHandler className="org.wcs.smart.connect.apache.BcryptCredentialHandler"/>
+		</Realm>
+  	</Realm>
+</Context>
