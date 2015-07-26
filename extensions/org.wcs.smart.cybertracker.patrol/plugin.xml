@@ -5,7 +5,7 @@
          point="org.eclipse.ui.menus">
       <menuContribution
             allPopups="false"
-            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.exportseparator">
+            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.patrolseparator">
          <command
                commandId="org.wcs.smart.cybertracker.patrol.export"
                label="Export Patrol..."
