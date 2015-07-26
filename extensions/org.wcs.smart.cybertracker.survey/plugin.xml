@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.exportseparator">
+         <command
+               commandId="org.wcs.smart.cybertracker.survey.export"
+               label="Export Survey..."
+               style="push">
+         </command>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.cybertracker.survey.export"
+            name="Survey CyberTracker Export">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.cybertracker.survey.handler.SurveyCTExportHandler$SurveyCTExportHandlerWrapper"
+            commandId="org.wcs.smart.cybertracker.survey.export">
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.cybertracker.survey.export"
+            icon="images/etool16/export.png">
+      </image>
+   </extension>
+
+</plugin>
