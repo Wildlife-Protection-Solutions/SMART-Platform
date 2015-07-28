@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.export;
 
-import java.io.StringWriter;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,25 +30,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
-import org.wcs.smart.cybertracker.model.filter.Categories;
-import org.wcs.smart.cybertracker.model.filter.ElementFilters;
-import org.wcs.smart.cybertracker.model.filter.Filter;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.hibernate.SmartDB;
@@ -71,7 +63,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class PatrolScreensUtil {
+public class PatrolScreensUtil extends ScreensUtil {
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
@@ -95,33 +87,11 @@ public class PatrolScreensUtil {
 
 	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
 	
-	/**
-	 * Contains data filled by {@link PatrolScreensUtil}
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	public static class ParolFilledDataContainer {
-		public List<Node> screenNodes = new ArrayList<Node>();
-		public List<IdNamePair> resultElements = new ArrayList<IdNamePair>();
-		public CyberTrackerId rootId = null;
-		protected List<String> defaultValues = new ArrayList<String>();
-	}
-	
-	public static class IdNamePair {
-		public String id;
-		public String name;
-		public IdNamePair(String id, String name) {
-			super();
-			this.id = id;
-			this.name = name;
-		}
-	}
-
-	
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 
 	protected PatrolScreensUtil(CyberTrackerUtil ctUtil) {
+		super(ctUtil);
 		this.ctUtil = ctUtil;
 		this.screensFactory = ctUtil.getScreensFactory();
 	}
@@ -131,8 +101,8 @@ public class PatrolScreensUtil {
 	 * @param element
 	 * @return root id
 	 */
-	public ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
-		ParolFilledDataContainer result = new ParolFilledDataContainer();
+	public MetaExportResult buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
 		ScreenOption so;
 		//start node
@@ -311,7 +281,7 @@ public class PatrolScreensUtil {
 		return result;
 	}
 
-	private CyberTrackerId addPilotScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, Map<ScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
+	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<ScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
 		//TYPE is visible						- PILOT displayed with navigation formula
 		//TYPE is not visible (set to GROUND)	- PILOT in not displayed
 		//TYPE is not visible (set to !GROUND)	- PILOT displayed without navigation formula
@@ -338,77 +308,8 @@ public class PatrolScreensUtil {
 		}
 	}
 	
-	/**
-	 * @param name
-	 * @param elements
-	 * @return String id of newly created element
-	 */
-	private String createResultElement(String name, Elements elements) {
-		CyberTrackerId resultId = new CyberTrackerId();
-		ElementsUtil.addElementsItem(elements, name, resultId.getItemId());
-		return resultId.getItemId();
-	}
 
-	private String createDefaultResultElement(String name, Elements elements, String defaultValue) {
-		CyberTrackerId resultId = new CyberTrackerId();
-		ElementsUtil.addElementsItem(elements, name, resultId.getItemId(), null, null, defaultValue);
-		return resultId.getItemId();
-	}
-	
-	private CyberTrackerId toNextScreen(Node node) {
-		return toNextScreen(node, false);
-	}
-	
-	private CyberTrackerId toNextScreen(Node node, boolean canSkip) {
-		CyberTrackerId nextId = new CyberTrackerId();
-		Control control2 = ScreensObjectFactory.getNavigationControl(node);
-		control2.setTranslateNextScreenId(nextId.getNodeId());
-		if (canSkip) {
-			//we should be here only for radio nodes if we want to allow user press "Next" without selecting anything
-			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
-			control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
-		}
-		return nextId;
-	}
-
-	private void applyFilter(Node node, String filter) {
-		if (filter != null) {
-			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
-			control7.setFilterEnabled("True"); //$NON-NLS-1$
-			control7.setTranslateFilter(filter);
-		}
-	}
-	
-	private CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, boolean canSkip) {
-		String resultId = createResultElement(resultElName, elements);
-		Node node = ctUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
-		container.screenNodes.add(node);
-		container.resultElements.add(new IdNamePair(resultId, resultElName));
-		return toNextScreen(node, canSkip);
-	}
-
-	private CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, String filter) {
-		String resultId = createResultElement(resultElName, elements);
-		Node node = ctUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
-		applyFilter(node, filter);
-		container.screenNodes.add(node);
-		container.resultElements.add(new IdNamePair(resultId, resultElName));
-		return toNextScreen(node);
-	}
-	
-	private CyberTrackerId addNoteNextNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, String name, String resultElName, int maxLength) {
-		String resultId = createResultElement(resultElName, elements);
-		Node node = screensFactory.createNodeNote(id.getNodeId(), name,  resultId);
-		
-		Control textControl = ScreensObjectFactory.getNoteMainControl(node);
-		textControl.setMaxLength(maxLength);
-		
-		container.screenNodes.add(node);
-		container.resultElements.add(new IdNamePair(resultId, resultElName));
-		return toNextScreen(node);
-	}
-
-	private CyberTrackerId addStartScreen(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerProperties ctProps) {
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_ExitCyberTracker);
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		container.screenNodes.add(nodeMain);
@@ -479,7 +380,7 @@ public class PatrolScreensUtil {
 		return list;
 	}
 	
-	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, List<PatrolType> pTypes, Map<ScreenOptionMeta, ScreenOption> screenOptions, Session session) {
+	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, List<PatrolType> pTypes, Map<ScreenOptionMeta, ScreenOption> screenOptions, Session session) {
 		ScreenOption typeOption = screenOptions.get(ScreenOptionMeta.TYPE);
 		if (typeOption == null || typeOption.isVisible()) {
 			List<String> types = new ArrayList<String>();
@@ -542,16 +443,7 @@ public class PatrolScreensUtil {
 		}
 	}
 
-	private CyberTrackerId addMembersNode(CyberTrackerId id, ParolFilledDataContainer container, List<CyberTrackerId> memberIds) {
-		List<String> values = ctUtil.listItemIds(memberIds);
-		String trElements = ctUtil.translateElements(memberIds);
-		String trLinks = ctUtil.translateLinks(memberIds, false);
-		Node node = screensFactory.createNodeMultiList(id.getNodeId(), Messages.PatrolScreens_Members, values, trElements, trLinks, 1, false);
-		container.screenNodes.add(node);
-		return toNextScreen(node);
-	}
-
-	private void addTaskNode(CyberTrackerId id, ParolFilledDataContainer container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps, String defaultValues) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps, String defaultValues) {
 		boolean canPause = ctProps.isCanPause();
 		
 		CyberTrackerId resumeId = new CyberTrackerId();
@@ -619,62 +511,6 @@ public class PatrolScreensUtil {
 		container.screenNodes.add(confirmNode);
 	}
 
-	public List<CyberTrackerId> toCyberTrackerIds(Elements elements, List<? extends NamedItem> items) {
-		List<String> labelValues = new ArrayList<String>();
-		List<String> tag0Values = new ArrayList<String>();
-		for (NamedItem i : items) {
-			labelValues.add(ctUtil.getName(i));
-			tag0Values.add(SmartUtils.encodeHex(i.getUuid()));
-		}
-		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
-	}
-
-	private String buildMembersFilter(String memberNodeId, List<CyberTrackerId> memberIds, List<String> memberNames) {
-		Filter filter = new Filter();
-		filter.setVersion(1);
-		
-		Categories categories = new Categories();
-		filter.setCategories(categories);
-		Categories.Items cItems = new Categories.Items();
-		categories.setItems(cItems);
-		Categories.Items.Item cIt = new Categories.Items.Item();
-		cIt.setId(new CyberTrackerId().getNodeId());
-		cIt.setName("Members"); //$NON-NLS-1$
-		cIt.setCategoryId(memberNodeId);
-		cIt.setFilterType(1); // 1 for "Any" filter type
-		cItems.getItem().add(cIt);
-		
-		ElementFilters elFilter = new ElementFilters();
-		filter.setElementFilters(elFilter);
-		ElementFilters.Items eItems = new ElementFilters.Items();
-		elFilter.setItems(eItems);
-		for (int i = 0; i < memberIds.size(); i++) {
-			CyberTrackerId id = memberIds.get(i);
-			String name = (memberNames != null && memberNames.size() > i) ? memberNames.get(i) : null;
-			ElementFilters.Items.Item eIt = new ElementFilters.Items.Item();
-			eIt.setId(id.getItemId());
-			eIt.setName(name);
-			ElementFilters.Items.Item.CheckedElements chEl = new ElementFilters.Items.Item.CheckedElements();
-			eIt.setCheckedElements(chEl);
-			chEl.getValue().add(id.getItemId());
-			eItems.getItem().add(eIt);
-		}
-		
-		try {
-			JAXBContext context = JAXBContext.newInstance(Filter.class);
-			Marshaller marshaller = context.createMarshaller();
-			final StringWriter stringWriter = new StringWriter();
-			//marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-			marshaller.marshal(filter, stringWriter);
-			String filterStr = stringWriter.toString();
-			int index = filterStr.indexOf("<Filter>"); //$NON-NLS-1$
-			return "<?xml version=\"1.0\"?>\r\n" + filterStr.substring(index); //$NON-NLS-1$ //this is REQUIRED as CyberTracker expects EXACTLY "<?xml version=\"1.0\"?>\r\n<Filter>" at the begining
-		} catch (JAXBException e) {
-			CyberTrackerPlugIn.log(e.getMessage(), e);
-		}
-		return null;
-	}
-	
 	private String builPilotFormula(List<PatrolType> patrolTypes) {
 		String result = ""; //$NON-NLS-1$
 		for (int i = 0; i < patrolTypes.size(); i++) {
@@ -693,41 +529,4 @@ public class PatrolScreensUtil {
 		return result;
 	}
 	
-	private void addNavigationFormula(Node node, String formula, String successId, String failId) {
-		Control formulaControl = screensFactory.createNavFormulaControl12(formula, failId, successId);
-		node.getData().getControls().getControl().add(formulaControl);
-	}
-
-	private void addGpsConfiguration(Node node, CyberTrackerProperties props) {
-		addGpsConfiguration(node, props, null);
-	}
-	
-	private void addGpsConfiguration(Node node, CyberTrackerProperties props, Integer timerOverride) {
-		Control gpsConf = screensFactory.createConfigureGPSControl13(props);
-		if (timerOverride != null) {
-			gpsConf.setWaypointTimer(timerOverride);
-		}
-		node.getData().getControls().getControl().add(gpsConf);
-	}
-	
-	private void addUniqueAttrubute(Node node, String resultElementId) {
-		Control uniqueAttr = screensFactory.createAttrubuteControl14(resultElementId, true, null);
-		ScreensObjectFactory.addControlToNode(node, uniqueAttr);
-	}
-
-	private void addStartTimeAttrubute(Node node, String resultDateId, String resultTimeId) {
-		Control dtAttr = screensFactory.createSnapDateTimeControl15(resultDateId, resultTimeId);
-		ScreensObjectFactory.addControlToNode(node, dtAttr);
-	}
-	
-	private void addGPSControl(Node node) {
-		Control gpsControl = screensFactory.createGPSControl16();
-		ScreensObjectFactory.addControlToNode(node, gpsControl);
-	}
-
-	private void addGPSRequiredWarning(Node node) {
-		Control msgControl = screensFactory.createBottomMemoControl17(Messages.PatrolScreens_Begin_GPSRequiredMessage);
-		ScreensObjectFactory.addControlToNode(node, msgControl);
-	}
-
 }
