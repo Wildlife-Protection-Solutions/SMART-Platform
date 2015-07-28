@@ -2,10 +2,11 @@
     pageEncoding="UTF-8"%>
 
 
-
 </div> <!--  end core div -->
 
 
-<div style="margin: 15px; border-top: 1px solid black">
-  Copyright
+<div id="footerid" class="float">
+  <img class="float " src="../css/smart_logo.png">
+ 
+    <p class="float"> Copyright </p>
 </div>
