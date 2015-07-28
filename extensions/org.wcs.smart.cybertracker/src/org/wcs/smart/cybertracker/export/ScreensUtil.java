@@ -45,12 +45,8 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.util.SmartUtils;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Util for creating screens based on metadata for CyberTracker.
+ * 
  * @author elitvin
  * @since 4.0.0
  */
