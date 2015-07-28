@@ -31,7 +31,6 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -107,7 +106,7 @@ public class CyberTrackerUtil {
 		return ctProperties;
 	}
 	
-	public ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+	public MetaExportResult buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
 		return screensUtil.buildPatrolNodes(elements, dmRootId, session);
 	}
 	
