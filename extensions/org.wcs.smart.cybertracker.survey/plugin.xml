@@ -8,7 +8,16 @@
             locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.surveyseparator">
          <command
                commandId="org.wcs.smart.cybertracker.survey.export"
-               label="Export Survey..."
+               label="%command.cybertracker.survey.export.label"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.surveymetaseparator">
+         <command
+               commandId="org.wcs.smart.patrol.patrolScreens"
+               label="%command.cybertracker.survey.meta.export.label"
                style="push">
          </command>
       </menuContribution>
@@ -17,7 +26,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.cybertracker.survey.export"
-            name="Survey CyberTracker Export">
+            name="%command.cybertracker.survey.export.name">
       </command>
    </extension>
    <extension

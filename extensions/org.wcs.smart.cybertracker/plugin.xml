@@ -36,11 +36,14 @@
                   label="%cybertracker.properties.command.label"
                   style="push">
             </command>
-            <command
-                  commandId="org.wcs.smart.patrol.patrolScreens"
-                  label="%cybertracker.patrol.screens.config.command.label"
-                  style="push">
-            </command>
+            <separator
+                  name="org.wcs.smart.cybertracker.patrolmetaseparator"
+                  visible="false">
+            </separator>
+            <separator
+                  name="org.wcs.smart.cybertracker.surveymetaseparator"
+                  visible="false">
+            </separator>
             <visibleWhen
                   checkEnabled="false">
                <and>
