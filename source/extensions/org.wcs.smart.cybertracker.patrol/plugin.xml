@@ -8,7 +8,16 @@
             locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.patrolseparator">
          <command
                commandId="org.wcs.smart.cybertracker.patrol.export"
-               label="Export Patrol..."
+               label="%command.cybertracker.patrol.export.label"
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.patrolmetaseparator">
+         <command
+               commandId="org.wcs.smart.patrol.patrolScreens"
+               label="%command.cybertracker.patrol.meta.export.label"
                style="push">
          </command>
       </menuContribution>
@@ -17,7 +26,7 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.cybertracker.patrol.export"
-            name="Patrol CyberTracker Export">
+            name="%command.cybertracker.patrol.export.name">
       </command>
    </extension>
    <extension
