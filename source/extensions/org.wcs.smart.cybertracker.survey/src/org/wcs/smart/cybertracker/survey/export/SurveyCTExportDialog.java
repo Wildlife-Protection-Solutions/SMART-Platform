@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.hibernate.SmartHibernateManager;
@@ -72,7 +73,7 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 	@Override
 	protected void addModelSourceControl(Composite parent) {
 		Label modelLabel = new Label(parent, SWT.NONE);
-		modelLabel.setText("Survey Design:");
+		modelLabel.setText(Messages.SurveyCTExportDialog_SurveyDesign);
 		designsViewer = new ComboViewer(parent, SWT.READ_ONLY);
 		designsViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridData)designsViewer.getControl().getLayoutData()).widthHint = 100;
@@ -96,7 +97,7 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 			;
 			modelList.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null));
 		} catch (Exception ex) {
-			SmartPlugIn.displayLog("Error loading list of Survey Designs", ex);
+			SmartPlugIn.displayLog(Messages.SurveyCTExportDialog_LoadSurveyDesigns_Error, ex);
 		} finally {
 			s.getTransaction().rollback();
 			s.close();
