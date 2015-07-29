@@ -163,8 +163,8 @@ public class CyberTrackerConfExporter {
 	private File performExport(File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
-		ctUtil = new CyberTrackerUtil(ctProperties, currentLanguage);
-		screensFactory = ctUtil.getScreensFactory();
+		screensFactory = new ScreensObjectFactory(ctProperties);
+		ctUtil = new CyberTrackerUtil(screensFactory, currentLanguage);
 		monitor.worked(10);
 		
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
@@ -172,7 +172,8 @@ public class CyberTrackerConfExporter {
 		Map<CmNode, CyberTrackerId> keyMap = ctUtil.buildMap(root);
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
-		MetaExportResult patrolScreensData = ctUtil.buildPatrolNodes(elements, keyMap.get(root), session);
+		PatrolScreensUtil patrolScreensUtil = new PatrolScreensUtil(ctUtil);
+		MetaExportResult patrolScreensData = patrolScreensUtil.buildPatrolNodes(elements, keyMap.get(root), session);
 		if (patrolScreensData == null) {
 			//failed to generate patrol data
 			//error message is expected to be displayed be PatrolScreensUtil
