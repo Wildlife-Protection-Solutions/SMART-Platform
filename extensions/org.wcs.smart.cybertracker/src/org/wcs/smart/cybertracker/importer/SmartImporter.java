@@ -49,7 +49,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
-import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
+import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
@@ -576,7 +576,7 @@ public class SmartImporter {
 				wp.setY(Double.valueOf(a.getV()));
 			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
 				wp.setX(Double.valueOf(a.getV()));
-			} else if (PatrolScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
+			} else if (ScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
 				E e = eMap.get(a.getV());
 				newWp = "true".equals(e.getTag0()); //$NON-NLS-1$
 			}
@@ -696,7 +696,7 @@ public class SmartImporter {
 				return true;
 			E e = eMap.get(i);
 			if (e != null) {
-				return e.getN().startsWith(PatrolScreensUtil.RESULT_PHOTO);
+				return e.getN().startsWith(ScreensUtil.RESULT_PHOTO);
 			}
 		}
 		return false;

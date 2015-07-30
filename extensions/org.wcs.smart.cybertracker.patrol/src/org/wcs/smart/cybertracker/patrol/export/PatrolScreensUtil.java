@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.export;
+package org.wcs.smart.cybertracker.patrol.export;
 
 import java.text.Collator;
 import java.util.ArrayList;
@@ -36,6 +36,11 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
+import org.wcs.smart.cybertracker.export.ElementsUtil;
+import org.wcs.smart.cybertracker.export.MetaExportResult;
+import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
+import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -64,6 +69,7 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class PatrolScreensUtil extends ScreensUtil {
+	//TODO: DO NOT USE Messages from main plugin!!!!!!!!!!!!!!!!
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
@@ -81,12 +87,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 	public static final String RESULT_LEADER = "#Leader"; //$NON-NLS-1$
 	public static final String RESULT_PILOT = "#Pilot"; //$NON-NLS-1$
 	
-	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
-	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
 	public static final String RESULT_DEFAULT_PATROL_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
 
-	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
-	
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 

@@ -53,6 +53,11 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ScreensUtil {
 
+	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
+	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
+
+	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
+	
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 	

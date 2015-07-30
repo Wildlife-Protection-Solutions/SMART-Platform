@@ -49,7 +49,6 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
-import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.importer.SmartImporter.CoordinateZComparator;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -59,6 +58,7 @@ import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.export.PatrolScreensUtilToDel;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -253,15 +253,15 @@ public class CyberTrackerImporter {
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
 				time = Time.valueOf(v);
-			} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
+			} else if (PatrolScreensUtilToDel.RESULT_PATROL_ID.equals(n)) {
 				ctPatrol.setId(v);
-			} else if (PatrolScreensUtil.RESULT_PATROL_START_DATE.equals(n)) {
+			} else if (PatrolScreensUtilToDel.RESULT_PATROL_START_DATE.equals(n)) {
 				try {
 					start_date = formatter.parse(v);
 				} catch (ParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
-			} else if (PatrolScreensUtil.RESULT_PATROL_START_TIME.equals(n)) {
+			} else if (PatrolScreensUtilToDel.RESULT_PATROL_START_TIME.equals(n)) {
 				start_time = Time.valueOf(v);
 			} else {
 				E ei = eMap.get(i);
@@ -320,65 +320,65 @@ public class CyberTrackerImporter {
 
 	private void recordPatrolData(CyberTrackerPatrol ctPatrol, E i, String v, Map<String, E> eMap, Session session) {
 		String n = i.getN();
-		if (PatrolScreensUtil.RESULT_DEFAULT_PATROL_VALUES.equals(n)) {
+		if (PatrolScreensUtilToDel.RESULT_DEFAULT_PATROL_VALUES.equals(n)) {
 			String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
 			for (String ctid : ctIdArray) {
 				E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
 				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
 			}
-		} else if (PatrolScreensUtil.RESULT_PATROL_ID.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_PATROL_ID.equals(n)) {
 			ctPatrol.setId(v);
-		}if (PatrolScreensUtil.RESULT_PATROL_TYPE.equals(n)) {
+		}if (PatrolScreensUtilToDel.RESULT_PATROL_TYPE.equals(n)) {
 			E e = eMap.get(v);
 			String tag0 = e != null ? e.getTag0() : null;
 			if (tag0 != null) {
 				ctPatrol.setPatrolType(Type.valueOf(e.getTag0()));
 			}
-		} else if (PatrolScreensUtil.RESULT_TRANSPORT.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_TRANSPORT.equals(n)) {
 			E e = eMap.get(v);
 			PatrolTransportType transportType = fetchFromTag0(PatrolTransportType.class, e, session);
 			if (transportType == null)
 				ctPatrol.addError(PatrolMeta.TRANSPORT, MessageFormat.format(Messages.CyberTrackerPatrol_Error_Transport, e.getN()));
 			ctPatrol.setCtTransport(e.getN());
 			ctPatrol.setPatrolTransportType(transportType);
-		} else if (PatrolScreensUtil.RESULT_ARMED.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_ARMED.equals(n)) {
 			E e = eMap.get(v);
 			String tag0 = e != null ? e.getTag0() : null;
 			if (tag0 != null) {
 				ctPatrol.setArmed(ElementsUtil.BOOL_TRUE.equals(tag0.toLowerCase()));
 			}				
-		} else if (PatrolScreensUtil.RESULT_TEAM.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_TEAM.equals(n)) {
 			E e = eMap.get(v);
 			Team t = fetchFromTag0(Team.class, e, session);
 			if (t == null && e.getTag0() != null)
 				ctPatrol.addWarning(PatrolMeta.TEAM, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Team, e.getN()));
 			ctPatrol.setCtTeam(e.getN());
 			ctPatrol.setTeam(t);
-		} else if (PatrolScreensUtil.RESULT_STATION.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_STATION.equals(n)) {
 			E e = eMap.get(v);
 			Station st = fetchFromTag0(Station.class, e, session);
 			if (st == null && e.getTag0() != null)
 				ctPatrol.addWarning(PatrolMeta.STATION, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Station, e.getN()));
 			ctPatrol.setCtStation(e.getN());
 			ctPatrol.setStation(st);
-		} else if (PatrolScreensUtil.RESULT_MANDATE.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_MANDATE.equals(n)) {
 			E e = eMap.get(v);
 			PatrolMandate m = fetchFromTag0(PatrolMandate.class, e, session);
 			if (m == null && e.getTag0() != null)
 				ctPatrol.addWarning(PatrolMeta.MANDATE, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Mandate, e.getN()));
 			ctPatrol.setMandate(m);
-		} else if (PatrolScreensUtil.RESULT_OBJECTIVE.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_OBJECTIVE.equals(n)) {
 			ctPatrol.setObjective(v);
-		} else if (PatrolScreensUtil.RESULT_COMMENTS.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_COMMENTS.equals(n)) {
 			ctPatrol.setComment(v);
-		} else if (PatrolScreensUtil.RESULT_LEADER.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_LEADER.equals(n)) {
 			E e = eMap.get(v);
 			Employee emp = fetchFromTag0(Employee.class, e, session);
 			if (emp == null && e.getTag0() != null)
 				ctPatrol.addError(PatrolMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
 			ctPatrol.setCtLeader(e.getN());
 			ctPatrol.setLeader(emp);
-		} else if (PatrolScreensUtil.RESULT_PILOT.equals(n)) {
+		} else if (PatrolScreensUtilToDel.RESULT_PILOT.equals(n)) {
 			E e = eMap.get(v);
 			Employee emp = fetchFromTag0(Employee.class, e, session);
 			if (emp == null && e.getTag0() != null)
@@ -429,7 +429,7 @@ public class CyberTrackerImporter {
 			//fetch patrol id value
 			String patrolId = null;
 			for (Data.Sightings.S.A a : s.getA()) {
-				if (PatrolScreensUtil.RESULT_PATROL_ID.equals(a.getN())) {
+				if (PatrolScreensUtilToDel.RESULT_PATROL_ID.equals(a.getN())) {
 					patrolId = a.getV();
 				}
 			}
