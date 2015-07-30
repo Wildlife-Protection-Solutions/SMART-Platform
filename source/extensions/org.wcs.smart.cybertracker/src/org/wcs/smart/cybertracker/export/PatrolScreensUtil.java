@@ -90,7 +90,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 
-	protected PatrolScreensUtil(CyberTrackerUtil ctUtil) {
+	public PatrolScreensUtil(CyberTrackerUtil ctUtil) {
 		super(ctUtil);
 		this.ctUtil = ctUtil;
 		this.screensFactory = ctUtil.getScreensFactory();
@@ -101,7 +101,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 	 * @param element
 	 * @return root id
 	 */
-	public MetaExportResult buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+	@Override
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
 		ScreenOption so;

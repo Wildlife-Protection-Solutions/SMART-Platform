@@ -50,7 +50,6 @@ import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
-import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
@@ -66,7 +65,6 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.cybertracker.util.PdaUtil;
-import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -82,8 +80,6 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerConfExporter {
 
-	private static final String DEFAULT_DATAMODEL_EXPORT_NAME = "SMART Data Model"; //$NON-NLS-1$
-	
 	private static final String NODE_DEPTH_RESULT_PREFIX = "node"; //$NON-NLS-1$
 	private static final String NODE_HEADER_COLOR = "0000FF00"; //$NON-NLS-1$
 	
@@ -114,18 +110,14 @@ public class CyberTrackerConfExporter {
 		this.currentLanguage = currentLanguage;
 	}
 
-	public File export(File destFolder, Object source, IProgressMonitor monitor) throws Exception {
+	public File export(File destFolder, IConfigurableModelProvider cmProvider, IProgressMonitor monitor) throws Exception {
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			if (source instanceof ConfigurableModel) {
-				monitor.subTask(Messages.CyberTrackerExporter_Progress_FetchDataModel);
-				ConfigurableModel model = (ConfigurableModel) source;
-				configurableModel = DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
-			} else if (source instanceof DataModelWrapper) {
-				configurableModel = ((DataModelWrapper) source).buildConfigurableModel(session, monitor);
-				configurableModel.setName(DEFAULT_DATAMODEL_EXPORT_NAME);
-			} else {
+			if (cmProvider != null) {
+				configurableModel = cmProvider.getConfigurableModel(session, monitor);
+			}
+			if (configurableModel == null) {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_InvalidSource, null);
 				return null;
 			}
@@ -160,6 +152,10 @@ public class CyberTrackerConfExporter {
 		}
 	}
 
+	protected ScreensUtil createScreensUtil(CyberTrackerUtil ctu) {
+		return new ScreensUtil(ctu);
+	}
+
 	private File performExport(File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
@@ -172,16 +168,16 @@ public class CyberTrackerConfExporter {
 		Map<CmNode, CyberTrackerId> keyMap = ctUtil.buildMap(root);
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
-		PatrolScreensUtil patrolScreensUtil = new PatrolScreensUtil(ctUtil);
-		MetaExportResult patrolScreensData = patrolScreensUtil.buildPatrolNodes(elements, keyMap.get(root), session);
-		if (patrolScreensData == null) {
+		ScreensUtil screensUtil = createScreensUtil(ctUtil);
+		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session);
+		if (metaScreensData == null) {
 			//failed to generate patrol data
 			//error message is expected to be displayed be PatrolScreensUtil
 			return null;
 		}
 		List<Node> screenNodes = new ArrayList<Node>();
-		screenNodes.addAll(patrolScreensData.screenNodes);
-		rootId = patrolScreensData.rootId;
+		screenNodes.addAll(metaScreensData.screenNodes);
+		rootId = metaScreensData.rootId;
 		monitor.worked(5);
 
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
@@ -212,7 +208,7 @@ public class CyberTrackerConfExporter {
 			List<Items.Item> columnItems = new ArrayList<Items.Item>();
 			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.DATE, Messages.CyberTrackerExporter_Report_Column_Date));
 			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.TIME, Messages.CyberTrackerExporter_Report_Column_Time));
-			for (IdNamePair pair : patrolScreensData.resultElements) {
+			for (IdNamePair pair : metaScreensData.resultElements) {
 				columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name));
 			}
 			for (Attribute attribute : attr2resultId.keySet()) {

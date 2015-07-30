@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.patrol.export;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -40,10 +41,12 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
+import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelLabelProvider;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -55,7 +58,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class PatrolCTExportDialog extends CyberTrackerExportDialog {
 
-	private CyberTrackerConfExporter exporter = new CyberTrackerConfExporter();
+	private CyberTrackerConfExporter exporter = new PatrolCTExporter();
 	
 	private Object selectedModel;
     private ComboViewer modelViewer;
@@ -64,10 +67,23 @@ public class PatrolCTExportDialog extends CyberTrackerExportDialog {
 		super(parentShell);
 	}
 
-	@Override
-	protected Object getSelectedSource() {
-		return selectedModel;
-	}
+    @Override
+    protected IConfigurableModelProvider getConfigurableModelProvider() {
+    	final Object src = selectedModel;
+    	return new IConfigurableModelProvider() {
+    		@Override
+    		public ConfigurableModel getConfigurableModel(Session session, IProgressMonitor monitor) {
+    			if (src instanceof ConfigurableModel) {
+    				monitor.subTask("Fetching configurable model...");
+    				ConfigurableModel model = (ConfigurableModel) src;
+    				return DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
+    			} else if (src instanceof DataModelWrapper) {
+    				return ((DataModelWrapper) src).buildConfigurableModel(session, monitor);
+    			}
+    			return null;
+    		}
+    	};
+    }
 
 	@Override
 	protected CyberTrackerConfExporter getExporter() {
