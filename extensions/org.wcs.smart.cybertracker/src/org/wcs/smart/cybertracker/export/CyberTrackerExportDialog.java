@@ -248,7 +248,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 
 	protected abstract void addModelSourceControl(Composite parent);
 	
-	protected abstract Object getSelectedSource();
+    protected abstract IConfigurableModelProvider getConfigurableModelProvider();
 
 	protected abstract CyberTrackerConfExporter getExporter();
 	
@@ -335,7 +335,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 					}
 	
 					try {
-						File generated = exporter.export(tempDir, getSelectedSource(), monitor);
+						File generated = exporter.export(tempDir, getConfigurableModelProvider(), monitor);
 						if (generated == null) {
 							return; //error is supposed to be tracked inside export call
 						}

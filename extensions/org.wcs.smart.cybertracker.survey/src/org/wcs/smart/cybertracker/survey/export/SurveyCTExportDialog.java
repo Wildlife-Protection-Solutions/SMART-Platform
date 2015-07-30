@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
+import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
@@ -60,8 +61,10 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 	}
 
 	@Override
-	protected Object getSelectedSource() {
-		return selectedDesign;
+	protected IConfigurableModelProvider getConfigurableModelProvider() {
+		// TODO Auto-generated method stub
+		return null;
+		
 	}
 
 	@Override

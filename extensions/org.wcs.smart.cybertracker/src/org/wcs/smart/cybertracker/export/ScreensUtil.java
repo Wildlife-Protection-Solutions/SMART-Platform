@@ -29,6 +29,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 
+import org.hibernate.Session;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
@@ -58,6 +59,11 @@ public class ScreensUtil {
 	protected ScreensUtil(CyberTrackerUtil ctUtil) {
 		this.ctUtil = ctUtil;
 		this.screensFactory = ctUtil.getScreensFactory();
+	}
+	
+	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+//		MetaExportResult result = new MetaExportResult();
+		return null; //TODO: in case we want to export without any meta screens logic for that should be placed here
 	}
 	
 	/**
