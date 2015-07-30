@@ -30,13 +30,13 @@ import org.apache.commons.io.filefilter.IOFileFilter;
 @SuppressWarnings("nls")
 public class Mergei18n {
 
-    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\java",
-    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er"};
+    public static final String IN_DIR[] = {"C:\\data\\SMART\\Source\\Version3.2.1\\source\\java",
+    	"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions",
+		"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions\\er"};
     
-    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\trunk\\source\\translations\\",
-    	"C:\\data\\SMART\\Source\\trunk\\source\\extensions",
-		"C:\\data\\SMART\\Source\\trunk\\source\\extensions\\er\\translations"};
+    public static final String TRANS_DIR[] = {"C:\\data\\SMART\\Source\\Version3.2.1\\source\\translations\\",
+    	"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions",
+		"C:\\data\\SMART\\Source\\Version3.2.1\\source\\extensions\\er\\translations"};
 	
     public static final String LINE_SEP = "\n";
 
