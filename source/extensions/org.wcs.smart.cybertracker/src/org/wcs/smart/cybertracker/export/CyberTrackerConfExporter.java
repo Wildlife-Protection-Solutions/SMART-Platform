@@ -126,10 +126,10 @@ public class CyberTrackerConfExporter {
 			
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
+			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
 			newWpElementsIds = createNewWpElementsIds(elements);
 			defaultAttrValuesResultId = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
+			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			photoResultIds = new ArrayList<CyberTrackerId>();
 			addPhotoElementIds = ElementsUtil.buildBooleanElements(elements);
 			return performExport(destFolder, monitor);
@@ -217,11 +217,11 @@ public class CyberTrackerConfExporter {
 					columnItems.add(ReportsObjectFactory.createColumnItem(map.get(i).getItemId(), LanguageUtil.getName(attribute, currentLanguage) + "#" + i)); //$NON-NLS-1$
 				}
 			}
-			columnItems.add(ReportsObjectFactory.createColumnItem(defaultAttrValuesResultId.getItemId(), PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES));
+			columnItems.add(ReportsObjectFactory.createColumnItem(defaultAttrValuesResultId.getItemId(), ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES));
 			for (Integer level : nodeLevel2resultId.keySet()) {
 				columnItems.add(ReportsObjectFactory.createColumnItem(nodeLevel2resultId.get(level).getItemId(), NODE_DEPTH_RESULT_PREFIX+String.valueOf(level)));
 			}
-			columnItems.add(ReportsObjectFactory.createColumnItem(newWpResultId.getItemId(), PatrolScreensUtil.RESULT_NEW_WAYPOINT));
+			columnItems.add(ReportsObjectFactory.createColumnItem(newWpResultId.getItemId(), ScreensUtil.RESULT_NEW_WAYPOINT));
 			Reports reports = ReportsObjectFactory.createReports(columnItems);
 			
 			try (BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_REPORTS))){
@@ -875,7 +875,7 @@ public class CyberTrackerConfExporter {
 		if (photoResultIds.size() >= index) {
 			for (int i = photoResultIds.size(); i <= index; i++) {
 				CyberTrackerId id = new CyberTrackerId();
-				ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_PHOTO + i, id.getItemId());
+				ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_PHOTO + i, id.getItemId());
 				photoResultIds.add(id);
 			}
 		}

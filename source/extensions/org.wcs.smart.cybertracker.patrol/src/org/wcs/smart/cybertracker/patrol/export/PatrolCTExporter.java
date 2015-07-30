@@ -23,7 +23,6 @@ package org.wcs.smart.cybertracker.patrol.export;
 
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
-import org.wcs.smart.cybertracker.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 
