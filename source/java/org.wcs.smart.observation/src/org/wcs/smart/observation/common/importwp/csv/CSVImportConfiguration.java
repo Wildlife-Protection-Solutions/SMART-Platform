@@ -34,12 +34,15 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -68,7 +71,7 @@ public class CSVImportConfiguration {
 	private int commentColumn = -1;
 	private int idColumn = -1;
 	
-	private Projection projection;
+	private CoordinateReferenceSystem sourceCrs;
 	private String dateFormat;
 	
 	private boolean skipHeaders;
@@ -112,7 +115,7 @@ public class CSVImportConfiguration {
 		
 		Date day0 = null;
 		if( singleDay != null){
-			day0 = SmartUtils.getDatePart(singleDay, false);
+			day0 = SharedUtils.getDatePart(singleDay, false);
 		}
 		try(CSVReader reader = new CSVReader(new FileReader(filename), getDelimiter())){
 			int counter = 0;
@@ -136,11 +139,10 @@ public class CSVImportConfiguration {
 					throw new Exception(MessageFormat.format(Messages.CSVImportConfiguration_2, new Object[]{counter, row[dateColumn]}), e); 
 				}
 				
-				Date day1 =SmartUtils.getDatePart(ptDate, false);
+				Date day1 =SharedUtils.getDatePart(ptDate, false);
 				if(singleDay == null ||  day0.equals(day1)){
 					Waypoint curWP = new Waypoint();
 					//reproject
-					CoordinateReferenceSystem sourceCrs = projection.getCrs();
 					Point point = gf.createPoint(new Coordinate(Double.parseDouble( row[XColumn].replaceAll("\\s+","")), Double.parseDouble( row[YColumn].replaceAll("\\s+","") ))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 					Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
 
@@ -294,8 +296,8 @@ public class CSVImportConfiguration {
 	}
 
 
-	public void setProjection(Projection projection) {
-		this.projection = projection;
+	public void setProjection(Projection projection) throws FactoryException {
+		this.sourceCrs = ReprojectUtils.stringToCrs(projection.getDefinition());
 	}
 
 

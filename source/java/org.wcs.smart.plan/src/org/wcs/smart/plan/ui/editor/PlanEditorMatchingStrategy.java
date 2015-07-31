@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.editor;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorMatchingStrategy;
@@ -45,9 +46,9 @@ public class PlanEditorMatchingStrategy implements IEditorMatchingStrategy {
 			try {
 				IEditorInput editorInput = editorRef.getEditorInput();
 				if (editorInput instanceof PlanEditorInput) {
-					byte[] uuid = ((PlanEditorInput)input).getUuid();
-					byte[] edit_uuid = ((PlanEditorInput)editorInput).getUuid();
-					return Arrays.equals(uuid, edit_uuid);
+					UUID uuid = ((PlanEditorInput)input).getUuid();
+					UUID edit_uuid = ((PlanEditorInput)editorInput).getUuid();
+					return uuid.equals(edit_uuid);
 				}
 			} catch (PartInitException e) {
 				e.printStackTrace();

@@ -42,6 +42,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Filter dialog for filtering the patrols displayed in the patrol list view.
@@ -180,7 +181,7 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		patrolTypeTableViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof PatrolType){
-					return ((PatrolType) element).getType().getGuiName();
+					return LabelConstants.getLabel( ((PatrolType) element).getType());
 				}
 				return super.getText(element);
 			}

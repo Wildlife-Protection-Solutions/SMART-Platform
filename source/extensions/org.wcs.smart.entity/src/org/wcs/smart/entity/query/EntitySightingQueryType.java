@@ -45,7 +45,7 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
 public class EntitySightingQueryType implements IQueryType {
 
 	public static final EntitySightingQueryType INSTANCE = new EntitySightingQueryType();
-	
+	public static final String KEY = "ENTITY_SIGHTING"; //$NON-NLS-1$
 	/**
 	 * @return null this query type is not persisted to the database
 	 */
@@ -56,7 +56,7 @@ public class EntitySightingQueryType implements IQueryType {
 
 	@Override
 	public String getKey() {
-		return "ENTITY_SIGHTING"; //$NON-NLS-1$
+		return KEY; 
 	}
 
 	@Override

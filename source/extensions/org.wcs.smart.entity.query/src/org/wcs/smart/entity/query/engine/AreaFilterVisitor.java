@@ -25,6 +25,7 @@ import java.util.HashSet;
 
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
@@ -40,7 +41,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 
 	private HashSet<String> addedTableNames = new HashSet<String>();
 	private StringBuilder sql;
-	private DerbyEntityQueryEngine engine;
+	private IQueryEngine engine;
 	
 	/**
 	 * Creates a new visitor
@@ -49,7 +50,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	 * @param usedTables list of tables already added to sql (Track.class)
 	 * only needs to be added once
 	 */
-	public AreaFilterVisitor(StringBuilder sql, DerbyEntityQueryEngine engine){
+	public AreaFilterVisitor(StringBuilder sql, IQueryEngine engine){
 		this.sql = sql;
 		this.engine = engine;
 	}

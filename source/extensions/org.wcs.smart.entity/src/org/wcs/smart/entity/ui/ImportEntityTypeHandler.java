@@ -185,7 +185,7 @@ public class ImportEntityTypeHandler{
 								//fire events
 								EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_ADDED, newType);
 								//fire data model modified events
-								DataModelManager.getInstance().fireChangeListeners();
+								DataModelManager.INSTANCE.fireChangeListeners();
 								
 								//open
 								(new OpenEntityTypeHandler()).openEntityType(newType, activeWindow);

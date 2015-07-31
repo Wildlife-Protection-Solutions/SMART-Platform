@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.model;
 
+import java.util.UUID;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -42,7 +44,7 @@ import org.wcs.smart.ui.map.location.ISmartPoint;
 @Table(name = "smart.intelligence_point")
 public class IntelligencePoint implements ISmartPoint {
 	
-	private byte[] uuid;
+	private UUID uuid;
     private Intelligence intelligence;
 	private double x;
 	private double y;
@@ -51,10 +53,10 @@ public class IntelligencePoint implements ISmartPoint {
 	@Id
 	@GeneratedValue(generator="uuid")
 	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
-	public void setUuid(byte[] uuid) {
+	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
 	}
 

@@ -25,6 +25,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,7 +43,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.ui.mission.export.MultiMissionExportDialog;
 import org.wcs.smart.er.xml.MissionExporter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
 * Handler for exporting survey designs.
@@ -58,7 +59,7 @@ public class MissionExportHandler{
 		MultiMissionExportDialog dialog = new MultiMissionExportDialog(shell);
 		if (dialog.open() != IDialogConstants.OK_ID) return;
 
-		final List<byte[]> missions = dialog.getObjectUuids();	
+		final List<UUID> missions = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
 		if (missions.size() == 0) return;
@@ -75,10 +76,10 @@ public class MissionExportHandler{
 					int exportCnt = 0;
 					for (int i = 0; i < missions.size(); i++) {
 						if (monitor.isCanceled()) break;
-						byte[] puuid = missions.get(i);
+						UUID puuid = missions.get(i);
 						String id = null;
 						try {
-							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_1,new Object[]{ SmartUtils.encodeHex(puuid)}));
+							monitor.subTask(MessageFormat.format(Messages.MissionExportHandler_1,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Mission m = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
@@ -87,7 +88,7 @@ public class MissionExportHandler{
 								m = (Mission) s.load(Mission.class, puuid);
 								id = m.getId();
 							} catch (Exception ex) {
-								EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
+								EcologicalRecordsPlugIn.displayLog(MessageFormat.format(Messages.MissionExportHandler_2, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
@@ -100,7 +101,7 @@ public class MissionExportHandler{
 							MissionExporter.exportMission(m, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							EcologicalRecordsPlugIn.displayLog(MessageFormat.format("Error exporting Missions: {0}", new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+							EcologicalRecordsPlugIn.displayLog(MessageFormat.format("Error exporting Missions: {0}", new Object[]{id!= null ? id : UuidUtils.uuidToString(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 						monitor.worked(1);
 					}

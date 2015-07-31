@@ -27,13 +27,13 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryResultItemFeature;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -50,9 +50,9 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(PatrolObservationQueryType.KEY) ||
-				query.getType().getKey().equals(PatrolWaypointQueryType.KEY)||
-				query.getType().getKey().equals(PatrolQueryType.KEY)){
+		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) ||
+				query.getTypeKey().equals(PatrolWaypointQuery.KEY)||
+				query.getTypeKey().equals(PatrolQuery.KEY)){
 			return true;
 		}
 		return false;
@@ -60,7 +60,7 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
-		if (queryType.getKey().equals(PatrolQueryType.KEY)){
+		if (queryType.getKey().equals(PatrolQuery.KEY)){
 			return QueryResultItemFeature.createTrackFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 		}else{
 			return QueryResultItemFeature.createObservationFeature((PatrolQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
@@ -69,7 +69,7 @@ public class PatrolShapeQueryExporter extends ShapeQueryExporter{
 	
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		if (queryType.getKey().equals(PatrolQueryType.KEY)){
+		if (queryType.getKey().equals(PatrolQuery.KEY)){
 			return DataUtilities.createType("smart." + PatrolQueryDataSource.PATROL_TYPE, PatrolQueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}else{
 			return DataUtilities.createType("smart." + QueryDataSource.WAYPOINT_TYPE, QueryDataSource.getFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$

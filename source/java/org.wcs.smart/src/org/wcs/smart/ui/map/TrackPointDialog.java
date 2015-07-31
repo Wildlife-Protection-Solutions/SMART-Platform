@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
@@ -110,14 +111,14 @@ import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.geometry.Envelope;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
 import org.wcs.smart.ui.map.tool.PanTool;
 import org.wcs.smart.ui.map.tool.TrackPointSelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -167,7 +168,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 	}
 
 	protected abstract TimeZone getTrackZTimezone();
-	protected abstract byte[] getEditTrackUUid();
+	protected abstract UUID getEditTrackUUid();
 	protected abstract LineString getEditTrackLineString();
 	protected abstract void setEditTrackLineString(LineString ls);
 	
@@ -250,12 +251,12 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 				try {
 					if (element instanceof Coordinate){
 						Coordinate c = (Coordinate)element;
-						Coordinate c2 = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
+						Coordinate c2 = ReprojectUtils.reproject(c.x, c.y, GeometryUtils.SMART_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.x);
 					}else if (element instanceof SimpleFeature){
 						Double x = (Double) (((SimpleFeature)element).getAttribute(X_FIELD));
 						Double y = (Double) (((SimpleFeature)element).getAttribute(Y_FIELD));
-						Coordinate c2 = ReprojectUtils.reproject(x, y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
+						Coordinate c2 = ReprojectUtils.reproject(x, y, GeometryUtils.SMART_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.x);
 					}
 				} catch (Exception e) {
@@ -276,12 +277,12 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 				try {
 					if (element instanceof Coordinate){
 						Coordinate c = (Coordinate)element;
-						Coordinate c2 = ReprojectUtils.reproject(c.x, c.y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
+						Coordinate c2 = ReprojectUtils.reproject(c.x, c.y, GeometryUtils.SMART_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.y);
 					}else if (element instanceof SimpleFeature){
 						Double x = (Double) (((SimpleFeature)element).getAttribute(X_FIELD));
 						Double y = (Double) (((SimpleFeature)element).getAttribute(Y_FIELD));
-						Coordinate c2 = ReprojectUtils.reproject(x, y, SmartDB.DATABASE_CRS, mapViewer.getMap().getViewportModel().getCRS());
+						Coordinate c2 = ReprojectUtils.reproject(x, y, GeometryUtils.SMART_CRS, mapViewer.getMap().getViewportModel().getCRS());
 						return String.valueOf(c2.y);
 					}
 				} catch (Exception e) {
@@ -531,7 +532,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		mapViewer.setMap(map);
 		//set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
-		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
+		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 		
 		final DeletePointAction deletePointAction = new DeletePointAction();
 		final MenuManager contextMenu = new MenuManager();
@@ -595,7 +596,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 					//the map.
 					//cannot simply use selected features as different objects are
 					//made for the layer, therefore we compare feature ids.
-					Envelope env = CRS.transform(bbox, SmartDB.DATABASE_CRS);
+					Envelope env = CRS.transform(bbox, GeometryUtils.SMART_CRS);
 					bbox = new ReferencedEnvelope(env);
 					FeatureCollection<SimpleFeatureType, SimpleFeature> selected = 
 							pointStore.getFeatures(FACTORY.bbox(FACTORY.property(GEOM_FIELD), bbox));
@@ -686,7 +687,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 	
 	private void createTrackFeatures(SimpleFeatureType featureType) throws IOException{
 		Object[] data = new Object[2];
-		data[0] = SmartUtils.encodeHex(getEditTrackUUid());
+		data[0] = UuidUtils.uuidToString(getEditTrackUUid());
 		data[1] = getEditTrackLineString();
 		List<SimpleFeature> features = new ArrayList<SimpleFeature>(1);
 		features.add(SimpleFeatureBuilder.build(featureType, data, (String)data[0]));
@@ -705,7 +706,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 			Coordinate c = getEditTrackLineString().getCoordinates()[i];
 		
 			Object[] data = new Object[7];
-			data[0] = SmartUtils.encodeHex(getEditTrackUUid()) + "." + i; //$NON-NLS-1$
+			data[0] = UuidUtils.uuidToString(getEditTrackUUid()) + "." + i; //$NON-NLS-1$
 			data[1] = c.x;
 			data[2] = c.y;
 			data[3] = DATEFORMAT.format(new Date( (long) ((Coordinate)c).z ));

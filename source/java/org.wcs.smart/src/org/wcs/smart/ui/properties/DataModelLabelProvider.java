@@ -32,6 +32,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -105,9 +106,9 @@ public class DataModelLabelProvider extends LabelProvider implements IColorProvi
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 		}else if (element instanceof CategoryAttribute){
 			CategoryAttribute ca = (CategoryAttribute)element;
-			return ca.getAttribute().getType().getImage();
+			return DataModel.getAttributeImage(ca.getAttribute().getType());
 		}else if (element instanceof Attribute){
-			return ((Attribute)element).getType().getImage();
+			return DataModel.getAttributeImage(((Attribute)element).getType());
 		}else if (element instanceof DataModelContentProvider.RootNode){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
 		}

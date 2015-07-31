@@ -31,9 +31,9 @@ import org.wcs.smart.intelligence.query.map.udig.IntelQueryDataSource;
 import org.wcs.smart.intelligence.query.map.udig.IntelQueryFeatureReader;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
 /**

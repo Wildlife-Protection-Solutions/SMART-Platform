@@ -61,6 +61,16 @@ the patrol group by node in summary queries.
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="FilterItemUi" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.model.IExtensionOption"/>
+               </appinfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
@@ -73,6 +83,16 @@ the patrol group by node in summary queries.
                </documentation>
                <appinfo>
                   <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution"/>
+               </appinfo>
+            </annotation>
+         </attribute>
+         <attribute name="GroupByItemUi" type="string">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.model.summary.IGroupByViewer"/>
                </appinfo>
             </annotation>
          </attribute>

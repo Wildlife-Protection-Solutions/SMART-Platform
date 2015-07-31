@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -59,7 +60,7 @@ public class ObservationQueryColumnCache {
 	private final Object WAYPOINTLOCK = new Object();
 	
 	private ObservationQueryColumnCache(){
-		DataModelManager.getInstance().addChangeListener(new IDataModelListener() {
+		DataModelManager.INSTANCE.addChangeListener(new IDataModelListener() {
 			@Override
 			public void modified() {
 				queryColumns = null;
@@ -76,10 +77,7 @@ public class ObservationQueryColumnCache {
 		});
 	}
 	
-	
-	
 	/**
-	 * 
 	 * @return query columns available to a waypoint query based
 	 * on the patrol options and the data model of the conservation
 	 * area.
@@ -126,14 +124,14 @@ public class ObservationQueryColumnCache {
 						add = obsOptions.getTrackObserver();
 					}
 					if (add){
-						cols.add(new FixedQueryColumn(item));
+						cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 					}
 				}
 
 				// add data model category columns
 				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
-					cols.add(new ObservationCategoryQueryColumn(i));
+					cols.add(new ObservationCategoryQueryColumn(i, Locale.getDefault()));
 				}
 					
 				//sort attributes alphabetically
@@ -213,7 +211,7 @@ public class ObservationQueryColumnCache {
 						add = false; //observer is associated with observation not waypoint
 					}
 					if (add){
-						cols.add(new FixedQueryColumn(item));
+						cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 					}
 				}
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
@@ -245,7 +243,7 @@ public class ObservationQueryColumnCache {
 			QueryColumn[] tmp = new QueryColumn[GridQueryColumn.GridColumns.values().length];	
 			for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
 				GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
-				tmp[i] = new GridQueryColumn(item); 
+				tmp[i] = new GridQueryColumn(item, Locale.getDefault()); 
 			}
 			gridQueryColumns  = tmp;
 		}

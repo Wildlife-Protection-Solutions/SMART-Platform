@@ -35,7 +35,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 
@@ -199,9 +199,9 @@ public class EntityAttributeValue {
 		case BOOLEAN:
 			if (getNumberValue() != null){
 				if (getNumberValue() < 0.5){
-					text = Attribute.BOOLEAN_FALSE_LABEL;
+					text = LabelConstants.BOOLEAN_FALSE_LABEL;
 				}else{
-					text = Attribute.BOOLEAN_TRUE_LABEL;
+					text = LabelConstants.BOOLEAN_TRUE_LABEL;
 				}
 			}
 			break;

@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui.editor;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,6 +53,7 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.query.DerbyEntitySightingEngine;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.query.SightingQueryColumn;
@@ -293,7 +295,9 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 			
 			EntitySightingQuery query = currentQuery;
 			try{
-				final SightingPagedResults results = (SightingPagedResults) query.executeQuery(lblProgressMonitor, null);
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put(IProgressMonitor.class.getName(), lblProgressMonitor);
+				final SightingPagedResults results = (SightingPagedResults)(new DerbyEntitySightingEngine()).executeQuery(query, params);
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {

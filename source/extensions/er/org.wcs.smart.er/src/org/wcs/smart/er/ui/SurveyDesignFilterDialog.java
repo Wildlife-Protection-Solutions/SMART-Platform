@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -115,9 +116,9 @@ public class SurveyDesignFilterDialog extends SmartFilterDialog {
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		chActive = new Button(g, SWT.CHECK);
-		chActive.setText(State.ACTIVE.getGuiName());
+		chActive.setText(State.ACTIVE.getGuiName(Locale.getDefault()));
 		chInactive = new Button(g, SWT.CHECK);
-		chInactive.setText(State.INACTIVE.getGuiName());
+		chInactive.setText(State.INACTIVE.getGuiName(Locale.getDefault()));
 		
 		
 		setTitle(Messages.SurveyDesignFilterDialog_Title);

@@ -24,6 +24,7 @@ package org.wcs.smart.query;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.criterion.Restrictions;
@@ -104,8 +105,8 @@ public class QueryTemplateCloner implements
 			Map<String, StyleBlackboard> blackboardMap = StyleManager.INSTANCE.fromStringMap(queryString);
 			for (StyleBlackboard blackboard : blackboardMap.values()){
 				if (blackboard.contains(SmartLayerStyle.STYLE_ID)){
-					byte[] uuid = (byte[])blackboard.get(SmartLayerStyle.STYLE_ID);
-					if (uuid != null && uuid.length == 16){
+					UUID uuid = (UUID)blackboard.get(SmartLayerStyle.STYLE_ID);
+					if (uuid != null){
 						UuidItem newStyleUuid = engine.getNewConservationItem(uuid);
 						if (newStyleUuid == null){
 							blackboard.remove(SmartLayerStyle.STYLE_ID);

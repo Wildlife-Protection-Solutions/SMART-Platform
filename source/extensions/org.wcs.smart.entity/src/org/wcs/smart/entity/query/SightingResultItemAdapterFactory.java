@@ -21,12 +21,15 @@
  */
 package org.wcs.smart.entity.query;
 
+import java.util.UUID;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.map.EntityQueryDataSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 /**
  * Adapter factory for adapting an EntityFeature or a SightingResultItem
  * to a Waypoint object.
@@ -50,9 +53,9 @@ public class SightingResultItemAdapterFactory implements IAdapterFactory {
 				if (sf.getFeatureType().getTypeName().equals(EntityQueryDataSource.TYPENAME)){
 					String key = sf.getID();
 					String uuid = key.substring(key.lastIndexOf('.')+1);
-					byte[] wpuuid;
+					UUID wpuuid;
 					try {
-						wpuuid = SmartUtils.decodeHex(uuid);
+						wpuuid = UuidUtils.stringToUuid(uuid);
 						Waypoint wp = new Waypoint();
 						wp.setUuid(wpuuid);
 						return wp;	

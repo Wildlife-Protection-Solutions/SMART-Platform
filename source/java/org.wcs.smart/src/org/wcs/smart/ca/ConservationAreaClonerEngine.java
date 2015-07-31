@@ -24,12 +24,12 @@ package org.wcs.smart.ca;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.CoreException;
@@ -43,7 +43,7 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.BinaryType;
+import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -85,7 +85,7 @@ public class ConservationAreaClonerEngine {
 				StandardRandomStrategy.INSTANCE);
 		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
 				UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new BinaryType(), prop, null);
+		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 	
 	/*
@@ -137,10 +137,9 @@ public class ConservationAreaClonerEngine {
 	 * @param copyTo item to copy descriptions to
 	 */
 	public void copyDescriptions(NamedDescriptionItem copyFrom, NamedDescriptionItem copyTo){
-		
-		byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) session, copyTo);
+		UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) session, copyTo);
 		copyTo.setDescUuid(uuid);
-		for (DescriptionLabel l : copyFrom.getDescriptions()){
+		for (DescriptionLabel l : copyFrom.getDescriptions(session)){
 			Language lang = (Language) templateToNewObjectMap.get(l.getLanguage());
 			if (lang != null){
 				DescriptionLabel clone = new DescriptionLabel();	
@@ -150,7 +149,7 @@ public class ConservationAreaClonerEngine {
 				clone.setElement(uuid);
 				getSession().save(clone);
 				getSession().saveOrUpdate(copyTo);
-				copyTo.getDescriptions().add(clone);
+				copyTo.getDescriptions(session).add(clone);
 			}
 		}
 		
@@ -163,9 +162,9 @@ public class ConservationAreaClonerEngine {
 	 * @param copyTo item to copy descriptions to
 	 */
 	public void copyDescriptions(NamedDescriptionKeyItem copyFrom, NamedDescriptionKeyItem copyTo){
-		byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) session, copyTo);
+		UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) session, copyTo);
 		copyTo.setDescUuid(uuid);
-		for (DescriptionLabel l : copyFrom.getDescriptions()){
+		for (DescriptionLabel l : copyFrom.getDescriptions(session)){
 			Language lang = (Language) templateToNewObjectMap.get(l.getLanguage());
 			if (lang != null){
 				DescriptionLabel clone = new DescriptionLabel();	
@@ -175,7 +174,7 @@ public class ConservationAreaClonerEngine {
 				clone.setElement(uuid);
 				getSession().save(clone);
 				getSession().saveOrUpdate(copyTo);
-				copyTo.getDescriptions().add(clone);
+				copyTo.getDescriptions(session).add(clone);
 			}
 		}
 		
@@ -219,9 +218,9 @@ public class ConservationAreaClonerEngine {
 	 * @return 
 	 * @throws Exception
 	 */
-	public UuidItem getNewConservationItem(byte[] templateUuid) throws Exception{
+	public UuidItem getNewConservationItem(UUID templateUuid) throws Exception{
 		for (UuidItem key : templateToNewObjectMap.keySet()){
-			if (Arrays.equals(key.getUuid(), templateUuid)){
+			if (key.getUuid().equals(templateUuid)){
 				return templateToNewObjectMap.get(key);
 			}
 		}

@@ -28,12 +28,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -45,7 +47,9 @@ import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine shared functionality.  Also intitalizes common
@@ -54,7 +58,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author Emily
  *
  */
-public class AbstractQueryEngine implements IQueryEngine {
+public abstract class AbstractQueryEngine implements IQueryEngine {
 
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
 	
@@ -128,7 +132,7 @@ public class AbstractQueryEngine implements IQueryEngine {
 	 * @param session
 	 * @return
 	 */
-	protected String[] getCategoryLabels(byte[] uuid, Session session){
+	protected String[] getCategoryLabels(UUID uuid, Session session){
 		if (uuid != null){
 			return QueryDataModelManager.getInstance().getFullCategoryLabel(session, uuid);
 		}
@@ -143,22 +147,22 @@ public class AbstractQueryEngine implements IQueryEngine {
 	 * @param session
 	 * @return
 	 */
-	protected String getEmployeeName(byte[] uuid, Session session){
+	protected String getEmployeeName(UUID uuid, Session session){
 		if (uuid != null){
 			Employee x = (Employee) session.load(Employee.class, uuid);
 			if (x != null) {
-				return x.getFullLabel();
+				return LabelConstants.getFullLabel(x);
 			}
 		}
 		return null;
 	}
 	
-	protected String getName(byte[] uuid, byte[] cauuid, Session session){
+	protected String getName(UUID uuid, UUID cauuid, Session session){
 		if (SmartDB.isMultipleAnalysis()){
 			//need find label for the given conservation area
-			return Label.getDescription(uuid, cauuid);	
+			return LabelConstants.getDescription(uuid, cauuid);	
 		}else{
-			return Label.getDescription(uuid);
+			return Label.getDescription(uuid, session);
 		}
 	}
 	
@@ -261,9 +265,10 @@ public class AbstractQueryEngine implements IQueryEngine {
 		NamedPreparedStatement pp = new NamedPreparedStatement(connection, query);
 		StringBuilder log = new StringBuilder();
 		for (Entry<String, Object> entry : currentParameters.entrySet()){
-			if (entry.getValue() instanceof byte[]){
-				pp.setBytes(entry.getKey(), (byte[])entry.getValue());
-				log.append("x'"+ SmartUtils.encodeHex((byte[])entry.getValue()) + ", "); //$NON-NLS-1$ //$NON-NLS-2$
+			if (entry.getValue() instanceof UUID){
+				//TODO: test this uuid stuff
+				pp.setObject(entry.getKey(), (UUID)entry.getValue());
+				log.append("x'"+ UuidUtils.uuidToString((UUID)entry.getValue()) + ", "); //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
 				pp.setObject(entry.getKey(), entry.getValue());
 				log.append(entry.getValue().toString().toString() + ", "); //$NON-NLS-1$
@@ -272,4 +277,10 @@ public class AbstractQueryEngine implements IQueryEngine {
 		QueryPlugIn.logSql(log.toString());
 		return pp.getStatement();
 	}
+
+	@Override
+	public abstract IQueryResult executeQuery(Query query, HashMap<String, Object> parameters) throws SQLException;
+
+	@Override
+	public abstract boolean canExecute(String querytype);
 }

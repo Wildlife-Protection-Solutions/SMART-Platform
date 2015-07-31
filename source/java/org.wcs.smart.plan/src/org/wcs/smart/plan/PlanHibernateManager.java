@@ -37,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -60,6 +61,7 @@ import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Extension of the smart hibernate manager for plan related data.
@@ -106,18 +108,18 @@ public class PlanHibernateManager{
 			Map<String, String>parents = new LinkedHashMap<String,String>();
 			
 			for (Object[] data : results){
-				String uuid = SmartUtils.encodeHex((byte[]) data[0]);
+				String uuid = UuidUtils.uuidToString((UUID) data[0]);
 				String name = Plan.generateLabel((String)data[1], (String)data[2]);
 				
-				inputs.put(uuid, new PlanEditorInput((byte[])data[0], name, (Plan.PlanType)data[3]));
+				inputs.put(uuid, new PlanEditorInput((UUID)data[0], name, (Plan.PlanType)data[3]));
 				
 				if (data[4] != null){
-					parents.put(uuid, SmartUtils.encodeHex((byte[])data[4]));
+					parents.put(uuid, UuidUtils.uuidToString((UUID)data[4]));
 				}
 			}
 			List<PlanEditorInput> all = new ArrayList<PlanEditorInput>();
 			for(PlanEditorInput in : inputs.values()){
-				String parent = parents.get(SmartUtils.encodeHex(in.getUuid()));
+				String parent = parents.get(UuidUtils.uuidToString(in.getUuid()));
 				if (parent != null){
 					PlanEditorInput pparent = inputs.get(parent);
 					if (pparent != null){
@@ -219,7 +221,7 @@ public class PlanHibernateManager{
 	 * 
 	 * @return
 	 */
-	public static boolean isDuplicatePlanId(Session s, String id, byte[] excludePlanUuid) {
+	public static boolean isDuplicatePlanId(Session s, String id, UUID excludePlanUuid) {
 		Criteria c = s.createCriteria(Plan.class).add(Restrictions.eq("id", id)).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())); //$NON-NLS-1$ //$NON-NLS-2$
 		if (excludePlanUuid != null){
 			c.add(Restrictions.ne("uuid", excludePlanUuid)); //$NON-NLS-1$
@@ -239,7 +241,7 @@ public class PlanHibernateManager{
 	 * @param uuid
 	 * @return the deleted plans - all children are automatically deleted
 	 */
-	public static Set<Plan> deletePlan(byte[] uuid) {
+	public static Set<Plan> deletePlan(UUID uuid) {
 		Set<Plan> deletedItems = new HashSet<Plan>();
 		Session session = HibernateManager.openSession();
 		Plan plan = null;
@@ -420,7 +422,7 @@ public class PlanHibernateManager{
 		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
 			Object[] data = (Object[]) iterator.next();
 
-			PatrolEditorInput pi = new PatrolEditorInput((byte[]) data[0],
+			PatrolEditorInput pi = new PatrolEditorInput((UUID) data[0],
 					(String) data[1], (PatrolType.Type) data[2],
 					(Date) data[3], (Date) data[4]);
 			patrols.add(pi);
@@ -464,7 +466,7 @@ public class PlanHibernateManager{
 	 * @param end - end date
 	 * @return a list of Plan IDs
 	 */
-	public static List<String> getPlanChildrenOutOfDateRange(byte[] planUuid, Date start, Date end) {
+	public static List<String> getPlanChildrenOutOfDateRange(UUID planUuid, Date start, Date end) {
 		if (planUuid == null) {
 			return Collections.emptyList();
 		}
@@ -509,12 +511,12 @@ public class PlanHibernateManager{
 	 */
 	public static ListItem getPlan(Session session, String id) throws Exception {
 		Query q = session.createQuery("SELECT uuid, id, name FROM Plan WHERE uuid =:uuid"); //$NON-NLS-1$
-		q.setParameter("uuid", SmartUtils.decodeHex(id)); //$NON-NLS-1$
+		q.setParameter("uuid", UuidUtils.stringToUuid(id)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1) {
 			String displayName = Plan.generateLabel((String)((Object[])results.get(0))[1], (String)((Object[])results.get(0))[2]);
-			return new ListItem( (byte[])((Object[])results.get(0))[0], displayName);
+			return new ListItem( (UUID)((Object[])results.get(0))[0], displayName);
 		} else {
 			SmartPlanPlugIn.displayLog(MessageFormat.format(Messages.PlanHibernateManager_Plan_NotFound_Error, id), null);
 			return null;
@@ -557,14 +559,14 @@ public class PlanHibernateManager{
 	 * @param planUuid
 	 * @return
 	 */
-	public static List<byte[]> getChildPlanIds(String planUuid) {
-		Session session = SmartHibernateManager.openSession();
+	public static List<UUID> getChildPlanIds(String planUuid) {
+		Session session = HibernateManager.openSession();
 		try {
-			byte[] uuid = SmartUtils.decodeHex(planUuid);
+			UUID uuid = UuidUtils.stringToUuid(planUuid);
 			return listChildPlanIds(uuid, session);
 		} catch (Exception e) {
 			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_FetchChildren_Error, null);
-			return new ArrayList<byte[]>();
+			return new ArrayList<UUID>();
 		} finally {
 			session.close();
 		}
@@ -576,14 +578,14 @@ public class PlanHibernateManager{
 	 * @param session
 	 * @return
 	 */
-	private static List<byte[]> listChildPlanIds(byte[] planUuid, Session session) {
-		List<byte[]> ids = new ArrayList<byte[]>();
+	private static List<UUID> listChildPlanIds(UUID planUuid, Session session) {
+		List<UUID> ids = new ArrayList<UUID>();
 		Query query = session.createQuery("SELECT p.uuid FROM Plan p where p.parent.uuid = :uuid"); //$NON-NLS-1$
 		query.setParameter("uuid", planUuid); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
-		List<byte[]> list = query.list();
+		List<UUID> list = query.list();
 		ids.addAll(list);
-		for (byte[] uuid : list) {
+		for (UUID uuid : list) {
 			ids.addAll(listChildPlanIds(uuid, session));
 		}
 		return ids;

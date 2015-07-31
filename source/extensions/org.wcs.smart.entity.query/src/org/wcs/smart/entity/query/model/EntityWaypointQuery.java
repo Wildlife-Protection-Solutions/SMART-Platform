@@ -30,17 +30,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.entity.query.engine.DerbyWaypointEngine;
 import org.wcs.smart.entity.query.model.columns.EntityQueryColumnCache;
 import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.WaypointQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
@@ -87,24 +82,6 @@ public class EntityWaypointQuery extends WaypointQuery {
 		}
 	}
 	
-	@Transient
-	public IPagedQueryResultSet getPagedQueryResults(IProgressMonitor progressMonitor, Session session) throws Exception {
-		Session lSession = session;
-		if (lSession == null){
-			lSession = HibernateManager.openSession();
-			lSession.beginTransaction();
-		}
-		try {
-			DerbyWaypointEngine engine = new DerbyWaypointEngine();
-			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lSession, progressMonitor);
-			return lastResult;
-		} finally {
-			if (session == null && lSession.isOpen()){
-				lSession.getTransaction().commit();
-				lSession.close();
-			}
-		}
-	}
 	/**
 	 * 
 	 * @see java.lang.Object#clone()
@@ -132,7 +109,7 @@ public class EntityWaypointQuery extends WaypointQuery {
 	@Override
 	@Transient
 	public IQueryType getType() {
-		return QueryTypeManager.getInstance().findQueryType(EntityWaypointQueryType.KEY);
+		return QueryTypeManager.INSTANCE.findQueryType(EntityWaypointQueryType.KEY);
 	}
 
 	@Override

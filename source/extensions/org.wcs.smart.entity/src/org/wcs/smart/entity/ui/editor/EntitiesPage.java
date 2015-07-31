@@ -353,7 +353,7 @@ public class EntitiesPage extends EditorPart implements IEntityTypeEditorPage {
 		}
 		
 		try{
-			DataModelManager.getInstance().fireChangeListeners();
+			DataModelManager.INSTANCE.fireChangeListeners();
 		}catch(Exception ex){
 			EntityPlugIn.displayLog(ex.getMessage(), ex);
 		}

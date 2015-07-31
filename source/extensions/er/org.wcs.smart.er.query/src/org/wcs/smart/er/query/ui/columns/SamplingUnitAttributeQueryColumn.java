@@ -25,7 +25,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**

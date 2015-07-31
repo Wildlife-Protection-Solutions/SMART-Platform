@@ -81,6 +81,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -96,7 +97,6 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.newwizard.StatusComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
@@ -134,7 +134,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
-				DataModelManager.getInstance().fireChangeListeners();
+				DataModelManager.INSTANCE.fireChangeListeners();
 			}catch(final Exception ex){
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
@@ -484,7 +484,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			@Override
 			public Image getImage(Object element) {
 				if (element instanceof EntityAttribute){
-					return ((EntityAttribute) element).getDmAttribute().getType().getImage();
+					return DataModel.getAttributeImage(((EntityAttribute) element).getDmAttribute().getType());
 				}
 				return super.getImage(element);
 				
@@ -672,7 +672,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				getEditorSite().getShell(), toEdit);
 		
 		if (dialog.open() == IDialogConstants.OK_ID) {
-			Session session = SmartHibernateManager.openSession();
+			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
 				session.saveOrUpdate(toEdit);
@@ -763,7 +763,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 					return;
 				}
 				attributeToAdd.add(att);	
-				DataModelManager.getInstance().fireAddListener(s, att);
+				DataModelManager.INSTANCE.fireAddListener(s, att);
 			}
 			s.getTransaction().commit();
 			
@@ -800,7 +800,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			ea.setIsPrimary(true);
 			ea.setOrder(et.getAttributes().size()+1);
 			
-			ea.setKeyId(NamedKeyItem.generateKey(attribute.getKeyId(), et.getAttributes()));
+			ea.setKeyId(DataModelManager.INSTANCE.generateKey(attribute.getKeyId(), et.getAttributes()));
 			
 			et.getAttributes().add(ea);
 			
@@ -885,9 +885,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 									}});
 							
 								if (ret[0] == 0){  //YES
-									boolean deletel = DataModelManager.getInstance().validateDelete(ea.getDmAttribute(), monitor, s);
+									boolean deletel = DataModelManager.INSTANCE.validateDelete(ea.getDmAttribute(), monitor, s);
 									if (deletel){
-										DataModelManager.getInstance().fireDeleteListener(s, ea.getDmAttribute());
+										DataModelManager.INSTANCE.fireDeleteListener(s, ea.getDmAttribute());
 										s.delete(ea.getDmAttribute());
 									}
 								}
@@ -977,7 +977,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtStatus.setText(type.getStatus().getGuiName());
 		txtType.setText(type.getType().getGuiName());
 		if (type.getCreator() != null){
-			txtCreatedBy.setText(type.getCreator().getFullLabel());
+			txtCreatedBy.setText(LabelConstants.getFullLabel(type.getCreator()));
 		}
 		if (type.getDateCreated() != null){
 			txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));	

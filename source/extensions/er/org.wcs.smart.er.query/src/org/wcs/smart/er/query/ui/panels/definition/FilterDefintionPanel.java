@@ -37,9 +37,9 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.ISurveyQuery;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.ui.SurveyDesignDialog;
 import org.wcs.smart.er.query.ui.dropitems.ISurveyDesignDropItem;
 import org.wcs.smart.er.query.ui.dropitems.SamplingUnitAttributeDropItem;
@@ -146,17 +146,17 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	}
 
 	private void configureSamplingUnitDropItem(DropItem item){
-		String key = currentQuery.getQuery().getType().getKey();
+		String key = currentQuery.getQueryType();
 	
 		if (item instanceof SamplingUnitDropItem){
 			SamplingUnitDropItem suItem = (SamplingUnitDropItem) item;
 			//these have fixed source; others are variable and defined 
 			// elsewhere
-			if (key.equals(MissionTrackQueryType.KEY)){
+			if (key.equals(MissionTrackQuery.KEY)){
 				suItem.setSource(Source.TRACK);
-			}else if (key.equals(SurveyWaypointQueryType.KEY)){
+			}else if (key.equals(SurveyWaypointQuery.KEY)){
 				suItem.setSource(Source.OBSERVATION);
-			}else if (key.equals(SurveyObservationQueryType.KEY)){
+			}else if (key.equals(SurveyObservationQuery.KEY)){
 				suItem.setSource(Source.OBSERVATION);
 			}
 		}else if (item instanceof SamplingUnitAttributeDropItem){
@@ -164,11 +164,11 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 			
 			//these have fixed source; others are variable and defined 
 			// elsewhere
-			if (key.equals(MissionTrackQueryType.KEY)){
+			if (key.equals(MissionTrackQuery.KEY)){
 				suItem.setSource(Source.TRACK);
-			}else if (key.equals(SurveyWaypointQueryType.KEY)){
+			}else if (key.equals(SurveyWaypointQuery.KEY)){
 				suItem.setSource(Source.OBSERVATION);
-			}else if (key.equals(SurveyObservationQueryType.KEY)){
+			}else if (key.equals(SurveyObservationQuery.KEY)){
 				suItem.setSource(Source.OBSERVATION);
 			}
 		}
@@ -276,7 +276,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 				((ISurveyDesignDropItem) di).setSurveyDesign(currentDesign);
 			}
 		}
-		IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQuery().getType());
+		IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQueryType());
 		if (pnl instanceof ISurveyPanel){
 			((ISurveyPanel) pnl).refreshPanel(currentDesign);
 		}

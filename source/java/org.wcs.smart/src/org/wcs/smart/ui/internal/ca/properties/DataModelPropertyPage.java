@@ -481,7 +481,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 						InterruptedException {
 					try {
 						currentTransaction.commit();
-						DataModelManager.getInstance().fireChangeListeners();
+						DataModelManager.INSTANCE.fireChangeListeners();
 						
 						currentTransaction = session.beginTransaction();
 						setChangesMade(false);
@@ -513,10 +513,10 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (o instanceof Category){
 			((DataModel)viewer.getInput()).disableCategory((Category)o, !((Category)o).getIsActive());
-			DataModelManager.getInstance().fireEnabledStateListener(getSession(), o);
+			DataModelManager.INSTANCE.fireEnabledStateListener(getSession(), o);
 		}else if (o instanceof CategoryAttribute){
 			((DataModel)viewer.getInput()).disableAttribute((CategoryAttribute)o, !((CategoryAttribute)o).getIsActive());
-			DataModelManager.getInstance().fireEnabledStateListener(getSession(), o);
+			DataModelManager.INSTANCE.fireEnabledStateListener(getSession(), o);
 		}
 		updateInfoPanel();
 		refreshTree();
@@ -564,9 +564,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 					InterruptedException {
 					boolean delete = false;
 					try{
-						delete = DataModelManager.getInstance().validateDelete(cat, monitor, getSession());
+						delete = DataModelManager.INSTANCE.validateDelete(cat, monitor, getSession());
 					
-						DataModelManager.getInstance().fireDeleteListener(getSession(), cat);
+						DataModelManager.INSTANCE.fireDeleteListener(getSession(), cat);
 						
 						if (delete){
 							if (cat.getParent() != null){
@@ -608,9 +608,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 					try{
-						boolean delete = DataModelManager.getInstance().validateDelete(catAtt, monitor, getSession());
+						boolean delete = DataModelManager.INSTANCE.validateDelete(catAtt, monitor, getSession());
 						if (delete){
-							DataModelManager.getInstance().fireDeleteListener(getSession(), catAtt);
+							DataModelManager.INSTANCE.fireDeleteListener(getSession(), catAtt);
 							
 							catAtt.getCategory().getAttributes().remove(catAtt);
 							if (catAtt.getCategory().getUuid() == null || catAtt.getAttribute().getUuid() == null){
@@ -649,9 +649,9 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 								
 								
 								if (ret[0] == 0){  //YES
-									delete = DataModelManager.getInstance().validateDelete(catAtt.getAttribute(), monitor, getSession());
+									delete = DataModelManager.INSTANCE.validateDelete(catAtt.getAttribute(), monitor, getSession());
 									if (delete){
-										DataModelManager.getInstance().fireDeleteListener(getSession(), catAtt.getAttribute());
+										DataModelManager.INSTANCE.fireDeleteListener(getSession(), catAtt.getAttribute());
 										
 										dataModel.getAttributes().remove(catAtt.getAttribute());
 										if (catAtt.getAttribute().getUuid() != null){
@@ -725,7 +725,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			parentCat.getChildren().add(newCat);
 		}
 		newCat.updateHkey();
-		DataModelManager.getInstance().fireAddListener(getSession(), newCat);
+		DataModelManager.INSTANCE.fireAddListener(getSession(), newCat);
 		session.flush();
 		
 		if (newCat.getParent() != null){
@@ -742,7 +742,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (o instanceof Category){
 			try{
-				String canEdit = DataModelManager.getInstance().canEdit((Category)o, session);
+				String canEdit = DataModelManager.INSTANCE.canEdit((Category)o, session);
 				if (canEdit != null){
 					if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_EditWarningTitle, Messages.DataModelPropertyPage_CategoryWarningMessage + "\n\n" + canEdit + "\n\n" + Messages.DataModelPropertyPage_ContinueLabel)){  //$NON-NLS-1$ //$NON-NLS-2$
 						return;
@@ -768,7 +768,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			refreshTree();
 		}else if (o instanceof CategoryAttribute){
 			try{
-				String canEdit = DataModelManager.getInstance().canEdit(((CategoryAttribute)o).getAttribute(), session);
+				String canEdit = DataModelManager.INSTANCE.canEdit(((CategoryAttribute)o).getAttribute(), session);
 				if (canEdit != null){
 					if (!MessageDialog.openQuestion(getShell(), Messages.DataModelPropertyPage_EditWarningTitle, Messages.DataModelPropertyPage_AttributeWarningMessage + "\n\n" + canEdit + "\n\n" + Messages.DataModelPropertyPage_ContinueLabel)){  //$NON-NLS-1$ //$NON-NLS-2$
 						return;
@@ -856,7 +856,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 			try{
 				newAttributes.add( dm.addNewAttribute(att, parent) );
 				//added a new attribute
-				DataModelManager.getInstance().fireAddListener(session, att);
+				DataModelManager.INSTANCE.fireAddListener(session, att);
 				session.saveOrUpdate(att);
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(ex.getMessage(), ex);
@@ -867,7 +867,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		for (CategoryAttribute newAttribute: newAttributes){
 			//added category/attribute links
-			DataModelManager.getInstance().fireAddListener(session, newAttribute);
+			DataModelManager.INSTANCE.fireAddListener(session, newAttribute);
 		}
 		session.flush();
 		setChangesMade(true);

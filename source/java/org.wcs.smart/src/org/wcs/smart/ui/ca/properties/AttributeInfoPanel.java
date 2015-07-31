@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -227,7 +228,7 @@ public class AttributeInfoPanel extends Composite {
 		btnAggs = new Button[aggs.size()];
 		for (int i = 0; i < aggs.size(); i++){
 			btnAggs[i] = new Button(compAggs, SWT.CHECK);
-			btnAggs[i].setText(aggs.get(i).getGuiName());
+			btnAggs[i].setText(Aggregation.getGuiName(aggs.get(i), currentSession, Locale.getDefault()));
 			btnAggs[i].setData(aggs.get(i));
 			if (createNew){
 				btnAggs[i].setSelection(true);
@@ -401,7 +402,7 @@ public class AttributeInfoPanel extends Composite {
 						public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 							try{
-								boolean delete = DataModelManager.getInstance().validateDelete(it, monitor, AttributeInfoPanel.this.currentSession);
+								boolean delete = DataModelManager.INSTANCE.validateDelete(it, monitor, AttributeInfoPanel.this.currentSession);
 								if (delete){
 									it.setAttribute(null);
 									Display.getDefault().asyncExec(new Runnable(){
@@ -966,7 +967,7 @@ public class AttributeInfoPanel extends Composite {
 						
 						//item deleted
 						try{
-							DataModelManager.getInstance().fireDeleteListener(session, oldItem);
+							DataModelManager.INSTANCE.fireDeleteListener(session, oldItem);
 						}catch (Exception ex){
 							SmartPlugIn.displayLog(Messages.AttributeInfoPanel_ListModificationError + ex.getMessage(), ex); 
 							return;
@@ -988,7 +989,7 @@ public class AttributeInfoPanel extends Composite {
 					item = (AttributeListItem) session.merge(item);	
 				}else{
 					//new item
-					DataModelManager.getInstance().fireAddListener(session, item);
+					DataModelManager.INSTANCE.fireAddListener(session, item);
 					att.getAttributeList().add(item);
 				}
 				for ( org.wcs.smart.ca.Label l : item.getNames()){
@@ -1024,7 +1025,7 @@ public class AttributeInfoPanel extends Composite {
 							for(AttributeTreeNode toDelete : attTree.getDeletedNodes()){
 								try{
 									if (toDelete.getUuid() != null){
-										DataModelManager.getInstance().fireDeleteListener(currentSession, toDelete);
+										DataModelManager.INSTANCE.fireDeleteListener(currentSession, toDelete);
 									}
 								}catch (Exception ex){
 									throw new InvocationTargetException(ex);
@@ -1071,7 +1072,7 @@ public class AttributeInfoPanel extends Composite {
 			node = (AttributeTreeNode) session.merge(node);
 		}else{
 			//newNode
-			DataModelManager.getInstance().fireAddListener(currentSession, node);
+			DataModelManager.INSTANCE.fireAddListener(currentSession, node);
 			session.saveOrUpdate(node);
 		}
 		

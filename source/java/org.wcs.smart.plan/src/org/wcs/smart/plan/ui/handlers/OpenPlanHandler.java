@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
+import java.util.UUID;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -47,7 +49,7 @@ public class OpenPlanHandler {
 	public static final String PLANUUID_PARAM = "planuuid"; //$NON-NLS-1$
 	
 	@Execute
-	public void openPlan(@Optional @Named(PLANUUID_PARAM) byte[] planUuid,
+	public void openPlan(@Optional @Named(PLANUUID_PARAM) UUID planUuid,
 			MWindow activeWindow){
 		if (planUuid == null) return;
 		

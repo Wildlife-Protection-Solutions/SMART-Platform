@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 
@@ -59,8 +60,8 @@ public class UserNameControlContribution extends
 		comp.setLayout(gl);
 		Label lbl = new Label(comp, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lbl.setText(SmartDB.getCurrentEmployee().getShortLabel());
-		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + SmartDB.getCurrentEmployee().getFullLabel());
+		lbl.setText(LabelConstants.getShortLabel(SmartDB.getCurrentEmployee()));
+		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + LabelConstants.getFullLabel(SmartDB.getCurrentEmployee()));
 		return comp;
 	}
 

@@ -45,6 +45,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
+import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -52,12 +53,15 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
@@ -80,6 +84,7 @@ import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing summary
@@ -95,6 +100,12 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	
 	private String rateTable;
 	private String valueTable;
+	
+	@Override
+	public boolean canExecute(IQueryType querytype) {
+		return EntitySummaryQueryType.KEY.equals(querytype.getKey());
+	}
+	
 	/**
 	 * Executes the given summary query.
 	 * 
@@ -125,9 +136,14 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 	 * are commputed and added to the results.
 	 *  
 	 */
-	public SummaryQueryResult executeQuery(final EntitySummaryQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+		
+		final EntitySummaryQuery query = (EntitySummaryQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+	
 
 		valueTable = createTempTableName();
 		rateTable = createTempTableName();
@@ -685,7 +701,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 						key += rs.getString(rsindex++);
 						break;
 					case BYTE:
-						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
+						key += UuidUtils.uuidToString(UuidUtils.byteToUUID(rs.getBytes(rsindex++)));
 						break;
 					case DATE:
 						key += rs.getDate(rsindex++).toString();
@@ -1076,7 +1092,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), UuidUtils.uuidToString( it.getUuid() ), false);
 				}else{
 					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}	
@@ -1094,7 +1110,7 @@ public class DerbySummaryEngine extends DerbyEntityQueryEngine{
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), UuidUtils.uuidToString( it.getUuid() ), false);
 				}else{
 					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}

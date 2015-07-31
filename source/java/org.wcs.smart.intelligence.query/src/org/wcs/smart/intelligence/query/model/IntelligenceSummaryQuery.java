@@ -25,14 +25,9 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
-import org.wcs.smart.intelligence.query.engine.SummaryIntelligenceQueryEngine;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -57,7 +52,7 @@ public class IntelligenceSummaryQuery extends Query {
 	@Transient
 	@Override
 	public IQueryType getType() {
-		return QueryTypeManager.getInstance().findQueryType(IntelligenceSummaryQueryType.KEY);
+		return QueryTypeManager.INSTANCE.findQueryType(IntelligenceSummaryQueryType.KEY);
 	}
 
 	@Transient
@@ -107,26 +102,4 @@ public class IntelligenceSummaryQuery extends Query {
 		q.setOwner(SmartDB.getCurrentEmployee());
 		return q;
 	}
-
-
-	@Transient
-	@Override
-	public SummaryQueryResult executeQueryInternal(IProgressMonitor monitor,
-			Session session) throws Exception {
-		Session lsession = session;
-		if (session == null){
-			lsession = HibernateManager.openSession();
-			lsession.beginTransaction();
-		}
-		try{
-			SummaryIntelligenceQueryEngine engine = new SummaryIntelligenceQueryEngine();
-			return engine.executeQuery(this, lsession, monitor);
-		}finally{
-			if (session == null && lsession.isOpen()){
-				lsession.getTransaction().commit();
-				lsession.close();
-			}
-		}
-	}
-
 }

@@ -41,15 +41,21 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
+import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
@@ -68,12 +74,18 @@ import org.wcs.smart.query.model.summary.IValueItem.ValueType;
  */
 
 public class DerbyGridEngine extends DerbyEntityQueryEngine{
-	private Collection<GridResultItem> myResults;
+	private GridQueryResult myResults;
 	
 	private EntityGriddedQuery query;
 	
 	private String dataTable;
 	private String gridTable;
+	
+	@Override
+	public boolean canExecute(IQueryType querytype) {
+		return EntityWaypointQueryType.KEY.equals(querytype.getKey());
+	}
+	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -83,12 +95,15 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 	 * @return
 	 * @throws SQLException
 	 */
-	public Collection<GridResultItem> executeQuery(
-			final EntityGriddedQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
-
-		this.query = query;
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+		
+		this.query = (EntityGriddedQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+	
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
@@ -111,7 +126,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 						items.put(it.getTileId(), it);
 					}
 
-					myResults = items.values();
+					myResults = new GridQueryResult(items.values());
 					
 					monitor.worked(1);
 				}catch (Exception ex){
@@ -125,6 +140,7 @@ public class DerbyGridEngine extends DerbyEntityQueryEngine{
 			}
 
 		});
+		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
 	}

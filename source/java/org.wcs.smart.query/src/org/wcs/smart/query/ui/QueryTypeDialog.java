@@ -82,7 +82,7 @@ public class QueryTypeDialog extends TitleAreaDialog {
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
 		
 		
-		IQueryType[] queryTypes = QueryTypeManager.getInstance().getSupportedQueryTypes();
+		IQueryType[] queryTypes = QueryTypeManager.INSTANCE.getSupportedQueryTypes();
 		ops = new TableViewer(main, SWT.BORDER);
 		ops.setContentProvider(ArrayContentProvider.getInstance());
 		ops.setLabelProvider(new QueryTypeLabelProvider());

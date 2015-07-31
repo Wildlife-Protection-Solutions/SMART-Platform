@@ -34,10 +34,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 

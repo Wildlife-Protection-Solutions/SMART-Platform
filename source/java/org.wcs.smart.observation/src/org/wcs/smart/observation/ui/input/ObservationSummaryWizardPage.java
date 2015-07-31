@@ -54,6 +54,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -117,7 +118,7 @@ public class ObservationSummaryWizardPage  extends WizardPage implements IObserv
 				@Override
 				public String getText(Object element){
 					if (element instanceof Employee){
-						return ((Employee)element).getFullLabel();
+						return LabelConstants.getFullLabel((Employee)element);
 					}
 					return super.getText(element);
 				}

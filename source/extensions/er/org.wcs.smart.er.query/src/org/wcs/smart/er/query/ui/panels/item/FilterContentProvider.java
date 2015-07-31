@@ -52,8 +52,8 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveySummaryQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -272,7 +272,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 	}
 	
 	private boolean hasTrackObservationSuOption(){
-		if (qType.getKey().equals(SurveySummaryQueryType.KEY)){
+		if (qType.getKey().equals(SurveySummaryQuery.KEY)){
 			
 			//TODO: implement others
 			return true;
@@ -310,7 +310,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (qType.getKey().equals(MissionTrackQueryType.KEY)){
+		if (qType.getKey().equals(MissionTrackQuery.KEY)){
 			if (this.design != null){
 				return new Object[]{
 						Node.SURVEY_MISSION, 

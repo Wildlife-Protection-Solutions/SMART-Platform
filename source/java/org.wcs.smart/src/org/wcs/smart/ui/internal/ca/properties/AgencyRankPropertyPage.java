@@ -70,6 +70,7 @@ import org.hibernate.Transaction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.export.AgencyCsvImporter;
@@ -119,7 +120,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 * columns of agency table
 	 */
 	private enum AgencyColumn{
-		NAME( Agency.NAME, 1);
+		NAME( LabelConstants.AGENCY_NAME, 1);
 		String name;
 		int bounds;
 		AgencyColumn(String name, int bounds){
@@ -132,7 +133,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 * columns of rank table
 	 */
 	private enum RankColumn{
-		NAME( Rank.NAME, 1);
+		NAME( LabelConstants.RANK_NAME, 1);
 		String name;
 		int bounds;
 		RankColumn(String name, int bounds){

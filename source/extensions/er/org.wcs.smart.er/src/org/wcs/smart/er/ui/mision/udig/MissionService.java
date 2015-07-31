@@ -39,7 +39,7 @@ import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Mission point service
@@ -67,7 +67,7 @@ public class MissionService extends IService {
 	public MissionService(Mission mission){
 		this.mission = mission;
 		this.params = new HashMap<String, Serializable>();
-		this.params.put(MissionDataSourceFactory.MISSION_UUID.key, SmartUtils.encodeHex(this.mission.getUuid()));
+		this.params.put(MissionDataSourceFactory.MISSION_UUID.key, UuidUtils.uuidToString(this.mission.getUuid()));
 		this.url = MissionServiceExtension.createURL(this.params);
 		
 	}

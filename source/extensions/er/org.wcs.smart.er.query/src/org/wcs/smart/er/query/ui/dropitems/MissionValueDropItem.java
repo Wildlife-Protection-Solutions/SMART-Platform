@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.ui.dropitems;
 
+import java.util.Locale;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
@@ -50,7 +52,7 @@ public class MissionValueDropItem extends AbstractValueDropItem implements IValu
 
 	@Override
 	protected String getValueText() {
-		return item.guiName;
+		return item.getGuiName(Locale.getDefault());
 	}
 
 	@Override

@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
@@ -39,6 +40,7 @@ import org.hibernate.criterion.Order;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -51,8 +53,6 @@ import org.wcs.smart.util.SmartUtils;
  * @since 1.0.0
  */
 public class DataModel {
-
-	public static final String HKEY_SEPERATOR = "."; //$NON-NLS-1$
 	
 	private ConservationArea ca;	//the conservation area of the data model
 	private List<Category> categories;	//the root categories for the data model
@@ -81,6 +81,14 @@ public class DataModel {
 		
 	}
 	
+	public static Aggregation getAggregation(String key){
+		for (Aggregation agg : getAggregations()) {
+			if (agg.getName().equals(key)) {
+				return agg;
+			}
+		}
+		return null;
+	}
 	/**
 	 * 
 	 * @return all valid aggregations
@@ -459,7 +467,7 @@ public class DataModel {
 			session.getTransaction().rollback();
 			throw ex;
 		}
-		DataModelManager.getInstance().fireChangeListeners();
+		DataModelManager.INSTANCE.fireChangeListeners();
 		
 	}
 	
@@ -512,4 +520,26 @@ public class DataModel {
 		return clone;
 	}
 	
+	
+	/**
+	 * 
+	 * @param type
+	 * @return the image associated with a given attribute type
+	 */
+	public static Image getAttributeImage(AttributeType type){
+		if (type == Attribute.AttributeType.BOOLEAN){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_BOOLEAN_ICON);
+		}else if (type == Attribute.AttributeType.TEXT){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TEXT_ICON);
+		}else if (type == Attribute.AttributeType.LIST){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_LIST_ICON);
+		}else if (type == Attribute.AttributeType.NUMERIC){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_NUMBER_ICON);
+		}else if (type == Attribute.AttributeType.TREE){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_TREE_ICON);
+		}else if (type == Attribute.AttributeType.DATE){
+			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.ATTRIBUTE_DATE_ICON);
+		}
+		return null;
+	}
 }

@@ -23,6 +23,8 @@ package org.wcs.smart.er.query.engine;
 
 import java.util.List;
 
+import org.wcs.smart.query.common.engine.IQueryResult;
+
 
 /**
  * Interface for providing list of associated missions with 
@@ -31,7 +33,7 @@ import java.util.List;
  * @author Emily
  *
  */
-public interface ISurveyQueryMissionResult {
+public interface ISurveyQueryMissionResult extends IQueryResult{
 
 	/**
 	 * 

@@ -32,9 +32,10 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.query.parser.AbstractEmptyPatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.AbstractEmptyPatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Intelligence option to contribute to Patrol Query Filter
@@ -46,7 +47,8 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 	
 	public static final String KEY = STRING_CONTRIBUTION_KEY_PREFIX + "intelligence"; //$NON-NLS-1$
 
-	public static final ListItem ANY_INTELLIGENCE_ITEM = new ListItem(new byte[0], Messages.IntelligencePatrolQueryOption_AnyIntelligence);
+	public static final ListItem ANY_INTELLIGENCE_ITEM = 
+			new ListItem(UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR), Messages.IntelligencePatrolQueryOption_AnyIntelligence);
 	
 	@Override
 	public String getGuiName() {

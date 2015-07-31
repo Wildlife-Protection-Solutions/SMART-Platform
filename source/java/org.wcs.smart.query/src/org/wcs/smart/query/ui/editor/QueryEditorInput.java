@@ -22,12 +22,13 @@
 package org.wcs.smart.query.ui.editor;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -40,7 +41,7 @@ import org.wcs.smart.query.model.Query;
  */
 public class QueryEditorInput implements IEditorInput {
 	
-	private byte[] uuid = null;
+	private UUID uuid = null;
 	private String queryName = null;
 	private String id = null;
 	private boolean isShared;
@@ -63,7 +64,7 @@ public class QueryEditorInput implements IEditorInput {
 	public QueryEditorInput(Query query){
 		this(query.getUuid(), query.getName(), query.getId(), query
 				.getIsShared(), 
-				query.getType());
+				QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()));
 	}
 	
 	/**
@@ -74,7 +75,7 @@ public class QueryEditorInput implements IEditorInput {
 	 * @param isShared if the query is shared or not
 	 * @param type the type of query
 	 */
-	public QueryEditorInput(byte[] uuid, 
+	public QueryEditorInput(UUID uuid, 
 			String queryName, 
 			String id, 
 			boolean isShared,
@@ -119,7 +120,7 @@ public class QueryEditorInput implements IEditorInput {
 	 * 
 	 * @param uuid
 	 */
-	public void setUuid(byte[] uuid){
+	public void setUuid(UUID uuid){
 		this.uuid = uuid;
 	}
 	/**
@@ -139,7 +140,7 @@ public class QueryEditorInput implements IEditorInput {
 	/**
 	 * @return the query uuid or null if not set
 	 */
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.uuid;
 	}
 	
@@ -202,7 +203,7 @@ public class QueryEditorInput implements IEditorInput {
 	
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(uuid);
+		return uuid.hashCode();
 	}
 
 	/**
@@ -221,7 +222,8 @@ public class QueryEditorInput implements IEditorInput {
 		QueryEditorInput other = (QueryEditorInput) obj;
 		
 		if (uuid == null && other.uuid == null) return false;
-		if (!Arrays.equals(uuid, other.uuid))
+		if (uuid == null) return false;
+		if (!uuid.equals(other.uuid))
 			return false;
 		return true;
 	}

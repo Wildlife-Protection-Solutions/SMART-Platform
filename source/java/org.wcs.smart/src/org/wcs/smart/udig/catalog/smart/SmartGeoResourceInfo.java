@@ -33,6 +33,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.internal.Messages;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -47,7 +48,7 @@ public class SmartGeoResourceInfo extends IGeoResourceInfo {
 	private int featureCount = -1;
 	
 	public SmartGeoResourceInfo( SmartGeoResource resource, IProgressMonitor monitor){
-		this.title = resource.areaType.getGuiName();
+		this.title = LabelConstants.getAreaTypeName(resource.areaType);
 		try {
 			@SuppressWarnings("unchecked")
 			FeatureSource<SimpleFeatureType, SimpleFeature> fs = resource.resolve(FeatureSource.class, monitor);
@@ -64,7 +65,7 @@ public class SmartGeoResourceInfo extends IGeoResourceInfo {
 			this.bounds = env;
 		} catch (IOException e) {
 			this.featureCount = -1;
-			SmartPlugIn.log(Messages.SmartGeoResourceInfo_Error_ComputingBounds + resource.getType().getGuiName(), e);
+			SmartPlugIn.log(Messages.SmartGeoResourceInfo_Error_ComputingBounds + title, e);
 		}
 	}
 	

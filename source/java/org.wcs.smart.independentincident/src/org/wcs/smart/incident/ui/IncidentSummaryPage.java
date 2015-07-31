@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -67,8 +68,10 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Projection;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
@@ -93,6 +96,7 @@ import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.ui.input.ObservationWizard;
 import org.wcs.smart.observation.ui.input.ObservationWizardDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -175,6 +179,7 @@ public class IncidentSummaryPage extends EditorPart {
 	 * @param incident
 	 */
 	public void initData(Waypoint incident){
+		
 		Session session = HibernateManager.openSession();
 		session.saveOrUpdate(editor.getIncident());
 		try{
@@ -188,8 +193,13 @@ public class IncidentSummaryPage extends EditorPart {
 			this.txtDate.setText(DateFormat.getDateInstance().format(incident.getDateTime()));
 			this.txtTime.setText(DateFormat.getTimeInstance().format(incident.getDateTime()));
 			ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-			
-			Point p = Projection.transform(incident.getX(), incident.getY(), observationOptions.getViewProjection());
+			CoordinateReferenceSystem crs = null;
+			try{
+				crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+			}catch(FactoryException ex){
+				IncidentPlugIn.log(ex.getMessage(), ex);
+			}
+			Point p = ReprojectUtils.transform(incident.getX(), incident.getY(), crs);
 			this.txtLocation.setText(p.getX() + Messages.IncidentSummaryPage_LocationSeparator + p.getY());
 		
 			if (editor.getOptions().getTrackDistanceDirection()){
@@ -475,14 +485,14 @@ public class IncidentSummaryPage extends EditorPart {
 				}else  if (columnIndex == colIndex[2]){
 					//value
 					if (element instanceof WaypointObservationAttribute){
-						return ((WaypointObservationAttribute) element).getAttributeValueAsString();
+						return ((WaypointObservationAttribute) element).getAttributeValueAsString(Locale.getDefault());
 					}
 				}else  if (columnIndex == colIndex[3]){
 					//observer
 					if (element instanceof WaypointObservation){
 						WaypointObservation o = (WaypointObservation)element;
 						if (o.getObserver() != null){
-							return ((WaypointObservation) element).getObserver().getFullLabel();
+							return LabelConstants.getFullLabel(((WaypointObservation) element).getObserver());
 						}
 					}
 				}else if (columnIndex == colIndex[4]){
@@ -552,7 +562,9 @@ public class IncidentSummaryPage extends EditorPart {
 					Collections.sort(employees, new Comparator<Employee>() {
 						@Override
 						public int compare(Employee arg0, Employee arg1) {
-							return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+							return Collator.getInstance().compare(
+									LabelConstants.getFullLabel(arg0).toUpperCase(), 
+									LabelConstants.getFullLabel(arg1).toUpperCase());
 						}
 					});
 				}

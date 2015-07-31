@@ -52,6 +52,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -163,7 +164,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		loadAreaTypes();		
 		
 		getShell().setText(Messages.AreaNameDialogPage_DialogTitle);
-		setTitle(Messages.AreaNameDialogPage_MessageTitle + type.getGuiName());
+		setTitle(Messages.AreaNameDialogPage_MessageTitle + LabelConstants.getAreaTypeName(type));
 		setMessage(Messages.AreaNameDialogPage_DialogMessage);
 		
 		return composite; 

@@ -53,7 +53,7 @@ import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Mission id group by drop item.
@@ -146,7 +146,7 @@ public class MissionIdGroupByDropItem extends DropItem implements IGroupByDropIt
 		sb.append("sgb:mission:id:"); //$NON-NLS-1$
 		if (filteredValues != null && filteredValues.size() > 0){
 			for (ListItem id: filteredValues){
-				sb.append(SmartUtils.encodeHex(id.getUuid()));
+				sb.append(UuidUtils.uuidToString(id.getUuid()));
 				sb.append(":"); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);

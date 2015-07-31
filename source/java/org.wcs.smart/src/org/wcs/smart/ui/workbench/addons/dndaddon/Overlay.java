@@ -12,6 +12,7 @@ package org.wcs.smart.ui.workbench.addons.dndaddon;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;

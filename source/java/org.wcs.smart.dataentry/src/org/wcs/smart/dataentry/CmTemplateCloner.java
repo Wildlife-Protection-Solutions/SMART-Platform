@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Query;
@@ -280,7 +281,7 @@ public class CmTemplateCloner implements IConservationAreaTemplateCloner {
 		throw new Exception(MessageFormat.format(Messages.CmTemplateCloner_TreeNodeNotFoundError,new Object[]{oldTreeNode.getHkey()}));
 	}
 	
-	private byte[] findNewUuidItem(byte[] oldUuidItem) throws Exception{
+	private UUID findNewUuidItem(UUID oldUuidItem) throws Exception{
 		//search list nodes
 		AttributeListItem li = (AttributeListItem) engine.getSession().get(AttributeListItem.class, oldUuidItem);
 		if (li != null){

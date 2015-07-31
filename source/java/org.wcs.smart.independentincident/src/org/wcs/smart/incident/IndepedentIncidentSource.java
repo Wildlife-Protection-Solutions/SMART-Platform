@@ -27,6 +27,7 @@ import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Waypoint source class for indepdenent incidents.
@@ -69,13 +70,17 @@ public class IndepedentIncidentSource implements IWaypointSource {
 	 * @see org.wcs.smart.observation.model.IWaypointSource#getDatastoreFileLocation(org.wcs.smart.observation.model.Waypoint)
 	 */
 	@Override
-	public String getDatastoreFileLocation(Waypoint wp) {
-		StringBuilder sb = new StringBuilder();
-		sb.append(FILESTORE_LOC);
-		sb.append(File.separator);
-		sb.append(SmartUtils.encodeHex(wp.getUuid()));
-		sb.append(File.separator);
-		return sb.toString();
+	public String getDatastoreFileLocation(Object wp) {
+		if (wp instanceof Waypoint){
+			StringBuilder sb = new StringBuilder();
+			sb.append(FILESTORE_LOC);
+			sb.append(File.separator);
+			sb.append(UuidUtils.uuidToString(((Waypoint)wp).getUuid()));
+			sb.append(File.separator);
+			return sb.toString();
+		}else{
+			throw new IllegalStateException("Object type " + wp.getClass().getName() + " not supported for idependent incident source."); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 }

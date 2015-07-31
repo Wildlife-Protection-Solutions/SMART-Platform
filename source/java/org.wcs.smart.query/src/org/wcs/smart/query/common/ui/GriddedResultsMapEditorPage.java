@@ -55,10 +55,13 @@ import org.locationtech.udig.project.internal.commands.DeleteLayerCommand;
 import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -91,9 +94,9 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 			}
 		}
 		
-		private void updateStyle(ILayer layer) throws IOException{
+		private void updateStyle(ILayer layer) throws Exception{
 			StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
-			sq.updateStyle(RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
+			QueryStyleParser.INSTANCE.updateStyle(sq, RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
 			getSite().getShell().getDisplay().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -113,9 +116,12 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 			try {
 				// retrieves the last query result
 				GriddedQuery query = (GriddedQuery) parentEditor.getQuery();
-				Collection<GridResultItem> queryResults = (Collection<GridResultItem>) parentEditor
-						.getQuery().getCachedResults(monitor);
-				if ((queryResults == null) || queryResults.isEmpty())
+				//TODO; if null then it has not be run or it is still running
+				//if not run we might want to run again
+				//if still running we probably want to wait.
+				IQueryResult queryResults = query.getCachedResults();
+				
+				if ((queryResults == null) || ((GridQueryResult)queryResults).getData().isEmpty())
 					return Status.OK_STATUS;
 
 				Map map = getMap();
@@ -180,7 +186,7 @@ public class GriddedResultsMapEditorPage extends SmartMapEditorPart {
 						final StyledQuery sq = ((StyledQuery) parentEditor.getQueryProxy().getQuery());
 						ILayer layer = getLayers().get(0);
 						if (sq.getStyle() != null) {
-							sq.applyStyle(RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
+							QueryStyleParser.INSTANCE.applyStyle(sq, RESOURCE_KEY, (StyleBlackboard) layer.getStyleBlackboard());
 							//do this to ensure the correct events are fired
 							((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
 						}

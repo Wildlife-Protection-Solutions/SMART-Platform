@@ -63,12 +63,12 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.tool.Tool;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider.ICrsProvider;
 import org.wcs.smart.ui.map.location.tool.IMapPointSelectionListener;
 import org.wcs.smart.ui.map.location.tool.SelectionTool;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
@@ -368,7 +368,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 		try {
 			CoordinateReferenceSystem sourceCrs = getCurrentCrs();
 			Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
-			return (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+			return (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, GeometryUtils.SMART_CRS));
 		} catch (Exception e) {
 			SmartPlugIn.displayLog(Messages.LocationSelectComposite_PointConversion_Error, e);
 		}
@@ -418,7 +418,7 @@ public abstract class LocationSelectComposite<T extends ISmartPoint> extends Sas
 
 	private void updateAddButtonDecoration() {
 		if (addButton == null) return;
-		boolean warn = addButton.isEnabled() && !CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS, getCurrentCrs());
+		boolean warn = addButton.isEnabled() && !CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, getCurrentCrs());
 		if (warn) {
 			addButtonDecoration.show();
 		} else {

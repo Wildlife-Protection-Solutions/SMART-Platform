@@ -42,6 +42,7 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Smart plan target data source factory.  This is a read only data source.
@@ -128,7 +129,7 @@ public class PlanTargetDataSourceFactory implements DataStoreFactorySpi{
 			protected IStatus run(IProgressMonitor monitor) {
 				Session session = HibernateManager.openSession();
 				try{
-					Plan temp = (Plan)session.load(Plan.class, SmartUtils.decodeHex(planUuid));
+					Plan temp = (Plan)session.load(Plan.class, UuidUtils.stringToUuid(planUuid));
 					if (temp == null ){
 						throw new IOException(Messages.PlanTargetDataSourceFactory_PlanNotFound);
 					}

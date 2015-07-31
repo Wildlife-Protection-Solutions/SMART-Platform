@@ -48,10 +48,10 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.IExtensionOption;
+import org.wcs.smart.patrol.query.model.IExtensionOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.parser.PatrolContributionFactory;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
@@ -59,10 +59,11 @@ import org.wcs.smart.query.common.ui.itempanel.DateTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
+import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
-import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
+import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 /**
  * Panel for displaying summary value
@@ -174,10 +175,10 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 			
-			List<IDateGroupBy> dates = new ArrayList<IDateGroupBy>();
-			dates.add(DayDateGroupBy.INSTANCE);
-			dates.add(MonthDateGroupBy.INSTANCE);
-			dates.add(YearDateGroupBy.INSTANCE);
+			List<DateGroupByViewer> dates = new ArrayList<DateGroupByViewer>();
+			dates.add(new DateGroupByViewer(new DateGroupBy(DayDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));
 			input.put(DateTreeNode.KEY, dates);
 			
 			

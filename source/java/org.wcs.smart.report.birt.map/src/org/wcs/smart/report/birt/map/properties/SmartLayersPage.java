@@ -24,6 +24,7 @@ package org.wcs.smart.report.birt.map.properties;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
@@ -73,7 +74,7 @@ import org.wcs.smart.report.birt.map.SmartMapItemPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.ui.BasemapLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 /**
  * A birt property tab for displaying map options
  * to user.
@@ -83,7 +84,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
-	private static final byte[] DEFAULT_BASEMAP = new byte[]{-1};
+	private static final UUID DEFAULT_BASEMAP = UuidUtils.stringToUuid("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"); 
 	
 	private static final String ERROR_DIALOG_TITLE = Messages.SmartLayersPage_ErrorDialog_Title;
 	public static final String PAGE_KEY = "MapLayers"; //$NON-NLS-1$
@@ -455,13 +456,13 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				mapItem.setDatasets(datasets);
 				
 			} else if (prop.equals(SmartMapItem.SMART_BASEMAP_PROP)) {
-				byte[] uuid = getSelectedBasemapUuid();
+				UUID uuid = getSelectedBasemapUuid();
 				if (uuid == null){
 					mapItem.setBasemapName(null);
 				}else if (uuid.equals(DEFAULT_BASEMAP)){
 					mapItem.setBasemapName(SmartMapItem.DEFAULT_BASEMAP_KEY);
 				}else{
-					String name = SmartUtils.encodeHex(uuid);
+					String name = UuidUtils.uuidToString(uuid);
 					mapItem.setBasemapName(name);
 				}
 			} else if (prop.equals(SmartMapItem.SMART_BOUNDS_GROUP)) {
@@ -483,12 +484,12 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 	 * 
 	 * @return the selected basemap uuid or null
 	 */
-	private byte[] getSelectedBasemapUuid(){
+	private UUID getSelectedBasemapUuid(){
 		IStructuredSelection selection = ((IStructuredSelection) basemapCombo.getSelection());
 		if (selection.isEmpty()) {
 			return null;
 		} else {
-			byte[] uuid = ((BasemapDefinition) selection
+			UUID uuid = ((BasemapDefinition) selection
 					.getFirstElement()).getUuid();
 			return uuid;
 		}
@@ -597,7 +598,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			BasemapDefinition bm = (BasemapDefinition) data[i];
 			if ((uuid == null && bm.getUuid() == null) ||
 				(uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY) && bm.getUuid().equals(DEFAULT_BASEMAP)) || 
-					SmartUtils.encodeHex(bm.getUuid()).equals(uuid)){
+					UuidUtils.uuidToString(bm.getUuid()).equals(uuid)){
 				selection = data[i];
 				break;
 			}

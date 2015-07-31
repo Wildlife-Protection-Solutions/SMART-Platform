@@ -67,6 +67,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -217,7 +218,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		btnUpdate = new Button[Area.AreaType.values().length];
 		for (int i = 0; i < Area.AreaType.values().length; i++) {
 			Label lbl = new Label(comp, SWT.NONE);
-			lbl.setText(Area.AreaType.values()[i].getGuiName() + ":"); //$NON-NLS-1$
+			lbl.setText(LabelConstants.getAreaTypeName(Area.AreaType.values()[i]) + ":"); //$NON-NLS-1$
 			lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 			
 			lbl = new Label(comp, SWT.NONE);
@@ -274,7 +275,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * clears areas from database
 	 */
 	private void deleteAll(Area.AreaType areatype){
-		boolean ret = MessageDialog.openConfirm(getShell(), Messages.AreaPropertyPage_Clear_DialogTitle + areatype.getGuiName(), MessageFormat.format(Messages.AreaPropertyPage_Clear_DialogMessage, new Object[]{areatype.getGuiName()}));
+		boolean ret = MessageDialog.openConfirm(getShell(), Messages.AreaPropertyPage_Clear_DialogTitle + LabelConstants.getAreaTypeName(areatype), MessageFormat.format(Messages.AreaPropertyPage_Clear_DialogMessage, new Object[]{LabelConstants.getAreaTypeName(areatype)}));
 		if (!ret ){
 			return;
 		}
@@ -324,7 +325,11 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		//check to ensure
 		if (verify){
-			boolean ret = MessageDialog.openConfirm(getShell(), Messages.AreaPropertyPage_Update_DialogTitle + areatype.getGuiName(), MessageFormat.format(Messages.AreaPropertyPage_Update_DialogMessage, new Object[]{areatype.getGuiName()}));
+			boolean ret = MessageDialog.openConfirm(getShell(),
+					Messages.AreaPropertyPage_Update_DialogTitle + 
+					LabelConstants.getAreaTypeName(areatype), 
+					MessageFormat.format(Messages.AreaPropertyPage_Update_DialogMessage, 
+							new Object[]{LabelConstants.getAreaTypeName(areatype)}));
 			if (!ret ){
 				return false;
 			}
@@ -332,7 +337,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		
 		fileDialog = new FileDialog(parent.getShell(), SWT.SINGLE | SWT.OPEN);
-		fileDialog.setText(Messages.AreaPropertyPage_Load_DialogTitle + areatype.getGuiName());
+		fileDialog.setText(Messages.AreaPropertyPage_Load_DialogTitle + LabelConstants.getAreaTypeName(areatype));
 		fileDialog.setFilterExtensions(new String[]{"*.shp", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		fileDialog.setFilterNames(new String[]{Messages.AreaPropertyPage_Shapefile_FilterName, Messages.AreaPropertyPage_AllFiles_FilterName});
 		
@@ -452,7 +457,7 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 										defaultName = id;
 									}
 								}
-								String key = Area.generateKey(defaultName, currentKeys);
+								String key = Area.generateKey(defaultName, Messages.Area_EmptyKey, currentKeys);
 								area.setKeyId(key);
 								currentKeys.add(key);
 								

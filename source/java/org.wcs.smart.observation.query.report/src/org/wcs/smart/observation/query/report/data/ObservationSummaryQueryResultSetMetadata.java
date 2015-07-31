@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.engine.DerbySummaryEngine;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.report.internal.Messages;
@@ -63,6 +64,8 @@ public class ObservationSummaryQueryResultSetMetadata extends SummaryQueryResult
 					}
 					
 					DerbySummaryEngine.getHeaderInfo((ObservationSummaryQuery)query, results, session);
+				}catch (Exception ex){
+					ObservationQueryPlugIn.displayLog(ex.getMessage(), ex);
 				}finally{
 					session.close();
 				}

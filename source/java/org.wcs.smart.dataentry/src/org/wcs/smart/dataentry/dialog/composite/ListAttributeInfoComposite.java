@@ -23,7 +23,6 @@ package org.wcs.smart.dataentry.dialog.composite;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -45,6 +44,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.dataentry.CmDefaultListsUtil;
 import org.wcs.smart.dataentry.dialog.RenameListDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -199,7 +199,7 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 			if (option != null && option.getUuidValue() != null) {
 				for (Object item : input) {
 					if (item instanceof AttributeListItem
-							&& (Arrays.equals(((AttributeListItem) item).getUuid(),option.getUuidValue()))) {
+							&& ((AttributeListItem) item).getUuid().equals(option.getUuidValue())) {
 						defaultViewer.setSelection(new StructuredSelection(item));
 					}
 				}

@@ -30,6 +30,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -69,7 +70,7 @@ public class SurveyDesignPropertyTable extends SmartBirtTable {
 		int i = 6;
 		List<NamedKeyItem> other = new ArrayList<NamedKeyItem>();
 		for (SurveyDesignProperty p : sd.getProperties()){
-			names[i++] = "sd:" + NamedKeyItem.generateKey(p.getName(), other); //$NON-NLS-1$
+			names[i++] = "sd:" + DataModelManager.INSTANCE.generateKey(p.getName(), other); //$NON-NLS-1$
 		}
 		return names;
 	}

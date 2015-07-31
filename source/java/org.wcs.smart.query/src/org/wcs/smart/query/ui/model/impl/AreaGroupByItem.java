@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.ToolTip;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -131,7 +132,7 @@ public class AreaGroupByItem extends DropItem implements IGroupByDropItem,ICombi
 	@Override
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
-		sb.append (type.getGuiName());
+		sb.append (getLabel(type));
 		int cnt = 0;
 		if (filters != null){
 			for (ListItem it : filters){
@@ -307,5 +308,7 @@ public class AreaGroupByItem extends DropItem implements IGroupByDropItem,ICombi
 		}
 		toolTip.setMessage(tipStr.toString());
 	}
-
+	protected String getLabel(Area.AreaType area){
+		return LabelConstants.getAreaTypeName(area);
+	}
 }

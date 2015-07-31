@@ -25,7 +25,7 @@ import java.sql.Time;
 
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**

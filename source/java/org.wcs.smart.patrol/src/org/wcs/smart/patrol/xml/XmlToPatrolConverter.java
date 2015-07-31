@@ -35,6 +35,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -50,6 +51,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -203,7 +205,8 @@ public class XmlToPatrolConverter {
 				
 		if (ttype == null){
 			throw new Exception(MessageFormat.format(
-				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), patrol.getPatrolType().getGuiName()}));
+				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), 
+						org.wcs.smart.patrol.ui.LabelConstants.getLabel(patrol.getPatrolType())}));
 		}
 		boolean found = false;
 		
@@ -219,7 +222,8 @@ public class XmlToPatrolConverter {
 		}
 		if (!found){
 			throw new Exception(MessageFormat.format(
-					Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), patrol.getPatrolType().getGuiName()}));
+					Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
+							org.wcs.smart.patrol.ui.LabelConstants.getLabel(patrol.getPatrolType())}));
 		}
 		leg.setType(ttype);
 		
@@ -232,7 +236,7 @@ public class XmlToPatrolConverter {
 				if (e != null){
 					warnings.add(MessageFormat.format(
 							Messages.XmlToPatrolConverter_Warning_EmployeeNameDifferent,
-							new Object[]{member.getEmployeeId(), Employee.formatName(member.getGivenName(), member.getFamilyName()),e.getShortLabel()}) 
+							new Object[]{member.getEmployeeId(), LabelConstants.formatName(member.getGivenName(), member.getFamilyName()),LabelConstants.getShortLabel(e)}) 
 						);
 							
 							
@@ -241,12 +245,12 @@ public class XmlToPatrolConverter {
 					if (e == null){
 						warnings.add(MessageFormat.format(
 								Messages.XmlToPatrolConverter_Warning_EmployeeNotFound,
-								new Object[]{Employee.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId())}
+								new Object[]{LabelConstants.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId())}
 						));
 					}else{					
 						
 						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_EmployeeIdDifferent,
-								new Object[]{Employee.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId() ), e.getFullLabel()}
+								new Object[]{LabelConstants.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId() ), LabelConstants.getFullLabel(e)}
 						));
 					}
 				}
@@ -315,7 +319,7 @@ public class XmlToPatrolConverter {
 			TrackType txml = xml.getTrack();
 			Track track = new Track();
 			track.setDistance((float)txml.getDistance().doubleValue());
-			track.setGeom( SmartUtils.decodeHex(txml.getGeom()) );
+			track.setGeom( SmartUtils.decodeGeometry(txml.getGeom()) );
 			track.setPatrolLegDay(legday);
 			legday.setTrack(track);
 		}
@@ -391,7 +395,12 @@ public class XmlToPatrolConverter {
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
 						ob.getAttachments().add(att);
-						att.setObservation(ob);
+						try {
+							att.setObservation(ob);
+						} catch (Exception e) {
+							SmartPatrolPlugIn.log(e.getMessage(), e);
+							warnings.add("Error configuring attachment.  " + e.getMessage());
+						}
 					}
 				}
 			}

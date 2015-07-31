@@ -179,7 +179,7 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 		});
 		
 		List<IWaypointSource> srcs = new ArrayList<IWaypointSource>();
-		srcs.addAll(WaypointSourceEngine.getInstance().getSupportedSources());
+		srcs.addAll(WaypointSourceEngine.INSTANCE.getSupportedSources());
 		Collections.sort(srcs, new Comparator<IWaypointSource>() {
 			@Override
 			public int compare(IWaypointSource o1, IWaypointSource o2) {

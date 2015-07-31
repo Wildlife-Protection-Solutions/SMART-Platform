@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,7 +39,7 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Udig service extension for smart queries
@@ -70,10 +71,10 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
             
         //check for the property service key
         if (params.containsKey(SamplingUnitSourceFactory.SD_UUID.key )
-        		&& params.get(SamplingUnitSourceFactory.SD_UUID.key) instanceof byte[]) {
+        		&& params.get(SamplingUnitSourceFactory.SD_UUID.key) instanceof UUID) {
             //found it, create the service handle
         	//in a separate job load survey design
-        	final byte[] uuid = (byte[]) params.get(SamplingUnitSourceFactory.SD_UUID.key);
+        	final UUID uuid = (UUID) params.get(SamplingUnitSourceFactory.SD_UUID.key);
         	final SurveyDesign[] sd = new SurveyDesign[1];
         	Job j = new Job(Messages.SamplingUnitServiceExtension_jobName){
 				@Override
@@ -119,7 +120,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	 * @param surveyDesignUuid
 	 * @return
 	 */
-	public static URL createURL(byte[] surveyDesignUuid) {
+	public static URL createURL(UUID surveyDesignUuid) {
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(SamplingUnitSourceFactory.SD_UUID.key, surveyDesignUuid);
 		return createURL(params);
@@ -165,7 +166,7 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 		
 		try{
 			sduuid = sduuid.substring(pos);
-			byte[] buuid = SmartUtils.decodeHex(sduuid);
+			UUID buuid = UuidUtils.stringToUuid(sduuid);
 			HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 			params.put(SamplingUnitSourceFactory.SD_UUID.key, buuid);
 			return params;
@@ -185,10 +186,10 @@ public class SamplingUnitServiceExtension implements ServiceExtension {
 	public static URL createURL(Map<String, Serializable> params){
 		String url = PROTOCOL + "://" + HOST + "/er/"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (params.get(SamplingUnitSourceFactory.SD_UUID.key) == null ||
-			!(params.get(SamplingUnitSourceFactory.SD_UUID.key) instanceof byte[])){
+			!(params.get(SamplingUnitSourceFactory.SD_UUID.key) instanceof UUID)){
 			url += System.nanoTime();
 		}else{
-			url += SmartUtils.encodeHex((byte[])params.get(SamplingUnitSourceFactory.SD_UUID.key)) ;
+			url += UuidUtils.uuidToString((UUID)params.get(SamplingUnitSourceFactory.SD_UUID.key)) ;
 		}
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);

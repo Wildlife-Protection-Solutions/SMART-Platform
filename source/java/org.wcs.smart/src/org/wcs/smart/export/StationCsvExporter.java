@@ -55,10 +55,9 @@ public class StationCsvExporter implements ICsvDataExporter {
 	}
 
 	@Override
-	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) {
-		
-		
-			List<Language> languages = new ArrayList<Language>(ca.getLanguages());
+	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, 
+			boolean headers, IProgressMonitor monitor, Session session) {
+		List<Language> languages = new ArrayList<Language>(ca.getLanguages());
 		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
 					delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
@@ -77,7 +76,7 @@ public class StationCsvExporter implements ICsvDataExporter {
 				String csvout[] = new String[stationColumns.length];
 				for(Language l : languages){
 					csvout[i++] = station.findName(l);
-					csvout[i++] = station.findDescriptionNull(l) == null ? "" : station.findDescriptionNull(l); //$NON-NLS-1$
+					csvout[i++] = station.findDescriptionNull(session, l) == null ? "" : station.findDescriptionNull(session, l); //$NON-NLS-1$
 				}
 				writer.writeNext(csvout);
 				

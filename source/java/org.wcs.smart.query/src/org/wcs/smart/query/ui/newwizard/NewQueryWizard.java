@@ -127,7 +127,7 @@ public class NewQueryWizard extends Wizard implements IPageChangingListener {
 	public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 		
-		List<QueryCategory> c = QueryTypeManager.getInstance().getQueryGroups();
+		List<QueryCategory> c = QueryTypeManager.INSTANCE.getQueryGroups();
 		Collections.sort(c, new Comparator<QueryCategory>() {
 			@Override
 			public int compare(QueryCategory c0, QueryCategory c1) {

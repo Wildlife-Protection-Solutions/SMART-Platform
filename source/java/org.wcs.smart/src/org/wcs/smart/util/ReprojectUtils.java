@@ -25,11 +25,14 @@ import java.util.HashMap;
 
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Point;
 
 /**
  * Database functions for reprojecting waypoints in 4326
@@ -81,7 +84,7 @@ public class ReprojectUtils {
 	public static Coordinate reproject(double x, double y, String destCrsWkt) throws Exception{
 		MathTransform t = transformMap.get(destCrsWkt);
 		if (t == null){
-			t = CRS.findMathTransform(SmartDB.DATABASE_CRS, CRS.parseWKT(destCrsWkt));
+			t = CRS.findMathTransform(GeometryUtils.SMART_CRS, CRS.parseWKT(destCrsWkt));
 			transformMap.put(destCrsWkt, t);
 		}
 		Coordinate transformed = JTS.transform(new Coordinate(x,y), null, t);
@@ -102,5 +105,42 @@ public class ReprojectUtils {
 	public static Coordinate reproject(double x, double y, CoordinateReferenceSystem sourceCrs, CoordinateReferenceSystem targetCrs) throws Exception{
 		MathTransform t = CRS.findMathTransform(sourceCrs, targetCrs);
 		return JTS.transform(new Coordinate(x,y), null, t);
+	}
+	
+	/**
+	 * Parses the definition into a coordinate reference system
+	 * object.
+	 * 
+	 * @return 
+	 * @throws FactoryException
+	 */
+	public static CoordinateReferenceSystem stringToCrs(String definition) throws FactoryException{
+		if (definition == null){
+			return null;
+		}
+		return CRS.parseWKT(definition);
+	}
+	
+	
+	public static String crsToString(CoordinateReferenceSystem crs){
+		return crs.toWKT();
+	}
+	
+	public static Point transform(double x, double y, CoordinateReferenceSystem target) {
+		Point point = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(x, y));
+		if (target == null)
+			return point;
+		try {
+			CoordinateReferenceSystem targetCrs = target;
+			
+			if (!CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS, targetCrs)){
+				MathTransform transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, targetCrs);
+				Point p = (Point) JTS.transform(point, transform);
+				return p;
+			}
+		} catch (Exception e) {
+			SmartPlugIn.log("Failed while converting to view projection's CRS", e); //$NON-NLS-1$
+		}
+		return point;
 	}
 }

@@ -25,7 +25,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.wcs.smart.intelligence.query.internal.Messages;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -86,7 +86,7 @@ public class FixedQueryColumn extends QueryColumn {
 
 
 	/**)
-	 * @see org.wcs.smart.query.model.QueryColumn#getValue(org.wcs.smart.query.model.IResultItem)
+	 * @see org.wcs.smart.query.model.QueryColumn#getValue(org.wcs.smart.query.common.engine.IResultItem)
 	 */
 	public Object getValue(IResultItem queryResultItem) {
 		if (queryResultItem instanceof IntelligenceRecordResultItem){

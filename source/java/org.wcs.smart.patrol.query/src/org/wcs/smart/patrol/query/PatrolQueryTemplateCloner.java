@@ -35,14 +35,10 @@ import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
@@ -58,7 +54,7 @@ import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Clones the various shared patrol queries.
@@ -101,7 +97,7 @@ public class PatrolQueryTemplateCloner implements
 		List<PatrolGriddedQuery> queries = (List<PatrolGriddedQuery>) engine.getSession().createCriteria(PatrolGriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(PatrolGriddedQuery query : queries){
-			PatrolGriddedQuery clone = (PatrolGriddedQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolGridQueryType.KEY) );
+			PatrolGriddedQuery clone = (PatrolGriddedQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolGriddedQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -132,7 +128,7 @@ public class PatrolQueryTemplateCloner implements
 		List<PatrolSummaryQuery> queries = (List<PatrolSummaryQuery>) engine.getSession().createCriteria(PatrolSummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(PatrolSummaryQuery query : queries){
-			PatrolSummaryQuery clone = (PatrolSummaryQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolSummaryQueryType.KEY) );
+			PatrolSummaryQuery clone = (PatrolSummaryQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolSummaryQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -160,7 +156,7 @@ public class PatrolQueryTemplateCloner implements
 		List<PatrolQuery> queries = (List<PatrolQuery>) engine.getSession().createCriteria(PatrolQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(PatrolQuery query : queries){
-			PatrolQuery clone = (PatrolQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolQueryType.KEY) );
+			PatrolQuery clone = (PatrolQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolQuery.KEY) );
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -190,7 +186,7 @@ public class PatrolQueryTemplateCloner implements
 		List<PatrolObservationQuery> queries = (List<PatrolObservationQuery>) engine.getSession().createCriteria(PatrolObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
 		
 		for(PatrolObservationQuery query : queries){
-			PatrolObservationQuery clone = (PatrolObservationQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolObservationQueryType.KEY) );
+			PatrolObservationQuery clone = (PatrolObservationQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolObservationQuery.KEY) );
 
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -221,7 +217,7 @@ public class PatrolQueryTemplateCloner implements
 		List<PatrolWaypointQuery> queries = (List<PatrolWaypointQuery>) engine.getSession().createCriteria(PatrolWaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(PatrolWaypointQuery query : queries){
-			PatrolWaypointQuery clone = (PatrolWaypointQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( PatrolWaypointQueryType.KEY) );
+			PatrolWaypointQuery clone = (PatrolWaypointQuery) PatrolQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( PatrolWaypointQuery.KEY) );
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -273,9 +269,9 @@ public class PatrolQueryTemplateCloner implements
 				PatrolGroupBy pgb = (PatrolGroupBy)gb;
 				if (pgb.getItems() != null){
 					for (int i = 0; i < pgb.getItems().length; i ++){
-						UuidItem it = engine.getNewConservationItem(SmartUtils.decodeHex(pgb.getItems()[i]));
+						UuidItem it = engine.getNewConservationItem(UuidUtils.stringToUuid(pgb.getItems()[i]));
 						if (it != null){
-							pgb.getItems()[i] = SmartUtils.encodeHex(it.getUuid());
+							pgb.getItems()[i] = UuidUtils.uuidToString(it.getUuid());
 						}
 					}
 				}
@@ -301,12 +297,13 @@ public class PatrolQueryTemplateCloner implements
 				if (filter instanceof PatrolFilter){
 					try{
 					PatrolFilter pFilter = (PatrolFilter)filter;
+					
 					if (pFilter.getPatrolOption().getType() == PatrolQueryOptionType.UUID){
 						//need to find the old uuid items and match to new items
 						String templateUuid = pFilter.getValue();
-						UuidItem newItem = engine.getNewConservationItem(SmartUtils.decodeHex(templateUuid));
+						UuidItem newItem = engine.getNewConservationItem(UuidUtils.stringToUuid(templateUuid));
 						if (newItem != null){
-							pFilter.setValue(SmartUtils.encodeHex(newItem.getUuid()));
+							pFilter.setValue(UuidUtils.uuidToString(newItem.getUuid()));
 						}
 					}
 					}catch (Exception ex){

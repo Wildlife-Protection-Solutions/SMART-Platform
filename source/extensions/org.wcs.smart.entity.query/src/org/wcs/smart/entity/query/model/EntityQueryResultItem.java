@@ -23,9 +23,10 @@ package org.wcs.smart.entity.query.model;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * A class to hold the results of a waypoint 
@@ -44,7 +45,7 @@ public class EntityQueryResultItem implements IResultItem{
 	private String sourceId;
 	
 	private Date wpDateTime;
-	private byte[] waypointUuid;
+	private UUID waypointUuid;
 	private int waypointId;
 	private double waypointX;
 	private double waypointY;
@@ -57,20 +58,20 @@ public class EntityQueryResultItem implements IResultItem{
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	private HashMap<String, Object> entityAttributes = new HashMap<String, Object>();
 	
-	private byte[] observationUuid;
+	private UUID observationUuid;
 	
 
 	/**
 	 * @param observationUuid the observation uuid
 	 */
-	public void setObservationUuid(byte[] observationUuid){
+	public void setObservationUuid(UUID observationUuid){
 		this.observationUuid = observationUuid;
 	}
 	
 	/**
 	 * @return the observation uuid
 	 */
-	public byte[] getObservationUuid(){
+	public UUID getObservationUuid(){
 		return this.observationUuid;
 	}
 
@@ -147,14 +148,14 @@ public class EntityQueryResultItem implements IResultItem{
 	 * sets the waypoint uuid
 	 * @param uuid
 	 */
-	public void setWaypointUuid(byte[] uuid){
+	public void setWaypointUuid(UUID uuid){
 		this.waypointUuid = uuid;
 	}
 	/**
 	 * 
 	 * @return the waypoint uuid
 	 */
-	public byte[] getWaypointUuid(){
+	public UUID getWaypointUuid(){
 		return this.waypointUuid;
 	}
 	

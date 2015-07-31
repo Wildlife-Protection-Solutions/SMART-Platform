@@ -40,7 +40,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * SMRAT Intelligence Location Points target result set
@@ -70,7 +70,7 @@ public class IntelligencePointsResultSet implements IResultSet {
 				try{
 					Intelligence p = (Intelligence)session.createCriteria(Intelligence.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-							.add(Restrictions.eq("uuid", SmartUtils.decodeHex(uuids[i]))).list().get(0); //$NON-NLS-1$
+							.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(uuids[i]))).list().get(0); //$NON-NLS-1$
 					if (p != null) {
 						points.addAll(p.getPoints());
 						m_maxRows += p.getPoints().size();

@@ -201,7 +201,7 @@ public class EntityTypeEditDmAttributeDialog extends TranslateSimpleListItemDial
 				}
 				
 				try{
-					String canEdit = DataModelManager.getInstance().canEdit(((EntityAttribute)item).getDmAttribute(), openSession);
+					String canEdit = DataModelManager.INSTANCE.canEdit(((EntityAttribute)item).getDmAttribute(), openSession);
 					if (canEdit != null){
 						if (!MessageDialog.openQuestion(getShell(), Messages.EntityTypeEditDmAttributeDialog_WarningTitle, 
 								Messages.EntityTypeEditDmAttributeDialog_AttributeError + "\n\n" + canEdit + "\n\n" + Messages.EntityTypeEditDmAttributeDialog_ContinueLabel)){   //$NON-NLS-1$ //$NON-NLS-2$

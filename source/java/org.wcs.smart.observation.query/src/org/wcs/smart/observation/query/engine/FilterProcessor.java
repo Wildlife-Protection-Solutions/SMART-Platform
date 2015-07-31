@@ -58,7 +58,7 @@ public class FilterProcessor implements IFilterProcessor {
 	private String tableName;
 	private String observationTable;
 	
-	private DerbyObservationQueryEngine engine;
+	private AbstractDerbyObservationQueryEngine engine;
 	
 	private HasObservationFilterVisitor observationFilterVisitor = new HasObservationFilterVisitor();
 	
@@ -68,7 +68,7 @@ public class FilterProcessor implements IFilterProcessor {
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public FilterProcessor(String tableName, DerbyObservationQueryEngine engine){
+	public FilterProcessor(String tableName, AbstractDerbyObservationQueryEngine engine){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.observationTable = engine.createTempTableName();

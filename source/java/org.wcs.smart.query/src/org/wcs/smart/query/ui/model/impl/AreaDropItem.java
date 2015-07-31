@@ -25,6 +25,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -56,7 +57,7 @@ public class AreaDropItem extends DropItem implements IFilterDropItem {
 	 */
 	@Override
 	public String getText() {
-		return area.getType().getGuiName() + " = " + area.getName(); //$NON-NLS-1$
+		return getLabel(area.getType()) + " = " + area.getName(); //$NON-NLS-1$
 	}
 
 	/**
@@ -81,9 +82,12 @@ public class AreaDropItem extends DropItem implements IFilterDropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText( formatStringForLabel(area.getName() + " [" + area.getType().getGuiName() + "]"));  //$NON-NLS-1$//$NON-NLS-2$
+		lbl.setText( formatStringForLabel(area.getName() + " [" + getLabel(area.getType()) + "]"));  //$NON-NLS-1$//$NON-NLS-2$
 		initDrag(lbl);
 
 	}
 
+	protected String getLabel(Area.AreaType area){
+		return LabelConstants.getAreaTypeName(area);
+	}
 }

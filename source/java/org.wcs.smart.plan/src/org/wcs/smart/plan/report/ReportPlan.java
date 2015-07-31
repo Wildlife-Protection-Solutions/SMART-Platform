@@ -27,6 +27,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -112,7 +113,7 @@ public class ReportPlan {
 	 * Export the plan to pdf
 	 * @param planUuid
 	 */
-	public static void exportPlan(byte[] planUuid){
+	public static void exportPlan(UUID planUuid){
 		ExportPlanJob job = new ExportPlanJob(planUuid);
 		job.schedule();
 	}

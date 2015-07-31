@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryCategory;
@@ -41,41 +42,25 @@ import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
  * @author Emily
  *
  */
-public class QueryTypeManager {
+public enum QueryTypeManager {
 
-	private static final Object LOCK = new Object();
+	INSTANCE;
 	
 	private static final String QUERYTYPE_EXTNAME = "QueryType"; //$NON-NLS-1$
 
 	private static final String QUERYTYPEGROUP_EXTNAME = "QueryCategory"; //$NON-NLS-1$
 
-	private static QueryTypeManager instance = null;
 	
 	private IQueryType[] allTypes;
 	private IQueryType[] supportedTypes;
 	private List<QueryTypeWrapper> types;
-	
 	private List<QueryCategory> groups;
-	
-	private QueryTypeManager(){
-		
-	}
-	
-	/**
-	 * 
-	 * @return the query type manager instance
-	 */
-	public static QueryTypeManager getInstance(){
-		if (instance == null){
-			synchronized (LOCK) {
-				if (instance == null){
-					instance = new QueryTypeManager();
-				}
-			}
-		}
-		return instance;
-	}
+	private Map<IQueryType, Class<? extends IQueryEngine>> executors;
 
+	public IQueryEngine getQueryEngine(IQueryType type) throws Exception{
+		return executors.get(type).newInstance();
+	}
+	
 	/**
 	 * Finds the query type for the given type key.
 	 * @param typeKey
@@ -192,7 +177,7 @@ public class QueryTypeManager {
 		}
 		List<IQueryType> aTypes = new ArrayList<IQueryType>();
 		groups = new ArrayList<QueryCategory>();
-		
+		executors = new HashMap<IQueryType, Class<? extends IQueryEngine>>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry()
 				.getConfigurationElementsFor(IQueryType.EXTENSION_ID);
 		for (IConfigurationElement e : config) {	
@@ -218,7 +203,7 @@ public class QueryTypeManager {
 							isValid = true;
 						}
 					}
-					
+					executors.put(qType, (Class<? extends IQueryEngine>)e.createExecutableExtension("executor").getClass());
 					if (isValid){
 						aTypes.add(qType);
 					

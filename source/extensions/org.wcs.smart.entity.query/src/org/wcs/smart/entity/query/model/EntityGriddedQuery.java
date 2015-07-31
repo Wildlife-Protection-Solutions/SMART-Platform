@@ -24,24 +24,17 @@ package org.wcs.smart.entity.query.model;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.entity.query.engine.DerbyGridEngine;
 import org.wcs.smart.entity.query.model.columns.EntityQueryColumnCache;
 import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
@@ -62,7 +55,7 @@ public class EntityGriddedQuery extends GriddedQuery {
 	@Override
 	@Transient
 	public IQueryType getType() {
-		return QueryTypeManager.getInstance().findQueryType(EntityGridQueryType.KEY);
+		return QueryTypeManager.INSTANCE.findQueryType(EntityGridQueryType.KEY);
 	}
 	
 	/**
@@ -80,29 +73,6 @@ public class EntityGriddedQuery extends GriddedQuery {
 			Parser parser = new Parser(is);
 			GridQueryDefinition myQuery = parser.GridQuery();		
 			return myQuery;
-		}
-	}
-
-	@Transient
-	public Collection<GridResultItem> executeQueryInternal(IProgressMonitor monitor, Session session) throws Exception{
-		resultMetadata = null;
-		Session lSession = session;
-		if (lSession == null){
-			lSession = HibernateManager.openSession();
-			lSession.beginTransaction();
-		}
-		try{
-			DerbyGridEngine engine = new DerbyGridEngine();
-			Collection<GridResultItem> lastResults = engine.executeQuery(this, lSession, monitor);
-			resultMetadata = GridQueryResultMetadata.computeMetadata(lastResults);
-			return lastResults;
-		}finally{
-			if (session == null){
-				if (lSession.isOpen()){
-					lSession.getTransaction().commit();
-					lSession.close();
-				}
-			}
 		}
 	}
 	

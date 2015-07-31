@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * Tree node for the survey list tree.
@@ -38,18 +39,18 @@ public class SurveyListTreeNode {
 	public enum Type {SURVEY, MISSION};
 	
 	private String label;
-	private byte[] uuid;
+	private UUID uuid;
 	private Type type;
 	private SurveyListTreeNode parent;
 	
-	public SurveyListTreeNode(String label, byte[] uuid, Type type, SurveyListTreeNode parent){
+	public SurveyListTreeNode(String label, UUID uuid, Type type, SurveyListTreeNode parent){
 		this.label = label;
 		this.uuid = uuid;
 		this.type = type;
 		this.parent = parent;
 	}
 	
-	public SurveyListTreeNode(String label, byte[] uuid, Type type){
+	public SurveyListTreeNode(String label, UUID uuid, Type type){
 		this(label, uuid, type, null);
 	}
 	
@@ -57,7 +58,7 @@ public class SurveyListTreeNode {
 		return this.label;
 	}
 	
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.uuid;
 	}
 	
@@ -71,13 +72,13 @@ public class SurveyListTreeNode {
 	
 	@Override
 	public int hashCode(){
-		return Arrays.hashCode(uuid);
+		return uuid.hashCode();
 	}
 	
 	@Override
 	public boolean equals(Object other){
 		if (other instanceof SurveyListTreeNode){
-			return Arrays.equals(uuid, ((SurveyListTreeNode)other).uuid );
+			return uuid.equals(((SurveyListTreeNode)other).uuid);
 		}
 		return false;
 	}

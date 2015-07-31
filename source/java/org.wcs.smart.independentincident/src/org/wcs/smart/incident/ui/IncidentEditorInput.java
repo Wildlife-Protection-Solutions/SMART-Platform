@@ -24,6 +24,7 @@ package org.wcs.smart.incident.ui;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -41,14 +42,14 @@ import org.wcs.smart.incident.internal.Messages;
 public class IncidentEditorInput implements IEditorInput {
 
 	private int id;
-	private byte[] uuid;
+	private UUID uuid;
 	private Date dateTime;
 	
-	public IncidentEditorInput(byte[] uuid){
+	public IncidentEditorInput(UUID uuid){
 		this.uuid = uuid;
 	}
 	
-	public IncidentEditorInput(byte[] uuid, int id, Date dateTime){
+	public IncidentEditorInput(UUID uuid, int id, Date dateTime){
 		this.id = id;
 		this.uuid = uuid;
 		this.dateTime = dateTime;
@@ -79,7 +80,7 @@ public class IncidentEditorInput implements IEditorInput {
 	/**
 	 * @return the incident uuid
 	 */
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.uuid;
 	}
 	
@@ -136,12 +137,12 @@ public class IncidentEditorInput implements IEditorInput {
 	}
 
 	public int hashCode() {
-		return Arrays.hashCode(uuid);
+		return uuid.hashCode();
 	}
 
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof IncidentEditorInput){
-			return Arrays.equals(this.uuid, ((IncidentEditorInput)obj).uuid);
+			return this.uuid.equals(((IncidentEditorInput)obj).uuid);
 		}
 		return false;
 	}

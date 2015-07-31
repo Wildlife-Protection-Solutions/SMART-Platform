@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
@@ -54,7 +55,7 @@ public class EmployeePlanDeleteAdvisor implements IDeleteAdvisor {
 		}else{
 			return  MessageFormat.format(
 					Messages.EmployeePlanDeleteAdvisor_CannotDelete,
-					new Object[]{cnt, e.getFullLabel()});
+					new Object[]{cnt,LabelConstants.getFullLabel(e)});
 		}
 	}
 

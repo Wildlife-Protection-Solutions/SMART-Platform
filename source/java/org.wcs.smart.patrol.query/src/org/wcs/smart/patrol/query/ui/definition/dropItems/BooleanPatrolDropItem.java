@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.query.ui.definition.dropItems;
 
+import java.util.Locale;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -48,7 +50,7 @@ public class BooleanPatrolDropItem extends DropItem implements IFilterDropItem{
 	 */
 	public BooleanPatrolDropItem(IPatrolQueryOption filter) {
 		//super(parent, target);
-		this.text = filter.getGuiName();
+		this.text = filter.getGuiName(Locale.getDefault());
 		this.key = "patrol:" + filter.getKey(); //$NON-NLS-1$
 	}
 

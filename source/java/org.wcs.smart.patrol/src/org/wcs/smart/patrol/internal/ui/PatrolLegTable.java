@@ -36,6 +36,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -206,14 +207,14 @@ public class PatrolLegTable {
 				if (pld.getLeader() == null){
 					return ""; //$NON-NLS-1$
 				}
-				return pld.getLeader().getMember().getFullLabel();
+				return LabelConstants.getFullLabel(pld.getLeader().getMember());
 			}else if (this.column == LegColumn.ENDDATE){
 				return DATE_TIME_FORMAT.format( pld.getEndDate() );
 			}else if (this.column == LegColumn.PILOT){
 				if (pld.getPilot() == null){
 					return ""; //$NON-NLS-1$
 				}
-				return pld.getPilot().getMember().getFullLabel();
+				return LabelConstants.getFullLabel(pld.getPilot().getMember());
 			}else if (this.column == LegColumn.STARTDATE){
 				return DATE_TIME_FORMAT.format(pld.getStartDate() );
 			}else if (this.column == LegColumn.TRANSPORTTYPE){
@@ -222,7 +223,7 @@ public class PatrolLegTable {
 				StringBuilder sb = new StringBuilder();
 				sb.append(pld.getMembers().size() + ": "); //$NON-NLS-1$
 				for(PatrolLegMember member: pld.getMembers()){
-					sb.append(member.getMember().getFullLabel());
+					sb.append(LabelConstants.getFullLabel(member.getMember()));
 					sb.append("; "); //$NON-NLS-1$
 				}
 				return sb.toString();

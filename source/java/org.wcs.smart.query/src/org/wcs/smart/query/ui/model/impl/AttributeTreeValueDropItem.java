@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.ValueItemLabelProvider;
 
 /**
  * Drop item that represents counting tree nodes & sub nodes from
@@ -86,7 +87,7 @@ public class AttributeTreeValueDropItem extends AbstractValueDropItem {
 		sb.append(":sum:"); //$NON-NLS-1$
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
-			if (values[i].guiLabel.equals(combo.getItem(combo.getSelectionIndex()))){
+			if (ValueItemLabelProvider.INSTANCE.getLabel(values[i]).equals(combo.getItem(combo.getSelectionIndex()))){
 				sb.append(values[i].key); 
 				break;
 			}
@@ -129,7 +130,7 @@ public class AttributeTreeValueDropItem extends AbstractValueDropItem {
 		combo = new Combo(main, SWT.READ_ONLY);
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
-			combo.add(values[i].guiLabel);
+			combo.add(ValueItemLabelProvider.INSTANCE.getLabel(values[i]));
 		}
 		combo.select(defaultSelection);
 		combo.addSelectionListener(new SelectionAdapter() {

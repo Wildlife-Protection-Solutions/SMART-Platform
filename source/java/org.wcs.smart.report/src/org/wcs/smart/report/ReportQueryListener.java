@@ -28,6 +28,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.internal.Messages;
@@ -66,7 +67,7 @@ public class ReportQueryListener extends QueryListenerAdapter {
 				sb.append(" ["); //$NON-NLS-1$
 				sb.append(rp.getReport().getId());
 				sb.append("] {"); //$NON-NLS-1$
-				sb.append(rp.getReport().getOwner().getFullLabel());
+				sb.append(LabelConstants.getFullLabel(rp.getReport().getOwner()));
 				sb.append("}"); //$NON-NLS-1$
 				sb.append("\n"); //$NON-NLS-1$
 			}

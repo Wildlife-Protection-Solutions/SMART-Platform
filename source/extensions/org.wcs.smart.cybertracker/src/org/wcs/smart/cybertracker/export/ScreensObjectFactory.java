@@ -56,10 +56,6 @@ public class ScreensObjectFactory {
 		this.ctProperties = properties;
 	}
 	
-	public CyberTrackerProperties getCtProperties() {
-		return ctProperties;
-	}
-	
 	/**
 	<Screens>
     	<Root>

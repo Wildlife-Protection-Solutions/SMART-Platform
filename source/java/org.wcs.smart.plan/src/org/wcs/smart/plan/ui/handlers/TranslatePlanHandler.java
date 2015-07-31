@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.ui.handlers;
 
+import java.util.UUID;
+
 import javax.inject.Named;
 
 import org.eclipse.core.commands.ExecutionException;
@@ -57,7 +59,7 @@ public class TranslatePlanHandler extends TranslateNamesHandler {
 
 		Plan plan = null;
 		if (obj instanceof PlanEditorInput) {
-			byte[] uuid = ((PlanEditorInput) obj).getUuid();
+			UUID uuid = ((PlanEditorInput) obj).getUuid();
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			plan = (Plan) session.load(Plan.class, uuid);

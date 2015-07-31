@@ -47,13 +47,14 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Observer drop item.
@@ -82,11 +83,11 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 				Collections.sort(es, new Comparator<Employee>(){
 					@Override
 					public int compare(Employee o1, Employee o2) {
-						return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
+						return Collator.getInstance().compare(getLabel(o1), getLabel(o2));
 					}});
 				for (Employee e: es){
 					e.getUuid();
-					e.getFullLabel();
+					getLabel(e);
 				}
 			}finally{
 				s.close();
@@ -164,7 +165,7 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 			}
 		}
 		if (it != null){
-			query.append("\"" + SmartUtils.encodeHex(it.getUuid()) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+			query.append("\"" + UuidUtils.uuidToString(it.getUuid()) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return query.toString();
 	}
@@ -199,7 +200,7 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 			@Override
 			public String getText(Object element){
 				if (element instanceof Employee){
-					return ((Employee)element).getFullLabel();
+					return getLabel((Employee)element);
 				}
 				return super.getText(element);
 			}
@@ -226,5 +227,9 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 		initDrag(l);
 		
 		loadEmployees.schedule();
+	}
+	
+	protected String getLabel(Employee e){
+		return LabelConstants.getFullLabel(e);
 	}
 }

@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
@@ -90,7 +91,14 @@ public class SelectCaDialog extends TitleAreaDialog {
 			}
 			//employee list remains the same as you want to 
 			//access all queries/reports saved by any user
-			newConfiguration = new ConservationAreaConfiguration(cas, SmartDB.getConservationAreaConfiguration().getEmployees());
+			Session s = HibernateManager.openSession();
+			try{
+				newConfiguration = new ConservationAreaConfiguration(cas, 
+					SmartDB.getConservationAreaConfiguration().getEmployees(),
+					s);
+			}finally{
+				if (s.isOpen()) s.close();
+			}
 		}
 		super.buttonPressed(buttonId);
 		

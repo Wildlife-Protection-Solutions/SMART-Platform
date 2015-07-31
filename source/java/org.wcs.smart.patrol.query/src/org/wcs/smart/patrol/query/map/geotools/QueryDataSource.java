@@ -36,6 +36,7 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * Geotools data source for waypoint query.
@@ -138,7 +139,7 @@ public class QueryDataSource extends AbstractDataStore{
 		
 		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
 		
 		
 		return sb.toString();

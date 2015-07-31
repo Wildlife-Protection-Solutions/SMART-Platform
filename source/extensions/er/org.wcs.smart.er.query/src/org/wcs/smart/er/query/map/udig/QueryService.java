@@ -39,10 +39,10 @@ import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.er.query.map.geotools.SurveyDataSourceFactory;
 import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
-import org.wcs.smart.er.query.model.MissionQueryType;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.IQueryService;
@@ -156,13 +156,13 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getType().getKey().equals(SurveyObservationQueryType.KEY) ||
-						query.getType().getKey().equals(SurveyWaypointQueryType.KEY)){
+					if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
+						query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_TYPE));
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE));
-					}else if (query.getType().getClass().equals(MissionQueryType.class)){
+					}else if (query.getTypeKey().equals(MissionQuery.KEY)){
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
-					}else if (query.getType().getClass().equals(MissionTrackQueryType.class)){
+					}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
 						members.add(new QueryGeoResource(this, SurveyQueryDataSource.TRACKS_TYPE));
 					}	
 				}
@@ -227,10 +227,10 @@ public class QueryService extends IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getType().getClass().equals(SurveyObservationQueryType.class) ||
-                			query.getType().getClass().equals(SurveyWaypointQueryType.class) ||
-                				query.getType().getClass().equals(MissionQueryType.class) || 
-                				query.getType().getClass().equals(MissionTrackQueryType.class)){
+                		if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
+                			query.getTypeKey().equals(SurveyWaypointQuery.KEY) ||
+                				query.getTypeKey().equals(MissionQuery.KEY) || 
+                				query.getTypeKey().equals(MissionTrackQuery.KEY)){
                 			ds = new SurveyQueryDataSource((SimpleQuery)query);
                 		
 //                		}else if (query.getType().getClass().equals(PatrolWaypointQueryType.class) ){

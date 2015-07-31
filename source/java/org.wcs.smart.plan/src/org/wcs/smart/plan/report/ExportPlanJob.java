@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
@@ -40,6 +41,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
@@ -47,7 +49,7 @@ import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 /**
  * Job for exporting a plan to a pdf file for printing
  * 
@@ -59,10 +61,10 @@ public class ExportPlanJob extends Job {
 
 	private static final String NONE = Messages.ExportPlanJob_NoneLabel;
 	
-	private byte[] planUuid;
+	private UUID planUuid;
 	private File outputFile;
 	
-	public ExportPlanJob(byte[] planUuid) {
+	public ExportPlanJob(UUID planUuid) {
 		super(Messages.ExportPlanJob_JobName);
 		this.planUuid = planUuid;
 	}
@@ -79,7 +81,7 @@ public class ExportPlanJob extends Job {
 			this.outputFile = File.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
 			outputFile.deleteOnExit();
 			
-			reportParameters.put(ReportPlan.PLAN_UUID, SmartUtils.encodeHex(plan.getUuid()));
+			reportParameters.put(ReportPlan.PLAN_UUID, UuidUtils.uuidToString(plan.getUuid()));
 			reportParameters.put(ReportPlan.PLAN_ID, plan.getId());
 			reportParameters.put(ReportPlan.PLAN_NAME, plan.getName());
 			reportParameters.put(ReportPlan.PLAN_DESCRIPTION, (plan.getDescription()==null?"" : plan.getDescription())); //$NON-NLS-1$
@@ -100,7 +102,7 @@ public class ExportPlanJob extends Job {
 				reportParameters.put(ReportPlan.PLAN_STATION,plan.getStation().getName());
 			}
 			reportParameters.put(ReportPlan.PLAN_COMMENT, plan.getComment() == null ? "" : plan.getComment()); //$NON-NLS-1$
-			reportParameters.put(ReportPlan.PLAN_CREATOR, plan.getCreator() == null ? "" : plan.getCreator().getFullLabel()); //$NON-NLS-1$
+			reportParameters.put(ReportPlan.PLAN_CREATOR, plan.getCreator() == null ? "" : LabelConstants.getFullLabel(plan.getCreator())); //$NON-NLS-1$
 						
 			StringBuilder sb = new StringBuilder();
 			List<PatrolEditorInput> ins = PlanHibernateManager.getPatrols(plan, session);

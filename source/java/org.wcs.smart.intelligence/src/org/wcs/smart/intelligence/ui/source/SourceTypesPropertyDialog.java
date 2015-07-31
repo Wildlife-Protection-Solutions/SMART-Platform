@@ -75,6 +75,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -398,7 +399,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 			for (Iterator<?> iterator = sourceTypes.iterator(); iterator.hasNext();) {
 				IntelligenceSource pm = (IntelligenceSource) iterator.next();
 				siblings.remove(pm);
-				String error = NamedKeyItem.validateKey(pm.getKeyId(), siblings);
+				String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
 				siblings.add(pm);
 				if (error != null){
 					throw new Exception(error);
@@ -482,7 +483,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 					
 					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
 					if (mnd.getKeyId() == null){
-						mnd.setKeyId(NamedKeyItem.generateKey(newValue, sourceTypes));
+						mnd.setKeyId(DataModelManager.INSTANCE.generateKey(newValue, sourceTypes));
 					}
 					setChangesMade(true);
 				}

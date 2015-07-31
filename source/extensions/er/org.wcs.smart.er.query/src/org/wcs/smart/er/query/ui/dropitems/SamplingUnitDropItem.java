@@ -37,7 +37,7 @@ import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Sampling unit drop item.  This works for both
@@ -107,11 +107,11 @@ public class SamplingUnitDropItem extends DropItem implements ISurveyDesignDropI
 			if (su == SamplingUnitFilter.NONE){
 				return "s:samplingunit:" + source.queryKey + ":" + SamplingUnitFilter.NONE_KEY; //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
-				return "s:samplingunit:" + source.queryKey + ":" + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+				return "s:samplingunit:" + source.queryKey + ":" + UuidUtils.uuidToString(su.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			
 		}else if (mt != null){
-			return "s:samplingunittrack:" + source.queryKey + ":" + SmartUtils.encodeHex(mt.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+			return "s:samplingunittrack:" + source.queryKey + ":" + UuidUtils.uuidToString(mt.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return null;
 	}

@@ -22,7 +22,6 @@
 package org.wcs.smart.er.query.map.udig;
 
 import org.locationtech.udig.catalog.IService;
-import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
@@ -49,7 +48,7 @@ public class QueryServiceFactory {
 		
 		if (query instanceof SimpleQuery){
 			return new QueryService((SimpleQuery)query);
-		}else if (query.getType().getClass().equals(SurveyGridQueryType.class) ){
+		}else if (query.getTypeKey().equals(SurveyGriddedQuery.KEY) ){
 			return new RasterService((SurveyGriddedQuery)query);
 		}
 		return null;

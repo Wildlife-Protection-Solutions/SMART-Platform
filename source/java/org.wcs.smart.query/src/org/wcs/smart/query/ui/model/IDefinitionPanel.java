@@ -104,7 +104,7 @@ public interface IDefinitionPanel {
 	/**
 	 * Initializes the query
 	 */
-	public abstract void initItems(QueryProxy q);
+	public abstract void initItems(QueryProxy q) throws Exception;
 	
 	/**
 	 * Clears all items in the panels. 

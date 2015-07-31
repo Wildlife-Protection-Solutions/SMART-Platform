@@ -63,7 +63,8 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Converts filters to sql for the Derby query engine.
@@ -217,7 +218,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(SurveyFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter.getType() == SurveyFilter.Type.ID){
 			
-			String value1 = SmartUtils.stripQuotes((String)filter.getValue());
+			String value1 = SharedUtils.stripQuotes((String)filter.getValue());
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -227,7 +228,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return x;
 		}else if (filter.getType() == SurveyFilter.Type.UUID){
 			try{
-				String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getValue()));
+				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(filter.getValue()));
 				return engine.tablePrefix(Survey.class) + ".uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 			}catch (Exception ex){
 				throw new SQLException(ex);
@@ -253,11 +254,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 						return " ( " + engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid is null AND "  //$NON-NLS-1$ //$NON-NLS-2$
 							+ engine.tablePrefix(MissionTrack.class) + ".uuid is not null )"; //$NON-NLS-1$
 					}else{
-						String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+						String p1 = engine.addParameterValue(UuidUtils.stringToUuid(filter.getUuid()));
 						return engine.tablePrefix(MissionTrack.class) + ".sampling_unit_uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ 
 					}
 				}else if (filter.getType() == Type.TRACK){
-					String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(filter.getUuid()));
 					return engine.tablePrefix(MissionTrack.class) + ".uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 				}			
 			}else if (filter.getSource() == Source.OBSERVATION){
@@ -267,11 +268,11 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 						return " (" + engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid is null " //$NON-NLS-1$ //$NON-NLS-2$
 							+ " AND " + engine.tablePrefix(SurveyWaypoint.class) + ".wp_uuid is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
 					}else{
-						String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+						String p1 = engine.addParameterValue(UuidUtils.stringToUuid(filter.getUuid()));
 						return engine.tablePrefix(SurveyWaypoint.class) + ".sampling_unit_uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$ 
 					}
 				}else if (filter.getType() == Type.TRACK){
-					String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getUuid()));
+					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(filter.getUuid()));
 					return engine.tablePrefix(SurveyWaypoint.class) + ".mission_track_uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
@@ -325,7 +326,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(MissionFilter filter, IQueryEngine engine) throws SQLException{
 		if (filter.getType() == MissionFilter.Type.ID){
 			
-			String value1 = SmartUtils.stripQuotes((String)filter.getValue());
+			String value1 = SharedUtils.stripQuotes((String)filter.getValue());
 			if (filter.getOperator() == Operator.STR_CONTAINS || 
 					filter.getOperator() == Operator.STR_NOTCONTAINS){
 				value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -335,7 +336,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			return x;
 		}else if (filter.getType() == MissionFilter.Type.UUID){
 			try{
-				String p1 = engine.addParameterValue(SmartUtils.decodeHex(filter.getValue()));
+				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(filter.getValue()));
 				return engine.tablePrefix(Mission.class) + ".uuid = " + p1 + " "; //$NON-NLS-1$ //$NON-NLS-2$
 			}catch (Exception ex){
 				throw new SQLException (ex);

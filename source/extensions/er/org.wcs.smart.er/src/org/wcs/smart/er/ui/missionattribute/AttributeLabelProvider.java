@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.missionattribute;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 
@@ -57,7 +58,7 @@ public class AttributeLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof MissionAttribute){
 			MissionAttribute ma = (MissionAttribute)element;
-			return ma.getType().getImage();
+			return DataModel.getAttributeImage(ma.getType());
 		}
 		return super.getImage(element);
 	}

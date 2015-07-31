@@ -51,6 +51,8 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.event.IQueryListener;
@@ -142,7 +144,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 			 try{
 				 Query squery = QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
 				 query = new QueryProxy(squery);
-				 squery.getType().getDropItemFactory().generateDropItems(query, session);
+				 query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 				 
 				getSite().getShell().getDisplay().asyncExec(new Runnable() {
 					@Override
@@ -169,13 +171,13 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 			setName(Messages.SummaryEditor_RunQueryJobName + getQuery().getName());
 			try {
 				IProgressMonitor mymonitor = resultsArea.createProgressMonitor();
-				SummaryQueryResult results = (SummaryQueryResult) getQuery().executeQuery(mymonitor);
+				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor);
 				
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
 					resultsArea.updateAndShowTable(null);
 					return Status.CANCEL_STATUS;
 				}
-				resultsArea.updateAndShowTable(results);
+				resultsArea.updateAndShowTable((SummaryQueryResult)results);
 			} catch (Exception ex) {
 				QueryPlugIn.displayLog(Messages.SummaryEditor_ErrorRunningQuery, ex);
 			}
@@ -488,7 +490,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 						@Override
 						public void run() {
 							try{
-								getQuery().getType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+								query.getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
 							}catch (Exception ex){
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}

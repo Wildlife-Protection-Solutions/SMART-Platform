@@ -30,7 +30,7 @@ import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Intelligence item filter.
@@ -59,7 +59,7 @@ public class IntelligenceFilter implements IFilter {
 		if (op == null){
 			throw new RuntimeException(MessageFormat.format(Messages.IntelligenceFilter_InvalidFilterOption, key));
 		}
-		value = SmartUtils.stripQuotes(value);
+		value = SharedUtils.stripQuotes(value);
 		return new IntelligenceFilter(op, operator, value);
 	}
 	

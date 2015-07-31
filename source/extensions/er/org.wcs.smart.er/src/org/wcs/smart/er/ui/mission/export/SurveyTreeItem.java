@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.mission.export;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Survey tree item for mission/survey tree.
@@ -34,7 +35,7 @@ import java.util.List;
 public class SurveyTreeItem implements TreeItem{
 
 	private String name;
-	private byte[] uuid;
+	private UUID uuid;
 	private String surveyDesignName;
 	
 	private List<MissionTreeItem> children;
@@ -50,10 +51,10 @@ public class SurveyTreeItem implements TreeItem{
 		name = n;
 	}
 	
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
-	public void setUuid(byte[] b) {
+	public void setUuid(UUID b) {
 		uuid = b;
 	}
 	

@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.engine;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
@@ -32,11 +33,12 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
+import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.parser.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -51,7 +53,8 @@ import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Converts filters to sql for the Derby query engine.
@@ -173,9 +176,9 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 				x += " is_pilot AND "; //$NON-NLS-1$
 			}
 			
-			String value2 = SmartUtils.stripQuotes((String)filter.getValue());
+			String value2 = SharedUtils.stripQuotes((String)filter.getValue());
 			try {
-				String p1 = engine.addParameterValue(SmartUtils.decodeHex(value2));
+				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
 				x += " employee_uuid = " + p1 + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (Exception e) {
 				throw new SQLException(e);
@@ -183,19 +186,19 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			 
 			return x;			
 		}		
-		String prefix = engine.tablePrefix(filter.getPatrolOption().getPatrolAttributeClass());
+		String prefix = engine.tablePrefix(option.getPatrolAttributeClass());
 		if (prefix == null){
 			throw new SQLException(MessageFormat.format(
-					Messages.PatrolFilter_InvalidPrefix, new Object[]{ filter.getPatrolOption().getKey()}));
+					Messages.PatrolFilter_InvalidPrefix, new Object[]{ option.getKey()}));
 		}
 		
 		if (option.getType() == PatrolQueryOptionType.STRING){
 			if (option == PatrolQueryOption.PATROL_TYPE){
-				String p1 = engine.addParameterValue(SmartUtils.stripQuotes((String)filter.getValue()) );
+				String p1 = engine.addParameterValue(SharedUtils.stripQuotes((String)filter.getValue()) );
 				String x = prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
 				return x;				
 			}else{
-				String value1 = SmartUtils.stripQuotes((String)filter.getValue());
+				String value1 = SharedUtils.stripQuotes((String)filter.getValue());
 				if (filter.getOperator() == Operator.STR_CONTAINS || 
 						filter.getOperator() == Operator.STR_NOTCONTAINS){
 					value1 = "%" + value1 + "%"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -211,8 +214,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		}else if (option.getType() == PatrolQueryOptionType.UUID){
 			//uuid
 			try{
-				String value2 = SmartUtils.stripQuotes((String)filter.getValue());
-				String p1 = engine.addParameterValue(SmartUtils.decodeHex(value2));
+				String value2 = SharedUtils.stripQuotes((String)filter.getValue());
+				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
 				String x = prefix + "." + option.getColumnName() + " = " + p1; //$NON-NLS-1$ //$NON-NLS-2$ 
 				return x;
 			}catch (Exception ex){
@@ -220,7 +223,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			}
 			
 		}else if (option.getType() == PatrolQueryOptionType.KEY){
-			String key = SmartUtils.stripQuotes((String)filter.getValue());
+			String key = SharedUtils.stripQuotes((String)filter.getValue());
 			String p1 = engine.addParameterValue(key);
 			return prefix + "." + option.getColumnName() + " IN ( select uuid from " + engine.tableName(option.getSourceClass()) + " where keyid = " + p1 + " ) "; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			
@@ -240,7 +243,8 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		if (filter.getOperator().equals(Operator.STR_EQUALS)){
 			if (filter.getValue().length() != 0){
 				try {
-					String p1 = engine.addParameterValue(SmartUtils.decodeHex(SmartUtils.stripQuotes(filter.getValue())));
+					String p1 = engine.addParameterValue(
+							UuidUtils.stringToUuid(SharedUtils.stripQuotes(filter.getValue())));
 					return prefix + ".uuid = " + p1; //$NON-NLS-1$
 				} catch (Exception e) {
 					throw new SQLException(e);
@@ -271,7 +275,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			table = engine.tablePrefix(PatrolLegDay.class);
 			field = "patrol_day"; //$NON-NLS-1$
 		}else{
-			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
+			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName(Locale.getDefault())}));
 		}
 		
 		field = table + "." + field; //$NON-NLS-1$

@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.ToolTip;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
@@ -51,7 +52,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Group by drop item for observer options.
@@ -77,11 +78,11 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 			Collections.sort(e, new Comparator<Employee>() {
 				@Override
 				public int compare(Employee arg0, Employee arg1) {
-					return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+					return Collator.getInstance().compare(getLabel(arg0).toUpperCase(), getLabel(arg1).toUpperCase());
 				}
 			});
 			for (Employee emp : e){
-				items.add(new ListItem(emp.getUuid(), emp.getFullLabel()));
+				items.add(new ListItem(emp.getUuid(), getLabel(emp)));
 			}
 			s.getTransaction().rollback();
 			s.close();
@@ -127,7 +128,7 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 		sql.append(":"); //$NON-NLS-1$
 		if (selectedItems != null && selectedItems.size() > 0){
 			for (ListItem li : selectedItems){
-				sql.append(SmartUtils.encodeHex(li.getUuid()) + ":"); //$NON-NLS-1$
+				sql.append(UuidUtils.uuidToString(li.getUuid()) + ":"); //$NON-NLS-1$
 			}
 			sql.deleteCharAt(sql.length() - 1);
 		}
@@ -223,5 +224,9 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 	private void updateLabel(){
 		lblText.setText( formatStringForLabel(getText()));
 		updateToolTipMessage();
+	}
+	
+	protected String getLabel(Employee e){
+		return LabelConstants.getFullLabel(e);
 	}
 }

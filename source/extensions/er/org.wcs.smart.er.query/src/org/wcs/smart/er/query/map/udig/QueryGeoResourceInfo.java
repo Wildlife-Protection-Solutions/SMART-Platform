@@ -34,8 +34,8 @@ import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -73,7 +73,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			this.bounds = env;
 			QueryService service = (QueryService) resource.resolve(IService.class, monitor);
 			if (service.getQuery() instanceof IPagedQuery){
-				IPagedQueryResultSet rs = (IPagedQueryResultSet) service.getQuery().getCachedResults(monitor);
+				IPagedQueryResultSet rs = (IPagedQueryResultSet) service.getQuery().getCachedResults();
 				if (rs != null){
 					Envelope local = rs.getEnvelope();
 					if (local != null){

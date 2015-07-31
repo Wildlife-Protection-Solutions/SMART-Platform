@@ -46,6 +46,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 /**
@@ -157,7 +158,8 @@ public class CaExporter {
 	 */
 	private void writeConservationAreaInfo(File directory, ConservationArea ca) throws IOException{
 		try(FileWriter fw = new FileWriter(new File(directory, CA_INFO_FILENAME))){
-			fw.write(SmartUtils.encodeHex(ca.getUuid()));
+//			fw.write(SmartUtils.encodeHex(ca.getUuid()));
+			fw.write(UuidUtils.uuidToString(ca.getUuid()));
 			fw.write(SmartUtils.LINE_SEPARATOR);
 			fw.write(ca.getId());
 			fw.write(SmartUtils.LINE_SEPARATOR);

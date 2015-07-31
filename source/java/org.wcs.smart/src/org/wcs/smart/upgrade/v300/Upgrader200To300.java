@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -101,7 +100,8 @@ public class Upgrader200To300 implements IDatabaseUpgrader {
 
 	private static List<CaData> getConservationAreas(Connection c) throws SQLException {
 		PreparedStatement pst = c.prepareStatement("select ca.uuid, lng.uuid from smart.CONSERVATION_AREA ca left join smart.LANGUAGE lng on ca.uuid = lng.CA_UUID WHERE ca.uuid <> ? and lng.ISDEFAULT = true"); //$NON-NLS-1$
-		pst.setBytes(1, ConservationArea.MULTIPLE_CA);
+		//TODO: fix this
+//		pst.setBytes(1, ConservationArea.MULTIPLE_CA);
 		ResultSet rs = pst.executeQuery();
 		List<CaData> areas = new ArrayList<CaData>();
 		while (rs.next()) {

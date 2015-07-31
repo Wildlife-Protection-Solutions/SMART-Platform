@@ -22,9 +22,9 @@
 package org.wcs.smart;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
-import java.util.List;
 
 /**
  * Tools to support additional locales in addition to 

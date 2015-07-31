@@ -31,8 +31,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -42,22 +45,43 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.hibernate.SurveyDesignFilter;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
+import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.filter.CmCategoryAttributeFilter;
+import org.wcs.smart.er.query.filter.MissionFilter;
+import org.wcs.smart.er.query.filter.MissionFilter.Type;
+import org.wcs.smart.er.query.filter.MissionMemberFilter;
+import org.wcs.smart.er.query.filter.MissionPropertyFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SurveyFilter;
+import org.wcs.smart.er.query.filter.TrackTypeFilter;
+import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
+import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
+import org.wcs.smart.er.query.filter.summary.MissionValueItem.ValueItem;
+import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
+import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
+import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyGridQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
-import org.wcs.smart.er.query.model.SurveySummaryQueryType;
+import org.wcs.smart.er.query.ui.filter.summary.MissionAttributeGroupByViewer;
+import org.wcs.smart.er.query.ui.filter.summary.MissionIdGroupByViewer;
+import org.wcs.smart.er.query.ui.filter.summary.SamplingUnitAttributeGroupByViewer;
+import org.wcs.smart.er.query.ui.filter.summary.SamplingUnitGroupByViewer;
+import org.wcs.smart.er.query.ui.filter.summary.SurveyIdGroupByViewer;
 import org.wcs.smart.er.query.ui.panels.definition.FilterDefintionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.GriddedDefinitionPanel;
 import org.wcs.smart.er.query.ui.panels.definition.SimpleValueRateFilterPanel;
@@ -73,26 +97,43 @@ import org.wcs.smart.er.query.ui.panels.item.SurveyGroupByContentProvider;
 import org.wcs.smart.er.query.ui.panels.item.SurveyValuesTreeNode;
 import org.wcs.smart.er.query.ui.panels.item.TrackObservationFilterItemPanel;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.AreaFilter;
+import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
+import org.wcs.smart.query.model.summary.CategoryValueItem;
+import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.model.summary.GroupByPart;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IGroupByViewer;
+import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
+import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
 import org.wcs.smart.query.ui.model.IValueDropItem;
+import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
+import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.query.ui.model.impl.CategoryDropItem;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Drop item factory for survey queries.
@@ -600,54 +641,60 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 	public void generateDropItems(QueryProxy proxy, Session session) {
 		
 		if (proxy.getQuery() instanceof SimpleQuery){
+			try{
+				IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
 			
-			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
-			
-			if (proxy.getQuery().getType().getKey().equals(MissionTrackQueryType.KEY)){
-				proxy.setDropItems(TrackFilterDefinitionPanel.ID, asDropItems(queryFilter, session));
-			}else{
-				proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(queryFilter, session));	
+				if (proxy.getQuery().getTypeKey().equals(MissionTrackQuery.KEY)){
+					proxy.setDropItems(TrackFilterDefinitionPanel.ID, asDropItems(queryFilter, session));
+				}else{
+					proxy.setDropItems(FilterDefintionPanel.ID, asDropItems(queryFilter, session));	
+				}
+			}catch(Exception ex){
+				EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
 			}
 					
-		}else if (proxy.getQuery().getType().getKey().equals(SurveySummaryQueryType.KEY)){
-			SurveySummaryQuery q = (SurveySummaryQuery) proxy.getQuery();
-			SumQueryDefinition def = q.getQueryDefinition();
-			
-			//value filter panel
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.RATE,  //$NON-NLS-1$
-					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
-//			//rate filter panel
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE, //$NON-NLS-1$
-					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
-			//column group by
-			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
-			//row group by
-			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
-
-			//values
-			List<DropItem> items = null;
-			if (def != null && def.getValuePart() != null){
-				items = def.getValuePart().getDropItems(session);
-				for (DropItem i : items){
-					if (i instanceof AbstractValueDropItem){
-						((AbstractValueDropItem)i).setEncounterRateOptions(SUMMARY_ENCOUNTER_RATE_ITEMS);
+		}else if (proxy.getQuery().getTypeKey().equals(SurveySummaryQuery.KEY)){
+			try{
+				SurveySummaryQuery q = (SurveySummaryQuery) proxy.getQuery();
+				SumQueryDefinition def = q.getQueryDefinition();
+				
+				//value filter panel
+				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.RATE,  //$NON-NLS-1$
+						def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
+	//			//rate filter panel
+				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE, //$NON-NLS-1$
+						def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
+				//column group by
+				proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
+						def == null || def.getColumnGroupByPart() == null ? null : groupByToDropItems(def.getColumnGroupByPart(), session));
+				//row group by
+				proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.ROW.name(), //$NON-NLS-1$
+						def == null || def.getRowGroupByPart() == null ? null : groupByToDropItems(def.getRowGroupByPart(), session));
+	
+				//values
+				List<DropItem> items = null;
+				if (def != null && def.getValuePart() != null){
+					items = valuePartToDropItems(def.getValuePart(), session);
+					for (DropItem i : items){
+						if (i instanceof AbstractValueDropItem){
+							((AbstractValueDropItem)i).setEncounterRateOptions(SUMMARY_ENCOUNTER_RATE_ITEMS);
+						}
 					}
 				}
-			}
-			proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
-					
+				proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
+			}catch(Exception ex){
+				EcologicalRecordsPlugIn.displayLog(ex.getMessage(), ex);
+			}	
 //			
-		}else if(proxy.getQuery().getType().getKey().equals(SurveyGridQueryType.KEY)){
+		}else if(proxy.getQuery().getTypeKey().equals(SurveyGriddedQuery.KEY)){
 			SurveyGriddedQuery q = (SurveyGriddedQuery) proxy.getQuery();
-			GridQueryDefinition def = q.getQueryDefinition();			
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
-			proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
-			
 			DropItem valueItem = null;
 			try{
-				valueItem = def.getValuePart().asDropItem(session);
+				GridQueryDefinition def = q.getQueryDefinition();			
+				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.RATE.name(), def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); //$NON-NLS-1$
+				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE.name(), def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); //$NON-NLS-1$
+			
+				valueItem = valueItemToDropItem(def.getValuePart(), session);
 				if (valueItem instanceof AbstractValueDropItem){
 					((AbstractValueDropItem)valueItem).setEncounterRateOptions(GRID_ENCOUNTER_RATE_ITEMS);
 				}
@@ -660,13 +707,348 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		}
 	}
 	
-	/*
-	 * Converts a filter to a set of drop items
+	public DropItem[] filterToDropItem(IFilter f, Session session) throws Exception{
+		if (f instanceof CmCategoryAttributeFilter){
+			return createDropItems((CmCategoryAttributeFilter)f, session);
+		}else if (f instanceof MissionFilter){
+			return createDropItems((MissionFilter)f, session);
+		}else if (f instanceof MissionMemberFilter){
+			return createDropItems((MissionMemberFilter)f, session);
+		}else if (f instanceof MissionPropertyFilter){
+			return createDropItems((MissionPropertyFilter)f, session);
+		}else if (f instanceof SamplingUnitAttributeFilter){
+			return createDropItems((SamplingUnitAttributeFilter)f, session);
+		}else if (f instanceof SamplingUnitFilter){
+			return createDropItems((SamplingUnitFilter)f, session);
+		}else if (f instanceof SurveyDesignFilter){
+			return null;
+		}else if (f instanceof SurveyFilter){
+			return createDropItems((SurveyFilter)f, session);
+		}else if (f instanceof TrackTypeFilter){
+			return createDropItems((SurveyFilter)f, session);
+		}
+		return null;
+		
+	}
+	
+	
+	public DropItem valueItemToDropItem(IValueItem item, Session session) throws Exception{
+		if (item instanceof MissionValueItem){
+			return createDropItems((CategoryValueItem)item, session);
+			
+		}else if (item instanceof CombinedValueItem){
+			return createDropItems((MissionValueItem)item, session);	
+		}
+		return null;
+		
+	}
+	
+	public DropItem[] createDropItems(CmCategoryAttributeFilter af, Session session) throws Exception{
+		Category c = null;
+		Attribute att = null;
+		
+		try{
+			c = getCategory(af.getCategoryFilter().getCategoryKey(), session);
+			att = getAttribute(af.getAttributeFilter().getAttributeKey(), session);
+
+			CmAttribute node = (CmAttribute) session.load(CmAttribute.class, af.getCmAttributeUuid());
+			
+			boolean found = false;
+			for (Attribute a : QueryDataModelManager.getInstance().getAttributes(session, c.getHkey())){
+				if (a.getKeyId().equals(att.getKeyId())){
+					found = true;
+					break;
+				}
+			}
+			if (!found){
+				throw new Exception(MessageFormat.format(Messages.CmCategoryAttributeFilter_invalidCatAttribute, new Object[]{c.getKeyId(), att.getKeyId()}));
+			}
+		
+			DropItem it = null;
+			if (node != null){
+				it = createCmAttribute(node);
+			}else{
+				//for whatever reason this configurable model node doesn't exist anymore but the category/attribute combination does so lets just create
+				//a normal category/attribute drop item
+				CategoryAttribute ca = new CategoryAttribute(c,  att);
+				it = createAttributeDropItem(ca);
+			}
+			initAttributeDropItem(af.getAttributeFilter(), it, session);
+			return new DropItem[]{it};
+		}catch (Exception ex){
+			return new DropItem[]{new ErrorDropItem(ex.getMessage())};
+		}
+		
+	}
+	
+	
+
+	public DropItem[] createDropItems(MissionFilter filter, Session session) throws Exception{
+		if (filter.getType() == Type.ID){
+			DropItem di = createMissionIdDropItem();
+			di.initializeData(new String[]{filter.getOperator().asSmartValue(), filter.getValue()});
+			return new DropItem[]{di};
+		}else if (filter.getType() == Type.UUID){
+			try{
+				Mission mission = (Mission) session.get(Mission.class, UuidUtils.stringToUuid(filter.getValue()));
+				if (mission == null){
+					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionFilter_MissionNotFound, new Object[]{filter.getValue()}))};
+				}
+				mission.getId();
+				mission.getSurvey().getId();
+				return new DropItem[]{createMissionUuidIdDropItem(mission)};
+			}catch (Exception ex){
+				ERQueryPlugIn.log(ex.getMessage(), ex);
+				return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionFilter_MissionNotFound, new Object[]{filter.getValue()}))};
+			}
+		}
+		return null;
+	}
+	
+	
+
+	public DropItem[] createDropItems(MissionMemberFilter exp, Session session) throws Exception{
+		Employee e = (Employee) session.get(Employee.class, exp.getUuid());
+		if (e == null){
+			return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionMemberFilter_EmployeeNotFound, new Object[]{UuidUtils.uuidToString(exp.getUuid())}))};
+		}
+		LabelConstants.getFullLabel(e);
+
+		DropItem di = null;
+		if (exp.isLeader() ){
+			di = createMissionLeaderDropItem();
+		}else{
+			di = createMissionMemberDropItem();
+		}
+		di.initializeData(e);
+		
+		return new DropItem[]{di};
+	}
+	
+
+	public DropItem[] createDropItems(MissionPropertyFilter filter, Session session) throws Exception{
+		try{
+			Object value = filter.getValue();
+			Attribute.AttributeType type = filter.getAttributeType();
+			
+			MissionAttribute ma = (MissionAttribute) session.createCriteria(MissionAttribute.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", filter.getAttributeKey())).list().get(0); //$NON-NLS-1$
+			DropItem di = SurveyDropItemFactory.INSTANCE.createMissionAttributeDropItem(ma);
+			
+			if (type.equals(AttributeType.NUMERIC) ||
+					type.equals(AttributeType.TEXT)){
+				di.initializeData(new String[]{filter.getOperator().asSmartValue(), value.toString()}); 
+			}else if (type.equals(AttributeType.LIST)){
+				
+				boolean ok = false;
+				if (value.equals(AttributeFilter.ANY_OPTION_KEY)){
+					di.initializeData(ANY_OPTION);
+					ok = true;
+				}else{
+					for (MissionAttributeListItem item : ma.getAttributeList()){
+						if (item.getKeyId().equals(value)){
+							ok = true;
+							di.initializeData(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+						}
+					}
+				}
+				if (!ok){
+					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionAttributeFilter_ListItemNotFoundError, new Object[]{filter.getAttributeKey()}))};		
+				}
+			}
+			return new DropItem[]{di};
+		}catch (Exception ex){
+			ERQueryPlugIn.log(ex.getMessage(), ex);
+			return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.MissionAttributeFilter_AttributeNotFoundError, new Object[]{filter.getAttributeKey()}))};
+		}
+	}
+	
+	/**
+	 * @see org.wcs.smart.query.parser.filter.IFilter#getDropItems(org.hibernate.Session)
+	 * 
+	 * @return {@link AttributeDropItem} or {@link AttributeListDropItem} 
+	 * or {@link AttributeTreeDropItem} depending on 
+	 * attribute type.
 	 */
+	public DropItem[] createDropItems(SamplingUnitAttributeFilter filter, Session session) throws Exception {
+		String samplingUnitAttributeKey = filter.getSamplingUnitAttributeKey();
+		Attribute.AttributeType type = filter.getAttributeType();
+		Object value = filter.getValue();
+		
+		try{
+			SamplingUnitAttribute sa = (SamplingUnitAttribute) session.createCriteria(SamplingUnitAttribute.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("keyId", samplingUnitAttributeKey)).list().get(0); //$NON-NLS-1$
+			DropItem di = SurveyDropItemFactory.INSTANCE.createSamplingUnitAttributeDropItem(sa, filter.getSource());
+			
+			if (type.equals(AttributeType.NUMERIC) ||
+					type.equals(AttributeType.TEXT)){
+				di.initializeData(new String[]{filter.getOperator().asSmartValue(), value.toString()}); 
+			}else if (type.equals(AttributeType.LIST)){
+				
+				boolean ok = false;
+				if (value.equals(AttributeFilter.ANY_OPTION_KEY)){
+					di.initializeData(ANY_OPTION);
+					ok = true;
+				}else{
+					for (SamplingUnitAttributeListItem item : sa.getAttributeList()){
+						if (item.getKeyId().equals(value)){
+							ok = true;
+							di.initializeData(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
+						}
+					}
+				}
+				if (!ok){
+					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SamplingUnitAttributeFilter_ListItemNotFound, new Object[]{samplingUnitAttributeKey}))};		
+				}
+			}
+			return new DropItem[]{di};
+		}catch (Exception ex){
+			ERQueryPlugIn.log(ex.getMessage(), ex);
+			return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SamplingUnitAttributeFilter_AttributeNotFound, new Object[]{samplingUnitAttributeKey}))};
+		}
+	}
+	
+	/**
+	 * @return {@link CategoryDropItem} or {@link ErrorDropItem} if 
+	 * category cannot be found.
+	 */
+	public DropItem[] createDropItems(SamplingUnitFilter filter, Session session) throws Exception{
+		SamplingUnitFilter.Source joinTable = filter.getSource();
+		SamplingUnitFilter.Type unitType = filter.getType();
+		String uuid = filter.getUuid();
+		if (unitType == SamplingUnitFilter.Type.SAMPLINGUNIT){
+			if (uuid.equals(SamplingUnitFilter.NONE_KEY)){
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(SamplingUnitFilter.NONE, joinTable)};
+			}
+			
+			SamplingUnit su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(uuid));
+			if (su != null){
+				su.getId();
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(su, joinTable)};
+			}else{
+				return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SamplingUnitFilter_SamplingUnitNotFound, new Object[]{uuid}))}; 
+			}
+		}
+		if (unitType == SamplingUnitFilter.Type.TRACK){
+			MissionTrack su = (MissionTrack) session.get(MissionTrack.class, UuidUtils.stringToUuid(uuid));
+			if (su != null){
+				su.getId();
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(su)};
+			}else{
+				return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SamplingUnitFilter_MissionTrackNotFound, new Object[]{uuid}))}; 
+			}
+		}
+		return null;
+	}
+	
+
+	public DropItem[] createDropItems(SurveyFilter filter, Session session) throws Exception {
+		SurveyFilter.Type type = filter.getType();
+		String value = filter.getValue();
+		if (type == SurveyFilter.Type.ID){
+			DropItem di = SurveyDropItemFactory.INSTANCE.createSurveyIdDropItem();
+			di.initializeData(new String[]{filter.getOperator().asSmartValue(), value});
+			return new DropItem[]{di};
+		}else if (type == SurveyFilter.Type.UUID){
+			try{
+				Survey s = (Survey) session.get(Survey.class, UuidUtils.stringToUuid(value));
+				if (s == null){
+					return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SurveyFilter_SurveyNotFound, new Object[]{value}))};
+				}
+				s.getId();
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSurveyUuidIdDropItem(s)};
+			}catch (Exception ex){
+				ERQueryPlugIn.log(ex.getMessage(), ex);
+				return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.SurveyFilter_SurveyNotFound, new Object[]{value}))};
+			}
+		}
+		return null;
+	}
+	
+	public DropItem[] createDropItems(TrackTypeFilter filter, Session session) throws Exception {
+		return new DropItem[]{new TrackTypeDropItem(filter.getTrackType())};
+	}
+
+	
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
+	 */
+	public DropItem createDropItems(MissionValueItem item, Session session) throws Exception{
+		if (item.getValueItem() == ValueItem.TRACK_LENGTH){
+			return SurveyDropItemFactory.INSTANCE.createMissionLengthValueItem();
+		}else if (item.getValueItem() == ValueItem.MISSION_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionCountValueItem();
+		}else if (item.getValueItem() == ValueItem.SURVEY_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createSurveyCountValueItem();
+		}else if (item.getValueItem() == ValueItem.DAY_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionDayCountValueItem();
+		}else if (item.getValueItem() == ValueItem.HOUR_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionHourCountValueItem();
+		}else if (item.getValueItem() == ValueItem.MANHOURS_COUNT){
+			return SurveyDropItemFactory.INSTANCE.createMissionPersonHourCountValueItem();
+		}else if (item.getValueItem() == ValueItem.TRACK_LENGTH_TOTAL){
+			return SurveyDropItemFactory.INSTANCE.createTotalMissionLengthValueItem();
+		}else if (item.getValueItem() == ValueItem.SURVEY_COUNT_TOTAL){
+			return SurveyDropItemFactory.INSTANCE.createTotalSurveyCountValueItem();
+		}else if (item.getValueItem() == ValueItem.MISSION_COUNT_TOTAL){
+			return SurveyDropItemFactory.INSTANCE.createTotalMissionCountValueItem();
+		}
+		return new ErrorDropItem(Messages.MissionValueItem_ValueItemNotSupported + item.getValueItem().key);
+	}
+		
+	/**
+	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#asDropItem(org.hibernate.Session)
+	 */
+	public DropItem createDropItems(CombinedValueItem item, Session session) throws Exception {
+		DropItem d1 = valueItemToDropItem(item.getPart1(), session);
+		DropItem d2 = valueItemToDropItem(item.getPart2(), session);
+		
+		Object[] data = new Object[2];
+		data[0] = getInitializeData(item.getPart1());
+		data[1] = d2;
+		d1.initializeData(data);
+		return d1;
+	}
+	
+	public DropItem groupByToDropItem(IGroupBy gb, Session session) throws Exception{
+		return findViewer(gb).asDropItem(session);
+	}
+	
+	public IGroupByViewer<?> findViewer(IGroupBy groupBy){
+		if (groupBy instanceof MissionAttributeGroupBy){
+			return  new MissionAttributeGroupByViewer((MissionAttributeGroupBy) groupBy);
+		}else if(groupBy instanceof MissionIdGroupBy){
+			return new MissionIdGroupByViewer((MissionIdGroupBy)groupBy);
+		}else if (groupBy instanceof SamplingUnitAttributeGroupBy){
+			return new SamplingUnitAttributeGroupByViewer((SamplingUnitAttributeGroupBy)groupBy);
+		}else if (groupBy instanceof SamplingUnitGroupBy){
+			return new SamplingUnitGroupByViewer((SamplingUnitGroupBy)groupBy);
+		}else if (groupBy instanceof SurveyIdGroupBy){
+			return new SurveyIdGroupByViewer((SurveyIdGroupBy)groupBy);
+		}
+		return super.findViewer(groupBy);
+	}
+	
+	public List<DropItem> groupByToDropItems(GroupByPart groupBy, Session session) {
+		ArrayList<DropItem> item = new ArrayList<DropItem>();
+		try{
+			for (IGroupBy groupByItem : groupBy.getGroupBys()){
+				item.add(groupByToDropItem(groupByItem, session));
+			}
+		}catch (Exception ex){
+			ERQueryPlugIn.log(ex.getMessage(), ex);
+			item.clear();
+			item.add(new ErrorDropItem(ex.getMessage()));
+		}
+		return item;
+	}
+	
 	private List<DropItem> asDropItems(IFilter filter, Session session){
 		List<DropItem> items = new ArrayList<DropItem>();
 		try{
-			DropItem[] filterItems = filter.getDropItems(session);
+			DropItem[] filterItems = filterToDropItem(filter, session);
 			for(DropItem i : filterItems){
 				items.add(i);
 			}
@@ -675,5 +1057,20 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			items.add(new ErrorDropItem(MessageFormat.format(Messages.SurveyDropItemFactory_ParseError, new Object[]{ex.getMessage()})));
 		}
 		return items;
+	}
+	
+	private List<DropItem> valuePartToDropItems(ValuePart part, Session session) {
+		ArrayList<DropItem> item = new ArrayList<DropItem>();
+		try{
+			for (IValueItem valueItem : part.getValueItems()){
+				item.add(valueItemToDropItem(valueItem, session));
+			}
+		}catch (Exception ex){
+			QueryPlugIn.log(ex.getMessage(), ex);
+			item.clear();
+			item.add(new ErrorDropItem(ex.getMessage()));
+		}
+		return item;
+
 	}
 }

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.ValueItemLabelProvider;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 
 /**
@@ -99,7 +100,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 		sb.append("category:sum:"); //$NON-NLS-1$
 		ValueType[] values = ValueType.values();
 		for (int i = 0; i < values.length; i++){
-			if (values[i].guiLabel.equals(combo.getItem(combo.getSelectionIndex()))){
+			if (ValueItemLabelProvider.INSTANCE.getLabel(values[i]).equals(combo.getItem(combo.getSelectionIndex()))){
 				sb.append(values[i].key + ":"); //$NON-NLS-1$
 				break;
 			}
@@ -132,7 +133,7 @@ public class CategoryValueDropItem extends AbstractValueDropItem {
 		combo = new Combo(main, SWT.READ_ONLY);
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
-			combo.add(values[i].guiLabel);
+			combo.add(ValueItemLabelProvider.INSTANCE.getLabel(values[i]));
 		}
 		combo.select(defaultSelection);
 		combo.addSelectionListener(new SelectionAdapter() {

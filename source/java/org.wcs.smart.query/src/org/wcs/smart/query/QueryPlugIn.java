@@ -41,13 +41,20 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.common.ui.GridQueryColumnLabelProvider;
+import org.wcs.smart.query.common.ui.OperatorLabelProvider;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
+import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
+import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
 import org.wcs.smart.query.ui.MultiCaQueryPerspective;
+import org.wcs.smart.query.ui.QueryDateLabelProvider;
 import org.wcs.smart.query.ui.QueryPerspective;
 import org.wcs.smart.query.ui.definition.DefinitionPanelManager;
 
@@ -212,9 +219,13 @@ public class QueryPlugIn extends AbstractUIPlugin {
 		cleanUp.schedule();
 		
 		DefinitionPanelManager.createInstance();
+				
+		SmartContext.INSTANCE.setClass(IOperatorLabelProvider.class, new OperatorLabelProvider());
+		SmartContext.INSTANCE.setClass(IGridQueryColumnLabelProvider.class, new GridQueryColumnLabelProvider());
+		SmartContext.INSTANCE.setClass(IQueryDateLabelProvider.class, new QueryDateLabelProvider());
+		SmartContext.INSTANCE.setTempFilestoreLocation(QueryPlugIn.getDefault().getQueryTempDirectory());
 	}
 
-	
 	
 	/*
 	 * (non-Javadoc)

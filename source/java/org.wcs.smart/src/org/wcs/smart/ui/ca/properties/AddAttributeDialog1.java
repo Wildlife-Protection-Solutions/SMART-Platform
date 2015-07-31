@@ -316,7 +316,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 			@Override
 			public Image getImage(Object element) {
 				if (element instanceof Attribute){
-					return ((Attribute) element).getType().getImage();
+					return DataModel.getAttributeImage(((Attribute) element).getType());
 				}
 				return null;
 			}

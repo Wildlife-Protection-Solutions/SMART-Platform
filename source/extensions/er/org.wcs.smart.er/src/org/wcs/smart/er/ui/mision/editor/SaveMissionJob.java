@@ -29,7 +29,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Job is used to save Mission object
@@ -48,7 +48,7 @@ public class SaveMissionJob extends Job {
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			//save a name

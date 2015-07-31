@@ -24,6 +24,7 @@ package org.wcs.smart.observation.query.engine;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
@@ -36,7 +37,7 @@ import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Converts filters to sql for the Derby query engine.
@@ -78,7 +79,7 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 		sb.append(engine.tablePrefix(Waypoint.class));
 		sb.append(".source "); //$NON-NLS-1$
 		sb.append(asSql(filter.getOperator()));
-		String src = engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
+		String src = engine.addParameterValue(SharedUtils.stripQuotes(filter.getWaypointSourceKey()));
 		sb.append(" " + src + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		return sb.toString();
 	}
@@ -88,7 +89,7 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 */
 	@Override
 	protected String asSql(AttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyObservationQueryEngine)engine).filterTables.get(filter);
+		String col = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
@@ -101,7 +102,7 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 */
 	@Override
 	protected String asSql(CategoryFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyObservationQueryEngine)engine).filterTables.get(filter);
+		String col = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
 			return col + ".wp_uuid is not null ";  //$NON-NLS-1$
 		}
@@ -113,7 +114,7 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 */
 	@Override
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		String col = ((DerbyObservationQueryEngine)engine).filterTables.get(filter);
+		String col = ((AbstractDerbyObservationQueryEngine)engine).filterTables.get(filter);
 		if (col != null){
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
@@ -130,7 +131,7 @@ public class ObservationFilterToSqlGenerator extends DerbyFilterToSqlGenerator  
 	 */
 	@Override
 	public String asSql(ConservationAreaFilter filter, String caTablePrefix, IQueryEngine engine) throws SQLException{
-		ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
+		ArrayList<UUID> localFilters = new ArrayList<UUID>();
 		if (filter.includeAll()){
 			//include all current conservation areas
 			if (SmartDB.getConservationAreaConfiguration() != null){

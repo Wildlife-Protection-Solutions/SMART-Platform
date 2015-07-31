@@ -29,6 +29,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.data.oda.smart.internal.Messages;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -92,7 +93,7 @@ public class PatrolReportQueryListener extends QueryListenerAdapter {
 						sb.append(" ["); //$NON-NLS-1$
 						sb.append( rp.getReport().getId());
 						sb.append("] {" ); //$NON-NLS-1$
-						sb.append( rp.getReport().getOwner().getFullLabel());
+						sb.append(LabelConstants.getFullLabel( rp.getReport().getOwner()));
 						sb.append("}"); //$NON-NLS-1$
 						sb.append("\n"); //$NON-NLS-1$
 					}

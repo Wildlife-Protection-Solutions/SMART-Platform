@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.importexport;
 
+import java.util.UUID;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -30,7 +32,7 @@ import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Filter visitor for processing patrol filters.
@@ -57,7 +59,7 @@ public class SurveyFilterProcessorVisitor implements IFilterVisitor {
 		        qt.getUuiditem().add(employeeToUuidItem(pf.getUuid()));
 			}else if (filter instanceof SamplingUnitFilter){
 				SamplingUnitFilter sf = (SamplingUnitFilter)filter;
-				qt.getUuiditem().add(samplingUnitToUuidItem(SmartUtils.decodeHex(sf.getUuid())));
+				qt.getUuiditem().add(samplingUnitToUuidItem(UuidUtils.stringToUuid(sf.getUuid())));
 			}
 		}catch (Exception ex){
 			this.ex = ex;
@@ -68,22 +70,22 @@ public class SurveyFilterProcessorVisitor implements IFilterVisitor {
 		return this.ex;
 	}
 	
-	public UuidItemType employeeToUuidItem(byte[] uuid){
+	public UuidItemType employeeToUuidItem(UUID uuid){
 		Employee e = (Employee) session.load(Employee.class, uuid);
 		
 		UuidItemType item = new UuidItemType();
-        item.setUuid(SmartUtils.encodeHex(uuid));
+        item.setUuid(UuidUtils.uuidToString(uuid));
         item.setId(e.getId());
         item.getValue().add(e.getGivenName());
         item.getValue().add(e.getFamilyName());
         return item;
 	}
 	
-	public UuidItemType samplingUnitToUuidItem(byte[] uuid){
+	public UuidItemType samplingUnitToUuidItem(UUID uuid){
 		SamplingUnit su = (SamplingUnit)session.load(SamplingUnit.class, uuid);
 		
 		UuidItemType item = new UuidItemType();
-		item.setUuid(SmartUtils.encodeHex(uuid));
+		item.setUuid(UuidUtils.uuidToString(uuid));
 		item.setId(su.getId());
         return item;
 	}

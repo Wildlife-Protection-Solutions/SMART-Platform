@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.plan.internal.ui.patrol;
 
-import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -81,7 +81,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			if (currentPlan == null){
 				return;
 			}
-			if (Arrays.equals(source.getUuid(), currentPlan.getUuid())){
+			if (source.getUuid().equals(currentPlan.getUuid())){
 				//my plan was deleted
 				currentPlan = null;
 				Display.getDefault().syncExec(new Runnable(){
@@ -99,7 +99,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 			if (currentPlan == null){
 				return;
 			}
-			if (Arrays.equals(source.getUuid(), currentPlan.getUuid())){
+			if (source.getUuid().equals(currentPlan.getUuid())){
 			
 				Job j = new Job(Messages.PatrolPlanContribution_RefreshJob_Title){
 
@@ -189,7 +189,7 @@ public class PatrolPlanContribution implements IPatrolEditorContribution {
 					String hql = "DELETE FROM PatrolPlan where id.patrol = :patrol"; //$NON-NLS-1$
 					Query q = s.createQuery(hql).setParameter("patrol", currentPatrol); //$NON-NLS-1$
 					q.executeUpdate();
-					byte[] planuuid = ((PatrolPlanComposite)content).getSelection();
+					UUID planuuid = ((PatrolPlanComposite)content).getSelection();
 					if (planuuid != null){
 						PatrolPlan pp = new PatrolPlan();
 						pp.setPatrol(currentPatrol);

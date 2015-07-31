@@ -67,6 +67,7 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.export.dialog.CsvCaImportDialog;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.SmartDB;
@@ -78,6 +79,7 @@ import org.wcs.smart.patrol.internal.export.PatrolTransportCsvImportConfig;
 import org.wcs.smart.patrol.internal.export.PatrolTransportCsvImporter;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -375,8 +377,8 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 							if (type.getType().equals(t.getPatrolType())){
 								//new to validate keys
 								Collection<PatrolTransportType> siblings = getAllTransportTypes();
-								if (NamedKeyItem.validateKey(t.getKeyId(), siblings) != null){
-									t.setKeyId(NamedKeyItem.generateKey(t.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()), siblings));
+								if (DataModelManager.INSTANCE.validateKey(t.getKeyId(), siblings) != null){
+									t.setKeyId(DataModelManager.INSTANCE.generateKey(t.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()), siblings));
 								}
 								type.getTransportTypes().add(t);
 							}
@@ -474,7 +476,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				@Override
 				public String getText(Object element) {
 					if (element instanceof PatrolType){
-						return (((PatrolType)element).getType().getGuiName());
+						return LabelConstants.getLabel( (((PatrolType)element).getType()));
 					}
 					return super.getText(element);
 				}
@@ -581,7 +583,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 							}else{
 								ttype.updateName(languageViewer.getCurrentSelection(), ((String)value).trim());
 								if (ttype.getKeyId() == null){
-									ttype.setKeyId(NamedKeyItem.generateKey((String)value, getAllTransportTypes()));
+									ttype.setKeyId(DataModelManager.INSTANCE.generateKey((String)value, getAllTransportTypes()));
 								}
 								setChangesMade(true);
 							}
@@ -599,7 +601,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 		/* Key Column */
 		viewerColumn = new TableViewerColumn(viewer,SWT.NONE);
 		column = viewerColumn.getColumn();
-		column.setText(PatrolTransportType.KEY);
+		column.setText(LabelConstants.TRANSTYPE_KEY);
 		column.setResizable(true);
 		column.setMoveable(true);
 
@@ -666,7 +668,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				if (type.getTransportTypes() != null){
 					for (PatrolTransportType tt : type.getTransportTypes()){
 						siblings.remove(tt);
-						String error = NamedKeyItem.validateKey(tt.getKeyId(), siblings);
+						String error = DataModelManager.INSTANCE.validateKey(tt.getKeyId(), siblings);
 						siblings.add(tt);
 						if (error != null){
 							throw new Exception(error);

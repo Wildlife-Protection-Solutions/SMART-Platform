@@ -23,7 +23,7 @@ package org.wcs.smart.entity.query;
 
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 

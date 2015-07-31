@@ -36,7 +36,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Smart area feature reader
@@ -113,7 +113,8 @@ public class SmartFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		values[1] = fid;
 		values[2] = a.getName();
 		values[3] = a.getKeyId();
-		values[4] = SmartUtils.encodeHex(a.getUuid());
+//		values[4] = SmartUtils.encodeHex(a.getUuid());
+		values[4] = UuidUtils.uuidToString(a.getUuid());
 		
 		return SimpleFeatureBuilder.build(ftype, values, fid);
 	}

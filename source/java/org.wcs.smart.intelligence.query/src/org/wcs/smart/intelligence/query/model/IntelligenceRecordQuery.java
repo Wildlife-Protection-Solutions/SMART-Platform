@@ -31,17 +31,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.intelligence.query.engine.RecordQueryIntelligenceEngine;
 import org.wcs.smart.intelligence.query.internal.IntelligenceQueryColumnCache;
 import org.wcs.smart.intelligence.query.parser.Parser;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -63,7 +58,7 @@ public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 	@Transient
 	@Override
 	public IQueryType getType() {
-		return QueryTypeManager.getInstance().findQueryType(IntelligenceRecordQueryType.KEY);
+		return QueryTypeManager.INSTANCE.findQueryType(IntelligenceRecordQueryType.KEY);
 	}
 
 	/**
@@ -168,27 +163,4 @@ public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 		q.setStyle(getStyle());
 		return q;
 	}
-
-	@Override
-	protected Object executeQueryInternal(IProgressMonitor monitor,
-			Session session) throws Exception {
-		Session lSession = session;
-		if (lSession == null){
-			lSession = HibernateManager.openSession();
-			lSession.beginTransaction();
-		}
-		try {
-			RecordQueryIntelligenceEngine engine = new RecordQueryIntelligenceEngine();
-			IPagedQueryResultSet lastResult = engine.executeQuery(this, lSession, monitor);
-			return lastResult;
-		} finally {
-			if (session == null && lSession.isOpen()){
-				lSession.getTransaction().commit();
-				lSession.close();
-			}
-		}
-		
-	}
-
-
 }

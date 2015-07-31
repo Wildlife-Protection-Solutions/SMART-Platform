@@ -26,18 +26,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.patrol.query.parser.AbstractEmptyPatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.AbstractEmptyPatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Plan option to contribute to Patrol Query Filter
@@ -49,7 +51,7 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 
 	public static final String KEY = STRING_CONTRIBUTION_KEY_PREFIX + "planPart"; //$NON-NLS-1$
 
-	public static final ListItem ANY_PATROL_ITEM = new ListItem(new byte[0], Messages.PlanPatrolQueryOption_AnyPlan);
+	public static final ListItem ANY_PATROL_ITEM = new ListItem(UuidUtils.stringToUuid("00000000000000000000000000000000"), Messages.PlanPatrolQueryOption_AnyPlan); //$NON-NLS-1$
 	
 	@Override
 	public String getGuiName() {

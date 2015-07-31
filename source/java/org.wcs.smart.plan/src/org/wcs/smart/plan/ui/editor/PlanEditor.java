@@ -22,9 +22,9 @@
 package org.wcs.smart.plan.ui.editor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -89,7 +89,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	private IPlanEventListener planListener = new IPlanEventListener(){
 		@Override
 		public void eventFired(int type, Plan source) {
-			if (Arrays.equals(source.getUuid(), getPlan().getUuid())){
+			if (source.getUuid().equals(getPlan().getUuid())){
 				if (type != PlanEventManager.PATROL_PLAN_ATTRIBUTE){
 					//force reload plan to get latest changes
 					plan = loadPlan();
@@ -287,7 +287,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	 * Will always get a new object.
 	 */
 	public Plan loadPlan(){
-		byte[] puuid = ((PlanEditorInput) getEditorInput()).getUuid();
+		UUID puuid = ((PlanEditorInput) getEditorInput()).getUuid();
 		Session session = HibernateManager.openSession();
 		//load parent plan so don't have lazy loading issues later.
 		session.beginTransaction();

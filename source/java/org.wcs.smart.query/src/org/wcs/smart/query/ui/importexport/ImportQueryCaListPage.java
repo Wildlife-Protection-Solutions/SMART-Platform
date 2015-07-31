@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -85,7 +86,7 @@ public class ImportQueryCaListPage extends WizardPage {
 	private Job loadQueriesJob = new Job(Messages.QueryListView_LoadQueryJobName){
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			HashMap<Integer, List<QueryEditorInput>> queries = new HashMap<Integer, List<QueryEditorInput>>();
+			HashMap<UUID, List<QueryEditorInput>> queries = new HashMap<UUID, List<QueryEditorInput>>();
 			List<QueryFolder> folders = new ArrayList<QueryFolder>();
 			
 			Language match = SmartUtils.findLanguageMatch(currentCa.getLanguages());
@@ -119,7 +120,7 @@ public class ImportQueryCaListPage extends WizardPage {
 				caRootFolder.setChildren(rootFolders);
 			
 
-				for (IQueryType type : QueryTypeManager.getInstance().getSupportedQueryTypes()){
+				for (IQueryType type : QueryTypeManager.INSTANCE.getSupportedQueryTypes()){
 					Query hquery = session
 						.createQuery("SELECT a.uuid, a.folder.uuid, a.isShared, a.id " //$NON-NLS-1$
 							+ "FROM " //$NON-NLS-1$
@@ -132,20 +133,20 @@ public class ImportQueryCaListPage extends WizardPage {
 					List<?> results = hquery.list();
 					for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 						Object[] object = (Object[]) iterator.next();
-						byte[] uuid = (byte[]) object[0];
-						byte[] folderuuid = (byte[])object[1];
+						UUID uuid = (UUID) object[0];
+						UUID folderuuid = (UUID)object[1];
 						String id = (String) object[3];
 						String name = findLabel(match, uuid, session);
 					
 						QueryEditorInput proxy = new QueryEditorInput(uuid, name, id, true, type);
-						byte[] key = folderuuid;
+						UUID key = folderuuid;
 						if (folderuuid == null) {
 							key = CaQueryHibernateManagerImpl.CA_QUERY_KEY;
 						}
-						List<QueryEditorInput> proxies = queries.get(Arrays.hashCode(key));
+						List<QueryEditorInput> proxies = queries.get(key);
 						if (proxies == null) {
 							proxies = new ArrayList<QueryEditorInput>();
-							queries.put(Arrays.hashCode(key), proxies);
+							queries.put(key, proxies);
 						}
 						proxies.add(proxy);
 					}
@@ -172,7 +173,7 @@ public class ImportQueryCaListPage extends WizardPage {
 			return Status.OK_STATUS;
 		}
 		
-		private String findLabel(Language match, byte[] item, Session session){
+		private String findLabel(Language match, UUID item, Session session){
 			org.wcs.smart.ca.Label.LabelItemPK lid = new org.wcs.smart.ca.Label.LabelItemPK();
 			lid.setElement(new UuidItem(item));
 			lid.setLanguage(match);

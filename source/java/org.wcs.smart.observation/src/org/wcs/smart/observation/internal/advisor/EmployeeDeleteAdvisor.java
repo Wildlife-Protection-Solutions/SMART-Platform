@@ -28,6 +28,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -55,7 +56,7 @@ public class EmployeeDeleteAdvisor implements IDeleteAdvisor {
 		if (cnt != 0){
 			return MessageFormat.format(
 					Messages.EmployeeDeleteAdvisor_DeleteError,
-					new Object[]{em.getFullLabel(), cnt});
+					new Object[]{LabelConstants.getFullLabel(em), cnt});
 		}
 		return null;
 	}

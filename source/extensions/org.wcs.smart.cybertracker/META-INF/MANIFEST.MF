@@ -11,12 +11,6 @@ Require-Bundle: org.eclipse.ui.forms,
  org.wcs.smart.p2
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: org.wcs.smart.cybertracker,
- org.wcs.smart.cybertracker.export,
- org.wcs.smart.cybertracker.export.data,
- org.wcs.smart.cybertracker.internal,
- org.wcs.smart.cybertracker.model,
- org.wcs.smart.cybertracker.model.elements,
- org.wcs.smart.cybertracker.model.screens,
+Export-Package: org.wcs.smart.cybertracker.model,
  org.wcs.smart.cybertracker.updatesite
 Bundle-Vendor: org.wcs.smart

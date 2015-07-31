@@ -183,7 +183,7 @@ public class GriddedDefinitionPanel extends
 		}
 		
 		//update associated item panel
-		IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQuery().getType());
+		IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQueryType());
 		if (pnl instanceof ISurveyPanel){
 			((ISurveyPanel) pnl).refreshPanel(currentDesign);
 		}

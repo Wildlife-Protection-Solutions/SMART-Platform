@@ -60,7 +60,7 @@ public class WaypointSourceGroupByDropItem extends DropItem implements IGroupByD
 	@Override
 	public List<ListItem> getListItem() {
 		List<ListItem> ops = new ArrayList<ListItem>();
-		for (IWaypointSource src : WaypointSourceEngine.getInstance().getSupportedSources()){
+		for (IWaypointSource src : WaypointSourceEngine.INSTANCE.getSupportedSources()){
 			ops.add(new ListItem(null, src.getName(), src.getKey()));
 		}
 		return ops;

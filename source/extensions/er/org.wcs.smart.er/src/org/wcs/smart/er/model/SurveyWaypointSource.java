@@ -22,6 +22,7 @@
 package org.wcs.smart.er.model;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,6 +37,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Survey waypoint source.
@@ -58,7 +60,11 @@ public class SurveyWaypointSource implements IWaypointSource{
 	}
 
 	@Override
-	public String getDatastoreFileLocation(final Waypoint wp) {
+	public String getDatastoreFileLocation(Object object) {
+		if (!(object instanceof Waypoint)){
+			throw new IllegalStateException(MessageFormat.format("Object type {0} not supported for survey waypoint source attachments", object.getClass().getName()));
+		}
+		final Waypoint wp = (Waypoint)object;
 		if (wp.getUuid() == null){
 			return null;
 		}
@@ -74,9 +80,9 @@ public class SurveyWaypointSource implements IWaypointSource{
 				try{
 					List<?> pws = s.createCriteria(SurveyWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).list(); //$NON-NLS-1$
 					if (pws.size() > 0){
-						surveyDir[0] = SmartUtils.getDirectoryPath(((SurveyWaypoint)pws.get(0)).getMissionDay().getMission().getUuid());
+						surveyDir[0] = UuidUtils.getDirectoryPath(((SurveyWaypoint)pws.get(0)).getMissionDay().getMission().getUuid());
 					}else{
-						EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + SmartUtils.encodeHex(wp.getUuid()), null);
+						EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + UuidUtils.uuidToString(wp.getUuid()), null);
 					}
 				}finally{
 					s.close();
@@ -89,7 +95,7 @@ public class SurveyWaypointSource implements IWaypointSource{
 		try {
 			j.join();
 		} catch (InterruptedException e) {
-			EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + SmartUtils.encodeHex(wp.getUuid()), null);
+			EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + UuidUtils.uuidToString(wp.getUuid()), null);
 			return null;
 		}
 			
@@ -109,7 +115,7 @@ public class SurveyWaypointSource implements IWaypointSource{
 		sb.append(SurveyDesign.SURVEY_FILESTORE_LOC);
 		sb.append(File.separator);
 		if (m != null){
-			sb.append(SmartUtils.encodeHex(m.getUuid()));
+			sb.append(UuidUtils.uuidToString(m.getUuid()));
 			sb.append(File.separator);
 		}
 		

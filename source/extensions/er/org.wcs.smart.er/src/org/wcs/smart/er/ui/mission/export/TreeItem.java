@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.ui.mission.export;
 
+import java.util.UUID;
+
 /**
  * Abstract tree node for survey/mission tree node.
  * @author Emily
@@ -40,6 +42,6 @@ public interface TreeItem {
 	 * 
 	 * @return
 	 */
-	abstract public byte[] getUuid();
+	abstract public UUID getUuid();
 	
 }

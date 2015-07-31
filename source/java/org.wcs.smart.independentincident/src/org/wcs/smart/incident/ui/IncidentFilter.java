@@ -29,7 +29,7 @@ import org.wcs.smart.common.filter.DateFilterComposite.DateFilter;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IndepedentIncidentSource;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Filter for the incident view.  Filters
@@ -195,8 +195,8 @@ public class IncidentFilter {
 			if (end == null){
 				end = endDate;
 			}
-			start = SmartUtils.getDatePart(start, false);
-			end = SmartUtils.getDatePart(end, true);
+			start = SharedUtils.getDatePart(start, false);
+			end = SharedUtils.getDatePart(end, true);
 			query.setParameter("date1", start); //$NON-NLS-1$
 			query.setParameter("date2", end); //$NON-NLS-1$
 		}

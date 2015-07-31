@@ -1,0 +1,150 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.er.query.model;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.internal.parser.Parser;
+import org.wcs.smart.query.common.model.GriddedQuery;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.summary.GridQueryDefinition;
+
+/**
+ * A class to represent a survey summary query.
+ * 
+ * @author Emily
+ */
+@Entity
+@Table(name="smart.survey_gridded_query")
+public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
+	private Object LOCK = new Object();
+	
+	protected String surveyDesignKey;
+
+	public static final String KEY = "surveygrid"; //$NON-NLS-1$
+	
+	/**
+	 * @see org.wcs.smart.query.model.Query#getType()
+	 */
+	@Override
+	@Transient
+	public String getTypeKey() {
+		return KEY;
+	}
+	
+	/**
+	 * Parse the string format of the query
+	 * into the filter format.
+	 * @return 
+	 */
+	@Transient
+	protected GridQueryDefinition parseQuery() throws Exception {
+		if (strQuery == null || strQuery.length() == 0){
+			return null;
+		}
+		try(InputStream is = new ByteArrayInputStream(strQuery.getBytes())){
+			Parser parser = new Parser(is);
+			GridQueryDefinition myQuery = parser.GridQuery();
+			return myQuery;
+		}
+	}
+	
+	/**
+	 * Creates a copy of the summary query
+	 * with a null uuid, and null id;
+	 * 
+	 * 
+	 * @see java.lang.Object#clone()
+	 */
+	@Transient
+	@Override
+	public SurveyGriddedQuery clone(Employee newEmployee){
+		SurveyGriddedQuery q = new SurveyGriddedQuery();
+		q.setUuid(null);
+		q.setId( null );
+		q.setName(getName());
+		q.setConservationArea(getConservationArea());
+		q.setConservationAreaFilter(getConservationAreaFilter());
+		q.setDateFilter(getDateFilter());
+		q.setOwner(newEmployee);
+		q.setQuery(getQuery());
+		q.setCrsDefinition(getCrsDefinition());
+		q.setSurveyDesign(getSurveyDesign());
+		q.setStyle(getStyle());
+		return q;
+	}
+
+	/**
+	 * Loads the query columns
+	 */
+	protected synchronized void initQueryColumns(){
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(KEY, getSurveyDesign());
+		
+		queryColumns = new ArrayList<QueryColumn>();
+		for (int i = 0; i < cols.length; i ++){
+			queryColumns.add(cols[i]);
+		}
+	}
+	
+	/**
+	 * Sets the query string.  At this point the
+	 * filter is not parsed.
+	 * 
+	 * @param filter
+	 * @return
+	 */
+	public void setSurveyDesign(String key){
+		this.surveyDesignKey = key;
+		synchronized (LOCK) {
+			this.queryColumns = null;	
+		}
+		
+	}
+	
+	/**
+	 * @return the query filter as string
+	 */
+	@Column(name = "surveydesign_key")
+	public String getSurveyDesign(){
+		return this.surveyDesignKey;
+	}
+	
+	@Transient
+	public void setSurveyDesign(SurveyDesign design){
+		if (design == null){
+			setSurveyDesign((String)null);
+		}else{
+			setSurveyDesign(design.getKeyId());
+		}
+	}
+
+}

@@ -27,6 +27,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
@@ -57,12 +58,12 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		}
 		Long cnt = (Long) session.createCriteria(Report.class).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{e.getFullLabel(), cnt});
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{LabelConstants.getFullLabel(e), cnt});
 		}
 	
 		cnt = (Long) session.createCriteria(ReportFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{e.getFullLabel(), cnt});
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{LabelConstants.getFullLabel(e), cnt});
 		}
 		return null;
 	}

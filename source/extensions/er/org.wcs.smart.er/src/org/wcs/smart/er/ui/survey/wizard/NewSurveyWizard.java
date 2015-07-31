@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.ui.survey.wizard;
 
+import java.util.UUID;
+
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -59,7 +61,7 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 	 * @param parentDesign parent design; optional
 	 * @param surveySibling sibling survey; optional
 	 */
-	public NewSurveyWizard(byte[] parentDesign, byte[] surveySibling){
+	public NewSurveyWizard(UUID parentDesign, UUID surveySibling){
 		session = HibernateManager.openSession();
 	
 		newSurvey = new Survey();

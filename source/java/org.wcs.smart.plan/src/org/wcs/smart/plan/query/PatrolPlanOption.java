@@ -22,8 +22,8 @@
 package org.wcs.smart.plan.query;
 
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.patrol.query.model.IExtensionOption;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
-import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.ui.model.DropItem;
 

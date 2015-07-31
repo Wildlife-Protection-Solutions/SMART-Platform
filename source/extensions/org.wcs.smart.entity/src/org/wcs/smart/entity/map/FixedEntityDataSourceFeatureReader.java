@@ -41,6 +41,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -117,7 +118,7 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 	private SimpleFeature getFeature(Entity entity){
 		Object data[] = new Object[entityType.getAttributes().size() + 4];
 		
-		data[0] = entity.getId() + "." + SmartUtils.encodeHex(entity.getUuid()); //$NON-NLS-1$ 
+		data[0] = entity.getId() + "." + UuidUtils.uuidToString(entity.getUuid()); //$NON-NLS-1$ 
 		data[1] = entity.getId();
 		data[2] = entity.getStatus().getGuiName();
 		

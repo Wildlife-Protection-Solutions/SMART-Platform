@@ -60,7 +60,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	private String tableName;
 	private String waypointTable;
 	
-	private DerbyObservationQueryEngine engine;
+	private AbstractDerbyObservationQueryEngine engine;
 
 	/**
 	 * Creates a new process filter
@@ -68,7 +68,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	 * @param tableName the output temporary table name
 	 * @param engine query engine
 	 */
-	public WaypointFilterProcessor(String tableName, DerbyObservationQueryEngine engine){
+	public WaypointFilterProcessor(String tableName, AbstractDerbyObservationQueryEngine engine){
 		this.tableName = tableName;
 		this.engine = engine;
 		this.waypointTable = engine.createTempTableName();
@@ -478,7 +478,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(prefix(AttributeListItem.class));
 					sql.append(".keyid ");  //$NON-NLS-1$
 					
-					if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION.getKey())){
+					if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION_KEY)){
 						sql.append (" is not null "); //$NON-NLS-1$
 					}else{
 						String p1 = engine.addParameterValue((String)attfilter.getValue());

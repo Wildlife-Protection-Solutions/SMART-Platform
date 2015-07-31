@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -144,7 +145,8 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		Collections.sort(sortedList, new Comparator<PatrolLegMember>(){
 			@Override
 			public int compare(PatrolLegMember o1, PatrolLegMember o2) {
-				return Collator.getInstance().compare(o1.getMember().getFullLabel(), o2.getMember().getFullLabel());
+				return Collator.getInstance().compare(
+						LabelConstants.getFullLabel(o1.getMember()), LabelConstants.getFullLabel(o2.getMember()));
 			}});
 		List<PatrolLegMember> wrinput = new ArrayList<PatrolLegMember>(sortedList);
 		patrolLeaderViewer.setInput(wrinput);

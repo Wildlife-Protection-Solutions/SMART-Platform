@@ -68,8 +68,8 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
@@ -249,7 +249,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 							getEditorSite().getShell(), SummaryPlanEditorPage.this.parentEditor.getPlan());
 					
 					if (dialog.open() == IDialogConstants.OK_ID) {
-						Session session = SmartHibernateManager.openSession();
+						Session session = HibernateManager.openSession();
 						try{
 							PlanHibernateManager.savePlan(SummaryPlanEditorPage.this.parentEditor.getPlan(),session);
 						}finally{
@@ -650,7 +650,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getEndDate()));
 
 		if (plan.getCreator() != null){
-			txtCreator.setText(plan.getCreator().getFullLabel());
+			txtCreator.setText(LabelConstants.getFullLabel(plan.getCreator()));
 		}else{
 			txtCreator.setText(""); //$NON-NLS-1$
 		}

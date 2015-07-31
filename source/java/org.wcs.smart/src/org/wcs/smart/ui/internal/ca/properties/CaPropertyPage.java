@@ -61,9 +61,11 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.I18nUtil;
 import org.wcs.smart.util.LocaleComparator;
 import org.wcs.smart.util.LocaleLabelProvider;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * The conservation area property dialog for managing 
@@ -159,7 +161,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 					Language l = new Language();
 					l.setCa(SmartDB.getCurrentConservationArea());
 					l.setDefault(false);
-					l.setCode(SmartUtils.localeToString((Locale)r));
+					l.setCode(I18nUtil.localeToString((Locale)r));
 					
 					boolean exists = false;
 					for (Object o : languages){
@@ -229,7 +231,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 		Text txt = new Text(caComposite, SWT.NONE);
 		txt.setEditable(false);
 		txt.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false,1,1));
-		txt.setText(SmartUtils.getDirectoryPath(ca.getUuid()));
+		txt.setText(UuidUtils.getDirectoryPath(ca.getUuid()));
 		
 		
 		caComposite.addChangeListener(new CaInfoComposite.IChangeListener() {

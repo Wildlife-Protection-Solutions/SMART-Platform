@@ -324,7 +324,7 @@ public abstract class ValueRateFilterDeifnitionPanel implements IDefinitionPanel
 	}
 
 	@Override
-	public void initItems(QueryProxy q) {
+	public void initItems(QueryProxy q) throws Exception {
 		this.currentQuery = q;
 		valueFilter.initItems(q);
 		rateFilter.initItems(q);

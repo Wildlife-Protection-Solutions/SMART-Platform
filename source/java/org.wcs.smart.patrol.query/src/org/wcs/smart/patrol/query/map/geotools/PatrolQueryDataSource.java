@@ -34,6 +34,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * A geotools patrol query data source that 
@@ -126,7 +127,7 @@ public class PatrolQueryDataSource extends AbstractDataStore{
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:MultiLineString:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
 		
 		return sb.toString();
 	}

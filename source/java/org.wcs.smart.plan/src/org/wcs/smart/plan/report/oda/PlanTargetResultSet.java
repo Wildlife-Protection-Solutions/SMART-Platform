@@ -43,6 +43,7 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * SMRAT Plan target result set
@@ -81,7 +82,7 @@ public class PlanTargetResultSet  implements IResultSet {
 			try{
 			Plan p = (Plan)session.createCriteria(Plan.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("uuid", SmartUtils.decodeHex(planUuids[i]))).list().get(0); //$NON-NLS-1$
+				.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(planUuids[i]))).list().get(0); //$NON-NLS-1$
 			if (p != null){
 				if (!onlyChildren){
 					plans.addAll(p.getTargets());

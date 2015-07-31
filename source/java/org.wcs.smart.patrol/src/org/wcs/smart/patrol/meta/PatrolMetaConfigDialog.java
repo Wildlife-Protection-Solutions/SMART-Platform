@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
@@ -126,7 +127,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		Collections.sort(members, new Comparator<Employee>() {
 			@Override
 			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
+				return Collator.getInstance().compare(LabelConstants.getFullLabel(e1), LabelConstants.getFullLabel(e2));
 			}
 		});
 	}
@@ -280,7 +281,7 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		public String getText(Object element) {
 			if (element instanceof ScreenOptionMeta) {
 				ScreenOptionMeta i = (ScreenOptionMeta)element;
-				return i.getGuiLabel();
+				return org.wcs.smart.patrol.ui.LabelConstants.getLabel(i);
 			}
 			return super.getText(element);
 		}

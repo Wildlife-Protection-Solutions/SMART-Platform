@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.ui.samplingunit.export.wizard;
 
+import java.util.Locale;
+
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -58,12 +60,12 @@ public class TypePage extends WizardPage implements SelectionListener{
 		
 		opTransects = new Button(c, SWT.CHECK);
 		opTransects.setSelection(true);
-		opTransects.setText(GeometryType.TRANSECT.getGuiName());
+		opTransects.setText(GeometryType.TRANSECT.getGuiName(Locale.getDefault()));
 		opTransects.addSelectionListener(this);
 		
 		opPlots = new Button(c, SWT.CHECK);
 		opPlots.setSelection(true);
-		opPlots.setText(GeometryType.PLOT.getGuiName());
+		opPlots.setText(GeometryType.PLOT.getGuiName(Locale.getDefault()));
 		opPlots.addSelectionListener(this);
 		
 		setControl(main);

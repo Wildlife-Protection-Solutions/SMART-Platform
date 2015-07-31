@@ -23,9 +23,10 @@ package org.wcs.smart.entity.query;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Sighting query result item.
@@ -39,7 +40,7 @@ public class SightingResultItem implements IResultItem{
 	private String sourceId;
 	
 	private Date wpDateTime;
-	private byte[] waypointUuid;
+	private UUID waypointUuid;
 	private int waypointId;
 	private double waypointX;
 	private double waypointY;
@@ -53,8 +54,8 @@ public class SightingResultItem implements IResultItem{
 	private String[] observationCategory;
 	private HashMap<String, Object> attributes = new HashMap<String, Object>();
 	
-	private byte[] observationUuid;
-	private byte[] entityUuid;
+	private UUID observationUuid;
+	private UUID entityUuid;
 	private EntityType.Status entityStatus;
 	
 	private HashMap<String,Object> entityValues = new HashMap<String,Object>();
@@ -63,14 +64,14 @@ public class SightingResultItem implements IResultItem{
 	/**
 	 * @param observationUuid the observation uuid
 	 */
-	public void setObservationUuid(byte[] observationUuid){
+	public void setObservationUuid(UUID observationUuid){
 		this.observationUuid = observationUuid;
 	}
 	
 	/**
 	 * @return the observation uuid
 	 */
-	public byte[] getObservationUuid(){
+	public UUID getObservationUuid(){
 		return this.observationUuid;
 	}
 
@@ -89,11 +90,11 @@ public class SightingResultItem implements IResultItem{
 		return this.entityId;
 	}
 	
-	public void setEntityUuid(byte[] uuid){
+	public void setEntityUuid(UUID uuid){
 		this.entityUuid = uuid;
 	}
 	
-	public byte[] getEntityUuid(){
+	public UUID getEntityUuid(){
 		return this.entityUuid;
 	}
 	
@@ -151,14 +152,14 @@ public class SightingResultItem implements IResultItem{
 	 * sets the waypoint uuid
 	 * @param uuid
 	 */
-	public void setWaypointUuid(byte[] uuid){
+	public void setWaypointUuid(UUID uuid){
 		this.waypointUuid = uuid;
 	}
 	/**
 	 * 
 	 * @return the waypoint uuid
 	 */
-	public byte[] getWaypointUuid(){
+	public UUID getWaypointUuid(){
 		return this.waypointUuid;
 	}
 	

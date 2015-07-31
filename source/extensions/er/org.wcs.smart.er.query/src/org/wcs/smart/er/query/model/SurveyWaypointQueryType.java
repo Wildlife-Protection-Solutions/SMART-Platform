@@ -54,8 +54,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class SurveyWaypointQueryType implements IQueryType {
 
-	public static final String KEY = "surveywaypoint"; //$NON-NLS-1$
-	
 	public SurveyWaypointQueryType() {
 	}
 
@@ -66,7 +64,7 @@ public class SurveyWaypointQueryType implements IQueryType {
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return SurveyWaypointQuery.KEY;
 	}
 
 	@Override
@@ -108,7 +106,7 @@ public class SurveyWaypointQueryType implements IQueryType {
 				squery.setSurveyDesign(  ((FilterDefintionPanel)panel).getSurveyDesign()  );
 				squery.setQueryFilter(  ((FilterDefintionPanel)panel).getQueryPart()  );
 			}else if (panel.getId().equals(ConservationAreaFilterPanel.ID)){
-				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter() );
+				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter().asString() );
 			}
 		}
 

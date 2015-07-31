@@ -19,7 +19,6 @@ import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.EntityQueryPlugIn;
-import org.wcs.smart.entity.query.engine.DerbyEntityObservationEngine;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EntityQueryColumnCache;
 import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
@@ -29,7 +28,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.ObservationQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -118,33 +116,9 @@ public class EntityObservationQuery extends ObservationQuery {
 					c.setVisible(false);
 				}
 			}
-			
-		}
-		
-		
-
-	}
-
-	
-	@Override
-	protected IPagedQueryResultSet getPagedQueryResults(
-			IProgressMonitor progressMonitor, Session session) throws Exception {
-		Session lSession = session;
-		if (lSession == null){
-			lSession = HibernateManager.openSession();
-			lSession.beginTransaction();
-		}
-		try {
-			DerbyEntityObservationEngine engine = new DerbyEntityObservationEngine();
-			IPagedQueryResultSet lastResult = engine.executeDerbyQuery(this, lSession, progressMonitor);
-			return lastResult;
-		} finally {
-			if (session == null && lSession.isOpen()){
-				lSession.getTransaction().commit();
-				lSession.close();
-			}
 		}
 	}
+
 
 	@Override
 	protected QueryFilter parseQueryFilter() throws Exception {
@@ -165,7 +139,7 @@ public class EntityObservationQuery extends ObservationQuery {
 	@Override
 	@Transient
 	public IQueryType getType() {
-		return QueryTypeManager.getInstance().findQueryType(EntityObservationQueryType.KEY);
+		return QueryTypeManager.INSTANCE.findQueryType(EntityObservationQueryType.KEY);
 	}
 
 	@Override

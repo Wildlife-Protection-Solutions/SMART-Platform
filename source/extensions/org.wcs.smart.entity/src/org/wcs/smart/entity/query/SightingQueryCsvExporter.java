@@ -24,7 +24,8 @@ package org.wcs.smart.entity.query;
 import java.io.File;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.importexport.CsvSimpleQueryExporter;
 import org.wcs.smart.query.model.Query;
 
@@ -47,22 +48,18 @@ public class SightingQueryCsvExporter extends CsvSimpleQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, File file, HashMap<String, Object> parameters,
-			IProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult result, File file,
+			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
+			throws Exception {
 		
 		if (parameters.get(DELIMITER_KEY) != null){
 			try{
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
-		
 		EntitySightingQuery squery = (EntitySightingQuery) query;
-		
-		super.setData((SightingPagedResults)squery.getCachedResults(monitor), 
-				squery.getQueryColumns(), file);
-		
+		super.setData((SightingPagedResults)result, squery.getQueryColumns(), file);
 		super.export(monitor);
-		
 	}
 	
 }

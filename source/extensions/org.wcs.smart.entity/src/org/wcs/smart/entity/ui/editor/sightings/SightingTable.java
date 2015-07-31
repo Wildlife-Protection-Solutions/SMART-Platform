@@ -32,7 +32,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -44,10 +44,10 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.ui.QueryLazyResultsContentProvider;
 import org.wcs.smart.query.common.ui.QueryTableViewerColumn;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
@@ -225,9 +225,9 @@ public class SightingTable {
 		}
 		if (type == ColumnType.BOOLEAN) {
 			if ((Double) value >= 0.5) {
-				return Attribute.BOOLEAN_TRUE_LABEL;
+				return LabelConstants.BOOLEAN_TRUE_LABEL;
 			} else {
-				return Attribute.BOOLEAN_FALSE_LABEL;
+				return LabelConstants.BOOLEAN_FALSE_LABEL;
 			}
 		} else if (type == ColumnType.DATE) {
 			return DateFormat.getDateInstance().format((Date) value);

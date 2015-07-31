@@ -31,18 +31,12 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.model.MissionQuery;
-import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyGridQueryType;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
-import org.wcs.smart.er.query.model.SurveySummaryQueryType;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTemplateCloner;
 import org.wcs.smart.query.QueryTypeManager;
@@ -103,7 +97,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
 		
 		for(SurveyGriddedQuery query : queries){
-			SurveyGriddedQuery clone = (SurveyGriddedQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( SurveyGridQueryType.KEY) );
+			SurveyGriddedQuery clone = (SurveyGriddedQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveyGriddedQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -138,7 +132,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 			.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
 		
 		for(SurveySummaryQuery query : queries){
-			SurveySummaryQuery clone = (SurveySummaryQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( SurveySummaryQueryType.KEY) );
+			SurveySummaryQuery clone = (SurveySummaryQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveySummaryQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -170,7 +164,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 		.add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$
 		
 		for(SurveyObservationQuery query : queries){
-			SurveyObservationQuery clone = (SurveyObservationQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( SurveyObservationQueryType.KEY) );
+			SurveyObservationQuery clone = (SurveyObservationQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveyObservationQuery.KEY) );
 
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -205,7 +199,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 		.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
 		
 		for(SurveyWaypointQuery query : queries){
-			SurveyWaypointQuery clone = (SurveyWaypointQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( SurveyWaypointQueryType.KEY) );
+			SurveyWaypointQuery clone = (SurveyWaypointQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( SurveyWaypointQuery.KEY) );
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -240,7 +234,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 		.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
 		
 		for(MissionQuery query : queries){
-			MissionQuery clone = (MissionQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( MissionQueryType.KEY) );
+			MissionQuery clone = (MissionQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( MissionQuery.KEY) );
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -275,7 +269,7 @@ public class SurveyQueryCloner implements IConservationAreaTemplateCloner {
 		.add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ 
 		
 		for(MissionTrackQuery query : queries){
-			MissionTrackQuery clone = (MissionTrackQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( MissionTrackQueryType.KEY) );
+			MissionTrackQuery clone = (MissionTrackQuery) SurveyQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( MissionTrackQuery.KEY) );
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());

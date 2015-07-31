@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.surveydesign.editor;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -38,7 +39,7 @@ import org.wcs.smart.er.model.SurveyDesign.State;
  */
 public class SurveyDesignEditorInput implements IEditorInput {
 
-	private byte[] uuid;
+	private UUID uuid;
 	private String name;
 	private SurveyDesign.State state;
 	private String key;
@@ -46,7 +47,7 @@ public class SurveyDesignEditorInput implements IEditorInput {
 	/**
 	 * Constructor
 	 */
-	public SurveyDesignEditorInput(String name, byte[] uuid, String key, SurveyDesign.State state) {
+	public SurveyDesignEditorInput(String name, UUID uuid, String key, SurveyDesign.State state) {
 		this.uuid = uuid;
 		this.name = name;
 		this.state = state;
@@ -62,7 +63,7 @@ public class SurveyDesignEditorInput implements IEditorInput {
 		return this.state;
 	}
 	
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
 	
@@ -111,13 +112,13 @@ public class SurveyDesignEditorInput implements IEditorInput {
 	@Override
 	public boolean equals(Object other){
 		if (other instanceof SurveyDesignEditorInput){
-			return Arrays.equals(uuid, ((SurveyDesignEditorInput) other).getUuid());
+			return uuid.equals(((SurveyDesignEditorInput) other).getUuid());
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode(){
-		return Arrays.hashCode(uuid);
+		return uuid.hashCode();
 	}
 }

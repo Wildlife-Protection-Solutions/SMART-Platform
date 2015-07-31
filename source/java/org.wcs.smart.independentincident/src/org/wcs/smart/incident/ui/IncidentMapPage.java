@@ -53,6 +53,7 @@ import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.ui.map.location.GeometryFactoryProvider;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -194,7 +195,7 @@ public class IncidentMapPage extends SmartMapEditorPart {
 	private SimpleFeature createIncidentFeature(SimpleFeatureType ftype) {
 		Waypoint incident = parent.getIncident();
 		Object data[] = new Object[3];
-		String name = ftype.getName() + "." + SmartUtils.encodeHex(incident.getUuid()); //$NON-NLS-1$
+		String name = ftype.getName() + "." + UuidUtils.uuidToString(incident.getUuid()); //$NON-NLS-1$
 		data[0] = name;
 		data[1] = incident.getId();
 		data[2] = GeometryFactoryProvider.getFactory().createPoint(new Coordinate(incident.getX(), incident.getY()));

@@ -37,6 +37,8 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
@@ -67,7 +69,7 @@ public class AreaTreeNode implements IItemTreeNode{
 		@Override
 		public String getText(Object element) {
 			if (element instanceof Area.AreaType) {
-				return ((Area.AreaType) element).getGuiName();
+				return LabelConstants.getAreaTypeName((AreaType) element);				
 			} else if (element instanceof Area) {
 				return ((Area) element).getName();
 			}
@@ -174,7 +176,8 @@ public class AreaTreeNode implements IItemTreeNode{
 		 * @param at
 		 */
 		private void loadAreas(final Area.AreaType at) {
-			Job j = new Job(MessageFormat.format(Messages.AreaTreeNode_jobname, new Object[]{at.getGuiName()})) {
+			Job j = new Job(MessageFormat.format(Messages.AreaTreeNode_jobname, 
+					new Object[]{LabelConstants.getAreaTypeName(at)})) {
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					Session session = HibernateManager.openSession();

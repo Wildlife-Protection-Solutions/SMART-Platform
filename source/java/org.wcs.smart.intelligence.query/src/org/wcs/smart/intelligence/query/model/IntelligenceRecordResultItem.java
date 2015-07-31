@@ -23,7 +23,7 @@ package org.wcs.smart.intelligence.query.model;
 
 import java.util.Date;
 
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Query result item for storing intelligence record query results.

@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.hibernate;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -30,7 +31,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Hibernate utility functions to support 
@@ -100,11 +101,12 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 */
 	private ListItem getListItem(Session session, String clazz, String value) throws Exception{
 		Query q = session.createQuery("SELECT uuid, name FROM " + clazz + " WHERE uuid =:uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-		q.setParameter("uuid", SmartUtils.decodeHex(value)); //$NON-NLS-1$
+		q.setParameter("uuid", UuidUtils.stringToUuid(value)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1){
-			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
+			return new ListItem( (UUID)((Object[])results.get(0))[0], 
+					(String)((Object[])results.get(0))[1]);
 		}else{
 			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadError, new Object[]{clazz, value}), null);
 			return null;
@@ -120,13 +122,13 @@ public abstract class AbstractPatrolQueryHibernateManager implements IPatrolQuer
 	 */
 	public ListItem getEmployee(Session session, String value) throws Exception{
 		Query q = session.createQuery("SELECT uuid, givenName, familyName, id FROM Employee WHERE uuid =:uuid and conservationArea = :ca"); //$NON-NLS-1$		
-		q.setParameter("uuid", SmartUtils.decodeHex(value)); //$NON-NLS-1$
+		q.setParameter("uuid", UuidUtils.stringToUuid(value)); //$NON-NLS-1$
 		q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1){
 			Object[] d = results.get(0);
-			return new ListItem( (byte[])d[0], (String) d[1] + " " + (String)d[2] + " [" + (String)d[3] + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return new ListItem( (UUID)d[0], (String) d[1] + " " + (String)d[2] + " [" + (String)d[3] + "]"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}else{
 			QueryPlugIn.log(MessageFormat.format(Messages.QueryHibernateManager_LoadEmployeeError, new Object[]{value}), null);
 			return null;

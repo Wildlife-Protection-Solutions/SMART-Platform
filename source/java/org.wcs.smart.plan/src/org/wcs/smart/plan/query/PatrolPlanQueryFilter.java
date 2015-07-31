@@ -30,7 +30,7 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * "Patrol is a part of a plan" Query Filter
@@ -58,7 +58,7 @@ public class PatrolPlanQueryFilter implements IExtensionFilter {
 	@Override
 	public DropItem[] getDropItems(Session session) throws Exception {
 		DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
-		String id = SmartUtils.stripQuotes((String)value);
+		String id = SharedUtils.stripQuotes((String)value);
 		ListItem listItem = isAnyPlan(id) ? PlanPatrolQueryOption.ANY_PATROL_ITEM : PlanHibernateManager.getPlan(session, id);
 		it.initializeData(listItem);
 		return new DropItem[]{it};

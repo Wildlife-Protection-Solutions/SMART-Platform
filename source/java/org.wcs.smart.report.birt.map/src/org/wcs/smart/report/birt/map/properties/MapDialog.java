@@ -23,6 +23,7 @@ package org.wcs.smart.report.birt.map.properties;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -74,6 +75,7 @@ import org.wcs.smart.ui.map.tool.ZoomExtentTool;
 import org.wcs.smart.ui.map.tool.ZoomInTool;
 import org.wcs.smart.ui.map.tool.ZoomOutTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -86,7 +88,7 @@ public class MapDialog extends Dialog implements MapPart{
 
 	private MapViewer viewer;
 	private Label lblCoordinates;
-	private byte[] basemapUuid = null;
+	private UUID basemapUuid = null;
 	private ReferencedEnvelope  bounds = null;
 	
 	private Job refreshJob = new Job(Messages.MapDialog_ResizeJobName){
@@ -97,7 +99,7 @@ public class MapDialog extends Dialog implements MapPart{
 		}
 	};
 	
-	protected MapDialog(Shell parentShell, byte[] basemapUuid, ReferencedEnvelope mapBounds) {
+	protected MapDialog(Shell parentShell, UUID basemapUuid, ReferencedEnvelope mapBounds) {
 		super(parentShell);
 		this.basemapUuid = basemapUuid;
 		this.bounds = mapBounds;
@@ -245,8 +247,8 @@ public class MapDialog extends Dialog implements MapPart{
 				ProjectionDialog pd = new ProjectionDialog(getShell(), viewer.getMap().getViewportModel().getCRS());
 				if (pd.open() == IDialogConstants.OK_ID) {
 					try {
-						ChangeCRSCommand command = new ChangeCRSCommand(pd
-								.getSelection().getCrs());
+						ChangeCRSCommand command = new ChangeCRSCommand(ReprojectUtils.stringToCrs(pd
+								.getSelection().getDefinition()));
 						getMap().sendCommandASync(command);
 					} catch (Exception ex) {
 						SmartPlugIn.displayLog(Messages.MapDialog_Error_SettingMapProjection

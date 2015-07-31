@@ -88,7 +88,7 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		
 		// fire events
 		EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_ADDED, newType);
-		DataModelManager.getInstance().fireChangeListeners();	//we have added a new attribute to the data model
+		DataModelManager.INSTANCE.fireChangeListeners();	//we have added a new attribute to the data model
 		
 		return true;
 	}

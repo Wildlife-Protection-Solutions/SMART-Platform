@@ -55,8 +55,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  *
  */
 public class MissionQueryType implements IQueryType {
-
-	public static final String KEY = "surveymission"; //$NON-NLS-1$
 	
 	public MissionQueryType() {
 	}
@@ -68,7 +66,7 @@ public class MissionQueryType implements IQueryType {
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return MissionQuery.KEY;
 	}
 
 	@Override
@@ -110,7 +108,7 @@ public class MissionQueryType implements IQueryType {
 				squery.setSurveyDesign(  ((FilterDefintionPanel)panel).getSurveyDesign()  );
 				squery.setQueryFilter(  ((FilterDefintionPanel)panel).getQueryPart()  );
 			}else if (panel.getId().equals(ConservationAreaFilterPanel.ID)){
-				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter() );
+				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter().asString() );
 			}
 		}
 

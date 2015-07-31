@@ -25,6 +25,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,7 +43,7 @@ import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.xml.export.IntelligenceExporter;
 import org.wcs.smart.intelligence.xml.export.MultiIntelligenceExportDialog;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Handler for exporting intelligence data.
@@ -65,7 +66,7 @@ public class ExportIntelligenceHandler {
 			return;
 		}
 		
-		final List<byte[]> ids = dialog.getObjectUuids();
+		final List<UUID> ids = dialog.getObjectUuids();
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
 
@@ -84,10 +85,10 @@ public class ExportIntelligenceHandler {
 						if (monitor.isCanceled()){
 							break;
 						}
-						byte[] uuid = ids.get(i);
+						UUID uuid = ids.get(i);
 						String name = null;
 						try {
-							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_SubTask,  SmartUtils.encodeHex(uuid)));
+							monitor.subTask(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_SubTask,  UuidUtils.uuidToString(uuid)));
 							Intelligence intel = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
@@ -96,7 +97,7 @@ public class ExportIntelligenceHandler {
 								intel.getReceivedDate();
 								name = intel.getName();
 							} catch (Exception ex) {
-								IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_Error, SmartUtils.encodeHex(uuid)), ex);
+								IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_LoadIntelligence_Error, UuidUtils.uuidToString(uuid)), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
@@ -110,7 +111,7 @@ public class ExportIntelligenceHandler {
 
 							exportCnt++;
 						} catch (Exception ex) {
-							IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_Error , name != null ? name : SmartUtils.encodeHex(uuid)) + "\n" +  ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+							IntelligencePlugIn.displayLog(MessageFormat.format(Messages.ExportIntelligenceHandler_ExportIntelligence_Error , name != null ? name : UuidUtils.uuidToString(uuid)) + "\n" +  ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						monitor.worked(1);
 					}

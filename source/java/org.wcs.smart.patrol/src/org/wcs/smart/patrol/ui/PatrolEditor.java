@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -67,6 +68,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -215,7 +217,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 	public Patrol getPatrol(){
 		if (this.patrol == null){
 			
-			byte[] puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
+			UUID puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			//load patrol items so don't have lazy loading issues later.
 			session.beginTransaction();
@@ -306,13 +308,13 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 				}
 			}
 			int insertindex = 1;
-			Calendar calStart = SmartUtils.convertDate(getPatrol().getStartDate());
+			Calendar calStart = SharedUtils.convertDate(getPatrol().getStartDate());
 			calStart.set(Calendar.HOUR, 0);
 			calStart.set(Calendar.MINUTE, 0);
 			calStart.set(Calendar.SECOND, 0);
 			calStart.set(Calendar.MILLISECOND, 0);
 			
-			Calendar calEnd = SmartUtils.convertDate(getPatrol().getEndDate());
+			Calendar calEnd = SharedUtils.convertDate(getPatrol().getEndDate());
 			
 			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
 				PatrolDayEditorInput input = new PatrolDayEditorInput(calStart.getTime());

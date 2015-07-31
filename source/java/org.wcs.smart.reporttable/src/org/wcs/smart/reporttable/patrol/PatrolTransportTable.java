@@ -23,6 +23,7 @@ package org.wcs.smart.reporttable.patrol;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -30,6 +31,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.reporttable.internal.Messages;
 
 /**
@@ -73,7 +75,7 @@ public class PatrolTransportTable extends SmartBirtTable {
 			case ACTIVE:
 				return e.getIsActive();
 			case PATROL_TYPE:
-				return e.getPatrolType().getGuiName();
+				return LabelConstants.getLabel(e.getPatrolType());
 			case CA:
 				return e.getConservationArea().getNameLabel();
 			}

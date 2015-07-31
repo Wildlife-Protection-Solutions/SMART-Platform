@@ -63,6 +63,7 @@ import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Abstract grid definition panel.  Basic definition panel
@@ -378,32 +379,11 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (!lstProjections.getSelection().isEmpty()){
 					Object o = ((IStructuredSelection)lstProjections.getSelection()).getFirstElement();
-					
-//					
-//					if (o instanceof Projection && ((GriddedQuery)parentView.getQuery() != null)){
-//						try{
-//							if (((Projection)o).getCrs().equals(((GriddedQuery)parentView.getQuery()).getCoordinateReferenceSystem())){
-//								//nothing changed
-//								return;
-//							}
-//						}catch (Exception ex){
-//							//log and continue;
-//							QueryPlugIn.log(ex.getMessage(), ex);
-//						}
-//						lblUnits.setText(Messages.GriddedValuePanel_UknownProjectionLabel);
-//						try{
-//							//assume units of all axis are the same
-//							Unit<?> units = ((Projection)o).getCrs().getCoordinateSystem().getAxis(0).getUnit();
-//							lblUnits.setText(units.toString());
-//						}catch (Exception ex){	
-//						}
-//					}
-					
 					if (o instanceof Projection){
 						lblUnits.setText(Messages.GriddedValuePanel_UknownProjectionLabel);
 						try{
 							//assume units of all axis are the same
-							Unit<?> units = ((Projection)o).getCrs().getCoordinateSystem().getAxis(0).getUnit();
+							Unit<?> units = ReprojectUtils.stringToCrs(((Projection)o).getDefinition()).getCoordinateSystem().getAxis(0).getUnit();
 							lblUnits.setText(units.toString());
 						}catch (Exception ex){	
 						}
@@ -438,7 +418,7 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 		Object o = ((IStructuredSelection)lstProjections.getSelection()).getFirstElement();
 		if (o instanceof Projection){
 			try {
-				return ((Projection)o).getCrs();
+				return ReprojectUtils.stringToCrs(((Projection)o).getDefinition());
 			} catch (FactoryException e) {
 				e.printStackTrace();
 			}
@@ -473,7 +453,7 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 				boolean found = false;
 				//search for projection
 				for (Projection p : ps){
-					if (CRS.equalsIgnoreMetadata(p.getCrs(), initialProjection)) {
+					if (CRS.equalsIgnoreMetadata(ReprojectUtils.stringToCrs(p.getDefinition()), initialProjection)) {
 						defaultP = p;
 						found = true;
 						break;
@@ -483,7 +463,7 @@ public abstract class AbstractGridDefinitionPanel implements IDefinitionPanel {
 					//projection not in default list; add custom
 					//projection for this query
 					Projection p = new Projection();
-					p.setCrs(initialProjection);
+					p.setDefinition(initialProjection.toWKT());
 					defaultP = p;
 					ps.add(p);
 				}

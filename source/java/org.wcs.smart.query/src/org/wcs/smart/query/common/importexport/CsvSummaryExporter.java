@@ -27,6 +27,8 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
@@ -77,9 +79,11 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, File outputFile, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult result, File file,
+			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
+			throws Exception {
 		SummaryQuery sumQuery = (SummaryQuery)query;
-		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults(monitor);
+		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults();
 		if (results == null){
 			throw new Exception(Messages.CsvSummaryExporter_QueryNotRun);
 		}
@@ -92,7 +96,7 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 		
 		//column headers
 		try(CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"), //$NON-NLS-1$ 
+				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
 				delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
 		
 			for (int i = 0; i < results.getColumnHeaders().size(); i ++){

@@ -28,11 +28,11 @@ import java.util.HashMap;
 import org.hibernate.Session;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.er.query.model.ISurveyQuery;
-import org.wcs.smart.er.query.model.MissionQueryType;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -56,16 +56,16 @@ public class SurveySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 	
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(SurveyObservationQueryType.KEY) ||
-				qt.getKey().equals(SurveyWaypointQueryType.KEY) ||
-				qt.getKey().equals(MissionQueryType.KEY) ||
-				qt.getKey().equals(MissionTrackQueryType.KEY);
+		return qt.getKey().equals(SurveyObservationQuery.KEY) ||
+				qt.getKey().equals(SurveyWaypointQuery.KEY) ||
+				qt.getKey().equals(MissionQuery.KEY) ||
+				qt.getKey().equals(MissionTrackQuery.KEY);
 	}
 
 	@Override
 	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		
-		if (qTypeInternal.equals(MissionTrackQueryType.KEY)){
+		if (qTypeInternal.equals(MissionTrackQuery.KEY)){
 			IFilter filter = null;
 			try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
 				Parser parser = new Parser(is);

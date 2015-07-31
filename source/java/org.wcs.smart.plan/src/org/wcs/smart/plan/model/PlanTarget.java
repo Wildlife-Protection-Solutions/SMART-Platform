@@ -22,7 +22,7 @@
 package org.wcs.smart.plan.model;
 
 
-import java.util.Arrays;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -56,7 +56,7 @@ public abstract class PlanTarget{
 
 	private String name;
 	private Plan plan;
-	private byte[] uuid;
+	private UUID uuid;
 
 	@Transient
 	private PlanTargetStatus currentStatus = null;
@@ -72,10 +72,10 @@ public abstract class PlanTarget{
 	@Id
 	@GeneratedValue(generator="uuid")
 	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
-	public void setUuid(byte[] uuid) {
+	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
 	}
 
@@ -91,7 +91,7 @@ public abstract class PlanTarget{
 	@Transient
 	public int hashCode() {
 		if (getUuid() != null) {
-			return Arrays.hashCode(getUuid());
+			return getUuid().hashCode();
 		}
 		return super.hashCode();
 	}
@@ -103,7 +103,7 @@ public abstract class PlanTarget{
 			if (s.getUuid() == null && this.getUuid() == null){
 				return super.equals(s);
 			}else if (s.getUuid() != null && this.getUuid() != null){
-				return Arrays.equals(s.getUuid(), this.getUuid());
+				return s.getUuid().equals(this.getUuid());
 			}
 		}
 		return false;

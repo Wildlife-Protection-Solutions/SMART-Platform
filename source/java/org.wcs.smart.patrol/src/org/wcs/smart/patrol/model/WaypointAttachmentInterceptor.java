@@ -28,6 +28,7 @@ import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
  * An extension of the default attachment interceptor
@@ -66,14 +67,22 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 				for (PatrolWaypoint wp : ((PatrolLegDay) entity).getWaypoints()){
 					if (wp.getWaypoint().getAttachments() != null){
 						for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
-							toDelete.add(att.getFullFile());
+							try {
+								toDelete.add(att.getFullFile());
+							} catch (Exception e) {
+								SmartPatrolPlugIn.log(e.getMessage(), e);
+							}
 						}
 					}
 					if (wp.getWaypoint().getObservations() != null){
 						for (WaypointObservation wo : wp.getWaypoint().getObservations()){
 							if (wo.getAttachments()!= null){
 								for (ObservationAttachment att : wo.getAttachments()){
-									toDelete.add(att.getFullFile());
+									try {
+										toDelete.add(att.getFullFile());
+									} catch (Exception e) {
+										SmartPatrolPlugIn.log(e.getMessage(), e);
+									}
 								}
 							}
 						}

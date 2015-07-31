@@ -76,11 +76,16 @@ import org.wcs.smart.query.common.engine.DistanceValueComputer;
 import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.Tile;
-import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -97,7 +102,7 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
 
 public class DerbyGridEngine extends DerbySurveyQueryEngine{
-	private Collection<GridResultItem> myResults;
+	private GridQueryResult myResults;
 	
 	private SurveyGriddedQuery query;
 	private DateFilter dateFilter;
@@ -106,8 +111,13 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	private String gridTable;
 	
 	private boolean hasTrackFilter = false;
+	@Override
+	public boolean canExecute(IQueryType querytype) {
+		return SurveyGriddedQuery.KEY.equals(querytype.getKey());
+	}
+	
 	/**
-	 * Runs the given survey query and retrieves the results from the database.
+	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
 	 * @param query
 	 * @param session
@@ -115,12 +125,15 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 	 * @return
 	 * @throws SQLException
 	 */
-	public Collection<GridResultItem> executeQuery(
-			final SurveyGriddedQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
 
-		this.query = query;
+		this.query = (SurveyGriddedQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
@@ -205,7 +218,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 							items.put(it.getTileId(), newitem); 
 						}
 					}
-					myResults = items.values();
+					myResults = new GridQueryResult(items.values());
 					monitor.worked(40);
 				}catch (Exception ex){
 					ERQueryPlugIn.log(ex.getMessage(), ex);
@@ -219,6 +232,7 @@ public class DerbyGridEngine extends DerbySurveyQueryEngine{
 			}
 
 		});
+		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
 	}

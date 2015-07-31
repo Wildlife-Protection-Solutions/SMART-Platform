@@ -83,7 +83,11 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	
     	if (shouldIntercept(entity)) {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
-    		toDelete.add(attachment.getFullFile());
+    		try {
+				toDelete.add(attachment.getFullFile());
+			} catch (Exception ex) {
+				SmartPlugIn.log("Unable to delete attachment", ex); //$NON-NLS-1$
+			}
     	}
     	
     }
@@ -103,8 +107,13 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
     		
     		if (attachment.getCopyFromLocation() != null){
-    		
-    			File f = new File(getAttachmentDirectory(attachment));
+    			File f = null;
+    			try{
+    				f = new File(getAttachmentDirectory(attachment));
+    			}catch (Exception ex){
+    				SmartPlugIn.log("Unable to save attachment", ex); //$NON-NLS-1$
+    				throw new RuntimeException(getExceptionErrorMessage());
+    			}
     			if (!f.exists()){
     				SmartUtils.createDirectory(f);
     			}
@@ -133,7 +142,7 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	return true;
     }
 
-    protected String getAttachmentDirectory(ISmartAttachment attachment) {
+    protected String getAttachmentDirectory(ISmartAttachment attachment) throws Exception {
     	return attachment.getDatastoreFolderPath();
     }
     

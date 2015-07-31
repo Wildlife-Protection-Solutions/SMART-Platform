@@ -32,7 +32,9 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -41,6 +43,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Creates a panel for displaying all
@@ -55,6 +58,7 @@ public class EntityInfoPanelComposite extends Composite{
 	private ScrolledComposite scroll;
 
 	private ObservationOptions observationOptions;
+	private CoordinateReferenceSystem crs;
 	private Entity entity;
 	private EntityType etype;
 	
@@ -130,7 +134,13 @@ public class EntityInfoPanelComposite extends Composite{
 		try{
 			this.observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
 			this.entity = (Entity) s.load(Entity.class, entity.getUuid());
+			try{
+				this.crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+			}catch (Exception ex){
+				EntityPlugIn.displayLog(ex.getMessage(), ex);
+			}
 			initEntityFields();
+			
 		}finally{
 			s.close();
 		}
@@ -153,14 +163,14 @@ public class EntityInfoPanelComposite extends Composite{
 		txtId.setText(entity.getId());
 		if (txtX != null){
 			if ( entity.getX() != null){
-				txtX.setText(String.valueOf(Projection.transform(entity.getX(), entity.getY(), observationOptions.getViewProjection()).getX()));
+				txtX.setText(String.valueOf(ReprojectUtils.transform(entity.getX(), entity.getY(), crs).getX()));
 			}else{
 				txtX.setText(""); //$NON-NLS-1$
 			}
 		}
 		if (txtY != null){
 			if ( entity.getY() != null){
-				txtY.setText(String.valueOf(Projection.transform(entity.getX(), entity.getY(), observationOptions.getViewProjection()).getY()));
+				txtY.setText(String.valueOf(ReprojectUtils.transform(entity.getX(), entity.getY(), crs).getY()));
 			}else{
 				txtY.setText(""); //$NON-NLS-1$
 			}

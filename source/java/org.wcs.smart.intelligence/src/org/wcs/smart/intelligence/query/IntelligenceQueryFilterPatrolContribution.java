@@ -24,13 +24,13 @@ package org.wcs.smart.intelligence.query;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wcs.smart.patrol.query.model.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Intelligence contribution for the Patrol section of a "Query Filter" view.
@@ -87,7 +87,7 @@ public class IntelligenceQueryFilterPatrolContribution implements IQueryFilterPa
 		
 		PatrolIntelligenceQueryFilter qFilter = (PatrolIntelligenceQueryFilter)filter;
 		String prefix = engine.tablePrefix(intelligenceOption.getOption().getPatrolAttributeClass());
-		String v = SmartUtils.stripQuotes((String)qFilter.getValue());
+		String v = SharedUtils.stripQuotes((String)qFilter.getValue());
 		//if v is empty this means that this is "Any Plan" case
 		String intelPart = !qFilter.isAnyIntelligence(v) ? " AND p2i.intelligence_uuid = x'" + v + "'" : "";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
 		String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = " + prefix + ".uuid" + intelPart + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

@@ -24,9 +24,9 @@ package org.wcs.smart.entity.map;
 import java.awt.RenderingHints.Key;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
@@ -41,7 +41,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param CAUUID = new Param("cauuid", byte[].class, Messages.FixedEntityDataSourceFactory_ParameterName, true);  //$NON-NLS-1$
+	public static final Param CAUUID = new Param("cauuid", UUID.class, Messages.FixedEntityDataSourceFactory_ParameterName, true);  //$NON-NLS-1$
   
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -101,7 +101,7 @@ public class FixedEntityDataSourceFactory implements DataStoreFactorySpi{
 	@Override
 	public DataStore createDataStore(Map<String, Serializable> params)
 			throws IOException {
-		if (!Arrays.equals(SmartDB.getCurrentConservationArea().getUuid(), ((byte[])params.get(CAUUID.key)))){
+		if (!SmartDB.getCurrentConservationArea().getUuid().equals((UUID)params.get(CAUUID.key))){
 			throw new IOException(Messages.FixedEntityDataSourceFactory_CaNotFoundError);
 		}
 		return new FixedEntityDataSource();

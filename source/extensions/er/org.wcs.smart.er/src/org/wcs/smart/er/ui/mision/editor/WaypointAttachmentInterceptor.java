@@ -26,6 +26,7 @@ import java.io.Serializable;
 import org.hibernate.type.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
@@ -70,14 +71,22 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 					for (SurveyWaypoint wp : md.getWaypoints()){
 						if (wp.getWaypoint().getAttachments() != null){
 							for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
-								toDelete.add(att.getFullFile());
+								try {
+									toDelete.add(att.getFullFile());
+								} catch (Exception e) {
+									EcologicalRecordsPlugIn.log(e.getMessage(), e);
+								}
 							}
 						}
 						if (wp.getWaypoint().getObservations() != null){
 							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
 								if (wo.getAttachments()!= null){
 									for (ObservationAttachment att : wo.getAttachments()){
-										toDelete.add(att.getFullFile());
+										try {
+											toDelete.add(att.getFullFile());
+										} catch (Exception e) {
+											EcologicalRecordsPlugIn.log(e.getMessage(), e);
+										}
 									}
 								}
 							}

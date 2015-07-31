@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -224,11 +225,11 @@ public class SurveyFilterDialog extends SmartFilterDialog  {
 		opAll.addSelectionListener(listener);
 		
 		opActive = new Button(tmp, SWT.RADIO);
-		opActive.setText(MessageFormat.format(Messages.SurveyFilterDialog_StateOnlyLabel, new Object[]{State.ACTIVE.getGuiName()}));
+		opActive.setText(MessageFormat.format(Messages.SurveyFilterDialog_StateOnlyLabel, new Object[]{State.ACTIVE.getGuiName(Locale.getDefault())}));
 		opActive.addSelectionListener(listener);
 		
 		opInactive = new Button(tmp, SWT.RADIO);
-		opInactive.setText(MessageFormat.format(Messages.SurveyFilterDialog_StateOnlyLabel, new Object[]{State.INACTIVE.getGuiName()}));
+		opInactive.setText(MessageFormat.format(Messages.SurveyFilterDialog_StateOnlyLabel, new Object[]{State.INACTIVE.getGuiName(Locale.getDefault())}));
 		opInactive.addSelectionListener(listener);
 		
 		opSelected = new Button(tmp, SWT.RADIO);

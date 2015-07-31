@@ -33,9 +33,12 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.query.common.model.udig.IQueryService;
@@ -129,13 +132,13 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions(){
-		if (isQueryType(SurveyObservationQueryType.KEY)){
+		if (isQueryType(SurveyObservationQuery.KEY)){
 			return SurveyObservationQueryType.validDateFields();
 		}else if (isQueryType(MissionQueryType.KEY)){
 			return MissionQueryType.validDateFields();
-		}else if (isQueryType(SurveyWaypointQueryType.KEY)){
+		}else if (isQueryType(SurveyWaypointQuery.KEY)){
 			return SurveyWaypointQueryType.validDateFields();
-		}else if (isQueryType(MissionTrackQueryType.KEY)){
+		}else if (isQueryType(MissionTrackQuery.KEY)){
 			return MissionTrackQueryType.validDateFields();
 		}
 		return null;
@@ -170,7 +173,7 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	@Override
 	protected ISummaryInfo createInfoSection(){
-		if (isQueryType(MissionTrackQueryType.KEY)){
+		if (isQueryType(MissionTrackQuery.KEY)){
 			return new MissionTrackInfoSection();
 		}else if (isQueryType(MissionQueryType.KEY)){
 			return new MissionInfoSection();

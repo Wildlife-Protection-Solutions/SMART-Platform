@@ -36,7 +36,7 @@ import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Converts filters to sql for the Derby query engine.
@@ -80,7 +80,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 		sb.append(engine.tablePrefix(Waypoint.class));
 		sb.append(".source "); //$NON-NLS-1$
 		sb.append(asSql(filter.getOperator()));
-		String p1 = engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
+		String p1 = engine.addParameterValue(SharedUtils.stripQuotes(filter.getWaypointSourceKey()));
 		sb.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		return sb.toString();
 	}

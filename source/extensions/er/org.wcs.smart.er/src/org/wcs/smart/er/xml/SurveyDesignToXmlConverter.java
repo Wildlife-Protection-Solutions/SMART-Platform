@@ -23,6 +23,7 @@ package org.wcs.smart.er.xml;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 
@@ -89,7 +90,7 @@ public class SurveyDesignToXmlConverter {
 		xml.setDescription(surveyDesign.getDescription());
 		
 		//state
-		xml.setState(surveyDesign.getState().getGuiName());
+		xml.setState(surveyDesign.getState().name());
 		
 		//keyid
 		xml.setKeyid(surveyDesign.getKeyId());

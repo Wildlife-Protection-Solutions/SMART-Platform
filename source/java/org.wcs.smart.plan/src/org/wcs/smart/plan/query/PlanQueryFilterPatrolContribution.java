@@ -23,13 +23,14 @@ package org.wcs.smart.plan.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.wcs.smart.patrol.query.model.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.IExtensionOption;
 import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
@@ -37,7 +38,8 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -84,7 +86,7 @@ public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolCont
 		PatrolPlanQueryFilter qfilter = (PatrolPlanQueryFilter)filter;
 		
 		String prefix = engine.tablePrefix(qfilter.getOption().getPatrolAttributeClass());
-		String v = SmartUtils.stripQuotes((String)qfilter.getValue());
+		String v = SharedUtils.stripQuotes((String)qfilter.getValue());
 		//if v is empty this means that this is "Any Plan" case
 		String planSqlPart = ""; //$NON-NLS-1$
 		if (!qfilter.isAnyPlan(v)) {
@@ -96,11 +98,11 @@ public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolCont
 			} catch (InterruptedException e) {
 				SmartPlanPlugIn.displayLog(Messages.PatrolPlanQueryFilter_FetchPlanChilder_Interrupted, e);
 			}
-			List<byte[]> planIds = job.getResultData();
+			List<UUID> planIds = job.getResultData();
 			StringBuilder planSql = new StringBuilder("AND pa2pl.plan_uuid in (x'"+v+"'"); //$NON-NLS-1$ //$NON-NLS-2$
 			for (int i = 0; i < planIds.size(); i++) {
 				planSql.append(",x'"); //$NON-NLS-1$
-				planSql.append(SmartUtils.encodeHex(planIds.get(i)));
+				planSql.append(UuidUtils.uuidToString(planIds.get(i)));
 				planSql.append("'"); //$NON-NLS-1$
 			}
 			planSql.append(")"); //$NON-NLS-1$
@@ -119,7 +121,7 @@ public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolCont
 	private class LoadChildPlanIdJob extends Job {
 		
 		private String id;
-		private List<byte[]> planIds = new ArrayList<byte[]>();
+		private List<UUID> planIds = new ArrayList<UUID>();
 		
 		public LoadChildPlanIdJob(String id) {
 			super(Messages.PatrolPlanQueryFilter_FetchPlanChilder_JobTitle);
@@ -132,7 +134,7 @@ public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolCont
 			return Status.OK_STATUS;
 		}
 		
-		public List<byte[]> getResultData() {
+		public List<UUID> getResultData() {
 			return planIds;
 		}
 

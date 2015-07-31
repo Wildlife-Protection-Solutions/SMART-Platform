@@ -24,6 +24,7 @@ package org.wcs.smart.observation.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -33,12 +34,17 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -49,12 +55,33 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
+public class DerbyWaypointEngine extends AbstractDerbyObservationQueryEngine {
 
 	private String queryDataTable;
 	
+	@Override
+	public boolean canExecute(String querytype) {
+		return ObservationWaypointQuery.KEY.equals(querytype);
+	}
 	
-	public IPagedQueryResultSet executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+
+		final SimpleQuery query = (SimpleQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+	
 		if (query.getDateFilter() == null){
 			return null;
 		}
@@ -66,17 +93,21 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
-				
-				IFilterProcessor filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				IFilterProcessor filterer;
+				try{
+					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				}catch (Exception ex){
+					throw new SQLException(ex);
+				}
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				try {			
+				try {		
+					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
-							false, true, monitor);
+							cafilter, false, true, monitor);
 					
 					if (monitor.isCanceled()) return;
 					populateTemporaryTableExtra(c, session, monitor);
@@ -143,7 +174,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(DerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(AbstractDerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
@@ -152,7 +183,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(DerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(AbstractDerbyObservationQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
 			QueryPlugIn.logSql(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
@@ -206,7 +237,7 @@ public class DerbyWaypointEngine extends DerbyObservationQueryEngine {
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
-		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
+		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$

@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.ui;
 import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -46,7 +47,7 @@ import org.wcs.smart.patrol.model.PatrolType;
  */
 public class PatrolEditorInput implements IEditorInput {
 
-	private byte[] patrolUuid;
+	private UUID patrolUuid;
 	private String id;
 	private PatrolType.Type type;
 	private Date startDate;
@@ -56,7 +57,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 * Creates a new input from the uuid only.
 	 * @param uuid
 	 */
-	public PatrolEditorInput(byte[] uuid){
+	public PatrolEditorInput(UUID uuid){
 		this.patrolUuid = uuid;
 	}
 	
@@ -68,7 +69,7 @@ public class PatrolEditorInput implements IEditorInput {
 	 * @param type
 	 * @param startDate
 	 */
-	public PatrolEditorInput(byte[] uuid, String id, PatrolType.Type type, Date startDate, Date endDate){
+	public PatrolEditorInput(UUID uuid, String id, PatrolType.Type type, Date startDate, Date endDate){
 		this.patrolUuid = uuid;
 		this.id = id;
 		this.type = type;
@@ -100,7 +101,7 @@ public class PatrolEditorInput implements IEditorInput {
 	/**
 	 * @return patrol uuid
 	 */
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.patrolUuid;
 	}
 	
@@ -167,12 +168,12 @@ public class PatrolEditorInput implements IEditorInput {
 	}
 
 	public int hashCode() {
-		return Arrays.hashCode(patrolUuid);
+		return patrolUuid.hashCode();
 	}
 
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof PatrolEditorInput){
-			return Arrays.equals(this.patrolUuid, ((PatrolEditorInput)obj).patrolUuid);
+			return this.patrolUuid.equals(((PatrolEditorInput)obj).patrolUuid);
 		}
 		return false;
 	}

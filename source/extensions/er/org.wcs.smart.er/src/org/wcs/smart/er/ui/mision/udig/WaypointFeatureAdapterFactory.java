@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.er.ui.mision.udig;
 
+import java.util.UUID;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Adpater factory for adapting SimpleFeature with WaypointFeatureType
@@ -43,9 +45,9 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 				if (sf.getFeatureType().getTypeName().equals(MissionDataSource.MISSIONWAYPOINT_TYPE)){
 					String key = sf.getID();
 					String uuids = key.substring(key.lastIndexOf('.') + 1);
-					byte[] wpuuid;
+					UUID wpuuid;
 					try {
-						wpuuid = SmartUtils.decodeHex(uuids);
+						wpuuid = UuidUtils.stringToUuid(uuids);
 					} catch (Exception e) {
 						EcologicalRecordsPlugIn.log("Could not determine waypoint for uuid " + uuids, e); //$NON-NLS-1$
 						return null;

@@ -28,9 +28,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Point;
@@ -87,7 +87,7 @@ public class SmartPointLabelProvider extends LabelProvider {
 		if (transform == null || transformCrs != destCrs){
 			try {
 				transformCrs = destCrs;
-				transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, transformCrs);
+				transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, transformCrs);
 			} catch (FactoryException e) {
 				SmartPlugIn.log(e.getMessage(),e);
 			}
@@ -106,7 +106,7 @@ public class SmartPointLabelProvider extends LabelProvider {
 			}
 			if (transform == null || transformCrs != destCrs){
 				transformCrs = destCrs;
-				transform = CRS.findMathTransform(SmartDB.DATABASE_CRS, transformCrs);
+				transform = CRS.findMathTransform(GeometryUtils.SMART_CRS, transformCrs);
 			}
 			Point p = (Point) JTS.transform(point, transform);
 			return p;

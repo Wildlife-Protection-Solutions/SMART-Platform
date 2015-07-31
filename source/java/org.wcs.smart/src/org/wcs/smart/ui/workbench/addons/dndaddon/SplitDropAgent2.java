@@ -32,7 +32,6 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.internal.e4.compatibility.E4Util;
 import org.wcs.smart.util.E3Utils;
 
 /**

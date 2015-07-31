@@ -22,8 +22,8 @@
 package org.wcs.smart.patrol.meta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -41,6 +41,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
@@ -114,7 +115,7 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 				public String getText(Object element) {
 					if (element instanceof PatrolType) {
 						PatrolType i = (PatrolType) element;
-						return i.getType().getGuiName();
+						return LabelConstants.getLabel(i);
 					}
 					return super.getText(element);
 				}
@@ -154,11 +155,11 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 
 	 	 				List<PatrolTransportType> tTypes = getTransportTypes();
 	 	 		 		transportViewer.setInput(tTypes);
-	 	 		 		byte[] uuid = tTypes.isEmpty() ? null : tTypes.get(0).getUuid();
+	 	 		 		UUID uuid = tTypes.isEmpty() ? null : tTypes.get(0).getUuid();
 	 		 			transportOption.setUuidValue(uuid);
 	 	 		 		if (uuid != null) {
 	 	 		 			for (NamedItem item : tTypes) {
-	 	 		 				if (Arrays.equals(item.getUuid(), uuid)) {
+	 	 		 				if (item.getUuid().equals(uuid)) {
 	 	 		 					transportViewer.setSelection(new StructuredSelection(item));
 	 	 		 					break;
 	 	 		 				}
@@ -201,14 +202,14 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 			transportViewer.setLabelProvider(new NamedItemLabelProvider());
 			List<PatrolTransportType> tTypes = getTransportTypes();
 	 		transportViewer.setInput(tTypes);
-	 		byte[] uuid = transportOption.getUuidValue();
+	 		UUID uuid = transportOption.getUuidValue();
 	 		if (uuid == null && !tTypes.isEmpty()) {
 	 			uuid = tTypes.get(0).getUuid();
 	 			transportOption.setUuidValue(uuid);
 	 		}
 	 		if (uuid != null) {
 	 			for (NamedItem item : tTypes) {
-	 				if (Arrays.equals(item.getUuid(), uuid)) {
+	 				if (item.getUuid().equals(uuid)) {
 	 					transportViewer.setSelection(new StructuredSelection(item));
 	 					break;
 	 				}

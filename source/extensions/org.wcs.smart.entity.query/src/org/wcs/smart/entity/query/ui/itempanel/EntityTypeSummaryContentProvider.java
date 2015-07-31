@@ -397,9 +397,9 @@ public class EntityTypeSummaryContentProvider implements ITreeContentProvider{
 			if (element instanceof EntityType){
 				return EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON);
 			}else if (element instanceof EntityAttribute){
-				return ((EntityAttribute) element).getDmAttribute().getType().getImage();
+				return DataModel.getAttributeImage(((EntityAttribute) element).getDmAttribute().getType());
 			}else if (element instanceof Attribute){
-				return ((Attribute) element).getType().getImage();
+				return DataModel.getAttributeImage(((Attribute) element).getType());
 			}
 			return super.getImage(element);
 		}

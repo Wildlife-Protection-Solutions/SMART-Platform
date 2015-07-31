@@ -25,7 +25,6 @@ import java.text.Collator;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -52,6 +51,7 @@ import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.PatrolUtils;
@@ -64,6 +64,7 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -328,7 +329,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			if (leg.getPatrolLegDays().size() > 0){
 				date = SmartUtils.combineDateTime(leg.getStartDate(), leg.getPatrolLegDays().get(0).getStartTime());	
 			}else{
-				date = SmartUtils.getDatePart(leg.getStartDate(), false);
+				date = SharedUtils.getDatePart(leg.getStartDate(), false);
 			}
 			tmpLeg.setStartDate(date);
 			
@@ -337,7 +338,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			if (leg.getPatrolLegDays().size() > 0){
 				date = SmartUtils.combineDateTime(leg.getEndDate(), leg.getPatrolLegDays().get(leg.getPatrolLegDays().size() - 1).getEndTime());	
 			}else{
-				date = SmartUtils.getDatePart(leg.getEndDate(), true);
+				date = SharedUtils.getDatePart(leg.getEndDate(), true);
 			}
 			tmpLeg.setEndDate(date);
 			
@@ -411,7 +412,8 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 			if (updatedLeg.getUuid() != null){
 				//find in the existing
 				for (PatrolLeg existing : currentLegs){
-					if (existing.getUuid() != null && Arrays.equals(updatedLeg.getUuid(), existing.getUuid())){
+					if (existing.getUuid() != null && 
+							updatedLeg.getUuid().equals(existing.getUuid())){
 						//update existing leg
 						existing.setId(updatedLeg.getId());
 						existing.setEndDate(updatedLeg.getEndDate());
@@ -490,14 +492,14 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	public String getErrorMessage(){
 		
 		/* ensure each patrol leg between the patrol start and end */
-		Date pstart = SmartUtils.getDatePart(patrolStartDate, false);
-		Date pend = SmartUtils.getDatePart(patrolEndDate, true);
+		Date pstart = SharedUtils.getDatePart(patrolStartDate, false);
+		Date pend = SharedUtils.getDatePart(patrolEndDate, true);
 		
 		for (Iterator<?> iterator = legs.iterator(); iterator.hasNext();) {
 			PatrolLeg legA = (PatrolLeg) iterator.next();
 			
-			Date legstart = SmartUtils.getDatePart(legA.getStartDate(), false);
-			Date legend = SmartUtils.getDatePart(legA.getEndDate(), true);
+			Date legstart = SharedUtils.getDatePart(legA.getStartDate(), false);
+			Date legend = SharedUtils.getDatePart(legA.getEndDate(), true);
 			
 			if (legstart.after(pend)){
 				return MessageFormat.format(Messages.PatrolLegsComposite_LegError_A, new Object[]{legA.getId()});
@@ -533,7 +535,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 					for (PatrolLegMember member : legA.getMembers()){
 						if (bMembers.contains(member.getMember())){
 							return MessageFormat.format(Messages.PatrolLegsComposite_LegError_E, 
-								new Object[]{member.getMember().getFullLabel(), legA.getId(), legB.getId() });
+								new Object[]{LabelConstants.getFullLabel(member.getMember()), legA.getId(), legB.getId() });
 						}
 					}
 				}
@@ -541,20 +543,20 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		}
 		
 		/* ensure there is at least one leg for each day in the patrol */
-		Calendar calStart = SmartUtils.convertDate(patrolStartDate);
+		Calendar calStart = SharedUtils.convertDate(patrolStartDate);
 		calStart.set(Calendar.HOUR, 0);
 		calStart.set(Calendar.MINUTE, 0);
 		calStart.set(Calendar.SECOND, 0);
 		calStart.set(Calendar.MILLISECOND, 0);
 				
-		Calendar calEnd = SmartUtils.convertDate(patrolEndDate);
+		Calendar calEnd = SharedUtils.convertDate(patrolEndDate);
 		
 		while (calStart.before(calEnd) || calStart.equals(calEnd)){
 			boolean found = false;
 			for (Iterator<?> iterator = legs.iterator(); iterator.hasNext();) {
 				PatrolLeg leg = (PatrolLeg) iterator.next();
-				Date legStart = SmartUtils.getDatePart(leg.getStartDate(), false);
-				Date legEnd = SmartUtils.getDatePart(leg.getEndDate(), true);
+				Date legStart = SharedUtils.getDatePart(leg.getStartDate(), false);
+				Date legEnd = SharedUtils.getDatePart(leg.getEndDate(), true);
 				
 				if ( (calStart.getTime().before(legEnd) || calStart.getTime().equals(legEnd)) && 
 						(calStart.getTime().after(legStart) ||calStart.getTime().equals(legStart)) ){

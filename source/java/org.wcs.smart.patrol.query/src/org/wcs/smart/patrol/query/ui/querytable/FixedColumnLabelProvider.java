@@ -25,7 +25,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
@@ -70,9 +70,9 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 	private static String asString(Object value, ColumnType type) {
 		if (type == ColumnType.BOOLEAN) {
 			if ((Boolean) value) {
-				return Attribute.BOOLEAN_TRUE_LABEL;
+				return LabelConstants.BOOLEAN_TRUE_LABEL;
 			} else {
-				return Attribute.BOOLEAN_FALSE_LABEL;
+				return LabelConstants.BOOLEAN_FALSE_LABEL;
 			}
 		} else if (type == ColumnType.DATE) {
 			if ((Date)value == null){

@@ -442,7 +442,7 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 			for (SamplingUnitAttributeListItem mi : toUpdate.getAttributeList()){
 				SamplingUnitAttributeListItem  found = null;
 				for (SamplingUnitAttributeListItem copy : copyItems){
-					if (Arrays.equals(mi.getUuid(), copy.getUuid())){
+					if (mi.getUuid().equals(copy.getUuid())){
 						found = copy;
 						break;
 					}

@@ -27,16 +27,16 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.query.map.geotools.SurveyQueryDataSource;
 import org.wcs.smart.er.query.map.geotools.SurveyResultItemFeature;
-import org.wcs.smart.er.query.model.MissionQueryType;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -55,10 +55,10 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(SurveyObservationQueryType.KEY) ||
-				query.getType().getKey().equals(SurveyWaypointQueryType.KEY)||
-				query.getType().getKey().equals(MissionQueryType.KEY) ||
-				query.getType().getKey().equals(MissionTrackQueryType.KEY)	){
+		if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
+				query.getTypeKey().equals(SurveyWaypointQuery.KEY)||
+				query.getTypeKey().equals(MissionQuery.KEY) ||
+				query.getTypeKey().equals(MissionTrackQuery.KEY)	){
 			return true;
 		}
 		return false;
@@ -66,12 +66,12 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 
 	@Override
 	protected SimpleFeature createFeature(IResultItem it, IQueryType queryType) throws Exception{
-		if (queryType.getKey().equals(MissionQueryType.KEY)){
+		if (queryType.getKey().equals(MissionQuery.KEY)){
 			return SurveyResultItemFeature.createTrackFeature((SurveyQueryResultItem)it,  queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
-		}else if ( query.getType().getKey().equals(SurveyObservationQueryType.KEY) ||
-				    query.getType().getKey().equals(SurveyWaypointQueryType.KEY)){
+		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
+				    query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
 			return SurveyResultItemFeature.createObservationFeature((SurveyQueryResultItem)it, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
-		}else if (query.getType().getKey().equals(MissionTrackQueryType.KEY)){
+		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
 			return SurveyResultItemFeature.createTrackFeature((MissionTrackResultItem)it, session, queryColumns, shapefile.getSchema(shapefile.getTypeNames()[0]));
 		}
 		return null;
@@ -79,13 +79,13 @@ public class SurveyShapeQueryExporter extends ShapeQueryExporter{
 	
 	@Override
 	protected SimpleFeatureType createSchema(IQueryType queryType) throws Exception{
-		if (queryType.getKey().equals(MissionQueryType.KEY)){
+		if (queryType.getKey().equals(MissionQuery.KEY)){
 			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
-		}else if ( query.getType().getKey().equals(SurveyObservationQueryType.KEY)){
+		}else if ( query.getTypeKey().equals(SurveyObservationQuery.KEY)){
 			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
-		}else if (query.getType().getKey().equals(SurveyWaypointQueryType.KEY)){
+		}else if (query.getTypeKey().equals(SurveyWaypointQuery.KEY)){
 			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.WAYPOINT_TYPE, SurveyQueryDataSource.getWaypointFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
-		}else if (query.getType().getKey().equals(MissionTrackQueryType.KEY)){
+		}else if (query.getTypeKey().equals(MissionTrackQuery.KEY)){
 			return DataUtilities.createType(SurveyQueryDataSource.FEATURETYPE_PREFIX + "." + SurveyQueryDataSource.TRACKS_TYPE, SurveyQueryDataSource.getTrackFeatureSchemaDef(this.queryColumns, false)); //$NON-NLS-1$
 		}
 		return null;

@@ -34,6 +34,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -49,7 +50,9 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
-import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
+import org.wcs.smart.cybertracker.export.PatrolScreensUtil.IdNamePair;
+import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
+import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.export.data.IAttributeListItemProxy;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
 import org.wcs.smart.cybertracker.export.data.ListItemsDataProvider;
@@ -65,12 +68,14 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Screens;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.cybertracker.util.PdaUtil;
+import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Exporter from {@link ConfigurableModel} to CyberTracker application
@@ -80,6 +85,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class CyberTrackerConfExporter {
 
+	private static final String DEFAULT_DATAMODEL_EXPORT_NAME = "SMART Data Model"; //$NON-NLS-1$
+	
 	private static final String NODE_DEPTH_RESULT_PREFIX = "node"; //$NON-NLS-1$
 	private static final String NODE_HEADER_COLOR = "0000FF00"; //$NON-NLS-1$
 	
@@ -110,14 +117,18 @@ public class CyberTrackerConfExporter {
 		this.currentLanguage = currentLanguage;
 	}
 
-	public File export(File destFolder, IConfigurableModelProvider cmProvider, IProgressMonitor monitor) throws Exception {
+	public File export(File destFolder, Object source, IProgressMonitor monitor) throws Exception {
 		session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			if (cmProvider != null) {
-				configurableModel = cmProvider.getConfigurableModel(session, monitor);
-			}
-			if (configurableModel == null) {
+			if (source instanceof ConfigurableModel) {
+				monitor.subTask(Messages.CyberTrackerExporter_Progress_FetchDataModel);
+				ConfigurableModel model = (ConfigurableModel) source;
+				configurableModel = DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
+			} else if (source instanceof DataModelWrapper) {
+				configurableModel = ((DataModelWrapper) source).buildConfigurableModel(session, monitor);
+				configurableModel.setName(DEFAULT_DATAMODEL_EXPORT_NAME);
+			} else {
 				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.CyberTrackerExporter_Error_InvalidSource, null);
 				return null;
 			}
@@ -126,10 +137,10 @@ public class CyberTrackerConfExporter {
 			
 			elements = ElementsUtil.buildEmptyElements();
 			newWpResultId = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
+			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_NEW_WAYPOINT, newWpResultId.getItemId());
 			newWpElementsIds = createNewWpElementsIds(elements);
 			defaultAttrValuesResultId = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
+			ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			photoResultIds = new ArrayList<CyberTrackerId>();
 			addPhotoElementIds = ElementsUtil.buildBooleanElements(elements);
 			return performExport(destFolder, monitor);
@@ -152,15 +163,11 @@ public class CyberTrackerConfExporter {
 		}
 	}
 
-	protected ScreensUtil createScreensUtil(CyberTrackerUtil ctu) {
-		return new ScreensUtil(ctu);
-	}
-
 	private File performExport(File file, IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Fetch_Configuration);
 		CyberTrackerProperties ctProperties = CyberTrackerHibernateManager.getProperties(session);
-		screensFactory = new ScreensObjectFactory(ctProperties);
-		ctUtil = new CyberTrackerUtil(screensFactory, currentLanguage);
+		ctUtil = new CyberTrackerUtil(ctProperties, currentLanguage);
+		screensFactory = ctUtil.getScreensFactory();
 		monitor.worked(10);
 		
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Mappings);
@@ -168,16 +175,15 @@ public class CyberTrackerConfExporter {
 		Map<CmNode, CyberTrackerId> keyMap = ctUtil.buildMap(root);
 
 		monitor.subTask(Messages.CyberTrackerExporter_Progress_Build_Content);
-		ScreensUtil screensUtil = createScreensUtil(ctUtil);
-		MetaExportResult metaScreensData = screensUtil.buildMetaNodes(elements, keyMap.get(root), session);
-		if (metaScreensData == null) {
+		ParolFilledDataContainer patrolScreensData = ctUtil.buildPatrolNodes(elements, keyMap.get(root), session);
+		if (patrolScreensData == null) {
 			//failed to generate patrol data
 			//error message is expected to be displayed be PatrolScreensUtil
 			return null;
 		}
 		List<Node> screenNodes = new ArrayList<Node>();
-		screenNodes.addAll(metaScreensData.screenNodes);
-		rootId = metaScreensData.rootId;
+		screenNodes.addAll(patrolScreensData.screenNodes);
+		rootId = patrolScreensData.rootId;
 		monitor.worked(5);
 
 		screenNodes.addAll(buildCategoryNodes(root, keyMap, 0));
@@ -208,7 +214,7 @@ public class CyberTrackerConfExporter {
 			List<Items.Item> columnItems = new ArrayList<Items.Item>();
 			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.DATE, Messages.CyberTrackerExporter_Report_Column_Date));
 			columnItems.add(ReportsObjectFactory.createColumnItem(ICyberTrackerConstants.TIME, Messages.CyberTrackerExporter_Report_Column_Time));
-			for (IdNamePair pair : metaScreensData.resultElements) {
+			for (IdNamePair pair : patrolScreensData.resultElements) {
 				columnItems.add(ReportsObjectFactory.createColumnItem(pair.id, pair.name));
 			}
 			for (Attribute attribute : attr2resultId.keySet()) {
@@ -217,11 +223,11 @@ public class CyberTrackerConfExporter {
 					columnItems.add(ReportsObjectFactory.createColumnItem(map.get(i).getItemId(), LanguageUtil.getName(attribute, currentLanguage) + "#" + i)); //$NON-NLS-1$
 				}
 			}
-			columnItems.add(ReportsObjectFactory.createColumnItem(defaultAttrValuesResultId.getItemId(), ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES));
+			columnItems.add(ReportsObjectFactory.createColumnItem(defaultAttrValuesResultId.getItemId(), PatrolScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES));
 			for (Integer level : nodeLevel2resultId.keySet()) {
 				columnItems.add(ReportsObjectFactory.createColumnItem(nodeLevel2resultId.get(level).getItemId(), NODE_DEPTH_RESULT_PREFIX+String.valueOf(level)));
 			}
-			columnItems.add(ReportsObjectFactory.createColumnItem(newWpResultId.getItemId(), ScreensUtil.RESULT_NEW_WAYPOINT));
+			columnItems.add(ReportsObjectFactory.createColumnItem(newWpResultId.getItemId(), PatrolScreensUtil.RESULT_NEW_WAYPOINT));
 			Reports reports = ReportsObjectFactory.createReports(columnItems);
 			
 			try (BufferedOutputStream outR = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath() + File.separator + ICyberTrackerConstants.XML_REPORTS))){
@@ -307,7 +313,7 @@ public class CyberTrackerConfExporter {
 		List<String> tag0Values = new ArrayList<String>();
 		for (IAttributeListItemProxy listItem : activeItems) {
 			itemNames.add(listItem.getName());
-			tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
+			tag0Values.add(UuidUtils.uuidToString(listItem.getUuid()));
 			
 		}
 		//tag0 - listAttrValue uuid
@@ -322,7 +328,7 @@ public class CyberTrackerConfExporter {
 		for (int i = 0; i < activeItems.size(); i++) {
 			IAttributeListItemProxy listItem = activeItems.get(i);
 			String name = listItem.getName();
-			String tag0 = SmartUtils.encodeHex(listItem.getUuid());
+			String tag0 = UuidUtils.uuidToString(listItem.getUuid());
 			String tag2 = isMulti ? String.valueOf(i) : null;
 			CyberTrackerId id = new CyberTrackerId();
 			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
@@ -526,7 +532,7 @@ public class CyberTrackerConfExporter {
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		for (IAttributeTreeNodeProxy treeNode : finalTreeNodes) {
 			String name = treeNode.getName();
-			String tag0 = SmartUtils.encodeHex(treeNode.getUuid());
+			String tag0 = UuidUtils.uuidToString(treeNode.getUuid());
 			CyberTrackerId id = new CyberTrackerId();
 			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0);
 			ids.add(id);
@@ -569,11 +575,11 @@ public class CyberTrackerConfExporter {
 		}
 		case LIST:
 		{
-			byte[] uuidValue = defaultValueOption.getUuidValue();
+			UUID uuidValue = defaultValueOption.getUuidValue();
 			if (uuidValue != null) {
 				AttributeListItem def = null;
 				for (AttributeListItem item : attribute.getAttributeList()) { //check all including disabled
-					if (Arrays.equals(uuidValue, item.getUuid())) {
+					if (uuidValue.equals(item.getUuid())) {
 						def = item; 
 						break;
 					}
@@ -583,18 +589,18 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, SmartUtils.encodeHex(def.getUuid()));
+				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
 				return recordDefaultValue(attribute, elId);
 			}
 			break;
 		}
 		case TREE:
 		{
-			byte[] uuidValue = defaultValueOption.getUuidValue();
+			UUID uuidValue = defaultValueOption.getUuidValue();
 			if (uuidValue != null) {
 				AttributeTreeNode def = null;
 				for (AttributeTreeNode item : attribute.getActiveTreeNodes()) { //check dm items
-					if (Arrays.equals(uuidValue, item.getUuid())) {
+					if (uuidValue.equals(item.getUuid())) {
 						def = item; 
 						break;
 					} else {
@@ -609,7 +615,7 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, SmartUtils.encodeHex(def.getUuid()));
+				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
 				return recordDefaultValue(attribute, elId);
 			}
 			break;
@@ -625,13 +631,13 @@ public class CyberTrackerConfExporter {
 		return null;
 	}
 
-	private AttributeTreeNode findTreeNode(AttributeTreeNode node, byte[] uuidValue) {
+	private AttributeTreeNode findTreeNode(AttributeTreeNode node, UUID uuidValue) {
 		if (node.getActiveChildren() == null)
 			return null;
 
 		AttributeTreeNode result = null;
 		for (AttributeTreeNode item : node.getActiveChildren()) {
-			if (Arrays.equals(uuidValue, item.getUuid())) {
+			if (uuidValue.equals(item.getUuid())) {
 				return item;
 			}
 			result = findTreeNode(item, uuidValue);
@@ -645,7 +651,7 @@ public class CyberTrackerConfExporter {
 	private String recordDefaultValue(Attribute attribute, String defaultValue) {
 		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
-		ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, SmartUtils.encodeHex(attribute.getUuid()), null, defaultValue);
+		ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, defaultValue);
 		return ctid;
 	}
 	
@@ -704,7 +710,7 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId id = map.get(index);
 		if (id == null) {
 			id = new CyberTrackerId();
-			String uuid = SmartUtils.encodeHex(attribute.getUuid());
+			String uuid = UuidUtils.uuidToString(attribute.getUuid());
 			ElementsUtil.addElementsItem(elements, attribute.getKeyId()+"#"+index, id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG, index.toString()); //$NON-NLS-1$
 			map.put(index, id);
 		}
@@ -741,7 +747,7 @@ public class CyberTrackerConfExporter {
 		
 		//below is same as ElementsUtil.addElements(elements, map);
 		for (IAttributeTreeNodeProxy dmObject : map.keySet()) {
-			ElementsUtil.addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), SmartUtils.encodeHex(dmObject.getUuid()));
+			ElementsUtil.addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), UuidUtils.uuidToString(dmObject.getUuid()));
 		}
 
 		return result;
@@ -875,7 +881,7 @@ public class CyberTrackerConfExporter {
 		if (photoResultIds.size() >= index) {
 			for (int i = photoResultIds.size(); i <= index; i++) {
 				CyberTrackerId id = new CyberTrackerId();
-				ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_PHOTO + i, id.getItemId());
+				ElementsUtil.addElementsItem(elements, PatrolScreensUtil.RESULT_PHOTO + i, id.getItemId());
 				photoResultIds.add(id);
 			}
 		}

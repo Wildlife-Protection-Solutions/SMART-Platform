@@ -41,11 +41,13 @@ import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IResolve;
 import org.locationtech.udig.catalog.IService;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.internal.SmartLabelProvider;
 import org.wcs.smart.startup.SmartStartUp;
 
 /**
@@ -218,6 +220,8 @@ public class SmartPlugIn extends AbstractUIPlugin {
 		Job.getJobManager().beginRule(SmartPlugIn.PLUGIN_START_MUTEX, null);
 
 		ConservationAreaManager.getInstance().addDeleteHandler(new DeleteConservationAreaHandler(), DeleteConservationAreaHandler.EXECUTE_ORDER);
+		SmartContext.INSTANCE.setClass(ICoreLabelProvider.class, new SmartLabelProvider());
+		SmartContext.INSTANCE.setFilestoreLocation(SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE));
 	}
 
 	public static void initializeDatabase(){

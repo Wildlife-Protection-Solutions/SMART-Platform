@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -246,7 +247,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog implements ModifyLis
 		cmbState.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof SamplingUnit.State){
-					return ((SamplingUnit.State) element).getGuiName();
+					return ((SamplingUnit.State) element).getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
@@ -309,7 +310,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog implements ModifyLis
 			}
 		}
 		
-		txtType.setText(su.getType().getGuiName());
+		txtType.setText(su.getType().getGuiName(Locale.getDefault()));
 		cmbState.setSelection(new StructuredSelection(su.getState()));
 		txtId.setText(su.getId());
 		
@@ -353,7 +354,7 @@ public class EditSamplingUnitDialog extends TitleAreaDialog implements ModifyLis
 		}
 
 		if (!error){
-			String idError = SamplingUnit.validateId(txtId.getText().trim()); 
+			String idError = EcologicalRecordsPlugIn.validateSamplingUnitId(txtId.getText().trim()); 
 			if (idError != null){
 				cdId.setDescriptionText(idError);
 				cdId.show();

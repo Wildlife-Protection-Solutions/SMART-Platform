@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.handlers;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import javax.inject.Named;
 
@@ -85,7 +86,7 @@ public class EditSurveyElementHandler {
 	 * @param parentShell
 	 * @param surveyUuid
 	 */
-	public static final void editSurvey(Shell parentShell, byte[] surveyUuid){
+	public static final void editSurvey(Shell parentShell, UUID surveyUuid){
 		EditSurveyDialog dialog = new EditSurveyDialog(parentShell, surveyUuid);
 		dialog.open();
 	}
@@ -96,7 +97,7 @@ public class EditSurveyElementHandler {
 	 * @param missionUuid
 	 * @param name
 	 */
-	public static final void editMission(Shell parentShell, byte[] missionUuid, String name){
+	public static final void editMission(Shell parentShell, UUID missionUuid, String name){
 		MissionEditorInput in = new MissionEditorInput(name, missionUuid);
 		try {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage().openEditor(in, MissionEditor.ID);

@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 
@@ -79,7 +80,11 @@ public class Thumbnail {
 	public Thumbnail(ISmartAttachment attachment, int thumbnailSize){
 		this.attachment = attachment;
 		this.thumbnailSize = thumbnailSize;
-		loadImageData();
+		try{
+			loadImageData();
+		}catch (Exception ex){
+			SmartPlugIn.log(ex.getMessage(), ex);
+		}
 	}
 	
 	/**
@@ -87,14 +92,13 @@ public class Thumbnail {
 	 * @param attachment
 	 */
 	public Thumbnail(ISmartAttachment attachment){
-		this.attachment = attachment;
-		loadImageData();
+		this(attachment, 100);
 	}
 	
 	/*
 	 * generate the thumbnail in memory 
 	 */
-	private void loadImageData(){
+	private void loadImageData() throws Exception{
 		try {
 			if (attachment.getFullFile().length() > 200 * Math.pow(10, 6)) {
 				// skip images > 200MB
@@ -140,7 +144,11 @@ public class Thumbnail {
 		
 		if (image == null){	
 			Label lbl = new Label(c, SWT.WRAP);
-			lbl.setText(attachment.getFullFile().getName());
+			try{
+				lbl.setText(attachment.getFullFile().getName());
+			}catch (Exception ex){
+				SmartPlugIn.log(ex.getMessage(), ex);
+			}
 			lbl.setLocation(0, 0);
 			lbl.setSize(thumbnailSize, thumbnailSize);
 			lbl.addMouseListener(doubleClickListener);

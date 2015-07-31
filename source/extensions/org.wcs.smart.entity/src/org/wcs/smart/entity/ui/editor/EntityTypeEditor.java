@@ -23,8 +23,8 @@ package org.wcs.smart.entity.ui.editor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -89,7 +89,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 					isThisEditor = true;
 				}
 			}else if (source instanceof EntityTypeEditorInput){
-				if (Arrays.equals(((EntityTypeEditorInput) source).getUuid(), entityType.getUuid())){
+				if (((EntityTypeEditorInput) source).getUuid().equals(entityType.getUuid())){
 					isThisEditor = true;
 				}
 			}else if (source instanceof Entity){
@@ -305,7 +305,7 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		if (SmartDB.isMultipleAnalysis()){
 			return EntityTypeCcaaManager.getInstance().findType(((EntityTypeEditorInput) getEditorInput()).getKeyId());
 		}
-		byte[] uuid = ((EntityTypeEditorInput) getEditorInput()).getUuid();
+		UUID uuid = ((EntityTypeEditorInput) getEditorInput()).getUuid();
 		EntityType et = null;
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();

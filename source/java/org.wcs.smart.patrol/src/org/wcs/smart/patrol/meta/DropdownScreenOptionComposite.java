@@ -22,8 +22,8 @@
 package org.wcs.smart.patrol.meta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -50,7 +50,7 @@ import org.wcs.smart.ui.NamedItemLabelProvider;
 public class DropdownScreenOptionComposite extends ScreenOptionComposite {
 
 	public static final NamedItem EMPTY_DROP_OPTION = new NamedItem() {
-		public byte[] getUuid() {
+		public UUID getUuid() {
 			return null;
 		}
 		public String getName() {
@@ -87,9 +87,9 @@ public class DropdownScreenOptionComposite extends ScreenOptionComposite {
 			viewer.setContentProvider(ArrayContentProvider.getInstance());
 			viewer.setLabelProvider(new NamedItemLabelProvider());
 			viewer.setInput(ddInput);
-			byte[] uuid = getModel().getUuidValue();
+			UUID uuid = getModel().getUuidValue();
 			for (NamedItem item : ddInput) {
-				if (uuid == item.getUuid() || Arrays.equals(item.getUuid(), uuid)) {
+				if (uuid == item.getUuid() || item.getUuid().equals(uuid)) {
 					viewer.setSelection(new StructuredSelection(item));
 					break;
 				}

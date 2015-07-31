@@ -35,7 +35,7 @@ import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * 
@@ -65,12 +65,21 @@ public class PatrolWaypointSource implements IWaypointSource {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Patrol.PATROL_FILESTORE_LOC);
 		sb.append(File.separator);
-		sb.append(SmartUtils.getDirectoryPath(p.getUuid()));
+		sb.append(UuidUtils.getDirectoryPath(p.getUuid()));
 		sb.append(File.separator);
 		return sb.toString();
 	}
 	
 	@Override
+	public String getDatastoreFileLocation(Object source) {
+		if (source instanceof Waypoint){
+			return getDatastoreFileLocation((Waypoint)source);
+		}else if (source instanceof Patrol){
+			return getDatastoreFileLocation((Patrol)source);
+		}
+		return null;
+	}
+	
 	public String getDatastoreFileLocation(final Waypoint wp) {
 		if (wp.getUuid() == null){
 			return null;
@@ -87,9 +96,9 @@ public class PatrolWaypointSource implements IWaypointSource {
 				try{
 					List<?> pws = s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).list(); //$NON-NLS-1$
 					if (pws.size() > 0){
-						patrolDir[0] = SmartUtils.getDirectoryPath(((PatrolWaypoint)pws.get(0)).getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
+						patrolDir[0] = UuidUtils.getDirectoryPath(((PatrolWaypoint)pws.get(0)).getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
 					}else{
-						SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + SmartUtils.encodeHex(wp.getUuid()), null);
+						SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + UuidUtils.uuidToString(wp.getUuid()), null);
 					}
 				}finally{
 					s.close();
@@ -102,7 +111,7 @@ public class PatrolWaypointSource implements IWaypointSource {
 		try {
 			j.join();
 		} catch (InterruptedException e) {
-			SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + SmartUtils.encodeHex(wp.getUuid()), null);
+			SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + UuidUtils.uuidToString(wp.getUuid()), null);
 			return null;
 		}
 			

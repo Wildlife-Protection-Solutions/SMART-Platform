@@ -23,10 +23,10 @@ package org.wcs.smart.report.query.map;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
@@ -41,14 +41,14 @@ public class QueryMapLayer extends AbstractQueryMapLayer {
 
 	@Override
 	public boolean canAddToMap(String queryTypeKey) {
-		if (queryTypeKey.equals(PatrolGridQueryType.KEY) ||
-				queryTypeKey.equals(PatrolQueryType.KEY) ||
-				queryTypeKey.equals(PatrolObservationQueryType.KEY) ||
-				queryTypeKey.equals(PatrolWaypointQueryType.KEY)){
+		if (queryTypeKey.equals(PatrolGriddedQuery.KEY) ||
+				queryTypeKey.equals(PatrolQuery.KEY) ||
+				queryTypeKey.equals(PatrolObservationQuery.KEY) ||
+				queryTypeKey.equals(PatrolWaypointQuery.KEY)){
 			return true;
 		}
 		//also test the deprecated query types
-		if (QueryTypeManager.getInstance().findDeprecatedQueryType(queryTypeKey) != null){
+		if (QueryTypeManager.INSTANCE.findDeprecatedQueryType(queryTypeKey) != null){
 			return true;
 		}
 		return false;

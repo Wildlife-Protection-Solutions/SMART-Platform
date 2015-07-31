@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -101,7 +102,7 @@ public class PatrolDeleteHandler implements IPatrolDeleteHandler {
 		List<?> ids = q.list();
 		List<Intelligence> result = new ArrayList<Intelligence>();
 		for (Object object : ids) {
-			byte[] uuid = (byte[]) object;
+			UUID uuid = (UUID) object;
 			Intelligence i = new Intelligence();
 			i.setUuid(uuid);
 			result.add(i);

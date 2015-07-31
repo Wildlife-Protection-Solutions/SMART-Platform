@@ -57,6 +57,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -146,7 +147,7 @@ public class PatrolDayEditor extends EditorPart {
 
 			for (PatrolLeg leg: legs){
 				for (PatrolLegDay day : leg.getPatrolLegDays()){
-					if (SmartUtils.getDatePart(day.getDate(), false).equals(  SmartUtils.getDatePart( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay(), false))){
+					if (SharedUtils.getDatePart(day.getDate(), false).equals(  SharedUtils.getDatePart( ((PatrolDayEditorInput)getEditorInput()).getPatrolDay(), false))){
 						plds.add(day);
 					}
 					

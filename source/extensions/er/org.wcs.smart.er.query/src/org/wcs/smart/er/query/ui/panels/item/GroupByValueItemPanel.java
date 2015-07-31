@@ -57,10 +57,11 @@ import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
-import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
+import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 /**
  * Panel for displaying summary value
@@ -176,10 +177,10 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 			final HashMap<Object, Object> input = new HashMap<Object, Object> ();
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 			
-			List<IDateGroupBy> dates = new ArrayList<IDateGroupBy>();
-			dates.add(DayDateGroupBy.INSTANCE);
-			dates.add(MonthDateGroupBy.INSTANCE);
-			dates.add(YearDateGroupBy.INSTANCE);
+			List<DateGroupByViewer> dates = new ArrayList<DateGroupByViewer>();
+			dates.add(new DateGroupByViewer(new DateGroupBy(DayDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));
 			input.put(DateTreeNode.KEY, dates);
 			
 			input.put(SurveyGroupByTreeItem.KEY, new Object[]{currentDesign, surveyNode});

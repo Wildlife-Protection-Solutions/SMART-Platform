@@ -22,9 +22,9 @@
 package org.wcs.smart.query.ui.querylist;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -56,7 +56,7 @@ public class SavedQueryTree {
 	private static SavedQueryTree instance = null;
 	
 	private List<QueryFolder> folders = null;
-	private HashMap<Integer, List<QueryEditorInput>> queries = null;
+	private HashMap<UUID, List<QueryEditorInput>> queries = null;
 	
 	
 	private List<ISourceChangedListener> listeners = new ArrayList<ISourceChangedListener>();
@@ -113,7 +113,7 @@ public class SavedQueryTree {
 				Query query = (Query)object;				
 				for (List<QueryEditorInput> list : queries.values()){
 					for (QueryEditorInput input : list){
-						if ( Arrays.equals(input.getUuid(), query.getUuid()) ){
+						if ( input.getUuid().equals(query.getUuid()) ){
 							input.setQueryName(query.getName());
 							break;
 						}
@@ -121,7 +121,7 @@ public class SavedQueryTree {
 				}
 			}else if (eventType == IQueryListener.QUERY_ADDED){
 				Query query = (Query)object;			
-				byte[] key = null;
+				UUID key = null;
 				if (query.getFolder() != null){
 					key = query.getFolder().getUuid();
 				}else if (query.getIsShared()){
@@ -129,10 +129,10 @@ public class SavedQueryTree {
 				}else{
 					key = IQueryHibernateManager.USER_QUERY_KEY;
 				}
-				List<QueryEditorInput> ins = queries.get(Arrays.hashCode(key));
+				List<QueryEditorInput> ins = queries.get(key);
 				if (ins == null){
 					ins = new ArrayList<QueryEditorInput>();
-					queries.put(Arrays.hashCode(key), ins);
+					queries.put(key, ins);
 				}
 				object = new QueryEditorInput(query);
 				ins.add((QueryEditorInput)object);
@@ -221,7 +221,7 @@ public class SavedQueryTree {
 	 * @return the saved queries; a map of the hashcode of the uuid array of a query folder 
 	 * mapped to set of query input of the query
 	 */
-	public HashMap<Integer, List<QueryEditorInput>> getQueries(){
+	public HashMap<UUID, List<QueryEditorInput>> getQueries(){
 		if (queries == null){
 			loadData();
 		}

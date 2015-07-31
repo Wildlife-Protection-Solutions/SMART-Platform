@@ -27,10 +27,12 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
-import org.wcs.smart.observation.query.model.types.ObservationQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -48,8 +50,8 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		if (qt.getKey().equals(ObservationQueryType.KEY) ||
-				qt.getKey().equals(ObservationWaypointQueryType.KEY)){
+		if (qt.getKey().equals(ObsObservationQuery.KEY) ||
+				qt.getKey().equals(ObservationWaypointQuery.KEY)){
 			return true;
 		}
 		return false;
@@ -68,7 +70,8 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			QueryDefinitionValidator validator = new QueryDefinitionValidator(session);
+			QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
+			
 			warnings.addAll(validator.validate(queryFilter.getFilter()));
 		} finally {
 			session.getTransaction().rollback();

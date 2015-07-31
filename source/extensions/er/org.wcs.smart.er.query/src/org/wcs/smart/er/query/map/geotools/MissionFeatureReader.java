@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.data.FeatureReader;
 import org.hibernate.Session;
 import org.opengis.feature.simple.SimpleFeature;
@@ -36,8 +35,8 @@ import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 /**
  * Feature reading for mission tracks associated with observation
@@ -71,7 +70,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 		
 		Object cachedResults;
 		try {
-			cachedResults = query.getCachedResults(new NullProgressMonitor());
+			cachedResults = query.getCachedResults();
 			if (ftype.getTypeName().equals(SurveyQueryDataSource.WAYPOINT_MISSION_TRACK_TYPE) && 
 			 (cachedResults instanceof ISurveyQueryMissionResult)){
 				fIterator = ((ISurveyQueryMissionResult) cachedResults).getMissionUuids().iterator();

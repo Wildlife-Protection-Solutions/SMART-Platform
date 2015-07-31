@@ -56,6 +56,7 @@ import org.eclipse.ui.forms.widgets.ScrolledForm;
 import org.eclipse.ui.part.EditorPart;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.common.attachment.SmartAttachmentLabelProvider;
@@ -279,7 +280,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
 		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
-		txtCreator.setText(intel.getCreator() != null ? intel.getCreator().getFullLabel() : ""); //$NON-NLS-1$
+		txtCreator.setText(intel.getCreator() != null ? LabelConstants.getFullLabel(intel.getCreator()) : ""); //$NON-NLS-1$
 		txtSource.setText(intel.getSource() != null ? intel.getSource().getName() : ""); //$NON-NLS-1$
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		lnkPatrolID.setText(value);

@@ -127,12 +127,13 @@ public class ConservationAreaListView {
 					}
 					
 					ConservationAreaConfiguration newConfig = dialog.getNewConfiguration();
-					SmartDB.setConservationAreaConfiguration(newConfig);
+					SmartDB.setConservationAreaConfiguration(newConfig.getEmployees().iterator().next(), 
+							SmartDB.getCurrentConservationArea(), newConfig);
 					eventManager.send(SmartDB.CCAA_CONFIGURATION_MODIFIED, newConfig);
 					
 					
 					//the data model has changed
-					DataModelManager.getInstance().fireChangeListeners();
+					DataModelManager.INSTANCE.fireChangeListeners();
 					initCas();
 				}
 				

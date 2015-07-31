@@ -2,8 +2,8 @@ package org.wcs.smart.entity.query.model.columns;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.AttributeQueryColumn;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 public class EtAttributeQueryColumn extends AttributeQueryColumn {

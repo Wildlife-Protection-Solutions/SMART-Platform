@@ -425,7 +425,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 			for (MissionAttributeListItem mi : toUpdate.getAttributeList()){
 				MissionAttributeListItem  found = null;
 				for (MissionAttributeListItem copy : copyItems){
-					if (Arrays.equals(mi.getUuid(), copy.getUuid())){
+					if (mi.getUuid().equals(copy.getUuid())){
 						found = copy;
 						break;
 					}

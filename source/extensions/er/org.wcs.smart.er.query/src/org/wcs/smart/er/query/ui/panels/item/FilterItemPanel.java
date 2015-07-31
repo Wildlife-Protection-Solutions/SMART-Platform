@@ -49,8 +49,8 @@ import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -143,7 +143,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	};
 
 	public FilterItemPanel() {
-		this(QueryTypeManager.getInstance().findQueryType(SurveyObservationQueryType.KEY));
+		this(QueryTypeManager.INSTANCE.findQueryType(SurveyObservationQuery.KEY));
 	}
 	public FilterItemPanel(IQueryType qType) {
 		this.qType = qType;
@@ -168,7 +168,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 		surveyNode =  new FiltersTreeNode(qType);
 		nodes.add(surveyNode);
 		
-		if (!qType.getKey().equals(MissionTrackQueryType.KEY)){
+		if (!qType.getKey().equals(MissionTrackQuery.KEY)){
 //			nodes.add(new DataModelTreeNode(DataModelTreeNode.Type.FILTER));
 			nodes.add(new SurveyDataModelTreeNode(DataModelTreeNode.Type.FILTER));
 		}

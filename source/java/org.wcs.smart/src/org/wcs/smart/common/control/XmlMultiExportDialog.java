@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -75,7 +76,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 	
 	private String dirName;
 	private boolean includeAttachements;
-	private List<byte[]> objUuids;
+	private List<UUID> objUuids;
 
 	private String filterLinkText;
 	private Link filterLink;
@@ -91,7 +92,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 
 	@Override
 	protected void okPressed() {
-		this.objUuids = new ArrayList<byte[]>();
+		this.objUuids = new ArrayList<UUID>();
 		Object[] checked = tableViewer.getCheckedElements();
 		int objNameIndex = 0;
 		if (checked.length > 0 && ((Object[])checked[0]).length >= 3) {
@@ -108,7 +109,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 				return;
 			}
 			file2Obj.put(fileName, objName);
-			objUuids.add( (byte[])((Object[])checked[i])[1] );
+			objUuids.add( (UUID)((Object[])checked[i])[1] );
 		}
 		super.okPressed();
 	}
@@ -139,7 +140,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 	 * 
 	 * @return list of uuids to export
 	 */
-	public List<byte[]> getObjectUuids(){
+	public List<UUID> getObjectUuids(){
 		return this.objUuids;
 	}
 	/**

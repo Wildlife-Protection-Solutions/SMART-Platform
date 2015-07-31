@@ -36,6 +36,7 @@ import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * Geotools data source for waypoint query.
@@ -166,14 +167,14 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	public static String getWaypointFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
 		return sb.toString();
 	}
 	
 	public static String getTrackFeatureSchemaDef(List<QueryColumn> columns, boolean supportsTime){
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:MultiLineString:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
 		return sb.toString();
 	}
 	

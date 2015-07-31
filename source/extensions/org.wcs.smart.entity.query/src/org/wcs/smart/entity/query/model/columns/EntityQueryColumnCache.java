@@ -52,7 +52,7 @@ public class EntityQueryColumnCache {
 	private final Object WAYPOINTLOCK = new Object();
 
 	private EntityQueryColumnCache() {
-		DataModelManager.getInstance().addChangeListener(
+		DataModelManager.INSTANCE.addChangeListener(
 				new IDataModelListener() {
 					@Override
 					public void modified() {

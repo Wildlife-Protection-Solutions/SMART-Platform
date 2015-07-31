@@ -40,6 +40,8 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog.ControlButton;
 import org.wcs.smart.dataentry.internal.Messages;

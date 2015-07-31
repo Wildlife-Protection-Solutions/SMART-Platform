@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -39,12 +40,16 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -59,9 +64,29 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 
 	private String queryDataTable;
 	
+	@Override
+	public boolean canExecute(String querytype) {
+		return PatrolWaypointQuery.KEY.equals(querytype);
+	}
 	
-	public IPagedQueryResultSet executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
 
+		final SimpleQuery query = (SimpleQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+	
 		if (query.getDateFilter() == null){
 			return null;
 		}
@@ -74,7 +99,12 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
 				
-				IFilterProcessor filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				IFilterProcessor filterer = null;
+				try{
+					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				}catch (Exception ex){
+					throw new SQLException (ex);
+				}
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -83,8 +113,9 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {			
+					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
+							cafilter, 
 							false, true, monitor);
 					
 					if (monitor.isCanceled()) return;
@@ -139,7 +170,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 				byte[] uuid = rs.getBytes(2);
 				if (uuid == null || ca_uuid == null)
 					continue;
-				String name = getName(uuid, ca_uuid, session);
+				String name = getName(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(ca_uuid), session);
 				statement.setString(1, name);
 				statement.setBytes(2, uuid);
 				statement.addBatch();
@@ -225,7 +256,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 		try (ResultSet rs = c.createStatement().executeQuery(sql.toString())){
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
-				String name = getEmployeeName(uuid, session);
+				String name = getEmployeeName(UuidUtils.byteToUUID(uuid), session);
 				
 				if (name != null) {
 					leaderSt.setString(1, name);
@@ -360,7 +391,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setPatrolUuid(rs.getBytes("p_uuid")); //$NON-NLS-1$
+		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("p_uuid"))); //$NON-NLS-1$
 		it.setPatrolId(rs.getString("p_id")); //$NON-NLS-1$
 		it.setPatrolStartDate(rs.getDate("p_startdate")); //$NON-NLS-1$
 		it.setPatrolEndDate(rs.getDate("p_enddate")); //$NON-NLS-1$
@@ -376,7 +407,7 @@ public class DerbyWaypointEngine extends DerbyPatrolQueryEngine {
 		
 		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
 		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
-		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
+		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$

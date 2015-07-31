@@ -24,6 +24,7 @@ package org.wcs.smart.common.attachment;
 import java.io.File;
 
 import org.eclipse.swt.program.Program;
+import org.wcs.smart.SmartPlugIn;
 
 /**
  * Util class for attachments
@@ -37,7 +38,11 @@ public class AttachmentUtil {
 		if (attachment.getCopyFromLocation() != null) {
 			launch(attachment.getCopyFromLocation());
 		} else {
-			launch(attachment.getFullFile());
+			try{
+				launch(attachment.getFullFile());
+			}catch (Exception ex){
+				SmartPlugIn.displayLog(ex.getMessage(), ex);
+			}
 		}
 	}
 	

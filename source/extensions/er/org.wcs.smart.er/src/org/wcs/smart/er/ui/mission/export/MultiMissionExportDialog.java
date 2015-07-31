@@ -29,6 +29,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -166,18 +167,18 @@ public class MultiMissionExportDialog extends XmlMultiExportTreeViewerDialog imp
 						if(prevSurvey != null && surveyName.equals(prevSurvey.getName()) ){
 							MissionTreeItem mti = new MissionTreeItem();
 							mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
-							mti.setUuid((byte[]) row[0]);
+							mti.setUuid((UUID) row[0]);
 							mti.setParent(prevSurvey);
 							prevSurvey.getChildren().add(mti);
 						}else{
 							SurveyTreeItem surveyTreeItem = new SurveyTreeItem();
 							surveyTreeItem.setName(surveyName);
-							surveyTreeItem.setUuid((byte[]) row[5]);
+							surveyTreeItem.setUuid((UUID) row[5]);
 							surveyTreeItem.setSurveyDesignName((String)row[6]);
 							
 							MissionTreeItem mti = new MissionTreeItem();
 							mti.setName(createMissionLabel((String)row[1], (Date)row[2], (Date)row[3]));
-							mti.setUuid((byte[]) row[0]);
+							mti.setUuid((UUID) row[0]);
 							mti.setParent(surveyTreeItem);
 							surveyTreeItem.getChildren().add(mti);
 							

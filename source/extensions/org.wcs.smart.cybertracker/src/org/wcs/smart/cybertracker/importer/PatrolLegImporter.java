@@ -36,6 +36,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
@@ -182,7 +183,7 @@ public class PatrolLegImporter extends SmartImporter {
 				for (Employee ctMember : ctPatrol.getMembers()) {
 					for (PatrolLegMember plm : leg.getMembers()) {
 						if (plm.getMember().equals(ctMember)) {
-							errors.add(MessageFormat.format(Messages.PatrolLegImporter_MemberOverlapError_Message, ctMember.getFullLabel(), leg.getId()));
+							errors.add(MessageFormat.format(Messages.PatrolLegImporter_MemberOverlapError_Message, LabelConstants.getFullLabel(ctMember), leg.getId()));
 						}
 					}
 				}
@@ -229,7 +230,7 @@ public class PatrolLegImporter extends SmartImporter {
 	private boolean equal(NamedItem o1, NamedItem o2) {
 		if (o1 == null || o2 == null)
 			return o1 == o2;
-		return Arrays.equals(o1.getUuid(), o2.getUuid());
+		return o1.getUuid().equals(o2.getUuid());
 	}
 	
 	

@@ -25,6 +25,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
@@ -32,6 +33,7 @@ import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Udig service extension for Fixed Entity Type layers
@@ -71,7 +73,7 @@ public class FixedEntityServiceExtension implements ServiceExtension {
             return null;
             
         //check for the property service key
-        if (params.containsKey(CAUUID_KEY) && params.get(CAUUID_KEY) instanceof byte[]) {
+        if (params.containsKey(CAUUID_KEY) && params.get(CAUUID_KEY) instanceof UUID) {
             //found it, create the service handle
         	return  new FixedEntityService(params);
         }
@@ -104,7 +106,7 @@ public class FixedEntityServiceExtension implements ServiceExtension {
 		
 		
 			HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-			params.put(CAUUID_KEY, SmartUtils.decodeHex(scauuid));
+			params.put(CAUUID_KEY,UuidUtils.stringToUuid(scauuid));
 		
 			return params;
 		} catch (Exception e) {
@@ -120,10 +122,10 @@ public class FixedEntityServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		if (params.get(CAUUID_KEY) == null || !(params.get(CAUUID_KEY) instanceof byte[])){
+		if (params.get(CAUUID_KEY) == null || !(params.get(CAUUID_KEY) instanceof UUID)){
 			return null;
 		}
-		String url = PROTOCOL + "://" + HOST + PATH + "/" + SmartUtils.encodeHex((byte[])params.get(CAUUID_KEY)); //$NON-NLS-1$ //$NON-NLS-2$
+		String url = PROTOCOL + "://" + HOST + PATH + "/" + UuidUtils.uuidToString((UUID)params.get(CAUUID_KEY)); //$NON-NLS-1$ //$NON-NLS-2$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){
@@ -140,7 +142,7 @@ public class FixedEntityServiceExtension implements ServiceExtension {
 		if (ca == null){
 			return null;
 		}
-		String url = PROTOCOL + "://" + HOST + PATH + "/" + SmartUtils.encodeHex(ca.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		String url = PROTOCOL + "://" + HOST + PATH + "/" + UuidUtils.uuidToString(ca.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

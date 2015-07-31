@@ -56,6 +56,7 @@ import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -70,11 +71,11 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -169,7 +170,7 @@ public class EntityEditPanelComposite extends Composite{
 		Projection defaultp = null;
 		for(Projection p : projs){
 			try{
-				if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
+				if (CRS.equalsIgnoreMetadata(ReprojectUtils.stringToCrs(p.getDefinition()), GeometryUtils.SMART_CRS)){
 					defaultp = p;
 					break;
 				}
@@ -179,7 +180,7 @@ public class EntityEditPanelComposite extends Composite{
 		}
 		if (defaultp == null){
 			defaultp = new Projection();
-			defaultp.setCrs(SmartDB.DATABASE_CRS);
+			defaultp.setDefinition(GeometryUtils.SMART_CRS.toWKT());
 			projs.add(defaultp);
 		}
 		return defaultp;
@@ -476,7 +477,9 @@ public class EntityEditPanelComposite extends Composite{
 		try {
 			//reproject
 			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
-			Point p = (Point) JTS.transform(point, CRS.findMathTransform(source.getCrs(), target.getCrs()));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(
+					ReprojectUtils.stringToCrs(source.getDefinition()), 
+					ReprojectUtils.stringToCrs(target.getDefinition())));
 
 			txtX.setText(String.valueOf(p.getX()));
 			txtY.setText(String.valueOf(p.getY()));
@@ -504,12 +507,13 @@ public class EntityEditPanelComposite extends Composite{
 		
 		//we need to get the x and y and projection and transform to latLong
 		Projection proj = (Projection) ((StructuredSelection)cmbProjection.getSelection()).getFirstElement();
-		if (CRS.equalsIgnoreMetadata(proj.getCrs(), SmartDB.DATABASE_CRS)){
+		CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(proj.getDefinition());
+		if (CRS.equalsIgnoreMetadata(crs, GeometryUtils.SMART_CRS)){
 			//this is in db crs so we don't need to do anything
 			return new Coordinate(x,y);
 		}else{
 			//need to reproject 
-			return ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+			return ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 		}
 		
 	}

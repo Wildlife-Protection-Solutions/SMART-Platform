@@ -27,9 +27,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
@@ -42,11 +43,15 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilter;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.BracketFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -54,6 +59,7 @@ import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Runs intelligence record queries, returning pages result set.
@@ -83,9 +89,28 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	
 	private DerbyPagedIntellResults results;
 	
-	public DerbyPagedIntellResults executeQuery( final IntelligenceRecordQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	@Override
+	public boolean canExecute(IQueryType querytype) {
+		return IntelligenceRecordQueryType.KEY.equals(querytype.getKey());
+	}
+	
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+	
+		final IntelligenceRecordQuery query = (IntelligenceRecordQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+	
 		if (query.getDateFilter() == null){
 			return null;
 		}
@@ -164,7 +189,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				List<Object> parameterValues = new ArrayList<Object>();
 				
 				// ca filter
-				ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
+				ArrayList<UUID> localFilters = new ArrayList<UUID>();
 				if (query.getConservationAreaFilterAsFilter().includeAll()){
 					//include all current conservation areas
 					if (SmartDB.getConservationAreaConfiguration() != null){
@@ -180,7 +205,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				}
 				if (localFilters.size() > 0){
 					sql.append(tablePrefix(ConservationArea.class) + ".uuid IN ("); //$NON-NLS-1$
-					for (byte[] ca : localFilters){
+					for (UUID ca : localFilters){
 						sql.append("?,"); //$NON-NLS-1$
 						parameterValues.add(ca);
 					}
@@ -221,7 +246,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					try(PreparedStatement ps = c.prepareStatement("UPDATE " + queryDataTable + " SET intel_source = ? where intel_sourceuuid = ?")){ //$NON-NLS-1$ //$NON-NLS-2$
 						while(rs.next()){
 							byte[] uuid = rs.getBytes(1);
-							String name = getSourceName(uuid, session);
+							String name = getSourceName(UuidUtils.byteToUUID(uuid), session);
 					
 							ps.setString(1, name);
 							ps.setBytes(2, uuid);
@@ -231,7 +256,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 				}
 				
 				/* set the intelligence record name */
-				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " + queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentLanguage().getUuid()) + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " + queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" + UuidUtils.uuidToString(SmartDB.getCurrentLanguage().getUuid()) + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				QueryPlugIn.logSql(s);
 				c.createStatement().executeUpdate(s);
 				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid where " + queryDataTable+ ".intel_uuid = a.element_uuid and b.isdefault) WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -346,7 +371,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	 * @param session
 	 * @return
 	 */
-	protected String getSourceName(byte[] uuid, Session session){
+	protected String getSourceName(UUID uuid, Session session){
 		if (uuid != null){
 			IntelligenceSource x = (IntelligenceSource) session.load(IntelligenceSource.class, uuid);
 			if (x != null) {
@@ -385,7 +410,7 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	 * @throws SQLException
 	 */
 	public String asString(ConservationAreaFilter filter) throws SQLException{
-		ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
+		ArrayList<UUID> localFilters = new ArrayList<UUID>();
 		if (filter.includeAll()){
 			//include all current conservation areas
 			if (SmartDB.getConservationAreaConfiguration() != null){
@@ -404,8 +429,8 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		for (byte[] b : localFilters){
-			sb.append("x'" + SmartUtils.encodeHex(b) + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+		for (UUID b : localFilters){
+			sb.append("x'" + UuidUtils.uuidToString(b) + "',"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		

@@ -32,7 +32,9 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -49,6 +51,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -149,7 +152,7 @@ public class EntityCsvImporter {
 		}
 		
 		List<EntityAttributeSelfReference> selfReferenceItems = new ArrayList<EntityAttributeSelfReference>();
-		
+		CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(configuration.getProjection().getDefinition());
 		int lineCount = 0;
 		try(CSVReader csvReader = new CSVReader(
 				new InputStreamReader(new FileInputStream(importFile), "UTF-8"), configuration.getDelimiter())){  //$NON-NLS-1$
@@ -240,10 +243,10 @@ public class EntityCsvImporter {
 					if (cx == null || cy == null){
 						throw new Exception(MessageFormat.format(Messages.EntityCsvImporter_InvalidCoordinates, new Object[]{lineCount}));
 					}
-					Projection proj = configuration.getProjection();
+					
 					Coordinate dbC = null;
 					try{
-						dbC = ReprojectUtils.reproject(cx, cy, proj.getCrs(), SmartDB.DATABASE_CRS);
+						dbC = ReprojectUtils.reproject(cx, cy, crs, GeometryUtils.SMART_CRS);
 					}catch (Exception ex){
 						throw new Exception(MessageFormat.format(Messages.EntityCsvImporter_CannotReproject + "\n\n" + ex.getMessage(), new Object[]{lineCount})); //$NON-NLS-1$
 					}
@@ -286,7 +289,7 @@ public class EntityCsvImporter {
 				AttributeListItem listItem = new AttributeListItem();
 				listItem.setAttribute(entityType.getDmAttribute());
 				listItem.setIsActive(entity.getStatus() == Status.ACTIVE);
-				listItem.setKeyId(NamedKeyItem.generateKey(entity.getId(), tmpList));
+				listItem.setKeyId(DataModelManager.INSTANCE.generateKey(entity.getId(), tmpList));
 				listItem.setListOrder(entityType.getDmAttribute().getAttributeList().size() + addedEntities.size());
 				listItem.setName(entity.getId());
 				listItem.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), entity.getId());
@@ -373,7 +376,7 @@ public class EntityCsvImporter {
 		EntityEventManager.getInstance().fireEvent(EntityEventManager.ENTITY_TYPE_MODIFIED, entityType);
 		
 		//fire events
-		DataModelManager.getInstance().fireChangeListeners();
+		DataModelManager.INSTANCE.fireChangeListeners();
 		
 		return true;
 	}
@@ -427,9 +430,9 @@ public class EntityCsvImporter {
 				try{
 					return Double.parseDouble(value);
 				}catch (Exception ex){}
-				if (value.equalsIgnoreCase(Attribute.BOOLEAN_FALSE_LABEL)){
+				if (value.equalsIgnoreCase(LabelConstants.BOOLEAN_FALSE_LABEL)){
 					return Boolean.FALSE;
-				}else if (value.equals(Attribute.BOOLEAN_TRUE_LABEL)){
+				}else if (value.equals(LabelConstants.BOOLEAN_TRUE_LABEL)){
 					return Boolean.TRUE;
 				}
 				

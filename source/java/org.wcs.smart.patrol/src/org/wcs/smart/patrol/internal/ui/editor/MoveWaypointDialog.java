@@ -50,6 +50,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -120,7 +121,7 @@ public class MoveWaypointDialog extends TitleAreaDialog{
 		final HashMap<Date, List<PatrolLegDay>> sets = new HashMap<Date, List<PatrolLegDay>>();
 		for (PatrolLeg leg : this.patrol.getLegs()){
 			for (PatrolLegDay day : leg.getPatrolLegDays()){
-				Date tmp = SmartUtils.getDatePart(day.getDate(), false);
+				Date tmp = SharedUtils.getDatePart(day.getDate(), false);
 				List<PatrolLegDay> plds = sets.get(tmp);
 				if (plds == null){
 					plds = new ArrayList<PatrolLegDay>();

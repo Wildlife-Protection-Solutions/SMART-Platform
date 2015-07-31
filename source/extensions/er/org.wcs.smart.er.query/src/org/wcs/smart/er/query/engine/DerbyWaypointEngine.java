@@ -25,13 +25,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
@@ -47,9 +48,12 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -65,7 +69,28 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 	private String queryDataTable;
 	
 	
-	public IPagedQueryResultSet executeDerbyQuery(final SurveyWaypointQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+	@Override
+	public boolean canExecute(IQueryType querytype) {
+		return SurveyWaypointQuery.KEY.equals(querytype.getKey());
+	}
+	
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+
+		final SurveyWaypointQuery query = (SurveyWaypointQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 
 		if (query.getDateFilter() == null){
 			return null;
@@ -150,7 +175,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				byte[] uuid = rs.getBytes(2);
 				if (uuid == null || ca_uuid == null)
 					continue;
-				String name = getName(uuid, ca_uuid, session);
+				String name = getName(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(ca_uuid), session);
 				statement.setString(1, name);
 				statement.setBytes(2, uuid);
 				statement.addBatch();
@@ -204,7 +229,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
 					byte[] cauuid = rs.getBytes(2);
-					String value = Label.getDescription(uuid, cauuid);
+					String value = LabelConstants.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid));
 					statement.setBytes(1, uuid);
 					statement.setString(2, value);
 					statement.addBatch();
@@ -256,7 +281,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
 					byte[] cauuid = rs.getBytes(2);
-					String value = Label.getDescription(uuid, cauuid);
+					String value = LabelConstants.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid));
 					statement.setBytes(1, uuid);
 					statement.setString(2, value);
 					statement.addBatch();
@@ -353,7 +378,7 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
-				String name = getEmployeeName(uuid, session);
+				String name = getEmployeeName(UuidUtils.byteToUUID(uuid), session);
 
 				if (name != null) {
 					leaderSt.setString(1, name);
@@ -468,16 +493,16 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
 		it.setSurveyEnd(rs.getDate("survey_enddate")); //$NON-NLS-1$
 		
-		it.setMissionUuid(rs.getBytes("mission_uuid")); //$NON-NLS-1$
+		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionEnd(rs.getDate("mission_startdate")); //$NON-NLS-1$
 		it.setMissionStart(rs.getDate("mission_enddate")); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
-		it.setSamplingUnitUuid(rs.getBytes("samplingunit_uuid")); //$NON-NLS-1$
+		it.setSamplingUnitUuid(UuidUtils.byteToUUID(rs.getBytes("samplingunit_uuid"))); //$NON-NLS-1$
 		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
 		
-		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
+		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$

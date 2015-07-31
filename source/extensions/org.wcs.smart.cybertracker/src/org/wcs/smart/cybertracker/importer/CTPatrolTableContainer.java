@@ -69,6 +69,7 @@ import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -567,11 +568,11 @@ public class CTPatrolTableContainer extends Composite {
 			
 			lblObjective.setText(patrol.getObjective()==null?"":patrol.getObjective());			 //$NON-NLS-1$
 			lblMandate.setText(patrol.getMandate() == null ? "" : patrol.getMandate().getName()); //$NON-NLS-1$
-			lblLeader.setText(patrol.getLeader() == null ? "" : patrol.getLeader().getFullLabel()); //$NON-NLS-1$
-			lblPilot.setText(patrol.getPilot() == null ? "" : patrol.getPilot().getFullLabel()); //$NON-NLS-1$
+			lblLeader.setText(patrol.getLeader() == null ? "" : LabelConstants.getFullLabel(patrol.getLeader())); //$NON-NLS-1$
+			lblPilot.setText(patrol.getPilot() == null ? "" : LabelConstants.getFullLabel(patrol.getPilot())); //$NON-NLS-1$
 			StringBuilder sbMembers = new StringBuilder();
 			for (Employee e : ((CyberTrackerPatrol) selection).getMembers()){
-				sbMembers.append(e.getFullLabel());
+				sbMembers.append(LabelConstants.getFullLabel(e));
 				sbMembers.append("\n"); //$NON-NLS-1$
 			}
 			lblMembers.setText(sbMembers.toString());

@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
@@ -70,7 +71,7 @@ public class QueryReportPropertyProvider extends AbstractQueryPropertyProvider {
 					sb.append("] {"); //$NON-NLS-1$
 					sb.append(Messages.QueryReportPropertyProvider_OwnerLabel); 
 					sb.append(": "); //$NON-NLS-1$
-					sb.append(rq.getReport().getOwner().getFullLabel());
+					sb.append(LabelConstants.getFullLabel(rq.getReport().getOwner()));
 					sb.append( "}");  //$NON-NLS-1$
 					
 					sb.append("\n"); //$NON-NLS-1$

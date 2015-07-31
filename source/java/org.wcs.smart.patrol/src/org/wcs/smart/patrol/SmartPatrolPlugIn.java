@@ -28,8 +28,11 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.internal.ui.PatrolLabelProvider;
+import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 
 
 /**
@@ -134,6 +137,7 @@ public class SmartPatrolPlugIn extends AbstractUIPlugin {
 		
 		//adds the delete handler
 		ConservationAreaManager.getInstance().addDeleteHandler(new PatrolCaDeleteHandler(),PatrolCaDeleteHandler.EXECUTE_ORDER);
+		SmartContext.INSTANCE.setClass(IPatrolLabelProvider.class, new PatrolLabelProvider());
 	}
 
 	/*

@@ -40,13 +40,10 @@ import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.patrol.query.map.geotools.PatrolQueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSource;
 import org.wcs.smart.patrol.query.map.geotools.QueryDataSourceFactory;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.model.udig.RasterService;
@@ -154,12 +151,12 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getType().getClass().equals(PatrolObservationQueryType.class) || 
-							query.getType().getClass().equals(PatrolWaypointQueryType.class) ){
+					if (query.getTypeKey().equals(PatrolObservationQuery.KEY) || 
+							query.getTypeKey().equals(PatrolWaypointQuery.KEY) ){
 						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
-					}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
+					}else if (query.getTypeKey().equals(PatrolQuery.KEY) ){
 						members.add(new QueryGeoResource(this, PatrolQueryDataSource.PATROL_TYPE));
-					}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
+					}else if (query.getTypeKey().equals(PatrolGriddedQuery.KEY) ){
 						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
 				}
@@ -224,11 +221,11 @@ public class QueryService extends IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getType().getClass().equals(PatrolObservationQueryType.class) ){
+                		if (query.getTypeKey().equals(PatrolObservationQuery.KEY) ){
                 			ds = new QueryDataSource((PatrolObservationQuery)query);
-                		}else if (query.getType().getClass().equals(PatrolWaypointQueryType.class) ){
+                		}else if (query.getTypeKey().equals(PatrolWaypointQuery.KEY) ){
                     		ds = new QueryDataSource((PatrolWaypointQuery)query);
-                		}else if (query.getType().getClass().equals(PatrolQueryType.class) ){
+                		}else if (query.getTypeKey().equals(PatrolQuery.KEY) ){
                 			ds = new PatrolQueryDataSource((PatrolQuery)query);
                 		}
                 	}else{

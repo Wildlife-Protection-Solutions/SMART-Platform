@@ -60,6 +60,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
@@ -129,7 +130,7 @@ public class EmployeeComposite extends Composite {
 				
 			}
 		};
-		Label lbl = createLabelField(this, Employee.ID + ":"); //$NON-NLS-1$
+		Label lbl = createLabelField(this, LabelConstants.EMP_ID + ":"); //$NON-NLS-1$
 		txtStaffId = createTextField(this, SWT.NONE,
 				Employee.MAX_ID_LENGTH, validate);
 		lbl.setToolTipText(
@@ -137,16 +138,16 @@ public class EmployeeComposite extends Composite {
 		txtStaffId.setText(EmployeeDialog.AUTO_GENERATE);
 		txtStaffId.addKeyListener(validate);
 		
-		createLabelField(this, Employee.GIVEN_NAME + ":"); //$NON-NLS-1$
+		createLabelField(this, LabelConstants.EMP_GIVEN_NAME + ":"); //$NON-NLS-1$
 		txtGivenName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
 
-		createLabelField(this, Employee.FAMILY_NAME + ":"); //$NON-NLS-1$
+		createLabelField(this,LabelConstants.EMP_FAMILY_NAME + ":"); //$NON-NLS-1$
 		txtFamilyName = createTextField(this, SWT.NONE,
 				Employee.MAX_NAME_LENGTH, validate);
 		
 		
-		createLabelField(this, Employee.EMPLOYEMENT_DATE + ":"); //$NON-NLS-1$
+		createLabelField(this, LabelConstants.EMP_EMPLOYEMENT_DATE + ":"); //$NON-NLS-1$
 		dtEmploymentStart = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
 				| SWT.LONG | SWT.DATE, dateValidate);
 		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
@@ -167,7 +168,7 @@ public class EmployeeComposite extends Composite {
 				}
 			});
 			
-			createLabelField(this, Employee.EMPLOYEMENT_ENDDATE + ":"); //$NON-NLS-1$
+			createLabelField(this, LabelConstants.EMP_EMPLOYEMENT_ENDDATE + ":"); //$NON-NLS-1$
 			dtEmploymentEnd = createDateField(this, SWT.BORDER | SWT.DROP_DOWN
 					| SWT.LONG | SWT.DATE, dateValidate);
 			data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
@@ -175,7 +176,7 @@ public class EmployeeComposite extends Composite {
 			dtEmploymentEnd.setLayoutData(data);
 
 		}
-		createLabelField(this, Employee.BIRTHDATE + ":"); //$NON-NLS-1$
+		createLabelField(this, LabelConstants.EMP_BIRTHDATE + ":"); //$NON-NLS-1$
 		dtBirthDate = createDateField(this, SWT.BORDER | SWT.DROP_DOWN	| SWT.LONG | SWT.DATE, dateValidate);
 		//default the date to something other than today.
 		dtBirthDate.setYear(1950);
@@ -185,7 +186,7 @@ public class EmployeeComposite extends Composite {
 		data.horizontalIndent = 8;
 		dtBirthDate.setLayoutData(data);
 
-		createLabelField(this, Employee.GENDER + ":"); //$NON-NLS-1$
+		createLabelField(this, LabelConstants.EMP_GENDER + ":"); //$NON-NLS-1$
 
 		composite = new Composite(this, SWT.NONE);
 		composite.setLayout(new RowLayout(SWT.HORIZONTAL));
@@ -215,7 +216,7 @@ public class EmployeeComposite extends Composite {
 		opFemale.addSelectionListener(changedGender);
 
 		if (includeAgencyRank){
-			createLabelField(this, Employee.AGENCY + ":"); //$NON-NLS-1$
+			createLabelField(this, LabelConstants.EMP_AGENCY + ":"); //$NON-NLS-1$
 			cmbViewerAgency = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 			cmbViewerAgency.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			cmbViewerAgency.setLabelProvider(new LabelProvider(){
@@ -243,7 +244,7 @@ public class EmployeeComposite extends Composite {
 			cmbViewerAgency.setInput(temp.toArray(new Agency[temp.size()]));
 			cmbViewerAgency.getCombo().select(0);
 			
-			createLabelField(this, Employee.RANK + ":"); //$NON-NLS-1$
+			createLabelField(this, LabelConstants.EMP_RANK + ":"); //$NON-NLS-1$
 			cmbViewerRank = new ComboViewer(this, SWT.READ_ONLY | SWT.BORDER);
 			cmbViewerRank.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			cmbViewerRank.setLabelProvider(new LabelProvider(){
@@ -287,7 +288,7 @@ public class EmployeeComposite extends Composite {
 		});
 		
 		smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
-		createLabelField(smartc, Employee.SMART_USER + ":"); //$NON-NLS-1$
+		createLabelField(smartc, LabelConstants.EMP_SMART_USER + ":"); //$NON-NLS-1$
 		txtSmartId = createTextField(smartc, SWT.NONE,
 				Employee.MAX_SMART_ID_LENGTH, validate);
 
@@ -300,7 +301,7 @@ public class EmployeeComposite extends Composite {
 				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
 
 		if (includeUserLevel){
-			createLabelField(smartc, Employee.SMART_USER_LEVEL + ":"); //$NON-NLS-1$
+			createLabelField(smartc, LabelConstants.EMP_SMART_USER_LEVEL + ":"); //$NON-NLS-1$
 			cmbSmartUserLevel = new ComboViewer(smartc , SWT.READ_ONLY | SWT.BORDER);
 			cmbSmartUserLevel.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 			cmbSmartUserLevel.setLabelProvider(new LabelProvider(){

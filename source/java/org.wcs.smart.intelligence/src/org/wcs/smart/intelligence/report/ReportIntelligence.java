@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
@@ -90,7 +91,7 @@ public class ReportIntelligence {
 	 * Export the plan to pdf
 	 * @param planUuid
 	 */
-	public static void export(byte[] planUuid){
+	public static void export(UUID planUuid){
 		ExportIntelligenceJob job = new ExportIntelligenceJob(planUuid);
 		job.schedule();
 	}

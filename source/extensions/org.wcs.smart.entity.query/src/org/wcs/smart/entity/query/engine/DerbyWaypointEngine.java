@@ -24,6 +24,7 @@ package org.wcs.smart.entity.query.engine;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
@@ -31,14 +32,18 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -54,7 +59,29 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 	private String queryDataTable;
 	
 	
-	public IPagedQueryResultSet executeDerbyQuery(final SimpleQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+	@Override
+	public boolean canExecute(IQueryType querytype) {
+		return EntityWaypointQueryType.KEY.equals(querytype.getKey());
+	}
+	
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+		
+		final SimpleQuery query = (SimpleQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+	
 		if (query.getDateFilter() == null){
 			return null;
 		}
@@ -206,7 +233,7 @@ public class DerbyWaypointEngine extends DerbyEntityQueryEngine {
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
-		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
+		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
 		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
 		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$

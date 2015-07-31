@@ -30,6 +30,9 @@ import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.opengis.coverage.grid.GridCoverage;
 import org.opengis.coverage.grid.GridCoverageWriter;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
@@ -67,18 +70,17 @@ public class GridTiffImageExporter implements IQueryExporter {
 	}
 
 	@Override
-	public void export(Query query, File file,
-			HashMap<String, Object> parameters, IProgressMonitor monitor)
+	public void export(Query query, IQueryResult result, File file,
+			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
 			throws Exception {
 		
-		File sourceFile = ((GriddedQuery)query).getLastRasterFile();
+		File sourceFile = ((GridQueryResult)result).getRasterFile();
 		if (sourceFile == null || !sourceFile.exists()){
 			throw new Exception(Messages.GridTiffImageExporter_QueryError, 
 					new Exception(
 					MessageFormat.format(Messages.GridTiffImageExporter_FileNotFound, new Object[]{(sourceFile == null ? "NULL" : sourceFile.toString()) }))); //$NON-NLS-1$
 		}
 
-		
 	    GeoTiffFormat frmt = new GeoTiffFormat();
 	    AbstractGridCoverage2DReader reader = (AbstractGridCoverage2DReader) frmt.getReader(sourceFile);
 	    GridCoverage gridCoverage = reader.read(null);
@@ -86,8 +88,6 @@ public class GridTiffImageExporter implements IQueryExporter {
 	    GridCoverageWriter writer = frmt.getWriter(file);
 	    writer.write(gridCoverage, null);
 	    writer.dispose();
-	    
-
 	}
 
 }

@@ -26,13 +26,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.model.Patrol;
@@ -46,8 +49,14 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for patrol queries.
@@ -58,9 +67,14 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  */
 public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 
-	private List<PatrolQueryResultItem> myResults;
+	private MemoryQueryResult<PatrolQueryResultItem> myResults;
 	private String queryDataTable;
 
+	@Override
+	public boolean canExecute(String querytype) {
+		return PatrolQuery.KEY.equals(querytype);
+	}
+	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -70,11 +84,15 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<PatrolQueryResultItem> executeQuery(
-			final PatrolQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
-		
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+
+		final SimpleQuery query = (SimpleQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+	
 		if (query.getDateFilter() == null){
 			return null;
 		}
@@ -86,7 +104,12 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyPatrolEngine_Progress_RunningQuery, 4);
-				IFilterProcessor filterer = DerbyPatrolEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				IFilterProcessor filterer = null;
+				try{
+					filterer = DerbyPatrolEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				}catch (Exception ex){
+					throw new SQLException (ex);
+				}
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -95,14 +118,18 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
-							false, false, monitor);
+					try{
+						ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
+						filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
+							cafilter, false, false, monitor);
+					}catch (Exception ex){
+						throw new SQLException (ex);
+					}
 					if (monitor.isCanceled()){
 						return;
 					}
 					monitor.subTask(Messages.DerbyPatrolEngine_Progress_LoadingResults);
-					myResults = getResults(c, session);
+					myResults = new MemoryQueryResult<PatrolQueryResultItem>(getResults(c, session));
 					
 					monitor.worked(1);
 				} finally {
@@ -329,25 +356,25 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			throws SQLException {
 		
 		PatrolQueryResultItem it = new PatrolQueryResultItem();
-		byte[] cauuid = rs.getBytes("r_p_ca_uuid"); //$NON-NLS-1$
+		UUID cauuid = UuidUtils.byteToUUID(rs.getBytes("r_p_ca_uuid")); //$NON-NLS-1$
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setPatrolUuid(rs.getBytes("r_p_uuid")); //$NON-NLS-1$
+		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("r_p_uuid"))); //$NON-NLS-1$
 		it.setPatrolId(rs.getString("r_p_id")); //$NON-NLS-1$
 		it.setPatrolStartDate(rs.getDate("r_p_start_date")); //$NON-NLS-1$
 		it.setPatrolEndDate(rs.getDate("r_p_end_date")); //$NON-NLS-1$
-		it.setStation(getName(rs.getBytes("r_p_station_uuid"), cauuid, session));				 //$NON-NLS-1$
-		it.setTeam(getName(rs.getBytes("r_p_team_uuid"), cauuid, session));				 //$NON-NLS-1$
+		it.setStation(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_station_uuid")), cauuid, session));				 //$NON-NLS-1$
+		it.setTeam(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_team_uuid")), cauuid, session));				 //$NON-NLS-1$
 		it.setObjective(rs.getString("r_p_objective")); //$NON-NLS-1$
-		it.setMandate(getName(rs.getBytes("r_p_mandate_uuid"), cauuid, session)); //$NON-NLS-1$
+		it.setMandate(getName(UuidUtils.byteToUUID(rs.getBytes("r_p_mandate_uuid")), cauuid, session)); //$NON-NLS-1$
 		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("r_p_type"))); //$NON-NLS-1$
 		it.setArmed(rs.getBoolean("r_p_is_armed")); //$NON-NLS-1$
-		it.setTransportType(getName(rs.getBytes("r_pl_transport_uuid"), cauuid, session)); //$NON-NLS-1$
+		it.setTransportType(getName(UuidUtils.byteToUUID(rs.getBytes("r_pl_transport_uuid")), cauuid, session)); //$NON-NLS-1$
 		it.setPatrolLegId(rs.getString("r_pl_id")); //$NON-NLS-1$
 		it.setPatrolLegStartDate(rs.getDate("r_pl_start_date")); //$NON-NLS-1$
 		it.setPatrolLegEndDate(rs.getDate("r_pl_end_date")); //$NON-NLS-1$
-		it.setLeader(getEmployeeName(rs.getBytes("r_plm_leader"), session)); //$NON-NLS-1$
-		it.setPilot(getEmployeeName(rs.getBytes("r_plm_pilot"), session)); //$NON-NLS-1$
+		it.setLeader(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_leader")), session)); //$NON-NLS-1$
+		it.setPilot(getEmployeeName(UuidUtils.byteToUUID(rs.getBytes("r_plm_pilot")), session)); //$NON-NLS-1$
 		it.addTrack(rs.getBytes("r_track")); //$NON-NLS-1$
 	
 

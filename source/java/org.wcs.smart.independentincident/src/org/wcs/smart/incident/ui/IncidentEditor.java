@@ -22,12 +22,20 @@
 package org.wcs.smart.incident.ui;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
@@ -89,7 +97,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				if ((source instanceof Waypoint &&
 						((Waypoint)source).equals(incident) ) ||
 						(source instanceof IncidentEditorInput &&
-								Arrays.equals(((IncidentEditorInput)source).getUuid(), incident.getUuid()))) {
+								(((IncidentEditorInput)source).getUuid().equals(incident.getUuid())))) {
 					
 					reloadIncident();
 					
@@ -101,7 +109,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				if ((source instanceof Waypoint &&
 						((Waypoint)source).equals(incident) ) ||
 						(source instanceof IncidentEditorInput &&
-								Arrays.equals(((IncidentEditorInput)source).getUuid(), incident.getUuid()))) {
+								((IncidentEditorInput)source).getUuid().equals(incident.getUuid()))) {
 					
 					//close this editor
 					getEditorSite().getShell().getDisplay().asyncExec(new Runnable(){
@@ -166,7 +174,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 	public Waypoint getIncident(){
 		if (this.incident == null){
 			
-			byte[] uuid = ((IncidentEditorInput) getEditorInput()).getUuid();
+			UUID uuid = ((IncidentEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			try{
 				//load incident 
@@ -242,6 +250,32 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 		}finally{
 			showBusy(false);
 		}
+		
+		getSite().setSelectionProvider(new ISelectionProvider() {
+			private Collection<ISelectionChangedListener> listeners = new ArrayList<ISelectionChangedListener>();
+			@Override
+			public void setSelection(ISelection selection) {
+				for (ISelectionChangedListener list: listeners){
+					list.selectionChanged(new SelectionChangedEvent(this, selection));
+				}
+			}
+			
+			@Override
+			public void removeSelectionChangedListener(
+					ISelectionChangedListener listener) {
+				listeners.remove(listener);
+			}
+			
+			@Override
+			public ISelection getSelection() {
+				return new StructuredSelection(getIncident());
+			}
+			
+			@Override
+			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+				listeners.add(listener);
+			}
+		});
 	}
 	
 	/** 
@@ -322,5 +356,8 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 //		}
 //		return super.getAdapter(adaptee);
 //	}
-	
+	public void setFocus() {
+		super.setFocus();
+		getSite().getSelectionProvider().setSelection(getSite().getSelectionProvider().getSelection());
+	}
 }

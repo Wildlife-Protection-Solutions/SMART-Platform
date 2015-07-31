@@ -13,6 +13,7 @@
 package org.wcs.smart.ui.workbench.addons.dndaddon;
 
 import java.util.List;
+
 import org.eclipse.e4.ui.internal.workbench.swt.AbstractPartRenderer;
 import org.eclipse.e4.ui.model.application.ui.MElementContainer;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;

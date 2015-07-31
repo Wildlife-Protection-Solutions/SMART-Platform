@@ -69,8 +69,6 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  */
 public class SurveySummaryQueryType implements IQueryType {
 	
-	public static final String KEY = "surveysummary"; //$NON-NLS-1$
-	
 	private static IDropItemFactory dropItemFactory;
 	
 	/**
@@ -86,7 +84,7 @@ public class SurveySummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return SurveySummaryQuery.KEY;
 	}
 
 	/**

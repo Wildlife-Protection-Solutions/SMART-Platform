@@ -28,7 +28,11 @@ import java.util.List;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -55,8 +59,15 @@ public class MemoryQueryResultSet extends AbstractQueryResultSet {
 		super(metadata);
 		this.metadata = metadata;
 		try {
-			Collection<? extends IResultItem> results = (Collection<? extends IResultItem>) query.getCachedResults(new NullProgressMonitor(), connection.getSession());
-			init(results);
+			IQueryResult results = query.getCachedResults();
+			if (results == null){
+				results = QueryExecutor.INSTANCE.executeQuery(query, connection.getSession(), new NullProgressMonitor());
+			}
+			if (results instanceof MemoryQueryResult<?>){
+				init(((MemoryQueryResult<? extends IResultItem>)results).getData());
+			}else if (results instanceof GridQueryResult){
+				init(((GridQueryResult)results).getData());	
+			}
 			
 		} catch (Exception e) {
 			throw new RuntimeException(e);

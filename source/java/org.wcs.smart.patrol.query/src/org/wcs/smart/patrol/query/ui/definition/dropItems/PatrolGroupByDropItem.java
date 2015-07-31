@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.ui.definition.dropItems;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -41,14 +42,15 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * A patorl group by drop item
@@ -86,7 +88,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	 */
 	@Override
 	public String getText() {
-		return groupBy.getGuiName();
+		return groupBy.getGuiName(Locale.getDefault());
 	}
 
 	/**
@@ -101,7 +103,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		if (filteredValues.size() > 0){
 			for (int i = 0; i < filteredValues.size(); i ++){
 				if (groupBy.getType() == PatrolQueryOptionType.UUID){
-					queryPart.append(  SmartUtils.encodeHex( filteredValues.get(i).getUuid())  );
+					queryPart.append(  UuidUtils.uuidToString( filteredValues.get(i).getUuid())  );
 				}else if (groupBy.getType() == PatrolQueryOptionType.KEY){
 					queryPart.append(  filteredValues.get(i).getKey() );
 				}else{
@@ -145,7 +147,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		comp.setLayout(new GridLayout(2, false));
 		
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText( formatStringForLabel(groupBy.getGuiName()));
+		lbl.setText( formatStringForLabel(groupBy.getGuiName(Locale.getDefault())));
 		initDrag(lbl);
 		
 		final Hyperlink link = new Hyperlink(comp,  SWT.NONE);
@@ -220,7 +222,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			items = groupBy.getAllActiveValues(s);
+			items = PatrolOptionData.findData(groupBy).getAllActiveValues(s);
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){

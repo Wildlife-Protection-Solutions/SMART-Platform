@@ -69,7 +69,7 @@ import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.JobUtil;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Map page for Plan editor.  Displays spatial targets on a map
@@ -236,7 +236,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 				if (patrolLayer != null){
 					try{
 						PatrolQuery pq = patrolLayer.resolve(PatrolQuery.class, monitor);
-						pq.clearCachedResults(); //clear cached results
+						pq.setCachedResults(null); //clear cached results
 						if (pq != null){
 							pq.setQueryFilter(generateQueryString()); //update filter
 						}
@@ -379,7 +379,7 @@ public class MapPlanEditorPage extends SmartMapEditorPart {
 			if (query.length() > 0){
 				query.append(" OR "); //$NON-NLS-1$
 			}
-			query.append("patrol:uuid equals\"" + SmartUtils.encodeHex(i.getUuid()) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
+			query.append("patrol:uuid equals\"" + UuidUtils.uuidToString(i.getUuid()) + "\""); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return "observation|" + query.toString(); //$NON-NLS-1$
     }

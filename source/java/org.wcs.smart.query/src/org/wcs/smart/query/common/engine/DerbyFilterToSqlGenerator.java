@@ -24,6 +24,7 @@ package org.wcs.smart.query.common.engine;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -49,7 +50,7 @@ import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.ObserverFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Converts filters to sql for the Derby query engine.
@@ -98,7 +99,7 @@ public class DerbyFilterToSqlGenerator {
 	 */
 	protected String asSql(ObserverFilter filter, IQueryEngine engine) throws SQLException{
 		try {
-			String param = engine.addParameterValue(SmartUtils.decodeHex(filter.getValue())); 
+			String param = engine.addParameterValue(UuidUtils.stringToUuid(filter.getValue())); 
 			StringBuilder sb = new StringBuilder();
 			sb.append(engine.tablePrefix(WaypointObservation.class));
 			sb.append(".employee_uuid "); //$NON-NLS-1$
@@ -159,7 +160,7 @@ public class DerbyFilterToSqlGenerator {
 			String p2 = engine.addParameterValue((String) filter.getValue2()); 
 			return "( qa." + filter.getAttributeKey() + " is not null AND DATE(qa." + filter.getAttributeKey() + ") " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
-			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
 				//any option
 				return "( qa."+ filter.getAttributeKey()  + " is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
 			}else{
@@ -229,7 +230,7 @@ public class DerbyFilterToSqlGenerator {
 	 * @throws SQLException
 	 */
 	public String asSql(ConservationAreaFilter filter, String caTablePrefix, IQueryEngine engine) throws SQLException{
-		ArrayList<byte[]> localFilters = new ArrayList<byte[]>();
+		ArrayList<UUID> localFilters = new ArrayList<UUID>();
 		if (filter.includeAll()){
 			//include all current conservation areas
 			if (SmartDB.getConservationAreaConfiguration() != null){
@@ -274,7 +275,8 @@ public class DerbyFilterToSqlGenerator {
 			table = engine.tablePrefix(Waypoint.class);
 			field = "datetime"; //$NON-NLS-1$
 		}else{
-			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
+			throw new SQLException(MessageFormat.format(Messages.DerbyFilterToSqlGenerator_DateFilteNotSupported, 
+					new Object[]{filter.getDateFieldOption().getKey()}));
 		}
 		
 		field = table + "." + field; //$NON-NLS-1$

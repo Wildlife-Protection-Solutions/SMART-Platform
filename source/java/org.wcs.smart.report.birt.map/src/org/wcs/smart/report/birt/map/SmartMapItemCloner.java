@@ -41,7 +41,7 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.report.model.Report;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * This template cloner fixes up the query references
@@ -97,10 +97,10 @@ public class SmartMapItemCloner implements IConservationAreaTemplateCloner {
 							String bits[] = queryText.split(":"); //$NON-NLS-1$
 							String queryUuid = bits[1];
 							try{
-								UuidItem newQueryReferences = engine.getNewConservationItem(SmartUtils.decodeHex(queryUuid));
+								UuidItem newQueryReferences = engine.getNewConservationItem(UuidUtils.stringToUuid(queryUuid));
 							
 								if (newQueryReferences != null){
-									mapLayerQueries.set(i, (Object)(bits[0] + ":" + SmartUtils.encodeHex(newQueryReferences.getUuid()))); //$NON-NLS-1$
+									mapLayerQueries.set(i, (Object)(bits[0] + ":" + UuidUtils.uuidToString(newQueryReferences.getUuid()))); //$NON-NLS-1$
 								}else{
 									//new query reference cannot be found; 
 									throw new Exception(MessageFormat.format(Messages.SmartMapItemCloner_CloneError, new Object[]{report.getName()}));

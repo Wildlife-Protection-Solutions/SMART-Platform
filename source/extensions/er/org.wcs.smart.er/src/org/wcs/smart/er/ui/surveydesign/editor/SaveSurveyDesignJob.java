@@ -35,7 +35,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SurveyDesign;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Job is used to save survey design object
@@ -53,7 +53,7 @@ public class SaveSurveyDesignJob extends Job {
 
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			

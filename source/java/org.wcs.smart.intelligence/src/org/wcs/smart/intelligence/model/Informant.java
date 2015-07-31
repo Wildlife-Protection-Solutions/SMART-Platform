@@ -39,7 +39,7 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.informant.PersistentManager;
 import org.wcs.smart.intelligence.informant.aes.EncryptedData;
 import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * @author elitvin
@@ -119,7 +119,7 @@ public final class Informant extends UuidItem {
     @Transient
 	public final File getDataFile() {
 		if (getUuid() != null) {
-    		String fn = SmartUtils.encodeHex(getUuid());
+    		String fn = UuidUtils.uuidToString(getUuid());
     		File file = new File(getDatastoreFolderPath() + File.separator + fn + ".dat"); //$NON-NLS-1$
 			return file;
 		} else {

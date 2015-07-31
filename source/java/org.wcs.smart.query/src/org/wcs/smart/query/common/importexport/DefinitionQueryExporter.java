@@ -29,8 +29,11 @@ import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.StyledQuery;
@@ -86,12 +89,13 @@ public abstract class DefinitionQueryExporter implements IQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(org.wcs.smart.query.model.Query query, File file, 
-			HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+	public void export(org.wcs.smart.query.model.Query query, IQueryResult result, File file,
+			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
+			throws Exception {
 		Query wpquery = new Query();
 		QueryType xmlQuery = new QueryType();
 		wpquery.setQuery(xmlQuery);
-		xmlQuery.setQueryType(query.getType().getKey());
+		xmlQuery.setQueryType(query.getTypeKey());
 		
 		
 		Session s = HibernateManager.openSession();

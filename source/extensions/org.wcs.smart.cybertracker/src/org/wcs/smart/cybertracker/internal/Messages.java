@@ -71,6 +71,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
+	public static String CyberTrackerExportDialog_ConfigurableModel;
 	public static String CyberTrackerExportDialog_ConfirmCreateDir_Message;
 	public static String CyberTrackerExportDialog_ConfirmOverwrite_Message;
 	public static String CyberTrackerExportDialog_ConfirmOverwrite_Title;
@@ -94,6 +95,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerExportDialog_Label_File;
 	public static String CyberTrackerExportDialog_Language;
 	public static String CyberTrackerExportDialog_LaunchInCyberTracker;
+	public static String CyberTrackerExportDialog_LoadConfModels_Error;
 	public static String CyberTrackerExportDialog_Message;
 	public static String CyberTrackerExportDialog_Task_Copy;
 	public static String CyberTrackerExportDialog_Task_Upload;
@@ -246,6 +248,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerPropertiesDialog_UtmZone_Tooltip;
 	public static String CyberTrackerPropertiesDialog_UtmZoneInvalid;
 	public static String CybertrackerTemplateCloner_CloningCtOptions;
+	public static String DataModelWrapper_Dropdown_Label;
 	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;

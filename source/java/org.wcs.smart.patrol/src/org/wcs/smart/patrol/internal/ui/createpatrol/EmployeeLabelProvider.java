@@ -27,6 +27,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLegMember;
@@ -114,7 +115,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 			if (pilots != null && pilots.contains(element)) {
 				text += "[" + PILOT_LABEL + "] "; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return text + ((Employee) element).getFullLabel();
+			return text + LabelConstants.getFullLabel((Employee) element);
 		} else if (element instanceof PatrolLegMember) {
 			String text = ""; //$NON-NLS-1$
 			if (((PatrolLegMember) element).getIsLeader()) {
@@ -123,7 +124,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 			if (((PatrolLegMember) element).getIsPilot()) {
 				text += "[" + PILOT_LABEL + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return text + ((PatrolLegMember) element).getMember().getFullLabel();
+			return text + LabelConstants.getFullLabel(((PatrolLegMember) element).getMember());
 		}
 		return super.getText(element);
 	}

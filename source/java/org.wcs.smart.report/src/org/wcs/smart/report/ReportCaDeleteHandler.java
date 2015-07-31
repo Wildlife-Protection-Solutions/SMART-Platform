@@ -32,7 +32,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Handler for deleting reports.
@@ -181,7 +181,7 @@ public class ReportCaDeleteHandler implements ICaDeleteHandler {
 		for (Report r : toDelete){
 			session.delete(r);
 			try{
-				String filename =  SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE) + File.separator + SmartUtils.encodeHex(ConservationArea.MULTIPLE_CA) + File.separator + ReportPlugIn.REPORT_DIR + File.separator + r.getFilename(); 
+				String filename =  SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE) + File.separator + UuidUtils.uuidToString(ConservationArea.MULTIPLE_CA) + File.separator + ReportPlugIn.REPORT_DIR + File.separator + r.getFilename(); 
 				(new File(filename)).delete();
 			}catch (Exception ex){
 				ReportPlugIn.log("Error deleting report file", ex); //$NON-NLS-1$

@@ -28,7 +28,8 @@ import org.wcs.smart.query.ui.model.impl.AttributeDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 public class EntityAttributeFilter implements IFilter {
 	
@@ -60,7 +61,7 @@ public class EntityAttributeFilter implements IFilter {
 	 * @return
 	 */
 	public static EntityAttributeFilter createStringFilter(String attributeIdentifier, Operator op, String value){
-		value = SmartUtils.stripQuotes(value);
+		value = SharedUtils.stripQuotes(value);
 		return new EntityAttributeFilter(attributeIdentifier,  op, value);
 	}
 
@@ -166,9 +167,9 @@ public class EntityAttributeFilter implements IFilter {
 		sql.append(" AND "); //$NON-NLS-1$
 		sql.append(engine.tablePrefix(EntityType.class));
 		if (SmartDB.isMultipleAnalysis()){
-			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(".ca_uuid = x'" + UuidUtils.uuidToString(SmartDB.getConservationAreaConfiguration().getMainConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
-			sql.append(".ca_uuid = x'" + SmartUtils.encodeHex(SmartDB.getCurrentConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(".ca_uuid = x'" + UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid()) + "'"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
 		try{

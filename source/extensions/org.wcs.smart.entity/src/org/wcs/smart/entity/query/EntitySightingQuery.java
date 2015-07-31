@@ -24,11 +24,8 @@ package org.wcs.smart.entity.query;
 import java.text.MessageFormat;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Session;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -116,30 +113,7 @@ public class EntitySightingQuery extends Query{
 	public void setQueryColumns(List<QueryColumn> cols){
 		this.columns = cols;
 	}
-	
-	
-	
-	/**
-	 * @param monitor
-	 * @param session can be null
-	 * 
-	 * @return runs the query and returns the results;
-	 */
-	protected Object executeQueryInternal(IProgressMonitor monitor, Session session)  throws Exception{
-		DerbyEntitySightingEngine queryEngine = new DerbyEntitySightingEngine();
-		Session lSession = session;
-		if (lSession == null){
-			lSession = HibernateManager.openSession();
-		}
-		try{
-			return queryEngine.executeDerbyQuery(this, lSession, monitor);
-		}finally{
-			if (session == null){
-				lSession.close();
-			}
-		}
-		
-	}
+
 
 	@Override
 	public IQueryType getType() {

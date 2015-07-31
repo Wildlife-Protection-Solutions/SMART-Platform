@@ -28,6 +28,8 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.swing.plaf.LabelUI;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -44,6 +46,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.common.control.MultipleSelectComposite.IListChanged;
 import org.wcs.smart.er.internal.Messages;
@@ -97,7 +100,9 @@ public class MissionEmployeeComposite extends MissionComposite {
 		composite.setItemComparator(new Comparator<Employee>() {
 			@Override
 			public int compare(Employee o1, Employee o2) {
-				return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
+				return Collator.getInstance().compare(
+						LabelConstants.getFullLabel(o1), 
+						LabelConstants.getFullLabel(o2));
 			}
 		});
 		composite.addSelectionChangedListener(new IListChanged<Employee>() {
@@ -230,8 +235,8 @@ public class MissionEmployeeComposite extends MissionComposite {
 			for (Employee observer : observers){
 				if (!selected.contains(observer)){
 					warnComp.setVisible(true);
-					errorlbl.setText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverError, new Object[]{observer.getFullLabel()}));
-					errorlbl.setToolTipText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverErrorTooltip, new Object[]{observer.getFullLabel()}));
+					errorlbl.setText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverError, new Object[]{LabelConstants.getFullLabel(observer)}));
+					errorlbl.setToolTipText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverErrorTooltip, new Object[]{LabelConstants.getFullLabel(observer)}));
 					warnComp.layout(true);
 					return false;
 				}

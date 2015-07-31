@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.model;
 
 import java.io.File;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,20 +47,20 @@ import org.wcs.smart.hibernate.SmartDB;
 @Entity
 @Table(name="smart.intelligence_attachment")
 public class IntelligenceAttachment implements ISmartAttachment {
-	private byte[] uuid;
+	private UUID uuid;
 	private Intelligence intelligence;
 	private String filename;
 	
 	private File copyFromLocation;
-   private String fullFile;
+    private String fullFile;
 	
 	@Id
 	@GeneratedValue(generator="uuid")
 	@GenericGenerator(name= "uuid", strategy="uuid2")
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
-	public void setUuid(byte[] uuid) {
+	public void setUuid(UUID uuid) {
 		this.uuid = uuid;
 	}
 	

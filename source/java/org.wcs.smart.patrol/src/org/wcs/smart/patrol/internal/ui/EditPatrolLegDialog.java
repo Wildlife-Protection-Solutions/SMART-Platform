@@ -53,11 +53,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -126,7 +128,8 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		Collections.sort(list, new Comparator<Employee>(){
 			@Override
 			public int compare(Employee o1, Employee o2) {
-				return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
+				return Collator.getInstance().compare(
+						LabelConstants.getFullLabel(o1), LabelConstants.getFullLabel(o2));
 			}});
 	}
 	
@@ -356,7 +359,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			}
 		});
 		
-		Calendar ca = SmartUtils.convertDate(editLeg.getStartDate());
+		Calendar ca = SharedUtils.convertDate(editLeg.getStartDate());
 		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 0 && ca.get(Calendar.MINUTE) == 0 && ca.get(Calendar.SECOND) == 0;
 		
 		opStart.setSelection(enabled);
@@ -414,7 +417,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 			}
 		});
 		
-		Calendar ca = SmartUtils.convertDate(editLeg.getEndDate());
+		Calendar ca = SharedUtils.convertDate(editLeg.getEndDate());
 		boolean enabled =ca.get(Calendar.HOUR_OF_DAY) == 23 && ca.get(Calendar.MINUTE) == 59 && ca.get(Calendar.SECOND) == 59;
 		
 		opEnd.setSelection(enabled);
@@ -439,8 +442,8 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 	 * @return
 	 */
 	private String validateDates(){
-		Date patrolStart = SmartUtils.getDatePart(patrolStartDate, false);
-		Date patrolEnd = SmartUtils.getDatePart(patrolEndDate, true);
+		Date patrolStart = SharedUtils.getDatePart(patrolStartDate, false);
+		Date patrolEnd = SharedUtils.getDatePart(patrolEndDate, true);
 			
 		Date legStart = SmartUtils.getDate(startDate);
 		if (opCustom.getSelection()){
@@ -453,7 +456,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		if (opEndCustom.getSelection()){
 			legEnd = SmartUtils.combineDateTime(legEnd, new Time(SmartUtils.getTime(endTime).getTime()));
 		}else{
-			legEnd = SmartUtils.getDatePart(legEnd, true);
+			legEnd = SharedUtils.getDatePart(legEnd, true);
 		}
 		
 		if (legStart.before(patrolStart)){
@@ -540,7 +543,7 @@ public class EditPatrolLegDialog extends TitleAreaDialog{
 		if (opEndCustom.getSelection()){
 			etime = SmartUtils.combineDateTime(etime, new Time(SmartUtils.getTime(endTime).getTime()));
 		}else{
-			etime = SmartUtils.getDatePart(etime, true);
+			etime = SharedUtils.getDatePart(etime, true);
 		}
 		editLeg.setEndDate(etime);
 		

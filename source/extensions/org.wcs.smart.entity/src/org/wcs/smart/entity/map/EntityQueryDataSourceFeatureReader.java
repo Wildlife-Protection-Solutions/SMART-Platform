@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
@@ -35,10 +34,11 @@ import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.query.SightingResultItem;
 import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -68,7 +68,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 		this.query = query;
 		
 		try {
-			Object cachedResults = query.getCachedResults(new NullProgressMonitor());
+			Object cachedResults = query.getCachedResults();
 			if (cachedResults != null){
 				fIterator = ((SightingPagedResults)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
 			}
@@ -133,7 +133,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 		GeometryFactory gf = new GeometryFactory();
 		Object[] data = new Object[columns.size() + 2];
 		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
-		data[1] = it.getEntityId() + "." + SmartUtils.encodeHex(it.getWaypointUuid()); //$NON-NLS-1$ 
+		data[1] = it.getEntityId() + "." + UuidUtils.uuidToString(it.getWaypointUuid()); //$NON-NLS-1$ 
 		for (int i = 0; i < columns.size(); i ++){
 			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}

@@ -50,6 +50,7 @@ import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.properties.DialogConstants;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -135,7 +136,7 @@ public class MissionEditorDialog extends TitleAreaDialog {
 				List<MissionDay> wpDelete = new ArrayList<MissionDay>();
 				for (MissionDay md : toUpdate.getMissionDays()){
 					if (!isBetweenMissionDates(
-							SmartUtils.getDatePart(md.getDate(), false))){
+							SharedUtils.getDatePart(md.getDate(), false))){
 						wpDelete.add(md);
 					}
 					
@@ -159,24 +160,24 @@ public class MissionEditorDialog extends TitleAreaDialog {
 				
 				//need to create new mission days as required
 				//create days
-				Calendar calStart = SmartUtils.convertDate(toUpdate.getStartDate());
+				Calendar calStart = SharedUtils.convertDate(toUpdate.getStartDate());
 				calStart.set(Calendar.HOUR, 0);
 				calStart.set(Calendar.MINUTE, 0);
 				calStart.set(Calendar.SECOND, 0);
 				calStart.set(Calendar.MILLISECOND, 0);
 				
-				Calendar calEnd = SmartUtils.convertDate(toUpdate.getEndDate());
+				Calendar calEnd = SharedUtils.convertDate(toUpdate.getEndDate());
 				while (calStart.before(calEnd) || calStart.equals(calEnd)) {
 					boolean found = false;
 					for(MissionDay md : toUpdate.getMissionDays()){
-						if (SmartUtils.isSameDate(md.getDate(), calStart.getTime())){
+						if (SharedUtils.isSameDate(md.getDate(), calStart.getTime())){
 							found = true;
 							break;
 						}
 					}
 					if (!found){
 						MissionDay md = new MissionDay();
-						md.setDate(SmartUtils.getDatePart(calStart.getTime(), false));
+						md.setDate(SharedUtils.getDatePart(calStart.getTime(), false));
 						md.setStartTime(createTime(0, 0, 0));
 						md.setEndTime(createTime(23, 59, 59));
 						md.setRestMinutes(0);

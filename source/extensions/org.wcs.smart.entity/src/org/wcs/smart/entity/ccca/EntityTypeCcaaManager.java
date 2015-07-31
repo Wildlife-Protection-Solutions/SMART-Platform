@@ -76,7 +76,7 @@ public class EntityTypeCcaaManager {
 	};
 	
 	private EntityTypeCcaaManager(){
-		DataModelManager.getInstance().addChangeListener(dmChanged);
+		DataModelManager.INSTANCE.addChangeListener(dmChanged);
 	}
 	
 	/**

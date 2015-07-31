@@ -650,6 +650,13 @@
                type="org.wcs.smart.observation.model.Waypoint">
          </adapter>
       </factory>
+      <factory
+            adaptableType="org.wcs.smart.patrol.model.PatrolWaypoint"
+            class="org.wcs.smart.patrol.geotools.WaypointFeatureAdapterFactory">
+         <adapter
+               type="org.wcs.smart.observation.model.Waypoint">
+         </adapter>
+      </factory>
    </extension>
    <extension
          point="org.wcs.smart.patrol.wizardpage">

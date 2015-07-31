@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.query.ui.editor;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -156,7 +155,7 @@ public class PatrolQueryEditorTableContent {
 		HashSet<Integer> keys = new HashSet<Integer>();
 		int cnt = 0;
 		for (PatrolQueryResultItem it : items){
-			int key = Arrays.hashCode(it.getPatrolUuid());
+			int key = it.getPatrolUuid().hashCode();
 			if (!keys.contains(key)){
 				cnt++;
 				keys.add(key);

@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
@@ -200,31 +201,7 @@ public class SmartUtils {
 	}
 	
 	
-	/**
-	 * Gets only the date part of a given date. Sets the time to 0 is not
-	 * endOfDay; sets the time to 23:59:59 if end of day.
-	 * 
-	 * @param dt
-	 * @return date only date
-	 */
-	public static Date getDatePart(Date date, boolean endOfDay) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		if (!endOfDay) {
-			calendar.set(Calendar.HOUR_OF_DAY, 0);
-			calendar.set(Calendar.MINUTE, 0);
-			calendar.set(Calendar.SECOND, 0);
-			calendar.set(Calendar.MILLISECOND, 0);
-		} else {
-			calendar.set(Calendar.HOUR_OF_DAY, 23);
-			calendar.set(Calendar.MINUTE, 59);
-			calendar.set(Calendar.SECOND, 59);
-			calendar.set(Calendar.MILLISECOND, 0);
-		}
 
-		return calendar.getTime();
-	}
-	
 	/**
 	 * Gets only the date part of a given date. Sets the time to 0.
 	 * 
@@ -282,28 +259,6 @@ public class SmartUtils {
 		return cal.getTime();
 	}
 
-	/**
-	 * converts a Date to a Calendar object
-	 */
-	public static Calendar convertDate(Date d) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(d);
-		return calendar;
-
-	}
-
-	public static boolean isSameDate(Date d1, Date d2) {
-		Calendar c1 = convertDate(d1);
-		Calendar c2 = convertDate(d2);
-		return c1.get(Calendar.DAY_OF_MONTH) == c2.get(Calendar.DAY_OF_MONTH) 
-				&& c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
-				&& c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR);
-	}
-	
-	public static String getDirectoryPath(byte[] uuid) {
-		return SmartUtils.encodeHex(uuid);
-	}
-
 
 	/**
 	 * Creates the given directory.  
@@ -355,7 +310,7 @@ public class SmartUtils {
 	 *            input byte array
 	 * @return hex encoded string
 	 */
-	public static String encodeHex(byte[] data) {
+	public static String encodeGeometry(byte[] data) {
 		if (data == null) return ""; //$NON-NLS-1$
 		char[] toDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 				'a', 'b', 'c', 'd', 'e', 'f' };
@@ -377,7 +332,7 @@ public class SmartUtils {
 	 * @return
 	 * @throws Exception
 	 */
-	public static byte[] decodeHex(String str) throws Exception {
+	public static byte[] decodeGeometry(String str) throws Exception {
 		char[] data = str.toCharArray();
 		int len = data.length;
 
@@ -433,28 +388,6 @@ public class SmartUtils {
 		ConservationArea newCa = new ConservationArea();
 		
 		return newCa;
-	}
-	
-	/**
-	 * <p>
-	 * Strips double quotes off the beginning and end of the string
-	 * only if they exist in both places.  Examples:</p>
-	 * <p>"abc" -> abc</p>
-	 * <p>abc" -> abc"</p>
-	 * <p>"abc -> "abc</p>
-	 * <p>""abc"" -> "abc"</p>
-	 *  
-	 * @param str 
-	 * @return string with quotes removed
-	 */
-	public static String stripQuotes(String str){
-		if (str == null) return str;
-		if (str.length() == 0) return str;
-		if (str.charAt(0)=='"' && str.charAt(str.length()-1) == '"'){
-			return str.substring(1, str.length() - 1);
-		}
-		return str;
-		
 	}
 	
 	/**
@@ -586,44 +519,7 @@ public class SmartUtils {
 	public static String formatStringForLabel(String text){
 		return text.replaceAll("&", "&&");  //$NON-NLS-1$//$NON-NLS-2$
 	}
-	
-	
-	/**
-	 * Converts a local string stored as lang_Country
-	 * to a Locale object.
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static Locale stringToLocale(String s)
-	{
-	    String l = ""; //$NON-NLS-1$
-	    String c = ""; //$NON-NLS-1$
-		StringTokenizer tempStringTokenizer = new StringTokenizer(s.trim(),"_"); //$NON-NLS-1$
-	    if(tempStringTokenizer.hasMoreTokens())
-	    	l = (String) tempStringTokenizer.nextElement();
-	    
-	    if(tempStringTokenizer.hasMoreTokens())
-	    	c = (String) tempStringTokenizer.nextElement();
-	    return new Locale(l,c);
-	}
-	
-	/**
-	 * Converts a local string stored as lang_Country
-	 * to a Locale object.
-	 * 
-	 * @param s
-	 * @return
-	 */
-	public static String localeToString(Locale l)
-	{
-	    String key = l.getLanguage();
-	    if (!l.getCountry().isEmpty()){
-	    	key += "_" + l.getCountry(); //$NON-NLS-1$
-	    }
-	    return key.trim();
-	}
-	
+
 	
 	/**
 	 * Finds the language that best matches the current

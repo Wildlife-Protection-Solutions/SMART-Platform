@@ -73,9 +73,9 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 		SimpleQuery wq;
 
 		String langCode = qt.getLanguage();
-		IQueryType qType = QueryTypeManager.getInstance().findQueryType(qt.getQueryType());
+		IQueryType qType = QueryTypeManager.INSTANCE.findQueryType(qt.getQueryType());
 		if (qType == null){
-			qType = QueryTypeManager.getInstance().findDeprecatedQueryType(qt.getQueryType());
+			qType = QueryTypeManager.INSTANCE.findDeprecatedQueryType(qt.getQueryType());
 		}
 		if (qType == null){
 			throw new Exception(MessageFormat.format(Messages.SimpleQueryDefinitionImporter_InvalidPatrolType, new Object[]{qt.getQueryType()}));
@@ -112,7 +112,7 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 		wq.setConservationArea(SmartDB.getCurrentConservationArea());
 		wq.setOwner(SmartDB.getCurrentEmployee());
 		
-		wq.setConservationAreaFilter(new ConservationAreaFilter(true));
+		wq.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		
 		if (wq instanceof StyledQuery && stylePart != null){
 			wq.setStyle(stylePart);

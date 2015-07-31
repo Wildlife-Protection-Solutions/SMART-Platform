@@ -51,11 +51,13 @@
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.intelligence.query"
-            class="org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType">
+            class="org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType"
+            executor="org.wcs.smart.intelligence.query.engine.SummaryIntelligenceQueryEngine">
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.intelligence.query"
-            class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType">
+            class="org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType"
+            executor="org.wcs.smart.intelligence.query.engine.RecordQueryIntelligenceEngine">
          <DefinitionPanel
                id="org.wcs.smart.intelligence.query.record.definition"
                itemPanelId="org.wcs.smart.intelligence.query.record.items">

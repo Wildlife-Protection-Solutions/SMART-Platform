@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
@@ -38,12 +39,12 @@ import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -77,15 +78,15 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	//current direction
 	private int direction = SWT.UP;
 	private boolean hasSortColumns = false;
-	private DerbyObservationQueryEngine engine;
+	private AbstractDerbyObservationQueryEngine engine;
 
 	
-	public DerbyPagedObservationResult(String queryTempTable, DerbyObservationQueryEngine engine) {
+	public DerbyPagedObservationResult(String queryTempTable, AbstractDerbyObservationQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
 	}
 
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyObservationQueryEngine engine) {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, AbstractDerbyObservationQueryEngine engine) {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;
@@ -321,7 +322,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 					attrSql.append(',');
 				}
 				hasObservations = true;
-				attrSql.append("x'").append(SmartUtils.encodeHex(it.getObservationUuid())).append('\''); //$NON-NLS-1$
+				attrSql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
 			}
 		}
 		
@@ -334,11 +335,11 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 
 		
 		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
-			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
+			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
 			for (IResultItem iri : result){
 				ObservationQueryResultItem it  = (ObservationQueryResultItem) iri;
 				if (it.getObservationUuid() != null) {
-					HashMap<String, Object> attributes = attrMap.get(wrap(it.getObservationUuid()));
+					HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());
 					if (attributes != null) {
 						it.setAttributes(attributes);
 					}
@@ -439,8 +440,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		return items;
 	}
 
-	protected HashMap<MapByteArrayKey, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
-		HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = new HashMap<MapByteArrayKey, HashMap<String, Object>>();
+	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
+		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
 		/*
 		1	OB_UUID
 		2	KEYID
@@ -451,14 +452,14 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		7	P_CA_UUID
 		*/
 		while (rs.next()) {
-			byte[] obUuid = rs.getBytes(1);
+			UUID obUuid = UuidUtils.byteToUUID(rs.getBytes(1));
+			
 			if (obUuid == null)
 				continue;
-			MapByteArrayKey keyObj = wrap(obUuid);
-			HashMap<String, Object> attributes = attrMap.get(keyObj);
+			HashMap<String, Object> attributes = attrMap.get(obUuid);
 			if (attributes == null) {
 				attributes = new HashMap<String, Object>();
-				attrMap.put(keyObj, attributes);
+				attrMap.put(obUuid, attributes);
 			}
 			String key = rs.getString(2);
 			if (key != null) {

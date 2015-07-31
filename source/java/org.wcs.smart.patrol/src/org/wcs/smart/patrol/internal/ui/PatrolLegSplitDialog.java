@@ -57,11 +57,13 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolTransportType;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -124,7 +126,9 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		Collections.sort(list, new Comparator<Employee>(){
 			@Override
 			public int compare(Employee arg0, Employee arg1) {
-				return Collator.getInstance().compare(arg0.getFullLabel(), arg1.getFullLabel());
+				return Collator.getInstance().compare(
+						LabelConstants.getFullLabel(arg0),
+						LabelConstants.getFullLabel(arg1));
 			}});
 	}
 	
@@ -538,7 +542,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 			etime = SmartUtils.combineDateTime(etime,  new Time (SmartUtils.getTime(endTime).getTime()));
 //			etime += endTime.getHours() * 60 * 60 * 1000 + endTime.getMinutes() * 60 * 1000 + endTime.getSeconds() * 1000;
 		}else{
-			etime = SmartUtils.getDatePart(etime, true);
+			etime = SharedUtils.getDatePart(etime, true);
 //			etime += 24 * 60 * 60 * 1000 - 1000;
 		}
 
@@ -583,7 +587,7 @@ public class PatrolLegSplitDialog extends TitleAreaDialog{
 		if (opEndCustom.getSelection()){
 			etime = SmartUtils.combineDateTime(etime,  new Time (SmartUtils.getTime(endTime).getTime()));
 		}else{
-			etime = SmartUtils.getDatePart(etime, true);
+			etime = SharedUtils.getDatePart(etime, true);
 		}
 
 		legA.setStartDate(stime);

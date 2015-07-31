@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -36,18 +37,18 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
  */
 public class MissionEditorInput implements IEditorInput {
 
-	private byte[] uuid;
+	private UUID uuid;
 	private String name;
 	
 	/**
 	 * Constructor
 	 */
-	public MissionEditorInput(String name, byte[] uuid) {
+	public MissionEditorInput(String name, UUID uuid) {
 		this.uuid = uuid;
 		this.name = name;
 	}
 	
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
 	
@@ -86,13 +87,13 @@ public class MissionEditorInput implements IEditorInput {
 	@Override
 	public boolean equals(Object other){
 		if (other instanceof MissionEditorInput){
-			return Arrays.equals(((MissionEditorInput)other).uuid, this.uuid);
+			return ((MissionEditorInput)other).uuid.equals(this.uuid);
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode(){
-		return Arrays.hashCode(this.uuid);
+		return this.uuid.hashCode();
 	}
 }

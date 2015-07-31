@@ -85,7 +85,7 @@ public class EntityQueryTemplateCloner implements
 		List<EntityGriddedQuery> queries = (List<EntityGriddedQuery>) engine.getSession().createCriteria(EntityGriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(EntityGriddedQuery query : queries){
-			EntityGriddedQuery clone = (EntityGriddedQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( EntityGridQueryType.KEY) );
+			EntityGriddedQuery clone = (EntityGriddedQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntityGridQueryType.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -115,7 +115,7 @@ public class EntityQueryTemplateCloner implements
 		List<EntitySummaryQuery> queries = (List<EntitySummaryQuery>) engine.getSession().createCriteria(EntitySummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(EntitySummaryQuery query : queries){
-			EntitySummaryQuery clone = (EntitySummaryQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( EntitySummaryQueryType.KEY) );
+			EntitySummaryQuery clone = (EntitySummaryQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntitySummaryQueryType.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -143,7 +143,7 @@ public class EntityQueryTemplateCloner implements
 		List<EntityObservationQuery> queries = (List<EntityObservationQuery>) engine.getSession().createCriteria(EntityObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
 		
 		for(EntityObservationQuery query : queries){
-			EntityObservationQuery clone = (EntityObservationQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( EntityObservationQueryType.KEY) );
+			EntityObservationQuery clone = (EntityObservationQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntityObservationQueryType.KEY) );
 
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -174,7 +174,7 @@ public class EntityQueryTemplateCloner implements
 		List<EntityWaypointQuery> queries = (List<EntityWaypointQuery>) engine.getSession().createCriteria(EntityWaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(EntityWaypointQuery query : queries){
-			EntityWaypointQuery clone = (EntityWaypointQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( EntityWaypointQueryType.KEY) );
+			EntityWaypointQuery clone = (EntityWaypointQuery) EntityQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( EntityWaypointQueryType.KEY) );
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());

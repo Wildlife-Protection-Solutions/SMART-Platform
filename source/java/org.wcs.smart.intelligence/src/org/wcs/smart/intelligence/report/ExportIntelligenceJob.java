@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.report;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
@@ -39,12 +40,13 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.common.attachment.AttachmentUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Job for exporting an intelligence to a pdf file for printing
@@ -54,10 +56,10 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ExportIntelligenceJob extends Job {
 	
-	private byte[] uuid;
+	private UUID uuid;
 	private File outputFile;
 
-	public ExportIntelligenceJob(byte[] uuid) {
+	public ExportIntelligenceJob(UUID uuid) {
 		super(Messages.ExportIntelligenceJob_Title);
 		this.uuid = uuid;
 	}
@@ -75,7 +77,7 @@ public class ExportIntelligenceJob extends Job {
 			outputFile = File.createTempFile(tmp + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
 			outputFile.deleteOnExit();
 			
-			reportParameters.put(ReportIntelligence.UUID, SmartUtils.encodeHex(intelligence.getUuid()));
+			reportParameters.put(ReportIntelligence.UUID, UuidUtils.uuidToString(intelligence.getUuid()));
 			reportParameters.put(ReportIntelligence.NAME, intelligence.getName());
 			reportParameters.put(ReportIntelligence.DESCRIPTION, (intelligence.getDescription()==null?"" : intelligence.getDescription())); //$NON-NLS-1$
 			reportParameters.put(ReportIntelligence.SOURCE, (intelligence.getSource() != null ? intelligence.getSource().getName() : "")); //$NON-NLS-1$
@@ -84,7 +86,7 @@ public class ExportIntelligenceJob extends Job {
 			reportParameters.put(ReportIntelligence.FROM_DATE, new java.sql.Date(intelligence.getFromDate().getTime()));
 			reportParameters.put(ReportIntelligence.TO_DATE, new java.sql.Date(intelligence.getToDate() != null ? intelligence.getToDate().getTime() : intelligence.getFromDate().getTime()));
 			reportParameters.put(ReportIntelligence.LOCATION, intelligence.getPoints());
-			reportParameters.put(ReportIntelligence.CREATOR, intelligence.getCreator() == null ? "" : intelligence.getCreator().getFullLabel()); //$NON-NLS-1$
+			reportParameters.put(ReportIntelligence.CREATOR, intelligence.getCreator() == null ? "" : LabelConstants.getFullLabel(intelligence.getCreator())); //$NON-NLS-1$
 						
 		} catch (Exception ex) {
 			IntelligencePlugIn.displayLog(Messages.ExportIntelligenceJob_ExportError + "\n\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
