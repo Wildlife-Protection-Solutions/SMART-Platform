@@ -4,9 +4,6 @@ package org.wcs.smart.cybertracker.export;
 public class PatrolScreensUtilToDel {
 	//TODO: temporary class for refactoring, MUST be removed after import logic split is completed
 
-	public static final String RESULT_PATROL_ID = "#PatrolID"; //$NON-NLS-1$
-	public static final String RESULT_PATROL_START_DATE = "#PatrolStartDate"; //$NON-NLS-1$
-	public static final String RESULT_PATROL_START_TIME = "#PatrolStartTime"; //$NON-NLS-1$
 	public static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
 	public static final String RESULT_TRANSPORT = "#PatrolTransport"; //$NON-NLS-1$
 	public static final String RESULT_ARMED = "#Armed"; //$NON-NLS-1$

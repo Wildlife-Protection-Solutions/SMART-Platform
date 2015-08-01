@@ -21,16 +21,21 @@
  */
 package org.wcs.smart.cybertracker.survey.export;
 
+import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
+import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
+import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
+
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Exporter for Surveys using {@link ConfigurableModel} to CyberTracker application
+ * 
  * @author elitvin
  * @since 4.0.0
  */
-public class SurveyCTExporter {
+public class SurveyCTExporter extends CyberTrackerConfExporter {
 
+	@Override
+	protected ScreensUtil createScreensUtil(CyberTrackerUtil ctu) {
+		return new SurveyScreensUtil(ctu);
+	}
 }
