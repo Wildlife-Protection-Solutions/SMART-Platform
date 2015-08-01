@@ -45,7 +45,6 @@ import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
-import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
@@ -85,15 +84,13 @@ public class PatrolScreensUtil extends ScreensUtil {
 	public static final String RESULT_LEADER = "#Leader"; //$NON-NLS-1$
 	public static final String RESULT_PILOT = "#Pilot"; //$NON-NLS-1$
 	
-	public static final String RESULT_DEFAULT_PATROL_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
+	public static final String DATATYPE_PATROL = "patrol"; //$NON-NLS-1$
 
-	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 
 	public PatrolScreensUtil(CyberTrackerUtil ctUtil) {
 		super(ctUtil);
 		this.ctUtil = ctUtil;
-		this.screensFactory = ctUtil.getScreensFactory();
 	}
 	
 	/**
@@ -103,6 +100,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 	 */
 	@Override
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+		registerDatatype(elements, DATATYPE_PATROL);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
 		ScreenOption so;
@@ -271,13 +269,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			
 		}
 		
-		StringBuilder defaults = new StringBuilder();
-		for (Iterator<String> i = result.defaultValues.iterator(); i.hasNext();) {
-			defaults.append(i.next());
-			if (i.hasNext())
-				defaults.append(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
-		}
-		addTaskNode(id, result, elements, startId, dmRootId, ctProps, defaults.toString());
+		addTaskNode(id, result, elements, startId, dmRootId, ctProps);
 		result.rootId = id;
 		return result;
 	}
@@ -417,74 +409,6 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			
 		}
-	}
-
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps, String defaultValues) {
-		boolean canPause = ctProps.isCanPause();
-		
-		CyberTrackerId resumeId = new CyberTrackerId();
-		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ResumePatrol);
-		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
-		String resScrTrElements = ctUtil.translateElements(resScrIds);
-		StringBuilder resScrLinks = new StringBuilder();
-		// "Resume Patrol" leads to "Next Task" screen
-		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(id.getNodeTranslatedId());
-		Node resumeNode = screensFactory.createNodeRadio(resumeId.getNodeId(), Messages.PatrolScreens_Paused, resScrValues, resScrTrElements, resScrLinks.toString(), null);
-		addGpsConfiguration(resumeNode, ctProps, 0);
-		
-		CyberTrackerId confId = new CyberTrackerId();
-		Node confirmNode = screensFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
-		//disable next button, enable save button,navigate on save to start point
-		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
-		control2.setShowNext("False"); //$NON-NLS-1$
-		control2.setShowMajor("True"); //$NON-NLS-1$
-		control2.setTranslateMajorScreenId(startId.getNodeId());
-
-		List<String> nextTaskOptions = new ArrayList<String>();
-		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
-		nextTaskOptions.add(Messages.PatrolScreens_EndPatrol);
-		if (canPause) {
-			nextTaskOptions.add(Messages.PatrolScreens_PausePatrol);
-		}
-		
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, nextTaskOptions.toArray(new String[nextTaskOptions.size()]));
-		List<String> values = ctUtil.listItemIds(ids);
-		String trElements = ctUtil.translateElements(ids);
-		//custom translate links logic
-		StringBuilder links = new StringBuilder();
-		// "Make observations" leads to datamodel root
-		links.append(ids.get(0).getItemTranslatedId()).append(dmRootId.getNodeTranslatedId());
-		// "End Patrol" leads to confirmation screen
-		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
-		// "Pause Patrol (Rest)" leads to "Paused" screen
-		if (canPause) {
-			links.append(ids.get(2).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
-		}
-		Node node = screensFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
-		if (defaultValues != null && !defaultValues.isEmpty()) {
-			//adding default values
-			CyberTrackerId defId = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, RESULT_DEFAULT_PATROL_VALUES, defId.getItemId());
-			Control defaultAttr = screensFactory.createAttrubuteControl14(defId.getItemId(), false, defaultValues);
-			ScreensObjectFactory.addControlToNode(node, defaultAttr);
-		}
-		
-		CyberTrackerProperties properties = ctUtil.getCtProperties();
-		control2 = ScreensObjectFactory.getNavigationControl(node);
-		control2.setShowBack("False"); //$NON-NLS-1$
-		if (properties.isShowEdit()) {
-			control2.setShowEdit("True"); //$NON-NLS-1$
-		}
-		if (properties.isShowGPS()) {
-			control2.setShowGPS("True"); //$NON-NLS-1$
-		}
-		
-		addGpsConfiguration(node, ctProps);
-		container.screenNodes.add(node);
-		if (canPause) {
-			container.screenNodes.add(resumeNode);
-		}
-		container.screenNodes.add(confirmNode);
 	}
 
 	private String builPilotFormula(List<PatrolType> patrolTypes) {

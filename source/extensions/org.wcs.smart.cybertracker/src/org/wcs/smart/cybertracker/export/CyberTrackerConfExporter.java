@@ -310,11 +310,6 @@ public class CyberTrackerConfExporter {
 			tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
 			
 		}
-		//tag0 - listAttrValue uuid
-		//tag1 - identifier
-		//tag2 - order
-		//tag3 - reference to listAttr in Elements.xml
-		//tag4 - reference to numAttr in Elements.xml
 
 		String tag1 = isMulti ? ElementsUtil.MULISELECT_ELEMENT_TAG : null;
 		String tag3 = isMulti ? getAttributeResultElementId(attribute, 0).getItemId() : null;

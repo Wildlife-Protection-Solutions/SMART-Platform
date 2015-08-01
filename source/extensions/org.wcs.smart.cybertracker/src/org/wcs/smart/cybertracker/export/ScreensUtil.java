@@ -65,6 +65,8 @@ public class ScreensUtil {
 
 	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
 	
+	public static final String RESULT_DATATYPE = "#DataType"; //$NON-NLS-1$
+
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 	
@@ -86,6 +88,16 @@ public class ScreensUtil {
 		return null; //TODO: in case we want to export without any meta screens logic for that should be placed here
 	}
 
+	/**
+	 * Required to determine what type of data we are recording (patrol vs survey)
+	 * @param elements
+	 * @param datatype
+	 */
+	protected void registerDatatype(Elements elements, String datatype) {
+		CyberTrackerId id = new CyberTrackerId();
+		ElementsUtil.addElementsItem(elements, RESULT_DATATYPE, id.getItemId(), datatype);
+	}
+	
 	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, StartScreenLabels labels) {
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, labels.startItemLabel, Messages.PatrolScreens_ExitCyberTracker);
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);

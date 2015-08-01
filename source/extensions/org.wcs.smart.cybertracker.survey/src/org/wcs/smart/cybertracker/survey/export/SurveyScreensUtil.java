@@ -55,12 +55,15 @@ public class SurveyScreensUtil extends ScreensUtil {
 	public static final String RESULT_MISSION_LEADER = "#Leader"; //$NON-NLS-1$
 	public static final String RESULT_MISSION_COMMENTS = "#Comments"; //$NON-NLS-1$
 	
+	public static final String DATATYPE_SURVEY = "survey"; //$NON-NLS-1$
+
 	protected SurveyScreensUtil(CyberTrackerUtil ctUtil) {
 		super(ctUtil);
 	}
 
 	@Override
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
+		registerDatatype(elements, DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
