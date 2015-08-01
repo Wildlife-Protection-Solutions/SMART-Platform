@@ -24,6 +24,7 @@ package org.wcs.smart.cybertracker.survey.export;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -40,9 +41,14 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerExportDialog;
 import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
+import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
+import org.wcs.smart.dataentry.DataentryHibernateManager;
+import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
@@ -53,7 +59,9 @@ import org.wcs.smart.hibernate.SmartHibernateManager;
  */
 public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 
-    private ComboViewer designsViewer;
+	private CyberTrackerConfExporter exporter = new SurveyCTExporter();
+
+	private ComboViewer designsViewer;
 	private Object selectedDesign;
 
     public SurveyCTExportDialog(Shell parentShell) {
@@ -62,15 +70,35 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 
 	@Override
 	protected IConfigurableModelProvider getConfigurableModelProvider() {
-		// TODO Auto-generated method stub
-		return null;
-		
+		final Object designInput = selectedDesign;
+		return new IConfigurableModelProvider() {
+			private DataModelWrapper dmWrapper;
+			@Override
+			public ConfigurableModel getConfigurableModel(Session session, IProgressMonitor monitor) {
+				if (designInput instanceof SurveyDesignEditorInput) {
+					SurveyDesignEditorInput input = (SurveyDesignEditorInput) designInput;
+					SurveyDesign sd = SurveyHibernateManager.getInstance().getSurveyDesign(input.getSurveyDesignKey(), session);
+					if (sd != null) {
+						if (sd.getConfigurableModel() != null) {
+		    				monitor.subTask("Fetching configurable model...");
+		    				return DataentryHibernateManager.getFullConfigurableModel(sd.getConfigurableModel().getUuid(), session);
+		    			} else {
+		    				if (dmWrapper == null) {
+		    					dmWrapper = new DataModelWrapper();
+		    				}
+		    				return dmWrapper.buildConfigurableModel(session, monitor);
+						}
+					}
+				}
+				return null;
+			}
+			
+		};
 	}
 
 	@Override
 	protected CyberTrackerConfExporter getExporter() {
-		// TODO Auto-generated method stub
-		return null;
+		return exporter;
 	}
 	
 	@Override

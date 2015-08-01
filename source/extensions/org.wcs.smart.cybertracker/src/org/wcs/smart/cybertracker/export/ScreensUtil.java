@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.export;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.bind.JAXBContext;
@@ -53,13 +54,27 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class ScreensUtil {
 
+	public static final String RESULT_ID = "#ID"; //$NON-NLS-1$
+	public static final String RESULT_START_DATE = "#StartDate"; //$NON-NLS-1$
+	public static final String RESULT_START_TIME = "#StartTime"; //$NON-NLS-1$
+
 	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
 	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
+
+	public static final String RESULT_DEFAULT_META_VALUES = "#DefaultMetaValues"; //$NON-NLS-1$
 
 	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
 	
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
+	
+	protected class StartScreenLabels {
+		public StartScreenLabels() {}
+		
+		public String startItemLabel;
+		public String beginTitle;
+		public String beginItemLabel;
+	}
 	
 	protected ScreensUtil(CyberTrackerUtil ctUtil) {
 		this.ctUtil = ctUtil;
@@ -69,6 +84,113 @@ public class ScreensUtil {
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
 //		MetaExportResult result = new MetaExportResult();
 		return null; //TODO: in case we want to export without any meta screens logic for that should be placed here
+	}
+
+	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, StartScreenLabels labels) {
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, labels.startItemLabel, Messages.PatrolScreens_ExitCyberTracker);
+		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
+		container.screenNodes.add(nodeMain);
+		addGpsConfiguration(nodeMain, ctProps, 0);
+
+		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, labels.beginTitle);
+		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), labels.beginItemLabel, idsBegin, null, true);
+		container.screenNodes.add(nodeBegin);
+		
+		String resultId = createResultElement(RESULT_ID, elements);
+		addUniqueAttrubute(nodeBegin, resultId);
+		String resultDateId = createResultElement(RESULT_START_DATE, elements);
+		String resultTimeId = createResultElement(RESULT_START_TIME, elements);
+		addStartTimeAttrubute(nodeBegin, resultDateId, resultTimeId);
+		//if "Use GPS Time" option is enabled than "Snap Date & Time" control needs time from GPS to calculate offset from device time,
+		//but it doesn't launch GPS reading itself, so we need to add "GPS" control (see ticket #1304 for details)
+		addGPSControl(nodeBegin);
+		addGPSRequiredWarning(nodeBegin);
+		container.resultElements.add(new IdNamePair(resultId, RESULT_ID));
+		container.resultElements.add(new IdNamePair(resultDateId, RESULT_START_DATE));
+		container.resultElements.add(new IdNamePair(resultTimeId, RESULT_START_TIME));
+
+		Node pwdNode = screensFactory.createNodePassword(ids.get(1).getNodeId(), Messages.PatrolScreens_Exit_Title);
+		container.screenNodes.add(pwdNode);
+		Control control2 = ScreensObjectFactory.getNavigationControl(pwdNode);
+		control2.setShowNext(ICyberTrackerConstants.STR_FALSE);
+		
+		return idsBegin.get(0);
+	}
+
+	protected void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps) {
+		StringBuilder defaults = new StringBuilder();
+		for (Iterator<String> i = container.defaultValues.iterator(); i.hasNext();) {
+			defaults.append(i.next());
+			if (i.hasNext())
+				defaults.append(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
+		}
+		String defaultValues = defaults.toString();
+		
+		boolean canPause = ctProps.isCanPause();
+		
+		CyberTrackerId resumeId = new CyberTrackerId();
+		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ResumePatrol);
+		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
+		String resScrTrElements = ctUtil.translateElements(resScrIds);
+		StringBuilder resScrLinks = new StringBuilder();
+		// "Resume Patrol" leads to "Next Task" screen
+		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(id.getNodeTranslatedId());
+		Node resumeNode = screensFactory.createNodeRadio(resumeId.getNodeId(), Messages.PatrolScreens_Paused, resScrValues, resScrTrElements, resScrLinks.toString(), null);
+		addGpsConfiguration(resumeNode, ctProps, 0);
+		
+		CyberTrackerId confId = new CyberTrackerId();
+		Node confirmNode = screensFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
+		//disable next button, enable save button,navigate on save to start point
+		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
+		control2.setShowNext("False"); //$NON-NLS-1$
+		control2.setShowMajor("True"); //$NON-NLS-1$
+		control2.setTranslateMajorScreenId(startId.getNodeId());
+
+		List<String> nextTaskOptions = new ArrayList<String>();
+		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
+		nextTaskOptions.add(Messages.PatrolScreens_EndPatrol);
+		if (canPause) {
+			nextTaskOptions.add(Messages.PatrolScreens_PausePatrol);
+		}
+		
+		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, nextTaskOptions.toArray(new String[nextTaskOptions.size()]));
+		List<String> values = ctUtil.listItemIds(ids);
+		String trElements = ctUtil.translateElements(ids);
+		//custom translate links logic
+		StringBuilder links = new StringBuilder();
+		// "Make observations" leads to datamodel root
+		links.append(ids.get(0).getItemTranslatedId()).append(dmRootId.getNodeTranslatedId());
+		// "End Patrol" leads to confirmation screen
+		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
+		// "Pause Patrol (Rest)" leads to "Paused" screen
+		if (canPause) {
+			links.append(ids.get(2).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
+		}
+		Node node = screensFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
+		if (defaultValues != null && !defaultValues.isEmpty()) {
+			//adding default values
+			CyberTrackerId defId = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, RESULT_DEFAULT_META_VALUES, defId.getItemId());
+			Control defaultAttr = screensFactory.createAttrubuteControl14(defId.getItemId(), false, defaultValues);
+			ScreensObjectFactory.addControlToNode(node, defaultAttr);
+		}
+		
+		CyberTrackerProperties properties = ctUtil.getCtProperties();
+		control2 = ScreensObjectFactory.getNavigationControl(node);
+		control2.setShowBack("False"); //$NON-NLS-1$
+		if (properties.isShowEdit()) {
+			control2.setShowEdit("True"); //$NON-NLS-1$
+		}
+		if (properties.isShowGPS()) {
+			control2.setShowGPS("True"); //$NON-NLS-1$
+		}
+		
+		addGpsConfiguration(node, ctProps);
+		container.screenNodes.add(node);
+		if (canPause) {
+			container.screenNodes.add(resumeNode);
+		}
+		container.screenNodes.add(confirmNode);
 	}
 	
 	/**

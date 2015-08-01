@@ -49,6 +49,8 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
+import org.wcs.smart.cybertracker.export.PatrolScreensUtilToDel;
+import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.SmartImporter.CoordinateZComparator;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
@@ -58,7 +60,6 @@ import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-import org.wcs.smart.cybertracker.export.PatrolScreensUtilToDel;
 import org.wcs.smart.cybertracker.util.PdaUtil;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -253,15 +254,15 @@ public class CyberTrackerImporter {
 				}
 			} else if (ICyberTrackerConstants.TIME.equals(i)) {
 				time = Time.valueOf(v);
-			} else if (PatrolScreensUtilToDel.RESULT_PATROL_ID.equals(n)) {
+			} else if (ScreensUtil.RESULT_ID.equals(n)) {
 				ctPatrol.setId(v);
-			} else if (PatrolScreensUtilToDel.RESULT_PATROL_START_DATE.equals(n)) {
+			} else if (ScreensUtil.RESULT_START_DATE.equals(n)) {
 				try {
 					start_date = formatter.parse(v);
 				} catch (ParseException e) {
 					CyberTrackerPlugIn.log(e.getMessage(), e);
 				}
-			} else if (PatrolScreensUtilToDel.RESULT_PATROL_START_TIME.equals(n)) {
+			} else if (ScreensUtil.RESULT_START_TIME.equals(n)) {
 				start_time = Time.valueOf(v);
 			} else {
 				E ei = eMap.get(i);
@@ -326,7 +327,7 @@ public class CyberTrackerImporter {
 				E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
 				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
 			}
-		} else if (PatrolScreensUtilToDel.RESULT_PATROL_ID.equals(n)) {
+		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctPatrol.setId(v);
 		}if (PatrolScreensUtilToDel.RESULT_PATROL_TYPE.equals(n)) {
 			E e = eMap.get(v);
@@ -429,7 +430,7 @@ public class CyberTrackerImporter {
 			//fetch patrol id value
 			String patrolId = null;
 			for (Data.Sightings.S.A a : s.getA()) {
-				if (PatrolScreensUtilToDel.RESULT_PATROL_ID.equals(a.getN())) {
+				if (ScreensUtil.RESULT_ID.equals(a.getN())) {
 					patrolId = a.getV();
 				}
 			}

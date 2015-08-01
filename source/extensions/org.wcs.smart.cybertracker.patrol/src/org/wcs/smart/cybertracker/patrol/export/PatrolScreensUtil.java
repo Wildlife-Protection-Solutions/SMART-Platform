@@ -37,18 +37,19 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
+import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
+import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
-import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -73,9 +74,6 @@ public class PatrolScreensUtil extends ScreensUtil {
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
-	public static final String RESULT_PATROL_ID = "#PatrolID"; //$NON-NLS-1$
-	public static final String RESULT_PATROL_START_DATE = "#PatrolStartDate"; //$NON-NLS-1$
-	public static final String RESULT_PATROL_START_TIME = "#PatrolStartTime"; //$NON-NLS-1$
 	public static final String RESULT_PATROL_TYPE = "#PatrolType"; //$NON-NLS-1$
 	public static final String RESULT_TRANSPORT = "#PatrolTransport"; //$NON-NLS-1$
 	public static final String RESULT_ARMED = "#Armed"; //$NON-NLS-1$
@@ -197,7 +195,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			result.defaultValues.add(createDefaultResultElement(RESULT_COMMENTS, elements, so.getStringValue()));
 		}
 
-		List<Employee> employees = PatrolHibernateManager.getActiveEmployees(ca, session);
+		List<Employee> employees = HibernateManager.getActiveEmployees(ca, session);
 		Collections.sort(employees, new Comparator<Employee>() {
 			@Override
 			public int compare(Employee e1, Employee e2) {
@@ -311,37 +309,12 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 	}
 	
-
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_ExitCyberTracker);
-		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
-		container.screenNodes.add(nodeMain);
-		addGpsConfiguration(nodeMain, ctProps, 0);
-
-		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin);
-		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), Messages.PatrolScreens_Begin_Title, idsBegin, null, true);
-		container.screenNodes.add(nodeBegin);
-		
-		String resultId = createResultElement(RESULT_PATROL_ID, elements);
-		addUniqueAttrubute(nodeBegin, resultId);
-		String resultDateId = createResultElement(RESULT_PATROL_START_DATE, elements);
-		String resultTimeId = createResultElement(RESULT_PATROL_START_TIME, elements);
-		addStartTimeAttrubute(nodeBegin, resultDateId, resultTimeId);
-		//if "Use GPS Time" option is enabled than "Snap Date & Time" control needs time from GPS to calculate offset from device time,
-		//but it doesn't launch GPS reading itself, so we need to add "GPS" control (see ticket #1304 for details)
-		addGPSControl(nodeBegin);
-		addGPSRequiredWarning(nodeBegin);
-		container.resultElements.add(new IdNamePair(resultId, RESULT_PATROL_ID));
-		container.resultElements.add(new IdNamePair(resultDateId, RESULT_PATROL_START_DATE));
-		container.resultElements.add(new IdNamePair(resultTimeId, RESULT_PATROL_START_TIME));
-
-		Node pwdNode = screensFactory.createNodePassword(ids.get(1).getNodeId(), Messages.PatrolScreens_Exit_Title);
-		container.screenNodes.add(pwdNode);
-		Control control2 = ScreensObjectFactory.getNavigationControl(pwdNode);
-		control2.setShowNext(ICyberTrackerConstants.STR_FALSE);
-		
-		return idsBegin.get(0);
-		
+		StartScreenLabels labels = new StartScreenLabels();
+		labels.startItemLabel = Messages.PatrolScreens_StartPatrol;
+		labels.beginTitle = Messages.PatrolScreens_Begin_Title;
+		labels.beginItemLabel = Messages.PatrolScreens_Begin;
+		return addStartScreen(id, container, elements, ctProps, labels);
 	}
 
 	private String validatePatrolTypes(List<PatrolType> pTypes) {
