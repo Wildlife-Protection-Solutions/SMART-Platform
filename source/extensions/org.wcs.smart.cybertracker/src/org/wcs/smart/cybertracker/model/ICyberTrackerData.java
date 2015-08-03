@@ -19,39 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer;
+package org.wcs.smart.cybertracker.model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-import org.wcs.smart.cybertracker.model.ICyberTrackerData;
+import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * Result of CyberTrackerImport
+/**
+ * Model representing single set of data imported from CyberTracker application
  * 
  * @author elitvin
- * @since 3.0.0
+ * @since 4.0.0
  */
-public class CyberTrackerImportResult {
+public interface ICyberTrackerData {
 
-	private int returnCode;
-	private List<ICyberTrackerData> data;
+	public Date getStartDate();
+
+	public Date getEndDate();
+
+	public String getType();
+
+	public String getDetails();
 	
-	public int getReturnCode() {
-		return returnCode;
-	}
-	public void setReturnCode(int returnCode) {
-		this.returnCode = returnCode;
-	}
+	public List<S> getSData();
 	
-	public List<ICyberTrackerData> getData() {
-		if (data == null)
-			data = new ArrayList<ICyberTrackerData>();
-		return data;
-	}
-	public void setData(List<ICyberTrackerData> data) {
-		this.data = data;
-	}
-	
+	public List<Coordinate> getTimerTrackList();
+
+	public void setTimerTrackList(List<Coordinate> timerTrackList);
 	
 }

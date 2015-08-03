@@ -46,7 +46,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author elitvin
  * @since 1.0.0
  */
-public class CyberTrackerPatrol {
+public class CyberTrackerPatrol implements ICyberTrackerData {
 	
 	public enum ErrorType{ERROR, WARNING};
 
@@ -146,7 +146,7 @@ public class CyberTrackerPatrol {
 		return elementsMap;
 	}
 
-	public List<S> getPatrolData() {
+	public List<S> getSData() {
 		if (patrolData == null)
 			patrolData = new ArrayList<S>();
 		return patrolData;
@@ -355,6 +355,18 @@ public class CyberTrackerPatrol {
 		public String getMessage(){
 			return this.problem;
 		}
+	}
+
+	@Override
+	public String getType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String getDetails() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

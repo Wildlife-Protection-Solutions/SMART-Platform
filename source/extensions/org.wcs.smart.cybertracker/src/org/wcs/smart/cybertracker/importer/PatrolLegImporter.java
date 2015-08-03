@@ -129,7 +129,7 @@ public class PatrolLegImporter extends SmartImporter {
 				addWarning(warnMsg);
 			}
 			
-			for (S s : ctPatrol.getPatrolData()) {
+			for (S s : ctPatrol.getSData()) {
 				addObservations(leg, s, ctPatrol.getElementsMap(), session);
 			}
 

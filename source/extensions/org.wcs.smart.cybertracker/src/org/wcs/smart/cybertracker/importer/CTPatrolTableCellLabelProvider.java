@@ -74,7 +74,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			case LEADER:	return ctPatrol.getCtLeader();
 			case PILOT:		return ctPatrol.getCtPilot();
 			case MEMBERS:	return asString(ctPatrol.getCtMembers(), "; "); //$NON-NLS-1$
-			case SIGHT_COUNT:return String.valueOf(ctPatrol.getPatrolData().size());
+			case SIGHT_COUNT:return String.valueOf(ctPatrol.getSData().size());
 			}
 		}
 		return super.getText(element);
