@@ -76,6 +76,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
+import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.ui.properties.DialogConstants;
 
@@ -140,7 +141,7 @@ public class CTPatrolTableContainer extends Composite {
 	
 	private CyberTrackerImporter importer = new CyberTrackerImporter();
 	
-	private List<CyberTrackerPatrol> tableInputData = new ArrayList<CyberTrackerPatrol>();
+	private List<ICyberTrackerData> tableInputData = new ArrayList<ICyberTrackerData>();
 	
 	private Text lblStartDate;
 	private Text lblEndDate;
@@ -358,7 +359,7 @@ public class CTPatrolTableContainer extends Composite {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, 1);
-					List<CyberTrackerPatrol> data;
+					List<ICyberTrackerData> data;
 					int code = 0;
 					try {
 						if (fromPda) {
@@ -367,7 +368,7 @@ public class CTPatrolTableContainer extends Composite {
 							code = result.getReturnCode();
 						}else{
 							monitor.beginTask(Messages.CyberTrackerImportDialog_Task_RawImport, files.length);
-							data = new ArrayList<CyberTrackerPatrol>();
+							data = new ArrayList<ICyberTrackerData>();
 							for (int i = 0; i < files.length; i ++){
 								File currentFile = files[i];
 								if (!currentFile.exists()){
@@ -536,7 +537,7 @@ public class CTPatrolTableContainer extends Composite {
 		return viewer;
 	}
 
-	public void addTableData(List<CyberTrackerPatrol> data) {
+	public void addTableData(List<ICyberTrackerData> data) {
 		tableInputData.addAll(data);
 		refreshViewer();
 	}

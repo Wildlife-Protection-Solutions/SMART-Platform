@@ -84,7 +84,7 @@ public class PatrolImporter extends SmartImporter {
 					return null;
 				}
 			}
-			for (S s : ctPatrol.getPatrolData()) {
+			for (S s : ctPatrol.getSData()) {
 				addObservations(patrol.getFirstLeg(), s, ctPatrol.getElementsMap(), session);
 			}
 			
