@@ -11,18 +11,6 @@ public class Messages extends NLS {
 	public static String CTPatrolTableCellLabelProvider_IngoreKeysWarning;
 	public static String CTPatrolTableCellLabelProvider_Tooltip_Error;
 	public static String CTPatrolTableCellLabelProvider_Tooltip_Warning;
-	public static String CTPatrolTableColumn_Armed;
-	public static String CTPatrolTableColumn_Comment;
-	public static String CTPatrolTableColumn_EndDate;
-	public static String CTPatrolTableColumn_Leader;
-	public static String CTPatrolTableColumn_Members;
-	public static String CTPatrolTableColumn_Pilot;
-	public static String CTPatrolTableColumn_SightCount;
-	public static String CTPatrolTableColumn_StartDate;
-	public static String CTPatrolTableColumn_Station;
-	public static String CTPatrolTableColumn_Team;
-	public static String CTPatrolTableColumn_Transport;
-	public static String CTPatrolTableColumn_Type;
 	public static String CTPatrolTableContainer_AddLeg_SubTaskName;
 	public static String CTPatrolTableContainer_AddLeg_TaskName;
 	public static String CTPatrolTableContainer_AddPatrol_SubTaskName;
