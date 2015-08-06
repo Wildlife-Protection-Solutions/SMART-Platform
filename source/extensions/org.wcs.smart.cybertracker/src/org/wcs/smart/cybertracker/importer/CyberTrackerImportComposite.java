@@ -77,13 +77,12 @@ import org.wcs.smart.ui.properties.DialogConstants;
 public class CyberTrackerImportComposite extends Composite {
 
 	private static final int HEIGHT_HINT = 300;
-//	private static final int DEFAULT_COLUMN_WIDTH = 80;
 	
 	/**
-	 * The supported patrol types.
+	 * Default displayed columns
 	 * 
 	 * @author elitvin
-	 * @since 1.0.0
+	 * @since 4.0.0
 	 */
 	public enum CTTableColumn {
 		IMPORT_NOTE ("",	20), //$NON-NLS-1$
@@ -95,9 +94,6 @@ public class CyberTrackerImportComposite extends Composite {
 		
 		private String guiName;
 		private int width;
-//		CTTableColumn(String guiName) {
-//			this(guiName, DEFAULT_COLUMN_WIDTH);
-//		}
 		CTTableColumn(String guiName, int width) {
 			this.guiName = guiName;
 			this.width = width;
