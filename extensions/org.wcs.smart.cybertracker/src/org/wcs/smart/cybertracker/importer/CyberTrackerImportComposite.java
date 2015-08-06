@@ -140,7 +140,7 @@ public class CyberTrackerImportComposite extends Composite {
 		layout = new GridLayout();
 		data.setLayout(layout);
 		data.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		data.setText(Messages.CTPatrolTableContainer_PatrolDataSectionHeader);
+		data.setText(Messages.CTPatrolTableContainer_DataSectionHeader);
 		
 		Composite dataComp = toolkit.createComposite(data);
 		layout = new GridLayout();
@@ -253,7 +253,7 @@ public class CyberTrackerImportComposite extends Composite {
 		details.setLayout(new GridLayout());
 		details.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		details.setText(Messages.CTPatrolTableContainer_PatrolDetailsSectionHeader);
+		details.setText(Messages.CTPatrolTableContainer_DetailsSectionHeader);
 		details.addExpansionListener(new ExpansionAdapter() {
 			@Override
 			public void expansionStateChanged(ExpansionEvent e) {
