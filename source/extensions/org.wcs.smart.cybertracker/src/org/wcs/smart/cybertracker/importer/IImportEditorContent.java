@@ -19,36 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.model;
+package org.wcs.smart.cybertracker.importer;
 
-import java.util.Date;
 import java.util.List;
 
-import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
-
-import com.vividsolutions.jts.geom.Coordinate;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.forms.widgets.FormToolkit;
+import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 
 /**
-/**
- * Model representing single set of data imported from CyberTracker application
- * 
+ * TODO Purpose of 
+ * <p>
+ * <ul>
+ * <li></li>
+ * </ul>
+ * </p>
  * @author elitvin
  * @since 4.0.0
  */
-public interface ICyberTrackerData {
-
-	public Date getStartDate();
-
-	public Date getEndDate();
-
-	public String getType();
-
-	public String getDetails();
+public interface IImportEditorContent {
 	
-	public List<S> getSData();
-	
-	public List<Coordinate> getTimerTrackList();
+	public Composite createDetailsComposite(Composite parent, FormToolkit toolkit);
 
-	public void setTimerTrackList(List<Coordinate> timerTrackList);
-	
+	public void inputChanged(Object selection);
+
+	/**
+	 * @return list of objects that were added
+	 */
+	public List<ICyberTrackerData> handleAdd(Shell shell, final IStructuredSelection selection);
+
+
 }
