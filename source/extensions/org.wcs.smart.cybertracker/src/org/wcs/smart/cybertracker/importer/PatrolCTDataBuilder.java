@@ -38,23 +38,19 @@ import org.wcs.smart.cybertracker.export.PatrolScreensUtilToDel;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
-import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.PatrolType.Type;
+import org.wcs.smart.patrol.model.Team;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Builds specific patrol objects that suitable for further import
+ * 
  * @author elitvin
  * @since 4.0.0
  */

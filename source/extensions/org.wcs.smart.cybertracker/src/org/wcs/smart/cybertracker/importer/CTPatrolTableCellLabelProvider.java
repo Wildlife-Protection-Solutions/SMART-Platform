@@ -31,7 +31,6 @@ import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
@@ -49,9 +48,9 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 	private static final Image ERROR_IMAGE = new Image(Display.getDefault(), Display.getDefault().getSystemImage(SWT.ICON_ERROR).getImageData().scaledTo(IMAGE_SIZE, IMAGE_SIZE));
 	private static final Image WARN_IMAGE  = new Image(Display.getDefault(), Display.getDefault().getSystemImage(SWT.ICON_WARNING).getImageData().scaledTo(IMAGE_SIZE, IMAGE_SIZE));
 
-	private CTPatrolTableColumn column;
+	private CTPatrolUIMeta column;
 	
-	public CTPatrolTableCellLabelProvider(CTPatrolTableColumn column) {
+	public CTPatrolTableCellLabelProvider(CTPatrolUIMeta column) {
 		this.column = column;
 	}
 	
@@ -82,7 +81,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 
 	@Override
 	public Image getImage(Object element) {
-		if (CTPatrolTableColumn.IMPORT_NOTE.equals(column)) {
+		if (CTPatrolUIMeta.IMPORT_NOTE.equals(column)) {
 			if (element instanceof CyberTrackerPatrol) {
 				CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
 				return ctPatrol.getMissingKeys().isEmpty() ? null : WARN_IMAGE;
@@ -113,7 +112,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 		if (element instanceof CyberTrackerPatrol) {
 			String result = ""; //$NON-NLS-1$
 			CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
-			if (CTPatrolTableColumn.IMPORT_NOTE.equals(column)) {
+			if (CTPatrolUIMeta.IMPORT_NOTE.equals(column)) {
 				if (!ctPatrol.getMissingKeys().isEmpty()) {
 					String keys = ""; //$NON-NLS-1$
 					for (String key : ctPatrol.getMissingKeys()) {
@@ -123,7 +122,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 				}
 				return result;
 			}
-			if (column == CTPatrolTableColumn.MEMBERS) {
+			if (column == CTPatrolUIMeta.MEMBERS) {
 				result = asString(ctPatrol.getCtMembers(), "\n"); //$NON-NLS-1$
 			} else {
 				result = getText(element);
@@ -149,7 +148,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 		return super.getToolTipText(element);
 	}
 
-	private PatrolMeta toMeta(CTPatrolTableColumn column) {
+	private PatrolMeta toMeta(CTPatrolUIMeta column) {
 		switch (column) {
 		case TRANSPORT:	return PatrolMeta.TRANSPORT;
 		case TEAM: 		return PatrolMeta.TEAM;

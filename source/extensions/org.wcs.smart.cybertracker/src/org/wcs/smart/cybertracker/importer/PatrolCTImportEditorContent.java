@@ -48,7 +48,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.importer.CTPatrolTableContainer.CTPatrolTableColumn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
@@ -58,12 +57,8 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Provides functionality and GUI that is specific for patrol import from CyberTracker.
+ * 
  * @author elitvin
  * @since 4.0.0
  */
@@ -100,9 +95,9 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 	private ControlDecoration cdLeader;
 	private ControlDecoration cdPilot;
 	
-	private Map<CTPatrolTableColumn, CTPatrolTableCellLabelProvider> labelProviderMap = new HashMap<CTPatrolTableColumn, CTPatrolTableCellLabelProvider>();
+	private Map<CTPatrolUIMeta, CTPatrolTableCellLabelProvider> labelProviderMap = new HashMap<CTPatrolUIMeta, CTPatrolTableCellLabelProvider>();
 	
-	private CTPatrolTableCellLabelProvider getLabelProvider(CTPatrolTableColumn column) {
+	private CTPatrolTableCellLabelProvider getLabelProvider(CTPatrolUIMeta column) {
 		CTPatrolTableCellLabelProvider lp = labelProviderMap.get(column);
 		if (lp == null) {
 			lp = new CTPatrolTableCellLabelProvider(column);
@@ -239,7 +234,7 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 	
 	public void inputChanged(Object selection) {
 		Text[] lbls = new Text[]{lblStartDate, lblEndDate,lblPatrolType,lblTransportType, lblArmed,lblTeam,lblStation,lblComment, lblObjective, lblMandate, lblLeader, lblPilot, lblMembers};
-		CTPatrolTableColumn[] cols = new CTPatrolTableColumn[]{CTPatrolTableColumn.START_DATE,CTPatrolTableColumn.END_DATE,CTPatrolTableColumn.TYPE,CTPatrolTableColumn.TRANSPORT,CTPatrolTableColumn.ARMED,CTPatrolTableColumn.TEAM,CTPatrolTableColumn.STATION,CTPatrolTableColumn.COMMENT};
+		CTPatrolUIMeta[] cols = new CTPatrolUIMeta[]{CTPatrolUIMeta.START_DATE,CTPatrolUIMeta.END_DATE,CTPatrolUIMeta.TYPE,CTPatrolUIMeta.TRANSPORT,CTPatrolUIMeta.ARMED,CTPatrolUIMeta.TEAM,CTPatrolUIMeta.STATION,CTPatrolUIMeta.COMMENT};
 		if (selection instanceof CyberTrackerPatrol){
 			
 			for (int i = 0; i < cols.length; i ++){
