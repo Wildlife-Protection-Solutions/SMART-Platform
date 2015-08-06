@@ -37,8 +37,8 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_Patrol_Error;
 	public static String CTPatrolTableContainer_Patrol_Success_Message;
 	public static String CTPatrolTableContainer_Patrol_Success_Title;
-	public static String CTPatrolTableContainer_PatrolDataSectionHeader;
-	public static String CTPatrolTableContainer_PatrolDetailsSectionHeader;
+	public static String CTPatrolTableContainer_DataSectionHeader;
+	public static String CTPatrolTableContainer_DetailsSectionHeader;
 	public static String CTPatrolTableContainer_PatrolTypeLabel;
 	public static String CTPatrolTableContainer_PilotLabel;
 	public static String CTPatrolTableContainer_StartDateLabel;
