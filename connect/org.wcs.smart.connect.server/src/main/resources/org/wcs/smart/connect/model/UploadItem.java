@@ -12,7 +12,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="connect.upload_item")
-public class UploadItem extends UuidItem {
+public class UploadItem extends ConnectUuidItem {
 
 	public enum Type {
 		CA;

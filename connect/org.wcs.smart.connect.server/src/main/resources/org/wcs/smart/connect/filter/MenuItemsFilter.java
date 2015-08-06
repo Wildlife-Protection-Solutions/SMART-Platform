@@ -33,7 +33,8 @@ public class MenuItemsFilter implements Filter {
 		CA("MenuItemsFilter.CaLabel", "/connect/ca", null), //$NON-NLS-1$ //$NON-NLS-2$
 		QUEUE("MenuItemsFilter.DataQueueLabel", "/connect/dataqueue", null), //$NON-NLS-1$ //$NON-NLS-2$
 		ALERT("MenuItemsFilter.AlertLabel", "/connect/alert", null), //$NON-NLS-1$ //$NON-NLS-2$
-		USERS("MenuItemsFilter.AccountsLabel", "/connect/users", UserAccountsAction.KEY); //$NON-NLS-1$ //$NON-NLS-2$
+		USERS("MenuItemsFilter.AccountsLabel", "/connect/users", UserAccountsAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
+		QUERY("MenuItemsFilter.QueryFilter", "/connect/query", null); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		String nameKey;
 		String url;

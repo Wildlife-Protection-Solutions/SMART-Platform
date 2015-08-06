@@ -1,0 +1,41 @@
+package org.wcs.smart.connect.servlet;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.hibernate.Session;
+import org.wcs.smart.connect.api.ConnectRESTApplication;
+import org.wcs.smart.connect.api.ConservationAreas;
+import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.query.QueryManager;
+@WebServlet(ConnectRESTApplication.SERVLET_PATH + "query")
+public class QueryServlet extends HttpServlet {
+	
+	private static final long serialVersionUID = 1L;
+     
+	/**
+	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		UUID uuid = UUID.fromString("4c4facd2-50bc-4533-8b30-26dc84828e61");
+		Session session = HibernateManager.getSession(request.getServletContext());
+		session.beginTransaction();
+		try{
+			QueryManager.INSTANCE.findQuery(uuid, session);
+		}finally{
+			session.getTransaction().commit();
+		}
+		request.getRequestDispatcher("/WEB-INF/query.jsp").forward(request, response); //$NON-NLS-1$
+	}
+
+
+}
