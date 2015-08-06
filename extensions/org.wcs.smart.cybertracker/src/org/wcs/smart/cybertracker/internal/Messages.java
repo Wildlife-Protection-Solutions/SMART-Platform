@@ -8,9 +8,6 @@ public class Messages extends NLS {
 	public static String CtDatabaseUpgrader_UpgradeTask;
 	public static String CTPatrolTableCellLabelProvider_Armed_No;
 	public static String CTPatrolTableCellLabelProvider_Armed_Yes;
-	public static String CTPatrolTableCellLabelProvider_IngoreKeysWarning;
-	public static String CTPatrolTableCellLabelProvider_Tooltip_Error;
-	public static String CTPatrolTableCellLabelProvider_Tooltip_Warning;
 	public static String CTPatrolTableContainer_AddLeg_SubTaskName;
 	public static String CTPatrolTableContainer_AddLeg_TaskName;
 	public static String CTPatrolTableContainer_AddPatrol_SubTaskName;
