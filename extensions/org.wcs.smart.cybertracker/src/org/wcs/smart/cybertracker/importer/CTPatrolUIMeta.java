@@ -21,44 +21,35 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
-import java.util.List;
-
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.cybertracker.model.ICyberTrackerData;
-
-/**
- * Provides functionality and GUI that is specific for type of object 
- * (patrol, survey, ect) that my be imported from CyberTracker.
- * 
- * @author elitvin
- * @since 4.0.0
- */
-public interface IImportEditorContent {
-	
+import org.wcs.smart.cybertracker.internal.Messages;
 	/**
-	 * Method is called once and is used to create details panel
+	 * Metadata for patrols that is displayed in details window.
 	 * 
-	 * @param parent
-	 * @param toolkit
-	 * @return
+	 * @author elitvin
+	 * @since 4.0.0
 	 */
-	public Composite createDetailsComposite(Composite parent, FormToolkit toolkit);
-
-	/**
-	 * Fired when selection in table is changed.
-	 * Typically used to update content for details panel
-	 * 
-	 * @param selection
-	 */
-	public void inputChanged(Object selection);
-
-	/**
-	 * @return list of objects that were added
-	 */
-	public List<ICyberTrackerData> handleAdd(Shell shell, final IStructuredSelection selection);
-
-
-}
+	public enum CTPatrolUIMeta {
+		IMPORT_NOTE (""), //$NON-NLS-1$
+		START_DATE	(Messages.CTPatrolTableColumn_StartDate),
+		END_DATE	(Messages.CTPatrolTableColumn_EndDate),
+		TYPE		(Messages.CTPatrolTableColumn_Type),
+		TRANSPORT	(Messages.CTPatrolTableColumn_Transport),
+		ARMED		(Messages.CTPatrolTableColumn_Armed),
+//		MANDATE		(Messages.CTPatrolTableColumn_Mandate),
+		TEAM		(Messages.CTPatrolTableColumn_Team),
+		STATION		(Messages.CTPatrolTableColumn_Station),
+//		OBJECTIVE	(Messages.CTPatrolTableColumn_Objective),
+		COMMENT		(Messages.CTPatrolTableColumn_Comment),
+		LEADER		(Messages.CTPatrolTableColumn_Leader),
+		PILOT		(Messages.CTPatrolTableColumn_Pilot),
+		MEMBERS		(Messages.CTPatrolTableColumn_Members),
+		SIGHT_COUNT	(Messages.CTPatrolTableColumn_SightCount);
+		
+		private String guiName;
+		CTPatrolUIMeta(String guiName) {
+			this.guiName = guiName;
+		}
+		public String getGuiName() {
+			return this.guiName;
+		}
+	}

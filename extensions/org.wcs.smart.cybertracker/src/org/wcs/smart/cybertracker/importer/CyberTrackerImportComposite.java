@@ -43,7 +43,6 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ToolTip;
@@ -52,7 +51,6 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -68,16 +66,11 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
-import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Main composite of Cyber Tracker import editor
+ * 
  * @author elitvin
  * @since 4.0.0
  */
@@ -118,8 +111,7 @@ public class CyberTrackerImportComposite extends Composite {
 	}
 
 	private TableViewer viewer;
-	private Button btnAsPatrol;
-	private Button btnAsLeg;
+	private Button btnAdd;
 	private Button btnRemove;
 	
 	private Composite detailsInnerPanel;
@@ -202,8 +194,7 @@ public class CyberTrackerImportComposite extends Composite {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				boolean selected = !viewer.getSelection().isEmpty();
-				btnAsPatrol.setEnabled(selected);
-				btnAsLeg.setEnabled(selected);
+				btnAdd.setEnabled(selected);
 				btnRemove.setEnabled(selected);
 				if (selected){
 					updatePatrolDetails(((IStructuredSelection)viewer.getSelection()).getFirstElement());
@@ -213,13 +204,7 @@ public class CyberTrackerImportComposite extends Composite {
 			}
 		});
 		final MenuManager mgr = new MenuManager();
-		Action asPatrolAction = new Action(Messages.CTPatrolTableContainer_Button_AsPatrol){
-			@Override
-			public void run() {
-				handleAdd();
-			}
-		};
-		Action asLegAction = new Action(Messages.CTPatrolTableContainer_Button_AsLeg){
+		Action addAction = new Action("Add"){
 			@Override
 			public void run() {
 				handleAdd();
@@ -231,8 +216,7 @@ public class CyberTrackerImportComposite extends Composite {
 				handleRemove();
 			}
 		};
-		mgr.add(asPatrolAction);
-		mgr.add(asLegAction);
+		mgr.add(addAction);
 		mgr.add(deleteAction);
 		mgr.addMenuListener(new IMenuListener() {
 			@Override
@@ -248,25 +232,15 @@ public class CyberTrackerImportComposite extends Composite {
 		buttons = new Composite(dataComp, SWT.NONE);
 		buttons.setLayout(new GridLayout(3, true));
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAsPatrol = toolkit.createButton(buttons,Messages.CTPatrolTableContainer_Button_AsPatrol, SWT.PUSH);
-		btnAsPatrol.addSelectionListener(new SelectionAdapter() {
+		btnAdd = toolkit.createButton(buttons,"Add", SWT.PUSH);
+		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				handleAdd();
 			}
 		});
-		btnAsPatrol.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAsPatrol.setEnabled(false);
-
-		btnAsLeg = toolkit.createButton(buttons,Messages.CTPatrolTableContainer_Button_AsLeg,SWT.PUSH);
-		btnAsLeg.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				handleAdd();
-			}
-		});
-		btnAsLeg.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAsLeg.setEnabled(false);
+		btnAdd.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+		btnAdd.setEnabled(false);
 
 		btnRemove = toolkit.createButton(buttons,DialogConstants.DELETE_BUTTON_TEXT,SWT.PUSH);
 		btnRemove.addSelectionListener(new SelectionAdapter() {
@@ -469,11 +443,7 @@ public class CyberTrackerImportComposite extends Composite {
 	
 	protected void handleAdd() {
 		getEditorContent().handleAdd(getShell(), (IStructuredSelection)viewer.getSelection());
-		// TODO Auto-generated method stub
-		//do import
 		refreshViewer();
-
-		
 	}
 
 }

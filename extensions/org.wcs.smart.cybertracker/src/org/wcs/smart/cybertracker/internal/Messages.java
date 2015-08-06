@@ -28,8 +28,6 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_AddPatrol_SubTaskName;
 	public static String CTPatrolTableContainer_AddPatrol_TaskName;
 	public static String CTPatrolTableContainer_ArmedLabel;
-	public static String CTPatrolTableContainer_Button_AsLeg;
-	public static String CTPatrolTableContainer_Button_AsPatrol;
 	public static String CTPatrolTableContainer_CommentLabel;
 	public static String CTPatrolTableContainer_CyberTrackerFiles;
 	public static String CTPatrolTableContainer_DeleteWarn_Message;
