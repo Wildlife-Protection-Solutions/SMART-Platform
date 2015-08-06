@@ -62,7 +62,7 @@ public class AttributeFilterCollectorVisitor implements IFilterVisitor{
 			
 		}else if (filter instanceof EntityAttributeFilter){
 			EntityAttributeFilter f = (EntityAttributeFilter) filter;
-			AttributeInfo in = new AttributeInfo(f.getEntityDmAttributeKey(c, engine), AttributeType.LIST);
+			AttributeInfo in = new AttributeInfo(engine.getEntityDmAttributeKey(f.getEntityKey(), c), AttributeType.LIST);
 			//we need to add the dm attribute associated with the entity type
 			if (!filters.contains(in)){
 				filters.add(in);

@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -528,7 +529,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			frmPatrolSummary.setText(editor.getPatrol().getId());
 			
 			txtPatrolId.setText(patrol.getId(), false, false);
-			txtPatrolType.setText(LabelConstants.getLabel(patrol.getPatrolType()), false, false);
+			txtPatrolType.setText(patrol.getPatrolType().getGuiName(Locale.getDefault()), false, false);
 			if (patrol.getStation() == null) {
 				txtStation.setText(Messages.PatrolSummaryEditor_NoStationLabel);
 			} else {

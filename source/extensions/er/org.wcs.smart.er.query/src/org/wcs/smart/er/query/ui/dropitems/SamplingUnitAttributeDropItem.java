@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.ui.dropitems;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -384,7 +385,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		initDrag(main);
 		initDrag(lblAttribute);
 		
-		lblAttribute.setText(MessageFormat.format("({0}) {1}", new Object[]{source.guiName, formatStringForLabel(this.text)})); //$NON-NLS-1$
+		lblAttribute.setText(MessageFormat.format("({0}) {1}", new Object[]{source.getGuiName(Locale.getDefault()), formatStringForLabel(this.text)})); //$NON-NLS-1$
 		if (currentValue != null){
 			if (value != null){
 				value.setText(currentValue);
@@ -432,7 +433,7 @@ public class SamplingUnitAttributeDropItem extends DropItem implements IFilterDr
 		initDrag(main);
 		initDrag(lblAttribute);
 		
-		lblAttribute.setText(MessageFormat.format("({0}) {1} = ", new Object[]{source.guiName, formatStringForLabel(this.text)})); //$NON-NLS-1$
+		lblAttribute.setText(MessageFormat.format("({0}) {1} = ", new Object[]{source.getGuiName(Locale.getDefault()), formatStringForLabel(this.text)})); //$NON-NLS-1$
 		loadItemsJobs.schedule();
 	}
 

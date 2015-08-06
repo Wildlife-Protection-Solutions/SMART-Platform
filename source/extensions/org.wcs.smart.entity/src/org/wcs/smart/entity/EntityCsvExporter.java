@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
@@ -39,6 +40,8 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.hibernate.SmartDB;
@@ -105,14 +108,14 @@ public class EntityCsvExporter implements ICsvDataExporter {
 			}
 			
 			String[] columns = new String[entityType.getAttributes().size() + extra];
-			columns[0] = Entity.ID_FIELD_NAME;
-			columns[1] = Entity.STATUS_FIELD_NAME;
+			columns[0] = EntityLabelProvider.ID_FIELD_NAME;
+			columns[1] = EntityLabelProvider.STATUS_FIELD_NAME;
 			if (entityType.getType().equals(EntityType.Type.FIXED)){
-				columns[2] = Entity.X_FIELD_NAME;
-				columns[3] = Entity.Y_FIELD_NAME;
+				columns[2] = EntityLabelProvider.X_FIELD_NAME;
+				columns[3] = EntityLabelProvider.Y_FIELD_NAME;
 			}
 			if (SmartDB.isMultipleAnalysis()){
-				columns[extra-1] = Entity.CA_FIELD_NAME;
+				columns[extra-1] = EntityLabelProvider.CA_FIELD_NAME;
 			}
 			int i = 0;
 			for (EntityAttribute ea : entityType.getAttributes()){
@@ -129,7 +132,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 				i = 0;
 				String csvout[] = new String[columns.length];
 				csvout[0] = entity.getId();
-				csvout[1] = entity.getStatus().getGuiName();
+				csvout[1] = entity.getStatus().getGuiName(Locale.getDefault());
 				if (entityType.getType().equals(EntityType.Type.FIXED)){
 					csvout[2] = String.valueOf(entity.getX());
 					csvout[3] = String.valueOf(entity.getY());
@@ -140,7 +143,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 				for (EntityAttribute ea : entityType.getAttributes()){
 					for (EntityAttributeValue v : entity.getAttributes()){
 						if (v.getEntityAttribute().getKeyId().equals(ea.getKeyId())){
-							csvout[i + extra] = v.getValueAsString();
+							csvout[i + extra] = v.getValueAsString(Locale.getDefault());
 							break;
 						}
 					}
@@ -167,7 +170,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		try{
 			Criteria c = session.createCriteria(Entity.class).add(Restrictions.eq("entityType", entityType)); //$NON-NLS-1$
 			if (onlyActive){
-				c = c.add(Restrictions.eq("status", Entity.Status.ACTIVE)); //$NON-NLS-1$
+				c = c.add(Restrictions.eq("status", Status.ACTIVE)); //$NON-NLS-1$
 			}
 			return c.list();
 		}finally{

@@ -39,8 +39,8 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.internal.Messages;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
@@ -51,8 +51,8 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
@@ -74,9 +74,10 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 	private int categoryCount;
 	private SimpleQuery query;
 	
+	private DerbyPagedObservationResult result;
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return EntityObservationQueryType.KEY.equals(querytype.getKey());
+	public boolean canExecute(String querytype) {
+		return EntityObservationQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -102,13 +103,17 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		}
 		
 		queryDataTable = createTempTableName();
-		final DerbyPagedObservationResult result = new DerbyPagedObservationResult(queryDataTable, this, query);
+		try{
+			result = new DerbyPagedObservationResult(queryDataTable, this, query);
+		}catch (Exception ex){
+			throw new SQLException(ex);
+		}
 		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyQueryEngine2_Progress_RunningQuery, 70);
-				IFilterProcessor filterer = DerbyEntityObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+				IFilterProcessor filterer = null;
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -116,8 +121,10 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				try {			
+					filterer = DerbyEntityObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
+							caFilter, 
 							true, true, monitor);
 					
 					if (monitor.isCanceled()) return;
@@ -137,9 +144,10 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 							result.setWpCount(rs.getInt(1));
 						}
 					}
-					
+				}catch (Exception ex){
+					throw new SQLException(ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}
@@ -221,7 +229,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		}
 	}
 	
-	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -337,7 +345,7 @@ public class DerbyEntityObservationEngine extends DerbyEntityQueryEngine {
 		}
 	}
 
-	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
+	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws Exception {
 		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql);

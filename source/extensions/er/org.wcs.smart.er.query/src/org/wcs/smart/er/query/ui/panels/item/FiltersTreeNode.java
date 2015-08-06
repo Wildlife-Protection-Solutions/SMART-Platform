@@ -40,8 +40,8 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.ERQueryPlugIn;
-import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.ui.dropitems.SamplingUnitDropItem;
 import org.wcs.smart.er.query.ui.panels.item.FilterContentProvider.Node;
 import org.wcs.smart.er.ui.ErLabelProvider;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -133,7 +133,7 @@ public class FiltersTreeNode implements IItemTreeNode{
 					}
 				}
 				if (element instanceof SamplingUnit){
-					if (element.equals(SamplingUnitFilter.NONE)){
+					if (element.equals(SamplingUnitDropItem.NONE)){
 						return null;
 					}
 					return ErLabelProvider.getImage(((SamplingUnit)element).getType());

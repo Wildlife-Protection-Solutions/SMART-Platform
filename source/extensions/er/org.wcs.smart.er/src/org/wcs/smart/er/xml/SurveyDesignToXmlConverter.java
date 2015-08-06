@@ -23,7 +23,6 @@ package org.wcs.smart.er.xml;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Locale;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 

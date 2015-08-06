@@ -24,11 +24,11 @@ package org.wcs.smart.cybertracker.export;
 import java.io.StringWriter;
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
@@ -489,7 +489,7 @@ public class PatrolScreensUtil {
 			List<String> types = new ArrayList<String>();
 			List<String> tag0Types = new ArrayList<String>();
 			for (PatrolType patrolType : pTypes) {
-				types.add(patrolType.getType().getGuiName());
+				types.add(patrolType.getType().getGuiName(Locale.getDefault()));
 				tag0Types.add(patrolType.getType().name());
 			}
 			List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);

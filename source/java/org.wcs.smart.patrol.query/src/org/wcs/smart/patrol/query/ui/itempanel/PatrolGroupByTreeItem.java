@@ -89,7 +89,7 @@ public class PatrolGroupByTreeItem implements IItemTreeNode{
 			if (element instanceof PatrolQueryOption){
 				return PatrolQueryLabelProvider.getImage((PatrolQueryOption)element);
 			}else if (element instanceof IExtensionOption){
-				return ((IExtensionOption) element).getImage();
+				return ((IExtensionOption) element).getOptionData().getImage();
 			}
 			return super.getImage(element);
 		}

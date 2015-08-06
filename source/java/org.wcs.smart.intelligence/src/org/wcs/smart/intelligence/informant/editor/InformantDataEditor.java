@@ -413,7 +413,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 					List<?> data = (List<?>) viewer.getInput();
 					for (Object object : data) {
 						if (object instanceof Informant) {
-							if (manager.get((Informant)object) != null) {
+							if (InformantEditor.getInformant((Informant)object) != null) {
 								break; //we found and successfully decoded at least one informant
 							}
 						}
@@ -492,7 +492,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 						Map<Informant, Map<InformantDataKey, Object>> i2data = new HashMap<>();
 						monitor.subTask(Messages.InformantDataEditor_Task_ExtractInformantData);
 						for (Informant informant : informantList) {
-							Map<InformantDataKey, Object> info = manager.get(informant);
+							Map<InformantDataKey, Object> info = InformantEditor.getInformant(informant);
 							i2data.put(informant, info);
 						}
 						
@@ -501,7 +501,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 							monitor.subTask(MessageFormat.format(Messages.InformantDataEditor_Task_EncryptInformantData, informant.getId()));
 							Map<InformantDataKey, Object> info = i2data.get(informant);
 							if (info != null) {
-								manager.set(informant, info);
+								InformantEditor.setInformant(informant, info);
 								EncryptedData encryptedData = informant.getEncryptedData();
 					    		File dataFile = informant.getDataFile();
 								if (!encryptedData.isEmpty()) {

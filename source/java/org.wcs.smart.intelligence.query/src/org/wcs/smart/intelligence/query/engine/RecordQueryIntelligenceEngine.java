@@ -43,14 +43,12 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilter;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.BracketFilter;
@@ -58,7 +56,6 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.NotExpression;
 import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -90,8 +87,8 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 	private DerbyPagedIntellResults results;
 	
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return IntelligenceRecordQueryType.KEY.equals(querytype.getKey());
+	public boolean canExecute(String querytype) {
+		return IntelligenceRecordQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -120,161 +117,166 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 			
 			@Override
 			public void execute(Connection c) throws SQLException {
-				//create temp table for holding reuslts
-				StringBuilder sql = new StringBuilder();
-				sql.append("CREATE TABLE "); //$NON-NLS-1$
-				sql.append(queryDataTable);
-				sql.append("(");//$NON-NLS-1$
-				sql.append(" ca_id varchar(8), ");//$NON-NLS-1$
-				sql.append(" ca_name varchar(256), ");//$NON-NLS-1$
-				sql.append(" intel_uuid char(16) for bit data, ");//$NON-NLS-1$
-				sql.append(" intel_name varchar(1024), ");//$NON-NLS-1$
-				sql.append(" intel_datereceived date, ");//$NON-NLS-1$
-				sql.append(" intel_fromdate date, ");//$NON-NLS-1$
-				sql.append(" intel_todate date, ");//$NON-NLS-1$
-				sql.append(" intel_sourceuuid char(16) for bit data, ");//$NON-NLS-1$
-				sql.append(" intel_source varchar(1024), ");//$NON-NLS-1$
-				sql.append(" intel_patrolid varchar(32), ");//$NON-NLS-1$
-				sql.append(" intel_informantid varchar(128), ");//$NON-NLS-1$
-				sql.append(" intel_description varchar(32672), ");//$NON-NLS-1$
-				sql.append(" intel_locations varchar(32672) ");//$NON-NLS-1$
-				sql.append(")"); //$NON-NLS-1$
+				try{
+					//create temp table for holding reuslts
+					StringBuilder sql = new StringBuilder();
+					sql.append("CREATE TABLE "); //$NON-NLS-1$
+					sql.append(queryDataTable);
+					sql.append("(");//$NON-NLS-1$
+					sql.append(" ca_id varchar(8), ");//$NON-NLS-1$
+					sql.append(" ca_name varchar(256), ");//$NON-NLS-1$
+					sql.append(" intel_uuid char(16) for bit data, ");//$NON-NLS-1$
+					sql.append(" intel_name varchar(1024), ");//$NON-NLS-1$
+					sql.append(" intel_datereceived date, ");//$NON-NLS-1$
+					sql.append(" intel_fromdate date, ");//$NON-NLS-1$
+					sql.append(" intel_todate date, ");//$NON-NLS-1$
+					sql.append(" intel_sourceuuid char(16) for bit data, ");//$NON-NLS-1$
+					sql.append(" intel_source varchar(1024), ");//$NON-NLS-1$
+					sql.append(" intel_patrolid varchar(32), ");//$NON-NLS-1$
+					sql.append(" intel_informantid varchar(128), ");//$NON-NLS-1$
+					sql.append(" intel_description varchar(32672), ");//$NON-NLS-1$
+					sql.append(" intel_locations varchar(32672) ");//$NON-NLS-1$
+					sql.append(")"); //$NON-NLS-1$
+					
+					QueryPlugIn.logSql(sql.toString());
+					c.createStatement().executeUpdate(sql.toString());
+					
+					//add results to table
+					sql = new StringBuilder();
+					sql.append("INSERT INTO "); //$NON-NLS-1$
+					sql.append(queryDataTable);
+					sql.append(" SELECT "); //$NON-NLS-1$
+					sql.append(tablePrefix(ConservationArea.class) + ".id,"); //$NON-NLS-1$
+					sql.append(tablePrefix(ConservationArea.class) + ".name,"); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".uuid,"); //$NON-NLS-1$
+					sql.append("'',");	//name //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".received_date,"); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".from_date,"); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".to_date,"); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".source_uuid,"); //$NON-NLS-1$
+					sql.append("'',");	//source //$NON-NLS-1$
+					sql.append(tablePrefix(Patrol.class) + ".id,"); //$NON-NLS-1$
+					sql.append(tablePrefix(Informant.class) + ".id,"); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".description,"); //$NON-NLS-1$
+					sql.append("''");	//locations //$NON-NLS-1$
+					sql.append(" FROM ");//$NON-NLS-1$
+					sql.append(tableNamePrefix(Intelligence.class));
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(tableNamePrefix(ConservationArea.class));
+					sql.append(" ON ");//$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".ca_uuid = " + tablePrefix(ConservationArea.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(tableNamePrefix(Informant.class));
+					sql.append(" ON "); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".informant_uuid = " + tablePrefix(Informant.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().executeUpdate(sql.toString());
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(tableNamePrefix(IntelligenceSource.class));
+					sql.append(" ON "); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".source_uuid = " + tablePrefix(IntelligenceSource.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				//add results to table
-				sql = new StringBuilder();
-				sql.append("INSERT INTO "); //$NON-NLS-1$
-				sql.append(queryDataTable);
-				sql.append(" SELECT "); //$NON-NLS-1$
-				sql.append(tablePrefix(ConservationArea.class) + ".id,"); //$NON-NLS-1$
-				sql.append(tablePrefix(ConservationArea.class) + ".name,"); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".uuid,"); //$NON-NLS-1$
-				sql.append("'',");	//name //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".received_date,"); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".from_date,"); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".to_date,"); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".source_uuid,"); //$NON-NLS-1$
-				sql.append("'',");	//source //$NON-NLS-1$
-				sql.append(tablePrefix(Patrol.class) + ".id,"); //$NON-NLS-1$
-				sql.append(tablePrefix(Informant.class) + ".id,"); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".description,"); //$NON-NLS-1$
-				sql.append("''");	//locations //$NON-NLS-1$
-				sql.append(" FROM ");//$NON-NLS-1$
-				sql.append(tableNamePrefix(Intelligence.class));
-				sql.append(" LEFT JOIN "); //$NON-NLS-1$
-				sql.append(tableNamePrefix(ConservationArea.class));
-				sql.append(" ON ");//$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".ca_uuid = " + tablePrefix(ConservationArea.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				sql.append(" LEFT JOIN "); //$NON-NLS-1$
-				sql.append(tableNamePrefix(Informant.class));
-				sql.append(" ON "); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".informant_uuid = " + tablePrefix(Informant.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-			
-				sql.append(" LEFT JOIN "); //$NON-NLS-1$
-				sql.append(tableNamePrefix(IntelligenceSource.class));
-				sql.append(" ON "); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".source_uuid = " + tablePrefix(IntelligenceSource.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-			
-				sql.append(" LEFT JOIN "); //$NON-NLS-1$
-				sql.append(tableNamePrefix(Patrol.class));
-				sql.append(" ON "); //$NON-NLS-1$
-				sql.append(tablePrefix(Intelligence.class) + ".patrol_uuid = " + tablePrefix(Patrol.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
-
-				
-				sql.append(" WHERE "); //$NON-NLS-1$
-				
-				List<Object> parameterValues = new ArrayList<Object>();
-				
-				// ca filter
-				ArrayList<UUID> localFilters = new ArrayList<UUID>();
-				if (query.getConservationAreaFilterAsFilter().includeAll()){
-					//include all current conservation areas
-					if (SmartDB.getConservationAreaConfiguration() != null){
-						for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-							localFilters.add(ca.getUuid());
+					sql.append(" LEFT JOIN "); //$NON-NLS-1$
+					sql.append(tableNamePrefix(Patrol.class));
+					sql.append(" ON "); //$NON-NLS-1$
+					sql.append(tablePrefix(Intelligence.class) + ".patrol_uuid = " + tablePrefix(Patrol.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+	
+					
+					sql.append(" WHERE "); //$NON-NLS-1$
+					
+					List<Object> parameterValues = new ArrayList<Object>();
+					
+					// ca filter
+					ArrayList<UUID> localFilters = new ArrayList<UUID>();
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
+					if (caFilter.includeAll()){
+						//include all current conservation areas
+						if (SmartDB.getConservationAreaConfiguration() != null){
+							for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
+								localFilters.add(ca.getUuid());
+							}
+						}else{
+							localFilters.add(SmartDB.getCurrentConservationArea().getUuid());
 						}
 					}else{
-						localFilters.add(SmartDB.getCurrentConservationArea().getUuid());
+						//include only selected conservation areas
+						localFilters.addAll(caFilter.getConservationAreaFilterIds());
 					}
-				}else{
-					//include only selected conservation areas
-					localFilters.addAll(query.getConservationAreaFilterAsFilter().getConservationAreaFilterIds());
-				}
-				if (localFilters.size() > 0){
-					sql.append(tablePrefix(ConservationArea.class) + ".uuid IN ("); //$NON-NLS-1$
-					for (UUID ca : localFilters){
-						sql.append("?,"); //$NON-NLS-1$
-						parameterValues.add(ca);
+					if (localFilters.size() > 0){
+						sql.append(tablePrefix(ConservationArea.class) + ".uuid IN ("); //$NON-NLS-1$
+						for (UUID ca : localFilters){
+							sql.append("?,"); //$NON-NLS-1$
+							parameterValues.add(ca);
+						}
+						sql.deleteCharAt(sql.length()-1);
+						sql.append(")"); //$NON-NLS-1$
 					}
-					sql.deleteCharAt(sql.length()-1);
-					sql.append(")"); //$NON-NLS-1$
-				}
-				
-				//date filter
-				Date[] d = query.getDateFilter().getDateFilterOption().getDates();
-				if (d != null){
-					sql.append(" AND "); //$NON-NLS-1$
-					sql.append(tablePrefix(Intelligence.class) + ".received_date>= ? AND "); //$NON-NLS-1$ 
-					sql.append(tablePrefix(Intelligence.class) + ".received_date <= ? "); //$NON-NLS-1$ 
 					
-					parameterValues.add(d[0].toString());
-					parameterValues.add(d[1].toString());
-				}
-				
-				//query filter
-				if (query.getQueryFilter().length() > 0){
-					sql.append("AND ( "); //$NON-NLS-1$
-					filterToSql(query.getFilter().getFilter(), sql, parameterValues);
-					sql.append(" )"); //$NON-NLS-1$
-				}
-				
-				QueryPlugIn.logSql(sql.toString());
-				try(PreparedStatement psq = c.prepareStatement(sql.toString())){
-					for (int i = 0; i < parameterValues.size(); i ++){
-						psq.setObject(i+1, parameterValues.get(i));
+					//date filter
+					Date[] d = query.getDateFilter().getDateFilterOption().getDates();
+					if (d != null){
+						sql.append(" AND "); //$NON-NLS-1$
+						sql.append(tablePrefix(Intelligence.class) + ".received_date>= ? AND "); //$NON-NLS-1$ 
+						sql.append(tablePrefix(Intelligence.class) + ".received_date <= ? "); //$NON-NLS-1$ 
+						
+						parameterValues.add(d[0].toString());
+						parameterValues.add(d[1].toString());
 					}
-					psq.executeUpdate();
-				}
-				
-				/* set the intelligence source name */
-				String s= "SELECT distinct intel_sourceuuid FROM " + queryDataTable; //$NON-NLS-1$
-				QueryPlugIn.logSql(s);
-				try( ResultSet rs = c.createStatement().executeQuery(s)){
-					try(PreparedStatement ps = c.prepareStatement("UPDATE " + queryDataTable + " SET intel_source = ? where intel_sourceuuid = ?")){ //$NON-NLS-1$ //$NON-NLS-2$
-						while(rs.next()){
-							byte[] uuid = rs.getBytes(1);
-							String name = getSourceName(UuidUtils.byteToUUID(uuid), session);
 					
-							ps.setString(1, name);
-							ps.setBytes(2, uuid);
-							ps.executeUpdate();
+					//query filter
+					if (query.getQueryFilter().length() > 0){
+						sql.append("AND ( "); //$NON-NLS-1$
+						filterToSql(query.getFilter().getFilter(), sql, parameterValues);
+						sql.append(" )"); //$NON-NLS-1$
+					}
+					
+					QueryPlugIn.logSql(sql.toString());
+					try(PreparedStatement psq = c.prepareStatement(sql.toString())){
+						for (int i = 0; i < parameterValues.size(); i ++){
+							psq.setObject(i+1, parameterValues.get(i));
+						}
+						psq.executeUpdate();
+					}
+					
+					/* set the intelligence source name */
+					String s= "SELECT distinct intel_sourceuuid FROM " + queryDataTable; //$NON-NLS-1$
+					QueryPlugIn.logSql(s);
+					try( ResultSet rs = c.createStatement().executeQuery(s)){
+						try(PreparedStatement ps = c.prepareStatement("UPDATE " + queryDataTable + " SET intel_source = ? where intel_sourceuuid = ?")){ //$NON-NLS-1$ //$NON-NLS-2$
+							while(rs.next()){
+								byte[] uuid = rs.getBytes(1);
+								String name = getSourceName(UuidUtils.byteToUUID(uuid), session);
+						
+								ps.setString(1, name);
+								ps.setBytes(2, uuid);
+								ps.executeUpdate();
+							}
 						}
 					}
+					
+					/* set the intelligence record name */
+					s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " + queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" + UuidUtils.uuidToString(SmartDB.getCurrentLanguage().getUuid()) + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					QueryPlugIn.logSql(s);
+					c.createStatement().executeUpdate(s);
+					s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid where " + queryDataTable+ ".intel_uuid = a.element_uuid and b.isdefault) WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					QueryPlugIn.logSql(s);
+					c.createStatement().executeUpdate(s);
+					
+					sql = new StringBuilder();
+					sql.append("SELECT count(*) FROM " + queryDataTable); //$NON-NLS-1$
+					
+					QueryPlugIn.logSql(sql.toString());
+					int rowCnt = 0;
+					try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
+						rs.next();
+						rowCnt = rs.getInt(1);
+					}
+					results = new DerbyPagedIntellResults(queryDataTable, rowCnt, RecordQueryIntelligenceEngine.this, query);
+					
+					c.commit();
+				}catch (Exception ex){
+					throw new SQLException (ex);
 				}
-				
-				/* set the intelligence record name */
-				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " + queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" + UuidUtils.uuidToString(SmartDB.getCurrentLanguage().getUuid()) + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-				QueryPlugIn.logSql(s);
-				c.createStatement().executeUpdate(s);
-				s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid where " + queryDataTable+ ".intel_uuid = a.element_uuid and b.isdefault) WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				QueryPlugIn.logSql(s);
-				c.createStatement().executeUpdate(s);
-				
-				sql = new StringBuilder();
-				sql.append("SELECT count(*) FROM " + queryDataTable); //$NON-NLS-1$
-				
-				QueryPlugIn.logSql(sql.toString());
-				int rowCnt = 0;
-				try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
-					rs.next();
-					rowCnt = rs.getInt(1);
-				}
-				results = new DerbyPagedIntellResults(queryDataTable, rowCnt, RecordQueryIntelligenceEngine.this, query);
-				
-				c.commit();
 			}
 		});
 		return results;

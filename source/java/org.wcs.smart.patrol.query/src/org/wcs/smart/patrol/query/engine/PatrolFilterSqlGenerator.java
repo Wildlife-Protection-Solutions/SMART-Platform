@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.engine;
 
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -35,7 +36,6 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.parser.IExtensionFilter;
 import org.wcs.smart.patrol.query.parser.PatrolContributionFactory;
@@ -159,7 +159,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * not expression
 	 */
 	protected String asSql(IExtensionFilter filter, IQueryEngine engine) throws SQLException{
-		return PatrolContributionFactory.getSql(engine, filter);	
+		return PatrolContributionFactory.getSql(engine, ((IPatrolQueryEngine)engine).getCurrentConnection(), filter);	
 	}
 	/*
 	 * Patrol Filter

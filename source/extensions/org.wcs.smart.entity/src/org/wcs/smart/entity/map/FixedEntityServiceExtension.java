@@ -32,7 +32,6 @@ import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.EntityPlugIn;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**

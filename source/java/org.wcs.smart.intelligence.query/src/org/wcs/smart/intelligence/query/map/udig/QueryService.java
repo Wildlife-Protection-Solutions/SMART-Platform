@@ -145,7 +145,7 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getType().getClass().equals(IntelligenceRecordQueryType.class)){ 
+					if (query.getTypeKey().equals(IntelligenceRecordQueryType.class)){ 
 						members.add(new QueryGeoResource(this, IntelQueryDataSource.INTEL_TYPE));
 					}
 				}
@@ -210,7 +210,7 @@ public class QueryService extends IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getType().getClass().equals(IntelligenceRecordQueryType.class) ){
+                		if (query.getTypeKey().equals(IntelligenceRecordQueryType.class) ){
                 			ds = new IntelQueryDataSource((IntelligenceRecordQuery)query);
                 		}
                 	}else{

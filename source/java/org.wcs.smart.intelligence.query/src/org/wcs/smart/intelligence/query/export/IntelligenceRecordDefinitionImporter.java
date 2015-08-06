@@ -24,7 +24,7 @@ package org.wcs.smart.intelligence.query.export;
 import java.util.HashMap;
 
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -47,7 +47,7 @@ public class IntelligenceRecordDefinitionImporter extends SimpleQueryDefinitionI
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		if (IntelligenceRecordQueryType.KEY.equals(qt.getKey())){
+		if (IntelligenceRecordQuery.KEY.equals(qt.getKey())){
 			return true;
 		}
 		return false;
@@ -55,7 +55,7 @@ public class IntelligenceRecordDefinitionImporter extends SimpleQueryDefinitionI
 
 	@Override
 	protected SimpleQuery createQuery(IQueryType qt) {
-		if (IntelligenceRecordQueryType.KEY.equals(qt.getKey())){
+		if (IntelligenceRecordQuery.KEY.equals(qt.getKey())){
 			return IntelligenceQueryFactory.createIntelligenceRecordQuery();
 		}
 		return null;

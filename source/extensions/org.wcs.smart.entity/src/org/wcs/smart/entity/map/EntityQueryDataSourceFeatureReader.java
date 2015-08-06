@@ -37,7 +37,7 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.query.model.QueryColumnUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -135,7 +135,7 @@ public class EntityQueryDataSourceFeatureReader implements FeatureReader<SimpleF
 		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
 		data[1] = it.getEntityId() + "." + UuidUtils.uuidToString(it.getWaypointUuid()); //$NON-NLS-1$ 
 		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		return new EntityFeature( SimpleFeatureBuilder.build(ftype, data, (String)data[1]));
 		

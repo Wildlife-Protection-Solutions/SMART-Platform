@@ -36,7 +36,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;

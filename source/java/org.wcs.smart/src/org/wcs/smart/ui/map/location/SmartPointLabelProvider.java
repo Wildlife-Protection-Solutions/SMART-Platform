@@ -28,6 +28,7 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
 import org.wcs.smart.util.GeometryUtils;

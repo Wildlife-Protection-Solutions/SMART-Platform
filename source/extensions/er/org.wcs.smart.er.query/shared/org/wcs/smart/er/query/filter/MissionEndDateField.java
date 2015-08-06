@@ -22,7 +22,10 @@
 
 package org.wcs.smart.er.query.filter;
 
-import org.wcs.smart.er.query.internal.Messages;
+import java.util.Locale;
+
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -37,8 +40,8 @@ public class MissionEndDateField implements IDateFieldFilter {
 	private MissionEndDateField(){}
 	
 	@Override
-	public String getGuiName() {
-		return Messages.MissionEndDateField_Name;
+	public String getGuiName(Locale l) {
+		return SmartContext.INSTANCE.getClass(ISurveyQueryLabelProvider.class).getLabel(this, l);
 	}
 
 	@Override

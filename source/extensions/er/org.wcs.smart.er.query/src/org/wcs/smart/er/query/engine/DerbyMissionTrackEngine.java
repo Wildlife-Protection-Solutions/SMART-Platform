@@ -50,8 +50,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.util.UuidUtils;
@@ -70,8 +70,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 	private String queryDataTable;
 	
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return MissionTrackQuery.KEY.equals(querytype.getKey());
+	public boolean canExecute(String querytype) {
+		return MissionTrackQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -114,9 +114,9 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				try {
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
-							false, false, new SubProgressMonitor(monitor, 50));
+							caFilter, false, false, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
 					
@@ -137,7 +137,8 @@ public class DerbyMissionTrackEngine extends DerbySurveyQueryEngine {
 						}
 					}
 					monitor.worked(10);
-					
+				}catch (Exception ex){
+					throw new SQLException(ex);
 				} finally {
 					filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, monitor.isCanceled());

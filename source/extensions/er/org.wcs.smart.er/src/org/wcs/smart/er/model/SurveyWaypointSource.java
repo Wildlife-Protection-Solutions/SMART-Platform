@@ -36,7 +36,6 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**

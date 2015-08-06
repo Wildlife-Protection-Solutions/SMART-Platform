@@ -21,8 +21,17 @@
  */
 package org.wcs.smart.intelligence.informant.editor;
 
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -37,6 +46,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.informant.editor.InformantDataEditor.InfromantColumn;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -123,7 +133,7 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 			
 			Text txt = new Text(main, SWT.BORDER);
 			txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-			Object value = informant.get(col.getKey());
+			Object value = getInformant(informant,col.getKey());
 			if (value != null) {
 				txt.setText(value.toString());
 			}
@@ -165,7 +175,7 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 				Text txt = col2Text.get(col);
 				data.put(col.getKey(), txt.getText());
 			}
-			informant.set(data);
+			setInformant(informant,data);
 		}
 		
 		IntelligenceHibernateManager.saveInformant(informant);
@@ -173,5 +183,87 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 		
 		return true;
 	}
-
+	
+	public static void setInformant (Informant informant, Map<InformantDataKey, Object> data){
+		try{
+			informant.set(data);
+		} catch (InvalidKeyException e) {
+			IntelligencePlugIn.log("InvalidKeyException decrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchAlgorithmException e) {
+			IntelligencePlugIn.log("NoSuchAlgorithmException decrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidKeySpecException e) {
+			IntelligencePlugIn.log("InvalidKeySpecException decrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchPaddingException e) {
+			IntelligencePlugIn.log("NoSuchPaddingException decrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidAlgorithmParameterException e) {
+			IntelligencePlugIn.log("InvalidAlgorithmParameterException decrypting informant ", null); //$NON-NLS-1$
+		} catch (IllegalBlockSizeException e) {
+			IntelligencePlugIn.log("IllegalBlockSizeException decrypting informant ", null); //$NON-NLS-1$
+		} catch (BadPaddingException e) {
+			IntelligencePlugIn.log("BadPaddingException decrypting informant ", null); //$NON-NLS-1$
+		} catch (IOException e) {
+			IntelligencePlugIn.log("IOException decrypting informant ", null); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			IntelligencePlugIn.log("ClassNotFoundException decrypting informant ", null); //$NON-NLS-1$
+		} catch (Exception e) {
+			IntelligencePlugIn.log("Exception decrypting informant: " + e.getClass().toString(), null); //$NON-NLS-1$
+		}
+	}
+	public static Object getInformant(Informant informant, InformantDataKey key){
+		try{
+			return informant.get(key);
+		} catch(InformantAesManager.InvalidPasswordException ex){
+			return Messages.InformantAesManager_InvalidPassword;
+		}catch(InformantAesManager.PasswordProctectedException ex){
+			return Messages.InformantAesManager_PasswordProtected;
+		} catch (InvalidKeyException e) {
+			IntelligencePlugIn.log("InvalidKeyException decrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchAlgorithmException e) {
+			IntelligencePlugIn.log("NoSuchAlgorithmException decrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidKeySpecException e) {
+			IntelligencePlugIn.log("InvalidKeySpecException decrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchPaddingException e) {
+			IntelligencePlugIn.log("NoSuchPaddingException decrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidAlgorithmParameterException e) {
+			IntelligencePlugIn.log("InvalidAlgorithmParameterException decrypting informant ", null); //$NON-NLS-1$
+		} catch (IllegalBlockSizeException e) {
+			IntelligencePlugIn.log("IllegalBlockSizeException decrypting informant ", null); //$NON-NLS-1$
+		} catch (BadPaddingException e) {
+			IntelligencePlugIn.log("BadPaddingException decrypting informant ", null); //$NON-NLS-1$
+		} catch (IOException e) {
+			IntelligencePlugIn.log("IOException decrypting informant ", null); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			IntelligencePlugIn.log("ClassNotFoundException decrypting informant ", null); //$NON-NLS-1$
+		} catch (Exception e) {
+			IntelligencePlugIn.log("Exception decrypting informant: " + e.getClass().toString(), null); //$NON-NLS-1$
+		}
+		return null;
+	}
+	
+	public static Map<InformantDataKey, Object> getInformant(Informant informant){
+		try{
+			return InformantAesManager.getInstance().get(informant);
+		} catch (InvalidKeyException e) {
+			IntelligencePlugIn.log("InvalidKeyException decrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchAlgorithmException e) {
+			IntelligencePlugIn.log("NoSuchAlgorithmException decrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidKeySpecException e) {
+			IntelligencePlugIn.log("InvalidKeySpecException decrypting informant ", null); //$NON-NLS-1$
+		} catch (NoSuchPaddingException e) {
+			IntelligencePlugIn.log("NoSuchPaddingException decrypting informant ", null); //$NON-NLS-1$
+		} catch (InvalidAlgorithmParameterException e) {
+			IntelligencePlugIn.log("InvalidAlgorithmParameterException decrypting informant ", null); //$NON-NLS-1$
+		} catch (IllegalBlockSizeException e) {
+			IntelligencePlugIn.log("IllegalBlockSizeException decrypting informant ", null); //$NON-NLS-1$
+		} catch (BadPaddingException e) {
+			IntelligencePlugIn.log("BadPaddingException decrypting informant ", null); //$NON-NLS-1$
+		} catch (IOException e) {
+			IntelligencePlugIn.log("IOException decrypting informant ", null); //$NON-NLS-1$
+		} catch (ClassNotFoundException e) {
+			IntelligencePlugIn.log("ClassNotFoundException decrypting informant ", null); //$NON-NLS-1$
+		} catch (Exception e) {
+			IntelligencePlugIn.log("Exception decrypting informant: " + e.getClass().toString(), null); //$NON-NLS-1$
+		}
+		return null;
+	}
 }

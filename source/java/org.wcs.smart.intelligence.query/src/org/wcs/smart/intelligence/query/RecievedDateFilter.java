@@ -22,7 +22,9 @@
 
 package org.wcs.smart.intelligence.query;
 
-import org.wcs.smart.intelligence.query.internal.Messages;
+import java.util.Locale;
+
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**
@@ -37,8 +39,8 @@ public class RecievedDateFilter implements IDateFieldFilter {
 	private RecievedDateFilter(){}
 	
 	@Override
-	public String getGuiName() {
-		return Messages.RecievedDateFilter_ReceivedDateFilterName;
+	public String getGuiName(Locale l) {
+		return SmartContext.INSTANCE.getClass(IIntelligenceQueryLabelProvider.class).getLabel(this, l);
 	}
 
 	@Override

@@ -129,12 +129,17 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private ValuePart valuePart;
 	
 	private boolean hasAreaFilter = false;
+	private Session session;
 	
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolSummaryQuery.KEY.equals(querytype);
 	}
 
+	@Override
+	public Session getCurrentConnection() {
+		return session;
+	}
 	
 	/**
 	 * Executes the given summary query.
@@ -171,7 +176,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			HashMap<String, Object> parameters) throws SQLException{
 
 		final PatrolSummaryQuery query = (PatrolSummaryQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		SumQueryDefinition def = null;
 		try{
@@ -525,7 +530,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		
 		fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
 		
-		PatrolValueOption option = PatrolQueryOptions.findPatrolValueItem(patrolItem.getPatrolValueOptionKey());
+		PatrolValueOption option = patrolItem.getPatrolValueOption();
 		String tmp = getNameByClass(option.getOptionClass()) ;
 		if (tmp != null){
 			selectSql.append(tmp + " as uniqueid"); //$NON-NLS-1$
@@ -952,7 +957,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		boolean filterValue2 = false;
 		if (item.getPart2() instanceof PatrolValueItem && 
-			PatrolQueryOptions.isGroupByFilterValueItem(  ((PatrolValueItem) item.getPart2()).getPatrolValueOptionKey())){
+			PatrolQueryOptions.isGroupByFilterValueItem(  ((PatrolValueItem) item.getPart2()).getPatrolValueOption())){
 				filterValue2 = true;
 		}
 		

@@ -66,7 +66,6 @@ import org.wcs.smart.patrol.query.engine.grids.PatrolDayCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolExistsCellMerger;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
@@ -109,6 +108,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	private String dataTable;
 	private String gridTable;
 	
+	private Session session;
+	
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolGriddedQuery.KEY.equals(querytype);
@@ -129,7 +130,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			HashMap<String, Object> parameters) throws SQLException{
 
 		this.query = (PatrolGriddedQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		
 		dataTable = createTempTableName();
@@ -532,7 +533,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
 		String dataField[] = null;
-		PatrolValueOption option = PatrolQueryOptions.findPatrolValueItem(item.getPatrolValueOptionKey());
+		PatrolValueOption option = item.getPatrolValueOption();
 		if (option == PatrolValueOption.DISTANCE){
 			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
 			DistanceValueComputer valueComputer = new DistanceValueComputer();
@@ -787,6 +788,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		return null;
 	}
 
-	
-	
+	@Override
+	public Session getCurrentConnection() {
+		return session;
+	}
 }

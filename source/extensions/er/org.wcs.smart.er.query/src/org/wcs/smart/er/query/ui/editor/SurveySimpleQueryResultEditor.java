@@ -32,6 +32,7 @@ import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.map.udig.QueryService;
 import org.wcs.smart.er.query.model.ISurveyQuery;
+import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.MissionTrackQueryType;
@@ -60,9 +61,9 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 
 	public static final String ID = "org.wcs.smart.er.query.ui.SimpleQueryResultsEditor";  //$NON-NLS-1$
 
-	private SurveyQueryEventManager.SurveyDesignChangeListener updateTable = new SurveyQueryEventManager.SurveyDesignChangeListener(){
+	private SurveyQueryEventManager.QuerySurveyDesignChangeListener updateTable = new SurveyQueryEventManager.QuerySurveyDesignChangeListener(){
 		@Override
-		public void surveyDesignChange(ISurveyQuery query) {
+		public void surveyDesignChange(ISurveyQuery query, SurveyDesign newDesign) {
 			if (!getQuery().equals(query)) return;
 			
 			//clear current results
@@ -84,8 +85,8 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 		@Override
 		public void event(Object o) {
 			if (o instanceof SurveyDesign){
-				SurveyDesign qd = ((ISurveyQuery)getQuery()).getSurveyDesignAsObject();
-				if (qd != null && qd.equals(o)){
+				String qd = ((ISurveyQuery)getQuery()).getSurveyDesign();
+				if (qd != null && qd.equals(((SurveyDesign) o).getKeyId())){
 					reparseQuery();		
 				}
 			}
@@ -127,14 +128,14 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	}
 	
 	private boolean isQueryType(String typeKey){
-		return (getQueryInternal().getType().getKey().equals(typeKey));
+		return (getQueryInternal().getTypeKey().equals(typeKey));
 	}
 	
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions(){
 		if (isQueryType(SurveyObservationQuery.KEY)){
 			return SurveyObservationQueryType.validDateFields();
-		}else if (isQueryType(MissionQueryType.KEY)){
+		}else if (isQueryType(MissionQuery.KEY)){
 			return MissionQueryType.validDateFields();
 		}else if (isQueryType(SurveyWaypointQuery.KEY)){
 			return SurveyWaypointQueryType.validDateFields();
@@ -175,7 +176,8 @@ public class SurveySimpleQueryResultEditor extends QueryResultsEditor{
 	protected ISummaryInfo createInfoSection(){
 		if (isQueryType(MissionTrackQuery.KEY)){
 			return new MissionTrackInfoSection();
-		}else if (isQueryType(MissionQueryType.KEY)){
+		}else if (isQueryType(MissionQuery.KEY)){
+			
 			return new MissionInfoSection();
 		}else{
 			return super.createInfoSection();

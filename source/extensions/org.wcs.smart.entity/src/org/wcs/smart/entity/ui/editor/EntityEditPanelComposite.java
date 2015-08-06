@@ -24,6 +24,7 @@ package org.wcs.smart.entity.ui.editor;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import javax.persistence.Column;
@@ -66,10 +67,11 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.ui.ProjectionLabelProvider;
@@ -313,7 +315,7 @@ public class EntityEditPanelComposite extends Composite{
 		
 		//ID
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText(Entity.ID_FIELD_NAME + ":"); //$NON-NLS-1$
+		lbl.setText(EntityLabelProvider.ID_FIELD_NAME + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		txtId = new Text(comp, SWT.BORDER);
@@ -340,7 +342,7 @@ public class EntityEditPanelComposite extends Composite{
 		
 		//STATUS
 		lbl = new Label(comp, SWT.NONE);
-		lbl.setText(Entity.STATUS_FIELD_NAME + ":"); //$NON-NLS-1$
+		lbl.setText(EntityLabelProvider.STATUS_FIELD_NAME + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		cmbStatus = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -350,10 +352,10 @@ public class EntityEditPanelComposite extends Composite{
 		cmbStatus.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
-				return ((Entity.Status)element).getGuiName();
+				return ((Status)element).getGuiName(Locale.getDefault());
 			}
 		});
-		cmbStatus.setInput(Entity.Status.values());
+		cmbStatus.setInput(Status.values());
 			
 		if (etype.getType() == EntityType.Type.FIXED){
 			lbl = new Label(comp, SWT.NONE);
@@ -389,7 +391,7 @@ public class EntityEditPanelComposite extends Composite{
 			posComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			lbl = new Label(posComp, SWT.NONE);
-			lbl.setText(Entity.X_FIELD_NAME + ":"); //$NON-NLS-1$
+			lbl.setText(EntityLabelProvider.X_FIELD_NAME + ":"); //$NON-NLS-1$
 			
 			txtX = new Text(posComp, SWT.BORDER);
 			txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -420,7 +422,7 @@ public class EntityEditPanelComposite extends Composite{
 			});
 			
 			lbl = new Label(posComp, SWT.NONE);
-			lbl.setText(Entity.Y_FIELD_NAME + ":"); //$NON-NLS-1$
+			lbl.setText(EntityLabelProvider.Y_FIELD_NAME + ":"); //$NON-NLS-1$
 			
 			txtY = new Text(posComp, SWT.BORDER);			
 			txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.ui.mision.editor;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;

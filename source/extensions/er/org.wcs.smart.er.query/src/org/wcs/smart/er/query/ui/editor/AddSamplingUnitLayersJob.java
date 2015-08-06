@@ -52,16 +52,18 @@ public abstract class AddSamplingUnitLayersJob extends Job {
 		if (getQuery() instanceof ISurveyQuery) {
 			ISurveyQuery qq = (ISurveyQuery) getQuery();
 
-			SurveyDesign sd = qq.getSurveyDesignAsObject();
-			if (sd != null) {
-				if (service != null && service.getSurveyDesign().equals(sd)) {
+			String sdkey = qq.getSurveyDesign();
+			if (sdkey != null) {
+				if (service != null && service.getSurveyDesign().getKeyId().equals(sdkey)) {
 					// we don't have to do anything
 					return Status.OK_STATUS;
 				}
 				disposeService(monitor);
-				service = new SamplingUnitService(sd);
 				Session s = HibernateManager.openSession();
 				try {
+					SurveyDesign sd = (SurveyDesign) s.load(SurveyDesign.class, sdkey);
+					service = new SamplingUnitService(sd);
+				
 					@SuppressWarnings("unchecked")
 					List<IGeoResource> layers = (List<IGeoResource>) service
 							.resources(null);

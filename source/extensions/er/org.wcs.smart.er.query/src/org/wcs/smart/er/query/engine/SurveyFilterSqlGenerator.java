@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.engine;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.model.Mission;
@@ -308,7 +309,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			}
 			return queryStr;
 		}else if (filter.getAttributeType() == AttributeType.LIST) {
-			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {
 				// any option
 				return "( sua.sua_" + filter.getSamplingUnitAttributeKey() + " is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
@@ -384,7 +385,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			}
 			return queryStr;
 		} else if (filter.getAttributeType() == AttributeType.LIST) {
-			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {
 				// any option
 				return "( mt.ma_" + filter.getAttributeKey() + " is not null )"; //$NON-NLS-1$ //$NON-NLS-2$
 			} else {
@@ -416,7 +417,7 @@ public class SurveyFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 			table = engine.tablePrefix(MissionDay.class);
 			field = "mission_day"; //$NON-NLS-1$
 		}else{
-			throw new SQLException(MessageFormat.format(Messages.SurveyFilterSqlGenerator_DateFilterNotSupported, new Object[]{filter.getDateFieldOption().getGuiName()}));
+			throw new SQLException(MessageFormat.format(Messages.SurveyFilterSqlGenerator_DateFilterNotSupported, new Object[]{filter.getDateFieldOption().getGuiName(Locale.getDefault())}));
 		}
 		
 		field = table + "." + field; //$NON-NLS-1$

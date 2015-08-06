@@ -22,7 +22,6 @@
 package org.wcs.smart.er.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;

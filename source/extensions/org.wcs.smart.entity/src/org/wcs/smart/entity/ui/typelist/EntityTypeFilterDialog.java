@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.entity.ui.typelist;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -38,7 +40,8 @@ import org.wcs.smart.common.filter.SmartFilterDialog;
 import org.wcs.smart.common.filter.StringFilterComposite;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.model.EntityTypeFilter;
+import org.wcs.smart.entity.model.Status;
+import org.wcs.smart.entity.ui.EntityTypeFilter;
 import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -95,9 +98,9 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 		
 		if (btnFilterStatus.getSelection()){
 			Object[] values = statusTableViewer.getCheckedElements();
-			EntityType.Status[] status= new EntityType.Status[values.length];
+			Status[] status= new Status[values.length];
 			for (int i = 0; i < values.length; i ++){
-				status[i] = ((EntityType.Status) values[i]);
+				status[i] = ((Status) values[i]);
 			}
 			this.currentFilter.setEntityStatus(status);
 		}else{
@@ -203,7 +206,7 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 		typeTableViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof EntityType.Type){
-					return ((EntityType.Type) element).getGuiName();
+					return ((EntityType.Type) element).getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
@@ -245,13 +248,13 @@ public class EntityTypeFilterDialog extends SmartFilterDialog {
 		statusTableViewer.setContentProvider(ArrayContentProvider.getInstance());
 		statusTableViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
-				if (element instanceof EntityType.Status){
-					return ((EntityType.Status) element).getGuiName();
+				if (element instanceof Status){
+					return ((Status) element).getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
 		});
-		statusTableViewer.setInput(EntityType.Status.values());
+		statusTableViewer.setInput(Status.values());
 		
 
 		btnFilterStatus.addSelectionListener(new SelectionAdapter() {

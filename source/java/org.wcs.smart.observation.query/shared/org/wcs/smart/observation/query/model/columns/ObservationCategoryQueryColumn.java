@@ -44,20 +44,14 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class ObservationCategoryQueryColumn extends CategoryQueryColumn{
 
-	private Locale l;
-	
 	/**
 	 * Creates a new category column
 	 * 
 	 * @param name the name
 	 * @param level the level in the data model this column represents
 	 */
-	public ObservationCategoryQueryColumn(int level, Locale l){
-		super(MessageFormat.format(
-				SmartContext.INSTANCE.getClass(IObservationQueryLabelProvider.class)
-				.getLabel(IObservationQueryLabelProvider.CATEGORY_LEVEL_LBL, l),
-				new Object[]{level}),level);
-		this.l = l;
+	public ObservationCategoryQueryColumn(String name, int level){
+		super(name, level);
 	}
 	
 
@@ -91,7 +85,7 @@ public class ObservationCategoryQueryColumn extends CategoryQueryColumn{
 	 */
 	@Override
 	public QueryColumn clone() {
-		ObservationCategoryQueryColumn newColumn = new ObservationCategoryQueryColumn(level, l);
+		ObservationCategoryQueryColumn newColumn = new ObservationCategoryQueryColumn(getName(), level);
 		return newColumn;
 	}
 

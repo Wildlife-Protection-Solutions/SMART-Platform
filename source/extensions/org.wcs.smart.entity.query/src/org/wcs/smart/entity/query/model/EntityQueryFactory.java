@@ -95,14 +95,14 @@ public class EntityQueryFactory {
 	public static EntityObservationQuery createObservationQuery(){
 		EntityObservationQuery query = new EntityObservationQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		return query;
 	}
 	
 	public static EntityWaypointQuery createWaypointQuery(){
 		EntityWaypointQuery query = new EntityWaypointQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		return query;
 	}
 	
@@ -110,7 +110,7 @@ public class EntityQueryFactory {
 	public static EntityGriddedQuery createGriddedQuery(){
 		EntityGriddedQuery query = new EntityGriddedQuery();
 		initQuery(query, Messages.GriddedQuery_DefaultQueryName);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}
@@ -119,7 +119,7 @@ public class EntityQueryFactory {
 		EntitySummaryQuery query = new EntitySummaryQuery();
 		initQuery(query, Messages.SummaryQuery_DefaultQueryName);
 		
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}

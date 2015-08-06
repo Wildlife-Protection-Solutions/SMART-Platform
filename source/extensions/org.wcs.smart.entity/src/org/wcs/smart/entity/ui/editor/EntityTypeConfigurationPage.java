@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -974,8 +975,8 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtName.setText(type.getName());
 		txtKey.setText(type.getKeyId());
 		txtDmAttribute.setText(type.getDmAttribute().getName());
-		txtStatus.setText(type.getStatus().getGuiName());
-		txtType.setText(type.getType().getGuiName());
+		txtStatus.setText(type.getStatus().getGuiName(Locale.getDefault()));
+		txtType.setText(type.getType().getGuiName(Locale.getDefault()));
 		if (type.getCreator() != null){
 			txtCreatedBy.setText(LabelConstants.getFullLabel(type.getCreator()));
 		}

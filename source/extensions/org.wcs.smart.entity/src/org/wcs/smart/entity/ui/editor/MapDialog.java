@@ -31,8 +31,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.entity.internal.Messages;
-import org.wcs.smart.ui.map.location.ISmartPoint;
 import org.wcs.smart.ui.map.location.LocationSelectComposite;
 
 /**

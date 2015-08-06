@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;

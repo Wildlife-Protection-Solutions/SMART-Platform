@@ -73,7 +73,7 @@ public class PlanPatrolQuery extends SmartQuery {
 	public void prepare(String queryText) throws OdaException {
 		parameters = new HashMap<Object, Object>();
 		try {
-			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(smartQuery.getType().getKey());
+			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(smartQuery.getTypeKey());
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}

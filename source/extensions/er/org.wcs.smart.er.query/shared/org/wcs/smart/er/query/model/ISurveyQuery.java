@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.model;
 
 
+
 /**
  * Interface for survey queries.
  * 
@@ -29,7 +30,7 @@ package org.wcs.smart.er.query.model;
  *
  */
 public interface ISurveyQuery {
-
+	
 	/**
 	 * Sets the survey design key
 	 * @param key
@@ -41,5 +42,5 @@ public interface ISurveyQuery {
 	 * @return the survey design key
 	 */
 	public String getSurveyDesign();
-	
+
 }

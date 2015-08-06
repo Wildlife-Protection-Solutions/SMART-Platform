@@ -254,7 +254,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 		for (IValueItem valueIt : def.getValuePart().getValueItems()){
 			if (valueIt instanceof PatrolValueItem){
 				PatrolValueItem pIt = (PatrolValueItem) valueIt;
-				PatrolValueOption option = PatrolQueryOptions.findPatrolValueItem(pIt.getPatrolValueOptionKey());
+				PatrolValueOption option = pIt.getPatrolValueOption();
 				if (option == PatrolValueOption.NUM_NIGHTS){
 					//cannot group by patrol leader, patrol memeber, time period, or transport
 					for (IGroupBy groupBy : groupBys){

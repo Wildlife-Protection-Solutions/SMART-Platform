@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.XMLMemento;
@@ -182,7 +183,7 @@ public class PlanTargetGeoResource extends IGeoResource {
     			 + "&lt;sld:FeatureTypeName&gt;Feature&lt;/sld:FeatureTypeName&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Rule&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Name&gt;Incomplete Rule&lt;/sld:Name&gt;" //$NON-NLS-1$
-    			 + "&lt;sld:Title&gt;" + PlanTargetStatus.Status.INCOMPLETE.guiName + "&lt;/sld:Title&gt;" //$NON-NLS-1$ //$NON-NLS-2$
+    			 + "&lt;sld:Title&gt;" + PlanTargetStatus.Status.INCOMPLETE.getGuiName(Locale.getDefault()) + "&lt;/sld:Title&gt;" //$NON-NLS-1$ //$NON-NLS-2$
     			 + "&lt;ogc:Filter&gt;" //$NON-NLS-1$
     			 + "&lt;ogc:PropertyIsEqualTo&gt;" //$NON-NLS-1$
     			 + "&lt;ogc:PropertyName&gt;targetStatus&lt;/ogc:PropertyName&gt;" //$NON-NLS-1$
@@ -203,7 +204,7 @@ public class PlanTargetGeoResource extends IGeoResource {
     			 + "&lt;/sld:Rule&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Rule&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Name&gt;Complete Rule&lt;/sld:Name&gt;" //$NON-NLS-1$
-    			 + "&lt;sld:Title&gt;" + PlanTargetStatus.Status.COMPLETE.guiName + "&lt;/sld:Title&gt;" //$NON-NLS-1$ //$NON-NLS-2$
+    			 + "&lt;sld:Title&gt;" + PlanTargetStatus.Status.COMPLETE.getGuiName(Locale.getDefault()) + "&lt;/sld:Title&gt;" //$NON-NLS-1$ //$NON-NLS-2$
     			 + "&lt;ogc:Filter&gt;" //$NON-NLS-1$
     			 + "&lt;ogc:PropertyIsEqualTo&gt;" //$NON-NLS-1$
     			 + "&lt;ogc:PropertyName&gt;targetStatus&lt;/ogc:PropertyName&gt;" //$NON-NLS-1$
@@ -224,7 +225,7 @@ public class PlanTargetGeoResource extends IGeoResource {
     			 + "&lt;/sld:Rule&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Rule&gt;" //$NON-NLS-1$
     			 + "&lt;sld:Name&gt;Unknown Rule&lt;/sld:Name&gt;" //$NON-NLS-1$
-    			 + "&lt;sld:Title&gt;" + PlanTargetStatus.Status.UNKNOWN.guiName + "&lt;/sld:Title&gt;" //$NON-NLS-1$ //$NON-NLS-2$
+    			 + "&lt;sld:Title&gt;" + PlanTargetStatus.Status.UNKNOWN.getGuiName(Locale.getDefault()) + "&lt;/sld:Title&gt;" //$NON-NLS-1$ //$NON-NLS-2$
     			 + "&lt;ogc:Filter&gt;" //$NON-NLS-1$
     			 + "&lt;ogc:PropertyIsEqualTo&gt;" //$NON-NLS-1$
     			 + "&lt;ogc:PropertyName&gt;targetStatus&lt;/ogc:PropertyName&gt;" //$NON-NLS-1$

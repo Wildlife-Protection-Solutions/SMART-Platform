@@ -28,7 +28,10 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.intelligence.query.internal.IntelligenceQueryLabelProvider;
 import org.wcs.smart.intelligence.query.internal.Messages;
+import org.wcs.smart.intelligence.query.model.IntelligenceQueryColumnProvider;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -58,6 +61,9 @@ public class IntelligenceQueryPlugIn extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
+		
+		SmartContext.INSTANCE.setClass(IIntelligenceQueryLabelProvider.class, new IntelligenceQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IIntelligenceQueryColumnProvider.class, new IntelligenceQueryColumnProvider());
 		plugin = this;
 	}
 

@@ -23,6 +23,7 @@ package org.wcs.smart.plan.ui.editor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -60,6 +61,7 @@ import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 
@@ -150,13 +152,15 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 			try {
 				thisPlan = (Plan) session.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
 				getChildTargets(thisPlan, childTargets);
+			
+				for(PlanTarget pt : childTargets){
+					pt.refreshStatus(Locale.getDefault(), session);
+				}
 			}finally{
 				session.getTransaction().rollback();
 				session.close();
 			}
-			for(PlanTarget pt : childTargets){
-				pt.refreshStatus();
-			}
+			
 			mapPage.updateSubplanTargetLayer(thisPlan);
 			
 			Display.getDefault().asyncExec(new Runnable(){
@@ -178,9 +182,16 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			final List<PlanTarget> targets = (List<PlanTarget>)plan.getTargets();
-			for (PlanTarget pt : targets){
-				pt.refreshStatus();
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				final List<PlanTarget> targets = (List<PlanTarget>)plan.getTargets();
+				for (PlanTarget pt : targets){
+					pt.refreshStatus(Locale.getDefault(), s);
+				}
+			}finally{
+				s.getTransaction().rollback();
+				s.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
 				public void run(){
@@ -358,7 +369,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	private void initEditor(){
 		summaryPage.initValues();	//loads the plan
 		setPartName(plan.getLabel());
-		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().getDescriptor(plan.getType().getIconKey()).createImage());
+		setTitleImage(PlanLabelProvider.getImage(plan.getType()).createImage());
 		computePlanTargetStatus();
 	}
 	

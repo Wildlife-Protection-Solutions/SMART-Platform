@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.parser;
 
 import java.util.List;
 
+import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.EmptyFilter;
@@ -135,9 +136,9 @@ public class PatrolContributionFactory {
 	 *  
 	 * @return the sql for the given filter or null if filter cannot be processed
 	 */
-	public static String getSql(IQueryEngine engine, IFilter filter){
+	public static String getSql(IQueryEngine engine, Session session, IFilter filter){
 		for (IQueryFilterPatrolContribution contribution : getFilterContributions()) {
-			String sql = contribution.asSql(engine, filter);
+			String sql = contribution.asSql(engine, session, filter);
 			if (sql != null){
 				return sql;
 			}

@@ -63,6 +63,7 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.locationtech.udig.project.ui.tool.Tool;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider.ICrsProvider;
 import org.wcs.smart.ui.map.location.tool.IMapPointSelectionListener;

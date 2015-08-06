@@ -113,8 +113,8 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		KEY(IntelligenceSource.KEY,		1),
-		NAME(IntelligenceSource.NAME,	2);
+		KEY(Messages.IntelligenceSource_Key, 1),
+		NAME(Messages.IntelligenceSource_Label,	2);
 		
 		String name;
 		int size;

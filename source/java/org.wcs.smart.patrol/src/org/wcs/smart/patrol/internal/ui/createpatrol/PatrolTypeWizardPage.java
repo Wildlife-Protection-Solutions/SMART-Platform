@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.internal.ui.createpatrol;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -85,7 +86,7 @@ public class PatrolTypeWizardPage extends NewPatrolWizardPage {
 
 		for (PatrolType t: types){
 			Button btn = new Button(buttonPanel, SWT.RADIO);
-			btn.setText(LabelConstants.getLabel(t));
+			btn.setText(t.getType().getGuiName(Locale.getDefault()));
 			btn.setData(t);
 			btnTypes.add(btn);
 			btn.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));

@@ -23,7 +23,6 @@ package org.wcs.smart.er.ui.samplingunit;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;

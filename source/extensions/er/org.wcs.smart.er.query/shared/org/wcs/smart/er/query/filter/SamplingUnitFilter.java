@@ -21,8 +21,10 @@
  */
 package org.wcs.smart.er.query.filter;
 
-import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.query.internal.Messages;
+import java.util.Locale;
+
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 
@@ -37,11 +39,6 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
 public class SamplingUnitFilter implements IFilter {
 
 	public static final String NONE_KEY = "none"; //$NON-NLS-1$
-	
-	public static SamplingUnit NONE = new SamplingUnit();
-	static{
-		NONE.setId(Messages.SamplingUnitFilter_NoneFilterName);
-	}
 	
 	public static Source keyToSource(String key){
 		for (Source s : Source.values()){
@@ -65,15 +62,17 @@ public class SamplingUnitFilter implements IFilter {
 	public enum Type {SAMPLINGUNIT, TRACK};
 	
 	public enum Source {
-		OBSERVATION ("obs", Messages.SamplingUnitFilter_ObservationSuFilterLabel),  //$NON-NLS-1$
-		TRACK ("trk", Messages.SamplingUnitFilter_TrackSuFilterLabel); //$NON-NLS-1$
+		OBSERVATION ("obs"),  //$NON-NLS-1$
+		TRACK ("trk");
 		
 		public String queryKey;
-		public String guiName;
 		
-		Source(String queryKey, String guiName){
+		Source(String queryKey){
 			this.queryKey = queryKey;
-			this.guiName = guiName;
+		}
+		
+		public String getGuiName(Locale l){
+			return SmartContext.INSTANCE.getClass(ISurveyQueryLabelProvider.class).getLabel(this, l);
 		}
 	};
 	

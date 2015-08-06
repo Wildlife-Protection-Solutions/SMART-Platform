@@ -22,17 +22,25 @@
 package org.wcs.smart.er.query.ui.panels.definition;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
 import org.wcs.smart.er.query.internal.Messages;
@@ -46,6 +54,8 @@ import org.wcs.smart.er.query.ui.dropitems.SamplingUnitAttributeDropItem;
 import org.wcs.smart.er.query.ui.dropitems.SamplingUnitDropItem;
 import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
@@ -70,7 +80,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	private boolean showSurveyDesignLabel = true;
 	private boolean includeFilterTypeOp = true;
 	
-	private SurveyQueryEventManager.SurveyDesignChangeListener listener;
+	private SurveyQueryEventManager.QuerySurveyDesignChangeListener listener;
 	
 	@Inject private DefinitionPanelManager pnlManager;
 	
@@ -146,7 +156,7 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	}
 
 	private void configureSamplingUnitDropItem(DropItem item){
-		String key = currentQuery.getQueryType();
+		String key = currentQuery.getQueryType().getKey();
 	
 		if (item instanceof SamplingUnitDropItem){
 			SamplingUnitDropItem suItem = (SamplingUnitDropItem) item;
@@ -193,12 +203,39 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	}
 
 	@Override
-	public void initItems(QueryProxy q) {
+	public void initItems(QueryProxy q) throws Exception {
 		super.initItems(q);
 		
 		if (q.getQuery() instanceof ISurveyQuery){
-			ISurveyQuery sq = (ISurveyQuery) q.getQuery();
-			refreshPanel(sq.getSurveyDesignAsObject());
+			final ISurveyQuery sq = (ISurveyQuery) q.getQuery();
+			
+			//load and configure survey design
+			Job j = new Job(
+					Messages.SurveyObservationQuery_loadingDesignJobName) {
+
+				@Override
+				protected IStatus run(IProgressMonitor monitor) {
+					Session s = HibernateManager.openSession();
+					List<?> results = s
+							.createCriteria(SurveyDesign.class)
+							.add(Restrictions.eq("keyId", sq.getSurveyDesign())) //$NON-NLS-1$
+							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+							.list(); 
+
+					if (results.size() > 0) {
+						final SurveyDesign sd = (SurveyDesign) results.get(0);
+						Display.getDefault().syncExec(new Runnable() {
+							@Override
+							public void run() {
+								refreshPanel(sd);
+							}
+						});
+					}
+
+					return Status.OK_STATUS;
+				}
+			};
+			j.schedule();
 		}
 	}
 
@@ -255,8 +292,8 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 						if ((currentDesign == null && newDesign != null)
 								|| (currentDesign != null 
 								&& !currentDesign.equals(newDesign))) {
-							((ISurveyQuery) currentQuery.getQuery()).setSurveyDesign(newDesign);
-							SurveyQueryEventManager.getInstance().fireSurveyDesignChange((ISurveyQuery) currentQuery.getQuery());
+							((ISurveyQuery) currentQuery.getQuery()).setSurveyDesign(newDesign.getKeyId());
+							SurveyQueryEventManager.getInstance().fireQuerySurveyDesignChange((ISurveyQuery) currentQuery.getQuery(), newDesign);
 							fireQueryChangedListeners();
 						}
 					}
@@ -267,9 +304,8 @@ public class FilterDefintionPanel extends BasicFilterDefintionPanel implements I
 	}
 
 	@Override
-	public void refreshPanel(SurveyDesign newDesign) {
-		this.currentDesign = newDesign;
-		
+	public void refreshPanel(SurveyDesign surveyDesign) {
+		this.currentDesign = surveyDesign;
 		updateDesignLabel();
 		for (DropItem di : super.items) {
 			if (di instanceof ISurveyDesignDropItem) {

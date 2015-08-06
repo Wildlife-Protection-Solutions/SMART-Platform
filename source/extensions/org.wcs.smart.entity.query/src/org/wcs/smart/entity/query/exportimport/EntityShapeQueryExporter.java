@@ -26,9 +26,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.query.map.geotools.QueryDataSource;
 import org.wcs.smart.entity.query.map.geotools.QueryResultItemFeature;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
@@ -48,8 +48,8 @@ public class EntityShapeQueryExporter extends ShapeQueryExporter{
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(EntityObservationQueryType.KEY) ||
-				query.getType().getKey().equals(EntityWaypointQueryType.KEY)){
+		if (query.getTypeKey().equals(EntityObservationQuery.KEY) ||
+				query.getTypeKey().equals(EntityWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

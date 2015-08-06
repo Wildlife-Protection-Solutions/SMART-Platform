@@ -30,6 +30,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -89,7 +90,7 @@ public class PlanEditorInput implements IEditorInput {
 	@Override
 	public ImageDescriptor getImageDescriptor() {
 		if (planType != null){
-			return SmartPlanPlugIn.getDefault().getImageRegistry().getDescriptor(planType.getIconKey());
+			return PlanLabelProvider.getImage(planType);
 		}
 		return null;
 	}

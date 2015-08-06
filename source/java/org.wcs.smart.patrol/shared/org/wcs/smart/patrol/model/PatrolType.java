@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.model;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -40,6 +41,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 
 /**
@@ -67,6 +69,10 @@ public class PatrolType {
 		GROUND, 
 		MARINE, 
 		AIR;
+		
+		public String getGuiName(Locale l){
+			return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, Locale.getDefault());
+		}
 	}
 
 	public static final Integer MAX_TRANSPORT_NAME_LENGTH = 128;

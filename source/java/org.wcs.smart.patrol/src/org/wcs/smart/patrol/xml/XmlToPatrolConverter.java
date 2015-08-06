@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -206,7 +207,7 @@ public class XmlToPatrolConverter {
 		if (ttype == null){
 			throw new Exception(MessageFormat.format(
 				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), 
-						org.wcs.smart.patrol.ui.LabelConstants.getLabel(patrol.getPatrolType())}));
+						patrol.getPatrolType().getGuiName(Locale.getDefault())}));
 		}
 		boolean found = false;
 		
@@ -223,7 +224,7 @@ public class XmlToPatrolConverter {
 		if (!found){
 			throw new Exception(MessageFormat.format(
 					Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
-							org.wcs.smart.patrol.ui.LabelConstants.getLabel(patrol.getPatrolType())}));
+							patrol.getPatrolType().getGuiName(Locale.getDefault())}));
 		}
 		leg.setType(ttype);
 		

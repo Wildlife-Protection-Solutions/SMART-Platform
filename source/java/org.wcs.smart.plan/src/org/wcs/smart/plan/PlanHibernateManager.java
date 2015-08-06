@@ -283,122 +283,7 @@ public class PlanHibernateManager{
 		deletedItems.add(parent);
 	}
 
-	/**
-	 * Returns the value of the target type for all patrols associated with this
-	 * one plan. Does not recurse through the plan tree, that is done in the
-	 * plantarget classes such as NumericPlanTarget.
-	 * 
-	 * @param type
-	 *            the variable we are interested in, distance, patrol days,
-	 *            etc...
-	 * @param plan
-	 *            the plan we are querying
-	 * 
-	 * @return the total calculated value from all associated patrols.
-	 */
-	public static Double getTargetTotalValue(TargetType type, Plan plan) {
-		Double targetTotal;
-		StringBuilder sql = new StringBuilder();
-		targetTotal = 0.0;
-		
-		if (type == TargetType.DISTANCE) {
-			sql.append(" SELECT "); //$NON-NLS-1$
-			sql.append(" sum(t.distance) "); //$NON-NLS-1$
-			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
-			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
-			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
-			sql.append(" JOIN pld.tracks as t"); //$NON-NLS-1$
-			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
-
-			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
-
-			List<?> rs = q.list();
-			targetTotal = (Double)rs.get(0);
-
-		}else if (type == TargetType.PATROL_DAYS) {
-			sql.append(" SELECT "); //$NON-NLS-1$
-			sql.append(" p.endDate, p.startDate "); //$NON-NLS-1$
-			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
-			sql.append(" JOIN pp.id.patrol p"); //$NON-NLS-1$
-			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
-
-			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
-
-			List<?> list = q.list();
-
-			Iterator<?> it = list.iterator();
-			if(it.hasNext()){
-		        while(it.hasNext()){
-		          Object[] row = (Object[])it.next();
-		          Timestamp t1 = (Timestamp)row[0];
-		          Timestamp t2 = (Timestamp)row[1];
-		          Long milDiff = t1.getTime() - t2.getTime();
-		          targetTotal += (milDiff / 1000 /60 /60 / 24) + 1; 
-		        }
-		     }
-		}else if (type == TargetType.PATROL_HOURS) {
-			sql.append(" SELECT "); //$NON-NLS-1$
-			sql.append(" pld.endTime, pld.startTime "); //$NON-NLS-1$
-			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
-			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
-			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
-			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
-			
-			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
-
-			List<?> list = q.list();
-
-			Iterator<?> it = list.iterator();
-			if(it.hasNext()){
-		        while(it.hasNext()){
-		          Object[] row = (Object[])it.next();
-		          Time t1 = (Time)row[0];
-		          Time t2 = (Time)row[1];
-		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
-		          targetTotal += (milDiff / 1000 /60 / 60); 
-		        }
-		    }
-
-		}else if (type == TargetType.PATROL_MANHOURS) {
-			sql.append(" SELECT "); //$NON-NLS-1$
-			sql.append(" pld.endTime, pld.startTime, m.isLeader "); //$NON-NLS-1$
-			sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
-			sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
-			sql.append(" JOIN pl.members m"); //$NON-NLS-1$
-			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
-			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
-			
-			Session session = HibernateManager.openSession();
-			Query q = session.createQuery(sql.toString());
-			q.setParameter("uuid", plan); //$NON-NLS-1$
-
-			List<?> list = q.list();
-
-			Iterator<?> it = list.iterator();
-			if(it.hasNext()){
-		        while(it.hasNext()){
-		          Object[] row = (Object[])it.next();
-		          Time t1 = (Time)row[0];
-		          Time t2 = (Time)row[1];
-		          Long milDiff = (t1.getTime() + 1000)- t2.getTime(); //all our default end times for a whole day are 11:59:59, adding a second here to get 24hours for full days.
-		          targetTotal += (milDiff / 1000 /60 / 60); 
-		        }
-		    }
-
-		} else {
-			return 1.0;
-		}
-		
-		if(targetTotal== null)targetTotal = 0.0;
-		return targetTotal;
-
-	}
+	
 
 	/**
 	 * Returns all patrols directly associated with a given plan.
@@ -430,32 +315,7 @@ public class PlanHibernateManager{
 		return patrols;
 	}
 	
-	/**
-	 * Returns all tracks directory associated with a given plan.
-	 *  
-	 * @param plan the plan you want all the tracks from
-	 * @param session the session/transaction that is already open and being used with this plan
-	 * @return a list of {@link PatrolEditorInput} directly associated with the plan.
-	 */
-	public static List<Track> getAllTracks(Plan plan, Session session){
-		StringBuilder sql = new StringBuilder();
-		sql.append(" SELECT pld.tracks"); //$NON-NLS-1$
-		sql.append(" FROM PatrolPlan pp "); //$NON-NLS-1$
-		sql.append(" JOIN pp.id.patrol.legs pl"); //$NON-NLS-1$
-		sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
-		sql.append(" WHERE pp.id.plan  =:uuid ");//$NON-NLS-1$
-		
-		List<Track> tracks = new ArrayList<Track>();
-		Query q = session.createQuery(sql.toString());
-		q.setParameter("uuid", plan); //$NON-NLS-1$
 
-		List<?> list = q.list();
-		for (Iterator<?> iterator = list.iterator(); iterator.hasNext();) {
-			tracks.add((Track) iterator.next());
-		}
-		return tracks;		
-
-	}
 
 	/**
 	 * Returns all plan IDs of given parent that do not fit in specify start/end date range.
@@ -554,41 +414,6 @@ public class PlanHibernateManager{
 		return plans;
 	}
 
-	/**
-	 * Returns the list of plan uuid that are children for given plan uuid
-	 * @param planUuid
-	 * @return
-	 */
-	public static List<UUID> getChildPlanIds(String planUuid) {
-		Session session = HibernateManager.openSession();
-		try {
-			UUID uuid = UuidUtils.stringToUuid(planUuid);
-			return listChildPlanIds(uuid, session);
-		} catch (Exception e) {
-			SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_FetchChildren_Error, null);
-			return new ArrayList<UUID>();
-		} finally {
-			session.close();
-		}
-	}
 	
-	/**
-	 * Returns the list of plan uuid that are children for given plan uuid
-	 * @param planUuid
-	 * @param session
-	 * @return
-	 */
-	private static List<UUID> listChildPlanIds(UUID planUuid, Session session) {
-		List<UUID> ids = new ArrayList<UUID>();
-		Query query = session.createQuery("SELECT p.uuid FROM Plan p where p.parent.uuid = :uuid"); //$NON-NLS-1$
-		query.setParameter("uuid", planUuid); //$NON-NLS-1$
-		@SuppressWarnings("unchecked")
-		List<UUID> list = query.list();
-		ids.addAll(list);
-		for (UUID uuid : list) {
-			ids.addAll(listChildPlanIds(uuid, session));
-		}
-		return ids;
-	}
 	
 }

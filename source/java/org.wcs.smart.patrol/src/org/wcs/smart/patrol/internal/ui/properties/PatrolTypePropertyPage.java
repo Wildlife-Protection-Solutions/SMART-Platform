@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -476,7 +477,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 				@Override
 				public String getText(Object element) {
 					if (element instanceof PatrolType){
-						return LabelConstants.getLabel( (((PatrolType)element).getType()));
+						return ((PatrolType)element).getType().getGuiName(Locale.getDefault());
 					}
 					return super.getText(element);
 				}

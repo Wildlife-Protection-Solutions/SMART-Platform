@@ -68,6 +68,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;

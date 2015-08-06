@@ -30,9 +30,11 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.IntelligenceAttachment;
 import org.wcs.smart.patrol.PatrolManager;
 
 /**
@@ -90,6 +92,9 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 		
 		PatrolManager.getInstance().addDeleteHandler(new PatrolDeleteHandler(), PatrolDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaDeleteHandler(), CaDeleteHandler.EXECUTE_ORDER);
+		
+		
+		SmartContext.INSTANCE.setPair(IntelligenceAttachment.ATTACHMENT_DIR_KEY, getIntelligenceDirectory().getAbsolutePath());
 	}
 
 	/*

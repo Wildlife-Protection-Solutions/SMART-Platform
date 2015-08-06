@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.targets;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -39,6 +40,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.model.PlanTargetStatus;
 
@@ -75,13 +77,13 @@ public class TargetProgressViewer{
 			}else if (this == TARGETNAME){
 				value = target.getName();
 			}else if (this == SUMMARY){
-				value = target.getSummary();
+				value = target.getSummary(Locale.getDefault());
 			}else if (this == STATUS){
 				PlanTargetStatus status = target.getCurrentStatus();
 				if (status == null){
 					value = Messages.TargetProgressViewer_Computing_Label;
 				}else{
-					value = status.getDisplayString();
+					value = status.getDisplayString(Locale.getDefault());
 				}
 			}
 			if (value == null){
@@ -181,7 +183,7 @@ public class TargetProgressViewer{
 		            public void update(ViewerCell cell) {
 		            	PlanTargetStatus status = ((PlanTarget)cell.getElement()).getCurrentStatus();
 		            	if (status != null){
-		            		cell.setImage(status.getStatus().guiImage);
+		            		cell.setImage(PlanLabelProvider.getImage(status.getStatus()));
 		            	}
 		            }
 				});

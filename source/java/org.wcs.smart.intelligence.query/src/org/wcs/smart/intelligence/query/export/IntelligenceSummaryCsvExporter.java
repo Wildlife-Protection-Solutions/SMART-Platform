@@ -28,7 +28,7 @@ import java.util.HashMap;
 
 import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.intelligence.query.internal.Messages;
-import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
@@ -54,7 +54,7 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (IntelligenceSummaryQueryType.KEY.equals(query.getType().getKey())){
+		if (IntelligenceSummaryQuery.KEY.equals(query.getTypeKey())){
 			return true;
 		}
 		return false;

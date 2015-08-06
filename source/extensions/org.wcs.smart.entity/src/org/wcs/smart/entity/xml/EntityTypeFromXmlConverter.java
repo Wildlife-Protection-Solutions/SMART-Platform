@@ -20,6 +20,7 @@ import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.entity.xml.model.AggregationType;
 import org.wcs.smart.entity.xml.model.DataModelAttribute;
 import org.wcs.smart.entity.xml.model.LabelType;
@@ -47,7 +48,7 @@ public class EntityTypeFromXmlConverter {
 		entityType.setEntities(new ArrayList<Entity>());
 		entityType.setKeyId(xml.getKeyid());
 		importNames(xml.getNames(), entityType, session, true);
-		entityType.setStatus(EntityType.Status.valueOf(xml.getStatus()));
+		entityType.setStatus(Status.valueOf(xml.getStatus()));
 		entityType.setType(EntityType.Type.valueOf(xml.getType()));
 		
 		//this should not exist; instead it should be created when

@@ -100,7 +100,7 @@ public class SamplingUnitGroupByDropItem extends DropItem
 			for (SamplingUnit su : objects){
 				items.add(new ListItem(su.getUuid(), su.getId(), null));
 			}
-			items.add(new ListItem(null, SamplingUnitFilter.NONE.getId(), SamplingUnitFilter.NONE_KEY));
+			items.add(new ListItem(null, SamplingUnitDropItem.NONE.getId(), SamplingUnitFilter.NONE_KEY));
 			
 			s.getTransaction().rollback();
 			s.close();

@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
@@ -179,13 +180,13 @@ public class PlanTargetResultSet  implements IResultSet {
 		
 		if ((colIndex == 3 || colIndex == 4) &&pt.getCurrentStatus() == null){
 			// recompute the status using the current session
-			pt.refreshStatus(session);
+			pt.refreshStatus(Locale.getDefault(), session);
 		}
 		
 		switch (colIndex) {
 			case 1: return pt.getName();
-			case 2: return pt.getSummary();
-			case 3: return pt.getCurrentStatus().getDisplayString();
+			case 2: return pt.getSummary(Locale.getDefault());
+			case 3: return pt.getCurrentStatus().getDisplayString(Locale.getDefault());
 			case 4: return pt.getCurrentStatus().getStatus().key;
 			case 5: return pt.getPlan().getId();
 		}

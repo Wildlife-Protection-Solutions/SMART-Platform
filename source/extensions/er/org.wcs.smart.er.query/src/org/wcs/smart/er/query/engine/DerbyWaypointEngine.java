@@ -49,8 +49,8 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.util.UuidUtils;
@@ -70,8 +70,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 	
 	
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return SurveyWaypointQuery.KEY.equals(querytype.getKey());
+	public boolean canExecute(String querytype) {
+		return SurveyWaypointQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -103,12 +103,12 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				monitor.beginTask(Messages.DerbyWaypointEngine_RunQueryProgress, 80);
-				
+				ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+				IFilterProcessor filterer = null;
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -116,8 +116,9 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				try {			
+					filterer = DerbyWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
+							caFilter, 
 							true, true, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;

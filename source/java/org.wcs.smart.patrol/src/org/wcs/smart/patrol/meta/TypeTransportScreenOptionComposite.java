@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.meta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -115,7 +116,7 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 				public String getText(Object element) {
 					if (element instanceof PatrolType) {
 						PatrolType i = (PatrolType) element;
-						return LabelConstants.getLabel(i);
+						return i.getType().getGuiName(Locale.getDefault());
 					}
 					return super.getText(element);
 				}

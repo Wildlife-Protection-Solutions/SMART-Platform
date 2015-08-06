@@ -66,7 +66,7 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.model.EntityTypeFilter;
+import org.wcs.smart.entity.ui.EntityTypeFilter;
 import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
 import org.wcs.smart.entity.ui.OpenEntityTypeHandler;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditor;

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
@@ -122,7 +123,7 @@ public class SurveyDesignPropertyTable extends SmartBirtTable {
 		if (index == 0){
 			return e.getName();
 		}else if (index == 1){
-			return e.getState().getGuiName();
+			return e.getState().getGuiName(Locale.getDefault());
 		}else if (index == 2){
 			return e.getStartDate();
 		}else if (index == 3){

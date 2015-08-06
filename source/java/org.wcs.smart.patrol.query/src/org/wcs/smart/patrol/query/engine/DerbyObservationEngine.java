@@ -70,6 +70,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 
 	private String queryDataTable;
 	private int categoryCount;
+	private Session session;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -91,7 +92,7 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 			HashMap<String, Object> parameters) throws SQLException{
 
 		final SimpleQuery query = (SimpleQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		
 		if (query.getDateFilter() == null){
@@ -627,5 +628,10 @@ public class DerbyObservationEngine extends DerbyPatrolQueryEngine {
 		QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
+	}
+	
+	@Override
+	public Session getCurrentConnection() {
+		return session;
 	}
 }

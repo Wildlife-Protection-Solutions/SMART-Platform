@@ -36,7 +36,7 @@ public class PatrolValueItemLabelProvider extends ValueItemLabelProvider {
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)
 	 */
 	public String getName(PatrolValueItem item, Session session){
-		return PatrolQueryOptions.findPatrolValueItem(item.getPatrolValueOptionKey()).getGuiName(Locale.getDefault());
+		return item.getPatrolValueOption().getGuiName(Locale.getDefault());
 	}
 
 

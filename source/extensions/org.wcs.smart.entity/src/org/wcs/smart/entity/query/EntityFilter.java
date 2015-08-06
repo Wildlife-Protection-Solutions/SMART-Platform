@@ -104,14 +104,4 @@ public class EntityFilter implements IFilter {
 		visitor.visit(this);
 	}
 
-	/**
-	 * Not supported.
-	 * 
-	 * @return null
-	 */
-	@Override
-	public DropItem[] getDropItems(Session session) throws Exception {
-		return null;
-	}
-
 }

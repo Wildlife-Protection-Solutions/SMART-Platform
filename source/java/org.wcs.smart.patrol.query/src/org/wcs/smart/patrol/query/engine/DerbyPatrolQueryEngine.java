@@ -50,7 +50,7 @@ import org.wcs.smart.query.model.filter.IFilter;
  * @author Emily
  * @since 1.0.0
  */
-public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine {
+public abstract class DerbyPatrolQueryEngine extends AbstractQueryEngine implements IPatrolQueryEngine{
 	
 	protected HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
 	

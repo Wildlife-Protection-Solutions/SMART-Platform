@@ -920,7 +920,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		String uuid = filter.getUuid();
 		if (unitType == SamplingUnitFilter.Type.SAMPLINGUNIT){
 			if (uuid.equals(SamplingUnitFilter.NONE_KEY)){
-				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(SamplingUnitFilter.NONE, joinTable)};
+				return new DropItem[]{SurveyDropItemFactory.INSTANCE.createSamplingUnitDropItem(SamplingUnitDropItem.NONE, joinTable)};
 			}
 			
 			SamplingUnit su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(uuid));

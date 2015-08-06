@@ -32,6 +32,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
+import org.wcs.smart.er.query.ui.dropitems.SamplingUnitDropItem;
 import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -59,7 +60,7 @@ public class SamplingUnitGroupByViewer extends AbstractGroupByViewer<SamplingUni
 			for (String it : items){
 				try{
 					if (it.equals(SamplingUnitFilter.NONE_KEY)){
-						listItems.add(new ListItem(null, SamplingUnitFilter.NONE.getId(), null));
+						listItems.add(new ListItem(null, SamplingUnitDropItem.NONE.getId(), null));
 					}else{
 						SamplingUnit su = (SamplingUnit) session.get(SamplingUnit.class, UuidUtils.stringToUuid(it));
 						if (su != null){
@@ -110,7 +111,7 @@ public class SamplingUnitGroupByViewer extends AbstractGroupByViewer<SamplingUni
 				SamplingUnit su = (SamplingUnit) o;
 				items.add(new ListItem(su.getUuid(), su.getId(), null));
 			}
-			items.add(new ListItem(null, SamplingUnitFilter.NONE.getId(), null));
+			items.add(new ListItem(null, SamplingUnitDropItem.NONE.getId(), null));
 			return items;
 		}
 	}

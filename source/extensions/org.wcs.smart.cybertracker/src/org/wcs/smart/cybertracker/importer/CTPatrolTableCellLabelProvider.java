@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.SWT;
@@ -63,7 +64,7 @@ public class CTPatrolTableCellLabelProvider extends ColumnLabelProvider {
 			case IMPORT_NOTE: return ""; //$NON-NLS-1$
 			case START_DATE:return dateAsString(ctPatrol.getStartDate());
 			case END_DATE: 	return dateAsString(ctPatrol.getEndDate());
-			case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName() : ""; //$NON-NLS-1$
+			case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName(Locale.getDefault()) : ""; //$NON-NLS-1$
 			case TRANSPORT:	return ctPatrol.getCtTransport();
 			case ARMED: 	return ctPatrol.isArmed() ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
 //			case MANDATE:	return asString(ctPatrol.getMandate());

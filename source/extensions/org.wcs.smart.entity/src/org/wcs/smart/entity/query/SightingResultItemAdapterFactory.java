@@ -28,7 +28,6 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.map.EntityQueryDataSource;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 /**
  * Adapter factory for adapting an EntityFeature or a SightingResultItem

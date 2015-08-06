@@ -131,7 +131,7 @@ public class ObservationQueryColumnCache {
 				// add data model category columns
 				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
-					cols.add(new ObservationCategoryQueryColumn(i, Locale.getDefault()));
+					cols.add(new ObservationCategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader,i));
 				}
 					
 				//sort attributes alphabetically

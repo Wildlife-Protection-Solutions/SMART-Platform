@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -40,7 +41,6 @@ import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -120,7 +120,7 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 		
 		data[0] = entity.getId() + "." + UuidUtils.uuidToString(entity.getUuid()); //$NON-NLS-1$ 
 		data[1] = entity.getId();
-		data[2] = entity.getStatus().getGuiName();
+		data[2] = entity.getStatus().getGuiName(Locale.getDefault());
 		
 		for (int i = 0; i < entityType.getAttributes().size();i++){
 			EntityAttribute ea = entityType.getAttributes().get(i);
@@ -131,7 +131,7 @@ public class FixedEntityDataSourceFeatureReader implements FeatureReader<SimpleF
 				if (ea.getDmAttribute().getType() == AttributeType.BOOLEAN){
 					data[i+3] = value.getNumberValue() < 0.5 ? 0 : 1;
 				}else{
-					data[i+3] = value.getValueAsString();
+					data[i+3] = value.getValueAsString(Locale.getDefault());
 				}
 			}
 		}

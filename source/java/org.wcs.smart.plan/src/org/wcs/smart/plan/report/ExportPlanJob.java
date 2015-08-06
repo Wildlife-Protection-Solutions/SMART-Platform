@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
@@ -87,7 +88,7 @@ public class ExportPlanJob extends Job {
 			reportParameters.put(ReportPlan.PLAN_DESCRIPTION, (plan.getDescription()==null?"" : plan.getDescription())); //$NON-NLS-1$
 			reportParameters.put(ReportPlan.PLAN_END_DATE,  new java.sql.Date(plan.getEndDate().getTime()));
 			reportParameters.put(ReportPlan.PLAN_START_DATE, new java.sql.Date(plan.getStartDate().getTime()));
-			reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getName());
+			reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getGuiName(Locale.getDefault()));
 			reportParameters.put(ReportPlan.UNAVAILABLE_EMPLOYEES, plan.getUnavailableEmployees());
 			reportParameters.put(ReportPlan.AVAILABLE_EMPLOYEES, plan.getActiveEmployees());
 			if (plan.getTeam() == null){

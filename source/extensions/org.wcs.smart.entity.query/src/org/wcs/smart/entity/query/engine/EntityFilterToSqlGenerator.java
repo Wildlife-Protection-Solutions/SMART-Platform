@@ -119,7 +119,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 			String p2 = engine.addParameterValue(date2);
 			return "( " + tableName + ".value is not null AND DATE(" + tableName + ".value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
-			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
 				//any option
 				return "( " + tableName + ".value is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
 			}else{

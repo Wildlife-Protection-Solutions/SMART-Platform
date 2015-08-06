@@ -23,6 +23,7 @@ package org.wcs.smart.intelligence.query.internal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
@@ -70,10 +71,10 @@ public class IntelligenceQueryColumnCache {
 					for (FixedQueryColumn.FixedColumns col : FixedQueryColumn.FixedColumns.values()){
 						if (col == FixedColumns.CA_ID || col == FixedColumns.CA_NAME){
 							if (SmartDB.isMultipleAnalysis()){
-								cols.add(new FixedQueryColumn(col));		
+								cols.add(new FixedQueryColumn(col, Locale.getDefault()));		
 							}
 						}else{
-							cols.add(new FixedQueryColumn(col));
+							cols.add(new FixedQueryColumn(col, Locale.getDefault()));
 						}
 					}
 					fixedRecordColumns = cols.toArray(new QueryColumn[cols.size()]);

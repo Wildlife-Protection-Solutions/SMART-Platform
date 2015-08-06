@@ -51,7 +51,7 @@ public class EntityTypeDropItem extends DropItem implements IFilterDropItem  {
 	public EntityTypeDropItem(EntityType et) {
 		//super(parent, target);
 		this.text = et.getName(); 
-		this.key = "entitytype:" + et.getKeyId() + ":attribute:" + et.getDmAttribute().getType().typeKey + ":" + et.getDmAttribute().getKeyId() + " = " + AttributeFilter.ANY_OPTION.getKey(); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		this.key = "entitytype:" + et.getKeyId() + ":attribute:" + et.getDmAttribute().getType().typeKey + ":" + et.getDmAttribute().getKeyId() + " = " + AttributeFilter.ANY_OPTION_KEY; //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 	
 	/**

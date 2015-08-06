@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -50,7 +49,6 @@ import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -87,7 +85,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 	private DerbyEntityQueryEngine engine;
 	private List<String> entityTypes;
 	
-	public DerbyPagedObservationResult(String queryTempTable, DerbyEntityQueryEngine engine, SimpleQuery query) {
+	public DerbyPagedObservationResult(String queryTempTable, DerbyEntityQueryEngine engine, SimpleQuery query) throws Exception {
 		this.queryTempTable = queryTempTable;
 		this.engine = engine;
 		
@@ -102,7 +100,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		});
 	}
 
-	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyEntityQueryEngine engine, SimpleQuery query) {
+	public DerbyPagedObservationResult(String queryTempTable, int itemCount, int wpCount, DerbyEntityQueryEngine engine, SimpleQuery query) throws Exception {
 		this.queryTempTable = queryTempTable;
 		this.itemCount = itemCount;
 		this.wpCount = wpCount;

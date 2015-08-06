@@ -23,7 +23,7 @@
 package org.wcs.smart.intelligence.query.export;
 
 import org.hibernate.Session;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -43,7 +43,7 @@ public class IntelligenceRecordDefinitionExporter extends SimpleQueryDefinitionE
 		 */
 		@Override
 		public boolean canExport(Query query) {
-			if (IntelligenceRecordQueryType.KEY.equals(query.getType().getKey())){
+			if (IntelligenceRecordQuery.KEY.equals(query.getTypeKey())){
 				return true;
 			}
 			return false;

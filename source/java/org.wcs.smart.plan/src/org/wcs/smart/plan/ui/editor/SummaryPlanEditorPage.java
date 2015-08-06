@@ -24,6 +24,7 @@ package org.wcs.smart.plan.ui.editor;
 import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -75,6 +76,7 @@ import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
@@ -617,7 +619,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 
 		setPartName(plan.getLabel());
 
-		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().get(plan.getType().getIconKey()));
+		setTitleImage(PlanLabelProvider.getImage(plan.getType()).createImage());
 		form.setText(plan.getLabel());
 		String none = Messages.PlanEditor_None_Label;
 
@@ -631,7 +633,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		} else {
 			txtTeam.setText(none);
 		}
-		txtType.setText(plan.getType().getName());
+		txtType.setText(plan.getType().getGuiName(Locale.getDefault()));
 		txtUnavailableEmployees.setText(plan.getUnavailableEmployees()
 				.toString());
 		if (plan.getParent() != null) {

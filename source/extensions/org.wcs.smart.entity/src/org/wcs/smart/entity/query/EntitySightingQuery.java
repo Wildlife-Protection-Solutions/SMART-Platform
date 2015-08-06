@@ -24,9 +24,10 @@ package org.wcs.smart.entity.query;
 import java.text.MessageFormat;
 import java.util.List;
 
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -52,6 +53,7 @@ public class EntitySightingQuery extends Query{
 	private EntityFilter entityFilter;
 	
 	private List<QueryColumn> columns;
+	public static final String KEY = "ENTITY_SIGHTING"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new entity query, creating a 
@@ -70,7 +72,7 @@ public class EntitySightingQuery extends Query{
 		this.entityFilter = entityFilter;
 		setName(MessageFormat.format(Messages.EntitySightingQuery_QueryName, new Object[]{entityType.getName()}));
 		
-		setConservationAreaFilter(new ConservationAreaFilter(true));
+		setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 	}
 	
 	/**
@@ -116,8 +118,8 @@ public class EntitySightingQuery extends Query{
 
 
 	@Override
-	public IQueryType getType() {
-		return EntitySightingQueryType.INSTANCE;
+	public String getTypeKey() {
+		return KEY;
 	}
 
 	@Override
@@ -142,7 +144,7 @@ public class EntitySightingQuery extends Query{
 	 * @return null
 	 */
 	@Override
-	public Query clone() {
+	public Query clone(Employee newOwner) {
 		throw new RuntimeException("Cannot clone entity sighting queries"); //$NON-NLS-1$
 	}
 

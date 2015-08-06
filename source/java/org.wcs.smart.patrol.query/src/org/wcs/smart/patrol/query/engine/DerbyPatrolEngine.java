@@ -69,7 +69,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 
 	private MemoryQueryResult<PatrolQueryResultItem> myResults;
 	private String queryDataTable;
-
+	private Session session;
+	
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolQuery.KEY.equals(querytype);
@@ -90,7 +91,7 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 			HashMap<String, Object> parameters) throws SQLException{
 
 		final SimpleQuery query = (SimpleQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
 		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 	
 		if (query.getDateFilter() == null){
@@ -381,4 +382,8 @@ public class DerbyPatrolEngine extends DerbyPatrolQueryEngine{
 		return it;
 	}
 	
+	@Override
+	public Session getCurrentConnection() {
+		return session;
+	}
 }

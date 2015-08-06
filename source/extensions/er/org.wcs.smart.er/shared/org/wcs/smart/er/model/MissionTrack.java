@@ -41,7 +41,6 @@ import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.io.ParseException;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
 

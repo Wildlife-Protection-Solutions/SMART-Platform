@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.query.parser.internal.summary;
 
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
+import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.query.model.filter.IValueVisitor;
 import org.wcs.smart.query.model.summary.IValueItem;
 
@@ -47,7 +49,7 @@ public class PatrolValueItem implements IValueItem {
 
 	private String key = null;
 	private String aggregation = null;
-	private String opKey = null;
+	private PatrolValueOption patrolOp;
 	
 	/**
 	 * Creates a patrol value item from a key of the form
@@ -58,8 +60,7 @@ public class PatrolValueItem implements IValueItem {
 	public PatrolValueItem(String key){
 		this.key = key;
 		String[] bits = key.split(":"); //$NON-NLS-1$
-		opKey = bits[2];
-//		patrolOp = PatrolQueryOptions.findPatrolValueItem(bits[2]);
+		patrolOp = PatrolQueryOptions.findPatrolValueItem(bits[2]);
 		this.aggregation = bits[1];		
 	}
 	
@@ -73,10 +74,9 @@ public class PatrolValueItem implements IValueItem {
 	/**
 	 * @return the patrol value option
 	 */
-	public String getPatrolValueOptionKey(){
-		return opKey;
+	public PatrolValueOption getPatrolValueOption(){
+		return patrolOp;
 	}
-
 	
 	public void accept(IValueVisitor visitor){
 		visitor.visit(this);

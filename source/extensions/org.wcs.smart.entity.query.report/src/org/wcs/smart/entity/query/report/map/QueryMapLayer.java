@@ -23,9 +23,9 @@ package org.wcs.smart.entity.query.report.map;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.entity.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
+import org.wcs.smart.entity.query.model.EntityGriddedQuery;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
 
@@ -39,9 +39,9 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	
 	@Override
 	public boolean canAddToMap(String queryTypeKey) {
-		if (queryTypeKey.equals(EntityGridQueryType.KEY) ||
-				queryTypeKey.equals(EntityObservationQueryType.KEY) ||
-				queryTypeKey.equals(EntityWaypointQueryType.KEY)){
+		if (queryTypeKey.equals(EntityGriddedQuery.KEY) ||
+				queryTypeKey.equals(EntityObservationQuery.KEY) ||
+				queryTypeKey.equals(EntityWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

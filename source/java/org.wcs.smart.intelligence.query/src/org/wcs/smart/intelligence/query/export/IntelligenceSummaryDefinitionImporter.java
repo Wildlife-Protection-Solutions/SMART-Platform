@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
 import org.wcs.smart.query.importexport.IQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
 import org.wcs.smart.query.model.IQueryType;
@@ -72,7 +71,7 @@ public class IntelligenceSummaryDefinitionImporter implements IQueryImporter{
 		
 		summaryQuery.setConservationArea(SmartDB.getCurrentConservationArea());
 		summaryQuery.setOwner(SmartDB.getCurrentEmployee());
-		summaryQuery.setConservationAreaFilter(new ConservationAreaFilter(true));
+		summaryQuery.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		
 		return summaryQuery;
 	}
@@ -87,7 +86,7 @@ public class IntelligenceSummaryDefinitionImporter implements IQueryImporter{
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		if (IntelligenceSummaryQueryType.KEY.equals(qt.getKey())){
+		if (IntelligenceSummaryQuery.KEY.equals(qt.getKey())){
 			return true;
 		}
 		return false;

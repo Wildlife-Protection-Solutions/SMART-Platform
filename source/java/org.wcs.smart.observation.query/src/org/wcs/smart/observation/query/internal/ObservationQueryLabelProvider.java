@@ -26,7 +26,6 @@ public class ObservationQueryLabelProvider implements
 				case WAYPOINT_OBSERVER: return Messages.FixedQueryColumn_ObserverColumnName;
 			}
 		}
-		if (key.equals(CATEGORY_LEVEL_LBL)) return Messages.QueryColumn_ObservationCategoryTableHeader;
 		return null;
 	}
 

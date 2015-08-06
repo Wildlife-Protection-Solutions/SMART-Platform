@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
@@ -56,7 +57,7 @@ public class SightingResultItem implements IResultItem{
 	
 	private UUID observationUuid;
 	private UUID entityUuid;
-	private EntityType.Status entityStatus;
+	private Status entityStatus;
 	
 	private HashMap<String,Object> entityValues = new HashMap<String,Object>();
 	
@@ -98,11 +99,11 @@ public class SightingResultItem implements IResultItem{
 		return this.entityUuid;
 	}
 	
-	public EntityType.Status getEntityStatus(){
+	public Status getEntityStatus(){
 		return entityStatus;
 	}
 	
-	public void setEntityStatus(EntityType.Status status){
+	public void setEntityStatus(Status status){
 		this.entityStatus = status;
 	}
 	/**

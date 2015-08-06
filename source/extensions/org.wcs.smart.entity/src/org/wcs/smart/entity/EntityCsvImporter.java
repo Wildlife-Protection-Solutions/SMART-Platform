@@ -28,6 +28,7 @@ import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -36,8 +37,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.ca.Projection;
-import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -46,10 +45,10 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
@@ -203,7 +202,7 @@ public class EntityCsvImporter {
 				//Status Column
 				entity.setStatus(Status.ACTIVE);
 				if (configuration.getStatusColumn() != null){
-					Entity.Status status = parseStatus(data[configuration.getStatusColumn()]);
+					Status status = parseStatus(data[configuration.getStatusColumn()]);
 					if (status == null){
 						warnings.add(
 								MessageFormat.format(Messages.EntityCsvImporter_StatusNotSupported, new Object[]{data[configuration.getStatusColumn()], lineCount}));
@@ -386,14 +385,14 @@ public class EntityCsvImporter {
 	 * @param value
 	 * @return
 	 */
-	private Entity.Status parseStatus(String value){
+	private Status parseStatus(String value){
 		try{
-			return Entity.Status.valueOf(value);
+			return Status.valueOf(value);
 		}catch(Exception ex){
 			
 		}
-		for (Entity.Status s : Entity.Status.values()){
-			if (s.getGuiName().equalsIgnoreCase(value)){
+		for (Status s : Status.values()){
+			if (s.getGuiName(Locale.getDefault()).equalsIgnoreCase(value)){
 				return s;
 			}
 		}

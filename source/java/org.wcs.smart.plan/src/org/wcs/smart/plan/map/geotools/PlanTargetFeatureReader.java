@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -138,10 +139,10 @@ public class PlanTargetFeatureReader implements FeatureReader<SimpleFeatureType,
 		data[2] = point.getPlanTarget().getName();
 		data[3] = point.getPlanTarget().getDescription();
 		if (point.getPlanTarget().getCurrentStatus() != null){
-			data[4] = point.getPlanTarget().getCurrentStatus().getDisplayString();
+			data[4] = point.getPlanTarget().getCurrentStatus().getDisplayString(Locale.getDefault());
 			data[5] = point.getPlanTarget().getCurrentStatus().getStatus().key;
 		}else{
-			data[4] = PlanTargetStatus.Status.UNKNOWN.guiName;
+			data[4] = PlanTargetStatus.Status.UNKNOWN.getGuiName(Locale.getDefault());
 			data[5] = PlanTargetStatus.Status.UNKNOWN.key;
 		}
 		data[6] = point.getPlanTarget().getPlan().getId();

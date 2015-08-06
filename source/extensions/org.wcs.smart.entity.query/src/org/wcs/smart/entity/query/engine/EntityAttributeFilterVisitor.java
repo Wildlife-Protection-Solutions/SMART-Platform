@@ -41,7 +41,6 @@ import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -150,7 +149,7 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 					}
 
 					@Override
-					public boolean canExecute(IQueryType querytype) {
+					public boolean canExecute(String querytype) {
 						return false;
 					}
 				};
@@ -236,7 +235,7 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				sql.append(" " + tableName); //$NON-NLS-1$
 				sql.append(" on "); //$NON-NLS-1$
 				sql.append(tableName + ".entity_keyid = "); //$NON-NLS-1$
-				sql.append("qa." + ff.getEntityDmAttributeKey(c, engine)); //$NON-NLS-1$
+				sql.append("qa." + engine.getEntityDmAttributeKey(ff.getEntityKey(), c)); //$NON-NLS-1$
 
 			}
 		}

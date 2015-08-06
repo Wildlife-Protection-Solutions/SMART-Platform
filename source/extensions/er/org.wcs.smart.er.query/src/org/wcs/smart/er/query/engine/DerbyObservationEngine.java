@@ -55,8 +55,8 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.util.UuidUtils;
@@ -76,8 +76,8 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 	private int categoryCount;
 	
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return SurveyObservationQuery.KEY.equals(querytype.getKey());
+	public boolean canExecute(String querytype) {
+		return SurveyObservationQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -115,7 +115,7 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+				IFilterProcessor filterer = null;
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -124,8 +124,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
+					filterer = DerbyObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
+							caFilter, 
 							true, true, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
@@ -148,9 +150,10 @@ public class DerbyObservationEngine extends DerbySurveyQueryEngine {
 						}
 					}
 					monitor.worked(10);
-					
+				}catch(Exception ex){
+					throw new SQLException(ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}

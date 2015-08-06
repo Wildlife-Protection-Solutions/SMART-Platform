@@ -41,6 +41,7 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.map.udig.QueryService;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EtAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EtCategoryQueryColumn;
@@ -82,9 +83,9 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions() {
-		if (getInputInternal().getType().getKey().equals(EntityObservationQueryType.KEY)){
+		if (getInputInternal().getType().getKey().equals(EntityObservationQuery.KEY)){
 			return EntityObservationQueryType.validDateFields();
-		}else if (getInputInternal().getType().getKey().equals(EntityWaypointQueryType.KEY)){
+		}else if (getInputInternal().getType().getKey().equals(EntityWaypointQuery.KEY)){
 			return EntityWaypointQueryType.validDateFields();
 		}
 		return null;
@@ -134,7 +135,14 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final SimpleQuery q = (SimpleQuery) getQuery();
-			QueryFilter filter = q.getFilter();
+			QueryFilter filter = null;
+			try{
+				filter = q.getFilter();
+			}catch(Exception ex){
+				EntityQueryPlugIn.displayLog(ex.getMessage(), ex);
+				return Status.OK_STATUS;
+			}
+			
 			final Set<String> entityTypes = new HashSet<String>();
 			filter.getFilter().accept(new IFilterVisitor() {			
 				@Override

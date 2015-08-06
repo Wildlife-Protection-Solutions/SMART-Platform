@@ -86,7 +86,7 @@ public class SurveySummaryQuery extends SummaryQuery implements ISurveyQuery{
 	 */
 	@Transient
 	public SurveySummaryQuery clone(Employee newEmployee){
-		SurveySummaryQuery q = SurveyQueryFactory.createSummaryQuery();
+		SurveySummaryQuery q = new SurveySummaryQuery();
 		q.setUuid(null);
 		q.setId( null );
 		q.setName(getName());

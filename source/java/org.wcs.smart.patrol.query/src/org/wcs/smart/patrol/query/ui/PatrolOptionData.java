@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.swt.graphics.Image;
@@ -23,7 +24,6 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.hibernate.MultiCaPatrolQueryHibernateManagerImpl;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.internal.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.model.IExtensionOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
@@ -129,7 +129,7 @@ public class PatrolOptionData implements IPatrolOptionData {
 				}
 			}else if (option == PatrolQueryOption.PATROL_TYPE){
 				for (int i = 0; i < keys.length; i ++){
-					results.add(new ListItem(null, org.wcs.smart.patrol.ui.LabelConstants.getLabel(PatrolType.Type.valueOf(keys[i])), keys[i]));
+					results.add(new ListItem(null, PatrolType.Type.valueOf(keys[i]).getGuiName(Locale.getDefault()), keys[i]));
 				}
 			}
 		}
@@ -165,12 +165,12 @@ public class PatrolOptionData implements IPatrolOptionData {
 		}else if (option == PatrolQueryOption.PATROL_TYPE){
 			if (SmartDB.isMultipleAnalysis()){
 				for (PatrolType.Type t : PatrolType.Type.values()){
-					items.add(new ListItem(null, org.wcs.smart.patrol.ui.LabelConstants.getLabel(t), t.name()));
+					items.add(new ListItem(null, t.getGuiName(Locale.getDefault()), t.name()));
 				}
 			}else{
 				List<PatrolType> types= PatrolHibernateManager.getActivePatrolTypes(SmartDB.getCurrentConservationArea(), session);
 				for (PatrolType t : types){
-					items.add(new ListItem(null, org.wcs.smart.patrol.ui.LabelConstants.getLabel(t.getType()), t.getType().name() ));
+					items.add(new ListItem(null, t.getType().getGuiName(Locale.getDefault()), t.getType().name() ));
 				}
 			}
 		}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE || option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){

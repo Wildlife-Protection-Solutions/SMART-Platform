@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.query;
 
 import java.sql.Date;
+import java.util.Locale;
 
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -41,7 +42,7 @@ public class LastSightingDateFilter implements IDateFilter {
 	public static final LastSightingDateFilter INSTANCE = new LastSightingDateFilter();
 	
 	@Override
-	public String getGuiName() {
+	public String getGuiName(Locale l) {
 		return Messages.LastSightingDateFilter_LastSightingGuiName;
 	}
 

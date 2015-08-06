@@ -40,17 +40,17 @@ import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
-import org.wcs.smart.er.query.model.MissionQueryType;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
 import org.wcs.smart.query.common.engine.IQueryResult;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.util.UuidUtils;
@@ -69,8 +69,8 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 	private String queryDataTable;
 	
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return MissionQueryType.KEY.equals(querytype.getKey());
+	public boolean canExecute(String  querytype) {
+		return MissionQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -104,23 +104,27 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = DerbyMissionEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+				
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
+				IFilterProcessor filterer = null;
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
+					filterer = DerbyMissionEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+					
 					SurveyHasObservationFilterVisitor vv = new SurveyHasObservationFilterVisitor();
 					boolean needsObservations = false;
 					if (query.getFilter() != null && query.getFilter().getFilter() != null){
 						query.getFilter().getFilter().accept(vv);
 						needsObservations = vv.hasObservationFilter();
 					}
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
+							caFilter, 
 							needsObservations, false, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
@@ -136,9 +140,10 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 						}
 					}
 					monitor.worked(10);
-					
+				}catch (Exception ex){
+					throw new SQLException(ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}
@@ -434,7 +439,11 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		q.setParameter("uuid", rs.getBytes("mission_uuid"));  //$NON-NLS-1$//$NON-NLS-2$
 		List<MissionTrack> mts = q.list();
 		for (MissionTrack mt : mts){
-			it.addTracks(mt.getLineString());
+			try {
+				it.addTracks(mt.getLineString());
+			} catch (Exception e) {
+				ERQueryPlugIn.log(e.getMessage(),e);
+			}
 		}
 		return it;
 	}

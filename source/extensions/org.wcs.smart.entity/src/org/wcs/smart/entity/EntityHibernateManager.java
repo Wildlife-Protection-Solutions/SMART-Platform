@@ -30,6 +30,7 @@ import org.wcs.smart.entity.ccca.EntityTypeCcaaManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 /**
@@ -116,7 +117,7 @@ public class EntityHibernateManager {
 		try {
 			Query q = session.createQuery("FROM EntityType WHERE conservationArea = :ca and status = :stat"); //$NON-NLS-1$
 			q.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
-			q.setParameter("stat", EntityType.Status.ACTIVE); //$NON-NLS-1$
+			q.setParameter("stat", Status.ACTIVE); //$NON-NLS-1$
 			
 			@SuppressWarnings("unchecked")
 			List<EntityType> items = q.list();

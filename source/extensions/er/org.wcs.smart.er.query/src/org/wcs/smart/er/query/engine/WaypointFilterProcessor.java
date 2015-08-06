@@ -595,7 +595,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append(prefix(AttributeListItem.class));
 				sql.append(".keyid ");  //$NON-NLS-1$
 				
-				if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION.getKey())){
+				if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION_KEY)){
 					sql.append (" is not null "); //$NON-NLS-1$
 				}else{
 					String p1 = engine.addParameterValue((String)attfilter.getValue());
@@ -707,7 +707,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(SurveyFilterSqlGenerator.asSql(lfilter.getOperator()));
 			sql.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
-			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {
 				sql.append(prefix(MissionAttributeListItem.class));
 				sql.append(".uuid is not null"); //$NON-NLS-1$
 			}else{
@@ -813,7 +813,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 				sql.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 
 			}else if (lfilter.getAttributeType() == AttributeType.LIST){
-				if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+				if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {
 					sql.append(prefix(SamplingUnitAttributeListItem.class));
 					sql.append(".uuid is not null"); //$NON-NLS-1$
 				}else{
@@ -899,7 +899,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}else if (lfilter.getAttributeType() == AttributeType.LIST){
-			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())) {
+			if (lfilter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)) {
 				sql.append(prefix(SamplingUnitAttributeListItem.class));
 				sql.append(".uuid is not null"); //$NON-NLS-1$
 			}else{

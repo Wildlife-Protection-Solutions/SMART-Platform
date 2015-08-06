@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.patrol.query.model;
 
-import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
 import org.wcs.smart.query.ui.model.DropItem;
 /**
@@ -37,17 +36,17 @@ public interface IExtensionOption {
 	 * @return
 	 */
 	public String getName();
-	
-	/**
-	 * The image associated with the option
-	 */
-	public Image getImage();
-	
+
 	/**
 	 * Converts the option to a drop item
 	 * @return
 	 */
 	public DropItem asDropItem();
 	
+	/**
+	 * The UI components of the patrol option extension
+	 * 
+	 * @return
+	 */
 	public IPatrolOptionData getOptionData();
 }

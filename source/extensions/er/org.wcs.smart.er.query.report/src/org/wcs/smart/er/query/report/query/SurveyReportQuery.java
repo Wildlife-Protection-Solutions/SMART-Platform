@@ -38,7 +38,7 @@ import org.wcs.smart.data.oda.smart.query.common.MemoryQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.PagedQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
-import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
@@ -71,23 +71,26 @@ public class SurveyReportQuery implements ISmartQuery {
 	 */
 	@Override
 	public void prepare(SmartQuery query) throws OdaException {
-		
-		// attempt to parse query
-		if (query.getQuery() instanceof SimpleQuery) {
-			((SimpleQuery) query.getQuery()).getFilter();
-		} else if (query.getQuery() instanceof SurveySummaryQuery) {
-			SurveySummaryQuery sumQuery = (SurveySummaryQuery)query.getQuery();
+		try{
+			// attempt to parse query
+			if (query.getQuery() instanceof SimpleQuery) {
+				((SimpleQuery) query.getQuery()).getFilter();
+			} else if (query.getQuery() instanceof SurveySummaryQuery) {
+				SurveySummaryQuery sumQuery = (SurveySummaryQuery)query.getQuery();
 			
-			//date group by problem with reports 
-			GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
-			List<IGroupBy> headers = part.getGroupBys();
-			for (IGroupBy h : headers){
-				if (h instanceof DateGroupBy){
-					throw new OdaException(Messages.SurveyReportQuery_SummaryQueryError);
+				//date group by problem with reports 
+				GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
+				List<IGroupBy> headers = part.getGroupBys();
+				for (IGroupBy h : headers){
+					if (h instanceof DateGroupBy){
+						throw new OdaException(Messages.SurveyReportQuery_SummaryQueryError);
+					}
 				}
+			} else if (query.getQuery() instanceof SurveyGriddedQuery){
+				((SurveyGriddedQuery)query.getQuery()).getQueryDefinition();
 			}
-		} else if (query.getQuery() instanceof SurveyGriddedQuery){
-			((SurveyGriddedQuery)query.getQuery()).getQueryDefinition();
+		}catch (Exception ex){
+			throw new OdaException(ex);
 		}
 	}
 
@@ -96,17 +99,17 @@ public class SurveyReportQuery implements ISmartQuery {
 	 */
 	@Override
 	public IResultSetMetaData getMetaData(SmartQuery query) throws OdaException {
-		if (query.getQuery().getType().getKey().equals(SurveyObservationQuery.KEY) ||
-				query.getQuery().getType().getKey().equals(SurveyWaypointQuery.KEY) ||
-				query.getQuery().getType().getKey().equals(MissionQueryType.KEY) ||
-				query.getQuery().getType().getKey().equals(MissionTrackQuery.KEY)){
+		if (query.getQuery().getTypeKey().equals(SurveyObservationQuery.KEY) ||
+				query.getQuery().getTypeKey().equals(SurveyWaypointQuery.KEY) ||
+				query.getQuery().getTypeKey().equals(MissionQuery.KEY) ||
+				query.getQuery().getTypeKey().equals(MissionTrackQuery.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) query.getQuery());
-		} else if (query.getQuery().getType().getKey().equals(SurveySummaryQuery.KEY)) {
+		} else if (query.getQuery().getTypeKey().equals(SurveySummaryQuery.KEY)) {
 			return new SurveySummaryQueryResultSetMetadata((SurveySummaryQuery) query.getQuery());
-		} else if (query.getQuery().getType().getKey().equals(SurveyGriddedQuery.KEY)){
+		} else if (query.getQuery().getTypeKey().equals(SurveyGriddedQuery.KEY)){
 			return new SimpleQueryResultSetMetadata( (SurveyGriddedQuery) query.getQuery());
 		}
-		throw new OdaException(MessageFormat.format(Messages.SurveyReportQuery_UnsupportedQueryType, new Object[]{query.getQuery().getType().getGuiName()}));
+		throw new OdaException(MessageFormat.format(Messages.SurveyReportQuery_UnsupportedQueryType, new Object[]{query.getQuery().getTypeKey()}));
 	}
 
 	@Override
@@ -118,7 +121,7 @@ public class SurveyReportQuery implements ISmartQuery {
 		Date endDate = (Date) query.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE);
 		
 		if (startDate == null || endDate == null){
-			if (query.getQuery().getType().getKey().equals(SurveySummaryQuery.KEY)){
+			if (query.getQuery().getTypeKey().equals(SurveySummaryQuery.KEY)){
 				//we choose to run summaries in order to get 
 				//all header information
 				Calendar cal = Calendar.getInstance();
@@ -140,20 +143,20 @@ public class SurveyReportQuery implements ISmartQuery {
 
 		//the result set
 		
-		if (query.getQuery().getType().getKey().equals(SurveyObservationQuery.KEY) ||
-				query.getQuery().getType().getKey().equals(SurveyWaypointQuery.KEY) ||
-				query.getQuery().getType().getKey().equals(MissionQueryType.KEY) ||
-				query.getQuery().getType().getKey().equals(MissionTrackQuery.KEY)){
+		if (query.getQuery().getTypeKey().equals(SurveyObservationQuery.KEY) ||
+				query.getQuery().getTypeKey().equals(SurveyWaypointQuery.KEY) ||
+				query.getQuery().getTypeKey().equals(MissionQuery.KEY) ||
+				query.getQuery().getTypeKey().equals(MissionTrackQuery.KEY)){
 			((SimpleQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new PagedQueryResultSet(query.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(query), 
 					connection);
-		}else  if (query.getQuery().getType().getKey().equals(SurveyGriddedQuery.KEY)){
+		}else  if (query.getQuery().getTypeKey().equals(SurveyGriddedQuery.KEY)){
 			((SurveyGriddedQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new MemoryQueryResultSet(query.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(query),
 					connection);
-		} else if (query.getQuery().getType().getKey().equals(SurveySummaryQuery.KEY)){
+		} else if (query.getQuery().getTypeKey().equals(SurveySummaryQuery.KEY)){
 			((SurveySummaryQuery) query.getQuery()).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
 					(SurveySummaryQuery) query.getQuery(),

@@ -36,7 +36,7 @@ import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
 import org.wcs.smart.intelligence.query.RecievedDateFilter;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -61,12 +61,15 @@ public class IntelligenceReportQuery implements ISmartQuery {
 	 */
 	@Override
 	public void prepare(SmartQuery smartQuery) throws OdaException {
-
-		// attempt to parse query
-		if (smartQuery.getQuery() instanceof SimpleQuery) {
-			((SimpleQuery) smartQuery.getQuery()).getFilter();
-		} else if (smartQuery.getQuery() instanceof IntelligenceSummaryQuery) {
+		try{
+			// attempt to parse query
+			if (smartQuery.getQuery() instanceof SimpleQuery) {
+				((SimpleQuery) smartQuery.getQuery()).getFilter();
+			} else if (smartQuery.getQuery() instanceof IntelligenceSummaryQuery) {
 			
+			}
+		}catch(Exception ex){
+			throw new OdaException(ex);
 		}
 	}
 
@@ -91,7 +94,7 @@ public class IntelligenceReportQuery implements ISmartQuery {
 		smartQuery.getQuery().setDateFilter(dateFilter);
 		
 		//the result set
-		if (smartQuery.getQuery().getType().getKey().equals(IntelligenceRecordQueryType.KEY)){
+		if (smartQuery.getQuery().getTypeKey().equals(IntelligenceRecordQuery.KEY)){
 			resultSet = new PagedQueryResultSet(smartQuery.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
 					connection);
@@ -107,9 +110,9 @@ public class IntelligenceReportQuery implements ISmartQuery {
 	@Override
 	public IResultSetMetaData getMetaData(SmartQuery smartQuery)
 			throws OdaException {
-		if (smartQuery.getQuery().getType().getKey().equals(IntelligenceRecordQueryType.KEY)){
+		if (smartQuery.getQuery().getTypeKey().equals(IntelligenceRecordQuery.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery.getQuery());
-		}else if (smartQuery.getQuery().getType().getKey().equals(IntelligenceSummaryQueryType.KEY)){
+		}else if (smartQuery.getQuery().getTypeKey().equals(IntelligenceSummaryQuery.KEY)){
 			return new IntelSummaryQueryResultSetMetadata((IntelligenceSummaryQuery)smartQuery.getQuery());
 		}
 		throw new OdaException("Unsupported query type."); //$NON-NLS-1$

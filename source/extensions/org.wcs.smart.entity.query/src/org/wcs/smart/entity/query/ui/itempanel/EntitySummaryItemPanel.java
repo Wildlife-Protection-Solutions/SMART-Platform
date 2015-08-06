@@ -59,14 +59,11 @@ import org.wcs.smart.query.common.ui.itempanel.DateTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
+import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
-import org.wcs.smart.query.model.filter.date.DayDateGroupByViewer;
-import org.wcs.smart.query.model.filter.date.IDateGroupBy;
-import org.wcs.smart.query.model.filter.date.IDateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
-import org.wcs.smart.query.model.filter.date.MonthDateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
-import org.wcs.smart.query.model.filter.date.YearDateGroupByViewer;
+import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
 /**
  * Panel for displaying summary value
@@ -206,11 +203,12 @@ public class EntitySummaryItemPanel extends AbstractQueryItemPanel{
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 			input.put(EntityTypeTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 			
-			List<IDateGroupByViewer<? extends IDateGroupBy>> dates = new ArrayList<IDateGroupByViewer<? extends IDateGroupBy>>();
-			dates.add(DayDateGroupByViewer.INSTANCE);
-			dates.add(MonthDateGroupByViewer.INSTANCE);
-			dates.add(YearDateGroupByViewer.INSTANCE);
+			List<DateGroupByViewer> dates = new ArrayList<DateGroupByViewer>();
+			dates.add(new DateGroupByViewer(new DateGroupBy(DayDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));
 			input.put(DateTreeNode.KEY, dates);
+			
 			input.put(GeneralTreeNode.KEY, generalItems);
 			
 			Display.getDefault().asyncExec(new Runnable(){

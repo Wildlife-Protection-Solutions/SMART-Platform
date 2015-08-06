@@ -64,9 +64,12 @@ import org.wcs.smart.er.query.filter.summary.SamplingUnitAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.internal.SurveyValueItemLabelProvider;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
+import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.filter.summary.ISurveyGroupByViewer;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -78,7 +81,6 @@ import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -98,6 +100,7 @@ import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.ObserverGroupBy;
 import org.wcs.smart.query.model.summary.ValuePart;
@@ -123,8 +126,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	
 	
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return SurveySummaryQuery.KEY.equals(querytype.getKey());
+	public boolean canExecute(String querytype) {
+		return SurveySummaryQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -175,15 +178,16 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 		
 		session.doWork(new Work() {
 			@Override
-			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size()*10 + 40);
-
-				SurveyDesignFilter surveyFilter = null;
-				if (query.getSurveyDesign() != null){
-					surveyFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
-				}
-				
+			public void execute(Connection c) throws SQLException {		
 				try {
+					monitor.beginTask(Messages.DerbySummaryEngine_ProcessingQueryProgress, query.getQueryDefinition().getValuePart().getValueItems().size()*10 + 40);
+					
+					SurveyDesignFilter surveyFilter = null;
+					if (query.getSurveyDesign() != null){
+						surveyFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+					}
+
+					
 					monitor.subTask(Messages.DerbySummaryEngine_LoadingTableProgress);
 					getHeaderInfo(query, sumResults, surveyFilter, session);
 					monitor.worked(10);
@@ -245,10 +249,10 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					//for different parts of the queries
 					DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 					
-					
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter);
 					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, new SubProgressMonitor(monitor, 10));
+						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false, new SubProgressMonitor(monitor, 10));
 					}finally{
 						filterer.dropTemporaryTables(c);
 					}
@@ -274,7 +278,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						rateTable = createTempTableName();
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable, surveyFilter);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, new SubProgressMonitor(monitor, 10));
+							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, caFilter, needsObservationRate, false, new SubProgressMonitor(monitor, 10));
 						}finally{
 							rfilterer.dropTemporaryTables(c);
 						}
@@ -290,7 +294,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 					monitor.subTask(Messages.DerbySummaryEngine_ProgressValues);
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupBy, query.getQueryDefinition().getValuePart(),
-							query.getConservationAreaFilterAsFilter(),new SubProgressMonitor(monitor, query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
+							caFilter, new SubProgressMonitor(monitor, query.getQueryDefinition().getValuePart().getValueItems().size() * 10));
 					
 					if (monitor.isCanceled() || data == null){
 						return ;
@@ -301,6 +305,8 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 						return;
 					}
 					monitor.worked(10);
+				}catch (Exception ex){
+					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
@@ -669,7 +675,7 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 				valueSql = valueSql + ",temp.cat_hkey"; //$NON-NLS-1$
 			}
 			StringBuilder valueAggSql = new StringBuilder();
-			valueAggSql.append(attributeItem.getAggregation().getName());
+			valueAggSql.append(attributeItem.getAggregationKey());
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
@@ -1473,15 +1479,19 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 	 * @param query the summary query
 	 * @param results the summary query results to update
 	 * @param session hibernate session
+	 * @throws Exception 
 	 */
 	public static void getHeaderInfo(SurveySummaryQuery query, 
 			SummaryQueryResult results, SurveyDesignFilter surveyDesignFilter,
-			Session session){
+			Session session) throws Exception{
 		
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){
-			SummaryHeader header = new SummaryHeader(item.getName(session), item.getFullName(session), item.asString(), true);
+			SummaryHeader header = new SummaryHeader(
+					SurveyValueItemLabelProvider.INSTANCE.getName(item, session),
+					SurveyValueItemLabelProvider.INSTANCE.getFullName(item, session),
+					item.asString(), true);
 			results.addValueHeader(header);
 		}
 		
@@ -1491,11 +1501,12 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items;
-			if (item instanceof ISurveyGroupByViewer){
-				items = ((ISurveyGroupByViewer)item).getItems(session, surveyDesignFilter);
+			List<ListItem> items = null;
+			IGroupByViewer<?> viewer = SurveyDropItemFactory.INSTANCE.findViewer(item);
+			if (viewer instanceof ISurveyGroupByViewer){
+				items = ((ISurveyGroupByViewer)viewer).getItems(session, surveyDesignFilter);
 			}else{
-				items = item.getItems(session);
+				items = viewer.getItems(session);
 			}
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
@@ -1514,12 +1525,14 @@ public class DerbySummaryEngine extends DerbySurveyQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items;
-			if (item instanceof ISurveyGroupByViewer){
-				items = ((ISurveyGroupByViewer)item).getItems(session, surveyDesignFilter);
+			List<ListItem> items = null;
+			IGroupByViewer<?> viewer = SurveyDropItemFactory.INSTANCE.findViewer(item);
+			if (viewer instanceof ISurveyGroupByViewer){
+				items = ((ISurveyGroupByViewer)viewer).getItems(session, surveyDesignFilter);
 			}else{
-				items = item.getItems(session);
+				items = viewer.getItems(session);
 			}
+			
 			SummaryHeader[] colHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);

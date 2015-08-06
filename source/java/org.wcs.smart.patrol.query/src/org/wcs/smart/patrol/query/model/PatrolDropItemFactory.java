@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -485,7 +486,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	
 	
 	public DropItem asDropItem(PatrolValueItem item, Session session) throws Exception{
-		return createPatrolValueDropItem(PatrolQueryOptions.findPatrolValueItem(item.getPatrolValueOptionKey()));
+		return createPatrolValueDropItem(item.getPatrolValueOption());
 	}
 	
 	public DropItem asDropItem(PatrolCategoryValueItem item, Session session) throws Exception{
@@ -659,7 +660,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 
 		} else if (option == PatrolQueryOption.PATROL_TYPE) {
 			PatrolType.Type t = PatrolType.Type.valueOf(value1);
-			ListItem m = new ListItem(null, LabelConstants.getLabel(t), t.name());
+			ListItem m = new ListItem(null, t.getGuiName(Locale.getDefault()), t.name());
 			it.initializeData(m);
 		} else if (option == PatrolQueryOption.EMPLOYEE
 				|| option == PatrolQueryOption.LEADER

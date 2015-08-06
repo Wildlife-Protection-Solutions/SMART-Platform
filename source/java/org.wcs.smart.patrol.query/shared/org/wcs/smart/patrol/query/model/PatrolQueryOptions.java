@@ -147,13 +147,13 @@ public class PatrolQueryOptions {
 	};
 
 	
-	public static final boolean isGroupByFilterValueItem(String valueItemKey){
-		if (valueItemKey.equals(PatrolValueOption.NUM_PATROLS_TOTAL.key)
-			|| 	valueItemKey.equals(PatrolValueOption.NUM_DAYS_TOTAL.key)
-			|| 	valueItemKey.equals(PatrolValueOption.DISTANCE_TOTAL.key)
-			|| 	valueItemKey.equals(PatrolValueOption.NUM_HOURS_TOTAL.key)
-			|| 	valueItemKey.equals(PatrolValueOption.MAN_HOURS_TOTAL.key)
-			|| 	valueItemKey.equals(PatrolValueOption.MAN_DAYS_TOTAL.key)){
+	public static final boolean isGroupByFilterValueItem(PatrolValueOption option){
+		if ((option == PatrolValueOption.NUM_PATROLS_TOTAL)
+			|| 	(option == PatrolValueOption.NUM_DAYS_TOTAL)
+			|| 	(option == PatrolValueOption.DISTANCE_TOTAL)
+			|| 	(option == PatrolValueOption.NUM_HOURS_TOTAL)
+			|| 	(option == PatrolValueOption.MAN_HOURS_TOTAL)
+			|| 	(option == PatrolValueOption.MAN_DAYS_TOTAL)){
 			return false;
 		}
 		return true;

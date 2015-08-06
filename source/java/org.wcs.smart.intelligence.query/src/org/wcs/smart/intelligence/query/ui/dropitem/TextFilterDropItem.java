@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.query.ui.dropitem;
 
+import java.util.Locale;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -66,7 +68,7 @@ public class TextFilterDropItem extends DropItem{
 	
 	@Override
 	public String getText() {
-		return filter.getGuiName();
+		return filter.getGuiName(Locale.getDefault());
 	}
 	@Override
 	public String asQueryPart() {

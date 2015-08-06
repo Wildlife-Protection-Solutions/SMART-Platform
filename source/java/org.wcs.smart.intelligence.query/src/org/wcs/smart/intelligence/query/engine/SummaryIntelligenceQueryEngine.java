@@ -37,7 +37,6 @@ import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
@@ -49,8 +48,8 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 
 	@Override
-	public boolean canExecute(IQueryType querytype) {
-		return IntelligenceSummaryQueryType.KEY.equals(querytype.getKey());
+	public boolean canExecute(String querytype) {
+		return IntelligenceSummaryQuery.KEY.equals(querytype);
 	}
 	
 	/**
@@ -72,7 +71,7 @@ public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 		try{
 			
 			Date[] d = query.getDateFilter().getDateFilterOption().getDates();
-			
+			ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT count(*) from Intelligence i");  //$NON-NLS-1$
 			sb.append(" WHERE i.conservationArea IN (:ca) "); //$NON-NLS-1$
@@ -81,7 +80,7 @@ public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 			}
 			sb.append("AND i in (select id.intelligence FROM PatrolIntelligence)"); //$NON-NLS-1$
 			org.hibernate.Query q = session.createQuery(sb.toString());
-			q.setParameterList("ca", asList(query.getConservationAreaFilterAsFilter())); //$NON-NLS-1$
+			q.setParameterList("ca", asList(caFilter)); //$NON-NLS-1$
 			if (d != null){
 				q.setParameter("d1",d[0]); //$NON-NLS-1$
 				q.setParameter("d2",d[1]); //$NON-NLS-1$
@@ -97,7 +96,7 @@ public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 			}
 			sb.append("AND i not in (select id.intelligence FROM PatrolIntelligence)"); //$NON-NLS-1$
 			q = session.createQuery(sb.toString());
-			q.setParameterList("ca", asList(query.getConservationAreaFilterAsFilter())); //$NON-NLS-1$
+			q.setParameterList("ca", asList(caFilter)); //$NON-NLS-1$
 			if (d != null){
 				q.setParameter("d1",d[0]); //$NON-NLS-1$
 				q.setParameter("d2",d[1]); //$NON-NLS-1$

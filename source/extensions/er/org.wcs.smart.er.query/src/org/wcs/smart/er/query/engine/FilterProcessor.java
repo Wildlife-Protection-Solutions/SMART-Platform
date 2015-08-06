@@ -26,6 +26,7 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -255,7 +256,7 @@ public class FilterProcessor implements IFilterProcessor {
 		if (dateFilter != null && dateFilter.getDateFieldOption() != MissionStartDateField.INSTANCE 
 				&& dateFilter.getDateFieldOption() != MissionEndDateField.INSTANCE
 				&& dateFilter.getDateFieldOption() != WaypointDateField.INSTANCE){
-			throw new SQLException(MessageFormat.format(Messages.FilterProcessor_DateFilterNotSupported, new Object[]{dateFilter.getDateFilterOption().getGuiName()}));
+			throw new SQLException(MessageFormat.format(Messages.FilterProcessor_DateFilterNotSupported, new Object[]{dateFilter.getDateFilterOption().getGuiName(Locale.getDefault())}));
 		}
 		
 		engine.clearParameters();

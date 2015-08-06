@@ -23,7 +23,7 @@ package org.wcs.smart.er.query.report.map;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.er.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.er.query.model.MissionQueryType;
+import org.wcs.smart.er.query.model.MissionQuery;
 import org.wcs.smart.er.query.model.MissionTrackQuery;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
@@ -42,7 +42,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	@Override
 	public boolean canAddToMap(String queryTypeKey) {
 		if (queryTypeKey.equals(SurveyGriddedQuery.KEY) ||
-				queryTypeKey.equals(MissionQueryType.KEY) ||
+				queryTypeKey.equals(MissionQuery.KEY) ||
 				queryTypeKey.equals(SurveyObservationQuery.KEY) ||
 				queryTypeKey.equals(MissionTrackQuery.KEY) ||
 				queryTypeKey.equals(SurveyWaypointQuery.KEY)){

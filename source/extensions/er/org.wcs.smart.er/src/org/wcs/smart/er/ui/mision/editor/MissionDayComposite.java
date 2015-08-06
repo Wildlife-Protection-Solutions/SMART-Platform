@@ -91,7 +91,6 @@ import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.LabelConstants;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;

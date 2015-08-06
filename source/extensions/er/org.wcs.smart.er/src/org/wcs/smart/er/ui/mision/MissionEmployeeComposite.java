@@ -28,8 +28,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
-import javax.swing.plaf.LabelUI;
-
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;

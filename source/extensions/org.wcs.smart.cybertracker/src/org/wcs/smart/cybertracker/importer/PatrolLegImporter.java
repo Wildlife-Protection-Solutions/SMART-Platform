@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
@@ -51,6 +52,7 @@ import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -76,7 +78,7 @@ public class PatrolLegImporter extends SmartImporter {
 			
 			patrol = CyberTrackerHibernateManager.fetchByUuid(Patrol.class, patrol.getUuid(), session);
 			if (patrol.getPatrolType() != ctPatrol.getPatrolType()) {
-				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(), patrol.getPatrolType().getGuiName()), null);
+				CyberTrackerPlugIn.displayError(Messages.PatrolLegImporter_TypeError_Title, MessageFormat.format(Messages.PatrolLegImporter_TypeError_Message, ctPatrol.getPatrolType().getGuiName(Locale.getDefault()), patrol.getPatrolType().getGuiName(Locale.getDefault())), null);
 				return false;
 			}
 			
@@ -167,11 +169,11 @@ public class PatrolLegImporter extends SmartImporter {
 		Date ctEnd = ctPatrol.getEndDate();
 		for (PatrolLeg leg : patrol.getLegs()) {
 			//ensure that legs overlap in time
-			Date legStart = SmartUtils.getDatePart(leg.getStartDate(), false);
-			Date legEnd = SmartUtils.getDatePart(leg.getEndDate(), false);
+			Date legStart = SharedUtils.getDatePart(leg.getStartDate(), false);
+			Date legEnd = SharedUtils.getDatePart(leg.getEndDate(), false);
 			if (leg.getPatrolLegDays() != null) {
 				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-					Date date = SmartUtils.getDatePart(pld.getDate(), false);
+					Date date = SharedUtils.getDatePart(pld.getDate(), false);
 					if (date.equals(legStart))
 						legStart = SmartImporter.combine(legStart, pld.getStartTime());
 					if (date.equals(legEnd))
@@ -195,8 +197,8 @@ public class PatrolLegImporter extends SmartImporter {
 	//ensures that gap between dates is less than a day
 	//(in this case we will not have a gap after adding leg to the patrol)
 	private boolean isValidTimeDelta(Date from, Date to) {
-		from = SmartUtils.getDatePart(from, false);
-		to = SmartUtils.getDatePart(to, false);
+		from = SharedUtils.getDatePart(from, false);
+		to = SharedUtils.getDatePart(to, false);
 		long delta = to.getTime() - from.getTime();
 		return delta <= 1000 * 60 * 60 * 24; //more that a day
 	}
