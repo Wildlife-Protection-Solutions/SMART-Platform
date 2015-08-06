@@ -87,10 +87,10 @@ public class CyberTrackerImportComposite extends Composite {
 	 */
 	public enum CTTableColumn {
 		IMPORT_NOTE ("",	20), //$NON-NLS-1$
-		START_DATE	(Messages.CTPatrolTableColumn_StartDate,	120),
-		END_DATE	(Messages.CTPatrolTableColumn_EndDate,		120),
-		TYPE		(Messages.CTPatrolTableColumn_Type, 		60),
-		SIGHT_COUNT	(Messages.CTPatrolTableColumn_SightCount, 	50),
+		START_DATE	("Start Date and Time",	120),
+		END_DATE	("End Date and Time",		120),
+		TYPE		("Type", 		60),
+		SIGHT_COUNT	("Observations Count", 	50),
 		DETAILS		("Details", 	300);
 		
 		private String guiName;
