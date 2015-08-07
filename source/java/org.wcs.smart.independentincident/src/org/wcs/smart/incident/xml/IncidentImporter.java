@@ -55,6 +55,7 @@ import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.model.WaypointType;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -238,7 +239,7 @@ public class IncidentImporter {
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){
 				sb.append(str);
-				sb.append(SmartUtils.LINE_SEPARATOR);
+				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
 			final String message = sb.toString();
 			final boolean[] cont = new boolean[]{true}; 

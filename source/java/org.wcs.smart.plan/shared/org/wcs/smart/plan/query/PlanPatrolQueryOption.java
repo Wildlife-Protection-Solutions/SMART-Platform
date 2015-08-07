@@ -39,7 +39,6 @@ public class PlanPatrolQueryOption extends AbstractEmptyPatrolQueryOption {
 
 	public static final String KEY = STRING_CONTRIBUTION_KEY_PREFIX + "planPart"; //$NON-NLS-1$
 
-	
 	@Override
 	public String getGuiName(Locale l) {
 		return SmartContext.INSTANCE.getClass(IPlanLabelProvider.class).getLabel(this, l);

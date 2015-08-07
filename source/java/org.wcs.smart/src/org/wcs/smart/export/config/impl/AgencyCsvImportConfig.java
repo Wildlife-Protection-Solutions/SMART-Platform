@@ -29,7 +29,7 @@ import org.wcs.smart.export.config.ICsvDataImporter;
 import org.wcs.smart.export.dialog.CsvImportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Configuration for current {@link CsvImportDialog} to import
@@ -63,13 +63,13 @@ public class AgencyCsvImportConfig extends AbstractCsvImportConfig {
 	
 	@Override
 	public String getInfo() {
-		return Messages.CsvConfig_Agency_Import_Info + SmartUtils.LINE_SEPARATOR +
+		return Messages.CsvConfig_Agency_Import_Info + SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Import_Info_Content +
-				SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR +
+				SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Example_Label +
-				SmartUtils.LINE_SEPARATOR +
+				SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Example_HeaderRow +
-				SmartUtils.LINE_SEPARATOR +
+				SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Example_ContentRow;
 	}
 

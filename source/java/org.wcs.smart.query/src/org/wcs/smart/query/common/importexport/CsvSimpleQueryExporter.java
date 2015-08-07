@@ -39,7 +39,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -77,7 +77,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	protected void init() throws Exception {
 		writer = new CSVWriter(
 				new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"), //$NON-NLS-1$ 
-				delimiter, '"', SmartUtils.LINE_SEPARATOR); 
+				delimiter, '"', SharedUtils.LINE_SEPARATOR); 
 		
 		String data[] = new String[queryColumns.size()]; 
 		for (int i = 0; i < data.length; i ++){

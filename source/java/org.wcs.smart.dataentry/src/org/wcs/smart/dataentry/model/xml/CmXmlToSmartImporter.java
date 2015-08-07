@@ -64,7 +64,7 @@ import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.OptionSelectionDialog;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Converts a SMART XML configurable model to the database
@@ -163,7 +163,7 @@ public class CmXmlToSmartImporter {
 				StringBuilder sb = new StringBuilder();
 				for (String str: warnings){
 					sb.append(str);
-					sb.append(SmartUtils.LINE_SEPARATOR);
+					sb.append(SharedUtils.LINE_SEPARATOR);
 				}
 				final String message = sb.toString();
 				final boolean[] cont = new boolean[]{true}; 

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.common.model.udig;
 
-
 import java.awt.Point;
 import java.awt.image.ColorModel;
 import java.awt.image.DataBuffer;
@@ -43,7 +42,7 @@ import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GridResultItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 
 /**
@@ -184,17 +183,17 @@ final class RasterBuilder {
 				.toString());
 		try(BufferedWriter out = new BufferedWriter(new FileWriter(prjFile))){
 			out.write(String.valueOf(gridSize));
-			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(SharedUtils.LINE_SEPARATOR);
 			out.write("0"); //$NON-NLS-1$
-			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(SharedUtils.LINE_SEPARATOR);
 			out.write("0"); //$NON-NLS-1$
-			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(SharedUtils.LINE_SEPARATOR);
 			out.write(String.valueOf(-gridSize));
-			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(SharedUtils.LINE_SEPARATOR);
 			out.write(String.valueOf(xmin));
-			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(SharedUtils.LINE_SEPARATOR);
 			out.write(String.valueOf(ymax));
-			out.write(SmartUtils.LINE_SEPARATOR);
+			out.write(SharedUtils.LINE_SEPARATOR);
 		}
 
 	}

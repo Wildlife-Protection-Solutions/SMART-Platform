@@ -59,6 +59,7 @@ import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.xml.model.IntelligenceType;
 import org.wcs.smart.intelligence.xml.model.LabelType;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -268,7 +269,7 @@ public class IntelligenceImporter {
 				StringBuilder sb = new StringBuilder();
 				for (String str: converter.getWarnings()){
 					sb.append(str);
-					sb.append(SmartUtils.LINE_SEPARATOR);
+					sb.append(SharedUtils.LINE_SEPARATOR);
 				}
 				final String message = sb.toString();
 				final boolean[] cont = new boolean[]{true}; 

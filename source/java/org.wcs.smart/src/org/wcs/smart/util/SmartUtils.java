@@ -30,9 +30,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
-import java.util.StringTokenizer;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipFile;
@@ -136,9 +133,6 @@ public class SmartUtils {
 			return o1.compareTo(o2);
 		}
 	});
-	
-	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
-	
 	
 	/**
 	 * Converts a datetime widget to a date object only setting year, month and

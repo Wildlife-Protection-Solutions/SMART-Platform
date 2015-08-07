@@ -33,7 +33,7 @@ import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -87,7 +87,7 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 		//column headers
 		try(CSVWriter writer = new CSVWriter(
 				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-				delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
+				delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 		
 			for (int i = 0; i < results.getColumnHeaders().size(); i ++){
 				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];

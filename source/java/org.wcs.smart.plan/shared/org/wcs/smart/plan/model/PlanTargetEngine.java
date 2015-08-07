@@ -30,9 +30,7 @@ import java.util.Locale;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.model.NumericPlanTarget.Operator;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTargetStatus.Status;
@@ -123,7 +121,7 @@ public class PlanTargetEngine {
 			return new PlanTargetStatus(Status.INCOMPLETE);
 		}
 		total = calculateTargetStatusValue(thisTarget.getPlan(),
-				thisTarget.getType());
+				thisTarget.getType(), session);
 		
 		String completeMsg = Status.COMPLETE.getGuiName(l) + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 		String incompleteMsg = Status.INCOMPLETE.getGuiName(l) + " (" + total + ")"; //$NON-NLS-1$ //$NON-NLS-2$
@@ -167,11 +165,11 @@ public class PlanTargetEngine {
 
 	}
 
-	private Double calculateTargetStatusValue(Plan plan, TargetType type) {
+	private Double calculateTargetStatusValue(Plan plan, TargetType type, Session session) {
 		List<Plan> children = plan.getChildren();
-		Double total = getTargetTotalValue(type, plan);
+		Double total = getTargetTotalValue(type, plan, session);
 		for (Plan p : children) {
-			total += calculateTargetStatusValue(p, type);
+			total += calculateTargetStatusValue(p, type, session);
 		}
 		return total;
 	}
@@ -237,7 +235,7 @@ public class PlanTargetEngine {
 	 * 
 	 * @return the total calculated value from all associated patrols.
 	 */
-	public static Double getTargetTotalValue(TargetType type, Plan plan) {
+	public static Double getTargetTotalValue(TargetType type, Plan plan, Session session) {
 		Double targetTotal;
 		StringBuilder sql = new StringBuilder();
 		targetTotal = 0.0;
@@ -251,7 +249,6 @@ public class PlanTargetEngine {
 			sql.append(" JOIN pld.tracks as t"); //$NON-NLS-1$
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
-			Session session = HibernateManager.openSession();
 			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
@@ -265,7 +262,6 @@ public class PlanTargetEngine {
 			sql.append(" JOIN pp.id.patrol p"); //$NON-NLS-1$
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 
-			Session session = HibernateManager.openSession();
 			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
@@ -289,7 +285,6 @@ public class PlanTargetEngine {
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
-			Session session = HibernateManager.openSession();
 			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 
@@ -315,7 +310,6 @@ public class PlanTargetEngine {
 			sql.append(" Join pl.patrolLegDays as pld "); //$NON-NLS-1$			
 			sql.append(" WHERE pp.id.plan  =:uuid "); //$NON-NLS-1$
 			
-			Session session = HibernateManager.openSession();
 			Query q = session.createQuery(sql.toString());
 			q.setParameter("uuid", plan); //$NON-NLS-1$
 

@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
 
@@ -56,6 +57,8 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 					wp.setUuid(wpuuid);
 					return wp;
 				}
+			}else if (adaptableObject instanceof SurveyWaypoint){
+				return ((SurveyWaypoint)adaptableObject).getWaypoint();
 			}
 		}
 		return null;

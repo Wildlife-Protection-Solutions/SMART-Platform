@@ -34,7 +34,8 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import org.wcs.smart.util.SmartUtils;
+import org.apache.commons.io.FileUtils;
+
 
 /**
  * Class responsible for saving/loading data to/from file.
@@ -49,7 +50,7 @@ public class PersistentManager {
 			return true;
 		}
 		if (!file.exists()) {
-			SmartUtils.createDirectory(file.getParentFile());
+			FileUtils.forceMkdir(file.getParentFile());
 			file.createNewFile();
 		}
 		try(OutputStream fout = new FileOutputStream(file);

@@ -46,7 +46,7 @@ import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.config.ICsvExportDialogConfig;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -94,7 +94,7 @@ public class EntityCsvExporter implements ICsvDataExporter {
 		
 		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR)){
+					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 			
 			List<Entity> stations = getEntities(session, activeOnly);
 

@@ -69,4 +69,6 @@ public class SharedUtils {
 				&& c1.get(Calendar.MONTH) == c2.get(Calendar.MONTH)
 				&& c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR);
 	}
+
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator"); //$NON-NLS-1$
 }

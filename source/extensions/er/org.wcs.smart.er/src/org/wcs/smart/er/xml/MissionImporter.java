@@ -53,6 +53,7 @@ import org.wcs.smart.er.ui.mision.editor.WaypointAttachmentInterceptor;
 import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -225,7 +226,7 @@ public class MissionImporter {
 				StringBuilder sb = new StringBuilder();
 				for (String str: errors){
 					sb.append(str);
-					sb.append(SmartUtils.LINE_SEPARATOR);
+					sb.append(SharedUtils.LINE_SEPARATOR);
 				}
 				final String message = sb.toString();
 				Display.getDefault().syncExec(new Runnable() {
@@ -258,7 +259,7 @@ public class MissionImporter {
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){
 				sb.append(str);
-				sb.append(SmartUtils.LINE_SEPARATOR);
+				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
 			final String message = sb.toString();
 			final boolean[] cont = new boolean[]{true}; 

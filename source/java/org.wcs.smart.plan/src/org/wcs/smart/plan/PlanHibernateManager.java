@@ -55,7 +55,7 @@ import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -251,7 +251,7 @@ public class PlanHibernateManager{
 				session.getTransaction().commit();
 			} catch (Exception ex) {
 				session.getTransaction().rollback();
-				SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_DeletePlan_Error + SmartUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
+				SmartPlanPlugIn.displayLog(Messages.PlanHibernateManager_DeletePlan_Error + SharedUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
 				return null;
 			}
 		} finally {

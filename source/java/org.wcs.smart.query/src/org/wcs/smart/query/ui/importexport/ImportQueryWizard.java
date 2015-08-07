@@ -59,7 +59,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.OpenQueryHandler;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 
 /**
@@ -266,8 +266,8 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){
 				sb.append(str);
-				sb.append(SmartUtils.LINE_SEPARATOR);
-				sb.append(SmartUtils.LINE_SEPARATOR);
+				sb.append(SharedUtils.LINE_SEPARATOR);
+				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
 		
 			ConfirmInputDialog dialog = new ConfirmInputDialog(

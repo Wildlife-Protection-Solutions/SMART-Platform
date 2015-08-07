@@ -45,6 +45,7 @@ import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
@@ -160,13 +161,13 @@ public class CaExporter {
 		try(FileWriter fw = new FileWriter(new File(directory, CA_INFO_FILENAME))){
 //			fw.write(SmartUtils.encodeHex(ca.getUuid()));
 			fw.write(UuidUtils.uuidToString(ca.getUuid()));
-			fw.write(SmartUtils.LINE_SEPARATOR);
+			fw.write(SharedUtils.LINE_SEPARATOR);
 			fw.write(ca.getId());
-			fw.write(SmartUtils.LINE_SEPARATOR);
+			fw.write(SharedUtils.LINE_SEPARATOR);
 			fw.write(ca.getName());
-			fw.write(SmartUtils.LINE_SEPARATOR);
+			fw.write(SharedUtils.LINE_SEPARATOR);
 			fw.write(ca.getDescription());
-			fw.write(SmartUtils.LINE_SEPARATOR);
+			fw.write(SharedUtils.LINE_SEPARATOR);
 			fw.write(SmartProperties.getInstance().getProperty(SmartProperties.DB_VERSION_KEY));
 		}
 	}
