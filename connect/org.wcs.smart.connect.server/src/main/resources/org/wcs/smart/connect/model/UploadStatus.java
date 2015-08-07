@@ -2,7 +2,7 @@ package org.wcs.smart.connect.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class UploadStatus extends UuidItem{
+public class UploadStatus extends ConnectUuidItem{
 
 	private UploadItem.Status status;
 	private long currentSize;

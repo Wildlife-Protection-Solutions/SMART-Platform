@@ -6,6 +6,3 @@
 <meta charset="UTF-8" />
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/smart.css"/>
 <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
-<link href="//fonts.googleapis.com/css?family=Crimson+Text" rel="stylesheet" type="text/css">
-<link href="//fonts.googleapis.com/css?family=Allerta" rel="stylesheet" type="text/css">

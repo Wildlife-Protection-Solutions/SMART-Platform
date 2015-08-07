@@ -10,7 +10,7 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name="connect.user_actions")
-public class SmartUserAction extends UuidItem{
+public class SmartUserAction extends ConnectUuidItem{
 
 	private String username;
 	private String actionKey;
