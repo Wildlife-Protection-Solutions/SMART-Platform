@@ -22,7 +22,7 @@
 package org.wcs.smart.intelligence.query.ui;
 
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
-import org.wcs.smart.intelligence.query.RecievedDateFilter;
+import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
 import org.wcs.smart.query.common.ui.SummaryEditor;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;

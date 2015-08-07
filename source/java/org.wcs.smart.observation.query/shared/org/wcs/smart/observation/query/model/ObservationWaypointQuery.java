@@ -61,7 +61,7 @@ public class ObservationWaypointQuery extends WaypointQuery {
 		if (queryColumns != null){
 			return;
 		}
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IObservationQueryColumnProvider.class).getQueryColumns(KEY);
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IObservationQueryColumnProvider.class).getQueryColumns(this);
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

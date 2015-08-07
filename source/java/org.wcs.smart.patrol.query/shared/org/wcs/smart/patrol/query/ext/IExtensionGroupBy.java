@@ -19,15 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.parser;
+package org.wcs.smart.patrol.query.ext;
 
-import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.summary.IGroupBy;
+
 /**
- * Filter wrapper for extension items.
+ * Extension for group by.
  * 
  * @author Emily
  *
  */
-public interface IExtensionFilter extends IFilter {
+public interface IExtensionGroupBy extends IGroupBy {
 
+	/**
+	 * Creates the group by item for the extension.  Returns
+	 * null if extension does not support the given key.
+	 * Keys are of the format "patrol:contribution:<key>:<items:>
+	 * 
+	 * @param key the contribution key 
+	 * @return group by item or null if key not supported
+	 */
+	public IExtensionGroupBy createGroupBy(String key);
 }

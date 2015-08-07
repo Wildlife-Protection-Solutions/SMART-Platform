@@ -4,7 +4,7 @@ package org.wcs.smart.patrol.query.parser.internal.parser;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.wcs.smart.patrol.query.parser.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;

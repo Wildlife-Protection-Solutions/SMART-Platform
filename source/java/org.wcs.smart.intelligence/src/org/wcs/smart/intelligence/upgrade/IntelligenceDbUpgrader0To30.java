@@ -36,7 +36,6 @@ import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.jdbc.Work;
-import org.hibernate.type.BinaryType;
 import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;

@@ -51,6 +51,10 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.internal.PatrolValueItemLabelProvider;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
@@ -60,9 +64,6 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
-import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
-import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
-import org.wcs.smart.patrol.query.parser.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
@@ -1298,8 +1299,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				fromSql.append(".keyid = " + p1); //$NON-NLS-1$
 				
 			}else if (gb instanceof IExtensionGroupBy){
-				IGroupByPatrolContribution cont = PatrolContributionFactory.findGroupByContribution(gb.asString());
-				cont.addGroupBySql(gb, fromSql, 
+				PatrolContributionFinder.addGroupBySql((IExtensionGroupBy)gb, fromSql, 
 						groupBySql, groupByInnerSql, 
 						value, caFilter, itemcnt, this);
 			}else{

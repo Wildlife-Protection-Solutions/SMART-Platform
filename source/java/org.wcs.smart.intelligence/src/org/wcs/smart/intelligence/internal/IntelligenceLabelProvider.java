@@ -19,44 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.query;
+package org.wcs.smart.intelligence.internal;
 
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.patrol.query.model.IExtensionOption;
-import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.ui.model.DropItem;
+import java.util.Locale;
+
+import org.wcs.smart.intelligence.IIntelligenceLabelProvider;
+import org.wcs.smart.intelligence.query.IntelligencePatrolQueryOption;
 
 /**
- * Patrol intelligence extension option
+ * SMART Desktop label provider.
+ * 
  * @author Emily
  *
  */
-public class PatrolIntelligenceOption implements IExtensionOption {
-
-	private	IPatrolQueryOption option;
-	
-	public PatrolIntelligenceOption(IPatrolQueryOption option){
-		this.option = option;
-	}
-	
-	@Override
-	public String getName() {
-		return option.getGuiName();
-	}
+public class IntelligenceLabelProvider implements
+		IIntelligenceLabelProvider {
 
 	@Override
-	public DropItem asDropItem() {
-		return PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
-	}
-	
-	@Override
-	public Image getImage() {
-		return option.getImage();
-	}
-	
-	public IPatrolQueryOption getOption(){
-		return this.option;
+	public String getLabel(Object item, Locale l) {
+		if (item instanceof IntelligencePatrolQueryOption){
+			return Messages.IntelligencePatrolQueryOption_Name;
+		}
+		return null;
 	}
 
 }

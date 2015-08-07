@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.ConservationAreaClonerEngine;
 import org.wcs.smart.ca.IConservationAreaTemplateCloner;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.report.ReportIntelligence;
 
@@ -79,12 +80,14 @@ public class IntelligenceCaCloner implements IConservationAreaTemplateCloner {
 	 */
 	private void clonePrintTemplate(ConservationAreaClonerEngine engine){
 		//need to clone: the plan template
-		File f = new File(engine.getTemplateCa().getFileDataStoreLocation(),IntelligencePlugIn.INTELLIGENCE_DIR);
+		File f = new File(engine.getTemplateCa().getFileDataStoreLocation(),
+				Intelligence.INTELLIGENCE_DIR);
 		File templateFile = new File(f, ReportIntelligence.INTELLIGENCE_TEMPLATE);
 		
 		if (templateFile.exists()){
-			//copy plan template
-			f = new File(engine.getNewCa().getFileDataStoreLocation(),IntelligencePlugIn.INTELLIGENCE_DIR);
+			//copy intelligence template
+			f = new File(engine.getNewCa().getFileDataStoreLocation(),
+					Intelligence.INTELLIGENCE_DIR);
 			File newFile = new File(f, ReportIntelligence.INTELLIGENCE_TEMPLATE);
 			try {
 				FileUtils.copyFile(templateFile, newFile);

@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.plan;
 
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.text.Collator;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
@@ -48,14 +46,11 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.internal.Messages;
-import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PatrolPlan;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;

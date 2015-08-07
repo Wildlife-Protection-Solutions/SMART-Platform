@@ -103,7 +103,7 @@ public class EntityGriddedQuery extends GriddedQuery {
 	 */
 	@Override
 	protected void initQueryColumns(){
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IEntityQueryColumnProvider.class).getQueryColumns(KEY, this);
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IEntityQueryColumnProvider.class).getQueryColumns(this);
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		for (int i = 0; i < cols.length; i ++){

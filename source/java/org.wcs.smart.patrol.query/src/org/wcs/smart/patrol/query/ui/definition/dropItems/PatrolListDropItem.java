@@ -45,11 +45,10 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
-import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -123,10 +122,7 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 	public PatrolListDropItem(IPatrolQueryOption option) {
 		this.keyPart = "patrol:" + option.getKey(); //$NON-NLS-1$
 		this.text = option.getGuiName(Locale.getDefault());
-		this.option = option;
-		data = PatrolOptionData.findData(option);
-		this.currentSelection = data.getDefaultListItem();
-		
+		this.option = option;		
 	}
 
 	
@@ -241,11 +237,20 @@ public class PatrolListDropItem extends DropItem implements IFilterDropItem{
 
 	
 	/**
-	 * @param data a list item
+	 * This expects an array with two elements.  The first is
+	 * the patrol option data providing the additional details, the
+	 * second is optional and can be null or the current selection.  
+	 * @param data a array {PatrolOptionData, ListItem}
 	 */
 	@Override
 	public void initializeData(Object data) {
-		currentSelection = (ListItem)data;
+		Object[] values = (Object[]) data;
+		this.data = (IPatrolOptionData) values[0];
+		if (values.length < 2 || values[1] == null){
+			this.currentSelection = this.data.getDefaultListItem();	
+		}else{
+			currentSelection = (ListItem)values[1];
+		}
 	}
 	
 }

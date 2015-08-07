@@ -108,7 +108,7 @@ public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 			return;
 		}
 		
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IIntelligenceQueryColumnProvider.class).getQueryColumns(KEY); 
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IIntelligenceQueryColumnProvider.class).getQueryColumns(this); 
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

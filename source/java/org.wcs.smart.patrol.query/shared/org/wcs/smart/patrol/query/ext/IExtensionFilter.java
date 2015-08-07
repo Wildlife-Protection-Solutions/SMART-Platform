@@ -19,44 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.query;
+package org.wcs.smart.patrol.query.ext;
 
-import org.eclipse.swt.graphics.Image;
-import org.wcs.smart.patrol.query.model.IExtensionOption;
-import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.ui.model.DropItem;
-
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.Operator;
 /**
- * Patrol intelligence extension option
+ * Filter wrapper for extension items.
+ * 
+ * Must have an empty constructor
+ * 
  * @author Emily
  *
  */
-public class PatrolIntelligenceOption implements IExtensionOption {
+public interface IExtensionFilter extends IFilter {
+	/**
+	 * Creates a patrol filter for a boolean patrol filter option.
+	 * 
+	 * If the key is not valid or this function is not supported
+	 * for this filter then this must
+	 * return null.
+	 * 
+	 * @param key the patrol key 
+	 * @return
+	 */
+	public IFilter createFilter(String key);
 
-	private	IPatrolQueryOption option;
-	
-	public PatrolIntelligenceOption(IPatrolQueryOption option){
-		this.option = option;
-	}
-	
-	@Override
-	public String getName() {
-		return option.getGuiName();
-	}
-
-	@Override
-	public DropItem asDropItem() {
-		return PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
-	}
-	
-	@Override
-	public Image getImage() {
-		return option.getImage();
-	}
-	
-	public IPatrolQueryOption getOption(){
-		return this.option;
-	}
-
+	/**
+	 * Creates a filter.
+	 * 
+	 * If the key is not valid or this function is not supported
+	 * for this filter then this must
+	 * return null.
+	 * 
+	 * @param key patrol filter key
+	 * @param op patrol filter operator 
+	 * @param value patrol filter value
+	 * @return
+	 */
+	public IFilter createFilter(String key, Operator op, Object value);
 }

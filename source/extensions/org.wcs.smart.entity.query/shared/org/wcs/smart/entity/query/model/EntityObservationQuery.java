@@ -35,7 +35,7 @@ public class EntityObservationQuery extends ObservationQuery {
 			if (this.queryColumns != null){
 				return;
 			}
-			QueryColumn[] cols = SmartContext.INSTANCE.getClass(IEntityQueryColumnProvider.class).getQueryColumns(KEY, this);
+			QueryColumn[] cols = SmartContext.INSTANCE.getClass(IEntityQueryColumnProvider.class).getQueryColumns(this);
 			queryColumns = new ArrayList<QueryColumn>();
 			HashSet<String> visible = null;
 			if (visibleColumns != null){

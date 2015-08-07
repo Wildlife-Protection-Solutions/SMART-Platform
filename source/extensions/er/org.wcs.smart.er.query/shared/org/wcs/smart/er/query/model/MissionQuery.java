@@ -115,7 +115,7 @@ public class MissionQuery extends SimpleQuery implements IPagedQuery, ISurveyQue
 		if (this.queryColumns != null){
 			return;
 		}
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(KEY, getSurveyDesign());
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(this);
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;
 		if (visibleColumns != null){

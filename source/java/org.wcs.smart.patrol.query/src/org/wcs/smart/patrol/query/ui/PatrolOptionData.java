@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.patrol.query.ui;
 
 import java.util.ArrayList;
@@ -9,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
@@ -24,25 +44,20 @@ import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.hibernate.MultiCaPatrolQueryHibernateManagerImpl;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.IExtensionOption;
+import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.UuidUtils;
 
-public class PatrolOptionData implements IPatrolOptionData {
-
-	public static IPatrolOptionData findData(Object option){
-		if (option instanceof IExtensionOption){
-			return ((IExtensionOption)option).getOptionData();
-		}
-		if (option instanceof PatrolQueryOption){
-			return new PatrolOptionData((PatrolQueryOption)option);
-		}
-		return null;
-	}
+/**
+ * Patrol optoin data for fixed patrol options.
+ * 
+ * @author Emily
+ *
+ */
+public class PatrolOptionData implements IPatrolOptionData{
 	
 	private IPatrolQueryOption option;
 	
@@ -50,9 +65,6 @@ public class PatrolOptionData implements IPatrolOptionData {
 		this.option = option;
 	}
 	
-	public void setPatrolOption(IPatrolQueryOption option){
-		this.option = option;
-	}
 	/**
 	 * Given a set of keys (hex encoded uuids or string keys), returns
 	 * a list of listitems that represent the objects
@@ -62,7 +74,7 @@ public class PatrolOptionData implements IPatrolOptionData {
 	 * @param keys
 	 * @return
 	 */
-	@Override
+//	@Override
 	public List<ListItem> getValues(Session session, String[] keys){
 		List<ListItem> results = new ArrayList<ListItem>();
 		PatrolQueryOptionType type = option.getType();
@@ -118,8 +130,8 @@ public class PatrolOptionData implements IPatrolOptionData {
 		}else if (type == PatrolQueryOptionType.STRING){
 			if (option == PatrolQueryOption.ID){
 				List<?> data = session.createCriteria(option.getSourceClass())
-						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-						.add(Restrictions.in(option.getColumnName(), keys)).list(); //$NON-NLS-1$
+						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+						.add(Restrictions.in(option.getColumnName(), keys)).list(); 
 				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 					Object object = (Object) iterator.next();
 					if (object instanceof Patrol){
@@ -192,10 +204,10 @@ public class PatrolOptionData implements IPatrolOptionData {
 		return null;
 	}
 
-	@Override
-	public Image getImage() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+//	@Override
+//	public Image getImage() {
+//		return PatrolQueryLabelProvider.getImage(option);
+//	}
+
 
 }

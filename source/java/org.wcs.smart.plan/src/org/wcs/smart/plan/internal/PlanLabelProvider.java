@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.plan.internal;
 
 import java.util.Locale;
@@ -13,10 +34,17 @@ import org.wcs.smart.plan.model.PlanTargetStatus;
 import org.wcs.smart.plan.model.SpatialPlanTarget;
 import org.wcs.smart.plan.query.PlanPatrolQueryOption;
 
+/**
+ * Implementation of plan label provider.
+ * 
+ * @author Emily
+ *
+ */
 public class PlanLabelProvider implements IPlanLabelProvider {
 
 	public static final String ADMIN_TARGET_GUI_NAME = Messages.AdministrativePlanTarget_GuiName;
-	public final static String NUMERIC_TARGET_GUI_NAME = Messages.NumericPlanTarget_GuiName;
+	
+	public static final String NUMERIC_TARGET_GUI_NAME = Messages.NumericPlanTarget_GuiName;
 
 	@Override
 	public String getLabel(Object item, Locale l) {
@@ -39,13 +67,13 @@ public class PlanLabelProvider implements IPlanLabelProvider {
 		if (item == PlanTargetStatus.Status.UNKNOWN) return Messages.PlanTargetStatus_Unknown; 
 		
 		if (item == AdministrativePlanTarget.SUMMARY_KEY){
-			return "[Admin] {0}";
+			return Messages.PlanLabelProvider_AdminSummary;
 		}
 		if (item == NumericPlanTarget.SUMMARY_KEY){
-			return "[Numeric] {0}";
+			return Messages.PlanLabelProvider_NumericSummary;
 		}
 		if (item == SpatialPlanTarget.SUMMARY_KEY){
-			return "[Spatial] {0} ({1} point(s))";
+			return Messages.PlanLabelProvider_SpatialSummary;
 		}
 		if (item instanceof PlanPatrolQueryOption){
 			return  Messages.PlanPatrolQueryOption_Name;

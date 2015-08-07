@@ -49,7 +49,7 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.conservation_area")
 public class ConservationArea extends UuidItem {
 
-	public static final UUID MULTIPLE_CA = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR); //$NON-NLS-1$
+	public static final UUID MULTIPLE_CA = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
 
 	/**
 	 * Maximum conservation area id length

@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 

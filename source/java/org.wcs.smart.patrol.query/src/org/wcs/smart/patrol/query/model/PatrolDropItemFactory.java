@@ -38,15 +38,20 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
+import org.wcs.smart.patrol.query.ext.IExtensionFilter;
+import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
@@ -58,7 +63,6 @@ import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.patrol.query.ui.itempanel.GriddedFilterPanel;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
-import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -124,13 +128,11 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createPatrolValueDropItem(
 							(PatrolValueOption) source)};
 
-		} else if (source instanceof IPatrolQueryOption) {
+		} else if (source instanceof PatrolQueryOption) {
 			if (queryItemPanelId == SummaryFilterPanel.ID){
-				items = new DropItem[]{createPatrolGroupByDropItem(
-						(IPatrolQueryOption) source)};
+				items = new DropItem[]{createPatrolGroupByDropItem((PatrolQueryOption) source)};
 			}else{
-				items = new DropItem[]{createPatrolFilterDropItem(
-						(IPatrolQueryOption) source)};
+				items = new DropItem[]{createPatrolFilterDropItem((PatrolQueryOption) source)};
 			}
 		} else if (source instanceof IDateGroupBy) {
 			items = new DropItem[]{createDateGroupByDropItem(
@@ -152,8 +154,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 					queryItemPanelId.equals(GriddedFilterPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
-		}else if (source instanceof IExtensionOption){
-			items = new DropItem[]{((IExtensionOption) source).asDropItem()};
+		}else if (source instanceof IExtensionFilterViewer){
+			items = new DropItem[]{((IExtensionFilterViewer) source).asDropItem()};
+		}else if (source instanceof IExtensionGroupByViewer){
+			items = new DropItem[]{((IExtensionGroupByViewer) source).asDropItem()};
 		}
 		return items;
 		
@@ -173,8 +177,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 * @param item
 	 * @return
 	 */
-	public DropItem createPatrolGroupByDropItem(IPatrolQueryOption item){
-		return new PatrolGroupByDropItem(item);
+	public DropItem createPatrolGroupByDropItem(PatrolQueryOption item){
+		DropItem di = new PatrolGroupByDropItem(item);
+		di.initializeData(new Object[]{new PatrolOptionData(item)});
+		return di;
 	}
 	
 	/**
@@ -214,6 +220,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			default:
 				break;
 			}
+		}
+		if (item instanceof PatrolListDropItem &&
+				option instanceof PatrolQueryOption){
+			item.initializeData(new Object[]{new PatrolOptionData((PatrolQueryOption)option)});
 		}
 		return item;		
 	}
@@ -448,6 +458,8 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			return createDropItems((PatrolFilter)f, session);
 		}else if (f instanceof PatrolUuidFilter){
 			return createDropItems((PatrolUuidFilter)f, session);
+		}else if (f instanceof IExtensionFilter){
+			return createDropItems((IExtensionFilter)f, session);
 		}
 		return super.filterToDropItem(f, session);
 		
@@ -574,6 +586,16 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 		return null;
 	}
 	
+	private DropItem[] createDropItems(IExtensionFilter f, Session session) throws Exception {
+		for (IExtensionFilterViewer b : PatrolContributionFinder.getFilterUiContributions()){
+			if (b.getFilterClass().isAssignableFrom(f.getClass())){
+				return b.getDropItems(f, session);
+			}
+		}
+		return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.PatrolDropItemFactory_ProcessError, f.asString()))};
+		
+	
+	}
 	private DropItem[] createDropItems(PatrolFilter f, Session session) throws Exception {
 		PatrolQueryOption option = f.getPatrolOption();
 		Object value = f.getValue();
@@ -595,7 +617,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 						Messages.PatrolFilter_MandateNotFound,
 						new Object[] { value1 }));
 			} else {
-				it.initializeData(m);
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
 		} else if (option == PatrolQueryOption.STATION) {
 			ListItem m = PatrolQueryHibernateManager.getInstance().getStation(
@@ -605,7 +627,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 						Messages.PatrolFilter_StationNotFound,
 						new Object[] { value1 }));
 			} else {
-				it.initializeData(m);
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
 		} else if (option == PatrolQueryOption.TEAM) {
 			ListItem m = PatrolQueryHibernateManager.getInstance().getTeam(
@@ -615,7 +637,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 						Messages.PatrolFilter_TeamNotFound,
 						new Object[] { value1 }));
 			} else {
-				it.initializeData(m);
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
 		} else if (option == PatrolQueryOption.TEAM_KEY
 				|| option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY
@@ -636,7 +658,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			if (items != null) {
 				for (ListItem item : items) {
 					if (item.getKey().equals(value1)) {
-						it.initializeData(item);
+						it.initializeData(new Object[]{new PatrolOptionData(option), item});
 						found = true;
 						break;
 					}
@@ -655,13 +677,13 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 						Messages.PatrolFilter_TransportTypeNotFound,
 						new Object[] { value1 }));
 			} else {
-				it.initializeData(m);
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
 
 		} else if (option == PatrolQueryOption.PATROL_TYPE) {
 			PatrolType.Type t = PatrolType.Type.valueOf(value1);
 			ListItem m = new ListItem(null, t.getGuiName(Locale.getDefault()), t.name());
-			it.initializeData(m);
+			it.initializeData(new Object[]{new PatrolOptionData(option), m});
 		} else if (option == PatrolQueryOption.EMPLOYEE
 				|| option == PatrolQueryOption.LEADER
 				|| option == PatrolQueryOption.PILOT) {
@@ -672,7 +694,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 						Messages.PatrolFilter_EmployeeNotFound,
 						new Object[] { value1 }));
 			} else {
-				it.initializeData(m);
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
 		}
 		return new DropItem[] { it };
@@ -701,8 +723,16 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	
 	@Override
 	public IGroupByViewer<?> findViewer(IGroupBy groupBy){
+		if (groupBy instanceof IExtensionGroupBy){
+			for (IExtensionGroupByViewer v : PatrolContributionFinder.getGroupByUiContributions()){
+				if (v.getGroupByClass().isAssignableFrom(groupBy.getClass())){
+					return v.createViewer(groupBy);
+				}
+			}
+			return null;
+		}
 		if (groupBy instanceof PatrolGroupBy){
-			return new PatrolGroupByViewer((PatrolGroupBy) groupBy);
+			return new PatrolGroupByViewer((PatrolGroupBy) groupBy, new PatrolOptionData(((PatrolGroupBy)groupBy).getOption()));
 		}
 		return super.findViewer(groupBy);
 	}

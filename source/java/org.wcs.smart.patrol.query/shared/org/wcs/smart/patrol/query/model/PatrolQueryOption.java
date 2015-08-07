@@ -18,7 +18,6 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 
 /**

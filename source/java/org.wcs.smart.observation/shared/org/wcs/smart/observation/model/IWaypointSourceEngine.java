@@ -22,12 +22,6 @@
 package org.wcs.smart.observation.model;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.Platform;
-import org.wcs.smart.observation.model.IWaypointSource;
 /**
  * Manager for dealing with waypoint
  * sources.

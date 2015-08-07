@@ -51,23 +51,23 @@ the patrol group by node in summary queries.
 
    <element name="FilterItem">
       <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="filter" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.model.IQueryFilterPatrolContribution"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.parser.IExtensionFilter"/>
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="FilterItemUi" type="string">
+         <attribute name="viewer" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.model.IExtensionOption"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution"/>
                </appinfo>
             </annotation>
          </attribute>
@@ -76,23 +76,23 @@ the patrol group by node in summary queries.
 
    <element name="GroupByItem">
       <complexType>
-         <attribute name="class" type="string" use="required">
+         <attribute name="groupby" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.ext.IExtensionGroupBy"/>
                </appinfo>
             </annotation>
          </attribute>
-         <attribute name="GroupByItemUi" type="string">
+         <attribute name="viewer" type="string" use="required">
             <annotation>
                <documentation>
                   
                </documentation>
                <appinfo>
-                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.model.summary.IGroupByViewer"/>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer"/>
                </appinfo>
             </annotation>
          </attribute>

@@ -25,8 +25,7 @@ package org.wcs.smart.intelligence.query;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
-import org.wcs.smart.query.model.filter.IGroupByVisitor;
+import org.wcs.smart.query.model.summary.AbstractGroupByViewer;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 
@@ -35,26 +34,16 @@ import org.wcs.smart.query.ui.model.ListItem;
  * @author Emily
  *
  */
-public class PatrolIntelligenceGroupBy implements IExtensionGroupBy{
+public class PatrolIntelligenceGroupByViewer extends AbstractGroupByViewer<IntelligencePatrolGroupBy>{
 
-	@Override
-	public String asString() {
-		return "patrol:contribution:intelligence:"; //$NON-NLS-1$
+	public PatrolIntelligenceGroupByViewer(IntelligencePatrolGroupBy gb) {
+		super(gb);
 	}
 
-	@Override
-	public String getKeyPart() {
-		return asString();
-	}
-
-	@Override
-	public GroupByType getType() {
-		return GroupByType.KEY;
-	}
 
 	@Override
 	public List<ListItem> getItems(Session session) {
-		return IntelligenceGroupByPatrolContribution.SUPPORTEDVALUES;
+		return IntelligenceGroupByDropItem.SUPPORTEDVALUES;
 	}
 
 	@Override
@@ -62,9 +51,5 @@ public class PatrolIntelligenceGroupBy implements IExtensionGroupBy{
 		return new IntelligenceGroupByDropItem();
 	}
 
-	@Override
-	public void visit(IGroupByVisitor visitor) {
-		visitor.visit(this);
-	}
 
 }

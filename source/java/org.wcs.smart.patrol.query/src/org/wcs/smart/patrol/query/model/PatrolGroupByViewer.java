@@ -17,12 +17,12 @@ import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.util.UuidUtils;
 
 public class PatrolGroupByViewer extends AbstractGroupByViewer<PatrolGroupBy> {
-
+	
 	private IPatrolOptionData data;
 	
-	public PatrolGroupByViewer(PatrolGroupBy gb) {
+	public PatrolGroupByViewer(PatrolGroupBy gb, IPatrolOptionData data) {
 		super(gb);
-		data = PatrolOptionData.findData(groupBy.getOption());
+		this.data = data;
 	}
 
 	/**
@@ -30,7 +30,6 @@ public class PatrolGroupByViewer extends AbstractGroupByViewer<PatrolGroupBy> {
 	 */
 	@Override
 	public List<ListItem> getItems(Session session) {
-		
 		if (groupBy.getItems() != null){
 			return data.getValues(session, groupBy.getItems());
 		}

@@ -70,6 +70,7 @@ public class Messages extends NLS {
 	public static String PatrolAttributeValueItem_TreeNodeNotFound;
 	public static String PatrolCategoryValueItem_CategoryNotFound;
 	public static String PatrolContributionFactory_ParseContribution_Error;
+	public static String PatrolDropItemFactory_ProcessError;
 	public static String PatrolFilter_EmployeeNotFound;
 	public static String PatrolFilter_InvalidPrefix;
 	public static String PatrolFilter_MandateNotFound;

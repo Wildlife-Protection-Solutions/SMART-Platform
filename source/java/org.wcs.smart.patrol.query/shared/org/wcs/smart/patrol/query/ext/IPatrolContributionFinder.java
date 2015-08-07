@@ -19,53 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.plan.query;
+package org.wcs.smart.patrol.query.ext;
 
-import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
-import org.wcs.smart.query.model.filter.Operator;
+import java.util.List;
 
 /**
- * "Patrol is a part of a plan" Query Filter
+ * Interface for finding patrol query contributions.
  * 
- * @author elitvin
- * @since 1.0.0
+ * @author Emily
+ *
  */
-public class PatrolPlanQueryFilter implements IExtensionFilter {
-
-	private IPatrolQueryOption option;
-	private Operator op;	
-	private Object value;
-
-	public PatrolPlanQueryFilter(IPatrolQueryOption option, Operator op, Object value) {
-		this.option = option;
-		this.op = op;
-		this.value = value;
-	}
-
-	@Override
-	public String asString() {
-		return "patrol:" + option.getKey() + " " + op.asSmartValue() + " " + value;  //$NON-NLS-1$  //$NON-NLS-2$ //$NON-NLS-3$
-	}
-
+public interface IPatrolContributionFinder {
 	
-	public boolean isAnyPlan(String v) {
-		return v == null || v.isEmpty();
-	}
+	/**
+	 * 
+	 * @return all filter extension contributions
+	 */
+	public List<IExtensionFilter> getFilterContributions();
 	
-	public IPatrolQueryOption getOption(){
-		return this.option;
-	}
-	
-	public Object getValue(){
-		return this.value;
-	}
-	
-
-	@Override
-	public void accept(IFilterVisitor visitor) {
-		visitor.visit(this);
-	}
+	/**
+	 * 
+	 * @return all group by extension contributions
+	 */
+	public List<IExtensionGroupBy> getGroupByContributions();
 	
 }

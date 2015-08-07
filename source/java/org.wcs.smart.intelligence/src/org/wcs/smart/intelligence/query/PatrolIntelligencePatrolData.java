@@ -19,57 +19,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.plan.query;
+package org.wcs.smart.intelligence.query;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.wcs.smart.patrol.query.model.IExtensionOption;
-import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
+import org.hibernate.Session;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
-import org.wcs.smart.plan.PlanHibernateManager;
-import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
- * Patrol intelligence extension option
+ * Patrol option data for intelligence filter.
+ * 
  * @author Emily
  *
  */
-public class PatrolPlanExtension implements IExtensionOption {
-
-	private	IPatrolQueryOption option;
-	private PlanPatrolQueryOptionData data;
+public class PatrolIntelligencePatrolData implements IPatrolOptionData {
 	
-	public PatrolPlanExtension(IPatrolQueryOption option){
-		this.option = option;
-		data = new PlanPatrolQueryOptionData(option);
+
+	public static final ListItem ANY_INTELLIGENCE_ITEM = 
+			new ListItem(UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR), Messages.IntelligencePatrolQueryOption_AnyIntelligence);
+	
+	public PatrolIntelligencePatrolData(){
 	}
 	
 	@Override
-	public String getName() {
-		return option.getGuiName(Locale.getDefault());
+	public List<ListItem> getValues(Session session, String[] keys) {
+		return getAllActiveValues(session);
 	}
 
 	@Override
-	public DropItem asDropItem() {
-		DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
-		
-		return it;
-//		String id = SharedUtils.stripQuotes((String)value);
-//		ListItem listItem = isAnyPlan(id) ? PlanPatrolQueryOptionData.ANY_PATROL_ITEM : PlanHibernateManager.getPlan(session, id);
-//		it.initializeData(listItem);
-//		return new DropItem[]{it};
-	}
-	
-	public IPatrolQueryOption getOption(){
-		return this.option;
+	public List<ListItem> getAllActiveValues(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		List<Intelligence> inteligenceList = IntelligenceHibernateManager.getIntelligences(session);
+		for (Intelligence i : inteligenceList) {
+			items.add(new ListItem(i.getUuid(), i.getName()));
+		}
+		Collections.sort(items);
+		items.add(0,ANY_INTELLIGENCE_ITEM);
+		return items;
 	}
 
 	@Override
-	public IPatrolOptionData getOptionData() {
-		return data;
+	public ListItem getDefaultListItem() {
+		return ANY_INTELLIGENCE_ITEM;
 	}
+
 
 }

@@ -63,7 +63,7 @@ public class SamplingUnitFilter implements IFilter {
 	
 	public enum Source {
 		OBSERVATION ("obs"),  //$NON-NLS-1$
-		TRACK ("trk");
+		TRACK ("trk"); //$NON-NLS-1$
 		
 		public String queryKey;
 		

@@ -77,15 +77,7 @@ public final class InformantAesManager {
 	public final boolean isPasswordSet() {
 		return password != null;
 	}
-	
-//	public final void set(Informant informant, InformantDataKey key, Object value) {
-//		Map<InformantDataKey, Object> info = data.get(informant);
-//		if (info == null) {
-//			info = new HashMap<InformantDataKey, Object>();
-//		}
-//		info.put(key, value);
-//		set(informant, info);
-//	}
+
 
 	public final void set(Informant informant, Map<InformantDataKey, Object> info) throws Exception{
 		if (data == null || informant == null)
@@ -178,6 +170,20 @@ public final class InformantAesManager {
 		password = null;
 	}
 	
-	public class InvalidPasswordException extends Exception{};
-	public class PasswordProctectedException extends Exception{};
+	public class InvalidPasswordException extends Exception{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
+	};
+	public class PasswordProctectedException extends Exception{
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		
+	};
 }

@@ -100,7 +100,7 @@ public class SurveyObservationQuery extends ObservationQuery implements ISurveyQ
 	protected void initQueryColumns() {
 		synchronized (LOCK) {
 			if (this.queryColumns != null) return;
-			QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(KEY, getSurveyDesign());
+			QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(this);
 			ArrayList<QueryColumn> temp = new ArrayList<QueryColumn>();
 			for (QueryColumn q : cols){
 				temp.add(q);

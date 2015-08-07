@@ -107,7 +107,7 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 	 * Loads the query columns
 	 */
 	protected synchronized void initQueryColumns(){
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(KEY, getSurveyDesign());
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(this);
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		for (int i = 0; i < cols.length; i ++){

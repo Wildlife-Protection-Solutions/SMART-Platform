@@ -175,6 +175,9 @@ public class Messages extends NLS {
 	public static String PlanIdNameDescComposite_Name;
 	public static String PlanIdNameDescComposite_PlanId;
 	public static String PlanIdNameDescComposite_Title;
+	public static String PlanLabelProvider_AdminSummary;
+	public static String PlanLabelProvider_NumericSummary;
+	public static String PlanLabelProvider_SpatialSummary;
 	public static String PlanParentIdComposite_ChildParentError;
 	public static String PlanParentIdComposite_DateWarnDialog_Message;
 	public static String PlanParentIdComposite_DateWarnDialog_Title;
@@ -188,6 +191,7 @@ public class Messages extends NLS {
 	public static String PlanParentIdComposite_SameParentError;
 	public static String PlanParentIdComposite_Title;
 	public static String PlanParentIdComposite_UseParent_Label;
+	public static String PlanPatrolQueryFilterViewer_ParseError;
 	public static String PlanPatrolQueryOption_AnyPlan;
 	public static String PlanPatrolQueryOption_Name;
 	public static String PlanStationTeamComposite_Message;

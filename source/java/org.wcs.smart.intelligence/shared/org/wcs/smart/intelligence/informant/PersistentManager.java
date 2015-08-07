@@ -34,10 +34,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import org.eclipse.swt.widgets.Display;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
-import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -48,24 +44,13 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class PersistentManager {
 
-	public static boolean toFile(File file, Object obj) {
+	public static boolean toFile(File file, Object obj) throws IOException{
 		if (file == null) {
 			return true;
 		}
 		if (!file.exists()) {
 			SmartUtils.createDirectory(file.getParentFile());
-			try {
-				file.createNewFile();
-			} catch (final IOException e) {
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						SmartPlugIn.displayLog(
-								Messages.PersistentManager_FileCreateError,
-								e);
-					}});
-				return false;
-			}
+			file.createNewFile();
 		}
 		try(OutputStream fout = new FileOutputStream(file);
 			OutputStream buffer = new BufferedOutputStream(fout);
@@ -73,21 +58,15 @@ public class PersistentManager {
 				output.writeObject(obj);
 				return true;
 
-		} catch (IOException e) {
-			IntelligencePlugIn.displayLog(Messages.PersistentManager_SaveError + e.getMessage(), e);
 		}
-		return false;
 	}
 
-	public static Object fromFile(File file) {
+	public static Object fromFile(File file) throws IOException, ClassNotFoundException {
 		try (InputStream fout = new FileInputStream(file);
 			InputStream buffer = new BufferedInputStream(fout);
 			ObjectInput input = new ObjectInputStream (buffer)){
 
 			return input.readObject();
-		} catch (Exception e) {
-			IntelligencePlugIn.displayLog(Messages.PersistentManager_ReadError + e.getMessage(), e);
 		}
-		return null;
 	}
 }

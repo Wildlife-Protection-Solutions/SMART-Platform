@@ -60,7 +60,7 @@ public class Employee {
 	 * UUID for the 'shared' employee.  This employee uuid
 	 * is associated with the CrossCA Conservation Area.
 	 */
-	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR); //$NON-NLS-1$
+	public static final UUID SHARED_UUID = UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR);
 	
 	//non internationalizable
 	public static final char DB_FEMALE = 'F';

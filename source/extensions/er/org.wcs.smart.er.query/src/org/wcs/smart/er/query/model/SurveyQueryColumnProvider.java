@@ -16,12 +16,16 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.ui.columns.SurveyQueryColumnManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
 public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(String queryTypeKey, String surveyDesignKey) {
+	public QueryColumn[] getQueryColumns(Query query) {
+		String queryTypeKey = query.getTypeKey();
+		String surveyDesignKey = ((ISurveyQuery)query).getSurveyDesign();
+		
 		if (queryTypeKey.equals(SurveyObservationQuery.KEY)){
 			SurveyQueryColumnManager.getInstance()
 				.getObservationQueryColumns(

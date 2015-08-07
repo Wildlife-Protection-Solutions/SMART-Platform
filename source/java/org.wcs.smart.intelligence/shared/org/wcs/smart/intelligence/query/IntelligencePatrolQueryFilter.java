@@ -21,30 +21,30 @@
  */
 package org.wcs.smart.intelligence.query;
 
-import org.hibernate.Session;
-import org.wcs.smart.intelligence.IntelligenceHibernateManager;
-import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
-import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
+import org.wcs.smart.patrol.query.ext.IExtensionFilter;
+import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
- * Patrol is motivated by Intelligence Query Filter
+ * Intelligence filter extension for patrol queries. 
  * 
  * @author elitvin
+ * @author Emily
  * @since 1.0.0
  */
-public class PatrolIntelligenceQueryFilter implements IExtensionFilter {
+public class IntelligencePatrolQueryFilter implements IExtensionFilter {
 	
 	private IPatrolQueryOption option;
 	private Operator op;	
 	private Object value;
 
-	public PatrolIntelligenceQueryFilter(IPatrolQueryOption option, Operator op, Object value) {
+	public IntelligencePatrolQueryFilter(){}
+	
+	public IntelligencePatrolQueryFilter(IPatrolQueryOption option, Operator op, Object value) {
 		this.option = option;
 		this.op = op;
 		this.value = value;
@@ -55,19 +55,13 @@ public class PatrolIntelligenceQueryFilter implements IExtensionFilter {
 		return "patrol:" + option.getKey() + " " + op.asSmartValue() + " " + value; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
-	@Override
-	public DropItem[] getDropItems(Session session) throws Exception {
-		DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
-		String id = SharedUtils.stripQuotes((String)value);
-		ListItem listItem = isAnyIntelligence(id) ? 
-				IntelligencePatrolQueryOption.ANY_INTELLIGENCE_ITEM :
-				IntelligenceHibernateManager.getIntelligence(session, id);
-		it.initializeData(listItem);
-		return new DropItem[]{it};
-	}
-
-	public boolean isAnyIntelligence(String v) {
-		return v == null || v.isEmpty();
+	public boolean isAnyIntelligence() {
+		if (value == null) return true;
+		if (!(value instanceof String)) return false;
+		
+		String obj = SharedUtils.stripQuotes((String)value);
+		if (obj.isEmpty() || obj.equals(UuidUtils.ZERO_UUID_STR)) return true;
+		return false;
 	}
 	
 	public Object getValue(){
@@ -78,6 +72,22 @@ public class PatrolIntelligenceQueryFilter implements IExtensionFilter {
 	@Override
 	public void accept(IFilterVisitor visitor) {
 		visitor.visit(this);
+	}
+
+	/**
+	 * not supported
+	 */
+	@Override
+	public IFilter createFilter(String key) {
+		return null;
+	}
+
+	@Override
+	public IFilter createFilter(String key, Operator op, Object value) {
+		if (key.equalsIgnoreCase("patrol:" + IntelligencePatrolQueryOption.KEY)){ //$NON-NLS-1$
+			return new IntelligencePatrolQueryFilter(new IntelligencePatrolQueryOption(), op, value);
+		}
+		return null;
 	}
 		
 }

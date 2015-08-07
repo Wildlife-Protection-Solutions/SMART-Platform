@@ -871,12 +871,14 @@
    </extension>
    <extension
          point="org.wcs.smart.patrol.query.contribution">
-      <FilterItem
-            class="org.wcs.smart.intelligence.query.IntelligenceQueryFilterPatrolContribution">
-      </FilterItem>
       <GroupByItem
-            class="org.wcs.smart.intelligence.query.IntelligenceGroupByPatrolContribution">
+            groupby="org.wcs.smart.intelligence.query.IntelligencePatrolGroupBy"
+            viewer="org.wcs.smart.intelligence.query.IntelligenceGroupByPatrolContribution">
       </GroupByItem>
+      <FilterItem
+            filter="org.wcs.smart.intelligence.query.IntelligencePatrolQueryFilter"
+            viewer="org.wcs.smart.intelligence.query.IntelligencePatrolQueryFilterViewer">
+      </FilterItem>
    </extension>
    <extension
          point="org.eclipse.equinox.p2.engine.actions">

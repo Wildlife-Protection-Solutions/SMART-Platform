@@ -19,41 +19,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.parser;
+package org.wcs.smart.patrol.query.ext;
 
-import java.sql.Connection;
-
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.query.ui.model.DropItem;
 
 /**
- * Contribution for the Patrol section of a "Query Filter" view.
+ * Maps an IExtensionFilter to the associated UI
+ * elements. 
  *
  * @author elitvin
  * @since 1.0.0
  */
-public interface IQueryFilterPatrolContribution {
+public interface IExtensionFilterViewer {
 
 	/**
-	 * Creates a patrol filter for a boolean patrol filter option
-	 * 
-	 * @param key the patrol key 
+	 * Name of the option as it appears on the gui
 	 * @return
 	 */
-	public IExtensionFilter createFilter(String key);
+	public String getName();
 
 	/**
-	 * Creates a patrol filter
-	 * 
-	 * @param key patrol filter key
-	 * @param op patrol filter operator 
-	 * @param value patrol filter value
+	 * Creates a new drop item for the filter.
 	 * @return
 	 */
-	public IExtensionFilter createFilter(String key, Operator op, Object value);
+	public DropItem asDropItem();
 	
+	/**
+	 * The image associated with the filter
+	 * @return
+	 */
+	public Image getImage();
+	
+	/**
+	 * 
+	 * @return the filter class
+	 */
+	public Class<? extends IExtensionFilter> getFilterClass();
+	
+	/**
+	 * Converts a filter to associated drop items 
+	 * @param filter
+	 * @param session
+	 * @return
+	 */
+	public DropItem[] getDropItems(IFilter filter, Session session);
 	
 	/**
 	 * Converts the given filter to sql 

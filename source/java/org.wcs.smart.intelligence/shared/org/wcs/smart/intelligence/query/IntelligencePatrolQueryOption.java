@@ -21,21 +21,13 @@
  */
 package org.wcs.smart.intelligence.query;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.Locale;
 
-import org.eclipse.swt.graphics.Image;
-import org.hibernate.Session;
-import org.wcs.smart.intelligence.IntelligenceHibernateManager;
-import org.wcs.smart.intelligence.IntelligencePlugIn;
-import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.intelligence.IIntelligenceLabelProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.query.model.AbstractEmptyPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
-import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Intelligence option to contribute to Patrol Query Filter
@@ -47,12 +39,9 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 	
 	public static final String KEY = STRING_CONTRIBUTION_KEY_PREFIX + "intelligence"; //$NON-NLS-1$
 
-	public static final ListItem ANY_INTELLIGENCE_ITEM = 
-			new ListItem(UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR), Messages.IntelligencePatrolQueryOption_AnyIntelligence);
-	
 	@Override
-	public String getGuiName() {
-		return Messages.IntelligencePatrolQueryOption_Name;
+	public String getGuiName(Locale l) {
+		return SmartContext.INSTANCE.getClass(IIntelligenceLabelProvider.class).getLabel(this, l);
 	}
 
 	@Override
@@ -77,25 +66,5 @@ public class IntelligencePatrolQueryOption extends AbstractEmptyPatrolQueryOptio
 		return Patrol.class;
 	}
 
-	@Override
-	public Image getImage() {
-		return IntelligencePlugIn.getDefault().getImageRegistry().get(IntelligencePlugIn.INTELLIGENCE_ICON);
-	}
-
-	@Override
-	public List<ListItem> getAllActiveValues(Session session) {
-		ArrayList<ListItem> items = new ArrayList<ListItem>();
-		List<Intelligence> inteligenceList = IntelligenceHibernateManager.getIntelligences(session);
-		for (Intelligence i : inteligenceList) {
-			items.add(new ListItem(i.getUuid(), i.getName()));
-		}
-		Collections.sort(items);
-		items.add(0,ANY_INTELLIGENCE_ITEM);
-		return items;
-	}
 	
-	@Override
-	public ListItem getDefaultListItem() {
-		return ANY_INTELLIGENCE_ITEM;
-	}
 }

@@ -19,40 +19,63 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.parser;
+package org.wcs.smart.patrol.query.ext;
 
 import java.sql.SQLException;
 
-import org.wcs.smart.patrol.query.model.IExtensionOption;
+import org.eclipse.swt.graphics.Image;
+import org.hibernate.Session;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.ui.model.DropItem;
 
 /**
- * Extension point for providing group by contributions to
- * patrol queries.
+ * Maps a IExtensionGroupBy to associated
+ * UI elements.
  * 
  * @author Emily
  *
  */
-public interface IGroupByPatrolContribution {
+public interface IExtensionGroupByViewer {
+
+	public IGroupByViewer<? extends IGroupBy> createViewer(IGroupBy groupBy);
+	
+	/**
+	 * Name of the option as it appears on the gui
+	 * @return
+	 */
+	public String getName();
 
 	/**
-	 * Creates the group by item for the extension.  Returns
-	 * null if extension does not support the given key.
-	 * Keys are of the format "patrol:contribution:<key>:<items:>
-	 * 
-	 * @param key the contribution key 
-	 * @return group by item or null if key not supported
+	 * Creates a new drop item for the filter.
+	 * @return
 	 */
-	public IExtensionGroupBy createGroupBy(String key);
+	public DropItem asDropItem();
+	
+	/**
+	 * The image associated with the filter
+	 * @return
+	 */
+	public Image getImage();
 	
 	/**
 	 * 
-	 * @return the extension option 
+	 * @return the filter class
 	 */
-	public IExtensionOption getOption();
+	public Class<? extends IExtensionGroupBy> getGroupByClass();
+	
+	/**
+	 * Converts a filter to associated drop items 
+	 * @param filter
+	 * @param session
+	 * @return
+	 */
+	public DropItem[] getDropItems(IExtensionGroupBy filter, Session session);
 	
 	
 	/**

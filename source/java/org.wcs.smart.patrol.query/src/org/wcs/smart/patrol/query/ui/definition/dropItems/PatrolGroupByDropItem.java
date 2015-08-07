@@ -42,8 +42,9 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
+import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
 import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -59,7 +60,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 
-	
+	private IPatrolOptionData data;
 	private IPatrolQueryOption groupBy;
 	private List<ListItem> filteredValues = new ArrayList<ListItem>();
 	private ToolTip toolTip;
@@ -121,16 +122,21 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 	}
 
 	/**
-	 * @param data - must be a (ListItem[]) that represents
+	 * @param data - must be a array of two elements.  The first
+	 * is the IPatrolOptionData associated with the patrol option
+	 * the second is an array of ListItem[] that represents the
+	 * select group of options (or null if all are selected)
 	 * the selected group by options or null if all selected
 	 * @see org.wcs.smart.query.ui.formulaDnd.DropItem#initializeData(java.lang.Object)
 	 */
 	@Override
 	public void initializeData(Object data) {
-		if (data == null){
+		Object[] values = (Object[])data;
+		this.data = (IPatrolOptionData) values[0];
+		if (values.length < 2 || values[1] == null){
 			this.filteredValues.clear();
 		}else{
-			ListItem[] d = (ListItem[])data;
+			ListItem[] d = (ListItem[])values[1];
 			this.filteredValues = new ArrayList<ListItem>();
 			for (int i = 0; i < d.length; i ++){
 				filteredValues.add(d[i]);
@@ -222,7 +228,7 @@ public class PatrolGroupByDropItem extends DropItem implements IGroupByDropItem{
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			items = PatrolOptionData.findData(groupBy).getAllActiveValues(s);
+			items = data.getAllActiveValues(s);
 			s.getTransaction().rollback();
 			s.close();
 		}catch (Exception ex){

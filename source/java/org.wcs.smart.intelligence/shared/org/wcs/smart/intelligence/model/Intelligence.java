@@ -37,7 +37,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
@@ -52,6 +51,9 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name = "smart.intelligence")
 public class Intelligence extends NamedItem {
 
+	public static final String  INTELLIGENCE_DIR = "intelligence"; //$NON-NLS-1$
+	
+	
 	/**
 	 * Maximum length of description field
 	 */
@@ -180,24 +182,19 @@ public class Intelligence extends NamedItem {
 	public void setCreator(Employee creator){
 		this.creator = creator;
 	}
-	
-	/**
-	 * 
-	 * <p>
-	 * To get full file names you must prepend this with the conservation area file store location.
-	 * </p>
-	 * <code>
-	 * ConservationArea.getFileDataStoreLocation() + File.separator + Intelligence.getIntelligenceDatastorePath();
-	 * </code>
-	 * @return the file store location for the intelligence relative to the conservation area file store
-	 */
-	@Transient
-	public String getIntelligenceDatastorePath(){
-		return SmartContext.INSTANCE.getPair(IntelligenceAttachment.ATTACHMENT_DIR_KEY) + File.separator + UuidUtils.getDirectoryPath(getUuid());
-	}
+
 	
 	@Transient
 	public static String generateLabel(String name, Date receivedDate) {
 		return name + "  [" + DateFormat.getDateInstance(DateFormat.SHORT).format(receivedDate) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	@Transient
+	public String getDatastoreLocation() {
+		return  getConservationArea().getFileDataStoreLocation()
+				+ File.separator
+				+ INTELLIGENCE_DIR
+				+ File.separator
+				+ UuidUtils.getDirectoryPath(getUuid());
 	}
 }

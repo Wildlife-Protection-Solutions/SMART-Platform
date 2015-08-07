@@ -107,7 +107,7 @@ public class ObservationGriddedQuery extends GriddedQuery {
 	 */
 	@Override
 	protected void initQueryColumns(){
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IObservationQueryColumnProvider.class).getQueryColumns(KEY);
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IObservationQueryColumnProvider.class).getQueryColumns(this);
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		for (int i = 0; i < cols.length; i ++){

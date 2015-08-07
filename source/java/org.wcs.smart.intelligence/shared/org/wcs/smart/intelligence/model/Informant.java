@@ -22,6 +22,7 @@
 package org.wcs.smart.intelligence.model;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -32,7 +33,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.intelligence.informant.PersistentManager;
@@ -82,7 +82,7 @@ public final class Informant extends UuidItem {
 	}
 	
     @Transient
-    public EncryptedData getEncryptedData() {
+    public EncryptedData getEncryptedData() throws IOException, ClassNotFoundException{
     	if (encryptedData == null) {
     		File file = getDataFile();
 			encryptedData = new EncryptedData();
@@ -122,15 +122,16 @@ public final class Informant extends UuidItem {
 	}
 	
     @Transient
-	public static final String getDatastoreFolderPath() {
-		return getDatastoreFolderPath(
-				SmartContext.INSTANCE.getFilestoreLocation());
-	}
-
-    @Transient
-	public static final String getDatastoreFolderPath(String fileDataStoreLocation) {
-		return fileDataStoreLocation + File.separator
-				+ SmartContext.INSTANCE.getPair(IntelligenceAttachment.ATTACHMENT_DIR_KEY) + File.separator + DIR_NAME;
-	}
+	private String getDatastoreFolderPath() {
+    	return getDatastoreFolderPath(conservationArea.getFileDataStoreLocation()); 
+    }
     
+    public static final String getDatastoreFolderPath(String filestore){
+    	return filestore 
+    			+ File.separator
+    			+ Intelligence.INTELLIGENCE_DIR
+    			+ File.separator
+    			+ DIR_NAME;
+    			
+    }
 }

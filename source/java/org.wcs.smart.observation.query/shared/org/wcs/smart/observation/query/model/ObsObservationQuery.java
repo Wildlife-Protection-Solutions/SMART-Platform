@@ -70,7 +70,7 @@ public class ObsObservationQuery extends ObservationQuery implements IPagedQuery
 				return;
 			}	
 		
-			QueryColumn[] cols = SmartContext.INSTANCE.getClass(IObservationQueryColumnProvider.class).getQueryColumns(KEY);
+			QueryColumn[] cols = SmartContext.INSTANCE.getClass(IObservationQueryColumnProvider.class).getQueryColumns(this);
 		
 			queryColumns = new ArrayList<QueryColumn>();
 			HashSet<String> visible = null;

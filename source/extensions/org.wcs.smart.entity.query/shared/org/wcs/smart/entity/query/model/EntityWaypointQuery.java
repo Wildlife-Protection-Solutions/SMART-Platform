@@ -59,7 +59,7 @@ public class EntityWaypointQuery extends WaypointQuery {
 		if (queryColumns != null){
 			return;
 		}
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IEntityQueryColumnProvider.class).getQueryColumns(KEY, this);
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IEntityQueryColumnProvider.class).getQueryColumns(this);
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

@@ -32,13 +32,15 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.query.ext.IExtensionFilter;
+import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
-import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
@@ -159,7 +161,12 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	 * not expression
 	 */
 	protected String asSql(IExtensionFilter filter, IQueryEngine engine) throws SQLException{
-		return PatrolContributionFactory.getSql(engine, ((IPatrolQueryEngine)engine).getCurrentConnection(), filter);	
+		for (IExtensionFilterViewer contrib: PatrolContributionFinder.getFilterUiContributions()){
+			if (contrib.getFilterClass().isAssignableFrom(filter.getClass())){
+				return contrib.asSql(engine, ((IPatrolQueryEngine)engine).getCurrentConnection(), filter);
+			}
+		}
+		throw new IllegalStateException(MessageFormat.format("Filter {0} not supported.", filter.asString()));	
 	}
 	/*
 	 * Patrol Filter

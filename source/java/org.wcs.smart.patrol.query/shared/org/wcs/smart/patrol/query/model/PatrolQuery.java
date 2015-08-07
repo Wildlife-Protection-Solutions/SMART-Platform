@@ -109,7 +109,7 @@ public class PatrolQuery extends SimpleQuery implements IMemoryQuery{
 		if (this.queryColumns != null){
 			return;
 		}
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IPatrolQueryColumnProvider.class).getQueryColumns(KEY);
+		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IPatrolQueryColumnProvider.class).getQueryColumns(this);
 		
 		queryColumns = new ArrayList<QueryColumn>();
 		HashSet<String> visible = null;

@@ -35,7 +35,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.hibernate.annotations.GenericGenerator;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 
 /**
@@ -47,8 +46,6 @@ import org.wcs.smart.common.attachment.ISmartAttachment;
 @Entity
 @Table(name="smart.intelligence_attachment")
 public class IntelligenceAttachment implements ISmartAttachment {
-	
-	public static final String ATTACHMENT_DIR_KEY = "intelligenc_attachment"; //$NON-NLS-1$
 	
 	private UUID uuid;
 	private Intelligence intelligence;
@@ -104,7 +101,7 @@ public class IntelligenceAttachment implements ISmartAttachment {
 	}
 	private void setFullFile(){
 		if (intelligence != null) {
-			this.fullFile = getDatastoreFolderPath() + File.separator + getFilename();
+			this.fullFile = intelligence.getDatastoreLocation() + File.separator + getFilename();
 		}
 	}
 	@Transient
@@ -117,10 +114,9 @@ public class IntelligenceAttachment implements ISmartAttachment {
 	}
 	
 	@Override
-	@Transient
-	public String getDatastoreFolderPath() {
-		return SmartContext.INSTANCE.getFilestoreLocation() + File.separator
-				+ intelligence.getIntelligenceDatastorePath();
+	public String getDatastoreFolderPath() throws Exception {
+		return intelligence.getDatastoreLocation();
 	}
 	
+
 }

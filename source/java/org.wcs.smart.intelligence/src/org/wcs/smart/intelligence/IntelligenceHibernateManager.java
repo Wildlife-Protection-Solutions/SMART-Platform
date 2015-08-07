@@ -164,7 +164,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @param intelligence who's filestore to delete
 	 */
 	public static void deleteFilestore(Intelligence intelligence) {
-		File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + intelligence.getIntelligenceDatastorePath());
+		File fileStore = new File(intelligence.getDatastoreLocation());
 		if (fileStore.exists()){
 			try{
 				FileUtils.forceDelete(fileStore);

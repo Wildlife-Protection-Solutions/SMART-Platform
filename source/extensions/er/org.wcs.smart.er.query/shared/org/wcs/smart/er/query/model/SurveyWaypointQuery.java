@@ -99,7 +99,7 @@ public class SurveyWaypointQuery extends WaypointQuery implements ISurveyQuery{
 		synchronized (LOCK) {
 			if (this.queryColumns != null) return;
 			ArrayList<QueryColumn> temp = new ArrayList<QueryColumn>();
-			QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(KEY, getSurveyDesign());
+			QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(this);
 			for (QueryColumn q : cols){
 				temp.add(q);
 			}	

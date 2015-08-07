@@ -19,20 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.internal;
+package org.wcs.smart.patrol.query.ext;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-import org.wcs.smart.patrol.query.model.IExtensionOption;
-import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
-import org.wcs.smart.patrol.query.parser.IPatrolContributionFinder;
-import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
-import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
+import org.hibernate.Session;
+import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.summary.IValueItem;
 
 /**
  * Factory for providing all patrol contribution related information added via extension point.
@@ -47,15 +48,17 @@ public class PatrolContributionFinder implements IPatrolContributionFinder{
 	 */
 	public static final String EXTENSION_ID = "org.wcs.smart.patrol.query.contribution"; //$NON-NLS-1$
 	
+	private static List<IExtensionFilterViewer> filterViewers = null;
+	private static List<IExtensionGroupByViewer> groupbyViewers = null;
 	
-	public List<IQueryFilterPatrolContribution> getFilterContributions() {
+	public List<IExtensionFilter> getFilterContributions() {
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		List<IQueryFilterPatrolContribution> items = new ArrayList<IQueryFilterPatrolContribution>();
+		List<IExtensionFilter> items = new ArrayList<IExtensionFilter>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("FilterItem")){ //$NON-NLS-1$
-					IQueryFilterPatrolContribution contribution = (IQueryFilterPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+					IExtensionFilter contribution = (IExtensionFilter)e.createExecutableExtension("filter"); //$NON-NLS-1$
 					items.add(contribution);
 				}
 			}
@@ -66,14 +69,14 @@ public class PatrolContributionFinder implements IPatrolContributionFinder{
 		}
 	}
 	
-	public List<IGroupByPatrolContribution> getGroupByContributions() {
+	public List<IExtensionGroupBy> getGroupByContributions() {
 		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
-		List<IGroupByPatrolContribution> items = new ArrayList<IGroupByPatrolContribution>();
+		List<IExtensionGroupBy> items = new ArrayList<IExtensionGroupBy>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("GroupByItem")){ //$NON-NLS-1$
-					IGroupByPatrolContribution contribution = (IGroupByPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
+					IExtensionGroupBy contribution = (IExtensionGroupBy)e.createExecutableExtension("groupby"); //$NON-NLS-1$
 					items.add(contribution);
 				}
 			}
@@ -84,39 +87,79 @@ public class PatrolContributionFinder implements IPatrolContributionFinder{
 		}
 	}
 	
-	public static IExtensionOption getPatrolOptionData(Class source){
-		if (Platform.getExtensionRegistry() == null) return null;
+	public static List<IExtensionFilterViewer> getFilterUiContributions() {
+		if (filterViewers != null) return filterViewers;
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<IExtensionFilterViewer> items = new ArrayList<IExtensionFilterViewer>();
 		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
 		try {
 			for (IConfigurationElement e : config) {
 				if (e.getName().equals("FilterItem")){ //$NON-NLS-1$
-					IQueryFilterPatrolContribution contribution = 
-							(IQueryFilterPatrolContribution)e.createExecutableExtension("class"); //$NON-NLS-1$
-					if (contribution.getClass().equals(source)){
-						return (IExtensionOption)e.createExecutableExtension("FilterItemUi");
-					}
+					IExtensionFilterViewer contribution = (IExtensionFilterViewer)e.createExecutableExtension("viewer"); //$NON-NLS-1$
+					items.add(contribution);
 				}
 			}
-			return null;
-		} catch (Exception ex) {
-			QueryPlugIn.displayLog(Messages.PatrolContributionFactory_ParseContribution_Error, ex);
-			return null;
-		}
-	}
-	public static List<IExtensionOption> getExtensions(){
-		if (Platform.getExtensionRegistry() == null) return null;
-		List<IExtensionOption> items = new ArrayList<IExtensionOption>();
-		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
-		try {
-			for (IConfigurationElement e : config) {
-				if (e.getName().equals("FilterItem")){ //$NON-NLS-1$
-					items.add ((IExtensionOption)e.createExecutableExtension("FilterItemUi"));
-				}
-			}
+			filterViewers = items;
 			return items;
 		} catch (Exception ex) {
 			QueryPlugIn.displayLog(Messages.PatrolContributionFactory_ParseContribution_Error, ex);
-			return null;
+			return Collections.emptyList();
+		}
+	}
+	
+	public static List<IExtensionGroupByViewer> getGroupByUiContributions() {
+		if (groupbyViewers != null) return groupbyViewers;
+		if (Platform.getExtensionRegistry() == null) return Collections.emptyList();
+		List<IExtensionGroupByViewer> items = new ArrayList<IExtensionGroupByViewer>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(EXTENSION_ID);
+		try {
+			for (IConfigurationElement e : config) {
+				if (e.getName().equals("GroupByItem")){ //$NON-NLS-1$
+					IExtensionGroupByViewer contribution = (IExtensionGroupByViewer)e.createExecutableExtension("viewer"); //$NON-NLS-1$
+					items.add(contribution);
+				}
+			}
+			groupbyViewers = items;
+			return items;
+		} catch (Exception ex) {
+			QueryPlugIn.displayLog(Messages.PatrolContributionFactory_ParseContribution_Error, ex);
+			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * Creates the sql string for the given filter
+	 * which should represent a contribution item
+	 *  
+	 * @return the sql for the given filter or null if filter cannot be processed
+	 */
+	public static String getSql(IQueryEngine engine, Session session, IExtensionFilter filter){
+		for (IExtensionFilterViewer contribution : getFilterUiContributions()) {
+			if (contribution.getFilterClass().isAssignableFrom(filter.getClass())){
+				return contribution.asSql(engine, session, filter);
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Creates the sql string for the given filter
+	 * which should represent a contribution item
+	 *  
+	 * @return the sql for the given filter or null if filter cannot be processed
+	 */
+	public static void addGroupBySql(IExtensionGroupBy groupBy,
+			StringBuilder fromSql,
+			StringBuilder groupBySql, 
+			StringBuilder groupByInnerSql, 
+			IValueItem value, ConservationAreaFilter caFilter,
+			int itemCnt,
+			IQueryEngine engine) throws SQLException{
+		for (IExtensionGroupByViewer contribution : getGroupByUiContributions()) {
+			if (contribution.getGroupByClass().isAssignableFrom(groupBy.getClass())){
+				contribution.addGroupBySql(groupBy, fromSql, groupBySql, groupByInnerSql, value, caFilter, itemCnt, engine);
+				return;
+			}
 		}
 	}
 }

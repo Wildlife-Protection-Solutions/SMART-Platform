@@ -20,11 +20,12 @@
  * SOFTWARE.
  */
 
-package org.wcs.smart.intelligence.query;
+package org.wcs.smart.intelligence.query.model;
 
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.intelligence.query.IIntelligenceQueryLabelProvider;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 
 /**

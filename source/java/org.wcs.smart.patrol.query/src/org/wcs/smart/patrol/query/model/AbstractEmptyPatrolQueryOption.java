@@ -25,7 +25,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
 
 /**
  * Blank implementation for some of {@link IPatrolQueryOption} methods 

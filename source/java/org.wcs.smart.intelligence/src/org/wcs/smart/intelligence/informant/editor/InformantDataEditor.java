@@ -349,8 +349,12 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 			@SuppressWarnings("unchecked")
 			List<Informant> list = (List<Informant>) input;
 			for (Informant i : list) {
-				if (i.getEncryptedData() != null && !i.getEncryptedData().isEmpty()) {
-					return false;
+				try{
+					if (i.getEncryptedData() != null && !i.getEncryptedData().isEmpty()) {
+						return false;
+					}
+				}catch (Exception ex){
+					IntelligencePlugIn.displayLog(Messages.PersistentManager_ReadError, ex);
 				}
 			}
 		}
@@ -502,17 +506,22 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 							Map<InformantDataKey, Object> info = i2data.get(informant);
 							if (info != null) {
 								InformantEditor.setInformant(informant, info);
-								EncryptedData encryptedData = informant.getEncryptedData();
-					    		File dataFile = informant.getDataFile();
-								if (!encryptedData.isEmpty()) {
-					    			PersistentManager.toFile(dataFile, encryptedData);
-					    		} else if (dataFile.exists()) {
-					    			try {
-										FileUtils.forceDelete(dataFile);
-									} catch (IOException e) {
-										IntelligencePlugIn.log("Cannot delete file", e); //$NON-NLS-1$
+								try{
+									EncryptedData encryptedData = informant.getEncryptedData();
+									File dataFile = informant.getDataFile();
+									if (!encryptedData.isEmpty()) {
+										PersistentManager.toFile(dataFile, encryptedData);
+									} else if (dataFile.exists()) {
+										try {
+											FileUtils.forceDelete(dataFile);
+										} catch (IOException e) {
+											IntelligencePlugIn.log("Cannot delete file", e); //$NON-NLS-1$
+										}
 									}
+					    		}catch (Exception ex){
+					    			IntelligencePlugIn.displayLog(Messages.PersistentManager_SaveError + ex.getMessage(), ex);
 					    		}
+								
 							}
 						}
 					}

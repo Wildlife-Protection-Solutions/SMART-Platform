@@ -23,15 +23,23 @@ package org.wcs.smart.plan.query;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+import org.eclipse.swt.graphics.Image;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.parser.IExtensionFilter;
-import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
+import org.wcs.smart.patrol.query.ext.IExtensionFilter;
+import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
+import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
+import org.wcs.smart.plan.PlanHibernateManager;
+import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.Operator;
+import org.wcs.smart.query.ui.model.DropItem;
+import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -42,37 +50,23 @@ import org.wcs.smart.util.UuidUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolContribution {
+public class PlanPatrolQueryFilterViewer implements IExtensionFilterViewer {
 
 	private PlanPatrolQueryOption option = new PlanPatrolQueryOption();
-
-	@Override
-	public IExtensionFilter createFilter(String key) {
-		return null;
-	}
-
-	@Override
-	public IExtensionFilter createFilter(String key, Operator op, Object value) {
-		String fullKey = "patrol:" + option.getKey(); //$NON-NLS-1$
-		if (fullKey.equals(key)) {
-			return new PatrolPlanQueryFilter(option, op, value);
-		}
-		return null;
-	}
 
 	
 	@Override
 	public String asSql(IQueryEngine engine, Session session, IFilter filter){
-		if (!(filter instanceof PatrolPlanQueryFilter)){
+		if (!(filter instanceof PlanPatrolQueryFilter)){
 			return null;
 		}
-		PatrolPlanQueryFilter qfilter = (PatrolPlanQueryFilter)filter;
+		PlanPatrolQueryFilter qfilter = (PlanPatrolQueryFilter)filter;
 		
 		String prefix = engine.tablePrefix(qfilter.getOption().getPatrolAttributeClass());
 		String v = SharedUtils.stripQuotes((String)qfilter.getValue());
 		//if v is empty this means that this is "Any Plan" case
 		String planSqlPart = ""; //$NON-NLS-1$
-		if (!qfilter.isAnyPlan(v)) {
+		if (!qfilter.isAnyPlan()) {
 			List<UUID> planIds = getChildPlanIds(v, session);
 			
 			StringBuilder planSql = new StringBuilder("AND pa2pl.plan_uuid in (x'"+v+"'"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -117,5 +111,60 @@ public class PlanQueryFilterPatrolContribution implements IQueryFilterPatrolCont
 			ids.addAll(listChildPlanIds(uuid, session));
 		}
 		return ids;
+	}
+
+
+
+	@Override
+	public String getName() {
+		return option.getGuiName(Locale.getDefault());
+	}
+
+
+
+	@Override
+	public DropItem asDropItem() {
+		DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
+		it.initializeData(new Object[]{new PlanPatrolQueryOptionData()});
+		return it;
+	}
+
+
+
+	@Override
+	public Image getImage() {
+		return SmartPlanPlugIn.getDefault().getImageRegistry().get(SmartPlanPlugIn.PLAN_ICON);
+	}
+
+
+
+	@Override
+	public Class<? extends IExtensionFilter> getFilterClass() {
+		return PlanPatrolQueryFilter.class;
+	}
+
+
+
+	@Override
+	public DropItem[] getDropItems(IFilter filter, Session session) {
+		if (!(filter instanceof PlanPatrolQueryFilter)){
+			return null;
+		}
+		PlanPatrolQueryFilter f = (PlanPatrolQueryFilter)filter;
+		
+		DropItem it = PatrolDropItemFactory.INSTANCE.createPatrolFilterDropItem(option);
+		
+		String id = SharedUtils.stripQuotes((String)f.getValue());
+		ListItem listItem;
+		try {
+			listItem = f.isAnyPlan() ? PlanPatrolQueryOptionData.ANY_PATROL_ITEM 
+					: PlanHibernateManager.getPlan(session, id);
+
+			it.initializeData(new Object[]{new PlanPatrolQueryOptionData(), listItem});
+		} catch (Exception e) {
+			SmartPlanPlugIn.log(e.getMessage(), e);
+			return new DropItem[]{new ErrorDropItem(Messages.PlanPatrolQueryFilterViewer_ParseError)};
+		}
+		return new DropItem[]{it};
 	}
 }

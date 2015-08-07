@@ -19,14 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.parser;
+package org.wcs.smart.patrol.query.model;
 
 import java.util.Locale;
 import java.util.UUID;
 
-import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 
 /**
  * Interface that represents patrol query options
@@ -82,12 +80,7 @@ public interface IPatrolQueryOption {
 	 * @return the class that represents the option
 	 */
 	public Class<?> getSourceClass();
-//
-//	/**
-//	 * @return the image that represents a particular patrol filter option
-//	 */
-//	public Image getImage();
-	
+
 	/**
 	 * Given a particular uuid (key) determine the string
 	 * name for the given option.
@@ -120,30 +113,5 @@ public interface IPatrolQueryOption {
 	 * @return
 	 */
 	public Object getObject(Session session, UUID uuid);
-	
-//	/**
-//	 * Given a set of keys (hex encoded uuids or string keys), returns
-//	 * a list of listitems that represent the objects
-//	 * with the given keys.
-//	 * 
-//	 * @param session
-//	 * @param keys
-//	 * @return
-//	 */
-//	public List<ListItem> getValues(Session session, String[] keys);
-//	
-//	/**
-//	 * @param session
-//	 * @return a list of listitems that represent all
-//	 * active values for a given object 
-//	 */
-//	public List<ListItem> getAllActiveValues(Session session);
-//	
-//	/**
-//	 * Specifies default list item that will be selected by default if option
-//	 * was added to the query.
-//	 * 
-//	 * @return list item selected by default
-//	 */
-//	public ListItem getDefaultListItem();
+
 }

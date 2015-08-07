@@ -19,16 +19,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.parser;
+package org.wcs.smart.intelligence.query;
 
-import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
+import org.wcs.smart.query.model.filter.IGroupByVisitor;
 
 /**
- * Extension for group by.
+ * Intelligence group by extension for patrol queries.
  * 
  * @author Emily
  *
  */
-public interface IExtensionGroupBy extends IGroupBy {
+public class IntelligencePatrolGroupBy implements IExtensionGroupBy {
 
+	public static final String KEY = "patrol:contribution:intelligence"; //$NON-NLS-1$
+	
+	public enum Options{
+		MOTIVATED("m"), //$NON-NLS-1$
+		NOT_MOTIVATED("nm"); //$NON-NLS-1$
+		
+		private String key;
+		
+		Options(String key){
+			this.key = key;
+		}
+		public String getKey(){
+			return key;
+		}
+	}
+	
+	@Override
+	public String asString() {
+		return getKeyPart();
+	}
+
+	@Override
+	public String getKeyPart() {
+		return KEY;
+	}
+
+	@Override
+	public GroupByType getType() {
+		return GroupByType.KEY;
+	}
+
+	@Override
+	public void visit(IGroupByVisitor visitor) {
+		visitor.visit(this);
+	}
+
+	@Override
+	public IExtensionGroupBy createGroupBy(String key) {
+		if (key.equals(KEY + ":")){ //$NON-NLS-1$
+			return new IntelligencePatrolGroupBy();
+		}
+		return null;
+	}
 }

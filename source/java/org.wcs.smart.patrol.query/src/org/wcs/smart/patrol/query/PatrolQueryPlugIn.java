@@ -29,11 +29,11 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.patrol.query.ext.IPatrolContributionFinder;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.internal.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
 import org.wcs.smart.patrol.query.model.observation.PatrolQueryColumnProvider;
-import org.wcs.smart.patrol.query.parser.IPatrolContributionFinder;
 import org.wcs.smart.patrol.query.ui.PatrolQueryLabelProvider;
 import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 
