@@ -62,7 +62,7 @@ public abstract class CyberTrackerDataBuilder {
 			for (String id : rawData.getTripsMap().keySet()) {
 				List<S> sData = rawData.getTripsMap().get(id);
 				ICyberTrackerData ctTripData = createDataRecord(session, rawData.getElementsMap(), sData);
-				List<Coordinate> trackPoints = SmartImporter.listPart(rawData.getTimerTrackList(), ctTripData.getStartDate(), ctTripData.getEndDate());
+				List<Coordinate> trackPoints = AbstractSmartImporter.listPart(rawData.getTimerTrackList(), ctTripData.getStartDate(), ctTripData.getEndDate());
 				
 				S lastS = !ctTripData.getSData().isEmpty() ? ctTripData.getSData().get(ctTripData.getSData().size()-1) : null;
 				if (lastS != null && !hasWaypointData(lastS, rawData.getElementsMap())) {
@@ -119,7 +119,7 @@ public abstract class CyberTrackerDataBuilder {
 	}
 
 	private Coordinate toCoordinate(S s) {
-		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
+		DateFormat formatter = AbstractSmartImporter.createCyberTrackerDateFormatter();
 		Date date = null;
 		Time time = null;
 		double x = 0;
@@ -144,6 +144,6 @@ public abstract class CyberTrackerDataBuilder {
 		if (date == null || time == null || x == 0 || y == 0)
 			return null;
 		
-		return new Coordinate(x, y, SmartImporter.combine(date, time).getTime());
+		return new Coordinate(x, y, AbstractSmartImporter.combine(date, time).getTime());
 	}
 }

@@ -74,7 +74,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 		Time time = null;
 		Date start_date = null;
 		Time start_time = null;
-		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
+		DateFormat formatter = AbstractSmartImporter.createCyberTrackerDateFormatter();
 		
 		for (S.A a : s.getA()) {
 			String i = a.getI();
@@ -109,8 +109,8 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		}
 		
-		date = SmartImporter.combine(date, time);
-		start_date = SmartImporter.combine(start_date, start_time);
+		date = AbstractSmartImporter.combine(date, time);
+		start_date = AbstractSmartImporter.combine(start_date, start_time);
 		if (date != null && start_date != null) {
 			if (start_date.before(date)) {
 				ctPatrol.setStartDate(start_date);
@@ -145,7 +145,7 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 					break;
 			}
 		}
-		ctPatrol.setEndDate(SmartImporter.combine(date, time));
+		ctPatrol.setEndDate(AbstractSmartImporter.combine(date, time));
 		
 		//it is possible that pilot is configured as default value, but pilot doesn't make sense for ground patrols
 		if (PatrolType.Type.GROUND.equals(ctPatrol.getPatrolType())) {

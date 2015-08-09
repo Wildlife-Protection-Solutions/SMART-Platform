@@ -36,12 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -51,30 +46,15 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.util.PdaUtil;
-import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
-import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.PatrolUtils;
-import org.wcs.smart.patrol.model.PatrolLeg;
-import org.wcs.smart.patrol.model.PatrolLegDay;
-import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.model.PatrolWaypointSource;
-import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -84,9 +64,9 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author elitvin
  * @since 1.0.0
  */
-public class SmartImporter {
+public abstract class AbstractSmartImporter {
 	
-	private static final int WARN_WP_TIME_FRAME = 10; //in minutes
+	public static final int WARN_WP_TIME_FRAME = 10; //in minutes
 	
 	private DateFormat fnDateFormat = new SimpleDateFormat("yyyy_MM_dd"); //$NON-NLS-1$
 
@@ -95,6 +75,10 @@ public class SmartImporter {
 	public static DateFormat createCyberTrackerDateFormatter() {
 		DateFormat formatter = new SimpleDateFormat(ICyberTrackerConstants.CT_DATE_FORMAT); //will this always work or CT might provide different format depending on locale settings?
 		return formatter;
+	}
+	
+	protected DateFormat getFDateFormat() {
+		return fnDateFormat;
 	}
 
 	public static Date combine(Date date, Time time) {
@@ -151,140 +135,6 @@ public class SmartImporter {
         return low-1;  // key not found
     }
 	
-	protected boolean fixTransportError(final CyberTrackerPatrol ctPatrol) {
-		Display.getDefault().syncExec(new Runnable() {
-			@Override
-			public void run() {
-				Session session = HibernateManager.openSession();
-				try {
-					List<PatrolTransportType> types = PatrolHibernateManager.getActivePatrolTransporationTypes(SmartDB.getCurrentConservationArea(), session, ctPatrol.getPatrolType());
-					List<ImportError> trProblem = ctPatrol.getProblems().get(PatrolMeta.TRANSPORT);
-					String message = trProblem != null && !trProblem.isEmpty() ? trProblem.get(0).getMessage() : null;
-					TransportSelectorDialog selectorDialog = new TransportSelectorDialog(Display.getDefault().getActiveShell(), types, message);
-					if (selectorDialog.open() != IDialogConstants.OK_ID) {
-						return;
-					}
-					ctPatrol.setPatrolTransportType(selectorDialog.getSelectedTransportType());
-				} catch (final Exception e) {
-					session.getTransaction().rollback();
-					Display.getDefault().syncExec(new Runnable() {
-						@Override
-						public void run() {
-							SmartPlugIn.displayLog(Messages.SmartImporter_Transport_Load_Error, e);
-						}
-					});
-				}
-				finally {
-					if (session.getTransaction().isActive()){
-						session.getTransaction().rollback();
-					}
-					session.close();
-				}
-			}
-		});
-		return ctPatrol.getPatrolTransportType() != null;
-	}
-	
-	protected String getPatrolIdentifier(CyberTrackerPatrol ctPatrol){
-		return DateFormat.getDateTimeInstance().format(ctPatrol.getStartDate()) + "  [" + ctPatrol.getCtTransport() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	private boolean checkEmployees(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol){
-		if (leg.getMembers().size() == 0){
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							Messages.SmartImporter_ImportErrorDialogTitle, 
-							MessageFormat.format(Messages.SmartImporter_NoEmployeesErrorMessage, 
-								new Object[]{getPatrolIdentifier(ctPatrol)}));
-				}				
-			});
-			return false;
-		}
-		return true;
-	}
-	
-	protected boolean fixLeaderError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session){
-		if (!checkEmployees(leg, ctPatrol)){
-			return false;
-		}
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
-			public void run() {
-				EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(
-						Display.getDefault().getActiveShell(), 
-						MessageFormat.format(Messages.SmartImporter_LeaderTitle, getPatrolIdentifier(ctPatrol)),
-						MessageFormat.format(Messages.SmartImporter_SelectLeaderMessage, new Object[]{ctPatrol.getCtLeader() }),
-						EmployeeSelectorDialog.Type.LEADER, leg);
-				dialog.open();
-			}});
-		return leg.getLeader() != null;
-	}
-
-
-	protected boolean fixPilotError(final PatrolLeg leg, final CyberTrackerPatrol ctPatrol, final Session session){
-		if (!checkEmployees(leg, ctPatrol)){
-			return false;
-		}
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
-			public void run() {
-				EmployeeSelectorDialog dialog = new EmployeeSelectorDialog(
-						Display.getDefault().getActiveShell(), 
-						MessageFormat.format(Messages.SmartImporter_PilotTitle, getPatrolIdentifier(ctPatrol)),
-						MessageFormat.format(Messages.SmartImporter_SelectPilotTitle, new Object[]{ctPatrol.getPilot()}), 
-						EmployeeSelectorDialog.Type.PILOT, leg);
-				dialog.open();
-			}});
-		return leg.getPilot() != null;
-	}
-	
-	protected void initLegData(PatrolLeg leg, CyberTrackerPatrol ctPatrol, Session session) {
-		if (ctPatrol.getPatrolTransportType() != null) {
-			leg.setType(ctPatrol.getPatrolTransportType());
-		}
-		leg.setStartDate(ctPatrol.getStartDate());
-		leg.setEndDate(ctPatrol.getEndDate());
-		List<PatrolLegMember> legMembers = new ArrayList<PatrolLegMember>();
-		for (Employee e : ctPatrol.getMembers()) {
-			PatrolLegMember plm = new PatrolLegMember();
-			plm.setPatrolLeg(leg);
-			plm.setMember(e);
-			plm.setIsLeader(e.equals(ctPatrol.getLeader()));
-			plm.setIsPilot(e.equals(ctPatrol.getPilot()));
-			legMembers.add(plm);
-		}
-		leg.setMembers(legMembers);
-		
-		leg.createLegDays(session);
-		
-		List<Coordinate> timerTrackList = ctPatrol.getTimerTrackList();
-		if (timerTrackList == null || timerTrackList.isEmpty())
-			return;
-		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-			Date from = combine(pld.getDate(), pld.getStartTime());
-			Date to = combine(pld.getDate(), pld.getEndTime());
-			List<Coordinate> coordinates = listPart(timerTrackList, from, to);
-			Track track = PatrolUtils.convertToTrack(coordinates);
-			if (track != null) {
-				track.setPatrolLegDay(pld);
-				pld.setTrack(track);
-			}
-		}
-	
-	}
-	
-	protected void addObservations(PatrolLeg leg, S s, Map<String, E> eMap, Session session) {
-		PatrolLegDay legDay = findLegDay(leg, s);
-		if (legDay == null)
-			return;
-		
-		Waypoint wp = findOrAddWaypoint(legDay, s, eMap);
-		addObservations(wp, s, eMap, session);
-		String prefix = fnDateFormat.format(legDay.getDate()) + "_Leg_"+leg.getId(); //$NON-NLS-1$
-		addAttachments(wp, s, eMap, prefix);
-	}
 
 	protected void addObservations(Waypoint wp, S s, Map<String, E> eMap, Session session) {
 		List<List<A>> aList = splitObservationRecords(s, eMap);
@@ -528,86 +378,6 @@ public class SmartImporter {
 		return category;
 	}
 
-	/**
-	 * All leg days must create at this point.
-	 * They must be created as part of initLegData(...) logic
-	 */
-	private PatrolLegDay findLegDay(PatrolLeg leg, S s) {
-		Date date = null;
-		for (A a : s.getA()) {
-			String i = a.getI();
-			if (ICyberTrackerConstants.DATE.equals(i)) {
-				date = toDate(a.getV());
-				break;
-			}
-		}
-		
-		if (date == null)
-			return null;
-		
-		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-			if (pld.getDate().equals(date)) {
-				return pld;
-			}
-		}
-		return null;
-	}
-
-	protected Waypoint findOrAddWaypoint(PatrolLegDay pld, S s, Map<String, E> eMap) {
-		if (pld.getWaypoints() == null)
-			pld.setWaypoints(new ArrayList<PatrolWaypoint>());
-
-		boolean newWp = true;
-
-		PatrolWaypoint pwp = new PatrolWaypoint();
-		Waypoint wp = new Waypoint();
-		wp.setObservations(new ArrayList<WaypointObservation>());
-		wp.setId(pld.getWaypoints().size()+1);
-		wp.setSourceId(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
-		wp.setConservationArea(SmartDB.getCurrentConservationArea());
-		wp.setX(0);
-		wp.setY(0);
-		for (A a : s.getA()) {
-			String i = a.getI();
-			if (ICyberTrackerConstants.TIME.equals(i)) {
-				Time t = Time.valueOf(a.getV());
-				wp.setDateTime(SmartUtils.combineDateTime(pld.getDate(), t));
-			} else if (ICyberTrackerConstants.LATITUDE.equals(i)) {
-				wp.setY(Double.valueOf(a.getV()));
-			} else if (ICyberTrackerConstants.LONGITUDE.equals(i)) {
-				wp.setX(Double.valueOf(a.getV()));
-			} else if (ScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
-				E e = eMap.get(a.getV());
-				newWp = "true".equals(e.getTag0()); //$NON-NLS-1$
-			}
-		}
-
-		pwp.setWaypoint(wp);
-		pwp.setPatrolLegDay(pld);
-		if (newWp) {
-			pld.getWaypoints().add(pwp);
-			return wp;
-		}
-		
-		//below is "Add To Last Waypoint" case
-		if (pld.getWaypoints().isEmpty()) {
-			addWarning(Messages.SmartImporter_Warn_WrongFirstWaypoint);
-			pld.getWaypoints().add(pwp);
-			return wp;
-		}
-		
-		PatrolWaypoint lastWp = pld.getWaypoints().get(pld.getWaypoints().size()-1);
-		if (wp.getDateTime() != null) {
-			if (lastWp.getWaypoint().getDateTime() == null)
-				lastWp.getWaypoint().setDateTime(wp.getDateTime());
-			
-			long delta = Math.abs(wp.getDateTime().getTime() - lastWp.getWaypoint().getDateTime().getTime());
-			if (delta > WARN_WP_TIME_FRAME * 60 * 1000) {
-				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AddToWaypointTimeframe, lastWp.getId(), WARN_WP_TIME_FRAME));
-			}
-		}
-		return lastWp.getWaypoint();
-	}
 	
 	protected Date toDate(String strDate) {
 		if (strDate == null)
@@ -621,7 +391,7 @@ public class SmartImporter {
 		}
 	}
 
-	private void addAttachments(Waypoint wp, S s, Map<String, E> eMap, String namePrefix) {
+	public void addAttachments(Waypoint wp, S s, Map<String, E> eMap, String namePrefix) {
 		String mediaFolder = null;
 		try {
 			mediaFolder = PdaUtil.getCTMediaFolder();
@@ -657,26 +427,6 @@ public class SmartImporter {
 		}
 	}
 
-	/**
-	 * Displays warnings dialog if warnings present and returns if user choose to proceed with import
-	 * @return
-	 */
-	protected boolean displayWarnings(final CyberTrackerPatrol ctPatrol) {
-		final boolean[] isOk = {true};
-		if (getWarnings() != null && getWarnings().size() > 0) {
-			Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					ImportWarningDialog wdialog = new ImportWarningDialog(Display.getDefault().getActiveShell(), 
-							Messages.SmartImporter_WarnDialog_Title, 
-							MessageFormat.format(Messages.SmartImporter_WarnDialog_Message, getPatrolIdentifier(ctPatrol)), 
-							getWarnings());
-					isOk[0] = wdialog.open() == IDialogConstants.OK_ID;
-				}
-			});
-		}
-		return isOk[0];
-	}
 	
 	public List<String> getWarnings() {
 		return warnings;

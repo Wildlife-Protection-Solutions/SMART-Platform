@@ -33,8 +33,8 @@ import java.util.Map;
 
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.cybertracker.importer.SmartImporter;
-import org.wcs.smart.cybertracker.importer.SmartImporter.CoordinateZComparator;
+import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
+import org.wcs.smart.cybertracker.importer.AbstractSmartImporter.CoordinateZComparator;
 import org.wcs.smart.cybertracker.model.data.Data;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 
@@ -121,7 +121,7 @@ public class CyberTrackerRawData {
 		List<Coordinate> result = new ArrayList<Coordinate>();
 		if (data == null || data.getTimerTracks() == null)
 			return result;
-		DateFormat formatter = SmartImporter.createCyberTrackerDateFormatter();
+		DateFormat formatter = AbstractSmartImporter.createCyberTrackerDateFormatter();
 		for (Data.TimerTracks.T t : data.getTimerTracks().getT()) {
 			Date date = null;
 			Time time = null;
@@ -147,7 +147,7 @@ public class CyberTrackerRawData {
 			if (date == null || time == null)
 				continue;
 			
-			result.add(new Coordinate(x, y, SmartImporter.combine(date, time).getTime()));
+			result.add(new Coordinate(x, y, AbstractSmartImporter.combine(date, time).getTime()));
 		}
 		//sort by date+time
 		Collections.sort(result, new CoordinateZComparator());
