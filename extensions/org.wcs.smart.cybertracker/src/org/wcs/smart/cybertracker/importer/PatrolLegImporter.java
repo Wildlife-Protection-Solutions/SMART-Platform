@@ -59,7 +59,7 @@ import org.wcs.smart.util.SmartUtils;
  * @author elitvin
  * @since 1.0.0
  */
-public class PatrolLegImporter extends SmartImporter {
+public class PatrolLegImporter extends AbstractPatrolImporter {
 
 	public boolean importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
 		clearWarning();
@@ -172,9 +172,9 @@ public class PatrolLegImporter extends SmartImporter {
 				for (PatrolLegDay pld : leg.getPatrolLegDays()) {
 					Date date = SmartUtils.getDatePart(pld.getDate(), false);
 					if (date.equals(legStart))
-						legStart = SmartImporter.combine(legStart, pld.getStartTime());
+						legStart = AbstractSmartImporter.combine(legStart, pld.getStartTime());
 					if (date.equals(legEnd))
-						legEnd = SmartImporter.combine(legEnd, pld.getEndTime());
+						legEnd = AbstractSmartImporter.combine(legEnd, pld.getEndTime());
 				}
 			}
 			

@@ -50,7 +50,7 @@ import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
  * @author elitvin
  * @since 1.0.0
  */
-public class PatrolImporter extends SmartImporter {
+public class PatrolImporter extends AbstractPatrolImporter {
 	
 	public Patrol importData(CyberTrackerPatrol ctPatrol) {
 		clearWarning();
