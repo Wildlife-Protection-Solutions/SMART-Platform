@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.model;
+package org.wcs.smart.cybertracker.patrol.model;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,8 +31,10 @@ import java.util.Set;
 
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -359,14 +361,13 @@ public class CyberTrackerPatrol implements ICyberTrackerData {
 
 	@Override
 	public String getType() {
-		// TODO Auto-generated method stub
-		return null;
+		return PatrolScreensUtil.DATATYPE_PATROL;
 	}
 
 	@Override
 	public String getDetails() {
 		// TODO Auto-generated method stub
-		return null;
+		return "PLACE PATROL DETAILS HERE!!!!";
 	}
 	
 }

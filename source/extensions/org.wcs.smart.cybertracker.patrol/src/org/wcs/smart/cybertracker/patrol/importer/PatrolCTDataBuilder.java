@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer;
+package org.wcs.smart.cybertracker.patrol.importer;
 
 import java.sql.Time;
 import java.text.DateFormat;
@@ -36,12 +36,14 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.PatrolScreensUtilToDel;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
+import org.wcs.smart.cybertracker.importer.CyberTrackerDataBuilder;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;

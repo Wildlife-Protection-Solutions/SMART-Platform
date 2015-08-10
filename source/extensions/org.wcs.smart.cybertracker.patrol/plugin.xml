@@ -43,5 +43,13 @@
             icon="images/etool16/export.png">
       </image>
    </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.datasource">
+      <datasource
+            dataBuilder="org.wcs.smart.cybertracker.patrol.importer.PatrolCTDataBuilder"
+            importEditorContent="org.wcs.smart.cybertracker.patrol.importer.PatrolCTImportEditorContent"
+            name="patrol">
+      </datasource>
+   </extension>
 
 </plugin>

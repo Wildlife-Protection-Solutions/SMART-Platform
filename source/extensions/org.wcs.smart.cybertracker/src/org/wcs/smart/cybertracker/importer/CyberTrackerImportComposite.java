@@ -25,10 +25,14 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -62,6 +66,7 @@ import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
@@ -116,8 +121,8 @@ public class CyberTrackerImportComposite extends Composite {
 	
 	private List<ICyberTrackerData> tableInputData = new ArrayList<ICyberTrackerData>();
 	
-	private IImportEditorContent tempEC = new PatrolCTImportEditorContent();
-	private Composite tempCmp;
+	private Map<String, IImportEditorContent> contentMap = new HashMap<String, IImportEditorContent>();
+	private Map<String, Composite> compositeMap = new HashMap<String, Composite>();
 	private Composite emptyComposite;
 
 	/**
@@ -126,9 +131,25 @@ public class CyberTrackerImportComposite extends Composite {
 	 */
 	public CyberTrackerImportComposite(Composite parent, int style, FormToolkit toolkit) {
 		super(parent, style);
+		buildContentMap();
 		createControls(toolkit);
 	}
 	
+	private void buildContentMap() {
+		if (Platform.getExtensionRegistry() != null) {
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(CyberTrackerPlugIn.EXTENSION_ID);
+			try {
+				for (IConfigurationElement e : config) {
+					String name = e.getAttribute("name"); //$NON-NLS-1$
+					IImportEditorContent content = (IImportEditorContent) e.createExecutableExtension("importEditorContent"); //$NON-NLS-1$
+					contentMap.put(name, content);
+				}
+			}catch (Exception ex){
+				SmartPlugIn.displayLog("Error getting CyberTracker extensions", ex);
+			}
+		}
+	}
+
 	private void createControls(FormToolkit toolkit) {
 		toolkit.adapt(this);
 		
@@ -397,10 +418,8 @@ public class CyberTrackerImportComposite extends Composite {
 		});
 	}
 	
-	private IImportEditorContent getEditorContent() {
-		//TODO: change!!!!
-		return tempEC;
-		
+	private IImportEditorContent getEditorContent(String datatype) {
+		return contentMap.get(datatype);
 	}
 	
 	private Composite createDetailsComposite(Composite parent, FormToolkit toolkit){
@@ -417,8 +436,11 @@ public class CyberTrackerImportComposite extends Composite {
 		emptyComposite = toolkit.createComposite(detailsInnerPanel);
 		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 		
-		// TODO wrong layout! must support many contents!
-		tempCmp = getEditorContent().createDetailsComposite(detailsInnerPanel, toolkit);
+		for (String datatype : contentMap.keySet()) {
+			IImportEditorContent content = contentMap.get(datatype);
+			Composite cmp = content.createDetailsComposite(detailsInnerPanel, toolkit);
+			compositeMap.put(datatype, cmp);
+		}
 		
 		scrolled.setContent(detailsInnerPanel);
 		detailsInnerPanel.setSize(detailsInnerPanel.computeSize(SWT.DEFAULT, SWT.DEFAULT).x, 300);
@@ -426,11 +448,13 @@ public class CyberTrackerImportComposite extends Composite {
 	}
 
 	private void updatePatrolDetails(Object selection) {
-		getEditorContent().inputChanged(selection);
-
+		
 		StackLayout stackLayout = ((StackLayout)detailsInnerPanel.getLayout());
 		if (selection != null) {
-			stackLayout.topControl = tempCmp;
+			ICyberTrackerData data = (ICyberTrackerData) selection;
+			String datatype = data.getType();
+			getEditorContent(datatype).inputChanged(selection);
+			stackLayout.topControl = compositeMap.get(datatype);
 		} else {
 			stackLayout.topControl = emptyComposite;
 		}
@@ -438,7 +462,23 @@ public class CyberTrackerImportComposite extends Composite {
 	}
 	
 	protected void handleAdd() {
-		getEditorContent().handleAdd(getShell(), (IStructuredSelection)viewer.getSelection());
+		IStructuredSelection selection = (IStructuredSelection)viewer.getSelection();
+		if (!selection.isEmpty()) {
+			String datatype = ((ICyberTrackerData)selection.getFirstElement()).getType();
+			boolean isSame = true;
+			for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+				ICyberTrackerData data = (ICyberTrackerData) i.next();
+				if (!datatype.equals(data.getType())) { //datatype should never be null even for old CTX file, importer/dataBuilder should handle this
+					isSame = false;
+					break;
+				}
+			}
+			if (isSame) {
+				getEditorContent(datatype).handleAdd(getShell(), selection);
+			} else {
+				MessageDialog.openError(getShell(), "Error", "Unable to import selected data. Please select data of the same type for importing.");
+			}
+		}
 		refreshViewer();
 	}
 
