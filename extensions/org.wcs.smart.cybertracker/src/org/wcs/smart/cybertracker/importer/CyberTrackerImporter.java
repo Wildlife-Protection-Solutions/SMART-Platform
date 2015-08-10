@@ -26,14 +26,19 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
@@ -54,6 +59,23 @@ import org.wcs.smart.hibernate.SmartDB;
  * @since 1.0.0
  */
 public class CyberTrackerImporter {
+	
+	private Map<String, CyberTrackerDataBuilder> dataBuilderMap = new HashMap<String, CyberTrackerDataBuilder>();
+	
+	public CyberTrackerImporter() {
+		if (Platform.getExtensionRegistry() != null) {
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(CyberTrackerPlugIn.EXTENSION_ID);
+			try {
+				for (IConfigurationElement e : config) {
+					String name = e.getAttribute("name"); //$NON-NLS-1$
+					CyberTrackerDataBuilder builder = (CyberTrackerDataBuilder) e.createExecutableExtension("dataBuilder"); //$NON-NLS-1$
+					dataBuilderMap.put(name, builder);
+				}
+			}catch (Exception ex){
+				SmartPlugIn.displayLog("Error getting CyberTracker extensions", ex);
+			}
+		}
+	}
 	
 	public CyberTrackerImportResult importPdaData(IProgressMonitor monitor) throws Exception {
 		monitor.subTask(Messages.CyberTrackerImporter_Task_Download);
@@ -154,14 +176,10 @@ public class CyberTrackerImporter {
 
 
 	private CyberTrackerDataBuilder findDataBuilder(CyberTrackerRawData rawData) {
-		//TODO: need specific databuilder for each type from extension point (patrol or survey)
 		for (E e : rawData.elementsMap.values()) {
 			if (ScreensUtil.RESULT_DATATYPE.equals(e.getN())) {
 				String datatype = e.getTag0();
-				//TODO: return instance for given datatype
-				if ("patrol".equals(datatype)) {
-					return new PatrolCTDataBuilder();
-				}
+				return dataBuilderMap.get(datatype);
 			}
 		}
 		return null;

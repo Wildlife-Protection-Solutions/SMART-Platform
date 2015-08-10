@@ -28,10 +28,10 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.importer.CyberTrackerImportEditor;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 
 /**
  * Handler for importing data from CyberTracker application.
@@ -50,7 +50,7 @@ public class CyberTrackerImportHandler {
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow()
 				.getActivePage().openEditor(new CTImportEditorInput(), CyberTrackerImportEditor.ID);						
 		} catch (Throwable t) {
-			SmartPatrolPlugIn.displayLog(t.getLocalizedMessage(), t);
+			SmartPlugIn.displayLog(t.getLocalizedMessage(), t);
 		}
 	}
 

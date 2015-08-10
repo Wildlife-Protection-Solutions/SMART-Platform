@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer;
+package org.wcs.smart.cybertracker.patrol.importer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
@@ -50,12 +50,13 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.importer.IImportEditorContent;
 import org.wcs.smart.cybertracker.internal.Messages;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ErrorType;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.ImportError;
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.ErrorType;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.ImportError;
+import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.Patrol;
 
 /**

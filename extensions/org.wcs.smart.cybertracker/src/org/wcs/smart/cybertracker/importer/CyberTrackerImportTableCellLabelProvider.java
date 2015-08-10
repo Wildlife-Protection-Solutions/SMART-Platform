@@ -51,7 +51,7 @@ public class CyberTrackerImportTableCellLabelProvider extends ColumnLabelProvide
 			case START_DATE:return dateAsString(ctData.getStartDate());
 			case END_DATE: 	return dateAsString(ctData.getEndDate());
 			case TYPE: 		return ctData.getType() != null ? ctData.getType() : ""; //$NON-NLS-1$
-			case DETAILS:	return "PUT DETAILS HERE!!!!"; //$NON-NLS-1$
+			case DETAILS:	return ctData.getDetails() != null ? ctData.getDetails() : ""; //$NON-NLS-1$
 			case SIGHT_COUNT:return String.valueOf(ctData.getSData().size());
 			}
 		}
