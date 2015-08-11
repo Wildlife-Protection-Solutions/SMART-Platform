@@ -69,6 +69,7 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
@@ -460,9 +461,29 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			return createDropItems((PatrolUuidFilter)f, session);
 		}else if (f instanceof IExtensionFilter){
 			return createDropItems((IExtensionFilter)f, session);
+		}else if (f instanceof BooleanExpression){
+			return createDropItems((BooleanExpression)f, session);
 		}
 		return super.filterToDropItem(f, session);
 		
+	}
+	
+	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
+		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
+		opDropItem.initializeData(exp.getOperator().asSmartValue());
+		
+		DropItem[] its2 = filterToDropItem(exp.getFilter2(), session);
+		
+		DropItem[] results = new DropItem[its1.length + its2.length + 1];
+		for (int i = 0; i < its1.length; i ++){
+			results[i] = its1[i];
+		}
+		results[its1.length] = opDropItem;
+		for (int i = 0; i < its2.length; i++){
+			results[its1.length + i + 1] = its2[i];
+		}
+		return results;
 	}
 	
 	/**

@@ -26,6 +26,7 @@ import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.UUID;
 
 import org.hibernate.HibernateException;
@@ -59,10 +60,17 @@ public class LabelUserType implements UserType {
 			SessionImplementor implementor, Object object) throws HibernateException,
 			SQLException {
 		assert names.length == 1;
-		byte[] uuid = (byte[]) rs.getBytes(names[0]);
-		if (uuid == null) return null;
-		ByteBuffer bb = ByteBuffer.wrap(uuid);
-		return Label.getDescription(new UUID(bb.getLong(), bb.getLong()), (Session) implementor);
+		Object value = rs.getObject(names[0]);
+		UUID uuid = null;
+		if (value instanceof byte[]){
+			byte[] uuida = (byte[]) rs.getBytes(names[0]);
+			if (uuida == null) return null;
+			ByteBuffer bb = ByteBuffer.wrap(uuida);
+			uuid = new UUID(bb.getLong(), bb.getLong());
+		}else if (value instanceof UUID){
+			uuid = (UUID) value;
+		}
+		return Label.getDescription(uuid, (Session) implementor);
 	}
 
 	@Override

@@ -831,7 +831,7 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 		
 		//show dialog
 		List<CategoryAttribute> newAttributes = new ArrayList<CategoryAttribute>();
-		AddAttributeDialog1 d1 = new AddAttributeDialog1(getShell(), parent, (DataModel)viewer.getInput(), getLanguage());
+		AddAttributeDialog1 d1 = new AddAttributeDialog1(getShell(), parent, (DataModel)viewer.getInput(), getLanguage(), getSession());
 		int ret = d1.open();
 		if (ret == AddAttributeDialog1.CANCEL){
 			return;

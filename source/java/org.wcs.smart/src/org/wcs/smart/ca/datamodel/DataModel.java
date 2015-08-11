@@ -105,7 +105,9 @@ public class DataModel {
 					Session s = HibernateManager.openSession();
 					try{
 						s.beginTransaction();
-						aggregations = s.createCriteria(Aggregation.class).addOrder(Order.asc("name")).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list(); //$NON-NLS-1$
+						aggregations = s.createCriteria(Aggregation.class)
+								.addOrder(Order.asc("name")) //$NON-NLS-1$
+								.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list(); 
 						s.getTransaction().rollback();
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(Messages.DataModel_Error_LoadAggregations, ex);

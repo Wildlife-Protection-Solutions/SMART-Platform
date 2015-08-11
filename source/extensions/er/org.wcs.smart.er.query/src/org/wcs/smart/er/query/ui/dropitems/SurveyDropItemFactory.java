@@ -106,10 +106,10 @@ import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AttributeFilter;
+import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
-import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 import org.wcs.smart.query.model.summary.GroupByPart;
@@ -307,6 +307,8 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 		Job j = new Job(""){ //$NON-NLS-1$
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
+				CmAttribute cnode = node;
+				cnode.getOrder();
 				Session s = HibernateManager.openSession();
 				try{
 					Category c = (Category) s.load(Category.class, node.getNode().getCategory().getUuid());
@@ -663,7 +665,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 						def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session));
 	//			//rate filter panel
 				proxy.setDropItems(SimpleValueRateFilterPanel.ID + "." + SimpleValueRateFilterPanel.PanelType.VALUE, //$NON-NLS-1$
-						def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
+						def == null || def.getRateFilter() == null ? null : asDropItems(def.getRateFilter().getFilter(), session)); 
 				//column group by
 				proxy.setDropItems(SummaryDefinitionPanel.ID + "." + SummaryDefinitionPanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
 						def == null || def.getColumnGroupByPart() == null ? null : groupByToDropItems(def.getColumnGroupByPart(), session));
@@ -726,20 +728,39 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			return createDropItems((SurveyFilter)f, session);
 		}else if (f instanceof TrackTypeFilter){
 			return createDropItems((SurveyFilter)f, session);
+		}else if (f instanceof BooleanExpression){
+			return createDropItems((BooleanExpression)f, session);
 		}
-		return null;
+		return super.filterToDropItem(f, session);
 		
 	}
 	
+	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
+		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
+		opDropItem.initializeData(exp.getOperator().asSmartValue());
+		
+		DropItem[] its2 = filterToDropItem(exp.getFilter2(), session);
+		
+		DropItem[] results = new DropItem[its1.length + its2.length + 1];
+		for (int i = 0; i < its1.length; i ++){
+			results[i] = its1[i];
+		}
+		results[its1.length] = opDropItem;
+		for (int i = 0; i < its2.length; i++){
+			results[its1.length + i + 1] = its2[i];
+		}
+		return results;
+	}
 	
 	public DropItem valueItemToDropItem(IValueItem item, Session session) throws Exception{
 		if (item instanceof MissionValueItem){
-			return createDropItems((CategoryValueItem)item, session);
+			return createDropItems((MissionValueItem)item, session);
 			
 		}else if (item instanceof CombinedValueItem){
-			return createDropItems((MissionValueItem)item, session);	
+			return createDropItems((CombinedValueItem)item, session);	
 		}
-		return null;
+		return super.valueItemToDropItem(item, session);
 		
 	}
 	
@@ -751,7 +772,7 @@ public class SurveyDropItemFactory extends BasicDropItemFactory implements IDrop
 			c = getCategory(af.getCategoryFilter().getCategoryKey(), session);
 			att = getAttribute(af.getAttributeFilter().getAttributeKey(), session);
 
-			CmAttribute node = (CmAttribute) session.load(CmAttribute.class, af.getCmAttributeUuid());
+			CmAttribute node = (CmAttribute) session.get(CmAttribute.class, af.getCmAttributeUuid());
 			
 			boolean found = false;
 			for (Attribute a : QueryDataModelManager.getInstance().getAttributes(session, c.getHkey())){

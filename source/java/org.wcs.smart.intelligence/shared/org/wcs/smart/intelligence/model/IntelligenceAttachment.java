@@ -113,6 +113,7 @@ public class IntelligenceAttachment implements ISmartAttachment {
 		return new File(this.fullFile);
 	}
 	
+	@Transient
 	@Override
 	public String getDatastoreFolderPath() throws Exception {
 		return intelligence.getDatastoreLocation();

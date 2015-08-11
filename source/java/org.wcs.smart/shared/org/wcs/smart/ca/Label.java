@@ -25,6 +25,8 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.persistence.AssociationOverride;
@@ -41,6 +43,7 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.util.I18nUtil;
 import org.wcs.smart.util.UuidUtils;
@@ -174,13 +177,54 @@ public class Label  {
 		  }
 	}
 	
-	
+	private static synchronized String searchAll(UUID element, Session session){
+		Locale lang = (Locale) I18nUtil.getLocale();
+		if (lang == null) return ""; //$NON-NLS-1$
+		
+		List<?> options = session.createCriteria(Label.class)
+				.add(Restrictions.eq("id.element.uuid",element)).list(); //$NON-NLS-1$
+		if (options.size() == 1){
+			return ((Label)options.get(0)).getValue();
+		}
+		
+		String langmatch = null;
+		String defaultvalue = null;
+		for (Object obj : options){
+			Label l = (Label)obj;
+			String code = l.getLanguage().getCode();
+			Locale test = null;
+			if (code.contains("_")){ //$NON-NLS-1$
+				String[] bits = code.split("_"); //$NON-NLS-1$
+				test = new Locale(bits[0], bits[1]);
+			}else{
+				test = new Locale(code);
+			}
+			if (test.equals(lang)){
+				return l.getValue();
+			}else if (test.getLanguage().equals(lang.getLanguage())){
+				langmatch = l.getValue();
+			}
+			if (l.getLanguage().isDefault()){
+				defaultvalue = l.getValue();
+			}
+		}
+		if (langmatch != null) return langmatch;
+		if (defaultvalue != null) return defaultvalue;
+		return null;
+	}
 	@Transient
 	public static synchronized String getDescription(
 			UUID elementuuid,
 			Session session) {
-		UUID lang = I18nUtil.getLocale();
+		Object ltemp = I18nUtil.getLocale();
+		if (ltemp instanceof Locale){
+			return searchAll(elementuuid, session);
+		}
+		UUID lang = (UUID)ltemp;
 		UUID ca = I18nUtil.getCa();
+		if (lang == null || ca == null){
+			return searchAll(elementuuid, session);
+		}
 	
 		if (elementuuid == null || ca == null){
 			return ""; //$NON-NLS-1$

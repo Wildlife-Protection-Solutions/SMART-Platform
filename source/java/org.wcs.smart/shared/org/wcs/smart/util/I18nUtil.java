@@ -15,7 +15,7 @@ public class I18nUtil
     /**
      * Thread-local containing the general Locale for the current thread
      */
-    private static ThreadLocal<UUID> languageLocale = new ThreadLocal<UUID>();
+    private static ThreadLocal<Object> languageLocale = new ThreadLocal<Object>();
     private static ThreadLocal<UUID> caLocale = new ThreadLocal<UUID>();
     
   
@@ -28,16 +28,25 @@ public class I18nUtil
     {
     	languageLocale.set(locale);
     }
-
+    
+    /**
+     * Set the locale for the current thread.
+     * 
+     * @param locale    the locale
+     */
+    public static void setLocale(Locale locale)
+    {
+    	languageLocale.set(locale);
+    }
     /**
      * Get the general local for the current thread, will revert to the default locale if none 
      * specified for this thread.
      * 
      * @return  the general locale
      */
-    public static UUID getLocale()
+    public static Object getLocale()
     {
-    	UUID locale = languageLocale.get(); 
+    	Object locale = languageLocale.get(); 
         return locale;
     }
     

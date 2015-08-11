@@ -211,7 +211,7 @@ public class DerbyFilterToSqlGenerator {
 	 * Category attribute filter
 	 */
 	protected String asSql(CategoryAttributeFilter filter, IQueryEngine engine) throws SQLException{
-		return "( " + toSql(filter.getCategoryFilter(), engine) + asSql(Operator.AND) + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$	
+		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$	
 	}
 	
 	/*

@@ -83,7 +83,7 @@ public class DataentryHibernateManager extends HibernateManager {
 	public static ConfigurableModel getFullConfigurableModel(UUID uuid) {
 		if (uuid == null)
 			return null;
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		session.beginTransaction();
 		try {
 			return getFullConfigurableModel(uuid, session);
@@ -128,7 +128,7 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @return <code>true</code> if saved successfully, <code>false</code> if error
 	 */
 	public static boolean saveConfigurableModel(ConfigurableModel model) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			return saveConfigurableModel(model, session);
 		} finally {

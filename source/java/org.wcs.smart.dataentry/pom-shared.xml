@@ -10,7 +10,7 @@
 	
 	<modelVersion>4.0.0</modelVersion>
 	
-	<artifactId>dataentry</artifactId>
+	<artifactId>org.wcs.smart.dataentry</artifactId>
 	<name>DataEntry Module</name>
 	<version>${smart.version}</version>
 	<packaging>jar</packaging>
@@ -18,7 +18,7 @@
 	<dependencies>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
-    			<artifactId>smart-core</artifactId>
+    			<artifactId>org.wcs.smart.core</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
 	</dependencies>

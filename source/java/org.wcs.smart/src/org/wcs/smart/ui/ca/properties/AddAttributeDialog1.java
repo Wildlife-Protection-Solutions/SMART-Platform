@@ -63,6 +63,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -108,6 +109,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 
 	/* items added */
 	List<CategoryAttribute> addedElements;
+	private Session session;
 	
 	private Job loadAttributesJob = new Job("Loading Attributes"){ //$NON-NLS-1$
 
@@ -150,11 +152,12 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 	 *            the current language being modified
 	 */
 	public AddAttributeDialog1(Shell parentShell, Category cat,
-			DataModel dm, Language lang) {
+			DataModel dm, Language lang, Session session) {
 		super(parentShell);
 		this.category = cat;
 		this.dm = dm;
 		this.lang = lang;
+		this.session = session;
 	}
 
 	/*
@@ -334,7 +337,7 @@ public class AddAttributeDialog1 extends TitleAreaDialog {
 		}
 
 		final AttributeInfoPanel attributeInfo = new AttributeInfoPanel(
-				compAddExisting, SWT.NONE, false, false, null);
+				compAddExisting, SWT.NONE, false, false, session);
 		attributeInfo.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		checkboxTableViewer

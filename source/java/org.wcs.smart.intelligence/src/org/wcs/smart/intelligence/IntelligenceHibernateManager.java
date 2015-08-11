@@ -120,7 +120,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 */
 	public static Intelligence deleteIntelligence(UUID uuid) {
 		//no need to add interceptor as files will be deleted manually
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		Intelligence intelligence = null;
 		try {
 			session.beginTransaction();
@@ -147,7 +147,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return list of Patrol IDs
 	 */
 	public static List<?> fetchRelatedPatrolIDs(UUID intelligenceUuid) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			Query query = session.createQuery("SELECT pi.id.patrol.id FROM PatrolIntelligence pi WHERE pi.id.intelligence.uuid = :uuid ORDER BY pi.id.patrol.id asc"); //$NON-NLS-1$
 			query.setParameter("uuid", intelligenceUuid); //$NON-NLS-1$
@@ -224,7 +224,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences reported by this patrol
 	 */
 	public static List<Intelligence> getReportedIntelligences(Patrol patrol) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		session.beginTransaction();
 		try {
 			return getReportedIntelligences(patrol, session);
@@ -256,7 +256,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences that motivated patrol
 	 */
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		session.beginTransaction();
 		try {
 			return getMotivatedIntelligences(patrol, session);
@@ -366,7 +366,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static boolean saveInformant(Informant informant) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			return saveInformant(informant, session);
 		} finally {
@@ -395,7 +395,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static boolean deleteInformant(Informant informant) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			session.beginTransaction();
 			try {
@@ -453,7 +453,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static void clearInformantsEncrptedData() {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			try {
 				List<Informant> informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), session, false);

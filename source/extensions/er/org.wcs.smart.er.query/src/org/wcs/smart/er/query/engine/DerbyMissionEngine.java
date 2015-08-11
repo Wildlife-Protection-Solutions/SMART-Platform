@@ -436,7 +436,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		
 		//need to add the tracks
 		org.hibernate.Query q = session.createQuery("FROM MissionTrack WHERE missionDay.mission.uuid = :uuid"); //$NON-NLS-1$
-		q.setParameter("uuid", rs.getBytes("mission_uuid"));  //$NON-NLS-1$//$NON-NLS-2$
+		q.setParameter("uuid", UuidUtils.byteToUUID(rs.getBytes("mission_uuid")));  //$NON-NLS-1$//$NON-NLS-2$
 		List<MissionTrack> mts = q.list();
 		for (MissionTrack mt : mts){
 			try {

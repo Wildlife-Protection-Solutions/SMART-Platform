@@ -59,7 +59,7 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 		this.metadata = metadata;
 
 		try {
-			IPagedQueryResultSet pagedQueryResults = (IPagedQueryResultSet) query.getCachedResults();
+			pagedQueryResults = (IPagedQueryResultSet) query.getCachedResults();
 			if (pagedQueryResults == null){
 				pagedQueryResults = (IPagedQueryResultSet) QueryExecutor.INSTANCE.executeQuery(query, connection.getSession(), new NullProgressMonitor());
 			}

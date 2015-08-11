@@ -74,7 +74,7 @@ public class ReportIntelligence {
 	 * if file does not exist
 	 */
 	public static File getCustomTemplateLocation(){
-		File f = new File(SmartDB.getCurrentConservationArea() + File.separator + Intelligence.INTELLIGENCE_DIR, INTELLIGENCE_TEMPLATE);
+		File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR, INTELLIGENCE_TEMPLATE);
 		if (!f.exists()){
 			return null;
 		}
@@ -107,7 +107,7 @@ public class ReportIntelligence {
 			//copy the default template to the template location if 
 			//it doesn't already exist
 			if (getCustomTemplateLocation() == null){
-				File f = new File(SmartDB.getCurrentConservationArea() + File.separator + Intelligence.INTELLIGENCE_DIR, INTELLIGENCE_TEMPLATE);
+				File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR, INTELLIGENCE_TEMPLATE);
 				try(InputStream in = getIntelligenceTemplate();
 						OutputStream out = new FileOutputStream(f)){
 					IOUtils.copy(in, out);

@@ -27,22 +27,22 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		String surveyDesignKey = ((ISurveyQuery)query).getSurveyDesign();
 		
 		if (queryTypeKey.equals(SurveyObservationQuery.KEY)){
-			SurveyQueryColumnManager.getInstance()
+			return SurveyQueryColumnManager.getInstance()
 				.getObservationQueryColumns(
 						getSurveyDesignAsObject(surveyDesignKey));
 		}else if (queryTypeKey.equals(SurveyWaypointQuery.KEY)){
-			SurveyQueryColumnManager.getInstance()
+			return SurveyQueryColumnManager.getInstance()
 			.getWaypointQueryColumns(
 					getSurveyDesignAsObject(surveyDesignKey));
 		}else if (queryTypeKey.equals(SurveyGriddedQuery.KEY)){
-			SurveyQueryColumnManager.getInstance()
+			return SurveyQueryColumnManager.getInstance()
 			.getGridColumns();
 		}else if (queryTypeKey.equals(MissionQuery.KEY)){
-			SurveyQueryColumnManager.getInstance()
+			return SurveyQueryColumnManager.getInstance()
 			.getMissionQueryColumns(
 					getSurveyDesignAsObject(surveyDesignKey));
 		}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
-			SurveyQueryColumnManager.getInstance()
+			return SurveyQueryColumnManager.getInstance()
 			.getMissionTrackQueryColumns(
 					getSurveyDesignAsObject(surveyDesignKey));
 		}

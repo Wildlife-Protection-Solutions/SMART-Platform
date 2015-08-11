@@ -26,6 +26,7 @@ import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -88,7 +89,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 				}finally{
 					s.close();
 				}
-				return null;
+				return Status.OK_STATUS;
 			}
 		};
 		j.setSystem(true);

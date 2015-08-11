@@ -57,26 +57,11 @@
     	</repositories>    
 	
 	<dependencies>
-		<dependency>
-    			<groupId>org.apache.commons</groupId>
-    			<artifactId>commons-compress</artifactId>
-    			<version>1.5</version>
-		</dependency>
        		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
 			<version>2.1</version>
 		</dependency>
-		<dependency>
-            		<groupId>net.sf.opencsv</groupId>
-            		<artifactId>opencsv</artifactId>
-            		<version>2.3</version>
-        	</dependency>	
-        	<dependency>
-            		<groupId>com.google.code.gson</groupId>
-            		<artifactId>gson</artifactId>
-            		<version>2.2.4</version>
-        	</dependency>
         	<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>

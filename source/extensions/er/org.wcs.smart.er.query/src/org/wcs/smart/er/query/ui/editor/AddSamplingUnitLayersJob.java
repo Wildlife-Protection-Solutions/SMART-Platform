@@ -1,6 +1,8 @@
 package org.wcs.smart.er.query.ui.editor;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +12,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
@@ -61,7 +64,14 @@ public abstract class AddSamplingUnitLayersJob extends Job {
 				disposeService(monitor);
 				Session s = HibernateManager.openSession();
 				try {
-					SurveyDesign sd = (SurveyDesign) s.load(SurveyDesign.class, sdkey);
+					List<?> items = s.createCriteria(SurveyDesign.class)
+					.add(Restrictions.eq("conservationArea", getQuery().getConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.eq("keyId", sdkey)) //$NON-NLS-1$
+					.list();
+					if (items.size() != 1){
+						throw new SQLException(MessageFormat.format(Messages.AddSamplingUnitLayersJob_SdNotFound, sdkey));
+					}
+					SurveyDesign sd = (SurveyDesign)items.get(0);
 					service = new SamplingUnitService(sd);
 				
 					@SuppressWarnings("unchecked")

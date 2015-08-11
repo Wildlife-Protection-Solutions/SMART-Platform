@@ -123,7 +123,7 @@ public final class Informant extends UuidItem {
 	
     @Transient
 	private String getDatastoreFolderPath() {
-    	return getDatastoreFolderPath(conservationArea.getFileDataStoreLocation()); 
+    	return getDatastoreFolderPath(getConservationArea().getFileDataStoreLocation()); 
     }
     
     public static final String getDatastoreFolderPath(String filestore){

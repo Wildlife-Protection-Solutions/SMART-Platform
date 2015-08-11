@@ -366,6 +366,9 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		Session s = HibernateManager.openSession();
 		try {
 			informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), s, false);
+			for (Informant i : informantList){
+				i.getConservationArea().getFileDataStoreLocation();
+			}
 		} catch (Exception e) {
 			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_InformantLoad_Error, e);
 			informantList = new ArrayList<Informant>();

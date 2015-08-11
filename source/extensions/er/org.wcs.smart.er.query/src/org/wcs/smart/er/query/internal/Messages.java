@@ -7,6 +7,7 @@ public class Messages extends NLS {
 	public static String AbstractSurveyPagedResult_missionAttributeTypeNotSupportedSort;
 	public static String AbstractSurveyPagedResult_suAttributeTypeNotSupportedSort;
 	public static String AddERQueryJob_JobName;
+	public static String AddSamplingUnitLayersJob_SdNotFound;
 	public static String CmAttributeListDropItem_loadModelAttributeJobName;
 	public static String CmAttributeTreeDropItem_ErrorDialog;
 	public static String CmAttributeTreeDropItem_ErrorMessage;

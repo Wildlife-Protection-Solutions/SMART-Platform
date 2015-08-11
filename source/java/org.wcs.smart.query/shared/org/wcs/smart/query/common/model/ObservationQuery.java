@@ -44,7 +44,7 @@ import org.wcs.smart.query.model.QueryColumn;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public abstract class ObservationQuery extends SimpleQuery implements IPagedQuery{
 
-	protected List<QueryColumn> queryColumns = null;
+	protected volatile List<QueryColumn> queryColumns = null;
 
 	/**
 	 * Creates a new observation query with the default
