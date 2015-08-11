@@ -1,7 +1,7 @@
 html {
   font-family: 'Crimson Text', Georgia, Times, serif;
   font-size: 1em;
-  background-image: url(../images/blue_background.jpg);
+  background-image: url(../css/background.jpg);
 }
 
 
@@ -56,7 +56,7 @@ h2{
 	line-height: 130px;
 	color: black;
 
-	background-image: url(../images/ruaha_pano_sm.png);
+	background-image: url(../css/header.jpg);
 	
 	font-family: 'Allerta', Helvetica, Arial, sans-serif;
 	font-size: 60px;

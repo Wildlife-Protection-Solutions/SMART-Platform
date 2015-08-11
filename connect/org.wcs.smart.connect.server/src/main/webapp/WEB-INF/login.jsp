@@ -34,7 +34,7 @@ function login(){
   <div style="min-width: 150px;" class="verticalmenu"></div>
   
   <div id="main">
-  <form  style="width:200px;" action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
+   <form  style="width:200px;" action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
    <div id="error" class="errorsection" style="display: ${loginerror == null ? "none" : "block"}">${loginerror}</div>
    <label class="top-spacer block">Username:</label>
    <input type="text" name="j_username" class="block formtext" value="smart"/>

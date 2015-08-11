@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,9 +12,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.filter.ApiAuthorizationFilter;
+import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.StyleConfiguration;
 
 import com.sun.istack.internal.logging.Logger;
 
@@ -41,6 +45,7 @@ public class LoginServlet extends HttpServlet {
 			logger.info("Error redirecting login.", e); //$NON-NLS-1$
 			throw new ServletException("Could not redirect login.", e); //$NON-NLS-1$
 		}
+		
 		request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response); //$NON-NLS-1$
 		
 	}

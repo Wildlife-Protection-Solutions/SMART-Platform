@@ -6,6 +6,9 @@ CREATE SCHEMA connect;
 DROP TABLE IF EXISTS connect.ca_plug_version;
 DROP TABLE IF EXISTS connect.conservation_area_info;
 DROP TABLE IF EXISTS connect.ca_info;
+DROP TABLE IF EXISTS connect.alerts;
+DROP TABLE IF EXISTS connect.alert_types;
+DROP TABLE IF EXISTS connect.style_configuration;
 DROP TABLE IF EXISTS connect.plugin_version;
 DROP TABLE IF EXISTS connect.connect_plugin_version;
 DROP TABLE IF EXISTS connect.user_actions;
@@ -74,6 +77,7 @@ CREATE TABLE connect.users
 	resetid varchar,
 	resetdatetime timestamp,
 	UNIQUE(username),
+	UNIQUE (uuid),
 	PRIMARY KEY (uuid, username)
 ) WITHOUT OIDS;
 
@@ -99,6 +103,61 @@ CREATE TABLE connect.user_roles
 	PRIMARY KEY (username, role)
 ) WITHOUT OIDS;
 
+CREATE TYPE alert_status AS ENUM ('ACTIVE', 'DISABLED');
+
+-- A list of all alerts in the system
+CREATE TABLE connect.alerts
+(
+	-- A unqiue identifier for hibernate.
+	alert_id uuid NOT NULL,
+	-- A unqiue identifier that the user generates.
+	user_generated_id varchar NOT NULL,
+	-- The date/time the alert was created.
+	date timestamp NOT NULL, 
+	-- Description associated with alert.
+	description varchar,
+	-- A link to the alert type.
+	type_uuid uuid NOT NULL,
+	-- A value of 1 (high) - 5(low).
+	level smallint NOT NULL,
+	-- Associated Conservation Area UUID
+	ca_uuid uuid NOT NULL,
+	--alert status, custom enum type defined above
+	status alert_status NOT NULL,
+	-- the longitude of the alert location
+	x double precision NOT NULL,
+	-- the latitude of the alert location
+	y double precision NOT NULL,
+	-- A link to the user who created the alert.  The user will always be able to modify the alert.
+	creator_uuid uuid NOT NULL,
+	PRIMARY KEY (alert_id)
+) WITHOUT OIDS;
+
+CREATE TABLE connect.alert_types(
+	-- A unqiue identifier for hibernate.
+	uuid uuid NOT NULL,
+	-- Label for the type.
+	key varchar(32),
+	-- A link to the alert type.
+	label varchar(64),
+	PRIMARY KEY (uuid)
+) WITHOUT OIDS;
+
+
+CREATE TABLE connect.style_configuration(
+	uuid uuid NOT NULL,
+	style_id varchar(64) NOT NULL,
+	active boolean NOT NULL,
+	header_image bytea NOT NULL,
+	background_image bytea NOT NULL,
+	login_image bytea NOT NULL,
+	users_image bytea NOT NULL,
+	server_name varchar(64),
+	footer_text text,
+	PRIMARY KEY(style_id)
+) WITHOUT OIDS;
+
+
 
 
 /* Create Foreign Keys */
@@ -121,6 +180,27 @@ ALTER TABLE connect.user_actions
 	ON UPDATE CASCADE
 	ON DELETE CASCADE;
 
+ALTER TABLE connect.alerts
+	ADD FOREIGN KEY (ca_uuid)
+	REFERENCES connect.ca_info (ca_uuid)
+	ON UPDATE RESTRICT
+	ON DELETE CASCADE
+;
+
+ALTER TABLE connect.alerts
+	ADD FOREIGN KEY (creator_uuid)
+	REFERENCES connect.users (uuid)
+	ON UPDATE RESTRICT
+;
+
+ALTER TABLE connect.alerts
+	ADD FOREIGN KEY (type_uuid)
+	REFERENCES connect.alert_types (uuid)
+	ON UPDATE RESTRICT
+;
+
+
+	
 CREATE OR REPLACE FUNCTION manage_user_roles() RETURNS TRIGGER AS $$
     BEGIN
         --

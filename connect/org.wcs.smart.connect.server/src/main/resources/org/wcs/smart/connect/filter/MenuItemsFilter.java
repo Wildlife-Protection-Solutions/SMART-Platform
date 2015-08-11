@@ -18,6 +18,7 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.security.UserAccountsAction;
 
@@ -35,6 +36,7 @@ public class MenuItemsFilter implements Filter {
 		ALERT("MenuItemsFilter.AlertLabel", "/connect/alert", null), //$NON-NLS-1$ //$NON-NLS-2$
 		USERS("MenuItemsFilter.AccountsLabel", "/connect/users", UserAccountsAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		QUERY("MenuItemsFilter.QueryFilter", "/connect/query", null); //$NON-NLS-1$ //$NON-NLS-2$
+		SETTINGS("MenuItemsFilter.ConfigurationLabel", "/connect/settings", AdminAccountAction.KEY);  //$NON-NLS-2$
 		
 		String nameKey;
 		String url;

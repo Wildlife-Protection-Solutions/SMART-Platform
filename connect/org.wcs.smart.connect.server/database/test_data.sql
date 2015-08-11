@@ -12,3 +12,7 @@ insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er', '1.0');
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er.query', '2.0');
 
+insert into alert_types values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50', 'emergency', 'Emergency');
+insert into alert_types values('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51', 'observation', 'Observation');
+insert into alert_types values('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52', 'intelligence', 'Intelligence');
+insert into alert_types values('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a53', 'patrolposition', 'Patrol Position');

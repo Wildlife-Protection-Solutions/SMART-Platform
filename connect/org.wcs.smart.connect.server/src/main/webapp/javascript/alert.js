@@ -9,7 +9,6 @@ function initializePage(){
 		document.getElementById('verticalmenu').style.display = 'none';
 		document.getElementById('footerid').style.display = 'none';
 	}
-	
 
 	//initialize the map
 	var map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8});
@@ -37,7 +36,22 @@ function initializePage(){
     
     //intialize the tab styles
     settab(tab);
+    
+    //set the lat/long if we can get them from the device automatically
+    if (navigator.geolocation) {
+    	navigator.geolocation.getCurrentPosition(showLatLong, showError)
+    }
 	
+}
+
+function showLatLong(position){
+	document.getElementById("lat").value = position.coords.latitude
+	document.getElementById("long").value = position.coords.longitude
+    	
+}
+
+function showError(error) {
+   	document.getElementById("long").value = "unable to auto-detect location";
 }
 
 function settab(tab){
@@ -91,3 +105,4 @@ function remove_class(id, classname){
 	var regex = new RegExp("(?:^|\s)" + classname + "(?!\S)", "g");
 	document.getElementById(id).className = document.getElementById(id).className.replace( regex , '' )
 }
+

@@ -37,9 +37,37 @@
 		<form action="${createAlert}" method="POST" id="newAlertForm">
      		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block">Conservation Area:</label>
-     		<input type="text" name="j_ca" class="block formtext" />
+     		<select name="alert_ca" class="block formtext">
+     		<c:forEach var="ca" items="${cas}" varStatus="count">
+     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
+			</c:forEach> 
+     		</select>
+     		
      		<label class="top-spacer block">Type:</label>
-     		<input type="password" name="j_type" class="formtext" />
+     		<select name="alert_type" class="block formtext">
+     		<c:forEach var="type" items="${alertTypes}" varStatus="count">
+     			<option value="${type.getKey()}"> ${type.getLabel()} </option> 
+			</c:forEach> 
+     		</select>
+
+			<label class="top-spacer block">Event Importance:</label>
+			<select class="block formtext">
+			<option value=1>1(Highest)</option>
+			<option value=2>2</option>
+			<option value=3>3</option>
+			<option value=4>4</option>
+			<option value=5>5(Lowest)</option>
+			</select>
+			
+			<label class="top-spacer block">Longitude:</label><input id=long type="text" name="long">
+			<label class="top-spacer block">Latitude:</label><input id=lat type="text" name="lat" >
+			
+			
+			<label class="top-spacer block">Description:</label>
+			<textarea name="alert_description" rows="5" cols="30">
+			
+			</textarea>
+
      		<input class="button block top-spacer" type="submit" value="Submit"/>
     	</form>
 		</p>
