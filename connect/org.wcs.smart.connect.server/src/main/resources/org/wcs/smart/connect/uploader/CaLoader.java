@@ -1,6 +1,7 @@
 package org.wcs.smart.connect.uploader;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
@@ -10,11 +11,10 @@ import org.wcs.smart.connect.model.UploadItem;
 import org.wcs.smart.connect.model.UploadItem.Status;
 import org.wcs.smart.connect.model.UploadItem.Type;
 
-import com.sun.istack.internal.logging.Logger;
 
 public class CaLoader implements IUploadItemProcessor {
 	
-	private final Logger logger = Logger.getLogger(CaLoader.class);
+	private final Logger logger = Logger.getLogger(CaLoader.class.getName());
 	
 	@Override
 	public Type getSupportedType() {
@@ -46,7 +46,7 @@ public class CaLoader implements IUploadItemProcessor {
 			
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			ex.printStackTrace();
 			session.getTransaction().rollback();
 			
@@ -58,7 +58,7 @@ public class CaLoader implements IUploadItemProcessor {
 				item.setMessage("Error extracting data, " + ex.getMessage());
 				session.getTransaction().commit();
 			}catch (Exception ex2){
-				logger.severe(ex2.getMessage(), ex2);
+				logger.severe(ex2.getMessage());
 				session.getTransaction().rollback();
 			}
 		}

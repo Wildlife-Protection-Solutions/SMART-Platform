@@ -4,6 +4,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -36,8 +37,6 @@ import org.wcs.smart.connect.security.ResourceOption;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.security.UserAccountsAction;
 
-import com.sun.istack.internal.logging.Logger;
-
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectUser.PATH +
 		ConnectRESTApplication.PATH_SEPERATOR + ConnectUserAction.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
@@ -47,7 +46,7 @@ public class ConnectUserAction extends HttpServlet {
 	public static final String PATH = "actions";
 	
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(ConnectUserAction.class);
+	private final Logger logger = Logger.getLogger(ConnectUserAction.class.getName());
 	
 	@Context private ServletContext context;
 
@@ -93,7 +92,7 @@ public class ConnectUserAction extends HttpServlet {
 			}
 			return actionResources;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConnectUserAction.ActionError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
@@ -128,7 +127,7 @@ public class ConnectUserAction extends HttpServlet {
 			}
 			return items;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR,
 					Messages.getString("ConnectUserAction.UserError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
@@ -177,7 +176,7 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConnectUserAction.UserDeleteError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
@@ -211,7 +210,7 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}

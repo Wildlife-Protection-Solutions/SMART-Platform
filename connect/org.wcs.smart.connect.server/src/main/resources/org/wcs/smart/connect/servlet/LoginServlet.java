@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,10 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.SmartUtils;
-import org.wcs.smart.connect.filter.ApiAuthorizationFilter;
 import org.wcs.smart.connect.i18n.Messages;
-
-import com.sun.istack.internal.logging.Logger;
 
 /**
  * Servlet implementation class LoginServlet
@@ -23,7 +21,7 @@ import com.sun.istack.internal.logging.Logger;
 @WebServlet(urlPatterns = {"/login", "/loginerror"})
 public class LoginServlet extends HttpServlet {
 	
-	private final Logger logger = Logger.getLogger(ApiAuthorizationFilter.class);
+	private final Logger logger = Logger.getLogger(LoginServlet.class.getName());
 	
 	private static final long serialVersionUID = 1L;
     
@@ -38,7 +36,7 @@ public class LoginServlet extends HttpServlet {
 		try {
 			request.setAttribute("logintarget", new URI(request.getContextPath() + "/j_security_check").toASCIIString()); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (URISyntaxException e) {
-			logger.info("Error redirecting login.", e); //$NON-NLS-1$
+			logger.info("Error redirecting login."); //$NON-NLS-1$
 			throw new ServletException("Could not redirect login.", e); //$NON-NLS-1$
 		}
 		request.getRequestDispatcher("WEB-INF/login.jsp").forward(request, response); //$NON-NLS-1$

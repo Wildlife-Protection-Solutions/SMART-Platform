@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.logging.Logger;
 
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -42,9 +43,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.query.engine.visitors.AreaFilterVisitor;
-import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.query.QueryPlugIn;
-import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.visitors.AttributeFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.model.filter.AttributeInfo;
@@ -52,6 +50,7 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
+
 
 /**
  * Processes an query filter creating a temporary table
@@ -61,7 +60,9 @@ import org.wcs.smart.query.model.filter.IFilter;
  *
  */
 public class FilterProcessor implements IFilterProcessor {
-
+	
+	private final Logger logger = Logger.getLogger(FilterProcessor.class.getName());
+	
 	private String tableName;
 	private String observationTable;
 	
@@ -107,16 +108,18 @@ public class FilterProcessor implements IFilterProcessor {
 			DateFilter dateFilter, ConservationAreaFilter caFilter, 
 			boolean populateObservation,
 			boolean includeEmptyObservations) throws SQLException{
-		
-	
+
 		IFilter qFilter = queryFilter;
 		if (qFilter == null){
 			qFilter = EmptyFilter.INSTANCE;
 		}
 		qFilter.accept(observationFilterVisitor);		
+
 		if (observationFilterVisitor.hasAttributeFilter()){
 			createObservationTable(c, qFilter, dateFilter, caFilter);
 		}
+
+		createTemporaryTable(c);
 		populateTemporaryTable(qFilter, dateFilter, caFilter, 
 				includeEmptyObservations, c, populateObservation);
 	}
@@ -128,7 +131,7 @@ public class FilterProcessor implements IFilterProcessor {
 	private void createTemporaryTable(Connection c) throws SQLException {
 
 		String createTableStatement = engine.getTemporaryTableCreateClause(tableName);
-		System.out.println(createTableStatement);
+		logger.finest(createTableStatement);
 		c.createStatement().execute(createTableStatement);
 		
 		engine.buildTemporaryTableIndexes(c, tableName);
@@ -207,7 +210,7 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(".patrol_uuid "); //$NON-NLS-1$
 		
 		if (caFilter != null) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
+			String filter = PsqlFilterToSqlGenerator.INSTANCE.toSql(caFilter, engine);
 			if (filter.length() > 0) {
 				sql.append(" AND "); //$NON-NLS-1$
 				sql.append("(" + filter + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -223,7 +226,7 @@ public class FilterProcessor implements IFilterProcessor {
 		sql.append(".patrol_leg_uuid "); //$NON-NLS-1$
 		
 		if (dateFilter != null) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+			String filter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 			if (filter.length() > 0) {
 				sql.append(" and "); //$NON-NLS-1$
 				sql.append(filter);
@@ -316,13 +319,13 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		// ---- WHERE CLAUSE -----
 		if (queryFilter != EmptyFilter.INSTANCE) {
-			String filter = PatrolFilterSqlGenerator.INSTANCE.toSql(queryFilter, engine);
+			String filter = PsqlFilterToSqlGenerator.INSTANCE.toSql(queryFilter, engine);
 			if (filter != null && filter.length() > 0) {
 				sql.append(" WHERE "); //$NON-NLS-1$
 			    sql.append(filter);
 			}
 		}
-		QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		engine.parseQueryString(c, sql.toString()).executeUpdate();
 	}
 	
@@ -337,33 +340,34 @@ public class FilterProcessor implements IFilterProcessor {
 		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + observationTable + " (observation_uuid char(16) for bit data"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + observationTable + " (observation_uuid uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		for (AttributeInfo key : keys) {
 			sql.append(", " + key.getKey() + " " //$NON-NLS-1$ //$NON-NLS-2$
 					+ engine.getDataType(key.getType()));
 		}
 		sql.append(")"); //$NON-NLS-1$
 		
-		QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
 		// -- create index
 		sql = new StringBuilder();
 		sql.append("CREATE INDEX " + observationTable + "_obuuid_idx on " + observationTable + " (observation_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
 		String attributeTempTable = engine.createTempTableName();
 			
 		for (AttributeInfo key : keys){
+			
 			//create temporary table for attribute observations
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(attributeTempTable); 
-			sql.append("(observation_uuid char(16) for bit data, value "); //$NON-NLS-1$
+			sql.append("(observation_uuid uuid, value "); //$NON-NLS-1$
 			sql.append( engine.getDataType(key.getType()) );
 			sql.append( ")"); //$NON-NLS-1$
-			QueryPlugIn.logSql(sql.toString());
+			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 			try {
 				engine.clearParameters();
@@ -398,7 +402,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append( prefix(PatrolLeg.class)); 
 				sql.append(" ON " + prefix(Patrol.class) + ".uuid = " + prefix(PatrolLeg.class) + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				if (caFilter != null) {
-					String cfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(caFilter, engine);
+					String cfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(caFilter, engine);
 					if (cfilter.length() > 0) {
 						sql.append(" and "); //$NON-NLS-1$
 						sql.append(cfilter);
@@ -424,7 +428,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" on " + prefix(PatrolWaypoint.class) + ".wp_uuid = " + prefix(Waypoint.class) + ".uuid "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 				if (dateFilter != null) {
-					String dfilter = PatrolFilterSqlGenerator.INSTANCE.toSql(dateFilter, engine);
+					String dfilter = PsqlFilterToSqlGenerator.INSTANCE.toSql(dateFilter, engine);
 					if (dfilter.length() > 0) {
 						sql.append(" and "); //$NON-NLS-1$
 						sql.append(dfilter);
@@ -458,7 +462,7 @@ public class FilterProcessor implements IFilterProcessor {
 				String p = engine.addParameterValue(key.getKey());
 				sql.append(" " + prefix(Attribute.class) + ".keyid = " + p ); //$NON-NLS-1$ //$NON-NLS-2$
 				
-				QueryPlugIn.logSql(sql.toString());
+				logger.finest(sql.toString());
 				engine.parseQueryString(c, sql.toString()).executeUpdate();
 
 				// - create index
@@ -468,7 +472,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append("__observation_uuid_idx on "); //$NON-NLS-1$
 				sql.append(attributeTempTable);
 				sql.append("(observation_uuid)"); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
+				logger.finest(sql.toString());
 				c.createStatement().execute(sql.toString());
 
 				// - add observation to main table
@@ -484,7 +488,7 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" a WHERE a.observation_uuid = "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append(".observation_uuid)"); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
+				logger.finest(sql.toString());
 				c.createStatement().execute(sql.toString());
 				
 				// add missing observations
@@ -499,15 +503,15 @@ public class FilterProcessor implements IFilterProcessor {
 				sql.append(" a WHERE NOT EXISTS (SELECT observation_uuid FROM "); //$NON-NLS-1$
 				sql.append(observationTable);
 				sql.append(" b WHERE b.observation_uuid = a.observation_uuid))"); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
+				logger.finest(sql.toString());
 				c.createStatement().execute(sql.toString());
 
 			} finally {
 				// -- drop attribute table
 				sql = new StringBuilder();
 				sql.append("DROP TABLE " + attributeTempTable); //$NON-NLS-1$
-				QueryPlugIn.logSql(sql.toString());
-				c.createStatement().execute(sql.toString());
+				logger.finest(sql.toString());
+			//	c.createStatement().execute(sql.toString());
 			}
 		}
 		

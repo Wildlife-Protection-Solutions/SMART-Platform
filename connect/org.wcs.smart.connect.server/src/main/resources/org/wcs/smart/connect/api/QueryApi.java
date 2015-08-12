@@ -1,0 +1,176 @@
+package org.wcs.smart.connect.api;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.MessageFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
+
+import org.apache.commons.io.FileUtils;
+import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.engine.patrol.CsvExporter;
+import org.wcs.smart.connect.query.engine.patrol.PsqlObservationEngine;
+import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.date.AllDatesFilter;
+import org.wcs.smart.query.model.filter.date.CustomDateFilter;
+import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
+import org.wcs.smart.query.model.filter.date.IDateFilter;
+import org.wcs.smart.util.UuidUtils;
+
+@Path(ConnectRESTApplication.PATH_SEPERATOR + QueryApi.PATH)
+public class QueryApi extends HttpServlet{
+	
+	public static final String PATH = "query"; //$NON-NLS-1$
+
+	@Context private ServletContext context; 
+	@Context private HttpServletRequest request;
+	
+	@GET
+    @Path("/{queryuuid}")
+	public Response getQueryResults(@PathParam("queryuuid") String queryUuid, 
+			@QueryParam("format") String format,
+			@QueryParam("start_date") String start,
+			@QueryParam("end_date") String end,
+			@QueryParam("date_filter") String filter,
+			@QueryParam("delimiter") String delimiter){
+		
+		Date startDate = null;
+		Date endDate = null;
+		if (start != null){
+			try{
+				startDate = SmartUtils.parseDate(start);
+			}catch (Exception ex){
+				return createErrorResponse(Status.BAD_REQUEST, "Could not parse start date.  Must be on form yyyy-MM-dd H:m:s");
+			}
+		}
+		
+		if (end != null){
+			try{
+				endDate = SmartUtils.parseDate(end);
+			}catch (Exception ex){
+				return createErrorResponse(Status.BAD_REQUEST, "Could not parse end date.  Must be on form yyyy-MM-dd H:m:s");
+			}
+		}
+		
+		IDateFieldFilter dateField = QueryManager.INSTANCE.findDateField(filter);
+		if (dateField == null){
+			return createErrorResponse(Status.BAD_REQUEST, MessageFormat.format("Invalid date field field.  {0} not supported.", filter));
+		}
+		
+		if (delimiter == null){
+			delimiter = ",";
+		}
+		
+		IDateFilter dfilter = null;
+		if (startDate == null && endDate == null){
+			dfilter = AllDatesFilter.INSTANCE; 
+		}else{
+			if (startDate == null){
+				startDate = new Date(0);
+			}
+			if (endDate == null){
+				endDate = new Date();
+			}
+			dfilter = new CustomDateFilter();
+			((CustomDateFilter)dfilter).setDates(startDate, endDate);
+		}
+		DateFilter df = new DateFilter(dateField, dfilter);
+		
+		UUID uuid = UuidUtils.stringToUuid(queryUuid);
+		Session s = HibernateManager.getSession(context, request.getLocale());
+		s.beginTransaction();
+		Query query = null;
+		try{
+			query = QueryManager.INSTANCE.findQuery(uuid, s);
+
+			if (query == null){
+				//query not found
+				return Response.status(Status.NOT_FOUND).build();
+			}
+		
+			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query, request.getLocale());
+			if(engine == null){
+				String error = MessageFormat.format("No query engine for query type {1}.", query.getTypeKey());
+				return createErrorResponse(Status.NOT_IMPLEMENTED, error);
+			}
+		
+			/* configure date filter */
+			query.setDateFilter(df);
+			
+			/* configure ca filter */
+
+			if (!query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+				ConservationAreaFilter caFilter = new ConservationAreaFilter();
+				caFilter.addConservationArea(query.getConservationArea());
+				query.setConservationAreaFilter(caFilter.asString());
+				//TODO: this will update the object in the database which we do not want to do!!
+			}else{
+				//TODO: this needs testing/fixing				
+			}
+			
+			HashMap<String, Object> params = new HashMap<String, Object>();
+			params.put(Session.class.getName(), s);
+			
+			engine.executeQuery(query, params);
+			
+			File f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.tmp");
+			CsvExporter exporter = new CsvExporter(f, delimiter.charAt(0),request.getLocale());
+			exporter.exportResults((PsqlObservationEngine) engine, s);
+			
+			StreamingOutput stream = new StreamingOutput() {
+			      @Override
+			      public void write(OutputStream output) throws IOException {
+			        try {
+			        	FileUtils.copyFile(f, output);
+			        } catch (Exception e) {
+			           e.printStackTrace();
+			        }
+			      }
+			    };
+			
+			//return accepted
+			Response rs = Response.ok(stream, MediaType.TEXT_PLAIN)
+		            .build();
+			return rs;
+		}catch (Exception ex){
+			String error = MessageFormat.format("Error executing query: {0}", ex.getMessage());
+			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, error);
+		}finally{
+			s.getTransaction().commit();
+		}
+		
+	}
+	
+	private Response createErrorResponse(Status code, String message){
+		String error = MessageFormat.format("\"status\": {0}, \"error:\": \"" + message + "\"", code.getStatusCode(), message);
+		return Response
+				.status(code)
+				.header("Content-Type", MediaType.APPLICATION_JSON)
+				.entity("{" + error +"}")
+				.build();
+	}
+}

@@ -9,8 +9,21 @@
 	<version>1.0-SNAPSHOT</version>
 	<name>SMART Connect Server</name>
 
+	<properties>
+		<smart.version>4.0.0-SNAPSHOT</smart.version>
+        	<geotools.version>11.2</geotools.version>
+        	<jts.version>1.13</jts.version>
+        	<hibernate.version>4.2.18.Final</hibernate.version>
+        	<resteasy.version>3.0.9.Final</resteasy.version>
+    	</properties>
 	
-	
+	<repositories>
+		<repository>
+			<id>osgeo</id>
+			<name>Open Source Geospatial Foundation Repository</name>
+			<url>http://download.osgeo.org/webdav/geotools/</url>
+		</repository>
+    	</repositories>   
 
 	<build>
 		<sourceDirectory>src/main/resources</sourceDirectory>
@@ -56,30 +69,30 @@
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jaxrs</artifactId>
-			<version>3.0.9.Final</version>
+			<version>${resteasy.version}</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>async-http-servlet-3.0</artifactId>
-			<version>3.0.9.Final</version>
+			<version>${resteasy.version}</version>
 		</dependency>
 		<dependency>
             		<groupId>org.jboss.resteasy</groupId>
             		<artifactId>resteasy-servlet-initializer</artifactId>
-            		<version>3.0.6.Final</version>
+            		<version>${resteasy.version}</version>
         	</dependency>
         	<dependency>
     			<groupId>org.jboss.resteasy</groupId>
     			<artifactId>resteasy-jackson2-provider</artifactId>
-    			<version>3.0.6.Final</version>
+    			<version>${resteasy.version}</version>
 		</dependency>
         	
 		<!-- apache juli -->
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>async-http-servlet-3.0</artifactId>
-			<version>3.0.9.Final</version>
+			<version>${resteasy.version}</version>
 		</dependency>
 
 		<!--jstl -->
@@ -100,12 +113,12 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>4.2.18.Final</version>
+			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
         	<groupId>org.hibernate</groupId>
             <artifactId>hibernate-ehcache</artifactId>
-            <version>4.2.18.Final</version>
+            <version>${hibernate.version}</version>
         </dependency>
 		<!-- <dependency> -->
   		<!-- 	<groupId>com.fasterxml.jackson.datatype</groupId> -->
@@ -135,15 +148,112 @@
 		
 		<!--  utilities -->
 		<dependency>
-    		<groupId>org.apache.commons</groupId>
-    		<artifactId>commons-compress</artifactId>
-    		<version>1.5</version>
+    			<groupId>org.apache.commons</groupId>
+    			<artifactId>commons-compress</artifactId>
+    			<version>1.5</version>
 		</dependency>
 		<dependency>
-          	<groupId>org.apache.commons</groupId>
-          	<artifactId>commons-exec</artifactId>
-			<version>1.1</version>
-       	</dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.1</version>
+		</dependency>
+		<dependency>
+          	<groupId>net.sf.opencsv</groupId>
+          	<artifactId>opencsv</artifactId>
+        	<version>2.3</version>
+        </dependency>	
+		<!-- SMART -->
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.core</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.observation</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+	
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.observation.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.dataentry</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.patrol</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.patrol.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>	
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.plan</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>		
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.intelligence</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>			
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.intelligence.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>	
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.er</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>		
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.er.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>			
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.entity</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
+		<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.entity.query</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>	
+		<dependency>
+    			<groupId>com.vividsolutions</groupId>
+    			<artifactId>jts</artifactId>
+    			<version>${jts.version}</version>
+			</dependency>
+		<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-referencing</artifactId>
+            		<version>${geotools.version}</version>
+        	</dependency>
+        	<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-api</artifactId>
+            		<version>${geotools.version}</version>
+        	</dependency>
+			<dependency>
+            	<groupId>org.geotools</groupId>
+            	<artifactId>gt-epsg-hsql</artifactId>
+            	<version>${geotools.version}</version>
+        	</dependency>	
 	</dependencies>
 	
 </project>

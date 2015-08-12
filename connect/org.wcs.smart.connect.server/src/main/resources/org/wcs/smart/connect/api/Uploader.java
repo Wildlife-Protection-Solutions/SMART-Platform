@@ -11,6 +11,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -37,13 +38,12 @@ import org.wcs.smart.connect.model.UploadItem.Status;
 import org.wcs.smart.connect.model.UploadStatus;
 import org.wcs.smart.connect.uploader.UploaderProcessor;
 
-import com.sun.istack.internal.logging.Logger;
 
 @Path(ConnectRESTApplication.PATH_SEPERATOR + Uploader.PATH)
 public class Uploader extends HttpServlet {
 
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(Uploader.class);
+	private final Logger logger = Logger.getLogger(Uploader.class.getName());
 	
 	public static final String PATH = "uploader"; //$NON-NLS-1$
 	
@@ -72,7 +72,7 @@ public class Uploader extends HttpServlet {
 			}
 			return status;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}finally{
 			s.getTransaction().commit();
@@ -175,7 +175,7 @@ public class Uploader extends HttpServlet {
 				s.getTransaction().commit();
 				
 			}catch (Exception ex){
-				logger.severe(ex.getMessage(), ex);
+				logger.severe(ex.getMessage());
 				s.getTransaction().rollback();
 				throw ex;
 			}

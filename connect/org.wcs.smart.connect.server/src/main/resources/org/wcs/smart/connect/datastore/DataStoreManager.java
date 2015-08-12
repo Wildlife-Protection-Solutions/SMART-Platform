@@ -59,7 +59,7 @@ public enum DataStoreManager {
 		return new File(DATASTORE_LOCATION, fileName);
 	}
 	
-	private File getRootDirectory(){
+	public File getRootDirectory(){
 		return new File(DATASTORE_LOCATION);
 	}
 	

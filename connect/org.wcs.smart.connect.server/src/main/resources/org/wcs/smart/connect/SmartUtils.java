@@ -1,5 +1,7 @@
 package org.wcs.smart.connect;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.UUID;
@@ -41,5 +43,16 @@ public class SmartUtils {
 				UUIDGenerationStrategy.class.getName());
 		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 		return (UUID)uuidGenerator.generate((SessionImplementor) session, obj);
+	}
+	
+	private static final SimpleDateFormat DT_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s");
+	private static final SimpleDateFormat D_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+	
+	public static Date parseDate(String dateString) throws Exception{
+		try{
+			return DT_FORMAT.parse(dateString);
+		}catch (Exception ex){
+			
+		}return D_FORMAT.parse(dateString);
 	}
 }

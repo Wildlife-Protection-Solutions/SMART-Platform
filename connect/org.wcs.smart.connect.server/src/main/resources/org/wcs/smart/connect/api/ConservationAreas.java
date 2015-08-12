@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -39,7 +40,6 @@ import org.wcs.smart.connect.model.UploadItem.Type;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
-import com.sun.istack.internal.logging.Logger;
 
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConservationAreas.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
@@ -48,7 +48,7 @@ public class ConservationAreas extends HttpServlet{
 	public static final String PATH = "conservationarea"; //$NON-NLS-1$
 	
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(ConservationAreas.class);
+	private final Logger logger = Logger.getLogger(ConservationAreas.class.getName());
 	
 	@Context private ServletContext context;
 	@Context private HttpHeaders headers;
@@ -104,7 +104,7 @@ public class ConservationAreas extends HttpServlet{
 			}
 			return conservationAreas;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConservationAreas.CaListError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
@@ -138,13 +138,12 @@ public class ConservationAreas extends HttpServlet{
 			
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.warning(ex.getMessage());
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			s.getTransaction().rollback();
-			logger.severe(ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConservationAreas.CouldNotDeleteCa", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
@@ -223,11 +222,11 @@ public class ConservationAreas extends HttpServlet{
 			
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.warning(ex.getMessage());
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.severe(ex.getMessage());
 			s.getTransaction().rollback();
 			throw new SmartConnectException(Messages.getString("ConservationAreas.UploadErr", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}

@@ -2,6 +2,7 @@ package org.wcs.smart.connect.filter;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.logging.Logger;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -16,7 +17,6 @@ import javax.servlet.http.HttpSession;
 
 import org.jboss.resteasy.util.Base64;
 
-import com.sun.istack.internal.logging.Logger;
 
 /**
  * Servlet Filter implementation class ApiAuthorization
@@ -24,7 +24,7 @@ import com.sun.istack.internal.logging.Logger;
 @WebFilter(filterName="api authorization files",urlPatterns={"/api/*"})
 public class ApiAuthorizationFilter implements Filter {
 
-	private final Logger logger = Logger.getLogger(ApiAuthorizationFilter.class);
+	private final Logger logger = Logger.getLogger(ApiAuthorizationFilter.class.getName());
 	
     /**
      * Default constructor. 
