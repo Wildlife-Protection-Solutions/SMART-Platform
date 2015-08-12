@@ -50,7 +50,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class UuidItem {
 	
 	
-	@JsonIgnore
 	private UUID uuid;
 	
 	/**

@@ -57,8 +57,8 @@ public class HibernateManager {
 	public static ConservationAreaInfo getConservationAreaInfo(Session session, UUID caUuid) {
 		return (ConservationAreaInfo)session
 				.createCriteria(ConservationAreaInfo.class)
-				.add(Restrictions.eq("ca_uuid", caUuid)) //$NON-NLS-1$
-				.list();
+				.add(Restrictions.eq("uuid", caUuid)) //$NON-NLS-1$
+				.uniqueResult();
 	}
 	
 	public static List<AlertType> getAlertTypes(Session session) {
@@ -76,7 +76,7 @@ public class HibernateManager {
 	public static Alert getAlert(Session session, UUID alertUuid) {
 		Alert a = (Alert)session
 				.createCriteria(Alert.class)
-				.add(Restrictions.eq("alert_id", alertUuid)) //$NON-NLS-1$
+				.add(Restrictions.eq("uuid", alertUuid)) //$NON-NLS-1$
 				.uniqueResult();
 		return a;
 	}
@@ -92,7 +92,7 @@ public class HibernateManager {
 	public static Alert getAlertByUserId(Session session, String userGenId) {
 		Alert a = (Alert)session
 				.createCriteria(Alert.class)
-				.add(Restrictions.eq("user_generated_id", userGenId)) //$NON-NLS-1$
+				.add(Restrictions.eq("userGeneratedId", userGenId)) //$NON-NLS-1$
 				.uniqueResult();
 		return a;
 	}
@@ -100,7 +100,7 @@ public class HibernateManager {
 	public static List<Alert> getAlertsByCa(Session session, UUID caUuid) {
 		return (List<Alert>)session
 				.createCriteria(Alert.class)
-				.add(Restrictions.eq("ca_uuid", caUuid))
+				.add(Restrictions.eq("caUuid", caUuid))
 				.list();
 	}
 	

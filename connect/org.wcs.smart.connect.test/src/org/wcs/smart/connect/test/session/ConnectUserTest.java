@@ -38,6 +38,7 @@ public class ConnectUserTest {
 	
 	@Test
 	public void testUser() throws Exception{
+		
 		testCreateUser();
 		testUserLogin();
 		testGetUser();
@@ -46,7 +47,9 @@ public class ConnectUserTest {
 		testUpdatePassword();
 		testUpdateInvalidPassword();
 		testDeleteUser();
+
 	}
+
 	
 	@Test
 	public void testGetAllUsers() throws Exception{
@@ -92,7 +95,10 @@ public class ConnectUserTest {
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
 		post.addHeader("Authorization", "basic " + info);
 		post.addHeader("Content-Type", SmartConnect.MT_APPLICATION_JSON);
-		String json = "{\"username\": \"" + username + "\", \"password\":\"" + password+"\", \"email\":\"" + email + "\"}";
+		//String json = "{\"username\": \"" + username + "\", \"password\":\"" + password+"\", \"email\":\"" + email + "\"}";
+		
+		String json = "{\"username\": \"" + "testjeffy" + "\", \"email\":\"" + "234asdasd" +"\", \"email\":\"" + email + "\"}";
+		
         HttpEntity entity = new ByteArrayEntity(json.getBytes());
         post.setEntity(entity);
 		

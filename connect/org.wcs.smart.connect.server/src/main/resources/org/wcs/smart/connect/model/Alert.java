@@ -1,5 +1,6 @@
 package org.wcs.smart.connect.model;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -7,19 +8,50 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.deser.std.JdkDeserializers.UUIDDeserializer;
+
 @Entity
 @Table(name = "connect.alerts")
 public class Alert extends UuidItem{
+	
+	public enum AlertStatusEnum {
+		ACTIVE("ACTIVE"),
+		DISABLED("DISABLED");
+	 
+		protected String value;
+			
+		private AlertStatusEnum(String value) {
+			this.value = value;
+		}
+		public String getValue() {
+			return value;
+		}
+	}
+	
 	private String userGeneratedId; 
 	private Date date;
 	private String description;
-	private UUID type_uuid;
+//	@JsonDeserialize(using = CustomUuidDeserializer.class)
+//	@JsonSerialize(using = CustomUuidSerializer.class)
 	private Integer level;
-	private UUID ca_uuid;
-	private String status;
+	private AlertStatusEnum status;
 	private Double x;
 	private Double y;
-	private UUID creator_uuid;
+	public UUID typeUuid;
+	private UUID caUuid;
+	private UUID creatorUuid;
 	
 	@Column(name="date")
 	public Date getDate() {
@@ -38,11 +70,11 @@ public class Alert extends UuidItem{
 	}
 	
 	@Column(name="type_uuid")
-	public UUID getType_uuid() {
-		return type_uuid;
+	public UUID getTypeUuid() {
+		return typeUuid;
 	}
-	public void setType_uuid(UUID type_uuid) {
-		this.type_uuid = type_uuid;
+	public void setTypeUuid(UUID type_uuid) {
+		this.typeUuid = type_uuid;
 	}
 	
 	@Column(name="level")
@@ -54,18 +86,19 @@ public class Alert extends UuidItem{
 	}
 	
 	@Column(name="ca_uuid")
-	public UUID getCa_uuid() {
-		return ca_uuid;
+	public UUID getCaUuid() {
+		return caUuid;
 	}
-	public void setCa_uuid(UUID ca_uuid) {
-		this.ca_uuid = ca_uuid;
+	public void setCaUuid(UUID ca_uuid) {
+		this.caUuid = ca_uuid;
 	}
 	
 	@Column(name="status")
-	public String getStatus() {
+	@Type(type="org.wcs.smart.connect.model.AlertStatusType")
+	public AlertStatusEnum getStatus() {
 		return status;
 	}
-	public void setStatus(String status) {
+	public void setStatus(AlertStatusEnum status) {
 		this.status = status;
 	}
 	
@@ -86,11 +119,11 @@ public class Alert extends UuidItem{
 	}
 	
 	@Column(name="creator_uuid")
-	public UUID getCreator_uuid() {
-		return creator_uuid;
+	public UUID getCreatorUuid() {
+		return creatorUuid;
 	}
-	public void setCreator_uuid(UUID creator_uuid) {
-		this.creator_uuid = creator_uuid;
+	public void setCreatorUuid(UUID creator_uuid) {
+		this.creatorUuid = creator_uuid;
 	}
 	
 	@Column(name="user_generated_id")
@@ -100,8 +133,5 @@ public class Alert extends UuidItem{
 	public void setUserGeneratedId(String userGeneratedId) {
 		this.userGeneratedId = userGeneratedId;
 	}
-	
-	
-	
 	
 }

@@ -12,24 +12,15 @@ import org.hibernate.annotations.common.reflection.MetadataProviderInjector;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
-import org.wcs.smart.ca.Agency;
+import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;	
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.Language;
-import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.ca.Rank;
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.connect.model.ConnectUuidItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.connect.model.UploadItem;
-import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryFolder;
+
 
 import com.sun.istack.internal.logging.Logger;
 
@@ -75,20 +66,10 @@ public class HibernateSessionFactoryListener implements ServletContextListener{
 		config.addAnnotatedClass(ConservationAreaInfo.class);
 		config.addAnnotatedClass(UploadItem.class);
 		
-		config.addAnnotatedClass(Employee.class);
-		config.addAnnotatedClass(Language.class);
-		config.addAnnotatedClass(Agency.class);
-		config.addAnnotatedClass(Rank.class);
-		config.addAnnotatedClass(ConservationArea.class);
-		config.addAnnotatedClass(QueryFolder.class);
-		config.addAnnotatedClass(Label.class);
-		config.addAnnotatedClass(NamedItem.class);
-		config.addAnnotatedClass(UuidItem.class);
-		config.addAnnotatedClass(Query.class);
-		config.addAnnotatedClass(PatrolObservationQuery.class);
 		config.addAnnotatedClass(StyleConfiguration.class);
 		config.addAnnotatedClass(AlertType.class);
-
+		config.addAnnotatedClass(Alert.class);
+		
 		ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
 		SessionFactory sf = config.buildSessionFactory(service);
 		

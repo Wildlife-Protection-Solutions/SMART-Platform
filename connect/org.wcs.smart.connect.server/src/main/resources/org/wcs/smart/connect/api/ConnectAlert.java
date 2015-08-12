@@ -131,7 +131,7 @@ public class ConnectAlert extends HttpServlet {
     @Path("/{usergenid}")
     public Alert addAlert(@PathParam("usergenid") String userGenId, Alert newAlert) {
 		validateUser();
-		
+			
 		//validate usergenid, is it unique?
 		String err = validateUserGeneratedId(userGenId);
 		if (err != null){
@@ -139,13 +139,13 @@ public class ConnectAlert extends HttpServlet {
 		}
 		
 		//validate type
-		err = validateAlertType(newAlert.getType_uuid());
+		err = validateAlertType(newAlert.getTypeUuid());
 		if (err != null){
 			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
 		}
 		
 		//validate alert CA UUID
-		err = validateCa(newAlert.getCa_uuid());
+		err = validateCa(newAlert.getCaUuid());
 		if (err != null){
 			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
 		}
@@ -157,18 +157,16 @@ public class ConnectAlert extends HttpServlet {
 		
 		
 		Alert a = new Alert();
-		a.setCa_uuid(newAlert.getCa_uuid());
-		a.setCreator_uuid(newAlert.getCreator_uuid());
 		a.setDate(newAlert.getDate());
 		a.setDescription(newAlert.getDescription());
 		a.setLevel(newAlert.getLevel());
 		a.setStatus(newAlert.getStatus());
-		a.setType_uuid(newAlert.getType_uuid());
 		a.setUserGeneratedId(userGenId);
 		a.setX(newAlert.getX());
 		a.setY(newAlert.getY());
-		
-		
+		a.setCaUuid(newAlert.getCaUuid());
+		a.setTypeUuid(newAlert.getTypeUuid());
+		a.setCreatorUuid(newAlert.getCreatorUuid());
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -177,6 +175,7 @@ public class ConnectAlert extends HttpServlet {
 			s.getTransaction().commit();
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
+
 		}catch (SmartConnectException ex){
 			logger.warning(ex.getMessage(), ex);
 			s.getTransaction().rollback();
@@ -188,6 +187,7 @@ public class ConnectAlert extends HttpServlet {
 		}finally{
 			
 		}
+		
 		return a;
 	}
  
@@ -202,8 +202,8 @@ public class ConnectAlert extends HttpServlet {
 		s.beginTransaction();
 		try{
 			toUpdate = (Alert)s.createCriteria(Alert.class)
-					.add(Restrictions.eq("user_generated_id", oldAlertId)) //$NON-NLS-1$
-					.list().get(0);
+					.add(Restrictions.eq("userGeneratedId", oldAlertId)) //$NON-NLS-1$
+					.uniqueResult();
 			
 			if (toUpdate == null){
 				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND, 
@@ -221,11 +221,11 @@ public class ConnectAlert extends HttpServlet {
 				toUpdate.setUserGeneratedId(newAlert.getUserGeneratedId());
 			}
 			
-			if (newAlert.getCa_uuid() != null){
-				toUpdate.setCa_uuid(newAlert.getCa_uuid());
+			if (newAlert.getCaUuid() != null){
+				toUpdate.setCaUuid(newAlert.getCaUuid());
 			}
-			if (newAlert.getCreator_uuid() != null){
-				toUpdate.setCreator_uuid(newAlert.getCreator_uuid());
+			if (newAlert.getCreatorUuid() != null){
+				toUpdate.setCreatorUuid(newAlert.getCreatorUuid());
 			}
 			if (newAlert.getDate() != null){
 				toUpdate.setDate(newAlert.getDate());
@@ -239,8 +239,8 @@ public class ConnectAlert extends HttpServlet {
 			if (newAlert.getStatus() != null){
 				toUpdate.setStatus(newAlert.getStatus());
 			}			
-			if (newAlert.getType_uuid() != null){
-				toUpdate.setType_uuid(newAlert.getType_uuid());
+			if (newAlert.getTypeUuid() != null){
+				toUpdate.setTypeUuid(newAlert.getTypeUuid());
 			}
 			if (newAlert.getX() != null){
 				toUpdate.setX(newAlert.getX());
@@ -292,6 +292,8 @@ public class ConnectAlert extends HttpServlet {
 		}
 		return toDelete;
     }
+    
+    
  
     
     private String validateAlertType(UUID typeUuid) {
@@ -321,7 +323,7 @@ public class ConnectAlert extends HttpServlet {
 		}
 
     	if(a != null){
-    		return "Alert with this User ID already exist, cannot create duplicate";
+    		return "Alert with this User Generated ID already exist, cannot create duplicate";
     	}
 		return null; 
 	}

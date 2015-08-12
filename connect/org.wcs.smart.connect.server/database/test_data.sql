@@ -16,3 +16,5 @@ insert into alert_types values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50', 'emergenc
 insert into alert_types values('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51', 'observation', 'Observation');
 insert into alert_types values('d0eebc99-9c0b-4ef8-bb6d-6bb9bd380a52', 'intelligence', 'Intelligence');
 insert into alert_types values('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a53', 'patrolposition', 'Patrol Position');
+
+insert into alerts values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a21','mynewalert',to_date('05 Dec 2000', 'DD Mon YYYY'),'test description, some stuffsdfsdr drsdf','c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51',2,'a0eedf99-9c0c-4ef8-bb6d-6bb9bd340a36','ACTIVE',12,23,'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a36');
