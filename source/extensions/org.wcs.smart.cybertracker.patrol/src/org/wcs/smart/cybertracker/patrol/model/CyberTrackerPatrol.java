@@ -22,16 +22,13 @@
 package org.wcs.smart.cybertracker.patrol.model;
 
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
-import org.wcs.smart.cybertracker.model.ICyberTrackerData;
+import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
+import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
@@ -48,11 +45,9 @@ import com.vividsolutions.jts.geom.Coordinate;
  * @author elitvin
  * @since 1.0.0
  */
-public class CyberTrackerPatrol implements ICyberTrackerData {
+public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	
-	public enum ErrorType{ERROR, WARNING};
-
-	public enum PatrolMeta {
+	public enum PatrolMeta implements IDataMeta {
 		START_DATE,
 		END_DATE,
 		TYPE,
@@ -68,12 +63,6 @@ public class CyberTrackerPatrol implements ICyberTrackerData {
 		MEMBERS
 	}
 	
-	private Map<PatrolMeta, List<ImportError>> problems = new HashMap<PatrolMeta, List<ImportError>>();
-	
-	private Map<String, E> elementsMap;
-	private List<S> patrolData;
-	
-	private String id;
 	private Station station;
 	private Team team;
 	private String objective;
@@ -82,12 +71,9 @@ public class CyberTrackerPatrol implements ICyberTrackerData {
 	private PatrolTransportType patrolTransportType;
 	private boolean isArmed = false;
 	private String comment;
-	private Date startDate;
-	private Date endDate;
 	private Employee leader;
 	private Employee pilot;
 	private List<Employee> members;
-	private List<Coordinate> timerTrackList;
 	
 	//used only for gui representation after initial load
 	private String ctTransport;
@@ -97,61 +83,8 @@ public class CyberTrackerPatrol implements ICyberTrackerData {
 	private String ctPilot;
 	private List<String> ctMembers;
 
-	private Set<String> missingKeys = new HashSet<String>();
-	
-	public CyberTrackerPatrol(Map<String, E> elementsMap, List<S> patrolData) {
-		this.elementsMap = elementsMap;
-		this.patrolData = patrolData;
-	}
-
-	public void addWarning(PatrolMeta area, String problem) {
-		if (!problems.containsKey(area))
-			problems.put(area, new ArrayList<ImportError>());
-		problems.get(area).add(new ImportError(problem, ErrorType.WARNING));
-	}
-	
-	public void addError(PatrolMeta area, String problem) {
-		if (!problems.containsKey(area))
-			problems.put(area, new ArrayList<ImportError>());
-		problems.get(area).add(new ImportError(problem, ErrorType.ERROR));
-	}
-	
-	public List<String> getErrors() {
-		List<String> errors = new ArrayList<String>();
-		for (List<ImportError> lerrors : problems.values()){
-			for(ImportError err : lerrors){
-				if (err.errorType == ErrorType.ERROR){
-					errors.add(err.problem);
-				}
-			}
-		}
-		return errors;
-	}
-	
-	public List<String> getWarnings() {
-		List<String> warnings = new ArrayList<String>();
-		for (List<ImportError> lerrors : problems.values()){
-			for(ImportError err : lerrors){
-				if (err.errorType == ErrorType.WARNING){
-					warnings.add(err.problem);
-				}
-			}
-		}
-		return warnings;
-	}
-	
-	public Map<PatrolMeta, List<ImportError>> getProblems() {
-		return problems;
-	}
-	
-	public Map<String, E> getElementsMap() {
-		return elementsMap;
-	}
-
-	public List<S> getSData() {
-		if (patrolData == null)
-			patrolData = new ArrayList<S>();
-		return patrolData;
+	public CyberTrackerPatrol(Map<String, E> elementsMap, List<S> sData) {
+		super(elementsMap, sData);
 	}
 
 	public Station getStation() {
@@ -218,22 +151,6 @@ public class CyberTrackerPatrol implements ICyberTrackerData {
 		this.comment = comment;
 	}
 
-	public Date getStartDate() {
-		return startDate;
-	}
-
-	public void setStartDate(Date startDate) {
-		this.startDate = startDate;
-	}
-
-	public Date getEndDate() {
-		return endDate;
-	}
-
-	public void setEndDate(Date endDate) {
-		this.endDate = endDate;
-	}
-
 	public Employee getLeader() {
 		return leader;
 	}
@@ -258,14 +175,6 @@ public class CyberTrackerPatrol implements ICyberTrackerData {
 
 	public void setMembers(List<Employee> members) {
 		this.members = members;
-	}
-
-	public String getId() {
-		return id;
-	}
-	
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public String getCtTransport() {
@@ -316,47 +225,6 @@ public class CyberTrackerPatrol implements ICyberTrackerData {
 
 	public void setCtMembers(List<String> ctMembers) {
 		this.ctMembers = ctMembers;
-	}
-
-	public List<Coordinate> getTimerTrackList() {
-		if (timerTrackList == null)
-			timerTrackList = new ArrayList<Coordinate>();
-		return timerTrackList;
-	}
-
-	public void setTimerTrackList(List<Coordinate> timerTrackList) {
-		this.timerTrackList = timerTrackList;
-	}
-	
-	public Set<String> getMissingKeys() {
-		return missingKeys;
-	}
-	public void addMissingKey(String i) {
-		missingKeys.add(i);
-	}
-	
-	/**
-	 * Import error class to track import error messages
-	 * and error type.
-	 * @author Emily
-	 *
-	 */
-	public class ImportError {
-		private ErrorType errorType;
-		private String problem;
-		
-		public ImportError(String problem, ErrorType type){
-			this.errorType = type;
-			this.problem = problem;
-		}
-		
-		public ErrorType getType(){
-			return this.errorType;
-		}
-		
-		public String getMessage(){
-			return this.problem;
-		}
 	}
 
 	@Override

@@ -53,9 +53,10 @@ import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.IImportEditorContent;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
+import org.wcs.smart.cybertracker.model.IDataMeta;
+import org.wcs.smart.cybertracker.model.ImportError;
+import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
-import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.ErrorType;
-import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.ImportError;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.Patrol;
 
@@ -285,7 +286,7 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 			lblMembers.setText(sbMembers.toString());
 			
 			
-			Map<PatrolMeta, List<ImportError>> problems = ((CyberTrackerPatrol) selection).getProblems();
+			Map<IDataMeta, List<ImportError>> problems = ((CyberTrackerPatrol) selection).getProblems();
 			updateCd(cdStartDate, problems.get(PatrolMeta.START_DATE));
 			updateCd(cdEndDate, problems.get(PatrolMeta.END_DATE));
 			updateCd(cdPatrolType, problems.get(PatrolMeta.TYPE));
