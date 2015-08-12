@@ -1,6 +1,7 @@
 package org.wcs.smart.er.query.model;
 
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.Transient;
 
@@ -22,7 +23,7 @@ import org.wcs.smart.query.model.QueryColumn;
 public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		String surveyDesignKey = ((ISurveyQuery)query).getSurveyDesign();
 		

@@ -23,17 +23,15 @@ package org.wcs.smart.patrol.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 
 /**
@@ -98,17 +96,10 @@ public class PatrolGriddedQuery extends GriddedQuery {
 		q.setStyle(getStyle());
 		return q;
 	}
-
-	/**
-	 * Loads the query columns
-	 */
-	protected synchronized void initQueryColumns(){
-		
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IPatrolQueryColumnProvider.class).getQueryColumns(this);
-		
-		queryColumns = new ArrayList<QueryColumn>();
-		for (int i = 0; i < cols.length; i ++){
-			queryColumns.add(cols[i]);
-		}
+	
+	@Override
+	@Transient
+	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+		return IPatrolQueryColumnProvider.class;
 	}
 }

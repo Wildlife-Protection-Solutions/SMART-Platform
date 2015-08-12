@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.model;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -125,7 +126,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 			}
 		});
 		
-		List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
+		List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null);
 		columnViewer.setInput(cols.toArray());
 		columnViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
@@ -167,7 +168,7 @@ public abstract class AbstractColumnQueryPropertyProvider extends AbstractQueryP
 	 */
 	@Override
 	public String save(Query query, Session session){
-		List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns();
+		List<QueryColumn> cols = ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), session);
 		for (QueryColumn col : cols){
 			col.setVisible( columnViewer.getChecked(col) );
 		}

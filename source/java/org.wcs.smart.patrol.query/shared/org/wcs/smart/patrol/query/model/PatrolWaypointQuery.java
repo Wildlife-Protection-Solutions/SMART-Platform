@@ -23,18 +23,15 @@ package org.wcs.smart.patrol.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.common.model.WaypointQuery;
-import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
@@ -82,34 +79,7 @@ public class PatrolWaypointQuery extends WaypointQuery{
 	public String getTypeKey() {
 		return KEY;
 	}
-	@Override
-	protected synchronized void initQueryColumns() {
-		if (this.queryColumns != null){
-			return;
-		}
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IPatrolQueryColumnProvider.class).getQueryColumns(this);
-		
-		queryColumns = new ArrayList<QueryColumn>();
-		HashSet<String> visible = null;
-		if (visibleColumns != null){
-			String[] bits = visibleColumns.split(","); //$NON-NLS-1$
-			visible = new HashSet<String>();
-			for (int i = 0; i < bits.length; i ++){
-				visible.add(bits[i]);
-			}
-		}
-		for (int i = 0; i < cols.length; i ++){
-			queryColumns.add(cols[i]);
-			if (visible == null){
-				cols[i].setVisible(true);
-			}else if (visible.contains(cols[i].getKey())){
-				cols[i].setVisible(true);
-			}else{
-				cols[i].setVisible(false);
-			}
-		}
-		
-	}
+	
 	@Override
 	protected QueryFilter parseQueryFilter() throws Exception {
 		if (strQueryFilter == null || strQueryFilter.length() == 0){
@@ -124,5 +94,11 @@ public class PatrolWaypointQuery extends WaypointQuery{
 			queryFilter = myQuery;
 			return myQuery;
 		}
+	}
+
+	@Override
+	@Transient
+	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+		return IPatrolQueryColumnProvider.class;
 	}
 }

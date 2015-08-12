@@ -24,6 +24,7 @@ package org.wcs.smart.observation.query.map.geotools;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
@@ -128,7 +129,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(query.getQueryColumns(), true)); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
 		return type;
 	}
 	

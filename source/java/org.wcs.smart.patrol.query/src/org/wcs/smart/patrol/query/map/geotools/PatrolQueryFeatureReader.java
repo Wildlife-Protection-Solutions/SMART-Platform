@@ -23,6 +23,7 @@ package org.wcs.smart.patrol.query.map.geotools;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -105,7 +106,7 @@ public class PatrolQueryFeatureReader implements FeatureReader<SimpleFeatureType
 			NoSuchElementException {
 		
 		PatrolQueryResultItem next = (PatrolQueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createTrackFeature(next, query.getQueryColumns(), ftype);
+		SimpleFeature f = QueryResultItemFeature.createTrackFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
 		return f;
 	}
 	

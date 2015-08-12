@@ -21,37 +21,26 @@
  */
 package org.wcs.smart.query.common.model;
 
-import java.util.List;
 import java.util.Locale;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Transient;
-
 import org.hibernate.Session;
-import org.wcs.smart.query.model.IPagedQuery;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
- * A class to represent an waypoint query.
- * <p>Waypoint queries query all observations at a
- * given waypoint.</p>  Also known as incident queries.
- * 
+ * Column provider for patrol query.
  * @author Emily
- * @since 1.0.0
+ *
  */
-@Entity
-@Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
-public abstract class WaypointQuery extends SimpleQuery  implements IPagedQuery{
-		
-	/**
-	 * Creates a new observation query with the default
-	 * conservation area filter and no date filter
-	 */
-	protected WaypointQuery(){
-		super();
-	}
-	
+public interface IQueryColumnProvider {
 
+	/**
+	 * Get default columns for query.
+	 * 
+	 * @param queryTypeKey
+	 * @return
+	 */
+	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session);
+	
+	
 }

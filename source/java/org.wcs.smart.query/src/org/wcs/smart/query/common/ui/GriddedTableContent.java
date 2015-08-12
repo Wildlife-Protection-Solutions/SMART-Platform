@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import java.util.Collection;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -91,7 +92,7 @@ public class GriddedTableContent {
 	public void initValues(GriddedQuery query) {
 		setQueryName(query);
 		resultsTable.initQuery(query);
-		resultsTable.updateVisible(query.getQueryColumns());
+		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null));
 	}
 	
 	public void setQueryName(GriddedQuery query){

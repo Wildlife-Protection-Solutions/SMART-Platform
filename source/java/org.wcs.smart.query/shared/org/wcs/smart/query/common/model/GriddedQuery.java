@@ -23,7 +23,9 @@ package org.wcs.smart.query.common.model;
 
 import java.awt.Point;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,6 +34,7 @@ import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
 import org.geotools.referencing.CRS;
+import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.model.Query;
@@ -59,7 +62,7 @@ public abstract class GriddedQuery extends StyledQuery {
 	@Transient
 	protected DateFilter dateFilter;		//temp date filter
 	@Transient
-	protected List<QueryColumn> queryColumns = null;	//parsed query columns
+	protected volatile List<QueryColumn> queryColumns = null;	//parsed query columns
 	@Transient
 	protected CoordinateReferenceSystem crs;	//parsed crs definition
 	
@@ -166,18 +169,19 @@ public abstract class GriddedQuery extends StyledQuery {
 	 * @return the columns associated with the query
 	 */
 	@Transient
-	public List<QueryColumn> getQueryColumns() {
-		if (this.queryColumns == null){
-			initQueryColumns();
+	public List<QueryColumn> getQueryColumns(Locale l, Session session) {
+		if (this.queryColumns != null) return queryColumns;
+		synchronized (this) {
+			if (this.queryColumns != null) return queryColumns;
+			QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
+			queryColumns = new ArrayList<QueryColumn>();
+			for (int i = 0; i < cols.length; i ++){
+				queryColumns.add(cols[i]);
+			}	
 		}
 		return this.queryColumns;
 	}
 
-	/**
-	 * Loads the query columns
-	 */
-	protected abstract void initQueryColumns();
-	
 	/**
 	 * Gets the grid size.
 	 * 
@@ -251,7 +255,11 @@ public abstract class GriddedQuery extends StyledQuery {
 		}
 	}
 
+	@Transient
 	protected abstract GridQueryDefinition parseQuery() throws Exception ;
+	
+	@Transient
+	protected abstract Class<? extends IQueryColumnProvider> getColumnProviderClass();
 	
 	/**
 	 * @return the raster file name for the gridded query

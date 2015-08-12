@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.er.query.model;
 
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 
 /**
  * Column provider for survey queries.
@@ -30,13 +29,6 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public interface ISurveyQueryColumnProvider {
-	
-	/**
-	 * 
-	 * @param queryTypeKey survey query type key
-	 * @return
-	 */
-	public QueryColumn[] getQueryColumns(Query query);
+public interface ISurveyQueryColumnProvider extends IQueryColumnProvider{
 	
 }

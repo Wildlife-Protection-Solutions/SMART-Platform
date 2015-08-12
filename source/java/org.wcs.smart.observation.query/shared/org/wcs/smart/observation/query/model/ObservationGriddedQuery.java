@@ -23,18 +23,16 @@ package org.wcs.smart.observation.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.observation.query.model.columns.IObservationQueryColumnProvider;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 
 /**
@@ -101,19 +99,9 @@ public class ObservationGriddedQuery extends GriddedQuery {
 		return q;
 	}
 
-
-	/**
-	 * Loads the query columns
-	 */
 	@Override
-	protected void initQueryColumns(){
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IObservationQueryColumnProvider.class).getQueryColumns(this);
-		
-		queryColumns = new ArrayList<QueryColumn>();
-		for (int i = 0; i < cols.length; i ++){
-			queryColumns.add(cols[i]);
-		}
+	@Transient
+	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+		return IObservationQueryColumnProvider.class;
 	}
-	
-
 }

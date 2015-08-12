@@ -21,23 +21,14 @@
  */
 package org.wcs.smart.patrol.query.model;
 
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 
 /**
  * Column provider for patrol query.
  * @author Emily
  *
  */
-public interface IPatrolQueryColumnProvider {
-
-	/**
-	 * Get default columns for query.
-	 * 
-	 * @param queryTypeKey
-	 * @return
-	 */
-	public QueryColumn[] getQueryColumns(Query query);
+public interface IPatrolQueryColumnProvider extends IQueryColumnProvider{
 	
 	
 }

@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.patrol.query.model.observation;
 
+import java.util.Locale;
+
+import org.hibernate.Session;
 import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
@@ -38,7 +41,7 @@ import org.wcs.smart.query.model.QueryColumn;
 public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		if (queryTypeKey.equals(PatrolObservationQuery.KEY)){
 			return PatrolQueryColumnCache.getInstance().getObservationQueryColumns();

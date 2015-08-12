@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -323,7 +324,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					SimpleQuery q = getQueryInternal();
-					q.getQueryColumns();
+					q.getQueryColumns(Locale.getDefault(), null);
 					
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 

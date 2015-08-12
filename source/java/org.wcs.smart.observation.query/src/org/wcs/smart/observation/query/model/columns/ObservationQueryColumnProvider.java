@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.observation.query.model.columns;
 
+import java.util.Locale;
+
+import org.hibernate.Session;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
@@ -36,7 +39,7 @@ import org.wcs.smart.query.model.QueryColumn;
 public class ObservationQueryColumnProvider implements IObservationQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		if (queryTypeKey.equals(ObsObservationQuery.KEY)){
 			return ObservationQueryColumnCache.getInstance().getObservationQueryColumns();

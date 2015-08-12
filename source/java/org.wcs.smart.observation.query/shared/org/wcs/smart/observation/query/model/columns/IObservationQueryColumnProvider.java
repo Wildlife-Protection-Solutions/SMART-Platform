@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.observation.query.model.columns;
 
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 
 /**
  * Column provider for all data queries.
@@ -30,9 +29,6 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public interface IObservationQueryColumnProvider {
-
-	public QueryColumn[] getQueryColumns(Query query);
-	
+public interface IObservationQueryColumnProvider extends IQueryColumnProvider{
 	
 }

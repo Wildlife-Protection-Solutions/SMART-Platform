@@ -23,19 +23,17 @@ package org.wcs.smart.er.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.parser.Parser;
 import org.wcs.smart.query.common.model.GriddedQuery;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
 
 /**
@@ -46,7 +44,6 @@ import org.wcs.smart.query.model.summary.GridQueryDefinition;
 @Entity
 @Table(name="smart.survey_gridded_query")
 public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
-	private Object LOCK = new Object();
 	
 	protected String surveyDesignKey;
 
@@ -104,18 +101,6 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 	}
 
 	/**
-	 * Loads the query columns
-	 */
-	protected synchronized void initQueryColumns(){
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(ISurveyQueryColumnProvider.class).getQueryColumns(this);
-		
-		queryColumns = new ArrayList<QueryColumn>();
-		for (int i = 0; i < cols.length; i ++){
-			queryColumns.add(cols[i]);
-		}
-	}
-	
-	/**
 	 * Sets the query string.  At this point the
 	 * filter is not parsed.
 	 * 
@@ -124,7 +109,7 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 	 */
 	public void setSurveyDesign(String key){
 		this.surveyDesignKey = key;
-		synchronized (LOCK) {
+		synchronized (this) {
 			this.queryColumns = null;	
 		}
 		
@@ -147,4 +132,9 @@ public class SurveyGriddedQuery extends GriddedQuery implements ISurveyQuery{
 		}
 	}
 
+	@Override
+	@Transient
+	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+		return ISurveyQueryColumnProvider.class;
+	}
 }

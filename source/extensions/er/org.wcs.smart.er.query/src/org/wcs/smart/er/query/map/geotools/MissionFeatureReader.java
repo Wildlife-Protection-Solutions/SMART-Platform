@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.map.geotools;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -126,11 +127,11 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 			Object n = this.fIterator.next();
 			if (n instanceof SurveyQueryResultItem){
 				SurveyQueryResultItem next = (SurveyQueryResultItem) n;
-				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, query.getQueryColumns(), ftype);
+				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
 				return f;
 			}else if (n instanceof MissionTrackResultItem){
 				MissionTrackResultItem next = (MissionTrackResultItem) n;
-				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, session, query.getQueryColumns(), ftype);
+				SimpleFeature f = SurveyResultItemFeature.createTrackFeature(next, session, query.getQueryColumns(Locale.getDefault(), null), ftype);
 				return f;
 			}
 		}

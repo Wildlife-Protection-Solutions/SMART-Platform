@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.geotools.data.DataStore;
@@ -153,11 +154,11 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		this.query = ((SimpleQuery)query);
 		
 		if (results instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet)results, ((SimpleQuery)query).getQueryColumns(), file);
+			super.setData((IPagedQueryResultSet)results, ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}else if (results instanceof MemoryQueryResult){
-			super.setData(((MemoryQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(), file);
+			super.setData(((MemoryQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}else if (results instanceof GridQueryResult){
-			super.setData(((GridQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(), file);
+			super.setData(((GridQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}
 		super.export(monitor);
 		

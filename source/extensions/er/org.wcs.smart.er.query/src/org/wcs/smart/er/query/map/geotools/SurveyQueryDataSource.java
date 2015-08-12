@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.map.geotools;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
@@ -150,7 +151,7 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(query.getQueryColumns(), true)); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType(FEATURETYPE_PREFIX + "." + WAYPOINT_TYPE, getWaypointFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
 		return type;
 	}
 	
@@ -160,7 +161,7 @@ public class SurveyQueryDataSource extends AbstractDataStore{
 	}
 	
 	private SimpleFeatureType createTrackSchema() throws SchemaException{
-		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns(), true)); //$NON-NLS-1$
+		SimpleFeatureType type = DataUtilities.createType(FEATURETYPE_PREFIX + "." + TRACKS_TYPE, getTrackFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
 		return type;
 	}
 	

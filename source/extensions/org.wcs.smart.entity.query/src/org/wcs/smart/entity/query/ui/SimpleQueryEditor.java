@@ -24,6 +24,7 @@ package org.wcs.smart.entity.query.ui;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -155,7 +156,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 		
 			Set<String> includedTypes = new HashSet<String>();
 			List<QueryColumn> remove = new ArrayList<QueryColumn>();
-			for (QueryColumn c : q.getQueryColumns()){
+			for (QueryColumn c : q.getQueryColumns(Locale.getDefault(), null)){
 				if (c instanceof EntityAttributeQueryColumn){
 					EntityAttributeQueryColumn col = (EntityAttributeQueryColumn) c;
 					String entityKey = col.getEntityKey();
@@ -168,7 +169,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 				}
 			}
 		
-			boolean mod = q.getQueryColumns().removeAll(remove);
+			boolean mod = q.getQueryColumns(Locale.getDefault(), null).removeAll(remove);
 			entityTypes.removeAll(includedTypes);
 			Session session = HibernateManager.openSession();
 			try{
@@ -176,7 +177,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 					EntityType et = EntityHibernateManager.getEntityType(entityType, session);
 					for (EntityAttribute ea : et.getAttributes()){
 						EntityAttributeQueryColumn newcol = new EntityAttributeQueryColumn("[" + et.getName() + "]" + ea.getName(), et.getKeyId(), ea.getKeyId(), ea.getDmAttribute().getType()); //$NON-NLS-1$ //$NON-NLS-2$
-						q.getQueryColumns().add(newcol);
+						q.getQueryColumns(Locale.getDefault(), null).add(newcol);
 						mod = true;
 					}
 				}

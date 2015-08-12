@@ -23,22 +23,18 @@ package org.wcs.smart.intelligence.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryColumnProvider;
 import org.wcs.smart.intelligence.query.parser.Parser;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
@@ -52,83 +48,12 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 @Table(name="smart.intel_record_query")
 public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 	
-	private List<QueryColumn> queryColumns = null;
 	public static final String KEY = "intelligencerecord"; //$NON-NLS-1$
 	
 	@Transient
 	@Override
 	public String getTypeKey() {
 		return KEY;
-	}
-
-	/**
-	 * Updates the visible columns based 
-	 * on the isVisible field of the associated
-	 * QueryColumn columns.
-	 */
-	@Transient
-	@Override
-	public void updateVisibleColumns(){
-		StringBuilder sb = new StringBuilder();
-		boolean all = true;
-		for (QueryColumn col : queryColumns){
-			if (col.isVisible() ){
-				sb.append(col.getKey());
-				sb.append(","); //$NON-NLS-1$
-			}else{
-				all = false;
-			}
-		}
-		if (!all){
-			if (sb.length() > 0){
-				sb.deleteCharAt(sb.length() - 1);
-			}
-			setVisibleColumns(sb.toString());
-		}else{
-			setVisibleColumns(null);
-		}
-	}
-	
-	/**
-	 * @return list of output columns available to the query.
-	 */
-	@Transient
-	public List<QueryColumn> getQueryColumns(){
-		if (this.queryColumns == null){
-			initQueryColumns();
-		}
-		return this.queryColumns;
-	}
-	
-	/**
-	 * Loads the query columns
-	 */
-	private synchronized void initQueryColumns(){
-		if (this.queryColumns != null){
-			return;
-		}
-		
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IIntelligenceQueryColumnProvider.class).getQueryColumns(this); 
-		
-		queryColumns = new ArrayList<QueryColumn>();
-		HashSet<String> visible = null;
-		if (visibleColumns != null){
-			String[] bits = visibleColumns.split(","); //$NON-NLS-1$
-			visible = new HashSet<String>();
-			for (int i = 0; i < bits.length; i ++){
-				visible.add(bits[i]);
-			}
-		}
-		for (int i = 0; i < cols.length; i ++){
-			queryColumns.add(cols[i]);
-			if (visible == null){
-				cols[i].setVisible(true);
-			}else if (visible.contains(cols[i].getKey())){
-				cols[i].setVisible(true);
-			}else{
-				cols[i].setVisible(false);
-			}
-		}
 	}
 
 	@Override
@@ -163,5 +88,11 @@ public class IntelligenceRecordQuery extends SimpleQuery implements IPagedQuery{
 		q.setVisibleColumns(getVisibleColumns());
 		q.setStyle(getStyle());
 		return q;
+	}
+
+	@Override
+	@Transient
+	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+		return IIntelligenceQueryColumnProvider.class;
 	}
 }

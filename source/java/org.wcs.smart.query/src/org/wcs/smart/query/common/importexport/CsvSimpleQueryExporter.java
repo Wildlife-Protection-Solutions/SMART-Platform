@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
@@ -149,13 +150,13 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 			}catch(Exception ex){}
 		}
 		if (result instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet)result, ((SimpleQuery)query).getQueryColumns(), file);
+			super.setData((IPagedQueryResultSet)result, ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}else if (result instanceof MemoryQueryResult){
 			super.setData( ((MemoryQueryResult)result).getData(), 
-					((SimpleQuery)query).getQueryColumns(), file);
+					((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}else if (result instanceof GridQueryResult){
 			super.setData( ((GridQueryResult)result).getData(), 
-					((SimpleQuery)query).getQueryColumns(), file);
+					((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}
 		super.export(monitor);		
 	}

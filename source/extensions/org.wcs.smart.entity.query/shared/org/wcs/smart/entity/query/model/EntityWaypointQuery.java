@@ -23,19 +23,16 @@ package org.wcs.smart.entity.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.common.model.WaypointQuery;
-import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 
@@ -52,36 +49,6 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 public class EntityWaypointQuery extends WaypointQuery {
 	public static final String KEY = "entitywaypoint"; //$NON-NLS-1$
 
-	/**
-	 * Loads the query columns
-	 */
-	protected synchronized void initQueryColumns(){
-		if (queryColumns != null){
-			return;
-		}
-		QueryColumn[] cols = SmartContext.INSTANCE.getClass(IEntityQueryColumnProvider.class).getQueryColumns(this);
-		
-		queryColumns = new ArrayList<QueryColumn>();
-		HashSet<String> visible = null;
-		if (visibleColumns != null){
-			String[] bits = visibleColumns.split(","); //$NON-NLS-1$
-			visible = new HashSet<String>();
-			for (int i = 0; i < bits.length; i ++){
-				visible.add(bits[i]);
-			}
-		}
-		for (int i = 0; i < cols.length; i ++){
-			queryColumns.add(cols[i]);
-			if (visible == null){
-				cols[i].setVisible(true);
-			}else if (visible.contains(cols[i].getKey())){
-				cols[i].setVisible(true);
-			}else{
-				cols[i].setVisible(false);
-			}
-		}
-	}
-	
 	/**
 	 * 
 	 * @see java.lang.Object#clone()
@@ -124,5 +91,11 @@ public class EntityWaypointQuery extends WaypointQuery {
 			queryFilter = myQuery;
 			return myQuery;
 		}
+	}
+	
+	@Override
+	@Transient
+	protected Class<? extends IQueryColumnProvider> getColumnProviderClass() {
+		return IEntityQueryColumnProvider.class;
 	}
 }

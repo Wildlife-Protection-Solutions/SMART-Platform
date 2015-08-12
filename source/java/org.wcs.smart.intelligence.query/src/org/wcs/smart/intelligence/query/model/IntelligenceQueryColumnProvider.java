@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
+import java.util.Locale;
+
+import org.hibernate.Session;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryColumnProvider;
 import org.wcs.smart.intelligence.query.internal.IntelligenceQueryColumnCache;
 import org.wcs.smart.query.model.Query;
@@ -36,7 +39,7 @@ public class IntelligenceQueryColumnProvider implements
 		IIntelligenceQueryColumnProvider {
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
 		if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){
 			return IntelligenceQueryColumnCache.getInstance().getIntelligenceRecordQueryColumns();
 		}

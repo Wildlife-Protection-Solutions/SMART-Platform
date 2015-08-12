@@ -21,8 +21,7 @@
  */
 package org.wcs.smart.intelligence.query;
 
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.common.model.IQueryColumnProvider;
 
 /**
  * Column provider for intelligence queries.
@@ -30,15 +29,6 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public interface IIntelligenceQueryColumnProvider {
-
-	/**
-	 * Returns a default set of query columns for a given query type.
-	 * 
-	 * @param queryTypeKey
-	 * @return
-	 */
-	public QueryColumn[] getQueryColumns(Query query);
-	
+public interface IIntelligenceQueryColumnProvider extends IQueryColumnProvider{
 	
 }

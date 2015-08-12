@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.query.common.model;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -29,6 +32,8 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.StyledQuery;
@@ -59,7 +64,8 @@ public abstract class SimpleQuery extends StyledQuery {
 	/* transient fieldss */
 	protected QueryFilter queryFilter;	//cached copy of the parsed query
 	private DateFilter dateFilter;
-	
+	@Transient
+	protected volatile List<QueryColumn> queryColumns = null;
 	
 	/**
 	 * Creates a new waypoint query with the default
@@ -106,22 +112,33 @@ public abstract class SimpleQuery extends StyledQuery {
 		return this.strQueryFilter;
 	}
 	
-	/**
-	 * May call the database, so if performance important
-	 * need to call inside job
-	 * @return list of output columns available to the query.
-	 */
-	@Transient
-	public abstract List<QueryColumn> getQueryColumns();
 
-	
 	/**
 	 * Updates the visible columns based 
 	 * on the isVisible field of the associated
 	 * WaypointQueryColumn columns.
 	 */
 	@Transient
-	public abstract void updateVisibleColumns();
+	public void updateVisibleColumns(){
+		StringBuilder sb = new StringBuilder();
+		boolean all = true;
+		for (QueryColumn col : queryColumns){
+			if (col.isVisible() ){
+				sb.append(col.getKey());
+				sb.append(","); //$NON-NLS-1$
+			}else{
+				all = false;
+			}
+		}
+		if (!all){
+			if (sb.length() > 0){
+				sb.deleteCharAt(sb.length() - 1);
+			}
+			setVisibleColumns(sb.toString());
+		}else{
+			setVisibleColumns(null);
+		}
+	}
 	
 	
 	/**
@@ -207,4 +224,40 @@ public abstract class SimpleQuery extends StyledQuery {
 		setConservationAreaFilter(q.getConservationAreaFilter());
 	}
 	
+	
+	@Transient
+	public List<QueryColumn> getQueryColumns(Locale l, Session session){
+		if (queryColumns != null) return queryColumns;
+		
+		synchronized (this) {
+			if (queryColumns != null) return queryColumns;
+			
+			QueryColumn[] cols = SmartContext.INSTANCE.getClass(getColumnProviderClass()).getQueryColumns(this, l, session);
+			
+			queryColumns = new ArrayList<QueryColumn>();
+			HashSet<String> visible = null;
+			if (visibleColumns != null){
+				String[] bits = visibleColumns.split(","); //$NON-NLS-1$
+				visible = new HashSet<String>();
+				for (int i = 0; i < bits.length; i ++){
+					visible.add(bits[i]);
+				}
+			}
+			for (int i = 0; i < cols.length; i ++){
+				queryColumns.add(cols[i]);
+				if (visible == null){
+					cols[i].setVisible(true);
+				}else if (visible.contains(cols[i].getKey())){
+					cols[i].setVisible(true);
+				}else{
+					cols[i].setVisible(false);
+				}
+			}
+		}
+		return queryColumns;
+		
+	}
+	
+	@Transient
+	protected abstract Class<? extends IQueryColumnProvider> getColumnProviderClass();
 }

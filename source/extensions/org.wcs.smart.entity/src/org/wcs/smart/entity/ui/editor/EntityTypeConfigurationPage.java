@@ -725,7 +725,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			//display add attribute dialog 1
 			DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), Collections.<Category>emptyList(), dmAttributes);
 			AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
-				null, tmpDm, SmartDB.getCurrentLanguage()){
+				null, tmpDm, SmartDB.getCurrentLanguage(), s){
 			
 				@Override
 				protected void buttonPressed(int buttonId) {

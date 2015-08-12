@@ -24,6 +24,7 @@ package org.wcs.smart.entity.query.model.columns;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -56,7 +57,7 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 
 	@Override
-	public QueryColumn[] getQueryColumns(Query query) {
+	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
 		String queryTypeKey = query.getTypeKey();
 		if (queryTypeKey.equals(EntityObservationQuery.KEY)){
 			QueryColumn[] col = EntityQueryColumnCache.getInstance().getObservationQueryColumns();

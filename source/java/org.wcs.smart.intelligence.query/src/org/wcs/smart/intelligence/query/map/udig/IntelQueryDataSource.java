@@ -102,7 +102,7 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		if (type == null){
 			try {
 				if (typeName.equals(INTEL_TYPE)) {
-					type = createIntelligenceRecordSchema(query.getQueryColumns());
+					type = createIntelligenceRecordSchema(query.getQueryColumns(Locale.getDefault(), null));
 				} 
 			}catch(SchemaException ex){
 				throw new IOException(Messages.IntelQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);

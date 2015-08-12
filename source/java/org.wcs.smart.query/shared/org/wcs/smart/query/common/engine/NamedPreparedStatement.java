@@ -46,7 +46,7 @@ import java.util.UUID;
 public class NamedPreparedStatement {
     
 	/** The statement this object is wrapping. */
-    private final PreparedStatement statement;
+    protected final PreparedStatement statement;
 
     /** Maps parameter names to arrays of ints which are the parameter indices. */
     private final Map<String, List<Integer>> indexMap;
@@ -130,7 +130,7 @@ public class NamedPreparedStatement {
      * @return parameter indexes
      * @throws IllegalArgumentException if the parameter does not exist
      */
-    private Collection<Integer> getIndexes(String name) {
+    protected Collection<Integer> getIndexes(String name) {
     	List<Integer> indexes = indexMap.get(name);
         if(indexes==null) {
             throw new IllegalArgumentException("Parameter not found: " + name); //$NON-NLS-1$

@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.map.geotools;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 import org.geotools.data.FeatureReader;
@@ -106,7 +107,7 @@ public class SurveyFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		SurveyQueryResultItem next = (SurveyQueryResultItem) this.fIterator.next();
-		SimpleFeature f = SurveyResultItemFeature.createObservationFeature(next, query.getQueryColumns(), ftype);
+		SimpleFeature f = SurveyResultItemFeature.createObservationFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
 		return f;
 	}
 	

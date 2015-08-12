@@ -23,6 +23,7 @@ package org.wcs.smart.query.common.ui;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -109,7 +110,7 @@ public abstract class QueryResultsTable {
 						if (table.getTable().isDisposed()){
 							return;
 						}
-						List<QueryColumn> cols = query.getQueryColumns();
+						List<QueryColumn> cols = query.getQueryColumns(Locale.getDefault(), null);
 						tableViewerColumns = createColumns(table,cols);
 						table.refresh(true);
 					}
@@ -136,7 +137,7 @@ public abstract class QueryResultsTable {
 						if (table.getTable().isDisposed()){
 							return;
 						}
-						tableViewerColumns = createColumns(table,query.getQueryColumns());
+						tableViewerColumns = createColumns(table,query.getQueryColumns(Locale.getDefault(), null));
 						table.refresh(true);
 					}
 				});
