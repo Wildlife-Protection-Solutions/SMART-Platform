@@ -435,6 +435,11 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 	}
 	
 
+	/**
+	 * Label provider for details panel fields
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
 	private class EditorContentLabelProvider {
 
 		private CTPatrolUIMeta column;
