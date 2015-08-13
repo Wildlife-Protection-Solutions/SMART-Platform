@@ -236,9 +236,16 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				this.mission = (Mission) session.load(Mission.class, muuid);
 				missionDates = new Date[]{new Date(mission.getStartDate().getTime()), new Date(mission.getEndDate().getTime())};
 				//load mission items so don't have lazy loading issues later.
+				
 				for (MissionDay md : mission.getMissionDays()){
-					md.getWaypoints().size();
 					md.getTracks().size();
+					try{
+						for (SurveyWaypoint wp : md.getWaypoints()){
+							ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+						}
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+					}
 				}
 
 				this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();

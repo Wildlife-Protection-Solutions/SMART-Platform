@@ -24,10 +24,13 @@ package org.wcs.smart.observation;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.observation.model.WaypointObservation;
 
 /**
  * Extension of the smart hibernate manager for observation related data.
@@ -65,6 +68,25 @@ public class ObservationHibernateManager extends HibernateManager{
 		return null;
 	}
 
+
+	public static void computeAttachmentLocations(Waypoint wp, Session session) throws Exception{
+		if (wp.getAttachments() != null){
+			for (ISmartAttachment a : wp.getAttachments()){
+				a.computeFileLocation(session);
+			}
+		}
+		if (wp.getObservations() != null){
+			for (WaypointObservation wo : wp.getObservations()){
+				if (wo.getAttachments() != null){
+					for (ISmartAttachment a : wo.getAttachments()){
+						a.computeFileLocation(session);
+					}
+				}
+			}
+		}
+	}
+		
+		
 	public static Projection getCurrentViewProjection() {
 		Session s = HibernateManager.openSession();
 		try {

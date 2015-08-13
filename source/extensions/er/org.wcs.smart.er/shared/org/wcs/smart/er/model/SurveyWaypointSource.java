@@ -24,16 +24,13 @@ package org.wcs.smart.er.model;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.er.EcologicalRecordsPlugIn;
-import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.hibernate.StatelessSession;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.UuidUtils;
@@ -54,14 +51,17 @@ public class SurveyWaypointSource implements IWaypointSource{
 	}
 
 	@Override
-	public String getName() {
-		return Messages.SurveyWaypointSource_Name;
+	public String getName(Locale l) {
+		return SmartContext.INSTANCE.getClass(IErLabelProvider.class).getLabel(this, l);
 	}
 
 	@Override
-	public String getDatastoreFileLocation(Object object) {
+	public String getDatastoreFileLocation(Object object, Session session) throws Exception {
+		if (object instanceof Mission){
+			return getDatastoreFileLocation((Mission)object);
+		}
 		if (!(object instanceof Waypoint)){
-			throw new IllegalStateException(MessageFormat.format("Object type {0} not supported for survey waypoint source attachments", object.getClass().getName()));
+			throw new Exception(MessageFormat.format("Object type {0} not supported for survey waypoint source attachments", object.getClass().getName())); //$NON-NLS-1$
 		}
 		final Waypoint wp = (Waypoint)object;
 		if (wp.getUuid() == null){
@@ -70,39 +70,29 @@ public class SurveyWaypointSource implements IWaypointSource{
 		//need to determine the patrol this waypoint is associated
 		//with; do in a different thread so we can have our own database
 		//connection
-		final String[] surveyDir = new String[]{null};
-		Job j = new Job("get datastore location"){ //$NON-NLS-1$
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
-					List<?> pws = s.createCriteria(SurveyWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).list(); //$NON-NLS-1$
-					if (pws.size() > 0){
-						surveyDir[0] = UuidUtils.getDirectoryPath(((SurveyWaypoint)pws.get(0)).getMissionDay().getMission().getUuid());
-					}else{
-						EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + UuidUtils.uuidToString(wp.getUuid()), null);
-					}
-				}finally{
-					s.close();
-				}
-				return Status.OK_STATUS;
-			}};
-		j.setSystem(true);
-		j.schedule();
+		String missionDir = null;
+		StatelessSession temp = session.getSessionFactory().openStatelessSession();
+		try{
+			Query q = temp.createQuery("SELECT m.uuid from Mission m join m.missionDays md join md.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
+			q.setParameter("wp", wp); //$NON-NLS-1$
+	
+			List<?> pws = q.list();
 		
-		try {
-			j.join();
-		} catch (InterruptedException e) {
-			EcologicalRecordsPlugIn.log(Messages.SurveyWaypointSource_WaypointNotFound + UuidUtils.uuidToString(wp.getUuid()), null);
-			return null;
+			if (pws.size() > 0){
+				UUID uuid = (UUID) pws.get(0);
+				missionDir = UuidUtils.getDirectoryPath(uuid);
+			}else{
+				throw new Exception("Could not determine attached location for survey waypoint attachment. " + wp.getUuid().toString()); //$NON-NLS-1$
+			}
+		}finally{
+			temp.close();
 		}
-			
+
 		StringBuilder sb = new StringBuilder();
 		sb.append(SurveyDesign.SURVEY_FILESTORE_LOC);
 		sb.append(File.separator);
-		if (surveyDir[0] != null){
-			sb.append(surveyDir[0]);
+		if (missionDir != null){
+			sb.append(missionDir);
 			sb.append(File.separator);
 		}
 		

@@ -26,6 +26,7 @@ import java.io.Serializable;
 import org.hibernate.type.Type;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
 import org.wcs.smart.common.attachment.ISmartAttachment;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
@@ -68,7 +69,8 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 					if (wp.getWaypoint().getAttachments() != null){
 						for (ISmartAttachment att : wp.getWaypoint().getAttachments()){
 							try {
-								toDelete.add(att.getFullFile());
+								att.computeFileLocation(HibernateManager.openSession());
+								toDelete.add(att.getAttachmentFile());
 							} catch (Exception e) {
 								SmartPatrolPlugIn.log(e.getMessage(), e);
 							}
@@ -79,7 +81,8 @@ public class WaypointAttachmentInterceptor extends AttachmentInterceptor {
 							if (wo.getAttachments()!= null){
 								for (ObservationAttachment att : wo.getAttachments()){
 									try {
-										toDelete.add(att.getFullFile());
+										att.computeFileLocation(HibernateManager.openSession());
+										toDelete.add(att.getAttachmentFile());
 									} catch (Exception e) {
 										SmartPatrolPlugIn.log(e.getMessage(), e);
 									}

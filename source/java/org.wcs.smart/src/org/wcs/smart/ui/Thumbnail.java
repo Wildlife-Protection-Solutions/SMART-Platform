@@ -100,12 +100,12 @@ public class Thumbnail {
 	 */
 	private void loadImageData() throws Exception{
 		try {
-			if (attachment.getFullFile().length() > 200 * Math.pow(10, 6)) {
+			if (attachment.getAttachmentFile().length() > 200 * Math.pow(10, 6)) {
 				// skip images > 200MB
 				return;
 			}
 
-			Image rawImage = new Image(Display.getDefault(), attachment.getFullFile()
+			Image rawImage = new Image(Display.getDefault(), attachment.getAttachmentFile()
 					.getAbsolutePath());
 
 			//scale image
@@ -145,7 +145,7 @@ public class Thumbnail {
 		if (image == null){	
 			Label lbl = new Label(c, SWT.WRAP);
 			try{
-				lbl.setText(attachment.getFullFile().getName());
+				lbl.setText(attachment.getAttachmentFile().getName());
 			}catch (Exception ex){
 				SmartPlugIn.log(ex.getMessage(), ex);
 			}

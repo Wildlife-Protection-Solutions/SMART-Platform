@@ -69,11 +69,11 @@ import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.TableInfo;
 import org.wcs.smart.util.I18nUtil;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Hibernate manager to manage database connections.
@@ -112,6 +112,7 @@ public class HibernateManager extends SmartHibernateManager{
 		Session session = SmartHibernateManager.openSession(interceptor);
 		return session;
 	}
+	
 	/**
 	 * 
 	 * @return the language for the given code associated with the conservation area

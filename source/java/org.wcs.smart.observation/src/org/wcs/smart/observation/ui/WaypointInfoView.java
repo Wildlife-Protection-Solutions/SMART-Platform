@@ -168,7 +168,7 @@ public class WaypointInfoView {
 							}
 							for (ObservationAttachment att: wo.getAttachments()){
 								try{
-									att.getFullFile();
+									att.computeFileLocation(s);
 									dd.attchmentFileNames.add(att);
 								}catch (Exception ex){
 									ObservationPlugIn.log(ex.getMessage(), ex);
@@ -181,7 +181,7 @@ public class WaypointInfoView {
 					if (currentWp.getAttachments() != null){
 						for(WaypointAttachment att: currentWp.getAttachments()){
 							try{
-								att.getFullFile();
+								att.computeFileLocation(s);
 							}catch (Exception ex){
 								ObservationPlugIn.log(ex.getMessage(), ex);
 							}

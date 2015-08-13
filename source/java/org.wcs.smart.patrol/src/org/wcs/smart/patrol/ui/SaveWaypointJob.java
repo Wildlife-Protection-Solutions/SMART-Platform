@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolEventManager;
@@ -81,8 +82,7 @@ public class SaveWaypointJob extends Job {
 				if (wp.getWaypoint().getObservations() != null) {
 					for (WaypointObservation wo : wp.getWaypoint().getObservations()) {
 						List<WaypointObservationAttribute> toDelete = new ArrayList<WaypointObservationAttribute>();
-						for (WaypointObservationAttribute att : wo
-								.getAttributes()) {
+						for (WaypointObservationAttribute att : wo.getAttributes()) {
 							if (!att.hasValue()) {
 								toDelete.add(att);
 							}
@@ -90,8 +90,11 @@ public class SaveWaypointJob extends Job {
 						wo.getAttributes().removeAll(toDelete);
 					}
 				}
+				ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
 			}
 			saveSession.getTransaction().commit();
+			
+			
 		} catch (Exception ex) {
 			if (saveSession.getTransaction().isActive()) {
 				saveSession.getTransaction().rollback();

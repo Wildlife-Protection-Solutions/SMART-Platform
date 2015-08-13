@@ -23,18 +23,15 @@ package org.wcs.smart.patrol.model;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
+import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.hibernate.HibernateManager;
+import org.hibernate.StatelessSession;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -57,8 +54,8 @@ public class PatrolWaypointSource implements IWaypointSource {
 	}
 
 	@Override
-	public String getName() {
-		return Messages.PatrolWaypointSource_PatrolWaypointSourceName;
+	public String getName(Locale l) {
+		return SmartContext.INSTANCE.getClass(IPatrolLabelProvider.class).getLabel(this, l);
 	}
 
 	public String getDatastoreFileLocation(Patrol p){
@@ -71,55 +68,42 @@ public class PatrolWaypointSource implements IWaypointSource {
 	}
 	
 	@Override
-	public String getDatastoreFileLocation(Object source) {
+	public String getDatastoreFileLocation(Object source, Session session) throws Exception{
 		if (source instanceof Waypoint){
-			return getDatastoreFileLocation((Waypoint)source);
+			return getDatastoreFileLocation((Waypoint)source, session);
 		}else if (source instanceof Patrol){
 			return getDatastoreFileLocation((Patrol)source);
 		}
 		return null;
 	}
 	
-	public String getDatastoreFileLocation(final Waypoint wp) {
+	public String getDatastoreFileLocation(final Waypoint wp, Session session)  throws Exception{
 		if (wp.getUuid() == null){
 			return null;
 		}
-		//need to determine the patrol this waypoint is associated
-		//with; do in a different thread so we can have our own database
-		//connection
-		final String[] patrolDir = new String[]{null};
-		Job j = new Job("get datastore location"){ //$NON-NLS-1$
-
-			@Override
-			protected IStatus run(IProgressMonitor monitor) {
-				Session s = HibernateManager.openSession();
-				try{
-					List<?> pws = s.createCriteria(PatrolWaypoint.class).add(Restrictions.eq("id.waypoint", wp)).list(); //$NON-NLS-1$
-					if (pws.size() > 0){
-						patrolDir[0] = UuidUtils.getDirectoryPath(((PatrolWaypoint)pws.get(0)).getPatrolLegDay().getPatrolLeg().getPatrol().getUuid());
-					}else{
-						SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + UuidUtils.uuidToString(wp.getUuid()), null);
-					}
-				}finally{
-					s.close();
-				}
-				return Status.OK_STATUS;
-			}};
-		j.setSystem(true);
-		j.schedule();
+		String patrolDir ;
+		StatelessSession temp = session.getSessionFactory().openStatelessSession();
+		try{
+			Query q = temp.createQuery("SELECT p.uuid from Patrol p join p.legs pl join pl.patrolLegDays pld join pld.waypoints wp where wp.id.waypoint = :wp "); //$NON-NLS-1$
+			q.setParameter("wp", wp); //$NON-NLS-1$
+	
+			List<?> pws = q.list();
 		
-		try {
-			j.join();
-		} catch (InterruptedException e) {
-			SmartPatrolPlugIn.log(Messages.PatrolWaypointSource_WaypointNotFoundError + UuidUtils.uuidToString(wp.getUuid()), null);
-			return null;
+			if (pws.size() > 0){
+				UUID uuid = (UUID) pws.get(0);
+				patrolDir = UuidUtils.getDirectoryPath(uuid);
+			}else{
+				throw new Exception("Could not determine attachment location for patrol waypoint: " + wp.getUuid().toString()); //$NON-NLS-1$
+			}
+		}finally{
+			temp.close();
 		}
 			
 		StringBuilder sb = new StringBuilder();
 		sb.append(Patrol.PATROL_FILESTORE_LOC);
 		sb.append(File.separator);
-		if (patrolDir[0] != null){
-			sb.append(patrolDir[0]);
+		if (patrolDir != null){
+			sb.append(patrolDir);
 			sb.append(File.separator);
 		}
 		

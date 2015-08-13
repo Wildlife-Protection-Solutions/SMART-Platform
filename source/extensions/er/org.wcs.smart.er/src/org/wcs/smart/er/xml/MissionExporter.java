@@ -42,6 +42,8 @@ import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.xml.model.missions.MissionType;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.SmartUtils;
 
@@ -82,7 +84,7 @@ public class MissionExporter {
 		Session session = HibernateManager.openSession();
 		try {
 			session.refresh(mission);
-			
+	
 			monitor.subTask(Messages.MissionExporter_1);
 			MissionType xml = MissionToXmlConverter.toXml(mission);
 			
@@ -91,6 +93,11 @@ public class MissionExporter {
 			if (!includeAttachments){
 				return exportMissionWithoutAttachments(xml, file, monitor);
 			}else{
+				for (MissionDay md : mission.getMissionDays()){
+					for (SurveyWaypoint wp : md.getWaypoints()){
+						ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+					}
+				}
 				return exportMissionWithAttachments(mission, xml, file, monitor);
 			}
 		} finally {
@@ -160,7 +167,7 @@ public class MissionExporter {
 				}
 			}
 			for (ISmartAttachment att : allAttach){
-				File attFile = att.getFullFile();
+				File attFile = att.getAttachmentFile();
 				zout.putNextEntry(new ZipEntry(MissionXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
 
 				

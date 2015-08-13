@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -410,6 +412,8 @@ public class PatrolHibernateManager extends HibernateManager{
 		if (saveWaypoints){
 			session.flush();
 		
+			IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+			
 			//save all the waypoints as well
 			if (patrol.getLegs() != null) {
 				for (PatrolLeg pl : patrol.getLegs()) {
@@ -420,21 +424,18 @@ public class PatrolHibernateManager extends HibernateManager{
 									if (wp.getWaypoint().getAttachments() != null){
 										//update all the waypoint attachments directory
 										for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-											wa.setDatastoreFolderExtension(
-												SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
-												.getSource(wp.getWaypoint().getSourceId())
-												.getDatastoreFileLocation(patrol), SmartDB.getCurrentConservationArea());
+											wa.computeFileLocation(new File(new File(
+													SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+													src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
 										}
 									}
 									if (wp.getWaypoint().getObservations() != null){
 										for (WaypointObservation wo : wp.getWaypoint().getObservations()){
 											if (wo.getAttachments() != null){
 												for (ObservationAttachment wa : wo.getAttachments()){
-													wa.setDatastoreFolderExtension(
-															SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
-															.getSource(wp.getWaypoint().getSourceId())
-															.getDatastoreFileLocation(patrol),
-															SmartDB.getCurrentConservationArea());
+													wa.computeFileLocation(new File(new File(
+															SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+															src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
 												}
 											}
 										}

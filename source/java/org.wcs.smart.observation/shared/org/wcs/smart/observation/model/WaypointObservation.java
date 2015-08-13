@@ -36,6 +36,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -128,7 +129,7 @@ public class WaypointObservation extends UuidItem {
 	 * Clones the waypoint observation object.  Does not
 	 * clone the uuid or the waypoint.
 	 */
-	public WaypointObservation clone(){
+	public WaypointObservation clone(Session session){
 		WaypointObservation clone = new WaypointObservation();
 		
 		clone.setCategory(getCategory());
@@ -153,7 +154,8 @@ public class WaypointObservation extends UuidItem {
 					File tmpLocation = File.createTempFile(
 							"smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
 					tmpLocation.deleteOnExit();
-					FileUtils.copyFile(sp.getFullFile(), tmpLocation);
+					sp.computeFileLocation(session);
+					FileUtils.copyFile(sp.getAttachmentFile(), tmpLocation);
 
 					att.setCopyFromLocation(tmpLocation);
 					att.setFilename(sp.getFilename());

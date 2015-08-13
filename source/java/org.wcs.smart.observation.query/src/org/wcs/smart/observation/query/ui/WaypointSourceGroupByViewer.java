@@ -26,13 +26,13 @@ public class WaypointSourceGroupByViewer extends AbstractGroupByViewer<WaypointS
 		List<ListItem> items = new ArrayList<ListItem>();
 		if (keys == null){
 			for(IWaypointSource src : WaypointSourceEngine.INSTANCE.getSupportedSources()){
-				items.add(new ListItem(null,src.getName(), src.getKey()));
+				items.add(new ListItem(null,src.getName(null), src.getKey()));
 			}
 		}else{
 			for (String k : keys){
 				IWaypointSource c = WaypointSourceEngine.INSTANCE.getSource(k);
 				if (c != null){
-					items.add(new ListItem(null, c.getName(), c.getKey()));
+					items.add(new ListItem(null, c.getName(null), c.getKey()));
 				}
 			}
 		}

@@ -19,37 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.observation.model;
+package org.wcs.smart.incident;
 
 import java.util.Locale;
 
-import org.hibernate.Session;
-
+import org.wcs.smart.incident.internal.Messages;
 /**
- * Interface representing a waypoint source.
+ * Label provider for independent incidents
  * 
  * @author Emily
  *
  */
-public interface IWaypointSource {
-
-	/**
-	 * The source key.  This key is stored in
-	 * the database.
-	 * @return
-	 */
-	public String getKey();
+public class IncidentLabelProvider implements IIncidentLabelProvider {
 	
-	/**
-	 * The full name of the waypoint source
-	 * @return
-	 */
-	public String getName(Locale l);
-	
-	/**
-	 * 
-	 * @param source the waypoint or other source object for finding the location
-	 * @return the location for sorting attachments associated with the waypoint
-	 */
-	public String getDatastoreFileLocation(Object source, Session session) throws Exception;
+	@Override
+	public String getLabel(Object item, Locale l) {
+		if (item instanceof IndepedentIncidentSource){
+			 return Messages.IndepedentIncidentSource_IndIncidentWaypointsourceName;
+		}
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

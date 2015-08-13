@@ -22,11 +22,12 @@
 package org.wcs.smart.incident;
 
 import java.io.File;
+import java.util.Locale;
 
-import org.wcs.smart.incident.internal.Messages;
+import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -62,15 +63,15 @@ public class IndepedentIncidentSource implements IWaypointSource {
 	 * @see org.wcs.smart.observation.model.IWaypointSource#getName()
 	 */
 	@Override
-	public String getName() {
-		return Messages.IndepedentIncidentSource_IndIncidentWaypointsourceName;
+	public String getName(Locale l) {
+		return SmartContext.INSTANCE.getClass(IIncidentLabelProvider.class).getLabel(this, l);
 	}
 
 	/**
 	 * @see org.wcs.smart.observation.model.IWaypointSource#getDatastoreFileLocation(org.wcs.smart.observation.model.Waypoint)
 	 */
 	@Override
-	public String getDatastoreFileLocation(Object wp) {
+	public String getDatastoreFileLocation(Object wp, Session session) throws Exception{
 		if (wp instanceof Waypoint){
 			StringBuilder sb = new StringBuilder();
 			sb.append(FILESTORE_LOC);
@@ -79,7 +80,7 @@ public class IndepedentIncidentSource implements IWaypointSource {
 			sb.append(File.separator);
 			return sb.toString();
 		}else{
-			throw new IllegalStateException("Object type " + wp.getClass().getName() + " not supported for idependent incident source."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new Exception("Object type " + wp.getClass().getName() + " not supported for idependent incident source."); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

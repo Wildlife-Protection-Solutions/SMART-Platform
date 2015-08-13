@@ -39,6 +39,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.Session;
 import org.hibernate.annotations.BatchSize;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -212,7 +213,7 @@ public class Waypoint extends UuidItem {
 		return text.toString();
 	}
 	
-	public Waypoint clone() {
+	public Waypoint clone(Session session) {
 		
 		Waypoint wp = new Waypoint();
 
@@ -231,7 +232,7 @@ public class Waypoint extends UuidItem {
 			wp.setObservations(new ArrayList<WaypointObservation>());
 			for (WaypointObservation wobp : this.observations){
 				
-				WaypointObservation cloned = wobp.clone();
+				WaypointObservation cloned = wobp.clone(session);
 				cloned.setUuid(null);
 				cloned.setWaypoint(wp);
 				wp.getObservations().add(cloned);
@@ -248,7 +249,8 @@ public class Waypoint extends UuidItem {
 					File tmpLocation = File.createTempFile(
 							"smart_" + System.nanoTime(), ""); //$NON-NLS-1$ //$NON-NLS-2$
 					tmpLocation.deleteOnExit();
-					FileUtils.copyFile(sp.getFullFile(), tmpLocation);
+					sp.computeFileLocation(session);
+					FileUtils.copyFile(sp.getAttachmentFile(), tmpLocation);
 
 					att.setCopyFromLocation(tmpLocation);
 					att.setFilename(sp.getFilename());

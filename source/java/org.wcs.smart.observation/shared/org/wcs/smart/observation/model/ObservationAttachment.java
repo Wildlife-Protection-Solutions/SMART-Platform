@@ -31,6 +31,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -46,13 +47,10 @@ import org.wcs.smart.util.UuidUtils;
  */
 @Entity
 @Table(name="smart.observation_attachment")
-public class ObservationAttachment extends UuidItem implements ISmartAttachment {
+public class ObservationAttachment extends ISmartAttachment {
 
 	private WaypointObservation observation;
-	private String filename;
-	
-	private File copyFromLocation;
-    private String fullFile;
+
     
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="obs_uuid", referencedColumnName="uuid")
@@ -62,45 +60,9 @@ public class ObservationAttachment extends UuidItem implements ISmartAttachment 
 	
 	public void setObservation(WaypointObservation observation) throws Exception{
 		this.observation = observation;
-		setFullFile();
-	}
-	
-	@Override
-	@Column(name="filename")
-	public String getFilename() {
-		return this.filename;
+		super.attachmentFile = null;
 	}
 
-	@Override
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-
-	
-	@Transient
-	@Override
-	public File getCopyFromLocation() {
-		return copyFromLocation;
-	}
-
-	@Override
-	public void setCopyFromLocation(File newFile) {
-		this.copyFromLocation = newFile;
-	}
-
-	@Transient
-	public File getFullFile() throws Exception{
-		if (this.fullFile == null){
-			//try to set it
-			setFullFile();
-		}
-		return new File(this.fullFile);
-	}
-	
-	private void setFullFile() throws Exception{
-		this.fullFile = getDatastoreFolderPath() + File.separator + getFilename();
-	}
-	
 	
 	@Transient
 	private String datastoreFolderPath = null;
@@ -128,7 +90,7 @@ public class ObservationAttachment extends UuidItem implements ISmartAttachment 
 	
 	@Transient
 	@Override
-	public String getDatastoreFolderPath() throws Exception {
+	public String getDatastoreFolderPath(Session session) throws Exception {
 		if (datastoreFolderPath != null){
 			return datastoreFolderPath;
 		}
@@ -140,7 +102,7 @@ public class ObservationAttachment extends UuidItem implements ISmartAttachment 
 
 				return getObservation().getWaypoint().getConservationArea().getFileDataStoreLocation() + 
 						File.separator + 
-						src.getDatastoreFileLocation(observation.getWaypoint()) ;
+						src.getDatastoreFileLocation(observation.getWaypoint(), session) ;
 			}
 		}
 		return null;

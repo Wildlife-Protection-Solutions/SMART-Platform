@@ -50,6 +50,7 @@ import org.wcs.smart.incident.event.IIncidentListener;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ObservationHibernateManager;
+import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
@@ -181,7 +182,13 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 				session.beginTransaction();
 				this.incident = (Waypoint) session.load(Waypoint.class, uuid);
 				this.incident.getId();
-			
+				
+				try{
+					ObservationHibernateManager.computeAttachmentLocations(incident, session);
+				}catch (Exception ex){
+					ObservationPlugIn.displayLog(ex.getMessage(), ex);
+				}
+				
 				session.getTransaction().commit();
 				
 				if (ops == null){

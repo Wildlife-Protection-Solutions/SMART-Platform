@@ -39,7 +39,7 @@ public class AttachmentUtil {
 			launch(attachment.getCopyFromLocation());
 		} else {
 			try{
-				launch(attachment.getFullFile());
+				launch(attachment.getAttachmentFile());
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(ex.getMessage(), ex);
 			}

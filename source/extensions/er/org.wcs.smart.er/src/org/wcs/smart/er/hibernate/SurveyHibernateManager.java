@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.hibernate;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Iterator;
@@ -36,7 +37,9 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
+import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -92,6 +95,7 @@ public class SurveyHibernateManager {
 		
 		session.saveOrUpdate(mission);
 		
+		IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(SurveyWaypointSource.KEY);
 		if (saveWaypoints){
 			session.flush();
 		
@@ -102,20 +106,18 @@ public class SurveyHibernateManager {
 						if (wp.getWaypoint().getAttachments() != null){
 							//update all the waypoint attachments directory
 							for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-								wa.setDatastoreFolderExtension(
-										SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
-										.getSource(wp.getWaypoint().getSourceId())
-										.getDatastoreFileLocation(mission), SmartDB.getCurrentConservationArea());
+								wa.computeFileLocation(new File(new File(
+										SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+										src.getDatastoreFileLocation(mission, session)), wa.getFilename()));
 							}
 						}
 						if (wp.getWaypoint().getObservations() != null){
 							for (WaypointObservation wo : wp.getWaypoint().getObservations()){
 								if (wo.getAttachments() != null){
 									for (ObservationAttachment wa : wo.getAttachments()){
-										wa.setDatastoreFolderExtension(
-												SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class)
-												.getSource(wp.getWaypoint().getSourceId())
-												.getDatastoreFileLocation(mission), SmartDB.getCurrentConservationArea());
+										wa.computeFileLocation(new File(new File(
+												SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+												src.getDatastoreFileLocation(mission, session)), wa.getFilename()));
 									}
 								}
 							}

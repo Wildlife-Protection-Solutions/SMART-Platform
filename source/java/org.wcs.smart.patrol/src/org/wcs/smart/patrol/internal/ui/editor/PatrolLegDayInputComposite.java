@@ -567,7 +567,7 @@ public class PatrolLegDayInputComposite {
 					toClone = (Waypoint)session.merge(toClone);
 				}
 				
-				Waypoint cloned = toClone.clone();
+				Waypoint cloned = toClone.clone(session);
 				
 				if (patrolLegDate.getWaypoints().remove(w)) {
 					w.setPatrolLegDay(null);

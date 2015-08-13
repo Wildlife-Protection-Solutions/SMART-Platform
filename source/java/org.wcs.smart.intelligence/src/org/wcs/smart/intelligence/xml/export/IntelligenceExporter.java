@@ -38,6 +38,7 @@ import javax.xml.bind.Marshaller;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -64,6 +65,11 @@ public class IntelligenceExporter {
 		try {
 			session.refresh(intelligence);
 			
+			if (intelligence.getAttachments() != null){
+				for (ISmartAttachment a : intelligence.getAttachments()){
+					a.computeFileLocation(session);
+				}
+			}
 			monitor.subTask(Messages.IntelligenceExporter_Converting);
 			IntelligenceType xml = IntelligenceToXmlConverter.toXml(intelligence);
 			monitor.worked(1);
@@ -116,7 +122,7 @@ public class IntelligenceExporter {
 
 			/* add all attachments */
 			for (IntelligenceAttachment att : intelligence.getAttachments()) {
-				File attFile = att.getFullFile();
+				File attFile = att.getAttachmentFile();
 				zout.putNextEntry(new ZipEntry(IIntelligenceXmlDataConstants.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
 
 				try(FileInputStream inStream = new FileInputStream(attFile);) {

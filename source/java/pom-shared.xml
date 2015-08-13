@@ -26,6 +26,7 @@
 		<module>./org.wcs.smart.plan/pom-shared.xml</module>
 		<module>./org.wcs.smart.intelligence/pom-shared.xml</module>
 		<module>./org.wcs.smart.intelligence.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.independentincident/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.entity/pom-shared.xml</module>
 		<module>../extensions/org.wcs.smart.entity.query/pom-shared.xml</module>
 		<module>../extensions/er/org.wcs.smart.er/pom-shared.xml</module>

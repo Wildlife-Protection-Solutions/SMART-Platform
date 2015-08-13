@@ -31,6 +31,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
@@ -46,14 +47,10 @@ import org.wcs.smart.util.UuidUtils;
  */
 @Entity
 @Table(name="smart.wp_attachments")
-public class WaypointAttachment extends UuidItem implements ISmartAttachment {
+public class WaypointAttachment extends ISmartAttachment {
 
 	private Waypoint wp;
-	private String filename;
-	
-	private File copyFromLocation;
-    private String fullFile = null;
-	
+
 	public WaypointAttachment(){
 		
 	}
@@ -65,69 +62,31 @@ public class WaypointAttachment extends UuidItem implements ISmartAttachment {
 	}
 	public void setWaypoint(Waypoint wp){
 		this.wp = wp;
+		super.attachmentFile = null;
 	}
+
 	
-	@Column(name="filename")
-	public String getFilename(){
-		return this.filename;
-	}
-	public void setFilename(String filename){
-		this.filename = filename;
-	}
-	
-	@Transient
-	/**
-	 * Location of the file to copy.  Temporarily set until
-	 * saved.  Will return null if file already in datastore.
-	 * @return 
-	 */
-	public File getCopyFromLocation(){
-		return this.copyFromLocation;
-	}
-	/**
-	 * Location to copy files from.  Temporarily set
-	 * for newly added attachments until saved. 
-	 */
-	public void setCopyFromLocation(File newFile){
-		this.copyFromLocation= newFile;
-	}
-	
-	@Transient
-	public File getFullFile() throws Exception{
-		if (this.fullFile == null){
-			//try to set it
-			setFullFile();
-		}
-		return new File(this.fullFile);
-	}
-	
-	private void setFullFile() throws Exception{
-		if (getWaypoint() != null){
-			this.fullFile = getDatastoreFolderPath() + File.separator + getFilename();
-		}
-	}
-	
-	@Transient
-	private String datastoreFolderPath = null;
-	/**
-	 * Sets directory location where the attachment should be stored.  This
-	 * does not have to be set.  If not set then getDatastoreFolderPath will
-	 * lookup the path from the waypoint and source.  
-	 * <p>This function is provided to deal with issues when saving waypoints.  In
-	 * some cases the waypoints are saved before the encompassing object (ex. patrol waypoint)
-	 * so the datastore folder path cannot be computed using standard process.  It
-	 * can be set manually here to allow objects to be saved.</p>
-	 * 
-	 * @param path this is the path not including the CAUUID 
-	 */
-	public void setDatastoreFolderExtension(String path, ConservationArea ca){
-		StringBuilder sb = new StringBuilder();
-		sb.append(ca);
-		sb.append(File.separator);
-		sb.append(path);
-		
-		this.datastoreFolderPath = sb.toString();
-	}
+//	@Transient
+//	private String datastoreFolderPath = null;
+//	/**
+//	 * Sets directory location where the attachment should be stored.  This
+//	 * does not have to be set.  If not set then getDatastoreFolderPath will
+//	 * lookup the path from the waypoint and source.  
+//	 * <p>This function is provided to deal with issues when saving waypoints.  In
+//	 * some cases the waypoints are saved before the encompassing object (ex. patrol waypoint)
+//	 * so the datastore folder path cannot be computed using standard process.  It
+//	 * can be set manually here to allow objects to be saved.</p>
+//	 * 
+//	 * @param path this is the path not including the CAUUID 
+//	 */
+//	public void setDatastoreFolderExtension(String path, ConservationArea ca){
+//		StringBuilder sb = new StringBuilder();
+//		sb.append(ca);
+//		sb.append(File.separator);
+//		sb.append(path);
+//		
+//		this.datastoreFolderPath = sb.toString();
+//	}
 	
 	/**
 	 * @return the full path to where the file should be stored in the 
@@ -135,10 +94,10 @@ public class WaypointAttachment extends UuidItem implements ISmartAttachment {
 	 */
 	@Transient
 	@Override
-	public String getDatastoreFolderPath() throws Exception{
-		if (datastoreFolderPath != null){
-			return datastoreFolderPath;
-		}
+	public String getDatastoreFolderPath(Session session) throws Exception{
+//		if (datastoreFolderPath != null){
+//			return datastoreFolderPath;
+//		}
 		if (getWaypoint() != null ){
 			if (getWaypoint().getSourceId() == null){
 				throw new Exception("No attachment information found for waypoint attachment " + UuidUtils.uuidToString(getUuid())); //$NON-NLS-1$
@@ -148,7 +107,7 @@ public class WaypointAttachment extends UuidItem implements ISmartAttachment {
 				StringBuilder sb = new StringBuilder();
 				sb.append(getWaypoint().getConservationArea().getFileDataStoreLocation());
 				sb.append(File.separator);
-				sb.append(src.getDatastoreFileLocation(getWaypoint()));
+				sb.append(src.getDatastoreFileLocation(getWaypoint(), session));
 				return sb.toString();
 			}
 		}

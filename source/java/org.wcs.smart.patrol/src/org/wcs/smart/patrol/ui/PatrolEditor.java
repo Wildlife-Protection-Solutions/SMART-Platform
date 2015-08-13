@@ -64,12 +64,12 @@ import org.wcs.smart.patrol.internal.ui.editor.PatrolDayEditorInput;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolMapPageEditor;
 import org.wcs.smart.patrol.internal.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * The patrol editor.
@@ -226,6 +226,18 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			this.patrol.getPatrolDatastorePath();
 			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
 			this.projections = tmp.toArray(new Projection[tmp.size()]);
+			
+			try{
+				for (PatrolLeg pl : patrol.getLegs()){
+					for (PatrolLegDay pld : pl.getPatrolLegDays()){
+						for (PatrolWaypoint pw : pld.getWaypoints()){
+							ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+						}
+					}
+				}
+			} catch (Exception e) {
+				SmartPatrolPlugIn.displayLog("Error loading attachment locations." + e.getMessage(), e);
+			}
 			session.getTransaction().commit();
 			if (ops == null){
 				ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);

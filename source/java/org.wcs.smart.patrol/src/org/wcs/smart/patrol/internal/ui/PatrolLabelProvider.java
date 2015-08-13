@@ -23,8 +23,10 @@ package org.wcs.smart.patrol.internal.ui;
 
 import java.util.Locale;
 
+import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
@@ -41,6 +43,8 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 			return getLabel(((PatrolType)item).getType(), l);
 		}else if (item instanceof PatrolType.Type){
 			return LabelConstants.getLabel( (PatrolType.Type)item);
+		}else if (item instanceof PatrolWaypointSource){
+			return Messages.PatrolWaypointSource_PatrolWaypointSourceName;
 		}
 		return null;
 	}
