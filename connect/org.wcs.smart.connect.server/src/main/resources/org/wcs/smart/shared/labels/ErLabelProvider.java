@@ -27,6 +27,7 @@ import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.model.SurveyWaypointSource;
 
 /**
  * Label provider for survey elements.
@@ -61,6 +62,9 @@ public class ErLabelProvider implements IErLabelProvider{
 		}
 		if (item == MissionTrack.TrackType.SAMPLING_UNIT){
 			return "Sampling Unit";
+		}
+		if (item instanceof SurveyWaypointSource){
+			return  "Survey";
 		}
 		return null;
 	}

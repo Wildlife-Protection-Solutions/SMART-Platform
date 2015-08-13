@@ -70,6 +70,7 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.observation.model.ObservationAttachment;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -225,10 +226,7 @@ public enum SmartHibernateConfiguration {
 			AggregationLabel.class,
 			SamplingUnitAttributeValue.class,
 			WaypointObservationAttribute.class,
-			
-			
-		
-			
+			ObservationOptions.class,
 		};
 	}
 }

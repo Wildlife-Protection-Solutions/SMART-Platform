@@ -1,12 +1,12 @@
 package org.wcs.smart.connect.api;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.UUID;
 
 import javax.servlet.ServletContext;
@@ -25,15 +25,15 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.connect.query.engine.patrol.CsvExporter;
-import org.wcs.smart.connect.query.engine.patrol.PsqlObservationEngine;
-import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
@@ -112,7 +112,7 @@ public class QueryApi extends HttpServlet{
 				return Response.status(Status.NOT_FOUND).build();
 			}
 		
-			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query, request.getLocale());
+			AbstractQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 			if(engine == null){
 				String error = MessageFormat.format("No query engine for query type {1}.", query.getTypeKey());
 				return createErrorResponse(Status.NOT_IMPLEMENTED, error);
@@ -121,25 +121,27 @@ public class QueryApi extends HttpServlet{
 			/* configure date filter */
 			query.setDateFilter(df);
 			
-			/* configure ca filter */
 
-			if (!query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-				ConservationAreaFilter caFilter = new ConservationAreaFilter();
-				caFilter.addConservationArea(query.getConservationArea());
-				query.setConservationAreaFilter(caFilter.asString());
-				//TODO: this will update the object in the database which we do not want to do!!
-			}else{
-				//TODO: this needs testing/fixing				
-			}
-			
 			HashMap<String, Object> params = new HashMap<String, Object>();
 			params.put(Session.class.getName(), s);
-			
-			engine.executeQuery(query, params);
+			params.put(Locale.class.getName(), request.getLocale());
 			
 			File f = new File(SmartContext.INSTANCE.getTempFilestoreLocation(), System.nanoTime() + ".smart.tmp");
-			CsvExporter exporter = new CsvExporter(f, delimiter.charAt(0),request.getLocale());
-			exporter.exportResults((PsqlObservationEngine) engine, s);
+			
+			try{
+				IQueryResult result = engine.executeQuery(query, params);
+			
+				if (format.equalsIgnoreCase("csv") 
+						&& result instanceof IDbTableResultSet
+						&& query instanceof SimpleQuery){
+					CsvExporter exporter = new CsvExporter(f, delimiter.charAt(0),request.getLocale());
+					exporter.exportResults((SimpleQuery)query, (IDbTableResultSet)result, s);
+				}else{
+					return createErrorResponse(Status.NOT_IMPLEMENTED, "Query export not implemented for select query type and format.");
+				}
+			}finally{
+				engine.cleanUp(s);
+			}
 			
 			StreamingOutput stream = new StreamingOutput() {
 			      @Override

@@ -1,18 +1,20 @@
 package org.wcs.smart.connect.query;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlObservationEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlSummaryEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlWaypointEngine;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
@@ -40,7 +42,6 @@ import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
-import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
 public enum QueryManager {
@@ -73,6 +74,14 @@ public enum QueryManager {
 		queryClasses.add(MissionTrackQuery.class);
 		
 	}
+
+	
+	private static final AbstractQueryEngine[] engines = new AbstractQueryEngine[]{
+		new PsqlObservationEngine(),
+		new PsqlWaypointEngine(),
+		new PsqlGridEngine(),
+		new PsqlSummaryEngine()
+	};
 	
 	private static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{
 		MissionEndDateField.INSTANCE,
@@ -95,7 +104,7 @@ public enum QueryManager {
 		return null;
 	}
 	
-	public List<QueryProxy> getQueries(Session session){
+	public List<QueryProxy> getQueries(Session session, final Locale l){
 		List<QueryProxy> proxies = new ArrayList<QueryProxy>();
 		for (Class<? extends Query> q : queryClasses){
 			List<Query> queries = session.createCriteria(q).list();
@@ -104,12 +113,27 @@ public enum QueryManager {
 				proxies.add(proxy);
 			}
 		}
+		Collections.sort(proxies, new Comparator<QueryProxy>() {
+
+			@Override
+			public int compare(QueryProxy o1, QueryProxy o2) {
+				Collator textCompare = Collator.getInstance(l);
+				int r = textCompare.compare(o1.getConservationArea(), o2.getConservationArea());
+				if (r != 0) return r;
+				r = textCompare.compare(o1.getType(), o2.getType());
+				if (r != 0) return r;
+				r = textCompare.compare(o1.getName(), o2.getName());
+				return r;
+			}
+		});
 		return proxies;
 	}
 	
-	public AbstractQueryEngine findQueryEngine(Query query, Locale l){
-		if (query.getTypeKey().equals(PatrolObservationQuery.KEY)){
-			return new PsqlObservationEngine(l);
+	public AbstractQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
+		for (AbstractQueryEngine e : engines){
+			if (e.canExecute(query.getTypeKey())){
+				return e.getClass().newInstance();
+			}
 		}
 		return null;
 	}

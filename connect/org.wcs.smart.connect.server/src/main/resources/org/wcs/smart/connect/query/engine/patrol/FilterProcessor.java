@@ -86,9 +86,10 @@ public class FilterProcessor implements IFilterProcessor {
 	 * 
 	 * drops temporary tables created during process of creating the main data table.
 	 * Does not drop the main table.
+	 * @throws SQLException 
 	 */
 	@Override
-	public void dropTemporaryTables(Connection c){
+	public void dropTemporaryTables(Connection c) throws SQLException{
 		engine.dropTable(c, observationTable);
 	}
 

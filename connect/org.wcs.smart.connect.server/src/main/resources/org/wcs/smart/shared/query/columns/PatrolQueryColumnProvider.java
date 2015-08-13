@@ -34,11 +34,15 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
+import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -51,15 +55,19 @@ import org.wcs.smart.query.model.QueryColumn;
 public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 	@Override
 	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
-		String queryTypeKey = query.getTypeKey();
-		if (queryTypeKey.equals(PatrolObservationQuery.KEY)){
-			try{
+		try{
+			String queryTypeKey = query.getTypeKey();
+			if (queryTypeKey.equals(PatrolObservationQuery.KEY)){
 				return getObservationQueryColumns(query, l, session);
-			}catch (SQLException ex){
-				//TODO:
-				ex.printStackTrace();
-				return null;
+			}else if (queryTypeKey.equals(PatrolWaypointQuery.KEY)){
+				return getWaypointQueryColumns(query, l, session);
+			}else if (queryTypeKey.equals(PatrolGriddedQuery.KEY)){
+				return getGriddedQueryColumns(query, l, session);
 			}
+		}catch (SQLException ex){
+			//TODO:
+			ex.printStackTrace();
+			return null;
 		}
 		return null;
 	}
@@ -106,8 +114,10 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_TIME,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_X,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_Y,l));
-		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION,l));
-		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE,l));
+		if (trackDistanceDirection(q.getConservationArea(), session)){
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION,l));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE,l));
+		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER,l));
 		
@@ -134,4 +144,57 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return keys.toArray(new QueryColumn[keys.size()]);
 	}
 	
+	public QueryColumn[] getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
+		List<QueryColumn> keys = new ArrayList<QueryColumn>();
+		
+		if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.CA_ID, l));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.CA_NAME, l));
+		}
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_ID,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_TYPE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_START_DATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_END_DATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_STATION,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_TEAM,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_OBJETIVE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_MANDATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_ARMED,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_ID,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_ID,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_TIME,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_X,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_Y,l));
+		if (trackDistanceDirection(q.getConservationArea(), session)){
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION,l));
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE,l));
+		}
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT,l));
+		
+		return keys.toArray(new QueryColumn[keys.size()]);
+	}
+	
+	public QueryColumn[] getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	
+		List<QueryColumn> cols = new ArrayList<QueryColumn>();
+		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
+			cols.add(new GridQueryColumn(t,l));
+		}
+		return cols.toArray(new QueryColumn[cols.size()]);
+	}
+	
+	public boolean trackDistanceDirection(ConservationArea ca, Session s){
+		ObservationOptions op = getOptions(ca, s);
+		if (op == null) return true;
+		return op.getTrackDistanceDirection();
+	}
+	
+	public ObservationOptions getOptions(ConservationArea ca, Session s){
+		return (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
+		
+	}
 }

@@ -29,16 +29,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.query.ListItem;
+import org.wcs.smart.connect.query.SummaryItemLabelProvider;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
@@ -53,7 +59,6 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
-import org.wcs.smart.patrol.query.ext.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
@@ -103,8 +108,9 @@ import org.wcs.smart.util.UuidUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class DerbySummaryEngine extends AbstractQueryEngine{
-
+public class PsqlSummaryEngine extends AbstractQueryEngine{
+	private final Logger logger = Logger.getLogger(PsqlSummaryEngine.class.getName());
+	
 	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 	
@@ -124,6 +130,8 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 	
 	private boolean hasAreaFilter = false;
 	private Session session;
+	
+	private Locale l = Locale.getDefault();
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -170,6 +178,7 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 
 		final PatrolSummaryQuery query = (PatrolSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
+		l = (Locale)parameters.get(Locale.class.getName());
 		
 		SumQueryDefinition def = null;
 		try{
@@ -202,7 +211,7 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 				
 				try {
 					try{
-						getHeaderInfo(query, sumResults, session);
+						getHeaderInfo(query, sumResults, l, session);
 					}catch (Exception ex){
 						throw new SQLException(ex);
 					}
@@ -247,14 +256,20 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 							needsObservationRate = true;
 						}
 					}
-					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), Collections.EMPTY_LIST);
+					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), Collections.singleton(query.getConservationArea()));
+					if(!query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+						cafilter.addConservationArea(query.getConservationArea());
+					}
+					
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
 							allGroupByParts, ldef.getValuePart(),
 							cafilter);
 					
 					sumResults.setData(data);
 					
-					
+				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
@@ -266,7 +281,7 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 		return sumResults ;
 	}
 
-	private void dropTemporaryTables(Connection c){
+	private void dropTemporaryTables(Connection c) throws SQLException{
 		if (rateTrackTable != null){
 			dropTable(c, rateTrackTable);
 		}
@@ -348,7 +363,7 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 	
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		for (IValueItem it : values.getValueItems()){
-			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, true, monitor) ; 
+			HashMap<SummaryResultKey, Double> data = computeValueItem(c, s, groupBy, it, caFilter, true) ; 
 			if (data != null){
 				results.putAll( data );	
 			}
@@ -419,7 +434,7 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 			//update filter type
 			af.changeGeometryType(geomType);
 		}
-		IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(
+		IFilterProcessor rfilterer = PsqlSummaryEngine.this.getFilterProcessor(
 				qFilter.getFilterType(), tableName);
 		try{
 			rfilterer.processFilter(c, qFilter.getFilter(), localDateFilter, caFilter, needsObservationRate, false);
@@ -1519,14 +1534,18 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 	 * @param results the summary query results to update
 	 * @param session hibernate session
 	 */
-	public static void getHeaderInfo(PatrolSummaryQuery query, SummaryQueryResult results, Session session) throws Exception{
-		
+	public static void getHeaderInfo(PatrolSummaryQuery query, 
+			SummaryQueryResult results,
+			Locale l,
+			Session session) throws Exception{
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, query.getConservationArea()); 
+
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){
 			SummaryHeader header = new SummaryHeader(
-					PatrolValueItemLabelProvider.INSTANCE.getName(item, session),
-					PatrolValueItemLabelProvider.INSTANCE.getFullName(item, session),
+					summary.getName(item),
+					summary.getFullName(item),
 					item.asString(), true);
 			results.addValueHeader(header);
 		}
@@ -1537,7 +1556,7 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = PatrolDropItemFactory.INSTANCE.findViewer(item).getItems(session);
+			List<ListItem> items = summary.getNames(item);
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
@@ -1555,7 +1574,7 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = PatrolDropItemFactory.INSTANCE.findViewer(item).getItems(session);
+			List<ListItem> items = summary.getNames(item);
 			SummaryHeader[] colHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
@@ -1611,28 +1630,28 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_ca_uuid UUID,"); //$NON-NLS-1$
+		sql.append("p_uuid UUID,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
-		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_station_uuid UUID,"); //$NON-NLS-1$
+		sql.append("p_team_uuid UUID,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_mandate_uuid  UUID,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_start_date date,"); //$NON-NLS-1$
 		sql.append("p_end_date date,"); //$NON-NLS-1$
-		sql.append("pl_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_uuid UUID,"); //$NON-NLS-1$
 		sql.append("pl_id varchar(50),"); //$NON-NLS-1$
-		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_transport_uuid UUID,"); //$NON-NLS-1$
 		sql.append("pl_start_date date,"); //$NON-NLS-1$
 		sql.append("pl_end_date date,"); //$NON-NLS-1$
-		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pld_uuid UUID,"); //$NON-NLS-1$
 		sql.append("pld_patrol_day date,"); //$NON-NLS-1$
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
+		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ob_uuid UUID,"); //$NON-NLS-1$
+		sql.append("plm_leader UUID,"); //$NON-NLS-1$
+		sql.append("plm_pilot UUID"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -1656,6 +1675,16 @@ public class DerbySummaryEngine extends AbstractQueryEngine{
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
+	}
+
+	@Override
+	public void cleanUp(Session session) {
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				dropTemporaryTables(c);
+				
+			}});
 	}
 
 }

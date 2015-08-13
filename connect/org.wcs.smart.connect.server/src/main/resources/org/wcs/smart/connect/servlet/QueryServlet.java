@@ -23,19 +23,14 @@ public class QueryServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-//		UUID uuid = UUID.fromString("4c4facd2-50bc-4533-8b30-26dc84828e61");
 		Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		session.beginTransaction();
 		try{
-			List<QueryProxy> allQueries = QueryManager.INSTANCE.getQueries(session);
+			List<QueryProxy> allQueries = QueryManager.INSTANCE.getQueries(session, request.getLocale());
 			request.setAttribute("allqueries", allQueries);
 		}finally{
 			session.getTransaction().commit();
 		}
-		
-		
-		
 		request.getRequestDispatcher("/WEB-INF/query.jsp").forward(request, response); //$NON-NLS-1$
 	}
 

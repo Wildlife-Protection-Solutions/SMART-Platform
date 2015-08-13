@@ -4,6 +4,7 @@ import java.net.HttpURLConnection;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -139,11 +140,11 @@ public class ConnectUser extends HttpServlet {
 			response.setStatus(Response.Status.CREATED.getStatusCode());
 			response.flushBuffer();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage());
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage());
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
@@ -229,11 +230,11 @@ public class ConnectUser extends HttpServlet {
 			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage());
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage());
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
@@ -272,11 +273,11 @@ public class ConnectUser extends HttpServlet {
 				request.logout();
 			}
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage());
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage());
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{

@@ -1,6 +1,7 @@
 package org.wcs.smart.connect.uploader;
 
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
@@ -46,7 +47,7 @@ public class CaLoader implements IUploadItemProcessor {
 			
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			logger.severe(ex.getMessage());
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			ex.printStackTrace();
 			session.getTransaction().rollback();
 			
@@ -58,7 +59,7 @@ public class CaLoader implements IUploadItemProcessor {
 				item.setMessage("Error extracting data, " + ex.getMessage());
 				session.getTransaction().commit();
 			}catch (Exception ex2){
-				logger.severe(ex2.getMessage());
+				logger.log(Level.SEVERE, ex2.getMessage(), ex2);
 				session.getTransaction().rollback();
 			}
 		}

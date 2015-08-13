@@ -15,9 +15,11 @@ import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
 import org.wcs.smart.er.model.IErLabelProvider;
 import org.wcs.smart.er.query.ISurveyQueryLabelProvider;
 import org.wcs.smart.er.query.model.ISurveyQueryColumnProvider;
+import org.wcs.smart.incident.IIncidentLabelProvider;
 import org.wcs.smart.intelligence.IIntelligenceLabelProvider;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryColumnProvider;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryLabelProvider;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.query.model.columns.IObservationQueryColumnProvider;
 import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
@@ -29,10 +31,12 @@ import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
 import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 import org.wcs.smart.shared.PatrolContributionFinder;
+import org.wcs.smart.shared.WaypointSourceEngine;
 import org.wcs.smart.shared.labels.EntityLabelProvider;
 import org.wcs.smart.shared.labels.EntityQueryLabelProvider;
 import org.wcs.smart.shared.labels.ErLabelProvider;
 import org.wcs.smart.shared.labels.GridQueryColumnLabelProvider;
+import org.wcs.smart.shared.labels.IncidentLabelProvider;
 import org.wcs.smart.shared.labels.IntelligenceLabelProvider;
 import org.wcs.smart.shared.labels.IntelligenceQueryLabelProvider;
 import org.wcs.smart.shared.labels.ObservationQueryLabelProvider;
@@ -73,6 +77,7 @@ public class SmartContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(ICoreLabelProvider.class, new SmartLabelProvider());
 		SmartContext.INSTANCE.setClass(ISurveyQueryLabelProvider.class, new SurveyQueryLabelProvider());
 		SmartContext.INSTANCE.setClass(ISurveyQueryLabelProvider.class, new SurveyQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IIncidentLabelProvider.class, new IncidentLabelProvider());
 		
 		SmartContext.INSTANCE.setClass(IEntityQueryColumnProvider.class, new EntityQueryColumnProvider());
 		SmartContext.INSTANCE.setClass(IIntelligenceQueryColumnProvider.class, new IntelligenceQueryColumnProvider());
@@ -82,6 +87,7 @@ public class SmartContextListener implements ServletContextListener{
 		
 		SmartContext.INSTANCE.setClass(IPatrolContributionFinder.class, new PatrolContributionFinder());
 		
+		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
 		SmartContext.INSTANCE.setFilestoreLocation(DataStoreManager.INSTANCE.getRootDirectory().getAbsolutePath());
 		SmartContext.INSTANCE.setTempFilestoreLocation(new File("C:\\temp\\webfilestore"));
 	}

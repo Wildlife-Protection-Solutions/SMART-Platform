@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.UUID;
 
@@ -218,13 +219,10 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	public void dropTable(Connection c, String tableName)  {
-		try {
-			String sql = "DROP TABLE " + tableName; //$NON-NLS-1$
-			c.createStatement().execute(sql);
-		} catch (Exception ex) {
-			// eatme
-		}
+	public void dropTable(Connection c, String tableName) throws SQLException  {
+		String sql = "DROP TABLE IF EXISTS " + tableName; //$NON-NLS-1$
+		logger.finest(sql);
+		c.createStatement().execute(sql);
 	}
 
 	/**
@@ -236,6 +234,11 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		return "query_temp_" + System.nanoTime(); //$NON-NLS-1$
 	}
 
+	/**
+	 * Removes any temporary tables generated during
+	 * execution retrieval of results. 
+	 */
+	public abstract void cleanUp(Session session);
 	
 	
 	/**
@@ -421,7 +424,6 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 
 	public abstract String getSurveySamplingUnitJoinFieldName();
 	
-
 	
 	/**
 	 * Creates the filter processor based on the query filter type

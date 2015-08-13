@@ -25,12 +25,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.text.DateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -42,9 +50,12 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
@@ -60,13 +71,18 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 public class PsqlWaypointEngine extends AbstractQueryEngine {
-
+	private final Logger logger = Logger.getLogger(PsqlWaypointEngine.class.getName());
+	
 	private String queryDataTable;
 	private Session session;
-	private Locale l;
+	private Locale l = Locale.getDefault();
 	
-	public PsqlWaypointEngine(Locale l){
-		this.l = l;
+	public PsqlWaypointEngine(){
+	}
+
+
+	public String getQueryDataTable(){
+		return this.queryDataTable;
 	}
 	
 	@Override
@@ -76,6 +92,10 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 	
 	public Session getCurrentConnection() {
 		return session;
+	}
+	
+	public Locale getLocale(){
+		return this.l;
 	}
 	
 	/**
@@ -94,7 +114,7 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 
 		final SimpleQuery query = (SimpleQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-	
+		l = (Locale)parameters.get(Locale.class.getName());
 		if (query.getDateFilter() == null){
 			return null;
 		}
@@ -119,12 +139,17 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 				
 				try {			
 					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), Collections.EMPTY_LIST);
+					if (!query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+						cafilter.addConservationArea(query.getConservationArea());
+					}
+					
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							cafilter, 
 							false, true);
 					
 					populateTemporaryTableExtra(c, session);
 				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
 
 				} finally {
@@ -135,7 +160,8 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 			}
 
 		});
-		return null;
+		WaypointQueryResult result = new WaypointQueryResult(this);
+		return result;
 	}
 
 	/**
@@ -154,19 +180,19 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, 
 			String nameColumn, Connection c, Session session) throws SQLException {
 		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		//QueryPlugIn.logSql(sql);
+		logger.finest(sql);
 		
 		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			int count = 0;
 			while (rs.next()) {
-				byte[] ca_uuid = rs.getBytes(1);
-				byte[] uuid = rs.getBytes(2);
+				UUID ca_uuid = (UUID)rs.getObject(1);
+				UUID uuid = (UUID)rs.getObject(2);
 				if (uuid == null || ca_uuid == null)
 					continue;
-				String name = getName(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(ca_uuid), session);
+				String name = getName(uuid, ca_uuid, session);
 				statement.setString(1, name);
-				statement.setBytes(2, uuid);
+				statement.setObject(2, uuid);
 				statement.addBatch();
 				count ++;
 				if (count > 100){
@@ -193,7 +219,7 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 		};
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			//QueryPlugIn.logSql(sql);
+			logger.finest(sql);
 			c.createStatement().execute(sql);
 		}
 		populateTemporaryTableNameObjExtra("p_station_uuid", "p_station", c, session);  //$NON-NLS-1$//$NON-NLS-2$
@@ -220,16 +246,17 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 		int cnt = 0;
 		try (ResultSet rs = c.createStatement().executeQuery(sql.toString())){
 			while (rs.next()) {
-				byte[] uuid = rs.getBytes(1);
-				String name = getEmployeeName(UuidUtils.byteToUUID(uuid), session);
+				UUID uuid = (UUID) rs.getObject(1);
+				if (uuid == null) continue;
+				String name = getEmployeeName(uuid, session);
 				
 				if (name != null) {
 					leaderSt.setString(1, name);
-					leaderSt.setBytes(2, uuid);
+					leaderSt.setObject(2, uuid);
 					leaderSt.addBatch();
 
 					pilotSt.setString(1, name);
-					pilotSt.setBytes(2, uuid);
+					pilotSt.setObject(2, uuid);
 					pilotSt.addBatch();
 					cnt++;
 					if (cnt >= 100){
@@ -308,70 +335,38 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("p_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
-		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$
+		sql.append("p_team_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_mandate_uuid  uuid,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_startdate date,"); //$NON-NLS-1$
 		sql.append("p_enddate date,"); //$NON-NLS-1$
-		sql.append("pl_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_legid varchar(50),"); //$NON-NLS-1$
-		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_transport_uuid uuid,"); //$NON-NLS-1$
+		sql.append("pld_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_date date,"); //$NON-NLS-1$ //sql.append("pld_patrol_day date,");
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
 
 		sql.append("wp_id integer,"); //$NON-NLS-1$
-		sql.append("wp_x double,"); //$NON-NLS-1$
-		sql.append("wp_y double,"); //$NON-NLS-1$
+		sql.append("wp_x double precision,"); //$NON-NLS-1$
+		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
-		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
+		sql.append("plm_leader uuid,"); //$NON-NLS-1$
+		sql.append("plm_pilot uuid"); //$NON-NLS-1$
 
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
 
-	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		PatrolQueryResultItem it = new PatrolQueryResultItem();
-
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setPatrolUuid(UuidUtils.byteToUUID(rs.getBytes("p_uuid"))); //$NON-NLS-1$
-		it.setPatrolId(rs.getString("p_id")); //$NON-NLS-1$
-		it.setPatrolStartDate(rs.getDate("p_startdate")); //$NON-NLS-1$
-		it.setPatrolEndDate(rs.getDate("p_enddate")); //$NON-NLS-1$
-		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
-		it.setTeam(rs.getString("p_team"));	 //$NON-NLS-1$
-		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
-		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$
-		it.setPatrolType(PatrolType.Type.valueOf(rs.getString("p_type"))); //$NON-NLS-1$
-		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
-		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
-		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
-		
-		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
-		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
-		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointTime(rs.getTime("wp_time")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
-		return it;
-	}
 	
 	
 	@Override
@@ -383,4 +378,15 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
 	}
+
+	@Override
+	public void cleanUp(Session session) {
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				dropTemporaryTables(c, true);		
+			}});	
+	}
+	
+	
 }

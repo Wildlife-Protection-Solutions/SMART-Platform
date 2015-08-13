@@ -30,5 +30,5 @@ public interface IFilterProcessor {
 	 * filter processing
 	 * @param c
 	 */
-	public void dropTemporaryTables(Connection c);
+	public void dropTemporaryTables(Connection c) throws SQLException;
 }

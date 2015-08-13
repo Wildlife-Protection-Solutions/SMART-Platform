@@ -11,6 +11,7 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -72,7 +73,7 @@ public class Uploader extends HttpServlet {
 			}
 			return status;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage());
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR);
 		}finally{
 			s.getTransaction().commit();
@@ -175,7 +176,7 @@ public class Uploader extends HttpServlet {
 				s.getTransaction().commit();
 				
 			}catch (Exception ex){
-				logger.severe(ex.getMessage());
+				logger.log(Level.SEVERE, ex.getMessage(), ex);
 				s.getTransaction().rollback();
 				throw ex;
 			}

@@ -84,7 +84,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 	 * Does not drop the main table.
 	 */
 	@Override
-	public void dropTemporaryTables(Connection c){
+	public void dropTemporaryTables(Connection c) throws SQLException{
 		engine.dropTable(c, waypointTable);
 		
 		for (String tableName: engine.filterTables.values()){

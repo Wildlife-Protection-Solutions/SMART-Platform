@@ -1,5 +1,6 @@
 package org.wcs.smart.connect.uploader;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
@@ -24,7 +25,7 @@ public class UploaderProcessor implements Runnable {
 		try{
 			ItemProcessManager.INSTANCE.processItem(item, session);
 		}catch (Exception ex){
-			logger.severe(ex.getMessage());
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 		}finally{
 			session.close();
 		}

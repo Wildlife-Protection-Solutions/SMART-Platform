@@ -43,7 +43,7 @@
 			<div class="table-cell smart-table-cell">${query.getId()}</div>
 			<div class="table-cell smart-table-cell">${query.getType()}</div>
 			<div class="table-cell smart-table-cell">${query.getConservationArea()}</div>
-			<div class="table-cell smart-table-cell"><a href="../api/query/${query.getUuid()}?format=csv">csv</a></div>
+			<div class="table-cell smart-table-cell"><a href="../api/query/${query.getUuid()}?format=csv&date_filter=waypointdate">csv</a></div>
 		</div>
 	</c:forEach>
 	</div>  

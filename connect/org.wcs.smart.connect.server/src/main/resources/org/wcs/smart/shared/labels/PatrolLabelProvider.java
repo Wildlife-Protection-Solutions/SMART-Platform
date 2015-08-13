@@ -25,6 +25,7 @@ import java.util.Locale;
 
 import org.wcs.smart.patrol.model.IPatrolLabelProvider;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.PatrolWaypointSource;
 
 /**
  * Implementation for patrol label provider.
@@ -44,6 +45,8 @@ public class PatrolLabelProvider implements IPatrolLabelProvider {
 				case GROUND: return "Ground";
 				case MARINE: return "Water";
 			}
+		}else if (item instanceof PatrolWaypointSource){
+			return "Patrol";
 		}
 		return null;
 	}

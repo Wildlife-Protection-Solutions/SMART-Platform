@@ -43,6 +43,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
@@ -96,8 +98,10 @@ import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
 
-public class DerbyGridEngine extends AbstractQueryEngine{
-	private GridQueryResult myResults;
+public class PsqlGridEngine extends AbstractQueryEngine{
+	private final Logger logger = Logger.getLogger(PsqlGridEngine.class.getName());
+	
+	private GridQueryResults result = null;
 	
 	private PatrolGriddedQuery query;
 	private DateFilter dateFilter;
@@ -132,7 +136,7 @@ public class DerbyGridEngine extends AbstractQueryEngine{
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
-		myResults = null;
+		 
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -202,9 +206,10 @@ public class DerbyGridEngine extends AbstractQueryEngine{
 							items.put(it.getTileId(), newitem); 
 						}
 					}
-					myResults = new GridQueryResult(items.values());
-					
+//					myResults = new GridQueryResult(items.values());
+					result = new GridQueryResults(PsqlGridEngine.this, items.values());			
 				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
@@ -213,11 +218,18 @@ public class DerbyGridEngine extends AbstractQueryEngine{
 				c.commit();
 			}
 		});
-		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
-		return myResults;
+//		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
+//		return myResults;
+		
+		
+		return result;
 
 	}
 
+	public String getGridTable(){
+		return this.gridTable;
+	}
+	
 	/*
 	 * Computes the grid results
 	 * @param needsFilter if the values need to be filtered or if previous filter can be used
@@ -731,28 +743,28 @@ public class DerbyGridEngine extends AbstractQueryEngine{
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("p_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
-		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$
+		sql.append("p_team_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_mandate_uuid  uuid,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_is_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_start_date date,"); //$NON-NLS-1$
 		sql.append("p_end_date date,"); //$NON-NLS-1$
-		sql.append("pl_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_uuid uuid,"); //$NON-NLS-1$
 		sql.append("pl_id varchar(50),"); //$NON-NLS-1$
-		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_transport_uuid uuid,"); //$NON-NLS-1$
 		sql.append("pl_start_date date,"); //$NON-NLS-1$
 		sql.append("pl_end_date date,"); //$NON-NLS-1$
-		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pld_uuid uuid,"); //$NON-NLS-1$
 		sql.append("pld_patrol_day date,"); //$NON-NLS-1$
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
+		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
+		sql.append("plm_leader uuid,"); //$NON-NLS-1$
+		sql.append("plm_pilot uuid"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -775,5 +787,14 @@ public class DerbyGridEngine extends AbstractQueryEngine{
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
+	}
+
+	@Override
+	public void cleanUp(Session session) {
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				dropTemporaryGridTable(c);
+			}});
 	}
 }
