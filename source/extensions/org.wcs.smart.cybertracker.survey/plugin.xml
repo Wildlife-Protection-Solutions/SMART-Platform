@@ -43,5 +43,13 @@
             icon="images/etool16/export.png">
       </image>
    </extension>
+   <extension
+         point="org.wcs.smart.cybertracker.datasource">
+      <datasource
+            dataBuilder="org.wcs.smart.cybertracker.survey.importer.SurveyCTDataBuilder"
+            importEditorContent="org.wcs.smart.cybertracker.survey.importer.SurveyCTImportEditorContent"
+            name="survey">
+      </datasource>
+   </extension>
 
 </plugin>
