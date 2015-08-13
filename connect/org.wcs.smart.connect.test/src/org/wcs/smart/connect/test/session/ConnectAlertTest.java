@@ -46,20 +46,21 @@ public class ConnectAlertTest {
 	private static String invalidUserGeneratedId = "iuasdfiuasdf";
 	
 	private static String userGeneratedId = "alert123"; 
-	private Date date = new Date(2015,1,1);
+	private Date date = new Date();
 	private String description = "basic description of an alert. Some was seen in the woods wearing a big blue costume and singing songs...";
-	private UUID typeUuid = UUID.fromString("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50");
+	private UUID typeUuid; //set in the getAlertTypes() call
 	private UUID invalidTypeUuid = UUID.fromString("f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a59");
 	private Integer level = new Integer(3);
-	private UUID caUuid = UUID.fromString("a0eedf99-9c0c-4ef8-bb6d-6bb9bd340a36");
+	private UUID caUuid;
 	private UUID invalidCaUuid = UUID.fromString("f0eedf88-9c0c-4ef8-bb6d-6bb9bd340a39");
 	private AlertStatusEnum status = AlertStatusEnum.ACTIVE;
 	private Double x = new Double(-2);
 	private Double y = new Double(-1);
-	private UUID creatorUuid = UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a36");
-
+	
+ 
 	private static String userGeneratedId2 = "alert456"; 
-	private Date date2 = new Date(2015,12,12);
+	private Date date2 = new Date();
+	
 	private String description2 = "new description";
 	private Integer level2 = new Integer(4);
 	private AlertStatusEnum status2 = AlertStatusEnum.DISABLED;
@@ -70,6 +71,8 @@ public class ConnectAlertTest {
 	
 	@Test
 	public void testAlert() throws Exception{
+		getCaUuid(); //gets the first CA uuid so we have a valid one for testing
+		testGetAlertTypes(); //gets the first alert type uuid so we have a valid one for testing
 		testCreateAlert();
 		testGetAllAlerts();
 		testGetAlert();
@@ -80,8 +83,76 @@ public class ConnectAlertTest {
 		testGetAlertsFromCa();
 		testDeleteAlert();
 	}
-	
-	
+	public void getCaUuid() throws Exception{
+		URIBuilder builder = new URIBuilder(SmartConnect.CA_API_URL );
+		
+		// Login Via Put Call
+		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
+		HttpGet get = new HttpGet(builder.build());
+		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
+		get.addHeader("Authorization", "basic " + info);
+		
+		httpClient.execute(get, new ResponseHandler<String>() {
+
+			@Override
+			public String handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
+				String userObject = EntityUtils.toString(response.getEntity());
+				System.out.println("0)" + userObject);
+				Assert.assertEquals("OK expected", HttpURLConnection.HTTP_OK, 
+						response.getStatusLine().getStatusCode());
+				String contentType = null;
+				for (Header h : response.getAllHeaders()){
+					if (h.getName().equalsIgnoreCase("Content-Type")){
+						Assert.assertNull("Duplicate content type headers provided.", contentType);
+						contentType = h.getValue();
+					}
+				}
+				Assert.assertEquals("Json expected", SmartConnect.MT_APPLICATION_JSON, contentType);
+				
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode n = mapper.readTree(userObject);
+				caUuid = UUID.fromString(n.findValue("uuid").textValue());
+				
+				return null;
+			}
+		});
+	}
+	public void testGetAlertTypes() throws Exception{
+		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + "alertTypes");
+		
+		// Login Via Put Call
+		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
+		HttpGet get = new HttpGet(builder.build());
+		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
+		get.addHeader("Authorization", "basic " + info);
+		
+		httpClient.execute(get, new ResponseHandler<String>() {
+
+			@Override
+			public String handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
+				String userObject = EntityUtils.toString(response.getEntity());
+				System.out.println("0)" + userObject);
+				Assert.assertEquals("OK expected", HttpURLConnection.HTTP_OK, 
+						response.getStatusLine().getStatusCode());
+				String contentType = null;
+				for (Header h : response.getAllHeaders()){
+					if (h.getName().equalsIgnoreCase("Content-Type")){
+						Assert.assertNull("Duplicate content type headers provided.", contentType);
+						contentType = h.getValue();
+					}
+				}
+				Assert.assertEquals("Json expected", SmartConnect.MT_APPLICATION_JSON, contentType);
+				
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode n = mapper.readTree(userObject);
+				typeUuid = UUID.fromString(n.findValue("uuid").textValue());
+				
+				return null;
+			}
+		});
+	}
 		
 	public void testCreateAlert() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + userGeneratedId);
@@ -92,18 +163,16 @@ public class ConnectAlertTest {
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
 		post.addHeader("Authorization", "basic " + info);
 		post.addHeader("Content-Type", SmartConnect.MT_APPLICATION_JSON);
-//		String json = "{\"username\": \"" + username + "\", \"password\":\"" + password+"\", \"email\":\"" + email + "\"}";
+
 		String json = "{\"userGeneratedId\": \"" + userGeneratedId  + 
 				"\", \"date\": \"" + date.getTime() +
 				"\", \"description\": \"" + description +
 				"\", \"typeUuid\": \"" + typeUuid +
-//				"\", \"typeUuid\": \"" + typeUuid.toString().replaceAll("-", "") +
 				"\", \"level\": \"" + level +
 				"\", \"caUuid\": \"" + caUuid  + 
 				"\", \"status\": \"" + status +
 				"\", \"x\": \"" + x + 
 				"\", \"y\": \"" + y +
-				"\", \"creatorUuid\": \"" + creatorUuid + 
 				"\"}";
 		
         HttpEntity entity = new ByteArrayEntity(json.getBytes());
@@ -218,22 +287,7 @@ public class ConnectAlertTest {
 				JsonNode n = mapper.readTree(userObject);
 				Assert.assertEquals("Validating size", 11, n.size());
 				Assert.assertEquals("Validating usergen id", userGeneratedId, n.findValue("userGeneratedId").textValue());
-				/*
-				 * TODO 
-				 * Validate the rest of the variables
-				 * 
-				 * description = "basic description of an alert. Some was seen in teh woods wearing a big blue costume and singing songs...";
-				private UUID type_uuid = UUID.fromString("b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50");
-				private UUID invalid_type_uuid = UUID.fromString("f0eebc99-9c0b-4ef8-bb6d-6bb9bd380a59");
-				private Integer level = new Integer(3);
-				private UUID ca_uuid = UUID.fromString("a0eedf99-9c0c-4ef8-bb6d-6bb9bd340a36");
-				private UUID invalid_ca_uuid = UUID.fromString("f0eedf88-9c0c-4ef8-bb6d-6bb9bd340a39");
-				private String status = "ACTIVE";
-				private Double x = new Double(-2);
-				private Double y = new Double(-1);
-				private UUID creator_uuid
-				*/
-				
+			
 				return null;
 			}
 		});
@@ -250,8 +304,8 @@ public class ConnectAlertTest {
 		
 		put.addHeader("Authorization", "basic " + info);
 		put.addHeader("Content-Type", SmartConnect.MT_APPLICATION_JSON);
-		//String json = "{\"username\": \"" + username2 + "\", \"email\":\"" + email2 + "\"}";
-		String json = "{\"userGeneratedId\": \"" + userGeneratedId  + "\", \"caUuid\": \"" + caUuid  + "\", \"creatorUuid\": \"" + creatorUuid+ "\", \"date\": \"" + date2.getTime() + "\", \"description\": \"" + description2 + "\", \"level\": \"" + level2 + "\", \"status\": \"" + status2 + "\", \"typeUuid\": \"" + typeUuid + "\", \"x\": \"" + x2 + "\", \"y\": \"" + y2 + "\"}";
+		date2 = new Date();
+		String json = "{\"userGeneratedId\": \"" + userGeneratedId2  + "\", \"caUuid\": \"" + caUuid  +  "\", \"date\": \"" + date2.getTime() + "\", \"description\": \"" + description2 + "\", \"level\": \"" + level2 + "\", \"status\": \"" + status2 + "\", \"typeUuid\": \"" + typeUuid + "\", \"x\": \"" + x2 + "\", \"y\": \"" + y2 + "\"}";
 		
         HttpEntity entity = new ByteArrayEntity(json.getBytes());
         put.setEntity(entity);
@@ -278,7 +332,7 @@ public class ConnectAlertTest {
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode n = mapper.readTree(userObject);
 				Assert.assertEquals("Validating size", 11, n.size());
-				Assert.assertEquals("Validating usergen id", userGeneratedId, n.findValue("userGeneratedId").textValue());
+				Assert.assertEquals("Validating usergen id", userGeneratedId2, n.findValue("userGeneratedId").textValue());
 				return null;
 			}
 		});
@@ -295,7 +349,7 @@ public class ConnectAlertTest {
 		
 		put.addHeader("Authorization", "basic " + info);
 		put.addHeader("Content-Type", SmartConnect.MT_APPLICATION_JSON);
-		String json = "{\"userGeneratedId\": \"" + invalidUserGeneratedId  + "\", \"caUuid\": \"" + caUuid  + "\", \"creatorUuid\": \"" + creatorUuid+ "\", \"date\": \"" + date.getTime() + "\", \"description\": \"" + description + "\", \"level\": \"" + level + "\", \"status\": \"" + status + "\", \"typeUuid\": \"" + typeUuid + "\", \"x\": \"" + x + "\", \"y\": \"" + y + "\"}";
+		String json = "{\"userGeneratedId\": \"" + invalidUserGeneratedId  + "\", \"caUuid\": \"" + caUuid  + "\", \"date\": \"" + date.getTime() + "\", \"description\": \"" + description + "\", \"level\": \"" + level + "\", \"status\": \"" + status + "\", \"typeUuid\": \"" + typeUuid + "\", \"x\": \"" + x + "\", \"y\": \"" + y + "\"}";
         HttpEntity entity = new ByteArrayEntity(json.getBytes());
         put.setEntity(entity);
         
@@ -324,7 +378,7 @@ public class ConnectAlertTest {
 		
 		put.addHeader("Authorization", "basic " + info);
 		put.addHeader("Content-Type", SmartConnect.MT_APPLICATION_JSON);
-		String json = "{\"userGeneratedId\": \"" + invalidUserGeneratedId  + "\", \"caUuid\": \"" + caUuid  + "\", \"creatorUuid\": \"" + creatorUuid+ "\", \"date\": \"" + date.getTime() + "\", \"description\": \"" + description + "\", \"level\": \"" + level + "\", \"status\": \"" + status + "\", \"typeUuid\": \"" + invalidTypeUuid + "\", \"x\": \"" + x + "\", \"y\": \"" + y + "\"}";
+		String json = "{\"userGeneratedId\": \"" + invalidUserGeneratedId  + "\", \"caUuid\": \"" + caUuid  + "\", \"date\": \"" + date.getTime() + "\", \"description\": \"" + description + "\", \"level\": \"" + level + "\", \"status\": \"" + status + "\", \"typeUuid\": \"" + invalidTypeUuid + "\", \"x\": \"" + x + "\", \"y\": \"" + y + "\"}";
         HttpEntity entity = new ByteArrayEntity(json.getBytes());
         put.setEntity(entity);
         
@@ -335,7 +389,7 @@ public class ConnectAlertTest {
 					throws ClientProtocolException, IOException {
 				String userObject = EntityUtils.toString(response.getEntity());
 				System.out.println("7) (expected not found)" + userObject);
-				Assert.assertEquals("Invalid Alert Type", HttpURLConnection.HTTP_NOT_FOUND, 
+				Assert.assertEquals("Invalid Alert Type", HttpURLConnection.HTTP_BAD_REQUEST, 
 						response.getStatusLine().getStatusCode());
 				return null;
 			}
@@ -358,7 +412,7 @@ public class ConnectAlertTest {
 			public String handleResponse(HttpResponse response)
 					throws ClientProtocolException, IOException {
 				String userObject = EntityUtils.toString(response.getEntity());
-				System.out.println("8)(expected not found & blank=>)" + userObject);
+				System.out.println("8)(should be blank)" + userObject);
 				Assert.assertEquals("not found expected", HttpURLConnection.HTTP_NOT_FOUND, 
 						response.getStatusLine().getStatusCode());
 				return null;
@@ -394,9 +448,6 @@ public class ConnectAlertTest {
 					}
 				}
 				Assert.assertEquals("Json expected", SmartConnect.MT_APPLICATION_JSON, contentType);
-				
-				ObjectMapper mapper = new ObjectMapper();
-				JsonNode n = mapper.readTree(userObject);
 				return null;
 			}
 		});

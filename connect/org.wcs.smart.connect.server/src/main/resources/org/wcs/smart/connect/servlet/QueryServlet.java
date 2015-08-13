@@ -30,7 +30,7 @@ public class QueryServlet extends HttpServlet {
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{
-			QueryManager.INSTANCE.findQuery(uuid, session);
+		//	QueryManager.INSTANCE.findQuery(uuid, session);
 		}finally{
 			session.getTransaction().commit();
 		}

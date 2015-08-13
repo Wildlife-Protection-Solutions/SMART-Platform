@@ -8,6 +8,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/users.js"></script>
+
 <title>SMART Connect - Users</title>
 </head>
 <body>

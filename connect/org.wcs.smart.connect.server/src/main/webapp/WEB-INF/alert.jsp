@@ -6,11 +6,12 @@
 
 <%@include file="includes.jsp" %>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/alert.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 <script type="text/javascript" >
 	var mobile="${mobile}";
 	var tab = ${tab};
-	
 </script>
 <script src="https://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-google.js"></script>
@@ -24,6 +25,10 @@
 
 <div id= "main">
   <div class="pageheader">Alerts</div>
+  <div>
+    <div id="message" class="msgsection"></div>
+    <div id="error" class="errorsection"></div>
+  </div>
   <article id="tabs" class="tabs">
 
 	<section id="tab1" class="">
@@ -34,7 +39,7 @@
 	<section id="tab2" class="">
 		<h2 id="tab2text" class=""><a onclick="settab(2)" href="#tab2">Create New Alert</a></h2>
 		<p>
-		<form action="${createAlert}" method="POST" id="newAlertForm">
+		<form id="newalertform">
      		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block">Conservation Area:</label>
      		<select name="alert_ca" class="block formtext">
@@ -46,12 +51,12 @@
      		<label class="top-spacer block">Type:</label>
      		<select name="alert_type" class="block formtext">
      		<c:forEach var="type" items="${alertTypes}" varStatus="count">
-     			<option value="${type.getKey()}"> ${type.getLabel()} </option> 
+     			<option value="${type.getUuid()}"> ${type.getLabel()} </option> 
 			</c:forEach> 
      		</select>
 
 			<label class="top-spacer block">Event Importance:</label>
-			<select class="block formtext">
+			<select name="level" class="block formtext">
 			<option value=1>1(Highest)</option>
 			<option value=2>2</option>
 			<option value=3>3</option>
@@ -59,16 +64,13 @@
 			<option value=5>5(Lowest)</option>
 			</select>
 			
-			<label class="top-spacer block">Longitude:</label><input id=long type="text" name="long">
-			<label class="top-spacer block">Latitude:</label><input id=lat type="text" name="lat" >
+			<label class="top-spacer block">Longitude:</label><input id="long" type="text" name="long">
+			<label class="top-spacer block">Latitude:</label><input id="lat" type="text" name="lat" >
 			
 			
 			<label class="top-spacer block">Description:</label>
-			<textarea name="alert_description" rows="5" cols="30">
-			
-			</textarea>
-
-     		<input class="button block top-spacer" type="submit" value="Submit"/>
+			<textarea name="alert_description" rows="5" cols="30"></textarea>
+   			<input class="button block top-spacer" type="submit" value="   Submit    "/>
     	</form>
 		</p>
 	</section>

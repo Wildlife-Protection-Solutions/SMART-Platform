@@ -43,8 +43,6 @@ public class Alert extends UuidItem{
 	private String userGeneratedId; 
 	private Date date;
 	private String description;
-//	@JsonDeserialize(using = CustomUuidDeserializer.class)
-//	@JsonSerialize(using = CustomUuidSerializer.class)
 	private Integer level;
 	private AlertStatusEnum status;
 	private Double x;

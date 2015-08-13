@@ -2,6 +2,7 @@ package org.wcs.smart.connect.api;
 
 import java.net.HttpURLConnection;
 import java.text.MessageFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,10 +31,12 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 import com.sun.istack.internal.logging.Logger;
+import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 
 
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlert.PATH)
@@ -138,35 +141,34 @@ public class ConnectAlert extends HttpServlet {
 			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
 		}
 		
-		//validate type
-		err = validateAlertType(newAlert.getTypeUuid());
-		if (err != null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
-		}
-		
-		//validate alert CA UUID
-		err = validateCa(newAlert.getCaUuid());
-		if (err != null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
-		}
-		
-		//validate x,y are Lat Long
-		if (newAlert.getX() > 180 || newAlert.getX() < -180 || newAlert.getY() > 90 || newAlert.getY() < -90){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid Longitude or Latitude :" + newAlert.getX() + "," + newAlert.getY() );
-		}
-		
+		validateAlertValues(newAlert);
 		
 		Alert a = new Alert();
-		a.setDate(newAlert.getDate());
+
+		//default to now if no date given 
+		if(newAlert.getDate() == null){
+			a.setDate(new Date());
+		}else{
+			a.setDate(newAlert.getDate());
+		}
+		
+		//default to Active for new alerts 
+		if(newAlert.getStatus() == null){
+			a.setStatus(AlertStatusEnum.ACTIVE);
+		}else{
+			a.setStatus(newAlert.getStatus());
+		}
+		
 		a.setDescription(newAlert.getDescription());
 		a.setLevel(newAlert.getLevel());
-		a.setStatus(newAlert.getStatus());
+
 		a.setUserGeneratedId(userGenId);
 		a.setX(newAlert.getX());
 		a.setY(newAlert.getY());
 		a.setCaUuid(newAlert.getCaUuid());
 		a.setTypeUuid(newAlert.getTypeUuid());
-		a.setCreatorUuid(newAlert.getCreatorUuid());
+		
+		a.setCreatorUuid(getCreatorUuid());
 		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -191,12 +193,13 @@ public class ConnectAlert extends HttpServlet {
 		return a;
 	}
  
-	
+
 	@PUT
     @Path("/{usergenid}")
     public Alert updateUser(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
     	validateUser();
-		
+    	validateAlertValues(newAlert);
+    	
     	Alert toUpdate = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -343,6 +346,42 @@ public class ConnectAlert extends HttpServlet {
     	}
 		return null;
 	}
+    private UUID getCreatorUuid() {
+    	SmartUser user;
+    	
+    	Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
+		}finally{
+			s.getTransaction().commit();
+		}
+		
+		return user.getUuid();
+	}
 
-
+    private void validateAlertValues(Alert newAlert) {
+		//validate type
+		String err = validateAlertType(newAlert.getTypeUuid());
+		if (err != null){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+		}
+		
+		//validate alert CA UUID
+		err = validateCa(newAlert.getCaUuid());
+		if (err != null){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+		}
+		
+		//validate x,y are valid Lat-Long values
+		if (newAlert.getX() > 180 || newAlert.getX() < -180 || newAlert.getY() > 90 || newAlert.getY() < -90 || newAlert.getY() == null || newAlert.getX() == null){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid Longitude or Latitude :" + newAlert.getX() + "," + newAlert.getY() );
+		}
+		
+		//validate Level
+		if (newAlert.getLevel() == null || newAlert.getLevel() < -32768 || newAlert.getLevel() > 32767){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid Level (must be a an integer between -32768 and 32767):" + newAlert.getLevel());
+		}
+		
+	}
 }

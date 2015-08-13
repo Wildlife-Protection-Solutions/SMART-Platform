@@ -1,5 +1,7 @@
-
-//Write parameters into javascript variables
+var ALERT_URL = "../api/connectalert/";
+var USER_URL = "../api/connectuser/";
+var ACTION_URL = USER_URL + "actions/";
+var allActions = null;
 
 
 function initializePage(){
@@ -34,14 +36,94 @@ function initializePage(){
 	*/
     
     
-    //intialize the tab styles
+    //initialize the tab styles
     settab(tab);
     
     //set the lat/long if we can get them from the device automatically
     if (navigator.geolocation) {
     	navigator.geolocation.getCurrentPosition(showLatLong, showError)
     }
+    
+    //new alert dialog
+	document.querySelector("#newalertform").onsubmit = createNewAlert;
 	
+}
+//creates a new user
+function createNewAlert() {
+	var cauuid = document.querySelector("select[name=alert_ca]").value;
+	var alerttypeuuid = document.querySelector("select[name=alert_type]").value;
+	var long = document.querySelector("input[name=long]").value;
+	var lat = document.querySelector("input[name=lat]").value;
+	var desc = document.querySelector("textarea[name=alert_description]").value;
+	var level = document.querySelector("select[name=level]").value;
+	
+	var error = "";
+	if (long > 180 || long < -180 ) {
+		error = "Invalid Longitude (-180 < Long < 180)";
+	}else if (lat > 90 || lat < -90){
+		error = "Invalid Latitude(-90 < Lat < 90)";
+	}
+
+	if (error.length > 0){
+		document.querySelector("#dialogerror").innerHTML = error;
+		document.querySelector("#dialogerror").style.display = "block";
+		return false;
+	}
+	usergenid = Math.random() * 1000000000;
+	usergenid = Math.round(usergenid);
+	
+	
+	var jsonData = {
+		"userGeneratedId" : usergenid,
+		"caUuid" : cauuid,
+		"description" : desc,
+		"typeUuid" : alerttypeuuid,
+		"x" : long,
+		"y" : lat,
+		"level" : level
+	};
+
+	//make ajax call
+	hideError();
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	var oReq = new XMLHttpRequest();
+	oReq.onload = alertCreated;
+	oReq.open("POST", ALERT_URL + encodeURIComponent(usergenid), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
+//callback for creating user 
+function alertCreated() {
+	if (this.status == 201) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("Alert created");
+	} else {
+		displayError(parseError("Error creating Alert", this.responseText));
+	}
+
+}
+/* loads all user actions from server */
+function loadActions(){
+	if (allActions != null) return;
+	var oReq = new XMLHttpRequest();
+	oReq.onload = setActions;
+	oReq.open("Get", ACTION_URL, true);
+	oReq.send();	
+}
+
+/* callback from loadActions to cache user actions */
+function setActions(){
+	if (this.status != 200){
+		//do something with error
+	}else{
+		allActions = JSON.parse(this.responseText);
+		updateActionsDropDown();
+	}
 }
 
 function showLatLong(position){
@@ -106,3 +188,24 @@ function remove_class(id, classname){
 	document.getElementById(id).className = document.getElementById(id).className.replace( regex , '' )
 }
 
+
+/* add alert action */
+function createAlert(username){
+	var ddactions = document.querySelector("#actionKey");
+	var ddresources = document.querySelector("#actionResourceKey");
+	
+	var selectedActionKey = ddactions.options[ddactions.selectedIndex].value;
+	var selectedResourceKey = ddresources.options[ddresources.selectedIndex].value;
+	
+	hideInfo();
+	hideError();
+	var oReq = new XMLHttpRequest();
+	oReq.onload = actionAdded;
+	oReq.smartuser = username;
+	var loc = ACTION_URL + encodeURIComponent(username) + "/" + encodeURIComponent(selectedActionKey);
+	if (selectedResourceKey.length > 0){
+		loc += "/" + selectedResourceKey;
+	}
+	oReq.open("POST", loc, true);
+	oReq.send();
+}
