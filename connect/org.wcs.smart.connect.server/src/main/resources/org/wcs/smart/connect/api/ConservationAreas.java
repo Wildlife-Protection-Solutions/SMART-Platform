@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.api;
 
 import java.io.File;
@@ -42,6 +63,12 @@ import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 
+/**
+ * Smart Connect REST APU for conservation areas.
+ * 
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConservationAreas.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
@@ -56,6 +83,16 @@ public class ConservationAreas extends HttpServlet{
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 		
+	/**
+	 * Configure the class parameters.  During normal use this will
+	 * be done automatically.  This is only when you want to user this class
+	 * outside for the REST workflow.
+	 * 
+	 * @param context
+	 * @param headers
+	 * @param response
+	 * @param request
+	 */
 	public void configure(ServletContext context, HttpHeaders headers, HttpServletResponse response, HttpServletRequest request){
 		this.context = context;
 		this.headers= headers;
@@ -63,6 +100,9 @@ public class ConservationAreas extends HttpServlet{
 		this.response = response;
 	}
 	
+	/*
+	 * Ensures the current user has read access.
+	 */
 	private void validateRead(ConservationAreaInfo info, Session s){
 		if (!SecurityManager.INSTANCE.canAccess(s, 
 				request.getUserPrincipal().getName(), 
@@ -73,6 +113,9 @@ public class ConservationAreas extends HttpServlet{
 		}
 	}
 	
+	/*
+	 * Ensures the current user had delete access for the given ca.
+	 */
 	private void validateDelete(ConservationAreaInfo info, Session s){
 		if (!SecurityManager.INSTANCE.canAccess(s, 
 				request.getUserPrincipal().getName(), 
@@ -83,6 +126,13 @@ public class ConservationAreas extends HttpServlet{
 		}
 	}
 	
+	/**
+	 * Lists all conservation areas that the current user has access
+	 * to read.
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
     public List<ConservationAreaInfo> getConservationAreas(){
@@ -90,9 +140,7 @@ public class ConservationAreas extends HttpServlet{
 		s.beginTransaction();
 		try{
 			List<ConservationAreaInfo> conservationAreas = new ArrayList<ConservationAreaInfo>();
-			
-			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class)
-					.list();
+			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
 			for (ConservationAreaInfo ca : db){
 				//check to determine if ca is accessable by current user
 				try{
@@ -116,6 +164,11 @@ public class ConservationAreas extends HttpServlet{
 	/*
 	 * TODO: this might need to be done as a background process incase
 	 * deleting takes a long time
+	 */
+	/**
+	 * Deletes a given conservation area.
+	 * 
+	 * @param caUuid
 	 */
 	@DELETE
     @Path("/{cauuid}")
@@ -157,6 +210,12 @@ public class ConservationAreas extends HttpServlet{
 
 	}
 	
+	/**
+	 * Initiates an upload CA session.
+	 * 
+	 * @param caUuid
+	 * @return
+	 */
 	@POST
 	@Path("/{cauuid}")
 	public String updateNewConservationArea(@PathParam("cauuid") String caUuid){

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -23,7 +23,6 @@ package org.wcs.smart.connect.query.engine;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -33,9 +32,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -85,13 +83,12 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.common.engine.IQueryEngine;
-import org.wcs.smart.query.common.engine.NamedPreparedStatement;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Query engine shared functionality.  Also intitalizes common
- * database tables.
+ * Query engine shared functionality.
+ * 
  * 
  * @author Emily
  *

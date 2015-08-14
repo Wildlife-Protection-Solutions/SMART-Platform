@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.api;
 
 import java.io.File;
@@ -30,9 +51,13 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
+import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.patrol.CsvExporter;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
+import org.wcs.smart.query.common.model.SummaryQuery;
+import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
@@ -41,14 +66,32 @@ import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * SMART Connect Query REST API
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + QueryApi.PATH)
 public class QueryApi extends HttpServlet{
 	
+	private static final long serialVersionUID = 1L;
+
 	public static final String PATH = "query"; //$NON-NLS-1$
 
 	@Context private ServletContext context; 
 	@Context private HttpServletRequest request;
 	
+	/**
+	 * Runs a query and returns the results.
+	 * 
+	 * @param queryUuid
+	 * @param format
+	 * @param start
+	 * @param end
+	 * @param filter
+	 * @param delimiter
+	 * @return
+	 */
 	@GET
     @Path("/{queryuuid}")
 	public Response getQueryResults(@PathParam("queryuuid") String queryUuid, 
@@ -131,11 +174,19 @@ public class QueryApi extends HttpServlet{
 			try{
 				IQueryResult result = engine.executeQuery(query, params);
 			
-				if (format.equalsIgnoreCase("csv") 
-						&& result instanceof IDbTableResultSet
-						&& query instanceof SimpleQuery){
+				if (format.equalsIgnoreCase("csv")){
 					CsvExporter exporter = new CsvExporter(f, delimiter.charAt(0),request.getLocale());
-					exporter.exportResults((SimpleQuery)query, (IDbTableResultSet)result, s);
+				
+					if (result instanceof IDbTableResultSet
+						&& query instanceof SimpleQuery){
+						exporter.exportResults((SimpleQuery)query, (IDbTableResultSet)result, s);
+					}else if (result instanceof IMemoryTableResultSet
+						&& query instanceof GriddedQuery){
+						exporter.exportResults((SimpleQuery)query, (IDbTableResultSet)result, s);
+					}else if (result instanceof SummaryQueryResult
+						&& query instanceof SummaryQuery){
+						exporter.exportResults((SummaryQuery)query, (SummaryQueryResult)result, s);
+					}
 				}else{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, "Query export not implemented for select query type and format.");
 				}

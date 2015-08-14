@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.query;
 
 import java.sql.SQLException;
@@ -44,6 +65,12 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
+/**
+ * Query manager for SMART Connect queries.
+ * 
+ * @author Emily
+ *
+ */
 public enum QueryManager {
 
 	INSTANCE;
@@ -93,7 +120,12 @@ public enum QueryManager {
 		RecievedDateFilter.INSTANCE
 	};
 	
-	//4c4facd2-50bc-4533-8b30-26dc84828e61
+	/**
+	 * Find a given query based on the uuid.
+	 * @param uuid
+	 * @param session
+	 * @return
+	 */
 	public Query findQuery(UUID uuid, Session session){
 		for (Class<?> table : queryClasses){
 			Query q = (Query) session.get(table, uuid);
@@ -104,6 +136,14 @@ public enum QueryManager {
 		return null;
 	}
 	
+	/**
+	 * Lists all queries.
+	 * 
+	 * @param session
+	 * @param l
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
 	public List<QueryProxy> getQueries(Session session, final Locale l){
 		List<QueryProxy> proxies = new ArrayList<QueryProxy>();
 		for (Class<? extends Query> q : queryClasses){
@@ -129,6 +169,14 @@ public enum QueryManager {
 		return proxies;
 	}
 	
+	/**
+	 * Find the query engine for running the given query.
+	 * 
+	 * @param query
+	 * @return
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 */
 	public AbstractQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
 		for (AbstractQueryEngine e : engines){
 			if (e.canExecute(query.getTypeKey())){
@@ -138,6 +186,11 @@ public enum QueryManager {
 		return null;
 	}
 	
+	/**
+	 * Finds all valid date field filters.
+	 * @param key
+	 * @return
+	 */
 	public IDateFieldFilter findDateField(String key){
 		for (IDateFieldFilter field : dateFields){
 			if (field.getKey().equalsIgnoreCase(key)){
@@ -147,16 +200,19 @@ public enum QueryManager {
 		return null;
 	}
 	
+	/**
+	 * Determines the maximum category depth for a given conservation area.
+	 * abc. = 1
+	 * abc.def. = 2
+	 * 
+	 * @param session
+	 * @param caUuid
+	 * @return
+	 * @throws SQLException
+	 */
 	public int getCategoryDepth(Session session, UUID caUuid) throws SQLException{
 		org.hibernate.Query q = session.createQuery("SELECT max(length(hkey) - length(replace(hkey, '.', ''))) FROM Category WHERE conservationArea.uuid = :cauuid");
 		q.setParameter("cauuid", caUuid);
-		return ((Integer)q.uniqueResult());
-//		PreparedStatement ps = c.prepareStatement("SELECT max(length(hkey) - length(replace(hkey, '.', ''))) FROM Category WHERE ca_uuid = ?");
-//		ps.setObject(1, caUuid);
-//		ResultSet rs = ps.executeQuery();
-//		if(rs.next()){
-//			return rs.getInt(1);
-//		}
-//		return 0;
+		return ((Integer)q.uniqueResult() + 1);
 	}
 }

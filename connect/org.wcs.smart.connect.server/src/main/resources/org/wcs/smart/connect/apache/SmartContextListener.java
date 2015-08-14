@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.apache;
 
 import java.io.File;
@@ -9,6 +30,28 @@ import javax.servlet.annotation.WebListener;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.i81n.labels.EntityLabelProvider;
+import org.wcs.smart.connect.i81n.labels.EntityQueryLabelProvider;
+import org.wcs.smart.connect.i81n.labels.ErLabelProvider;
+import org.wcs.smart.connect.i81n.labels.GridQueryColumnLabelProvider;
+import org.wcs.smart.connect.i81n.labels.IncidentLabelProvider;
+import org.wcs.smart.connect.i81n.labels.IntelligenceLabelProvider;
+import org.wcs.smart.connect.i81n.labels.IntelligenceQueryLabelProvider;
+import org.wcs.smart.connect.i81n.labels.ObservationQueryLabelProvider;
+import org.wcs.smart.connect.i81n.labels.OperatorLabelProvider;
+import org.wcs.smart.connect.i81n.labels.PatrolLabelProvider;
+import org.wcs.smart.connect.i81n.labels.PatrolQueryLabelProvider;
+import org.wcs.smart.connect.i81n.labels.PlanLabelProvider;
+import org.wcs.smart.connect.i81n.labels.QueryDateLabelProvider;
+import org.wcs.smart.connect.i81n.labels.SmartLabelProvider;
+import org.wcs.smart.connect.i81n.labels.SurveyQueryLabelProvider;
+import org.wcs.smart.connect.query.PatrolContributionFinder;
+import org.wcs.smart.connect.query.WaypointSourceEngine;
+import org.wcs.smart.connect.query.columns.EntityQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.IntelligenceQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.ObservationQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.PatrolQueryColumnProvider;
+import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
 import org.wcs.smart.entity.IEntityLabelProvider;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
 import org.wcs.smart.entity.query.IEntityQueryLabelProvider;
@@ -30,29 +73,15 @@ import org.wcs.smart.plan.IPlanLabelProvider;
 import org.wcs.smart.query.model.IGridQueryColumnLabelProvider;
 import org.wcs.smart.query.model.filter.IOperatorLabelProvider;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
-import org.wcs.smart.shared.PatrolContributionFinder;
-import org.wcs.smart.shared.WaypointSourceEngine;
-import org.wcs.smart.shared.labels.EntityLabelProvider;
-import org.wcs.smart.shared.labels.EntityQueryLabelProvider;
-import org.wcs.smart.shared.labels.ErLabelProvider;
-import org.wcs.smart.shared.labels.GridQueryColumnLabelProvider;
-import org.wcs.smart.shared.labels.IncidentLabelProvider;
-import org.wcs.smart.shared.labels.IntelligenceLabelProvider;
-import org.wcs.smart.shared.labels.IntelligenceQueryLabelProvider;
-import org.wcs.smart.shared.labels.ObservationQueryLabelProvider;
-import org.wcs.smart.shared.labels.OperatorLabelProvider;
-import org.wcs.smart.shared.labels.PatrolLabelProvider;
-import org.wcs.smart.shared.labels.PatrolQueryLabelProvider;
-import org.wcs.smart.shared.labels.PlanLabelProvider;
-import org.wcs.smart.shared.labels.QueryDateLabelProvider;
-import org.wcs.smart.shared.labels.SmartLabelProvider;
-import org.wcs.smart.shared.labels.SurveyQueryLabelProvider;
-import org.wcs.smart.shared.query.columns.EntityQueryColumnProvider;
-import org.wcs.smart.shared.query.columns.IntelligenceQueryColumnProvider;
-import org.wcs.smart.shared.query.columns.ObservationQueryColumnProvider;
-import org.wcs.smart.shared.query.columns.PatrolQueryColumnProvider;
-import org.wcs.smart.shared.query.columns.SurveyQueryColumnProvider;
 
+/**
+ * Web listener to initialize the SMART Context on startup.  This configures
+ * the various label providers and other items required for supporting query
+ * functions and other functions that use the smart desktop libraries.
+ * 
+ * @author Emily
+ *
+ */
 @WebListener
 public class SmartContextListener implements ServletContextListener{
 

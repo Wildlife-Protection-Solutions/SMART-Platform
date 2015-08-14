@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -67,7 +67,6 @@ import org.wcs.smart.patrol.query.engine.grids.PatrolCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolDayCntValueComputer;
 import org.wcs.smart.patrol.query.engine.grids.PatrolExistsCellMerger;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.common.engine.AddCellMerger;
@@ -79,8 +78,6 @@ import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridQueryResultMetadata;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.Tile;
 import org.wcs.smart.query.model.Query;

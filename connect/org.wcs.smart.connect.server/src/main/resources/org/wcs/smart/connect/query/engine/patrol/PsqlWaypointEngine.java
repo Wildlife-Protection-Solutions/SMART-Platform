@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -25,10 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
@@ -37,8 +34,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
@@ -47,28 +42,16 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
-import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
-import org.wcs.smart.util.UuidUtils;
 
 /**
- * Query engine for executing lazy queries using derby.
- * This engines create temporary tables that one to one correspond with the table
- * that user see. {@link DerbyPagedObservationResult} obtains the name of this table and is
- * responsible for all other operations (fetching/sorting/deleting tables)
- * 
- * @author elitvin
- * @since 1.0.0
+ * Patorl waypoint query engine.
  */
 public class PsqlWaypointEngine extends AbstractQueryEngine {
 	private final Logger logger = Logger.getLogger(PsqlWaypointEngine.class.getName());
@@ -160,7 +143,7 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 			}
 
 		});
-		WaypointQueryResult result = new WaypointQueryResult(this);
+		PatrolWaypointQueryResult result = new PatrolWaypointQueryResult(this);
 		return result;
 	}
 

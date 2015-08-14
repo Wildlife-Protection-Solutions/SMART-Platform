@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,10 +44,11 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.connect.query.ListItem;
-import org.wcs.smart.connect.query.SummaryItemLabelProvider;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.ListItem;
+import org.wcs.smart.connect.query.engine.SummaryItemLabelProvider;
+import org.wcs.smart.intelligence.query.IntelligencePatrolGroupBy;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -62,7 +64,6 @@ import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
@@ -102,8 +103,7 @@ import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Query engine for executing summary
- * queries.
+ * Patrol summary query engine.
  * 
  * @author egouge
  * @since 1.0.0
@@ -316,8 +316,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			sql.append("ALTER TABLE "); //$NON-NLS-1$
 			sql.append(tableName);
 			sql.append(" ADD column cat_hkey varchar(32672)"); //$NON-NLS-1$
-			//QueryPlugIn.logSql(sql.toString());
-			
+			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 			
 			sql = new StringBuilder();
@@ -340,7 +339,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(WaypointObservation.class));
 			sql.append(".category_uuid )"); //$NON-NLS-1$
 			
-			//QueryPlugIn.logSql(sql.toString());
+			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 		}
 	}
@@ -597,7 +596,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 		}
 		
 		//do something here with sql
-		//QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 		return createValueResults(rs, groupBy, patrolItem.asString());
 	}
@@ -690,7 +689,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			}
 
 			// do something here with sql
-			//QueryPlugIn.logSql(sql.toString());
+			logger.finest(sql.toString());
 			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		} else if (attributeItem.getAttributeType() == AttributeType.LIST) {
@@ -777,7 +776,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			}
 			
 			//do something here with sql
-			//QueryPlugIn.logSql(sql.toString());
+			logger.finest(sql.toString());
 			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		} else if (attributeItem.getAttributeType() == AttributeType.TREE) {
@@ -868,8 +867,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 				sql.append(groupBySql);
 			}
 			
-			//do something here with sql
-			//QueryPlugIn.logSql(sql.toString());
+			logger.finest(sql.toString());
 			ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 			return createValueResults(rs, groupBy, attributeItem.asString());
 		}
@@ -901,7 +899,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 						key += rs.getString(rsindex++);
 						break;
 					case BYTE:
-						key += UuidUtils.uuidToString(UuidUtils.byteToUUID(rs.getBytes(rsindex++)));
+						key += UuidUtils.uuidToString((UUID)rs.getObject(rsindex++));
 						break;
 					case DATE:
 						key += rs.getDate(rsindex++).toString();
@@ -1068,8 +1066,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			sql.append(groupBySql);
 		}
 		
-		//do something here with sql
-		//QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();
 		return createValueResults(rs, groupBy, categoryItem.asString());
 	}
@@ -1283,7 +1280,16 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 				fromSql.append(".keyid = " + p1); //$NON-NLS-1$
 				
 			}else if (gb instanceof IExtensionGroupBy){
-				//TODO:
+				if (gb instanceof IntelligencePatrolGroupBy){
+					String intelPrefix = "intel_" + itemcnt; //$NON-NLS-1$
+					groupBySql.append("i_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append(" CASE WHEN " + intelPrefix + ".patrol_uuid IS NULL THEN 'nm' else 'm' END as i_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+					fromSql.append(" LEFT JOIN "); //$NON-NLS-1$
+					fromSql.append(" smart.patrol_intelligence " + intelPrefix); //$NON-NLS-1$
+					fromSql.append(" on "); //$NON-NLS-1$
+					fromSql.append("temp.p_uuid = " + intelPrefix + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
+					
+				}
 //				PatrolContributionFinder.addGroupBySql((IExtensionGroupBy)gb, fromSql, 
 //						groupBySql, groupByInnerSql, 
 //						value, caFilter, itemcnt, this);
@@ -1344,8 +1350,8 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			return "sum(distance)"; //$NON-NLS-1$
 		case NUM_HOURS:
 		case NUM_HOURS_TOTAL:
-			if (!hasAreaGroupBy){
-				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end / 60.0))"; //$NON-NLS-1$
+			if (!hasAreaGroupBy){			
+				return "sum((EXTRACT(EPOCH FROM  pld_end_time - pld_start_time) / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end / 60.0))"; //$NON-NLS-1$
 			}else{
 				return "sum(hours)"; //$NON-NLS-1$
 			}
@@ -1354,7 +1360,7 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 		case MAN_HOURS:
 		case MAN_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
-				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end  / 60.0))"; //$NON-NLS-1$
+				return "sum((EXTRACT(EPOCH FROM  pld_end_time - pld_start_time) / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end  / 60.0))"; //$NON-NLS-1$
 			}else{
 				return "sum(hours)"; //$NON-NLS-1$
 			}
@@ -1618,8 +1624,8 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		}else{
-			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as uuid),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as uuid),");	//wpob_uuid //$NON-NLS-1$
 		}
 		sql.append(tablePrefix(PatrolLegMember.class) + "_leader.employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegMember.class) + "_pilot.employee_uuid "); //$NON-NLS-1$
@@ -1662,15 +1668,10 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 		super.buildTemporaryTableIndexes(c, tableName);
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		//QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
 
-	
-	public PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session)
-			throws SQLException {
-		return null;
-	}
 
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {

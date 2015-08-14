@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -56,7 +56,7 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 
 /**
- *
+ * Patrol Observation query engine.
  * @author egouge
  * @since 1.0.0
  */
@@ -121,7 +121,7 @@ public class PsqlObservationEngine extends AbstractQueryEngine {
 
 		});
 		
-		ObservationQueryResult results = new ObservationQueryResult(this);
+		PatrolObservationQueryResult results = new PatrolObservationQueryResult(this);
 		return results;
 	}
 
