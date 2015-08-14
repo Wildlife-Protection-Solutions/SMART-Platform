@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.LabelConstants;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -258,7 +257,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @param session
 	 * @param uuid attribute uuid
 	 * @param level tree node level
-	 * @param active if only active tree nodes should be loaded
+	 * @param active ignored
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")

@@ -190,16 +190,20 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * 
 	 * @param session
 	 * @param level
-	 * @param active if only active tree nodes should be loaded
+	 * @param active if only active tree nodes should be loaded; if false all nodes will be returned
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, Attribute attribute, int level, boolean active){
-		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level and isActive = :active"; //$NON-NLS-1$
+		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
+		if (active){
+			query += " and isActive = :active"; //$NON-NLS-1$ 
+		}
+		
 		Query q = session.createQuery(query);
 		q.setParameter("uuid", attribute.getUuid()); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
-		q.setParameter("active", active); //$NON-NLS-1$
+		if (active) q.setParameter("active", active); //$NON-NLS-1$
 		List<AttributeTreeNode> nodes = q.list();
 		return nodes;
 	}

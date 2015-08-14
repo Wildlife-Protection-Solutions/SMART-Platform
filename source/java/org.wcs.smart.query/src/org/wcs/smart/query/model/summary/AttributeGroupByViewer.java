@@ -90,7 +90,7 @@ public class AttributeGroupByViewer extends AbstractGroupByViewer<AttributeGroup
 				for (int i = 0; i < filterHkeys.length; i ++){
 					keys.add(filterHkeys[i]);
 				}
-				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att, groupBy.getTreeLevel(), true)){
+				for(AttributeTreeNode child : QueryDataModelManager.getInstance().getAttributeTreeNodes(session, att, groupBy.getTreeLevel(), false)){
 					if (keys.contains(child.getHkey())){
 						items.add(new ListItem(null, child.getName(), child.getHkey()));	
 					}
