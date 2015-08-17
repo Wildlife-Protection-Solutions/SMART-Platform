@@ -44,6 +44,8 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.model.SurveyDesign;
 
 /**
  * Builds specific survey objects that suitable for further import
@@ -61,11 +63,13 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 	}
 
 	private void initMetaData(CyberTrackerSurvey ctSurvey, Session session) {
+		Map<String, E> eMap = ctSurvey.getElementsMap();
+		recordSurveyDesign(ctSurvey, eMap, session);
+		
 		List<S> patrolData = ctSurvey.getSData();
 		if (patrolData.isEmpty())
 			return;
 		
-		 Map<String, E> eMap = ctSurvey.getElementsMap();
 		S s = patrolData.get(0); //init metadata from the first sight (as all other sighs MUST have the same metadata by design)
 		Date date = null;
 		Time time = null;
@@ -143,6 +147,22 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			}
 		}
 		ctSurvey.setEndDate(AbstractSmartImporter.combine(date, time));
+	}
+	
+	private void recordSurveyDesign(CyberTrackerSurvey ctSurvey, Map<String, E> eMap, Session session) {
+		for (E e : eMap.values()) {
+			if (SurveyScreensUtil.RESULT_SURVEY_DESIGN.equals(e.getN())) {
+				String key = e.getTag0();
+				SurveyDesign sd = SurveyHibernateManager.getInstance().getSurveyDesign(key, session);
+				if (sd != null) {
+					ctSurvey.setSurveyDesign(sd);
+				} else {
+					ctSurvey.addError(SurveyMeta.SURVEY_DESIGN, MessageFormat.format("Survey Design not found. Conservation area doesn''t contain survey design with key = ''{0}''.", e.getN()));
+				}
+				return;
+			}
+		}
+		ctSurvey.addError(SurveyMeta.SURVEY_DESIGN, "Reference to Survey Design is missing in imported file");
 	}
 	
 	private void recordSurveyData(CyberTrackerSurvey ctSurvey, E i, String v, Map<String, E> eMap, Session session) {

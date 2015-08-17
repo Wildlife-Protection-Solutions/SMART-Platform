@@ -23,8 +23,13 @@ package org.wcs.smart.cybertracker.survey.export;
 
 import org.wcs.smart.cybertracker.export.CyberTrackerConfExporter;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
+import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
+import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
  * Exporter for Surveys using {@link ConfigurableModel} to CyberTracker application
@@ -37,5 +42,22 @@ public class SurveyCTExporter extends CyberTrackerConfExporter {
 	@Override
 	protected ScreensUtil createScreensUtil(CyberTrackerUtil ctu) {
 		return new SurveyScreensUtil(ctu);
+	}
+	
+	@Override
+	protected void processExportSource(Elements elems, Object exportSource) {
+		super.processExportSource(elems, exportSource);
+		CyberTrackerId id = new CyberTrackerId();
+		ElementsUtil.addElementsItem(elems, SurveyScreensUtil.RESULT_SURVEY_DESIGN, id.getItemId(), getSourceKey(exportSource));
+		
+	}
+	
+	private String getSourceKey(Object src) {
+		if (src instanceof SurveyDesignEditorInput) {
+			return ((SurveyDesignEditorInput) src).getSurveyDesignKey();
+		} else if (src instanceof SurveyDesign) {
+			return ((SurveyDesign) src).getKeyId();
+		}
+		throw new IllegalArgumentException("Unsupported export source object"); //$NON-NLS-1$
 	}
 }
