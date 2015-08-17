@@ -43,6 +43,8 @@ public interface ICyberTrackerData {
 
 	public String getType();
 
+	public String getDisplayType();
+	
 	public String getDetails();
 	
 	public List<S> getSData();

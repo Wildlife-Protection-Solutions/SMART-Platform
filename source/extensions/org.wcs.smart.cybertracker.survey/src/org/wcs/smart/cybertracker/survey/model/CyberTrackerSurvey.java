@@ -121,6 +121,11 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 	}
 
 	@Override
+	public String getDisplayType() {
+		return "Survey";
+	}
+	
+	@Override
 	public String getDetails() {
 		return "MUST BE SOME SURVEY DETAILS!!!";
 	}
