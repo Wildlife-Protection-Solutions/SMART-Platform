@@ -21,15 +21,23 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -41,6 +49,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.IImportEditorContent;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
@@ -49,6 +58,7 @@ import org.wcs.smart.cybertracker.model.ImportError;
 import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
+import org.wcs.smart.er.model.Mission;
 
 /**
  * Provides functionality and GUI that is specific for survey import from CyberTracker.
@@ -57,6 +67,8 @@ import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
  * @since 4.0.0
  */
 public class SurveyCTImportEditorContent implements IImportEditorContent {
+	
+	private MissionImporter missionImporter;
 
 	private Text lblStartDate;
 	private Text lblEndDate;
@@ -236,9 +248,52 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 	}
 
 	@Override
-	public List<ICyberTrackerData> handleAdd(Shell shell, IStructuredSelection selection) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<ICyberTrackerData> handleAdd(Shell shell, final IStructuredSelection selection) {
+		final List<ICyberTrackerData> processedList = new ArrayList<ICyberTrackerData>();
+		MissionSelectorDialog selectorDialog = new MissionSelectorDialog(shell);
+		if (selectorDialog.open() != IDialogConstants.OK_ID) {
+			return processedList;
+		}
+		if (missionImporter == null)
+			missionImporter = new MissionImporter();
+		final List<Mission> addedList = new ArrayList<Mission>();
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell.getDisplay().getActiveShell());
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+					int missionsCount = selection.size();
+					int counter = 1;
+					monitor.beginTask("Adding new missions...", missionsCount);
+					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+						monitor.subTask(MessageFormat.format("Adding mission {0} out of {1}.", counter, missionsCount));
+						CyberTrackerSurvey ctp = (CyberTrackerSurvey) i.next();
+						Mission p = missionImporter.importData(ctp);
+						if (p != null) {
+							addedList.add(p);
+							processedList.add(ctp);
+						}
+						monitor.worked(1);
+						counter++;
+					}
+					monitor.done();
+				}
+			});
+		} catch (Exception e) {
+			CyberTrackerPlugIn.displayError("Error","Add mission operation was aborted", e);
+		}
+		
+		if (!addedList.isEmpty()) {
+			String ids = ""; //$NON-NLS-1$
+			for (Iterator<Mission> i = addedList.iterator(); i.hasNext();) {
+				Mission p = i.next();
+				ids += p.getId();
+				if (i.hasNext())
+					ids += ", "; //$NON-NLS-1$
+			}
+			MessageDialog.openInformation(shell, "Add Mission", MessageFormat.format("Mission(s) with following id(s) were successfully added: {0}", ids)); 
+		}
+		return processedList;
 	}
 
 	/**
@@ -255,14 +310,14 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		}
 		public String getText(Object element) {
 			if (element instanceof CyberTrackerSurvey) {
-				CyberTrackerSurvey ctPatrol = (CyberTrackerSurvey) element;
+				CyberTrackerSurvey ctSurvey = (CyberTrackerSurvey) element;
 				switch (column) {
-				case START_DATE:return dateAsString(ctPatrol.getStartDate());
-				case END_DATE: 	return dateAsString(ctPatrol.getEndDate());
-				case COMMENT:	return ctPatrol.getComment();
-				case LEADER:	return ctPatrol.getCtLeader();
-				case MEMBERS:	return asString(ctPatrol.getCtMembers(), "; "); //$NON-NLS-1$
-				case SIGHT_COUNT:return String.valueOf(ctPatrol.getSData().size());
+				case START_DATE:return dateAsString(ctSurvey.getStartDate());
+				case END_DATE: 	return dateAsString(ctSurvey.getEndDate());
+				case COMMENT:	return ctSurvey.getComment();
+				case LEADER:	return ctSurvey.getCtLeader();
+				case MEMBERS:	return asString(ctSurvey.getCtMembers(), "; "); //$NON-NLS-1$
+				case SIGHT_COUNT:return String.valueOf(ctSurvey.getSData().size());
 				}
 			}
 			return "unknown meta: " + column; //$NON-NLS-1$
