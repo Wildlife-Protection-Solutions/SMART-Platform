@@ -233,6 +233,11 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	}
 
 	@Override
+	public String getDisplayType() {
+		return "Patrol";
+	}
+
+	@Override
 	public String getDetails() {
 		// TODO Auto-generated method stub
 		return "PLACE PATROL DETAILS HERE!!!!";
