@@ -132,6 +132,7 @@ public class CyberTrackerConfExporter {
 			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			photoResultIds = new ArrayList<CyberTrackerId>();
 			addPhotoElementIds = ElementsUtil.buildBooleanElements(elements);
+			processExportSource(elements, cmProvider.getExportSource());
 			return performExport(destFolder, monitor);
 		} finally {
 			screensFactory = null;
@@ -150,6 +151,10 @@ public class CyberTrackerConfExporter {
 			session.close();
 			session = null;
 		}
+	}
+
+	protected void processExportSource(Elements elems, Object exportSource) {
+		// nothing by default
 	}
 
 	protected ScreensUtil createScreensUtil(CyberTrackerUtil ctu) {

@@ -31,6 +31,7 @@ import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
+import org.wcs.smart.er.model.SurveyDesign;
 
 /**
  * Model representing single survey imported from CyberTracker application
@@ -43,6 +44,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 	public enum SurveyMeta implements IDataMeta {
 		START_DATE,
 		END_DATE,
+		SURVEY_DESIGN,
 		COMMENT,
 		LEADER,
 		MEMBERS
@@ -51,6 +53,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 	private String comment;
 	private Employee leader;
 	private List<Employee> members;
+	private SurveyDesign surveyDesign;
 	
 	//used only for gui representation after initial load
 	private String ctLeader;
@@ -102,6 +105,14 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 
 	public void setCtMembers(List<String> ctMembers) {
 		this.ctMembers = ctMembers;
+	}
+
+	public SurveyDesign getSurveyDesign() {
+		return surveyDesign;
+	}
+
+	public void setSurveyDesign(SurveyDesign surveyDesign) {
+		this.surveyDesign = surveyDesign;
 	}
 
 	@Override

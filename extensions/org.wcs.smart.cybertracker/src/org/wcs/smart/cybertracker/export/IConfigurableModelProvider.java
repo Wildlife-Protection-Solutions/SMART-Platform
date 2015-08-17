@@ -36,4 +36,6 @@ public interface IConfigurableModelProvider {
 	
 	public ConfigurableModel getConfigurableModel(Session session, IProgressMonitor monitor);
 
+	public Object getExportSource();
+
 }

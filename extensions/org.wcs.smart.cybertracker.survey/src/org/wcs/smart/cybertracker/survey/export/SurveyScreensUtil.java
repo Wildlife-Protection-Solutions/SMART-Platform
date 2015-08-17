@@ -52,6 +52,8 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class SurveyScreensUtil extends ScreensUtil {
 
+	public static final String RESULT_SURVEY_DESIGN = "#SurveyDesign"; //$NON-NLS-1$
+
 	public static final String RESULT_MISSION_LEADER = "#Leader"; //$NON-NLS-1$
 	public static final String RESULT_MISSION_COMMENTS = "#Comments"; //$NON-NLS-1$
 	

@@ -72,12 +72,14 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 
 	private Text lblStartDate;
 	private Text lblEndDate;
+	private Text lblSurveyDesign;
 	private Text lblMembers;
 	private Text lblComment;
 	private Text lblLeader;
 	
 	private ControlDecoration cdStartDate;
 	private ControlDecoration cdEndDate;
+	private ControlDecoration cdSurveyDesign;
 	private ControlDecoration cdMembers;
 	private ControlDecoration cdComment;
 	private ControlDecoration cdLeader;
@@ -123,6 +125,13 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		int indent = 10;
+		toolkit.createLabel(left, "Survey Design");
+		lblSurveyDesign = toolkit.createText(left, ""); //$NON-NLS-1$
+		lblSurveyDesign.setEditable(false);
+		lblSurveyDesign.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)lblSurveyDesign.getLayoutData()).horizontalIndent = indent;
+		cdSurveyDesign = createDecoration(lblSurveyDesign);
+
 		toolkit.createLabel(left, Messages.CTPatrolTableContainer_StartDateLabel);
 		lblStartDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblStartDate.setEditable(false);
@@ -178,7 +187,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 
 	@Override
 	public void inputChanged(Object selection) {
-		Text[] lbls = new Text[]{lblStartDate, lblEndDate, lblComment, lblLeader, lblMembers};
+		Text[] lbls = new Text[]{lblStartDate, lblEndDate, lblComment, lblSurveyDesign, lblLeader, lblMembers};
 		CTSurveyUIMeta[] cols = new CTSurveyUIMeta[]{CTSurveyUIMeta.START_DATE,CTSurveyUIMeta.END_DATE,CTSurveyUIMeta.COMMENT};
 		if (selection instanceof CyberTrackerSurvey){
 			
@@ -190,20 +199,22 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 				((Text)lbls[i]).setText(text);
 			}
 			
-			CyberTrackerSurvey patrol = ((CyberTrackerSurvey) selection);
+			CyberTrackerSurvey survey = ((CyberTrackerSurvey) selection);
 			
-			lblLeader.setText(patrol.getLeader() == null ? "" : patrol.getLeader().getFullLabel()); //$NON-NLS-1$
+			lblLeader.setText(survey.getLeader() == null ? "" : survey.getLeader().getFullLabel()); //$NON-NLS-1$
 			StringBuilder sbMembers = new StringBuilder();
 			for (Employee e : ((CyberTrackerSurvey) selection).getMembers()){
 				sbMembers.append(e.getFullLabel());
 				sbMembers.append("\n"); //$NON-NLS-1$
 			}
 			lblMembers.setText(sbMembers.toString());
+			lblSurveyDesign.setText(survey.getSurveyDesign() == null ? "" : survey.getSurveyDesign().getName()); //$NON-NLS-1$
 			
 			
 			Map<IDataMeta, List<ImportError>> problems = ((CyberTrackerSurvey) selection).getProblems();
 			updateCd(cdStartDate, problems.get(SurveyMeta.START_DATE));
 			updateCd(cdEndDate, problems.get(SurveyMeta.END_DATE));
+			updateCd(cdSurveyDesign, problems.get(SurveyMeta.SURVEY_DESIGN));
 			updateCd(cdComment, problems.get(SurveyMeta.COMMENT));
 			updateCd(cdLeader, problems.get(SurveyMeta.LEADER));
 			updateCd(cdMembers, problems.get(SurveyMeta.MEMBERS));
@@ -212,7 +223,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 			for (int i = 0; i < lbls.length; i ++){
 				((Text)lbls[i]).setText(""); //$NON-NLS-1$
 			}
-			ControlDecoration[] cds = {cdStartDate, cdEndDate, cdComment, cdLeader, cdMembers};
+			ControlDecoration[] cds = {cdStartDate, cdEndDate, cdSurveyDesign, cdComment, cdLeader, cdMembers};
 			for (int i = 0; i < cds.length; i ++){
 				cds[i].hide();
 			}

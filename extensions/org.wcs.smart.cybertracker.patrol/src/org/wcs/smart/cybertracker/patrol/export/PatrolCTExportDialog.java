@@ -82,6 +82,11 @@ public class PatrolCTExportDialog extends CyberTrackerExportDialog {
     			}
     			return null;
     		}
+
+			@Override
+			public Object getExportSource() {
+				return src;
+			}
     	};
     }
 
