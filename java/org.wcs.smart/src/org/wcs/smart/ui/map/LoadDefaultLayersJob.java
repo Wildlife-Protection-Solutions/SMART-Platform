@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -49,6 +50,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Job that initializes a map with the default basemap
@@ -61,7 +63,7 @@ public class LoadDefaultLayersJob extends Job{
 
 	private static final String JOB_NAME = Messages.LoadDefaultLayersJob_JobName;
 	private IMap map;
-	private byte[] basemapUuid = null;
+	private UUID basemapUuid = null;
 	
 	/**
 	 * Creates a new job that loads the the session
@@ -84,7 +86,7 @@ public class LoadDefaultLayersJob extends Job{
 	 * @param map
 	 * @param basemapUuid
 	 */
-	public LoadDefaultLayersJob(IMap map, byte[] basemapUuid){
+	public LoadDefaultLayersJob(IMap map, UUID basemapUuid){
 		super(JOB_NAME);
 		this.map = map;
 		this.basemapUuid = basemapUuid;
@@ -129,7 +131,7 @@ public class LoadDefaultLayersJob extends Job{
     				Projection prj = getDefaultCrs();
     				if (prj != null){
     					try{
-    						CoordinateReferenceSystem crs = prj.getCrs();
+    						CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(prj.getDefinition());
     						if (monitor.isCanceled()) return Status.CANCEL_STATUS;
     						ChangeCRSCommand cmd = new ChangeCRSCommand(crs);
     						map.sendCommandSync(cmd);

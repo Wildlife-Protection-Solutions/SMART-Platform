@@ -349,8 +349,12 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 			@SuppressWarnings("unchecked")
 			List<Informant> list = (List<Informant>) input;
 			for (Informant i : list) {
-				if (i.getEncryptedData() != null && !i.getEncryptedData().isEmpty()) {
-					return false;
+				try{
+					if (i.getEncryptedData() != null && !i.getEncryptedData().isEmpty()) {
+						return false;
+					}
+				}catch (Exception ex){
+					IntelligencePlugIn.displayLog(Messages.PersistentManager_ReadError, ex);
 				}
 			}
 		}
@@ -362,6 +366,9 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		Session s = HibernateManager.openSession();
 		try {
 			informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), s, false);
+			for (Informant i : informantList){
+				i.getConservationArea().getFileDataStoreLocation();
+			}
 		} catch (Exception e) {
 			IntelligencePlugIn.displayLog(Messages.IntelligenceSourceComposite_InformantLoad_Error, e);
 			informantList = new ArrayList<Informant>();
@@ -413,7 +420,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 					List<?> data = (List<?>) viewer.getInput();
 					for (Object object : data) {
 						if (object instanceof Informant) {
-							if (manager.get((Informant)object) != null) {
+							if (InformantEditor.getInformant((Informant)object) != null) {
 								break; //we found and successfully decoded at least one informant
 							}
 						}
@@ -492,7 +499,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 						Map<Informant, Map<InformantDataKey, Object>> i2data = new HashMap<>();
 						monitor.subTask(Messages.InformantDataEditor_Task_ExtractInformantData);
 						for (Informant informant : informantList) {
-							Map<InformantDataKey, Object> info = manager.get(informant);
+							Map<InformantDataKey, Object> info = InformantEditor.getInformant(informant);
 							i2data.put(informant, info);
 						}
 						
@@ -501,18 +508,23 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 							monitor.subTask(MessageFormat.format(Messages.InformantDataEditor_Task_EncryptInformantData, informant.getId()));
 							Map<InformantDataKey, Object> info = i2data.get(informant);
 							if (info != null) {
-								manager.set(informant, info);
-								EncryptedData encryptedData = informant.getEncryptedData();
-					    		File dataFile = informant.getDataFile();
-								if (!encryptedData.isEmpty()) {
-					    			PersistentManager.toFile(dataFile, encryptedData);
-					    		} else if (dataFile.exists()) {
-					    			try {
-										FileUtils.forceDelete(dataFile);
-									} catch (IOException e) {
-										IntelligencePlugIn.log("Cannot delete file", e); //$NON-NLS-1$
+								InformantEditor.setInformant(informant, info);
+								try{
+									EncryptedData encryptedData = informant.getEncryptedData();
+									File dataFile = informant.getDataFile();
+									if (!encryptedData.isEmpty()) {
+										PersistentManager.toFile(dataFile, encryptedData);
+									} else if (dataFile.exists()) {
+										try {
+											FileUtils.forceDelete(dataFile);
+										} catch (IOException e) {
+											IntelligencePlugIn.log("Cannot delete file", e); //$NON-NLS-1$
+										}
 									}
+					    		}catch (Exception ex){
+					    			IntelligencePlugIn.displayLog(Messages.PersistentManager_SaveError + ex.getMessage(), ex);
 					    		}
+								
 							}
 						}
 					}

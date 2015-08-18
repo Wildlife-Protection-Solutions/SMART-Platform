@@ -25,6 +25,7 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -151,7 +152,7 @@ public class MultiIntelligenceExportDialog extends XmlMultiExportDialog implemen
 					for(Object x : results){
 						Object[] row = (Object[])x;
 						String dname = Intelligence.generateLabel((String)row[1], (Date)row[2]);
-						Object[] thisdata = {dname, (byte[])row[0], row[1]};
+						Object[] thisdata = {dname, (UUID)row[0], row[1]};
 						data[counter++] = thisdata;
 					}
 					

@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
@@ -49,7 +49,7 @@ public class PatrolPlanXmlExtraDataContribution implements IXmlExtraDataContribu
 
 	@Override
 	public List<ExtraDataType> exportData(Patrol patrol) throws Exception {
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		try {
 			List<ExtraDataType> result = new ArrayList<ExtraDataType>();
 			//plan to which the patrol belong

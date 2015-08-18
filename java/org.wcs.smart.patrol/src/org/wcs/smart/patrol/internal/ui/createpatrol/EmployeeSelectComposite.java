@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.common.control.MultipleSelectComposite;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Composite to select employees.  This composite
@@ -49,7 +50,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 		setItemComparator(new Comparator<Employee>() {
 			@Override
 			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
+				return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
 			}
 		});
 		setLabelAllText(Messages.EmployeeSelectComposite_AddEmployee_Label);

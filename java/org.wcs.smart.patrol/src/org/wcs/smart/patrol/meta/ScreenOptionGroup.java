@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Container for group common logic.
@@ -71,7 +72,7 @@ public abstract class ScreenOptionGroup extends Composite {
 		group = new Group(this,  SWT.NONE);
 		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		group.setLayout(new GridLayout(2, false));
-		group.setText(model.getType().getGuiLabel());
+		group.setText(LabelConstants.getLabel(model));
 
 		label1 = new Label(group, SWT.NONE);
 		label1.setText(Messages.ScreenOptionComposite_DisplayPage);

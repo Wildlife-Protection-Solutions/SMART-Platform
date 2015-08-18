@@ -25,17 +25,19 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
+import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 /**
@@ -43,18 +45,33 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
  * @author Emily
  *
  */
-public class SummaryIntelligenceQueryEngine  {
+public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 
+	@Override
+	public boolean canExecute(String querytype) {
+		return IntelligenceSummaryQuery.KEY.equals(querytype);
+	}
+	
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
 
-	
-	
-	public SummaryQueryResult executeQuery( final IntelligenceSummaryQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+		final IntelligenceSummaryQuery query = (IntelligenceSummaryQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
 		try{
 			
 			Date[] d = query.getDateFilter().getDateFilterOption().getDates();
-			
+			ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT count(*) from Intelligence i");  //$NON-NLS-1$
 			sb.append(" WHERE i.conservationArea IN (:ca) "); //$NON-NLS-1$
@@ -62,8 +79,8 @@ public class SummaryIntelligenceQueryEngine  {
 				sb.append(" and i.receivedDate >= :d1 and i.receivedDate <= :d2 "); //$NON-NLS-1$
 			}
 			sb.append("AND i in (select id.intelligence FROM PatrolIntelligence)"); //$NON-NLS-1$
-			Query q = session.createQuery(sb.toString());
-			q.setParameterList("ca", asList(query.getConservationAreaFilterAsFilter())); //$NON-NLS-1$
+			org.hibernate.Query q = session.createQuery(sb.toString());
+			q.setParameterList("ca", asList(caFilter)); //$NON-NLS-1$
 			if (d != null){
 				q.setParameter("d1",d[0]); //$NON-NLS-1$
 				q.setParameter("d2",d[1]); //$NON-NLS-1$
@@ -79,7 +96,7 @@ public class SummaryIntelligenceQueryEngine  {
 			}
 			sb.append("AND i not in (select id.intelligence FROM PatrolIntelligence)"); //$NON-NLS-1$
 			q = session.createQuery(sb.toString());
-			q.setParameterList("ca", asList(query.getConservationAreaFilterAsFilter())); //$NON-NLS-1$
+			q.setParameterList("ca", asList(caFilter)); //$NON-NLS-1$
 			if (d != null){
 				q.setParameter("d1",d[0]); //$NON-NLS-1$
 				q.setParameter("d2",d[1]); //$NON-NLS-1$
@@ -127,12 +144,33 @@ public class SummaryIntelligenceQueryEngine  {
 			}
 		}else{
 			//include only selected conservation areas
-			for (byte[] ca : filter.getConservationAreaFilterIds()){
+			for (UUID ca : filter.getConservationAreaFilterIds()){
 				ConservationArea cca = new ConservationArea();
 				cca.setUuid(ca);
 				localFilters.add(cca);
 			}
 		}
 		return localFilters;
+	}
+
+
+	@Override
+	public String tableNamePrefix(Class<?> clazz) {
+		return null;
+	}
+
+	@Override
+	public String tablePrefix(Class<?> clazz) {
+		return null;
+	}
+
+	@Override
+	public String tableName(Class<?> clazz) {
+		return null;
+	}
+
+	@Override
+	public String addParameterValue(Object parameter) {
+		return null;
 	}
 }

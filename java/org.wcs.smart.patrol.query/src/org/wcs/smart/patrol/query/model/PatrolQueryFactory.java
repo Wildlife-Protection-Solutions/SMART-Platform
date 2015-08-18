@@ -100,21 +100,21 @@ public class PatrolQueryFactory {
 	public static PatrolObservationQuery createObservationQuery(){
 		PatrolObservationQuery query = new PatrolObservationQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString() );
 		return query;
 	}
 	
 	public static PatrolWaypointQuery createWaypointQuery(){
 		PatrolWaypointQuery query = new PatrolWaypointQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString() );
 		return query;
 	}
 	
 	public static PatrolQuery createPatrolQuery(){
 		PatrolQuery query = new PatrolQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString() );
 		return query;
 	}
 	
@@ -122,7 +122,7 @@ public class PatrolQueryFactory {
 	public static PatrolGriddedQuery createGriddedQuery(){
 		PatrolGriddedQuery query = new PatrolGriddedQuery();
 		initQuery(query, Messages.GriddedQuery_DefaultQueryName);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString() );
 		query.setDateFilter(null);
 		return query;
 	}
@@ -131,7 +131,7 @@ public class PatrolQueryFactory {
 		PatrolSummaryQuery query = new PatrolSummaryQuery();
 		initQuery(query, Messages.SummaryQuery_DefaultQueryName);
 		
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString() );
 		query.setDateFilter(null);
 		return query;
 	}

@@ -44,7 +44,7 @@ public class InformantColumnLabelProvider extends ColumnLabelProvider {
 	public String getText(Object element) {
 		if (element instanceof Informant) {
 			Informant i = (Informant) element;
-			Object value = i.get(key);
+			Object value = InformantEditor.getInformant(i,key);
 			return value != null ? value.toString() : ""; //$NON-NLS-1$
 		}
 		return super.getText(element);

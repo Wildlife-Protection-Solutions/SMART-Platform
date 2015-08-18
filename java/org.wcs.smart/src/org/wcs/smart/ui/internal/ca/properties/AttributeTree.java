@@ -487,7 +487,7 @@ public class AttributeTree {
 					monitor.subTask(Messages.AttributeTree_DeleteSubProgress + node.getName());
 					boolean delete = false;
 					try{
-						delete = DataModelManager.getInstance().validateDelete(node, new NullProgressMonitor(), AttributeTree.this.currentSession);
+						delete = DataModelManager.INSTANCE.validateDelete(node, new NullProgressMonitor(), AttributeTree.this.currentSession);
 						if (delete){
 							if (node.getParent() != null){
 								if (node.getParent().getActiveChildren() != null){

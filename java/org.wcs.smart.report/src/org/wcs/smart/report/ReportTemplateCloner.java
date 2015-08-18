@@ -48,7 +48,7 @@ import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Report template cloner that copies report information
@@ -215,9 +215,9 @@ public class ReportTemplateCloner implements
 					String bits[] = ((OdaDataSetHandle) dataset).getQueryText().split(":"); //$NON-NLS-1$
 					
 					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1]; //$NON-NLS-1$
-					UuidItem newQueryReferences = engine.getNewConservationItem(SmartUtils.decodeHex(queryUuid));
+					UuidItem newQueryReferences = engine.getNewConservationItem(UuidUtils.stringToUuid(queryUuid));
 					if (newQueryReferences != null){
-						((OdaDataSetHandle) dataset).setQueryText(bits[0] + ":" + SmartUtils.encodeHex(newQueryReferences.getUuid())); //$NON-NLS-1$
+						((OdaDataSetHandle) dataset).setQueryText(bits[0] + ":" + UuidUtils.uuidToString(newQueryReferences.getUuid())); //$NON-NLS-1$
 					}else{
 						//new query reference cannot be found; 
 						throw new Exception(MessageFormat.format(Messages.ReportTemplateCloner_CloneError, new Object[]{report.getName()}));

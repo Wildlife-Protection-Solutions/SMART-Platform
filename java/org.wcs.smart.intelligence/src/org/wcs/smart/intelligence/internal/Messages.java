@@ -452,6 +452,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceLocation_PageTitle;
 
+	public static String IntelligencePatrolQueryFilterViewer_ParseError;
+
 	public static String IntelligencePatrolQueryOption_AnyIntelligence;
 
 	public static String IntelligencePatrolQueryOption_Name;

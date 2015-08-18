@@ -50,8 +50,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class IntelligenceRecordQueryType implements IQueryType {
 
-	public static final String KEY = "intelligencerecord"; //$NON-NLS-1$
-
 	@Override
 	public Class<? extends Query> getHibernateClass() {
 		return IntelligenceRecordQuery.class;
@@ -59,7 +57,7 @@ public class IntelligenceRecordQueryType implements IQueryType {
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return IntelligenceRecordQuery.KEY;
 	}
 
 	@Override

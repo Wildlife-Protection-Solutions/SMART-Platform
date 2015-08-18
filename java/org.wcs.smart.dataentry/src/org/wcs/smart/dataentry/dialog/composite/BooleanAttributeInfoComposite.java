@@ -40,6 +40,7 @@ import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Info composite for {@link CmAttribute} of boolean type
@@ -99,9 +100,9 @@ public class BooleanAttributeInfoComposite extends CmAttributeInfoComposite {
 			public String getText(Object element){
 				if (element instanceof Boolean){
 					if ((Boolean)element){
-						return Attribute.BOOLEAN_TRUE_LABEL;
+						return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 					}else{
-						return Attribute.BOOLEAN_FALSE_LABEL;
+						return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 					}
 				}
 				return ""; //$NON-NLS-1$

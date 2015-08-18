@@ -73,7 +73,7 @@ public class PatrolIdComposite extends PatrolItemComposite {
 		
 		txtPatrolId = new Text(center, SWT.BORDER | style);
 		txtPatrolId.setTextLimit(Patrol.MAX_ID_LENGTH);
-		txtPatrolId.setText(Patrol.AUTO_GENERATE_TEXT);
+		txtPatrolId.setText(PatrolHibernateManager.AUTO_GENERATE_TEXT);
 		
 		GridData data = new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1);
 		data.horizontalIndent = 8;

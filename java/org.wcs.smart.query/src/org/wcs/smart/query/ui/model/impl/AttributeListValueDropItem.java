@@ -32,9 +32,11 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.engine.spi.ValueInclusion;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.ValueItemLabelProvider;
 
 /**
  * Drop item that represents counting items from
@@ -86,7 +88,7 @@ public class AttributeListValueDropItem extends AbstractValueDropItem {
 		sb.append(":sum:"); //$NON-NLS-1$
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
-			if (values[i].guiLabel.equals(combo.getItem(combo.getSelectionIndex()))){
+			if (ValueItemLabelProvider.INSTANCE.getLabel(values[i]).equals(combo.getItem(combo.getSelectionIndex()))){
 				sb.append(values[i].key);
 				break;
 			}
@@ -129,7 +131,7 @@ public class AttributeListValueDropItem extends AbstractValueDropItem {
 		combo = new Combo(main, SWT.READ_ONLY);
 		IValueItem.ValueType[] values = IValueItem.ValueType.values();
 		for (int i = 0; i < values.length; i++){
-			combo.add(values[i].guiLabel);
+			combo.add(ValueItemLabelProvider.INSTANCE.getLabel(values[i]));
 		}
 		combo.select(defaultSelection);
 		combo.addSelectionListener(new SelectionAdapter() {

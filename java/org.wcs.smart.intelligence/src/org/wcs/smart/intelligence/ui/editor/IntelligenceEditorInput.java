@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
-import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -36,14 +36,14 @@ import org.eclipse.ui.IPersistableElement;
  */
 public class IntelligenceEditorInput implements IEditorInput {
 
-	private byte[] uuid;
+	private UUID uuid;
 	private String shortName;
 	private Date receivedDate;
 	
 	/**
 	 * Constructor
 	 */
-	public IntelligenceEditorInput(byte[] uuid, String shortName, Date receivedDate) {
+	public IntelligenceEditorInput(UUID uuid, String shortName, Date receivedDate) {
 		this.uuid = uuid;
 		this.shortName = shortName;
 		this.receivedDate = receivedDate;
@@ -52,7 +52,7 @@ public class IntelligenceEditorInput implements IEditorInput {
 	/**
 	 * @return uuid
 	 */
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.uuid;
 	}
 	
@@ -113,7 +113,7 @@ public class IntelligenceEditorInput implements IEditorInput {
 	@Override
 	public int hashCode() {
 		if (uuid != null) {
-			return Arrays.hashCode(uuid);
+			return uuid.hashCode();
 		}
 		return super.hashCode();
 	}
@@ -125,7 +125,7 @@ public class IntelligenceEditorInput implements IEditorInput {
 			if (i.getUuid() == null && this.getUuid() == null) {
 				return super.equals(i);
 			} else if (i.getUuid() != null && this.getUuid() != null) {
-				return Arrays.equals(i.getUuid(), this.getUuid());
+				return i.getUuid().equals(this.getUuid());
 			}
 		}
 		return false;

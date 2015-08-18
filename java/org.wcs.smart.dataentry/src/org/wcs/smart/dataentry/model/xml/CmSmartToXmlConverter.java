@@ -55,6 +55,7 @@ import org.wcs.smart.dataentry.model.xml.generated.NodeType;
 import org.wcs.smart.dataentry.model.xml.generated.NodeTypeList;
 import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Converts a database configurable model to the xml representation 
@@ -245,7 +246,7 @@ public class CmSmartToXmlConverter {
 			LanguageType lt = new LanguageType();
 			lt.setCode(ll.getCode());
 			llt.getLanguage().add(lt);
-			lookup.put(new String(ll.getUuid()), ll);
+			lookup.put(UuidUtils.uuidToString(ll.getUuid()), ll);
 		}	
 		return lookup;
 	}
@@ -257,7 +258,7 @@ public class CmSmartToXmlConverter {
 		for (Label lbl: names){
 			NameType nt = new NameType();
 			nt.setValue(lbl.getValue());
-			nt.setLanguageCode(llookup.get(new String(lbl.getLanguage().getUuid())).getCode());
+			nt.setLanguageCode(llookup.get(UuidUtils.uuidToString(lbl.getLanguage().getUuid())).getCode());
 			list.add(nt);
 		}
 	}

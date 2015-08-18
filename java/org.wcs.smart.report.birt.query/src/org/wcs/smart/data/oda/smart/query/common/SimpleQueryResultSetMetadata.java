@@ -23,6 +23,7 @@ package org.wcs.smart.data.oda.smart.query.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.datatools.connectivity.oda.IResultSetMetaData;
 import org.eclipse.datatools.connectivity.oda.OdaException;
@@ -49,7 +50,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	 */
 	public SimpleQueryResultSetMetadata(SimpleQuery query){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
-		for (QueryColumn col : query.getQueryColumns()){
+		for (QueryColumn col : query.getQueryColumns(Locale.getDefault(), null)){
 			if (col.isVisible()){
 				vis.add(col);
 			}
@@ -59,7 +60,7 @@ public class SimpleQueryResultSetMetadata implements IResultSetMetaData {
 	
 	public SimpleQueryResultSetMetadata(GriddedQuery query){
 		List<QueryColumn> vis = new ArrayList<QueryColumn>();
-		for (QueryColumn col : query.getQueryColumns()){
+		for (QueryColumn col : query.getQueryColumns(Locale.getDefault(), null)){
 			if (col.isVisible()){
 				vis.add(col);
 			}

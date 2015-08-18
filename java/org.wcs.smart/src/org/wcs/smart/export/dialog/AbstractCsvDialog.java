@@ -44,7 +44,7 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.export.config.ICsvDialogConfig;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Dialog for exporting/importing into/from CSV file
@@ -243,7 +243,7 @@ public abstract class AbstractCsvDialog extends TitleAreaDialog {
 				getShell().getDisplay().syncExec(new Runnable() {
 					@Override
 					public void run() {
-						SmartPlugIn.displayLog(Messages.AbstractCsvDialog_Fail_Error + SmartUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
+						SmartPlugIn.displayLog(Messages.AbstractCsvDialog_Fail_Error + SharedUtils.LINE_SEPARATOR + ex.getLocalizedMessage(), ex);
 					}						
 				});
 			} finally {

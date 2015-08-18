@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -99,6 +100,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.patrol.ui.PatrolEditor;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.patrol.ui.StationComposite;
@@ -527,7 +529,7 @@ public class PatrolSummaryEditor extends EditorPart {
 			frmPatrolSummary.setText(editor.getPatrol().getId());
 			
 			txtPatrolId.setText(patrol.getId(), false, false);
-			txtPatrolType.setText(patrol.getPatrolType().getGuiName(), false, false);
+			txtPatrolType.setText(patrol.getPatrolType().getGuiName(Locale.getDefault()), false, false);
 			if (patrol.getStation() == null) {
 				txtStation.setText(Messages.PatrolSummaryEditor_NoStationLabel);
 			} else {
@@ -585,7 +587,9 @@ public class PatrolSummaryEditor extends EditorPart {
 			Arrays.sort(employeeArray, new Comparator<Employee>(){
 				@Override
 				public int compare(Employee o1, Employee o2) {
-					return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
+					return Collator.getInstance().compare(
+							org.wcs.smart.ui.SmartLabelProvider.getFullLabel(o1), 
+							org.wcs.smart.ui.SmartLabelProvider.getFullLabel(o2));
 				}});
 			employeeList.setInput(employeeArray);
 
@@ -629,7 +633,7 @@ public class PatrolSummaryEditor extends EditorPart {
 		}
 		for(PatrolLegDay pld : input){
 			for (PatrolLegMember employee: pld.getPatrolLeg().getMembers()){
-				employee.getMember().getFullLabel();
+				org.wcs.smart.ui.SmartLabelProvider.getFullLabel(employee.getMember());
 			}
 		}
 		
@@ -786,10 +790,10 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				if (((PatrolLegDay)element).getPatrolLeg().getLeader() == null){
 					return ""; //$NON-NLS-1$
 				}
-				return ((PatrolLegDay)element).getPatrolLeg().getLeader().getMember().getFullLabel();
+				return org.wcs.smart.ui.SmartLabelProvider.getFullLabel(((PatrolLegDay)element).getPatrolLeg().getLeader().getMember());
 			}else if (column == PatrolLegDayColumn.PILOT){
 				if (((PatrolLegDay)element).getPatrolLeg().getPilot() != null){
-					return ((PatrolLegDay)element).getPatrolLeg().getPilot().getMember().getFullLabel();
+					return org.wcs.smart.ui.SmartLabelProvider.getFullLabel(((PatrolLegDay)element).getPatrolLeg().getPilot().getMember());
 				}
 				return ""; //$NON-NLS-1$
 			}else if (column == PatrolLegDayColumn.TRANSPORT){

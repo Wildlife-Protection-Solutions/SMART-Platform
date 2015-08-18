@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -38,6 +39,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.geotools.referencing.CRS;
 import org.hibernate.Criteria;
+import org.hibernate.Interceptor;
 import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
@@ -60,16 +62,18 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.ICaCreateHandler;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.TableInfo;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.I18nUtil;
 
 /**
  * Hibernate manager to manage database connections.
@@ -78,19 +82,47 @@ import org.wcs.smart.util.SmartUtils;
  *
  */
 public class HibernateManager extends SmartHibernateManager{
-
+	
+	private static void initContext(){
+		if (SmartDB.getCurrentLanguage() != null){
+			I18nUtil.setLocale(SmartDB.getCurrentLanguage().getUuid());
+		}
+		if (SmartDB.getCurrentConservationArea() != null){
+			I18nUtil.setCa(SmartDB.getCurrentConservationArea().getUuid());
+		}
+	}
+	public synchronized static Session openSession(){
+		initContext();
+		
+		Session session = SmartHibernateManager.openSession();
+		return session;
+	}
+	
+	/**
+	 * Users are required to close the session when they are done with it.
+	 * <p>
+	 * Note you ensure that the current thread session is closed; otherwise
+	 * this will not close it to re-open it with the correct interceptor.
+	 * </p> 
+	 * @param interceptor a session interceptor
+	 * @return
+	 */
+	public synchronized static Session openSession(Interceptor interceptor){
+		initContext();
+		Session session = SmartHibernateManager.openSession(interceptor);
+		return session;
+	}
 	
 	/**
 	 * 
 	 * @return the language for the given code associated with the conservation area
 	 * <code>null</code> if not found
 	 */
-	public static Language findLanguage(Locale l, ConservationArea ca){
-		Session x = openSession();
+	public static Language findLanguage(Session x, Locale l, ConservationArea ca){
 		Transaction tx = x.beginTransaction();
 		try {
 			//match language and country code
-			String fullCode = SmartUtils.localeToString(l);
+			String fullCode = I18nUtil.localeToString(l);
 			List<?> results = x.createCriteria(Language.class).add(Restrictions.eq("ca", ca)).add(Restrictions.eq("code", fullCode)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 			if (results.size() > 0){
 				return (Language)results.get(0);
@@ -733,7 +765,7 @@ public class HibernateManager extends SmartHibernateManager{
 	 * @return the default basemap defined for the conservation area or null
 	 * if no default specified
 	 */
-	public static BasemapDefinition getBasemapDefinition(Session session, byte[] uuid){
+	public static BasemapDefinition getBasemapDefinition(Session session, UUID uuid){
 		List<?> defaultmap = session.createCriteria(BasemapDefinition.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 				.add(Restrictions.eq("uuid", uuid)).list(); //$NON-NLS-1$
@@ -824,6 +856,20 @@ public class HibernateManager extends SmartHibernateManager{
 			}else{
 				SQLQuery query = s.createSQLQuery("UPDATE " + SmartDB.PLUGIN_VERSION_TBL + " SET version = '" + newVersion + "' WHERE plugin_id = '" + pluginId + "'"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 				query.executeUpdate();
+			}
+		}
+	}
+	
+
+	
+	/**
+	 * Evicts all names from the given session
+	 * @param session
+	 */
+	public static void evitNames(NamedItem item, Session session){
+		for(org.wcs.smart.ca.Label name: item.getNames()){
+			if (name.getElementuuid() != null){
+				session.evict(name);
 			}
 		}
 	}

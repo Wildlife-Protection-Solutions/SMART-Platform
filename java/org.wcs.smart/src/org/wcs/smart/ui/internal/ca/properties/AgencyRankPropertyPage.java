@@ -80,6 +80,7 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
@@ -119,7 +120,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 * columns of agency table
 	 */
 	private enum AgencyColumn{
-		NAME( Agency.NAME, 1);
+		NAME( SmartLabelProvider.AGENCY_NAME, 1);
 		String name;
 		int bounds;
 		AgencyColumn(String name, int bounds){
@@ -132,7 +133,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	 * columns of rank table
 	 */
 	private enum RankColumn{
-		NAME( Rank.NAME, 1);
+		NAME( SmartLabelProvider.RANK_NAME, 1);
 		String name;
 		int bounds;
 		RankColumn(String name, int bounds){

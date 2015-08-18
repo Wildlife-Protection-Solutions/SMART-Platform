@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.intelligence.ui.editor;
 
-import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -61,8 +61,8 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 	private IIntelligenceEventListener intelligenceListener = new IIntelligenceEventListener(){
 		@Override
 		public void eventFired(int type, Intelligence source) {
-			byte[] uuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
-			if (Arrays.equals(source.getUuid(), uuid)) {
+			UUID uuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
+			if (source.getUuid().equals(uuid)) {
 				intelligence = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
 				setPartName(getIntelligence().getName());
 				summaryPage.initValues();
@@ -116,7 +116,7 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 	
 	public Intelligence getIntelligence(){
 		if (intelligence == null){
-			byte[] puuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
+			UUID puuid = ((IntelligenceEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			//load patrol items so don't have lazy loading issues later.
 			session.beginTransaction();

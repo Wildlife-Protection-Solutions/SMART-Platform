@@ -21,6 +21,13 @@
  */
 package org.wcs.smart.query.ui.model.impl;
 
+import java.util.HashMap;
+import java.util.Locale;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -36,10 +43,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
 
 
@@ -59,11 +69,36 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 	private ComboViewer listViewer;
 	
 	private Font smallerFont;
+	private HashMap<Aggregation, String> aggLabels = new HashMap<Aggregation, String>();
 	
 	public AttributeValueDropItem(boolean hasEncounter, Attribute attribute){
 		super(hasEncounter);
 		
 		this.attribute = attribute;
+		Job j = new Job("load aggregation labels") { //$NON-NLS-1$
+			
+			@Override
+			protected IStatus run(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					for (Aggregation a : AttributeValueDropItem.this.attribute.getAggregations()){
+						aggLabels.put(a, Aggregation.getGuiName(a, s, Locale.getDefault()));
+					}
+					s.getTransaction().commit();
+				}finally{
+					s.close();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		j.setSystem(true);
+		j.schedule();
+		try {
+			j.join();
+		} catch (InterruptedException e) {
+			QueryPlugIn.log(e.getMessage(),e);
+		}
 		if (this.attribute.getAggregations().size() > 0){
 			selectedAggregation = this.attribute.getAggregations().get(0);
 		}
@@ -94,7 +129,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 	public String getValueText() {
 		StringBuilder sb = new StringBuilder();
 		if (selectedAggregation != null){
-			sb.append(selectedAggregation.getGuiName());
+			sb.append(aggLabels.get(selectedAggregation));
 		}
 		sb.append(attribute.getName());
 		if (category != null){
@@ -160,7 +195,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 			main.setLayout(gl);
 			main.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, true));
 			Label lblAgg = new Label(main, SWT.NONE);
-			lblAgg.setText( formatStringForLabel(attribute.getAggregations().get(0).getGuiName()));
+			lblAgg.setText( formatStringForLabel(aggLabels.get(attribute.getAggregations().get(0))));
 			selectedAggregation = attribute.getAggregations().get(0);
 			initDrag(lblAgg);
 		}else {
@@ -183,7 +218,7 @@ public class AttributeValueDropItem extends AbstractValueDropItem {
 			listViewer.setLabelProvider(new LabelProvider(){
 				public String getText(Object element) {
 					if (element instanceof Aggregation){
-						return ((Aggregation) element).getGuiName();
+						return aggLabels.get(((Aggregation) element));
 					}
 					return super.getText(element);
 				}

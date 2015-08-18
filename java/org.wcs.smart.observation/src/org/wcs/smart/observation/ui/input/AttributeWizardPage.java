@@ -664,9 +664,14 @@ public class AttributeWizardPage extends WizardPage implements IObservationWizar
 
 		// update the attachments
 		wo.setAttachments(new ArrayList<ObservationAttachment>());
+		
 		for (ObservationAttachment a : currentAttachments){
-			a.setObservation(wo);
-			wo.getAttachments().add(a);
+			try{
+				a.setObservation(wo);
+				wo.getAttachments().add(a);
+			}catch (Exception ex){
+				ObservationPlugIn.displayLog(ex.getMessage(), ex);
+			}
 		}
 		
 		//clear all fields

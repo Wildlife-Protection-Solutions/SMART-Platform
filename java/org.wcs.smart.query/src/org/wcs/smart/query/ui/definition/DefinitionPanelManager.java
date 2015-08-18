@@ -132,7 +132,7 @@ public class DefinitionPanelManager {
 	 * @return
 	 */
 	public IQueryItemPanel getQueryItemPanel(String definitionPanelId, IQueryType queryType){
-		String filterPanelId = QueryTypeManager.getInstance().getQueryItemPanel(queryType, definitionPanelId);
+		String filterPanelId = QueryTypeManager.INSTANCE.getQueryItemPanel(queryType, definitionPanelId);
 		if (filterPanelId == null){
 			return null;
 		}

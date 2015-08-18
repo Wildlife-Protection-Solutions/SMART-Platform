@@ -38,6 +38,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -46,10 +47,16 @@ import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
+import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
@@ -67,13 +74,19 @@ import org.wcs.smart.query.model.summary.IValueItem.ValueType;
  * @since 1.0.0
  */
 
-public class DerbyGridEngine extends DerbyObservationQueryEngine{
-	private Collection<GridResultItem> myResults;
+public class DerbyGridEngine extends AbstractDerbyObservationQueryEngine{
+	private GridQueryResult myResults;
 	
 	private ObservationGriddedQuery query;
 	
 	private String dataTable;
 	private String gridTable;
+	
+	@Override
+	public boolean canExecute(String querytype) {
+		return ObservationGriddedQuery.KEY.equals(querytype);
+	}
+	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -83,12 +96,15 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 	 * @return
 	 * @throws SQLException
 	 */
-	public Collection<GridResultItem> executeQuery(
-			final ObservationGriddedQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
 
-		this.query = query;
+		this.query = (ObservationGriddedQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
@@ -111,7 +127,7 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 						items.put(it.getTileId(), it);
 					}
 
-					myResults = items.values();
+					myResults = new GridQueryResult(items.values());
 					
 					monitor.worked(1);
 				}catch (Exception ex){
@@ -123,8 +139,8 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 				}
 				c.commit();
 			}
-
 		});
+		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
 	}
@@ -168,8 +184,8 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 			DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 			
 			try{
-				filterer.processFilter(c, filter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), 
-					needsObservation, false, monitor);
+				ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
+				filterer.processFilter(c, filter.getFilter(), dFilter, cafilter, needsObservation, false, monitor);
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
@@ -203,7 +219,7 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 			AttributeValueItem tmp = (AttributeValueItem)value;
 				
 				String strAggValue = "number_value"; //$NON-NLS-1$
-				strAgg = tmp.getAggregation().getName();
+				strAgg = tmp.getAggregationKey();
 				if (tmp.getAttributeType() == AttributeType.LIST || tmp.getAttributeType() == AttributeType.TREE){
 					strAgg="count";  //$NON-NLS-1$
 					strAggValue = "value";  //$NON-NLS-1$
@@ -474,5 +490,6 @@ public class DerbyGridEngine extends DerbyObservationQueryEngine{
 			Session session) throws SQLException {
 		return null;
 	}
+
 	
 }

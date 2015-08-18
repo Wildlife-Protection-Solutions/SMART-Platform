@@ -24,6 +24,7 @@ package org.wcs.smart.query.internal.hibernate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -63,7 +64,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 */
 	public String generateQueryId(Session session){
 		
-		IQueryType[] types = QueryTypeManager.getInstance().getSupportedQueryTypes();
+		IQueryType[] types = QueryTypeManager.INSTANCE.getSupportedQueryTypes();
 		
 		int id = 0;
 		for (IQueryType type : types){
@@ -101,7 +102,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * @param session
 	 * @return a map of the hashcode of the uuid array of a query folder mapped to query input of the query
 	 */
-	public abstract HashMap<Integer, List<QueryEditorInput>> getQueryProxies(Session session);
+	public abstract HashMap<UUID, List<QueryEditorInput>> getQueryProxies(Session session);
 		
 	
 //	/**
@@ -165,7 +166,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 				//page1.setQuery();
 			}
 			if (proxy != null){
-				query.getType().getDropItemFactory().generateDropItems(proxy, s);
+				QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getDropItemFactory().generateDropItems(proxy, s);
 			}
 			s.saveOrUpdate(query);
 			query.updateName(SmartDB.getCurrentLanguage(), query.getName());
@@ -206,7 +207,7 @@ public abstract class AbstractQueryHibernateManager implements IQueryHibernateMa
 	 * @return the query or null if query not found
 	 */
 	public org.wcs.smart.query.model.Query findQuery(Session session, 
-			byte[] queryUuid, IQueryType queryType) {		
+			UUID queryUuid, IQueryType queryType) {		
 		return (org.wcs.smart.query.model.Query) session.get(queryType.getHibernateClass(), queryUuid);
 	}
 	

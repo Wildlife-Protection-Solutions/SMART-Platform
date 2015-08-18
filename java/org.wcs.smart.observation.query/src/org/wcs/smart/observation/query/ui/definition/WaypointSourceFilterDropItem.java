@@ -172,18 +172,18 @@ public class WaypointSourceFilterDropItem extends DropItem implements IFilterDro
 			@Override
 			public String getText(Object element){
 				if (element instanceof IWaypointSource){
-					return ((IWaypointSource)element).getName();
+					return ((IWaypointSource)element).getName(null);
 				}
 				return super.getText(element);
 			}
 		});
 		
 		List<IWaypointSource> srcs = new ArrayList<IWaypointSource>();
-		srcs.addAll(WaypointSourceEngine.getInstance().getSupportedSources());
+		srcs.addAll(WaypointSourceEngine.INSTANCE.getSupportedSources());
 		Collections.sort(srcs, new Comparator<IWaypointSource>() {
 			@Override
 			public int compare(IWaypointSource o1, IWaypointSource o2) {
-				return o1.getName().compareTo(o2.getName());
+				return o1.getName(null).compareTo(o2.getName(null));
 			}
 		});
 		listViewer.setInput(srcs);

@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -37,7 +38,9 @@ import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.CaExporter;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Imports the conservation area data store.  Imports the entire
@@ -76,13 +79,13 @@ public class DatastoreImporter implements ICaDataImporter {
 	 * @param monitor progress monitor
 	 * @throws IOException
 	 */
-	private void importFileStore(File dir, byte[] cauuid, IProgressMonitor monitor) throws IOException{
+	private void importFileStore(File dir, UUID cauuid, IProgressMonitor monitor) throws IOException{
 		monitor.setTaskName(Messages.CaImporter_Progress_ImportingFileStore);
 		File sourceFile = new File(dir, CaExporter.FILESTORE_DIR);
 		
 		
 		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
-		filestore = filestore + File.separator + SmartUtils.getDirectoryPath(cauuid);
+		filestore = filestore + File.separator + UuidUtils.getDirectoryPath(cauuid);
 		File destLocation = new File(filestore);
 		if (!destLocation.exists()){
 			destLocation.mkdir();

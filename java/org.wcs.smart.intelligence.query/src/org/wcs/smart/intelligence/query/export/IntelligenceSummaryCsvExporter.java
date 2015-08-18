@@ -26,14 +26,14 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
-import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQueryType;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -54,7 +54,7 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (IntelligenceSummaryQueryType.KEY.equals(query.getType().getKey())){
+		if (IntelligenceSummaryQuery.KEY.equals(query.getTypeKey())){
 			return true;
 		}
 		return false;
@@ -70,10 +70,11 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	@Override
-	public void export(Query query, File outputFile, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
-		IntelligenceSummaryQuery sumQuery = (IntelligenceSummaryQuery)query;
-		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults(monitor);
-		if (results == null){
+	public void export (Query query, IQueryResult result, 
+			File file, HashMap<String, Object> parameters, 
+			ISmartProgressMonitor monitor) throws Exception{
+	
+		if (result == null){
 			throw new Exception(Messages.IntelligenceSummaryCsvExporter_MustRunQuery);
 		}
 		
@@ -82,11 +83,11 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
-		
+		SummaryQueryResult results = (SummaryQueryResult) result;
 		//column headers
 		try(CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"), //$NON-NLS-1$ 
-				delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
+				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+				delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 		
 			for (int i = 0; i < results.getColumnHeaders().size(); i ++){
 				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];

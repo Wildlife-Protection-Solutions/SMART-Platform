@@ -28,8 +28,10 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.observation.internal.Messages;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -62,7 +64,7 @@ public class ObservationPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
+		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCa, CaDeleteHandler.DELETE_ORDER);
 	}
 

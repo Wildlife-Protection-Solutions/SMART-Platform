@@ -39,7 +39,7 @@ import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 /**
  * Intelligence point service.
  * 
@@ -66,7 +66,7 @@ public class IntelligenceService extends IService{
 	public IntelligenceService(Intelligence intelligence){
 		this.intelligence = intelligence;
 		this.params = new HashMap<String, Serializable>();
-		this.params.put(IntelligenceDataSourceFactory.INTELL_UUID.key, SmartUtils.encodeHex(this.intelligence.getUuid()));
+		this.params.put(IntelligenceDataSourceFactory.INTELL_UUID.key, UuidUtils.uuidToString(this.intelligence.getUuid()));
 		this.url = IntelligenceServiceExtension.createURL(this.params);
 		
 	}

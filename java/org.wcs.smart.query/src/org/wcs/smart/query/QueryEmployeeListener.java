@@ -41,7 +41,7 @@ public class QueryEmployeeListener implements IEmployeeListener {
 
 	@Override
 	public void beforeDelete(Employee e, Session s) {
-		for (IQueryType qt : QueryTypeManager.getInstance().getAllQueryTypes()){
+		for (IQueryType qt : QueryTypeManager.INSTANCE.getAllQueryTypes()){
 			checkQueryType(e, s, qt);
 		}
 		checkQueryFolder(e, s);

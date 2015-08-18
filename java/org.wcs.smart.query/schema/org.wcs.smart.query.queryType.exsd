@@ -73,6 +73,16 @@
                </appinfo>
             </annotation>
          </attribute>
+         <attribute name="executor" type="string" use="required">
+            <annotation>
+               <documentation>
+                  
+               </documentation>
+               <appinfo>
+                  <meta.attribute kind="java" basedOn=":org.wcs.smart.query.common.engine.IQueryEngine"/>
+               </appinfo>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 

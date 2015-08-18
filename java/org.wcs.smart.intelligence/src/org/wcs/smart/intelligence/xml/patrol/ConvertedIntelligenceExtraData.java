@@ -32,8 +32,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -140,7 +140,7 @@ public class ConvertedIntelligenceExtraData implements IConvertedExtraData {
 		
 		//name and received date are known and contain valid data
 		//try to fetch this intelligence from database
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		try {
 			Query query = session.createQuery("SELECT i FROM Intelligence i, Label lbl WHERE i.receivedDate = :receivedDate AND lbl.id.element.uuid = i.uuid AND lbl.value = :name AND lbl.id.language = :language"); //$NON-NLS-1$
 			query.setParameter("receivedDate", receivedDate); //$NON-NLS-1$

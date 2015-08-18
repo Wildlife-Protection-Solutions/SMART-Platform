@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.patrol;
 
+import java.io.File;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -34,9 +35,12 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -61,6 +65,11 @@ import org.wcs.smart.patrol.model.Team;
  * @since 1.0.0
  */
 public class PatrolHibernateManager extends HibernateManager{
+
+	/**
+	 * Text to identify patrol id as auto-generated
+	 */
+	public static final String AUTO_GENERATE_TEXT = Messages.Patrol_SystemGenerateId_Name;
 	
 	private static NumberFormat PATROL_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
 	
@@ -393,7 +402,7 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return
 	 */
 	public static void savePatrol(Patrol patrol, Session session, boolean saveWaypoints) throws Exception{
-		if (patrol.getId() == null || patrol.getId().equals(Patrol.AUTO_GENERATE_TEXT)){
+		if (patrol.getId() == null || patrol.getId().equals(AUTO_GENERATE_TEXT)){
 			String id = PatrolHibernateManager.generatePatrolId(patrol, session);
 			patrol.setId(id);
 		}
@@ -403,6 +412,8 @@ public class PatrolHibernateManager extends HibernateManager{
 		if (saveWaypoints){
 			session.flush();
 		
+			IWaypointSource src = SmartContext.INSTANCE.getClass(IWaypointSourceEngine.class).getSource(PatrolWaypointSource.PATROL_WP_SOURCE_ID);
+			
 			//save all the waypoints as well
 			if (patrol.getLegs() != null) {
 				for (PatrolLeg pl : patrol.getLegs()) {
@@ -413,16 +424,18 @@ public class PatrolHibernateManager extends HibernateManager{
 									if (wp.getWaypoint().getAttachments() != null){
 										//update all the waypoint attachments directory
 										for (WaypointAttachment wa : wp.getWaypoint().getAttachments()){
-											wa.setDatastoreFolderExtension(
-												((PatrolWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(patrol));
+											wa.computeFileLocation(new File(new File(
+													SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+													src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
 										}
 									}
 									if (wp.getWaypoint().getObservations() != null){
 										for (WaypointObservation wo : wp.getWaypoint().getObservations()){
 											if (wo.getAttachments() != null){
 												for (ObservationAttachment wa : wo.getAttachments()){
-													wa.setDatastoreFolderExtension(
-															((PatrolWaypointSource)wp.getWaypoint().getSource()).getDatastoreFileLocation(patrol));
+													wa.computeFileLocation(new File(new File(
+															SmartDB.getCurrentConservationArea().getFileDataStoreLocation(),
+															src.getDatastoreFileLocation(patrol, session)), wa.getFilename()));
 												}
 											}
 										}

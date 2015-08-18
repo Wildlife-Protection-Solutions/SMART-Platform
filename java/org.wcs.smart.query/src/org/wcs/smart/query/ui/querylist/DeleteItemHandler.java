@@ -137,7 +137,7 @@ public class DeleteItemHandler {
 			return;
 		}
 		
-		List<?> items = SavedQueryTree.getInstance().getQueries().get(Arrays.hashCode(folder.getUuid()));
+		List<?> items = SavedQueryTree.getInstance().getQueries().get(folder.getUuid());
 		if (items != null && items.size() > 0){
 			QueryPlugIn.displayLog(MessageFormat.format(Messages.DeleteItemHandler_CannotDeleteItemWithKids1, new Object[]{folder.getName()}), null);
 			return;

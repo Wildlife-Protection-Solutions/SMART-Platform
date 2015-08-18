@@ -30,6 +30,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Delete advisor for determining if an
@@ -57,7 +58,7 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		}else{
 			return  MessageFormat.format(
 					Messages.EmployeeDeleteAdvisor_DeleteError,
-					new Object[]{cnt, e.getFullLabel()});
+					new Object[]{cnt, SmartLabelProvider.getFullLabel(e)});
 		}
 	}
 

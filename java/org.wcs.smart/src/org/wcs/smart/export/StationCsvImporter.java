@@ -105,7 +105,7 @@ public class StationCsvImporter implements ICsvDataImporter {
 					throw new Exception(MessageFormat.format(Messages.AgencyCsvImporter_Error_IncorrectFieldsNumber, new Object[]{line, row.length, headerRow.length}));
 				}
 				
-				Station station = handleStation(row, langCodes, code2Language);
+				Station station = handleStation(row, langCodes, code2Language, session);
 				stations.add(station);
 				line++;
 			}
@@ -122,7 +122,8 @@ public class StationCsvImporter implements ICsvDataImporter {
 	 * @param langCodes
 	 * @return
 	 */
-	private Station handleStation(String[] row, List<String> columnLanguages, Map<String, Language> langCodes) {
+	private Station handleStation(String[] row, List<String> columnLanguages, 
+			Map<String, Language> langCodes, Session session) {
 		Station station = new Station();
 		station.setIsActive(true);
 		station.setConservationArea(SmartDB.getCurrentConservationArea());
@@ -137,7 +138,7 @@ public class StationCsvImporter implements ICsvDataImporter {
 					station.updateName(l, name);
 				}
 				if (description.length() > 0){
-					station.updateDescription(l, description);
+					station.updateDescription(session, l, description);
 				}
 			}
 		}

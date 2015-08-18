@@ -55,8 +55,11 @@ import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 
 /**
@@ -70,6 +73,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 
 	private List<AbstractQueryPropertyProvider> props;
 	private Query query;
+	private IQueryType qType;
 	private Text txtName;
 	private HashMap<Language, String> names;
 	
@@ -89,6 +93,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 			Query query) {
 		super(parent);
 		this.query = query;
+		this.qType = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
 		
 		if (query.getUuid() != null){
 			//load translations from db
@@ -246,7 +251,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		Label lblOwner = new Label(main, SWT.NONE);
 		lblOwner.setText(Messages.QueryPropertiesDialog_CreatorLabel);
 		Label lblOwnerName = new Label(main, SWT.NONE);
-		lblOwnerName.setText(query.getOwner().getFullLabel());
+		lblOwnerName.setText(SmartLabelProvider.getFullLabel(query.getOwner()));
 		
 
 		List<AbstractQueryPropertyProvider> allProps = new ArrayList<AbstractQueryPropertyProvider>();
@@ -270,7 +275,7 @@ public class QueryPropertiesDialog extends TitleAreaDialog {
 		});
 		props = new ArrayList<AbstractQueryPropertyProvider>();
 		for(AbstractQueryPropertyProvider prop: allProps){
-			if (prop.isValid(query.getType())){
+			if (prop.isValid(qType)){
 				//prop.clearChangeListener();
 				props.add(prop);
 				

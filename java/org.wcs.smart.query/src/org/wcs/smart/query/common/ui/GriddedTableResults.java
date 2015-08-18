@@ -31,7 +31,7 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
-import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.model.filter.DateFilter;
 
 public class GriddedTableResults  extends EditorPart  {

@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Contribution item to display the current
@@ -59,8 +60,8 @@ public class UserNameControlContribution extends
 		comp.setLayout(gl);
 		Label lbl = new Label(comp, SWT.NONE);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-		lbl.setText(SmartDB.getCurrentEmployee().getShortLabel());
-		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + SmartDB.getCurrentEmployee().getFullLabel());
+		lbl.setText(SmartLabelProvider.getShortLabel(SmartDB.getCurrentEmployee()));
+		lbl.setToolTipText(Messages.UserNameControlContribution_LoggedInLabel_ToolTip + SmartLabelProvider.getFullLabel(SmartDB.getCurrentEmployee()));
 		return comp;
 	}
 

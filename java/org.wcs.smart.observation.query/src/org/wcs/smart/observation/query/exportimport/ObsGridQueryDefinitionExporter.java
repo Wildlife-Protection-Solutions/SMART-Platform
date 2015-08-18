@@ -22,7 +22,7 @@
 package org.wcs.smart.observation.query.exportimport;
 
 import org.hibernate.Session;
-import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
+import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.query.common.importexport.GridQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -41,7 +41,7 @@ public class ObsGridQueryDefinitionExporter extends GridQueryDefinitionExporter{
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		return query.getType().getKey().equals(ObservationGridQueryType.KEY);	
+		return query.getTypeKey().equals(ObservationGriddedQuery.KEY);	
 	}
 
 	/**

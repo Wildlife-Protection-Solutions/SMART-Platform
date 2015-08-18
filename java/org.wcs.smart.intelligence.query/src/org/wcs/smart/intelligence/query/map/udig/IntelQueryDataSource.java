@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.query.map.udig;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
@@ -101,7 +102,7 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		if (type == null){
 			try {
 				if (typeName.equals(INTEL_TYPE)) {
-					type = createIntelligenceRecordSchema(query.getQueryColumns());
+					type = createIntelligenceRecordSchema(query.getQueryColumns(Locale.getDefault(), null));
 				} 
 			}catch(SchemaException ex){
 				throw new IOException(Messages.IntelQueryDataSource_SchemaError + ex.getLocalizedMessage(), ex);
@@ -136,11 +137,11 @@ public class IntelQueryDataSource extends AbstractDataStore{
 		for (FixedQueryColumn.FixedColumns c : FixedQueryColumn.FixedColumns.values()){
 			if (c == FixedColumns.CA_ID || c == FixedColumns.CA_NAME){
 				if (SmartDB.isMultipleAnalysis()){
-					sb.append("," + c.guiName + ":" + c.type.geotoolsType ); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append("," + c.getGuiName(Locale.getDefault()) + ":" + c.type.geotoolsType ); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}else{
 				//for some reason "Name" is not a valid attribute name
-				sb.append("," + (c.guiName.equalsIgnoreCase("Name") ? c.guiName + "_" : c.guiName) + ":" + c.type.geotoolsType );  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				sb.append("," + (c.getGuiName(Locale.getDefault()).equalsIgnoreCase("Name") ? c.getGuiName(Locale.getDefault()) + "_" : c.getGuiName(Locale.getDefault())) + ":" + c.type.geotoolsType );  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 		}		
 		return sb.toString();

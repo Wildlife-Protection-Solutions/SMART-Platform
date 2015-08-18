@@ -43,6 +43,7 @@ import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseMotionListener;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -103,7 +104,8 @@ public class MapInfoAreaComposite extends Composite {
 				ProjectionDialog pd = new ProjectionDialog(getShell(), mapViewer.getMap().getViewportModel().getCRS());
 				if (pd.open() == IDialogConstants.OK_ID){
 					try{
-						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
+						ChangeCRSCommand command = new ChangeCRSCommand(
+								ReprojectUtils.stringToCrs(pd.getSelection().getDefinition()));
 						getMap().sendCommandASync(command);
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(SmartMapEditorPart.ERROR_SETTING_MAP_PROJECTION + ex.getLocalizedMessage(), ex);

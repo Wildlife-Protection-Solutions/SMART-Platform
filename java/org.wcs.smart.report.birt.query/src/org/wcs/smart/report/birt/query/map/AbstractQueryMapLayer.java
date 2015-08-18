@@ -22,9 +22,9 @@
 package org.wcs.smart.report.birt.query.map;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.birt.report.engine.api.script.IReportContext;
 import org.eclipse.birt.report.model.api.DataSetHandle;
@@ -38,9 +38,10 @@ import org.wcs.smart.data.oda.smart.impl.SmartQuery;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.StyledQuery;
@@ -51,7 +52,7 @@ import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 import org.wcs.smart.report.birt.query.Activator;
 import org.wcs.smart.udig.style.StyleManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Abstract map layer for linking a SMART query to a BIRT map layer.  This
@@ -87,19 +88,19 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 		}
 		
 		String queryText = ((OdaDataSetHandle)handle).getQueryText();
-		byte[] quuid = null;
+		UUID quuid = null;
 		try {
-			quuid = SmartUtils.decodeHex(queryText.split(":")[1]); //$NON-NLS-1$
+			quuid = UuidUtils.stringToUuid(queryText.split(":")[1]); //$NON-NLS-1$
 		} catch (Exception e) {
 			Activator.log(e.getMessage(), e);
 			return null;
 		}
 		
 		String queryType = queryText.split(":")[0]; //$NON-NLS-1$
-		IQueryType qtype = QueryTypeManager.getInstance().findQueryType(queryType);
+		IQueryType qtype = QueryTypeManager.INSTANCE.findQueryType(queryType);
 		/* for historic support */
 		if (qtype == null) {
-			qtype = QueryTypeManager.getInstance().findDeprecatedQueryType(queryType);
+			qtype = QueryTypeManager.INSTANCE.findDeprecatedQueryType(queryType);
 		}
 		if (qtype == null) return null;
 		
@@ -130,7 +131,7 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 	 * Gets the query associated with the layer.  
 	 * 
 	 */
-	protected Query getQuery(byte[] quuid, IQueryType qtype){
+	protected Query getQuery(UUID quuid, IQueryType qtype){
 		//do not close session as assume it is managed by SmartConnection is BIRT report
 		Session session = HibernateManager.openSession();
 		return QueryHibernateManager.getInstance().findQuery(session,quuid, qtype);
@@ -145,13 +146,13 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 		}
 		String queryText = ((OdaDataSetHandle) handle).getQueryText();
 
-		byte[] quuid = SmartUtils.decodeHex(queryText.split(":")[1]); //$NON-NLS-1$
+		UUID quuid = UuidUtils.stringToUuid(queryText.split(":")[1]); //$NON-NLS-1$
 
 		String queryType = queryText.split(":")[0]; //$NON-NLS-1$
-		IQueryType qtype = QueryTypeManager.getInstance().findQueryType(queryType);
+		IQueryType qtype = QueryTypeManager.INSTANCE.findQueryType(queryType);
 		/* for historic support */
 		if (qtype == null) {
-			qtype = QueryTypeManager.getInstance().findDeprecatedQueryType(queryType);
+			qtype = QueryTypeManager.INSTANCE.findDeprecatedQueryType(queryType);
 		}
 		Query q = null;
 
@@ -181,16 +182,17 @@ public abstract class AbstractQueryMapLayer implements IBirtMapLayerManager {
 				q.setDateFilter(dateFilter);
 			}
 
+			
 			if (q instanceof SimpleQuery) {
-				((SimpleQuery) q).setDateFilter(dateFilter);
-				q.executeQuery(new NullProgressMonitor(), session);
+				QueryExecutor.INSTANCE.executeQuery(q, session, new NullProgressMonitor());
 			} else if (q instanceof GriddedQuery) {
 				((GriddedQuery) q).setDateFilter(dateFilter);
-				Collection<GridResultItem> data = (Collection<GridResultItem>) q.executeQuery(new NullProgressMonitor(), session);
-				if (data.size() <= 0) {
+				GridQueryResult result = (GridQueryResult)QueryExecutor.INSTANCE.executeQuery(q, session, new NullProgressMonitor());
+				if (result.getData().size() <= 0) {
 					add = false;
 				}
 			}
+			
 			if (add) {
 				List<? extends IGeoResource> resources = qs.resources(null);
 				if (resources.size() > 0) {

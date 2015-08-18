@@ -30,6 +30,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Validates if the employee has created any plans.
@@ -54,7 +55,7 @@ public class EmployeePlanDeleteAdvisor implements IDeleteAdvisor {
 		}else{
 			return  MessageFormat.format(
 					Messages.EmployeePlanDeleteAdvisor_CannotDelete,
-					new Object[]{cnt, e.getFullLabel()});
+					new Object[]{cnt,SmartLabelProvider.getFullLabel(e)});
 		}
 	}
 

@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -235,7 +236,7 @@ public class AttributeTable {
 					WaypointObservationAttribute att = observation.findAttribute(attribute);
 				
 					if (att != null) {
-						return att.getAttributeValueAsString();
+						return att.getAttributeValueAsString(Locale.getDefault());
 					}
 				}
 				

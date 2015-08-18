@@ -27,7 +27,7 @@ import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Configuration for current {@link CsvExportDialog} to export
@@ -63,9 +63,9 @@ public class StationCsvExportConfig extends AbstractCsvExportConfig {
 	@Override
 	public String getInfo() {
 		return Messages.StationCsvExportConfig_Message1
-				+ SmartUtils.LINE_SEPARATOR
+				+ SharedUtils.LINE_SEPARATOR
 				+Messages.StationCsvExportConfig_Message2
-				+ SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR
+				+ SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR
 				+ Messages.StationCsvExportConfig_Message3;
 	}
 

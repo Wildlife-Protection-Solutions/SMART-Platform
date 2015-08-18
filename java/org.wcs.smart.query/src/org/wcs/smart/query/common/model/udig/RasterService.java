@@ -27,11 +27,11 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -55,11 +55,12 @@ import org.locationtech.udig.style.sld.SLDContent;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResultMetadata;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.GridResultItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * This service maintains the raster file associated to the query result.
@@ -104,12 +105,12 @@ public class RasterService extends AbstractRasterService {
 	 * @param queryId
 	 * @return
 	 */
-	private static URL buildUrl(byte[] queryId){
+	private static URL buildUrl(UUID queryId){
 		String url = "smart://smartdb/query/"; //$NON-NLS-1$
 		if (queryId == null){
 			url += System.nanoTime();
 		}else{
-			url += SmartUtils.encodeHex(queryId) ;
+			url += UuidUtils.uuidToString(queryId) ;
 		}
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
@@ -170,8 +171,13 @@ public class RasterService extends AbstractRasterService {
 			rb.build();
 			return rb.getResult();	
 		}
+		GridQueryResult results = (GridQueryResult) query.getCachedResults();
+		if (results == null){
+			//query has not been run
+			return null;
+		}
 		
-		GridQueryResultMetadata metadata = query.getResultMetadata();
+		GridQueryResultMetadata metadata = results.getMetadata();
 		if (metadata == null){
 			//query has not been run
 			return null;
@@ -191,11 +197,13 @@ public class RasterService extends AbstractRasterService {
 					(metadata.getMinXTile()-1)* gridCellSize + 0.5* gridCellSize + query.getGridOrigin().x, 
 					(metadata.getMinYTile()-1) * gridCellSize - 0.5*gridCellSize + query.getGridOrigin().y, 
 					width * gridCellSize , height*gridCellSize)); 
-		rb.setTable((Collection<GridResultItem>) query.getCachedResults(new NullProgressMonitor()), query.getResultMetadata());
+		rb.setTable(((GridQueryResult)query.getCachedResults()).getData(), 
+				results.getMetadata());
 		rb.setGridCellSize(gridCellSize);
 		rb.build();
-		
-		return rb.getResult();
+		File f = rb.getResult();
+		results.setLastRasterFile(f);
+		return f;
 	}
 
 	
@@ -235,9 +243,16 @@ public class RasterService extends AbstractRasterService {
 			 public Style style( IProgressMonitor monitor ) {
 				double minValue = 0;
 				double maxValue = 10;
-				if (query.getResultMetadata() != null){
-					 minValue = query.getResultMetadata().getMinResultValue();
-					 maxValue = query.getResultMetadata().getMaxResultValue();
+				
+				GridQueryResult results = (GridQueryResult) query.getCachedResults();
+				if (results == null){
+					//query has not been run
+					return null;
+				}
+				GridQueryResultMetadata metadata = results.getMetadata();
+				if (metadata != null){
+					 minValue = metadata.getMinResultValue();
+					 maxValue = metadata.getMaxResultValue();
 				}
 				
 				

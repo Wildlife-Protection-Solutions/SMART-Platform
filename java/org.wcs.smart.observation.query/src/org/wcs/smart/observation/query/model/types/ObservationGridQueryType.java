@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
@@ -60,7 +61,6 @@ public class ObservationGridQueryType implements IQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
-	public static final String KEY = "observationgrid"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
@@ -74,7 +74,7 @@ public class ObservationGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return ObservationGriddedQuery.KEY;
 	}
 
 	/**

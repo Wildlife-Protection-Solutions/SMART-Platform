@@ -12,6 +12,7 @@
 package org.wcs.smart.ui.workbench.addons.dndaddon;
 
 import java.util.List;
+
 import org.eclipse.e4.ui.model.application.ui.MUIElement;
 import org.eclipse.e4.ui.model.application.ui.advanced.impl.AdvancedFactoryImpl;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;

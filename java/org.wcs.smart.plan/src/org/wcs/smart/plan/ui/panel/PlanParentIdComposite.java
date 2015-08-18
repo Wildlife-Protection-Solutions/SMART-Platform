@@ -21,8 +21,8 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -152,7 +152,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		if(!btnNoParent.getSelection()){
 			PlanEditorInput tmp = (PlanEditorInput) planTreeViewer.getSelectedPlan();
 			//tmp is supposed not to be null as in was checked in validate() method
-			if (Arrays.equals(tmp.getUuid(), plan.getUuid())){
+			if (tmp.getUuid().equals(plan.getUuid())){
 				MessageDialog.openError(getShell(),  Messages.PlanParentIdComposite_InfoDialog_Title, Messages.PlanParentIdComposite_InfoDialog_ReferItself_Message);
 				return false;
 			}
@@ -211,7 +211,7 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 			}
 			PlanEditorInput in = (PlanEditorInput) planTreeViewer.getSelectedPlan();
 			if (currentPlan.getUuid() != null){
-				if (Arrays.equals(in.getUuid(), currentPlan.getUuid())){
+				if (in.getUuid().equals(currentPlan.getUuid())){
 					setErrorMessage(Messages.PlanParentIdComposite_SameParentError);
 					return;
 				}
@@ -236,12 +236,12 @@ public class PlanParentIdComposite extends PlanComposite implements IPlanFilterI
 		setErrorMessage(null);
 	}
 
-	private boolean findPlan(List<Plan> plans, byte[] uuid){
+	private boolean findPlan(List<Plan> plans, UUID uuid){
 		if (plans == null){
 			return false;
 		}
 		for (Plan p : plans){
-			if(Arrays.equals(p.getUuid(), uuid)){
+			if(p.getUuid().equals(uuid)){
 				return true;
 			}
 		}

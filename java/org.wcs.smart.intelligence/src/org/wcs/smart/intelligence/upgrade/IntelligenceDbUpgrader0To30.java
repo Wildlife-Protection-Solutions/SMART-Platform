@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
@@ -35,7 +36,7 @@ import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.jdbc.Work;
-import org.hibernate.type.BinaryType;
+import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
@@ -201,7 +202,7 @@ public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
 		Properties prop = new Properties();
 		prop.put(UUIDGenerator.UUID_GEN_STRATEGY, StandardRandomStrategy.INSTANCE);
 		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS, UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new BinaryType(), prop, null);
+		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 		for (ConservationArea ca : areas) {
 			createSource(session, ca, "Patrol", "patrol", uuidGenerator); //$NON-NLS-1$ //$NON-NLS-2$
 			createSource(session, ca, "Public", "public", uuidGenerator); //$NON-NLS-1$ //$NON-NLS-2$
@@ -297,20 +298,21 @@ public class IntelligenceDbUpgrader0To30 implements IIntelligenceUpgrader {
 	}
 
 	private void createSource(Session s, final ConservationArea ca, final String name, final String keyId, UUIDGenerator uuidGenerator) {
-		final byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) s, name);
+		final UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) s, name);
 		s.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				PreparedStatement pst = c.prepareStatement("INSERT INTO smart.intelligence_source (UUID, CA_UUID, KEYID, IS_ACTIVE) VALUES (?, ?, ?, ?)"); //$NON-NLS-1$
-				pst.setBytes(1, uuid);
-				pst.setBytes(2, ca.getUuid());
+				pst.setObject(1, uuid);
+				//TODO: set this
+				pst.setObject(2, ca.getUuid());
 				pst.setString(3, keyId);
 				pst.setBoolean(4, true);
 				pst.execute();
 				
 				pst = c.prepareStatement("INSERT INTO smart.I18N_LABEL (LANGUAGE_UUID, ELEMENT_UUID, VALUE) VALUES (?, ?, ?)"); //$NON-NLS-1$
-				pst.setBytes(1, ca.getDefaultLanguage().getUuid());
-				pst.setBytes(2, uuid);
+				pst.setObject(1, ca.getDefaultLanguage().getUuid());
+				pst.setObject(2, uuid);
 				pst.setString(3, name);
 				pst.execute();
 			}

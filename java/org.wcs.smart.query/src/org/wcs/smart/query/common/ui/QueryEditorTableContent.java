@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.query.common.ui;
 
+import java.util.Locale;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -37,9 +39,9 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -90,7 +92,7 @@ public class QueryEditorTableContent {
 		if (stackComposite.isDisposed()) return;
 		setQueryName(query);
 		resultsTable.initQuery(query);
-		resultsTable.updateVisible(query.getQueryColumns());
+		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null));
 	}
 
 	/**

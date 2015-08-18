@@ -47,7 +47,8 @@
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
-            class="org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType">
+            class="org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType"
+            executor="org.wcs.smart.patrol.query.engine.DerbyObservationEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.query.patrol.filterPanel">
@@ -58,7 +59,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
-            class="org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType">
+            class="org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType"
+            executor="org.wcs.smart.patrol.query.engine.DerbyWaypointEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.query.patrol.filterPanel">
@@ -69,7 +71,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
-            class="org.wcs.smart.patrol.query.model.types.PatrolQueryType">
+            class="org.wcs.smart.patrol.query.model.types.PatrolQueryType"
+            executor="org.wcs.smart.patrol.query.engine.DerbyPatrolEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.query.patrol.filterPanel">
@@ -80,7 +83,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
-            class="org.wcs.smart.patrol.query.model.types.PatrolGridQueryType">
+            class="org.wcs.smart.patrol.query.model.types.PatrolGridQueryType"
+            executor="org.wcs.smart.patrol.query.engine.DerbyGridEngine">
          <DefinitionPanel
                id="org.wcs.smart.patrol.query.PatrolGriddedQueryDefinitionPanel"
                itemPanelId="org.wcs.smart.query.patrol.GridFilterItemPanel">
@@ -95,7 +99,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.patrol.query.group.PatrolQueries"
-            class="org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType">
+            class="org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType"
+            executor="org.wcs.smart.patrol.query.engine.DerbySummaryEngine">
          <DefinitionPanel
                id="org.wcs.smart.patrol.query.PatrolSummaryGroupByValuePanel"
                itemPanelId="org.wcs.smart.query.patrol.summaryItemPanel">

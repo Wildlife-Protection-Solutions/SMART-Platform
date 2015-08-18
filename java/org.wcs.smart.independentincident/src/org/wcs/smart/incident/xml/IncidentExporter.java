@@ -38,6 +38,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.model.WaypointType;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.SmartUtils;
@@ -85,6 +86,7 @@ public class IncidentExporter {
 			if (!includeAttachments){
 				return exportIncidentWithoutAttachments(xml, file, monitor);
 			}else{
+				ObservationHibernateManager.computeAttachmentLocations(incident, session);
 				return exportIncidentWithAttachments(incident, xml, file, monitor);
 			}
 		} finally {
@@ -149,7 +151,7 @@ public class IncidentExporter {
 				}
 			}
 			for (ISmartAttachment att : all) {
-				File attFile = att.getFullFile();
+				File attFile = att.getAttachmentFile();
 				zout.putNextEntry(new ZipEntry(IncidentXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
 				try(FileInputStream inStream = new FileInputStream(attFile)){
 					while ((bytesRead = inStream.read(buffer)) > 0) {

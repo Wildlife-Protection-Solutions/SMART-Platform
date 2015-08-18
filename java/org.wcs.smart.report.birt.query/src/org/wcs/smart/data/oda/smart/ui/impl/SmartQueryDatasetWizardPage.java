@@ -68,7 +68,7 @@ import org.wcs.smart.query.ui.querylist.SavedQueryTree;
 import org.wcs.smart.report.birt.query.Activator;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.ui.SmartReportEditorInput;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * A ODA data set designer page for an user to create a SMART ODA data set
@@ -352,7 +352,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 
 		//create dataests
 		IQuery query = conn.newQuery(SmartQuery.SMART_DATASET_TYPE);
-		String queryText = getQuery().getType().getKey() + ":" + SmartUtils.encodeHex(getQuery().getUuid()); //$NON-NLS-1$
+		String queryText = getQuery().getType().getKey() + ":" + UuidUtils.uuidToString(getQuery().getUuid()); //$NON-NLS-1$
 		query.prepare(queryText);
 		dataSetDesign.setQueryText(queryText);
 

@@ -55,6 +55,7 @@ public class SmartHibernateManager {
 	private static String databaseLocation = ""; //$NON-NLS-1$
 	
 	public static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
+	
 	//TODO: perhaps this can be replaced with
 	//hibernate.current_session_context_class=thread
 	//hibernate.transaction.factory_class=JDBCTransactionFactory
@@ -107,11 +108,11 @@ public class SmartHibernateManager {
 			ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
 			sessionFactory = config.buildSessionFactory(service);
 			
-			
 			if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
 				//fail
 				throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
 			}
+			
 		}
 	}
 	
@@ -141,7 +142,7 @@ public class SmartHibernateManager {
 	 * Users are required to close the session when they are done with it.
 	 * @return
 	 */
-	public synchronized static final Session openSession(){
+	protected synchronized static Session openSession(){
 		
 		if (sessionFactory == null){
 			createSessionFactory();
@@ -163,7 +164,7 @@ public class SmartHibernateManager {
 	 * @param interceptor a session interceptor
 	 * @return
 	 */
-	public synchronized static final Session openSession(Interceptor interceptor){
+	protected synchronized static Session openSession(Interceptor interceptor){
 		if (sessionFactory == null){
 			createSessionFactory();
 		}
@@ -227,4 +228,5 @@ public class SmartHibernateManager {
 		}
 		return null;
 	}
+	
 }

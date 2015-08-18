@@ -16,12 +16,10 @@ import org.wcs.smart.data.oda.smart.query.common.MemoryQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.PagedQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
-import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.report.internal.Messages;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -44,23 +42,26 @@ public class ObservationReportQuery implements ISmartQuery {
 	 */
 	@Override
 	public void prepare(SmartQuery smartQuery) throws OdaException {
-
-		// attempt to parse query
-		if (smartQuery.getQuery() instanceof SimpleQuery) {
-			((SimpleQuery) smartQuery.getQuery()).getFilter();
-		} else if (smartQuery.getQuery() instanceof ObservationSummaryQuery) {
-			ObservationSummaryQuery sumQuery = (ObservationSummaryQuery)smartQuery.getQuery();
+		try{
+			// attempt to parse query
+			if (smartQuery.getQuery() instanceof SimpleQuery) {
+				((SimpleQuery) smartQuery.getQuery()).getFilter();
+			} else if (smartQuery.getQuery() instanceof ObservationSummaryQuery) {
+				ObservationSummaryQuery sumQuery = (ObservationSummaryQuery)smartQuery.getQuery();
 			
-			//date group by problem with reports 
-			GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
-			List<IGroupBy> headers = part.getGroupBys();
-			for (IGroupBy h : headers){
-				if (h instanceof DateGroupBy){
-					throw new OdaException(Messages.ObservationReportQuery_SummaryDateGroupByInvalid);
+				//date group by problem with reports 
+				GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
+				List<IGroupBy> headers = part.getGroupBys();
+				for (IGroupBy h : headers){
+					if (h instanceof DateGroupBy){
+						throw new OdaException(Messages.ObservationReportQuery_SummaryDateGroupByInvalid);
+					}
 				}
+			} else if (smartQuery.getQuery() instanceof ObservationGriddedQuery){
+				((ObservationGriddedQuery)smartQuery.getQuery()).getQueryDefinition();
 			}
-		} else if (smartQuery.getQuery() instanceof ObservationGriddedQuery){
-			((ObservationGriddedQuery)smartQuery.getQuery()).getQueryDefinition();
+		}catch (Exception ex){
+			throw new OdaException(ex);
 		}
 	}
 
@@ -73,7 +74,7 @@ public class ObservationReportQuery implements ISmartQuery {
 		Date endDate = (Date) smartQuery.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE);
 		
 		if (startDate == null || endDate == null){
-			if (smartQuery.getQuery().getType().getKey().equals(ObservationSummaryQueryType.KEY)){
+			if (smartQuery.getQuery().getTypeKey().equals(ObservationSummaryQuery.KEY)){
 				//we choose to run summaries in order to get 
 				//all header information
 				Calendar cal = Calendar.getInstance();
@@ -95,18 +96,18 @@ public class ObservationReportQuery implements ISmartQuery {
 
 		//the result set
 		
-		if (smartQuery.getQuery().getType().getKey().equals(ObservationQueryType.KEY) ||
-				smartQuery.getQuery().getType().getKey().equals(ObservationWaypointQueryType.KEY)){
+		if (smartQuery.getQuery().getTypeKey().equals(ObsObservationQuery.KEY) ||
+				smartQuery.getQuery().getTypeKey().equals(ObservationWaypointQuery.KEY)){
 			((SimpleQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new PagedQueryResultSet(smartQuery.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
 					connection);
-		}else  if (smartQuery.getQuery().getType().getKey().equals(ObservationGridQueryType.KEY)){
+		}else  if (smartQuery.getQuery().getTypeKey().equals(ObservationGriddedQuery.KEY)){
 			((GriddedQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new MemoryQueryResultSet(smartQuery.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
 					connection);
-		} else if (smartQuery.getQuery().getType().getKey().equals(ObservationSummaryQueryType.KEY)){
+		} else if (smartQuery.getQuery().getTypeKey().equals(ObservationSummaryQuery.KEY)){
 			((SummaryQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
 					(SummaryQuery) smartQuery.getQuery(),
@@ -120,12 +121,12 @@ public class ObservationReportQuery implements ISmartQuery {
 	@Override
 	public IResultSetMetaData getMetaData(SmartQuery smartQuery)
 			throws OdaException {
-		if (smartQuery.getQuery().getType().getKey().equals(ObservationQueryType.KEY) ||
-				smartQuery.getQuery().getType().getKey().equals(ObservationWaypointQueryType.KEY)){
+		if (smartQuery.getQuery().getTypeKey().equals(ObsObservationQuery.KEY) ||
+				smartQuery.getQuery().getTypeKey().equals(ObservationWaypointQuery.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery.getQuery());
-		} else if (smartQuery.getQuery().getType().getKey().equals(ObservationSummaryQueryType.KEY)) {
+		} else if (smartQuery.getQuery().getTypeKey().equals(ObservationSummaryQuery.KEY)) {
 			return new ObservationSummaryQueryResultSetMetadata((ObservationSummaryQuery) smartQuery.getQuery());
-		} else if (smartQuery.getQuery().getType().getKey().equals(ObservationGridQueryType.KEY)){
+		} else if (smartQuery.getQuery().getTypeKey().equals(ObservationGriddedQuery.KEY)){
 			return new SimpleQueryResultSetMetadata( (ObservationGriddedQuery) smartQuery.getQuery());
 		}
 		throw new OdaException(Messages.ObservationReportQuery_MetadataError);

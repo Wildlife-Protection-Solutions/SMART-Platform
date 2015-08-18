@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.report.IntelligenceReportPerspective;
 import org.wcs.smart.intelligence.report.ReportIntelligence;
 
@@ -73,7 +74,7 @@ public class ImportIntelligenceTemplateHandler {
 		try{
 			boolean open = ReportIntelligence.closeTemplateEditor();
 
-			File f = new File(IntelligencePlugIn.getDefault().getIntelligenceDirectory(), ReportIntelligence.INTELLIGENCE_TEMPLATE);
+			File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR, ReportIntelligence.INTELLIGENCE_TEMPLATE);
 			FileUtils.copyFile(inFile, f);
 
 			//re-open

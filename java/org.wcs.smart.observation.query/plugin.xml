@@ -25,7 +25,8 @@
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
-            class="org.wcs.smart.observation.query.model.types.ObservationQueryType">
+            class="org.wcs.smart.observation.query.model.types.ObservationQueryType"
+            executor="org.wcs.smart.observation.query.engine.DerbyObservationEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.observation.query.filterPanel">
@@ -36,7 +37,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
-            class="org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType">
+            class="org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType"
+            executor="org.wcs.smart.observation.query.engine.DerbyWaypointEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.observation.query.filterPanel">
@@ -47,7 +49,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
-            class="org.wcs.smart.observation.query.model.types.ObservationGridQueryType">
+            class="org.wcs.smart.observation.query.model.types.ObservationGridQueryType"
+            executor="org.wcs.smart.observation.query.engine.DerbyGridEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.grid"
                itemPanelId="org.wcs.smart.observation.query.GriddedItemPanel">
@@ -62,7 +65,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.observation.query.group.AllData"
-            class="org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType">
+            class="org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType"
+            executor="org.wcs.smart.observation.query.engine.DerbySummaryEngine">
          <DefinitionPanel
                id="org.wcs.smart.observation.query.ObservationSummaryGroupByValuePanel"
                itemPanelId="org.wcs.smart.observation.query.summaryItemPanel">

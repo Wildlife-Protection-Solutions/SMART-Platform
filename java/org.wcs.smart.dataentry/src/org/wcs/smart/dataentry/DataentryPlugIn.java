@@ -60,8 +60,8 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 		super.start(context);
 		plugin = this;
 		
-		DataModelManager.getInstance().addItemChangeListener(deleteListener);
-		DataModelManager.getInstance().addChangeListener(dmListener);
+		DataModelManager.INSTANCE.addItemChangeListener(deleteListener);
+		DataModelManager.INSTANCE.addChangeListener(dmListener);
 	}
 
 	/*
@@ -69,8 +69,8 @@ public class DataentryPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
-		DataModelManager.getInstance().removeItemChangeListener(deleteListener);
-		DataModelManager.getInstance().removeChangeListener(dmListener);
+		DataModelManager.INSTANCE.removeItemChangeListener(deleteListener);
+		DataModelManager.INSTANCE.removeChangeListener(dmListener);
 		plugin = null;
 		super.stop(context);
 	}

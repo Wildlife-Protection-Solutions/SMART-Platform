@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.newPlanWizard.ITargetPage;
@@ -74,7 +75,7 @@ public class AdministrativePlanTargetPropertyPage implements ITargetPage{
 	 * @return page name
 	 */
 	public String getPageName(){
-		return AdministrativePlanTarget.TARGET_GUI_NAME;
+		return PlanLabelProvider.ADMIN_TARGET_GUI_NAME;
 	}
 	
 	private GridData createGridDataWithIndent(){

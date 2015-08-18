@@ -86,8 +86,9 @@ import org.locationtech.udig.ui.IBlockingSelection;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.opengis.feature.simple.SimpleFeature;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -271,7 +272,7 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
         mapViewer.setMap(map);
         //set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
-		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
+		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 	      
         ApplicationGIS.getToolManager().setCurrentEditor(this);
         
@@ -314,7 +315,8 @@ public abstract class SmartMapEditorPart extends EditorPart implements MapPart, 
 				ProjectionDialog pd = new ProjectionDialog(getSite().getShell(), mapViewer.getMap().getViewportModel().getCRS());
 				if (pd.open() == IDialogConstants.OK_ID){
 					try{
-						ChangeCRSCommand command = new ChangeCRSCommand(pd.getSelection().getCrs());
+						ChangeCRSCommand command = new ChangeCRSCommand(
+								ReprojectUtils.stringToCrs(pd.getSelection().getDefinition()));
 						getMap().sendCommandASync(command);
 					}catch (Exception ex){
 						SmartPlugIn.displayLog(ERROR_SETTING_MAP_PROJECTION + ex.getLocalizedMessage(), ex);

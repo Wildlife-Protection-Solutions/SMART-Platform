@@ -23,6 +23,7 @@ package org.wcs.smart.report.model;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.UUID;
 
 import javax.persistence.AssociationOverride;
 import javax.persistence.AssociationOverrides;
@@ -62,7 +63,7 @@ public class ReportQuery {
 		
 	}
 	
-	public ReportQuery(Report report, byte[] quuid){
+	public ReportQuery(Report report, UUID quuid){
 		setId(new ReportQueryPk(report, quuid));
 	}
 	
@@ -81,7 +82,7 @@ public class ReportQuery {
 	}
 	
 	@Transient
-	public byte[] getQueryUuid(){
+	public UUID getQueryUuid(){
 		return id.getQueryUuid();
 	}
 	/**
@@ -94,13 +95,13 @@ public class ReportQuery {
 		private static final long serialVersionUID = 1L;
 		
 		private Report report;
-		private byte[] queryUuid;
+		private UUID queryUuid;
 		
 		public ReportQueryPk(){
 			
 		}
 		
-		public ReportQueryPk(Report report, byte[] queryUuid){
+		public ReportQueryPk(Report report, UUID queryUuid){
 			setReport(report);
 			setQueryUuid(queryUuid);
 		}
@@ -125,14 +126,14 @@ public class ReportQuery {
 		 * @return the queryUuid
 		 */
 		@Column(name="query_uuid")
-		public byte[] getQueryUuid() {
+		public UUID getQueryUuid() {
 			return queryUuid;
 		}
 		
 		/**
 		 * @param queryUuid the queryUuid to set
 		 */
-		public void setQueryUuid(byte[] queryUuid) {
+		public void setQueryUuid(UUID queryUuid) {
 			this.queryUuid = queryUuid;
 		}
 		
@@ -144,7 +145,7 @@ public class ReportQuery {
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
-			result = prime * result + Arrays.hashCode(getQueryUuid());
+			result = prime * result + getQueryUuid().hashCode();
 			result = prime * result + ((report == null) ? 0 : report.hashCode());
 			return result;
 		}
@@ -162,7 +163,7 @@ public class ReportQuery {
 			if (getClass() != obj.getClass())
 				return false;
 			ReportQueryPk other = (ReportQueryPk) obj;
-			if (!Arrays.equals(getQueryUuid(), other.getQueryUuid()))
+			if (!getQueryUuid().equals(other.getQueryUuid()))
 				return false;
 			if (report == null) {
 				if (other.report != null)

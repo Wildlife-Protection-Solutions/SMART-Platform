@@ -29,15 +29,17 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.IDataModelManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -46,6 +48,7 @@ import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Basic tool for validating query definitions.  This class should be
@@ -59,14 +62,19 @@ public class QueryDefinitionValidator {
 
 	protected Session session;
 
+	protected IDataModelManager manager;
+	
+	protected ConservationArea ca;
 	/**
 	 * @param langCode the language value of the query 
 	 * @param uuidLookup a uuid lookup map that looks up uuid values
 	 * @param session database session
 	 * 
 	 */
-	public QueryDefinitionValidator(Session session ){
+	public QueryDefinitionValidator(Session session, IDataModelManager manager, ConservationArea ca ){
 		this.session = session;
+		this.manager = manager;
+		this.ca = ca;
 	}
 
 	
@@ -140,27 +148,27 @@ public class QueryDefinitionValidator {
 	 * 
 	 */
 	public Employee findEmployee(String employeeId, String givenName, String familyName, List<String> warnings){
-		Employee e = HibernateManager.findEmployeeByIdAndName(employeeId, givenName, familyName, SmartDB.getCurrentConservationArea(), session);
+		Employee e = HibernateManager.findEmployeeByIdAndName(employeeId, givenName, familyName, ca, session);
 		if (e != null){
 			warnings.add(MessageFormat.format(
 					Messages.FilterValidator_Employee_DifferentUniqueId,
-					new Object[]{e.getFullLabel()}));
+					new Object[]{SmartLabelProvider.getFullLabel(e)}));
 			return e;
 		}
 		
-		e = HibernateManager.findEmployeeById(employeeId, SmartDB.getCurrentConservationArea(), session);
+		e = HibernateManager.findEmployeeById(employeeId, ca, session);
 		if (e != null){
 			warnings.add(MessageFormat.format(
 					Messages.FilterValidator_EmployeeDifferentName,
-					new Object[]{Employee.formatName(givenName, familyName, employeeId),
-					e.getShortLabel()})); 
+					new Object[]{SmartLabelProvider.formatName(givenName, familyName, employeeId),
+							SmartLabelProvider.getShortLabel(e)})); 
 			return e;
 		}
 		
-		e = HibernateManager.findEmployeeByName(givenName, familyName, SmartDB.getCurrentConservationArea(), session);
+		e = HibernateManager.findEmployeeByName(givenName, familyName, ca, session);
 		if (e != null){
 			warnings.add(MessageFormat.format(Messages.FilterValidator_EmployeeDifferentId,
-					new Object[]{Employee.formatName(givenName, familyName, employeeId), e.getId()}));
+					new Object[]{SmartLabelProvider.formatName(givenName, familyName, employeeId), e.getId()}));
 			return e;
 		}
 		
@@ -191,7 +199,7 @@ public class QueryDefinitionValidator {
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("cd", langCode); //$NON-NLS-1$
 		query.setParameter("value", value); //$NON-NLS-1$
-		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
 		
 		List<?> results = query.list();
 		if (results.size() == 0){
@@ -217,7 +225,7 @@ public class QueryDefinitionValidator {
 		
 		org.hibernate.Query query = session.createQuery(sql);
 		query.setParameter("keyId", key); //$NON-NLS-1$
-		query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
+		query.setParameter("ca",ca); //$NON-NLS-1$
 		
 		List<?> results = query.list();
 		if (results.size() == 0){
@@ -237,7 +245,7 @@ public class QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateCategory(String hkey) throws Exception{
-		Category c = QueryDataModelManager.getInstance().getCategory(session, hkey);
+		Category c = manager.getCategory(session, hkey);
 		if (c == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_CategoryNotFound, new Object[]{hkey}));
 		}
@@ -255,7 +263,7 @@ public class QueryDefinitionValidator {
 	public void validateArea(AreaType type, String areaKey) throws Exception{
 		Area a = HibernateManager.findArea(type, areaKey, session);
 		if (a == null){
-			throw new Exception (MessageFormat.format(Messages.FilterValidator_InvalidAreaFilter, new Object[]{type.getGuiName(), areaKey}));
+			throw new Exception (MessageFormat.format(Messages.FilterValidator_InvalidAreaFilter, new Object[]{SmartLabelProvider.getAreaTypeName(type), areaKey}));
 		}
 	}
 	
@@ -266,7 +274,7 @@ public class QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateAttribute(String key) throws Exception{
-		Attribute a = QueryDataModelManager.getInstance().getAttribute(session, key);
+		Attribute a = manager.getAttribute(session, key);
 		if (a == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeNotFound, new Object[]{key}));
 		}
@@ -280,10 +288,10 @@ public class QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateAttributeListItem(String key, String attributeKey) throws Exception{
-		if (key.equals(AttributeFilter.ANY_OPTION.getKey())){
+		if (key.equals(AttributeFilter.ANY_OPTION_KEY)){
 			return;
 		}
-		Object x = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, key);
+		Object x = manager.getAttributeListItem(session, attributeKey, key);
 		if (x == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeListItemNotFound, new Object[]{key}));
 		}
@@ -298,7 +306,7 @@ public class QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateAttributeTreeNode(String key, String attributeKey) throws Exception{
-		Object x = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, key);
+		Object x = manager.getAttributeTreeNode(session, attributeKey, key);
 		if (x == null){
 			throw new Exception (MessageFormat.format(Messages.FilterValidator_AttributeTreeNodeNotFound, new Object[]{key}));
 		}
@@ -390,7 +398,8 @@ public class QueryDefinitionValidator {
 					if (it.getCategoryKey() != null){
 						validateCategory(it.getCategoryKey());
 					}
-					if (it.getAggregation() == null){
+					Aggregation agg = DataModel.getAggregation(it.getAggregationKey());
+					if (agg == null){
 						throw new Exception(MessageFormat.format(Messages.QueryDefinitionValidator_AggregationNotSupported, new Object[]{ it.getAggregationKey() }));
 					}
 					

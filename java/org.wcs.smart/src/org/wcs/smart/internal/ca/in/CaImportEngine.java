@@ -22,6 +22,7 @@
 package org.wcs.smart.internal.ca.in;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
@@ -35,9 +36,9 @@ public class CaImportEngine implements ICaDataImportEngine {
 
 	private Session session;
 	private File backupDir;
-	private byte[] cauuid;
+	private UUID cauuid;
 	
-	public CaImportEngine(Session session, File backupDir, byte[] cauuid){
+	public CaImportEngine(Session session, File backupDir, UUID cauuid){
 		this.session = session;
 		this.backupDir = backupDir;
 		this.cauuid = cauuid;
@@ -56,7 +57,7 @@ public class CaImportEngine implements ICaDataImportEngine {
 
 
 	@Override
-	public byte[] getConservationAreaUuid() {
+	public UUID getConservationAreaUuid() {
 		return this.cauuid;
 	}
 

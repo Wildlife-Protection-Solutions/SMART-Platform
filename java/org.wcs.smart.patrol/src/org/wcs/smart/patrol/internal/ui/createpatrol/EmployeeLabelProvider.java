@@ -30,6 +30,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Label provided for employee class.
@@ -114,7 +115,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 			if (pilots != null && pilots.contains(element)) {
 				text += "[" + PILOT_LABEL + "] "; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return text + ((Employee) element).getFullLabel();
+			return text + SmartLabelProvider.getFullLabel((Employee) element);
 		} else if (element instanceof PatrolLegMember) {
 			String text = ""; //$NON-NLS-1$
 			if (((PatrolLegMember) element).getIsLeader()) {
@@ -123,7 +124,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 			if (((PatrolLegMember) element).getIsPilot()) {
 				text += "[" + PILOT_LABEL + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return text + ((PatrolLegMember) element).getMember().getFullLabel();
+			return text + SmartLabelProvider.getFullLabel(((PatrolLegMember) element).getMember());
 		}
 		return super.getText(element);
 	}

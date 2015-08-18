@@ -30,7 +30,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -77,7 +77,7 @@ public class IntelligenceFeatureReader implements FeatureReader<SimpleFeatureTyp
 	}
 	
 	private SimpleFeature createFeature(IntelligencePoint point){
-		String fid = SmartUtils.encodeHex(point.getUuid());
+		String fid = UuidUtils.uuidToString(point.getUuid());
 		Point pnt = gf.createPoint(new Coordinate(point.getX(),point.getY()));
 		return SimpleFeatureBuilder.build(featureType, new Object[]{pnt,fid}, fid);
 	}

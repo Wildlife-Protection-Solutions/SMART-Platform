@@ -22,7 +22,7 @@
 package org.wcs.smart.query.ui.model;
 
 import java.text.Collator;
-import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
@@ -40,7 +40,7 @@ import org.eclipse.jface.viewers.LabelProvider;
  */
 public class ListItem implements Comparable<ListItem>{
 	
-	private byte[] uuid;
+	private UUID uuid;
 	private String name;
 	private String key;
 	private String shortName;
@@ -63,7 +63,7 @@ public class ListItem implements Comparable<ListItem>{
 	 * @param uuid
 	 * @param name
 	 */
-	public ListItem(byte[] uuid, String name){
+	public ListItem(UUID uuid, String name){
 		this(uuid, name, null);
 	}
 			
@@ -73,7 +73,7 @@ public class ListItem implements Comparable<ListItem>{
 	 * @param name
 	 * @param key
 	 */
-	public ListItem(byte[] uuid, String name, String key){
+	public ListItem(UUID uuid, String name, String key){
 		this.uuid = uuid;
 		this.name = name;
 		this.key = key;
@@ -85,7 +85,7 @@ public class ListItem implements Comparable<ListItem>{
 	 * @param name
 	 * @param key
 	 */
-	public ListItem(byte[] uuid, String name, String key, String shortName){
+	public ListItem(UUID uuid, String name, String key, String shortName){
 		this.uuid = uuid;
 		this.name = name;
 		this.key = key;
@@ -117,7 +117,7 @@ public class ListItem implements Comparable<ListItem>{
 	/**
 	 * @return the list item uuid
 	 */
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.uuid;
 	}
 	/**
@@ -147,7 +147,7 @@ public class ListItem implements Comparable<ListItem>{
 		final int prime = 31;
 		int result = 1;
 		if (uuid != null){
-			result = prime * result + Arrays.hashCode(uuid);
+			result = prime * result + uuid.hashCode();
 		}else{
 			result = prime * result + ((key == null) ? 0 : key.hashCode());
 		}
@@ -167,7 +167,7 @@ public class ListItem implements Comparable<ListItem>{
 		if (key != null && other.key != null) {
 			return key.equals(other.key);
 		}else if (uuid != null && other.uuid != null){
-			return Arrays.equals(uuid, other.uuid);
+			return uuid.equals(other.uuid);
 		}
 		return false;
 	}

@@ -22,15 +22,18 @@
 package org.wcs.smart.query.common.ui.itempanel;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.filter.date.IDateGroupBy;
+import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
+import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 
 /**
  * Tree node for displaying date options.  
@@ -44,15 +47,17 @@ public class DateTreeNode implements IItemTreeNode {
 	
 	private final static LabelProvider lblProvider = new LabelProvider(){
 		public String getText(Object element){
-			if (element instanceof IDateGroupBy){
-				return ((IDateGroupBy) element).getGuiName();
+			if (element instanceof DateGroupByViewer){
+				return SmartContext.INSTANCE.getClass(IQueryDateLabelProvider.class).getLabel(
+						((DateGroupByViewer) element).getGroupBy().getOption(),
+						Locale.getDefault());
 			}
 			return super.getText(element);
 		}
 		
 		public Image getImage(Object element){
-			if (element instanceof IDateGroupBy){
-				return ((IDateGroupBy) element).getImage();
+			if (element instanceof DateGroupByViewer){
+				return ((DateGroupByViewer) element).getImage();
 			}
 			return super.getImage(element);
 		}
@@ -93,7 +98,7 @@ public class DateTreeNode implements IItemTreeNode {
 	class DateContentProider implements ITreeContentProvider{
 
 		
-		private List<IDateGroupBy> groupbys;
+		private List<DateGroupByViewer> groupbys;
 		
 		
 		@Override
@@ -102,7 +107,7 @@ public class DateTreeNode implements IItemTreeNode {
 
 		@Override
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			groupbys = (List<IDateGroupBy>) newInput;
+			groupbys = (List<DateGroupByViewer>) newInput;
 
 		}
 

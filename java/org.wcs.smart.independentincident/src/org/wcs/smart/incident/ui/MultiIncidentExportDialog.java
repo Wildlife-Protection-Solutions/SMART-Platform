@@ -26,6 +26,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -157,7 +158,7 @@ public class MultiIncidentExportDialog extends XmlMultiExportDialog implements I
 						Object[] row = (Object[])x;
 						
 						String pname = row[1] + " [" + DateFormat.getDateInstance(DateFormat.SHORT).format((Timestamp)row[2]) + "]";   //$NON-NLS-1$ //$NON-NLS-2$
-						Object[] thisdata = {pname, (byte[])row[0], row[1]};
+						Object[] thisdata = {pname, (UUID)row[0], row[1]};
 						data[counter++] = thisdata;
 					}
 					

@@ -36,6 +36,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.map.udig.QueryServiceFactory;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.plan.report.oda.PlanPatrolQuery;
+import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.report.birt.map.IBirtMapLayerManager;
 
 /**
@@ -93,7 +94,7 @@ public class PlanPatrolMapLayer implements IBirtMapLayerManager {
 		IService qs = QueryServiceFactory.generateQueryService(q);
 		ArrayList<IGeoResource> toAdd = new ArrayList<IGeoResource>();
 		if (qs != null) {
-			q.executeQuery(new NullProgressMonitor(), session);
+			QueryExecutor.INSTANCE.executeQuery(q, session, new NullProgressMonitor());
 			List<? extends IGeoResource> resources = qs.resources(null);
 			if (resources.size() > 0){
 				toAdd.add(resources.get(0));

@@ -24,9 +24,11 @@ package org.wcs.smart.patrol.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
+import org.wcs.smart.patrol.query.model.PatrolQueryValidator;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.importexport.GriddedQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -42,7 +44,7 @@ public class PatrolGriddedQueryDefImporter extends GriddedQueryDefinitionImporte
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(PatrolGridQueryType.KEY);
+		return qt.getKey().equals(PatrolGriddedQuery.KEY);
 	}
 
 	@Override
@@ -54,7 +56,7 @@ public class PatrolGriddedQueryDefImporter extends GriddedQueryDefinitionImporte
 	protected void validateQuery(GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 		
-		PatrolQueryValidator validator = new PatrolQueryValidator(langCode,uuidLookup, session);
+		PatrolQueryValidator validator = new PatrolQueryValidator(langCode,uuidLookup, session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
 		if (def.getValueFilter() != null){
 			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
 		}

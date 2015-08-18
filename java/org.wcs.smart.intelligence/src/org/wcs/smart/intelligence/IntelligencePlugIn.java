@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.intelligence;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -30,8 +28,9 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.intelligence.internal.IntelligenceLabelProvider;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.patrol.PatrolManager;
 
@@ -64,8 +63,6 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 	 */
 	public static final String INFORMANT_ICON = "org.wcs.smart.intelligence.INFORMANT"; //$NON-NLS-1$
 	
-	public static final String  INTELLIGENCE_DIR = "intelligence"; //$NON-NLS-1$
-	
 	/**
 	 * The constructor
 	 */
@@ -90,6 +87,8 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 		
 		PatrolManager.getInstance().addDeleteHandler(new PatrolDeleteHandler(), PatrolDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaDeleteHandler(), CaDeleteHandler.EXECUTE_ORDER);
+		
+		SmartContext.INSTANCE.setClass(IIntelligenceLabelProvider.class, new IntelligenceLabelProvider());
 	}
 
 	/*
@@ -110,21 +109,6 @@ public class IntelligencePlugIn extends AbstractUIPlugin {
 		return plugin;
 	}
 
-
-	/**
-	 * Gets the location of intelligence files within the smart file store.
-	 * If the directory does not exist it will create it.
-	 * @return
-	 */
-	public File getIntelligenceDirectory() {
-		File f =  new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() 
-				+ File.separator + INTELLIGENCE_DIR + File.separator);
-		if (!f.exists()) {
-			f.mkdir();
-		}
-		return f;
-	}
-	
 	public static void log(String message, Throwable t){
 		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
         getDefault().getLog().log(new Status(status, PLUGIN_ID, IStatus.OK, message, t));

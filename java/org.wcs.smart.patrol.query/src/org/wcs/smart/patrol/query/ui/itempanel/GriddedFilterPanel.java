@@ -41,7 +41,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;

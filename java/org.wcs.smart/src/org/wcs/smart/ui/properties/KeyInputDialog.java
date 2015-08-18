@@ -28,6 +28,7 @@ import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.internal.Messages;
 
 /**
@@ -50,7 +51,7 @@ public class KeyInputDialog extends InputDialog{
 						//same key
 						return ""; //$NON-NLS-1$
 					}
-					String error = NamedKeyItem.validateKey(newText, siblings);
+					String error = DataModelManager.INSTANCE.validateKey(newText, siblings);
 					return error;
 
 				}

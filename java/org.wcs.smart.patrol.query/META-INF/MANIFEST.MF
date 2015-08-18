@@ -17,8 +17,9 @@ Export-Package: org.wcs.smart.patrol.query,
  org.wcs.smart.patrol.query.model,
  org.wcs.smart.patrol.query.model.observation,
  org.wcs.smart.patrol.query.model.types,
- org.wcs.smart.patrol.query.parser,
+ org.wcs.smart.patrol.query.ext,
  org.wcs.smart.patrol.query.parser.internal.filter;x-friends:="org.wcs.smart.query.test",
  org.wcs.smart.patrol.query.parser.internal.parser;x-friends:="org.wcs.smart.query.test",
- org.wcs.smart.patrol.query.parser.internal.summary;x-friends:="org.wcs.smart.query.test"
+ org.wcs.smart.patrol.query.parser.internal.summary;x-friends:="org.wcs.smart.query.test",
+ org.wcs.smart.patrol.query.ui
 Bundle-Vendor: org.wcs.smart

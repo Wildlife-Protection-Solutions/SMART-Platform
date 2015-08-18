@@ -26,7 +26,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.ui.editor.PlanEditorInput;
 
@@ -70,7 +70,7 @@ public class PlanViewer {
 			@Override
 			public Image getImage(Object element){
 				if (element instanceof Plan){
-					return SmartPlanPlugIn.getDefault().getImageRegistry().get(((Plan) element).getType().getIconKey());
+					return PlanLabelProvider.getImage(((Plan)element).getType()).createImage();
 				}else if (element instanceof PlanEditorInput){
 					return ((PlanEditorInput) element).getImageDescriptor().createImage();
 				}

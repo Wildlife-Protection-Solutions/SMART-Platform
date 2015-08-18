@@ -31,6 +31,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.AbstractQueryPropertyProvider;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.ReportQuery;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Query property that will display a list of reports
@@ -70,7 +71,7 @@ public class QueryReportPropertyProvider extends AbstractQueryPropertyProvider {
 					sb.append("] {"); //$NON-NLS-1$
 					sb.append(Messages.QueryReportPropertyProvider_OwnerLabel); 
 					sb.append(": "); //$NON-NLS-1$
-					sb.append(rq.getReport().getOwner().getFullLabel());
+					sb.append(SmartLabelProvider.getFullLabel(rq.getReport().getOwner()));
 					sb.append( "}");  //$NON-NLS-1$
 					
 					sb.append("\n"); //$NON-NLS-1$

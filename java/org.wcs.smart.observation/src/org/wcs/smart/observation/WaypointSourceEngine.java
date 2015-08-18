@@ -28,6 +28,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.observation.model.IWaypointSource;
+import org.wcs.smart.observation.model.IWaypointSourceEngine;
 /**
  * Manager for dealing with waypoint
  * sources.
@@ -35,22 +36,11 @@ import org.wcs.smart.observation.model.IWaypointSource;
  * @author Emily
  *
  */
-public class WaypointSourceEngine {
-
+public enum WaypointSourceEngine implements IWaypointSourceEngine{
+	
+	INSTANCE;
+	
 	private static String SOURCE_EXTENSION_ID = "org.wcs.smart.observation.ObservationSource"; //$NON-NLS-1$
-	
-	private static WaypointSourceEngine instance;
-	
-	/**
-	 * 
-	 * @return the static engine
-	 */
-	public synchronized static WaypointSourceEngine getInstance(){
-		if (instance == null){
-			instance = new WaypointSourceEngine();
-		}
-		return instance;
-	}
 	
 	/**
 	 * Cached sources

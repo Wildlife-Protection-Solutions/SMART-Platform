@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -28,6 +29,7 @@ import java.util.List;
 
 import javax.inject.Named;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
@@ -37,12 +39,16 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
+import org.wcs.smart.incident.IndepedentIncidentSource;
 import org.wcs.smart.incident.event.IncidentEventManager;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Delete incident handler.
@@ -86,6 +92,18 @@ public class DeleteIncidentHandler{
 				q.executeUpdate();
 			}
 			s.getTransaction().commit();
+			
+			for (IncidentEditorInput w : toDelete){
+				File f = new File(new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation(), IndepedentIncidentSource.FILESTORE_LOC), UuidUtils.getDirectoryPath(w.getUuid()));
+				if (f.exists()){
+					try{
+						FileUtils.forceDelete(f);
+					}catch(Exception ex){
+						IncidentPlugIn.displayLog(
+								MessageFormat.format("Could not delete incident attachment folder: {0}.", f.getAbsolutePath()), ex);
+					}
+				}
+			}
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			IncidentPlugIn.displayLog(Messages.DeleteIncidentHandler_Error1 + ex.getMessage(), ex);

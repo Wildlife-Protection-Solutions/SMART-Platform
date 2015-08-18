@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeValidator;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -111,11 +112,11 @@ public class BooleanAttributeField implements IAttributeField<Boolean> {
 		
 		
 		btnYes = new Button(comp, SWT.RADIO);
-		btnYes.setText(Attribute.BOOLEAN_TRUE_LABEL);
+		btnYes.setText(SmartLabelProvider.BOOLEAN_TRUE_LABEL);
 		btnYes.addSelectionListener(validateListener);
 		
 		btnNo = new Button(comp, SWT.RADIO);
-		btnNo.setText(Attribute.BOOLEAN_FALSE_LABEL);
+		btnNo.setText(SmartLabelProvider.BOOLEAN_FALSE_LABEL);
 		btnNo.addSelectionListener(validateListener);
 		
 		if (!attribute.getIsRequired()){

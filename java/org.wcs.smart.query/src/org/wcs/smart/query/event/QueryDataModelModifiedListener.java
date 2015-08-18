@@ -55,11 +55,11 @@ public class QueryDataModelModifiedListener implements IDataModelListener {
 	
 	
 	public QueryDataModelModifiedListener() {
-		DataModelManager.getInstance().addChangeListener(this);
+		DataModelManager.INSTANCE.addChangeListener(this);
 	}
 	
 	public void dispose(){
-		DataModelManager.getInstance().removeChangeListener(this);
+		DataModelManager.INSTANCE.removeChangeListener(this);
 	}
 	
 

@@ -26,10 +26,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
@@ -54,7 +54,7 @@ public abstract class SimpleQueryExporter {
 	 * 
 	 * @return <code>true</code> if export successful, <code>false</code> otherwise
 	 */
-	public boolean export(IProgressMonitor monitor) throws Exception{
+	public boolean export(ISmartProgressMonitor monitor) throws Exception{
 		if (data == null) {
 			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);
 		}
@@ -115,7 +115,7 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	public void setData(Collection<IResultItem> data, List<QueryColumn> queryColumns, File outputFile ) {
+	public void setData(Collection<? extends IResultItem> data, List<QueryColumn> queryColumns, File outputFile ) {
 		this.data = data != null ? data.iterator() : null;
 		dataSize = data != null ? data.size() : 0;
 		this.queryColumns = queryColumns;

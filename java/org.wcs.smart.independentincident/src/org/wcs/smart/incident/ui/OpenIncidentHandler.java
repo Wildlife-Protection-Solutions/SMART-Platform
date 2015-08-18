@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.incident.ui;
 
+import java.util.UUID;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -43,7 +45,7 @@ public class OpenIncidentHandler {
 
 	public static final String UUID_PARAM = "incidentUuid"; //$NON-NLS-1$
 	@Execute
-	public void openIncident(@Optional @Named(UUID_PARAM) byte[] incidentUuid,
+	public void openIncident(@Optional @Named(UUID_PARAM) UUID incidentUuid,
 			MWindow activeWindow){
 		if (incidentUuid == null) return;
 		

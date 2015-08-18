@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -189,16 +190,20 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * 
 	 * @param session
 	 * @param level
-	 * @param active if only active tree nodes should be loaded
+	 * @param active if only active tree nodes should be loaded; if false all nodes will be returned
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
 	public List<AttributeTreeNode> getAttributeTreeNodes(Session session, Attribute attribute, int level, boolean active){
-		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level and isActive = :active"; //$NON-NLS-1$
+		String query = "FROM AttributeTreeNode WHERE attribute_uuid =:uuid AND smart.hkeyLength(hkey) = :level"; //$NON-NLS-1$
+		if (active){
+			query += " and isActive = :active"; //$NON-NLS-1$ 
+		}
+		
 		Query q = session.createQuery(query);
 		q.setParameter("uuid", attribute.getUuid()); //$NON-NLS-1$
 		q.setParameter("level", level); //$NON-NLS-1$
-		q.setParameter("active", active); //$NON-NLS-1$
+		if (active) q.setParameter("active", active); //$NON-NLS-1$
 		List<AttributeTreeNode> nodes = q.list();
 		return nodes;
 	}
@@ -320,7 +325,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * @return
 	 */
 	@Override
-	public String[] getFullCategoryLabel(Session session, byte[] categoryUuid){
+	public String[] getFullCategoryLabel(Session session, UUID categoryUuid){
 		Category category = (Category) session.load(Category.class, categoryUuid);
 		ArrayList<String> values = new ArrayList<String>();
 		values.add(category.getName());
@@ -338,7 +343,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * attribute like item 
 	 */
 	@Override
-	public String getAttributeListItemLabel(Session session, byte[] cauuid, byte[] keyuuid){
+	public String getAttributeListItemLabel(Session session, UUID cauuid, UUID keyuuid){
 		return getName(keyuuid, session);
 	}
 	
@@ -346,7 +351,7 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * @return the label to use for the given attribute tree node
 	 */
 	@Override
-	public String getAttributeTreeNodeLabel(Session session, byte[] cauuid, byte[] keyuuid){
+	public String getAttributeTreeNodeLabel(Session session, UUID cauuid, UUID keyuuid){
 		return getName(keyuuid, session);
 	}
 	
@@ -356,8 +361,8 @@ public class CaDataModelManagerImpl implements IDataModelManager {
 	 * @param session
 	 * @return
 	 */
-	private String getName(byte[] uuid, Session session){
-		return Label.getDescription(uuid);
+	private String getName(UUID uuid, Session session){
+		return Label.getDescription(uuid, session);
 	}
 	
 	/**

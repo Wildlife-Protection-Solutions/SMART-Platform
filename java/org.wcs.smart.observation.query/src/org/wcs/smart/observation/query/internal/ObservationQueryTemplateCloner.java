@@ -34,10 +34,6 @@ import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
-import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
 import org.wcs.smart.observation.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTemplateCloner;
@@ -85,7 +81,7 @@ public class ObservationQueryTemplateCloner implements
 		List<ObservationGriddedQuery> queries = (List<ObservationGriddedQuery>) engine.getSession().createCriteria(ObservationGriddedQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(ObservationGriddedQuery query : queries){
-			ObservationGriddedQuery clone = (ObservationGriddedQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( ObservationGridQueryType.KEY) );
+			ObservationGriddedQuery clone = (ObservationGriddedQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationGriddedQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -116,7 +112,7 @@ public class ObservationQueryTemplateCloner implements
 		List<ObservationSummaryQuery> queries = (List<ObservationSummaryQuery>) engine.getSession().createCriteria(ObservationSummaryQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(ObservationSummaryQuery query : queries){
-			ObservationSummaryQuery clone = (ObservationSummaryQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( ObservationSummaryQueryType.KEY) );
+			ObservationSummaryQuery clone = (ObservationSummaryQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationSummaryQuery.KEY) );
 			clone.setConservationArea(engine.getNewCa());
 			engine.copyLabels(query, clone);
 			clone.setConservationAreaFilter(query.getConservationAreaFilter());
@@ -144,7 +140,7 @@ public class ObservationQueryTemplateCloner implements
 		List<ObsObservationQuery> queries = (List<ObsObservationQuery>) engine.getSession().createCriteria(ObsObservationQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list();  //$NON-NLS-1$//$NON-NLS-2$
 		
 		for(ObsObservationQuery query : queries){
-			ObsObservationQuery clone = (ObsObservationQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( ObservationQueryType.KEY) );
+			ObsObservationQuery clone = (ObsObservationQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObsObservationQuery.KEY) );
 
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());
@@ -175,7 +171,7 @@ public class ObservationQueryTemplateCloner implements
 		List<ObservationWaypointQuery> queries = (List<ObservationWaypointQuery>) engine.getSession().createCriteria(ObservationWaypointQuery.class).add(Restrictions.eq("conservationArea", engine.getTemplateCa())).add(Restrictions.eq("isShared", true)).list(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for(ObservationWaypointQuery query : queries){
-			ObservationWaypointQuery clone = (ObservationWaypointQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.getInstance().findQueryType( ObservationWaypointQueryType.KEY) );
+			ObservationWaypointQuery clone = (ObservationWaypointQuery) ObservationQueryFactory.createBlankQuery(QueryTypeManager.INSTANCE.findQueryType( ObservationWaypointQuery.KEY) );
 			
 			engine.copyLabels(query, clone);
 			clone.setConservationArea(engine.getNewCa());

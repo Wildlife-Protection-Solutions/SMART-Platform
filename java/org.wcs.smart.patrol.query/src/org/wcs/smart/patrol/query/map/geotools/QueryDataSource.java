@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.query.map.geotools;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.geotools.data.AbstractDataStore;
 import org.geotools.data.DataUtilities;
@@ -36,6 +37,7 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 /**
  * Geotools data source for waypoint query.
@@ -127,7 +129,7 @@ public class QueryDataSource extends AbstractDataStore{
 	 * @throws SchemaException
 	 */
 	private SimpleFeatureType createWaypointSchema() throws SchemaException{
-		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(query.getQueryColumns(), true)); //$NON-NLS-1$
+		SimpleFeatureType type =  DataUtilities.createType("smart." + WAYPOINT_TYPE, getFeatureSchemaDef(query.getQueryColumns(Locale.getDefault(), null), true)); //$NON-NLS-1$
 		return type;
 	}
 	
@@ -138,7 +140,7 @@ public class QueryDataSource extends AbstractDataStore{
 		
 		sb.append("the_geom:Point:srid=4326"); //$NON-NLS-1$
 		sb.append(",fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));
 		
 		
 		return sb.toString();

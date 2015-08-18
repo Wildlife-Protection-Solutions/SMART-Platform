@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -36,7 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.common.control.MultipleSelectComposite;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -122,7 +123,7 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
 	}
 	
     private List<Intelligence> loadIntelligences() {
-    	Session s = SmartHibernateManager.openSession();
+    	Session s = HibernateManager.openSession();
     	try {
     		Query query = filter.buildQuery(s);
     		List<?> results = query.list();
@@ -130,7 +131,7 @@ public class IntelligenceFilteredSelectComposite extends MultipleSelectComposite
     		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
     			Object[] data = (Object[]) iterator.next();
     			Intelligence i = new Intelligence();
-    			i.setUuid((byte[])data[0]);
+    			i.setUuid((UUID)data[0]);
     			i.setName((String)data[1]);
     			i.setReceivedDate((Date)data[2]);
     			intelligences.add(i);

@@ -62,7 +62,7 @@ import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.ReportQuery;
 import org.wcs.smart.report.ui.SmartReportEditorInput;
 import org.wcs.smart.util.E3Utils;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * A report manager.
@@ -278,7 +278,7 @@ public class ReportManager {
 	private static MPart createReportViewer(Report report, IEclipseContext context){
 		EPartService partService = context.get(EPartService.class);
 		
-		MPart existing = partService.findPart(ReportView.ID + ":" + SmartUtils.encodeHex(report.getUuid())); //$NON-NLS-1$
+		MPart existing = partService.findPart(ReportView.ID + ":" + UuidUtils.uuidToString(report.getUuid())); //$NON-NLS-1$
 		if (existing != null){
 			return existing;
 		}
@@ -289,7 +289,7 @@ public class ReportManager {
 		MPart part = partService.createPart(ReportView.ID);
 		part.setVisible(true);
 		part.setCloseable(true);
-		part.setElementId(ReportView.ID + ":" + SmartUtils.encodeHex(report.getUuid())); //$NON-NLS-1$
+		part.setElementId(ReportView.ID + ":" + UuidUtils.uuidToString(report.getUuid())); //$NON-NLS-1$
 		part.getTags().add(EPartService.REMOVE_ON_HIDE_TAG);
 		
 		MPartStack stack = (MPartStack) mService.find(ReportViewerPerspective.VIEWER_AREA_ID, app);
@@ -318,7 +318,7 @@ public class ReportManager {
 			if (dataset instanceof OdaDataSetHandle){
 				OdaDataSetHandle h = (OdaDataSetHandle)dataset;
 				if (h.getExtensionID().equals(SMART_DATASET_TYPE)){
-					reportQueries.add(new ReportQuery(r, SmartUtils.decodeHex(h.getQueryText().split(":")[1]))); //$NON-NLS-1$
+					reportQueries.add(new ReportQuery(r, UuidUtils.stringToUuid(h.getQueryText().split(":")[1]))); //$NON-NLS-1$
 				}
 			}
 		}

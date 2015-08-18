@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -40,9 +41,9 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.common.filter.NullSmartProgressMonitor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
@@ -55,7 +56,7 @@ import org.wcs.smart.report.export.IReportExporter;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.manger.ReportManager;
 import org.wcs.smart.report.model.Report;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Report exporter that exports the report
@@ -157,8 +158,8 @@ public class ReportDefintionExporter implements IReportExporter {
 					String queryUuid = ((OdaDataSetHandle) dataset).getQueryText().split(":")[1]; //$NON-NLS-1$
 					if (!processedQueries.contains(queryUuid)){
 						processedQueries.add(queryUuid);
-						IQueryType qType = QueryTypeManager.getInstance().findQueryType((((OdaDataSetHandle) dataset).getQueryText().split(":")[0])); //$NON-NLS-1$
-						byte[] uuid = SmartUtils.decodeHex(queryUuid);
+						IQueryType qType = QueryTypeManager.INSTANCE.findQueryType((((OdaDataSetHandle) dataset).getQueryText().split(":")[0])); //$NON-NLS-1$
+						UUID uuid = UuidUtils.stringToUuid(queryUuid);
 						Session hsession = HibernateManager.openSession();
 						Query smartQuery = null;
 						try{
@@ -198,10 +199,10 @@ public class ReportDefintionExporter implements IReportExporter {
 			throw new Exception(MessageFormat.format(Messages.ReportDefintionExporter_Error_NoExporter, new Object[]{ query.getName()}));
 		}
 		
-		File tmpFile = File.createTempFile(SmartUtils.encodeHex(query.getUuid()), QUERYFILE_EXTENSION);
+		File tmpFile = File.createTempFile(UuidUtils.uuidToString(query.getUuid()), QUERYFILE_EXTENSION);
 		try{
-			definitionExporter.export(query, tmpFile, null, new NullProgressMonitor());
-			addFile(tmpFile, SmartUtils.encodeHex(query.getUuid()) + QUERYFILE_EXTENSION, zipOut);
+			definitionExporter.export(query, null, tmpFile, null, new NullSmartProgressMonitor());
+			addFile(tmpFile, UuidUtils.uuidToString(query.getUuid()) + QUERYFILE_EXTENSION, zipOut);
 		}finally{
 			tmpFile.delete();
 		}

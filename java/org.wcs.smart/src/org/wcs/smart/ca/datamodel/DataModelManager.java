@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.ca.datamodel;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -30,6 +33,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.internal.Messages;
 
@@ -39,22 +43,9 @@ import org.wcs.smart.internal.Messages;
  * @author egouge
  * @since 1.0.0
  */
-public class DataModelManager {
+public enum DataModelManager {
 
-	/*
-	 * Singlegton instance
-	 */
-	private static DataModelManager INSTANCE = null;
-	
-	/**
-	 * @return the local data model manager
-	 */
-	public static DataModelManager getInstance(){
-		if (INSTANCE == null){
-			INSTANCE = new DataModelManager();
-		}
-		return INSTANCE;
-	}
+	INSTANCE;
 	
 	/*
 	 * Registered change listeners
@@ -379,5 +370,97 @@ public class DataModelManager {
 			}
 		}
 		return editAdvisors;
+	}
+	
+	
+	
+	/**
+	 * Validates a data model object key.
+	 * <p>Keys must not be empty, less than DmObject.MAX_KEY_LENGTH characters,
+	 * and different from their siblings.</p>
+	 * 
+	 * @param key the key to validate.
+	 * @param otherValues set of {@link DmObject} the key value must be different from
+	 * @return <code>null</code> if the key is valid otherwise a string description of the error
+	 */
+	public String validateKey(String key, Collection<? extends NamedKeyItem> otherValues){
+		if (key == null || key.isEmpty()){
+			return Messages.DataModel_Error_Key_NotEmpty;
+		}
+		if (key.length() > NamedKeyItem.MAX_KEY_LENGTH ){
+			return MessageFormat.format(Messages.DataModel_Error_Key_ToLong, new Object[]{DmObject.MAX_KEY_LENGTH});
+		}
+		if (!key.matches(NamedKeyItem.VALID_DM_KEY_PATTERN)){
+			return Messages.DataModel_Error_Key_InvalidCharacters;
+		}
+		if (checkKeyExists(key, otherValues)){
+			return Messages.DataModel_Error_Key_NotUnique;
+		}
+		for (String keyword: NamedKeyItem.KEYWORDS){
+			if (keyword.equals(key)){
+				return MessageFormat.format(Messages.DataModel_KeywordKeyError, new Object[]{keyword});
+			}
+		}
+		return null;
+	}
+	
+	/*
+	 * determines if a key exists in 
+	 * a set of objects
+	 */
+	private boolean checkKeyExists(String key, Collection<? extends NamedKeyItem> otherValues){
+		if (otherValues == null){
+			return false;
+		}
+		for (NamedKeyItem other : otherValues){
+			if (key.equals(other.getKeyId())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Generates a key for a dm object from a name.
+	 * 
+	 * @param value the name provided
+	 * @param otherValues list of other dm objects that the key must be different from
+	 * 
+	 * @return valid key
+	 */
+	public String generateKey (String value, Collection<? extends NamedKeyItem> otherValues){
+		String raw = value.toLowerCase().replaceAll("[^a-z0-9_]", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		//DM keys should not start with number or '_' character or queries will be invalid see ticket #354
+		if (!raw.isEmpty() && Pattern.matches(NamedKeyItem.INVALID_START_CHARS_KEY_PATTERN, raw.subSequence(0, 1))) {
+			raw = raw.replaceFirst(NamedKeyItem.INVALID_START_CHARS_KEY_PATTERN, ""); //$NON-NLS-1$
+		}
+		if (raw.isEmpty()){
+			raw = "object"; //$NON-NLS-1$
+		}
+	
+		int count = 0;
+		String key = raw;
+		if (raw.length() > NamedKeyItem.MAX_KEY_LENGTH){
+			key = raw.substring(0, NamedKeyItem.MAX_KEY_LENGTH);
+		}
+
+		for (String keyword: NamedKeyItem.KEYWORDS){
+			if (keyword.equals(key)){
+				key = key + "_"; //$NON-NLS-1$
+				break;
+			}
+		}
+		while(checkKeyExists(key, otherValues)){
+			count ++;
+			String cnt = String.valueOf(count);
+			if (raw.length() + cnt.length() > DmObject.MAX_KEY_LENGTH){
+				key = raw.substring(0, DmObject.MAX_KEY_LENGTH - cnt.length() ) + cnt;
+			}else{
+				key = raw + String.valueOf(count);
+			}
+			
+		}
+		
+		return key;
 	}
 }

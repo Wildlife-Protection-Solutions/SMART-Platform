@@ -35,6 +35,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Derby implementation of a ICaDataExportEngine
@@ -122,7 +123,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		query.append(" WHERE "); //$NON-NLS-1$
 		query.append(conservationAreaProperty);
 		query.append(" = x''" ); //$NON-NLS-1$
-		query.append(SmartUtils.encodeHex(getConservationArea().getUuid()));
+		query.append(UuidUtils.uuidToString(getConservationArea().getUuid()));
 		query.append("''" ); //$NON-NLS-1$
 
 		writeQuery(tableName + "." + hibernateClass, query.toString()); //$NON-NLS-1$
@@ -148,7 +149,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 		sql = sql.replaceAll("'", "''"); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		//set sql parameter
-		sql = sql.replace("?", " x''" + SmartUtils.encodeHex(getConservationArea().getUuid()) + "''"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql = sql.replace("?", " x''" + UuidUtils.uuidToString(getConservationArea().getUuid()) + "''"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
 		//find the alias for the first table in the query
 		Pattern pattern = Pattern.compile(".*from\\s+[^\\s,]*\\s([^,\\s]*)[,\\s].*"); //$NON-NLS-1$

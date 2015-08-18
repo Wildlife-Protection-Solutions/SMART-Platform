@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 import javax.imageio.stream.ImageOutputStream;
@@ -70,7 +71,7 @@ import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.report.birt.map.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.SmartService;
 import org.wcs.smart.udig.catalog.smart.SmartServiceExtension;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * For rendering map in a report.
@@ -367,9 +368,9 @@ public class SmartMapPresentationImpl extends ReportItemPresentationBase {
 			return HibernateManager.getDefaultBasemapDefinition(session);
 		}
 		
-		byte[] uuid = null;
+		UUID uuid = null;
 		try{
-			uuid = SmartUtils.decodeHex(basemap);
+			uuid = UuidUtils.stringToUuid(basemap);
 		}catch (Exception ex){
 			//eatme
 		}

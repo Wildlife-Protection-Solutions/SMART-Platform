@@ -24,7 +24,7 @@ package org.wcs.smart.query.common.ui;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 
 /**
  * Lazy query results table for a given query.

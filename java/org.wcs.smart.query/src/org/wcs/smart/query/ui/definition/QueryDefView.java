@@ -47,6 +47,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.ISourceProviderListener;
 import org.osgi.service.event.Event;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
@@ -210,7 +211,7 @@ public class QueryDefView  {
 	public void validate(){
 		if (currentPanel != null ) { 
 			//validate the individual panels
-			String error = current.getQuery().getType().validateQuery(currentPanel.getDefinitionPanels());
+			String error = current.getQueryType().validateQuery(currentPanel.getDefinitionPanels());
 			
 			//validate the entire query
 			current.setValid(error);
@@ -219,7 +220,7 @@ public class QueryDefView  {
 			}else{
 				//update the query
 				getSourceProvider().setQueryValid(true, null);
-				current.getQuery().getType().updateQueryDefinition(current.getQuery(), currentPanel.getDefinitionPanels());				
+				current.getQueryType().updateQueryDefinition(current.getQuery(), currentPanel.getDefinitionPanels());				
 			}
 		}
 	}
@@ -311,7 +312,7 @@ public class QueryDefView  {
 	 */
 	public IDropItemFactory getDropItemFactory(){
 		if (current != null){
-			return current.getQuery().getType().getDropItemFactory();
+			return current.getQueryType().getDropItemFactory();
 		}
 		return null;
 	}
@@ -323,10 +324,14 @@ public class QueryDefView  {
 	 * @param query
 	 */
 	private void refreshQuery(){
-		currentPanel.clear();
-		currentPanel.initItems(current);
-		showCurrentPanel();
-		validate();
+		try{
+			currentPanel.clear();
+			currentPanel.initItems(current);
+			showCurrentPanel();
+			validate();
+		}catch (Exception ex){
+			QueryPlugIn.displayLog(ex.getMessage(), ex);
+		}
 	}
 	
 	/**
@@ -343,16 +348,20 @@ public class QueryDefView  {
 		
 		current = query;
 		if (query != null){
-			currentPanel = definitionPanels.get(query.getQuery().getType());
+			currentPanel = definitionPanels.get(query.getQueryType());
 			
 			if (currentPanel == null){
-				currentPanel = new QueryDefPanel(query.getQuery().getType(), this);
-				definitionPanels.put(query.getQuery().getType(), currentPanel);
+				currentPanel = new QueryDefPanel(query.getQueryType(), this);
+				definitionPanels.put(query.getQueryType(), currentPanel);
 			}
 			
 			if (currentPanel != null){
 				current.setQueryDefinitionPanel(currentPanel);
-				currentPanel.initItems(current);
+				try{
+					currentPanel.initItems(current);
+				}catch (Exception ex){
+					QueryPlugIn.displayLog(ex.getMessage(), ex);
+				}
 			}
 		}else{
 			currentPanel = null;

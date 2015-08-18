@@ -87,8 +87,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
@@ -109,6 +109,9 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.ui.PatrolEditor;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -129,7 +132,6 @@ public class PatrolLegDayInputComposite {
 	private Label lblTotalHours;
 
 	private TableViewer observationTable;
-	private ObservationOptions observationOptions;
 	
 	private WizardDialog dialog = null;
 	private PatrolDayEditor editor;
@@ -156,6 +158,8 @@ public class PatrolLegDayInputComposite {
 	
 	private Font okayFont;
 	private Font errorFont;
+	
+	private CoordinateReferenceSystem tempCrs;
 	
 	private IPatrolEventListener trackListener = new IPatrolEventListener() {
 		@Override
@@ -195,9 +199,13 @@ public class PatrolLegDayInputComposite {
 	}
 
 	
-	public PatrolLegDayInputComposite(PatrolDayEditor editor, ObservationOptions observationOptions){
+	public PatrolLegDayInputComposite(PatrolDayEditor editor, ObservationOptions observationOptions) {
 		this.editor = editor;
-		this.observationOptions = observationOptions;
+		try{
+			this.tempCrs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+		}catch (Exception ex){
+			SmartPatrolPlugIn.log(ex.getMessage(), ex);
+		}
 	}
 
 	public void refreshObservationTable(){
@@ -559,7 +567,7 @@ public class PatrolLegDayInputComposite {
 					toClone = (Waypoint)session.merge(toClone);
 				}
 				
-				Waypoint cloned = toClone.clone();
+				Waypoint cloned = toClone.clone(session);
 				
 				if (patrolLegDate.getWaypoints().remove(w)) {
 					w.setPatrolLegDay(null);
@@ -921,9 +929,9 @@ public class PatrolLegDayInputComposite {
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
-			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getX());
+			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), tempCrs).getX());
 		} else if (column == OtColumn.NORTH) {
-			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), observationOptions.getViewProjection()).getY());
+			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), tempCrs).getY());
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
@@ -1029,7 +1037,7 @@ public class PatrolLegDayInputComposite {
 			PatrolWaypoint wp = add.getWaypoint();
 			wp.setPatrolLegDay(patrolLegDate);
 			
-			wp.getWaypoint().setDateTime(SmartUtils.getDatePart(patrolLegDate.getDate(), false));
+			wp.getWaypoint().setDateTime(SharedUtils.getDatePart(patrolLegDate.getDate(), false));
 			
 			patrolLegDate.getWaypoints().add(wp);
 			
@@ -1096,7 +1104,7 @@ public class PatrolLegDayInputComposite {
 					Collections.sort(emps, new Comparator<Employee>() {
 						@Override
 						public int compare(Employee arg0, Employee arg1) {
-							return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+							return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(arg0).toUpperCase(), SmartLabelProvider.getFullLabel(arg1).toUpperCase());
 						}
 					});
 					observationEditor.setObservers(emps);

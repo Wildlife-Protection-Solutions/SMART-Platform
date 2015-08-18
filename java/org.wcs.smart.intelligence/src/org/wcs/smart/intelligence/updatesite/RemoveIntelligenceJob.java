@@ -36,6 +36,7 @@ import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
 
 /**
  * Job removes all intelligence related tabled from the database
@@ -87,7 +88,7 @@ public class RemoveIntelligenceJob extends Job {
 			
 			//delete filestore entries
 			for (ConservationArea ca : caList) {
-				File folder = new File(ca.getFileDataStoreLocation() + File.separator + IntelligencePlugIn.INTELLIGENCE_DIR);
+				File folder = new File(ca.getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR);
 				FileUtils.deleteDirectory(folder);
 			}
 	

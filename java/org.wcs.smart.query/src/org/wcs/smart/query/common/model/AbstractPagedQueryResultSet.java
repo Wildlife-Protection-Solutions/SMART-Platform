@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,9 +39,9 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 
 /**
  * An abstract class containing some common functions for paged query result set.
@@ -84,10 +85,6 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 		return new LazyQueryIterator(pageSize);
 	}
 
-	protected MapByteArrayKey wrap(byte[] array) {
-		return new MapByteArrayKey(array);
-	}
-
 	public int getItemCount() {
 		return itemCount;
 	}
@@ -96,34 +93,6 @@ public abstract class AbstractPagedQueryResultSet implements IPagedQueryResultSe
 		this.itemCount = itemCount;
 	}
 
-	/**
-	 * This is a wrapper for byte[] so we can use it as HashMap key. The reason
-	 * for creating this wrapper is that byte[] do not provide required equals
-	 * and hashCode operations.
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	protected class MapByteArrayKey {
-		private final byte[] data;
-
-		public MapByteArrayKey(byte[] data) {
-			this.data = data;
-		}
-
-		@Override
-		public boolean equals(Object arg) {
-			if (arg instanceof MapByteArrayKey)
-				return Arrays.equals(data, ((MapByteArrayKey) arg).data);
-			return super.equals(arg);
-		}
-
-		@Override
-		public int hashCode() {
-			return Arrays.hashCode(data);
-		}
-	}
-	
 	/**
 	 * Iterator that uses lazy approach
 	 * 

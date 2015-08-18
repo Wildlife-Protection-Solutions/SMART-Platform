@@ -33,7 +33,7 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Smart patrol data source factor.  This is a read only data source.
@@ -108,7 +108,7 @@ public class PatrolDataSourceFactory implements DataStoreFactorySpi{
 		Session session = HibernateManager.openSession();
 		Patrol patrol = null;
 		try{
-			patrol = (Patrol)session.load(Patrol.class, SmartUtils.decodeHex((String)params.get(PATROL_UUID.key)));	
+			patrol = (Patrol)session.load(Patrol.class, UuidUtils.stringToUuid((String)params.get(PATROL_UUID.key)));	
 		}catch (Exception ex){
 			throw new IOException(ex);
 		}finally{

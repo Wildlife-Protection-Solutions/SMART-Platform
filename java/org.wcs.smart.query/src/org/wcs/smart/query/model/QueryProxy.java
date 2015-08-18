@@ -24,6 +24,7 @@ package org.wcs.smart.query.model;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.ui.definition.QueryDefPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 /**
@@ -35,6 +36,8 @@ import org.wcs.smart.query.ui.model.DropItem;
 public class QueryProxy {
 
 	private Query query;
+	private IQueryType qType;
+	
 	private HashMap<String, Collection<DropItem>> dropItems;
 	private QueryDefPanel definitionPanel;
 	private String isValid;
@@ -46,6 +49,7 @@ public class QueryProxy {
 	 */
 	public QueryProxy (Query query){
 		this.query = query;
+		this.qType = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
 		dropItems = new HashMap<String, Collection<DropItem>>();
 	}
 	
@@ -77,6 +81,10 @@ public class QueryProxy {
 		return this.query;
 	}
 	
+	public IQueryType getQueryType(){
+		return this.qType;
+	}
+	
 	/**
 	 * Disposes of all drop items
 	 */
@@ -99,7 +107,7 @@ public class QueryProxy {
 		Collection<DropItem> di = dropItems.get(panelId);
 		if (di != null){
 			for (DropItem d : di){
-				d.dispose();
+				if (d != null) d.dispose();
 			}
 			dropItems.remove(panelId);
 		}

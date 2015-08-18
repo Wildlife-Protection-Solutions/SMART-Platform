@@ -31,6 +31,7 @@ import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -67,7 +68,7 @@ public class QueryResultItemFeature {
 		data[1] = it.getPatrolId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
@@ -108,7 +109,7 @@ public class QueryResultItemFeature {
 		data[1] = it.getPatrolId() + "." + System.nanoTime(); //$NON-NLS-1$
 		
 		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 		

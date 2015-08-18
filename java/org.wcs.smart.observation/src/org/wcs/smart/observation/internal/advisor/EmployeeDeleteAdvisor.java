@@ -31,6 +31,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Delete advisor to ensure employees that are observation observers
@@ -55,7 +56,7 @@ public class EmployeeDeleteAdvisor implements IDeleteAdvisor {
 		if (cnt != 0){
 			return MessageFormat.format(
 					Messages.EmployeeDeleteAdvisor_DeleteError,
-					new Object[]{em.getFullLabel(), cnt});
+					new Object[]{SmartLabelProvider.getFullLabel(em), cnt});
 		}
 		return null;
 	}

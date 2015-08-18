@@ -24,8 +24,10 @@ package org.wcs.smart.observation.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
-import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.importexport.GriddedQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -42,7 +44,7 @@ public class ObsGriddedQueryDefImporter extends GriddedQueryDefinitionImporter{
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(ObservationGridQueryType.KEY);
+		return qt.getKey().equals(ObservationGriddedQuery.KEY);
 	}
 
 	@Override
@@ -56,7 +58,7 @@ public class ObsGriddedQueryDefImporter extends GriddedQueryDefinitionImporter{
 	@Override
 	protected void validateQuery(GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
-		QueryDefinitionValidator validator = new QueryDefinitionValidator(session);
+		QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
 		if (def.getValueFilter() != null){
 			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
 		}

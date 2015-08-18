@@ -22,6 +22,7 @@
 package org.wcs.smart.dataentry;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -79,10 +80,10 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @param uuid the uuid of the configurable model to load
 	 * @return the loaded configurable model
 	 */
-	public static ConfigurableModel getFullConfigurableModel(byte[] uuid) {
+	public static ConfigurableModel getFullConfigurableModel(UUID uuid) {
 		if (uuid == null)
 			return null;
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		session.beginTransaction();
 		try {
 			return getFullConfigurableModel(uuid, session);
@@ -100,10 +101,11 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @param session
 	 * @return all ConfigurableModels
 	 */
-	public static ConfigurableModel getFullConfigurableModel(byte[] uuid, Session session) {
+	public static ConfigurableModel getFullConfigurableModel(UUID uuid, Session session) {
 		if (uuid == null)
 			return null;
-		Criteria query = session.createCriteria(ConfigurableModel.class).add(Restrictions.eq("uuid", uuid)); //$NON-NLS-1$
+		Criteria query = session.createCriteria(ConfigurableModel.class)
+				.add(Restrictions.eq("uuid", uuid)); //$NON-NLS-1$
 		ConfigurableModel model = (ConfigurableModel) query.uniqueResult();
 		model.getNames().size();
 		fetchNodesData(model.getNodes());
@@ -126,7 +128,7 @@ public class DataentryHibernateManager extends HibernateManager {
 	 * @return <code>true</code> if saved successfully, <code>false</code> if error
 	 */
 	public static boolean saveConfigurableModel(ConfigurableModel model) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			return saveConfigurableModel(model, session);
 		} finally {

@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.services.ISourceProviderService;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
@@ -105,7 +106,7 @@ public class QueryDefPanel {
 	 */
 	public void addItem(DropItem dropItem, String itemPanelId){
 		for (IDefinitionPanel p : dropPanels){
-			String itemId = QueryTypeManager.getInstance().getQueryItemPanel(queryType, p.getId());
+			String itemId = QueryTypeManager.INSTANCE.getQueryItemPanel(queryType, p.getId());
 			if (itemId != null && itemId.equals(itemPanelId)){
 				p.addItem(dropItem);
 			}
@@ -117,7 +118,7 @@ public class QueryDefPanel {
 	 * Init the items in each definition panel
 	 * @param q
 	 */
-	public void initItems(QueryProxy q){
+	public void initItems(QueryProxy q) throws Exception{
 		for (IDefinitionPanel p : dropPanels){
 			p.initItems(q);
 		}
@@ -150,8 +151,7 @@ public class QueryDefPanel {
 		GridLayout gl = new GridLayout(1, false);
 		gl.marginHeight = gl.marginWidth = 0;
 		main.setLayout(gl);
-		String[] panelIds = QueryTypeManager.getInstance()
-				.getQueryDefinitionPanelIds(queryType);
+		String[] panelIds = QueryTypeManager.INSTANCE.getQueryDefinitionPanelIds(queryType);
 		if (panelIds == null || panelIds.length == 0) {
 			main.setLayout(new GridLayout(1, false));
 			Label l = new Label(parent, SWT.NONE);
@@ -167,7 +167,11 @@ public class QueryDefPanel {
 			setQueryDefinitionPanel(pnl.getId());
 			currentPanel = pnl.getId();
 
-			pnl.initItems(parentView.getQueryProxy());
+			try{
+				pnl.initItems(parentView.getQueryProxy());
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(ex.getMessage(), ex);
+			}
 		} else {
 			final TabFolder tf = new TabFolder(main, SWT.NONE);
 			tf.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -181,7 +185,11 @@ public class QueryDefPanel {
 					item.setControl(comp);
 					item.setData(pnl);
 
-					pnl.initItems(parentView.getQueryProxy());
+					try{
+						pnl.initItems(parentView.getQueryProxy());
+					}catch (Exception ex){
+						QueryPlugIn.displayLog(ex.getMessage(), ex);
+					}
 					dropPanels.add(pnl);
 				}
 

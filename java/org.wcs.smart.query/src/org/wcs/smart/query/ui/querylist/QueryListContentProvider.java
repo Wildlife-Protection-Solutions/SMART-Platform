@@ -23,13 +23,13 @@ package org.wcs.smart.query.ui.querylist;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -51,8 +51,8 @@ public class QueryListContentProvider implements ITreeContentProvider{
 	public static final int QUERY_KEY = 2;
 	
 	private List<QueryFolder> rootFolders = null;
-	private HashMap<Integer, QueryFolder> folders = null;
-	private HashMap<Integer, List<QueryEditorInput>> queries = null;
+	private HashMap<UUID, QueryFolder> folders = null;
+	private HashMap<UUID, List<QueryEditorInput>> queries = null;
 	
 	private boolean includeQueries = false;
 	
@@ -72,16 +72,16 @@ public class QueryListContentProvider implements ITreeContentProvider{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		folders = new HashMap<Integer, QueryFolder>();
+		folders = new HashMap<UUID, QueryFolder>();
 		if (newInput == null || !(newInput instanceof HashMap)){
 			rootFolders = null;
 			queries = null;
 			return;
 		}
 		if (newInput instanceof HashMap){
-			HashMap<Integer, Object> data = (HashMap<Integer, Object>)newInput;
+			HashMap<UUID, Object> data = (HashMap<UUID, Object>)newInput;
 			rootFolders = (List<QueryFolder>) data.get(FOLDER_KEY);
-			queries = (HashMap<Integer, List<QueryEditorInput>>) data.get(QUERY_KEY);
+			queries = (HashMap<UUID, List<QueryEditorInput>>) data.get(QUERY_KEY);
 		}
 	
 	}
@@ -108,11 +108,11 @@ public class QueryListContentProvider implements ITreeContentProvider{
 			if (folder.getChildren() != null){
 				for (QueryFolder kid: folder.getChildren()){
 					children.add(kid);
-					folders.put(Arrays.hashCode(kid.getUuid()), kid);
+					folders.put(kid.getUuid(), kid);
 				}
 			}
 			if (includeQueries){
-				List<QueryEditorInput> qs = queries.get( Arrays.hashCode(folder.getUuid()) );
+				List<QueryEditorInput> qs = queries.get( folder.getUuid() );
 				if (qs != null){
 					children.addAll(qs);
 				}
@@ -145,13 +145,13 @@ public class QueryListContentProvider implements ITreeContentProvider{
 		
 		if (element instanceof QueryEditorInput && queries != null){
 			QueryFolder parent = null;
-			for (Iterator<Entry<Integer, List<QueryEditorInput>>> iterator = queries.entrySet().iterator(); iterator.hasNext();) {
-				Entry<Integer, List<QueryEditorInput>> type = (Entry<Integer, List<QueryEditorInput>>) iterator.next();
+			for (Iterator<Entry<UUID, List<QueryEditorInput>>> iterator = queries.entrySet().iterator(); iterator.hasNext();) {
+				Entry<UUID, List<QueryEditorInput>> type = (Entry<UUID, List<QueryEditorInput>>) iterator.next();
 				if (type.getValue().contains(element)){
 					parent = folders.get(type.getKey());
 					if (parent == null){
 						for (QueryFolder f : rootFolders){
-							if (Arrays.hashCode(f.getUuid()) == type.getKey()){
+							if (f.getUuid().equals(type.getKey())){
 								return f;
 							}
 						}
@@ -169,9 +169,10 @@ public class QueryListContentProvider implements ITreeContentProvider{
 			if (parent == null){
 				for (QueryFolder f : rootFolders){
 					if (f.isRootFolder()){
-						if (((QueryFolder) element).getEmployee() == null && Arrays.equals(f.getUuid(), IQueryHibernateManager.CA_QUERY_KEY)){
+						if (((QueryFolder) element).getEmployee() == null 
+								&& (f.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY))){
 							return f;
-						}else if (((QueryFolder) element).getEmployee() != null && Arrays.equals(f.getUuid(), IQueryHibernateManager.USER_QUERY_KEY)){
+						}else if (((QueryFolder) element).getEmployee() != null && f.getUuid().equals(IQueryHibernateManager.USER_QUERY_KEY)){
 							return f;
 						}
 					}
@@ -195,7 +196,7 @@ public class QueryListContentProvider implements ITreeContentProvider{
 				return true;
 			}
 			if (includeQueries){
-				List<QueryEditorInput> q = queries.get(Arrays.hashCode( folder.getUuid() ) );
+				List<QueryEditorInput> q = queries.get( folder.getUuid() );
 				if ( q != null && q.size() > 0){
 					return true;
 				}

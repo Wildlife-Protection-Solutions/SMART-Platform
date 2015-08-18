@@ -25,11 +25,10 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.DefaultTransaction;
@@ -40,13 +39,17 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -82,7 +85,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 		params.put(ShapefileDataStoreFactory.URLP.key, shpFileURL);
 		
 		shapefile = factory.createNewDataStore(params);
-		SimpleFeatureType type = createSchema(this.query.getType());
+		SimpleFeatureType type = createSchema(QueryTypeManager.INSTANCE.findQueryType(this.query.getTypeKey()));
 		
 		shapefile.createSchema(type);
 		features = new ArrayList<SimpleFeature>();
@@ -93,7 +96,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 */
 	@Override
 	protected void writeRow(IResultItem row) throws Exception {
-		features.add(createFeature(row, this.query.getType()));
+		features.add(createFeature(row, QueryTypeManager.INSTANCE.findQueryType(this.query.getTypeKey())));
 	}
 
 	/**
@@ -145,19 +148,18 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	 */
 	protected abstract SimpleFeatureType createSchema(IQueryType queryType) throws Exception;
 	
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, java.io.File, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+
 	@Override
-	public void export(Query query, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult results, File file, HashMap<String, Object> parameters, ISmartProgressMonitor monitor) throws Exception {
 		this.query = ((SimpleQuery)query);
 		
-		if (query instanceof IPagedQuery) {
-			super.setData((IPagedQueryResultSet)query.getCachedResults(monitor), ((SimpleQuery)query).getQueryColumns(), file);
-		} else {
-			super.setData((Collection<IResultItem>)query.getCachedResults(monitor), ((SimpleQuery)query).getQueryColumns(), file);
+		if (results instanceof IPagedQueryResultSet){
+			super.setData((IPagedQueryResultSet)results, ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+		}else if (results instanceof MemoryQueryResult){
+			super.setData(((MemoryQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+		}else if (results instanceof GridQueryResult){
+			super.setData(((GridQueryResult)results).getData(), ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}
-
 		super.export(monitor);
 		
 	}

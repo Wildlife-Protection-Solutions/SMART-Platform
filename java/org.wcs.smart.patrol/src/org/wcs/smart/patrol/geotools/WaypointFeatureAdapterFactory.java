@@ -21,10 +21,13 @@
  */
 package org.wcs.smart.patrol.geotools;
 
+import java.util.UUID;
+
 import org.eclipse.core.runtime.IAdapterFactory;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.patrol.model.PatrolWaypoint;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Adpater factory for adapting SimpleFeature with WaypointFeatureType
@@ -44,9 +47,9 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 				if (sf.getFeatureType().getTypeName().equals(PatrolDataSource.WAYPOINT_TYPE)){
 					String key = sf.getID();
 					String uuids = key.substring(key.lastIndexOf('.') + 1);
-					byte[] wpuuid;
+					UUID wpuuid;
 					try {
-						wpuuid = SmartUtils.decodeHex(uuids);
+						wpuuid = UuidUtils.stringToUuid(uuids);
 					} catch (Exception e) {
 						SmartPatrolPlugIn
 							.log("Could not determine waypoint for uuid " + uuids, e); //$NON-NLS-1$
@@ -56,6 +59,9 @@ public class WaypointFeatureAdapterFactory implements IAdapterFactory {
 					wp.setUuid(wpuuid);
 					return wp;
 				}
+			}else if (adaptableObject instanceof PatrolWaypoint){
+				return ((PatrolWaypoint)adaptableObject).getWaypoint();
+				
 			}
 		}
 		return null;

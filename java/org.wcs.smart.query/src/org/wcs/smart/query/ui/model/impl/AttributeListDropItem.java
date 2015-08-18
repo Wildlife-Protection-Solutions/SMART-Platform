@@ -49,7 +49,6 @@ import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
@@ -90,7 +89,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 					items.add(new ListItem(item.getUuid(), item.getName(), item.getKeyId()));
 				}
 				//add the any item
-				items.add(0, AttributeFilter.ANY_OPTION);				
+				items.add(0, BasicDropItemFactory.ANY_OPTION);				
 				if (currentSelection != null && !items.contains(currentSelection)){
 					//item is not longer active; but still in query
 					items.add(currentSelection);
@@ -113,7 +112,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 					if (currentSelection != null){
 						listViewer.setSelection(new StructuredSelection(currentSelection));
 					}else{
-						listViewer.setSelection(new StructuredSelection(AttributeFilter.ANY_OPTION));
+						listViewer.setSelection(new StructuredSelection(BasicDropItemFactory.ANY_OPTION));
 					}
 					getTargetPanel().redraw();
 				}});
@@ -196,7 +195,7 @@ public class AttributeListDropItem extends DropItem implements IFilterDropItem{
 				it = (ListItem) sel.getFirstElement();
 			}
 		}
-		if (it != null && (it.getUuid() != null || it == AttributeFilter.ANY_OPTION)){			
+		if (it != null && (it.getUuid() != null || it == BasicDropItemFactory.ANY_OPTION)){			
 			query.append(it.getKey());
 		}
 		return query.toString();

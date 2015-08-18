@@ -23,6 +23,8 @@ package org.wcs.smart.ui.map.location;
 
 import java.util.List;
 
+import org.wcs.smart.ca.ISmartPoint;
+
 /**
  * DataProvider for {@link MapComposite}. Contains all required information to
  * properly display points on a map.

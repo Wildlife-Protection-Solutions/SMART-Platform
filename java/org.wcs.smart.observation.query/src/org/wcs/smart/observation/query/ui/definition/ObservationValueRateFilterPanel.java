@@ -84,7 +84,7 @@ public class ObservationValueRateFilterPanel extends ValueRateFilterDeifnitionPa
 			session.beginTransaction();
 			List<DropItem> copies = new ArrayList<DropItem>();
 			if (filterPart != null){
-				DropItem[] filterItems = filterPart.getFilter().getDropItems(session);
+				DropItem[] filterItems = ObservationDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), session);
 				for (int i = 0; i < filterItems.length; i ++){
 					copies.add(filterItems[i]);
 				}

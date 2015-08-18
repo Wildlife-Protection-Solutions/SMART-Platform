@@ -24,8 +24,10 @@ package org.wcs.smart.observation.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
-import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
+import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -44,7 +46,7 @@ public class ObsSummaryQueryDefinitionImporter extends SummaryQueryDefinitionImp
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(ObservationSummaryQueryType.KEY);
+		return qt.getKey().equals(ObservationSummaryQuery.KEY);
 	}
 
 	@Override
@@ -52,7 +54,7 @@ public class ObsSummaryQueryDefinitionImporter extends SummaryQueryDefinitionImp
 			HashMap<String, UuidItemType> uuidLookup, Session session)
 			throws Exception {
 			
-		QueryDefinitionValidator validator = new QueryDefinitionValidator(session);
+		QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
 		if (sumDef.getValueFilter() != null ){
 			warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
 		}

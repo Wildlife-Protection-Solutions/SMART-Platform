@@ -144,7 +144,9 @@ public class StyleManager {
 	public Map<String,StyleBlackboard> fromStringMap(String string) throws IOException, WorkbenchException{
 		
 		HashMap<String, StyleBlackboard> maps = new HashMap<String, StyleBlackboard>();
-		
+		if (string == null){ 
+			return maps;
+		}
 		try(JsonReader reader = new JsonReader(new StringReader(string))){
 			reader.beginArray();
 			while(reader.hasNext()){

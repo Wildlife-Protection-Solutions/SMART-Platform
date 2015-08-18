@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -35,7 +36,6 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -49,6 +49,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 /**
  * Data model manager for when users are performing cross
@@ -256,7 +257,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @param session
 	 * @param uuid attribute uuid
 	 * @param level tree node level
-	 * @param active if only active tree nodes should be loaded
+	 * @param active ignored
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
@@ -393,7 +394,7 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @return
 	 */
 	@Override
-	public String[] getFullCategoryLabel(Session session, byte[] categoryUuid){
+	public String[] getFullCategoryLabel(Session session, UUID categoryUuid){
 		//if (true) return new String[]{"abc"};
 		
 		DataModel dm = getDataModel();
@@ -482,8 +483,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * 
 	 */
 	@Override
-	public String getAttributeListItemLabel(Session session, byte[] cauuid, byte[] keyuuid ){
-		return Label.getDescription(keyuuid, cauuid);
+	public String getAttributeListItemLabel(Session session, UUID cauuid, UUID keyuuid ){
+		return SmartLabelProvider.getDescription(keyuuid, cauuid);
 	}
 
 	
@@ -497,8 +498,8 @@ public class MultiCaDataModelManagerImpl implements IDataModelManager{
 	 * @return the label to use for the given attribute tree node
 	 */
 	@Override
-	public String getAttributeTreeNodeLabel(Session session, byte[] cauuid, byte[] keyuuid){
-		return Label.getDescription(keyuuid, cauuid);
+	public String getAttributeTreeNodeLabel(Session session, UUID cauuid, UUID keyuuid){
+		return SmartLabelProvider.getDescription(keyuuid, cauuid);
 	}
 	
 	/**

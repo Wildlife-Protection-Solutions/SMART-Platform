@@ -22,3 +22,4 @@ Export-Package: org.wcs.smart.observation.query,
  org.wcs.smart.observation.query.ui,
  org.wcs.smart.observation.query.ui.definition,
  org.wcs.smart.observation.query.ui.itempanel
+Import-Package: org.wcs.smart.observation.query.ui

@@ -544,7 +544,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 					sql.append(prefix(AttributeListItem.class));
 					sql.append(".keyid ");  //$NON-NLS-1$
 					
-					if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION.getKey())){
+					if (((String)attfilter.getValue()).equals(AttributeFilter.ANY_OPTION_KEY)){
 						sql.append (" is not null "); //$NON-NLS-1$
 					}else{
 						sql.append(PatrolFilterSqlGenerator.asSql(attfilter.getOperator()));

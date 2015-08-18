@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.ui.SavePatrolPartJob;
 import org.wcs.smart.patrol.ui.SaveWaypointJob;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 import com.vividsolutions.jts.geom.LineString;
@@ -250,9 +251,9 @@ public class PatrolGPSDataImport {
 			boolean found = false;
 			Date wpdt = point.getDateTime();
 			for(PatrolLeg leg : patrolLegs){
-				if (betweenDates(SmartUtils.getDatePart(wpdt, false), 
-						SmartUtils.getDatePart(leg.getStartDate(), false),
-						SmartUtils.getDatePart(leg.getEndDate(), false))){
+				if (betweenDates(SharedUtils.getDatePart(wpdt, false), 
+						SharedUtils.getDatePart(leg.getStartDate(), false),
+						SharedUtils.getDatePart(leg.getEndDate(), false))){
 					//find the leg day
 					
 					for (PatrolLegDay legday : leg.getPatrolLegDays()){
@@ -285,8 +286,8 @@ public class PatrolGPSDataImport {
 							trackpnts = new ArrayList<Waypoint>();
 							tracks.put(legday, trackpnts);
 						}
-						if (SmartUtils.getDatePart(wpdt, false).equals(
-							SmartUtils.getDatePart(legday.getDate(),
+						if (SharedUtils.getDatePart(wpdt, false).equals(
+								SharedUtils.getDatePart(legday.getDate(),
 								false))) {
 							
 							trackpnts.add(point);
@@ -335,7 +336,7 @@ public class PatrolGPSDataImport {
 			//find patrol leg day based on times
 			for (Iterator<PatrolLeg> iterator = patrolLegs.iterator(); iterator.hasNext();) {
 				PatrolLeg leg = (PatrolLeg) iterator.next();				
-				if (betweenDates(SmartUtils.getDatePart(wpdt,false), SmartUtils.getDatePart(leg.getStartDate(), false), SmartUtils.getDatePart(leg.getEndDate(), false))){
+				if (betweenDates(SharedUtils.getDatePart(wpdt,false), SharedUtils.getDatePart(leg.getStartDate(), false), SharedUtils.getDatePart(leg.getEndDate(), false))){
 					//find the leg day
 					for (Iterator<PatrolLegDay> iterator2 = leg.getPatrolLegDays().iterator(); iterator2.hasNext();) {
 						PatrolLegDay legday = (PatrolLegDay) iterator2.next();
@@ -366,7 +367,7 @@ public class PatrolGPSDataImport {
 					PatrolLeg leg = (PatrolLeg) iterator.next();
 					for (Iterator<PatrolLegDay> iterator2 = leg.getPatrolLegDays().iterator(); iterator2.hasNext();) {
 						PatrolLegDay legday = (PatrolLegDay) iterator2.next();
-						if (SmartUtils.getDatePart(wpdt, false).equals(SmartUtils.getDatePart(legday.getDate(),false))) {
+						if (SharedUtils.getDatePart(wpdt, false).equals(SharedUtils.getDatePart(legday.getDate(),false))) {
 							
 							PatrolWaypoint pwp = new PatrolWaypoint();
 							pwp.setPatrolLegDay(legday);

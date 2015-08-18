@@ -22,13 +22,17 @@
  */
 package org.wcs.smart.patrol.query.ui.itempanel;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
+import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolValueOption;
+import org.wcs.smart.patrol.query.ui.PatrolQueryLabelProvider;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 
 /**
@@ -74,14 +78,14 @@ public class PatrolValueTreeItem implements IItemTreeNode{
 	private static final LabelProvider lblProvider = new LabelProvider(){
 		
 		public String getText(Object element){
-			if (element instanceof PatrolQueryOptions.PatrolValueOption){
-				return ((PatrolQueryOptions.PatrolValueOption) element).getGuiName();
+			if (element instanceof PatrolValueOption){
+				return ((PatrolValueOption) element).getGuiName(Locale.getDefault());
 			}
 			return super.getText(element);
 		}
 		public Image getImage(Object element){
-			if (element instanceof PatrolQueryOptions.PatrolValueOption){
-				return ((PatrolQueryOptions.PatrolValueOption) element).getIcon();
+			if (element instanceof PatrolValueOption){
+				return PatrolQueryLabelProvider.getImage((PatrolValueOption)element);
 			}
 			return super.getImage(element);
 		}

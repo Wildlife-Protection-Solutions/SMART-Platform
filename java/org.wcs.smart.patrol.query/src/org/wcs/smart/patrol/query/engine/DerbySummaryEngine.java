@@ -39,6 +39,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -50,20 +51,24 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.internal.PatrolValueItemLabelProvider;
+import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
+import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
-import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
-import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
-import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.AreaFilterCollectorVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
@@ -71,6 +76,7 @@ import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
@@ -92,9 +98,10 @@ import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing summary
@@ -123,6 +130,17 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	private ValuePart valuePart;
 	
 	private boolean hasAreaFilter = false;
+	private Session session;
+	
+	@Override
+	public boolean canExecute(String querytype) {
+		return PatrolSummaryQuery.KEY.equals(querytype);
+	}
+
+	@Override
+	public Session getCurrentConnection() {
+		return session;
+	}
 	
 	/**
 	 * Executes the given summary query.
@@ -154,9 +172,19 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	 * are commputed and added to the results.
 	 *  
 	 */
-	public SummaryQueryResult executeQuery(final PatrolSummaryQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+
+		final PatrolSummaryQuery query = (PatrolSummaryQuery) lquery;
+		session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+		SumQueryDefinition def = null;
+		try{
+			def = query.getQueryDefinition();
+		}catch (Exception ex){
+			throw new SQLException (ex);
+		}
 
 		//parse query bits that are needed for processing
 		sumResults = new SummaryQueryResult();
@@ -169,46 +197,51 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		localDateFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));
 		
 		List<IGroupBy> all = new ArrayList<IGroupBy>();
-		all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
-		all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
+		all.addAll(def.getColumnGroupByPart().getGroupBys());
+		all.addAll(def.getRowGroupByPart().getGroupBys());
 		allGroupByParts = new GroupByPart(all);
 		
-		valuePart = query.getQueryDefinition().getValuePart();
+		valuePart = def.getValuePart();
 			
+		final SumQueryDefinition ldef = def;
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
+				monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, ldef.getValuePart().getValueItems().size() + 5);
 
 				try {
 					monitor.subTask(Messages.DerbySummaryEngine_Progress_LoadingHeaders);
-					getHeaderInfo(query, sumResults, session);
+					try{
+						getHeaderInfo(query, sumResults, session);
+					}catch (Exception ex){
+						throw new SQLException(ex);
+					}
 					monitor.worked(1);
 					if (monitor.isCanceled()){
 						return;
 					}
 					
 					HasObservationValueVisitor vv = new HasObservationValueVisitor();
-					query.getQueryDefinition().getValuePart().visit(vv);
+					ldef.getValuePart().visit(vv);
 					needsObservationValue = vv.hasCategory() || vv.hasAttribute();
 					
 					if(!needsObservationValue){
 						HasObservationGroupByVisitor cv = new HasObservationGroupByVisitor();
-						query.getQueryDefinition().getColumnGroupByPart().visit(cv);
+						ldef.getColumnGroupByPart().visit(cv);
 						needsObservationValue = cv.hasCategory()  || cv.hasAttribute();;
 						if (!needsObservationValue){
-							query.getQueryDefinition().getRowGroupByPart().visit(cv);
+							ldef.getRowGroupByPart().visit(cv);
 							needsObservationValue = cv.hasCategory() || cv.hasAttribute();;
 						}
 					}
 					needsObservationRate = needsObservationValue;
 					valueFilter = new QueryFilter(EmptyFilter.INSTANCE);
-					if (query.getQueryDefinition().getValueFilter() != null){
-						valueFilter = query.getQueryDefinition().getValueFilter();
+					if (ldef.getValueFilter() != null){
+						valueFilter = ldef.getValueFilter();
 					}
 					rateFilter = new QueryFilter(EmptyFilter.INSTANCE);
-					if (query.getQueryDefinition().getRateFilter() != null){
-						rateFilter = query.getQueryDefinition().getRateFilter();
+					if (ldef.getRateFilter() != null){
+						rateFilter = ldef.getRateFilter();
 					}
 					
 					//determine if has area filter
@@ -229,10 +262,10 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 							needsObservationRate = true;
 						}
 					}
-
+					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
-							allGroupByParts, query.getQueryDefinition().getValuePart(),
-							query.getConservationAreaFilterAsFilter(),monitor);
+							allGroupByParts, ldef.getValuePart(),
+							cafilter, monitor);
 					
 					if (monitor.isCanceled() || data == null){
 						return ;
@@ -498,7 +531,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		
 		fromSql.append(dataTableName + " temp "); //$NON-NLS-1$
 		
-		String tmp = getNameByClass(patrolItem.getOption().getOptionClass()) ;
+		PatrolValueOption option = patrolItem.getPatrolValueOption();
+		String tmp = getNameByClass(option.getOptionClass()) ;
 		if (tmp != null){
 			selectSql.append(tmp + " as uniqueid"); //$NON-NLS-1$
 			selectSql.append(","); //$NON-NLS-1$
@@ -520,34 +554,34 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				break;
 			}
 		}
+		
+		valueSql.append(getFieldName(option, hasAreaGroupBy));
+		valueAggSql.append(getAggFieldName(option, hasAreaGroupBy));
 
-		valueSql.append(getFieldName(patrolItem, hasAreaGroupBy));
-		valueAggSql.append(getAggFieldName(patrolItem, hasAreaGroupBy));
-
-		if (patrolItem.getOption().getOptionClass().equals(Track.class) && !hasAreaGroupBy){
+		if (option.getOptionClass().equals(Track.class) && !hasAreaGroupBy){
 			fromSql.append(" join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(Track.class));
 			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$ 
 			fromSql.append(tablePrefix(Track.class));
 			fromSql.append(".patrol_leg_day_uuid " ); //$NON-NLS-1$
 		}
-		if (patrolItem.getOption() == PatrolValueOption.NUM_MEMBERS ||
-			patrolItem.getOption() == PatrolValueOption.MAN_HOURS  ||
-			patrolItem.getOption() == PatrolValueOption.MAN_HOURS_TOTAL  || 
-			patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ||
-			patrolItem.getOption() == PatrolValueOption.MAN_DAYS_TOTAL){
+		if (option == PatrolValueOption.NUM_MEMBERS ||
+			option == PatrolValueOption.MAN_HOURS  ||
+			option == PatrolValueOption.MAN_HOURS_TOTAL  || 
+			option == PatrolValueOption.MAN_DAYS  ||
+			option == PatrolValueOption.MAN_DAYS_TOTAL){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(PatrolLegMember.class));
 			fromSql.append(" on temp.pl_uuid = ");//$NON-NLS-1$
 			fromSql.append( tablePrefix(PatrolLegMember.class));
 			fromSql.append(".patrol_leg_uuid " ); //$NON-NLS-1$ 
 		}
-		if (patrolItem.getOption() == PatrolValueOption.NUM_HOURS ||
-			  patrolItem.getOption() == PatrolValueOption.NUM_HOURS_TOTAL ||
-			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS ||
-			  patrolItem.getOption() == PatrolValueOption.MAN_HOURS_TOTAL  ||
-			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS  ||
-			  patrolItem.getOption() == PatrolValueOption.MAN_DAYS_TOTAL){
+		if (option == PatrolValueOption.NUM_HOURS ||
+			  option == PatrolValueOption.NUM_HOURS_TOTAL ||
+			  option == PatrolValueOption.MAN_HOURS ||
+			  option == PatrolValueOption.MAN_HOURS_TOTAL  ||
+			  option == PatrolValueOption.MAN_DAYS  ||
+			  option == PatrolValueOption.MAN_DAYS_TOTAL){
 			fromSql.append(" left join "); //$NON-NLS-1$
 			fromSql.append(tableNamePrefix(PatrolLegDay.class));
 			fromSql.append( " on temp.pld_uuid = "); //$NON-NLS-1$
@@ -616,7 +650,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				valueSql = valueSql + ",temp.cat_hkey"; //$NON-NLS-1$
 			}
 			StringBuilder valueAggSql = new StringBuilder();
-			valueAggSql.append(attributeItem.getAggregation().getName());
+			valueAggSql.append(attributeItem.getAggregationKey());
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
@@ -882,7 +916,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 						key += rs.getString(rsindex++);
 						break;
 					case BYTE:
-						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
+						key += UuidUtils.uuidToString(UuidUtils.byteToUUID(rs.getBytes(rsindex++)));
 						break;
 					case DATE:
 						key += rs.getDate(rsindex++).toString();
@@ -924,7 +958,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		HashMap<SummaryResultKey, Double> results = new HashMap<SummaryResultKey, Double>();
 		boolean filterValue2 = false;
 		if (item.getPart2() instanceof PatrolValueItem && 
-			PatrolQueryOptions.isGroupByFilterValueItem(  ((PatrolValueItem) item.getPart2()).getOption())){
+			PatrolQueryOptions.isGroupByFilterValueItem(  ((PatrolValueItem) item.getPart2()).getPatrolValueOption())){
 				filterValue2 = true;
 		}
 		
@@ -1153,22 +1187,23 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				}
 				
 			}else if (gb instanceof PatrolGroupBy){
-				String prefix = getTablePrefix((PatrolGroupBy) gb);
-				String name = getFieldName((PatrolGroupBy) gb);
+				PatrolQueryOption option = ((PatrolGroupBy) gb).getOption();
+				String prefix = getTablePrefix(option);
+				String name = getFieldName(option);
 				if (prefix != null){
 					groupByInnerSql.append(prefix + "."); //$NON-NLS-1$
 				}
 				groupByInnerSql.append(name + " as " + "gp_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
 				groupBySql.append("gp_" + itemcnt); //$NON-NLS-1$
 				
-				if (((PatrolGroupBy)gb).getOption() == PatrolQueryOption.EMPLOYEE){
+				if (option == PatrolQueryOption.EMPLOYEE){
 					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(PatrolLegMember.class));
 					fromSql.append(" "); //$NON-NLS-1$
 					fromSql.append(tablePrefix(PatrolLegMember.class));
 					fromSql.append(" on temp.pl_uuid = " + tablePrefix(PatrolLegMember.class) + ".patrol_leg_uuid "); //$NON-NLS-1$ //$NON-NLS-2$
-				}else if (((PatrolGroupBy)gb).getOption().getType() == PatrolQueryOptionType.KEY){
-					PatrolQueryOption op = ((PatrolGroupBy)gb).getOption();
+				}else if (option.getType() == PatrolQueryOptionType.KEY){
+					PatrolQueryOption op = option;
 					fromSql.append(" join "); //$NON-NLS-1$
 					fromSql.append(tableNames.get(op.getSourceClass()));
 					fromSql.append(" on temp."); //$NON-NLS-1$
@@ -1264,8 +1299,7 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				fromSql.append(".keyid = " + p1); //$NON-NLS-1$
 				
 			}else if (gb instanceof IExtensionGroupBy){
-				IGroupByPatrolContribution cont = PatrolContributionFactory.findGroupByContribution(gb.asString());
-				cont.addGroupBySql(gb, fromSql, 
+				PatrolContributionFinder.addGroupBySql((IExtensionGroupBy)gb, fromSql, 
 						groupBySql, groupByInnerSql, 
 						value, caFilter, itemcnt, this);
 			}else{
@@ -1310,8 +1344,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	 * @param item
 	 * @return
 	 */
-	private String getAggFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
-		switch(item.getOption()){
+	private String getAggFieldName(PatrolValueOption option, boolean hasAreaGroupBy){		
+		switch(option){
 		case NUM_PATROLS:
 		case NUM_PATROLS_TOTAL:
 			return "count(p_uuid)"; //$NON-NLS-1$
@@ -1347,8 +1381,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		return ""; //$NON-NLS-1$
 	}
 	
-	private String getFieldName(PatrolValueItem item, boolean hasAreaGroupBy){
-		switch(item.getOption()){
+	private String getFieldName(PatrolValueOption option, boolean hasAreaGroupBy){
+		switch(option){
 		case NUM_PATROLS:
 		case NUM_PATROLS_TOTAL:
 			return "p_uuid"; //$NON-NLS-1$
@@ -1461,8 +1495,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	 * @param gb
 	 * @return
 	 */
-	private String getFieldName(PatrolGroupBy gb){
-		switch(gb.getOption()){
+	private String getFieldName(PatrolQueryOption option){
+		switch(option){
 		case ID:
 			return "p_id"; //$NON-NLS-1$
 		case STATION:
@@ -1499,8 +1533,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	 * @param gb
 	 * @return
 	 */
-	private String getTablePrefix(PatrolGroupBy gb){
-		if (gb.getOption() == PatrolQueryOption.EMPLOYEE){
+	private String getTablePrefix(PatrolQueryOption option){
+		if (option == PatrolQueryOption.EMPLOYEE){
 			return tablePrefix(PatrolLegMember.class);
 		}
 		return null;
@@ -1515,12 +1549,15 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 	 * @param results the summary query results to update
 	 * @param session hibernate session
 	 */
-	public static void getHeaderInfo(PatrolSummaryQuery query, SummaryQueryResult results, Session session){
+	public static void getHeaderInfo(PatrolSummaryQuery query, SummaryQueryResult results, Session session) throws Exception{
 		
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){
-			SummaryHeader header = new SummaryHeader(item.getName(session), item.getFullName(session), item.asString(), true);
+			SummaryHeader header = new SummaryHeader(
+					PatrolValueItemLabelProvider.INSTANCE.getName(item, session),
+					PatrolValueItemLabelProvider.INSTANCE.getFullName(item, session),
+					item.asString(), true);
 			results.addValueHeader(header);
 		}
 		
@@ -1530,12 +1567,12 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = item.getItems(session);
+			List<ListItem> items = PatrolDropItemFactory.INSTANCE.findViewer(item).getItems(session);
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), UuidUtils.uuidToString( it.getUuid() ), false);
 				}else{
 					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}	
@@ -1548,12 +1585,12 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = item.getItems(session);
+			List<ListItem> items = PatrolDropItemFactory.INSTANCE.findViewer(item).getItems(session);
 			SummaryHeader[] colHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), UuidUtils.uuidToString( it.getUuid() ), false);
 				}else{
 					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}

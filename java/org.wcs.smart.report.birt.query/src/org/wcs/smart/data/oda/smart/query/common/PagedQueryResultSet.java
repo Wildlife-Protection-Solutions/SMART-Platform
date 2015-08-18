@@ -28,8 +28,9 @@ import java.util.WeakHashMap;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.datatools.connectivity.oda.OdaException;
 import org.wcs.smart.data.oda.smart.impl.SmartConnection;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -58,7 +59,10 @@ public class PagedQueryResultSet extends AbstractQueryResultSet {
 		this.metadata = metadata;
 
 		try {
-			pagedQueryResults = (IPagedQueryResultSet) query.getCachedResults(new NullProgressMonitor(), connection.getSession());
+			pagedQueryResults = (IPagedQueryResultSet) query.getCachedResults();
+			if (pagedQueryResults == null){
+				pagedQueryResults = (IPagedQueryResultSet) QueryExecutor.INSTANCE.executeQuery(query, connection.getSession(), new NullProgressMonitor());
+			}
 			setMaxRows(pagedQueryResults.getItemCount());
 		} catch (Exception e) {
 			throw new RuntimeException(e);

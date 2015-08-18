@@ -22,6 +22,7 @@
 package org.wcs.smart.udig.style;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -72,7 +73,7 @@ public class SmartLayerStyleInterceptor implements LayerInterceptor {
 	
 	private static void loadStyle(ILayer layer){
 		//check for SMART saved style
-		final byte[] styleUuid = (byte[]) layer.getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
+		final UUID styleUuid = (UUID) layer.getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
 		if (styleUuid != null) {
 			//load from database
 			final String[] styleString = {null};

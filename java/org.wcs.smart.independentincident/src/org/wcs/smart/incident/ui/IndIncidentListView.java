@@ -25,6 +25,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -121,7 +122,7 @@ public class IndIncidentListView implements IIncidentFilteringView {
 				int i = 0;
 				for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 					Object[] data = (Object[]) iterator.next();					
-					input[i++] = new IncidentEditorInput((byte[])data[0], (Integer)data[1], (Date)data[2]);
+					input[i++] = new IncidentEditorInput((UUID)data[0], (Integer)data[1], (Date)data[2]);
 				}
 				
 				monitor.internalWorked(0.5);

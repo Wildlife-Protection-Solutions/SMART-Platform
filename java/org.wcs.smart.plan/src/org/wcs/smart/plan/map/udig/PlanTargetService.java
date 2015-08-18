@@ -43,6 +43,7 @@ import org.wcs.smart.plan.map.geotools.PlanTargetDataSource;
 import org.wcs.smart.plan.map.geotools.PlanTargetDataSourceFactory;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * A udig service for plan targets.
@@ -81,7 +82,7 @@ public class PlanTargetService extends IService {
 		this.plan = plan;
 		this.subPlans = subPlans;
 		this.params = new HashMap<String, Serializable>();
-		this.params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, SmartUtils.encodeHex(this.plan.getUuid()));
+		this.params.put(PlanTargetDataSourceFactory.PLAN_UUID.key, UuidUtils.uuidToString(this.plan.getUuid()));
 		this.params.put(PlanTargetDataSourceFactory.SUB_PLANS.key, subPlans);
 		this.url = PlanTargetServiceExtension.createURL(this.params);
 	}

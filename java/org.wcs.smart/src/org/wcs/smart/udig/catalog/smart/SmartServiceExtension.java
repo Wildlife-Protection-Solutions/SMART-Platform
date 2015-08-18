@@ -4,12 +4,13 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Udig service extension for smart conservation area 
@@ -48,7 +49,7 @@ public class SmartServiceExtension implements ServiceExtension {
             return null;
             
         //check for the property service key
-        if (params.containsKey(CA_UUID_KEY) && params.get(CA_UUID_KEY) instanceof byte[]) {
+        if (params.containsKey(CA_UUID_KEY) && params.get(CA_UUID_KEY) instanceof UUID) {
             //found it, create the service handle
         	return  new SmartService(params);
         }
@@ -102,7 +103,7 @@ public class SmartServiceExtension implements ServiceExtension {
 		
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		try{
-			byte[] buuid = SmartUtils.decodeHex(scauuid);
+			UUID buuid = UuidUtils.stringToUuid(scauuid);
 			params.put(CA_UUID_KEY, buuid);
 		}catch (Throwable ex){
 			SmartPlugIn.log("Error parsing ca uuid.", ex); //$NON-NLS-1$
@@ -118,10 +119,10 @@ public class SmartServiceExtension implements ServiceExtension {
 	 * @return url generated from connection parameters
 	 */
 	public static URL createURL(Map<String, Serializable> params){
-		if (params.get(CA_UUID_KEY) == null || !(params.get(CA_UUID_KEY) instanceof byte[])){
+		if (params.get(CA_UUID_KEY) == null || !(params.get(CA_UUID_KEY) instanceof UUID)){
 			return null;
 		}
-		String url = PROTOCOL + "://" + HOST + "/" + SmartUtils.encodeHex((byte[])params.get(CA_UUID_KEY)) ; //$NON-NLS-1$ //$NON-NLS-2$
+		String url = PROTOCOL + "://" + HOST + "/" + UuidUtils.uuidToString((UUID)params.get(CA_UUID_KEY)) ; //$NON-NLS-1$ //$NON-NLS-2$
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);
 		}catch (Throwable t){

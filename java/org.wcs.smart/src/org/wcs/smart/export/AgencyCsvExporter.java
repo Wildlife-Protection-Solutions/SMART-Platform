@@ -39,7 +39,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -69,7 +69,7 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 		try (
 			CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR)){ 
+					delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 			List<Agency> agencies = getAgencies(session);
 
 			// WriteHeaders

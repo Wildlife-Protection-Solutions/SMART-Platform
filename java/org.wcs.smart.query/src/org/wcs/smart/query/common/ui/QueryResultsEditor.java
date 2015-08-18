@@ -22,6 +22,8 @@
 package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -46,6 +48,10 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.QueryExecutor;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.WaypointQuery;
@@ -55,7 +61,6 @@ import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -95,12 +100,12 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			runQueryJob.setName(Messages.QueryResultsEditor_RunQueryJobName + getQuery().getName());
 			final IProgressMonitor mymonitor = page1.createProgressMonitor();
 			try {
-				IPagedQueryResultSet results = (IPagedQueryResultSet) getQuery().executeQuery(mymonitor);
+				IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor); 
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
 					page1.updateAndShowTable(null);
 					return Status.CANCEL_STATUS;
 				}
-				page1.updateAndShowTable(results);
+				page1.updateAndShowTable((IPagedQueryResultSet)results);
 			} catch (Exception ex) {
 				String message = Messages.QueryResultsEditor_ErrorRunningQuery;
 				if (ex.getCause() != null){
@@ -167,7 +172,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			try{
 				Query squery = (SimpleQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
 				query = new QueryProxy(squery);
-				squery.getType().getDropItemFactory().generateDropItems(query, session);
+				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(MessageFormat.format(
 						Messages.QueryResultsEditor_Error_CouldNotParse, new Object[]{ input.getName()})+ ex.getLocalizedMessage(), ex);
@@ -319,7 +324,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 				@Override
 				protected IStatus run(IProgressMonitor monitor) {
 					SimpleQuery q = getQueryInternal();
-					q.getQueryColumns();
+					q.getQueryColumns(Locale.getDefault(), null);
 					
 					getSite().getShell().getDisplay().syncExec(new Runnable(){
 
@@ -517,7 +522,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 						@Override
 						public void run() {
 							try {
-								getQueryProxy().getQuery().getType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+								getQueryProxy().getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
 							} catch (Exception ex) {
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}

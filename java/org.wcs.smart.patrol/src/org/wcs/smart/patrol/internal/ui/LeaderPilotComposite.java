@@ -47,6 +47,7 @@ import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Patrol Item Composite for patrol leader and pilot.
@@ -144,7 +145,8 @@ public class LeaderPilotComposite extends PatrolLegItemComposite{
 		Collections.sort(sortedList, new Comparator<PatrolLegMember>(){
 			@Override
 			public int compare(PatrolLegMember o1, PatrolLegMember o2) {
-				return Collator.getInstance().compare(o1.getMember().getFullLabel(), o2.getMember().getFullLabel());
+				return Collator.getInstance().compare(
+						SmartLabelProvider.getFullLabel(o1.getMember()), SmartLabelProvider.getFullLabel(o2.getMember()));
 			}});
 		List<PatrolLegMember> wrinput = new ArrayList<PatrolLegMember>(sortedList);
 		patrolLeaderViewer.setInput(wrinput);

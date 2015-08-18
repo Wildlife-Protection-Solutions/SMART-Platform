@@ -52,7 +52,7 @@ import org.wcs.smart.observation.common.gpx.WptType;
 import org.wcs.smart.observation.common.importwp.gpsbabel.GPSBabel;
 import org.wcs.smart.observation.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -385,7 +385,7 @@ public class GPSDataImport {
 		HashMap<ImportType, List<Waypoint>> data = new HashMap<ImportType, List<Waypoint>>();		
 		Date plddt = null;
 		if (day != null){
-			plddt = SmartUtils.getDatePart(day, false);
+			plddt = SharedUtils.getDatePart(day, false);
 		}
 		for (String file : gpxFiles) {
 			File gpxFile = new File(file);
@@ -404,7 +404,7 @@ public class GPSDataImport {
 					} else  {
 						// only import waypoints whose imported date match the
 						// given date
-						if (newwp.getDateTime() != null && SmartUtils.getDatePart(newwp.getDateTime(), false).equals(plddt)) {
+						if (newwp.getDateTime() != null && SharedUtils.getDatePart(newwp.getDateTime(), false).equals(plddt)) {
 							newwaypoints.add(newwp);
 						}
 					}
@@ -445,7 +445,7 @@ public class GPSDataImport {
 							} else if (plddt != null && datetime != null) {
 								// include only waytpoints which match current
 								// date
-								if (SmartUtils.getDatePart(datetime, false)
+								if (SharedUtils.getDatePart(datetime, false)
 										.equals(plddt)) {
 									trackCoords.add(c);
 								}

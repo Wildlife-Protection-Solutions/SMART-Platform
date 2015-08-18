@@ -22,6 +22,7 @@
 package org.wcs.smart.query.ui.model.impl;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -57,7 +58,7 @@ public class DateGroupByDropItem extends DropItem implements IGroupByDropItem {
 	 */
 	@Override
 	public String getText() {
-		return dateOption.getGuiName();
+		return dateOption.getGuiName(Locale.getDefault());
 	}
 
 	/**
@@ -83,7 +84,7 @@ public class DateGroupByDropItem extends DropItem implements IGroupByDropItem {
 	@Override
 	protected void createComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText( formatStringForLabel(dateOption.getGuiName()));
+		lbl.setText( formatStringForLabel(dateOption.getGuiName(Locale.getDefault())));
 		
 		initDrag(lbl);
 	}

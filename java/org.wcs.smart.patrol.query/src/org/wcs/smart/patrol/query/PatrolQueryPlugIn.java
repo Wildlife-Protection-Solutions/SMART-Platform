@@ -28,7 +28,14 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.patrol.query.ext.IPatrolContributionFinder;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
+import org.wcs.smart.patrol.query.model.observation.PatrolQueryColumnProvider;
+import org.wcs.smart.patrol.query.ui.PatrolQueryLabelProvider;
+import org.wcs.smart.patrol.ui.IQueryPatrolLabelProvider;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -102,6 +109,10 @@ public class PatrolQueryPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		SmartContext.INSTANCE.setClass(IPatrolContributionFinder.class, new PatrolContributionFinder());
+		SmartContext.INSTANCE.setClass(IQueryPatrolLabelProvider.class, new PatrolQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IPatrolQueryColumnProvider.class, new PatrolQueryColumnProvider());
 	}
 
 	/*

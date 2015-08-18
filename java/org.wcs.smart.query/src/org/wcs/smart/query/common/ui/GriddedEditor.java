@@ -47,14 +47,17 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.event.IQueryListener;
 import org.wcs.smart.query.event.QueryAreaModifiedListener;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -137,7 +140,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 			try{
 				GriddedQuery gquery = (GriddedQuery) QueryHibernateManager.getInstance().findQuery(session, input.getUuid(), input.getType());
 				query = new QueryProxy(gquery);
-				gquery.getType().getDropItemFactory().generateDropItems(query, session);
+				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 				
 				
 			}catch (Exception ex){
@@ -174,11 +177,11 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 				GriddedEditor.this.firstRun = false;
 				
 				try {
-					Collection<GridResultItem> results = (Collection<GridResultItem>) getQuery().executeQuery(mymonitor);
+					IQueryResult results = QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor);
 					if (monitor.isCanceled() || mymonitor.isCanceled()){
 						return Status.CANCEL_STATUS;
 					}
-					resultPage.updateAndShowTable(results, mymonitor);
+					resultPage.updateAndShowTable(((GridQueryResult)results).getData(), mymonitor);
 				} catch (Exception ex) {
 					String message = "Could not execute query." + "\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 					if (ex.getCause() != null && ex.getCause().getCause()== Grid.GRID_TO_BIG_EXCEPTION){
@@ -513,7 +516,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 						@Override
 						public void run() {
 							try{
-								query.getQuery().getType().getDropItemFactory().generateDropItems(query, session);
+								query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 							}catch (Exception ex){
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}

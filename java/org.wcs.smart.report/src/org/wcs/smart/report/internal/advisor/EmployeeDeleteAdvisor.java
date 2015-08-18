@@ -31,6 +31,7 @@ import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Delete advisor for determining if an
@@ -57,12 +58,12 @@ public class EmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		}
 		Long cnt = (Long) session.createCriteria(Report.class).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{e.getFullLabel(), cnt});
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsReports, new Object[]{SmartLabelProvider.getFullLabel(e), cnt});
 		}
 	
 		cnt = (Long) session.createCriteria(ReportFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{e.getFullLabel(), cnt});
+			return MessageFormat.format( Messages.EmployeeDeleteAdvisor_Error_OwnsFolders, new Object[]{SmartLabelProvider.getFullLabel(e), cnt});
 		}
 		return null;
 	}

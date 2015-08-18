@@ -30,16 +30,17 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.editor.PatrolGriddedEditor;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.IQueryType;
@@ -62,7 +63,6 @@ public class PatrolGridQueryType implements IQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
-	public static final String KEY = "patrolgrid"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
@@ -76,7 +76,7 @@ public class PatrolGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return PatrolGriddedQuery.KEY;
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class PatrolGridQueryType implements IQueryType {
 					if (items != null){
 						for (int i = 0; i < items.length; i ++){
 							if (items[i] instanceof AbstractValueDropItem){
-								((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_DROP_OPTIONS);
+								((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolDropItems.GRID_ENCOUNTER_RATE_DROP_OPTIONS);
 							}
 						}
 					}

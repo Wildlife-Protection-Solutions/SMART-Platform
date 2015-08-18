@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
@@ -58,8 +59,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class ObservationSummaryQueryType implements IQueryType {
 	
-	public static final String KEY = "observationsummary"; //$NON-NLS-1$
-	
 	private static IDropItemFactory dropItemFactory = null;
 	
 	/**
@@ -75,7 +74,7 @@ public class ObservationSummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return ObservationSummaryQuery.KEY;
 	}
 
 	/**

@@ -48,6 +48,7 @@ import org.locationtech.udig.project.internal.commands.DeleteLayersCommand;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.internal.Messages;
+import org.wcs.smart.query.model.QueryStyleParser;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.ui.editor.IMapQueryEditor;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
@@ -81,14 +82,14 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 			}
 		}
 		
-		private void updateStyle(ILayer layer) throws IOException{
+		private void updateStyle(ILayer layer) throws Exception{
 			StyledQuery sq = ((StyledQuery)parentEditor.getQueryProxy().getQuery());
 			
 			String dataType = layer.getGeoResource().getIdentifier().getRef();
 			if (dataType == null){
 				dataType = layer.getGeoResource().getID().toString();
 			}
-			sq.updateStyle(dataType, (StyleBlackboard) layer.getStyleBlackboard());
+			QueryStyleParser.INSTANCE.updateStyle(sq, dataType, (StyleBlackboard) layer.getStyleBlackboard());
 			getSite().getShell().getDisplay().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -124,7 +125,7 @@ public class QueryMapPageEditor extends SmartMapEditorPart{
 										if (dataType == null){
 											dataType = layer.getGeoResource().getID().toString();
 										}
-										sq.applyStyle(dataType, (StyleBlackboard)layer.getStyleBlackboard());
+										QueryStyleParser.INSTANCE.applyStyle(sq, dataType, (StyleBlackboard) layer.getStyleBlackboard());
 										//do this to ensure the correct events are fired
 										((Layer)layer).setStyleBlackboard((StyleBlackboard)layer.getStyleBlackboard());
 										

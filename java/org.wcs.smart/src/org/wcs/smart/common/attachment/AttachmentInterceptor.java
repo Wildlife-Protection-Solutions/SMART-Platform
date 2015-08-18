@@ -30,6 +30,7 @@ import org.hibernate.EmptyInterceptor;
 import org.hibernate.Transaction;
 import org.hibernate.type.Type;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.util.SmartUtils;
 
@@ -83,7 +84,12 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	
     	if (shouldIntercept(entity)) {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
-    		toDelete.add(attachment.getFullFile());
+    		try {
+    			attachment.computeFileLocation(HibernateManager.openSession());
+				toDelete.add(attachment.getAttachmentFile());
+			} catch (Exception ex) {
+				SmartPlugIn.log("Unable to delete attachment", ex); //$NON-NLS-1$
+			}
     	}
     	
     }
@@ -103,16 +109,19 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     		ISmartAttachment attachment = (ISmartAttachment) entity;
     		
     		if (attachment.getCopyFromLocation() != null){
-    		
-    			File f = new File(getAttachmentDirectory(attachment));
-    			if (!f.exists()){
-    				SmartUtils.createDirectory(f);
+    			try {
+					attachment.computeFileLocation(HibernateManager.openSession());
+				} catch (Exception e) {
+					throw new RuntimeException(e);
+				}
+    			File to = attachment.getAttachmentFile();
+    			if (!to.getParentFile().exists()){
+    				SmartUtils.createDirectory(to.getParentFile());
     			}
-    			File to = new File(f.getAbsoluteFile() + File.separator + attachment.getFilename());
     			int counter = 1;
     			while(to.exists()){
     				String name = (counter++) + "_" + attachment.getFilename(); //$NON-NLS-1$
-    				to = new File(f.getAbsoluteFile() + File.separator + name);
+    				to = new File(to.getParentFile(), name);
     			}
     			if (!SmartUtils.copyFile(attachment.getCopyFromLocation(), to)){
     				throw new RuntimeException(getExceptionErrorMessage());
@@ -133,9 +142,6 @@ public class AttachmentInterceptor extends EmptyInterceptor {
     	return true;
     }
 
-    protected String getAttachmentDirectory(ISmartAttachment attachment) {
-    	return attachment.getDatastoreFolderPath();
-    }
     
     protected String getExceptionErrorMessage() {
     	return Messages.AttachmentInterceptor_Error_CannotCopyFile;
