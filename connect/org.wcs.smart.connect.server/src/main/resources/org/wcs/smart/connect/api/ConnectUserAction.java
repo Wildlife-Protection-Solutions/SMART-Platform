@@ -1,9 +1,32 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.api;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -36,8 +59,12 @@ import org.wcs.smart.connect.security.ResourceOption;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.security.UserAccountsAction;
 
-import com.sun.istack.internal.logging.Logger;
-
+/**
+ * SMART Connect REST API for configuring user permission and actions.
+ * 
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectUser.PATH +
 		ConnectRESTApplication.PATH_SEPERATOR + ConnectUserAction.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
@@ -47,13 +74,15 @@ public class ConnectUserAction extends HttpServlet {
 	public static final String PATH = "actions";
 	
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(ConnectUserAction.class);
+	private final Logger logger = Logger.getLogger(ConnectUserAction.class.getName());
 	
 	@Context private ServletContext context;
-
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 
+	/*
+	 * Ensures the user has access to change/view user actions
+	 */
 	private void validateUser(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -67,6 +96,11 @@ public class ConnectUserAction extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Lists all available actions.
+	 * 
+	 * @return
+	 */
 	@GET
     @Path("/")
     public List<SmartActionsProxy> getActions(){
@@ -93,7 +127,7 @@ public class ConnectUserAction extends HttpServlet {
 			}
 			return actionResources;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConnectUserAction.ActionError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
@@ -101,6 +135,12 @@ public class ConnectUserAction extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Lists all actions associated with a given user.
+	 * 
+	 * @param username
+	 * @return
+	 */
 	@GET
     @Path("/{username}")
     public List<SmartUserActionProxy> getUserActions(@PathParam("username") String username){
@@ -109,8 +149,9 @@ public class ConnectUserAction extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			@SuppressWarnings("unchecked")
 			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
-					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+					.add(Restrictions.eq("username", username))
 					.list();
 			
 			List<SmartUserActionProxy> items = new ArrayList<SmartUserActionProxy>();
@@ -128,7 +169,7 @@ public class ConnectUserAction extends HttpServlet {
 			}
 			return items;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR,
 					Messages.getString("ConnectUserAction.UserError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
@@ -136,6 +177,12 @@ public class ConnectUserAction extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Removes an action from a given user.
+	 * 
+	 * @param username
+	 * @param action
+	 */
 	@DELETE
     @Path("/{username}/{action}")
     public void getUserActions(@PathParam("username") String username,
@@ -144,6 +191,13 @@ public class ConnectUserAction extends HttpServlet {
 		deleteUserActions(username, action, null);
 	}
 	
+	/**
+	 * Removes an action and specific resource from a given user.
+	 * 
+	 * @param username
+	 * @param action
+	 * @param resource
+	 */
 	@DELETE
     @Path("/{username}/{action}/{resource}")
     public void deleteUserActions(@PathParam("username") String username,
@@ -155,6 +209,7 @@ public class ConnectUserAction extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			@SuppressWarnings("unchecked")
 			List<SmartUserAction> actions = s.createCriteria(SmartUserAction.class)
 					.add(Restrictions.eq("username", username)) //$NON-NLS-1$
 					.add(Restrictions.eq("action", action)) //$NON-NLS-1$
@@ -177,13 +232,18 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConnectUserAction.UserDeleteError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	}
 	
 	
+	/**
+	 * Adds a new action for a given user.
+	 * @param username
+	 * @param actionKey
+	 */
 	@POST
     @Path("/{username}/{action}")
     public void addUserActions(@PathParam("username") String username,
@@ -191,6 +251,12 @@ public class ConnectUserAction extends HttpServlet {
 		addUserActions(username, actionKey, null);
 	}
 	
+	/**
+	 * Add a new action with a specific resource for a given user.
+	 * @param username
+	 * @param actionKey
+	 * @param resourceKey
+	 */
 	@POST
     @Path("/{username}/{action}/{resource}")
     public void addUserActions(@PathParam("username") String username,
@@ -211,7 +277,7 @@ public class ConnectUserAction extends HttpServlet {
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}

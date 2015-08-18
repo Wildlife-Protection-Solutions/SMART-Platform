@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "connect.style_configuration")
-public class StyleConfiguration extends UuidItem {
+public class StyleConfiguration extends ConnectUuidItem {
 
 	private String styleId;
 	private boolean active;

@@ -1,6 +1,29 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.uploader;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
@@ -10,11 +33,16 @@ import org.wcs.smart.connect.model.UploadItem;
 import org.wcs.smart.connect.model.UploadItem.Status;
 import org.wcs.smart.connect.model.UploadItem.Type;
 
-import com.sun.istack.internal.logging.Logger;
-
-public class CaLoader implements IUploadItemProcessor {
+/**
+ * A upload item processor that loads a conservation area export into
+ * the database.
+ * 
+ * @author Emily
+ *
+ */
+public class LoadCaProcessor implements IUploadItemProcessor {
 	
-	private final Logger logger = Logger.getLogger(CaLoader.class);
+	private final Logger logger = Logger.getLogger(LoadCaProcessor.class.getName());
 	
 	@Override
 	public Type getSupportedType() {
@@ -46,7 +74,7 @@ public class CaLoader implements IUploadItemProcessor {
 			
 			session.getTransaction().commit();
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			ex.printStackTrace();
 			session.getTransaction().rollback();
 			
@@ -58,7 +86,7 @@ public class CaLoader implements IUploadItemProcessor {
 				item.setMessage("Error extracting data, " + ex.getMessage());
 				session.getTransaction().commit();
 			}catch (Exception ex2){
-				logger.severe(ex2.getMessage(), ex2);
+				logger.log(Level.SEVERE, ex2.getMessage(), ex2);
 				session.getTransaction().rollback();
 			}
 		}

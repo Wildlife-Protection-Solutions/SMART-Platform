@@ -8,5 +8,5 @@
 <div id="footerid" class="float">
   <img class="float " src="../css/smart_logo.png">
  
-    <p class="float"> Copyright </p>
+    <p class="float"> Copyright 2015</p>
 </div>

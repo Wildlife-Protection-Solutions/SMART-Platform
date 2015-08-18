@@ -1,9 +1,5 @@
-package org.wcs.smart.connect.hibernate;
 
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.hibernate.annotations.common.reflection.AnnotationReader;
-import org.hibernate.annotations.common.reflection.MetadataProvider;
+package org.wcs.smart.connect.hibernate;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -14,7 +10,20 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-// see: http://stackoverflow.com/questions/4495233/postgresql-uuid-supported-by-hibernate
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.common.reflection.AnnotationReader;
+import org.hibernate.annotations.common.reflection.MetadataProvider;
+
+/**
+ * this is necessary to be able to reuse the derby desktop code with the
+ * postgresql connect code.
+ * 
+ * see: http://stackoverflow.com/questions/4495233/postgresql-uuid-supported-by-hibernate
+ * 
+ * @author Emily
+ *
+ */
 class UUIDTypeInsertingMetadataProvider implements MetadataProvider {
     private final Map<AnnotatedElement, AnnotationReader> cache = new HashMap<>();
     private final MetadataProvider delegate;

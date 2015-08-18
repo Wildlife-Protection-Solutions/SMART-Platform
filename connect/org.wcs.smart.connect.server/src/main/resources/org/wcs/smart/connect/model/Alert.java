@@ -1,6 +1,5 @@
 package org.wcs.smart.connect.model;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.UUID;
 
@@ -10,21 +9,9 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.deser.std.JdkDeserializers.UUIDDeserializer;
-
 @Entity
 @Table(name = "connect.alerts")
-public class Alert extends UuidItem{
+public class Alert extends ConnectUuidItem{
 	
 	public enum AlertStatusEnum {
 		ACTIVE("ACTIVE"),

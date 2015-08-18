@@ -6,7 +6,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "connect.alert_types")
-public class AlertType extends UuidItem{
+public class AlertType extends ConnectUuidItem{
 	private String key;
 	private String label;
 	

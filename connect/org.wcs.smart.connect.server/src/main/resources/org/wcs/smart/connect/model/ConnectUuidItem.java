@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -32,8 +32,6 @@ import javax.persistence.InheritanceType;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Type;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * This represents entities with simple uuid field.
  * 
@@ -49,8 +47,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Inheritance(strategy= InheritanceType.TABLE_PER_CLASS)
 public class ConnectUuidItem {
 	
-	
-	@JsonIgnore
 	private UUID uuid;
 	
 	/**

@@ -1,8 +1,28 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,10 +32,16 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
-import org.wcs.smart.connect.api.ConservationAreas;
 import org.wcs.smart.connect.hibernate.HibernateManager;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.QueryProxy;
+
+/**
+ * Query servlet.
+ * 
+ * @author Emily
+ *
+ */
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "query")
 public class QueryServlet extends HttpServlet {
 	
@@ -25,12 +51,11 @@ public class QueryServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
-		UUID uuid = UUID.fromString("4c4facd2-50bc-4533-8b30-26dc84828e61");
-		Session session = HibernateManager.getSession(request.getServletContext());
+		Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		session.beginTransaction();
 		try{
-		//	QueryManager.INSTANCE.findQuery(uuid, session);
+			List<QueryProxy> allQueries = QueryManager.INSTANCE.getQueries(session, request.getLocale());
+			request.setAttribute("allqueries", allQueries);
 		}finally{
 			session.getTransaction().commit();
 		}

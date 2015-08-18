@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.api;
 
 import java.io.File;
@@ -7,6 +28,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -39,8 +62,13 @@ import org.wcs.smart.connect.model.UploadItem.Type;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
-import com.sun.istack.internal.logging.Logger;
 
+/**
+ * Smart Connect REST APU for conservation areas.
+ * 
+ * @author Emily
+ *
+ */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConservationAreas.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
@@ -48,13 +76,23 @@ public class ConservationAreas extends HttpServlet{
 	public static final String PATH = "conservationarea"; //$NON-NLS-1$
 	
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(ConservationAreas.class);
+	private final Logger logger = Logger.getLogger(ConservationAreas.class.getName());
 	
 	@Context private ServletContext context;
 	@Context private HttpHeaders headers;
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 		
+	/**
+	 * Configure the class parameters.  During normal use this will
+	 * be done automatically.  This is only when you want to user this class
+	 * outside for the REST workflow.
+	 * 
+	 * @param context
+	 * @param headers
+	 * @param response
+	 * @param request
+	 */
 	public void configure(ServletContext context, HttpHeaders headers, HttpServletResponse response, HttpServletRequest request){
 		this.context = context;
 		this.headers= headers;
@@ -62,6 +100,9 @@ public class ConservationAreas extends HttpServlet{
 		this.response = response;
 	}
 	
+	/*
+	 * Ensures the current user has read access.
+	 */
 	private void validateRead(ConservationAreaInfo info, Session s){
 		if (!SecurityManager.INSTANCE.canAccess(s, 
 				request.getUserPrincipal().getName(), 
@@ -72,6 +113,9 @@ public class ConservationAreas extends HttpServlet{
 		}
 	}
 	
+	/*
+	 * Ensures the current user had delete access for the given ca.
+	 */
 	private void validateDelete(ConservationAreaInfo info, Session s){
 		if (!SecurityManager.INSTANCE.canAccess(s, 
 				request.getUserPrincipal().getName(), 
@@ -82,6 +126,13 @@ public class ConservationAreas extends HttpServlet{
 		}
 	}
 	
+	/**
+	 * Lists all conservation areas that the current user has access
+	 * to read.
+	 * 
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
     public List<ConservationAreaInfo> getConservationAreas(){
@@ -89,9 +140,7 @@ public class ConservationAreas extends HttpServlet{
 		s.beginTransaction();
 		try{
 			List<ConservationAreaInfo> conservationAreas = new ArrayList<ConservationAreaInfo>();
-			
-			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class)
-					.list();
+			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
 			for (ConservationAreaInfo ca : db){
 				//check to determine if ca is accessable by current user
 				try{
@@ -104,7 +153,7 @@ public class ConservationAreas extends HttpServlet{
 			}
 			return conservationAreas;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConservationAreas.CaListError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
@@ -115,6 +164,11 @@ public class ConservationAreas extends HttpServlet{
 	/*
 	 * TODO: this might need to be done as a background process incase
 	 * deleting takes a long time
+	 */
+	/**
+	 * Deletes a given conservation area.
+	 * 
+	 * @param caUuid
 	 */
 	@DELETE
     @Path("/{cauuid}")
@@ -138,13 +192,12 @@ public class ConservationAreas extends HttpServlet{
 			
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
-			logger.severe(ex.getMessage(), ex);
 			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
 					Messages.getString("ConservationAreas.CouldNotDeleteCa", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
@@ -157,6 +210,12 @@ public class ConservationAreas extends HttpServlet{
 
 	}
 	
+	/**
+	 * Initiates an upload CA session.
+	 * 
+	 * @param caUuid
+	 * @return
+	 */
 	@POST
 	@Path("/{cauuid}")
 	public String updateNewConservationArea(@PathParam("cauuid") String caUuid){
@@ -223,11 +282,11 @@ public class ConservationAreas extends HttpServlet{
 			
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(Messages.getString("ConservationAreas.UploadErr", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}

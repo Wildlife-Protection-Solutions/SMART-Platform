@@ -1,6 +1,13 @@
 drop schema smart cascade;
 create schema smart; 
 
+CREATE OR REPLACE FUNCTION smart.trimhkeytolevel(level integer, str varchar) RETURNS VARCHAR AS $$
+BEGIN
+	RETURN (regexp_matches(str, '(?:[a-zA-Z_0-9]*\.){' || level+1 || '}'))[1];
+END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE TABLE smart.agency
 (
    UUID uuid NOT NULL,

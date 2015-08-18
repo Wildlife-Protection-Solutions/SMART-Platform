@@ -7,7 +7,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/ca.js"></script>
-<title>SMART Connect - User Account</title>
+<title>SMART Connect - Conservation Areas</title>
 
 <script>
 	

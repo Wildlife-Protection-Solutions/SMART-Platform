@@ -1,16 +1,9 @@
 package org.wcs.smart.connect.servlet;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -21,8 +14,6 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.engine.profile.Fetch.Style;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.StyleConfiguration;

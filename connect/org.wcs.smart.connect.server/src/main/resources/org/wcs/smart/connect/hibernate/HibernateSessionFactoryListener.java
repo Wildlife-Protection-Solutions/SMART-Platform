@@ -1,7 +1,29 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.hibernate;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -21,13 +43,15 @@ import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.connect.model.UploadItem;
 
-
-import com.sun.istack.internal.logging.Logger;
-
+/**
+ * Web listener to configure the hibernate connection on start up and shut down.
+ * @author Emily
+ *
+ */
 @WebListener
 public class HibernateSessionFactoryListener implements ServletContextListener{
 
-	public final Logger logger = Logger.getLogger(HibernateSessionFactoryListener.class);
+	private final Logger logger = Logger.getLogger(HibernateSessionFactoryListener.class.getName());
 	
 	public static final String EXECUTOR_KEY = "threadExecutor"; //$NON-NLS-1$
 	
@@ -65,11 +89,14 @@ public class HibernateSessionFactoryListener implements ServletContextListener{
 		config.addAnnotatedClass(SmartUserAction.class);
 		config.addAnnotatedClass(ConservationAreaInfo.class);
 		config.addAnnotatedClass(UploadItem.class);
-		
 		config.addAnnotatedClass(StyleConfiguration.class);
 		config.addAnnotatedClass(AlertType.class);
 		config.addAnnotatedClass(Alert.class);
-		
+
+		for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
+			config.addAnnotatedClass(c);
+		}
+
 		ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
 		SessionFactory sf = config.buildSessionFactory(service);
 		

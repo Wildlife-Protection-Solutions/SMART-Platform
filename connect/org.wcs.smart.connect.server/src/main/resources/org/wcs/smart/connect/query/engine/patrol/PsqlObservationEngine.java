@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -21,22 +21,24 @@
  */
 package org.wcs.smart.connect.query.engine.patrol;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.postgresql.copy.CopyManager;
-import org.postgresql.core.BaseConnection;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -44,55 +46,43 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolLegMember;
-import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 
 /**
- * Query engine for executing lazy queries using derby.
- * This engines create temporary tables that one to one correspond with the table
- * that user see. {@link PostgresqlPagedObservationResult} obtains the name of this table and is
- * responsible for all other operations (fetching/sorting/deleting tables)
- * 
- * @author elitvin
+ * Patrol Observation query engine.
+ * @author egouge
  * @since 1.0.0
  */
-public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
-
-	private String queryDataTable;
-	private int categoryCount;
-	private SimpleQuery query;
+public class PsqlObservationEngine extends AbstractQueryEngine {
 	
-	public void exportToFile(File f, char delimiter, Session session){
-		String sql = "COPY " + queryDataTable +" TO '" + f.getAbsolutePath() + "' WITH (FORMAT CSV, DELIMITER '" + delimiter + "' HEADER true)";
-		
-		session.doWork(new Work(){
-			@Override
-			public void execute(Connection c) throws SQLException {
-				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)c).getConnection());
-				try{
-					copy.copyOut(sql);
-				}catch(SQLException ex){
-					throw new SQLException(ex);
-				}
-			}
-		});
+	private final Logger logger = Logger.getLogger(PsqlObservationEngine.class.getName());
+	
+	private String queryDataTable;
+	private SimpleQuery query;
+	private Locale l = Locale.getDefault();
+	
+	public PsqlObservationEngine(){
 	}
 	
-	@Override
-	public boolean canExecute(IQueryType type) {
-		return PatrolObservationQueryType.KEY.equals(type.getKey());
+	public String getQueryDataTable(){
+		return this.queryDataTable;
+	}
+	
+	public Locale getLocale(){
+		return this.l;
 	}
 	
 	@Override
 	public IQueryResult executeQuery(Query lquery, HashMap<String, Object> params) throws SQLException {
 		this.query = (SimpleQuery) lquery;
+		this.l = (Locale) params.get(Locale.class.getName());
 		queryDataTable = createTempTableName();
 		
 		Session session = (Session) params.get(Session.class.getName());
@@ -100,31 +90,50 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				IFilterProcessor filterer = PostgresqlObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
-				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				
-				try {			
+				IFilterProcessor filterer = null;
+				try {
+					filterer = PsqlObservationEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
+					
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), 
+							Collections.singleton(query.getConservationArea()));
+					if (!query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+						caFilter.addConservationArea(query.getConservationArea());
+					}
+					
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
-							true, true);
+							caFilter, true, true);
 					
 					populateTemporaryTableExtra(c, session);
+				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					throw new SQLException(ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
 				}
 				c.commit();
 			}
 
 		});
-		return null;
+		
+		PatrolObservationQueryResult results = new PatrolObservationQueryResult(this);
+		return results;
 	}
 
+	@Override
+	public void cleanUp(Session session){
+		session.doWork(new Work(){
+			@Override
+			public void execute(Connection c) throws SQLException {
+				dropTemporaryTables(c, true);		
+			}});
+		
+	}
 	/**
 	 * Drop the created temporary tables.
 	 * 
@@ -142,7 +151,7 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 
 	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
 		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		System.out.println(sql);
+		logger.info(sql);
 		
 		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
@@ -171,27 +180,27 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 	private void populateTemporaryTableCategory(Connection c, Session session) throws SQLException {
 		
 		// add data model category columns
-		int categoryCount = getCategoryDepth(c, query.getConservationArea().getUuid());
+		int categoryCount = QueryManager.INSTANCE.getCategoryDepth(session, query.getConservationArea().getUuid());
 		if (categoryCount < 0){
 			return;			//nothing to update
 		}
 		
 		for (int i = 0; i <= categoryCount; i++) {
 			String sql = "ALTER TABLE "+queryDataTable+" ADD category_"+i+" varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			System.out.println(sql);
+			logger.finest(sql);
 			c.createStatement().execute(sql);
 		}
 		
 		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
 		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
-		System.out.println(sql);
+		logger.finest(sql);
 		
 		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
 			while (rs.next()) {
 				UUID uuid = (UUID) rs.getObject(1);
 				if (uuid == null)
 					continue;
-				String[] names = getCategoryLabels(uuid, session);
+				String[] names = getCategoryLabels(uuid, l, session);
 				int count = names.length;
 				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
 				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement
@@ -205,7 +214,7 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					sql = "UPDATE "+queryDataTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					System.out.println(sql);
+					logger.finest(sql);
 					statement = c.prepareStatement(sql);
 					
 					num2Statement.put(count, statement);
@@ -236,8 +245,8 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		
 		for (int i = 0; i < columnsToAdd.length; i ++){
 			String sql = "ALTER TABLE " + queryDataTable + " ADD "+ columnsToAdd[i][0] + " " + columnsToAdd[i][1]; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			System.out.println(sql);
-			c.createStatement().execute(sql);
+			logger.finest(sql);
+			c.createStatement().executeUpdate(sql);
 		}
 		
 		
@@ -254,7 +263,7 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		sql.append(queryDataTable);
 		sql.append(" UNION SELECT DISTINCT ob_observer_uuid FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
-		System.out.println(sql.toString());
+		logger.finest(sql.toString());
 		
 		
 		String updateSql = "UPDATE "+queryDataTable+" SET "; //$NON-NLS-1$ //$NON-NLS-2$
@@ -262,9 +271,9 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		String q1 = updateSql + "p_leader = ? where plm_leader = ?"; //$NON-NLS-1$
 		String q2 = updateSql + "p_pilot = ? where plm_pilot = ?"; //$NON-NLS-1$
 		String q3 = updateSql + "ob_observer = ? where ob_observer_uuid = ?"; //$NON-NLS-1$
-		System.out.println(q1);
-		System.out.println(q2);
-		System.out.println(q3);
+		logger.finest(q1);
+		logger.finest(q2);
+		logger.finest(q3);
 		PreparedStatement leaderSt = c.prepareStatement(q1);
 		PreparedStatement pilotSt = c.prepareStatement(q2);
 		PreparedStatement observerSt = c.prepareStatement(q3);
@@ -311,18 +320,18 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(PostgresqlObservationEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(PsqlObservationEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			System.out.println(sql.toString());
+			logger.finest(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 			
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
 			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(PostgresqlObservationEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append(PsqlObservationEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
 			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			System.out.println(sql.toString());
+			logger.finest(sql.toString());
 			c.createStatement().executeUpdate(sql.toString());
 		}
 				
@@ -332,8 +341,7 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				//TODO:
-				return "TODO:";
+				return Label.getDescription(uuid, session);
 				//return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, uuid);
 			}
 		};
@@ -342,8 +350,7 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
 			@Override
 			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				//TODO:
-				return "TODO:";
+				return Label.getDescription(uuid, session);
 //				return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
 			}
 		};
@@ -351,16 +358,18 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		
 	}
 
+	
+	
 	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
-		System.out.println(sql.toString());
+		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid uuid, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
+		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 
 		String sql2 = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.P_CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		System.out.println(sql.toString());
+		logger.finest(sql.toString());
 		
 		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		System.out.println(sql.toString());
+		logger.finest(sql.toString());
 		PreparedStatement statement = c.prepareStatement(sql);
 		int count = 0;
 		try(ResultSet rs = c.createStatement().executeQuery(sql2)){
@@ -453,88 +462,42 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
+		sql.append("p_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_id varchar(32),"); //$NON-NLS-1$
-		sql.append("p_station_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("p_team_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_station_uuid uuid,"); //$NON-NLS-1$
+		sql.append("p_team_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_objective varchar(8192),"); //$NON-NLS-1$
-		sql.append("p_mandate_uuid  char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("p_mandate_uuid  uuid,"); //$NON-NLS-1$
 		sql.append("p_type varchar(6),"); //$NON-NLS-1$
 		sql.append("p_armed boolean,"); //$NON-NLS-1$
 		sql.append("p_startdate date,"); //$NON-NLS-1$
 		sql.append("p_enddate date,"); //$NON-NLS-1$
-		sql.append("pl_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_uuid uuid,"); //$NON-NLS-1$
 		sql.append("p_legid varchar(50),"); //$NON-NLS-1$
-		sql.append("pl_transport_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("pl_transport_uuid uuid,"); //$NON-NLS-1$
+		sql.append("pld_uuid uuid,"); //$NON-NLS-1$
 		sql.append("wp_date date,"); //$NON-NLS-1$ //sql.append("pld_patrol_day date,");
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
 
 		sql.append("wp_id integer,"); //$NON-NLS-1$
-		sql.append("wp_x double,"); //$NON-NLS-1$
-		sql.append("wp_y double,"); //$NON-NLS-1$
+		sql.append("wp_x double precision,"); //$NON-NLS-1$
+		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_time timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
-		sql.append("ob_observer_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_category_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ob_observer_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ob_uuid uuid,"); //$NON-NLS-1$
+		sql.append("ob_category_uuid uuid,"); //$NON-NLS-1$
 		
-		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("plm_pilot char(16) for bit data"); //$NON-NLS-1$
+		sql.append("plm_leader uuid,"); //$NON-NLS-1$
+		sql.append("plm_pilot uuid"); //$NON-NLS-1$
 
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
 	
-	@Override
-	protected PatrolQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		PatrolQueryResultItem it = new PatrolQueryResultItem();
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		it.setPatrolUuid( (UUID)rs.getObject("p_uuid")); //$NON-NLS-1$
-		it.setPatrolId(rs.getString("p_id")); //$NON-NLS-1$
-		it.setPatrolStartDate(rs.getDate("p_startdate")); //$NON-NLS-1$
-		it.setPatrolEndDate(rs.getDate("p_enddate")); //$NON-NLS-1$
-		it.setStation(rs.getString("p_station"));				 //$NON-NLS-1$
-		it.setTeam(rs.getString("p_team"));	 //$NON-NLS-1$
-		it.setObjective(rs.getString("p_objective")); //$NON-NLS-1$
-		it.setMandate(rs.getString("p_mandate")); //$NON-NLS-1$
-		it.setPatrolType( org.wcs.smart.patrol.model.PatrolType.Type.valueOf(rs.getString("p_type"))); //$NON-NLS-1$
-		it.setArmed(rs.getBoolean("p_armed")); //$NON-NLS-1$
-		it.setTransportType(rs.getString("p_transporttype")); //$NON-NLS-1$
-		it.setPatrolLegId(rs.getString("p_legid")); //$NON-NLS-1$
-		it.setWpDateTime(rs.getDate("wp_date")); //$NON-NLS-1$
-		
-		it.setLeader(rs.getString("p_leader")); //$NON-NLS-1$
-		it.setPilot(rs.getString("p_pilot")); //$NON-NLS-1$
-		it.setWaypointUuid( (UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointTime(rs.getTime("wp_time")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		it.setWaypointObserver(rs.getString("ob_observer")); //$NON-NLS-1$
-		it.setObservationUuid((UUID)rs.getObject("ob_uuid")); //$NON-NLS-1$
-		
-		//build categories
-		List<String> categories = new ArrayList<String>();
-		for (int i = 0; i < categoryCount; i ++){
-			String category = rs.getString("category_"+i); //$NON-NLS-1$
-			if (category == null){
-				break;
-			}
-			categories.add(category);
-		}
-		
-		it.setCategory(categories.toArray(new String[categories.size()]));
-		return it;
-	}
-
 	@Override
 	public void buildTemporaryTableIndexes(Connection c, String tableName)
 			throws SQLException {
@@ -546,9 +509,19 @@ public class PostgresqlObservationEngine extends PostgresqlPatrolQueryEngine {
 		sql.append("_ob_category_uuid_idx on "); //$NON-NLS-1$
 		sql.append(tableName);
 		sql.append("(ob_category_uuid)"); //$NON-NLS-1$
-		System.out.println(sql.toString());
+		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
+	}
+
+	@Override
+	public boolean canExecute(String queryType) {
+		return queryType.equals(PatrolObservationQuery.KEY);
+	}
+
+	@Override
+	public String getSurveySamplingUnitJoinFieldName() {
+		return null;
 	}
 
 }
