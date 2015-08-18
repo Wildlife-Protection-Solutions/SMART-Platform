@@ -22,6 +22,9 @@
 
 package org.wcs.smart.datamodelmatcher.ui;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -32,6 +35,7 @@ import org.eclipse.swt.widgets.Shell;
 public class DataModelMatcher {
 
 	  public static void main(String[] args) {
+		  
 			Display display = new Display();
 			Shell shell = new Shell(display);
 			

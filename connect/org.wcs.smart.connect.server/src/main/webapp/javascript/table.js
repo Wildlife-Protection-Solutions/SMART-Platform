@@ -37,3 +37,20 @@ function tableCreateRow(table, values, rowstyle){
 	}
 	return row;
 }
+
+function tableCreateRowTDs(table, values, rowstyle){
+	var row = document.createElement("tr");
+	row.className="table-row " + rowstyle;
+	
+	table.appendChild(row);
+	
+	for (var i = 0; i < values.length; i ++){
+		cell = document.createElement("td");
+		cell.className="table-cell smart-table-cell";
+		if (values[i] != null && values[i].length > 0){
+			cell.innerHTML=values[i];
+		}
+		row.appendChild(cell);
+	}
+	return row;
+}

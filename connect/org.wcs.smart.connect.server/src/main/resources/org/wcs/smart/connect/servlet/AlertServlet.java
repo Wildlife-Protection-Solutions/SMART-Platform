@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.SmartUser;
@@ -26,6 +27,7 @@ public class AlertServlet extends HttpServlet{
 		List<SmartUser> users = null;
 		List<ConservationAreaInfo> cas = null;
 		List<AlertType> alertTypes = null;
+		List<Alert> alerts = null;
 		
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();

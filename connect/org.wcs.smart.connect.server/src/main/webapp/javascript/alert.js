@@ -4,7 +4,7 @@ var ACTION_URL = USER_URL + "actions/";
 var allActions = null;
 
 
-function initializePage(){
+window.onload = function(){
 	//Hide header/footer and menu if mobile parameter is set:
 	if(mobile == "true"){
 		document.getElementById('mainheader').style.display = 'none';
@@ -44,10 +44,27 @@ function initializePage(){
     	navigator.geolocation.getCurrentPosition(showLatLong, showError)
     }
     
+    
+    
+    //setup action events
+    
     //new alert dialog
 	document.querySelector("#newalertform").onsubmit = createNewAlert;
 	
+	refreshAlerts();
+	setTableActions();
+	
 }
+
+
+function setTableActions(){
+	//delete alert clicked
+	elements = document.querySelectorAll(".deletealert");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=deleteAlert;
+	}
+}
+
 //creates a new user
 function createNewAlert() {
 	var cauuid = document.querySelector("select[name=alert_ca]").value;
@@ -105,6 +122,8 @@ function alertCreated() {
 	} else {
 		displayError(parseError("Error creating Alert", this.responseText));
 	}
+	
+	refreshAlerts();
 
 }
 /* loads all user actions from server */
@@ -137,9 +156,13 @@ function showError(error) {
 }
 
 function settab(tab){
+	hideInfo();
+	hideError();
+
 	remove_all_tab_classes();
 	switch(tab){
 		case 2:
+			document.getElementById("tab2").style.zIndex = 2;
 			document.getElementById('tab2').className += "selectedTab";
 			document.getElementById('tab2text').className += "selectedTab";
 
@@ -149,6 +172,7 @@ function settab(tab){
 			document.getElementById('tab3text').className += "unselectedTab";
 			break;
 		case 3:
+			document.getElementById("tab3").style.zIndex = 2;
 			document.getElementById('tab3').className += "selectedTab";
 			document.getElementById('tab3text').className += "selectedTab";
 			
@@ -158,6 +182,7 @@ function settab(tab){
 			document.getElementById('tab2text').className += "unselectedTab";
 			break;
 		default:
+			document.getElementById("tab1").style.zIndex = 2;
 			document.getElementById('tab1').className += "selectedTab";
 			document.getElementById('tab1text').className += "selectedTab";
 			
@@ -181,6 +206,11 @@ function remove_all_tab_classes(){
 	remove_class("tab1text", "unselectedTab");
 	remove_class("tab2text", "unselectedTab");
 	remove_class("tab3text", "unselectedTab");
+	
+	document.getElementById("tab1").style.zIndex = 0;
+	document.getElementById("tab2").style.zIndex = 0
+	document.getElementById("tab3").style.zIndex = 0
+
 }
 
 function remove_class(id, classname){
@@ -209,3 +239,95 @@ function createAlert(username){
 	oReq.open("POST", loc, true);
 	oReq.send();
 }
+
+/* delete alert*/
+function deleteAlert(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	var ok = window.confirm("Are you sure you want to delete the alert?");
+	if (!ok) return;
+	
+	hideInfo();
+	hideError();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = alertDeleted;
+//	oReq.smartuser=username;
+	oReq.open("DELETE", ALERT_URL + encodeURIComponent(uuid), true);
+	oReq.send();
+	return false;	
+}
+
+//callback for delete alert  
+function alertDeleted() {
+	if (this.status == 200  && this.status != 201 ) {
+		var r = JSON.parse(this.response);
+		displayInfo("Deleted Alert with UUID: " + r.uuid + " deleted");
+	} else {
+		displayError(parseError("Error deleting account " + this.uuid));
+	}
+	refreshAlerts();
+	
+}
+
+/* reload alert table */
+function refreshAlerts(){
+	//clear current table
+	var objects = document.querySelectorAll("tr.alertrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.getElementById("alerttable");
+	var row = document.createElement("tr");
+	row.className="alertrow";
+	row.innerHTML="Refreshing Alert Table...";
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createAlertTable;
+ 	oReq.open("Get", ALERT_URL, true);
+ 	oReq.send();
+}
+
+/* callback that displays all alert info */
+function createAlertTable(){
+	
+	if (this.status != 200 && this.status != 201 ) {
+		var msg = "Error: ";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("tr.alertrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.getElementById("alerttable");
+ 	var alerts = JSON.parse(this.responseText);
+ 	for (var i = 0; i < alerts.length; i ++){
+ 		var d = new Date(alerts[i].date);
+ 		var row = tableCreateRowTDs(parent,
+ 				[alerts[i].userGeneratedId, d.toLocaleString() , alerts[i].description, alerts[i].level.toString(), alerts[i].status, alerts[i].x + "," + alerts[i].y, null], 
+ 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		row.id = "alertRow" + i;
+ 		row.dataset.uuid = alerts[i].uuid;
+ 	
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
+ 		deleteicon.title="delete alert";
+ 		deleteicon.onclick = deleteAlert;
+ 		deleteicon.href="";
+ 		row.childNodes[6].appendChild(deleteicon);
+ 	}
+}
+

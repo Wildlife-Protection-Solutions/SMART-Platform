@@ -5,7 +5,7 @@
             username="smart"
             password=""
             driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://turtle:9944/connect"
+            url="jdbc:postgresql://turtle:9944/jeffloun"
             maxActive="20"
             maxIdle="10"
             factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"/>

@@ -6,6 +6,7 @@
 
 <%@include file="includes.jsp" %>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/alert.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
@@ -19,7 +20,7 @@
 
 <title>SMART Connect - Operational Map</title>
 </head>
-<body onLoad="initializePage()">
+<body>
 <%@include file="header.jsp" %>
 <%@include file="menu.jsp" %>
 
@@ -32,12 +33,12 @@
   <article id="tabs" class="tabs">
 
 	<section id="tab1" class="">
-		<h2 id="tab1text" class=""><a onclick="settab(1)" href="#tab1">Operational Map</a></h2>
+		<h2 id="tab1text" class=""><a onclick="settab(1)">Operational Map</a></h2>
 		<div id="map"></div>  
 	</section>
 	
 	<section id="tab2" class="">
-		<h2 id="tab2text" class=""><a onclick="settab(2)" href="#tab2">Create New Alert</a></h2>
+		<h2 id="tab2text" class=""><a onclick="settab(2)">Create New Alert</a></h2>
 		<p>
 		<form id="newalertform">
      		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
@@ -76,8 +77,10 @@
 	</section>
 	
 	<section id="tab3" class="">
-		<h2 id="tab3text" class=" "><a onclick="settab(3)" href="#tab3">View/Manage Alerts</a></h2>
-		<p>This content appears on tab 3.</p>
+		<h2 id="tab3text" class=" "><a onclick="settab(3)">View/Manage Alerts</a></h2>
+		<table id="alerttable">
+		<tr class="table-row smart-table-header"><th>Alert Id</th><th>Date</th><th>Description</th><th>Level</th><th>Status</th><th>Location</th><th>Action</th></tr>
+		</table> 
 	</section>
 
   </article>

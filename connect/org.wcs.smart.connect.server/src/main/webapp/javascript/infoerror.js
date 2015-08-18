@@ -23,7 +23,7 @@ function displayInfo(msg){
  */
 function parseError(msg, json){
 	var error = msg;
-	if (json.length > 0){
+	if (json != null && json.length > 0){
 		try{
 			error = error + ": " + JSON.parse(json).error;
 		}catch(err){}
