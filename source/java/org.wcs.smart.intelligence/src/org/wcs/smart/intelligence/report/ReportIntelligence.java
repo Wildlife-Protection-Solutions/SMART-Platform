@@ -26,13 +26,16 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.birt.report.designer.ui.editors.IReportEditorContants;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
 
 
 /**
@@ -71,7 +74,7 @@ public class ReportIntelligence {
 	 * if file does not exist
 	 */
 	public static File getCustomTemplateLocation(){
-		File f = new File(IntelligencePlugIn.getDefault().getIntelligenceDirectory(), INTELLIGENCE_TEMPLATE);
+		File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR, INTELLIGENCE_TEMPLATE);
 		if (!f.exists()){
 			return null;
 		}
@@ -90,7 +93,7 @@ public class ReportIntelligence {
 	 * Export the plan to pdf
 	 * @param planUuid
 	 */
-	public static void export(byte[] planUuid){
+	public static void export(UUID planUuid){
 		ExportIntelligenceJob job = new ExportIntelligenceJob(planUuid);
 		job.schedule();
 	}
@@ -104,7 +107,7 @@ public class ReportIntelligence {
 			//copy the default template to the template location if 
 			//it doesn't already exist
 			if (getCustomTemplateLocation() == null){
-				File f = new File(IntelligencePlugIn.getDefault().getIntelligenceDirectory(), INTELLIGENCE_TEMPLATE);
+				File f = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + Intelligence.INTELLIGENCE_DIR, INTELLIGENCE_TEMPLATE);
 				try(InputStream in = getIntelligenceTemplate();
 						OutputStream out = new FileOutputStream(f)){
 					IOUtils.copy(in, out);

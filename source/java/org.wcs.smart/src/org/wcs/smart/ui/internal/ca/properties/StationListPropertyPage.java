@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -76,7 +77,7 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.BinaryType;
+import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
@@ -90,6 +91,7 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.LanguageViewer;
@@ -124,8 +126,8 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		NAME(Station.NAME, 1), 
-		DESCIPTION(Station.DESCRIPTION, 3);
+		NAME(SmartLabelProvider.STATION_NAME, 1), 
+		DESCIPTION(SmartLabelProvider.STATION_DESCRIPTION, 3);
 
 		String name;
 		int bounds;
@@ -150,7 +152,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				StandardRandomStrategy.INSTANCE);
 		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
 				UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new BinaryType(), prop, null);
+		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 
 	/**
@@ -404,9 +406,9 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 			return value;
 		} else if (type == Column.DESCIPTION) {
-			String value = stn.findDescriptionNull(lang);
+			String value = stn.findDescriptionNull(getSession(), lang);
 			if (value == null){
-				value = stn.findDescriptionNull(SmartDB.getCurrentConservationArea().getDefaultLanguage());
+				value = stn.findDescriptionNull(getSession(), SmartDB.getCurrentConservationArea().getDefaultLanguage());
 				if (value == null){
 					value = ""; //$NON-NLS-1$
 				}
@@ -467,12 +469,12 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				setChangesMade(true);
 			}
 		} else if (type == Column.DESCIPTION) {
-			if (newValue.equals(stn.findDescriptionNull(lang))){
+			if (newValue.equals(stn.findDescriptionNull(getSession(), lang))){
 				//no modification made
 				return;
 			}
 			if (validate(type, stn, newValue) == null){
-				stn.updateDescription(lang, newValue.trim());
+				stn.updateDescription(getSession(), lang, newValue.trim());
 				setChangesMade(true);
 			}
 		}
@@ -555,10 +557,10 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 				Station stn = (Station) stations.get(i);
 				s.saveOrUpdate(stn);
 
-				for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions()) {
+				for (org.wcs.smart.ca.DescriptionLabel lbl : stn.getDescriptions(getSession())) {
 					if (lbl.getElementuuid() == null) {
 						if (stn.getDescUuid() == null) {
-							byte[] uuid = (byte[]) uuidGenerator.generate(
+							UUID uuid = (UUID) uuidGenerator.generate(
 									(SessionImplementor) s, lbl);
 							stn.setDescUuid(uuid);
 							s.saveOrUpdate(stn);

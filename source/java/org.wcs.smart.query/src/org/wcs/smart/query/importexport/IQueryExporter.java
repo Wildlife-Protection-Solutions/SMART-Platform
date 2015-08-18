@@ -25,6 +25,8 @@ import java.io.File;
 import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -76,11 +78,11 @@ public interface IQueryExporter {
 	 * Export the given query.
 	 * 
 	 * @param query the query to export
+	 * @param results the query results to export (can be null)
 	 * @param file the file to write results to
-	 * @param monitor the progress monitor
-	 * @param options additional export parameters
+	 * @param options additional export parameters 
 	 * @throws Exception an exception if an error occurs
 	 * while exporting
 	 */
-	void export (Query query, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception;
+	void export (Query query, IQueryResult results, File file, HashMap<String, Object> parameters, ISmartProgressMonitor monitor) throws Exception;
 }

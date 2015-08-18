@@ -23,7 +23,7 @@ package org.wcs.smart.query.common.ui;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 /**
  * Info section to appear at the top of the results
  * table to display count or other summary information.

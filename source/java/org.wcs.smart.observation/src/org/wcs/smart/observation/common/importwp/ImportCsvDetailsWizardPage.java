@@ -29,7 +29,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
+import org.opengis.referencing.FactoryException;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.common.importwp.csv.CSVImportConfiguration;
 import org.wcs.smart.observation.common.importwp.csv.CsvHeader;
@@ -126,8 +128,9 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 	 * selected on the gui
 	 * 
 	 * @param config
+	 * @throws FactoryException 
 	 */
-	public void updateConfiguration(CSVImportConfiguration config){
+	public void updateConfiguration(CSVImportConfiguration config) throws FactoryException{
 		config.setDateFormat(ops.getDateFormat());
 		config.setXColumn(ops.getXColumnNumber());
 		config.setYColumn(ops.getYColumnNumber());
@@ -155,7 +158,12 @@ public class ImportCsvDetailsWizardPage extends WizardPage implements IImportWiz
 	@Override
 	public boolean beforeMoveNext(WizardPage nextPage) {
 		CSVImportConfiguration config = ((CsvImportEngine)((ImportGpsDataWizard)getWizard()).getImportEngine()).getConfiguration();
-		updateConfiguration(config);
+		try{
+			updateConfiguration(config);
+		}catch (FactoryException ex){
+			ObservationPlugIn.log(ex.getMessage(), ex);
+			return false;
+		}
 		
 		SmartPlugIn.getDefault().getDialogSettings().put(SmartPlugIn.DEFAULT_DELIMITER_KEY, String.valueOf(config.getDelimiter()));
 		return true;

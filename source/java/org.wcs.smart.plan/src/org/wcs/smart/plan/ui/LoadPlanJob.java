@@ -28,7 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.filter.PlanFilter;
 import org.wcs.smart.plan.internal.Messages;
@@ -92,7 +92,7 @@ public class LoadPlanJob extends Job {
 				planViewer.refresh();
 			}
 		});
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		try{
 			final List roots = PlanHibernateManager.getRootPlans(session, currentFilter);
 			if (addNone){

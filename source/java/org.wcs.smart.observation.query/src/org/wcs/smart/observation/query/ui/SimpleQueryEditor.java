@@ -23,7 +23,9 @@ package org.wcs.smart.observation.query.ui;
 
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.wcs.smart.observation.query.map.udig.QueryService;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
 import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
@@ -58,9 +60,9 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions() {
-		if (getInputInternal().getType().getKey().equals(ObservationQueryType.KEY)){
+		if (getInputInternal().getType().getKey().equals(ObsObservationQuery.KEY)){
 			return ObservationQueryType.validDateFields();
-		}else if (getInputInternal().getType().getKey().equals(ObservationWaypointQueryType.KEY)){
+		}else if (getInputInternal().getType().getKey().equals(ObservationWaypointQuery.KEY)){
 			return ObservationWaypointQueryType.validDateFields();
 		}
 		return null;

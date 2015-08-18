@@ -28,6 +28,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.datatools.connectivity.oda.IBlob;
@@ -43,6 +44,7 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * SMRAT Plan target result set
@@ -81,7 +83,7 @@ public class PlanTargetResultSet  implements IResultSet {
 			try{
 			Plan p = (Plan)session.createCriteria(Plan.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
-				.add(Restrictions.eq("uuid", SmartUtils.decodeHex(planUuids[i]))).list().get(0); //$NON-NLS-1$
+				.add(Restrictions.eq("uuid", UuidUtils.stringToUuid(planUuids[i]))).list().get(0); //$NON-NLS-1$
 			if (p != null){
 				if (!onlyChildren){
 					plans.addAll(p.getTargets());
@@ -178,13 +180,13 @@ public class PlanTargetResultSet  implements IResultSet {
 		
 		if ((colIndex == 3 || colIndex == 4) &&pt.getCurrentStatus() == null){
 			// recompute the status using the current session
-			pt.refreshStatus(session);
+			pt.refreshStatus(Locale.getDefault(), session);
 		}
 		
 		switch (colIndex) {
 			case 1: return pt.getName();
-			case 2: return pt.getSummary();
-			case 3: return pt.getCurrentStatus().getDisplayString();
+			case 2: return pt.getSummary(Locale.getDefault());
+			case 3: return pt.getCurrentStatus().getDisplayString(Locale.getDefault());
 			case 4: return pt.getCurrentStatus().getStatus().key;
 			case 5: return pt.getPlan().getId();
 		}

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.ui;
 
+import java.util.UUID;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -45,7 +47,7 @@ public class OpenPatrolHandler {
 	public static final String UUID_PARAM = "patroluuid"; //$NON-NLS-1$
 	
 	@Execute
-	public void openPatrol(@Optional @Named(UUID_PARAM) byte[] patrolUuid,
+	public void openPatrol(@Optional @Named(UUID_PARAM) UUID patrolUuid,
 			MWindow activeWindow){
 		
 		if (patrolUuid == null) return;

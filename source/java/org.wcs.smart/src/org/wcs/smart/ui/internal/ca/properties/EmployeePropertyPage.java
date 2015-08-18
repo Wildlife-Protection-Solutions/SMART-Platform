@@ -88,6 +88,7 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.internal.ca.EmployeeDialog;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -123,19 +124,19 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	 * columns of agency table
 	 */
 	private enum EmployeeColumn{
-		IS_ACTIVE( Employee.IS_ACTIVE),
-		ID (Employee.ID),
-		FAMILY_NAME( Employee.FAMILY_NAME),
-		GIVEN_NAME( Employee.GIVEN_NAME),
-		GENDER( Employee.GENDER),
-		BIRTHDATE( Employee.BIRTHDATE),
-		AGENCY( Employee.AGENCY),
-		RANK( Employee.RANK),
-		SMART_USER( Employee.SMART_USER),
-		SMART_USER_LEVEL( Employee.SMART_USER_LEVEL),
-		EMPLOYEMENT_DATE( Employee.EMPLOYEMENT_DATE),
-		EMPLOYEMENT_ENDDATE( Employee.EMPLOYEMENT_ENDDATE),
-		DATE_CREATED( Employee.DATE_CREATED);		
+		IS_ACTIVE( SmartLabelProvider.EMP_IS_ACTIVE),
+		ID (SmartLabelProvider.EMP_ID),
+		FAMILY_NAME( SmartLabelProvider.EMP_FAMILY_NAME),
+		GIVEN_NAME( SmartLabelProvider.EMP_GIVEN_NAME),
+		GENDER( SmartLabelProvider.EMP_GENDER),
+		BIRTHDATE( SmartLabelProvider.EMP_BIRTHDATE),
+		AGENCY( SmartLabelProvider.EMP_AGENCY),
+		RANK( SmartLabelProvider.EMP_RANK),
+		SMART_USER( SmartLabelProvider.EMP_SMART_USER),
+		SMART_USER_LEVEL( SmartLabelProvider.EMP_SMART_USER_LEVEL),
+		EMPLOYEMENT_DATE( SmartLabelProvider.EMP_EMPLOYEMENT_DATE),
+		EMPLOYEMENT_ENDDATE( SmartLabelProvider.EMP_EMPLOYEMENT_ENDDATE),
+		DATE_CREATED( SmartLabelProvider.EMP_DATE_CREATED);		
 		
 		String name;
 		
@@ -378,7 +379,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 		if (toDelete.size() == 1){
 			message = MessageFormat.format(
 					Messages.EmployeePropertyPage_DeleteEmployee_DialogMessage, 
-					new Object[]{toDelete.get(0).getFullLabel()});
+					new Object[]{SmartLabelProvider.getFullLabel(toDelete.get(0))});
 		}else{
 			message = MessageFormat.format(Messages.EmployeePropertyPage_ConfirmDeleteMulti, new Object[]{toDelete.size()});
 		}
@@ -402,7 +403,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 					Transaction tx = s.beginTransaction();
 					try{
 						for (Employee del : toDelete){
-							monitor.subTask(del.getFullLabel());
+							monitor.subTask(SmartLabelProvider.getFullLabel(del));
 							String deleteError = null;
 							try{
 								//first run before delete 
@@ -410,7 +411,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 								
 								//validate delete
 								if (!DeleteManager.canDelete(del, s)){
-									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{del.getFullLabel()});
+									deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee, new Object[]{SmartLabelProvider.getFullLabel(del)});
 								}else{
 									//delete
 									if (del.equals(SmartDB.getCurrentEmployee())){
@@ -420,7 +421,7 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 									employees.remove(del);
 								}
 							}catch (Exception ex){
-								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{del.getFullLabel()}); //$NON-NLS-1$
+								deleteError = MessageFormat.format(Messages.EmployeePropertyPage_CouldNotDeleteEmployee + "\n\n" + ex.getLocalizedMessage(), new Object[]{SmartLabelProvider.getFullLabel(del)}); //$NON-NLS-1$
 								SmartPlugIn.log(ex.getMessage(), ex);
 							}
 							

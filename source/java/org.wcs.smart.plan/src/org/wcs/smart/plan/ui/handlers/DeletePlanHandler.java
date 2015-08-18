@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Named;
 
@@ -62,11 +63,11 @@ public class DeletePlanHandler{
 		if (thisSelection == null || !(thisSelection instanceof IStructuredSelection )) {
 			return;
 		}
-		List<byte[]> toDelete = new ArrayList<byte[]>();
+		List<UUID> toDelete = new ArrayList<UUID>();
 		
 		for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
 			Object selected = iterator.next();
-			byte[] planUuid = null;
+			UUID planUuid = null;
 			if (selected instanceof Plan) {
 				planUuid = ((Plan) selected).getUuid();
 			}else if (selected instanceof PlanEditorInput){
@@ -100,9 +101,9 @@ public class DeletePlanHandler{
      */
     private class DeletePlanJob extends Job {
     	
-    	private List<byte[]> uuids;
+    	private List<UUID> uuids;
   
-        public DeletePlanJob(List<byte[]> uuids) {
+        public DeletePlanJob(List<UUID> uuids) {
             super(Messages.DeletePlanHandler_DeleteJob_Title);
             this.uuids = uuids;
         }
@@ -110,7 +111,7 @@ public class DeletePlanHandler{
         @Override
         protected IStatus run(IProgressMonitor monitor) {
         	while(uuids.size() > 0){
-        		byte[] uuid = uuids.remove(0);
+        		UUID uuid = uuids.remove(0);
         		Set<Plan> deletedPlans = PlanHibernateManager.deletePlan(uuid);
         		if (deletedPlans != null) {
         			for (Plan deletedPlan : deletedPlans){

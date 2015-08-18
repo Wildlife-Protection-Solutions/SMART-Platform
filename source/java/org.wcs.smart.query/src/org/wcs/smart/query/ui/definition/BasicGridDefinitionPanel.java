@@ -64,6 +64,7 @@ import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDefinitionPanel;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Abstract grid definition panel.  Basic definition panel
@@ -444,7 +445,8 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 						lblUnits.setText(Messages.GriddedValuePanel_UknownProjectionLabel);
 						try{
 							//assume units of all axis are the same
-							Unit<?> units = ((Projection)o).getCrs().getCoordinateSystem().getAxis(0).getUnit();
+							Unit<?> units = ReprojectUtils.stringToCrs(((Projection)o).getDefinition()).getCoordinateSystem().getAxis(0).getUnit();
+							
 							lblUnits.setText(units.toString());
 						}catch (Exception ex){	
 						}
@@ -479,7 +481,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 		Object o = ((IStructuredSelection)lstProjections.getSelection()).getFirstElement();
 		if (o instanceof Projection){
 			try {
-				return ((Projection)o).getCrs();
+				return ReprojectUtils.stringToCrs(((Projection)o).getDefinition());
 			} catch (FactoryException e) {
 				e.printStackTrace();
 			}
@@ -514,7 +516,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 				boolean found = false;
 				//search for projection
 				for (Projection p : ps){
-					if (CRS.equalsIgnoreMetadata(p.getCrs(), initialProjection)) {
+					if (CRS.equalsIgnoreMetadata(ReprojectUtils.stringToCrs(p.getDefinition()), initialProjection)) {
 						defaultP = p;
 						found = true;
 						break;
@@ -524,7 +526,7 @@ public class BasicGridDefinitionPanel implements IDefinitionPanel {
 					//projection not in default list; add custom
 					//projection for this query
 					Projection p = new Projection();
-					p.setCrs(initialProjection);
+					p.setDefinition(initialProjection.toWKT());
 					defaultP = p;
 					ps.add(p);
 				}

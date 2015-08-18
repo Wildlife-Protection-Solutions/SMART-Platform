@@ -35,6 +35,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
@@ -102,6 +103,14 @@ public class PatrolExporter {
 			if (!includeAttachments){
 				return exportPatrolWithoutAttachments(xml, file, monitor);
 			}else{
+				for (PatrolLeg pl : patrol.getLegs()){
+					for (PatrolLegDay pld : pl.getPatrolLegDays()){
+						for (PatrolWaypoint wp : pld.getWaypoints()){
+							ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+						}
+					}
+				}
+				
 				return exportPatrolWithAttachments(patrol, xml, file, monitor);
 			}
 		} finally {
@@ -173,7 +182,7 @@ public class PatrolExporter {
 				}
 			}
 			for (ISmartAttachment att : allAttach){
-				File attFile = att.getFullFile();
+				File attFile = att.getAttachmentFile();
 				zout.putNextEntry(new ZipEntry(PatrolXmlManager.ATTACHMENT_DIR_NAME + File.separator + att.getFilename()));
 
 				

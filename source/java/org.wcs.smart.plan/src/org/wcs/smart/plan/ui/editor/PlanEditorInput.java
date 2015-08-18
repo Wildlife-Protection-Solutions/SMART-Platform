@@ -24,11 +24,13 @@ package org.wcs.smart.plan.ui.editor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.plan.SmartPlanPlugIn;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 
 /**
@@ -40,7 +42,7 @@ import org.wcs.smart.plan.model.Plan;
  */
 public class PlanEditorInput implements IEditorInput {
 
-	private byte[] uuid;
+	private UUID uuid;
 	private String label;
 	
 	private List<PlanEditorInput> kids;
@@ -50,7 +52,7 @@ public class PlanEditorInput implements IEditorInput {
 	/**
 	 * Constructor
 	 */
-	public PlanEditorInput(byte[] uuid, String label, Plan.PlanType type) {
+	public PlanEditorInput(UUID uuid, String label, Plan.PlanType type) {
 		this.uuid = uuid;
 		this.label = label;
 		this.planType = type;
@@ -61,7 +63,7 @@ public class PlanEditorInput implements IEditorInput {
 	/**
 	 * @return uuid
 	 */
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.uuid;
 	}
 	
@@ -88,7 +90,7 @@ public class PlanEditorInput implements IEditorInput {
 	@Override
 	public ImageDescriptor getImageDescriptor() {
 		if (planType != null){
-			return SmartPlanPlugIn.getDefault().getImageRegistry().getDescriptor(planType.getIconKey());
+			return PlanLabelProvider.getImage(planType);
 		}
 		return null;
 	}
@@ -122,7 +124,7 @@ public class PlanEditorInput implements IEditorInput {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(uuid);
+		result = prime * result + uuid.hashCode();
 		return result;
 	}
 
@@ -135,7 +137,7 @@ public class PlanEditorInput implements IEditorInput {
 		if (getClass() != obj.getClass())
 			return false;
 		PlanEditorInput other = (PlanEditorInput) obj;
-		if (!Arrays.equals(uuid, other.uuid))
+		if (!uuid.equals(other.uuid))
 			return false;
 		return true;
 	}

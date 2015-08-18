@@ -29,5 +29,5 @@ package org.wcs.smart.query.ui.model;
  *
  */
 public interface IValueDropItem {
-
+		
 }

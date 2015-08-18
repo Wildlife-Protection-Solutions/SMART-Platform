@@ -22,6 +22,8 @@
 package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
+import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;
@@ -63,7 +65,8 @@ public class PatrolSummaryQueryDefinitionExporter extends SummaryQueryDefinition
 				if (gb.getType() == GroupByType.BYTE){
 					if (gb.getItems() != null){
 						for (String uuid : gb.getItems()){
-							UuidItemType uuidItem = PatrolFilterProcessorVisitor.processPatrolOption(gb.getOption(), uuid, session);
+							PatrolQueryOption option = gb.getOption();
+							UuidItemType uuidItem = PatrolFilterProcessorVisitor.processPatrolOption(option, uuid, session);
 							if (uuid != null){
 								qt.getUuiditem().add(uuidItem);
 							}

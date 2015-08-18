@@ -46,11 +46,11 @@ import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -97,7 +97,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 		double y = Double.parseDouble(txtY.getText());
 		Projection proj = (Projection) ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
 		try{
-			ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+			ReprojectUtils.reproject(x, y, ReprojectUtils.stringToCrs(proj.getDefinition()), GeometryUtils.SMART_CRS);
 		}catch (Exception ex){
 			return Messages.LocationComposite_CoordinatesNotValid + ex.getMessage();
 		}
@@ -174,7 +174,9 @@ public class LocationComposite extends AbstractIncidentComposite {
 		try {
 			//reproject
 			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
-			Point p = (Point) JTS.transform(point, CRS.findMathTransform(source.getCrs(), target.getCrs()));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(
+					ReprojectUtils.stringToCrs(source.getDefinition()),
+					ReprojectUtils.stringToCrs(target.getDefinition())));
 
 			txtX.setText(String.valueOf(p.getX()));
 			txtY.setText(String.valueOf(p.getY()));
@@ -199,7 +201,8 @@ public class LocationComposite extends AbstractIncidentComposite {
 		double x = Double.parseDouble(txtX.getText());
 		double y = Double.parseDouble(txtY.getText());
 		Projection proj = (Projection) ((IStructuredSelection)cmbProjection.getSelection()).getFirstElement();
-		Coordinate z = ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+		Coordinate z = ReprojectUtils.reproject(x, y, 
+				ReprojectUtils.stringToCrs(proj.getDefinition()), GeometryUtils.SMART_CRS);
 		return z;
 	}
 	
@@ -210,7 +213,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 			List<Projection> projs = HibernateManager.getCaProjectionList(session);
 			for(Projection p : projs){
 				try{
-					if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
+					if (CRS.equalsIgnoreMetadata(ReprojectUtils.stringToCrs(p.getDefinition()), GeometryUtils.SMART_CRS)){
 						dbProjection = p;
 						break;
 					}
@@ -220,7 +223,7 @@ public class LocationComposite extends AbstractIncidentComposite {
 			}
 			if (dbProjection == null){
 				dbProjection = new Projection();
-				dbProjection.setCrs(SmartDB.DATABASE_CRS);
+				dbProjection.setDefinition(GeometryUtils.SMART_CRS.toWKT());
 				projs.add(dbProjection);
 			}
 			cmbProjection.setInput(projs);

@@ -24,6 +24,7 @@ package org.wcs.smart.report.internal.ui.export;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -312,7 +313,7 @@ public class ImportReportCaListPage extends WizardPage {
 			it.setName(findLabel(match, it.getUuid(), ca, s));	
 		}
 	}
-	private static String findLabel(Language match, byte[] item, ConservationArea currentCa, Session session){
+	private static String findLabel(Language match, UUID item, ConservationArea currentCa, Session session){
 		org.wcs.smart.ca.Label.LabelItemPK lid = new org.wcs.smart.ca.Label.LabelItemPK();
 		lid.setElement(new UuidItem(item));
 		lid.setLanguage(match);

@@ -22,6 +22,7 @@
 package org.wcs.smart.query.common.ui;
 
 import java.util.Collection;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -40,9 +41,9 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.GridResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
@@ -91,7 +92,7 @@ public class GriddedTableContent {
 	public void initValues(GriddedQuery query) {
 		setQueryName(query);
 		resultsTable.initQuery(query);
-		resultsTable.updateVisible(query.getQueryColumns());
+		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null));
 	}
 	
 	public void setQueryName(GriddedQuery query){

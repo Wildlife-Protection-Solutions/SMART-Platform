@@ -57,6 +57,7 @@ import org.wcs.smart.patrol.xml.XmlToPatrolConverter;
 import org.wcs.smart.patrol.xml.external.IConvertedExtraData;
 import org.wcs.smart.patrol.xml.external.IXmlExtraDataContribution;
 import org.wcs.smart.patrol.xml.model.PatrolType;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -257,7 +258,7 @@ public class PatrolImporter {
 			StringBuilder sb = new StringBuilder();
 			for (String str: warnings){
 				sb.append(str);
-				sb.append(SmartUtils.LINE_SEPARATOR);
+				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
 			final String message = sb.toString();
 			final boolean[] cont = new boolean[]{true}; 

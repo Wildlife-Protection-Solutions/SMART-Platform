@@ -22,9 +22,9 @@
 package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -43,9 +43,9 @@ public class PatrolSimpleQueryDefinitionExporter extends SimpleQueryDefinitionEx
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(PatrolQueryType.KEY) ||
-				query.getType().getKey().equals(PatrolObservationQueryType.KEY) ||
-				query.getType().getKey().equals(PatrolWaypointQueryType.KEY)){
+		if (query.getTypeKey().equals(PatrolQuery.KEY) ||
+				query.getTypeKey().equals(PatrolObservationQuery.KEY) ||
+				query.getTypeKey().equals(PatrolWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

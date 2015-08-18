@@ -24,13 +24,14 @@ package org.wcs.smart.udig.style;
 import java.awt.Color;
 import java.io.IOException;
 import java.net.URL;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.ui.IMemento;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.StyleContent;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * For tracking a SMART Saved style.  This style stores the uuid
@@ -49,21 +50,25 @@ public class SmartLayerStyle extends StyleContent {
 
 	@Override
 	public Class<?> getStyleClass() {
-		return byte[].class;
+		return UUID.class;
 	}
 
 	@Override
 	public void save(IMemento memento, Object value) {
-		byte[] uuid = (byte[]) value;
-		memento.putString("uuid", SmartUtils.encodeHex(uuid)); //$NON-NLS-1$
-
+		if (value == null){
+			memento.putString("uuid", null); //$NON-NLS-1$	
+		}else{
+			UUID uuid = (UUID) value;
+			memento.putString("uuid", UuidUtils.uuidToString(uuid)); //$NON-NLS-1$
+		}
 	}
 
 	@Override
 	public Object load(IMemento memento) {
 		try{
-			byte[] uuid = SmartUtils.decodeHex(memento.getString("uuid")); //$NON-NLS-1$
-			return uuid;
+			String uuid = memento.getString("uuid");
+			if (uuid == null || uuid.length() != 32) return null;
+			return UuidUtils.stringToUuid(uuid); //$NON-NLS-1$
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);
 		}

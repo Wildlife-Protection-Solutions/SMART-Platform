@@ -68,7 +68,7 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.ISmartPoint;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.SetBasemapTool;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
@@ -80,6 +80,7 @@ import org.wcs.smart.ui.map.tool.ZoomExtentTool;
 import org.wcs.smart.ui.map.tool.ZoomInTool;
 import org.wcs.smart.ui.map.tool.ZoomOutTool;
 import org.wcs.smart.ui.map.tool.ZoomTool;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
@@ -156,7 +157,7 @@ public class MapComposite extends Composite implements MapPart {
 		mapViewer.setMap(map);
 		//set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
-		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
+		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
 		String[] thisTools = new String[] {

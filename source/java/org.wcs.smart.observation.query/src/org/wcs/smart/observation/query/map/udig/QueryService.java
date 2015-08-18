@@ -40,10 +40,8 @@ import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.observation.query.map.geotools.QueryDataSource;
 import org.wcs.smart.observation.query.map.geotools.QueryDataSourceFactory;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
+import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
-import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.model.udig.RasterService;
@@ -151,10 +149,10 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getType().getClass().equals(ObservationQueryType.class) || 
-							query.getType().getClass().equals(ObservationWaypointQueryType.class) ){
+					if (query.getTypeKey().equals(ObsObservationQuery.KEY) || 
+							query.getTypeKey().equals(ObservationWaypointQuery.KEY) ){
 						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
-					}else if (query.getType().getClass().equals(ObservationGridQueryType.class) ){
+					}else if (query.getTypeKey().equals(ObservationGriddedQuery.KEY) ){
 						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
 				}
@@ -219,9 +217,9 @@ public class QueryService extends IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getType().getClass().equals(ObservationQueryType.class) ){
+                		if (query.getTypeKey().equals(ObsObservationQuery.KEY) ){
                 			ds = new QueryDataSource((ObsObservationQuery)query);
-                		}else if (query.getType().getClass().equals(ObservationWaypointQueryType.class) ){
+                		}else if (query.getTypeKey().equals(ObservationWaypointQuery.KEY) ){
                     		ds = new QueryDataSource((ObservationWaypointQuery)query);
                 		}
                 	}else{

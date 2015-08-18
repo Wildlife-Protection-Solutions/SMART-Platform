@@ -27,25 +27,28 @@ import java.net.URL;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
+import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.editor.PatrolSummaryEditor;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
 import org.wcs.smart.query.QueryPlugIn;
@@ -70,9 +73,7 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
  *
  */
 public class PatrolSummaryQueryType implements IQueryType {
-	
-	public static final String KEY = "patrolsummary"; //$NON-NLS-1$
-	
+		
 	private static IDropItemFactory dropItemFactory = null;
 	
 	/**
@@ -88,7 +89,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return PatrolSummaryQuery.KEY;
 	}
 
 	/**
@@ -153,7 +154,7 @@ public class PatrolSummaryQueryType implements IQueryType {
 					if (items != null){
 						for (int i = 0; i < items.length; i ++){
 							if (items[i] instanceof AbstractValueDropItem){
-								((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS);
+								((AbstractValueDropItem)items[i]).setEncounterRateOptions(PatrolDropItems.SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS);
 							}
 						}
 					}
@@ -253,28 +254,29 @@ public class PatrolSummaryQueryType implements IQueryType {
 		for (IValueItem valueIt : def.getValuePart().getValueItems()){
 			if (valueIt instanceof PatrolValueItem){
 				PatrolValueItem pIt = (PatrolValueItem) valueIt;
-				if (pIt.getOption() == PatrolValueOption.NUM_NIGHTS){
+				PatrolValueOption option = pIt.getPatrolValueOption();
+				if (option == PatrolValueOption.NUM_NIGHTS){
 					//cannot group by patrol leader, patrol memeber, time period, or transport
 					for (IGroupBy groupBy : groupBys){
 						if (groupBy instanceof CategoryGroupBy ){
 							throw new Exception(
 									MessageFormat.format(
-									Messages.SummaryQuery_CannotGroupByCategory, new Object[]{pIt.getOption().getGuiName()}));
+									Messages.SummaryQuery_CannotGroupByCategory, new Object[]{option.getGuiName(Locale.getDefault())}));
 									
 						}else if (groupBy instanceof AttributeGroupBy){
 							throw new Exception(MessageFormat.format(
-									Messages.SummaryQuery_CannotGroupByAttribute, new Object[]{pIt.getOption().getGuiName()}));
+									Messages.SummaryQuery_CannotGroupByAttribute, new Object[]{option.getGuiName(Locale.getDefault())}));
 						}
 					}
-				}else if (pIt.getOption() == PatrolValueOption.MAN_DAYS ||
-						pIt.getOption() == PatrolValueOption.MAN_HOURS || 
-						pIt.getOption() == PatrolValueOption.NUM_MEMBERS ){
+				}else if (option == PatrolValueOption.MAN_DAYS ||
+						option == PatrolValueOption.MAN_HOURS || 
+								option == PatrolValueOption.NUM_MEMBERS ){
 					
 					for (IGroupBy groupBy : groupBys){
 						if (groupBy instanceof PatrolGroupBy){
-							if (((PatrolGroupBy)groupBy).getOption() == PatrolQueryOption.EMPLOYEE){
+							if (((PatrolGroupBy)groupBy).getOption().equals(PatrolQueryOption.EMPLOYEE)){
 								throw new Exception( MessageFormat.format(
-										Messages.SummaryQuery_GroupByError3 , new Object[]{pIt.getOption().getGuiName(), ((PatrolGroupBy)groupBy).getOption().getGuiName()}));
+										Messages.SummaryQuery_GroupByError3 , new Object[]{option.getGuiName(Locale.getDefault()), PatrolQueryOption.EMPLOYEE.getGuiName(Locale.getDefault())}));
 							}
 						}
 					}

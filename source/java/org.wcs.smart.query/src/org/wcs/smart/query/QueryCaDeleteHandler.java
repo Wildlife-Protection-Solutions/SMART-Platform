@@ -49,7 +49,7 @@ public class QueryCaDeleteHandler implements ICaDeleteHandler {
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor)
 			throws Exception {
-		for (IQueryType queryType : QueryTypeManager.getInstance().getAllQueryTypes()){
+		for (IQueryType queryType : QueryTypeManager.INSTANCE.getAllQueryTypes()){
 			monitor.subTask(MessageFormat.format(Messages.QueryCaDeleteHandler_DeleteProgressMessage, new Object[]{queryType.getGuiName()}));
 			moveCrossCaUserQueries(ca, session, queryType);
 			deleteQueries(queryType, ca, session);

@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.query.ui.editor;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -52,6 +51,8 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryMapPageEditor;
 import org.wcs.smart.query.common.ui.QueryResultsTable;
@@ -92,12 +93,12 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			setName(Messages.PatrolQueryResultsEditor_RunQueryJobName + getQuery().getName());
 			IProgressMonitor mymonitor = page1.createProgressMonitor();
 			try {
-				Collection<PatrolQueryResultItem> results = (Collection<PatrolQueryResultItem>) getQuery().executeQuery(mymonitor);
+				MemoryQueryResult<PatrolQueryResultItem> results = (MemoryQueryResult<PatrolQueryResultItem>) QueryExecutor.INSTANCE.executeQuery(getQuery(), null, mymonitor);
 				if (monitor.isCanceled() || mymonitor.isCanceled()){
 					page1.updateAndShowTable(null);
 					return Status.CANCEL_STATUS;
 				}
-				page1.updateAndShowTable(results);
+				page1.updateAndShowTable(results.getData());
 			} catch (Exception ex) {
 				QueryPlugIn.displayLog(Messages.PatrolQueryResultsEditor_ErrorRunningQuery, ex);
 				page1.updateAndShowTable(new ArrayList<PatrolQueryResultItem>());
@@ -146,10 +147,6 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 				refreshQuery();
 			}
 		}
-		
-	
-
-		
 	};
 	
 	
@@ -163,7 +160,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			try{
 				Query tquery = (PatrolQuery) session.load(PatrolQuery.class, input.getUuid());
 				query = new QueryProxy(tquery);
-				tquery.getType().getDropItemFactory().generateDropItems(query, session);
+				query.getQueryType().getDropItemFactory().generateDropItems(query, session);
 				
 			}catch (Exception ex){
 				QueryPlugIn.displayLog(
@@ -484,7 +481,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 						@Override
 						public void run() {
 							try{
-								getQuery().getType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
+								query.getQueryType().getDropItemFactory().generateDropItems(getQueryProxy(), session);
 							}catch (Exception ex){
 								QueryPlugIn.log(ex.getMessage(), ex);
 							}

@@ -6,7 +6,7 @@ import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Configuration for current {@link CsvExportDialog} to export
@@ -32,13 +32,13 @@ public class AgencyCsvExportConfig extends AbstractCsvExportConfig {
 	@Override
 	public String getInfo() {
 		return Messages.CsvConfig_Agency_Export_Info +
-				SmartUtils.LINE_SEPARATOR +
+				SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Export_Info_Content +
-				SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR +
+				SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Example_Label +
-				SmartUtils.LINE_SEPARATOR +
+				SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Example_HeaderRow +
-				SmartUtils.LINE_SEPARATOR +
+				SharedUtils.LINE_SEPARATOR +
 				Messages.CsvConfig_Agency_Example_ContentRow;
 	}
 

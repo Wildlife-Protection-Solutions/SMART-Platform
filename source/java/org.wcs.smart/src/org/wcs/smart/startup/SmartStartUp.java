@@ -23,7 +23,6 @@ package org.wcs.smart.startup;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -177,8 +176,7 @@ public class SmartStartUp {
 	 * @return true if successfully logged in, false otherwise
 	 */
 	public static boolean login(ConservationArea ca, String userName, String password ){
-		
-		if (Arrays.equals(ca.getUuid(), ConservationArea.MULTIPLE_CA)) {
+		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			// we are performing cross-ca analysis and need to do something
 			// different
 			List<ConservationArea> areas;
@@ -238,9 +236,13 @@ public class SmartStartUp {
 					//	disconnect from the database & setup correct user level
 					
 					HibernateManager.endSessionFactory(true);					
-					SmartDB.setCurrentUser(users.get(0), ca);
-					ConservationAreaConfiguration config = new ConservationAreaConfiguration(areas, users);
-					SmartDB.setConservationAreaConfiguration(config);
+					Session s = HibernateManager.openSession();
+					try{
+						ConservationAreaConfiguration config = new ConservationAreaConfiguration(areas, users, s);
+						SmartDB.setConservationAreaConfiguration(users.get(0), ca, config);
+					}finally{
+						if (s.isOpen()) s.close();
+					}
 										
 					return true;
 				}
@@ -257,12 +259,16 @@ public class SmartStartUp {
 				}
 				//	disconnect from the database & setup correct user level
 				HibernateManager.endSessionFactory(true);
-				SmartDB.setCurrentUser(e, ca);
-			
-
-				ConservationAreaConfiguration config = new ConservationAreaConfiguration(Collections.singleton(ca), Collections.singleton(e));
-				SmartDB.setConservationAreaConfiguration(config);
-				HibernateManager.openSession();
+				
+				Session s = HibernateManager.openSession();
+				try{
+					ConservationAreaConfiguration config = 
+							new ConservationAreaConfiguration(Collections.singleton(ca), Collections.singleton(e), s);
+					SmartDB.setConservationAreaConfiguration(e, ca, config);
+				}finally{
+					if (s.isOpen()) s.close();
+				}
+				
 				return true;
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);

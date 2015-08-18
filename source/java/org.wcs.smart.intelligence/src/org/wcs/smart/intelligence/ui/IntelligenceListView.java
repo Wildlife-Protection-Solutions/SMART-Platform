@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.ui;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -65,7 +66,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
 import org.wcs.smart.intelligence.IntelligenceEventManager.IIntelligenceEventListener;
@@ -257,7 +258,7 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 			final List<IntelligenceEditorInput> inputData = new ArrayList<IntelligenceEditorInput>();
 			for (Object obj : result) {
 				Object[] data = (Object[]) obj;
-				inputData.add(new IntelligenceEditorInput((byte[])data[0], (String)data[1], (Date)data[2]));
+				inputData.add(new IntelligenceEditorInput((UUID)data[0], (String)data[1], (Date)data[2]));
 			}
 			monitor.internalWorked(0.8);
 			
@@ -272,7 +273,7 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 		}
 		
 		private List<?> loadIntelligences() {
-			Session session = SmartHibernateManager.openSession();
+			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try {
 				Query query = IntelligenceListView.this.getFilter().buildQuery(session);

@@ -35,7 +35,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.patrol.model.PatrolTransportType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -61,7 +61,7 @@ public class PatrolTransportCsvExporter implements ICsvDataExporter {
 		
 		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR)){
+					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 
 			List<PatrolTransportType> types = getTransportTypes(ca, session);
 

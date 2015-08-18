@@ -61,7 +61,7 @@ public class CreateUnknownQueryHandler {
 				context.get(MWindow.class));
 		
 		if (queryType != null){
-			IQueryType type = QueryTypeManager.getInstance().findQueryType(queryType);
+			IQueryType type = QueryTypeManager.INSTANCE.findQueryType(queryType);
 			if (type != null){
 				createQuery(type);
 				return;

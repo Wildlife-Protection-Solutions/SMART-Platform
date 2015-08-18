@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.query.ui.dropitem;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -152,7 +153,7 @@ public class ListFilterDropItem extends DropItem{
 	
 	@Override
 	public String getText() {
-		return filter.getGuiName();
+		return filter.getGuiName(Locale.getDefault());
 	}
 
 	@Override

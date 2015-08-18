@@ -29,11 +29,11 @@ import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.intelligence.model.IntelligencePoint;
 import org.wcs.smart.intelligence.query.map.udig.IntelQueryDataSource;
 import org.wcs.smart.intelligence.query.map.udig.IntelQueryFeatureReader;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -47,7 +47,7 @@ public class IntelligenceRecordShpExporter extends ShapeQueryExporter{
 
 	@Override
 	public boolean canExport(Query query) {
-		if (IntelligenceRecordQueryType.KEY.equals(query.getType().getKey())){
+		if (IntelligenceRecordQuery.KEY.equals(query.getTypeKey())){
 			return true;
 		}
 		return false;

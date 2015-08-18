@@ -363,13 +363,13 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 			}
 		};
 		btnWaypoint = new Button(filterTypeComp, SWT.RADIO);
-		btnWaypoint.setText(IFilter.FilterType.WAYPOINT.getGuiName());
+		btnWaypoint.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.WAYPOINT));
 		btnWaypoint.setToolTipText(Messages.FilterDropTargetPanel_waypointtooltip);
 		btnWaypoint.setSelection(true);
 		btnWaypoint.addListener(SWT.Selection, selectListener);
 		
 		btnObservation = new Button(filterTypeComp, SWT.RADIO);
-		btnObservation.setText(IFilter.FilterType.OBSERVATION.getGuiName());
+		btnObservation.setText(BasicDropItemFactory.INSTANCE.getFilterTypeName(IFilter.FilterType.OBSERVATION));
 		btnObservation.addListener(SWT.Selection, selectListener);
 		btnObservation.setToolTipText(Messages.FilterDropTargetPanel_observationtooltip);
 		Label lspacer = new Label(filterTypeComp, SWT.NONE);
@@ -562,7 +562,7 @@ public class BasicFilterDefintionPanel implements IDefinitionPanel {
 	}
 
 	@Override
-	public void initItems(QueryProxy q){
+	public void initItems(QueryProxy q) throws Exception{
 		this.currentQuery = q;
 		addItems(q.getDropItems(getId()));
 		

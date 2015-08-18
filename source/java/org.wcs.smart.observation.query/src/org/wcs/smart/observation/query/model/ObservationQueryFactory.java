@@ -95,14 +95,14 @@ public class ObservationQueryFactory {
 	public static ObsObservationQuery createObservationQuery(){
 		ObsObservationQuery query = new ObsObservationQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		return query;
 	}
 	
 	public static ObservationWaypointQuery createWaypointQuery(){
 		ObservationWaypointQuery query = new ObservationWaypointQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		return query;
 	}
 	
@@ -110,7 +110,7 @@ public class ObservationQueryFactory {
 	public static ObservationGriddedQuery createGriddedQuery(){
 		ObservationGriddedQuery query = new ObservationGriddedQuery();
 		initQuery(query, Messages.GriddedQuery_DefaultQueryName);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}
@@ -119,7 +119,7 @@ public class ObservationQueryFactory {
 		ObservationSummaryQuery query = new ObservationSummaryQuery();
 		initQuery(query, Messages.SummaryQuery_DefaultQueryName);
 		
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}

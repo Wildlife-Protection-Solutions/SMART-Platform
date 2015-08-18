@@ -892,7 +892,8 @@
    <extension
          point="org.wcs.smart.patrol.query.contribution">
       <FilterItem
-            class="org.wcs.smart.plan.query.PlanQueryFilterPatrolContribution">
+            filter="org.wcs.smart.plan.query.PlanPatrolQueryFilter"
+            viewer="org.wcs.smart.plan.query.PlanPatrolQueryFilterViewer">
       </FilterItem>
    </extension>
    <extension

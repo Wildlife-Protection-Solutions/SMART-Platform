@@ -24,9 +24,11 @@ package org.wcs.smart.patrol.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
+import org.wcs.smart.patrol.query.model.PatrolQueryValidator;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -44,14 +46,14 @@ public class PatrolSummaryQueryDefinitionImporter extends SummaryQueryDefinition
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(PatrolSummaryQueryType.KEY);
+		return qt.getKey().equals(PatrolSummaryQuery.KEY);
 	}
 
 	@Override
 	protected void validateQuery(SumQueryDefinition sumDef, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session)
 			throws Exception {
-		PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session);
+		PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
 		if (sumDef.getValueFilter() != null ){
 			warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
 		}

@@ -30,6 +30,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -50,6 +51,7 @@ import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
@@ -69,6 +71,7 @@ import org.wcs.smart.patrol.xml.model.TrackType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationAttributeType;
 import org.wcs.smart.patrol.xml.model.WaypointObservationType;
 import org.wcs.smart.patrol.xml.model.WaypointType;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -203,7 +206,8 @@ public class XmlToPatrolConverter {
 				
 		if (ttype == null){
 			throw new Exception(MessageFormat.format(
-				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), patrol.getPatrolType().getGuiName()}));
+				Messages.XmlToPatrolConverter_Error_TranpsortTypeNotFound, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), 
+						patrol.getPatrolType().getGuiName(Locale.getDefault())}));
 		}
 		boolean found = false;
 		
@@ -219,7 +223,8 @@ public class XmlToPatrolConverter {
 		}
 		if (!found){
 			throw new Exception(MessageFormat.format(
-					Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(), patrol.getPatrolType().getGuiName()}));
+					Messages.XmlToPatrolConverter_Error_InvalidTransportType, new Object[]{xml.getTransportType().getValue(), xml.getTransportType().getLanguageCode(),
+							patrol.getPatrolType().getGuiName(Locale.getDefault())}));
 		}
 		leg.setType(ttype);
 		
@@ -232,7 +237,7 @@ public class XmlToPatrolConverter {
 				if (e != null){
 					warnings.add(MessageFormat.format(
 							Messages.XmlToPatrolConverter_Warning_EmployeeNameDifferent,
-							new Object[]{member.getEmployeeId(), Employee.formatName(member.getGivenName(), member.getFamilyName()),e.getShortLabel()}) 
+							new Object[]{member.getEmployeeId(), SmartLabelProvider.formatName(member.getGivenName(), member.getFamilyName()),SmartLabelProvider.getShortLabel(e)}) 
 						);
 							
 							
@@ -241,12 +246,12 @@ public class XmlToPatrolConverter {
 					if (e == null){
 						warnings.add(MessageFormat.format(
 								Messages.XmlToPatrolConverter_Warning_EmployeeNotFound,
-								new Object[]{Employee.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId())}
+								new Object[]{SmartLabelProvider.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId())}
 						));
 					}else{					
 						
 						warnings.add(MessageFormat.format(Messages.XmlToPatrolConverter_Warning_EmployeeIdDifferent,
-								new Object[]{Employee.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId() ), e.getFullLabel()}
+								new Object[]{SmartLabelProvider.formatName(member.getGivenName(), member.getFamilyName(), member.getEmployeeId() ), SmartLabelProvider.getFullLabel(e)}
 						));
 					}
 				}
@@ -315,7 +320,7 @@ public class XmlToPatrolConverter {
 			TrackType txml = xml.getTrack();
 			Track track = new Track();
 			track.setDistance((float)txml.getDistance().doubleValue());
-			track.setGeom( SmartUtils.decodeHex(txml.getGeom()) );
+			track.setGeom( SmartUtils.decodeGeometry(txml.getGeom()) );
 			track.setPatrolLegDay(legday);
 			legday.setTrack(track);
 		}
@@ -391,7 +396,12 @@ public class XmlToPatrolConverter {
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
 						ob.getAttachments().add(att);
-						att.setObservation(ob);
+						try {
+							att.setObservation(ob);
+						} catch (Exception e) {
+							SmartPatrolPlugIn.log(e.getMessage(), e);
+							warnings.add("Error configuring attachment.  " + e.getMessage());
+						}
 					}
 				}
 			}

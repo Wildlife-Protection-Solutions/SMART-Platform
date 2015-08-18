@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 import org.apache.commons.collections.comparators.NullComparator;
 import org.eclipse.jface.dialogs.InputDialog;
@@ -78,16 +79,18 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.id.UUIDGenerationStrategy;
 import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.BinaryType;
+import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -123,10 +126,10 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		NAME(Team.NAME, 1),
-		MANDATE(Team.MANDATE,1),
-		DESCRIPTION(Team.DESCRIPTION,2),
-		KEY(Team.KEY, 1);
+		NAME(LabelConstants.TEAM_NAME, 1),
+		MANDATE(LabelConstants.TEAM_MANDATE,1),
+		DESCRIPTION(LabelConstants.TEAM_DESCRIPTION,2),
+		KEY(LabelConstants.TEAM_KEY, 1);
 		
 		String name;
 		int weight;
@@ -176,7 +179,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				StandardRandomStrategy.INSTANCE);
 		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
 				UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new BinaryType(), prop, null);
+		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 	}
 	
 	/* (non-Javadoc)
@@ -395,17 +398,17 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			for (Iterator<?> iterator = teams.iterator(); iterator.hasNext();) {
 				Team team = (Team) iterator.next();
 				siblings.remove(team);
-				String error = NamedKeyItem.validateKey(team.getKeyId(), siblings);
+				String error = DataModelManager.INSTANCE.validateKey(team.getKeyId(), siblings);
 				siblings.add(team);
 				if (error != null){
 					throw new Exception(error);
 				}
 				s.saveOrUpdate(team);
 				
-				for (org.wcs.smart.ca.DescriptionLabel lbl : team.getDescriptions()) {
+				for (org.wcs.smart.ca.DescriptionLabel lbl : team.getDescriptions(s)) {
 					if (lbl.getElementuuid() == null) {
 						if (team.getDescUuid() == null) {
-							byte[] uuid = (byte[]) uuidGenerator.generate((SessionImplementor) s, lbl);
+							UUID uuid = (UUID) uuidGenerator.generate((SessionImplementor) s, lbl);
 							team.setDescUuid(uuid);
 							s.saveOrUpdate(team);
 						}
@@ -436,8 +439,8 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 		
 		team.updateName(currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamName);
 		team.setName(team.findName(currentCa.getDefaultLanguage()));		
-		team.updateDescription(currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
-		team.setDescription(team.findDescriptionNull(currentCa.getDefaultLanguage()));
+		team.updateDescription(getSession(), currentCa.getDefaultLanguage(), Messages.TeamPropertyPage_DefaultNewTeamDescription);
+		team.setDescription(team.findDescriptionNull(getSession(), currentCa.getDefaultLanguage()));
 		
 		teams.add(team);
 		setChangesMade(true);
@@ -474,7 +477,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 			}
 			return x;
 		}else if (type == Column.DESCRIPTION){
-			String x = mnd.findDescriptionNull(languageViewer.getCurrentSelection());
+			String x = mnd.findDescriptionNull(getSession(), languageViewer.getCurrentSelection());
 			if (x == null){
 				x = mnd.getDescription();
 				if (x == null){
@@ -546,12 +549,12 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 				setChangesMade(true);
 				
 				if (mnd.getKeyId() == null){
-					mnd.setKeyId(NamedKeyItem.generateKey((String)newValue, teams));
+					mnd.setKeyId(DataModelManager.INSTANCE.generateKey((String)newValue, teams));
 				}
 			}
 		}else if (type == Column.DESCRIPTION){
 			if (!findValue(type, mnd).equals((String)newValue)){
-				mnd.updateDescription(languageViewer.getCurrentSelection(), (String)newValue);
+				mnd.updateDescription(getSession(), languageViewer.getCurrentSelection(), (String)newValue);
 				setChangesMade(true);
 			}
 		}else if (type == Column.MANDATE){

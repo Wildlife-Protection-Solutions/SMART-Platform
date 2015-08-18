@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.ui.panel;
 
+import java.util.Locale;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -87,7 +89,7 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		planType.setContentProvider(ArrayContentProvider.getInstance());
 		planType.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				return ((Plan.PlanType)element).guiName;
+				return ((Plan.PlanType)element).getGuiName(Locale.getDefault());
 			}
 		});
 		planType.setInput(Plan.PlanType.values());

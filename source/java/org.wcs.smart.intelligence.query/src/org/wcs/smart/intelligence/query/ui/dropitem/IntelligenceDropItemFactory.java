@@ -23,9 +23,11 @@ package org.wcs.smart.intelligence.query.ui.dropitem;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.intelligence.query.filter.IntelligenceFilter;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
@@ -78,10 +80,24 @@ public class IntelligenceDropItemFactory implements IDropItemFactory{
 	@Override
 	public void generateDropItems(QueryProxy proxy, Session session) {
 		if (proxy.getQuery() instanceof IntelligenceRecordQuery){
-			IFilter queryFilter = ((IntelligenceRecordQuery)proxy.getQuery()).getFilter().getFilter();
-			proxy.setDropItems(DefinitionPanel.ID, asDropItems(queryFilter, session));
+			try{
+				IFilter queryFilter = ((IntelligenceRecordQuery)proxy.getQuery()).getFilter().getFilter();
+				proxy.setDropItems(DefinitionPanel.ID, asDropItems(queryFilter, session));
+			}catch (Exception ex){
+				DropItem dr = new ErrorDropItem(ex.getMessage());
+				proxy.setDropItems(DefinitionPanel.ID, Collections.singleton(dr));
+			}
 		}
 		
+	}
+	
+	public DropItem[] filterToDropItem(IFilter filter){
+		if (filter instanceof IntelligenceFilter){
+			DropItem di = IntelligenceDropItemFactory.INSTANCE.createDropItem(((IntelligenceFilter) filter).getFilterOption());
+			di.initializeData(new Object[]{((IntelligenceFilter) filter).getOperator(), ((IntelligenceFilter) filter).getValue()});
+			return new DropItem[]{di};
+		}
+		return null;
 	}
 	
 	/*
@@ -90,7 +106,7 @@ public class IntelligenceDropItemFactory implements IDropItemFactory{
 	private List<DropItem> asDropItems(IFilter filter, Session session){
 		List<DropItem> items = new ArrayList<DropItem>();
 		try{
-			DropItem[] filterItems = filter.getDropItems(session);
+			DropItem[] filterItems = filterToDropItem(filter);
 			for(DropItem i : filterItems){
 				items.add(i);
 			}

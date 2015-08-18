@@ -50,6 +50,7 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.HkeyObject;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
@@ -191,7 +192,7 @@ public class NameKeyComposite {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (currentSelection.isDefault()){
-					String newKey = NamedKeyItem.generateKey(txtName.getText(), siblings);
+					String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), siblings);
 					txtKey.setText(newKey);
 				}
 				
@@ -336,7 +337,7 @@ public class NameKeyComposite {
 			values.put(currentSelection, txtName.getText());
 		}
 						
-		String errormsg = NamedKeyItem.validateKey(txtKey.getText(), new ArrayList<NamedKeyItem>());
+		String errormsg = DataModelManager.INSTANCE.validateKey(txtKey.getText(), new ArrayList<NamedKeyItem>());
 		if (errormsg != null){
 			cdKey.setDescriptionText(errormsg);
 			cdKey.show();

@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.intelligence.query;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -39,6 +40,12 @@ import org.wcs.smart.query.ui.model.ListItem;
 public class IntelligenceGroupByDropItem extends DropItem implements
 		IGroupByDropItem {
 
+	public static final List<ListItem> SUPPORTEDVALUES = new ArrayList<ListItem>();
+	static{
+		SUPPORTEDVALUES.add(new ListItem(null, Messages.IntelligenceGroupByPatrolContribution_MotivatedByIntelligenceLabel, IntelligencePatrolGroupBy.Options.MOTIVATED.getKey())); 
+		SUPPORTEDVALUES.add(new ListItem(null, Messages.IntelligenceGroupByPatrolContribution_NotMotivatedByIntelligenceLabel, IntelligencePatrolGroupBy.Options.NOT_MOTIVATED.getKey()));
+	}
+	
 	/**
 	 * Creates a new attribute list group by drop item for a attribute.
 	 * 
@@ -55,7 +62,7 @@ public class IntelligenceGroupByDropItem extends DropItem implements
 	 */
 	@Override
 	public List<ListItem> getListItem() {
-		return IntelligenceGroupByPatrolContribution.SUPPORTEDVALUES;
+		return SUPPORTEDVALUES;
 	}
 
 	/**

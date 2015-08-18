@@ -26,12 +26,12 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.observation.query.map.geotools.QueryDataSource;
 import org.wcs.smart.observation.query.map.geotools.QueryResultItemFeature;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
-import org.wcs.smart.observation.query.model.types.ObservationQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.importexport.ShapeQueryExporter;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 
 /**
@@ -48,8 +48,8 @@ public class ObsShapeQueryExporter extends ShapeQueryExporter{
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(ObservationQueryType.KEY) ||
-				query.getType().getKey().equals(ObservationWaypointQueryType.KEY)){
+		if (query.getTypeKey().equals(ObsObservationQuery.KEY) ||
+				query.getTypeKey().equals(ObservationWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

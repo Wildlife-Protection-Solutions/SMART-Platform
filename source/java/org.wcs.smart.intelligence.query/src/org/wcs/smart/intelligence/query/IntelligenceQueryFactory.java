@@ -44,14 +44,14 @@ public class IntelligenceQueryFactory {
 		IntelligenceSummaryQuery query =  new IntelligenceSummaryQuery();
 		initQuery(query);
 		query.setName(Messages.IntelligenceQueryFactory_DefaultNameSummary);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		return query;
 	}
 	
 	public static IntelligenceRecordQuery createIntelligenceRecordQuery(){
 		IntelligenceRecordQuery query = new IntelligenceRecordQuery();
 		initQuery(query);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		return query;
 	}
 	

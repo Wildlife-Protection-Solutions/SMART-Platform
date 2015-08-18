@@ -56,6 +56,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
@@ -163,7 +164,7 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 		loadAreaTypes();		
 		
 		getShell().setText(Messages.AreaNameDialogPage_DialogTitle);
-		setTitle(Messages.AreaNameDialogPage_MessageTitle + type.getGuiName());
+		setTitle(Messages.AreaNameDialogPage_MessageTitle + SmartLabelProvider.getAreaTypeName(type));
 		setMessage(Messages.AreaNameDialogPage_DialogMessage);
 		
 		return composite; 

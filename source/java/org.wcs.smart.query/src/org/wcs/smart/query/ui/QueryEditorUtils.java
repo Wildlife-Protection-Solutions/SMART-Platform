@@ -126,7 +126,7 @@ public class QueryEditorUtils {
 					query.setFolder(qf);
 					query.setIsShared(qf.getEmployee() == null);
 				
-				}else if (Arrays.equals(qf.getUuid(),IQueryHibernateManager.CA_QUERY_KEY)){
+				}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 					query.setIsShared(true);
 				}
 				//set the owner
@@ -189,7 +189,7 @@ public class QueryEditorUtils {
 					monitor.beginTask(Messages.QueryEditorUtils_Progress_SaveAs, 3);
 					monitor.subTask(Messages.QueryEditorUtils_Progress_Cloning);
 					
-					Query newQuery = (Query) query.clone();
+					Query newQuery = (Query) query.clone(SmartDB.getCurrentEmployee());
 					if (addNamePrefix){
 						newQuery.setName(Messages.QueryEditorUtils_CopyOfLabel + newQuery.getName());
 					}
@@ -213,7 +213,7 @@ public class QueryEditorUtils {
 						newQuery.setFolder(qf);
 						newQuery.setIsShared(qf.getEmployee() == null);
 					
-					}else if (Arrays.equals(qf.getUuid(),IQueryHibernateManager.CA_QUERY_KEY)){
+					}else if (qf.getUuid().equals(IQueryHibernateManager.CA_QUERY_KEY)){
 						newQuery.setIsShared(true);
 					}
 					//set the owner

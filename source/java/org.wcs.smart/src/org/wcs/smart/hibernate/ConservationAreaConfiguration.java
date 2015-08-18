@@ -25,10 +25,11 @@ import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.Platform;
+import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.I18nUtil;
 
 /**
  * System configuration when performing cross conservation analysis.
@@ -52,10 +53,11 @@ public class ConservationAreaConfiguration {
 	 * @param conservationAreas
 	 */
 	public ConservationAreaConfiguration(Collection<ConservationArea> conservationAreas,
-			Collection<Employee> employees){
+			Collection<Employee> employees,
+			Session session){
 		this.conservationAreas = conservationAreas;
 		this.employees = employees;
-		computeMainConservationArea();
+		computeMainConservationArea(session);
 	}
 
 	/**
@@ -66,6 +68,7 @@ public class ConservationAreaConfiguration {
 	public Collection<Employee> getEmployees(){
 		return this.employees;
 	}
+	
 	/**
 	 * 
 	 * @return the main conservation area to be used for
@@ -105,15 +108,15 @@ public class ConservationAreaConfiguration {
 	 * determines the main conservation area
 	 * based on the current locale.
 	 */
-	private void computeMainConservationArea(){
+	private void computeMainConservationArea(Session session){
 		Locale l = Locale.getDefault();
 		try{
-			l = SmartUtils.stringToLocale(Platform.getNL());
+			l = I18nUtil.stringToLocale(Platform.getNL());
 		}catch (Exception ex){
 			//eatme
 		}
 		for (ConservationArea ca : conservationAreas){
-			Language language = HibernateManager.findLanguage(l, ca);
+			Language language = HibernateManager.findLanguage(session, l, ca);
 			if (language != null){
 				mainConservationArea = ca;
 				this.language = language;

@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Area;
@@ -35,38 +36,55 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
+import org.wcs.smart.patrol.query.ext.IExtensionFilter;
+import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
+import org.wcs.smart.patrol.query.hibernate.PatrolQueryHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolSummaryQueryType;
-import org.wcs.smart.patrol.query.parser.IExtensionOption;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
+import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolAttributeValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolCategoryValueItem;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
+import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.patrol.query.ui.definition.PatrolGriddedQueryDefinitionPanel;
 import org.wcs.smart.patrol.query.ui.definition.PatrolSummaryGroupByValuePanel;
 import org.wcs.smart.patrol.query.ui.definition.SimpleValueRateFilterPanel;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.BooleanPatrolDropItem;
+import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolDropItems;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolGroupByDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolIdDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolListDropItem;
 import org.wcs.smart.patrol.query.ui.definition.dropItems.PatrolValueDropItem;
 import org.wcs.smart.patrol.query.ui.itempanel.GriddedFilterPanel;
 import org.wcs.smart.patrol.query.ui.itempanel.SummaryFilterPanel;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.model.summary.GroupByPart;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IGroupByViewer;
+import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
+import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.ValueRateFilterDeifnitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IDropItemFactory;
+import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListValueDropItem;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeValueDropItem;
@@ -74,6 +92,7 @@ import org.wcs.smart.query.ui.model.impl.AttributeValueDropItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Drop item factory for patrol queries.
@@ -110,13 +129,11 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			items = new DropItem[]{createPatrolValueDropItem(
 							(PatrolValueOption) source)};
 
-		} else if (source instanceof IPatrolQueryOption) {
+		} else if (source instanceof PatrolQueryOption) {
 			if (queryItemPanelId == SummaryFilterPanel.ID){
-				items = new DropItem[]{createPatrolGroupByDropItem(
-						(IPatrolQueryOption) source)};
+				items = new DropItem[]{createPatrolGroupByDropItem((PatrolQueryOption) source)};
 			}else{
-				items = new DropItem[]{createPatrolFilterDropItem(
-						(IPatrolQueryOption) source)};
+				items = new DropItem[]{createPatrolFilterDropItem((PatrolQueryOption) source)};
 			}
 		} else if (source instanceof IDateGroupBy) {
 			items = new DropItem[]{createDateGroupByDropItem(
@@ -138,8 +155,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 					queryItemPanelId.equals(GriddedFilterPanel.ID)){
 				items = new DropItem[]{createCategoryValueDropItem(null)};
 			}
-		}else if (source instanceof IExtensionOption){
-			items = new DropItem[]{((IExtensionOption) source).asDropItem()};
+		}else if (source instanceof IExtensionFilterViewer){
+			items = new DropItem[]{((IExtensionFilterViewer) source).asDropItem()};
+		}else if (source instanceof IExtensionGroupByViewer){
+			items = new DropItem[]{((IExtensionGroupByViewer) source).asDropItem()};
 		}
 		return items;
 		
@@ -159,8 +178,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 * @param item
 	 * @return
 	 */
-	public DropItem createPatrolGroupByDropItem(IPatrolQueryOption item){
-		return new PatrolGroupByDropItem(item);
+	public DropItem createPatrolGroupByDropItem(PatrolQueryOption item){
+		DropItem di = new PatrolGroupByDropItem(item);
+		di.initializeData(new Object[]{new PatrolOptionData(item)});
+		return di;
 	}
 	
 	/**
@@ -200,6 +221,10 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			default:
 				break;
 			}
+		}
+		if (item instanceof PatrolListDropItem &&
+				option instanceof PatrolQueryOption){
+			item.initializeData(new Object[]{new PatrolOptionData((PatrolQueryOption)option)});
 		}
 		return item;		
 	}
@@ -347,13 +372,12 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	 */
 	@Override
 	public void generateDropItems(QueryProxy proxy, Session session) {
-		
+		try{
 		if (proxy.getQuery() instanceof SimpleQuery){
-			
 			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
 			proxy.setDropItems(BasicFilterDefintionPanel.ID, asDropItems(queryFilter, session));
-					
-		}else if (proxy.getQuery().getType().getClass().equals(PatrolSummaryQueryType.class)){
+
+		}else if (proxy.getQuery().getTypeKey().equals(PatrolSummaryQuery.KEY)){
 			PatrolSummaryQuery q = (PatrolSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
@@ -365,25 +389,28 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 					def == null || def.getValueFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
 			//column group by
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
+					def == null || def.getColumnGroupByPart() == null ? null :
+						groupByToDropItems(def.getColumnGroupByPart(), session));
+						
 			//row group by
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
+					def == null || def.getRowGroupByPart() == null ? null : 
+						groupByToDropItems(def.getRowGroupByPart(), session));
 
 			//values
 			List<DropItem> items = null;
 			if (def != null && def.getValuePart() != null){
-				items = def.getValuePart().getDropItems(session);
+				items = valuePartToDropItems(def.getValuePart(),session);
 				for (DropItem i : items){
 					if (i instanceof AbstractValueDropItem){
-						((AbstractValueDropItem)i).setEncounterRateOptions(PatrolQueryOptions.SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS);
+						((AbstractValueDropItem)i).setEncounterRateOptions(PatrolDropItems.SUMMARY_ENCOUNTER_RATE_DROP_OPTIONS);
 					}
 				}
 			}
 			proxy.setDropItems(PatrolSummaryGroupByValuePanel.ID + "." + PatrolSummaryGroupByValuePanel.ListTargetType.VALUE.name(), items);//$NON-NLS-1$
 					
 			
-		}else if(proxy.getQuery().getType().getClass().equals(PatrolGridQueryType.class)){
+		}else if(proxy.getQuery().getTypeKey().equals(PatrolGriddedQuery.KEY)){
 			PatrolGriddedQuery q = (PatrolGriddedQuery) proxy.getQuery();
 			GridQueryDefinition def = q.getQueryDefinition();
 			
@@ -393,18 +420,19 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			
 			DropItem valueItem = null;
 			try{
-				valueItem = def.getValuePart().asDropItem(session);
+				valueItem = valueItemToDropItem(def.getValuePart(), session);
 				if (valueItem instanceof AbstractValueDropItem){
-					((AbstractValueDropItem)valueItem).setEncounterRateOptions(PatrolQueryOptions.GRID_ENCOUNTER_RATE_DROP_OPTIONS);
+					((AbstractValueDropItem)valueItem).setEncounterRateOptions(PatrolDropItems.GRID_ENCOUNTER_RATE_DROP_OPTIONS);
 				}
 			}catch(Exception ex){
 				QueryPlugIn.log(ex.getMessage(), ex);
 				valueItem = new ErrorDropItem(ex.getMessage());
 			}
 			proxy.setDropItems(PatrolGriddedQueryDefinitionPanel.VALUE_PANEL_ID,
-					Collections.singletonList(valueItem));
-					
-			
+					Collections.singletonList(valueItem));	
+		}
+		}catch (Exception ex){
+			PatrolQueryPlugIn.log(ex.getMessage(), ex);
 		}
 	}
 	
@@ -414,7 +442,7 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 	private List<DropItem> asDropItems(IFilter filter, Session session){
 		List<DropItem> items = new ArrayList<DropItem>();
 		try{
-			DropItem[] filterItems = filter.getDropItems(session);
+			DropItem[] filterItems = filterToDropItem(filter, session);
 			for(DropItem i : filterItems){
 				items.add(i);
 			}
@@ -423,5 +451,315 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			items.add(new ErrorDropItem(MessageFormat.format(Messages.SimpleQuery_DropItemParseError, new Object[]{ex.getMessage()})));
 		}
 		return items;
+	}
+	
+	@Override
+	public DropItem[] filterToDropItem(IFilter f, Session session) throws Exception{
+		if (f instanceof PatrolFilter){
+			return createDropItems((PatrolFilter)f, session);
+		}else if (f instanceof PatrolUuidFilter){
+			return createDropItems((PatrolUuidFilter)f, session);
+		}else if (f instanceof IExtensionFilter){
+			return createDropItems((IExtensionFilter)f, session);
+		}else if (f instanceof BooleanExpression){
+			return createDropItems((BooleanExpression)f, session);
+		}
+		return super.filterToDropItem(f, session);
+		
+	}
+	
+	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
+		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
+		opDropItem.initializeData(exp.getOperator().asSmartValue());
+		
+		DropItem[] its2 = filterToDropItem(exp.getFilter2(), session);
+		
+		DropItem[] results = new DropItem[its1.length + its2.length + 1];
+		for (int i = 0; i < its1.length; i ++){
+			results[i] = its1[i];
+		}
+		results[its1.length] = opDropItem;
+		for (int i = 0; i < its2.length; i++){
+			results[its1.length + i + 1] = its2[i];
+		}
+		return results;
+	}
+	
+	/**
+	 * Converts all value items to drop items.
+	 * @param session
+	 * @return
+	 */
+	public List<DropItem> valuePartToDropItems(ValuePart part, Session session) {
+		ArrayList<DropItem> item = new ArrayList<DropItem>();
+		try{
+			for (IValueItem valueItem : part.getValueItems()){
+				item.add(valueItemToDropItem(valueItem, session));
+			}
+		}catch (Exception ex){
+			QueryPlugIn.log(ex.getMessage(), ex);
+			item.clear();
+			item.add(new ErrorDropItem(ex.getMessage()));
+		}
+		return item;
+
+	}
+	@Override
+	public DropItem valueItemToDropItem(IValueItem item, Session session) throws Exception{
+		if (item instanceof PatrolAttributeValueItem){
+			return asDropItem((PatrolAttributeValueItem) item, session);
+		}else if (item instanceof PatrolCategoryValueItem){
+			return asDropItem((PatrolCategoryValueItem) item, session);
+		}else if (item instanceof PatrolValueItem){
+			return asDropItem((PatrolValueItem) item, session);
+		}
+		return super.valueItemToDropItem(item, session);
+	}
+	
+	
+	public DropItem asDropItem(PatrolValueItem item, Session session) throws Exception{
+		return createPatrolValueDropItem(item.getPatrolValueOption());
+	}
+	
+	public DropItem asDropItem(PatrolCategoryValueItem item, Session session) throws Exception{
+		try{
+			String categoryHkey = item.getCategoryHKey();
+			DropItem di = null;
+			if (categoryHkey == null){
+				di = PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(null);
+			}else{
+				Category category = QueryDataModelManager.getInstance().getCategory(session, categoryHkey);
+				if (category == null){
+					throw new Exception(MessageFormat.format(Messages.PatrolCategoryValueItem_CategoryNotFound, new Object[]{categoryHkey}));
+				}
+				category.getFullCategoryName();		//cache this
+				di = PatrolDropItemFactory.INSTANCE.createCategoryValueDropItem(category);
+			}
+			
+			di.initializeData(new Object[]{getInitializeData(item), null});
+			return di;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
+		}
+		
+	}
+	public DropItem asDropItem(PatrolAttributeValueItem item, Session session) throws Exception{
+		String attributeKey = item.getAttributeKey();
+		String categoryKey = item.getCategoryKey();
+		String itemKey = item.getItemKey();
+		
+		Attribute.AttributeType attributeType = item.getAttributeType();
+		
+		try{
+			Attribute att = QueryDataModelManager.getInstance().getAttribute(session,attributeKey);
+			if (att == null){
+				throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_AttributeNotFound, new Object[]{attributeKey}));
+			}
+			DropItem di = null;
+			Category cat = null;
+			if (categoryKey != null){
+				cat = QueryDataModelManager.getInstance().getCategory(session, categoryKey);
+				if (cat == null){
+					throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_CategoryNotFound, new Object[]{categoryKey}));
+				}
+				cat.getFullCategoryName();			
+			}
+			if (attributeType == AttributeType.NUMERIC){
+				if (cat == null){
+					di = PatrolDropItemFactory.INSTANCE.createAttributeValueDropItem(att);
+				}else{
+					di = PatrolDropItemFactory.INSTANCE.createAttributeValueDropItem(new CategoryAttribute(cat, att));
+				}
+			}else if (attributeType == AttributeType.LIST){
+				AttributeListItem ali = QueryDataModelManager.getInstance().getAttributeListItem(session, attributeKey, itemKey);
+				if (ali == null){
+					throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_ListItemNotFound, new Object[]{attributeKey, itemKey}));		
+				}
+				if (cat == null){
+					di = PatrolDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali);
+				}else{
+					di = PatrolDropItemFactory.INSTANCE.createAttributeListItemValueDropItem(ali,cat);
+				}
+			
+			}else if (attributeType == AttributeType.TREE){
+				AttributeTreeNode atn = QueryDataModelManager.getInstance().getAttributeTreeNode(session, attributeKey, itemKey);
+				if (atn == null){
+					throw new Exception(MessageFormat.format(Messages.PatrolAttributeValueItem_TreeNodeNotFound, new Object[]{attributeKey, itemKey}));		
+				}
+				if (cat == null){
+					di = PatrolDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn);
+				}else{
+					di = PatrolDropItemFactory.INSTANCE.createAttributeTreeNodeValueDropItem(atn,cat);
+				}
+			}
+			if (di != null){
+				di.initializeData(new Object[]{getInitializeData(item), null});
+			}
+			return di;
+		} catch (Exception ex) {
+			return new ErrorDropItem(ex.getMessage());
+		}
+	}
+	
+	
+	private DropItem[] createDropItems(PatrolUuidFilter f, Session session) throws Exception {
+		return null;
+	}
+	
+	private DropItem[] createDropItems(IExtensionFilter f, Session session) throws Exception {
+		for (IExtensionFilterViewer b : PatrolContributionFinder.getFilterUiContributions()){
+			if (b.getFilterClass().isAssignableFrom(f.getClass())){
+				return b.getDropItems(f, session);
+			}
+		}
+		return new DropItem[]{new ErrorDropItem(MessageFormat.format(Messages.PatrolDropItemFactory_ProcessError, f.asString()))};
+		
+	
+	}
+	private DropItem[] createDropItems(PatrolFilter f, Session session) throws Exception {
+		PatrolQueryOption option = f.getPatrolOption();
+		Object value = f.getValue();
+		
+		DropItem it = PatrolDropItemFactory.INSTANCE
+				.createPatrolFilterDropItem(option);
+
+		String value1 = null;
+		if (value != null) {
+			value1 = SharedUtils.stripQuotes((String) value);
+		}
+		if (option == PatrolQueryOption.ID) {
+			it.initializeData(new String[] { f.getOperator().getGuiValue(), value1 });
+		} else if (option == PatrolQueryOption.MANDATE) {
+			ListItem m = PatrolQueryHibernateManager.getInstance()
+					.getPatrolMandate(session, value1);
+			if (m == null) {
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolFilter_MandateNotFound,
+						new Object[] { value1 }));
+			} else {
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
+			}
+		} else if (option == PatrolQueryOption.STATION) {
+			ListItem m = PatrolQueryHibernateManager.getInstance().getStation(
+					session, value1);
+			if (m == null) {
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolFilter_StationNotFound,
+						new Object[] { value1 }));
+			} else {
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
+			}
+		} else if (option == PatrolQueryOption.TEAM) {
+			ListItem m = PatrolQueryHibernateManager.getInstance().getTeam(
+					session, value1);
+			if (m == null) {
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolFilter_TeamNotFound,
+						new Object[] { value1 }));
+			} else {
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
+			}
+		} else if (option == PatrolQueryOption.TEAM_KEY
+				|| option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY
+				|| option == PatrolQueryOption.MANDATE_KEY) {
+			List<ListItem> items = null;
+			// TODO: should get all not just active
+			if (option == PatrolQueryOption.TEAM_KEY) {
+				items = PatrolQueryHibernateManager.getInstance()
+						.getActiveTeams(session);
+			} else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY) {
+				items = PatrolQueryHibernateManager.getInstance()
+						.getActiveTransportTypes(session);
+			} else if (option == PatrolQueryOption.MANDATE_KEY) {
+				items = PatrolQueryHibernateManager.getInstance()
+						.getActiveMandates(session);
+			}
+			boolean found = false;
+			if (items != null) {
+				for (ListItem item : items) {
+					if (item.getKey().equals(value1)) {
+						it.initializeData(new Object[]{new PatrolOptionData(option), item});
+						found = true;
+						break;
+					}
+				}
+			}
+			if (!found) {
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolFilter_TeamNotFound,
+						new Object[] { value1 }));
+			}
+		} else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE) {
+			ListItem m = PatrolQueryHibernateManager.getInstance()
+					.getTransportType(session, value1);
+			if (m == null) {
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolFilter_TransportTypeNotFound,
+						new Object[] { value1 }));
+			} else {
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
+			}
+
+		} else if (option == PatrolQueryOption.PATROL_TYPE) {
+			PatrolType.Type t = PatrolType.Type.valueOf(value1);
+			ListItem m = new ListItem(null, t.getGuiName(Locale.getDefault()), t.name());
+			it.initializeData(new Object[]{new PatrolOptionData(option), m});
+		} else if (option == PatrolQueryOption.EMPLOYEE
+				|| option == PatrolQueryOption.LEADER
+				|| option == PatrolQueryOption.PILOT) {
+			ListItem m = PatrolQueryHibernateManager.getInstance().getEmployee(
+					session, value1);
+			if (m == null) {
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolFilter_EmployeeNotFound,
+						new Object[] { value1 }));
+			} else {
+				it.initializeData(new Object[]{new PatrolOptionData(option), m});
+			}
+		}
+		return new DropItem[] { it };
+	}
+	
+	/**
+	 * Converts the group by part into a collection of
+	 * drop items.
+	 * 
+	 * @param session
+	 * @return
+	 */
+	public List<DropItem> groupByToDropItems(GroupByPart groupBy, Session session) {
+		ArrayList<DropItem> item = new ArrayList<DropItem>();
+		try{
+			for (IGroupBy groupByItem : groupBy.getGroupBys()){
+				item.add(groupByToDropItem(groupByItem, session));
+			}
+		}catch (Exception ex){
+			QueryPlugIn.log(ex.getMessage(), ex);
+			item.clear();
+			item.add(new ErrorDropItem(ex.getMessage()));
+		}
+		return item;
+	}
+	
+	@Override
+	public IGroupByViewer<?> findViewer(IGroupBy groupBy){
+		if (groupBy instanceof IExtensionGroupBy){
+			for (IExtensionGroupByViewer v : PatrolContributionFinder.getGroupByUiContributions()){
+				if (v.getGroupByClass().isAssignableFrom(groupBy.getClass())){
+					return v.createViewer(groupBy);
+				}
+			}
+			return null;
+		}
+		if (groupBy instanceof PatrolGroupBy){
+			return new PatrolGroupByViewer((PatrolGroupBy) groupBy, new PatrolOptionData(((PatrolGroupBy)groupBy).getOption()));
+		}
+		return super.findViewer(groupBy);
+	}
+	
+	@Override
+	public DropItem groupByToDropItem(IGroupBy item, Session session) throws Exception{
+		return findViewer(item).asDropItem(session);
 	}
 }

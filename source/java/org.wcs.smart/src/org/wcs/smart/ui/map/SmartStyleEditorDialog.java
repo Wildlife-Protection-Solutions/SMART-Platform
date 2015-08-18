@@ -26,12 +26,12 @@ import java.io.StringWriter;
 import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -119,7 +119,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 	private TableViewer lstSmart;
 	private Job loadStylesJob;
 	private SmartStyle lastSelectedSs;
-	private byte[] currentLayerSs;
+	private UUID currentLayerSs;
 	private boolean firstSelectionEvents = true;
 
 	/**
@@ -224,10 +224,13 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			@Override
 			public String getText(Object element){
 				String value = super.getText(element);
-				byte[] uuid = currentLayerSs;
-				if (uuid != null && element instanceof SmartStyle && Arrays.equals(((SmartStyle)element).getUuid(), uuid)){
+				UUID uuid = currentLayerSs;
+				if (uuid != null && element instanceof SmartStyle 
+//						&& Arrays.equals(((SmartStyle)element).getUuid(), uuid)){
+					&& (((SmartStyle)element).getUuid().equals(uuid))){
 						return value + "**"; //$NON-NLS-1$
-				}else if ((uuid == null || uuid.length == 0) && element == NOT_SELECTED){
+//				}else if ((uuid == null || uuid.length == 0) && element == NOT_SELECTED){
+				}else if ((uuid == null ) && element == NOT_SELECTED){
 					return value + "**"; //$NON-NLS-1$
 				}
 				return value;
@@ -316,7 +319,12 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 		});
 		loadStylesJob.schedule();
 		
-		currentLayerSs = (byte[]) getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
+		String uuid = (String)getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
+		if (uuid == null || uuid.length() != 32){
+			currentLayerSs = null;
+		}else{
+			currentLayerSs = UUID.fromString(uuid);
+		}
 		return leftArea;
 	}
 	
@@ -330,8 +338,8 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 	}
 	
 	private void updateStyleSelectionToMatchBlackboard(){
-		byte[] existingStyleUuid = (byte[]) getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
-		if (existingStyleUuid == null || existingStyleUuid.length == 0){
+		UUID existingStyleUuid = (UUID) getSelectedLayer().getStyleBlackboard().get(SmartLayerStyle.STYLE_ID);
+		if (existingStyleUuid == null ){//|| existingStyleUuid.length == 0){
 			lstSmart.setSelection(new StructuredSelection(NOT_SELECTED), true);
 		}else{
 			SmartStyle temp = new SmartStyle();
@@ -920,7 +928,7 @@ public class SmartStyleEditorDialog extends StyleEditorDialog implements Listene
 			
 			Language defaultLanguage = SmartDB.getCurrentConservationArea().getDefaultLanguage();
 			if (SmartDB.isMultipleAnalysis()){
-				defaultLanguage = SmartDB.getConservationAreaConfiguration().getLanguage();
+				defaultLanguage = SmartDB.getCurrentLanguage();
 			}
 			lblCreateNew.setText(Messages.SmartStyleEditorDialog_StyleNameLabel + " [" + defaultLanguage.getCode() + "]:");   //$NON-NLS-1$//$NON-NLS-2$
 			lblCreateNew.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));

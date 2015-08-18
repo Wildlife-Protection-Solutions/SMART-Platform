@@ -24,6 +24,7 @@ package org.wcs.smart.patrol.ui;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -229,7 +230,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
         		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
         			Object[] data = (Object[]) iterator.next();
         			Patrol p = new Patrol();
-        			p.setUuid((byte[])data[0]);
+        			p.setUuid((UUID)data[0]);
         			p.setId((String)data[1]);
         			defaultPresent = defaultPresent || p.equals(preselectedPatrol);
         			patrols.add(p);

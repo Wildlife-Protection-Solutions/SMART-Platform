@@ -25,6 +25,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -41,7 +42,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Handler for exporting patrol data.
@@ -65,7 +66,7 @@ public class ExportPatrolHandler {
 			return ;
 		}
 		
-		final List<byte[]> patrols = dialog.getObjectUuids();	
+		final List<UUID> patrols = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
 		if (patrols.size() == 0){
@@ -85,10 +86,10 @@ public class ExportPatrolHandler {
 					int exportCnt = 0;
 					for (int i = 0; i < patrols.size(); i++) {
 						if (monitor.isCanceled()) break;
-						byte[] puuid = patrols.get(i);
+						UUID puuid = patrols.get(i);
 						String id = null;
 						try {
-							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_LoadingPatrol,new Object[]{ SmartUtils.encodeHex(puuid)}));
+							monitor.subTask(MessageFormat.format(Messages.ExportPatrolHandler_Progress_LoadingPatrol,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Patrol p = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
@@ -97,7 +98,7 @@ public class ExportPatrolHandler {
 								p = (Patrol) s.load(Patrol.class, puuid);
 								id = p.getId();
 							} catch (Exception ex) {
-								SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
+								SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_CouldNotFindPatrol, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
@@ -110,7 +111,7 @@ public class ExportPatrolHandler {
 							PatrolExporter.exportPatrol(p, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
+							SmartPatrolPlugIn.displayLog(MessageFormat.format(Messages.ExportPatrolHandler_Error_ExportingPatrol , new Object[]{id!= null ? id : UuidUtils.uuidToString(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$
 						}
 						monitor.worked(1);
 					}

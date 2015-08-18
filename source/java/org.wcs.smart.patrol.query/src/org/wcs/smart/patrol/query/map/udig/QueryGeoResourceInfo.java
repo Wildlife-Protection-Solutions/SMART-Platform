@@ -32,8 +32,8 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.BoundingBox;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -64,7 +64,7 @@ public class QueryGeoResourceInfo extends IGeoResourceInfo {
 			this.bounds = env;
 			QueryService service = (QueryService) resource.resolve(IService.class, monitor);
 			if (service.getQuery() instanceof IPagedQuery){
-				IPagedQueryResultSet rs = (IPagedQueryResultSet) service.getQuery().getCachedResults(monitor);
+				IPagedQueryResultSet rs = (IPagedQueryResultSet) service.getQuery().getCachedResults();
 				if (rs != null){
 					Envelope local = rs.getEnvelope();
 					env.expandToInclude(local.getMinX(), local.getMinY());

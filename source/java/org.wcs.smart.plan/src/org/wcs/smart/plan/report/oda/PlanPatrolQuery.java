@@ -45,7 +45,7 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.AllDatesFilter;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Plan patrols query
@@ -73,7 +73,7 @@ public class PlanPatrolQuery extends SmartQuery {
 	public void prepare(String queryText) throws OdaException {
 		parameters = new HashMap<Object, Object>();
 		try {
-			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(smartQuery.getType().getKey());
+			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(smartQuery.getTypeKey());
 		} catch (Exception e) {
 			throw new OdaException(e);
 		}
@@ -141,7 +141,7 @@ public class PlanPatrolQuery extends SmartQuery {
 		
 		Session session = HibernateManager.openSession();
 		Plan p = (Plan)session.createCriteria(Plan.class)
-				.add(Restrictions.eq("uuid", SmartUtils.decodeHex(parentPlanUuid))).list().get(0); //$NON-NLS-1$
+				.add(Restrictions.eq("uuid",UuidUtils.stringToUuid(parentPlanUuid))).list().get(0); //$NON-NLS-1$
 		
 		List<String> patrols = new ArrayList<String>();
 		
@@ -152,7 +152,7 @@ public class PlanPatrolQuery extends SmartQuery {
 			Plan thisplan = plans.remove(0);
 			List<PatrolEditorInput> items = PlanHibernateManager.getPatrols(thisplan, session);
 			for (PatrolEditorInput in : items){
-				patrols.add(SmartUtils.encodeHex(in.getUuid()));
+				patrols.add(UuidUtils.uuidToString(in.getUuid()));
 			}
 			plans.addAll(thisplan.getChildren());
 		}

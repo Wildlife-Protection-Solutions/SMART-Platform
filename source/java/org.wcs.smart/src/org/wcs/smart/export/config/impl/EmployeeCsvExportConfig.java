@@ -31,7 +31,7 @@ import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Configuration for current {@link CsvExportDialog} to export
@@ -67,10 +67,10 @@ public class EmployeeCsvExportConfig extends AbstractCsvExportConfig {
 	@Override
 	public String getInfo() {
 		return Messages.ExportEmployeeDialog_CSVFormat_1
-				+ SmartUtils.LINE_SEPARATOR
+				+ SharedUtils.LINE_SEPARATOR
 				+ MessageFormat.format(
 						Messages.ExportEmployeeDialog_CSVFormat_2, new Object[]{EmployeeCsvImporter.DATE_FORMAT, Employee.DB_MALE + "/" + Employee.DB_FEMALE, EmployeeCsvImporter.DATE_FORMAT, EmployeeCsvImporter.DATE_FORMAT}) //$NON-NLS-1$
-				+ SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR
+				+ SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR
 				+ Messages.ExportEmployeeDialog_CSVFormat_3;
 	}
 

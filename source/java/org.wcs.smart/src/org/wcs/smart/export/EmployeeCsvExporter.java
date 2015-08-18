@@ -36,7 +36,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
 import org.wcs.smart.export.config.ICsvDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -53,7 +53,7 @@ public class EmployeeCsvExporter implements ICsvDataExporter {
 	public boolean exportCsvFile(File file, char delimiter, ConservationArea ca, boolean headers, IProgressMonitor monitor, Session session) throws Exception {
 		try (CSVWriter writer = new CSVWriter(
 					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
-					delimiter, '"',SmartUtils.LINE_SEPARATOR)){
+					delimiter, '"',SharedUtils.LINE_SEPARATOR)){
 			if (headers) {
 				// WriteHeaders
 				//String[] headerCols = {"ID", "Given Name", "Family Name", "Birth Date", "Gender", "Start Employement Date", "End Employement Date", "Agency", "Rank"};

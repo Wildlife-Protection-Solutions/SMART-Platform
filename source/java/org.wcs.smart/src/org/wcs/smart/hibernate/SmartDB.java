@@ -22,12 +22,8 @@
 package org.wcs.smart.hibernate;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
-import org.eclipse.core.runtime.Platform;
 import org.geotools.referencing.CRS;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -38,7 +34,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Manages the smart database.
@@ -58,15 +54,7 @@ public class SmartDB {
 	 * associated with the current database schema
 	 */
 	public static final String PLUGIN_VERSION_TBL = "smart.db_version"; //$NON-NLS-1$
-	
-	public static CoordinateReferenceSystem DATABASE_CRS;
-	static{
-		try {
-			DATABASE_CRS = CRS.decode("EPSG:4326", true); //$NON-NLS-1$
-		} catch (Exception e) {
-			SmartPlugIn.log(Messages.SmartDB_Error_ReadingDefaultCRS, e);
-		}
-	}
+	public static CoordinateReferenceSystem DATABASE_CRS = GeometryUtils.SMART_CRS;
 	
 	/**
 	 * MapSettingsStore user accounts
@@ -102,8 +90,6 @@ public class SmartDB {
 	private static ConservationArea currentCa = null;
 	private static ConservationAreaConfiguration caConfig = null;
 	
-	private static Language currentLanguage = null;
-	
 	/**
 	 * 
 	 * @return the current database user
@@ -114,24 +100,7 @@ public class SmartDB {
 		}
 		return current;
 	}
-	
-	/**
-	 * 
-	 * @param user database user account
-	 */
-	public static void setCurrentUser(Employee user, ConservationArea ca){
-		currentEmployee = user;
-		currentCa = ca;
-		if (currentEmployee != null){
-			current = findDbUser(user);
-			HibernateManager.setUserName(current.username, current.password);
-		}else{
-			current = null;
-		}
-			
-		getCurrentLanguage();
-	}
-	
+
 	/**
 	 * Loads from the DB the shared user which is used 
 	 * for associated shared cross conservation area queries.
@@ -198,7 +167,7 @@ public class SmartDB {
 	}
 	
 	public static boolean isMultipleAnalysis(){
-		return Arrays.equals(getCurrentConservationArea().getUuid(), ConservationArea.MULTIPLE_CA);
+		return getCurrentConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
 	}
 	/**
 	 * 
@@ -207,9 +176,6 @@ public class SmartDB {
 	 * it will return <code>null</code>.
 	 */
 	public static ConservationAreaConfiguration getConservationAreaConfiguration(){
-		if (caConfig == null){
-			return new ConservationAreaConfiguration(Collections.<ConservationArea>emptyList(), Collections.<Employee>emptyList());
-		}
 		return caConfig;
 	}
 	
@@ -218,7 +184,16 @@ public class SmartDB {
 	 * Sets the configuration for cross conservation area analysis
 	 * @param selectedCa
 	 */
-	public static void setConservationAreaConfiguration(ConservationAreaConfiguration configuration){
+	public static void setConservationAreaConfiguration(Employee user, ConservationArea ca, ConservationAreaConfiguration configuration){
+		currentCa = ca;
+		if (currentEmployee == null || !currentEmployee.equals(user)){
+			//new user
+			current = findDbUser(user);
+			HibernateManager.setUserName(current.username, current.password);
+		}else{
+			current = null;
+		}
+		currentEmployee = user;
 		caConfig = configuration;
 	}
 	
@@ -255,21 +230,25 @@ public class SmartDB {
 	 * @return the current language of the logged in user
 	 */
 	public static Language getCurrentLanguage(){
-		if (currentLanguage == null){
-			Locale l = Locale.getDefault();
-			try{
-				l = SmartUtils.stringToLocale(Platform.getNL());
-			}catch (Exception ex){
-				//eatme
-			}
-			currentLanguage = HibernateManager.findLanguage(l, getCurrentConservationArea());
-			if (currentLanguage == null){
-				Language temp = new Language();
-				temp.setUuid(new byte[]{-1});
-				currentLanguage = temp;
-			}
+		if (caConfig == null){
+			return null;
 		}
-		return currentLanguage;
+		return caConfig.getLanguage();
+//		if (currentLanguage == null){
+//			Locale l = Locale.getDefault();
+//			try{
+//				l = SmartUtils.stringToLocale(Platform.getNL());
+//			}catch (Exception ex){
+//				//eatme
+//			}
+//			currentLanguage = HibernateManager.findLanguage(l, getCurrentConservationArea());
+//			if (currentLanguage == null){
+//				Language temp = new Language();
+//				temp.setUuid(null);
+//				currentLanguage = temp;
+//			}
+//		}
+//		return currentLanguage;
 		
 	}
 	

@@ -44,7 +44,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 /**
  * Conservation area group by drop item.
  * 
@@ -91,7 +91,7 @@ public class ConservationAreaGroupByDropItem extends DropItem implements IGroupB
 		queryPart.append("ca:"); //$NON-NLS-1$
 		if (filteredValues.size() > 0){
 			for (int i = 0; i < filteredValues.size(); i ++){
-				queryPart.append(  SmartUtils.encodeHex( filteredValues.get(i).getUuid())  );
+				queryPart.append(  UuidUtils.uuidToString( filteredValues.get(i).getUuid())  );
 				if (i != filteredValues.size() -1){
 					queryPart.append(":"); //$NON-NLS-1$
 				}

@@ -21,10 +21,12 @@
  */
 package org.wcs.smart.patrol.query.ui.definition.dropItems;
 
+import java.util.Locale;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 
 /**
@@ -44,7 +46,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	public PatrolValueDropItem(PatrolValueOption item){
 		super(true);
 		this.item = item;
-		this.guiLabel = item.getGuiName();
+		this.guiLabel = item.getGuiName(Locale.getDefault());
 	}
 	
 	/**
@@ -72,7 +74,7 @@ public class PatrolValueDropItem extends AbstractValueDropItem{
 	@Override
 	protected void createValueComposite(Composite parent) {
 		Label lbl = new Label(parent, SWT.NONE);
-		lbl.setText( formatStringForLabel(item.getGuiName()));
+		lbl.setText( formatStringForLabel(item.getGuiName(Locale.getDefault())));
 		initDrag(lbl);
 	}
 

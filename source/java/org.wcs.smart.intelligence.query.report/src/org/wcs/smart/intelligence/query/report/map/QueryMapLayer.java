@@ -23,7 +23,7 @@ package org.wcs.smart.intelligence.query.report.map;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.intelligence.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
 
@@ -37,7 +37,7 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 	
 	@Override
 	public boolean canAddToMap(String queryTypeKey) {
-		if (queryTypeKey.equals(IntelligenceRecordQueryType.KEY)){
+		if (queryTypeKey.equals(IntelligenceRecordQuery.KEY)){
 			return true;
 		}
 		return false;

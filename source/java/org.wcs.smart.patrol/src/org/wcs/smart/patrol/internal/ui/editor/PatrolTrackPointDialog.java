@@ -22,10 +22,12 @@
 package org.wcs.smart.patrol.internal.ui.editor;
 
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.patrol.PatrolEventManager;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
@@ -56,7 +58,11 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 		this.track = t;
 		
 		editTrack = new Track();
-		editTrack.setLineString(t.getLineString());
+		try{
+			editTrack.setLineString(t.getLineString());
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+		}
 		editTrack.setUuid(track.getUuid());
 	}
 
@@ -66,13 +72,18 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 	}
 
 	@Override
-	protected byte[] getEditTrackUUid() {
+	protected UUID getEditTrackUUid() {
 		return editTrack.getUuid();
 	}
 
 	@Override
 	protected LineString getEditTrackLineString() {
-		return editTrack.getLineString();
+		try{
+			return editTrack.getLineString();
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+			return null;
+		}
 	}
 
 	@Override
@@ -88,16 +99,19 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 	protected void okPressed(){
 		Patrol p = track.getPatrolLegDay().getPatrolLeg().getPatrol();
 		PatrolLegDay pld = track.getPatrolLegDay();
-		
-		//save then close
-		if (editTrack.getLineString() == null){
-			//delete track
-			track.getPatrolLegDay().setTrack(null);
-			track.setPatrolLegDay(null);
-		}else{
-			track.setLineString(editTrack.getLineString());
+		try{
+			//save then close
+			if (editTrack.getLineString() == null){
+				//delete track
+				track.getPatrolLegDay().setTrack(null);
+				track.setPatrolLegDay(null);
+			}else{
+				track.setLineString(editTrack.getLineString());
+			}
+		}catch (Exception ex){
+			SmartPatrolPlugIn.displayLog(ex.getMessage(), ex);
+			return;
 		}
-		
 		//save and fire
 		SavePatrolPartJob saveJob = new SavePatrolPartJob(p,pld); 		
 		saveJob.schedule();

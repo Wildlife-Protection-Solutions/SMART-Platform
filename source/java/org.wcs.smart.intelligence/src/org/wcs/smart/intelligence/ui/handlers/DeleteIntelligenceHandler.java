@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.ui.handlers;
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Named;
 
@@ -110,9 +111,9 @@ public class DeleteIntelligenceHandler {
      */
     private class DeleteIntelligenceJob extends Job {
     	
-    	private byte[] uuid;
+    	private UUID uuid;
   
-        public DeleteIntelligenceJob(byte[] uuid) {
+        public DeleteIntelligenceJob(UUID uuid) {
             super(Messages.NewIntelligenceWizard_SaveIntelligenceJob_Title);
             this.uuid = uuid;
         }

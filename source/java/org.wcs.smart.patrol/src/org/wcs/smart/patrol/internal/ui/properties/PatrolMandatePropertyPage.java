@@ -75,11 +75,13 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 import org.wcs.smart.ui.properties.KeyInputDialog;
@@ -113,8 +115,8 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		NAME(PatrolMandate.NAME,2),
-		KEY(PatrolMandate.KEY,1);
+		NAME(LabelConstants.MANDATE_NAME,2),
+		KEY(LabelConstants.MANDATE_KEY,1);
 		
 		String name;
 		int size;
@@ -309,7 +311,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 			for (Iterator<?> iterator = mandates.iterator(); iterator.hasNext();) {
 				PatrolMandate pm = (PatrolMandate) iterator.next();
 				siblings.remove(pm);
-				String error = NamedKeyItem.validateKey(pm.getKeyId(), siblings);
+				String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
 				siblings.add(pm);
 				if (error != null){
 					throw new Exception(error);
@@ -455,7 +457,7 @@ public class PatrolMandatePropertyPage extends AbstractPropertyJHeaderDialog {
 					
 					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
 					if (mnd.getKeyId() == null){
-						mnd.setKeyId(NamedKeyItem.generateKey(newValue, mandates));
+						mnd.setKeyId(DataModelManager.INSTANCE.generateKey(newValue, mandates));
 					}
 					setChangesMade(true);
 				}

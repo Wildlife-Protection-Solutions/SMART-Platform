@@ -22,6 +22,7 @@
 package org.wcs.smart.plan.ui.targets;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.layout.TableColumnLayout;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -85,7 +86,7 @@ public class TargetListViewer{
 		viewerColumn.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element) {
-				String x = ((PlanTarget)element).getSummary();
+				String x = ((PlanTarget)element).getSummary(Locale.getDefault());
 				if (x == null){
 					return ""; //$NON-NLS-1$
 				}

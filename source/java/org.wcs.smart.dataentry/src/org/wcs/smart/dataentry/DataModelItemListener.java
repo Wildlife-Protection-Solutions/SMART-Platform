@@ -23,6 +23,7 @@ package org.wcs.smart.dataentry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -163,7 +164,7 @@ public class DataModelItemListener implements IDataModelItemListener {
 	 * @param currentSession
 	 * @param uuidValue
 	 */
-	private void deleteAttributeOption(Session currentSession, byte[] uuidValue){
+	private void deleteAttributeOption(Session currentSession, UUID uuidValue){
 		Query q = currentSession.createQuery("From CmAttributeOption WHERE uuidValue = :uuid"); //$NON-NLS-1$
 		q.setParameter("uuid", uuidValue); //$NON-NLS-1$
 		List<CmAttributeOption> ops = q.list();

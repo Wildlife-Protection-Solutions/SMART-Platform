@@ -32,6 +32,7 @@ import org.wcs.smart.query.event.QueryListenerAdapter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.ReportQuery;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Query save listener that checks to determine if queries
@@ -66,7 +67,7 @@ public class ReportQueryListener extends QueryListenerAdapter {
 				sb.append(" ["); //$NON-NLS-1$
 				sb.append(rp.getReport().getId());
 				sb.append("] {"); //$NON-NLS-1$
-				sb.append(rp.getReport().getOwner().getFullLabel());
+				sb.append(SmartLabelProvider.getFullLabel(rp.getReport().getOwner()));
 				sb.append("}"); //$NON-NLS-1$
 				sb.append("\n"); //$NON-NLS-1$
 			}

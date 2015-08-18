@@ -22,9 +22,10 @@
 package org.wcs.smart.plan.ui.editor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -60,6 +61,7 @@ import org.wcs.smart.plan.PlanEventManager.IPlanEventListener;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 
@@ -89,7 +91,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	private IPlanEventListener planListener = new IPlanEventListener(){
 		@Override
 		public void eventFired(int type, Plan source) {
-			if (Arrays.equals(source.getUuid(), getPlan().getUuid())){
+			if (source.getUuid().equals(getPlan().getUuid())){
 				if (type != PlanEventManager.PATROL_PLAN_ATTRIBUTE){
 					//force reload plan to get latest changes
 					plan = loadPlan();
@@ -150,13 +152,15 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 			try {
 				thisPlan = (Plan) session.get(Plan.class, plan.getUuid());	//load a copy so we don't have problems with trying to have plan open in multiple sessions
 				getChildTargets(thisPlan, childTargets);
+			
+				for(PlanTarget pt : childTargets){
+					pt.refreshStatus(Locale.getDefault(), session);
+				}
 			}finally{
 				session.getTransaction().rollback();
 				session.close();
 			}
-			for(PlanTarget pt : childTargets){
-				pt.refreshStatus();
-			}
+			
 			mapPage.updateSubplanTargetLayer(thisPlan);
 			
 			Display.getDefault().asyncExec(new Runnable(){
@@ -178,9 +182,16 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			final List<PlanTarget> targets = (List<PlanTarget>)plan.getTargets();
-			for (PlanTarget pt : targets){
-				pt.refreshStatus();
+			Session s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				final List<PlanTarget> targets = (List<PlanTarget>)plan.getTargets();
+				for (PlanTarget pt : targets){
+					pt.refreshStatus(Locale.getDefault(), s);
+				}
+			}finally{
+				s.getTransaction().rollback();
+				s.close();
 			}
 			Display.getDefault().asyncExec(new Runnable(){
 				public void run(){
@@ -287,7 +298,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	 * Will always get a new object.
 	 */
 	public Plan loadPlan(){
-		byte[] puuid = ((PlanEditorInput) getEditorInput()).getUuid();
+		UUID puuid = ((PlanEditorInput) getEditorInput()).getUuid();
 		Session session = HibernateManager.openSession();
 		//load parent plan so don't have lazy loading issues later.
 		session.beginTransaction();
@@ -358,7 +369,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	private void initEditor(){
 		summaryPage.initValues();	//loads the plan
 		setPartName(plan.getLabel());
-		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().getDescriptor(plan.getType().getIconKey()).createImage());
+		setTitleImage(PlanLabelProvider.getImage(plan.getType()).createImage());
 		computePlanTargetStatus();
 	}
 	

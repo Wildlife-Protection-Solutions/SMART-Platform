@@ -70,6 +70,7 @@ import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelTyp
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -279,7 +280,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 		String none = Messages.IntelligenceEditor_NoValue;
 		String value = null;
 		txtDateReceived.setText(DateFormat.getDateInstance(DateFormat.LONG).format(intel.getReceivedDate()));
-		txtCreator.setText(intel.getCreator() != null ? intel.getCreator().getFullLabel() : ""); //$NON-NLS-1$
+		txtCreator.setText(intel.getCreator() != null ? SmartLabelProvider.getFullLabel(intel.getCreator()) : ""); //$NON-NLS-1$
 		txtSource.setText(intel.getSource() != null ? intel.getSource().getName() : ""); //$NON-NLS-1$
 		value = intel.getPatrol() != null ? intel.getPatrol().getId() : none;
 		lnkPatrolID.setText(value);

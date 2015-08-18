@@ -1,0 +1,74 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.intelligence.query;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hibernate.Session;
+import org.wcs.smart.intelligence.IntelligenceHibernateManager;
+import org.wcs.smart.intelligence.internal.Messages;
+import org.wcs.smart.intelligence.model.Intelligence;
+import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
+import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.util.UuidUtils;
+
+/**
+ * Patrol option data for intelligence filter.
+ * 
+ * @author Emily
+ *
+ */
+public class PatrolIntelligencePatrolData implements IPatrolOptionData {
+	
+
+	public static final ListItem ANY_INTELLIGENCE_ITEM = 
+			new ListItem(UuidUtils.stringToUuid(UuidUtils.ZERO_UUID_STR), Messages.IntelligencePatrolQueryOption_AnyIntelligence);
+	
+	public PatrolIntelligencePatrolData(){
+	}
+	
+	@Override
+	public List<ListItem> getValues(Session session, String[] keys) {
+		return getAllActiveValues(session);
+	}
+
+	@Override
+	public List<ListItem> getAllActiveValues(Session session) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		List<Intelligence> inteligenceList = IntelligenceHibernateManager.getIntelligences(session);
+		for (Intelligence i : inteligenceList) {
+			items.add(new ListItem(i.getUuid(), i.getName()));
+		}
+		Collections.sort(items);
+		items.add(0,ANY_INTELLIGENCE_ITEM);
+		return items;
+	}
+
+	@Override
+	public ListItem getDefaultListItem() {
+		return ANY_INTELLIGENCE_ITEM;
+	}
+
+
+}

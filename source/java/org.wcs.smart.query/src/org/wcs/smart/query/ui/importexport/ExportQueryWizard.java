@@ -41,6 +41,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.common.filter.SmartProgressMonitor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -237,10 +238,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			hasError = true;
 			return false;
 		}
-		exporter.export(query, outputFile, ops, monitor);
 		
+		exporter.export(getQuery(), getQuery().getCachedResults(), outputFile, ops, new SmartProgressMonitor(monitor));
 
-		
 		if (monitor.isCanceled()){
 			MessageDialog.openInformation(
 					Display.getDefault().getActiveShell(), EXPORT_DIALOGTITLE,
@@ -340,11 +340,10 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				}else if (ret == 0){
 					overwriteall = true;
 				}
-					
 			}
 
 			try{
-				lexporter.export(query, outputFile, ops, monitor);
+				lexporter.export(query, query.getCachedResults(), outputFile, ops, new SmartProgressMonitor(monitor));
 				exportedCnt++;
 			}catch (Throwable ex){
 				MessageDialog.openError(getShell(), 

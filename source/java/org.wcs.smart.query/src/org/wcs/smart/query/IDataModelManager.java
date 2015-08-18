@@ -24,6 +24,7 @@ package org.wcs.smart.query;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Attribute;
@@ -176,7 +177,7 @@ public interface IDataModelManager {
 	 * @param categoryUuid
 	 * @return
 	 */
-	public String[] getFullCategoryLabel(Session session, byte[] categoryUuid);
+	public String[] getFullCategoryLabel(Session session, UUID categoryUuid);
 	
 	/**
 	 * Returns the label for the attribute list item with the given uuid.
@@ -186,7 +187,7 @@ public interface IDataModelManager {
 	 * @param keyuuid attribute list item uuid
 	 * @return
 	 */
-	public String getAttributeListItemLabel(Session session, byte[] cauuid, byte[] keyuuid);
+	public String getAttributeListItemLabel(Session session, UUID cauuid, UUID keyuuid);
 	
 	/**
 	 * Returns the label for the attribute tree node with the given uuid
@@ -195,7 +196,7 @@ public interface IDataModelManager {
 	 * @param keyuuid attribute tree node uuid
 	 * @return
 	 */
-	public String getAttributeTreeNodeLabel(Session session, byte[] cauuid, byte[] keyuuid);
+	public String getAttributeTreeNodeLabel(Session session, UUID cauuid, UUID keyuuid);
 	
 	/**
 	 * Returns a modifiable list of all the active attributes

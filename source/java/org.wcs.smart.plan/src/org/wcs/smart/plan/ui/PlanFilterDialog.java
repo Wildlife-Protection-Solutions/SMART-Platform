@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.ui;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -198,7 +200,7 @@ public class PlanFilterDialog extends SmartFilterDialog {
 		planTypeTableViewer.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof Plan.PlanType) {
-					return ((Plan.PlanType) element).guiName;
+					return ((Plan.PlanType) element).getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}

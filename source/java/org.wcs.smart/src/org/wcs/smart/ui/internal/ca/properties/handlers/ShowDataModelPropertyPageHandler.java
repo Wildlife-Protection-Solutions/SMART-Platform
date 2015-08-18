@@ -42,6 +42,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.properties.DataModelPropertyPage;
 import org.wcs.smart.ui.internal.ca.properties.InitCaDataModelDialog;
+import org.wcs.smart.util.I18nUtil;
 
 /**
  * Handler for displaying data model property dialog.
@@ -117,6 +118,8 @@ public class ShowDataModelPropertyPageHandler {
 				public void run(IProgressMonitor monitor)
 						throws InvocationTargetException, InterruptedException {
 					monitor.beginTask(Messages.ShowDataModelPropertyPageHandler_Progress_LoadingDataModel, 0);
+					I18nUtil.setLocale(SmartDB.getCurrentLanguage().getUuid());
+					I18nUtil.setCa(SmartDB.getCurrentConservationArea().getUuid());
 					loadedSession = dialog.getSession();
 					loadedSession.beginTransaction();
 					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), loadedSession);

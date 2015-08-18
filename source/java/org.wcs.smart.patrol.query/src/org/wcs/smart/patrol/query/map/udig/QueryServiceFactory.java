@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.query.map.udig;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
-import org.wcs.smart.patrol.query.model.types.PatrolGridQueryType;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.model.Query;
@@ -48,7 +47,7 @@ public class QueryServiceFactory {
 		
 		if (query instanceof SimpleQuery){
 			return new QueryService((SimpleQuery)query);
-		}else if (query.getType().getClass().equals(PatrolGridQueryType.class) ){
+		}else if (query.getTypeKey().equals(PatrolGriddedQuery.class) ){
 			return new RasterService((PatrolGriddedQuery)query);
 		}
 		return null;

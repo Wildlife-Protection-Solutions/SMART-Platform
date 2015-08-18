@@ -25,6 +25,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 import org.eclipse.birt.report.engine.api.HTMLRenderOption;
 import org.eclipse.birt.report.engine.api.IRenderOption;
@@ -47,7 +49,8 @@ import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 /**
  * Job for exporting a plan to a pdf file for printing
  * 
@@ -59,10 +62,10 @@ public class ExportPlanJob extends Job {
 
 	private static final String NONE = Messages.ExportPlanJob_NoneLabel;
 	
-	private byte[] planUuid;
+	private UUID planUuid;
 	private File outputFile;
 	
-	public ExportPlanJob(byte[] planUuid) {
+	public ExportPlanJob(UUID planUuid) {
 		super(Messages.ExportPlanJob_JobName);
 		this.planUuid = planUuid;
 	}
@@ -79,13 +82,13 @@ public class ExportPlanJob extends Job {
 			this.outputFile = File.createTempFile(URLUtils.cleanFilename(plan.getId()) + "_", ".pdf"); //$NON-NLS-1$ //$NON-NLS-2$
 			outputFile.deleteOnExit();
 			
-			reportParameters.put(ReportPlan.PLAN_UUID, SmartUtils.encodeHex(plan.getUuid()));
+			reportParameters.put(ReportPlan.PLAN_UUID, UuidUtils.uuidToString(plan.getUuid()));
 			reportParameters.put(ReportPlan.PLAN_ID, plan.getId());
 			reportParameters.put(ReportPlan.PLAN_NAME, plan.getName());
 			reportParameters.put(ReportPlan.PLAN_DESCRIPTION, (plan.getDescription()==null?"" : plan.getDescription())); //$NON-NLS-1$
 			reportParameters.put(ReportPlan.PLAN_END_DATE,  new java.sql.Date(plan.getEndDate().getTime()));
 			reportParameters.put(ReportPlan.PLAN_START_DATE, new java.sql.Date(plan.getStartDate().getTime()));
-			reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getName());
+			reportParameters.put(ReportPlan.PLAN_TYPE, plan.getType().getGuiName(Locale.getDefault()));
 			reportParameters.put(ReportPlan.UNAVAILABLE_EMPLOYEES, plan.getUnavailableEmployees());
 			reportParameters.put(ReportPlan.AVAILABLE_EMPLOYEES, plan.getActiveEmployees());
 			if (plan.getTeam() == null){
@@ -100,7 +103,7 @@ public class ExportPlanJob extends Job {
 				reportParameters.put(ReportPlan.PLAN_STATION,plan.getStation().getName());
 			}
 			reportParameters.put(ReportPlan.PLAN_COMMENT, plan.getComment() == null ? "" : plan.getComment()); //$NON-NLS-1$
-			reportParameters.put(ReportPlan.PLAN_CREATOR, plan.getCreator() == null ? "" : plan.getCreator().getFullLabel()); //$NON-NLS-1$
+			reportParameters.put(ReportPlan.PLAN_CREATOR, plan.getCreator() == null ? "" : SmartLabelProvider.getFullLabel(plan.getCreator())); //$NON-NLS-1$
 						
 			StringBuilder sb = new StringBuilder();
 			List<PatrolEditorInput> ins = PlanHibernateManager.getPatrols(plan, session);

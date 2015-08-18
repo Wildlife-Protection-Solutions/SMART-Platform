@@ -175,7 +175,11 @@ public class XmlToIncident {
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
 						ob.getAttachments().add(att);
-						att.setObservation(ob);
+						try{
+							att.setObservation(ob);
+						}catch (Exception ex){
+							warnings.add(MessageFormat.format("Could not configure attachment {0}. {1}", filename, ex.getMessage()));
+						}
 					}
 				}
 			}

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.patrol.internal.ui.views;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -42,6 +44,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Filter dialog for filtering the patrols displayed in the patrol list view.
@@ -180,7 +183,7 @@ public class PatrolFilterDialog extends SmartFilterDialog {
 		patrolTypeTableViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof PatrolType){
-					return ((PatrolType) element).getType().getGuiName();
+					return ((PatrolType) element).getType().getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}

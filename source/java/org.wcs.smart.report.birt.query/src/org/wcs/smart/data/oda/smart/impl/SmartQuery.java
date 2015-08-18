@@ -26,6 +26,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -45,7 +46,7 @@ import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.ibm.icu.text.MessageFormat;
 
@@ -61,7 +62,7 @@ public class SmartQuery implements IQuery {
 	private int m_maxRows;
 
 	//the query uuid and type
-	private byte[] uuid;
+	private UUID uuid;
 	private IQueryType queryType;
 	
 	//the loaded query
@@ -127,11 +128,11 @@ public class SmartQuery implements IQuery {
 //		parameters = new HashMap<SmartParameterMetaData.Parameter, Object>();
 		
 		String[] bits = queryText.split(":"); //$NON-NLS-1$
-		this.queryType = QueryTypeManager.getInstance().findQueryType(bits[0]);
+		this.queryType = QueryTypeManager.INSTANCE.findQueryType(bits[0]);
 			
 		/* for historic support */
 		if (this.queryType == null){
-			this.queryType = QueryTypeManager.getInstance().findDeprecatedQueryType(bits[0]);
+			this.queryType = QueryTypeManager.INSTANCE.findDeprecatedQueryType(bits[0]);
 		}
 			
 		if (this.queryType == null){
@@ -139,7 +140,7 @@ public class SmartQuery implements IQuery {
 		}
 		
 		try {
-			this.uuid = SmartUtils.decodeHex(bits[1]);
+			this.uuid = UuidUtils.stringToUuid(bits[1]);
 			this.wrapperObject = QueryDatasetExtensionManager.getInstance().getDatasetHandler(queryType.getKey());
 		} catch (Exception e1) {
 			throw new OdaException(e1);

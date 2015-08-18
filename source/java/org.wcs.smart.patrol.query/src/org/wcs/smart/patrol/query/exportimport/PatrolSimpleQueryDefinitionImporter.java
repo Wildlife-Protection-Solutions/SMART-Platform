@@ -27,12 +27,14 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryFactory;
-import org.wcs.smart.patrol.query.model.types.PatrolObservationQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
-import org.wcs.smart.patrol.query.model.types.PatrolWaypointQueryType;
-import org.wcs.smart.patrol.query.parser.PatrolQueryValidator;
+import org.wcs.smart.patrol.query.model.PatrolQueryValidator;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -49,9 +51,9 @@ public class PatrolSimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(PatrolObservationQueryType.KEY) ||
-				qt.getKey().equals(PatrolWaypointQueryType.KEY) || 
-				qt.getKey().equals(PatrolQueryType.KEY);
+		return qt.getKey().equals(PatrolObservationQuery.KEY) ||
+				qt.getKey().equals(PatrolWaypointQuery.KEY) || 
+				qt.getKey().equals(PatrolQuery.KEY);
 	}
 
 	@Override
@@ -67,7 +69,7 @@ public class PatrolSimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session);
+			PatrolQueryValidator validator = new PatrolQueryValidator(langCode, uuidLookup, session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
 			warnings.addAll(validator.validate(queryFilter.getFilter()));
 		} finally {
 			session.getTransaction().rollback();

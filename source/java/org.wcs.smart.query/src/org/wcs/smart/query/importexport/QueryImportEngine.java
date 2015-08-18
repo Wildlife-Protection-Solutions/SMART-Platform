@@ -109,9 +109,9 @@ public class QueryImportEngine {
 		}
 		
 		QueryType qt = q.getQuery();
-		IQueryType lQueryType = QueryTypeManager.getInstance().findQueryType(qt.getQueryType());
+		IQueryType lQueryType = QueryTypeManager.INSTANCE.findQueryType(qt.getQueryType());
 		if (lQueryType == null){
-			lQueryType = QueryTypeManager.getInstance().findDeprecatedQueryType(qt.getQueryType());
+			lQueryType = QueryTypeManager.INSTANCE.findDeprecatedQueryType(qt.getQueryType());
 		}
 		if (lQueryType == null){
 			throw new Exception(MessageFormat.format(Messages.QueryImporter_InvalidQueryType, new Object[]{ qt.getQueryType()}));

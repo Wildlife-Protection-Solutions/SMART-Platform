@@ -13,6 +13,7 @@
 package org.wcs.smart.ui.workbench.addons.dndaddon;
 
 import javax.inject.Inject;
+
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.ui.MUIElement;

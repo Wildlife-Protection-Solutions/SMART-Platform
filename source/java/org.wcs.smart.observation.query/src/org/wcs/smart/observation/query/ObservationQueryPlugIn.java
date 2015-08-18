@@ -28,7 +28,12 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.internal.ObservationQueryLabelProvider;
+import org.wcs.smart.observation.query.model.columns.IObservationQueryColumnProvider;
+import org.wcs.smart.observation.query.model.columns.ObservationQueryColumnProvider;
+import org.wcs.smart.observation.query.view.IObservationQueryLabelProvider;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -77,8 +82,8 @@ public class ObservationQueryPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
-		
-//		DatabaseUtils.createTablesDerby();
+		SmartContext.INSTANCE.setClass(IObservationQueryLabelProvider.class, new ObservationQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(IObservationQueryColumnProvider.class, new ObservationQueryColumnProvider());
 	}
 
 	/*

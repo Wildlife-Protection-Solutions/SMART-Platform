@@ -22,8 +22,8 @@
 package org.wcs.smart.observation.query.exportimport;
 
 import org.hibernate.Session;
-import org.wcs.smart.observation.query.model.types.ObservationQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationWaypointQueryType;
+import org.wcs.smart.observation.query.model.ObsObservationQuery;
+import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -42,8 +42,8 @@ public class ObsSimpleQueryDefinitionExporter extends SimpleQueryDefinitionExpor
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(ObservationQueryType.KEY) ||
-				query.getType().getKey().equals(ObservationWaypointQueryType.KEY)){
+		if (query.getTypeKey().equals(ObsObservationQuery.KEY) ||
+				query.getTypeKey().equals(ObservationWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

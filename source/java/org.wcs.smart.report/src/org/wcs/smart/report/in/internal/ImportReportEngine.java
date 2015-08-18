@@ -74,8 +74,10 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.query.importexport.QueryImportEngine;
+import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.report.ReportEventManager;
 import org.wcs.smart.report.ReportPlugIn;
@@ -86,6 +88,7 @@ import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
 import org.wcs.smart.report.model.RootReportFolder;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Report importer.
@@ -600,7 +603,7 @@ public class ImportReportEngine {
 		}
 		
 		//update report definition to point to correct query
-		String newQueryText = smartQuery.getType().getKey() + ":" + SmartUtils.encodeHex(smartQuery.getUuid());  //$NON-NLS-1$
+		String newQueryText = smartQuery.getTypeKey() + ":" + UuidUtils.uuidToString(smartQuery.getUuid());  //$NON-NLS-1$
 		oldToNewQueries.put(handle.getQueryText(), newQueryText);
 		handle.setQueryText( newQueryText );
 		return true;
@@ -634,15 +637,15 @@ public class ImportReportEngine {
 		
 		final List<org.wcs.smart.query.model.Query> queries = new ArrayList<org.wcs.smart.query.model.Query>();
 
+		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(importedQuery.getTypeKey());
 		//search by uuid
-		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.getInstance().findQuery(session, SmartUtils.decodeHex(queryUuid), importedQuery.getType());
+		org.wcs.smart.query.model.Query uuidQuery = QueryHibernateManager.getInstance().findQuery(session, UuidUtils.stringToUuid(queryUuid), type);
 		if (uuidQuery != null && uuidQuery.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 			queries.add(uuidQuery);
 		}else{
 			//search by name
 			queries.addAll( QueryHibernateManager.getInstance().findQuery(session, 
-						importedQuery.getName(), 
-						importedQuery.getType()) );
+						importedQuery.getName(), type) );
 		}
 		
 		if (sharedReport){

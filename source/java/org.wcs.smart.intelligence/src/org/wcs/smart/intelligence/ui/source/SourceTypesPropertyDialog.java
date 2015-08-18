@@ -73,8 +73,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableColumn;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -112,8 +112,8 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 	 * columns in the station table
 	 */
 	private enum Column {
-		KEY(IntelligenceSource.KEY,		1),
-		NAME(IntelligenceSource.NAME,	2);
+		KEY(Messages.IntelligenceSource_Key, 1),
+		NAME(Messages.IntelligenceSource_Label,	2);
 		
 		String name;
 		int size;
@@ -398,7 +398,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 			for (Iterator<?> iterator = sourceTypes.iterator(); iterator.hasNext();) {
 				IntelligenceSource pm = (IntelligenceSource) iterator.next();
 				siblings.remove(pm);
-				String error = NamedKeyItem.validateKey(pm.getKeyId(), siblings);
+				String error = DataModelManager.INSTANCE.validateKey(pm.getKeyId(), siblings);
 				siblings.add(pm);
 				if (error != null){
 					throw new Exception(error);
@@ -482,7 +482,7 @@ public class SourceTypesPropertyDialog extends AbstractPropertyJHeaderDialog {
 					
 					mnd.updateName(cmbLanguage.getCurrentSelection(), newValue.trim());
 					if (mnd.getKeyId() == null){
-						mnd.setKeyId(NamedKeyItem.generateKey(newValue, sourceTypes));
+						mnd.setKeyId(DataModelManager.INSTANCE.generateKey(newValue, sourceTypes));
 					}
 					setChangesMade(true);
 				}

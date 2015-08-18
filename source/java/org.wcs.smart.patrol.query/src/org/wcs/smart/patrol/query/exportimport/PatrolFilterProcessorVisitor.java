@@ -21,16 +21,19 @@
  */
 package org.wcs.smart.patrol.query.exportimport;
 
+import java.util.Locale;
+
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Filter visitor for processing patrol filters.
@@ -59,11 +62,11 @@ public class PatrolFilterProcessorVisitor implements IFilterVisitor {
             //find item in database
             if (NamedKeyItem.class.isAssignableFrom(option.getSourceClass())){
             	//match items based on key
-            	NamedKeyItem ki = (NamedKeyItem)option.getObject(session,  SmartUtils.decodeHex(uuid));
+            	NamedKeyItem ki = (NamedKeyItem)option.getObject(session,  UuidUtils.stringToUuid(uuid));
             	item.getValue().add(ki.getKeyId());
             }else{
             	//match items based on name
-            	String[] data = option.getNames(session, SmartUtils.decodeHex(uuid));
+            	String[] data = option.getNames(session, UuidUtils.stringToUuid(uuid), Locale.getDefault());
             	if (data != null){
             		int index = 0;
             		if (data.length > 1){

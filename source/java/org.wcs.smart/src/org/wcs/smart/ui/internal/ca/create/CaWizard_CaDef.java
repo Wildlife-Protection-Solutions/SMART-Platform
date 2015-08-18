@@ -40,6 +40,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
+import org.wcs.smart.util.I18nUtil;
 import org.wcs.smart.util.LocaleComparator;
 import org.wcs.smart.util.LocaleLabelProvider;
 import org.wcs.smart.util.SmartUtils;
@@ -95,7 +96,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		lstViewer.setInput(lls);
 		lstViewer.setLabelProvider(new LocaleLabelProvider());
 		
-		Locale l = SmartUtils.stringToLocale(Locale.getDefault().getLanguage());
+		Locale l = I18nUtil.stringToLocale(Locale.getDefault().getLanguage());
 		if (l != null){
 			lstViewer.setSelection(new StructuredSelection(l));
 		}
@@ -151,7 +152,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 			lang.setCa(ca);
 
 			Locale e = (Locale) ((IStructuredSelection)lstViewer.getSelection()).getFirstElement(); 
-			lang.setCode(SmartUtils.localeToString(e));
+			lang.setCode(I18nUtil.localeToString(e));
 			lang.setDefault(true);
 			ca.getLanguages().add(lang);
 		}
@@ -161,7 +162,7 @@ public class CaWizard_CaDef extends CaWizardPage  {
 		composite.updateValues(ca);
 		
 		if (ca.getDefaultLanguage() != null){
-			lstViewer.setSelection(new StructuredSelection(SmartUtils.stringToLocale(ca.getDefaultLanguage().getCode())));
+			lstViewer.setSelection(new StructuredSelection(I18nUtil.stringToLocale(ca.getDefaultLanguage().getCode())));
 			lstViewer.getControl().setEnabled(false);
 		}else{
 			lstViewer.getControl().setEnabled(true);

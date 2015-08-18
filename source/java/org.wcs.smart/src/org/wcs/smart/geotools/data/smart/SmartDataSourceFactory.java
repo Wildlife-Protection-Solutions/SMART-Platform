@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
@@ -41,7 +42,7 @@ import org.wcs.smart.internal.Messages;
  */
 public class SmartDataSourceFactory implements DataStoreFactorySpi{
 
-	public static final Param CA_UUID = new Param("cauuid", byte[].class, Messages.SmartDataSourceFactory_CA_ParameterName, true);  //$NON-NLS-1$
+	public static final Param CA_UUID = new Param("cauuid", UUID.class, Messages.SmartDataSourceFactory_CA_ParameterName, true);  //$NON-NLS-1$
 	  
 	/* (non-Javadoc)
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)
@@ -105,7 +106,7 @@ public class SmartDataSourceFactory implements DataStoreFactorySpi{
 		Session session = HibernateManager.openSession();
 		ConservationArea ca = null;
 		try{
-			ca = (ConservationArea)session.load(ConservationArea.class, ((byte[])params.get(CA_UUID.key)));	
+			ca = (ConservationArea)session.load(ConservationArea.class, ((UUID)params.get(CA_UUID.key)));	
 		
 		}finally{
 			session.close();

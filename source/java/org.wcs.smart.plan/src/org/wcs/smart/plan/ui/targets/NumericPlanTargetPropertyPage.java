@@ -23,6 +23,8 @@
 package org.wcs.smart.plan.ui.targets;
 
 
+import java.util.Locale;
+
 import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -42,6 +44,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.AdministrativePlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
@@ -91,7 +94,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 	
 	@Override
 	public String getPageName(){
-		return NumericPlanTarget.TARGET_GUI_NAME;
+		return PlanLabelProvider.NUMERIC_TARGET_GUI_NAME;
 	}
 	
 	private GridData createGridDataWithIndent(int colspan){
@@ -116,7 +119,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetType.setContentProvider(ArrayContentProvider.getInstance());
 		targetType.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				return ((NumericPlanTarget.TargetType)element).guiName;
+				return ((NumericPlanTarget.TargetType)element).getGuiName(Locale.getDefault());
 			}
 		});
 		targetType.setInput(NumericPlanTarget.TargetType.values());
@@ -126,9 +129,9 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if(planTarget == null || planTarget.getName() == null || planTarget.getName().isEmpty()){
-					targetName.setText( getTargetType().getName() );
+					targetName.setText( getTargetType().getGuiName(Locale.getDefault()));
 				}
-				lblUnits.setText(getTargetType().getUnits());
+				lblUnits.setText(getTargetType().getUnits().getGuiName(Locale.getDefault()));
 			}
 		});
 		targetType.getControl().addListener(SWT.Selection, changeListener);
@@ -143,7 +146,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetOp.setContentProvider(ArrayContentProvider.getInstance());
 		targetOp.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				return ((NumericPlanTarget.Operator)element).guiName;
+				return ((NumericPlanTarget.Operator)element).getSmartValue();
 			}
 		});
 		targetOp.setInput(NumericPlanTarget.Operator.values());
@@ -161,7 +164,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetValue.addListener(SWT.Modify, changeListener);
 		
 		lblUnits = new Label(center, SWT.NONE);
-		lblUnits.setText(getTargetType().getUnits());
+		lblUnits.setText(getTargetType().getUnits().getGuiName(Locale.getDefault()));
 		lblUnits.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 		Label lbl = new Label(center, SWT.NONE);
@@ -172,7 +175,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 		targetName.setTextLimit(SpatialPlanTarget.MAX_NAME_LENGTH);
 		targetName.setLayoutData(createGridDataWithIndent(2));
 		if(planTarget == null){
-			targetName.setText( getTargetType().getName() );
+			targetName.setText( getTargetType().getGuiName(Locale.getDefault()) );
 		}
 		targetName.addListener(SWT.Modify, changeListener);
 		
@@ -326,7 +329,7 @@ public class NumericPlanTargetPropertyPage implements ITargetPage {
 			this.targetValue.setText(pt.getValue().toString());
 			this.planTarget = p;
 			this.targetName.setText(pt.getName());
-			lblUnits.setText(pt.getType().getUnits());
+			lblUnits.setText(pt.getType().getUnits().getGuiName(Locale.getDefault()));
 			String descr = pt.getDescription();
 			this.targetDesc.setText(descr != null ? descr : ""); //$NON-NLS-1$
 		

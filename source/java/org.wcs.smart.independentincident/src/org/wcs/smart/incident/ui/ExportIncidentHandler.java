@@ -25,6 +25,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -42,6 +43,7 @@ import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.IncidentExporter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Handler for exporting incident data.
@@ -65,7 +67,7 @@ public class ExportIncidentHandler {
 			return;
 		}
 		
-		final List<byte[]> incidents = dialog.getObjectUuids();	
+		final List<UUID> incidents = dialog.getObjectUuids();	
 		final boolean includeAtt = dialog.getIncludeAttachments();
 		final File dir = new File(dialog.getDirectory());
 		if (incidents.size() == 0){
@@ -85,10 +87,10 @@ public class ExportIncidentHandler {
 					int exportCnt = 0;
 					for (int i = 0; i < incidents.size(); i++) {
 						if (monitor.isCanceled()) break;
-						byte[] puuid = incidents.get(i);
+						UUID puuid = incidents.get(i);
 						Integer id = null;
 						try {
-							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_IncidentProgress,new Object[]{ SmartUtils.encodeHex(puuid)}));
+							monitor.subTask(MessageFormat.format(Messages.ExportIncidentHandler_IncidentProgress,new Object[]{ UuidUtils.uuidToString(puuid)}));
 							Waypoint wp = null;
 							Session s = HibernateManager.openSession();
 							s.beginTransaction();
@@ -97,7 +99,7 @@ public class ExportIncidentHandler {
 								wp = (Waypoint) s.load(Waypoint.class, puuid);
 								id = wp.getId();
 							} catch (Exception ex) {
-								IncidentPlugIn.displayLog(MessageFormat.format(Messages.ExportIncidentHandler_IncidentNotFound, new Object[]{SmartUtils.encodeHex(puuid)}), ex);
+								IncidentPlugIn.displayLog(MessageFormat.format(Messages.ExportIncidentHandler_IncidentNotFound, new Object[]{UuidUtils.uuidToString(puuid)}), ex);
 								continue;
 							} finally {
 								s.getTransaction().commit();
@@ -110,7 +112,7 @@ public class ExportIncidentHandler {
 							IncidentExporter.exportIncident(wp, outFile, includeAtt, new NullProgressMonitor());
 							exportCnt++;
 						} catch (Exception ex) {
-							IncidentPlugIn.displayLog(MessageFormat.format("Error exporting incident.  Skipping ID {0}." , new Object[]{id!= null ? id : SmartUtils.encodeHex(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
+							IncidentPlugIn.displayLog(MessageFormat.format("Error exporting incident.  Skipping ID {0}." , new Object[]{id!= null ? id : UuidUtils.uuidToString(puuid)}) + "\n" + ex.getLocalizedMessage(), ex); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 						monitor.worked(1);
 					}

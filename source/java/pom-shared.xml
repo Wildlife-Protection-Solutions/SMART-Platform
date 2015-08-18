@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	
+	<groupId>org.wcs.smart</groupId>
+  	<artifactId>smart</artifactId>
+  	<version>4.0</version>
+  	<packaging>pom</packaging>
+  	
+	<modelVersion>4.0.0</modelVersion>
+ 	
+	<properties>
+		<smart.version>4.0.0-SNAPSHOT</smart.version>
+        	<geotools.version>11.2</geotools.version>
+        	<jts.version>1.13</jts.version>
+        	<hibernate.version>4.2.18.Final</hibernate.version>
+    	</properties>
+    
+	<modules>
+		<module>./org.wcs.smart/pom-shared.xml</module>
+		<module>./org.wcs.smart.dataentry/pom-shared.xml</module>
+		<module>./org.wcs.smart.observation/pom-shared.xml</module>
+		<module>./org.wcs.smart.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.patrol/pom-shared.xml</module>
+		<module>./org.wcs.smart.patrol.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.observation.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.plan/pom-shared.xml</module>
+		<module>./org.wcs.smart.intelligence/pom-shared.xml</module>
+		<module>./org.wcs.smart.intelligence.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.independentincident/pom-shared.xml</module>
+		<module>../extensions/org.wcs.smart.entity/pom-shared.xml</module>
+		<module>../extensions/org.wcs.smart.entity.query/pom-shared.xml</module>
+		<module>../extensions/er/org.wcs.smart.er/pom-shared.xml</module>
+		<module>../extensions/er/org.wcs.smart.er.query/pom-shared.xml</module>
+		
+	</modules>
+  
+	<build>
+		<sourceDirectory>shared</sourceDirectory>
+		<plugins>
+      			<plugin>
+        		<groupId>org.apache.maven.plugins</groupId>
+        		<artifactId>maven-compiler-plugin</artifactId>
+        		<version>3.3</version>
+        		<configuration>
+          			<source>1.7</source>
+          			<target>1.7</target>
+        		</configuration>
+      		</plugin>
+    		</plugins>
+	</build>
+	
+	<repositories>
+		<repository>
+			<id>osgeo</id>
+			<name>Open Source Geospatial Foundation Repository</name>
+			<url>http://download.osgeo.org/webdav/geotools/</url>
+		</repository>
+    	</repositories>    
+	
+	<dependencies>
+       		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.1</version>
+		</dependency>
+        	<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>${hibernate.version}</version>
+        	</dependency>
+        	<dependency>
+    			<groupId>com.vividsolutions</groupId>
+    			<artifactId>jts</artifactId>
+    			<version>${jts.version}</version>
+			</dependency>
+		<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-referencing</artifactId>
+            		<version>${geotools.version}</version>
+        	</dependency>
+        	<dependency>
+            		<groupId>org.geotools</groupId>
+            		<artifactId>gt-api</artifactId>
+            		<version>${geotools.version}</version>
+        	</dependency>
+	</dependencies>
+</project>

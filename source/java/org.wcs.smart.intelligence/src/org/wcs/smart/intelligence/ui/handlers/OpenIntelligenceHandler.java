@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
+import java.util.UUID;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -46,7 +48,7 @@ public class OpenIntelligenceHandler {
 
 	public static final String INTELLUUID_PARAM = "intelligenceuuid"; //$NON-NLS-1$
 	@Execute
-	public void openIntelligence(@Optional @Named(INTELLUUID_PARAM) byte[] intellUuid,
+	public void openIntelligence(@Optional @Named(INTELLUUID_PARAM) UUID intellUuid,
 			MWindow activeWindow){
 		if (intellUuid == null) return;
 		

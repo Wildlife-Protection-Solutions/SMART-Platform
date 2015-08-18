@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Builds combiner report for batch import.
@@ -76,14 +76,14 @@ public class CombinedReportBuilder {
 				sb.append(MessageFormat.format(Messages.CombinedReportBuilder_Times, count));
 			}
 			sb.append(warn);
-			sb.append(SmartUtils.LINE_SEPARATOR);
+			sb.append(SharedUtils.LINE_SEPARATOR);
 		}
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(Messages.CombinedReportBuilder_FilesLabel);
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		for (String file : files){
 			sb.append(file);
-			sb.append(SmartUtils.LINE_SEPARATOR);
+			sb.append(SharedUtils.LINE_SEPARATOR);
 		}
 		
 		return sb.toString();

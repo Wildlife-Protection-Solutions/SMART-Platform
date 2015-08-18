@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.query.internal.Messages;
@@ -32,6 +33,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.QueryProxy;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Hibernate utility functions to support 
@@ -50,9 +52,9 @@ public interface IQueryHibernateManager {
 	 */
 	public static final String CONSERVATION_AREA_QUERIES_NAME = Messages.QueryHibernateManager_CaQueryFolderName;
 	
-	public static final byte[] CA_QUERY_KEY = new byte[]{1};
+	public static final UUID CA_QUERY_KEY = UuidUtils.stringToUuid("00000000000000000000000000000001"); //$NON-NLS-1$
 	
-	public static final byte[] USER_QUERY_KEY = new byte[]{2};
+	public static final UUID USER_QUERY_KEY = UuidUtils.stringToUuid("00000000000000000000000000000002"); //$NON-NLS-1$
 	
 	
 	public static final NumberFormat QUERY_ID_FORMATTER = new DecimalFormat("000000"); //$NON-NLS-1$
@@ -85,10 +87,10 @@ public interface IQueryHibernateManager {
 	 * A set of query proxies for all queries associated with the
 	 * current conservation area  and the current user. 
 	 * @param session
-	 * @return a map of the hashcode of the uuid array of a query folder 
+	 * @return a map of the uuid of a query folder 
 	 * mapped to query input of the query
 	 */
-	public HashMap<Integer, List<QueryEditorInput>> getQueryProxies(Session session);
+	public HashMap<UUID, List<QueryEditorInput>> getQueryProxies(Session session);
 
 	/**
 	 * Saves the given query to the database.
@@ -111,7 +113,7 @@ public interface IQueryHibernateManager {
 	 * @return the query or null if query not found
 	 */
 	public org.wcs.smart.query.model.Query findQuery(Session session, 
-			byte[] queryUuid, IQueryType queryType);
+			UUID queryUuid, IQueryType queryType);
 	
 	
 	

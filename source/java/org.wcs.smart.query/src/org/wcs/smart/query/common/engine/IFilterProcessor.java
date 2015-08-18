@@ -24,7 +24,7 @@ public interface IFilterProcessor {
 	public void processFilter(Connection c, IFilter queryFilter, 
 			DateFilter dateFilter, ConservationAreaFilter caFilter, 
 			boolean populateObservation,
-			boolean includeEmptyObservations,
+			boolean includeEmptyObservations, 
 			IProgressMonitor monitor) throws SQLException;
 	
 	/**

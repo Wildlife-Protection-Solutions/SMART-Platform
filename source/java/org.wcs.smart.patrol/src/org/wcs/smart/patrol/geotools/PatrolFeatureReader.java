@@ -32,12 +32,13 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Track;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -131,7 +132,7 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 	private SimpleFeature getWaypointAsFeature(PatrolWaypoint waypoint){
 		//String spec = "fid:String,id:integer,date:Date,time:Time,comment:String,geom:Point:srid=4326";
 		Object data[] = new Object[7];
-		data[0] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + SmartUtils.encodeHex(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
+		data[0] = ftype.getName() + "." + waypoint.getWaypoint().getId() + "." + UuidUtils.uuidToString(waypoint.getWaypoint().getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 		data[1] = waypoint.getWaypoint().getId();
 		data[2] = waypoint.getPatrolLegDay() == null ? null : waypoint.getPatrolLegDay().getDate();
 		data[3] = waypoint.getWaypoint().getDateTime();
@@ -153,7 +154,11 @@ public class PatrolFeatureReader implements FeatureReader<SimpleFeatureType, Sim
 		data[1] = track.getDistance();
 		data[2] = track.getPatrolLegDay().getDate();
 		data[3] = track.getPatrolLegDay().getPatrolLeg().getId();
-		data[4] = track.getLineString();
+		try{
+			data[4] = track.getLineString();
+		}catch (Exception ex){
+			SmartPatrolPlugIn.log(ex.getMessage(), ex);
+		}
 		
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[0]);
 	}

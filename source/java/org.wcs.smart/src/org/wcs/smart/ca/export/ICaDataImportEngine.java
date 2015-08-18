@@ -1,6 +1,7 @@
 package org.wcs.smart.ca.export;
 
 import java.io.File;
+import java.util.UUID;
 
 import org.hibernate.Session;
 
@@ -23,6 +24,6 @@ public interface ICaDataImportEngine {
 	 * @return the conservation area uuid of the ca being
 	 * importer
 	 */
-	public byte[] getConservationAreaUuid();
+	public UUID getConservationAreaUuid();
 }
 

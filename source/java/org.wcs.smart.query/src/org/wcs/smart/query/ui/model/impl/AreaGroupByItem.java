@@ -51,6 +51,7 @@ import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ICombinableDropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Drop item for area group bys
@@ -131,7 +132,7 @@ public class AreaGroupByItem extends DropItem implements IGroupByDropItem,ICombi
 	@Override
 	public String getText() {
 		StringBuilder sb = new StringBuilder();
-		sb.append (type.getGuiName());
+		sb.append (getLabel(type));
 		int cnt = 0;
 		if (filters != null){
 			for (ListItem it : filters){
@@ -307,5 +308,7 @@ public class AreaGroupByItem extends DropItem implements IGroupByDropItem,ICombi
 		}
 		toolTip.setMessage(tipStr.toString());
 	}
-
+	protected String getLabel(Area.AreaType area){
+		return SmartLabelProvider.getAreaTypeName(area);
+	}
 }

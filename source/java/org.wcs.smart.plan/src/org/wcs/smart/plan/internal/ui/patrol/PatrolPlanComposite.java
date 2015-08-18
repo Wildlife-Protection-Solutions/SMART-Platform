@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.plan.internal.ui.patrol;
 
+import java.util.UUID;
+
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
@@ -92,7 +94,7 @@ public class PatrolPlanComposite extends PlanComposite implements IPlanFilterIte
 		return this.pv;
 	}
 	
-	public byte[] getSelection(){
+	public UUID getSelection(){
 		Object sel = pv.getSelectedPlan();
 		if (sel instanceof PlanEditorInput){
 			return ((PlanEditorInput) sel).getUuid();

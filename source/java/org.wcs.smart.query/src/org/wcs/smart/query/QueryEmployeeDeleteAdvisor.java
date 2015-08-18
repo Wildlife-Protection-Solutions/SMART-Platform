@@ -31,6 +31,7 @@ import org.wcs.smart.ca.advisors.IDeleteAdvisor;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.QueryFolder;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Delete advisor for determining if an
@@ -55,16 +56,16 @@ public class QueryEmployeeDeleteAdvisor  implements IDeleteAdvisor {
 		if (e.getUuid() == null){
 			return null;
 		}
-		for(IQueryType queryType : QueryTypeManager.getInstance().getAllQueryTypes()){
+		for(IQueryType queryType : QueryTypeManager.INSTANCE.getAllQueryTypes()){
 			Long cnt = (Long) session.createCriteria(queryType.getHibernateClass()).add(Restrictions.eq("owner", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 			if (cnt > 0){
-				return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsQueries, new Object[]{ e.getFullLabel(), cnt ,queryType.getGuiName()});
+				return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsQueries, new Object[]{ SmartLabelProvider.getFullLabel(e), cnt ,queryType.getGuiName()});
 			}
 		}
 	
 		Long cnt = (Long) session.createCriteria(QueryFolder.class).add(Restrictions.eq("employee", e)).setProjection(Projections.rowCount()).uniqueResult(); //$NON-NLS-1$
 		if (cnt > 0){
-			return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsFolders, new Object[]{ e.getFullLabel(), cnt});
+			return MessageFormat.format(Messages.EmployeeDeleteAdvisor_ErrorOwnsFolders, new Object[]{ SmartLabelProvider.getFullLabel(e), cnt});
 		}
 		return null;
 	}

@@ -22,8 +22,8 @@
 package org.wcs.smart.query.ui.definition;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -79,7 +79,7 @@ public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionL
 	
 	private Composite caList = null;
 	private Color yellow = null;
-	private List<byte[]> missingFilterUuids = new ArrayList<byte[]>();
+	private List<UUID> missingFilterUuids = new ArrayList<UUID>();
 	
 	private QueryProxy currentQuery;
 	
@@ -188,7 +188,8 @@ public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionL
 	@Override
 	public void initItems(QueryProxy query){
 		this.currentQuery = query;
-		query.getQuery().getConservationAreaFilterAsFilter().refreshMissingList();
+		ConservationAreaFilter temp = ConservationAreaFilter.parseFilter(query.getQuery().getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
+		temp.refreshMissingList(SmartDB.getConservationAreaConfiguration().getConservationAreas());
 		missingFilterUuids.clear();
 		
 		for (Control c : caList.getChildren()){
@@ -201,16 +202,16 @@ public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionL
 			btnCa.setData(ca);
 			btnCa.setSelection(false);
 		
-			for (int i = 0; i < query.getQuery().getConservationAreaFilterAsFilter().getConservationAreaFilterIds().size(); i ++){
-				if (Arrays.equals(query.getQuery().getConservationAreaFilterAsFilter().getConservationAreaFilterIds().get(i), ca.getUuid())){
+			for (int i = 0; i < temp.getConservationAreaFilterIds().size(); i ++){
+				if (temp.getConservationAreaFilterIds().get(i).equals(ca.getUuid())){
 					btnCa.setSelection(true);
 				}
 			}
 			btnCa.addSelectionListener(this);
 		}
 
-		if (query.getQuery().getConservationAreaFilterAsFilter().getMissingCas() != null){
-			missingFilterUuids.addAll(query.getQuery().getConservationAreaFilterAsFilter().getMissingCas());
+		if (temp.getMissingCas() != null){
+			missingFilterUuids.addAll(temp.getMissingCas());
 		}
 		
 		if (missingFilterUuids.size() > 0){
@@ -226,7 +227,7 @@ public class ConservationAreaFilterPanel implements IDefinitionPanel, SelectionL
 			((GridData)caWarning.getLayoutData()).heightHint = 0;
 		}
 
-		boolean sel = query.getQuery().getConservationAreaFilterAsFilter().includeAll();
+		boolean sel = temp.includeAll();
 		btnIncludeAll.setSelection(sel);
 		btnFilter.setSelection(!sel);
 		

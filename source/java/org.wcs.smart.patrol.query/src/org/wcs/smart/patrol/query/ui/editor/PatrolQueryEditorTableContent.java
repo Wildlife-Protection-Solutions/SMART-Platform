@@ -21,9 +21,9 @@
  */
 package org.wcs.smart.patrol.query.ui.editor;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.viewers.CellLabelProvider;
@@ -100,7 +100,7 @@ public class PatrolQueryEditorTableContent {
 	public void initValues(PatrolQuery query) {
 		updateName(query);
 		resultsTable.initQuery(query);
-		resultsTable.updateVisible(query.getQueryColumns());
+		resultsTable.updateVisible(query.getQueryColumns(Locale.getDefault(), null));
 	}
 
 	/**
@@ -156,7 +156,7 @@ public class PatrolQueryEditorTableContent {
 		HashSet<Integer> keys = new HashSet<Integer>();
 		int cnt = 0;
 		for (PatrolQueryResultItem it : items){
-			int key = Arrays.hashCode(it.getPatrolUuid());
+			int key = it.getPatrolUuid().hashCode();
 			if (!keys.contains(key)){
 				cnt++;
 				keys.add(key);

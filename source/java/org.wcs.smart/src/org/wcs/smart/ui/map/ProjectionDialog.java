@@ -45,6 +45,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Dialog for select the map projection.
@@ -115,7 +116,7 @@ public class ProjectionDialog extends TitleAreaDialog {
 							try{
 								Projection selection = null;
 								for (Object x : ps){
-									if (x instanceof Projection && ((Projection) x).getCrs().equals(defaultCrs)){
+									if (x instanceof Projection && ReprojectUtils.stringToCrs(((Projection) x).getDefinition()).equals(defaultCrs)){
 										selection = (Projection) x;
 									}
 								}

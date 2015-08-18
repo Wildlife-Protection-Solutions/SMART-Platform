@@ -28,12 +28,14 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSetMetadata;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.engine.DerbySummaryEngine;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.Last30DaysDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
+import org.wcs.smart.report.query.PatrolQueryReportPlugIn;
 import org.wcs.smart.report.query.internal.Messages;
 
 /**
@@ -65,6 +67,8 @@ public class PatrolSummaryQueryResultSetMetadata extends SummaryQueryResultSetMe
 						query.setDateFilter(new DateFilter(WaypointDateField.INSTANCE, Last30DaysDateFilter.INSTANCE));
 					}
 					DerbySummaryEngine.getHeaderInfo((PatrolSummaryQuery)query, results, session);
+				}catch (Exception ex){
+					PatrolQueryPlugIn.displayLog(ex.getMessage(), ex);
 				}finally{
 					session.close();
 				}

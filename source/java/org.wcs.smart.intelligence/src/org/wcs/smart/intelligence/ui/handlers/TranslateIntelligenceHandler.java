@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.intelligence.ui.handlers;
 
+import java.util.UUID;
+
 import javax.inject.Named;
 
 import org.eclipse.core.commands.ExecutionException;
@@ -54,7 +56,7 @@ public class TranslateIntelligenceHandler extends TranslateNamesHandler {
 
 		Intelligence intelligence = null;
 		if (obj instanceof IntelligenceEditorInput) {
-			byte[] uuid = ((IntelligenceEditorInput) obj).getUuid();
+			UUID uuid = ((IntelligenceEditorInput) obj).getUuid();
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			intelligence = (Intelligence) session.load(Intelligence.class, uuid);

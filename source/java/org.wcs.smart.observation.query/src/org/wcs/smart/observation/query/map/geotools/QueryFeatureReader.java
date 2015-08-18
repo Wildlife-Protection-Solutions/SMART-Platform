@@ -23,18 +23,19 @@ package org.wcs.smart.observation.query.map.geotools;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.data.FeatureReader;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 
 /**
  * Feature reader for waypoint/observation query.
@@ -62,7 +63,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 		this.query = query;
 		if (query instanceof IPagedQuery){
 			try {
-				Object cachedResults = query.getCachedResults(new NullProgressMonitor());
+				IQueryResult cachedResults = query.getCachedResults();
 				if (cachedResults != null){
 					fIterator = ((IPagedQueryResultSet)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
 				}
@@ -107,7 +108,7 @@ public class QueryFeatureReader implements FeatureReader<SimpleFeatureType, Simp
 	@Override
 	public SimpleFeature next() throws IOException, IllegalArgumentException, NoSuchElementException {
 		ObservationQueryResultItem next = (ObservationQueryResultItem) this.fIterator.next();
-		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, query.getQueryColumns(), ftype);
+		SimpleFeature f = QueryResultItemFeature.createObservationFeature(next, query.getQueryColumns(Locale.getDefault(), null), ftype);
 		return f;
 	}
 	

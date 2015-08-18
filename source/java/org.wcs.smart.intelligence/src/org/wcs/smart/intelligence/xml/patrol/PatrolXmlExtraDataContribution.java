@@ -26,7 +26,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.model.Intelligence;
 import org.wcs.smart.patrol.model.Patrol;
@@ -56,7 +56,7 @@ public class PatrolXmlExtraDataContribution implements IXmlExtraDataContribution
 	
 	@Override
 	public List<ExtraDataType> exportData(Patrol patrol) throws Exception {
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		try {
 			List<ExtraDataType> result = new ArrayList<ExtraDataType>();
 			//motivation intelligence

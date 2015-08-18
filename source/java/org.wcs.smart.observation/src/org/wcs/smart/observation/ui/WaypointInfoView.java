@@ -23,11 +23,12 @@ package org.wcs.smart.observation.ui;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -63,6 +64,7 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.observation.ObservationPlugIn;
 import org.wcs.smart.observation.events.IWaypointEventListener;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.events.WaypointEventManager.EventType;
@@ -93,13 +95,13 @@ public class WaypointInfoView {
 	private Font boldFont = null;
 	private ScrolledForm infoSection = null;
 
-	private byte[] selectedWaypointUuid;
+	private UUID selectedWaypointUuid;
 	
 	//listener for modifications to waypoints
 	private IWaypointEventListener waypointListener = new IWaypointEventListener() {
 		@Override
 		public void handleEvent(Waypoint wp) {
-			if (Arrays.equals(wp.getUuid(), selectedWaypointUuid)){
+			if (wp.getUuid().equals(selectedWaypointUuid)){
 				updateUiJob.schedule();
 			}
 		}
@@ -162,11 +164,15 @@ public class WaypointInfoView {
 							});
 							for (WaypointObservationAttribute woa : tmp) {
 								dd.attributeLabels.add(woa.getAttribute().getName());
-								dd.attributeValues.add(woa.getAttributeValueAsString());
+								dd.attributeValues.add(woa.getAttributeValueAsString(Locale.getDefault()));
 							}
 							for (ObservationAttachment att: wo.getAttachments()){
-								att.getFullFile();
-								dd.attchmentFileNames.add(att);
+								try{
+									att.computeFileLocation(s);
+									dd.attchmentFileNames.add(att);
+								}catch (Exception ex){
+									ObservationPlugIn.log(ex.getMessage(), ex);
+								}
 							}
 						}
 					}
@@ -174,7 +180,11 @@ public class WaypointInfoView {
 					//load attachment information
 					if (currentWp.getAttachments() != null){
 						for(WaypointAttachment att: currentWp.getAttachments()){
-							att.getFullFile();
+							try{
+								att.computeFileLocation(s);
+							}catch (Exception ex){
+								ObservationPlugIn.log(ex.getMessage(), ex);
+							}
 						}
 					}
 				}
@@ -454,7 +464,8 @@ public class WaypointInfoView {
 	 * @param wp
 	 */
 	private void updateContents(final Waypoint wp){
-		if (selectedWaypointUuid != null && Arrays.equals(selectedWaypointUuid,wp.getUuid())){
+		if (selectedWaypointUuid != null && 
+				selectedWaypointUuid.equals(wp.getUuid())){
 			//same waypoint do nothing
 			return;
 		}

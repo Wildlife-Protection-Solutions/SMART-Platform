@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -63,7 +64,7 @@ public class PatrolQueryColumnCache {
 	
 	private PatrolQueryColumnCache(){
 	
-		DataModelManager.getInstance().addChangeListener(new IDataModelListener() {
+		DataModelManager.INSTANCE.addChangeListener(new IDataModelListener() {
 			
 			@Override
 			public void modified() {
@@ -136,7 +137,7 @@ public class PatrolQueryColumnCache {
 						add = patrolOps.getTrackObserver();
 					}
 					if (add){
-						cols.add(new FixedQueryColumn(item));
+						cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 					}
 				}
 
@@ -230,7 +231,7 @@ public class PatrolQueryColumnCache {
 						add = false;
 					}
 					if (add){
-						cols.add(new FixedQueryColumn(item));
+						cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 					}
 				}
 				waypointQueryColumns = cols.toArray(new QueryColumn[cols.size()]);
@@ -294,7 +295,7 @@ public class PatrolQueryColumnCache {
 								}
 							}
 							if (add){
-								cols.add(new FixedQueryColumn(item));
+								cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 							}
 								
 						}
@@ -332,7 +333,7 @@ public class PatrolQueryColumnCache {
 			QueryColumn[] tmp = new QueryColumn[GridQueryColumn.GridColumns.values().length];	
 			for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
 				GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns.values()[i];
-				tmp[i] = new GridQueryColumn(item); 
+				tmp[i] = new GridQueryColumn(item, Locale.getDefault()); 
 			}
 			gridQueryColumns  = tmp;
 		}

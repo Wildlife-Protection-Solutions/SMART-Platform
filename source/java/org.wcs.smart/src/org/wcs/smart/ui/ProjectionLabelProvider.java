@@ -24,6 +24,7 @@ package org.wcs.smart.ui;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.opengis.referencing.FactoryException;
 import org.wcs.smart.ca.Projection;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Label provider for projection objects
@@ -57,7 +58,7 @@ public class ProjectionLabelProvider extends LabelProvider{
 				return name;
 			}else{
 				try {
-					return ((Projection) element).getCrs().getName().getCode();
+					return ReprojectUtils.stringToCrs(((Projection)element).getDefinition()).getName().getCode();
 				} catch (FactoryException e) {
 					return ""; //$NON-NLS-1$
 				}

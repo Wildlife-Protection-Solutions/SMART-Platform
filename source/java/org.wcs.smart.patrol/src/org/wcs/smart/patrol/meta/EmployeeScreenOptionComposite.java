@@ -22,9 +22,9 @@
 package org.wcs.smart.patrol.meta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -97,10 +97,10 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 	private void updateEmployeeDropOptionGroup(EmployeeDropOptionGroup optionGroup) {
 		Object[] checkedElements = membersViewer.getCheckedElements();
 		optionGroup.getViewer().setInput(checkedElements);
-		byte[] uuid = optionGroup.getModel().getUuidValue();
+		UUID uuid = optionGroup.getModel().getUuidValue();
 		for (Object object : checkedElements) {
 			Employee item = (Employee) object;
-			if (Arrays.equals(item.getUuid(), uuid)) {
+			if (item.getUuid().equals(uuid)) {
 				optionGroup.getViewer().setSelection(new StructuredSelection(item));
 				return; //current option is allowed
 			}
@@ -160,9 +160,9 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 			//set current value
 			List<Employee> pickedMembers = new ArrayList<Employee>();
 			for (ScreenOptionUuid sou : membersOption.getUuidList()) {
-				byte[] uuid = sou.getUuidValue();
+				UUID uuid = sou.getUuidValue();
 				for (Employee e : members) {
-					if (Arrays.equals(uuid, e.getUuid()))
+					if (uuid.equals(e.getUuid()))
 						pickedMembers.add(e);
 				}
 			}
@@ -224,7 +224,7 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 			Object[] pickedMembers = membersViewer.getCheckedElements();
 			viewer.setInput(pickedMembers);
 			
-	 		byte[] uuid = getModel().getUuidValue();
+	 		UUID uuid = getModel().getUuidValue();
 	 		if (uuid == null && pickedMembers.length > 0) {
 	 			uuid = ((Employee) pickedMembers[0]).getUuid();
 	 			getModel().setUuidValue(uuid);
@@ -232,7 +232,7 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 	 		if (uuid != null) {
 	 			for (Object obj : pickedMembers) {
 	 				Employee item = (Employee) obj;
-	 				if (Arrays.equals(item.getUuid(), uuid)) {
+	 				if (item.getUuid().equals(uuid)) {
 	 					viewer.setSelection(new StructuredSelection(item));
 	 					break;
 	 				}

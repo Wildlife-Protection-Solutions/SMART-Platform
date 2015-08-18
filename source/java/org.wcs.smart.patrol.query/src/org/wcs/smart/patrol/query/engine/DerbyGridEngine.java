@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,6 +51,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -65,7 +67,7 @@ import org.wcs.smart.patrol.query.engine.grids.PatrolExistsCellMerger;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolValueOption;
+import org.wcs.smart.patrol.query.model.PatrolValueOption;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AddCellMerger;
@@ -73,12 +75,17 @@ import org.wcs.smart.query.common.engine.DistanceValueComputer;
 import org.wcs.smart.query.common.engine.ExistsValueComputer;
 import org.wcs.smart.query.common.engine.GridAnalysisEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.UuidCellMerger;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.Grid;
+import org.wcs.smart.query.common.model.GridQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResultMetadata;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.Tile;
-import org.wcs.smart.query.model.GridResultItem;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
@@ -93,13 +100,21 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
 
 public class DerbyGridEngine extends DerbyPatrolQueryEngine{
-	private Collection<GridResultItem> myResults;
+	private GridQueryResult myResults;
 	
 	private PatrolGriddedQuery query;
 	private DateFilter dateFilter;
 	
 	private String dataTable;
 	private String gridTable;
+	
+	private Session session;
+	
+	@Override
+	public boolean canExecute(String querytype) {
+		return PatrolGriddedQuery.KEY.equals(querytype);
+	}
+	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -109,12 +124,15 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	 * @return
 	 * @throws SQLException
 	 */
-	public Collection<GridResultItem> executeQuery(
-			final PatrolGriddedQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
 
-		this.query = query;
+		this.query = (PatrolGriddedQuery) lquery;
+		session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
@@ -140,9 +158,10 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						denominator = ((CombinedValueItem)valueItem).getPart2();
 					}
 					
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					
 					//get numerator results
-					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), c, session, monitor, true);
+					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), caFilter, c, session, monitor, true);
 					
 					//apply denominator results
 					if (denominator != null){
@@ -154,7 +173,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						}
 						//computer denominator results
 						//only recompute filter if filter is different
-						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), c, session, monitor, !isSame);
+						Collection<GridResultItem> denominatorResults = getItems(gridDef, denominator, query.getQueryDefinition().getRateFilter(), caFilter, c, session, monitor, !isSame);
 						HashMap<String, Double> items = new HashMap<String, Double>();
 						for (GridResultItem it : denominatorResults){
 							items.put(it.getTileId(), it.getValue());
@@ -179,7 +198,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						items.put(it.getTileId(), it);
 					}
 
-					List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef);
+					List<GridResultItem> patrolLocations = computePatrolExistance(c, gridDef, caFilter);
 					for (GridResultItem it : patrolLocations){
 						if (items.get(it.getTileId()) == null){ 
 							GridResultItem newitem = new GridResultItem();
@@ -189,7 +208,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 							items.put(it.getTileId(), newitem); 
 						}
 					}
-					myResults = items.values();
+					myResults = new GridQueryResult(items.values());
 					
 					monitor.worked(1);
 				}catch (Exception ex){
@@ -201,8 +220,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				}
 				c.commit();
 			}
-
 		});
+		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
 		return myResults;
 
 	}
@@ -213,7 +232,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	 * 
 	 */
 	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
-			QueryFilter filter, Connection c, Session session, 
+			QueryFilter filter, ConservationAreaFilter caFilter, Connection c, Session session, 
 			IProgressMonitor monitor, boolean needsFilter) throws Exception{
 		monitor.subTask(Messages.DerbyGridEngine_Progress_CreatingObservationTable);
 		
@@ -240,8 +259,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			
 			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
 			try{
-				filterer.processFilter(c, filter.getFilter(), dateFilter, query.getConservationAreaFilterAsFilter(), 
-					needsObservation, false, monitor);
+				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false, monitor);
 			}finally{
 				filterer.dropTemporaryTables(c);
 			}
@@ -278,7 +296,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 				AttributeValueItem tmp = (AttributeValueItem)value;
 				
 				String strAggValue = "number_value"; //$NON-NLS-1$
-				strAgg = tmp.getAggregation().getName();
+				strAgg = tmp.getAggregationKey();
 				if (tmp.getAttributeType() == AttributeType.LIST || tmp.getAttributeType() == AttributeType.TREE){
 					strAgg="count";  //$NON-NLS-1$
 					strAggValue = "value";  //$NON-NLS-1$
@@ -499,14 +517,15 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		}
 	}
 
-	private List<GridResultItem> computePatrolExistance(Connection c, Grid gridDef) throws Exception{
+	private List<GridResultItem> computePatrolExistance(Connection c, 
+			Grid gridDef, ConservationAreaFilter caFilter) throws Exception{
 		GridAnalysisEngine<?> engine = null;
 		
 		PatrolExistsCellMerger cellMerger = new PatrolExistsCellMerger();
 		ExistsValueComputer valueComputer = new ExistsValueComputer();
 		
 		engine = new GridAnalysisEngine<Boolean>(gridDef, cellMerger, valueComputer);
-		return computePatrolTrackNoFilter(c, engine);
+		return computePatrolTrackNoFilter(c, engine, caFilter);
 	}
 	
 	private Collection<GridResultItem> computePatrolValue(Connection c,
@@ -514,17 +533,17 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			Grid gridDef) throws Exception{
 		GridAnalysisEngine<?> engine = null;
 		String dataField[] = null;
-		
-		if (item.getOption() == PatrolValueOption.DISTANCE){
+		PatrolValueOption option = item.getPatrolValueOption();
+		if (option == PatrolValueOption.DISTANCE){
 			AddCellMerger cellMerger = new AddCellMerger();	//adds cell values
 			DistanceValueComputer valueComputer = new DistanceValueComputer();
 			engine = new GridAnalysisEngine<Double>(gridDef, cellMerger, valueComputer);
-		}else if (item.getOption() == PatrolValueOption.NUM_DAYS){	
+		}else if (option == PatrolValueOption.NUM_DAYS){	
 			dataField = new String[]{"p_uuid", "pld_patrol_day"}; //$NON-NLS-1$ //$NON-NLS-2$
 			UuidCellMerger cellMerger = new UuidCellMerger();
 			PatrolDayCntValueComputer valueComputer = new PatrolDayCntValueComputer();
 			engine = new GridAnalysisEngine<HashSet<Object>>(gridDef, cellMerger, valueComputer);
-		}else if (item.getOption() == PatrolValueOption.NUM_PATROLS){
+		}else if (option == PatrolValueOption.NUM_PATROLS){
 			dataField = new String[]{"p_uuid"}; //$NON-NLS-1$
 			UuidCellMerger cellMerger = new UuidCellMerger();
 			PatrolCntValueComputer valueComputer = new PatrolCntValueComputer();
@@ -532,7 +551,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			
 		}else{
 			throw new UnsupportedOperationException(
-					MessageFormat.format(Messages.DerbyGridEngine_Error_PatrolValueNotSupported, new Object[]{item.getOption().getGuiName()}));
+					MessageFormat.format(Messages.DerbyGridEngine_Error_PatrolValueNotSupported, new Object[]{option.getGuiName(Locale.getDefault())}));
 		}
 		return computePatrolTrack(c, engine, dataField);
 	}
@@ -622,7 +641,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 	 * @throws Exception
 	 */
 	private List<GridResultItem> computePatrolTrackNoFilter(Connection c, 
-			GridAnalysisEngine<?> engine) throws Exception{
+			GridAnalysisEngine<?> engine, ConservationAreaFilter caFilter) throws Exception{
 		clearParameters();
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT " + tablePrefix.get(Track.class) + ".geometry as geom "); //$NON-NLS-1$ //$NON-NLS-2$
@@ -644,7 +663,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 			}
 		}
 		sql.append( " and "); //$NON-NLS-1$
-		sql.append(PatrolFilterSqlGenerator.INSTANCE.toSql(query.getConservationAreaFilterAsFilter(), this));
+		sql.append(PatrolFilterSqlGenerator.INSTANCE.toSql(caFilter, this));
 		
 		QueryPlugIn.logSql(sql.toString());		
 		try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();){
@@ -769,6 +788,8 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 		return null;
 	}
 
-	
-	
+	@Override
+	public Session getCurrentConnection() {
+		return session;
+	}
 }

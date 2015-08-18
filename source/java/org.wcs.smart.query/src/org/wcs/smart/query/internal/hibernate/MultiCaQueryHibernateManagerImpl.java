@@ -22,9 +22,9 @@
 package org.wcs.smart.query.internal.hibernate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
@@ -119,11 +119,11 @@ public class MultiCaQueryHibernateManagerImpl extends
 	 * @return a map of the hashcode of the uuid array of a query folder mapped to query input of the query
 	 */
 	@Override
-	public HashMap<Integer, List<QueryEditorInput>> getQueryProxies(Session session){
+	public HashMap<UUID, List<QueryEditorInput>> getQueryProxies(Session session){
 		
-		HashMap<Integer, List<QueryEditorInput>> queries = new HashMap<Integer, List<QueryEditorInput>>();
+		HashMap<UUID, List<QueryEditorInput>> queries = new HashMap<UUID, List<QueryEditorInput>>();
 	
-		for(IQueryType type: QueryTypeManager.getInstance().getSupportedQueryTypes()){
+		for(IQueryType type: QueryTypeManager.INSTANCE.getSupportedQueryTypes()){
 
 			if (session.getSessionFactory().getClassMetadata(type.getHibernateClass()) == null){
 				//query is not mapped to hibernate class so skip it
@@ -138,8 +138,9 @@ public class MultiCaQueryHibernateManagerImpl extends
 				.list();
 			
 			for (org.wcs.smart.query.model.Query q : objects){
-				QueryEditorInput proxy = new QueryEditorInput(q.getUuid(),q.getName(),q.getId(),q.getIsShared(),q.getType());
-				byte[] key = null;
+				QueryEditorInput proxy = new QueryEditorInput(q.getUuid(),q.getName(),q.getId(),q.getIsShared(),
+						QueryTypeManager.INSTANCE.findQueryType(q.getTypeKey()));
+				UUID key = null;
 				if (q.getFolder() == null) {
 					if (q.getIsShared()) {
 						// root conservation area queries
@@ -151,10 +152,10 @@ public class MultiCaQueryHibernateManagerImpl extends
 					key = q.getFolder().getUuid();
 				}
 				if (key != null) {
-					List<QueryEditorInput> proxies = queries.get(Arrays.hashCode(key));
+					List<QueryEditorInput> proxies = queries.get(key);
 					if (proxies == null) {
 						proxies = new ArrayList<QueryEditorInput>();
-						queries.put(Arrays.hashCode(key), proxies);
+						queries.put(key, proxies);
 					}
 					proxies.add(proxy);
 				}

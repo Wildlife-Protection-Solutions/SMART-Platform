@@ -27,7 +27,7 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * A conservation area exporter that export
@@ -79,7 +79,7 @@ public class DataModelExporter implements ICaDataExporter {
 		query.append(HibernateManager.getTableName(Attribute.class));
 		query.append(" b on a.attribute_uuid = b.uuid "); //$NON-NLS-1$
 		query.append(" WHERE b.ca_uuid = x''"); //$NON-NLS-1$
-		query.append(SmartUtils.encodeHex(exportEngine.getConservationArea().getUuid()));
+		query.append(UuidUtils.uuidToString(exportEngine.getConservationArea().getUuid()));
 		query.append("''"); //$NON-NLS-1$
 		
 		String hibernateClass = "AttributeAggregation"; //$NON-NLS-1$

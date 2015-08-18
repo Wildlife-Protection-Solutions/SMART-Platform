@@ -26,6 +26,7 @@ import org.eclipse.birt.core.script.functionservice.IScriptFunctionContext;
 import org.eclipse.birt.core.script.functionservice.IScriptFunctionExecutor;
 import org.eclipse.birt.core.script.functionservice.IScriptFunctionFactory;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Smart functions for BIRT reports
@@ -50,7 +51,7 @@ public class SmartCategoryFactory implements IScriptFunctionFactory {
 			public Object execute(Object[] arguments, IScriptFunctionContext context)
 					throws BirtException {
 				if (functionName.equals(SMART_USER_FUNCTION)){
-					return SmartDB.getCurrentEmployee().getFullLabel();
+					return SmartLabelProvider.getFullLabel(SmartDB.getCurrentEmployee());
 				}else if (functionName.equals(CA_NAME_FUNCTION)){
 					return SmartDB.getCurrentConservationArea().getName();
 				}else if (functionName.equals(CA_ID_FUNCTION)){

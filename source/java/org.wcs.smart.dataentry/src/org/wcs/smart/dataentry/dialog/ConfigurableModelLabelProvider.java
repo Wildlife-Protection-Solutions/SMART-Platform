@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.dataentry.DataentryPlugIn;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelTreeContentProvider.CmRootNode;
 import org.wcs.smart.dataentry.model.CmAttribute;
@@ -79,7 +80,7 @@ public class ConfigurableModelLabelProvider extends LabelProvider implements ICo
 			CmNode node = (CmNode) element;
 			return node.isGroup() ? DataentryPlugIn.getDefault().getImageRegistry().get(DataentryPlugIn.GROUP_ICON) : SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.CATEGORY_ICON);
 		} else if (element instanceof CmAttribute){
-			return (((CmAttribute)element).getAttribute()).getType().getImage();
+			return DataModel.getAttributeImage((((CmAttribute)element).getAttribute()).getType());
 		} else if (element instanceof CmRootNode){
 			return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.DATA_MODEL_ICON);
 		}

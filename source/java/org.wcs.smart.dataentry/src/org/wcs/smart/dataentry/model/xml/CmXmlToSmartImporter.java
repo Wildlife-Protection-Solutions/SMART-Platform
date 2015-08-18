@@ -44,8 +44,8 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.common.attachment.AttachmentInterceptor;
-import org.wcs.smart.dataentry.dialog.composite.CmDefaultListsUtil;
-import org.wcs.smart.dataentry.dialog.composite.CmDefaultTreesUtil;
+import org.wcs.smart.dataentry.CmDefaultListsUtil;
+import org.wcs.smart.dataentry.CmDefaultTreesUtil;
 import org.wcs.smart.dataentry.internal.Messages;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -64,7 +64,7 @@ import org.wcs.smart.dataentry.model.xml.generated.TreeNodeType;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.OptionSelectionDialog;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Converts a SMART XML configurable model to the database
@@ -163,7 +163,7 @@ public class CmXmlToSmartImporter {
 				StringBuilder sb = new StringBuilder();
 				for (String str: warnings){
 					sb.append(str);
-					sb.append(SmartUtils.LINE_SEPARATOR);
+					sb.append(SharedUtils.LINE_SEPARATOR);
 				}
 				final String message = sb.toString();
 				final boolean[] cont = new boolean[]{true}; 

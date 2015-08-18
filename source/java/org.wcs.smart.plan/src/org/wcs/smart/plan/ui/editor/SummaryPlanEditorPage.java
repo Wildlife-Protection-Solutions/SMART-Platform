@@ -24,6 +24,7 @@ package org.wcs.smart.plan.ui.editor;
 import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -69,17 +70,18 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;
 import org.wcs.smart.plan.model.PlanTarget;
 import org.wcs.smart.plan.ui.panel.PlanCompositeFactory.PanelType;
 import org.wcs.smart.plan.ui.targets.TargetProgressViewer;
 import org.wcs.smart.plan.ui.targets.TargetPropertyDialog;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.properties.DialogConstants;
 /**
@@ -249,7 +251,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 							getEditorSite().getShell(), SummaryPlanEditorPage.this.parentEditor.getPlan());
 					
 					if (dialog.open() == IDialogConstants.OK_ID) {
-						Session session = SmartHibernateManager.openSession();
+						Session session = HibernateManager.openSession();
 						try{
 							PlanHibernateManager.savePlan(SummaryPlanEditorPage.this.parentEditor.getPlan(),session);
 						}finally{
@@ -617,7 +619,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 
 		setPartName(plan.getLabel());
 
-		setTitleImage(SmartPlanPlugIn.getDefault().getImageRegistry().get(plan.getType().getIconKey()));
+		setTitleImage(PlanLabelProvider.getImage(plan.getType()).createImage());
 		form.setText(plan.getLabel());
 		String none = Messages.PlanEditor_None_Label;
 
@@ -631,7 +633,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		} else {
 			txtTeam.setText(none);
 		}
-		txtType.setText(plan.getType().getName());
+		txtType.setText(plan.getType().getGuiName(Locale.getDefault()));
 		txtUnavailableEmployees.setText(plan.getUnavailableEmployees()
 				.toString());
 		if (plan.getParent() != null) {
@@ -650,7 +652,7 @@ public class SummaryPlanEditorPage extends EditorPart {
 		txtEndDate.setText(DateFormat.getDateInstance(DateFormat.LONG).format(plan.getEndDate()));
 
 		if (plan.getCreator() != null){
-			txtCreator.setText(plan.getCreator().getFullLabel());
+			txtCreator.setText(SmartLabelProvider.getFullLabel(plan.getCreator()));
 		}else{
 			txtCreator.setText(""); //$NON-NLS-1$
 		}

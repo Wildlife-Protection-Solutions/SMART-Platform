@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,7 +42,7 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Patrol Manager for deleting patrols.
@@ -109,14 +110,14 @@ public class PatrolManager {
 	 * @param monitor the progress monitor; cannot be null
 	 * @throws Exception if conservation area not deleted
 	 */
-	public boolean deletePatrol(byte[] patrolUuid, IProgressMonitor monitor) throws Exception{
+	public boolean deletePatrol(UUID patrolUuid, IProgressMonitor monitor) throws Exception{
 		
 		int work = 1;
 		for (ArrayList<IPatrolDeleteHandler> data : deleteHandlers.values()){
 			work += data.size();
 		}
 		
-		monitor.beginTask(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{SmartUtils.encodeHex(patrolUuid)}), work);
+		monitor.beginTask(MessageFormat.format(Messages.PatrolManager_Progress_DeletingPatrol1, new Object[]{UuidUtils.uuidToString(patrolUuid)}), work);
 		monitor.worked(0);
 		Patrol patrol = null;
 		Session session = HibernateManager.openSession();

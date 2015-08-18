@@ -40,7 +40,7 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * SMART installation info page.
@@ -74,8 +74,8 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		}catch (Exception ex){
 			sb.append(db.getAbsolutePath());
 		}
-		sb.append(SmartUtils.LINE_SEPARATOR);
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		
 		sb.append(Messages.SmartInstallationInfoPage_FilestoreLocation_Label);
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);
@@ -85,8 +85,8 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		}catch (Exception ex){
 			sb.append(db.getAbsolutePath());
 		}
-		sb.append(SmartUtils.LINE_SEPARATOR);
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		
 		sb.append(Messages.SmartInstallationInfoPage_GPSBabel_LocationLabel);
 		embeddedDb = SmartProperties.getInstance().getProperty(SmartProperties.PROP_GPS_BABEL);
@@ -96,13 +96,13 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		}catch (Exception ex){
 			sb.append(db.getAbsolutePath());
 		}
-		sb.append(SmartUtils.LINE_SEPARATOR);
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		
 		
 		sb.append(Messages.SmartInstallationInfoPage_SystemLang_Label);
 		sb.append((new Locale(Platform.getNL())).getDisplayName());
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(Messages.SmartInstallationInfoPage_DefaultLang_Label);
 		Language defaultl = null;
 		for (Language l : SmartDB.getCurrentConservationArea().getLanguages()){
@@ -116,17 +116,17 @@ public class SmartInstallationInfoPage extends InstallationPage {
 		}else{
 			sb.append(defaultl.getLabel());
 		}
-		sb.append(SmartUtils.LINE_SEPARATOR);
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		sb.append(Messages.SmartInstallationInfoPage_DbPluginVersions);
-		sb.append(SmartUtils.LINE_SEPARATOR);
+		sb.append(SharedUtils.LINE_SEPARATOR);
 		Session s = HibernateManager.openSession();
 		try{
 			List<?> data = s.createSQLQuery("SELECT plugin_id, version FROM " +SmartDB.PLUGIN_VERSION_TBL).list(); //$NON-NLS-1$
 			for (Object x : data){
 				Object[] z = (Object[])x;
 				sb.append("  " + (String)z[0] + ": " + (String)z[1]);  //$NON-NLS-1$//$NON-NLS-2$
-				sb.append(SmartUtils.LINE_SEPARATOR);
+				sb.append(SharedUtils.LINE_SEPARATOR);
 			}
 				
 		}catch (Exception ex){

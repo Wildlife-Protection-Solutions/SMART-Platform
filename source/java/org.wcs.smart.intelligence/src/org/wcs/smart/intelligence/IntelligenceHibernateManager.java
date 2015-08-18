@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -47,7 +48,7 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.model.PatrolIntelligence;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Intelligence related database functions.
@@ -117,9 +118,9 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @param uuid uuid of the intelligence to delete
 	 * @return intelligence that was deleted or <code>null</code> in case of error
 	 */
-	public static Intelligence deleteIntelligence(byte[] uuid) {
+	public static Intelligence deleteIntelligence(UUID uuid) {
 		//no need to add interceptor as files will be deleted manually
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		Intelligence intelligence = null;
 		try {
 			session.beginTransaction();
@@ -145,8 +146,8 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @param uuid uuid of the intelligence
 	 * @return list of Patrol IDs
 	 */
-	public static List<?> fetchRelatedPatrolIDs(byte[] intelligenceUuid) {
-		Session session = SmartHibernateManager.openSession();
+	public static List<?> fetchRelatedPatrolIDs(UUID intelligenceUuid) {
+		Session session = openSession();
 		try {
 			Query query = session.createQuery("SELECT pi.id.patrol.id FROM PatrolIntelligence pi WHERE pi.id.intelligence.uuid = :uuid ORDER BY pi.id.patrol.id asc"); //$NON-NLS-1$
 			query.setParameter("uuid", intelligenceUuid); //$NON-NLS-1$
@@ -163,7 +164,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @param intelligence who's filestore to delete
 	 */
 	public static void deleteFilestore(Intelligence intelligence) {
-		File fileStore = new File(SmartDB.getCurrentConservationArea().getFileDataStoreLocation() + File.separator + intelligence.getIntelligenceDatastorePath());
+		File fileStore = new File(intelligence.getDatastoreLocation());
 		if (fileStore.exists()){
 			try{
 				FileUtils.forceDelete(fileStore);
@@ -223,7 +224,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences reported by this patrol
 	 */
 	public static List<Intelligence> getReportedIntelligences(Patrol patrol) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		session.beginTransaction();
 		try {
 			return getReportedIntelligences(patrol, session);
@@ -255,7 +256,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 * @return the list of intelligences that motivated patrol
 	 */
 	public static List<Intelligence> getMotivatedIntelligences(Patrol patrol) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		session.beginTransaction();
 		try {
 			return getMotivatedIntelligences(patrol, session);
@@ -292,11 +293,11 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	 */
 	public static ListItem getIntelligence(Session session, String id) throws Exception {
 		Query q = session.createQuery("SELECT uuid, name FROM Intelligence WHERE uuid =:uuid"); //$NON-NLS-1$
-		q.setParameter("uuid", SmartUtils.decodeHex(id)); //$NON-NLS-1$
+		q.setParameter("uuid", UuidUtils.stringToUuid(id)); //$NON-NLS-1$
 		@SuppressWarnings("unchecked")
 		List<Object[]> results = q.list();
 		if (results.size() == 1) {
-			return new ListItem( (byte[])((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
+			return new ListItem( (UUID)((Object[])results.get(0))[0], (String)((Object[])results.get(0))[1]);
 		} else {
 			IntelligencePlugIn.displayLog(MessageFormat.format(Messages.IntelligenceHibernateManager_Intelligence_NotFound_Error, id), null);
 			return null;
@@ -365,7 +366,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static boolean saveInformant(Informant informant) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			return saveInformant(informant, session);
 		} finally {
@@ -394,7 +395,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static boolean deleteInformant(Informant informant) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			session.beginTransaction();
 			try {
@@ -452,7 +453,7 @@ public class IntelligenceHibernateManager extends HibernateManager {
 	}
 
 	public static void clearInformantsEncrptedData() {
-		Session session = SmartHibernateManager.openSession();
+		Session session = openSession();
 		try {
 			try {
 				List<Informant> informantList = IntelligenceHibernateManager.getInformants(SmartDB.getCurrentConservationArea(), session, false);

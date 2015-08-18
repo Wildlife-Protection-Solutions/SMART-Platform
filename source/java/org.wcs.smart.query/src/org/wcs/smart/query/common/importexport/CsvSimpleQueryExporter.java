@@ -26,17 +26,21 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.engine.MemoryQueryResult;
+import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
 
@@ -74,7 +78,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	protected void init() throws Exception {
 		writer = new CSVWriter(
 				new OutputStreamWriter(new FileOutputStream(outputFile), "UTF-8"), //$NON-NLS-1$ 
-				delimiter, '"', SmartUtils.LINE_SEPARATOR); 
+				delimiter, '"', SharedUtils.LINE_SEPARATOR); 
 		
 		String data[] = new String[queryColumns.size()]; 
 		for (int i = 0; i < data.length; i ++){
@@ -135,23 +139,25 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.wcs.smart.query.export.IQueryExporter#export(org.wcs.smart.query.model.Query, org.eclipse.core.runtime.IProgressMonitor)
-	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void export(Query query, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult result, File file,
+			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
+			throws Exception {
 		if (parameters.get(DELIMITER_KEY) != null){
 			try{
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
-		if (query instanceof IPagedQuery) {
-			super.setData((IPagedQueryResultSet)query.getCachedResults(monitor), ((SimpleQuery)query).getQueryColumns(), file);
-		} else {
-			super.setData((Collection<IResultItem>)query.getCachedResults(monitor), ((SimpleQuery)query).getQueryColumns(), file);
+		if (result instanceof IPagedQueryResultSet){
+			super.setData((IPagedQueryResultSet)result, ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+		}else if (result instanceof MemoryQueryResult){
+			super.setData( ((MemoryQueryResult)result).getData(), 
+					((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+		}else if (result instanceof GridQueryResult){
+			super.setData( ((GridQueryResult)result).getData(), 
+					((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
 		}
-		super.export(monitor);
-		
+		super.export(monitor);		
 	}
 }

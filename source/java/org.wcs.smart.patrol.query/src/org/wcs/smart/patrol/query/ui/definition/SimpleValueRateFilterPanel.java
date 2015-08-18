@@ -29,6 +29,7 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
 import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.model.filter.QueryFilter;
@@ -80,7 +81,7 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 			session.beginTransaction();
 			List<DropItem> copies = new ArrayList<DropItem>();
 			if (filterPart != null){
-				DropItem[] filterItems = filterPart.getFilter().getDropItems(session);
+				DropItem[] filterItems = PatrolDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), session);
 				for (int i = 0; i < filterItems.length; i ++){
 					copies.add(filterItems[i]);
 				}

@@ -35,25 +35,35 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
+import org.wcs.smart.observation.WaypointSourceEngine;
+import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.ObservationQueryPlugIn;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
-import org.wcs.smart.observation.query.model.types.ObservationGridQueryType;
-import org.wcs.smart.observation.query.model.types.ObservationSummaryQueryType;
+import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
+import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
+import org.wcs.smart.observation.query.ui.WaypointSourceGroupByViewer;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider;
 import org.wcs.smart.observation.query.ui.itempanel.GeneralContentProvider.GeneralItem;
 import org.wcs.smart.observation.query.ui.itempanel.GriddedItemPanel;
 import org.wcs.smart.observation.query.ui.itempanel.SummaryFilterPanel;
+import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDataModelContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.SummaryDmObject;
 import org.wcs.smart.query.model.QueryProxy;
+import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.model.summary.GroupByPart;
+import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IGroupByViewer;
+import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
+import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.definition.BasicFilterDefintionPanel;
 import org.wcs.smart.query.ui.definition.BasicGridDefinitionPanel;
 import org.wcs.smart.query.ui.model.DropItem;
@@ -212,25 +222,29 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	 */
 	@Override
 	public void generateDropItems(QueryProxy proxy, Session session) {
+		try{
 		if (proxy.getQuery() instanceof SimpleQuery){
 			
 			IFilter queryFilter = ((SimpleQuery)proxy.getQuery()).getFilter().getFilter();
 			proxy.setDropItems(BasicFilterDefintionPanel.ID, asDropItems(queryFilter, session));
 					
-		}else if (proxy.getQuery().getType().getKey().equals(ObservationSummaryQueryType.KEY)){
+		}else if (proxy.getQuery().getTypeKey().equals(ObservationSummaryQuery.KEY)){
 			ObservationSummaryQuery q = (ObservationSummaryQuery) proxy.getQuery();
 			SumQueryDefinition def = q.getQueryDefinition();
 			
 			proxy.setDropItems(BasicFilterDefintionPanel.ID, def == null || def.getValueFilter() == null || def.getValueFilter().getFilter() == null ? null : asDropItems(def.getValueFilter().getFilter(), session)); 
 			
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.COLUMN.name(), //$NON-NLS-1$
-					def == null || def.getColumnGroupByPart() == null ? null : def.getColumnGroupByPart().getDropItems(session));
+					def == null || def.getColumnGroupByPart() == null ? null : 
+						groupByToDropItems(def.getColumnGroupByPart(), session));
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.ROW.name(), //$NON-NLS-1$
-					def == null || def.getRowGroupByPart() == null ? null : def.getRowGroupByPart().getDropItems(session));
+					def == null || def.getRowGroupByPart() == null ? null : 
+						groupByToDropItems(def.getRowGroupByPart(), session));
 			proxy.setDropItems(ObservationSummaryGroupByValuePanel.ID + "." + ObservationSummaryGroupByValuePanel.ListTargetType.VALUE.name(), //$NON-NLS-1$
-					def == null || def.getValuePart() == null ? null : def.getValuePart().getDropItems(session));
+					def == null || def.getValuePart() == null ? null : 
+						valuePartToDropItems(def.getValuePart(), session));						
 			
-		}else if(proxy.getQuery().getType().getKey().equalsIgnoreCase(ObservationGridQueryType.KEY)){
+		}else if(proxy.getQuery().getTypeKey().equalsIgnoreCase(ObservationGriddedQuery.KEY)){
 			ObservationGriddedQuery q = (ObservationGriddedQuery) proxy.getQuery();
 			GridQueryDefinition def = q.getQueryDefinition();
 			
@@ -238,15 +252,16 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			
 			DropItem valueItem = null;
 			try{
-				valueItem = def.getValuePart().asDropItem(session);
+				valueItem = valueItemToDropItem(def.getValuePart(), session);
 			}catch(Exception ex){
 				ObservationQueryPlugIn.log(ex.getMessage(), ex);
 				valueItem = new ErrorDropItem(ex.getMessage());
 			}
 			proxy.setDropItems(BasicGridDefinitionPanel.ID + BasicGridDefinitionPanel.VALUE_PANEL_SUFFIX,
 					Collections.singletonList(valueItem));
-					
-			
+		}
+		}catch (Exception ex){
+			ObservationQueryPlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 	
@@ -256,7 +271,7 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 	private List<DropItem> asDropItems(IFilter filter, Session session){
 		List<DropItem> items = new ArrayList<DropItem>();
 		try{
-			DropItem[] filterItems = filter.getDropItems(session);
+			DropItem[] filterItems = filterToDropItem(filter, session);
 			for(DropItem i : filterItems){
 				items.add(i);
 			}
@@ -265,5 +280,95 @@ public class ObservationDropItemFactory extends BasicDropItemFactory implements 
 			items.add(new ErrorDropItem(MessageFormat.format(Messages.SimpleQuery_DropItemParseError, new Object[]{ex.getMessage()})));
 		}
 		return items;
+	}
+	
+	@Override
+	public DropItem[] filterToDropItem(IFilter f, Session session) throws Exception{
+		if (f instanceof WaypointSourceFilter){
+			return createDropItems((WaypointSourceFilter)f, session);
+		}else if (f instanceof BooleanExpression){
+			return createDropItems((BooleanExpression)f, session);
+		}
+		return super.filterToDropItem(f, session);
+	}
+	
+	public DropItem[] createDropItems(BooleanExpression exp, Session session) throws Exception{
+		DropItem[] its1 = filterToDropItem(exp.getFilter1(), session);
+		DropItem opDropItem = BasicDropItemFactory.createBooleanOpDropItem();
+		opDropItem.initializeData(exp.getOperator().asSmartValue());
+		
+		DropItem[] its2 = filterToDropItem(exp.getFilter2(), session);
+		
+		DropItem[] results = new DropItem[its1.length + its2.length + 1];
+		for (int i = 0; i < its1.length; i ++){
+			results[i] = its1[i];
+		}
+		results[its1.length] = opDropItem;
+		for (int i = 0; i < its2.length; i++){
+			results[its1.length + i + 1] = its2[i];
+		}
+		return results;
+	}
+
+	private DropItem[] createDropItems(WaypointSourceFilter filter, Session session) throws Exception {
+		IWaypointSource src = WaypointSourceEngine.INSTANCE.getSource(filter.getWaypointSourceKey());
+		DropItem di;
+		if (src == null){
+			di = new ErrorDropItem(MessageFormat.format(Messages.WaypointSourceFilter_InvalidSourceFilter, new Object[]{filter.getWaypointSourceKey()}));
+		}else{
+	
+			di = new WaypointSourceFilterDropItem();
+			di.initializeData(new Object[]{filter.getOperator(), src});
+		}
+		return new DropItem[]{di};
+	}
+	
+	/**
+	 * Converts all value items to drop items.
+	 * @param session
+	 * @return
+	 */
+	public List<DropItem> valuePartToDropItems(ValuePart part, Session session) {
+		ArrayList<DropItem> item = new ArrayList<DropItem>();
+		try{
+			for (IValueItem valueItem : part.getValueItems()){
+				item.add(valueItemToDropItem(valueItem, session));
+			}
+		}catch (Exception ex){
+			QueryPlugIn.log(ex.getMessage(), ex);
+			item.clear();
+			item.add(new ErrorDropItem(ex.getMessage()));
+		}
+		return item;
+
+	}
+	
+	/**
+	 * Converts the group by part into a collection of
+	 * drop items.
+	 * 
+	 * @param session
+	 * @return
+	 */
+	public List<DropItem> groupByToDropItems(GroupByPart groupBy, Session session) {
+		ArrayList<DropItem> item = new ArrayList<DropItem>();
+		try{
+			for (IGroupBy groupByItem : groupBy.getGroupBys()){
+				item.add(groupByToDropItem(groupByItem, session));
+			}
+		}catch (Exception ex){
+			QueryPlugIn.log(ex.getMessage(), ex);
+			item.clear();
+			item.add(new ErrorDropItem(ex.getMessage()));
+		}
+		return item;
+	}
+	
+	@Override
+	public IGroupByViewer<?> findViewer(IGroupBy groupBy){
+		if (groupBy instanceof WaypointSourceGroupBy){
+			return new WaypointSourceGroupByViewer((WaypointSourceGroupBy) groupBy);
+		}
+		return super.findViewer(groupBy);
 	}
 }

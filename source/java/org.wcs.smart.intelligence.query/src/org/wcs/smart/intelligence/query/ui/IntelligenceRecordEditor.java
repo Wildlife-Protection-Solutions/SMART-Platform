@@ -24,14 +24,14 @@ package org.wcs.smart.intelligence.query.ui;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
-import org.wcs.smart.intelligence.query.RecievedDateFilter;
 import org.wcs.smart.intelligence.query.map.udig.QueryService;
 import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
-import org.wcs.smart.intelligence.query.model.IntelligenceRecordQueryType;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
+import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.ui.QueryResultsEditor;
 import org.wcs.smart.query.model.IQueryType;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
@@ -47,7 +47,7 @@ public class IntelligenceRecordEditor extends QueryResultsEditor {
 
 	@Override
 	public Query createNewQuery(IQueryType type) {
-		if (type.getKey().equals(IntelligenceRecordQueryType.KEY)){
+		if (type.getKey().equals(IntelligenceRecordQuery.KEY)){
 			return IntelligenceQueryFactory.createIntelligenceRecordQuery();
 		}
 		return null;

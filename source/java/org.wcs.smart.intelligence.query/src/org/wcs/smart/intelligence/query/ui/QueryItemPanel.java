@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.query.ui;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -42,6 +43,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.query.filter.IntelligenceFilterOption;
+import org.wcs.smart.intelligence.query.internal.IntelligenceQueryLabelProvider;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
@@ -92,14 +94,14 @@ public class QueryItemPanel extends AbstractQueryItemPanel {
 					if (element instanceof String){
 						return (String)element;
 					}else if (element instanceof IntelligenceFilterOption){
-						return ((IntelligenceFilterOption) element).getGuiName();
+						return ((IntelligenceFilterOption) element).getGuiName(Locale.getDefault());
 					}
 					return super.getText(element);
 				}
 				@Override
 				public Image getImage(Object element){
 					if (element instanceof IntelligenceFilterOption){
-						return ((IntelligenceFilterOption)element).getImage();
+						return IntelligenceQueryLabelProvider.getImage( (IntelligenceFilterOption)element );
 					}
 					return super.getImage(element);
 				}

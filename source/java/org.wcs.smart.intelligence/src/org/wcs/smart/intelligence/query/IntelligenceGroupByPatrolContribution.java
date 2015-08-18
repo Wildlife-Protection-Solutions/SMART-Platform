@@ -22,21 +22,19 @@
 package org.wcs.smart.intelligence.query;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.swt.graphics.Image;
+import org.hibernate.Session;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
-import org.wcs.smart.intelligence.internal.Messages;
-import org.wcs.smart.patrol.query.parser.IExtensionGroupBy;
-import org.wcs.smart.patrol.query.parser.IExtensionOption;
-import org.wcs.smart.patrol.query.parser.IGroupByPatrolContribution;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
+import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.ui.model.DropItem;
-import org.wcs.smart.query.ui.model.ListItem;
 
 /**
  * Intelligence patrol gorup by contribution item.
@@ -44,54 +42,10 @@ import org.wcs.smart.query.ui.model.ListItem;
  * @author Emily
  *
  */
-public class IntelligenceGroupByPatrolContribution implements
-		IGroupByPatrolContribution {
-
-	public static final List<ListItem> SUPPORTEDVALUES = new ArrayList<ListItem>();
-	static{
-		SUPPORTEDVALUES.add(new ListItem(null, Messages.IntelligenceGroupByPatrolContribution_MotivatedByIntelligenceLabel, "m")); //$NON-NLS-1$
-		SUPPORTEDVALUES.add(new ListItem(null, Messages.IntelligenceGroupByPatrolContribution_NotMotivatedByIntelligenceLabel, "nm")); //$NON-NLS-1$
-	}
+public class IntelligenceGroupByPatrolContribution implements IExtensionGroupByViewer {
 	
-	private static final IExtensionOption GBOPTION = new IExtensionOption() {
-		
-		@Override
-		public String getName() {
-			return Messages.IntelligenceGroupByPatrolContribution_ContributionName;
-		}
-		
-		@Override
-		public Image getImage() {
-			return IntelligencePlugIn.getDefault().getImageRegistry().get(IntelligencePlugIn.INTELLIGENCE_ICON);
-		}
-		
-		@Override
-		public DropItem asDropItem() {
-			return new IntelligenceGroupByDropItem();
-		}
-	};
-	
-	
-	
+	private IntelligencePatrolQueryOption op = new IntelligencePatrolQueryOption();
 	public IntelligenceGroupByPatrolContribution() {
-	}
-
-	
-	/**
-	 * Supports group bys of the form "patrol:contribution:intelligence"
-	 */
-	@Override
-	public IExtensionGroupBy createGroupBy(String key) {
-		String[] bits = key.split(":"); //$NON-NLS-1$
-		if (bits[2].equals("intelligence")){ //$NON-NLS-1$
-			return new PatrolIntelligenceGroupBy();
-		}
-		return null;
-	}
-
-	@Override
-	public IExtensionOption getOption() {
-		return GBOPTION;
 	}
 
 	@Override
@@ -101,7 +55,7 @@ public class IntelligenceGroupByPatrolContribution implements
 			IQueryEngine engine)
 			throws SQLException {
 		
-		if (!(groupBy instanceof PatrolIntelligenceGroupBy)){
+		if (!(groupBy instanceof IntelligencePatrolGroupBy)){
 			return;
 		}
 		
@@ -113,6 +67,48 @@ public class IntelligenceGroupByPatrolContribution implements
 		fromSql.append(" on "); //$NON-NLS-1$
 		fromSql.append("temp.p_uuid = " + intelPrefix + ".patrol_uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 		
+	}
+
+
+	@Override
+	public String getName() {
+		return op.getGuiName(Locale.getDefault());
+	}
+
+
+	@Override
+	public DropItem asDropItem() {
+		return new IntelligenceGroupByDropItem();
+	}
+
+
+	@Override
+	public Image getImage() {
+		return IntelligencePlugIn.getDefault().getImageRegistry().get(IntelligencePlugIn.INTELLIGENCE_ICON);
+	}
+
+
+	@Override
+	public Class<? extends IExtensionGroupBy> getGroupByClass() {
+		return IntelligencePatrolGroupBy.class;
+	}
+
+
+	@Override
+	public DropItem[] getDropItems(IExtensionGroupBy groupBy, Session session) {
+		if (!(groupBy instanceof IntelligencePatrolGroupBy)){
+			return null;
+		}
+		DropItem di = new IntelligenceGroupByDropItem();
+		return new DropItem[]{di};
+	}
+
+	@Override
+	public IGroupByViewer<? extends IGroupBy> createViewer(IGroupBy groupBy) {
+		if (groupBy instanceof IntelligencePatrolGroupBy){
+			return new PatrolIntelligenceGroupByViewer((IntelligencePatrolGroupBy)groupBy);
+		}
+		return null;
 	}
 
 }

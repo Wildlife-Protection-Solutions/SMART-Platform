@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -52,6 +53,7 @@ import org.wcs.smart.internal.Messages;
 import org.wcs.smart.internal.ca.export.CaExporter;
 import org.wcs.smart.internal.ca.export.PlugInConfigurationExporter;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -116,7 +118,7 @@ public class CaImporter {
 			monitor.worked(10);
 			
 			monitor.subTask(Messages.CaImporter_Progress_ValidatingCaImport);
-			byte[] cauuid = validateConservationAreaInfo(dir, session);
+			UUID cauuid = validateConservationAreaInfo(dir, session);
 			monitor.worked(10);
 			
 			monitor.subTask(Messages.CaImporter_ValidatingPluginProgressMessage);
@@ -222,10 +224,10 @@ public class CaImporter {
 	 * @return conservation area uuid
 	 * @throws Exception
 	 */
-	private byte[] validateConservationAreaInfo(File dir, Session session) throws Exception{
+	private UUID validateConservationAreaInfo(File dir, Session session) throws Exception{
 		File caInfo = new File(dir, CaExporter.CA_INFO_FILENAME);
 		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
-		byte[] uuid = null;
+		UUID uuid = null;
 		
 		try(BufferedReader reader = new BufferedReader(new FileReader(caInfo))){
 			String cauuid = reader.readLine();
@@ -242,7 +244,7 @@ public class CaImporter {
 			}	
 			session.beginTransaction();
 			try{
-				uuid = SmartUtils.decodeHex(cauuid);
+				uuid = UuidUtils.stringToUuid(cauuid);
 				long cnt = (Long)session.createCriteria(ConservationArea.class).add(Restrictions.eq("uuid", uuid)).setProjection(Projections.rowCount()).list().get(0); //$NON-NLS-1$
 				if (cnt != 0){				
 					throw new Exception(MessageFormat.format(Messages.CaImporter_Error_CaAlreadyExists, new Object[]{name, id}));

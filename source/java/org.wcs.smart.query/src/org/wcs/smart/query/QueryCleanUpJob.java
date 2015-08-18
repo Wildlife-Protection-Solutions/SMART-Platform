@@ -8,7 +8,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.internal.Messages;
 
 public class QueryCleanUpJob extends Job{
@@ -30,7 +30,7 @@ public class QueryCleanUpJob extends Job{
 		
 		//cleanup query tables
 		
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		try{
 			session.beginTransaction();
 			SQLQuery q = session.createSQLQuery("CALL smart.cleanUpTempData()"); //$NON-NLS-1$

@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.hibernate.Session;
@@ -42,10 +41,10 @@ import org.wcs.smart.intelligence.query.model.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordResultItem;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -80,9 +79,9 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 		
 		if (query instanceof IPagedQuery){
 			try {
-				Object cachedResults = query.getCachedResults(new NullProgressMonitor());
+				IPagedQueryResultSet cachedResults = (IPagedQueryResultSet) query.getCachedResults();
 				if (cachedResults != null){
-					fIterator = ((IPagedQueryResultSet)cachedResults).iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
+					fIterator = cachedResults.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE);
 				}
 			} catch (Exception e) {
 				QueryPlugIn.log(e.getMessage(), e);
@@ -127,7 +126,7 @@ public class IntelQueryFeatureReader implements FeatureReader<SimpleFeatureType,
 		Object[] data = new Object[size];
 		int i = 0;
 		data[i++] = gf.createPoint(new Coordinate(ip.getX(), ip.getY()));
-		data[i++] = SmartUtils.encodeHex(ip.getUuid());
+		data[i++] = UuidUtils.uuidToString(ip.getUuid());
 		for (FixedQueryColumn.FixedColumns c : FixedQueryColumn.FixedColumns.values()){
 			boolean add = true;
 			if (c == FixedColumns.CA_ID || c == FixedColumns.CA_NAME){

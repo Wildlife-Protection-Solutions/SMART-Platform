@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.birt.report.engine.api.IParameterGroupDefn;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -103,7 +104,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 			@Override
 			public String getText(Object element){
 				if (element instanceof IDateFilter){
-					return ((IDateFilter)element).getGuiName();
+					return ((IDateFilter)element).getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
@@ -152,7 +153,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 			@Override
 			public void handleEvent(Event event) {
 				IDateFilter filterOp = (IDateFilter) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement(); 
-				boolean enabled = (filterOp.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey()));
+				boolean enabled = (filterOp.getQueryKey().equals(CustomDateFilter.KEY));
 				lblStart.setEnabled(enabled);
 				lblEnd.setEnabled(enabled);
 				startPicker.setEnabled(enabled);
@@ -196,7 +197,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		
 		IDateFilter op = (IDateFilter) ((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
 
-		if (op.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey())){
+		if (op.getQueryKey().equals(CustomDateFilter.KEY)){
 			//update custom date filter with values from combo boxes
 			((CustomDateFilter) op).setDates(SmartUtils.getDate(startPicker), SmartUtils.getDate(endPicker));
 		}	
@@ -240,7 +241,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 				throw new UnsupportedOperationException(
 						MessageFormat
 								.format(Messages.SmartDateParameterComponent_DateFilterNotSupported,
-										new Object[] { op.getGuiName() }));
+										new Object[] { op.getGuiName(Locale.getDefault()) }));
 			}
 		}else if (dates.length == 1){
 			params.put(SmartReportParameters.PARAM_START_DATE_KEY, dates[0]);
@@ -258,7 +259,7 @@ public class SmartDateParameterComponent implements IBirtParameterComponent, Lis
 		IDateFilter op = (IDateFilter) 
 				((IStructuredSelection)cmbDatesOps.getSelection()).getFirstElement();
 
-		if (op.getQueryKey().equals(CustomDateFilter.INSTANCE.getQueryKey())){
+		if (op.getQueryKey().equals(CustomDateFilter.KEY)){
 			Date start = SmartUtils.getDate(startPicker);
 			Date end = SmartUtils.getDate(endPicker);
 			

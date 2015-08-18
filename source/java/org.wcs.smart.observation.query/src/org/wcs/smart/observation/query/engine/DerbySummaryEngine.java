@@ -37,21 +37,27 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.observation.query.internal.Messages;
+import org.wcs.smart.observation.query.internal.ObservationValueItemLabelProvider;
 import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
+import org.wcs.smart.observation.query.ui.definition.ObservationDropItemFactory;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor;
 import org.wcs.smart.query.common.engine.visitors.HasObservationValueVisitor;
 import org.wcs.smart.query.common.model.SummaryHeader;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
@@ -70,10 +76,12 @@ import org.wcs.smart.query.model.summary.ConservationAreaGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
 import org.wcs.smart.query.model.summary.IGroupBy;
+import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.model.summary.SumQueryDefinition;
 import org.wcs.smart.query.model.summary.ValuePart;
 import org.wcs.smart.query.ui.model.ListItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing summary
@@ -82,13 +90,19 @@ import org.wcs.smart.util.SmartUtils;
  * @author egouge
  * @since 1.0.0
  */
-public class DerbySummaryEngine extends DerbyObservationQueryEngine{
+public class DerbySummaryEngine extends AbstractDerbyObservationQueryEngine{
 
 	private SummaryQueryResult sumResults = null;
 	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 	
 	private String rateTable;
 	private String valueTable;
+	
+	@Override
+	public boolean canExecute(String querytype) {
+		return ObservationSummaryQuery.KEY.equals(querytype);
+	}
+
 	/**
 	 * Executes the given summary query.
 	 * 
@@ -119,10 +133,15 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 	 * are commputed and added to the results.
 	 *  
 	 */
-	public SummaryQueryResult executeQuery(final ObservationSummaryQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
 
+		final ObservationSummaryQuery query = (ObservationSummaryQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
+	
 		valueTable = createTempTableName();
 		rateTable = createTempTableName();
 		
@@ -134,7 +153,13 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, query.getQueryDefinition().getValuePart().getValueItems().size() + 5);
+				SumQueryDefinition def = null;
+				try{
+					def = query.getQueryDefinition();
+				}catch (Exception ex){
+					throw new SQLException (ex.getMessage(), ex);
+				}
+				monitor.beginTask(Messages.DerbySummaryEngine_Progress_RunningQuery, def.getValuePart().getValueItems().size() + 5);
 
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
@@ -155,32 +180,32 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 					boolean needsObservationRate = false;
 					
 					List<IGroupBy> all = new ArrayList<IGroupBy>();
-					all.addAll(query.getQueryDefinition().getColumnGroupByPart().getGroupBys());
-					all.addAll(query.getQueryDefinition().getRowGroupByPart().getGroupBys());
+					all.addAll(def.getColumnGroupByPart().getGroupBys());
+					all.addAll(def.getRowGroupByPart().getGroupBys());
 					GroupByPart allGroupBy = new GroupByPart(all);
 					
 					HasObservationValueVisitor vv = new HasObservationValueVisitor();
-					query.getQueryDefinition().getValuePart().visit(vv);
+					def.getValuePart().visit(vv);
 					needsObservationValue = vv.hasCategory() || vv.hasAttribute();
 					
 					if(!needsObservationValue){
 						HasObservationGroupByVisitor cv = new HasObservationGroupByVisitor();
-						query.getQueryDefinition().getColumnGroupByPart().visit(cv);
+						def.getColumnGroupByPart().visit(cv);
 						needsObservationValue = cv.hasCategory() || cv.hasAttribute();
 						if (!needsObservationValue){
-							query.getQueryDefinition().getRowGroupByPart().visit(cv);
+							def.getRowGroupByPart().visit(cv);
 							needsObservationValue = cv.hasCategory() || cv.hasAttribute();
 						}
 						
 					}
 					needsObservationRate = needsObservationValue;
 					QueryFilter valueFilter = new QueryFilter(EmptyFilter.INSTANCE);
-					if (query.getQueryDefinition().getValueFilter() != null){
-						valueFilter = query.getQueryDefinition().getValueFilter();
+					if (def.getValueFilter() != null){
+						valueFilter = def.getValueFilter();
 					}
 					QueryFilter rateFilter = new QueryFilter(EmptyFilter.INSTANCE);
-					if (query.getQueryDefinition().getRateFilter() != null){
-						rateFilter = query.getQueryDefinition().getRateFilter();
+					if (def.getRateFilter() != null){
+						rateFilter = def.getRateFilter();
 					}
 					
 					if (!needsObservationValue){
@@ -199,8 +224,9 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 					}
 					
 					IFilterProcessor filterer = DerbySummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable);
+					ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					try{
-						filterer.processFilter(c, valueFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationValue, false, monitor);
+						filterer.processFilter(c, valueFilter.getFilter(), dFilter, cafilter, needsObservationValue, false, monitor);
 					}finally{
 						filterer.dropTemporaryTables(c);
 					}
@@ -209,7 +235,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 						return;
 					}
 					monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+					addCategoryHkey(valueTable, allGroupBy, def.getValuePart(), c);
 					
 					String vFilter = valueFilter.asString();
 					String rFilter = rateFilter.asString();
@@ -222,7 +248,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 						
 						IFilterProcessor rfilterer = DerbySummaryEngine.this.getFilterProcessor(rateFilter.getFilterType(), rateTable);
 						try{
-							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, query.getConservationAreaFilterAsFilter(), needsObservationRate, false, monitor);
+							rfilterer.processFilter(c, rateFilter.getFilter(), dFilter, cafilter, needsObservationRate, false, monitor);
 						}finally{
 							rfilterer.dropTemporaryTables(c);
 						}
@@ -230,12 +256,11 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 							return;
 						}
 						monitor.subTask(Messages.DerbySummaryEngine_Progress_ProcessingValue);
-						addCategoryHkey(rateTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
+						addCategoryHkey(rateTable, allGroupBy, def.getValuePart(), c);
 					}
 					
 					HashMap<SummaryResultKey, Double> data = computeSummaryValues(c, session, 
-							allGroupBy, query.getQueryDefinition().getValuePart(),
-							query.getConservationAreaFilterAsFilter(),monitor);
+							allGroupBy, def.getValuePart(), cafilter, monitor);
 					
 					if (monitor.isCanceled() || data == null){
 						return ;
@@ -244,6 +269,8 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 					
 					
 					monitor.worked(1);
+				}catch (Exception ex){
+					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					dropTemporaryTables(c);
@@ -410,7 +437,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 				valueSql = valueSql + ",temp.cat_hkey"; //$NON-NLS-1$
 			}
 			StringBuilder valueAggSql = new StringBuilder();
-			valueAggSql.append(attributeItem.getAggregation().getName());
+			valueAggSql.append(attributeItem.getAggregationKey());
 			valueAggSql.append("("); //$NON-NLS-1$
 			valueAggSql.append(tablePrefix
 					.get(WaypointObservationAttribute.class));
@@ -675,7 +702,7 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 						key += rs.getString(rsindex++);
 						break;
 					case BYTE:
-						key += SmartUtils.encodeHex(rs.getBytes(rsindex++));
+						key += UuidUtils.uuidToString(UuidUtils.byteToUUID(rs.getBytes(rsindex++)));
 						break;
 					case DATE:
 						key += rs.getDate(rsindex++).toString();
@@ -978,13 +1005,17 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 	 * @param query the summary query
 	 * @param results the summary query results to update
 	 * @param session hibernate session
+	 * @throws Exception 
 	 */
-	public static void getHeaderInfo(ObservationSummaryQuery query, SummaryQueryResult results, Session session){
+	public static void getHeaderInfo(ObservationSummaryQuery query, SummaryQueryResult results, Session session) throws Exception{
 		
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
 		for (IValueItem item : vp.getValueItems()){
-			SummaryHeader header = new SummaryHeader(item.getName(session), item.getFullName(session), item.asString(), true);
+			SummaryHeader header = new SummaryHeader(ObservationValueItemLabelProvider.INSTANCE.getName(item, session),
+					ObservationValueItemLabelProvider.INSTANCE.getFullName(item, session),
+					item.asString(), true);
+			
 			results.addValueHeader(header);
 		}
 		
@@ -994,12 +1025,13 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = item.getItems(session);
+			IGroupByViewer<?> viewer = ObservationDropItemFactory.INSTANCE.findViewer(item);
+			List<ListItem> items = viewer.getItems(session);
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), UuidUtils.uuidToString( it.getUuid() ), false);
 				}else{
 					rowHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}	
@@ -1012,12 +1044,13 @@ public class DerbySummaryEngine extends DerbyObservationQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = item.getItems(session);
+			IGroupByViewer<?> viewer = ObservationDropItemFactory.INSTANCE.findViewer(item);
+			List<ListItem> items = viewer.getItems(session);
 			SummaryHeader[] colHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
 				if (it.getUuid() != null){
-					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), SmartUtils.encodeHex( it.getUuid() ), false);
+					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), UuidUtils.uuidToString( it.getUuid() ), false);
 				}else{
 					colHeader[i] = new SummaryHeader( it.getName(), it.getName(), item.getKeyPart(), it.getKey(), false);
 				}

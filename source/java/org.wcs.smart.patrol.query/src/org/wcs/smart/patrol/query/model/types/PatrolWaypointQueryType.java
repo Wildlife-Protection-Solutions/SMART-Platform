@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.PatrolQueryPlugIn;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolDropItemFactory;
@@ -58,7 +59,6 @@ public class PatrolWaypointQueryType implements IQueryType {
 	
 	private static IDropItemFactory dropItemFactory = null;
 	
-	public static final String KEY = "patrolwaypoint"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
@@ -72,7 +72,7 @@ public class PatrolWaypointQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return PatrolWaypointQuery.KEY;
 	}
 
 	/**

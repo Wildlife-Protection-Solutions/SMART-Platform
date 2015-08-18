@@ -204,7 +204,8 @@ public class DataModelSmartToXmlConverter {
 		for (Label lbl: names){
 			NameType nt = new NameType();
 			nt.setValue(lbl.getValue());
-			nt.setLanguageCode(llookup.get(new String(lbl.getLanguage().getUuid())).getCode());
+//			nt.setLanguageCode(llookup.get(new String(lbl.getLanguage().getUuid())).getCode());
+			nt.setLanguageCode(llookup.get(lbl.getLanguage().getUuid().toString()).getCode());
 			list.add(nt);
 		}
 	}
@@ -217,7 +218,8 @@ public class DataModelSmartToXmlConverter {
 			LanguageType lt = new LanguageType();
 			lt.setCode(ll.getCode());
 			llt.getLanguages().add(lt);
-			lookup.put(new String(ll.getUuid()), ll);
+//			lookup.put(new String(ll.getUuid()), ll);
+			lookup.put(ll.getUuid().toString(), ll);
 		}	
 		return lookup;
 		

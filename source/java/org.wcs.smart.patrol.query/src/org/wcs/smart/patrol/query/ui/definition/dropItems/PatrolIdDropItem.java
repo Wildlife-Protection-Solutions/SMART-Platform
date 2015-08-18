@@ -22,6 +22,7 @@
 package org.wcs.smart.patrol.query.ui.definition.dropItems;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -42,8 +43,8 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.IPatrolQueryOption;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions.PatrolQueryOption;
+import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
+import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.query.model.filter.Operator;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
@@ -111,7 +112,7 @@ public class PatrolIdDropItem  extends DropItem implements IFilterDropItem{
 	public PatrolIdDropItem(IPatrolQueryOption option) {
 		//super(parent, target);
 		assert option == PatrolQueryOption.ID;
-		this.text = option.getGuiName();
+		this.text = option.getGuiName(Locale.getDefault());
 		this.key = "patrol:" + option.getKey(); //$NON-NLS-1$
 	}
 

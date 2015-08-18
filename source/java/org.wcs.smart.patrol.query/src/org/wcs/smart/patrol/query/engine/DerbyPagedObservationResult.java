@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
@@ -38,12 +39,12 @@ import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -321,7 +322,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 					attrSql.append(',');
 				}
 				hasObservations = true;
-				attrSql.append("x'").append(SmartUtils.encodeHex(it.getObservationUuid())).append('\''); //$NON-NLS-1$
+				attrSql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
 			}
 		}
 		
@@ -334,11 +335,11 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 
 		
 		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
-			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
+			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
 			for (IResultItem pit : result){
 				PatrolQueryResultItem it  = (PatrolQueryResultItem) pit;
 				if (it.getObservationUuid() != null) {
-					HashMap<String, Object> attributes = attrMap.get(wrap(it.getObservationUuid()));
+					HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());
 					if (attributes != null) {
 						it.setAttributes(attributes);
 					}
@@ -436,8 +437,8 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 		return items;
 	}
 
-	protected HashMap<MapByteArrayKey, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
-		HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = new HashMap<MapByteArrayKey, HashMap<String, Object>>();
+	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
+		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
 		/*
 		1	OB_UUID
 		2	KEYID
@@ -451,7 +452,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 			byte[] obUuid = rs.getBytes(1);
 			if (obUuid == null)
 				continue;
-			MapByteArrayKey keyObj = wrap(obUuid);
+			UUID keyObj = UuidUtils.byteToUUID(obUuid);
 			HashMap<String, Object> attributes = attrMap.get(keyObj);
 			if (attributes == null) {
 				attributes = new HashMap<String, Object>();

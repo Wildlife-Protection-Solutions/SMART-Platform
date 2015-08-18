@@ -47,11 +47,10 @@ import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
+import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
-import org.wcs.smart.patrol.query.parser.IExtensionOption;
-import org.wcs.smart.patrol.query.parser.IQueryFilterPatrolContribution;
-import org.wcs.smart.patrol.query.parser.PatrolQueryOptions;
-import org.wcs.smart.patrol.query.parser.internal.filter.PatrolContributionFactory;
+import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
 import org.wcs.smart.query.common.ui.itempanel.DataModelTreeNode;
@@ -160,12 +159,8 @@ public class QueryFilterPanel extends AbstractQueryItemPanel {
 		}
 	}
 
-	private List<IExtensionOption> findContributedPatrolQueryOptions() {
-		List<IExtensionOption> items = new ArrayList<IExtensionOption>();
-		for (IQueryFilterPatrolContribution contribution : PatrolContributionFactory.getFilterContributions()) {
-			items.addAll(contribution.getOptions());
-		}
-		return items;
+	private List<IExtensionFilterViewer> findContributedPatrolQueryOptions() {
+		return PatrolContributionFinder.getFilterUiContributions();
 	}
 	
 	private Job refreshJob = new Job(Messages.QueryFilterPanel_RefreshTree_JobTitle) {

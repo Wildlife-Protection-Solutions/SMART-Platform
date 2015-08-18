@@ -165,7 +165,7 @@ public class PatrolToXmlConverter {
 			TrackType track = new TrackType();
 			track.setDistance((double)legDay.getTrack().getDistance());
 			
-			track.setGeom(SmartUtils.encodeHex(legDay.getTrack().getGeom()) );
+			track.setGeom(SmartUtils.encodeGeometry(legDay.getTrack().getGeom()) );
 			xml.setTrack(track);
 		}
 		

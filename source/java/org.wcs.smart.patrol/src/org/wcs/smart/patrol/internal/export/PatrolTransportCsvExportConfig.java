@@ -27,7 +27,7 @@ import org.wcs.smart.export.dialog.CsvExportDialog;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Configuration for current {@link CsvExportDialog} to export
@@ -63,9 +63,9 @@ public class PatrolTransportCsvExportConfig extends AbstractCsvExportConfig {
 	@Override
 	public String getInfo() {
 		return Messages.PatrolTransportCsvExportConfig_Message1
-				+ SmartUtils.LINE_SEPARATOR
+				+ SharedUtils.LINE_SEPARATOR
 				+ Messages.PatrolTransportCsvExportConfig_Message1a
-				+ SmartUtils.LINE_SEPARATOR + SmartUtils.LINE_SEPARATOR
+				+ SharedUtils.LINE_SEPARATOR + SharedUtils.LINE_SEPARATOR
 				+ Messages.PatrolTransportCsvExportConfig_Message2 + 
 				PatrolType.Type.AIR.name() + ","+ PatrolType.Type.MARINE.name() + "," +	PatrolType.Type.GROUND.name() + ". " + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				Messages.PatrolTransportCsvExportConfig_Message3;
