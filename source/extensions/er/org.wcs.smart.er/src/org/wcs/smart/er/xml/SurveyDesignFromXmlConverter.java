@@ -163,9 +163,9 @@ public class SurveyDesignFromXmlConverter {
 		}
 		
 		
-		if(xml.getState().equals("Active")){ //$NON-NLS-1$
+		if(xml.getState().equals(State.ACTIVE.name())){ 
 			surveyDesign.setState(State.ACTIVE);
-		}else if(xml.getState().equals("Inactive") ){ //$NON-NLS-1$
+		}else if(xml.getState().equals(State.INACTIVE.name()) ){ 
 			surveyDesign.setState(State.INACTIVE);
 		}
 

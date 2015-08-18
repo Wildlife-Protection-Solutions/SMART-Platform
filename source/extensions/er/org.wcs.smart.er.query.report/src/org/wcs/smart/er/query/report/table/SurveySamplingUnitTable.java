@@ -25,11 +25,13 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.data.oda.smart.impl.table.SmartBirtTable;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -39,6 +41,7 @@ import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.report.internal.Messages;
+import org.wcs.smart.er.ui.ErLabelProvider;
 
 /**
  * Sampling unit table.
@@ -53,12 +56,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 	private SamplingUnit.GeometryType type;
 	
 	public SurveySamplingUnitTable(SurveyDesign sd, SamplingUnit.GeometryType type) {
-		super(MessageFormat.format(Messages.SurveySamplingUnitTable_LongDisplayName, new Object[]{sd.getName(), type.getGuiName()}),
-				sd.getName() + " [" + type.getGuiName() + "]", //$NON-NLS-1$ //$NON-NLS-2$
+		super(MessageFormat.format(Messages.SurveySamplingUnitTable_LongDisplayName, new Object[]{sd.getName(), type.getGuiName(Locale.getDefault())}),
+				sd.getName() + " [" + type.getGuiName(Locale.getDefault()) + "]", //$NON-NLS-1$ //$NON-NLS-2$
 				SU_PREFIX + ":" + type.name() + ":" + sd.getKeyId()); //$NON-NLS-1$ //$NON-NLS-2$
 		this.type = type;
 		this.sd = sd;
-		this.tableImage = type.getImage();
+		this.tableImage = ErLabelProvider.getImage(type);
 	}
 
 	@Override
@@ -165,11 +168,16 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			if (index == 0){
 				return e.getId();
 			}else if (index == 1){
-				return e.getState().getGuiName();
+				return e.getState().getGuiName(Locale.getDefault());
 			}else{
 				if (type == GeometryType.TRANSECT){
 					if (index == 2){
-						return e.getGeometryLengthKm();
+						try{
+							return e.getGeometryLengthKm();
+						}catch (Exception ex){
+							EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+							return -1;
+						}
 					}
 					index--;
 				}
@@ -195,7 +203,12 @@ public class SurveySamplingUnitTable extends SmartBirtTable {
 			}else if (index == 3){
 				return mt.getMissionDay().getDate();
 			}else if (index == 4){
-				return mt.getGeometryLengthKm();
+				try{
+					return mt.getGeometryLengthKm();
+				}catch (Exception ex){
+					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+					return -1;
+				}
 			}
 		}
 		return null;

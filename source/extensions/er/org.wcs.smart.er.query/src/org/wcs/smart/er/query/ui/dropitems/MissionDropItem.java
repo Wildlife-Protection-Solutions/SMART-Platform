@@ -33,7 +33,7 @@ import org.wcs.smart.er.query.filter.MissionFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Mission uuid drop item.  This drop item represents a specific
@@ -57,7 +57,7 @@ public class MissionDropItem extends DropItem implements IFilterDropItem{
 
 	@Override
 	public String asQueryPart() {
-		return MissionFilter.UUID_QUERY_KEY + ":" + SmartUtils.encodeHex(mission.getUuid()); //$NON-NLS-1$
+		return MissionFilter.UUID_QUERY_KEY + ":" + UuidUtils.uuidToString(mission.getUuid()); //$NON-NLS-1$
 	}
 
 	@Override

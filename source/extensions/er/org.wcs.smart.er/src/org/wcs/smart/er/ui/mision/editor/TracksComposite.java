@@ -110,7 +110,6 @@ import org.wcs.smart.er.ui.mision.udig.MissionGeoResource;
 import org.wcs.smart.er.ui.mision.udig.MissionService;
 import org.wcs.smart.er.ui.mision.udig.MissionServiceExtension;
 import org.wcs.smart.er.ui.mision.udig.SplitTool;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.ImportGpsDataWizard;
 import org.wcs.smart.udig.SetBasemapTool;
@@ -122,6 +121,7 @@ import org.wcs.smart.ui.map.tool.ClearSelectionTool;
 import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Envelope;
@@ -187,9 +187,13 @@ public class TracksComposite extends Composite implements MapPart{
 		Collections.sort(tblInput, new Comparator<MissionTrack>() {
 			@Override
 			public int compare(MissionTrack o1, MissionTrack o2) {
-				double z1 = o1.getLineString().getCoordinateN(0).z;
-				double z2 = o2.getLineString().getCoordinateN(0).z;
-				return Double.compare(z1, z2);
+				try{
+					double z1 = o1.getLineString().getCoordinateN(0).z;
+					double z2 = o2.getLineString().getCoordinateN(0).z;
+					return Double.compare(z1, z2);
+				}catch (Exception ex){
+					return 0;
+				}
 			}
 		});
 		return tblInput;
@@ -520,7 +524,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 		//set default crs
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
-		mapViewer.getMap().getViewportModelInternal().setCRS(SmartDB.DATABASE_CRS);
+		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 		
 		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap());
 		// we need to do this because this map is in a dialog box and
@@ -566,7 +570,7 @@ public class TracksComposite extends Composite implements MapPart{
 			if (su instanceof MissionTrack){
 				MissionTrack mt = (MissionTrack)su;
 				allFilters.add(ff.equals(ff.property("fid"),  //$NON-NLS-1$
-					ff.literal(SmartUtils.encodeHex(mt.getUuid())))); 
+					ff.literal(UuidUtils.uuidToString(mt.getUuid())))); 
 			}
 		}
 		for (Layer l : trackLayers){
@@ -653,36 +657,45 @@ public class TracksComposite extends Composite implements MapPart{
 		Collections.sort(tracksToMerge, new Comparator<MissionTrack>() {
 			@Override
 			public int compare(MissionTrack o1, MissionTrack o2) {
-				double z1 = o1.getLineString().getCoordinateN(0).z;
-				double z2 = o2.getLineString().getCoordinateN(0).z;
-				return Double.compare(z1, z2);
+				try{
+					double z1 = o1.getLineString().getCoordinateN(0).z;
+					double z2 = o2.getLineString().getCoordinateN(0).z;
+					return Double.compare(z1, z2);
+				}catch (Exception ex){
+					return 0;
+				}
+				
 			}
 		});
 		
 		//get all coordinates; if start and end coordinates match
 		//then only add once
-		MissionTrack main = tracksToMerge.get(0);
-		List<Coordinate> ls = new ArrayList<Coordinate>();
-		for (Coordinate c : main.getLineString().getCoordinates()){
-			ls.add(c);
-		}
-		for (int i = 1; i < tracksToMerge.size(); i ++){
-			toDelete.add(tracksToMerge.get(i));
-			dialog.getMissionDay().getTracks().remove(tracksToMerge.get(i));
-			Coordinate[] cs = tracksToMerge.get(i).getLineString().getCoordinates();
-			if (!ls.get(ls.size()-1).equals2D(cs[0])){
-				ls.add(cs[0]);
+		try{
+			MissionTrack main = tracksToMerge.get(0);
+			List<Coordinate> ls = new ArrayList<Coordinate>();
+			for (Coordinate c : main.getLineString().getCoordinates()){
+				ls.add(c);
 			}
-			for (int j = 1; j < cs.length;j ++){
-				ls.add(cs[j]);
+			for (int i = 1; i < tracksToMerge.size(); i ++){
+				toDelete.add(tracksToMerge.get(i));
+				dialog.getMissionDay().getTracks().remove(tracksToMerge.get(i));
+				Coordinate[] cs = tracksToMerge.get(i).getLineString().getCoordinates();
+				if (!ls.get(ls.size()-1).equals2D(cs[0])){
+					ls.add(cs[0]);
+				}
+				for (int j = 1; j < cs.length;j ++){
+					ls.add(cs[j]);
+				}
 			}
+			
+			GeometryFactory gf = new GeometryFactory();
+			LineString newLs = gf.createLineString(ls.toArray(new Coordinate[ls.size()]));
+			main.setLineString(newLs);
+		
+			refresh(true);
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.displayLog("Could not parse linestring", ex);
 		}
-		
-		GeometryFactory gf = new GeometryFactory();
-		LineString newLs = gf.createLineString(ls.toArray(new Coordinate[ls.size()]));
-		main.setLineString(newLs);
-		
-		refresh(true);
 	}
 	
 	protected void splitTrack() {
@@ -714,8 +727,13 @@ public class TracksComposite extends Composite implements MapPart{
 					}
 					
 					if (trackToSplit != null){
-						LineString ls1 = trackToSplit.getLineString();
-						
+						LineString ls1 = null;
+						try{
+							ls1 = trackToSplit.getLineString();
+						}catch (Exception ex){
+							setError("Could not parse track.");
+							return;
+						}
 						
 						GeometryFactory gf = new GeometryFactory();
 						LineString ls2 = gf.createLineString(new Coordinate[]{points.get(0), points.get(1)});
@@ -838,9 +856,12 @@ public class TracksComposite extends Composite implements MapPart{
 		IStructuredSelection sel = (IStructuredSelection) trackViewer.getSelection();
 		if (sel != null && !sel.isEmpty()) {
 			MissionTrack track = (MissionTrack) sel.getFirstElement();
-			MissionTrackPointDialog tpd = new MissionTrackPointDialog(getShell(), track);
-			tpd.open();
-			
+			try{
+				MissionTrackPointDialog tpd = new MissionTrackPointDialog(getShell(), track);
+				tpd.open();
+			}catch (Exception ex){
+				EcologicalRecordsPlugIn.displayLog("Could not parse linestring", ex);
+			}
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			toolComp.selectLastTool();
 			refresh(false);
@@ -852,15 +873,19 @@ public class TracksComposite extends Composite implements MapPart{
 		Envelope env = null;
 		for (Iterator<?> iterator = sel.iterator(); iterator.hasNext();) {
 			MissionTrack track = (MissionTrack) iterator.next();
-			if (env == null){
-				env = track.getLineString().getEnvelopeInternal();
-			}else{
-				env.expandToInclude(track.getLineString().getEnvelopeInternal());
+			try{
+				if (env == null){
+					env = track.getLineString().getEnvelopeInternal();
+				}else{
+					env.expandToInclude(track.getLineString().getEnvelopeInternal());
+				}
+			}catch (Exception ex){
+				EcologicalRecordsPlugIn.displayLog("Could not parse linestring", ex);
 			}
 			
 		}
 		if (env != null){
-			SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, SmartDB.DATABASE_CRS);
+			SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, GeometryUtils.SMART_CRS);
 			getMap().sendCommandASync(bbox);
 		}
 	}

@@ -63,6 +63,8 @@ public class EntitySummaryQueryResultSetMetadata extends SummaryQueryResultSetMe
 					}
 					
 					DerbySummaryEngine.getHeaderInfo((EntitySummaryQuery)query, results, session);
+				} catch (Exception e) {
+					throw new IllegalStateException(e);
 				}finally{
 					session.close();
 				}

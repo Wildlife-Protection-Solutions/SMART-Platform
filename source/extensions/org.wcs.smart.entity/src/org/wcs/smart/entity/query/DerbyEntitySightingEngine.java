@@ -41,8 +41,10 @@ import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.entity.query.EntityFilter.EntityFilterType;
 import org.wcs.smart.entity.query.SightingQueryColumn.FixedColumns;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -50,10 +52,14 @@ import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.DerbyFilterToSqlGenerator;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.IQueryType;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing entity sighting queries in a lazy
@@ -88,11 +94,28 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 	private DateFilter localDateFilter;
 	private int categoryCount;
 
-	public SightingPagedResults executeDerbyQuery(EntitySightingQuery query,
-			final Session session, final IProgressMonitor monitor)
-			throws SQLException {
+	@Override
+	public boolean canExecute(String querytype) {
+		return EntitySightingQuery.KEY.equals(querytype);
+	}
 	
-		this.query = query;
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+
+		this.query = (EntitySightingQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		
 		// create a date filter that caches the dates so the same
 		// dates are used for all parts of the query;
@@ -206,14 +229,14 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 			//entity filter		
 			if (query.getEntityFilter().getType() == EntityFilterType.ALLACTIVE){
 				s.append(" AND "); //$NON-NLS-1$
-				s.append(tablePrefix(Entity.class) + ".status = '" + Entity.Status.ACTIVE +"' "); //$NON-NLS-1$ //$NON-NLS-2$
+				s.append(tablePrefix(Entity.class) + ".status = '" + Status.ACTIVE +"' "); //$NON-NLS-1$ //$NON-NLS-2$
 			}else if (query.getEntityFilter().getType() == EntityFilterType.CUSTOM){
 				if(query.getEntityFilter().getEntities().size() > 0){
 					s.append(" AND "); //$NON-NLS-1$
 					s.append(tablePrefix(Entity.class) + ".uuid IN ("); //$NON-NLS-1$
 				
 					for (Entity e : query.getEntityFilter().getEntities()){
-						s.append("x'" + SmartUtils.encodeHex(e.getUuid()) + "',"); //$NON-NLS-1$ //$NON-NLS-2$
+						s.append("x'" + UuidUtils.uuidToString(e.getUuid()) + "',"); //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					s.deleteCharAt(s.length() - 1);
 					s.append(")"); //$NON-NLS-1$
@@ -289,7 +312,8 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		//ca filter
 		sql.append(" AND "); //$NON-NLS-1$
-		sql.append(sqlGenerator.asSql(query.getConservationAreaFilterAsFilter(), tablePrefix(Waypoint.class), this));
+		ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
+		sql.append(sqlGenerator.asSql(cafilter, tablePrefix(Waypoint.class), this));
 
 		//date filter
 		if (lastSightingReport == null){
@@ -303,7 +327,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		
 		//entity filter		
 		if (query.getEntityFilter().getType() == EntityFilterType.ALLACTIVE){
-			String p2 = addParameterValue(Entity.Status.ACTIVE.name());
+			String p2 = addParameterValue(Status.ACTIVE.name());
 			sql.append(" AND "); //$NON-NLS-1$
 			sql.append(tablePrefix(Entity.class) + ".status = " + p2); //$NON-NLS-1$
 		}else if (query.getEntityFilter().getType() == EntityFilterType.CUSTOM){
@@ -358,7 +382,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		try(ResultSet rs1 = c.createStatement().executeQuery(sql.toString())) {
 			while (rs1.next()) {
 				byte[] uuid = rs1.getBytes(1);
-				String name = getEmployeeName(uuid, session);
+				String name = getEmployeeName(UuidUtils.byteToUUID(uuid), session);
 						
 				if (name != null) {
 					observerSt.setString(1, name);
@@ -471,7 +495,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				try(ResultSet rs = ps.executeQuery()){
 					while(rs.next()){
 						byte[] uuid = rs.getBytes(1);
-						String key = Label.getDescription(uuid);
+						String key = Label.getDescription(UuidUtils.byteToUUID(uuid), session);
 					
 						sql.append(" when "); //$NON-NLS-1$
 						sql.append(tablePrefix(EntityAttributeValue.class));
@@ -563,7 +587,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		it.setConservationAreaId(rs.getString(FixedColumns.CA_ID.dbColName)); 
 		it.setConservationAreaName(rs.getString(FixedColumns.CA_NAME.dbColName)); 
 		it.setSourceId(rs.getString(FixedColumns.WAYPOINT_SOURCE.dbColName)); 
-		it.setWaypointUuid(rs.getBytes("wp_uuid")); //$NON-NLS-1$
+		it.setWaypointUuid(UuidUtils.byteToUUID(rs.getBytes("wp_uuid"))); //$NON-NLS-1$
 		it.setWaypointId(rs.getInt(FixedColumns.WAYPOINT_ID.dbColName)); 
 		it.setWaypointX(rs.getDouble(FixedColumns.WAYPOINT_X.dbColName)); 
 		it.setWaypointY(rs.getDouble(FixedColumns.WAYPOINT_Y.dbColName)); 
@@ -572,12 +596,12 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 		it.setWaypointDistance(rs.getFloat(FixedColumns.WAYPOINT_DISTANCE.dbColName)); 
 		it.setWaypointComment(rs.getString(FixedColumns.WAYPOINT_COMMENT.dbColName));
 		it.setWaypointObserver(rs.getString(FixedColumns.WAYPOINT_OBSERVER.dbColName)); 
-		it.setObservationUuid(rs.getBytes("ob_uuid")); //$NON-NLS-1$
+		it.setObservationUuid(UuidUtils.byteToUUID(rs.getBytes("ob_uuid"))); //$NON-NLS-1$
 		it.setEntityId(rs.getString(FixedColumns.ENTITY_ID.dbColName));
-		it.setEntityStatus(EntityType.Status.valueOf(rs.getString(FixedColumns.ENTITY_STATUS.dbColName))); 
+		it.setEntityStatus(Status.valueOf(rs.getString(FixedColumns.ENTITY_STATUS.dbColName))); 
 		// build categories
 		byte[] entityUuid = rs.getBytes("entity_uuid"); //$NON-NLS-1$
-		it.setEntityUuid(entityUuid);
+		it.setEntityUuid(UuidUtils.byteToUUID(entityUuid));
 		
 		
 		for (EntityAttribute ea : query.getEntityType().getAttributes()){
@@ -630,7 +654,7 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid == null)
 					continue;
-				String[] names = getCategoryLabels(uuid, session);
+				String[] names = getCategoryLabels(UuidUtils.byteToUUID(uuid), session);
 				int count = names.length;
 				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
 				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement
@@ -658,5 +682,4 @@ public class DerbyEntitySightingEngine extends AbstractQueryEngine {
 			}
 		}
 	}
-	
 }

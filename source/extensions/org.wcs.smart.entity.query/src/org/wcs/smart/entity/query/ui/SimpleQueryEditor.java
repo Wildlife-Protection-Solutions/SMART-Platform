@@ -24,6 +24,7 @@ package org.wcs.smart.entity.query.ui;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,6 +42,7 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.map.udig.QueryService;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EtAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.EtCategoryQueryColumn;
@@ -82,9 +84,9 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 
 	@Override
 	protected IDateFieldFilter[] getDateFilterOptions() {
-		if (getInputInternal().getType().getKey().equals(EntityObservationQueryType.KEY)){
+		if (getInputInternal().getType().getKey().equals(EntityObservationQuery.KEY)){
 			return EntityObservationQueryType.validDateFields();
-		}else if (getInputInternal().getType().getKey().equals(EntityWaypointQueryType.KEY)){
+		}else if (getInputInternal().getType().getKey().equals(EntityWaypointQuery.KEY)){
 			return EntityWaypointQueryType.validDateFields();
 		}
 		return null;
@@ -134,7 +136,14 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			final SimpleQuery q = (SimpleQuery) getQuery();
-			QueryFilter filter = q.getFilter();
+			QueryFilter filter = null;
+			try{
+				filter = q.getFilter();
+			}catch(Exception ex){
+				EntityQueryPlugIn.displayLog(ex.getMessage(), ex);
+				return Status.OK_STATUS;
+			}
+			
 			final Set<String> entityTypes = new HashSet<String>();
 			filter.getFilter().accept(new IFilterVisitor() {			
 				@Override
@@ -147,7 +156,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 		
 			Set<String> includedTypes = new HashSet<String>();
 			List<QueryColumn> remove = new ArrayList<QueryColumn>();
-			for (QueryColumn c : q.getQueryColumns()){
+			for (QueryColumn c : q.getQueryColumns(Locale.getDefault(), null)){
 				if (c instanceof EntityAttributeQueryColumn){
 					EntityAttributeQueryColumn col = (EntityAttributeQueryColumn) c;
 					String entityKey = col.getEntityKey();
@@ -160,7 +169,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 				}
 			}
 		
-			boolean mod = q.getQueryColumns().removeAll(remove);
+			boolean mod = q.getQueryColumns(Locale.getDefault(), null).removeAll(remove);
 			entityTypes.removeAll(includedTypes);
 			Session session = HibernateManager.openSession();
 			try{
@@ -168,7 +177,7 @@ public class SimpleQueryEditor extends QueryResultsEditor {
 					EntityType et = EntityHibernateManager.getEntityType(entityType, session);
 					for (EntityAttribute ea : et.getAttributes()){
 						EntityAttributeQueryColumn newcol = new EntityAttributeQueryColumn("[" + et.getName() + "]" + ea.getName(), et.getKeyId(), ea.getKeyId(), ea.getDmAttribute().getType()); //$NON-NLS-1$ //$NON-NLS-2$
-						q.getQueryColumns().add(newcol);
+						q.getQueryColumns(Locale.getDefault(), null).add(newcol);
 						mod = true;
 					}
 				}

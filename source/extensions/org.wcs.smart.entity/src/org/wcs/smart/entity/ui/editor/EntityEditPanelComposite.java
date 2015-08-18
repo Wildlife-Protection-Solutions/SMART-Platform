@@ -24,6 +24,7 @@ package org.wcs.smart.entity.ui.editor;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map.Entry;
 
 import javax.persistence.Column;
@@ -56,6 +57,7 @@ import org.eclipse.swt.widgets.Text;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Aggregation;
@@ -65,16 +67,17 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.ui.ProjectionLabelProvider;
 import org.wcs.smart.ui.ca.datamodel.AttributeFieldFactory;
 import org.wcs.smart.ui.ca.datamodel.IAttributeField;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 import org.wcs.smart.util.SmartUtils;
 
@@ -169,7 +172,7 @@ public class EntityEditPanelComposite extends Composite{
 		Projection defaultp = null;
 		for(Projection p : projs){
 			try{
-				if (CRS.equalsIgnoreMetadata(p.getCrs(), SmartDB.DATABASE_CRS)){
+				if (CRS.equalsIgnoreMetadata(ReprojectUtils.stringToCrs(p.getDefinition()), GeometryUtils.SMART_CRS)){
 					defaultp = p;
 					break;
 				}
@@ -179,7 +182,7 @@ public class EntityEditPanelComposite extends Composite{
 		}
 		if (defaultp == null){
 			defaultp = new Projection();
-			defaultp.setCrs(SmartDB.DATABASE_CRS);
+			defaultp.setDefinition(GeometryUtils.SMART_CRS.toWKT());
 			projs.add(defaultp);
 		}
 		return defaultp;
@@ -312,7 +315,7 @@ public class EntityEditPanelComposite extends Composite{
 		
 		//ID
 		Label lbl = new Label(comp, SWT.NONE);
-		lbl.setText(Entity.ID_FIELD_NAME + ":"); //$NON-NLS-1$
+		lbl.setText(EntityLabelProvider.ID_FIELD_NAME + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		txtId = new Text(comp, SWT.BORDER);
@@ -339,7 +342,7 @@ public class EntityEditPanelComposite extends Composite{
 		
 		//STATUS
 		lbl = new Label(comp, SWT.NONE);
-		lbl.setText(Entity.STATUS_FIELD_NAME + ":"); //$NON-NLS-1$
+		lbl.setText(EntityLabelProvider.STATUS_FIELD_NAME + ":"); //$NON-NLS-1$
 		lbl.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
 		
 		cmbStatus = new ComboViewer(comp, SWT.DROP_DOWN | SWT.READ_ONLY);
@@ -349,10 +352,10 @@ public class EntityEditPanelComposite extends Composite{
 		cmbStatus.setLabelProvider(new LabelProvider(){
 			@Override
 			public String getText(Object element){
-				return ((Entity.Status)element).getGuiName();
+				return ((Status)element).getGuiName(Locale.getDefault());
 			}
 		});
-		cmbStatus.setInput(Entity.Status.values());
+		cmbStatus.setInput(Status.values());
 			
 		if (etype.getType() == EntityType.Type.FIXED){
 			lbl = new Label(comp, SWT.NONE);
@@ -388,7 +391,7 @@ public class EntityEditPanelComposite extends Composite{
 			posComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 			
 			lbl = new Label(posComp, SWT.NONE);
-			lbl.setText(Entity.X_FIELD_NAME + ":"); //$NON-NLS-1$
+			lbl.setText(EntityLabelProvider.X_FIELD_NAME + ":"); //$NON-NLS-1$
 			
 			txtX = new Text(posComp, SWT.BORDER);
 			txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -419,7 +422,7 @@ public class EntityEditPanelComposite extends Composite{
 			});
 			
 			lbl = new Label(posComp, SWT.NONE);
-			lbl.setText(Entity.Y_FIELD_NAME + ":"); //$NON-NLS-1$
+			lbl.setText(EntityLabelProvider.Y_FIELD_NAME + ":"); //$NON-NLS-1$
 			
 			txtY = new Text(posComp, SWT.BORDER);			
 			txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -476,7 +479,9 @@ public class EntityEditPanelComposite extends Composite{
 		try {
 			//reproject
 			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
-			Point p = (Point) JTS.transform(point, CRS.findMathTransform(source.getCrs(), target.getCrs()));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(
+					ReprojectUtils.stringToCrs(source.getDefinition()), 
+					ReprojectUtils.stringToCrs(target.getDefinition())));
 
 			txtX.setText(String.valueOf(p.getX()));
 			txtY.setText(String.valueOf(p.getY()));
@@ -504,12 +509,13 @@ public class EntityEditPanelComposite extends Composite{
 		
 		//we need to get the x and y and projection and transform to latLong
 		Projection proj = (Projection) ((StructuredSelection)cmbProjection.getSelection()).getFirstElement();
-		if (CRS.equalsIgnoreMetadata(proj.getCrs(), SmartDB.DATABASE_CRS)){
+		CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(proj.getDefinition());
+		if (CRS.equalsIgnoreMetadata(crs, GeometryUtils.SMART_CRS)){
 			//this is in db crs so we don't need to do anything
 			return new Coordinate(x,y);
 		}else{
 			//need to reproject 
-			return ReprojectUtils.reproject(x, y, proj.getCrs(), SmartDB.DATABASE_CRS);
+			return ReprojectUtils.reproject(x, y, crs, GeometryUtils.SMART_CRS);
 		}
 		
 	}

@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -143,9 +144,9 @@ public class EntityTypeFilterContentProvider implements ITreeContentProvider{
 			if (element instanceof EntityType){
 				return EntityPlugIn.getDefault().getImageRegistry().get(EntityPlugIn.ENTITY_TYPE_ICON);
 			}else if (element instanceof EntityAttribute){
-				return ((EntityAttribute) element).getDmAttribute().getType().getImage();
+				return DataModel.getAttributeImage(((EntityAttribute) element).getDmAttribute().getType());
 			}else if (element instanceof Attribute){
-				return ((Attribute) element).getType().getImage();
+				return DataModel.getAttributeImage(((Attribute) element).getType());
 			}
 			return super.getImage(element);
 		}

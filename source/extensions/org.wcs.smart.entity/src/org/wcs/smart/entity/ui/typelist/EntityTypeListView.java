@@ -23,6 +23,7 @@ package org.wcs.smart.entity.ui.typelist;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -65,7 +66,7 @@ import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.model.EntityTypeFilter;
+import org.wcs.smart.entity.ui.EntityTypeFilter;
 import org.wcs.smart.entity.ui.IEntityTypeFilteringView;
 import org.wcs.smart.entity.ui.OpenEntityTypeHandler;
 import org.wcs.smart.entity.ui.editor.EntityTypeEditor;
@@ -127,7 +128,7 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 					int i = 0;
 					for	(Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 						Object[] data = (Object[]) iterator.next();					
-						input[i++] = new EntityTypeEditorInput((byte[])data[0], (String)data[1], (String)data[2]);
+						input[i++] = new EntityTypeEditorInput((UUID)data[0], (String)data[1], (String)data[2]);
 					}
 					
 					monitor.internalWorked(0.5);

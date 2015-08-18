@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.er.ui.surveydesign.editor;
 
-import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -61,8 +61,8 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 		public void event(Object o) {
 			if (o instanceof SurveyDesign) {
 				SurveyDesign source = (SurveyDesign) o;
-				byte[] uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
-				if (Arrays.equals(source.getUuid(), uuid)) {
+				UUID uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
+				if (source.getUuid().equals(uuid)) {
 					surveyDesign = null; //this will force the intelligence to be fully reloaded as it might be changed from outside
 					getSurveyDesign();
 					getSite().getShell().getDisplay().asyncExec(new Runnable(){
@@ -84,8 +84,8 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 		public void event(Object o) {
 			if (o instanceof SurveyDesign) {
 				SurveyDesign source = (SurveyDesign) o;
-				byte[] uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
-				if (Arrays.equals(source.getUuid(), uuid)) {
+				UUID uuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
+				if (source.getUuid().equals(uuid)) {
 					//close this editor
 					SurveyDesignEditor.this.getEditorSite().getWorkbenchWindow().getShell().getDisplay().asyncExec(new Runnable(){
 						@Override
@@ -145,7 +145,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 
 	public SurveyDesign getSurveyDesign() {
 		if (surveyDesign == null) {
-			byte[] puuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
+			UUID puuid = ((SurveyDesignEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{

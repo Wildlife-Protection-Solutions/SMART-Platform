@@ -10,7 +10,8 @@
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.entity.query.group.EntityQuery"
-            class="org.wcs.smart.entity.query.model.type.EntityGridQueryType">
+            class="org.wcs.smart.entity.query.model.type.EntityGridQueryType"
+            executor="org.wcs.smart.entity.query.engine.DerbyGridEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.grid"
                itemPanelId="org.wcs.smart.entity.query.GriddedItemPanel">
@@ -25,7 +26,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.entity.query.group.EntityQuery"
-            class="org.wcs.smart.entity.query.model.type.EntitySummaryQueryType">
+            class="org.wcs.smart.entity.query.model.type.EntitySummaryQueryType"
+            executor="org.wcs.smart.entity.query.engine.DerbySummaryEngine">
          <DefinitionPanel
                id="org.wcs.smart.entity.query.SummaryGroupByValuePanel"
                itemPanelId="org.wcs.smart.entity.query.summaryItemPanel">
@@ -40,7 +42,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.entity.query.group.EntityQuery"
-            class="org.wcs.smart.entity.query.model.type.EntityObservationQueryType">
+            class="org.wcs.smart.entity.query.model.type.EntityObservationQueryType"
+            executor="org.wcs.smart.entity.query.engine.DerbyEntityObservationEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.entity.query.filterPanel">
@@ -51,7 +54,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.entity.query.group.EntityQuery"
-            class="org.wcs.smart.entity.query.model.type.EntityWaypointQueryType">
+            class="org.wcs.smart.entity.query.model.type.EntityWaypointQueryType"
+            executor="org.wcs.smart.entity.query.engine.DerbyWaypointEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.common.definition.filter"
                itemPanelId="org.wcs.smart.entity.query.filterPanel">

@@ -26,9 +26,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.swt.SWT;
 import org.hibernate.Session;
@@ -44,20 +44,20 @@ import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
+import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.ui.columns.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.ui.columns.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.er.query.ui.columns.SurveyAttributeQueryColumn;
 import org.wcs.smart.er.query.ui.columns.SurveyCategoryQueryColumn;
-import org.wcs.smart.er.query.ui.columns.SurveyQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.AbstractPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -502,7 +502,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 					attrSql.append(',');
 				}
 				hasObservations = true;
-				attrSql.append("x'").append(SmartUtils.encodeHex(it.getObservationUuid())).append('\''); //$NON-NLS-1$
+				attrSql.append("x'").append(UuidUtils.uuidToString(it.getObservationUuid())).append('\''); //$NON-NLS-1$
 			}
 		}
 		
@@ -514,11 +514,11 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		attrSql.append(')');
 
 		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
-			HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
+			HashMap<UUID, HashMap<String, Object>> attrMap = getResultsAttributes(rs, session);
 			for (IResultItem irt : result) {
 				SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
 				if (it.getObservationUuid() != null) {
-					HashMap<String, Object> attributes = attrMap.get(wrap(it.getObservationUuid()));
+					HashMap<String, Object> attributes = attrMap.get(it.getObservationUuid());
 					if (attributes != null) {
 						it.setAttributes(attributes);
 					}
@@ -536,7 +536,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 		boolean hasItem = false;
 		for (IResultItem irt : result) {
-			byte[] muuid = null;
+			UUID muuid = null;
 			if (irt instanceof SurveyQueryResultItem){
 				muuid = ((SurveyQueryResultItem) irt).getMissionUuid();
 			}else if (irt instanceof MissionTrackResultItem){
@@ -544,7 +544,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			}
 			if (muuid != null){
 				if (hasItem) attrSql.append(","); //$NON-NLS-1$
-				attrSql.append("x'").append(SmartUtils.encodeHex(muuid)).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append("x'").append(UuidUtils.uuidToString(muuid)).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
 				hasItem = true;
 			}
 		}
@@ -566,7 +566,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 				for (IResultItem irt : result) {
 					if (irt instanceof SurveyQueryResultItem){
 						SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
-						if (Arrays.equals(muuid,it.getMissionUuid())){
+						if (muuid.equals(it.getMissionUuid())){
 							if (rs.getObject(3) != null){
 								it.addMissionPropertyValue(key, dvalue);
 							}else if (svalue != null){
@@ -578,7 +578,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 						}
 					}else if (irt instanceof MissionTrackResultItem){
 						MissionTrackResultItem it = (MissionTrackResultItem)irt;
-						if (Arrays.equals(muuid,it.getMissionUuid())){
+						if (muuid.equals(it.getMissionUuid())){
 							if (rs.getObject(3) != null){
 								it.addMissionPropertyValue(key, dvalue);
 							}else if (svalue != null){
@@ -609,7 +609,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
 			if (it.getSamplingUnitUuid() != null){
 				if (hasItem) attrSql.append(","); //$NON-NLS-1$
-				attrSql.append("x'").append(SmartUtils.encodeHex(it.getSamplingUnitUuid())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
+				attrSql.append("x'").append(UuidUtils.uuidToString(it.getSamplingUnitUuid())).append("'"); //$NON-NLS-1$ //$NON-NLS-2$
 				hasItem = true;
 			}
 		}
@@ -631,7 +631,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 				for (IResultItem irt : result) {
 				
 					SurveyQueryResultItem it = (SurveyQueryResultItem)irt;
-					if (Arrays.equals(muuid,it.getSamplingUnitUuid())){
+					if (muuid.equals(it.getSamplingUnitUuid())){
 						if (rs.getObject(3) != null){
 							it.addSamplingUnitAttributeValue(key, dvalue);
 						}else if (svalue != null){
@@ -646,8 +646,8 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		}		
 	}
 	
-	protected HashMap<MapByteArrayKey, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
-		HashMap<MapByteArrayKey, HashMap<String, Object>> attrMap = new HashMap<MapByteArrayKey, HashMap<String, Object>>();
+	protected HashMap<UUID, HashMap<String, Object>> getResultsAttributes(ResultSet rs, Session s) throws SQLException {
+		HashMap<UUID, HashMap<String, Object>> attrMap = new HashMap<UUID, HashMap<String, Object>>();
 		/*
 		1	OB_UUID
 		2	KEYID
@@ -661,7 +661,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 			byte[] obUuid = rs.getBytes(1);
 			if (obUuid == null)
 				continue;
-			MapByteArrayKey keyObj = wrap(obUuid);
+			UUID keyObj = UuidUtils.byteToUUID(obUuid);
 			HashMap<String, Object> attributes = attrMap.get(keyObj);
 			if (attributes == null) {
 				attributes = new HashMap<String, Object>();

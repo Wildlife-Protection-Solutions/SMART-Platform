@@ -31,10 +31,11 @@ import org.geotools.data.FeatureReader;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Feature reader for mission tracks.
@@ -78,15 +79,19 @@ public class MissionTrackFeatureReader implements FeatureReader<SimpleFeatureTyp
 	}
 	
 	private SimpleFeature createFeature(MissionTrack point){
-		String fid = SmartUtils.encodeHex(point.getUuid());
+		String fid = UuidUtils.uuidToString(point.getUuid());
 		Object[] data = new Object[7];
 		data[0] = fid;
 		data[1] = point.getId();
 		data[2] = point.getMissionDay().getDate();
 		data[3] = point.getSamplingUnit() == null ? "" : point.getSamplingUnit().getId(); //$NON-NLS-1$
 		data[4] = point.getMissionDay().getMission().getId();
-		data[5] = point.getGeometryLengthKm();
-		data[6] = point.getLineString();
+		try{
+			data[5] = point.getGeometryLengthKm();
+			data[6] = point.getLineString();
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+		}
 		return SimpleFeatureBuilder.build(featureType, data, fid);
 	}
 }

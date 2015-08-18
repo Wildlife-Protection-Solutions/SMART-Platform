@@ -23,6 +23,7 @@ package org.wcs.smart.cybertracker.export.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
@@ -101,7 +102,7 @@ public class TreeNodeDataProvider {
 		}
 
 		@Override
-		public byte[] getUuid() {
+		public UUID getUuid() {
 			AttributeTreeNode dmNode = item.getDmTreeNode();
 			return dmNode != null ? dmNode.getUuid() : null;
 		}

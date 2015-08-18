@@ -59,6 +59,7 @@ import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Provides functionality and GUI that is specific for survey import from CyberTracker.
@@ -201,10 +202,10 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 			
 			CyberTrackerSurvey survey = ((CyberTrackerSurvey) selection);
 			
-			lblLeader.setText(survey.getLeader() == null ? "" : survey.getLeader().getFullLabel()); //$NON-NLS-1$
+			lblLeader.setText(survey.getLeader() == null ? "" : SmartLabelProvider.getFullLabel(survey.getLeader())); //$NON-NLS-1$
 			StringBuilder sbMembers = new StringBuilder();
 			for (Employee e : ((CyberTrackerSurvey) selection).getMembers()){
-				sbMembers.append(e.getFullLabel());
+				sbMembers.append(SmartLabelProvider.getFullLabel(e));
 				sbMembers.append("\n"); //$NON-NLS-1$
 			}
 			lblMembers.setText(sbMembers.toString());

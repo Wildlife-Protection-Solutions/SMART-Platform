@@ -38,11 +38,9 @@ import org.wcs.smart.data.oda.smart.query.common.PagedQueryResultSet;
 import org.wcs.smart.data.oda.smart.query.common.SimpleQueryResultSetMetadata;
 import org.wcs.smart.data.oda.smart.query.common.SummaryQueryResultSet;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
-import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.report.internal.Messages;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -65,23 +63,26 @@ public class EntityReportQuery implements ISmartQuery {
 	 */
 	@Override
 	public void prepare(SmartQuery smartQuery) throws OdaException {
-
-		// attempt to parse query
-		if (smartQuery.getQuery() instanceof SimpleQuery) {
-			((SimpleQuery) smartQuery.getQuery()).getFilter();
-		} else if (smartQuery.getQuery() instanceof EntitySummaryQuery) {
-			EntitySummaryQuery sumQuery = (EntitySummaryQuery)smartQuery.getQuery();
-			
-			//date group by problem with reports 
-			GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
-			List<IGroupBy> headers = part.getGroupBys();
-			for (IGroupBy h : headers){
-				if (h instanceof DateGroupBy){
-					throw new OdaException(Messages.EntityReportQuery_SummaryDateGroupByInvalid);
+		try{
+			// attempt to parse query
+			if (smartQuery.getQuery() instanceof SimpleQuery) {
+				((SimpleQuery) smartQuery.getQuery()).getFilter();
+			} else if (smartQuery.getQuery() instanceof EntitySummaryQuery) {
+				EntitySummaryQuery sumQuery = (EntitySummaryQuery)smartQuery.getQuery();
+				
+				//date group by problem with reports 
+				GroupByPart part = sumQuery.getQueryDefinition().getColumnGroupByPart();
+				List<IGroupBy> headers = part.getGroupBys();
+				for (IGroupBy h : headers){
+					if (h instanceof DateGroupBy){
+						throw new OdaException(Messages.EntityReportQuery_SummaryDateGroupByInvalid);
+					}
 				}
+			} else if (smartQuery.getQuery() instanceof EntityGriddedQuery){
+				((EntityGriddedQuery)smartQuery.getQuery()).getQueryDefinition();
 			}
-		} else if (smartQuery.getQuery() instanceof EntityGriddedQuery){
-			((EntityGriddedQuery)smartQuery.getQuery()).getQueryDefinition();
+		}catch (Exception ex){
+			throw new OdaException(ex);
 		}
 	}
 
@@ -94,7 +95,7 @@ public class EntityReportQuery implements ISmartQuery {
 		Date endDate = (Date) smartQuery.getParameters().get(SmartParameterMetaData.Parameter.ENDDATE);
 		
 		if (startDate == null || endDate == null){
-			if (smartQuery.getQuery().getType().getKey().equals(EntitySummaryQueryType.KEY)){
+			if (smartQuery.getQuery().getTypeKey().equals(EntitySummaryQuery.KEY)){
 				//we choose to run summaries in order to get 
 				//all header information
 				Calendar cal = Calendar.getInstance();
@@ -116,18 +117,18 @@ public class EntityReportQuery implements ISmartQuery {
 
 		//the result set
 		
-		if (smartQuery.getQuery().getType().getKey().equals(EntityObservationQueryType.KEY) ||
-				smartQuery.getQuery().getType().getKey().equals(EntityWaypointQueryType.KEY)){
+		if (smartQuery.getQuery().getTypeKey().equals(EntityObservationQuery.KEY) ||
+				smartQuery.getQuery().getTypeKey().equals(EntityWaypointQuery.KEY)){
 			((SimpleQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new PagedQueryResultSet(smartQuery.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
 					connection);
-		}else  if (smartQuery.getQuery().getType().getKey().equals(EntityGridQueryType.KEY)){
+		}else  if (smartQuery.getQuery().getTypeKey().equals(EntityGriddedQuery.KEY)){
 			((GriddedQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new MemoryQueryResultSet(smartQuery.getQuery(), 
 					(SimpleQueryResultSetMetadata)getMetaData(smartQuery),
 					connection);
-		} else if (smartQuery.getQuery().getType().getKey().equals(EntitySummaryQueryType.KEY)){
+		} else if (smartQuery.getQuery().getTypeKey().equals(EntitySummaryQuery.KEY)){
 			((SummaryQuery) smartQuery.getQuery()).setDateFilter(dateFilter);
 			resultSet = new SummaryQueryResultSet(
 					(SummaryQuery) smartQuery.getQuery(),
@@ -141,12 +142,12 @@ public class EntityReportQuery implements ISmartQuery {
 	@Override
 	public IResultSetMetaData getMetaData(SmartQuery smartQuery)
 			throws OdaException {
-		if (smartQuery.getQuery().getType().getKey().equals(EntityObservationQueryType.KEY) ||
-				smartQuery.getQuery().getType().getKey().equals(EntityWaypointQueryType.KEY)){
+		if (smartQuery.getQuery().getTypeKey().equals(EntityObservationQuery.KEY) ||
+				smartQuery.getQuery().getTypeKey().equals(EntityWaypointQuery.KEY)){
 			return new SimpleQueryResultSetMetadata((SimpleQuery) smartQuery.getQuery());
-		} else if (smartQuery.getQuery().getType().getKey().equals(EntitySummaryQueryType.KEY)) {
+		} else if (smartQuery.getQuery().getTypeKey().equals(EntitySummaryQuery.KEY)) {
 			return new EntitySummaryQueryResultSetMetadata((EntitySummaryQuery) smartQuery.getQuery());
-		} else if (smartQuery.getQuery().getType().getKey().equals(EntityGridQueryType.KEY)){
+		} else if (smartQuery.getQuery().getTypeKey().equals(EntityGriddedQuery.KEY)){
 			return new SimpleQueryResultSetMetadata( (GriddedQuery) smartQuery.getQuery());
 		}
 		throw new OdaException(Messages.EntityReportQuery_MetadataError);

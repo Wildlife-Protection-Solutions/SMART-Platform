@@ -24,8 +24,8 @@ package org.wcs.smart.entity.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
-import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
 import org.wcs.smart.query.common.importexport.GriddedQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -41,7 +41,7 @@ public class EntityGriddedQueryDefImporter extends GriddedQueryDefinitionImporte
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(EntityGridQueryType.KEY);
+		return qt.getKey().equals(EntityGriddedQuery.KEY);
 	}
 
 	@Override

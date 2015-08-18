@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er;
 
+import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -28,9 +30,15 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.internal.SurveyDeleteCaHandler;
+import org.wcs.smart.er.model.IErLabelProvider;
+import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.ui.ErLabelProvider;
+import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SmartUtils.RegExLevel;
 /**
  * The activator class controls the plug-in life cycle
  */
@@ -92,6 +100,8 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
 		
 		SurveyDeleteCaHandler deleteCaHandler = new SurveyDeleteCaHandler();
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCaHandler,SurveyDeleteCaHandler.EXECUTE_ORDER);
+		
+		SmartContext.INSTANCE.setClass(IErLabelProvider.class, new ErLabelProvider());
 	}
 
 	/*
@@ -155,6 +165,19 @@ public class EcologicalRecordsPlugIn extends AbstractUIPlugin {
      	reg.put(ZOOM_TRACK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/zoom_track.png")); //$NON-NLS-1$
     }
     
+	/**
+	 * Validates the sampling unit id.  Does not ensure uniqueness.
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public static String validateSamplingUnitId(String id){
+		if (!SmartUtils.isSimpleString(id, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, SamplingUnit.ID_MAX_LENGTH)){
+			return MessageFormat.format(Messages.SamplingUnit_IdError, new Object[]{RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc, SamplingUnit.ID_MAX_LENGTH});
+		}
+		return null;
+	}
+	
     
 	/**
 	 * Displays an error message to the user and logs the

@@ -24,10 +24,10 @@ package org.wcs.smart.er.ui.mision.editor;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -70,7 +70,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Mission editor
@@ -142,7 +142,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 		@Override
 		public void event(final Object o) {
 			if ((o instanceof Mission && 
-				( Arrays.equals(((Mission)o).getUuid(), mission.getUuid()))) 
+				( ((Mission)o).getUuid().equals(mission.getUuid()))) 
 				|| ((o instanceof SurveyDesign 
 					&& ((SurveyDesign)o).equals(mission.getSurvey().getSurveyDesign())))){
 					try {
@@ -152,7 +152,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 								Date[] lastDates = missionDates;
 								mission = null;
 								getMission(); //to avoid nested transactions exception
-								final boolean datesChanged = !SmartUtils.isSameDate(lastDates[0], missionDates[0])|| !SmartUtils.isSameDate(lastDates[1], missionDates[1]);
+								final boolean datesChanged = !SharedUtils.isSameDate(lastDates[0], missionDates[0])|| !SharedUtils.isSameDate(lastDates[1], missionDates[1]);
 								
 								getSite().getShell().getDisplay().syncExec(new Runnable(){
 									@Override
@@ -227,7 +227,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 	public Mission getMission(){
 		if (this.mission == null){
 			
-			byte[] muuid = ((MissionEditorInput) getEditorInput()).getUuid();
+			UUID muuid = ((MissionEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
 			
 			
@@ -236,9 +236,16 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 				this.mission = (Mission) session.load(Mission.class, muuid);
 				missionDates = new Date[]{new Date(mission.getStartDate().getTime()), new Date(mission.getEndDate().getTime())};
 				//load mission items so don't have lazy loading issues later.
+				
 				for (MissionDay md : mission.getMissionDays()){
-					md.getWaypoints().size();
 					md.getTracks().size();
+					try{
+						for (SurveyWaypoint wp : md.getWaypoints()){
+							ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), session);
+						}
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+					}
 				}
 
 				this.trackDistanceDirection = mission.getSurvey().getSurveyDesign().getTrackDistanceDirection();

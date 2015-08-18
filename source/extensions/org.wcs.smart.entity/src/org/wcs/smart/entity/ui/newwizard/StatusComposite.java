@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.entity.ui.newwizard;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -37,7 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
-import org.wcs.smart.entity.model.EntityType.Status;
+import org.wcs.smart.entity.model.Status;
 
 /**
  * Composite for entity type status field
@@ -77,10 +79,10 @@ public class StatusComposite extends AbstractEntityComposite {
 		statusCombo.setContentProvider(ArrayContentProvider.getInstance());
 		statusCombo.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				return ((EntityType.Status)element).getGuiName();
+				return ((Status)element).getGuiName(Locale.getDefault());
 			}
 		});
-		statusCombo.setInput(EntityType.Status.values());
+		statusCombo.setInput(Status.values());
 		statusCombo.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {

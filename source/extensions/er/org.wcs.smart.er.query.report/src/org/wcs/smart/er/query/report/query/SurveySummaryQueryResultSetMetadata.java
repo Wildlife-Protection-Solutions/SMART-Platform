@@ -67,6 +67,8 @@ public class SurveySummaryQueryResultSetMetadata extends SummaryQueryResultSetMe
 							results,
 							new SurveyDesignFilter( ((SurveySummaryQuery)query).getSurveyDesign() ),
 							session);
+				}catch (Exception ex){
+					throw new RuntimeException(ex);
 				}finally{
 					session.close();
 				}

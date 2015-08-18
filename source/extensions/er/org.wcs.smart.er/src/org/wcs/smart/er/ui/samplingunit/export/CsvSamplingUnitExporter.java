@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -91,7 +92,7 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 	}
 	
 	private void exportPlotsAndTransects(GeometryType type, CSVWriter writer, 
-			SurveyDesign sd, Session session, IProgressMonitor monitor){
+			SurveyDesign sd, Session session, IProgressMonitor monitor) throws Exception{
 		
 		WKTWriter wktWriter = new WKTWriter();
 		
@@ -112,8 +113,9 @@ public class CsvSamplingUnitExporter implements ISamplingUnitExporter {
 			String[] data = new String[headers.length];
 				
 			data[index++] = unit.getId();
-			data[index++] = unit.getType().getGuiName();
-			data[index++] = unit.getState().getGuiName();
+			data[index++] = unit.getType().getGuiName(Locale.getDefault());
+			data[index++] = unit.getState().getGuiName(Locale.getDefault());
+			
 			if (type != GeometryType.PLOT){
 				Double l = unit.getGeometryLengthKm();
 				data[index++] = l == null ? "" : l.toString(); //$NON-NLS-1$

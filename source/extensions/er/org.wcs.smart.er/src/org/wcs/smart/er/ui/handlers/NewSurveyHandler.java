@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.handlers;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import javax.inject.Named;
 
@@ -58,8 +59,8 @@ public class NewSurveyHandler {
 			IEclipseContext ctx){
 		
 		//search for a parent
-		byte[] parentDesign = null;
-		byte[] parentSurvey = null;
+		UUID parentDesign = null;
+		UUID parentSurvey = null;
 		if (selection != null && selection instanceof StructuredSelection){
 			IStructuredSelection sselection = (IStructuredSelection)selection;
 			
@@ -98,7 +99,7 @@ public class NewSurveyHandler {
 	 * 
 	 * @return the newly created survey of null if not created
 	 */
-	public static Survey newSurvey(Shell parent, byte[] parentDesign, byte[] parentSurvey){
+	public static Survey newSurvey(Shell parent, UUID parentDesign, UUID parentSurvey){
 		NewSurveyWizard newWizard = new NewSurveyWizard(parentDesign, parentSurvey);
 		WizardDialog wd = new WizardDialog(parent, newWizard);
 		if (wd.open() == WizardDialog.OK){

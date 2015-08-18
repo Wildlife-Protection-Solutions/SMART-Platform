@@ -27,6 +27,7 @@ import java.text.SimpleDateFormat;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
@@ -90,9 +91,9 @@ public class SamplingUnitLabelProvider extends LabelProvider {
 	@Override
 	public Image getImage(Object element){
 		if (element instanceof SamplingUnitAttribute){
-			return ((SamplingUnitAttribute) element).getType().getImage();
+			return DataModel.getAttributeImage(((SamplingUnitAttribute) element).getType());
 		}else if (element instanceof SurveyDesignSamplingUnitAttribute){
-			return ((SurveyDesignSamplingUnitAttribute) element).getSamplingUnitAttribute().getType().getImage();
+			return DataModel.getAttributeImage(((SurveyDesignSamplingUnitAttribute) element).getSamplingUnitAttribute().getType());
 		}
 		return super.getImage(element);
 	}

@@ -48,7 +48,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.TreeDropDownViewer;
 import org.wcs.smart.query.ui.model.impl.AttributeTreeDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Configurable model attribute list drop item.  Only shows
@@ -153,7 +153,7 @@ public class CmAttributeTreeDropItem extends AttributeTreeDropItem {
 	public CmAttributeTreeDropItem(CmAttribute cmAttribute, CategoryAttribute att) {
 		super(att);
 		this.cmAttribute = cmAttribute;
-		this.key = "category:" + att.getCategory().getHkey() + ":cmattribute:" + att.getAttribute().getType().typeKey + ":" + SmartUtils.encodeHex(cmAttribute.getUuid()) + ":" + att.getAttribute().getKeyId();  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		this.key = "category:" + att.getCategory().getHkey() + ":cmattribute:" + att.getAttribute().getType().typeKey + ":" + UuidUtils.uuidToString(cmAttribute.getUuid()) + ":" + att.getAttribute().getKeyId();  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
 	
 	@Override

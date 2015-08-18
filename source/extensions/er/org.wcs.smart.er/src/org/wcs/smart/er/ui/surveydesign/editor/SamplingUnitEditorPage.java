@@ -78,6 +78,7 @@ import org.locationtech.udig.project.internal.commands.selection.SelectCommand;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
 import org.wcs.smart.ca.advisors.DeleteManager;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -97,11 +98,11 @@ import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportAttributeWizard;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportOptionDialog;
 import org.wcs.smart.er.ui.samplingunit.load.wizard.ImportWizard;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.map.LoadDefaultLayersJob;
 import org.wcs.smart.ui.map.SmartMapEditorPart;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.JobUtil;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Envelope;
 
@@ -559,10 +560,14 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 			Object type = (Object) iterator.next();
 			if (type instanceof SamplingUnit){
-				if (env == null){
-					env = ((SamplingUnit) type).getGeometry().getEnvelopeInternal();
-				}else{
-					env.expandToInclude(((SamplingUnit) type).getGeometry().getEnvelopeInternal());
+				try{
+					if (env == null){
+						env = ((SamplingUnit) type).getGeometry().getEnvelopeInternal();
+					}else{
+						env.expandToInclude(((SamplingUnit) type).getGeometry().getEnvelopeInternal());
+					}
+				}catch (Exception ex){
+					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
 				}
 			}
 		}
@@ -571,7 +576,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 		env.expandBy((env.getMaxX() - env.getMinX()) * 0.1, (env.getMaxY() - env.getMinY()) * 0.1);
 		
 		//zoom but fix a minimum scale factor
-		SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, SmartDB.DATABASE_CRS){
+		SetViewportBBoxCommand bbox = new SetViewportBBoxCommand(env, GeometryUtils.SMART_CRS){
 			private static final int MINZOOM = 10000;
 			@Override
 			protected void runImpl(IProgressMonitor monitor) {
@@ -670,7 +675,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 				column.getColumn().setWidth(gc.stringExtent(att.getSamplingUnitAttribute().getName()).x + 50);
 				column.getColumn().setText(att.getSamplingUnitAttribute().getName());
 				column.getColumn().addSelectionListener(createTableColumnSelectionListener(labelProvider, column));
-				column.getColumn().setImage(att.getSamplingUnitAttribute().getType().getImage());
+				column.getColumn().setImage(DataModel.getAttributeImage(att.getSamplingUnitAttribute().getType()));
 			}
 		}finally{
 			gc.dispose();
@@ -806,7 +811,7 @@ public class SamplingUnitEditorPage extends SmartMapEditorPart  {
 			if (su instanceof SamplingUnit){
 				SamplingUnit s = (SamplingUnit)su;
 				allFilters.add(ff.equals(ff.property("fid"),  //$NON-NLS-1$
-							ff.literal(s.getId() + "." + SmartUtils.encodeHex(s.getUuid())))); //$NON-NLS-1$
+							ff.literal(s.getId() + "." + UuidUtils.uuidToString(s.getUuid())))); //$NON-NLS-1$
 			}
 		}
 		for (Layer l : suLayers){

@@ -31,10 +31,12 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.query.model.QueryColumnUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -68,7 +70,7 @@ public class SurveyResultItemFeature {
 		data[0] = gf.createPoint(new Coordinate(it.getWaypointX(), it.getWaypointY()));
 		data[1] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
@@ -92,7 +94,7 @@ public class SurveyResultItemFeature {
 		data[0] = g;
 		data[1] = it.getMissionId() + "." + it.getWaypointId() + "." + System.nanoTime(); //$NON-NLS-1$ //$NON-NLS-2$
 		for (int i = 0; i < columns.size(); i ++){
-			data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+			data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 		}
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
 	}
@@ -111,14 +113,18 @@ public class SurveyResultItemFeature {
 			List<QueryColumn> columns, SimpleFeatureType ftype){
 		Object[] data = new Object[columns.size() + 2];
 		MissionTrack mt = (MissionTrack) session.load(MissionTrack.class, it.getTrackUuid());
-		data[0] = mt.getLineString();
-		data[1] = it.getMissionId() + "." + SmartUtils.encodeHex(it.getTrackUuid()); //$NON-NLS-1$ 
+		try{
+			data[0] = mt.getLineString();
+		}catch (Exception ex){
+			ERQueryPlugIn.log(ex.getMessage(), ex);
+		}
+		data[1] = it.getMissionId() + "." + UuidUtils.uuidToString(it.getTrackUuid()); //$NON-NLS-1$ 
 		
 		for (int i = 0; i < columns.size(); i ++){
 			if (i == 3){
-				data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+				data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 			}else{
-				data[i+2] = QueryColumn.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
+				data[i+2] = QueryColumnUtils.getValue(it, columns.get(i), ftype.getDescriptor(i + 1));
 			}
 		}
 		return SimpleFeatureBuilder.build(ftype, data, (String)data[1]);
@@ -135,7 +141,7 @@ public class SurveyResultItemFeature {
 		//"fid:String,id:String,start:Date,end:Date,comment:String,geom:LineString:srid=4326"
 		
 		Object[] data = new Object[6];
-		data[0] = mission.getId() + "." + SmartUtils.encodeHex(mission.getUuid()); //$NON-NLS-1$
+		data[0] = mission.getId() + "." + UuidUtils.uuidToString(mission.getUuid()); //$NON-NLS-1$
 		data[1] = mission.getId();
 		data[2] = mission.getStartDate();
 		data[3] = mission.getEndDate();
@@ -144,7 +150,11 @@ public class SurveyResultItemFeature {
 		List<LineString> geoms = new ArrayList<LineString>();
 		for (MissionDay md : mission.getMissionDays()){
 			for (MissionTrack mt : md.getTracks()){
-				geoms.add(mt.getLineString());
+				try{
+					geoms.add(mt.getLineString());
+				}catch (Exception ex){
+					ERQueryPlugIn.log(ex.getMessage(), ex);
+				}
 			}
 		}
 		

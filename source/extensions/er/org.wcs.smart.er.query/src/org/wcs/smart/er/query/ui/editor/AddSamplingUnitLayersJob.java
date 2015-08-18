@@ -1,6 +1,8 @@
 package org.wcs.smart.er.query.ui.editor;
 
 import java.io.IOException;
+import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -10,6 +12,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.locationtech.udig.catalog.CatalogPlugin;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.project.ILayer;
@@ -52,16 +55,25 @@ public abstract class AddSamplingUnitLayersJob extends Job {
 		if (getQuery() instanceof ISurveyQuery) {
 			ISurveyQuery qq = (ISurveyQuery) getQuery();
 
-			SurveyDesign sd = qq.getSurveyDesignAsObject();
-			if (sd != null) {
-				if (service != null && service.getSurveyDesign().equals(sd)) {
+			String sdkey = qq.getSurveyDesign();
+			if (sdkey != null) {
+				if (service != null && service.getSurveyDesign().getKeyId().equals(sdkey)) {
 					// we don't have to do anything
 					return Status.OK_STATUS;
 				}
 				disposeService(monitor);
-				service = new SamplingUnitService(sd);
 				Session s = HibernateManager.openSession();
 				try {
+					List<?> items = s.createCriteria(SurveyDesign.class)
+					.add(Restrictions.eq("conservationArea", getQuery().getConservationArea())) //$NON-NLS-1$
+					.add(Restrictions.eq("keyId", sdkey)) //$NON-NLS-1$
+					.list();
+					if (items.size() != 1){
+						throw new SQLException(MessageFormat.format(Messages.AddSamplingUnitLayersJob_SdNotFound, sdkey));
+					}
+					SurveyDesign sd = (SurveyDesign)items.get(0);
+					service = new SamplingUnitService(sd);
+				
 					@SuppressWarnings("unchecked")
 					List<IGeoResource> layers = (List<IGeoResource>) service
 							.resources(null);

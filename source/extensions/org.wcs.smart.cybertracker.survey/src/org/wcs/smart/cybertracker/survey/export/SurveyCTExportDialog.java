@@ -44,6 +44,7 @@ import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
@@ -95,7 +96,7 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 	
 	private List<?> getDesignsList() {
 		List<Object> modelList = new ArrayList<Object>();
-		Session s = SmartHibernateManager.openSession();
+		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try {
 			;

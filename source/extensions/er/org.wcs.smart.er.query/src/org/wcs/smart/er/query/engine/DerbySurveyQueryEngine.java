@@ -46,7 +46,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.query.common.engine.AbstractQueryEngine;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.filter.IFilter;
 
 /**

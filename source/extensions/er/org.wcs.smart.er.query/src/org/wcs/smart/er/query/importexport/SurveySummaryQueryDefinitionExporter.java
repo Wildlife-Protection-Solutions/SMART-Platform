@@ -33,7 +33,7 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Summary query definition exporter
@@ -75,7 +75,7 @@ public class SurveySummaryQueryDefinitionExporter extends SummaryQueryDefinition
 				SamplingUnitGroupBy gb = (SamplingUnitGroupBy)item;
 				if (gb.getRawItems() != null){
 					for (String uuid : gb.getRawItems()){
-						UuidItemType uuidItem = vv.samplingUnitToUuidItem(SmartUtils.decodeHex(uuid));
+						UuidItemType uuidItem = vv.samplingUnitToUuidItem(UuidUtils.stringToUuid(uuid));
 						if (uuid != null){
 							qt.getUuiditem().add(uuidItem);
 						}

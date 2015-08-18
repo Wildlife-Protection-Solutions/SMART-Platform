@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.referencing.CRS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Projection;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.internal.Messages;
@@ -41,7 +42,7 @@ import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -108,6 +109,7 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 		String x2Field = (String)options.get(X2_FIELD_KEY);
 		String y2Field = (String)options.get(Y2_FIELD_KEY);
 		Character delim = (Character) options.get(DELIMETER_KEY);
+		CoordinateReferenceSystem crs = ReprojectUtils.stringToCrs(proj.getDefinition());
 		
 		HashSet<String> existingIds = (HashSet<String>) options.get(EXISTING_IDS_KEY);
 		
@@ -175,8 +177,8 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 					Double y = Double.parseDouble(headers[y1]);
 					
 					Coordinate out = new Coordinate(x,y);
-					if (!CRS.equalsIgnoreMetadata(proj.getCrs(),SmartDB.DATABASE_CRS)){
-						out = ReprojectUtils.reproject(out.x, out.y, proj.getCrs(), SmartDB.DATABASE_CRS);
+					if (!CRS.equalsIgnoreMetadata(crs,GeometryUtils.SMART_CRS)){
+						out = ReprojectUtils.reproject(out.x, out.y, crs, GeometryUtils.SMART_CRS);
 					}
 					su.setGeometry(gf.createPoint(out));
 				}else{
@@ -189,9 +191,9 @@ public class CsvSamplingUnitImporter extends ISamplingUnitImporter {
 					
 					Coordinate p1 = new Coordinate(dx1,dy1);
 					Coordinate p2 = new Coordinate(dx2,dy2);
-					if (!proj.getCrs().equals(SmartDB.DATABASE_CRS)){
-						p1 = ReprojectUtils.reproject(p1.x, p1.y, proj.getCrs(), SmartDB.DATABASE_CRS);
-						p2 = ReprojectUtils.reproject(p2.x, p2.y, proj.getCrs(), SmartDB.DATABASE_CRS);
+					if (!crs.equals(GeometryUtils.SMART_CRS)){
+						p1 = ReprojectUtils.reproject(p1.x, p1.y, crs, GeometryUtils.SMART_CRS);
+						p2 = ReprojectUtils.reproject(p2.x, p2.y, crs, GeometryUtils.SMART_CRS);
 					}
 					su.setGeometry(gf.createLineString(new Coordinate[]{p1,p2}));
 				}

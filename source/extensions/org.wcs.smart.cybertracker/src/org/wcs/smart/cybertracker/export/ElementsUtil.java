@@ -33,6 +33,7 @@ import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Util for manipulations with {@link Elements} object
@@ -151,7 +152,7 @@ public class ElementsUtil {
 		Set<CmNode> keys = map.keySet();
 		for (CmNode node : keys) {
 			//no need for tag0 in case of group cause we should not relay on any uuids from configurable model
-			String tag0 = node.isGroup() ? null : SmartUtils.encodeHex(node.getCategory().getUuid());
+			String tag0 = node.isGroup() ? null :UuidUtils.uuidToString(node.getCategory().getUuid());
 			addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0);
 		}
 	}

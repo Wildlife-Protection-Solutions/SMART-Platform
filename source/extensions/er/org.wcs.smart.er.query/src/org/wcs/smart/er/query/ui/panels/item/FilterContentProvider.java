@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,8 +53,9 @@ import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveySummaryQueryType;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveySummaryQuery;
+import org.wcs.smart.er.query.ui.dropitems.SamplingUnitDropItem;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.ui.itempanel.IItemTreeNode;
@@ -163,7 +165,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 					List<SamplingUnit> allUnits = SurveyHibernateManager.getInstance().getSamplingUnits(design, s, null);
 					lUnits = new ArrayList<Object>();
 					lUnits.addAll(allUnits);
-					lUnits.add(SamplingUnitFilter.NONE);
+					lUnits.add(SamplingUnitDropItem.NONE);
 				}
 			}finally{
 				s.getTransaction().rollback();
@@ -252,8 +254,8 @@ public class FilterContentProvider implements ITreeContentProvider{
 		MISSION_MEMBER(Messages.FilterContentProvider_MissionMemberNode),
 		MISSION_LEADER(Messages.FilterContentProvider_MissionLeaderNode),
 		TRACKTYPE(Messages.FilterContentProvider_TrackTypeNode),
-		TRACK_SAMPLING_UNIT(MessageFormat.format(Messages.FilterContentProvider_TrackSamplingUnits, new Object[]{SamplingUnitFilter.Source.TRACK.guiName})),
-		OBSERVATION_SAMPLING_UNIT(MessageFormat.format(Messages.FilterContentProvider_ObservationSamplingUnits, new Object[]{SamplingUnitFilter.Source.OBSERVATION.guiName})),
+		TRACK_SAMPLING_UNIT(MessageFormat.format(Messages.FilterContentProvider_TrackSamplingUnits, new Object[]{SamplingUnitFilter.Source.TRACK.getGuiName(Locale.getDefault())})),
+		OBSERVATION_SAMPLING_UNIT(MessageFormat.format(Messages.FilterContentProvider_ObservationSamplingUnits, new Object[]{SamplingUnitFilter.Source.OBSERVATION.getGuiName(Locale.getDefault())})),
 		SAMPLING_UNITS_OBS(Messages.FilterContentProvider_SuLabel),
 		SAMPLING_UNIT_ATTRIBUTE_OBS(Messages.FilterContentProvider_SamplingUnitAttributesLabel),
 		SAMPLING_UNITS_TRK(Messages.FilterContentProvider_SuLabel),
@@ -272,9 +274,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 	}
 	
 	private boolean hasTrackObservationSuOption(){
-		if (qType.getKey().equals(SurveySummaryQueryType.KEY)){
-			
-			//TODO: implement others
+		if (qType.getKey().equals(SurveySummaryQuery.KEY)){
 			return true;
 		}
 		return false;
@@ -310,7 +310,7 @@ public class FilterContentProvider implements ITreeContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement) {
-		if (qType.getKey().equals(MissionTrackQueryType.KEY)){
+		if (qType.getKey().equals(MissionTrackQuery.KEY)){
 			if (this.design != null){
 				return new Object[]{
 						Node.SURVEY_MISSION, 

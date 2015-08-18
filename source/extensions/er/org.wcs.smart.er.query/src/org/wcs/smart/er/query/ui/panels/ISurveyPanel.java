@@ -42,14 +42,20 @@ public interface ISurveyPanel {
 	 */
 	public SurveyDesign getSurveyDesign();
 	
+//	/**
+//	 * Updates the panel based on the new survey design
+//	 * key.
+//	 * 
+//	 * @param currentDesign
+//	 * @param qType
+//	 */
+//	public void refreshPanel(String surveyDesignKey);
 	/**
-	 * Updates the panel based on the new survey design
-	 * 
-	 * @param currentDesign
-	 * @param qType
+	 * The same as refreshPanel(String surveyDesignKey) except
+	 * it uses the surveydesign object provided instead of the key.
+	 * @param surveyDesign
 	 */
-	public void refreshPanel(SurveyDesign currentDesign);
-	
+	public void refreshPanel(SurveyDesign surveyDesign);
 	/**
 	 * 
 	 * @return the current query or null if not applicable

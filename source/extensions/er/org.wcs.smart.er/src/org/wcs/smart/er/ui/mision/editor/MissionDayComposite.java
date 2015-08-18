@@ -88,8 +88,8 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
 import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
@@ -111,6 +111,9 @@ import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.ui.AttachmentCellEditor;
 import org.wcs.smart.observation.ui.ObservationCellEditor;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.ReprojectUtils;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -155,6 +158,7 @@ public class MissionDayComposite {
 	private SamplingUnitCellEditor samplingUnitEditor;
 	
 	private HashMap<OtColumn, TableViewerColumn> observationTableColumns;	
+	private CoordinateReferenceSystem lcrs;
 	
 	protected enum OtColumn {
 		ID(Messages.MissionDayComposite_WaypointID, 1),
@@ -179,6 +183,11 @@ public class MissionDayComposite {
 
 	public MissionDayComposite(MissionDayPage editor) {
 		this.editor = editor;
+		try{
+			lcrs = ReprojectUtils.stringToCrs(editor.getMissionEditor().getObservationOptions().getViewProjection().getDefinition());
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+		}
 	}
 	
 	public Composite createComposite(Composite parent, FormToolkit toolkit) {
@@ -539,7 +548,7 @@ public class MissionDayComposite {
 	
 	private MissionDay findMissionDay(Mission m){
 		for (MissionDay md : m.getMissionDays()){
-			if (SmartUtils.isSameDate(md.getDate(), editor.getDay())){
+			if (SharedUtils.isSameDate(md.getDate(), editor.getDay())){
 				return md;		
 			}
 		}
@@ -618,7 +627,7 @@ public class MissionDayComposite {
 						boolean enabled = !((IStructuredSelection)observationTable.getSelection()).isEmpty();
 						btnDeleteWaypoint.setEnabled(enabled);
 						
-						if (!SmartUtils.isSameDate(editor.getMissionEditor().getMission().getStartDate(), 
+						if (!SharedUtils.isSameDate(editor.getMissionEditor().getMission().getStartDate(), 
 								editor.getMissionEditor().getMission().getEndDate())) {
 							btnMoveWaypoint.setEnabled(enabled);	
 						} else {
@@ -813,7 +822,7 @@ public class MissionDayComposite {
 			SurveyWaypoint wp = add.getWaypoint();
 			wp.setMissionDay(missionDay);
 			
-			wp.getWaypoint().setDateTime(SmartUtils.getDatePart(missionDay.getDate(), false));
+			wp.getWaypoint().setDateTime(SharedUtils.getDatePart(missionDay.getDate(), false));
 			
 			missionDay.getWaypoints().add(wp);
 			
@@ -881,9 +890,9 @@ public class MissionDayComposite {
 		if (column == OtColumn.ID) {
 			return String.valueOf(wp.getId());
 		} else if (column == OtColumn.EAST) {
-			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), editor.getMissionEditor().getObservationOptions().getViewProjection()).getX());
+			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), lcrs).getX());
 		} else if (column == OtColumn.NORTH) {
-			return String.valueOf(Projection.transform(wp.getX(), wp.getY(), editor.getMissionEditor().getObservationOptions().getViewProjection()).getY());
+			return String.valueOf(ReprojectUtils.transform(wp.getX(), wp.getY(), lcrs).getY());
 		} else if (column == OtColumn.TIME) {
 			if (wp.getDateTime() != null) {
 				return DateFormat.getTimeInstance(DateFormat.MEDIUM).format(wp.getDateTime());
@@ -1118,13 +1127,15 @@ public class MissionDayComposite {
 					List<Employee> emps = new ArrayList<Employee>();
 					for (MissionMember mm : missionDay.getMission().getMembers()){
 						emps.add(mm.getMember());
-						mm.getMember().getFullLabel();
+						SmartLabelProvider.getFullLabel(mm.getMember());
 					}
 					//sort
 					Collections.sort(emps, new Comparator<Employee>() {
 						@Override
 						public int compare(Employee arg0, Employee arg1) {
-							return Collator.getInstance().compare(arg0.getFullLabel().toUpperCase(), arg1.getFullLabel().toUpperCase());
+							return Collator.getInstance().compare(
+									SmartLabelProvider.getFullLabel(arg0).toUpperCase(), 
+									SmartLabelProvider.getFullLabel(arg1).toUpperCase());
 						}
 					});
 					observationEditor.setObservers(emps);

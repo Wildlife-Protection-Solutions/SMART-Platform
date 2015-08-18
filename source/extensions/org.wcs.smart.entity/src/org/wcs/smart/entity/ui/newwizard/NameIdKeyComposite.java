@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityType;
@@ -107,7 +108,7 @@ public class NameIdKeyComposite extends AbstractEntityComposite{
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (txtKey.getData() == null){
-					txtKey.setText(NamedKeyItem.generateKey(txtName.getText(), sharedKeys));
+					txtKey.setText(DataModelManager.INSTANCE.generateKey(txtName.getText(), sharedKeys));
 				}
 				fireChange(new Event());
 			}

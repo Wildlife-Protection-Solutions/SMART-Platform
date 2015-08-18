@@ -31,7 +31,7 @@ import org.wcs.smart.er.query.filter.SurveyFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Survey uuid drop item.  This drop item represents a specific
@@ -56,7 +56,7 @@ public class SurveyDropItem extends DropItem implements IFilterDropItem{
 
 	@Override
 	public String asQueryPart() {
-		return SurveyFilter.UUID_QUERY_KEY + ":" + SmartUtils.encodeHex(survey.getUuid()); //$NON-NLS-1$
+		return SurveyFilter.UUID_QUERY_KEY + ":" + UuidUtils.uuidToString(survey.getUuid()); //$NON-NLS-1$
 	}
 
 	@Override

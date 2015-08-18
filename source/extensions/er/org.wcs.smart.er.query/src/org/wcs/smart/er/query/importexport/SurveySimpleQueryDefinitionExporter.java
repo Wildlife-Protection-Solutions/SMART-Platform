@@ -23,10 +23,10 @@ package org.wcs.smart.er.query.importexport;
 
 import org.hibernate.Session;
 import org.wcs.smart.er.query.model.ISurveyQuery;
-import org.wcs.smart.er.query.model.MissionQueryType;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -47,10 +47,10 @@ public class SurveySimpleQueryDefinitionExporter extends SimpleQueryDefinitionEx
 	@Override
 	public boolean canExport(Query query) {
 		
-		if (query.getType().getKey().equals(SurveyObservationQueryType.KEY) ||
-				query.getType().getKey().equals(SurveyWaypointQueryType.KEY) ||
-				query.getType().getKey().equals(MissionQueryType.KEY) ||
-				query.getType().getKey().equals(MissionTrackQueryType.KEY)){
+		if (query.getTypeKey().equals(SurveyObservationQuery.KEY) ||
+				query.getTypeKey().equals(SurveyWaypointQuery.KEY) ||
+				query.getTypeKey().equals(MissionQuery.KEY) ||
+				query.getTypeKey().equals(MissionTrackQuery.KEY)){
 			return true;
 		}
 		return false;

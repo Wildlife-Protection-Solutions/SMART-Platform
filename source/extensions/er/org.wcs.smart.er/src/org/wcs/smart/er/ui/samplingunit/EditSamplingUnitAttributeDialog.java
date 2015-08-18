@@ -23,7 +23,6 @@ package org.wcs.smart.er.ui.samplingunit;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -442,7 +441,7 @@ public class EditSamplingUnitAttributeDialog extends TitleAreaDialog implements 
 			for (SamplingUnitAttributeListItem mi : toUpdate.getAttributeList()){
 				SamplingUnitAttributeListItem  found = null;
 				for (SamplingUnitAttributeListItem copy : copyItems){
-					if (Arrays.equals(mi.getUuid(), copy.getUuid())){
+					if (mi.getUuid().equals(copy.getUuid())){
 						found = copy;
 						break;
 					}

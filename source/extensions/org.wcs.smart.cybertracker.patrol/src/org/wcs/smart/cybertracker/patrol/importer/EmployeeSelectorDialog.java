@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegMember;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Dialog for selecting an employee for leader or pilot
@@ -98,7 +99,7 @@ public class EmployeeSelectorDialog extends TitleAreaDialog{
         employeeViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof PatrolLegMember){
-					return ((PatrolLegMember) element).getMember().getFullLabel();
+					return SmartLabelProvider.getFullLabel( ((PatrolLegMember) element).getMember() );
 				}
 				return super.getText(element);
 			}

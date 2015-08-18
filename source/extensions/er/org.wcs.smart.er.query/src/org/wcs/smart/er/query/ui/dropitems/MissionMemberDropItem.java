@@ -51,7 +51,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IFilterDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Mission member/leader drop item
@@ -89,7 +90,9 @@ public class MissionMemberDropItem extends DropItem implements IFilterDropItem {
 				Collections.sort(data, new Comparator<Employee>() {
 					@Override
 					public int compare(Employee e0, Employee e1) {
-						return Collator.getInstance().compare(e0.getFullLabel().toUpperCase(), e1.getFullLabel().toUpperCase());
+						return Collator.getInstance().compare(
+								SmartLabelProvider.getFullLabel(e0).toUpperCase(), 
+								SmartLabelProvider.getFullLabel(e1).toUpperCase());
 					}
 				});
 				s.getTransaction().rollback();
@@ -169,7 +172,7 @@ public class MissionMemberDropItem extends DropItem implements IFilterDropItem {
 			key = "s:missionmember:"; //$NON-NLS-1$
 		}
 		if (e != null){
-			key += SmartUtils.encodeHex(e.getUuid());
+			key += UuidUtils.uuidToString(e.getUuid());
 		}
 		return key;
 	}

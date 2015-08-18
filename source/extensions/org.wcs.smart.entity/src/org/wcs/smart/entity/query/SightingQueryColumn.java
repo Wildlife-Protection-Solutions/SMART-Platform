@@ -21,9 +21,12 @@
  */
 package org.wcs.smart.entity.query;
 
+import java.util.Locale;
+
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 
@@ -50,8 +53,8 @@ public class SightingQueryColumn extends QueryColumn{
 	 *
 	 */
 	public static enum FixedColumns{
-		ENTITY_ID(Entity.ID_FIELD_NAME, ColumnType.STRING, "entity:id", "entity_id"), //$NON-NLS-1$ //$NON-NLS-2$
-		ENTITY_STATUS(Entity.STATUS_FIELD_NAME, ColumnType.STRING, "entity:status", "entity_status"), //$NON-NLS-1$ //$NON-NLS-2$
+		ENTITY_ID(EntityLabelProvider.ID_FIELD_NAME, ColumnType.STRING, "entity:id", "entity_id"), //$NON-NLS-1$ //$NON-NLS-2$
+		ENTITY_STATUS(EntityLabelProvider.STATUS_FIELD_NAME, ColumnType.STRING, "entity:status", "entity_status"), //$NON-NLS-1$ //$NON-NLS-2$
 		CA_ID(Messages.SightingQueryColumn_CaIdColumnName, ColumnType.STRING,"ca:id", "ca_id"), //$NON-NLS-1$ //$NON-NLS-2$
 		CA_NAME(Messages.SightingQueryColumn_CaNameColumnName, ColumnType.STRING,"ca:name", "ca_name"), //$NON-NLS-1$ //$NON-NLS-2$
 		WAYPOINT_SOURCE(Messages.SightingQueryColumn_WpSourceColumnName, ColumnType.STRING,"wp:source", "wp_source"),  //$NON-NLS-1$ //$NON-NLS-2$
@@ -115,7 +118,7 @@ public class SightingQueryColumn extends QueryColumn{
 		if (getKey().equals(FixedColumns.ENTITY_ID.getKey())){
 			return ri.getEntityId();
 		}else if (getKey().equals(FixedColumns.ENTITY_STATUS.getKey())){
-			return ri.getEntityStatus().getGuiName();
+			return ri.getEntityStatus().getGuiName(Locale.getDefault());
 		}else if (getKey().equals(FixedColumns.CA_ID.getKey())){
 			return ri.getConservationAreaId();
 		}else if (getKey().equals(FixedColumns.CA_NAME.getKey())){

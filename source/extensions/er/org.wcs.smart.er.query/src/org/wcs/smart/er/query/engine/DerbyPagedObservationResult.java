@@ -29,8 +29,8 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.IObservationPagedQueryResultSet;
-import org.wcs.smart.query.model.IResultItem;
 
 
 /**

@@ -51,7 +51,7 @@ import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.GroupByFilterDialog;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Sampling unit group by drop item.
@@ -100,7 +100,7 @@ public class SamplingUnitGroupByDropItem extends DropItem
 			for (SamplingUnit su : objects){
 				items.add(new ListItem(su.getUuid(), su.getId(), null));
 			}
-			items.add(new ListItem(null, SamplingUnitFilter.NONE.getId(), SamplingUnitFilter.NONE_KEY));
+			items.add(new ListItem(null, SamplingUnitDropItem.NONE.getId(), SamplingUnitFilter.NONE_KEY));
 			
 			s.getTransaction().rollback();
 			s.close();
@@ -139,7 +139,7 @@ public class SamplingUnitGroupByDropItem extends DropItem
 					sb.append(SamplingUnitFilter.NONE_KEY);
 					sb.append(":"); //$NON-NLS-1$
 				}else{
-					sb.append(SmartUtils.encodeHex(id.getUuid()));
+					sb.append(UuidUtils.uuidToString(id.getUuid()));
 					sb.append(":"); //$NON-NLS-1$
 				}
 			}

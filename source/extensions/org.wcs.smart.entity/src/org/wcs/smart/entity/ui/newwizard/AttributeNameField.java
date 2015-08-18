@@ -44,6 +44,7 @@ import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.hibernate.SmartDB;
@@ -102,7 +103,7 @@ public class AttributeNameField extends AbstractEntityComposite{
 			@Override
 			public void modifyText(ModifyEvent e) {
 				if (txtAttributeId.getData() == null){
-					txtAttributeId.setText(NamedKeyItem.generateKey(txtAttributeName.getText(), sharedKeys));
+					txtAttributeId.setText(DataModelManager.INSTANCE.generateKey(txtAttributeName.getText(), sharedKeys));
 				}
 				fireChange(new Event());
 			}
@@ -179,7 +180,7 @@ public class AttributeNameField extends AbstractEntityComposite{
 				
 		if (entityType.getDmAttribute() == null){
 			txtAttributeName.setText(entityType.getName() + Messages.AttributeNameField_IdLabel);
-			txtAttributeId.setText(NamedKeyItem.generateKey(txtAttributeName.getText(), sharedKeys));
+			txtAttributeId.setText(DataModelManager.INSTANCE.generateKey(txtAttributeName.getText(), sharedKeys));
 			txtAttributeId.setData(null);
 			txtAttributeName.setData(null);
 		}else{

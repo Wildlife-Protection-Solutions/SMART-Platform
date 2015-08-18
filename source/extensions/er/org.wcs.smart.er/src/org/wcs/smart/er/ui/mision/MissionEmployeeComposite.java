@@ -52,6 +52,7 @@ import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.ui.EmployeeLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Mission members composite.
@@ -97,7 +98,9 @@ public class MissionEmployeeComposite extends MissionComposite {
 		composite.setItemComparator(new Comparator<Employee>() {
 			@Override
 			public int compare(Employee o1, Employee o2) {
-				return Collator.getInstance().compare(o1.getFullLabel(), o2.getFullLabel());
+				return Collator.getInstance().compare(
+						SmartLabelProvider.getFullLabel(o1), 
+						SmartLabelProvider.getFullLabel(o2));
 			}
 		});
 		composite.addSelectionChangedListener(new IListChanged<Employee>() {
@@ -230,8 +233,8 @@ public class MissionEmployeeComposite extends MissionComposite {
 			for (Employee observer : observers){
 				if (!selected.contains(observer)){
 					warnComp.setVisible(true);
-					errorlbl.setText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverError, new Object[]{observer.getFullLabel()}));
-					errorlbl.setToolTipText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverErrorTooltip, new Object[]{observer.getFullLabel()}));
+					errorlbl.setText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverError, new Object[]{SmartLabelProvider.getFullLabel(observer)}));
+					errorlbl.setToolTipText(MessageFormat.format(Messages.MissionEmployeeComposite_ObserverErrorTooltip, new Object[]{SmartLabelProvider.getFullLabel(observer)}));
 					warnComp.layout(true);
 					return false;
 				}

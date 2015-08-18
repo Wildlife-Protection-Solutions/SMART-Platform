@@ -22,6 +22,7 @@
 package org.wcs.smart.er.ui.handlers;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 import javax.inject.Named;
 
@@ -58,8 +59,8 @@ public class NewMissionHandler {
 			IEclipseContext ctx,
 			Shell activeShell){
 		//search for a parent
-		byte[] parentDesign = null;
-		byte[] parentSurvey = null;
+		UUID parentDesign = null;
+		UUID parentSurvey = null;
 		if (selection != null && selection instanceof StructuredSelection){
 			IStructuredSelection sselection = (IStructuredSelection)selection;
 			
@@ -95,7 +96,7 @@ public class NewMissionHandler {
 		EditSurveyElementHandler.editMission(activeShell, m.getUuid(), m.getId());
 	}
 	
-	public static Mission newMission(Shell parent, byte[] parentDesign, byte[] parentSurvey){
+	public static Mission newMission(Shell parent, UUID parentDesign, UUID parentSurvey){
 		NewMissionWizard newWizard = new NewMissionWizard(parentDesign, parentSurvey);
 		WizardDialog wd = new WizardDialog(parent, newWizard);
 		if (wd.open() == WizardDialog.OK){

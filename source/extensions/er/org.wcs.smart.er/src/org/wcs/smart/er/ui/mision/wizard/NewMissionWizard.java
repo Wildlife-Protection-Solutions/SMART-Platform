@@ -25,6 +25,7 @@ import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IPageChangingListener;
 import org.eclipse.jface.dialogs.PageChangingEvent;
@@ -57,7 +58,7 @@ import org.wcs.smart.er.ui.mision.SurveyComposite;
 import org.wcs.smart.er.ui.mision.SurveyDesignComposite;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Wizard for creating a new mission.
@@ -82,7 +83,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 	/**
 	 * Creates a new wizard
 	 */
-	public NewMissionWizard(byte[] parentDesignUuid, byte[] parentSurveyUuid){
+	public NewMissionWizard(UUID parentDesignUuid, UUID parentSurveyUuid){
 		//init design
 		this.newMission = new Mission();
 		
@@ -168,17 +169,17 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		try{
 			
 			//create days
-			Calendar calStart = SmartUtils.convertDate(newMission.getStartDate());
+			Calendar calStart = SharedUtils.convertDate(newMission.getStartDate());
 			calStart.set(Calendar.HOUR, 0);
 			calStart.set(Calendar.MINUTE, 0);
 			calStart.set(Calendar.SECOND, 0);
 			calStart.set(Calendar.MILLISECOND, 0);
 			
-			Calendar calEnd = SmartUtils.convertDate(newMission.getEndDate());
+			Calendar calEnd = SharedUtils.convertDate(newMission.getEndDate());
 			newMission.setMissionDays(new ArrayList<MissionDay>());
 			while (calStart.before(calEnd) || calStart.equals(calEnd)) {
 				MissionDay md = new MissionDay();
-				md.setDate(SmartUtils.getDatePart(calStart.getTime(), false));
+				md.setDate(SharedUtils.getDatePart(calStart.getTime(), false));
 				md.setStartTime(createTime(0, 0, 0));
 				md.setEndTime(createTime(23, 59, 59));
 				md.setRestMinutes(0);

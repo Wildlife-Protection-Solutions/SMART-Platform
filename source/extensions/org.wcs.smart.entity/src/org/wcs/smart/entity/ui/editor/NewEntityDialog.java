@@ -38,14 +38,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -134,7 +134,7 @@ public class NewEntityDialog extends TitleAreaDialog {
 				ai.setName(newEntity.getId());
 				ai.updateName(SmartDB.getCurrentConservationArea().getDefaultLanguage(), newEntity.getId());
 				ai.updateName(SmartDB.getCurrentLanguage(), newEntity.getId());
-				ai.setKeyId(NamedKeyItem.generateKey(newEntity.getId(),
+				ai.setKeyId(DataModelManager.INSTANCE.generateKey(newEntity.getId(),
 					etype.getDmAttribute().getAttributeList()));
 			
 				etype.getDmAttribute().getAttributeList().add(ai);

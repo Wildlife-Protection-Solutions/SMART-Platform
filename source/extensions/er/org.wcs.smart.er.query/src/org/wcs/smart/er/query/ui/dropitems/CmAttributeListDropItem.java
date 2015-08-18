@@ -40,10 +40,10 @@ import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
-import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.AttributeListDropItem;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Configurable model attribute list drop item.  Only shows
@@ -59,7 +59,7 @@ public class CmAttributeListDropItem extends AttributeListDropItem {
 	public CmAttributeListDropItem(CmAttribute cmAttribute, CategoryAttribute att) {
 		super(att);
 		this.cmAttribute = cmAttribute;
-		this.key = "category:" + att.getCategory().getHkey() + ":cmattribute:" + att.getAttribute().getType().typeKey + ":" + SmartUtils.encodeHex(cmAttribute.getUuid()) + ":" + att.getAttribute().getKeyId();  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		this.key = "category:" + att.getCategory().getHkey() + ":cmattribute:" + att.getAttribute().getType().typeKey + ":" + UuidUtils.uuidToString(cmAttribute.getUuid()) + ":" + att.getAttribute().getKeyId();  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	
 		loadItemsJobs = new Job(Messages.CmAttributeListDropItem_loadModelAttributeJobName){
 
@@ -99,7 +99,7 @@ public class CmAttributeListDropItem extends AttributeListDropItem {
 						}
 					}
 					//add the any item
-					items.add(0, AttributeFilter.ANY_OPTION);				
+					items.add(0, BasicDropItemFactory.ANY_OPTION);				
 					if (currentSelection != null && !items.contains(currentSelection)){
 						//item is not longer active; but still in query
 						items.add(currentSelection);
@@ -122,7 +122,7 @@ public class CmAttributeListDropItem extends AttributeListDropItem {
 						if (currentSelection != null){
 							listViewer.setSelection(new StructuredSelection(currentSelection));
 						}else{
-							listViewer.setSelection(new StructuredSelection(AttributeFilter.ANY_OPTION));
+							listViewer.setSelection(new StructuredSelection(BasicDropItemFactory.ANY_OPTION));
 						}
 						getTargetPanel().redraw();
 					}});

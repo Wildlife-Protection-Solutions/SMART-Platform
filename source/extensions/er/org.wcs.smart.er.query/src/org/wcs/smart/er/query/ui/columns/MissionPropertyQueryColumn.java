@@ -26,7 +26,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**

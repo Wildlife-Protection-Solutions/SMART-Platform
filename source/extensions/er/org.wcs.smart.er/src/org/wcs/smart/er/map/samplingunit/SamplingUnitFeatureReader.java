@@ -32,13 +32,14 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.GeometryType;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Feature reading from sampling unit georesource.
@@ -114,8 +115,12 @@ public class SamplingUnitFeatureReader implements FeatureReader<SimpleFeatureTyp
 
 	public static SimpleFeature createFeature(SimpleFeatureType ftype, SamplingUnit su){
 		Object[] data = new Object[su.getSurveyDesign().getSamplingUnitAttributes().size() + 3];
-		data[0] = su.getGeometry();
-		data[1] = su.getId() + "." + SmartUtils.encodeHex(su.getUuid()); //$NON-NLS-1$ 
+		try{
+			data[0] = su.getGeometry();
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+		}
+		data[1] = su.getId() + "." + UuidUtils.uuidToString(su.getUuid()); //$NON-NLS-1$ 
 		data[2] = su.getId(); 
 		int i = 3;
 		for (SurveyDesignSamplingUnitAttribute att : su.getSurveyDesign().getSamplingUnitAttributes()){

@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -33,6 +34,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * CyberTracker related database functions.
@@ -105,7 +107,7 @@ public class CyberTrackerHibernateManager {
 		if (isEmptyTag0(uuid))
 			return null;
 		try {
-			return fetchByUuid(clazz, SmartUtils.decodeHex(uuid), session);
+			return fetchByUuid(clazz, UuidUtils.stringToUuid(uuid), session);
 		} catch (Exception e) {
 			CyberTrackerPlugIn.log(e.getMessage(), e);
 			return null;
@@ -113,10 +115,11 @@ public class CyberTrackerHibernateManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T> T fetchByUuid(Class<T> clazz, byte[] byteUuid, Session session) {
+	public static <T> T fetchByUuid(Class<T> clazz, UUID byteUuid, Session session) {
 		if (byteUuid == null)
 			return null;
-		Criteria query = session.createCriteria(clazz).add(Restrictions.eq("uuid", byteUuid)); //$NON-NLS-1$
+		Criteria query = session.createCriteria(clazz)
+				.add(Restrictions.eq("uuid", byteUuid)); //$NON-NLS-1$
 		return (T) query.uniqueResult();
 	}
 	

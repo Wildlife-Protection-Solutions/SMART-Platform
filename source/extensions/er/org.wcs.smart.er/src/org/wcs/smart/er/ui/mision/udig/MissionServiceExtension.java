@@ -30,7 +30,7 @@ import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Udig service extension for mission points.
@@ -94,7 +94,7 @@ public class MissionServiceExtension implements ServiceExtension {
 	
 	public static URL createURUL(Mission mission){
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
-		params.put(MISSION_UUID_KEY, SmartUtils.encodeHex(mission.getUuid()));
+		params.put(MISSION_UUID_KEY, UuidUtils.uuidToString(mission.getUuid()));
 		return createURL(params);
 	}
 	/**

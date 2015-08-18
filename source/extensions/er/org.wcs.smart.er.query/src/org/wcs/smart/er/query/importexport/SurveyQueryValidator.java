@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
@@ -52,6 +53,7 @@ import org.wcs.smart.er.query.filter.summary.SamplingUnitGroupBy;
 import org.wcs.smart.er.query.filter.summary.SurveyIdGroupBy;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.filter.AttributeFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
@@ -60,7 +62,7 @@ import org.wcs.smart.query.model.filter.QueryDefinitionValidator;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.xml.model.UuidItemType;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Tools for patrol query validation.
@@ -82,7 +84,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 	 * 
 	 */
 	public SurveyQueryValidator(HashMap<String, UuidItemType> uuidLookup, Session session ){
-		super(session);
+		super(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
 		this.uuidLookup = uuidLookup;
 	}
 
@@ -146,14 +148,14 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 			if (ex != null) return;
 			try{
 				if (filter instanceof MissionMemberFilter){
-					byte[] uuid = ((MissionMemberFilter)filter).getUuid();
+					UUID uuid = ((MissionMemberFilter)filter).getUuid();
 					Object x = session.get(Employee.class, uuid);
 					if (x != null 
 							&& x instanceof Employee
 							&& ((Employee)x).getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 						return;
 					}
-					UuidItemType item = uuidLookup.get(  SmartUtils.encodeHex(((MissionMemberFilter)filter).getUuid())  );
+					UuidItemType item = uuidLookup.get(  UuidUtils.uuidToString(((MissionMemberFilter)filter).getUuid())  );
 					if (item == null){
 						throw new Exception(
 							MessageFormat.format(COULDNOTRESOLVE_ERRMSG, new Object[]{ filter.asString()}));
@@ -171,7 +173,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					
 				}else if (filter instanceof MissionFilter){
 					if (((MissionFilter) filter).getType() == MissionFilter.Type.UUID){
-						byte[] uuid = SmartUtils.decodeHex(((MissionFilter)filter).getValue());
+						UUID uuid = UuidUtils.stringToUuid(((MissionFilter)filter).getValue());
 						Object x = session.get(Mission.class, uuid);
 						if (x != null 
 								&& x instanceof Mission
@@ -182,7 +184,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					}
 				}else if (filter instanceof SurveyFilter){
 					if (((SurveyFilter) filter).getType() == SurveyFilter.Type.UUID){
-						byte[] uuid = SmartUtils.decodeHex(((SurveyFilter)filter).getValue());
+						UUID uuid = UuidUtils.stringToUuid(((SurveyFilter)filter).getValue());
 						Object x = session.get(Survey.class, uuid);
 						if (x != null 
 								&& x instanceof Survey
@@ -196,7 +198,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					if (suFilter.isNone()){
 						return;
 					}
-					Object x = session.get(SamplingUnit.class, SmartUtils.decodeHex(suFilter.getUuid()));
+					Object x = session.get(SamplingUnit.class, UuidUtils.stringToUuid(suFilter.getUuid()));
 					if (x != null 
 							&& x instanceof SamplingUnit
 							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
@@ -206,7 +208,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					if (item != null){
 						SamplingUnit it = findSamplingUnit(item.getId());
 						if (it != null){
-							suFilter.setUuid(SmartUtils.encodeHex(it.getUuid()));
+							suFilter.setUuid(UuidUtils.uuidToString(it.getUuid()));
 						}
 					}
 					throw new Exception(MessageFormat.format(Messages.SurveyQueryValidator_SuNotFound,
@@ -284,7 +286,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 					SamplingUnitGroupBy gb = (SamplingUnitGroupBy) filter;
 					String[] items = gb.getRawItems();
 					for (int i = 0; i < items.length;i++){
-						Object x = session.get(SamplingUnit.class, SmartUtils.decodeHex(items[i]));
+						Object x = session.get(SamplingUnit.class, UuidUtils.stringToUuid(items[i]));
 						if (x != null 
 							&& ((SamplingUnit)x).getSurveyDesign().getConservationArea().equals(SmartDB.getCurrentConservationArea())){
 							continue;
@@ -293,7 +295,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 						if (item != null){
 							SamplingUnit it = findSamplingUnit(item.getId());
 							if (it != null){
-								items[i] = SmartUtils.encodeHex(it.getUuid());
+								items[i] = UuidUtils.uuidToString(it.getUuid());
 								continue;
 							}
 						}
@@ -343,7 +345,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateMissionAttributeListItem(String key, String attributeKey) throws Exception{
-		if (key.equals(AttributeFilter.ANY_OPTION.getKey())){
+		if (key.equals(AttributeFilter.ANY_OPTION_KEY)){
 			return ;
 		}
 		String sql = "SELECT c FROM " + MissionAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$
@@ -366,7 +368,7 @@ public class SurveyQueryValidator extends QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateSamplingUnitAttributeListItem(String key, String attributeKey) throws Exception{
-		if (key.equals(AttributeFilter.ANY_OPTION.getKey())){
+		if (key.equals(AttributeFilter.ANY_OPTION_KEY)){
 			return ;
 		}
 		String sql = "SELECT c FROM " + SamplingUnitAttributeListItem.class.getSimpleName() + " c WHERE keyId = :keyId and c.attribute.conservationArea = :ca "; //$NON-NLS-1$ //$NON-NLS-2$

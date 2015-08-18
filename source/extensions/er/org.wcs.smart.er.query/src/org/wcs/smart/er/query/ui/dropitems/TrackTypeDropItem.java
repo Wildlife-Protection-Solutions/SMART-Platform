@@ -22,6 +22,7 @@
 package org.wcs.smart.er.query.ui.dropitems;
 
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -49,7 +50,7 @@ public class TrackTypeDropItem extends DropItem implements IFilterDropItem{
 	
 	@Override
 	public String getText() {
-		return MessageFormat.format(Messages.TrackTypeDropItem_TrackTypeLabel, new Object[]{type.getGuiName()});
+		return MessageFormat.format(Messages.TrackTypeDropItem_TrackTypeLabel, new Object[]{type.getGuiName(Locale.getDefault())});
 	}
 
 	@Override

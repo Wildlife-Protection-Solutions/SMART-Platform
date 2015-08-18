@@ -25,11 +25,12 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.ServiceExtension;
 import org.locationtech.udig.core.internal.CorePlugin;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Udig service extension for smart queries
@@ -55,7 +56,7 @@ public class QueryServiceExtension implements ServiceExtension {
             return null;
             
         //check for the property service key
-        if (params.containsKey(QUERY_UUID_KEY) && params.get(QUERY_UUID_KEY) instanceof byte[]) {
+        if (params.containsKey(QUERY_UUID_KEY) && params.get(QUERY_UUID_KEY) instanceof UUID) {
             //found it, create the service handle
         	return  new QueryService(params);
         }
@@ -89,7 +90,7 @@ public class QueryServiceExtension implements ServiceExtension {
 		}
 		
 		quuid = quuid.substring(pos);
-		byte[] buuid = quuid.getBytes();
+		UUID buuid = UuidUtils.stringToUuid(quuid);
 		HashMap<String, Serializable> params = new HashMap<String, Serializable>();
 		params.put(QUERY_UUID_KEY, buuid);
 		return params;
@@ -103,10 +104,10 @@ public class QueryServiceExtension implements ServiceExtension {
 	 */
 	public static URL createURL(Map<String, Serializable> params){
 		String url = "smart://smartdb/query/"; //$NON-NLS-1$
-		if (params.get(QUERY_UUID_KEY) == null || !(params.get(QUERY_UUID_KEY) instanceof byte[])){
+		if (params.get(QUERY_UUID_KEY) == null || !(params.get(QUERY_UUID_KEY) instanceof UUID)){
 			url += System.nanoTime();
 		}else{
-			url += SmartUtils.encodeHex((byte[])params.get(QUERY_UUID_KEY)) ;
+			url += UuidUtils.uuidToString((UUID)params.get(QUERY_UUID_KEY)) ;
 		}
 		try{
 			return new URL(null, url, CorePlugin.RELAXED_HANDLER);

@@ -24,6 +24,7 @@ package org.wcs.smart.entity.ui.editor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import javax.swing.event.ChangeEvent;
@@ -57,10 +58,11 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
-import org.wcs.smart.entity.model.Entity.Status;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.model.Status;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.properties.FilterComposite;
 
@@ -259,16 +261,16 @@ public class EntityListTable extends Composite {
 		filterColumns = new ArrayList<Object>();
 		filterColumns.add(Messages.EntityListTable_AnyLabel);
 		
-		TableViewerColumn col = createTableColumn(Entity.STATUS_FIELD_NAME,60, new ColumnLabelProvider() {
+		TableViewerColumn col = createTableColumn(EntityLabelProvider.STATUS_FIELD_NAME,60, new ColumnLabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof Entity) {
-					return ((Entity) element).getStatus().getGuiName();
+					return ((Entity) element).getStatus().getGuiName(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
 		});
 		
-		col = createTableColumn(Entity.ID_FIELD_NAME,null, new ColumnLabelProvider() {
+		col = createTableColumn(EntityLabelProvider.ID_FIELD_NAME,null, new ColumnLabelProvider() {
 			public String getText(Object element) {
 				if (element instanceof Entity) {
 					return ((Entity) element).getId();
@@ -279,7 +281,7 @@ public class EntityListTable extends Composite {
 		filterColumns.add(col);
 		
 		if (SmartDB.isMultipleAnalysis()){
-			col = createTableColumn(Entity.CA_FIELD_NAME, null, new ColumnLabelProvider() {
+			col = createTableColumn(EntityLabelProvider.CA_FIELD_NAME, null, new ColumnLabelProvider() {
 				public String getText(Object element) {
 					if (element instanceof Entity) {
 						return ((Entity) element).getEntityType().getConservationArea().getId();
@@ -301,7 +303,7 @@ public class EntityListTable extends Composite {
 								Entity e = (Entity) element;
 								EntityAttributeValue value = e.findAttribute(ea.getKeyId());
 								if (value != null) {
-									return value.getValueAsString();
+									return value.getValueAsString(Locale.getDefault());
 								}
 								return ""; //$NON-NLS-1$
 							}

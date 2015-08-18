@@ -24,6 +24,7 @@ package org.wcs.smart.entity.report;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -36,6 +37,7 @@ import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.query.SightingQueryColumn;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
 
 /**
  * Entity type table for BIRT reporting 
@@ -86,11 +88,11 @@ public class EntityTable extends SmartBirtTable {
 		}
 		String[] cols = new String[et.getAttributes().size() + add];
 		
-		cols[0] = Entity.ID_FIELD_NAME;
-		cols[1] = Entity.STATUS_FIELD_NAME;
+		cols[0] = EntityLabelProvider.ID_FIELD_NAME;
+		cols[1] = EntityLabelProvider.STATUS_FIELD_NAME;
 		if (et.getType() == EntityType.Type.FIXED){
-			cols[2] = Entity.X_FIELD_NAME;
-			cols[3] = Entity.Y_FIELD_NAME;
+			cols[2] = EntityLabelProvider.X_FIELD_NAME;
+			cols[3] = EntityLabelProvider.Y_FIELD_NAME;
 		}
 		
 		int i = 0;
@@ -155,7 +157,7 @@ public class EntityTable extends SmartBirtTable {
 		if (index == 0){
 			return e.getId();
 		}else if (index == 1){
-			return e.getStatus().getGuiName();
+			return e.getStatus().getGuiName(Locale.getDefault());
 		}
 		if (et.getType() == EntityType.Type.FIXED){
 			if (index == 2){
@@ -173,7 +175,7 @@ public class EntityTable extends SmartBirtTable {
 		if (eav.getEntityAttribute().getDmAttribute().getType() ==  AttributeType.LIST ||
 				eav.getEntityAttribute().getDmAttribute().getType() ==  AttributeType.TREE ||
 				eav.getEntityAttribute().getDmAttribute().getType() == AttributeType.BOOLEAN){
-			return eav.getValueAsString();
+			return eav.getValueAsString(Locale.getDefault());
 		}
 		return eav.getValue();
 	}

@@ -23,11 +23,11 @@ package org.wcs.smart.er.query.report.map;
 
 import org.locationtech.udig.catalog.IService;
 import org.wcs.smart.er.query.map.udig.QueryServiceFactory;
-import org.wcs.smart.er.query.model.MissionQueryType;
-import org.wcs.smart.er.query.model.MissionTrackQueryType;
-import org.wcs.smart.er.query.model.SurveyGridQueryType;
-import org.wcs.smart.er.query.model.SurveyObservationQueryType;
-import org.wcs.smart.er.query.model.SurveyWaypointQueryType;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyGriddedQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.report.birt.query.map.AbstractQueryMapLayer;
 
@@ -41,11 +41,11 @@ public class QueryMapLayer extends AbstractQueryMapLayer{
 
 	@Override
 	public boolean canAddToMap(String queryTypeKey) {
-		if (queryTypeKey.equals(SurveyGridQueryType.KEY) ||
-				queryTypeKey.equals(MissionQueryType.KEY) ||
-				queryTypeKey.equals(SurveyObservationQueryType.KEY) ||
-				queryTypeKey.equals(MissionTrackQueryType.KEY) ||
-				queryTypeKey.equals(SurveyWaypointQueryType.KEY)){
+		if (queryTypeKey.equals(SurveyGriddedQuery.KEY) ||
+				queryTypeKey.equals(MissionQuery.KEY) ||
+				queryTypeKey.equals(SurveyObservationQuery.KEY) ||
+				queryTypeKey.equals(MissionTrackQuery.KEY) ||
+				queryTypeKey.equals(SurveyWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

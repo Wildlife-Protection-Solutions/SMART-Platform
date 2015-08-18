@@ -22,6 +22,7 @@
 package org.wcs.smart.er.map.samplingunit;
 
 import java.io.IOException;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,7 +51,7 @@ public class SamplingUnitGeoResourceInfo extends IGeoResourceInfo {
 
 	
 	public SamplingUnitGeoResourceInfo( SamplingUnitGeoResource resource, IProgressMonitor monitor){
-		String title = Messages.SamplingUnitGeoResourceInfo_SuLayerNamePrefix + " - " + GeometryType.valueOf(resource.getDataType()).getGuiName();  //$NON-NLS-1$
+		String title = Messages.SamplingUnitGeoResourceInfo_SuLayerNamePrefix + " - " + GeometryType.valueOf(resource.getDataType()).getGuiName(Locale.getDefault());  //$NON-NLS-1$
 		try {
 			String sdName = ((SamplingUnitService)resource.service(monitor)).getCachedName();
 			title += " [" + sdName + "]"; //$NON-NLS-1$ //$NON-NLS-2$

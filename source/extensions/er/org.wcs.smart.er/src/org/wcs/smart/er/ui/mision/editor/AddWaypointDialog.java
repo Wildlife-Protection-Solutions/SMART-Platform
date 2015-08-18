@@ -58,6 +58,8 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.ui.ProjectionLabelProvider;
+import org.wcs.smart.util.GeometryUtils;
+import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -124,9 +126,9 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		
 		try {
 			//reproject
-			CoordinateReferenceSystem sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs();
+			CoordinateReferenceSystem sourceCrs = ReprojectUtils.stringToCrs(((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getDefinition());
 			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
-			Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(sourceCrs, GeometryUtils.SMART_CRS));
 
 			newWaypoint.getWaypoint().setX(p.getX());
 			newWaypoint.getWaypoint().setY(p.getY());
@@ -173,18 +175,22 @@ public class AddWaypointDialog extends TitleAreaDialog{
 					SamplingUnit su = (SamplingUnit)x;
 					//update x and y values
 					Coordinate c = null;
-					if (su.getGeometry() instanceof Point){
-						c = ((Point)su.getGeometry()).getCoordinate();
-					}else if (su.getGeometry() instanceof LineString){
-						LengthIndexedLine lil = new LengthIndexedLine(su.getGeometry());
-						c = lil.extractPoint(su.getGeometry().getLength() / 2);
+					try{
+						if (su.getGeometry() instanceof Point){
+							c = ((Point)su.getGeometry()).getCoordinate();
+						}else if (su.getGeometry() instanceof LineString){
+							LengthIndexedLine lil = new LengthIndexedLine(su.getGeometry());
+							c = lil.extractPoint(su.getGeometry().getLength() / 2);
+						}
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.displayLog("Error reading geometry." , ex);
 					}
 					if (c == null) return;
 
 					//if c will be in lat/long - we need to reproject o current projection
-					CoordinateReferenceSystem src = SmartDB.DATABASE_CRS;
+					CoordinateReferenceSystem src = GeometryUtils.SMART_CRS;
 					try{
-						CoordinateReferenceSystem trg  = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs();
+						CoordinateReferenceSystem trg  = ReprojectUtils.stringToCrs(((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getDefinition());
 						Point p = (Point) JTS.transform(gf.createPoint(new Coordinate(c.x, c.y)), CRS.findMathTransform(src, trg));
 					
 						if (p != null){
@@ -232,7 +238,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			lstProjections.setSelection(new StructuredSelection(currentProjection));			
 			try{
 				Point point = gf.createPoint(new Coordinate(x,y));
-				Point np = (Point)JTS.transform(point, CRS.findMathTransform(SmartDB.DATABASE_CRS, currentProjection.getCrs()));
+				Point np = (Point)JTS.transform(point, CRS.findMathTransform(GeometryUtils.SMART_CRS, ReprojectUtils.stringToCrs(currentProjection.getDefinition())));
 				x = np.getX();
 				y = np.getY();
 			}catch (Exception ex){
@@ -322,9 +328,9 @@ public class AddWaypointDialog extends TitleAreaDialog{
 	private void transformInput() {
 		try {
 			//reproject
-			CoordinateReferenceSystem sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs();
+			CoordinateReferenceSystem sourceCrs = ReprojectUtils.stringToCrs(((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getDefinition());
 			Point point = gf.createPoint(new Coordinate(Double.parseDouble(txtX.getText()),Double.parseDouble(txtY.getText())));
-			Point p = (Point) JTS.transform(point, CRS.findMathTransform(currentProjection.getCrs(), sourceCrs));
+			Point p = (Point) JTS.transform(point, CRS.findMathTransform(ReprojectUtils.stringToCrs(currentProjection.getDefinition()), sourceCrs));
 
 			txtX.setText(String.valueOf(p.getX()));
 			txtY.setText(String.valueOf(p.getY()));
@@ -354,7 +360,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 			return Messages.AddWaypointDialog_EmptyProjectionError;
 		}
 		try{
-			sourceCrs = ((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getCrs(); 
+			sourceCrs = ReprojectUtils.stringToCrs(((Projection)((IStructuredSelection)lstProjections.getSelection()).getFirstElement()).getDefinition()); 
 		}catch (Exception ex){
 			return Messages.AddWaypointDialog_ParseCRSError + ex.getLocalizedMessage();
 		}
@@ -391,7 +397,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 		
 		try{
 			Point point = gf.createPoint(new Coordinate(x, y));
-			JTS.transform(point, CRS.findMathTransform(sourceCrs, SmartDB.DATABASE_CRS));
+			JTS.transform(point, CRS.findMathTransform(sourceCrs, GeometryUtils.SMART_CRS));
 		}catch (Exception ex){
 			return Messages.AddWaypointDialog_InvalidXYError + ex.getLocalizedMessage();
 		}

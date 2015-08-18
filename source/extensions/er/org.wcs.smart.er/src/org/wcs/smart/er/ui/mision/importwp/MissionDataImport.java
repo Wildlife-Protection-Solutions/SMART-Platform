@@ -48,6 +48,7 @@ import org.wcs.smart.observation.common.importwp.GPSDataImport;
 import org.wcs.smart.observation.common.importwp.GPSDataImport.ImportType;
 import org.wcs.smart.observation.common.importwp.ImportOptionsComposite.ImportOption;
 import org.wcs.smart.observation.model.Waypoint;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.SmartUtils.RegExLevel;
 
@@ -154,8 +155,8 @@ public class MissionDataImport {
 			}
 			Date wpdt = point.getDateTime();
 			for (MissionDay mday : missionDays){
-				if (SmartUtils.getDatePart(wpdt, false).equals(
-						SmartUtils.getDatePart(mday.getDate(), false))){
+				if (SharedUtils.getDatePart(wpdt, false).equals(
+						SharedUtils.getDatePart(mday.getDate(), false))){
 
 					String key = mday.getDate().toString() + "_" + point.getSourceId(); //$NON-NLS-1$
 					Item trackpnts = tracksPnts.get(key);
@@ -297,8 +298,8 @@ public class MissionDataImport {
 			//find patrol leg day based on times
 			for (Iterator<MissionDay> iterator = days.iterator(); iterator.hasNext();) {
 				MissionDay mday = (MissionDay) iterator.next();				
-				if (SmartUtils.getDatePart(wpdt, false).equals(
-						SmartUtils.getDatePart(mday.getDate(), false))){
+				if (SharedUtils.getDatePart(wpdt, false).equals(
+						SharedUtils.getDatePart(mday.getDate(), false))){
 					
 					SurveyWaypoint se = new SurveyWaypoint();
 					se.setMissionDay(mday);
