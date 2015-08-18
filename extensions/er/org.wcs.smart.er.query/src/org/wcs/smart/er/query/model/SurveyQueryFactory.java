@@ -100,7 +100,7 @@ public class SurveyQueryFactory {
 	public static SurveyObservationQuery createObservationQuery(){
 		SurveyObservationQuery query = new SurveyObservationQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		
 		
 		return query;
@@ -109,14 +109,14 @@ public class SurveyQueryFactory {
 	public static SurveyWaypointQuery createSurveyWaypointQuery(){
 		SurveyWaypointQuery query = new SurveyWaypointQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		return query;
 	}
 	
 	public static SurveyGriddedQuery createGriddedQuery(){
 		SurveyGriddedQuery query = new SurveyGriddedQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}
@@ -124,7 +124,7 @@ public class SurveyQueryFactory {
 	public static MissionQuery createMissionQuery(){
 		MissionQuery query = new MissionQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}
@@ -132,7 +132,7 @@ public class SurveyQueryFactory {
 	public static SurveySummaryQuery createSummaryQuery(){
 		SurveySummaryQuery query = new SurveySummaryQuery();
 		initQuery(query, null);
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}
@@ -140,7 +140,7 @@ public class SurveyQueryFactory {
 	public static MissionTrackQuery createMissionTrackQuery(){
 		MissionTrackQuery query = new MissionTrackQuery();
 		initQuery(query, null);		
-		query.setConservationAreaFilter(new ConservationAreaFilter(true));
+		query.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
 		query.setDateFilter(null);
 		return query;
 	}

@@ -22,10 +22,12 @@
 package org.wcs.smart.er.ui.mision.editor;
 
 import java.util.TimeZone;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
 import org.wcs.smart.er.model.Mission;
@@ -50,7 +52,7 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 	 * @param parentShell parent shell
 	 * @param t the track to display
 	 */
-	public MissionTrackPointDialog(Shell parentShell, MissionTrack t) {
+	public MissionTrackPointDialog(Shell parentShell, MissionTrack t) throws Exception {
 		super(parentShell);
 		this.track = t;
 		
@@ -65,13 +67,17 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 	}
 
 	@Override
-	protected byte[] getEditTrackUUid() {
+	protected UUID getEditTrackUUid() {
 		return editTrack.getUuid();
 	}
 
 	@Override
 	protected LineString getEditTrackLineString() {
-		return editTrack.getLineString();
+		try{
+			return editTrack.getLineString();
+		}catch (Exception ex){
+			throw new IllegalStateException(ex);
+		}
 	}
 
 	@Override
@@ -84,14 +90,19 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 		Job job = null;
 		Mission m = track.getMissionDay().getMission();
 		//save then close
-		if (editTrack.getLineString() == null){
-			//delete track
-			track.getMissionDay().getTracks().remove(track);
-			track.setMissionDay(null);
-			job = new DeleteMissionTracksJob(track);
-		}else{
-			track.setLineString(editTrack.getLineString());
-			job = new SaveMissionTracksJob(track);
+		try{
+			if (editTrack.getLineString() == null){
+				//delete track
+				track.getMissionDay().getTracks().remove(track);
+				track.setMissionDay(null);
+				job = new DeleteMissionTracksJob(track);
+			}else{
+				track.setLineString(editTrack.getLineString());
+				job = new SaveMissionTracksJob(track);
+			}
+		}catch (Exception ex){
+			EcologicalRecordsPlugIn.displayLog("Error reading track geometry.", ex);
+			
 		}
 
 		//save and fire

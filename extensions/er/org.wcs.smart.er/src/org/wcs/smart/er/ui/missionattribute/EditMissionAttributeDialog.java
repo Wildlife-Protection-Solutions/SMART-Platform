@@ -23,7 +23,6 @@ package org.wcs.smart.er.ui.missionattribute;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -425,7 +424,7 @@ public class EditMissionAttributeDialog extends TitleAreaDialog implements Selec
 			for (MissionAttributeListItem mi : toUpdate.getAttributeList()){
 				MissionAttributeListItem  found = null;
 				for (MissionAttributeListItem copy : copyItems){
-					if (Arrays.equals(mi.getUuid(), copy.getUuid())){
+					if (mi.getUuid().equals(copy.getUuid())){
 						found = copy;
 						break;
 					}

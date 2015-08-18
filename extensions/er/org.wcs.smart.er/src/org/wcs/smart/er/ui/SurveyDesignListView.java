@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -125,7 +126,7 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 			bar.setSelection(1);
 			pService.bringToTop(localPart);
 		}else if (src instanceof MissionEditor){
-			byte[] missionUuid = ((MissionEditorInput)((MissionEditor)src).getEditorInput()).getUuid();
+			UUID missionUuid = ((MissionEditorInput)((MissionEditor)src).getEditorInput()).getUuid();
 			lstViewer.setSelection(new StructuredSelection(new SurveyListTreeNode(null, missionUuid, Type.MISSION)));
 			bar.setSelection(0);
 			pService.bringToTop(localPart);

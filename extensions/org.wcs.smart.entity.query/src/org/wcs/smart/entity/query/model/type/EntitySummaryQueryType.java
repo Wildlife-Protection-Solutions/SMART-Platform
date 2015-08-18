@@ -57,8 +57,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class EntitySummaryQueryType implements IQueryType {
 	
-	public static final String KEY = "entitysummary"; //$NON-NLS-1$
-	
 	private static IDropItemFactory dropItemFactory = null;
 	
 	/**
@@ -74,7 +72,7 @@ public class EntitySummaryQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return EntitySummaryQuery.KEY;
 	}
 
 	/**

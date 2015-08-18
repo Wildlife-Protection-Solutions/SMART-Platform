@@ -23,9 +23,11 @@ package org.wcs.smart.er.ui.surveydesign.editor;
 
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.Locale;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 
@@ -124,17 +126,22 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 			
 			if (type == null){
 				if (key.equals(FixedColumns.TYPE.name())){
-					return su.getType().getGuiName();
+					return su.getType().getGuiName(Locale.getDefault());
 				}else if(key.equals(FixedColumns.ID.name())){
 					return su.getId();
 				}else if (key.equals(FixedColumns.LENGTH.name())){
-					if (su.getGeometryLengthKm() == null){
-						return null; 
-					}else{
-						return su.getGeometryLengthKm();
+					try{
+						if (su.getGeometryLengthKm() == null){
+							return null; 
+						}else{
+							return su.getGeometryLengthKm();
+						}
+					}catch (Exception ex){
+						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+						return "Error computing length";
 					}
 				}else if (key.equals(FixedColumns.STATE.name())){
-					return su.getState().getGuiName();
+					return su.getState().getGuiName(Locale.getDefault());
 				}
 			}else{
 				//search attributes
@@ -158,17 +165,22 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 			SamplingUnit su = (SamplingUnit) element;
 			
 			if (key.equals(FixedColumns.TYPE.name())){
-				return su.getType().getGuiName();
+				return su.getType().getGuiName(Locale.getDefault());
 			}else if(key.equals(FixedColumns.ID.name())){
 				return su.getId();
 			}else if (key.equals(FixedColumns.LENGTH.name())){
-				if (su.getGeometryLengthKm() == null){
-					return ""; //$NON-NLS-1$
-				}else{
-					return su.getGeometryLengthKm().toString();
+				try{
+					if (su.getGeometryLengthKm() == null){
+						return ""; //$NON-NLS-1$
+					}else{
+						return su.getGeometryLengthKm().toString();
+					}
+				}catch (Exception ex){
+					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
+					return "Error computing length";
 				}
 			}else if (key.equals(FixedColumns.STATE.name())){
-				return su.getState().getGuiName();
+				return su.getState().getGuiName(Locale.getDefault());
 			}else{
 				//search attributes
 				for (SamplingUnitAttributeValue sua : su.getAttributes()){

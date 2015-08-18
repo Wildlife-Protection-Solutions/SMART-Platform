@@ -25,21 +25,21 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;
@@ -47,8 +47,13 @@ import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -63,8 +68,28 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 
 	private String queryDataTable;
 	
+	@Override
+	public boolean canExecute(String  querytype) {
+		return MissionQuery.KEY.equals(querytype);
+	}
 	
-	public DerbyPagedMissionResult executeDerbyQuery(final MissionQuery query, final Session session, final IProgressMonitor monitor) throws SQLException {
+	/**
+	 * Runs the given patrol query and retrieves the results from the database.
+	 * 
+	 * @param query
+	 * @param session
+	 * @param monitor
+	 * @return
+	 * @throws SQLException
+	 */
+	@Override
+	public IQueryResult executeQuery(
+			Query lquery,
+			HashMap<String, Object> parameters) throws SQLException{
+
+		final MissionQuery query = (MissionQuery) lquery;
+		final Session session = (Session) parameters.get(Session.class.getName());
+		final IProgressMonitor monitor = (IProgressMonitor) parameters.get(IProgressMonitor.class.getName());
 		
 		if (query.getDateFilter() == null){
 			return null;
@@ -79,23 +104,27 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				IFilterProcessor filterer = DerbyMissionEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+				
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
+				IFilterProcessor filterer = null;
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
+					filterer = DerbyMissionEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+					
 					SurveyHasObservationFilterVisitor vv = new SurveyHasObservationFilterVisitor();
 					boolean needsObservations = false;
 					if (query.getFilter() != null && query.getFilter().getFilter() != null){
 						query.getFilter().getFilter().accept(vv);
 						needsObservations = vv.hasObservationFilter();
 					}
+					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), SmartDB.getConservationAreaConfiguration().getConservationAreas());
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							query.getConservationAreaFilterAsFilter(), 
+							caFilter, 
 							needsObservations, false, new SubProgressMonitor(monitor, 50));
 					
 					if (monitor.isCanceled()) return;
@@ -111,9 +140,10 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 						}
 					}
 					monitor.worked(10);
-					
+				}catch (Exception ex){
+					throw new SQLException(ex);
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, monitor.isCanceled());
 					monitor.done();
 				}
@@ -153,7 +183,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				byte[] uuid = rs.getBytes(2);
 				if (uuid == null || ca_uuid == null)
 					continue;
-				String name = getName(uuid, ca_uuid, session);
+				String name = getName(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(ca_uuid), session);
 				statement.setString(1, name);
 				statement.setBytes(2, uuid);
 				statement.addBatch();
@@ -254,7 +284,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
 			while (rs.next()) {
 				byte[] uuid = rs.getBytes(1);
-				String name = getEmployeeName(uuid, session);
+				String name = getEmployeeName(UuidUtils.byteToUUID(uuid), session);
 				
 				if (name != null) {
 					leaderSt.setString(1, name);
@@ -320,7 +350,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 				byte[] uuid = rs.getBytes(1);
 				if (uuid != null) {
 					byte[] cauuid = rs.getBytes(2);
-					String value = Label.getDescription(uuid, cauuid);
+					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid));
 					statement.setBytes(1, uuid);
 					statement.setString(2, value);
 					statement.addBatch();
@@ -389,7 +419,7 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		
-		it.setMissionUuid(rs.getBytes("mission_uuid")); //$NON-NLS-1$
+		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
 		it.setMissionEnd(rs.getDate("mission_enddate")); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
 		it.setMissionStart(rs.getDate("mission_startdate")); //$NON-NLS-1$
@@ -405,11 +435,15 @@ public class DerbyMissionEngine extends DerbySurveyQueryEngine {
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
 		//need to add the tracks
-		Query q = session.createQuery("FROM MissionTrack WHERE missionDay.mission.uuid = :uuid"); //$NON-NLS-1$
-		q.setParameter("uuid", rs.getBytes("mission_uuid"));  //$NON-NLS-1$//$NON-NLS-2$
+		org.hibernate.Query q = session.createQuery("FROM MissionTrack WHERE missionDay.mission.uuid = :uuid"); //$NON-NLS-1$
+		q.setParameter("uuid", UuidUtils.byteToUUID(rs.getBytes("mission_uuid")));  //$NON-NLS-1$//$NON-NLS-2$
 		List<MissionTrack> mts = q.list();
 		for (MissionTrack mt : mts){
-			it.addTracks(mt.getLineString());
+			try {
+				it.addTracks(mt.getLineString());
+			} catch (Exception e) {
+				ERQueryPlugIn.log(e.getMessage(),e);
+			}
 		}
 		return it;
 	}

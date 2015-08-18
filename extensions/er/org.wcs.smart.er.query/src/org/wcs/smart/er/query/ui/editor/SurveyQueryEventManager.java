@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.ui.editor;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 
 /**
@@ -36,10 +37,10 @@ public class SurveyQueryEventManager {
 
 	private static SurveyQueryEventManager instance;
 	
-	private List<SurveyDesignChangeListener> listeners;
+	private List<QuerySurveyDesignChangeListener> listeners;
 	
 	private SurveyQueryEventManager(){
-		listeners = new ArrayList<SurveyQueryEventManager.SurveyDesignChangeListener>();
+		listeners = new ArrayList<SurveyQueryEventManager.QuerySurveyDesignChangeListener>();
 	}
 	
 	public static SurveyQueryEventManager getInstance(){
@@ -53,7 +54,7 @@ public class SurveyQueryEventManager {
 	 * Adds a new listener
 	 * @param listener
 	 */
-	public void addSurveyDesignChangeListener(SurveyDesignChangeListener listener){
+	public void addSurveyDesignChangeListener(QuerySurveyDesignChangeListener listener){
 		listeners.add(listener);
 		
 	}
@@ -62,7 +63,7 @@ public class SurveyQueryEventManager {
 	 * Removes a new listener
 	 * @param listener
 	 */
-	public void removeSurveyDesignChangeListener(SurveyDesignChangeListener listener){
+	public void removeSurveyDesignChangeListener(QuerySurveyDesignChangeListener listener){
 		listeners.remove(listener);
 	}
 	
@@ -71,9 +72,9 @@ public class SurveyQueryEventManager {
 	 * @param newDesign new survey design
 	 * @param query current query
 	 */
-	public void fireSurveyDesignChange(ISurveyQuery query){
-		for (SurveyDesignChangeListener ll : listeners){
-			ll.surveyDesignChange(query);
+	public void fireQuerySurveyDesignChange(ISurveyQuery query, SurveyDesign newDesign){
+		for (QuerySurveyDesignChangeListener ll : listeners){
+			ll.surveyDesignChange(query, newDesign);
 		}
 	}
 	
@@ -83,12 +84,14 @@ public class SurveyQueryEventManager {
 	 * @author Emily
 	 *
 	 */
-	public interface SurveyDesignChangeListener{
+	public interface QuerySurveyDesignChangeListener{
 		/**
-		 * The survey design has changed.
-		 * @param newDesign new query design
-		 * @param query updated query; note that the query may not be updated with the new survey design at this point
+		 * The survey design associated with the query has
+		 * been modified.
+		 * 
+		 * @param query new query that was modified
+		 * @param newDesign the new survey design to be associated with the query.  The query may not be updated with the new survey design at this point
 		 */
-		public void surveyDesignChange(ISurveyQuery query);
+		public void surveyDesignChange(ISurveyQuery query, SurveyDesign newDesign);
 	}
 }

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -96,7 +97,7 @@ import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.ui.newwizard.StatusComposite;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog1;
 import org.wcs.smart.ui.ca.properties.AddAttributeDialog2;
@@ -134,7 +135,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
-				DataModelManager.getInstance().fireChangeListeners();
+				DataModelManager.INSTANCE.fireChangeListeners();
 			}catch(final Exception ex){
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
@@ -484,7 +485,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			@Override
 			public Image getImage(Object element) {
 				if (element instanceof EntityAttribute){
-					return ((EntityAttribute) element).getDmAttribute().getType().getImage();
+					return DataModel.getAttributeImage(((EntityAttribute) element).getDmAttribute().getType());
 				}
 				return super.getImage(element);
 				
@@ -672,7 +673,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 				getEditorSite().getShell(), toEdit);
 		
 		if (dialog.open() == IDialogConstants.OK_ID) {
-			Session session = SmartHibernateManager.openSession();
+			Session session = HibernateManager.openSession();
 			session.beginTransaction();
 			try{
 				session.saveOrUpdate(toEdit);
@@ -724,7 +725,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			//display add attribute dialog 1
 			DataModel tmpDm = new DataModel(SmartDB.getCurrentConservationArea(), Collections.<Category>emptyList(), dmAttributes);
 			AddAttributeDialog1 d1 = new AddAttributeDialog1(parentEditor.getSite().getShell(), 
-				null, tmpDm, SmartDB.getCurrentLanguage()){
+				null, tmpDm, SmartDB.getCurrentLanguage(), s){
 			
 				@Override
 				protected void buttonPressed(int buttonId) {
@@ -763,7 +764,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 					return;
 				}
 				attributeToAdd.add(att);	
-				DataModelManager.getInstance().fireAddListener(s, att);
+				DataModelManager.INSTANCE.fireAddListener(s, att);
 			}
 			s.getTransaction().commit();
 			
@@ -800,7 +801,7 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 			ea.setIsPrimary(true);
 			ea.setOrder(et.getAttributes().size()+1);
 			
-			ea.setKeyId(NamedKeyItem.generateKey(attribute.getKeyId(), et.getAttributes()));
+			ea.setKeyId(DataModelManager.INSTANCE.generateKey(attribute.getKeyId(), et.getAttributes()));
 			
 			et.getAttributes().add(ea);
 			
@@ -885,9 +886,9 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 									}});
 							
 								if (ret[0] == 0){  //YES
-									boolean deletel = DataModelManager.getInstance().validateDelete(ea.getDmAttribute(), monitor, s);
+									boolean deletel = DataModelManager.INSTANCE.validateDelete(ea.getDmAttribute(), monitor, s);
 									if (deletel){
-										DataModelManager.getInstance().fireDeleteListener(s, ea.getDmAttribute());
+										DataModelManager.INSTANCE.fireDeleteListener(s, ea.getDmAttribute());
 										s.delete(ea.getDmAttribute());
 									}
 								}
@@ -974,10 +975,10 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 		txtName.setText(type.getName());
 		txtKey.setText(type.getKeyId());
 		txtDmAttribute.setText(type.getDmAttribute().getName());
-		txtStatus.setText(type.getStatus().getGuiName());
-		txtType.setText(type.getType().getGuiName());
+		txtStatus.setText(type.getStatus().getGuiName(Locale.getDefault()));
+		txtType.setText(type.getType().getGuiName(Locale.getDefault()));
 		if (type.getCreator() != null){
-			txtCreatedBy.setText(type.getCreator().getFullLabel());
+			txtCreatedBy.setText(SmartLabelProvider.getFullLabel(type.getCreator()));
 		}
 		if (type.getDateCreated() != null){
 			txtDateCreated.setText(DateFormat.getDateInstance().format(type.getDateCreated()));	

@@ -33,6 +33,8 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.entity.query.parser.internal.EntityTypeFilter;
+import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
 import org.wcs.smart.query.model.filter.IGroupByVisitor;
@@ -55,7 +57,7 @@ public class EntityQueryValidator extends QueryDefinitionValidator {
 	 * 
 	 */
 	public EntityQueryValidator( Session session ){
-		super(session);
+		super(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
 	}
 
 	
@@ -120,7 +122,7 @@ public class EntityQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof EntityAttributeFilter){
 					EntityAttributeFilter item = (EntityAttributeFilter)filter;
 					validateEntity(item.getEntityKey());
-					EntityAttribute ea = item.getEntityAttribute(session);
+					EntityAttribute ea = EntityHibernateManager.getEntityAttribute(((EntityAttributeFilter) filter).getEntityKey(), ((EntityAttributeFilter) filter).getEntityAttributeKey(),session);
 					if (ea == null){
 						throw new Exception(MessageFormat.format(Messages.EntityQueryValidator_EntityAttributeNotFound, new Object[]{item.getEntityAttributeKey(), item.getEntityKey()}));
 					}
@@ -150,7 +152,7 @@ public class EntityQueryValidator extends QueryDefinitionValidator {
 					EntityAttributeGroupBy gb = (EntityAttributeGroupBy) filter;
 					validateEntity(gb.getEntityKey());
 					
-					EntityAttribute ea = gb.getEntityAttribute(session);
+					EntityAttribute ea = EntityHibernateManager.getEntityAttribute(((EntityAttributeGroupBy) filter).getEntityKey(), ((EntityAttributeGroupBy) filter).getEntityAttributeKey(),session);
 					if (ea == null){
 						throw new Exception(MessageFormat.format(Messages.EntityQueryValidator_EntityAttributeNotFound, new Object[]{gb.getEntityAttributeKey(), gb.getEntityKey()}));
 					}

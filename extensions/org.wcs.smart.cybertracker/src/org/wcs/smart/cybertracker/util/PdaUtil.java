@@ -30,6 +30,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Class containing utility methods to work with PDA + CyberTracker application.
@@ -64,7 +65,7 @@ public class PdaUtil {
 	}	
 
 	public static String getRegistryKey(ConservationArea ca) {
-		return ICyberTrackerConstants.REG_KEY_SMART + SmartUtils.encodeHex(ca.getUuid());
+		return ICyberTrackerConstants.REG_KEY_SMART + UuidUtils.uuidToString(ca.getUuid());
 	}
 
 //	public static String getFilestoreFromRegistry(ConservationArea ca) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {

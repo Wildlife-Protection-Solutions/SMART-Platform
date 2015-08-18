@@ -39,11 +39,9 @@ import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
 import org.wcs.smart.entity.query.map.geotools.QueryDataSource;
 import org.wcs.smart.entity.query.map.geotools.QueryDataSourceFactory;
+import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
-import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.model.udig.IQueryService;
 import org.wcs.smart.query.common.model.udig.RasterService;
@@ -151,10 +149,10 @@ public class QueryService extends IQueryService {
 			synchronized (this) {
 				if (members == null){
 					members = new ArrayList<QueryGeoResource>();
-					if (query.getType().getClass().equals(EntityObservationQueryType.class) || 
-							query.getType().getClass().equals(EntityWaypointQueryType.class) ){
+					if (query.getTypeKey().equals(EntityObservationQuery.KEY) || 
+							query.getTypeKey().getClass().equals(EntityWaypointQuery.KEY) ){
 						members.add(new QueryGeoResource(this, QueryDataSource.WAYPOINT_TYPE));
-					}else if (query.getType().getClass().equals(EntityGridQueryType.class) ){
+					}else if (query.getTypeKey().getClass().equals(EntityGriddedQuery.KEY) ){
 						members.add(new QueryGeoResource(this, RasterService.GRIDDED_TYPE));
 					}
 				}
@@ -219,9 +217,9 @@ public class QueryService extends IQueryService {
             try {
                 if (ds == null) {
                 	if (query != null){
-                		if (query.getType().getClass().equals(EntityObservationQueryType.class) ){
+                		if (query.getTypeKey().equals(EntityObservationQuery.KEY) ){
                 			ds = new QueryDataSource((EntityObservationQuery)query);
-                		}else if (query.getType().getClass().equals(EntityWaypointQueryType.class) ){
+                		}else if (query.getTypeKey().equals(EntityWaypointQuery.KEY) ){
                     		ds = new QueryDataSource((EntityWaypointQuery)query);
                 		}
                 	}else{

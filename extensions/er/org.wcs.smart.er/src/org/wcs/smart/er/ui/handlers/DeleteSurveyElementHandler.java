@@ -27,6 +27,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Named;
 
@@ -63,7 +64,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Handler for deleting survey elements.
@@ -187,8 +188,8 @@ public class DeleteSurveyElementHandler {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static boolean deleteSurveyDesign(byte[] uuid, Session session) {
-		String id = SmartUtils.encodeHex(uuid);
+	public static boolean deleteSurveyDesign(UUID uuid, Session session) {
+		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
 		try{
 			
@@ -211,7 +212,7 @@ public class DeleteSurveyElementHandler {
 					//delete all waypoints
 					if (survey.getMissions() != null){
 						for (Mission m : survey.getMissions()){
-							dirsToDelete.add(m.getFilestoreLocation());
+							dirsToDelete.add(m.getFilestoreLocation(SmartDB.getCurrentConservationArea()));
 							for (MissionDay md : m.getMissionDays()){
 								if (md.getWaypoints() != null){
 									for (SurveyWaypoint sw : md.getWaypoints()){
@@ -275,8 +276,8 @@ public class DeleteSurveyElementHandler {
 	 * @return
 	 * @throws Exception
 	 */
-	public static boolean deleteSurvey(byte[] uuid, Session session) {
-		String id = SmartUtils.encodeHex(uuid);
+	public static boolean deleteSurvey(UUID uuid, Session session) {
+		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
 		try{
 			Survey survey = (Survey) session.load(Survey.class, uuid);
@@ -297,7 +298,7 @@ public class DeleteSurveyElementHandler {
 				//delete all waypoints
 				if (survey.getMissions() != null){
 					for (Mission m : survey.getMissions()){
-						dirsToDelete.add(m.getFilestoreLocation());
+						dirsToDelete.add(m.getFilestoreLocation(SmartDB.getCurrentConservationArea()));
 						for (MissionDay md : m.getMissionDays()){
 							if (md.getWaypoints() != null){
 								for (SurveyWaypoint sw : md.getWaypoints()){
@@ -355,8 +356,8 @@ public class DeleteSurveyElementHandler {
 	 * @param session
 	 * @return
 	 */
-	public static boolean deleteMission(byte[] uuid, Session session){
-		String id = SmartUtils.encodeHex(uuid);
+	public static boolean deleteMission(UUID uuid, Session session){
+		String id = UuidUtils.uuidToString(uuid);
 		session.beginTransaction();
 		try{
 			Mission mission = (Mission) session.load(Mission.class, uuid);
@@ -372,7 +373,7 @@ public class DeleteSurveyElementHandler {
 				throw new Exception(error);
 			}
 			
-			File fileStore = mission.getFilestoreLocation();
+			File fileStore = mission.getFilestoreLocation(SmartDB.getCurrentConservationArea());
 			if (DeleteManager.canDelete(mission, session)){
 				
 				//waypoint delete not cascaded so we need to delete

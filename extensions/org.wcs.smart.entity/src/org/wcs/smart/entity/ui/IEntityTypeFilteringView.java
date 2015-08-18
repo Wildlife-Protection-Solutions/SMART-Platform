@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.ui;
 
 import org.wcs.smart.common.filter.IUpdatableView;
-import org.wcs.smart.entity.model.EntityTypeFilter;
 
 /**
  * Interface for views that filter entity types.

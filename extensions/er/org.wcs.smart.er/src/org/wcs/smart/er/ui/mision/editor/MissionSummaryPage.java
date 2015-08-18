@@ -23,6 +23,7 @@ package org.wcs.smart.er.ui.mision.editor;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.layout.TableColumnLayout;
@@ -70,6 +71,7 @@ import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionEmployeeComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
@@ -202,9 +204,9 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			public String getText(Object element){
 				if (element instanceof MissionMember){
 					if (((MissionMember) element).getIsLeader()){
-						return MessageFormat.format(Messages.MissionSummaryPage_LeaderLabel, new Object[]{((MissionMember)element).getMember().getFullLabel()});
+						return MessageFormat.format(Messages.MissionSummaryPage_LeaderLabel, new Object[]{SmartLabelProvider.getFullLabel(((MissionMember)element).getMember())});
 					}
-					return ((MissionMember)element).getMember().getFullLabel();
+					return SmartLabelProvider.getFullLabel(((MissionMember)element).getMember());
 				}
 				return super.getText(element);
 			}
@@ -283,7 +285,7 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 			@Override
 			public String getText(Object element) {
 				if (element instanceof MissionPropertyValue){
-					return ((MissionPropertyValue) element).getValueAsString();
+					return ((MissionPropertyValue) element).getValueAsString(Locale.getDefault());
 				}
 				return super.getText(element);
 			}
@@ -379,7 +381,11 @@ public class MissionSummaryPage extends EditorPart implements IHyperlinkListener
 					}else if (col == 3){
 						double d = 0;
 						for (MissionTrack mt : md.getTracks()){
-							d += mt.getDistance();
+							try{
+								d += mt.getDistance();
+							}catch (Exception ex){
+								//eat this one
+							}
 						}
 						return String.valueOf(d);
 					}else if (col == 4){

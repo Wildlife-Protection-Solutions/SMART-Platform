@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.er.query.ui.panels.definition;
 
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.ui.editor.SurveyQueryEventManager;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
@@ -33,7 +34,7 @@ import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
  * @author Emily
  *
  */
-public class DefinitionListener implements SurveyQueryEventManager.SurveyDesignChangeListener  {
+public class DefinitionListener implements SurveyQueryEventManager.QuerySurveyDesignChangeListener  {
 
 	private ISurveyPanel panel;
 	
@@ -45,9 +46,9 @@ public class DefinitionListener implements SurveyQueryEventManager.SurveyDesignC
 	}
 	
 	@Override
-	public void surveyDesignChange(ISurveyQuery query) {
+	public void surveyDesignChange(ISurveyQuery query, SurveyDesign newDesign) {
 		if (panel.getQuery() == null || panel.getQuery().equals(query)){
-			panel.refreshPanel(query.getSurveyDesignAsObject());
+			panel.refreshPanel(newDesign);
 		}
 	}
 

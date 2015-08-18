@@ -194,9 +194,9 @@ public class DeleteEntityTypeHandler {
 							}});
 					
 						if (ret[0] == 0){  //YES
-							boolean deletel = DataModelManager.getInstance().validateDelete(type2.getDmAttribute(), new NullProgressMonitor(), session);
+							boolean deletel = DataModelManager.INSTANCE.validateDelete(type2.getDmAttribute(), new NullProgressMonitor(), session);
 							if (deletel){
-								DataModelManager.getInstance().fireDeleteListener(session, type2.getDmAttribute());
+								DataModelManager.INSTANCE.fireDeleteListener(session, type2.getDmAttribute());
 								session.delete(type2.getDmAttribute());
 							}
 						}
@@ -250,7 +250,7 @@ public class DeleteEntityTypeHandler {
 					for (CategoryAttribute ca : items){
 						if (DeleteManager.canDelete(ca, session)){
 							session.delete(ca);
-							DataModelManager.getInstance().fireDeleteListener(session, ca);
+							DataModelManager.INSTANCE.fireDeleteListener(session, ca);
 						}else{
 							//we cannot delete so rollback and exit
 							session.getTransaction().rollback();
@@ -260,7 +260,7 @@ public class DeleteEntityTypeHandler {
 					}
 					
 					session.delete(dmAttribute);
-					DataModelManager.getInstance().fireDeleteListener(session, dmAttribute);
+					DataModelManager.INSTANCE.fireDeleteListener(session, dmAttribute);
 				}else{
 					//we cannot delete so we want to rollback and not delete anything
 					session.getTransaction().rollback();
@@ -273,7 +273,7 @@ public class DeleteEntityTypeHandler {
 			//fire data model change listeners as we have edited the data model
 			if (deleteAttribute[0]){
 				try{
-					DataModelManager.getInstance().fireChangeListeners();
+					DataModelManager.INSTANCE.fireChangeListeners();
 				}catch (Exception ex){
 					EntityPlugIn.displayLog(ex.getMessage(), ex);
 				}

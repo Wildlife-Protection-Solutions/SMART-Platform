@@ -25,6 +25,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Label provided for employees and mission members.
@@ -57,11 +58,15 @@ public class EmployeeLabelProvider extends LabelProvider {
 	@Override
 	public String getText(Object element) {
 		if (element instanceof Employee) {
-			return ((Employee)element).getFullLabel();
+			return getLabel((Employee)element);
 		} else if (element instanceof MissionMember) {
-			return ((MissionMember)element).getMember().getFullLabel();
+			return getLabel(((MissionMember)element).getMember());
 		}
 		return super.getText(element);
+	}
+	
+	private String getLabel(Employee e){
+		return SmartLabelProvider.getFullLabel(e);
 	}
 
 }

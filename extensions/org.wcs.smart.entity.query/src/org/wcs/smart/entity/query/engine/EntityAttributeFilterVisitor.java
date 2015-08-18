@@ -25,6 +25,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import org.hibernate.Session;
@@ -39,6 +40,8 @@ import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
@@ -137,6 +140,18 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 							Session session) throws SQLException {
 						return null;
 					}
+
+					@Override
+					public IQueryResult executeQuery(Query query,
+							HashMap<String, Object> parameters)
+							throws SQLException {
+						return null;
+					}
+
+					@Override
+					public boolean canExecute(String querytype) {
+						return false;
+					}
 				};
 				tmp = new StringBuilder();
 				tmp.append("INSERT INTO "); //$NON-NLS-1$
@@ -220,7 +235,7 @@ public class EntityAttributeFilterVisitor  implements IFilterVisitor{
 				sql.append(" " + tableName); //$NON-NLS-1$
 				sql.append(" on "); //$NON-NLS-1$
 				sql.append(tableName + ".entity_keyid = "); //$NON-NLS-1$
-				sql.append("qa." + ff.getEntityDmAttributeKey(c, engine)); //$NON-NLS-1$
+				sql.append("qa." + engine.getEntityDmAttributeKey(ff.getEntityKey(), c)); //$NON-NLS-1$
 
 			}
 		}

@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -146,7 +147,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 			List<Object[]> data = q.list();
 			List<SurveyDesignEditorInput> all = new ArrayList<SurveyDesignEditorInput>();
 			for (Object[] x : data){
-				SurveyDesignEditorInput ii = new SurveyDesignEditorInput((String)x[1], (byte[])x[0], (String)x[3], (SurveyDesign.State)x[2]);
+				SurveyDesignEditorInput ii = new SurveyDesignEditorInput((String)x[1], (UUID)x[0], (String)x[3], (SurveyDesign.State)x[2]);
 				all.add(ii);
 			}
 			return all;
@@ -182,7 +183,7 @@ public class CaSurveyHibernateManager implements ISurveyHibernateManager{
 			List<Object[]> data = q.list();
 			List<SurveyEditorInput> all = new ArrayList<SurveyEditorInput>();
 			for (Object[] x : data){
-				SurveyEditorInput ii = new SurveyEditorInput((String)x[1], (byte[])x[0], (Date)x[2], (String)x[3]);
+				SurveyEditorInput ii = new SurveyEditorInput((String)x[1], (UUID)x[0], (Date)x[2], (String)x[3]);
 				all.add(ii);
 			}
 			return all;

@@ -25,10 +25,10 @@ import java.text.DateFormat;
 import java.util.Date;
 
 import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Class represents one of the fixed table columns that do not change from
@@ -71,9 +71,9 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 		if (value == null) return ""; //$NON-NLS-1$
 		if (type == ColumnType.BOOLEAN) {
 			if ((Boolean) value) {
-				return Attribute.BOOLEAN_TRUE_LABEL;
+				return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
 			} else {
-				return Attribute.BOOLEAN_FALSE_LABEL;
+				return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
 			}
 		} else if (type == ColumnType.DATE) {
 			return DateFormat.getDateInstance().format((Date) value);

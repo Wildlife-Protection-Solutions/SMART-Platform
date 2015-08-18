@@ -31,6 +31,8 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -69,6 +71,7 @@ import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -453,7 +456,7 @@ public class SurveyDesignDataPage extends EditorPart {
 			TreeColumn column = new TreeColumn(dataViewer.getTree(), SWT.LEFT);
 			column.setText(mp.getAttribute().getName());
 			column.setWidth(100);
-			column.setImage(mp.getAttribute().getType().getImage());
+			column.setImage(DataModel.getAttributeImage(mp.getAttribute().getType()));
 			columnToAttributeKey.put(col, mp.getAttribute().getKeyId());
 			col++;
 		}
@@ -538,7 +541,7 @@ public class SurveyDesignDataPage extends EditorPart {
 						TreeNode kid = new TreeNode(m.getUuid(), m.getId(), m.getStartDate(), m.getEndDate(), TreeNode.Type.MISSION);
 						node.addKid(kid);
 						for (MissionPropertyValue mpv : m.getMissionPropertyValues()){
-							kid.addAttribute(mpv.getMissionAttribute().getKeyId(), mpv.getValueAsString());
+							kid.addAttribute(mpv.getMissionAttribute().getKeyId(), mpv.getValueAsString(Locale.getDefault()));
 						}
 					}
 					node.sortKids();
@@ -578,13 +581,13 @@ public class SurveyDesignDataPage extends EditorPart {
 		private Date startDate;
 		private Date endDate;
 
-		private byte[] uuid;
+		private UUID uuid;
 		private Type type;
 		
 		private HashMap<String, String> attributeValues;
 		private List<TreeNode> kids;
 		private TreeNode parent;
-		public TreeNode(byte[] uuid, String id, Date startDate, Date endDate, Type type){
+		public TreeNode(UUID uuid, String id, Date startDate, Date endDate, Type type){
 			this.uuid = uuid;
 			this.id = id;
 			this.startDate = startDate;
@@ -625,7 +628,7 @@ public class SurveyDesignDataPage extends EditorPart {
 		public String getId(){
 			return this.id;
 		}
-		public byte[] getUuid(){
+		public UUID getUuid(){
 			return this.uuid;
 		}
 		public Date getStartDate(){

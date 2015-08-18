@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.er.query.ui.panels.item;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -47,12 +49,12 @@ public class SurveyValuesTreeNode implements IItemTreeNode{
 	private LabelProvider labelprovider;
 		
 	public enum Node {
-		MISSION_LENGTH(MissionValueItem.ValueItem.TRACK_LENGTH.guiName, ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.TRACK_DISTANCE_ICON)),
-		MISSION_COUNT(MissionValueItem.ValueItem.MISSION_COUNT.guiName, ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.MISSION_COUNT_ICON)),
-		SURVEY_COUNT(MissionValueItem.ValueItem.SURVEY_COUNT.guiName, ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.SURVEY_COUNT_ICON)),
-		MISSION_DAY_COUNT(MissionValueItem.ValueItem.DAY_COUNT.guiName, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_DAYS_ICON)),
-		MISSION_HOUR_COUNT(MissionValueItem.ValueItem.HOUR_COUNT.guiName, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON)),
-		MISSION_PERSONHOUR_COUNT(MissionValueItem.ValueItem.MANHOURS_COUNT.guiName, QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON));
+		MISSION_LENGTH(MissionValueItem.ValueItem.TRACK_LENGTH.getGuiName(Locale.getDefault()), ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.TRACK_DISTANCE_ICON)),
+		MISSION_COUNT(MissionValueItem.ValueItem.MISSION_COUNT.getGuiName(Locale.getDefault()), ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.MISSION_COUNT_ICON)),
+		SURVEY_COUNT(MissionValueItem.ValueItem.SURVEY_COUNT.getGuiName(Locale.getDefault()), ERQueryPlugIn.getDefault().getImageRegistry().get(ERQueryPlugIn.SURVEY_COUNT_ICON)),
+		MISSION_DAY_COUNT(MissionValueItem.ValueItem.DAY_COUNT.getGuiName(Locale.getDefault()), QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_DAYS_ICON)),
+		MISSION_HOUR_COUNT(MissionValueItem.ValueItem.HOUR_COUNT.getGuiName(Locale.getDefault()), QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON)),
+		MISSION_PERSONHOUR_COUNT(MissionValueItem.ValueItem.MANHOURS_COUNT.getGuiName(Locale.getDefault()), QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_ICON));
 
 		private String guiName;
 		private Image image;

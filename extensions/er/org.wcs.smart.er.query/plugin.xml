@@ -10,7 +10,8 @@
       </QueryCategory>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"
-            class="org.wcs.smart.er.query.model.SurveyObservationQueryType">
+            class="org.wcs.smart.er.query.model.SurveyObservationQueryType"
+            executor="org.wcs.smart.er.query.engine.DerbyObservationEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
@@ -18,7 +19,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"
-            class="org.wcs.smart.er.query.model.SurveyWaypointQueryType">
+            class="org.wcs.smart.er.query.model.SurveyWaypointQueryType"
+            executor="org.wcs.smart.er.query.engine.DerbyWaypointEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel">
@@ -26,7 +28,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"
-            class="org.wcs.smart.er.query.model.MissionTrackQueryType">
+            class="org.wcs.smart.er.query.model.MissionTrackQueryType"
+            executor="org.wcs.smart.er.query.engine.DerbyMissionTrackEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter.track"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.misisonTrack">
@@ -34,7 +37,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"
-            class="org.wcs.smart.er.query.model.MissionQueryType">
+            class="org.wcs.smart.er.query.model.MissionQueryType"
+            executor="org.wcs.smart.er.query.engine.DerbyMissionEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.filter"
                itemPanelId="org.wcs.smart.er.query.survey.filterItemPanel.trackObservation">
@@ -42,7 +46,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"
-            class="org.wcs.smart.er.query.model.SurveySummaryQueryType">
+            class="org.wcs.smart.er.query.model.SurveySummaryQueryType"
+            executor="org.wcs.smart.er.query.engine.DerbySummaryEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.summary"
                itemPanelId="org.wcs.smart.er.query.survey.summaryItemPanel">
@@ -54,7 +59,8 @@
       </QueryType>
       <QueryType
             QueryCategory="org.wcs.smart.er.query.category.survey"
-            class="org.wcs.smart.er.query.model.SurveyGridQueryType">
+            class="org.wcs.smart.er.query.model.SurveyGridQueryType"
+            executor="org.wcs.smart.er.query.engine.DerbyGridEngine">
          <DefinitionPanel
                id="org.wcs.smart.query.er.survey.definition.grid"
                itemPanelId="org.wcs.smart.er.query.survey.gridValueItemPanel">

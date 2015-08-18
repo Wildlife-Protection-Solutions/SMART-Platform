@@ -58,7 +58,6 @@ public class EntityObservationQueryType implements IQueryType {
 
 	private static IDropItemFactory dropItemFactory = null;
 	
-	public static final String KEY = "entityobservation"; //$NON-NLS-1$
 	/**
 	 * @see org.wcs.smart.query.model.IQueryType#getHibernateClass()
 	 */
@@ -72,7 +71,7 @@ public class EntityObservationQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return EntityObservationQuery.KEY;
 	}
 
 	/**

@@ -22,6 +22,8 @@
 
 package org.wcs.smart.er.ui.mission.export;
 
+import java.util.UUID;
+
 
 /**
  * Mission tree item for survey/mission tree
@@ -32,7 +34,7 @@ package org.wcs.smart.er.ui.mission.export;
 public class MissionTreeItem implements TreeItem {
 
 	private String name;
-	private byte[] uuid;
+	private UUID uuid;
 	private SurveyTreeItem parent;
 	
 	public String getName() {
@@ -42,10 +44,10 @@ public class MissionTreeItem implements TreeItem {
 		name = n;
 	}
 	
-	public byte[] getUuid() {
+	public UUID getUuid() {
 		return uuid;
 	}
-	public void setUuid(byte[] b) {
+	public void setUuid(UUID b) {
 		uuid = b;
 	}
 	

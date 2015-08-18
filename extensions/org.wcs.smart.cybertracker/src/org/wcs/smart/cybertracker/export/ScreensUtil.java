@@ -44,7 +44,7 @@ import org.wcs.smart.cybertracker.model.filter.ElementFilters;
 import org.wcs.smart.cybertracker.model.filter.Filter;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Util for creating screens based on metadata for CyberTracker.
@@ -289,7 +289,7 @@ public class ScreensUtil {
 		List<String> tag0Values = new ArrayList<String>();
 		for (NamedItem i : items) {
 			labelValues.add(ctUtil.getName(i));
-			tag0Values.add(SmartUtils.encodeHex(i.getUuid()));
+			tag0Values.add(UuidUtils.uuidToString(i.getUuid()));
 		}
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 	}

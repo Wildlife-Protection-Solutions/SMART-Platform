@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.survey;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.Date;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
@@ -82,7 +83,7 @@ public class EditSurveyDialog extends TitleAreaDialog{
 	private Survey toEdit;
 	
 	public EditSurveyDialog(Shell parentShell, 
-			byte[] toEdit) {
+			UUID toEdit) {
 		super(parentShell);
 		this.session = HibernateManager.openSession();
 		this.toEdit = (Survey) session.load(Survey.class, toEdit);

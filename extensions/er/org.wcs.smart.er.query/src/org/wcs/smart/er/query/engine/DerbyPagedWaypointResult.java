@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.query.model.IResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
 
 /**
  * Paged result set for waypoint queries.

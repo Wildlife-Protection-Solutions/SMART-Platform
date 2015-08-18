@@ -26,9 +26,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.entity.query.parser.internal.parser.Parser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
@@ -47,8 +47,8 @@ public class EntitySimpleQueryDefinitionImporter extends SimpleQueryDefinitionIm
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		if (qt.getKey().equals(EntityObservationQueryType.KEY) ||
-				qt.getKey().equals(EntityWaypointQueryType.KEY)){
+		if (qt.getKey().equals(EntityObservationQuery.KEY) ||
+				qt.getKey().equals(EntityWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

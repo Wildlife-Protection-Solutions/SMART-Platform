@@ -28,8 +28,10 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -69,7 +71,7 @@ public class EntityPlugIn extends AbstractUIPlugin {
 		deleteCaHandler = new EntityCaDeleteHandler();
 		ConservationAreaManager.getInstance().addDeleteHandler(deleteCaHandler,
 				EntityCaDeleteHandler.EXECUTE_ORDER);
-		
+		SmartContext.INSTANCE.setClass(IEntityLabelProvider.class, new EntityLabelProvider());
 		plugin = this;
 	}
 

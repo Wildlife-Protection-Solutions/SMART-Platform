@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,6 +60,7 @@ import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Provides functionality and GUI that is specific for patrol import from CyberTracker.
@@ -276,11 +278,11 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 			
 			lblObjective.setText(patrol.getObjective()==null?"":patrol.getObjective());			 //$NON-NLS-1$
 			lblMandate.setText(patrol.getMandate() == null ? "" : patrol.getMandate().getName()); //$NON-NLS-1$
-			lblLeader.setText(patrol.getLeader() == null ? "" : patrol.getLeader().getFullLabel()); //$NON-NLS-1$
-			lblPilot.setText(patrol.getPilot() == null ? "" : patrol.getPilot().getFullLabel()); //$NON-NLS-1$
+			lblLeader.setText(patrol.getLeader() == null ? "" : SmartLabelProvider.getFullLabel( patrol.getLeader() )); //$NON-NLS-1$
+			lblPilot.setText(patrol.getPilot() == null ? "" : SmartLabelProvider.getFullLabel(patrol.getPilot())); //$NON-NLS-1$
 			StringBuilder sbMembers = new StringBuilder();
 			for (Employee e : ((CyberTrackerPatrol) selection).getMembers()){
-				sbMembers.append(e.getFullLabel());
+				sbMembers.append(SmartLabelProvider.getFullLabel(e));
 				sbMembers.append("\n"); //$NON-NLS-1$
 			}
 			lblMembers.setText(sbMembers.toString());
@@ -453,7 +455,7 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 				switch (column) {
 				case START_DATE:return dateAsString(ctPatrol.getStartDate());
 				case END_DATE: 	return dateAsString(ctPatrol.getEndDate());
-				case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName() : ""; //$NON-NLS-1$
+				case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName(Locale.getDefault()) : ""; //$NON-NLS-1$
 				case TRANSPORT:	return ctPatrol.getCtTransport();
 				case ARMED: 	return ctPatrol.isArmed() ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
 //				case MANDATE:	return asString(ctPatrol.getMandate());

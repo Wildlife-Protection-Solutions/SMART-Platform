@@ -62,7 +62,6 @@ import org.wcs.smart.query.ui.model.impl.AbstractValueDropItem;
 public class SurveyGridQueryType implements IQueryType {
 
 	
-	public static final String KEY = "surveygrid"; //$NON-NLS-1$
 	private static IDropItemFactory dropItemFactory;
 	
 	/**
@@ -78,7 +77,7 @@ public class SurveyGridQueryType implements IQueryType {
 	 */
 	@Override
 	public String getKey() {
-		return KEY;
+		return SurveyGriddedQuery.KEY;
 	}
 
 	/**

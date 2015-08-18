@@ -49,9 +49,9 @@ public class SurveyGriddedEditor extends GriddedEditor  {
 
 	public static final String ID = "org.wcs.smart.er.query.ui.GriddedEditor";  //$NON-NLS-1$
 
-	private SurveyQueryEventManager.SurveyDesignChangeListener updateTable = new SurveyQueryEventManager.SurveyDesignChangeListener(){
+	private SurveyQueryEventManager.QuerySurveyDesignChangeListener updateTable = new SurveyQueryEventManager.QuerySurveyDesignChangeListener(){
 		@Override
-		public void surveyDesignChange(ISurveyQuery query) {
+		public void surveyDesignChange(ISurveyQuery query, SurveyDesign newDesign) {
 			if (!getQuery().equals(query)) return;
 			
 			getQueryResultsTable().clearColumns();
@@ -67,8 +67,8 @@ public class SurveyGriddedEditor extends GriddedEditor  {
 		@Override
 		public void event(Object o) {
 			if (o instanceof SurveyDesign){
-				SurveyDesign qd = ((ISurveyQuery)getQuery()).getSurveyDesignAsObject();
-				if (qd != null && qd.equals(o)){
+				String surveyKey = ((ISurveyQuery)getQuery()).getSurveyDesign();
+				if (surveyKey != null && surveyKey.equals(((SurveyDesign) o).getKeyId())){
 					reparseQuery();		
 				}
 			}

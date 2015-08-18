@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFactorySpi;
@@ -42,7 +43,7 @@ public class QueryDataSourceFactory implements DataStoreFactorySpi{
 	/**
 	 * query uuid parameter
 	 */
-	public static final Param QUERY_UUID = new Param("queryuuid", byte[].class, Messages.QueryDataSourceFactory_queryUuidParameterName, true);  //$NON-NLS-1$
+	public static final Param QUERY_UUID = new Param("queryuuid", UUID.class, Messages.QueryDataSourceFactory_queryUuidParameterName, true);  //$NON-NLS-1$
 	  
 	/**
 	 * @see org.geotools.data.DataAccessFactory#canProcess(java.util.Map)

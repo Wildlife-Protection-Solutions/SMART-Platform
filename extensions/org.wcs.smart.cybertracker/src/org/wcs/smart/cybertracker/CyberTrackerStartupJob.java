@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -93,7 +94,7 @@ public class CyberTrackerStartupJob extends Job {
 	private void cleanStorage(List<ConservationArea> caList, List<CyberTrackerPropertiesOption> storageOptionList) {
 		if (caList == null || storageOptionList == null)
 			return;
-		Map<byte[], CyberTrackerPropertiesOption> propMap = new HashMap<byte[], CyberTrackerPropertiesOption>();
+		Map<UUID, CyberTrackerPropertiesOption> propMap = new HashMap<UUID, CyberTrackerPropertiesOption>();
 		for (CyberTrackerPropertiesOption ctp : storageOptionList) {
 			propMap.put(ctp.getConservationArea().getUuid(), ctp);
 		}

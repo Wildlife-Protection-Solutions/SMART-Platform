@@ -24,6 +24,7 @@ package org.wcs.smart.er.ui.samplingunit;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 
 /**
@@ -56,7 +57,7 @@ public class SamplingUnitAttributeLabelProvider extends LabelProvider {
 	public Image getImage(Object element) {
 		if (element instanceof SamplingUnitAttribute){
 			SamplingUnitAttribute ma = (SamplingUnitAttribute)element;
-			return ma.getType().getImage();
+			return DataModel.getAttributeImage(ma.getType());
 		}
 		return super.getImage(element);
 	}

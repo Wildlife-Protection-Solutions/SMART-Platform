@@ -25,7 +25,7 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.er.query.model.ISurveyQuery;
-import org.wcs.smart.er.query.model.SurveyGridQueryType;
+import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
 import org.wcs.smart.query.common.importexport.GriddedQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -45,7 +45,7 @@ public class SurveyGridQueryDefinitionImporter extends GriddedQueryDefinitionImp
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(SurveyGridQueryType.KEY);
+		return qt.getKey().equals(SurveyGriddedQuery.KEY);
 	}
 
 	@Override

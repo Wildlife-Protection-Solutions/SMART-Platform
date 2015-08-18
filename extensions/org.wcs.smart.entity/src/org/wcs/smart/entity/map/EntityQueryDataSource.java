@@ -33,6 +33,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.QueryColumnUtils;
 /**
  * Data source for entity sighting queries.
  * @author Emily
@@ -100,7 +101,7 @@ public class EntityQueryDataSource extends AbstractDataStore{
 	public static SimpleFeatureType createQuerySchema(List<QueryColumn> columns, boolean supportsTime) throws SchemaException {
 		StringBuilder sb = new StringBuilder();
 		sb.append("the_geom:Point:srid=4326,fid:String"); //$NON-NLS-1$
-		sb.append(QueryColumn.createFeatureDefinitionString(columns, supportsTime));	
+		sb.append(QueryColumnUtils.createFeatureDefinitionString(columns, supportsTime));	
 		SimpleFeatureType type =  DataUtilities.createType(TYPENAME, sb.toString()); 
 		return type;
 	}

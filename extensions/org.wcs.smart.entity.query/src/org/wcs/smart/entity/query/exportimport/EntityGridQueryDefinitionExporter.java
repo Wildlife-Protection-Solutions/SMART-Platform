@@ -22,7 +22,7 @@
 package org.wcs.smart.entity.query.exportimport;
 
 import org.hibernate.Session;
-import org.wcs.smart.entity.query.model.type.EntityGridQueryType;
+import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.query.common.importexport.GridQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -41,7 +41,7 @@ public class EntityGridQueryDefinitionExporter extends GridQueryDefinitionExport
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		return query.getType().getKey().equals(EntityGridQueryType.KEY);	
+		return query.getTypeKey().equals(EntityGriddedQuery.KEY);	
 	}
 
 	/**

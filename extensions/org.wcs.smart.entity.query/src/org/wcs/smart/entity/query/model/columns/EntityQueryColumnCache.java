@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,7 +53,7 @@ public class EntityQueryColumnCache {
 	private final Object WAYPOINTLOCK = new Object();
 
 	private EntityQueryColumnCache() {
-		DataModelManager.getInstance().addChangeListener(
+		DataModelManager.INSTANCE.addChangeListener(
 				new IDataModelListener() {
 					@Override
 					public void modified() {
@@ -119,7 +120,7 @@ public class EntityQueryColumnCache {
 							add = obsOptions.getTrackObserver();
 						}
 						if (add) {
-							cols.add(new FixedQueryColumn(item));
+							cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 						}
 					}
 
@@ -127,7 +128,7 @@ public class EntityQueryColumnCache {
 					int numCategory = QueryDataModelManager.getInstance()
 							.getActiveDepth();
 					for (int i = 0; i < numCategory; i++) {
-						cols.add(new EtCategoryQueryColumn(i));
+						cols.add(new EtCategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader, i));
 					}
 
 					// sort attributes alphabetically
@@ -210,7 +211,7 @@ public class EntityQueryColumnCache {
 							add = false;
 						}
 						if (add) {
-							cols.add(new FixedQueryColumn(item));
+							cols.add(new FixedQueryColumn(item, Locale.getDefault()));
 						}
 					}
 					waypointQueryColumns = cols.toArray(new QueryColumn[cols
@@ -242,7 +243,7 @@ public class EntityQueryColumnCache {
 			for (int i = 0; i < GridQueryColumn.GridColumns.values().length; i++) {
 				GridQueryColumn.GridColumns item = GridQueryColumn.GridColumns
 						.values()[i];
-				tmp[i] = new GridQueryColumn(item);
+				tmp[i] = new GridQueryColumn(item, Locale.getDefault());
 			}
 			gridQueryColumns = tmp;
 		}

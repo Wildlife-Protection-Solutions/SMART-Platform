@@ -36,6 +36,7 @@ import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.events.WaypointEventManager;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -90,6 +91,7 @@ public class SaveWaypointJob extends Job {
 						wo.getAttributes().removeAll(toDelete);
 					}
 				}
+				ObservationHibernateManager.computeAttachmentLocations(wp.getWaypoint(), saveSession);
 			}
 			saveSession.getTransaction().commit();
 		} catch (Exception ex) {

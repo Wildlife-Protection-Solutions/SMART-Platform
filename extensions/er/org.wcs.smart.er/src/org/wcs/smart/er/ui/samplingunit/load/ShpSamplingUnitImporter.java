@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,7 +51,7 @@ import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.GeometryUtils;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.LineString;
@@ -101,7 +102,8 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 			if (error){
 				throw new Exception(
 						MessageFormat.format(Messages.ShpSamplingUnitImporter_InvalidGeometryType,
-								new Object[]{type.getGeometryDescriptor().getType().getBinding().getName(), suType.getGuiName()}));
+								new Object[]{type.getGeometryDescriptor().getType().getBinding().getName(), 
+								suType.getGuiName(Locale.getDefault())}));
 			}
 			
 			
@@ -173,8 +175,8 @@ public class ShpSamplingUnitImporter extends ISamplingUnitImporter{
 				throw new Exception(Messages.ShpSamplingUnitImporter_ProjectionNotFound);
 			}
 			MathTransform transform = null;
-			if (!CRS.equalsIgnoreMetadata(SmartDB.DATABASE_CRS,store.getSchema().getCoordinateReferenceSystem())){
-				transform = CRS.findMathTransform(store.getSchema().getCoordinateReferenceSystem(), SmartDB.DATABASE_CRS);
+			if (!CRS.equalsIgnoreMetadata(GeometryUtils.SMART_CRS,store.getSchema().getCoordinateReferenceSystem())){
+				transform = CRS.findMathTransform(store.getSchema().getCoordinateReferenceSystem(), GeometryUtils.SMART_CRS);
 			}
 			String idField = (String) options.get(ID_FIELD_KEY);
 			

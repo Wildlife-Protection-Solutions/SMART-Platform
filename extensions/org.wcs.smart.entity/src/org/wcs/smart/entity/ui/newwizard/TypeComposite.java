@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.entity.ui.newwizard;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -76,7 +78,7 @@ public class TypeComposite extends AbstractEntityComposite{
 		typeviewer.setContentProvider(ArrayContentProvider.getInstance());
 		typeviewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				return ((EntityType.Type)element).getGuiName();
+				return ((EntityType.Type)element).getGuiName(Locale.getDefault());
 			}
 		});
 		typeviewer.setInput(EntityType.Type.values());

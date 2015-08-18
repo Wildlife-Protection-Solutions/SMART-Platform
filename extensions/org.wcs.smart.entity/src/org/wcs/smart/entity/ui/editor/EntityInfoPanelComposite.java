@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui.editor;
 
 import java.util.HashMap;
+import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
@@ -32,15 +33,18 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.hibernate.Session;
-import org.wcs.smart.ca.Projection;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
 import org.wcs.smart.entity.model.EntityType;
+import org.wcs.smart.entity.ui.EntityLabelProvider;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.ObservationHibernateManager;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.util.ReprojectUtils;
 
 /**
  * Creates a panel for displaying all
@@ -55,6 +59,7 @@ public class EntityInfoPanelComposite extends Composite{
 	private ScrolledComposite scroll;
 
 	private ObservationOptions observationOptions;
+	private CoordinateReferenceSystem crs;
 	private Entity entity;
 	private EntityType etype;
 	
@@ -130,7 +135,13 @@ public class EntityInfoPanelComposite extends Composite{
 		try{
 			this.observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), s);
 			this.entity = (Entity) s.load(Entity.class, entity.getUuid());
+			try{
+				this.crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+			}catch (Exception ex){
+				EntityPlugIn.displayLog(ex.getMessage(), ex);
+			}
 			initEntityFields();
+			
 		}finally{
 			s.close();
 		}
@@ -153,20 +164,20 @@ public class EntityInfoPanelComposite extends Composite{
 		txtId.setText(entity.getId());
 		if (txtX != null){
 			if ( entity.getX() != null){
-				txtX.setText(String.valueOf(Projection.transform(entity.getX(), entity.getY(), observationOptions.getViewProjection()).getX()));
+				txtX.setText(String.valueOf(ReprojectUtils.transform(entity.getX(), entity.getY(), crs).getX()));
 			}else{
 				txtX.setText(""); //$NON-NLS-1$
 			}
 		}
 		if (txtY != null){
 			if ( entity.getY() != null){
-				txtY.setText(String.valueOf(Projection.transform(entity.getX(), entity.getY(), observationOptions.getViewProjection()).getY()));
+				txtY.setText(String.valueOf(ReprojectUtils.transform(entity.getX(), entity.getY(), crs).getY()));
 			}else{
 				txtY.setText(""); //$NON-NLS-1$
 			}
 		}
 		
-		txtStatus.setText(entity.getStatus().getGuiName());
+		txtStatus.setText(entity.getStatus().getGuiName(Locale.getDefault()));
 		for (Text t : attributeToUi.values()){
 			t.setText(""); //$NON-NLS-1$
 		}
@@ -174,7 +185,7 @@ public class EntityInfoPanelComposite extends Composite{
 		for(EntityAttributeValue v : entity.getAttributes()){
 			Text txt = attributeToUi.get(v.getEntityAttribute().getKeyId());
 			if (txt != null){
-				txt.setText(v.getValueAsString());
+				txt.setText(v.getValueAsString(Locale.getDefault()));
 			}
 		}
 	}
@@ -211,26 +222,26 @@ public class EntityInfoPanelComposite extends Composite{
 		comp.setLayout(new GridLayout(4, false));
 		comp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		toolkit.createLabel(comp, Entity.ID_FIELD_NAME + ":"); //$NON-NLS-1$
+		toolkit.createLabel(comp, EntityLabelProvider.ID_FIELD_NAME + ":"); //$NON-NLS-1$
 		txtId = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txtId.getLayoutData()).widthHint = 100;
 		txtId.setEditable(false);
 		
-		toolkit.createLabel(comp, Entity.STATUS_FIELD_NAME + ":"); //$NON-NLS-1$
+		toolkit.createLabel(comp, EntityLabelProvider.STATUS_FIELD_NAME + ":"); //$NON-NLS-1$
 		txtStatus = toolkit.createText(comp, ""); //$NON-NLS-1$
 		txtStatus.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)txtStatus.getLayoutData()).widthHint = 100;
 		txtStatus.setEditable(false);
 		
 		if (etype.getType() == EntityType.Type.FIXED){
-			toolkit.createLabel(comp, Entity.X_FIELD_NAME + ":"); //$NON-NLS-1$
+			toolkit.createLabel(comp, EntityLabelProvider.X_FIELD_NAME + ":"); //$NON-NLS-1$
 			txtX = toolkit.createText(comp, ""); //$NON-NLS-1$
 			txtX.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtX.getLayoutData()).widthHint = 100;
 			txtX.setEditable(false);
 			
-			toolkit.createLabel(comp, Entity.Y_FIELD_NAME + ":"); //$NON-NLS-1$
+			toolkit.createLabel(comp, EntityLabelProvider.Y_FIELD_NAME + ":"); //$NON-NLS-1$
 			txtY = toolkit.createText(comp, ""); //$NON-NLS-1$
 			txtY.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			((GridData)txtY.getLayoutData()).widthHint = 100;

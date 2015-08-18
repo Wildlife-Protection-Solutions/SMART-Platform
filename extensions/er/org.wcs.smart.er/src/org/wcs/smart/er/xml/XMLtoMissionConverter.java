@@ -359,7 +359,12 @@ public class XMLtoMissionConverter {
 						att.setCopyFromLocation(f);
 						att.setFilename(filename);
 						ob.getAttachments().add(att);
-						att.setObservation(ob);
+						try {
+							att.setObservation(ob);
+						} catch (Exception e) {
+							warnings.add(MessageFormat.format(
+									"Can not import attachment {0}: {1}", filename, e.getMessage()));
+						}
 					}
 				}
 			}

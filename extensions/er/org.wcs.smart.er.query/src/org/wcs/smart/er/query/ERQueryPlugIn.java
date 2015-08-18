@@ -7,7 +7,11 @@ import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.er.query.internal.SurveyQueryLabelProvider;
+import org.wcs.smart.er.query.model.ISurveyQueryColumnProvider;
+import org.wcs.smart.er.query.model.SurveyQueryColumnProvider;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -47,6 +51,9 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		
+		SmartContext.INSTANCE.setClass(ISurveyQueryLabelProvider.class, new SurveyQueryLabelProvider());
+		SmartContext.INSTANCE.setClass(ISurveyQueryColumnProvider.class, new SurveyQueryColumnProvider());
 	}
 
 	/*

@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -75,7 +76,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 		
 	private String dirName;
 	private boolean includeAttachements;
-	private List<byte[]> objUuids;
+	private List<UUID> objUuids;
 
 	private String filterLinkText;
 	private Link filterLink;
@@ -91,7 +92,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 
 	@Override
 	protected void okPressed() {
-		this.objUuids = new ArrayList<byte[]>();
+		this.objUuids = new ArrayList<UUID>();
 		Object[] checked = chReports.getCheckedElements();
 
 		Map<String, String> file2Obj = new HashMap<String, String>();
@@ -138,7 +139,7 @@ public abstract class XmlMultiExportTreeViewerDialog extends TitleAreaDialog imp
 	 * 
 	 * @return list of uuids to export
 	 */
-	public List<byte[]> getObjectUuids(){
+	public List<UUID> getObjectUuids(){
 		return this.objUuids;
 	}
 	/**

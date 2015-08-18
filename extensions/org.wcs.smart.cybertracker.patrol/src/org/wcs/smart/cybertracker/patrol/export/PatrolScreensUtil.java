@@ -23,11 +23,11 @@ package org.wcs.smart.cybertracker.patrol.export;
 
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.hibernate.Session;
@@ -60,7 +60,9 @@ import org.wcs.smart.patrol.model.ScreenOption;
 import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.patrol.model.ScreenOptionUuid;
 import org.wcs.smart.patrol.model.Team;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Util for creating patrol screens for CyberTracker.
@@ -142,7 +144,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, ctUtil.getName(team), elId, SmartUtils.encodeHex(team.getUuid()));
+			ElementsUtil.addElementsItem(elements, ctUtil.getName(team), elId, UuidUtils.uuidToString(team.getUuid()));
 			result.defaultValues.add(createDefaultResultElement(RESULT_TEAM, elements, elId));
 		}
 
@@ -158,7 +160,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, ctUtil.getName(station), elId, SmartUtils.encodeHex(station.getUuid()));
+			ElementsUtil.addElementsItem(elements, ctUtil.getName(station), elId, UuidUtils.uuidToString(station.getUuid()));
 			result.defaultValues.add(createDefaultResultElement(RESULT_STATION, elements, elId));
 		}
 
@@ -175,7 +177,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return null;
 			}
 			String elId = (new CyberTrackerId()).getItemId();
-			ElementsUtil.addElementsItem(elements, ctUtil.getName(mandate), elId, SmartUtils.encodeHex(mandate.getUuid()));
+			ElementsUtil.addElementsItem(elements, ctUtil.getName(mandate), elId, UuidUtils.uuidToString(mandate.getUuid()));
 			result.defaultValues.add(createDefaultResultElement(RESULT_MANDATE, elements, elId));
 		}
 
@@ -197,7 +199,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		Collections.sort(employees, new Comparator<Employee>() {
 			@Override
 			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
+				return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
 			}
 		});
 		so = screenOptions.get(ScreenOptionMeta.MEMBERS);
@@ -207,16 +209,16 @@ public class PatrolScreensUtil extends ScreensUtil {
 			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
 			List<String> members = new ArrayList<String>();
 			for (Employee i : employees) {
-				members.add(i.getFullLabel());
+				members.add(SmartLabelProvider.getFullLabel(i));
 				CyberTrackerId mctid = new CyberTrackerId();
-				ElementsUtil.addElementsItem(elements, i.getFullLabel(), mctid.getItemId(), SmartUtils.encodeHex(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+				ElementsUtil.addElementsItem(elements, SmartLabelProvider.getFullLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
 				memberIds.add(mctid);
 				
 			}
 			
 			String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
 			if (filter != null) {
-				filter = SmartUtils.encodeHex(filter.getBytes());
+				filter = SmartUtils.encodeGeometry(filter.getBytes());
 			}
 			
 			id = addMembersNode(id, result, memberIds);
@@ -232,15 +234,15 @@ public class PatrolScreensUtil extends ScreensUtil {
 			CyberTrackerId pilotCtId = null;
 			for (ScreenOptionUuid sou : so.getUuidList()) {
 				for (Employee e : employees) {
-					if (Arrays.equals(sou.getUuidValue(), e.getUuid())) {
+					if (sou.getUuidValue().equals(e.getUuid())) {
 						CyberTrackerId mctid = new CyberTrackerId();
-						ElementsUtil.addElementsItem(elements, e.getFullLabel(), mctid.getItemId(), SmartUtils.encodeHex(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+						ElementsUtil.addElementsItem(elements, SmartLabelProvider.getFullLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
 						result.defaultValues.add(mctid.getItemId());
 						memberIds.add(mctid);
-						if (leader_so.getUuidValue() != null && Arrays.equals(leader_so.getUuidValue(), e.getUuid())) {
+						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
 							leaderCtId = mctid;
 						}
-						if (pilot_so.getUuidValue() != null && Arrays.equals(pilot_so.getUuidValue(), e.getUuid())) {
+						if (pilot_so.getUuidValue() != null && pilot_so.getUuidValue().equals(e.getUuid())) {
 							pilotCtId = mctid;
 						}
 					}
@@ -354,7 +356,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			List<String> types = new ArrayList<String>();
 			List<String> tag0Types = new ArrayList<String>();
 			for (PatrolType patrolType : pTypes) {
-				types.add(patrolType.getType().getGuiName());
+				types.add(patrolType.getType().getGuiName(Locale.getDefault()));
 				tag0Types.add(patrolType.getType().name());
 			}
 			List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
@@ -403,7 +405,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 					return null;
 				}
 				String trElId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, SmartUtils.encodeHex(transport.getUuid()));
+				ElementsUtil.addElementsItem(elements, ctUtil.getName(transport), trElId, UuidUtils.uuidToString(transport.getUuid()));
 				container.defaultValues.add(createDefaultResultElement(RESULT_TRANSPORT, elements, trElId));
 				return id;
 			}

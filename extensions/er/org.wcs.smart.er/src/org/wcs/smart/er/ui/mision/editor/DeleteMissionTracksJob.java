@@ -32,7 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.MissionTrack;
-import org.wcs.smart.hibernate.SmartHibernateManager;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Job for saving {@link MissionTrack} objects
@@ -57,7 +57,7 @@ public class DeleteMissionTracksJob extends Job {
     
     @Override
     protected IStatus run(IProgressMonitor monitor) {
-		Session session = SmartHibernateManager.openSession();
+		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
 			for (MissionTrack t : tracks) {

@@ -37,7 +37,7 @@ import org.locationtech.udig.project.ui.render.displayAdapter.MapMouseEvent;
 import org.locationtech.udig.project.ui.tool.SimpleTool;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.GeometryUtils;
 import org.wcs.smart.util.ReprojectUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -133,7 +133,7 @@ public class SplitTool extends SimpleTool implements KeyListener {
 					Coordinate c1 = getContext().getViewportModel().pixelToWorld(p.x, p.y);
 					
 					//convert to lat/lng
-					Coordinate c2 = ReprojectUtils.reproject(c1.x, c1.y, getContext().getViewportModel().getCRS(), SmartDB.DATABASE_CRS);
+					Coordinate c2 = ReprojectUtils.reproject(c1.x, c1.y, getContext().getViewportModel().getCRS(), GeometryUtils.SMART_CRS);
 					cs.add(c2);
 				}
 				finishCommand.onFinish(cs);

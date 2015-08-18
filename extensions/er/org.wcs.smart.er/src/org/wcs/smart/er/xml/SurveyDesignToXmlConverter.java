@@ -89,7 +89,7 @@ public class SurveyDesignToXmlConverter {
 		xml.setDescription(surveyDesign.getDescription());
 		
 		//state
-		xml.setState(surveyDesign.getState().getGuiName());
+		xml.setState(surveyDesign.getState().name());
 		
 		//keyid
 		xml.setKeyid(surveyDesign.getKeyId());

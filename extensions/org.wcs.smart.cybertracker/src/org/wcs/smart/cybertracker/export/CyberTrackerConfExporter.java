@@ -28,12 +28,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -70,7 +70,7 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Exporter from {@link ConfigurableModel} to CyberTracker application
@@ -312,7 +312,7 @@ public class CyberTrackerConfExporter {
 		List<String> tag0Values = new ArrayList<String>();
 		for (IAttributeListItemProxy listItem : activeItems) {
 			itemNames.add(listItem.getName());
-			tag0Values.add(SmartUtils.encodeHex(listItem.getUuid()));
+			tag0Values.add(UuidUtils.uuidToString(listItem.getUuid()));
 			
 		}
 
@@ -322,7 +322,7 @@ public class CyberTrackerConfExporter {
 		for (int i = 0; i < activeItems.size(); i++) {
 			IAttributeListItemProxy listItem = activeItems.get(i);
 			String name = listItem.getName();
-			String tag0 = SmartUtils.encodeHex(listItem.getUuid());
+			String tag0 = UuidUtils.uuidToString(listItem.getUuid());
 			String tag2 = isMulti ? String.valueOf(i) : null;
 			CyberTrackerId id = new CyberTrackerId();
 			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0, tag1, tag2, tag3, tag4);
@@ -526,7 +526,7 @@ public class CyberTrackerConfExporter {
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
 		for (IAttributeTreeNodeProxy treeNode : finalTreeNodes) {
 			String name = treeNode.getName();
-			String tag0 = SmartUtils.encodeHex(treeNode.getUuid());
+			String tag0 = UuidUtils.uuidToString(treeNode.getUuid());
 			CyberTrackerId id = new CyberTrackerId();
 			ElementsUtil. addElementsItem(elements, name, id.getItemId(), tag0);
 			ids.add(id);
@@ -569,11 +569,11 @@ public class CyberTrackerConfExporter {
 		}
 		case LIST:
 		{
-			byte[] uuidValue = defaultValueOption.getUuidValue();
+			UUID uuidValue = defaultValueOption.getUuidValue();
 			if (uuidValue != null) {
 				AttributeListItem def = null;
 				for (AttributeListItem item : attribute.getAttributeList()) { //check all including disabled
-					if (Arrays.equals(uuidValue, item.getUuid())) {
+					if (uuidValue.equals(item.getUuid())) {
 						def = item; 
 						break;
 					}
@@ -583,18 +583,18 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, SmartUtils.encodeHex(def.getUuid()));
+				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
 				return recordDefaultValue(attribute, elId);
 			}
 			break;
 		}
 		case TREE:
 		{
-			byte[] uuidValue = defaultValueOption.getUuidValue();
+			UUID uuidValue = defaultValueOption.getUuidValue();
 			if (uuidValue != null) {
 				AttributeTreeNode def = null;
 				for (AttributeTreeNode item : attribute.getActiveTreeNodes()) { //check dm items
-					if (Arrays.equals(uuidValue, item.getUuid())) {
+					if (uuidValue.equals(item.getUuid())) {
 						def = item; 
 						break;
 					} else {
@@ -609,7 +609,7 @@ public class CyberTrackerConfExporter {
 					return null;
 				}
 				String elId = (new CyberTrackerId()).getItemId();
-				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, SmartUtils.encodeHex(def.getUuid()));
+				ElementsUtil.addElementsItem(elements, LanguageUtil.getName(def, currentLanguage), elId, UuidUtils.uuidToString(def.getUuid()));
 				return recordDefaultValue(attribute, elId);
 			}
 			break;
@@ -625,13 +625,13 @@ public class CyberTrackerConfExporter {
 		return null;
 	}
 
-	private AttributeTreeNode findTreeNode(AttributeTreeNode node, byte[] uuidValue) {
+	private AttributeTreeNode findTreeNode(AttributeTreeNode node, UUID uuidValue) {
 		if (node.getActiveChildren() == null)
 			return null;
 
 		AttributeTreeNode result = null;
 		for (AttributeTreeNode item : node.getActiveChildren()) {
-			if (Arrays.equals(uuidValue, item.getUuid())) {
+			if (uuidValue.equals(item.getUuid())) {
 				return item;
 			}
 			result = findTreeNode(item, uuidValue);
@@ -645,7 +645,7 @@ public class CyberTrackerConfExporter {
 	private String recordDefaultValue(Attribute attribute, String defaultValue) {
 		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
-		ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, SmartUtils.encodeHex(attribute.getUuid()), null, defaultValue);
+		ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, defaultValue);
 		return ctid;
 	}
 	
@@ -704,7 +704,7 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId id = map.get(index);
 		if (id == null) {
 			id = new CyberTrackerId();
-			String uuid = SmartUtils.encodeHex(attribute.getUuid());
+			String uuid = UuidUtils.uuidToString(attribute.getUuid());
 			ElementsUtil.addElementsItem(elements, attribute.getKeyId()+"#"+index, id.getItemId(), uuid, ElementsUtil.ATTRIBUTE_ELEMENT_TAG, index.toString()); //$NON-NLS-1$
 			map.put(index, id);
 		}
@@ -741,7 +741,7 @@ public class CyberTrackerConfExporter {
 		
 		//below is same as ElementsUtil.addElements(elements, map);
 		for (IAttributeTreeNodeProxy dmObject : map.keySet()) {
-			ElementsUtil.addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), SmartUtils.encodeHex(dmObject.getUuid()));
+			ElementsUtil.addElementsItem(elements, dmObject.getName(), map.get(dmObject).getItemId(), UuidUtils.uuidToString(dmObject.getUuid()));
 		}
 
 		return result;

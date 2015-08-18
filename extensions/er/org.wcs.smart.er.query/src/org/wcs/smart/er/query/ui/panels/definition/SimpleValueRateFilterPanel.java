@@ -32,6 +32,7 @@ import org.hibernate.Session;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.internal.parser.Parser;
+import org.wcs.smart.er.query.ui.dropitems.SurveyDropItemFactory;
 import org.wcs.smart.er.query.ui.panels.ISurveyPanel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
@@ -75,7 +76,7 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 			@Override
 			public void refreshPanel(SurveyDesign currentDesign) {
 				super.refreshPanel(currentDesign);
-				IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQuery().getType());
+				IQueryItemPanel pnl = pnlManager.getQueryItemPanel(getId(), currentQuery.getQueryType());
 				if (pnl instanceof ISurveyPanel){
 					((ISurveyPanel) pnl).refreshPanel(currentDesign);
 				}
@@ -102,7 +103,7 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 			session.beginTransaction();
 			List<DropItem> copies = new ArrayList<DropItem>();
 			if (filterPart != null){
-				DropItem[] filterItems = filterPart.getFilter().getDropItems(session);
+				DropItem[] filterItems = SurveyDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), (session));
 				for (int i = 0; i < filterItems.length; i ++){
 					copies.add(filterItems[i]);
 				}

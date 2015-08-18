@@ -34,7 +34,7 @@ import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Smart patrol data source factor.  This is a read only data source.
@@ -112,7 +112,7 @@ public class MissionDataSourceFactory implements DataStoreFactorySpi{
 		try{
 			String uuid = (String)params.get(MISSION_UUID.key);
 			if (uuid != null){
-				mission = (Mission)session.load(Mission.class, SmartUtils.decodeHex(uuid));
+				mission = (Mission)session.load(Mission.class, UuidUtils.stringToUuid(uuid));
 				if (mission != null ){
 					//load lazy items
 					for (MissionDay md : mission.getMissionDays()){

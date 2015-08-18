@@ -34,7 +34,7 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -85,7 +85,7 @@ public class MissionFeatureReader implements FeatureReader<SimpleFeatureType, Si
 	//String spec = 
 	//"fid:String,id:Integer,date:Date,sampling_unit_id:String,observation:String,comment:String,geom:Point:srid=4326"; //$NON-NLS-1$
 	private SimpleFeature createFeature(SurveyWaypoint point){
-		String fid = point.getWaypoint().getId() + "." + SmartUtils.encodeHex(point.getWaypoint().getUuid()); //$NON-NLS-1$
+		String fid = point.getWaypoint().getId() + "." + UuidUtils.uuidToString(point.getWaypoint().getUuid()); //$NON-NLS-1$
 		
 		Object[] data = new Object[7];
 		data[0] = fid;

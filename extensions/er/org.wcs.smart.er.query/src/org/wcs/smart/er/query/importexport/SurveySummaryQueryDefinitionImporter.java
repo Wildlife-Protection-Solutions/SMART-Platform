@@ -26,7 +26,7 @@ import java.util.HashMap;
 import org.hibernate.Session;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
-import org.wcs.smart.er.query.model.SurveySummaryQueryType;
+import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -47,7 +47,7 @@ public class SurveySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(SurveySummaryQueryType.KEY);
+		return qt.getKey().equals(SurveySummaryQuery.KEY);
 	}
 
 	@Override

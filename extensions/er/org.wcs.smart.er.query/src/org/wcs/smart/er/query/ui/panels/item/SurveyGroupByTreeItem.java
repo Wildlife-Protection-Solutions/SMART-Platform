@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.datamodel.DataModel;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionProperty;
@@ -91,9 +92,9 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 		
 		public Image getImage(Object element){
 			if (element instanceof MissionAttribute){
-				return ((MissionAttribute) element).getType().getImage();
+				return DataModel.getAttributeImage(((MissionAttribute) element).getType());
 			}else if (element instanceof MissionProperty){
-				return ((MissionProperty) element).getAttribute().getType().getImage();
+				return DataModel.getAttributeImage(((MissionProperty) element).getAttribute().getType());
 			}else if (element instanceof SurveyGroupByContentProvider.Node){
 				SurveyGroupByContentProvider.Node node = (Node) element;
 				if (node == Node.MISSION_ID){
@@ -110,7 +111,7 @@ public class SurveyGroupByTreeItem implements IItemTreeNode{
 					return SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.EMPLOYEE_ICON);
 				}
 			}else if (element instanceof SamplingUnitAttribute){
-				return ((SamplingUnitAttribute)element).getType().getImage();
+				return DataModel.getAttributeImage(((SamplingUnitAttribute)element).getType());
 			}
 			return super.getImage(element);
 		}

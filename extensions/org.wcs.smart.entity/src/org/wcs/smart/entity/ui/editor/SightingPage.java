@@ -22,6 +22,7 @@
 package org.wcs.smart.entity.ui.editor;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,11 +53,13 @@ import org.eclipse.ui.part.EditorPart;
 import org.hibernate.Session;
 import org.wcs.smart.entity.EntityPlugIn;
 import org.wcs.smart.entity.internal.Messages;
+import org.wcs.smart.entity.query.DerbyEntitySightingEngine;
 import org.wcs.smart.entity.query.EntitySightingQuery;
 import org.wcs.smart.entity.query.SightingPagedResults;
 import org.wcs.smart.entity.query.SightingQueryColumn;
 import org.wcs.smart.entity.ui.editor.sightings.EntityFilterComposite;
 import org.wcs.smart.entity.ui.editor.sightings.SightingTable;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.ui.QueryDateFilterComposite;
 import org.wcs.smart.query.ui.importexport.ExportQueryWizard;
 import org.wcs.smart.ui.properties.DialogConstants;
@@ -292,8 +295,13 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 			};
 			
 			EntitySightingQuery query = currentQuery;
+			Session s = HibernateManager.openSession();
 			try{
-				final SightingPagedResults results = (SightingPagedResults) query.executeQuery(lblProgressMonitor, null);
+				
+				HashMap<String, Object> params = new HashMap<String, Object>();
+				params.put(IProgressMonitor.class.getName(), lblProgressMonitor);
+				params.put(Session.class.getName(), s);
+				final SightingPagedResults results = (SightingPagedResults)(new DerbyEntitySightingEngine()).executeQuery(query, params);
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
@@ -302,9 +310,10 @@ public class SightingPage extends EditorPart implements IEntityTypeEditorPage {
 							parentEditor.getMapPage().updatePage(null, false);
 						}
 					}});
-				
 			}catch (Exception ex){
 				EntityPlugIn.displayLog(Messages.SightingPage_QueryError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
+			}finally{
+				s.close();
 			}
 			lblProgressMonitor.done();
 			return Status.OK_STATUS;

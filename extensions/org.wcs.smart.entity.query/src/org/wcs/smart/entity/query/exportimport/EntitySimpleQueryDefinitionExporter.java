@@ -22,8 +22,8 @@
 package org.wcs.smart.entity.query.exportimport;
 
 import org.hibernate.Session;
-import org.wcs.smart.entity.query.model.type.EntityObservationQueryType;
-import org.wcs.smart.entity.query.model.type.EntityWaypointQueryType;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionExporter;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -42,8 +42,8 @@ public class EntitySimpleQueryDefinitionExporter extends SimpleQueryDefinitionEx
 	 */
 	@Override
 	public boolean canExport(Query query) {
-		if (query.getType().getKey().equals(EntityObservationQueryType.KEY) ||
-				query.getType().getKey().equals(EntityWaypointQueryType.KEY)){
+		if (query.getTypeKey().equals(EntityObservationQuery.KEY) ||
+				query.getTypeKey().equals(EntityWaypointQuery.KEY)){
 			return true;
 		}
 		return false;

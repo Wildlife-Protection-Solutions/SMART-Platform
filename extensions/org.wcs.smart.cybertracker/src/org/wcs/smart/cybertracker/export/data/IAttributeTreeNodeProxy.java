@@ -22,6 +22,7 @@
 package org.wcs.smart.cybertracker.export.data;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Proxy logic around tree attribute nodes as there names and enable state
@@ -34,7 +35,7 @@ public interface IAttributeTreeNodeProxy {
 
 	public String getName();
 	
-	public byte[] getUuid();
+	public UUID getUuid();
 	
 	public List<IAttributeTreeNodeProxy> getActiveChildren();
 

@@ -36,7 +36,7 @@ import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.Operator;
-import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.SharedUtils;
 
 /**
  * Converts filters to sql for the Derby query engine.
@@ -80,7 +80,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 		sb.append(engine.tablePrefix(Waypoint.class));
 		sb.append(".source "); //$NON-NLS-1$
 		sb.append(asSql(filter.getOperator()));
-		String p1 = engine.addParameterValue(SmartUtils.stripQuotes(filter.getWaypointSourceKey()));
+		String p1 = engine.addParameterValue(SharedUtils.stripQuotes(filter.getWaypointSourceKey()));
 		sb.append(" " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 		return sb.toString();
 	}
@@ -119,7 +119,7 @@ public class EntityFilterToSqlGenerator extends DerbyFilterToSqlGenerator  {
 			String p2 = engine.addParameterValue(date2);
 			return "( " + tableName + ".value is not null AND DATE(" + tableName + ".value) " + " " + asSql(filter.getOperator()) + " CAST(" + p1 + " as DATE) " + asSql(Operator.AND) + " CAST(" + p2 + " as DATE) )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		}else if (filter.getAttributeType() == AttributeType.LIST ){
-			if (filter.getValue().equals(AttributeFilter.ANY_OPTION.getKey())){
+			if (filter.getValue().equals(AttributeFilter.ANY_OPTION_KEY)){
 				//any option
 				return "( " + tableName + ".value is not null )";  //$NON-NLS-1$ //$NON-NLS-2$
 			}else{

@@ -47,8 +47,8 @@ public class SurveySummaryEditor extends SummaryEditor{
 		@Override
 		public void event(Object o) {
 			if (o instanceof SurveyDesign){
-				SurveyDesign qd = ((ISurveyQuery)getQuery()).getSurveyDesignAsObject();
-				if (qd != null && qd.equals(o)){
+				String key = ((ISurveyQuery)getQuery()).getSurveyDesign();
+				if (key != null && key.equals(((SurveyDesign) o).getKeyId())){
 					reparseQuery();		
 				}
 			}

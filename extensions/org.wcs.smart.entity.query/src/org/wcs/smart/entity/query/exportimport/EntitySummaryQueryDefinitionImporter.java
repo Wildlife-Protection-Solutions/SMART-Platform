@@ -25,7 +25,7 @@ import java.util.HashMap;
 
 import org.hibernate.Session;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
-import org.wcs.smart.entity.query.model.type.EntitySummaryQueryType;
+import org.wcs.smart.entity.query.model.EntitySummaryQuery;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionImporter;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.IQueryType;
@@ -43,7 +43,7 @@ public class EntitySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 
 	@Override
 	public boolean canImport(IQueryType qt) {
-		return qt.getKey().equals(EntitySummaryQueryType.KEY);
+		return qt.getKey().equals(EntitySummaryQuery.KEY);
 	}
 
 	@Override

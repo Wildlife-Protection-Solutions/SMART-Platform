@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.entity.ui.editor;
 
-import java.util.Arrays;
+import java.util.UUID;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
@@ -37,11 +37,11 @@ import org.wcs.smart.entity.internal.Messages;
  */
 public class EntityTypeEditorInput implements IEditorInput {
 
-	private byte[] uuid;
+	private UUID uuid;
 	private String key;
 	private String name;
 	
-	public EntityTypeEditorInput(byte[] uuid){
+	public EntityTypeEditorInput(UUID uuid){
 		this.uuid = uuid;
 	}
 	
@@ -52,7 +52,7 @@ public class EntityTypeEditorInput implements IEditorInput {
 	 * @param key the id
 	 * @param name the name
 	 */
-	public EntityTypeEditorInput(byte[] uuid, String key, String name){
+	public EntityTypeEditorInput(UUID uuid, String key, String name){
 		this.uuid = uuid;
 		this.key = key;
 		this.name = name;
@@ -71,7 +71,7 @@ public class EntityTypeEditorInput implements IEditorInput {
 	 * @return the uuid
 	 * of the entity type represented
 	 */
-	public byte[] getUuid(){
+	public UUID getUuid(){
 		return this.uuid;
 	}
 	@Override
@@ -106,7 +106,7 @@ public class EntityTypeEditorInput implements IEditorInput {
 	}
 	
 	public int hashCode() {
-		return Arrays.hashCode(uuid);
+		return uuid.hashCode();
 	}
 
 	public boolean equals(Object obj) {
@@ -117,7 +117,7 @@ public class EntityTypeEditorInput implements IEditorInput {
 					return key.equals(((EntityTypeEditorInput)obj).key);
 				}
 			}else if (this.uuid != null && ((EntityTypeEditorInput)obj).uuid != null){
-				return Arrays.equals(this.uuid, ((EntityTypeEditorInput)obj).uuid);
+				return this.uuid.equals(((EntityTypeEditorInput)obj).uuid);
 			}
 		}
 		return false;

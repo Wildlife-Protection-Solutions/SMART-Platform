@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.common.control.WarningDialog;
+import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
@@ -95,7 +96,7 @@ public abstract class ISamplingUnitImporter {
 			warnings.add(MessageFormat.format(Messages.ISamplingUnitImporter_IdNotUnique, new Object[]{idField}));
 			id = AUTO_GENERATE_KEY_PREFIX + " " + cnt; //$NON-NLS-1$
 		}else{
-			String warn = SamplingUnit.validateId(id);
+			String warn = EcologicalRecordsPlugIn.validateSamplingUnitId(id);
 			if (warn != null){
 				warnings.add(MessageFormat.format(Messages.ISamplingUnitImporter_IdInvalid, new Object[]{id, warn} ));
 				id = AUTO_GENERATE_KEY_PREFIX + " " + cnt; //$NON-NLS-1$

@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.DataModel;
+import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.ca.datamodel.DmObject;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -71,7 +72,7 @@ public class NameIdComposite extends SurveyDesignComposite {
 	final KeyListener generateKeyListener = new KeyListener() {
 		@Override
 		public void keyReleased(KeyEvent e) {
-			String newKey = NamedKeyItem.generateKey(txtName.getText(), otherKeys);
+			String newKey = DataModelManager.INSTANCE.generateKey(txtName.getText(), otherKeys);
 			txtKey.setText(newKey);
 			validate();
 		}
@@ -194,7 +195,7 @@ public class NameIdComposite extends SurveyDesignComposite {
 	public boolean validate(){
 		boolean error = false;
 	
-		String errormsg = NamedKeyItem.validateKey(txtKey.getText(), new ArrayList<DmObject>());
+		String errormsg = DataModelManager.INSTANCE.validateKey(txtKey.getText(), new ArrayList<DmObject>());
 		if (errormsg != null){
 			cdKey.setDescriptionText(errormsg);
 			cdKey.show();

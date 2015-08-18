@@ -29,8 +29,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.er.query.engine.DerbyPagedMissionResult;
 import org.wcs.smart.er.query.internal.Messages;
+import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.ui.ISummaryInfo;
-import org.wcs.smart.query.model.IPagedQueryResultSet;
 
 /**
  * Info section for mission track queries

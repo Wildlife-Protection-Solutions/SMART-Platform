@@ -54,8 +54,6 @@ import org.wcs.smart.query.ui.model.IDropItemFactory;
  */
 public class SurveyObservationQueryType implements IQueryType {
 
-	public static final String KEY = "surveyobservation"; //$NON-NLS-1$
-	
 	public SurveyObservationQueryType() {
 	}
 
@@ -66,7 +64,7 @@ public class SurveyObservationQueryType implements IQueryType {
 
 	@Override
 	public String getKey() {
-		return KEY;
+		return SurveyObservationQuery.KEY;
 	}
 
 	@Override
@@ -108,7 +106,7 @@ public class SurveyObservationQueryType implements IQueryType {
 				squery.setSurveyDesign(  ((FilterDefintionPanel)panel).getSurveyDesign()  );
 				squery.setQueryFilter(  ((FilterDefintionPanel)panel).getQueryPart()  );
 			}else if (panel.getId().equals(ConservationAreaFilterPanel.ID)){
-				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter() );
+				squery.setConservationAreaFilter(  ((ConservationAreaFilterPanel)panel).getCaFilter().asString() );
 			}
 		}
 

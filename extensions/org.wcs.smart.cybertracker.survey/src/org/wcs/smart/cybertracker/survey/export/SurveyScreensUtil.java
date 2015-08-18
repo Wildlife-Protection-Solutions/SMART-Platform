@@ -42,7 +42,9 @@ import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Util for creating survey/mission screens for CyberTracker.
@@ -78,7 +80,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		Collections.sort(employees, new Comparator<Employee>() {
 			@Override
 			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
+				return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
 			}
 		});
 		
@@ -87,16 +89,16 @@ public class SurveyScreensUtil extends ScreensUtil {
 		List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
 		List<String> members = new ArrayList<String>();
 		for (Employee i : employees) {
-			members.add(i.getFullLabel());
+			members.add(SmartLabelProvider.getFullLabel(i));
 			CyberTrackerId mctid = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, i.getFullLabel(), mctid.getItemId(), SmartUtils.encodeHex(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+			ElementsUtil.addElementsItem(elements, SmartLabelProvider.getFullLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
 			memberIds.add(mctid);
 			
 		}
 		
 		String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
 		if (filter != null) {
-			filter = SmartUtils.encodeHex(filter.getBytes());
+			filter = SmartUtils.encodeGeometry(filter.getBytes());
 		}
 		
 		id = addMembersNode(id, result, memberIds);
