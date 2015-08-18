@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.wcs.smart.hibernate.mapping">
+      <class
+            class="org.wcs.smart.connect.model.ConnectServer">
+      </class>
+      <class
+            ca_property=".server.conservationArea"
+            class="org.wcs.smart.connect.model.ConnectUser">
+      </class>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.connect.configuration.show"
+            name="Server Configuration...">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.report">
+         <menu
+               id="org.wcs.smart.connect.menu"
+               label="CONNECT">
+            <command
+                  commandId="org.wcs.smart.connect.configuration.show"
+                  style="push"
+                  tooltip="configure the smart connect server for this conservation area">
+            </command>
+            <visibleWhen
+                  checkEnabled="false">
+               <test
+                     forcePluginActivation="true"
+                     property="org.wcs.smart.caSingle">
+               </test>
+            </visibleWhen>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.connect.ui.server.configure.ShowServerConfigurationHandler$ShowServerConfigurationHandlerWrapper"
+            commandId="org.wcs.smart.connect.configuration.show">
+      </handler>
+   </extension>
+
+</plugin>
