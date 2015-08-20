@@ -158,7 +158,13 @@
           		<groupId>net.sf.opencsv</groupId>
           		<artifactId>opencsv</artifactId>
         		<version>2.3</version>
-        	</dependency>	
+        	</dependency>
+        <dependency>
+    		<groupId>org.json</groupId>
+    		<artifactId>json</artifactId>
+    		<version>20141113</version>
+		</dependency>
+		
 		<!-- SMART -->
 		<dependency>
     			<groupId>org.wcs.smart</groupId>

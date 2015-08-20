@@ -22,6 +22,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartUtils;
@@ -37,7 +38,7 @@ import org.wcs.smart.connect.security.SecurityManager;
 
 import com.sun.istack.internal.logging.Logger;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
-
+import org.json.*;
 
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlert.PATH)
 
@@ -81,12 +82,15 @@ public class ConnectAlert extends HttpServlet {
 	
 	@GET
     @Path("")
-    public List<Alert> getAllAlerts(){
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    public String getAllAlerts(){
 		validateUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			return HibernateManager.getAlerts(s);
+			List<Alert> list = HibernateManager.getAlerts(s);
+			
+			return convertToGeoJson(s, list).toString();
 		}finally{
 			s.getTransaction().commit();
 		}
@@ -384,4 +388,49 @@ public class ConnectAlert extends HttpServlet {
 		}
 		
 	}
+    
+    private JSONObject convertToGeoJson(Session s , List<Alert> list) throws HibernateException{
+    	 JSONObject featureCollection = new JSONObject();
+    	    try {
+    	        featureCollection.put("type", "FeatureCollection");
+    	        JSONArray featureList = new JSONArray();
+
+    	        for (Alert obj : list) {
+    	            // {"geometry": {"type": "Point", "coordinates": [-94.149, 36.33]}
+    	            JSONObject point = new JSONObject();
+    	            point.put("type", "Point");
+    	            // construct a JSONArray from a string; can also use an array or list
+    	            JSONArray coord = new JSONArray("["+obj.getX()+","+obj.getY()+"]");
+    	            point.put("coordinates", coord);
+    	            JSONObject feature = new JSONObject();
+    	            feature.put("geometry", point);
+    	            
+    	            JSONObject properties = new JSONObject();
+    	            properties.put("uuid", obj.getUuid());
+    	            properties.put("cauuid", obj.getCaUuid());
+    	            properties.put("creatoruuid", obj.getCreatorUuid());
+    	            properties.put("date", obj.getDate());
+    	            properties.put("desc", obj.getDescription());
+    	            properties.put("level", obj.getLevel());
+    	            properties.put("status", obj.getStatus());
+    	            properties.put("typeuuid", obj.getTypeUuid());
+
+    	            AlertType type = HibernateManager.getAlertType(s, obj.getTypeUuid());
+    	    		properties.put("type", type.getLabel());
+    	            
+    	            properties.put("id", obj.getUserGeneratedId());
+    	            properties.put("x", obj.getX());
+    	            properties.put("y", obj.getY());
+
+    	            feature.put("properties", properties);
+    	            featureList.put(feature);
+    	            feature.put("type", "Feature");
+    	            featureCollection.put("features", featureList);
+    	        }
+    	        
+    	    } catch (JSONException e) {
+    	    	throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "can't save json object: "+e.toString());
+    	    }
+    	 return featureCollection;
+    }
 }

@@ -2,6 +2,7 @@ var ALERT_URL = "../api/connectalert/";
 var USER_URL = "../api/connectuser/";
 var ACTION_URL = USER_URL + "actions/";
 var allActions = null;
+var interval = 30000; //# of seconds between map refresh on the alert layer
 
 
 window.onload = function(){
@@ -16,6 +17,40 @@ window.onload = function(){
 	var map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8});
     var googleLayer = new L.Google('ROADMAP');
     map.addLayer(googleLayer);
+    
+    realtime = L.realtime({
+//        url: 'https://wanderdrone.appspot.com/',
+    	  url: ALERT_URL,
+        crossOrigin: true,
+        type: 'json'
+    }, {
+        interval: interval
+    }).addTo(map);
+
+    realtime.on('update', function(e) {
+        var coordPart = function(v, dirs) {
+                return dirs.charAt(v >= 0 ? 0 : 1) +
+                    (Math.round(Math.abs(v) * 100) / 100).toString();
+            },
+            popupContent = function(fId) {
+                var feature = e.features[fId],
+                    c = feature.geometry.coordinates;
+                return 'Event: ' + feature.properties.type + " - " + feature.properties.id + 
+                	"<br>Reported time: " + feature.properties.date +
+                	"<br>Location: " +
+                    coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW');
+            },
+            bindFeaturePopup = function(fId) {
+                realtime.getLayer(fId).bindPopup(popupContent(fId));
+            },
+            updateFeaturePopup = function(fId) {
+                realtime.getLayer(fId).getPopup().setContent(popupContent(fId));
+            };
+
+
+        Object.keys(e.enter).forEach(bindFeaturePopup);
+        Object.keys(e.update).forEach(updateFeaturePopup);
+    });
     
 	/*
 	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
@@ -313,14 +348,15 @@ function createAlertTable(){
 	}
 	
 	var parent = document.getElementById("alerttable");
- 	var alerts = JSON.parse(this.responseText);
+ 	var geojson = JSON.parse(this.responseText);
+ 	var alerts = geojson.features;
  	for (var i = 0; i < alerts.length; i ++){
- 		var d = new Date(alerts[i].date);
+ 		var d = new Date(alerts[i].properties.date);
  		var row = tableCreateRowTDs(parent,
- 				[alerts[i].userGeneratedId, d.toLocaleString() , alerts[i].description, alerts[i].level.toString(), alerts[i].status, alerts[i].x + "," + alerts[i].y, null], 
+ 				[alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, alerts[i].properties.x + "," + alerts[i].properties.y, null], 
  				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.id = "alertRow" + i;
- 		row.dataset.uuid = alerts[i].uuid;
+ 		row.dataset.uuid = alerts[i].properties.uuid;
  	
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";

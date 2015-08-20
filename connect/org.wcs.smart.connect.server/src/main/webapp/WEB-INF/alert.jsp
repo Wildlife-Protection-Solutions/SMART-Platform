@@ -16,6 +16,7 @@
 </script>
 <script src="https://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-google.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-realtime.js"></script>
 
 
 <title>SMART Connect - Operational Map</title>
