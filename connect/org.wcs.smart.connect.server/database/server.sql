@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS connect.users;
 DROP TABLE IF EXISTS connect.user_roles;
 DROP TABLE IF EXISTS connect.upload_status;
 DROP TABLE IF EXISTS connect.upload_item;
+DROP TABLE IF EXISTS connect.map_layers;
 
 
 /* Create Tables */
@@ -157,7 +158,16 @@ CREATE TABLE connect.style_configuration(
 	PRIMARY KEY(style_id)
 ) WITHOUT OIDS;
 
-
+CREATE TABLE connect.map_layers(
+	uuid uuid NOT NULL,
+	-- layer type  1-mapbox.com layer, 2-giscloud.com (WMS-published), 3 - generic WMS
+	layer_type int NOT NULL,
+	active boolean NOT NULL,
+	token varchar(256),
+	mapboxid varchar(64),
+	wms_layer_list text,
+	layer_name varchar(32)
+) WITHOUT OIDS;
 
 
 /* Create Foreign Keys */

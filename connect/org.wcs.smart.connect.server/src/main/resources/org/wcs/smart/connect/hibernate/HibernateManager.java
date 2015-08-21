@@ -34,6 +34,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.StyleConfiguration;
 import org.wcs.smart.util.I18nUtil;
@@ -168,6 +169,20 @@ public class HibernateManager {
 				.createCriteria(Alert.class)
 				.add(Restrictions.eq("caUuid", caUuid))
 				.list();
+	}
+	
+	public static List<MapLayer> getMapLayers(Session session) {
+		return (List<MapLayer>)session
+				.createCriteria(MapLayer.class)
+				.list();
+	}
+
+	public static MapLayer getMapLayer(Session session, UUID layerUuid) {
+		MapLayer m = (MapLayer)session
+				.createCriteria(MapLayer.class)
+				.add(Restrictions.eq("uuid", layerUuid)) //$NON-NLS-1$
+				.uniqueResult();
+		return m;
 	}
 	
 }

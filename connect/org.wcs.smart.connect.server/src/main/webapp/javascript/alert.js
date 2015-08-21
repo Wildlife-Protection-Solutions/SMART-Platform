@@ -11,21 +11,22 @@ window.onload = function(){
 		document.getElementById('mainheader').style.display = 'none';
 		document.getElementById('verticalmenu').style.display = 'none';
 		document.getElementById('footerid').style.display = 'none';
+		
+		document.body.style.width = '38em';
 	}
 
-	//initialize the map
-	var map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8});
-    var googleLayer = new L.Google('ROADMAP');
-    map.addLayer(googleLayer);
+	
+   
     
+    
+    // The real-time layer that auto-refreshes to show alerts
     realtime = L.realtime({
-//        url: 'https://wanderdrone.appspot.com/',
     	  url: ALERT_URL,
         crossOrigin: true,
         type: 'json'
     }, {
         interval: interval
-    }).addTo(map);
+    });
 
     realtime.on('update', function(e) {
         var coordPart = function(v, dirs) {
@@ -52,23 +53,80 @@ window.onload = function(){
         Object.keys(e.update).forEach(updateFeaturePopup);
     });
     
-	/*
-	L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-	    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-	    maxZoom: 18,
-	    id: 'jeffloun.mp3jogfm',
-	    accessToken: 'pk.eyJ1IjoiamVmZmxvdW4iLCJhIjoiOTYyMGFkZDk5ZWM2ZDQ5NDc5Njc2Y2ZlOGM4YjQ1YWIifQ.R715pq8aRAM9hRdGcy10Xg'
-	}).addTo(map);
-	*/
+    //google maps layer - Not supposed to use this with private maps/data, so we won't. 
+    //    var googleLayer = new L.Google('ROADMAP');
+    //    map.addLayer(googleLayer);
+
+    //OSM Basemap Layer - the only Hardcoded basemap
+    var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+	var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
+	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});		
+
 	
-	/*var testwms = L.tileLayer.wms("https://editor.giscloud.com/wms/bdd66dd4ade33e6b69aed41b64b2b294", {
-	    layers: '1084716:canada_major_lakes',
-	    format: 'image/png',
-	    transparent: true,
-	    attribution: "giscloud.com"
-	});
-	testwms.addTo(map);
-	*/
+	var baseMaps = {
+			"OSM Standard": osm
+	};
+	
+	var dataLayers = {
+			"Events": realtime
+	};
+	
+	var activeLayers = [osm, realtime];
+
+	
+	for (i = 0; i < mapLayers.length; ++i) {
+		//Mapbox layer type
+		if(mapLayers[i][0] == 1){
+			var accesstoken = mapLayers[i][1];
+			var mapboxId = mapLayers[i][2];
+
+			var layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+			    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+			    maxZoom: 18,
+			    id: mapboxId,
+			    accessToken: accesstoken
+			});
+
+			//add the new layer to the list of datalayers
+			dataLayers[mapLayers[i][4]] = layer;
+			
+			//add to layer list so it is active to start with
+			if(mapLayers[i][5]){
+				activeLayers.push(layer);
+			}
+			
+		}else if(mapLayers[i][0] == 2){
+
+			var token = mapLayers[i][1];
+		    var layerName =  mapLayers[i][3];
+			
+			var giscloud= L.tileLayer.wms("https://editor.giscloud.com/wms/" + token, {
+				layers: layerName ,
+			    format: 'image/png',
+			    transparent: true,
+			    attribution: "giscloud.com"
+			});
+			dataLayers[mapLayers[i][4]] = giscloud;
+			
+			//add to layer list so it is active to start with
+			if(mapLayers[i][5]){
+				activeLayers.push(giscloud);
+			}
+		}
+	    
+	}
+//-----------------------	
+			
+	//initialize the map
+	var map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8, layers: activeLayers});
+	
+	//add layer control to map
+	L.control.layers(baseMaps, dataLayers).addTo(map);
+	
+
+	
+	
+
     
     
     //initialize the tab styles
@@ -296,9 +354,9 @@ function deleteAlert(){
 function alertDeleted() {
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
-		displayInfo("Deleted Alert with UUID: " + r.uuid + " deleted");
+		displayInfo("Deleted Alert with UUID: " + r.uuid);
 	} else {
-		displayError(parseError("Error deleting account " + this.uuid));
+		displayError(parseError("Error deleting alert " + this.uuid));
 	}
 	refreshAlerts();
 	
@@ -353,7 +411,7 @@ function createAlertTable(){
  	for (var i = 0; i < alerts.length; i ++){
  		var d = new Date(alerts[i].properties.date);
  		var row = tableCreateRowTDs(parent,
- 				[alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, alerts[i].properties.x + "," + alerts[i].properties.y, null], 
+ 				[alerts[i].properties.type, alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
  				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.id = "alertRow" + i;
  		row.dataset.uuid = alerts[i].properties.uuid;
@@ -363,7 +421,7 @@ function createAlertTable(){
  		deleteicon.title="delete alert";
  		deleteicon.onclick = deleteAlert;
  		deleteicon.href="";
- 		row.childNodes[6].appendChild(deleteicon);
+ 		row.childNodes[7].appendChild(deleteicon);
  	}
 }
 

@@ -16,6 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.StyleConfiguration;
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "settings")
 @MultipartConfig(fileSizeThreshold=1024*1024,maxFileSize=1024*1024*5, maxRequestSize=1024*1024*5*5)
@@ -29,6 +30,7 @@ public class SettingsServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		List<StyleConfiguration> styles = null;
+		List<MapLayer> layers = null;
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{

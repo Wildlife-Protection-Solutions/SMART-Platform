@@ -1,9 +1,11 @@
 html {
   font-family: 'Crimson Text', Georgia, Times, serif;
   font-size: 1em;
-  background-image: url(../css/background.jpg);
 }
 
+body {
+	background-image: url(../css/background.jpg);
+}
 
 p{
   font-size: 1em;
@@ -246,7 +248,14 @@ h2{
 	height: 525px;
 }
 
+.overflow{
+	height: inherit;
+	overflow: auto;
+}
 
+.alert-select{
+	width: 20em;
+}
 
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/

@@ -1,4 +1,5 @@
 var STYLE_URL = "../api/connectstyle/";
+var LAYER_URL = "../api/maplayer/";
 var ACTION_URL = STYLE_URL + "actions/";
 var allActions = null;
 
@@ -22,9 +23,20 @@ window.onload = function(){
 		closeDialog('newStyleDialog');
 	};
 	
-	document.querySelector("#newStyleForm").onsubmit = createNewStyle;
+	document.querySelector("#newstyleform").onsubmit = createNewStyle;
+	
+	//Layer table and actions
+	refreshLayers();
+	setTableActions();
 }
 
+function setTableActions(){
+	//delete layer clicked
+	elements = document.querySelectorAll(".deletelayer");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=deletelayer;
+	}
+}
 
 /* clears and displays new user dialog */
 function clearAndShowNewStyleDialog(){
@@ -126,6 +138,107 @@ function userCreated() {
 		displayError(parseError("Error creating account", this.responseText));
 	}
 	refreshUsers();
+}
+
+
+/* reload map layer table */
+function refreshLayers(){
+	//clear current Map layer table
+	var objects = document.querySelectorAll("tr.layerrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.getElementById("layertable");
+	var row = document.createElement("tr");
+	row.className="layerrow";
+	row.innerHTML="Refreshing Layer Table...";
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createLayerTable;
+ 	oReq.open("Get", LAYER_URL, true);
+ 	oReq.send();
+}
+
+/* callback that displays all layer info */
+function createLayerTable(){
+	
+	if (this.status != 200 && this.status != 201 ) {
+		var msg = "Error: ";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("tr.layerrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.getElementById("layertable");
+ 	var layers = JSON.parse(this.responseText);
+ 	for (var i = 0; i < layers.length; i ++){
+ 		var type = layers[i].layerType;
+ 		var typeText = "unknown";
+ 		if(type == 1){
+ 			typeText = "Mapbox.com";
+ 		}else if(type == 2){
+ 			typeText = "GISCloud.com";
+ 		}
+ 		var active = "False";
+ 		if (layers[i].active){
+ 			active = "True";
+ 		}
+ 		var row = tableCreateRowTDs(parent,
+ 				[layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null], 
+ 				"layerrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+ 		row.id = "layerRow" + i;
+ 		row.dataset.uuid = layers[i].uuid;
+ 	
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
+ 		deleteicon.title="delete layer";
+ 		deleteicon.onclick = deleteLayer;
+ 		deleteicon.href="";
+ 		row.childNodes[5].appendChild(deleteicon);
+ 	}
+}
+
+/* delete layer*/
+function deleteLayer(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	var ok = window.confirm("Are you sure you want to delete the layer?");
+	if (!ok) return;
+	
+	hideInfo();
+	hideError();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = layerDeleted;
+	oReq.open("DELETE", LAYER_URL + encodeURIComponent(uuid), true);
+	oReq.send();
+	return false;	
+}
+
+//callback for delete layer  
+function layerDeleted() {
+	if (this.status == 200  && this.status != 201 ) {
+		var r = JSON.parse(this.response);
+		displayInfo("Deleted Layer with UUID: " + r.uuid);
+	} else {
+		displayError(parseError("Error deleting Layer " + this.uuid));
+	}
+	refreshLayers();
+	
 }
 
 

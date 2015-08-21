@@ -27,6 +27,16 @@
     <div id="error" class="errorsection"></div>
     	<button id="btnNewStyle" class="block button top-spacer">Create New Style</button>
     </div>
+
+
+<div class="overflow">
+	<div style="width:50%; float:left"><p style="float"><b>Operational Map Layers Configuration    </b><button style="float:right" "class="block button top-spacer" id="btnNewLayer">Add New Layer</button></p>
+	</div>
+	<table id="layertable">
+		<tr class="table-row smart-table-header"><th>Layer Name</th><th>Type</th><th>On by Default?</th><th>Mapbox ID</th><th>Layer List</th></tr>
+	</table>
+</div>
+
   
 <div class="top-spacer"  style="margin-left: -20px" >
   <div class="styleTable table-cell smart-table">
@@ -59,7 +69,7 @@
   <div class="dialog-title">Create a New Style</div>
   <div id="dialogerror" class="errorsection"></div>
   <div>Create a new SMART Connect Server Style</div>
-  <form id="newuserform" action="settings" method="POST" enctype="multipart/form-data">
+  <form id="newstyleform" action="settings" method="POST" enctype="multipart/form-data">
     <label class="block top-spacer">Style Id:</label>
     <input type="text" name="style_id" class="formtext block" />
     <label class="block top-spacer">Background Image:</label>

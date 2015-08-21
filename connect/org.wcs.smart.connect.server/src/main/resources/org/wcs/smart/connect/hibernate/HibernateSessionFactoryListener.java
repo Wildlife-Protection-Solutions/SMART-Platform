@@ -38,6 +38,7 @@ import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;	
 import org.wcs.smart.connect.model.ConnectUuidItem;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.StyleConfiguration;
@@ -92,6 +93,7 @@ public class HibernateSessionFactoryListener implements ServletContextListener{
 		config.addAnnotatedClass(StyleConfiguration.class);
 		config.addAnnotatedClass(AlertType.class);
 		config.addAnnotatedClass(Alert.class);
+		config.addAnnotatedClass(MapLayer.class);
 
 		for(Class<?> c : SmartHibernateConfiguration.INSTANCE.getTables()){
 			config.addAnnotatedClass(c);
