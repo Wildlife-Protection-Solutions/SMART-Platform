@@ -29,6 +29,7 @@ public class CaUploaderTest {
 
 	public static final String EMPTY_CA_EXPORT = "EmptyCa.export.zip";
 	public static final String EMPTY_CA_UUID = "a24d825f-f7f8-4790-9d46-44861132b787";
+	public static final String VERSION_UUID =  "00000000-0000-0000-0000-000000000001";
 
 	@Test
 	public void testUploadFileSingleCall() throws Exception{
@@ -36,7 +37,7 @@ public class CaUploaderTest {
 		
 		//create ca
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
-		HttpPost post = SmartConnect.createPost(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID, 
+		HttpPost post = SmartConnect.createPost(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID + "?version=" + VERSION_UUID, 
 				new String[][]{{"X-Upload-Content-Type", SmartConnect.MT_APPLICATION_OCTET},
 								{"X-Upload-Content-Length", String.valueOf(Files.size(f.toPath()))}});
 		
@@ -142,7 +143,7 @@ public class CaUploaderTest {
 		});
 		
 		//create ca
-		HttpDelete delete= SmartConnect.createDelete(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID, null);
+		HttpDelete delete= SmartConnect.createDelete(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID + "?dataonly=false&username="+SmartConnect.USERNAME+"&password=" + SmartConnect.PASSWORD, null);
 		httpClient.execute(delete, new ResponseHandler<String>() {
 
 			@Override
@@ -160,7 +161,7 @@ public class CaUploaderTest {
 		File f = new File(ClassLoader.getSystemResource(EMPTY_CA_EXPORT).toURI());
 		//create ca
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
-		HttpPost post = SmartConnect.createPost(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID, 
+		HttpPost post = SmartConnect.createPost(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID + "?version=" + VERSION_UUID, 
 			new String[][]{{"X-Upload-Content-Type", SmartConnect.MT_APPLICATION_OCTET},
 						{"X-Upload-Content-Length", String.valueOf(Files.size(f.toPath()))}});
 				
@@ -262,7 +263,7 @@ public class CaUploaderTest {
 		});
 		
 		//delete CA
-		HttpDelete delete= SmartConnect.createDelete(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID, null);
+		HttpDelete delete= SmartConnect.createDelete(SmartConnect.CA_API_URL + "/" + EMPTY_CA_UUID + "?dataonly=false&username="+SmartConnect.USERNAME+"&password=" + SmartConnect.PASSWORD, null);
 		httpClient.execute(delete, new ResponseHandler<String>() {
 
 			@Override

@@ -24,7 +24,7 @@ CREATE TABLE connect.upload_item
 	uuid uuid NOT NULL,
 	ca_uuid uuid NOT NULL,
 	start_datetime timestamp not null,
-	total_bytes int not null,
+	total_bytes bigint not null,
 	local_filename varchar not null,
 	type varchar(16) not null,
 	status varchar(16) not null,
@@ -51,7 +51,7 @@ CREATE TABLE connect.ca_plugin_version
 CREATE TABLE connect.ca_info
 (
 	ca_uuid uuid NOT NULL,
-	version uuid not null,
+	version uuid,
 	label varchar not null,
 	status varchar not null,
 	PRIMARY KEY (ca_uuid)

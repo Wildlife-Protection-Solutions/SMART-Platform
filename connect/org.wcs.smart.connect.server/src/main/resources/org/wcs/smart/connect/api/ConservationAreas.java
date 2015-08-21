@@ -42,14 +42,15 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.io.FileUtils;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -57,6 +58,7 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConservationAreaInfo.Status;
+import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.UploadItem;
 import org.wcs.smart.connect.model.UploadItem.Type;
 import org.wcs.smart.connect.security.CaAction;
@@ -116,11 +118,11 @@ public class ConservationAreas extends HttpServlet{
 	/*
 	 * Ensures the current user had delete access for the given ca.
 	 */
-	private void validateDelete(ConservationAreaInfo info, Session s){
+	private void validateDelete(UUID cauuid, Session s){
 		if (!SecurityManager.INSTANCE.canAccess(s, 
 				request.getUserPrincipal().getName(), 
 				CaAction.DELETECA_KEY,
-				info.getUuid())){
+				cauuid)){
 			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to delete ca."); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
 		}
@@ -160,6 +162,36 @@ public class ConservationAreas extends HttpServlet{
 			s.getTransaction().commit();
 		}
 	}
+	/*
+	 * TODO: this might need to be done as a background process incase
+	 * deleting takes a long time
+	 */
+	/**
+	 * Deletes a given conservation area.
+	 * 
+	 * @param caUuid
+	 */
+	@GET
+    @Path("/{cauuid}")
+    public ConservationAreaInfo getConservationArea(@PathParam("cauuid") String caUuid){
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			ConservationAreaInfo info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, UUID.fromString(caUuid));
+			if (info == null){
+				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND);
+			}
+			return info;
+		}catch (SmartConnectException ex){
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
+					Messages.getString("ConservationAreas.CaListError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
 	
 	/*
 	 * TODO: this might need to be done as a background process incase
@@ -172,23 +204,65 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@DELETE
     @Path("/{cauuid}")
-    public void deleteConservationArea(@PathParam("cauuid") String caUuid){
-		ConservationAreaInfo toDelete = null;
+    public void deleteConservationArea(@PathParam("cauuid") String caUuid, 
+    		@QueryParam("dataonly") String dataonly,
+    		@QueryParam("username") String username,
+    		@QueryParam("password") String password){
+		
+		if (username == null || password == null || username.length() == 0 || password.length() == 0){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Must resupply username and password and query parameter");
+		}
+		
+		if (request.getSession(false) != null){
+			//valid user against current session
+			if (!username.equals(request.getUserPrincipal().getName())){
+				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+			}
+		}
+		boolean deleteAll = false;
+		if (dataonly == null || dataonly.length() == 0){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid value for query parameter dataonly");
+		}
+		try{
+			deleteAll = !Boolean.valueOf(dataonly);
+		}catch (Exception ex){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid value for query parameter dataonly");
+		}
+		
+		UUID caUuidToDelete = null;
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			SmartUser su = HibernateManager.getUser(s, username);
+			if (su == null){
+				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+			}
+			if (!BCrypt.checkpw(password, su.getPassword())){
+				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+			}
+			
+			
 			UUID uuid = UUID.fromString(caUuid);
 			
-			toDelete = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
+			ConservationAreaInfo serverDelete = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
 					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
-			if (toDelete == null){
+			if (serverDelete == null){
 				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
-			validateDelete(toDelete, s);
-			s.delete(toDelete);
+			validateDelete(serverDelete.getUuid(), s);
+
+			//delete desktop data
+			String query = "DELETE FROM smart.conservation_area WHERE uuid = '" + serverDelete.getUuid().toString() + "'";
+			s.createSQLQuery(query).executeUpdate();
+			caUuidToDelete = serverDelete.getUuid();
 			
-			SQLQuery query = s.createSQLQuery("DELETE FROM smart.conservation_area WHERE uuid = '" + uuid.toString() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
-			query.executeUpdate();
+			if (deleteAll){
+				//delete server only data
+				s.delete(serverDelete);
+			}else{
+				serverDelete.setStatus(Status.NODATA);
+				serverDelete.setVersion(null);
+			}
 			
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
@@ -203,7 +277,7 @@ public class ConservationAreas extends HttpServlet{
 		}
 		//delete all ca data and findstore
 		try{
-			DataStoreManager.INSTANCE.deleteDirectory(toDelete);
+			DataStoreManager.INSTANCE.deleteDirectory(caUuidToDelete);
 		}catch (Exception ex){
 			logger.severe(Messages.getString("ConservationAreas.CouldNotDeleteFilestore", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
@@ -218,25 +292,32 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@POST
 	@Path("/{cauuid}")
-	public String updateNewConservationArea(@PathParam("cauuid") String caUuid){
+	public String createAndUploadConservationArea(@PathParam("cauuid") String caUuid, @QueryParam("version") String versionUuid){
+		if (versionUuid == null){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "A version must be supplied");
+		}
+		UUID version = null;
+		try{
+			version = UUID.fromString(versionUuid);
+		}catch (Exception ex){
+			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "A version must be a valid uuid.");
+		}
+		
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
 			UUID uuid = UUID.fromString(caUuid);
-			
 			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
 					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
-			if (ca != null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("ConservationAreas.CaExists", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			}
+
 					
 			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
 			if (lengthHeader == null){
 				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
 			}
-			int totalBytes = -1;
+			long totalBytes = -1;
 			try{
-				totalBytes = Integer.parseInt(lengthHeader);
+				totalBytes = Long.parseLong(lengthHeader);
 			}catch (Exception ex){
 				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "X-Upload-Content-Length invalid value", ex); //$NON-NLS-1$
 			}
@@ -244,27 +325,38 @@ public class ConservationAreas extends HttpServlet{
 				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
 			}
 			
-			ConservationAreaInfo cai = new ConservationAreaInfo();
-			cai.setUuid(uuid);
-			cai.setStatus(Status.UPLOADING);
-			cai.setLabel(Messages.getString("ConservationAreas.UnknownLbl", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
-			cai.setVersion(SmartUtils.generateUUID(s, cai));
-			s.save(cai);
+			if (ca == null){
+				ca = new ConservationAreaInfo();
+				ca.setUuid(uuid);
+				ca.setStatus(Status.UPLOADING);
+				ca.setLabel(Messages.getString("ConservationAreas.UnknownLbl", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+				ca.setVersion(version);
+				s.save(ca);
+			}else{
+				if (ca.getStatus() == Status.NODATA){
+					//we can upload data
+					ca.setStatus(Status.UPLOADING);
+					s.saveOrUpdate(ca);
+				}else{
+					//otherwise ca already exists
+					throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("ConservationAreas.CaExists", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+				}
+			}
 							
 			UploadItem up = new UploadItem();
-			up.setConservationAreaInfo(cai);
+			up.setConservationAreaInfo(ca);
 			up.setStartTime(new Date());
 			up.setStatus(UploadItem.Status.UPLOADING);
 			up.setType(Type.CA);
 			up.setTotalBytes(totalBytes);
-			File caDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(cai);
+			File caDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(ca);
 			if (!caDir.exists()){
 				FileUtils.forceMkdir(caDir);
 			}
 			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(
-					DataStoreManager.INSTANCE.getConservationAreaFolder(cai)
+					DataStoreManager.INSTANCE.getConservationAreaFolder(ca)
 					+ File.separator + 
-					DataStoreManager.INSTANCE.getConservationAreaFolder(cai)
+					DataStoreManager.INSTANCE.getConservationAreaFolder(ca)
 					+ ".zip")); //$NON-NLS-1$
 		
 			s.save(up);

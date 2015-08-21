@@ -5,14 +5,61 @@ window.onload = function(){
 	//delete user
 	elements = document.querySelectorAll(".deleteca");
 	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=deleteca;
+		elements[i].onclick=confirmdeleteca;
 	}
 }
 
-function deleteca(){
+function confirmdeleteca(){
+	
 	var cauuid = this.dataset.cauuid;
+	var status = this.dataset.status;
+	
+	if (status == 'DATA'){
+		document.querySelector("#deleteform > div#confirmtype").style.display = 'block';
+		document.querySelector("#deleteform > * > input[name=caoption][value=desktop]").checked = true;
+	}else{
+		
+		document.querySelector("#deleteform > div#confirmtype").style.display = 'none';
+		document.querySelector("#deleteform > * > input[name=caoption][value=all]").checked = true;
+	}
+	var formUuidElement = document.querySelector("#deleteform > input[name=cauuid]");
+	formUuidElement.setAttribute("value", cauuid);
+
+	displayDialog('deleteDialog', 'main');
+
+	return false;	
+}
+
+function deleteca(){
+
+	document.querySelector("#dialogerror").style.display = "none";
+	
+	var cauuid = document.querySelector("#deleteform > input[name=cauuid]").value;
+	var username = document.querySelector("#deleteform > input[name=username]").value;
+	var password = document.querySelector("#deleteform > input[name=password]").value;
+	
+	document.querySelector("#deleteform > input[name=username]").value = "";
+	document.querySelector("#deleteform > input[name=password]").value = "";
+	
+	var datavalue = document.querySelector('input[name="caoption"]:checked').value;
+	var dataonly = "true";
+	if (datavalue == "all"){
+		dataonly = "false";
+	}
+	
+	if (username.length == 0){
+		document.querySelector("#dialogerror").style.display = "block";
+		document.querySelector("#dialogerror").innerHTML = "Username required.";
+		return false;
+	}
+	if (password.length == 0){
+		document.querySelector("#dialogerror").style.display = "block";
+		document.querySelector("#dialogerror").innerHTML = "Password required.";
+		return false;
+	}
+	
 	var ok = window.confirm("Are you sure you want to the conservation area " + cauuid + "?");
-	if (!ok) return;
+	if (!ok) return false;
 	
 	hideInfo();
 	hideError();
@@ -20,16 +67,20 @@ function deleteca(){
 	var oReq = new XMLHttpRequest();
 	oReq.onload = caDeleted;
 	oReq.cauuid=cauuid;
-	oReq.open("DELETE", CAURL + encodeURIComponent(cauuid), true);
+	oReq.open("DELETE", CAURL + encodeURIComponent(cauuid) + "?username=" + encodeURIComponent(username) + "&password="+encodeURIComponent(password)+"&dataonly="+encodeURIComponent(dataonly), true);
 	oReq.send();
-	return false;	
 	
+	closeDialog('deleteDialog');
+	return false;
 }
+
 
 function caDeleted(){
 	if (this.status == 204) {
-		displayInfo(this.cauuid + " deleted");
-	} else {
+		displayInfo("Conservation area (" + this.cauuid + ") data deleted");
+	} else if (this.status == 401){
+		displayError(parseError("Error deleting conservation area " + this.cauuid + ". Unauthorized.", this.responseText));
+	}else{
 		displayError(parseError("Error deleting conservation area " + this.cauuid, this.responseText));
 	}
 	refreshCaList();
@@ -89,7 +140,8 @@ function createCaTable(){
  		deleteicon.className="delete-icon";
  		deleteicon.title="delete conservation area";
  		deleteicon.dataset.cauuid = cas[i].uuid;
- 		deleteicon.onclick = deleteca;
+ 		deleteicon.dataset.status = cas[i].status;
+ 		deleteicon.onclick = confirmdeleteca;
  		deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);
  	}

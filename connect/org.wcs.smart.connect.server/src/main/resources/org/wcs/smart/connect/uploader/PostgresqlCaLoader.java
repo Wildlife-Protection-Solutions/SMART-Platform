@@ -37,11 +37,14 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.wcs.smart.connect.ZipUtil;
+import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 
 /**
  * Loads a conservation area export into the postgresql
@@ -63,12 +66,31 @@ public class PostgresqlCaLoader {
 		this.session = session;
 	}
 	
-	public void importData(File zipFile) throws Exception {
+	public void importData(File zipFile, ConservationAreaInfo ca) throws Exception {
 		File tempDir = ZipUtil.createTemporaryDirectory();
-		ZipUtil.unzipFolder(zipFile, tempDir);
-		processDatabaseFiles(tempDir);
+		try{
+			ZipUtil.unzipFolder(zipFile, tempDir);
+			processDatabaseFiles(tempDir);
+			processFilestore(tempDir, ca);
+		}finally{
+			tempDir.delete();
+		}
 	}
 	
+	private void processFilestore(File dir, ConservationAreaInfo ca) throws Exception{
+		File toDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(ca);
+		File filestore = new File(dir, "filestore");
+		
+		for (File f: filestore.listFiles()){
+			if (f.isDirectory()){
+				FileUtils.copyDirectory(f, new File(toDir, f.getName()));
+			}else if (f.isFile()){
+				FileUtils.copyFile(f, new File(toDir, f.getName()));
+			}
+			
+		}
+		
+	}
 	/**
 	 * Processes all database files, loading them into the database
 	 * one at a time.

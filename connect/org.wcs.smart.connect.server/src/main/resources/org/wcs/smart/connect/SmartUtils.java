@@ -71,24 +71,24 @@ public class SmartUtils {
 		return request.getLocale();
 	}
 	
-	/**
-	 * Generates a new uuid for the given object.
-	 * 
-	 * @param session
-	 * @param obj
-	 * @return
-	 */
-	public static UUID generateUUID(Session session, Object obj){
-		UUIDGenerator uuidGenerator = UUIDGenerator
-				.buildSessionFactoryUniqueIdentifierGenerator();
-		Properties prop = new Properties();
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY,
-				StandardRandomStrategy.INSTANCE);
-		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
-				UUIDGenerationStrategy.class.getName());
-		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
-		return (UUID)uuidGenerator.generate((SessionImplementor) session, obj);
-	}
+//	/**
+//	 * Generates a new uuid for the given object.
+//	 * 
+//	 * @param session
+//	 * @param obj
+//	 * @return
+//	 */
+//	public static UUID generateUUID(Session session, Object obj){
+//		UUIDGenerator uuidGenerator = UUIDGenerator
+//				.buildSessionFactoryUniqueIdentifierGenerator();
+//		Properties prop = new Properties();
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY,
+//				StandardRandomStrategy.INSTANCE);
+//		prop.put(UUIDGenerator.UUID_GEN_STRATEGY_CLASS,
+//				UUIDGenerationStrategy.class.getName());
+//		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
+//		return (UUID)uuidGenerator.generate((SessionImplementor) session, obj);
+//	}
 	
 	public static final SimpleDateFormat DT_FORMAT = new SimpleDateFormat("yyyy-MM-dd H:m:s");
 	public static final SimpleDateFormat D_FORMAT = new SimpleDateFormat("yyyy-MM-dd");

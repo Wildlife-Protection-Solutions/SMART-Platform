@@ -26,6 +26,7 @@ public class LoadCaTestDb {
 	
 	public static final String FULL_CA_EXPORT = "FullCa.export.zip";
 	public static final String FULL_CA_UUID = "8f7fbe1b-201a-4ef4-bda8-14f5581e65ce";
+	public static final String VERSION_UUID =  "00000000-0000-0000-0000-000000000002";
 	
 	@Test
 	public void testFullUploadFileSingleCall() throws Exception{
@@ -33,7 +34,7 @@ public class LoadCaTestDb {
 		
 		//create ca
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
-		HttpPost post = SmartConnect.createPost(SmartConnect.CA_API_URL + "/" + FULL_CA_UUID, 
+		HttpPost post = SmartConnect.createPost(SmartConnect.CA_API_URL + "/" + FULL_CA_UUID +"?version=" + VERSION_UUID, 
 				new String[][]{{"X-Upload-Content-Type", SmartConnect.MT_APPLICATION_OCTET},
 								{"X-Upload-Content-Length", String.valueOf(Files.size(f.toPath()))}});
 		

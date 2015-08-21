@@ -23,9 +23,11 @@ package org.wcs.smart.connect.datastore;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Tools for managing the SMART datastore.
@@ -60,9 +62,12 @@ public enum DataStoreManager {
 	 * @throws IOException
 	 */
 	public void deleteDirectory(ConservationAreaInfo info) throws IOException{
-		FileUtils.deleteDirectory(getConservationAreaFullPath(info));
+		deleteDirectory(info.getUuid());
 	}
-	
+	public void deleteDirectory(UUID caUuid) throws IOException{
+		File f = new File(getRootDirectory() + File.separator + UuidUtils.uuidToString(caUuid));
+		FileUtils.deleteDirectory(f);
+	}
 	/**
 	 * Return the folder name of the conservation area data folder in the filestore. 
 	 * 
@@ -70,7 +75,7 @@ public enum DataStoreManager {
 	 * @return
 	 */
 	public String getConservationAreaFolder(ConservationAreaInfo info){
-		return info.getUuid().toString().replaceAll("-", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		return UuidUtils.uuidToString(info.getUuid()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	/**

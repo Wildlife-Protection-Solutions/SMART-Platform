@@ -48,6 +48,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
@@ -98,10 +99,13 @@ public class Uploader extends HttpServlet {
 			}
 			UploadStatus status = new UploadStatus(item);
 			File f = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
+			
 			if (!f.exists()){
+				System.out.println("UPLOADED FILE SIZE: 0 (status)");
 				status.setCurrentSize(0);
 			}else{
 				Long size = Files.size(f.toPath());
+				System.out.println("UPLOADED FILE SIZE: " + f.length() + " (status)");
 				status.setCurrentSize(size);
 			}
 			return status;
@@ -128,7 +132,6 @@ public class Uploader extends HttpServlet {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response updateFile(@PathParam("uploaduuid") String uuid, InputStream data) throws IOException{
-
 		UploadItem item = null;
 		
 		//get upload item
@@ -171,22 +174,10 @@ public class Uploader extends HttpServlet {
 		}
 		
 		File datastoreFile = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
-		if (!datastoreFile.exists()){
-			datastoreFile.createNewFile();
+		try(OutputStream out = Files.newOutputStream(datastoreFile.toPath(), StandardOpenOption.APPEND, StandardOpenOption.CREATE)){
+			IOUtils.copy(data, out);
 		}
-		
-		
-		//read some bytes from the data and write to file
-		byte[] buffer = new byte[1024];
-		int read = -1;
-		try(OutputStream out = Files.newOutputStream(datastoreFile.toPath(), StandardOpenOption.APPEND)){
-			while((read = data.read(buffer)) > 0){
-			//	copy read number of bytes from buffer into file
-				out.write(buffer, 0, read);
-				out.flush();
-			}
-		}
-		
+
 		//TODO: content range?!?
 		//if start at bytes already provided we should probably either fail or skip 
 		//bytes
@@ -227,5 +218,6 @@ public class Uploader extends HttpServlet {
 		return Response.accepted().
 	            entity(item).
 	            build();
+		
 	}
 }

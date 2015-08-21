@@ -2097,3 +2097,41 @@ insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum',
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','ru','минимальный');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','ru','максимальный');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('avg','ru','средний');
+
+
+create table smart.connect_server(
+uuid UUID not null,
+ca_uuid UUID,
+url varchar(2064),
+timeout bigint,
+PRIMARY KEY (uuid));
+
+alter table smart.connect_server add constraint server_ca_uuid_fk foreign key (ca_uuid) 
+references smart.conservation_area (uuid) on update restrict on delete cascade;
+
+
+create table smart.connect_account(
+employee_uuid UUID not null,
+connect_uuid UUID not null,
+connect_user varchar(32),
+connect_pass varchar(60),
+primary key(employee_uuid, connect_uuid));
+
+alter table smart.connect_account add constraint connect_employee_uuid_fk foreign key (employee_uuid) 
+references smart.employee (uuid) on update restrict on delete cascade;
+
+
+create table smart.connect_status(
+ca_uuid UUID not null,
+connect_uuid UUID not null,
+client_id UUID not null,
+version UUID,
+revision bigint,
+status varchar(6),
+uploadurl varchar,
+localfile varchar,
+primary key (ca_uuid));
+
+alter table smart.connect_status add constraint connect_status_ca_uuid_fk foreign key (ca_uuid) references smart.conservation_area (uuid) on update restrict on delete cascade;
+
+alter table smart.connect_status add constraint connect_status_connect_uuid_fk foreign key (connect_uuid) references smart.connect_server (uuid) on update restrict on delete cascade;

@@ -55,14 +55,15 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 		
 		try{
 			session.update(item);
-		
+
+			ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
+			
 			//load data
 			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session);
-			ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()));
+			ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
 			session.flush();
 			
 			//update ca item label
-			ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
 			String sql = "SELECT id, name from smart.conservation_area WHERE uuid = :uuid"; //$NON-NLS-1$
 			List<?> data = session.createSQLQuery(sql).setParameter("uuid", info.getUuid(), PostgresUUIDType.INSTANCE).list(); //$NON-NLS-1$
 			if (data.size() > 0){
@@ -81,6 +82,10 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 			//start a new transaction; update status to error
 			session.beginTransaction();
 			try{
+				//ca exists but data doesn't, so lets update the status to reference that
+				ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
+				info.setStatus(ConservationAreaInfo.Status.NODATA);
+				
 				session.update(item);
 				item.setStatus(Status.ERROR);
 				item.setMessage("Error extracting data, " + ex.getMessage());

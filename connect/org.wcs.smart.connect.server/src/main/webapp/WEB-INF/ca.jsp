@@ -7,6 +7,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/ca.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
 <title>SMART Connect - Conservation Areas</title>
 
 <script>
@@ -42,7 +43,7 @@
 			<div class="table-cell smart-table-cell">${ca.getUuid()}</div>
 			<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
 			<div class="table-cell smart-table-cell">${ca.getVersion().toString()}</div>
-			<div class="table-cell smart-table-cell "><a href="" data-cauuid = "${ca.getUuid()}" title="delete conservation area" class="deleteca delete-icon"></a></div>
+			<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" title="delete conservation area" class="deleteca delete-icon"></a></div>
 		</div>
 	</c:forEach>
 	</div>  
@@ -52,5 +53,30 @@
 
 <%@include file="footer.jsp" %>
 
+<div id="deleteDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Delete Conservation Area</div>
+  <div id="dialogerror" class="errorsection"></div>
+  
+  <form id="deleteform" onsubmit="return deleteca();" >
+    <input type="hidden" name="cauuid"/>
+    <div id="confirmtype">
+    	<p>You can delete the entire Conservation Area from SMART Connect or you can choose to delete
+    	only the data managed by SMART Desktop.</p>
+    	<input type="radio" name="caoption" value="desktop" checked/>Desktop Data Only<br>
+    	<input type="radio" name="caoption"  value="all"/>Entire Conservation Area<br><br>
+    </div>
+    <p>Re-enter you username and password:</p>
+    <label class="block">Username:</label>
+    <input type="text" name="username" class="formtext block" />
+
+    <div class="block top-spacer">Password:</div>
+    <input type="password" name="password" class="formtext block" />
+    
+    <div class="block top-spacer" style="text-align:right">
+     <input class="button" type="submit" value="Delete" />
+     <input class="button" type="button" value="Cancel" onclick="closeDialog('deleteDialog')" />
+    </div>
+  </form>
+  </div>
 </body>
 </html>
