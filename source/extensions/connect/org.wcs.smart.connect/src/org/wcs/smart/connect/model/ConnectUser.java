@@ -23,11 +23,9 @@ package org.wcs.smart.connect.model;
 
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -35,9 +33,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.GenericGenerator;
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.UuidItem;
 
 /**
  * Link between a SMART Connect server, a SMART user and 
@@ -48,6 +44,7 @@ import org.wcs.smart.ca.UuidItem;
  */
 @Entity
 @Table(name="smart.connect_account")
+//TODO: we do not want to store connect server passwords in plain text!!!!
 public class ConnectUser {
 	
 	private UUID uuid;

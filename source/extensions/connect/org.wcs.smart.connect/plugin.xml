@@ -4,11 +4,18 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.connect.model.ConnectServer">
+            class="org.wcs.smart.connect.model.ConnectServer"
+            include_ca_export="true">
       </class>
       <class
             ca_property=".server.conservationArea"
-            class="org.wcs.smart.connect.model.ConnectUser">
+            class="org.wcs.smart.connect.model.ConnectUser"
+            include_ca_export="true">
+      </class>
+      <class
+            ca_property=".uuid"
+            class="org.wcs.smart.connect.model.ConnectServerStatus"
+            include_ca_export="false">
       </class>
    </extension>
    <extension
@@ -16,6 +23,10 @@
       <command
             id="org.wcs.smart.connect.configuration.show"
             name="Server Configuration...">
+      </command>
+      <command
+            id="org.wcs.smart.connect.server.exportca"
+            name="Export To SMART Connect">
       </command>
    </extension>
    <extension
@@ -26,6 +37,10 @@
          <menu
                id="org.wcs.smart.connect.menu"
                label="CONNECT">
+            <command
+                  commandId="org.wcs.smart.connect.server.exportca"
+                  style="push">
+            </command>
             <command
                   commandId="org.wcs.smart.connect.configuration.show"
                   style="push"
@@ -46,6 +61,10 @@
       <handler
             class="org.wcs.smart.connect.ui.server.configure.ShowServerConfigurationHandler$ShowServerConfigurationHandlerWrapper"
             commandId="org.wcs.smart.connect.configuration.show">
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.server.export.ExportCaHandler$ExportCaHandlerrWrapper"
+            commandId="org.wcs.smart.connect.server.exportca">
       </handler>
    </extension>
 
