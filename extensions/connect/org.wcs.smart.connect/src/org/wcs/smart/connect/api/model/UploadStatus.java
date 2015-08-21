@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Wildlife Conservation Society
+ * Copyright (C) 2015 Wildlife Conservation Society
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in
@@ -19,33 +19,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.ui.server.configure;
+package org.wcs.smart.connect.api.model;
 
-import javax.inject.Named;
+import java.util.UUID;
 
-import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.swt.widgets.Shell;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Show server configuration dialog handler.
+ * Upload status object.
  * 
  * @author Emily
  *
  */
-public class ShowServerConfigurationHandler{
-	
-	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
-		ConnectServerDialog dialog = new ConnectServerDialog(activeShell);
-		dialog.open();
+public class UploadStatus {
+
+	public enum Status{
+		UPLOADING,
+		PROCESSING,
+		COMPLETE,
+		ERROR
 	}
 	
-	// E3
-	public static class ShowServerConfigurationHandlerWrapper extends DIHandler<ShowServerConfigurationHandler> {
-		public ShowServerConfigurationHandlerWrapper() {
-			super(ShowServerConfigurationHandler.class);
-		}
+	private UUID uuid;
+	private Status status;
+	private long currentSize;
+	private long expectedSize;
+
+	@JsonProperty("uuid")
+	public UUID getUuid(){
+		return this.uuid;
+	}
+	public void setUuid(UUID  uuid){
+		this.uuid = uuid;
+	}
+	
+	@JsonProperty("status")
+	public Status getStatus(){
+		return this.status;
+	}
+	public void setStatus(Status  status){
+		this.status = status;
+	}
+	
+	@JsonProperty("current_size")
+	public long getCurrentSize(){
+		return this.currentSize;
+	}
+	public void setCurrentSize(long size){
+		this.currentSize = size;
+	}
+
+	@JsonProperty("expected_size")
+	public long getExpectedSize(){
+		return this.expectedSize;
+	}
+	public void setExpectedSize(long size){
+		this.expectedSize = size;
 	}
 }

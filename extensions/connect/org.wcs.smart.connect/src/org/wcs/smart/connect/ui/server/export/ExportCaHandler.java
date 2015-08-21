@@ -19,33 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.ui.server.configure;
+package org.wcs.smart.connect.ui.server.export;
 
 import javax.inject.Named;
 
+import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.swt.widgets.Shell;
 
 /**
- * Show server configuration dialog handler.
- * 
+ * Export conservation area to connect handler.
  * @author Emily
  *
  */
-public class ShowServerConfigurationHandler{
-	
+public class ExportCaHandler {
+
 	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
-		ConnectServerDialog dialog = new ConnectServerDialog(activeShell);
-		dialog.open();
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
+		ExportCaDialog dialog = new ExportCaDialog(activeShell);
+		dialog.open(); 
 	}
-	
+
 	// E3
-	public static class ShowServerConfigurationHandlerWrapper extends DIHandler<ShowServerConfigurationHandler> {
-		public ShowServerConfigurationHandlerWrapper() {
-			super(ShowServerConfigurationHandler.class);
+	public static class ExportCaHandlerrWrapper extends DIHandler<ExportCaHandler> {
+		public ExportCaHandlerrWrapper() {
+			super(ExportCaHandler.class);
 		}
 	}
 }
