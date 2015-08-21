@@ -37,11 +37,11 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.export.CaExporter;
 
 /**
  * Imports all the database data tables.

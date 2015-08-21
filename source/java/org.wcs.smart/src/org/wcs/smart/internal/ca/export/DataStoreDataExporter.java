@@ -25,6 +25,7 @@ import java.io.File;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
 import org.wcs.smart.internal.Messages;
