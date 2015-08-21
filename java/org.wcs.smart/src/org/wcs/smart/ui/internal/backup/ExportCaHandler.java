@@ -38,9 +38,9 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.export.CaExporter;
 
 /**
  * Handler for exporting conservation area
