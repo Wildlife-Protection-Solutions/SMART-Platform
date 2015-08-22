@@ -463,24 +463,35 @@ public class CyberTrackerImportComposite extends Composite {
 	
 	protected void handleAdd() {
 		IStructuredSelection selection = (IStructuredSelection)viewer.getSelection();
-		if (!selection.isEmpty()) {
+		String validationError = validateSelection(selection);
+		if (validationError == null) {
 			String datatype = ((ICyberTrackerData)selection.getFirstElement()).getType();
-			boolean isSame = true;
-			for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-				ICyberTrackerData data = (ICyberTrackerData) i.next();
-				if (!datatype.equals(data.getType())) { //datatype should never be null even for old CTX file, importer/dataBuilder should handle this
-					isSame = false;
-					break;
-				}
-			}
-			if (isSame) {
-				List<ICyberTrackerData> processedItems = getEditorContent(datatype).handleAdd(getShell(), selection);
-				tableInputData.removeAll(processedItems);
-			} else {
-				MessageDialog.openError(getShell(), "Error", "Unable to import selected data. Please select data of the same type for importing.");
-			}
+			List<ICyberTrackerData> processedItems = getEditorContent(datatype).handleAdd(getShell(), selection);
+			tableInputData.removeAll(processedItems);
+		} else {
+			MessageDialog.openError(getShell(), "Error", validationError);
 		}
 		refreshViewer();
 	}
 
+	protected String validateSelection(IStructuredSelection selection) {
+		if (selection.isEmpty()) {
+			return "No data is selected for import.";
+		}
+		
+		//validate that all selected data for import is of the same type
+		String datatype = ((ICyberTrackerData)selection.getFirstElement()).getType();
+		boolean isSame = true;
+		for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+			ICyberTrackerData data = (ICyberTrackerData) i.next();
+			if (!datatype.equals(data.getType())) { //datatype should never be null even for old CTX file, importer/dataBuilder should handle this
+				isSame = false;
+				break;
+			}
+		}
+		if (!isSame) {
+			return "Unable to import selected data. Please select data of the same type for importing.";
+		}
+		return null;
+	}
 }
