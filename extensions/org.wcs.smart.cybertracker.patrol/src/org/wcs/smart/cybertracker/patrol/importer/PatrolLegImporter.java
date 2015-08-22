@@ -24,7 +24,6 @@ package org.wcs.smart.cybertracker.patrol.importer;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -54,7 +53,6 @@ import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.WaypointAttachmentInterceptor;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Imports from {@link CyberTrackerPatrol} to {@link Patrol} object
