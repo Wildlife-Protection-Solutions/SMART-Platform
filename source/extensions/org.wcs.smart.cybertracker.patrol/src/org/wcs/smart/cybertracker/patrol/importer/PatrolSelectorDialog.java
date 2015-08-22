@@ -26,11 +26,13 @@ import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
@@ -47,6 +49,11 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 	private PatrolFilteredComboViewer patrolId;
 	private Patrol patrol;
 	
+	private boolean isNew;
+	
+	private Button btnNew;
+	private Button btnAppend;
+
 	public PatrolSelectorDialog(Shell parentShell) {
 		super(parentShell);
 	}
@@ -58,15 +65,47 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite = (Composite) super.createDialogArea(parent);
 		Composite main = new Composite(composite, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
+		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+
 		
-        Label patrolLabel = new Label(main, SWT.NONE);
-        patrolLabel.setText(Messages.PatrolSelectorDialog_PatrolID);
-        patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
-        
-        patrolId = new PatrolFilteredComboViewer(main);
-        patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
+		
+		btnNew = new Button(main, SWT.RADIO);
+		GridData gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
+		gd.horizontalIndent = 10;
+		btnNew.setLayoutData(gd);
+		
+		btnNew.setSelection(true);
+		btnNew.setText("Add as new patrol");
+		btnNew.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				optionChanged();
+			}
+		});
+		
+		btnAppend = new Button(main, SWT.RADIO);
+		btnAppend.setSelection(false);
+		gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
+		gd.horizontalIndent = 10;
+		btnAppend.setLayoutData(gd);
+		btnAppend.setText("Add as leg to existing patrol");
+		btnAppend.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				optionChanged();
+			}
+		});
+
+		Composite appendCmp = new Composite(main, SWT.NONE);
+		GridLayout appendCmpLayout = new GridLayout(1, false);
+		appendCmpLayout.marginLeft = 25;
+		appendCmp.setLayout(appendCmpLayout);
+		appendCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		patrolId = new PatrolFilteredComboViewer(appendCmp);
+		patrolId.setControlsEnabled(false);
+		patrolId.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (getButton(IDialogConstants.OK_ID) != null) {
@@ -81,6 +120,19 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 		return composite;
 	}
 	
+	@Override
+	protected Control createContents(Composite parent) {
+		Control control = super.createContents(parent);
+		getShell().setSize(getShell().computeSize(440, 200));
+		return control;
+	}	
+	
+	protected void optionChanged() {
+		boolean enable = btnNew.getSelection() || patrolId.getSelection() != null;
+		getButton(IDialogConstants.OK_ID).setEnabled(enable);
+		patrolId.setControlsEnabled(btnAppend.getSelection());
+	}
+
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
@@ -89,22 +141,25 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 		// create OK and Cancel buttons by default
 		createButton(parent, IDialogConstants.OK_ID, IDialogConstants.OK_LABEL, true);
 		createButton(parent, IDialogConstants.CANCEL_ID,IDialogConstants.CANCEL_LABEL, false);
-		getButton(IDialogConstants.OK_ID).setEnabled(false);
-		getButton(IDialogConstants.CANCEL_ID).setFocus();
+		getButton(IDialogConstants.OK_ID).setFocus();
 		super.setReturnCode(IDialogConstants.CANCEL_ID);
 	}
 
-	
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			patrol = patrolId.getSelection();
+			isNew = btnNew.getSelection();
+			patrol = isNew ? null : patrolId.getSelection();
 			setReturnCode(IDialogConstants.OK_ID);
 		}
 		close();
+	}
+
+	public boolean isNew() {
+		return isNew;
 	}
 
 	public Patrol getSelectedPatrol() {

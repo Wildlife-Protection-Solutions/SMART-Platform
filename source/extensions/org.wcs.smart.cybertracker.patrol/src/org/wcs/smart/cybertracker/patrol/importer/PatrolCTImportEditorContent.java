@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -347,8 +348,11 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 	 * @return list of objects that were added
 	 */
 	public List<ICyberTrackerData> handleAdd(Shell shell, final IStructuredSelection selection) {
-		//TODO:
-		return handleAddAsPatrol(shell, selection);
+		PatrolSelectorDialog selectorDialog = new PatrolSelectorDialog(shell);
+		if (selectorDialog.open() == IDialogConstants.OK_ID) {
+			return selectorDialog.isNew() ? handleAddAsPatrol(shell, selection) : handleAddAsLeg(shell, selection, selectorDialog.getSelectedPatrol());
+		}
+		return Collections.emptyList();
 	}
 	
 	protected List<ICyberTrackerData> handleAddAsPatrol(Shell shell, final IStructuredSelection selection) {
@@ -395,18 +399,13 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 		return processedList;
 	}
 
-	protected List<ICyberTrackerData> handleAddAsLeg(Shell shell, final IStructuredSelection selection) {
-		final List<ICyberTrackerData> processedList = new ArrayList<ICyberTrackerData>();
-		PatrolSelectorDialog selectorDialog = new PatrolSelectorDialog(shell);
-		if (selectorDialog.open() != IDialogConstants.OK_ID) {
-			return processedList;
-		}
+	protected List<ICyberTrackerData> handleAddAsLeg(Shell shell, final IStructuredSelection selection, final Patrol patrol) {
 		if (legImporter == null)
 			legImporter = new PatrolLegImporter();
 
+		final List<ICyberTrackerData> processedList = new ArrayList<ICyberTrackerData>();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell);
 		try {
-			final Patrol patrol = selectorDialog.getSelectedPatrol();
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
