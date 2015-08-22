@@ -474,7 +474,8 @@ public class CyberTrackerImportComposite extends Composite {
 				}
 			}
 			if (isSame) {
-				getEditorContent(datatype).handleAdd(getShell(), selection);
+				List<ICyberTrackerData> processedItems = getEditorContent(datatype).handleAdd(getShell(), selection);
+				tableInputData.removeAll(processedItems);
 			} else {
 				MessageDialog.openError(getShell(), "Error", "Unable to import selected data. Please select data of the same type for importing.");
 			}
