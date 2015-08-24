@@ -115,6 +115,10 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 		this.surveyDesign = surveyDesign;
 	}
 
+	public String getSurveyDesignKey() {
+		return surveyDesign != null ? surveyDesign.getKeyId() : null;
+	}
+	
 	@Override
 	public String getType() {
 		return SurveyScreensUtil.DATATYPE_SURVEY;
