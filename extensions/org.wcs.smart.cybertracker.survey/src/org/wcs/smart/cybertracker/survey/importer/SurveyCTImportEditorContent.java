@@ -59,6 +59,8 @@ import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.Survey;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
@@ -262,10 +264,36 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 	@Override
 	public List<ICyberTrackerData> handleAdd(Shell shell, final IStructuredSelection selection) {
 		final List<ICyberTrackerData> processedList = new ArrayList<ICyberTrackerData>();
-		MissionSelectorDialog selectorDialog = new MissionSelectorDialog(shell);
-		if (selectorDialog.open() != IDialogConstants.OK_ID) {
+		String validationError = validateSelection(selection);
+		if (validationError != null) {
+			MessageDialog.openError(shell, "Error", validationError);
 			return processedList;
 		}
+
+		SurveyDesign surveyDesign = ((CyberTrackerSurvey)selection.getFirstElement()).getSurveyDesign();
+		if (surveyDesign == null) {
+			//TODO: allow user to fix survey design
+			throw new IllegalStateException("Unknown survey design"); //$NON-NLS-1$
+		}
+		
+		MissionSelectorDialog missionDialog = new MissionSelectorDialog(shell, surveyDesign);
+		if (missionDialog.open() != IDialogConstants.OK_ID) {
+			return processedList;
+		}
+		
+		Survey survey = null;
+		if (missionDialog.isNew()) {
+			SurveySelectorDialog surveyDialog = new SurveySelectorDialog(shell, surveyDesign);
+			if (surveyDialog.open() != IDialogConstants.OK_ID) {
+				return processedList;
+			}
+			survey = surveyDialog.isNew() ? null : surveyDialog.getSelectedSurvey();
+			//TODO: how to handle null for survey? new item need to be created
+		} else {
+			//use survey from selected mission
+			survey = missionDialog.getSelectedMission().getSurvey(); //TODO: lazy exception?
+		}
+		
 		if (missionImporter == null)
 			missionImporter = new MissionImporter();
 		final List<Mission> addedList = new ArrayList<Mission>();
@@ -308,6 +336,31 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		return processedList;
 	}
 
+	protected String validateSelection(IStructuredSelection selection) {
+		//validate that all selected surveys are from the same survey design, otherwise mission/survey selection is ambiguous
+		String keyID = ((CyberTrackerSurvey)selection.getFirstElement()).getSurveyDesignKey();
+		boolean isSame = true;
+		for (Iterator<?> i = selection.iterator(); i.hasNext();) {
+			CyberTrackerSurvey data = (CyberTrackerSurvey) i.next();
+			if (keyID != null) {
+				if (!keyID.equals(data.getSurveyDesignKey())) {
+					isSame = false;
+					break;
+				}
+			} else {
+				//keyID is null, this is exceptional case when surveyDesign associated with CT data was deleted before import
+				if (data.getSurveyDesignKey() != null) {
+					isSame = false;
+					break;
+				}
+			}
+		}
+		if (!isSame) {
+			return "Unable to import selected data. Please select surveys that belong to the same survey design.";
+		}
+		return null;
+	}
+	
 	/**
 	 * Label provider for details panel fields
 	 * @author elitvin

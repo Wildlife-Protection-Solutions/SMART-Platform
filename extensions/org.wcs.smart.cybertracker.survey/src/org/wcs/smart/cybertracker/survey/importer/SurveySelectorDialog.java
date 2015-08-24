@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -43,29 +42,28 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
- * Dialog for selecting the target {@link Mission} when importing mission from CyberTracker.
+ * Dialog for selecting the target {@link Survey} when importing mission from CyberTracker.
  * 
  * @author elitvin
  * @since 4.0.0
  */
-public class MissionSelectorDialog extends TitleAreaDialog {
+public class SurveySelectorDialog extends TitleAreaDialog {
 
 	private SurveyDesign surveyDesign;
-	
-	private ComboViewer missionId;
-	private Mission mission;
+
+	private ComboViewer surveyId;
+	private Survey survey;
 	private boolean isNew;
 	
 	private Button btnNew;
 	private Button btnAppend;
 	
-	public MissionSelectorDialog(Shell parentShell, SurveyDesign surveyDesign) {
+	public SurveySelectorDialog(Shell parentShell, SurveyDesign surveyDesign) {
 		super(parentShell);
 		this.surveyDesign = surveyDesign;
 	}
@@ -88,7 +86,7 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 		btnNew.setLayoutData(gd);
 		
 		btnNew.setSelection(true);
-		btnNew.setText("Create a new mission");
+		btnNew.setText("Create a new survey");
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -101,7 +99,7 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 		gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
 		gd.horizontalIndent = 10;
 		btnAppend.setLayoutData(gd);
-		btnAppend.setText("Add to existing mission");
+		btnAppend.setText("Add to existing survey");
 		btnAppend.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -116,9 +114,9 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 		appendCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		
-        missionId = new ComboViewer(appendCmp);
-        missionId.getControl().setEnabled(false);
-        missionId.addSelectionChangedListener(new ISelectionChangedListener() {
+        surveyId = new ComboViewer(appendCmp);
+        surveyId.getControl().setEnabled(false);
+        surveyId.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (getButton(IDialogConstants.OK_ID) != null) {
@@ -126,22 +124,22 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 				}
 			}
 		});
-        missionId.setContentProvider(ArrayContentProvider.getInstance());
-        missionId.setLabelProvider(new LabelProvider() {
+        surveyId.setContentProvider(ArrayContentProvider.getInstance());
+        surveyId.setLabelProvider(new LabelProvider() {
         	@Override
         	public String getText(Object element) {
-        		if (element instanceof Mission) {
-        			return ((Mission)element).getId();
+        		if (element instanceof Survey) {
+        			return ((Survey)element).getId();
         		}
         		return super.getText(element);
         	}
         	
         });
-        missionId.setInput(loadMissions());
+        surveyId.setInput(loadSurveys());
 
-		setTitle("Mission selection");
-		setMessage("Select a target mission to which selected data will be added");
-		super.getShell().setText("Mission selection");
+		setTitle("survey selection");
+		setMessage("Select a target survey to which selected data will be added");
+		super.getShell().setText("survey selection");
 		return composite;
 	}
 
@@ -153,9 +151,9 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 	}	
 	
 	protected void optionChanged() {
-		boolean enable = btnNew.getSelection() || !missionId.getSelection().isEmpty();
+		boolean enable = btnNew.getSelection() || !surveyId.getSelection().isEmpty();
 		getButton(IDialogConstants.OK_ID).setEnabled(enable);
-		missionId.getControl().setEnabled(btnAppend.getSelection());
+		surveyId.getControl().setEnabled(btnAppend.getSelection());
 	}
 
 	/**
@@ -177,39 +175,31 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			isNew = btnNew.getSelection();
-			mission = isNew ? null : (Mission) ((IStructuredSelection) missionId.getSelection()).getFirstElement();
+			survey = isNew ? null : (Survey) ((IStructuredSelection) surveyId.getSelection()).getFirstElement();
 			setReturnCode(IDialogConstants.OK_ID);
 		}
 		close();
 	}
 
-    private List<Mission> loadMissions() {
+    private List<Survey> loadSurveys() {
     	Session s = HibernateManager.openSession();
     	try {
 			@SuppressWarnings("unchecked")
 			List<Survey> surveys = s.createCriteria(Survey.class)
 					.add(Restrictions.eq("surveyDesign", surveyDesign)) //$NON-NLS-1$
 					.list();
-			if (surveys == null || surveys.isEmpty()) {
-				return Collections.emptyList();
-			}
-			@SuppressWarnings("unchecked")
-			List<Mission> missions = s.createCriteria(Mission.class)
-					.add(Restrictions.in("survey", surveys)) //$NON-NLS-1$
-					.list();
-    		return missions;
+    		return surveys;
     	} finally {
     		s.close();
     	}
     }
-
-    public boolean isNew() {
+	
+	public boolean isNew() {
 		return isNew;
 	}
 	
-	public Mission getSelectedMission() {
-		return mission;
+	public Survey getSelectedSurvey() {
+		return survey;
 
 	}
-	
 }
