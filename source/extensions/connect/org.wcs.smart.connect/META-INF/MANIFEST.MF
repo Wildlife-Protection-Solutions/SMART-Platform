@@ -6,7 +6,8 @@ Bundle-Version: 4.0.0
 Bundle-Activator: org.wcs.smart.connect.ConnectPlugIn
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
- org.wcs.smart;bundle-version="3.2.1"
+ org.wcs.smart;bundle-version="3.2.1",
+ org.wcs.smart.hibernate.libs
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.connect.model

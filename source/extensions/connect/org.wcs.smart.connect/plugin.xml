@@ -67,5 +67,11 @@
             commandId="org.wcs.smart.connect.server.exportca">
       </handler>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.login">
+      <loginHandler
+            clazz="org.wcs.smart.connect.replication.LoginHandler">
+      </loginHandler>
+   </extension>
 
 </plugin>
