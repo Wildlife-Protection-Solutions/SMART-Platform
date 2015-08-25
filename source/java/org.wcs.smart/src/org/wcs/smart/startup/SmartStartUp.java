@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 //import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -35,6 +37,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
@@ -55,6 +58,8 @@ import org.wcs.smart.ui.internal.ca.create.CreateCaWizard;
  *
  */
 public class SmartStartUp {
+	
+	public static final String LOGIN_EXT_ID = "org.wcs.smart.ca.login"; //$NON-NLS-1$
 	
 	/**
 	 * Initializes the db and checks the version.
@@ -268,13 +273,38 @@ public class SmartStartUp {
 				}finally{
 					if (s.isOpen()) s.close();
 				}
-				
-				return true;
 			}catch (Exception ex){
 				SmartPlugIn.displayLog(Messages.SmartStartUp_Error_LoginError, ex);
+				return false;
 			}
 		}
-		return false;
+		
+		//run login handlers
+		List<ILoginHandler> handlers = new ArrayList<ILoginHandler>();
+		try{
+			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(LOGIN_EXT_ID);
+			for (IConfigurationElement e : config) {	
+				if (e.getName().equals("loginHandler")){
+					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("clazz");
+					handlers.add(handler);
+				}
+			}
+		}catch (Exception ex){
+			String error = MessageFormat.format("Cannot log into Conservation Area {0}." + "\n\n" + "{1}.", ca.getName(), ex.getMessage());
+			SmartPlugIn.displayLog(error, ex);
+			return false;
+		}
+		for (ILoginHandler h : handlers){
+			try{
+				h.onLogin();
+			}catch (Exception ex){
+				String error = MessageFormat.format("Cannot log into Conservation Area {0}." + "\n\n" + "Could not run login handler {1}. {2}", ca.getName(), h.getClass().getName(), ex.getMessage());
+				SmartPlugIn.displayLog(error, ex);
+				return false;
+			}
+		}
+		
+		return true;
 	}
 	
 		
