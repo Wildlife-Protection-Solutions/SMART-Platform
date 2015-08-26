@@ -291,12 +291,13 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 			//TODO: how to handle null for survey? new item need to be created
 		} else {
 			//use survey from selected mission
-			survey = missionDialog.getSelectedMission().getSurvey(); //TODO: lazy exception?
+			survey = missionDialog.getSelectedMission().getSurvey();
 		}
 		
 		if (missionImporter == null)
 			missionImporter = new MissionImporter();
 		final List<Mission> addedList = new ArrayList<Mission>();
+		final Survey targetSurvey = survey;
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(shell.getDisplay().getActiveShell());
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -308,7 +309,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
 						monitor.subTask(MessageFormat.format("Adding mission {0} out of {1}.", counter, missionsCount));
 						CyberTrackerSurvey ctp = (CyberTrackerSurvey) i.next();
-						Mission p = missionImporter.importData(ctp);
+						Mission p = missionImporter.importData(ctp, targetSurvey);
 						if (p != null) {
 							addedList.add(p);
 							processedList.add(ctp);
