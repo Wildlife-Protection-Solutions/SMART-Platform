@@ -9,6 +9,8 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/serialize-0.2.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
 <script type="text/javascript" >
 	var mobile="${mobile}";
@@ -101,5 +103,59 @@
 </div>
 
 <%@include file="footer.jsp" %>
+
+
+<div id="updateAlertDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Update Alert</div>
+  <div id="dialogerror" class="errorsection"></div>
+  <div>Update Alert</div>
+	<form id="updatealertform">
+     		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
+     		<label class="top-spacer block">Conservation Area:</label>
+     		<input type="hidden" name="uuid" value="" />
+     		<input type="hidden" name="user_id" value="" />
+     		<select name="update_alert_ca" class="block formtext alert-select">
+     		<c:forEach var="ca" items="${cas}" varStatus="count">
+     			<option value="${ca.getUuid()}">${ca.getLabel()} </option> 
+			</c:forEach> 
+     		</select>
+     		
+     		<label class="top-spacer block">Type:</label>
+     		<select name="update_alert_type" class="block formtext alert-select">
+     		<c:forEach var="type" items="${alertTypes}" varStatus="count">
+     			<option value="${type.getUuid()}"> ${type.getLabel()} </option> 
+			</c:forEach> 
+     		</select>
+
+			<label class="top-spacer block">Event Importance:</label>
+			<select name="update_level" class="block formtext alert-select">
+			<option value=1>1(Highest)</option>
+			<option value=2>2</option>
+			<option value=3>3</option>
+			<option value=4>4</option>
+			<option value=5>5(Lowest)</option>
+			</select>
+			
+			<label class="top-spacer block">Status:</label>
+			<select name="update_status" class="block formtext alert-select">
+			<option value="ACTIVE">ACTIVE</option>
+			<option value="DISABLED">DISABLED</option>
+			</select>
+			
+			<label class="top-spacer block">Longitude:</label><input id="long" type="text" name="update_long">
+			<label class="top-spacer block">Latitude:</label><input id="lat" type="text" name="update_lat" >
+			
+			
+			<label class="top-spacer block">Description:</label>
+			<textarea name="update_alert_description" rows="5" cols="45"></textarea>
+   			<div class="block top-spacer" style="text-align:right">
+   			 <input class="button top-spacer" type="submit" value="   Update    "/>
+   			 <input class="button" type="button" id="cancel" value="Cancel" />
+   			 </div>
+    	</form>
+  </div>
+
+
+
 </body>
 </html>

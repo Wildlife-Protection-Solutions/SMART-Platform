@@ -184,5 +184,12 @@ public class HibernateManager {
 				.uniqueResult();
 		return m;
 	}
-	
+
+	public static MapLayer getMapLayerByLayerName(Session session, String layerName) {
+		MapLayer m = (MapLayer)session
+				.createCriteria(MapLayer.class)
+				.add(Restrictions.eq("layerName", layerName)) //$NON-NLS-1$
+				.uniqueResult();
+		return m;
+	}	
 }

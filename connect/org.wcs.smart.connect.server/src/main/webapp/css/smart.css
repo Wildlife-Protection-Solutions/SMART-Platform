@@ -185,6 +185,12 @@ h2{
 	margin: 5px 0px;
 	display: none;
 }
+.hide{
+	display: none;
+}
+.show{
+	display: inline-block;
+}
 
 .infotext{
 	font-size:0.8em;
@@ -239,6 +245,15 @@ h2{
 	display: block;
 }
 
+.update-icon{
+	background-image: url("edit.png");
+	width:16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	display: block;
+	float: right;
+}
+
 .selecteduser{
 	background-color: #21B6E3;
 }
@@ -255,6 +270,18 @@ h2{
 
 .alert-select{
 	width: 20em;
+}
+
+.layer_field{
+	width: 20em;
+}
+
+div.scrollable {
+    width: 15em;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: auto;
 }
 
 /*----------------------------------------------------------------------*/

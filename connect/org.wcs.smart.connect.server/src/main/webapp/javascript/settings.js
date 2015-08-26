@@ -19,24 +19,33 @@ window.onload = function(){
 	}
 	
 	//new style dialog
-	document.querySelector("#cancelNewStyle").onclick = function(){
+	document.getElementById("cancelNewStyle").onclick = function(){
 		closeDialog('newStyleDialog');
 	};
+	document.getElementById("newstyleform").onsubmit = createNewStyle;
 	
-	document.querySelector("#newstyleform").onsubmit = createNewStyle;
+	
+	
+	//new Layers dialog
+	document.getElementById("btnNewLayer").onclick = function(){
+	 	displayDialog('layerDialog', 'main');
+	 	document.getElementById("updateLayerButton").classList.remove("show");
+		document.getElementById("updateLayerButton").classList.add("hide");
+		document.getElementById("newLayerButton").classList.remove("hide");
+		document.getElementById("newLayerButton").classList.add("show");
+	} 
+	document.getElementById("cancelLayer").onclick = function(){
+		closeDialog('layerDialog');
+	};
+	document.getElementById("newLayerButton").addEventListener("click", createNewLayer);
+	document.getElementById("updateLayerButton").addEventListener("click", submitUpdateLayer);
+	
 	
 	//Layer table and actions
 	refreshLayers();
-	setTableActions();
+
 }
 
-function setTableActions(){
-	//delete layer clicked
-	elements = document.querySelectorAll(".deletelayer");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=deletelayer;
-	}
-}
 
 /* clears and displays new user dialog */
 function clearAndShowNewStyleDialog(){
@@ -199,17 +208,31 @@ function createLayerTable(){
  			active = "True";
  		}
  		var row = tableCreateRowTDs(parent,
- 				[layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null], 
+ 				[layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null, null], 
  				"layerrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.id = "layerRow" + i;
  		row.dataset.uuid = layers[i].uuid;
+
+ 	    var scrollable = document.createElement("div");
+ 	    scrollable.className = "scrollable";
+ 	    scrollable.innerHTML = layers[i].token;
+ 		row.childNodes[5].appendChild(scrollable);
+
  	
+ 		//update goes first, shows second, since it floats right in the css...
+ 		var updateicon = document.createElement("a");
+ 		updateicon.className="update-icon";
+ 		updateicon.title="update layer";
+ 		updateicon.onclick = updateLayer;
+ 		updateicon.href="";
+ 		row.childNodes[6].appendChild(updateicon);
+
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title="delete layer";
  		deleteicon.onclick = deleteLayer;
  		deleteicon.href="";
- 		row.childNodes[5].appendChild(deleteicon);
+ 		row.childNodes[6].appendChild(deleteicon);
  	}
 }
 
@@ -233,7 +256,7 @@ function deleteLayer(){
 function layerDeleted() {
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
-		displayInfo("Deleted Layer with UUID: " + r.uuid);
+		displayInfo("Deleted Layer: " + r.layerName);
 	} else {
 		displayError(parseError("Error deleting Layer " + this.uuid));
 	}
@@ -241,4 +264,136 @@ function layerDeleted() {
 	
 }
 
+function createNewLayer(){
+	
+	var layer_name = document.querySelector("input[name=layer_name]").value;
+	var layer_mapbox_id = document.querySelector("input[name=layer_mapbox_id]").value;
+	var layer_list = document.querySelector("input[name=layer_list]").value;
+	var layer_token = document.querySelector("input[name=layer_token]").value;
+	var layer_type = document.querySelector("select[name=layer_type]").value;
+	var layer_status = document.querySelector("select[name=layer_status]").value;
+	
+	
+	var jsonData = {
+		"layerName" : layer_name,
+		"wmsLayerList" : layer_list,
+		"layerType" : layer_type,
+		"token" : layer_token,
+		"mapboxId" : layer_mapbox_id,
+		"active" : layer_status
+	};
 
+	//make ajax call
+	hideError();
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	var oReq = new XMLHttpRequest();
+	oReq.onload = layerCreated;
+	oReq.open("POST", LAYER_URL + encodeURIComponent(layer_name), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
+
+function layerCreated(){
+	if (this.status == 201) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("Layer created");
+	} else {
+		displayError("Error creating Layer;  " + this.responseText + "; " + this.statusText);
+	}
+	refreshLayers();
+	closeDialog('layerDialog');
+}
+
+function updateLayer(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	document.getElementById("maplayersform").uuid.value = uuid;
+	
+	hideInfo();
+	hideError();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = showCurrentLayer;
+	oReq.open("GET", LAYER_URL + encodeURIComponent(uuid), true);
+	oReq.send();
+	return false;	
+}
+
+
+//callback for update layer clicked, fill in update layer form with current details 
+function showCurrentLayer() {
+	if (this.status == 200 ) {
+		var r = JSON.parse(this.response);
+	} else {
+		displayError(parseError("Error getting alert details for layer from server; layer uuid: " + this.uuid));
+	}
+	
+	document.querySelector("#dialogerror").style.display = "none";
+	
+	var form = document.getElementById("maplayersform");
+	
+	form.layer_name.value = r.layerName;
+	form.layer_type.value = r.layerType;
+	form.layer_status.value = r.active;
+	form.layer_token.value = r.token;
+	form.layer_mapbox_id.value = r.mapboxId;
+	form.layer_list.value = r.wmsLayerList;
+
+	document.getElementById("updateLayerButton").classList.remove("hide");
+	document.getElementById("updateLayerButton").classList.add("show");
+	
+	document.getElementById("newLayerButton").classList.remove("show");
+	document.getElementById("newLayerButton").classList.add("hide");
+	
+	displayDialog('layerDialog', 'main');
+}
+
+
+function submitUpdateLayer(){
+	var uuid = document.getElementById("maplayersform").uuid.value;
+	
+	var layer_name = document.querySelector("input[name=layer_name]").value;
+	var layer_mapbox_id = document.querySelector("input[name=layer_mapbox_id]").value;
+	var layer_list = document.querySelector("input[name=layer_list]").value;
+	var layer_token = document.querySelector("input[name=layer_token]").value;
+	var layer_type = document.querySelector("select[name=layer_type]").value;
+	var layer_status = document.querySelector("select[name=layer_status]").value;
+	
+	
+	var jsonData = {
+		"layerName" : layer_name,
+		"wmsLayerList" : layer_list,
+		"layerType" : layer_type,
+		"token" : layer_token,
+		"mapboxId" : layer_mapbox_id,
+		"active" : layer_status
+	};
+
+	//make ajax call
+	hideError();
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	var oReq = new XMLHttpRequest();
+	oReq.onload = layerUpdated;
+	oReq.open("PUT", LAYER_URL + encodeURIComponent(uuid), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.setRequestHeader("Accept","application/json");
+	oReq.send(JSON.stringify(jsonData));	
+}
+
+function layerUpdated(){
+	if (this.status == 200) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("Layer Update");
+	} else {
+		displayError("Error creating Layer;  " + this.responseText + "; " + this.statusText);
+	}
+	refreshLayers();
+	closeDialog('layerDialog');
+}

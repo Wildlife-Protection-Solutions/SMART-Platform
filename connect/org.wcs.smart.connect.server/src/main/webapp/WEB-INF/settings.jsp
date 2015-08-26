@@ -30,10 +30,11 @@
 
 
 <div class="overflow">
-	<div style="width:50%; float:left"><p style="float"><b>Operational Map Layers Configuration    </b><button style="float:right" "class="block button top-spacer" id="btnNewLayer">Add New Layer</button></p>
+	<div class="block" style="text-align:left"><b>Operational Map Layers Configuration</b> <button class="button top-spacer" id="btnNewLayer">Add New Layer</button>
 	</div>
 	<table id="layertable">
-		<tr class="table-row smart-table-header"><th>Layer Name</th><th>Type</th><th>On by Default?</th><th>Mapbox ID</th><th>Layer List</th></tr>
+		<tr class="table-row smart-table-header"><th>Layer Name</th><th>Type</th><th>On by Default?</th><th>Mapbox ID</th><th>Layer List</th><th>Token</th><th>Actions</th>
+		</tr>
 	</table>
 </div>
 
@@ -79,6 +80,48 @@
     </div>
   </form>
   </div>
+
+
+<div id="layerDialog" style="display: none;" class="dialog">
+  <div class="dialog-title">Map Layer Details</div>
+  <div id="layerdialogerror" class="errorsection"></div>
+	<form id="maplayersform">
+     		<div id="layererror" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
+     		<label class="top-spacer block">Layer Name:</label>
+     		<input class="layer_field" type=text name="layer_name" value="" maxlength="32"/>
+     		
+     		<input type="hidden" name="uuid" value="" />
+     		
+     		
+     		<label class="top-spacer block">Layer Type:</label>
+			<select name="layer_type" class="block formtext alert-select">
+			<option value=1>Mapbox.com</option>
+			<option value=2>GisCloud.com</option>
+			</select>
+     		
+     		<label class="top-spacer block">On By Default?:</label>
+     		<select name="layer_status" class="block formtext alert-select">
+			<option value="true">True</option>
+			<option value="false">False</option>
+			</select>
+     		
+     		<label class="top-spacer block">Token:</label>
+     		<input class="layer_field" type=text name="layer_token" value="" maxlength="256"/>
+ 		
+     		<label class="top-spacer block">MapBox ID (mapbox only):</label>
+     		<input class="layer_field" type=text name="layer_mapbox_id" value="" maxlength="64"/>
+     		
+     		<label class="top-spacer block">WMS Layer List (GISCloud only):</label>
+     		<input class="layer_field" type=text name="layer_list" value=""/>
+     		<div class="top-spacer block">
+     			<input id="newLayerButton" class="button" type="button" value="CreateLayer" />
+     			<input id="updateLayerButton" class="button" type="button" value="Update Layer" />
+     			<input class="button" type="button" id="cancelLayer" value="Cancel" />
+     		</div>
+    	</form>
+  </div>
+
+
 
 </body>
 </html>

@@ -1,7 +1,5 @@
 var ALERT_URL = "../api/connectalert/";
 var USER_URL = "../api/connectuser/";
-var ACTION_URL = USER_URL + "actions/";
-var allActions = null;
 var interval = 30000; //# of seconds between map refresh on the alert layer
 
 
@@ -18,7 +16,8 @@ window.onload = function(){
 	
    
     
-    
+//------------------------------------------------------------
+//Setup map layers
     // The real-time layer that auto-refreshes to show alerts
     realtime = L.realtime({
     	  url: ALERT_URL,
@@ -53,27 +52,23 @@ window.onload = function(){
         Object.keys(e.update).forEach(updateFeaturePopup);
     });
     
-    //google maps layer - Not supposed to use this with private maps/data, so we won't. 
-    //    var googleLayer = new L.Google('ROADMAP');
-    //    map.addLayer(googleLayer);
-
     //OSM Basemap Layer - the only Hardcoded basemap
     var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 	var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
 	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});		
-
 	
 	var baseMaps = {
-			"OSM Standard": osm
+//			"OSM basemap": osm
 	};
 	
 	var dataLayers = {
+			"OSM basemap": osm,
 			"Events": realtime
 	};
 	
 	var activeLayers = [osm, realtime];
 
-	
+	//Load all saved, active layers
 	for (i = 0; i < mapLayers.length; ++i) {
 		//Mapbox layer type
 		if(mapLayers[i][0] == 1){
@@ -91,10 +86,11 @@ window.onload = function(){
 			dataLayers[mapLayers[i][4]] = layer;
 			
 			//add to layer list so it is active to start with
-			if(mapLayers[i][5]){
+			if(mapLayers[i][5] == "true"){
 				activeLayers.push(layer);
 			}
-			
+		
+			//GIScloud layer type
 		}else if(mapLayers[i][0] == 2){
 
 			var token = mapLayers[i][1];
@@ -109,13 +105,13 @@ window.onload = function(){
 			dataLayers[mapLayers[i][4]] = giscloud;
 			
 			//add to layer list so it is active to start with
-			if(mapLayers[i][5]){
+			if(mapLayers[i][5] == "true"){
 				activeLayers.push(giscloud);
 			}
 		}
 	    
 	}
-//-----------------------	
+
 			
 	//initialize the map
 	var map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8, layers: activeLayers});
@@ -123,40 +119,32 @@ window.onload = function(){
 	//add layer control to map
 	L.control.layers(baseMaps, dataLayers).addTo(map);
 	
-
+//Map setup complete.
+//--------------------------------------------------	
 	
-	
-
-    
     
     //initialize the tab styles
     settab(tab);
     
-    //set the lat/long if we can get them from the device automatically
+    //set the lat/long in the "new alert form", if we can get them from the device automatically
     if (navigator.geolocation) {
     	navigator.geolocation.getCurrentPosition(showLatLong, showError)
     }
-    
-    
-    
-    //setup action events
-    
-    //new alert dialog
+      
+    //new alert and update alert actions
 	document.querySelector("#newalertform").onsubmit = createNewAlert;
+	document.querySelector("#updatealertform").onsubmit = submitUpdatedAlert;
+	document.querySelector("#cancel").onclick = function(){
+		closeDialog('updateAlertDialog');
+	};
+
 	
+	//draw the alerts table listing all current alerts
+	//TODO - probably need to default this to "last 48 hours" or something once API supports date filters.
 	refreshAlerts();
-	setTableActions();
 	
 }
 
-
-function setTableActions(){
-	//delete alert clicked
-	elements = document.querySelectorAll(".deletealert");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=deleteAlert;
-	}
-}
 
 //creates a new user
 function createNewAlert() {
@@ -217,25 +205,6 @@ function alertCreated() {
 	}
 	
 	refreshAlerts();
-
-}
-/* loads all user actions from server */
-function loadActions(){
-	if (allActions != null) return;
-	var oReq = new XMLHttpRequest();
-	oReq.onload = setActions;
-	oReq.open("Get", ACTION_URL, true);
-	oReq.send();	
-}
-
-/* callback from loadActions to cache user actions */
-function setActions(){
-	if (this.status != 200){
-		//do something with error
-	}else{
-		allActions = JSON.parse(this.responseText);
-		updateActionsDropDown();
-	}
 }
 
 function showLatLong(position){
@@ -311,27 +280,6 @@ function remove_class(id, classname){
 	document.getElementById(id).className = document.getElementById(id).className.replace( regex , '' )
 }
 
-
-/* add alert action */
-function createAlert(username){
-	var ddactions = document.querySelector("#actionKey");
-	var ddresources = document.querySelector("#actionResourceKey");
-	
-	var selectedActionKey = ddactions.options[ddactions.selectedIndex].value;
-	var selectedResourceKey = ddresources.options[ddresources.selectedIndex].value;
-	
-	hideInfo();
-	hideError();
-	var oReq = new XMLHttpRequest();
-	oReq.onload = actionAdded;
-	oReq.smartuser = username;
-	var loc = ACTION_URL + encodeURIComponent(username) + "/" + encodeURIComponent(selectedActionKey);
-	if (selectedResourceKey.length > 0){
-		loc += "/" + selectedResourceKey;
-	}
-	oReq.open("POST", loc, true);
-	oReq.send();
-}
 
 /* delete alert*/
 function deleteAlert(){
@@ -415,13 +363,110 @@ function createAlertTable(){
  				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.id = "alertRow" + i;
  		row.dataset.uuid = alerts[i].properties.uuid;
- 	
+
+ 		//update goes first, shows second, since it floats right in the css...
+ 		var updateicon = document.createElement("a");
+ 		updateicon.className="update-icon";
+ 		updateicon.title="update alert";
+ 		updateicon.onclick = updateAlert;
+ 		updateicon.href="";
+ 		row.childNodes[7].appendChild(updateicon);
+ 		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title="delete alert";
  		deleteicon.onclick = deleteAlert;
  		deleteicon.href="";
  		row.childNodes[7].appendChild(deleteicon);
+ 		
  	}
 }
 
+
+/* update alert button clicked */
+function updateAlert(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	document.getElementById("updatealertform").uuid.value = uuid;
+	
+	hideInfo();
+	hideError();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = showCurrentAlert;
+	oReq.open("GET", ALERT_URL + encodeURIComponent(uuid), true);
+	oReq.send();
+	return false;	
+}
+
+//callback for update alert clicked, fill in update alert form with current details 
+function showCurrentAlert() {
+	if (this.status == 200 ) {
+		var r = JSON.parse(this.response);
+	} else {
+		displayError(parseError("Error getting alert details for alert: " + this.uuid));
+	}
+	
+	document.querySelector("#dialogerror").style.display = "none";
+	displayDialog('updateAlertDialog', 'main');
+	
+	document.getElementById("updatealertform").user_id.value = r.userGeneratedId;
+	
+	document.getElementById("updatealertform").update_alert_ca.value = r.caUuid;
+	document.getElementById("updatealertform").update_alert_type.value = r.typeUuid;
+	document.getElementById("updatealertform").update_level.value = r.level;
+	document.getElementById("updatealertform").update_status.value = r.status;
+	document.getElementById("updatealertform").update_long.value = r.x;
+	document.getElementById("updatealertform").update_lat.value = r.y;
+	document.getElementById("updatealertform").update_alert_description.value = r.description;
+}
+
+/*submit updated alert details on an existing alert*/
+function submitUpdatedAlert(){
+	var form = document.getElementById("updatealertform");
+	var userId = form.user_id.value
+	var error = "";
+	
+	if( isNaN(form.update_long.value) || form.update_long.value < -180 || form.update_long.value > 180 ){
+		error += "Invalid longitude value;<br>";
+	}
+	if( isNaN(form.update_lat.value) || form.update_lat.value < -90 || form.update_lat.value > 90 ){
+		error += "Invalid latitude value;<br>";
+	}
+	if (error.length > 0){
+		document.querySelector("#dialogerror").innerHTML = error;
+		document.querySelector("#dialogerror").style.display = "block";
+		return false;
+	}
+	hideInfo();
+	hideError();
+	
+	//generate the data to send
+	data = {
+		    "caUuid": form.update_alert_ca.value,
+		    "typeUuid": form.update_alert_type.value,
+		    "level": form.update_level.value ,
+		    "status": form.update_status.value,
+		    "x": form.update_long.value,
+		    "y": form.update_lat.value,
+		    "description": form.update_alert_description.value
+		    };
+	var oReq = new XMLHttpRequest();
+	oReq.onload = AlertUpdated;
+	oReq.open("PUT", ALERT_URL + encodeURIComponent(userId), true);
+	oReq.setRequestHeader("Accept","application/json");
+	oReq.setRequestHeader("Content-Type","application/json");
+	oReq.send(JSON.stringify(data));
+	return false;	
+}
+
+function AlertUpdated(){
+	if (this.status == 200 ) {
+		var r = JSON.parse(this.response);
+		displayInfo("Alert with UUID " + r.uuid + " Updated.");
+	} else {
+		displayError(parseError("Error updating alert: " + this.statusText + "; " + this.responseText));
+	}
+	
+	closeDialog('updateAlertDialog');
+	refreshAlerts();
+}
