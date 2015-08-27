@@ -200,7 +200,7 @@ public class ConnectAlert extends HttpServlet {
 
 	@PUT
     @Path("/{usergenid}")
-    public Alert updateUser(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
+    public Alert updateAlert(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
     	validateUser();
     	validateAlertValues(newAlert);
     	

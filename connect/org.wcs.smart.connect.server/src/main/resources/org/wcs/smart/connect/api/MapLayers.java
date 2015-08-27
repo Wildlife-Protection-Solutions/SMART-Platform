@@ -174,6 +174,22 @@ public class MapLayers extends HttpServlet {
 			}			
 			toUpdate.setActive(newLayer.isActive());
 			toUpdate.setLayerName(newLayer.getLayerName());
+
+			//validate values
+			if(toUpdate.getLayerType() < 0 || toUpdate.getLayerType() > 10){
+				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid layerType provided");
+			}
+			if(toUpdate.getMapboxId().length() > 64){
+				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "mapboxId must be < 64 characters");
+			}
+			if(toUpdate.getToken().length() > 256){
+				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Token must be < 256 characters");
+			}
+			if(toUpdate.getLayerName().length() > 32){
+				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Layer Name must be < 32 characters");
+			}
+
+			
 			
 			s.update(toUpdate);
 			s.getTransaction().commit();

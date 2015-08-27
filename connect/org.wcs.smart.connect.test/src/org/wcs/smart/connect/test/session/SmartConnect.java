@@ -23,6 +23,7 @@ public class SmartConnect {
 	public static final String BASE_URL = "https://localhost:8443/server/";
 	public static final String USER_API_URL = SmartConnect.BASE_URL + "api/connectuser";
 	public static final String ALERT_API_URL = SmartConnect.BASE_URL + "api/connectalert";
+	public static final String LAYER_API_URL = SmartConnect.BASE_URL + "api/maplayer";
 	public static final String LOGIN_API_URL = SmartConnect.BASE_URL + "login";
 	public static final String LOGOUT_API_URL = SmartConnect.BASE_URL + "logout";
 	public static final String LOGIN_PAGE_URL = SmartConnect.BASE_URL + "connect/login";

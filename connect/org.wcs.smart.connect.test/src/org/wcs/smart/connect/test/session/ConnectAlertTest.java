@@ -86,7 +86,7 @@ public class ConnectAlertTest {
 	public void getCaUuid() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.CA_API_URL );
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpGet get = new HttpGet(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -121,7 +121,7 @@ public class ConnectAlertTest {
 	public void testGetAlertTypes() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + "alertTypes");
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpGet get = new HttpGet(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -157,7 +157,7 @@ public class ConnectAlertTest {
 	public void testCreateAlert() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + userGeneratedId);
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpPost post = new HttpPost(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -194,6 +194,15 @@ public class ConnectAlertTest {
 				JsonNode n = mapper.readTree(userObject);
 				alertUuid = UUID.fromString(n.findValue("uuid").textValue());
 				
+				Assert.assertEquals("Validating layer name", userGeneratedId, n.findValue("userGeneratedId").textValue());
+				Assert.assertEquals("Validating description", description, n.findValue("description").textValue());
+				Assert.assertEquals("Validating type", typeUuid.toString(), n.findValue("typeUuid").textValue());
+				Assert.assertEquals("Validating level", level.intValue(), n.findValue("level").intValue());
+				Assert.assertEquals("Validating ca uuid", caUuid.toString(), n.findValue("caUuid").textValue());
+				Assert.assertEquals("Validating status", status.toString(), n.findValue("status").textValue());
+				Assert.assertTrue("Validating x", x == n.findValue("x").asDouble());
+				Assert.assertTrue("Validating y", y == n.findValue("y").asDouble());
+				
 				return null;
 			}
 		});
@@ -209,7 +218,7 @@ public class ConnectAlertTest {
 					throws ClientProtocolException, IOException {
 				String userObject = EntityUtils.toString(response.getEntity());
 				System.out.println("2) (already exists expected)" + userObject);
-				Assert.assertEquals("Second attempt to create user should fail", HttpURLConnection.HTTP_BAD_REQUEST, 
+				Assert.assertEquals("Second attempt to create alert should fail", HttpURLConnection.HTTP_BAD_REQUEST, 
 						response.getStatusLine().getStatusCode());
 				return null;
 			}
@@ -221,7 +230,7 @@ public class ConnectAlertTest {
 	public void testGetAllAlerts() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL);
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpGet get = new HttpGet(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -248,6 +257,12 @@ public class ConnectAlertTest {
 				ObjectMapper mapper = new ObjectMapper();
 				JsonNode n = mapper.readTree(userObject);
 				Assert.assertTrue("Validating at least on user", n.size() > 0);
+				
+				 
+				Assert.assertTrue("Valid level property in a geojson feature?", n.get("features").get(0).get("properties").get("level").asInt() > 0  && n.get("features").get(0).get("properties").get("level").asInt() < 10);
+				Assert.assertTrue("Valid x property in first geojson feature?", n.get("features").get(0).get("properties").get("x").asInt() > -181  && n.get("features").get(0).get("properties").get("x").asInt() < 181);
+				Assert.assertTrue("Valid y property in first geojson feature?", n.get("features").get(0).get("properties").get("y").asInt() > -91  && n.get("features").get(0).get("properties").get("y").asInt() < 91);
+				
 				return null;
 			}
 		});
@@ -259,7 +274,7 @@ public class ConnectAlertTest {
 	public void testGetAlert() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + alertUuid);
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpGet get = new HttpGet(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -287,7 +302,8 @@ public class ConnectAlertTest {
 				JsonNode n = mapper.readTree(userObject);
 				Assert.assertEquals("Validating size", 11, n.size());
 				Assert.assertEquals("Validating usergen id", userGeneratedId, n.findValue("userGeneratedId").textValue());
-			
+				Assert.assertTrue("Validating x", n.findValue("x").intValue() > -181 && n.findValue("x").intValue() < 181);
+				Assert.assertTrue("Validating y", n.findValue("y").intValue() > -91 && n.findValue("y").intValue() < 91);
 				return null;
 			}
 		});
@@ -297,7 +313,7 @@ public class ConnectAlertTest {
 	public void testUpdateAlert() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + userGeneratedId);
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpPut put = new HttpPut(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -305,6 +321,7 @@ public class ConnectAlertTest {
 		put.addHeader("Authorization", "basic " + info);
 		put.addHeader("Content-Type", SmartConnect.MT_APPLICATION_JSON);
 		date2 = new Date();
+		System.out.println(date2.getTime());
 		String json = "{\"userGeneratedId\": \"" + userGeneratedId2  + "\", \"caUuid\": \"" + caUuid  +  "\", \"date\": \"" + date2.getTime() + "\", \"description\": \"" + description2 + "\", \"level\": \"" + level2 + "\", \"status\": \"" + status2 + "\", \"typeUuid\": \"" + typeUuid + "\", \"x\": \"" + x2 + "\", \"y\": \"" + y2 + "\"}";
 		
         HttpEntity entity = new ByteArrayEntity(json.getBytes());
@@ -333,6 +350,13 @@ public class ConnectAlertTest {
 				JsonNode n = mapper.readTree(userObject);
 				Assert.assertEquals("Validating size", 11, n.size());
 				Assert.assertEquals("Validating usergen id", userGeneratedId2, n.findValue("userGeneratedId").textValue());
+				Assert.assertEquals("Validating caUuid", caUuid.toString(), n.findValue("caUuid").textValue());
+				Assert.assertEquals("Validating date2", date2.getTime(), n.findValue("date").asLong());
+				Assert.assertEquals("Validating description2", description2, n.findValue("description").textValue());
+				Assert.assertTrue("Validating level2", level2 == n.findValue("level").intValue());
+				Assert.assertEquals("Validating status2", status2.toString(), n.findValue("status").textValue());
+				Assert.assertEquals("Validating typeUuid", typeUuid.toString(), n.findValue("typeUuid").textValue());
+				
 				return null;
 			}
 		});
@@ -342,7 +366,7 @@ public class ConnectAlertTest {
 //	@Test
 	public void testUpdateAlertInvalidAlert() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + invalidUserGeneratedId );
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpPut put = new HttpPut(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -371,7 +395,7 @@ public class ConnectAlertTest {
 //	@Test
 	public void testUpdateAlertInvalidType() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + invalidUserGeneratedId );
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpPut put = new HttpPut(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -400,7 +424,7 @@ public class ConnectAlertTest {
 	public void testGetAlertInvalidCa() throws Exception {
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/" + invalidCaUuid);
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpGet get = new HttpGet(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -425,7 +449,7 @@ public class ConnectAlertTest {
 	public void testGetAlertsFromCa() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "/ca/" + caUuid);
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpGet get = new HttpGet(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -448,6 +472,14 @@ public class ConnectAlertTest {
 					}
 				}
 				Assert.assertEquals("Json expected", SmartConnect.MT_APPLICATION_JSON, contentType);
+				
+				
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode n = mapper.readTree(userObject);
+				for(int x=0; x < n.size(); x++){
+					Assert.assertEquals("CA matches", caUuid.toString(), n.get(x).get("caUuid").toString().replace("\"", ""));
+				}
+				
 				return null;
 			}
 		});
@@ -459,7 +491,7 @@ public class ConnectAlertTest {
 	public void testDeleteAlert() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL  + "/" + alertUuid);
 		
-		// Login Via Put Call
+		// Login 
 		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
 		HttpDelete post = new HttpDelete(builder.build());
 		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
@@ -476,7 +508,7 @@ public class ConnectAlertTest {
 			}
 		});
 		
-		//lets get the user; this should fail as user should be deleted
+		//lets get the alert; this should fail as alertshould be deleted
 		HttpGet get = new HttpGet(builder.build());
 		get.addHeader("Authorization", "basic " + info);
 		httpClient.execute(get, new ResponseHandler<String>() {
@@ -492,7 +524,7 @@ public class ConnectAlertTest {
 		});
 				
 		//try to delete again
-		// Login Via Put Call
+		// Login 
 		HttpDelete delete = new HttpDelete(builder.build());
 		delete.addHeader("Authorization", "basic " + info);
 		httpClient.execute(delete, new ResponseHandler<String>() {
