@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.internal.ca.export;
+package org.wcs.smart.ca.export;
 
 /**
  * Class to track table and hibernate mapping information

@@ -20,6 +20,7 @@
 		<module>./org.wcs.smart.dataentry/pom-shared.xml</module>
 		<module>./org.wcs.smart.observation/pom-shared.xml</module>
 		<module>./org.wcs.smart.query/pom-shared.xml</module>
+		<module>./org.wcs.smart.report/pom-shared.xml</module>
 		<module>./org.wcs.smart.patrol/pom-shared.xml</module>
 		<module>./org.wcs.smart.patrol.query/pom-shared.xml</module>
 		<module>./org.wcs.smart.observation.query/pom-shared.xml</module>

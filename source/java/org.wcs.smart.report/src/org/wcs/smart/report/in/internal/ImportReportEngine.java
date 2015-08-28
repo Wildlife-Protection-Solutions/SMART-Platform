@@ -281,11 +281,12 @@ public class ImportReportEngine {
 	 * @throws Exception
 	 */
 	private void copyToFileStore(File source, Report r) throws Exception{
+		File f = ReportPlugIn.getDefault().getReportFile(r);
 		if (r.getUuid() != null){
 			//delete existing definition file if it exists
-			r.getFullReportFilename().delete();
+			f.delete();
 		}
-		SmartUtils.copyFile(source, r.getFullReportFilename());
+		SmartUtils.copyFile(source, f);
 	}
 	
 	/**

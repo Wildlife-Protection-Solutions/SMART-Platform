@@ -85,7 +85,7 @@ public class ReportView implements IReportListener{
 		protected IStatus run(IProgressMonitor monitor) {
 			try{
 				IReportEngine engine = ReportEngineManager.getBirtReportEngine();
-				final IReportRunnable design = engine.openReportDesign(report.getFullReportFilename().getAbsolutePath());
+				final IReportRunnable design = engine.openReportDesign(ReportPlugIn.getDefault().getReportFile(report).getAbsolutePath());
 				
 				try(ByteArrayOutputStream bos = new ByteArrayOutputStream()){
 					HTMLRenderOption options = new HTMLRenderOption();

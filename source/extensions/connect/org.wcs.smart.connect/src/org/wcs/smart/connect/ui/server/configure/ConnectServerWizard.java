@@ -58,7 +58,13 @@ public class ConnectServerWizard extends Wizard {
 		String password = page2.getPassword();
 		
 		String error = null;
-		try(SmartConnect cs = new SmartConnect(url, username, password)){
+		
+		ConnectServer server = new ConnectServer();
+		server.setConservationArea(SmartDB.getCurrentConservationArea());
+		server.setServerUrl(url);
+		server.setTimeout(120);
+		
+		try(SmartConnect cs = new SmartConnect(server, username, password)){
 			error = cs.validateUser();
 		}
 		
@@ -66,11 +72,6 @@ public class ConnectServerWizard extends Wizard {
 			MessageDialog.openError(getShell(), "Error", error);
 			return false;
 		}
-		
-		ConnectServer server = new ConnectServer();
-		server.setConservationArea(SmartDB.getCurrentConservationArea());
-		server.setServerUrl(url);
-		server.setTimeout(120);
 			
 		ConnectUser user = new ConnectUser();
 		user.setConnectPassword(password);

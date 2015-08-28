@@ -44,6 +44,7 @@ public class UploadStatus {
 	private Status status;
 	private long currentSize;
 	private long expectedSize;
+	private String message;
 
 	@JsonProperty("uuid")
 	public UUID getUuid(){
@@ -75,5 +76,13 @@ public class UploadStatus {
 	}
 	public void setExpectedSize(long size){
 		this.expectedSize = size;
+	}
+	
+	@JsonProperty("message")
+	public String getMessage(){
+		return this.message;
+	}
+	public String setMessage(){
+		return this.message;
 	}
 }

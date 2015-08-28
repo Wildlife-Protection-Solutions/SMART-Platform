@@ -22,11 +22,9 @@
 package org.wcs.smart.ca;
 
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.UUID;
 
 import org.hibernate.HibernateException;
@@ -34,6 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionImplementor;
 import org.hibernate.type.BinaryType;
 import org.hibernate.usertype.UserType;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Custom Hibernate user type for internationalized labels.
@@ -65,8 +64,7 @@ public class LabelUserType implements UserType {
 		if (value instanceof byte[]){
 			byte[] uuida = (byte[]) rs.getBytes(names[0]);
 			if (uuida == null) return null;
-			ByteBuffer bb = ByteBuffer.wrap(uuida);
-			uuid = new UUID(bb.getLong(), bb.getLong());
+			uuid = UuidUtils.byteToUUID(uuida);
 		}else if (value instanceof UUID){
 			uuid = (UUID) value;
 		}

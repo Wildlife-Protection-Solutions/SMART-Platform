@@ -21,20 +21,16 @@
  */
 package org.wcs.smart.report.model;
 
-import java.io.File;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
-import org.wcs.smart.report.ReportPlugIn;
 
 /**
  * A report object.
@@ -145,14 +141,6 @@ public class Report extends NamedItem {
 	 */
 	public void setFilename(String filename){
 		this.filename = filename;
-	}
-	
-	/**
-	 * @return the full report filename including path
-	 */
-	@Transient
-	public File getFullReportFilename(){
-		return new File(ReportPlugIn.getReportDirectory(getConservationArea()), getFilename());
 	}
 	
 }

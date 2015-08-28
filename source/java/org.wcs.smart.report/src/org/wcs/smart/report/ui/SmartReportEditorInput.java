@@ -22,6 +22,7 @@
 package org.wcs.smart.report.ui;
 
 import org.eclipse.birt.report.designer.internal.ui.editors.ReportEditorInput;
+import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.model.Report;
 
 /**
@@ -37,7 +38,7 @@ public class SmartReportEditorInput extends ReportEditorInput {
 	 * @param report the report object
 	 */
 	public SmartReportEditorInput(Report report) {
-		super(report.getFullReportFilename());
+		super(ReportPlugIn.getDefault().getReportFile(report));
 		this.report = report;
 	}
 	

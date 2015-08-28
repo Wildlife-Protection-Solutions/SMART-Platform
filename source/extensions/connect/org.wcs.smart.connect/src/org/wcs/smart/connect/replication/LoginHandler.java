@@ -16,12 +16,19 @@ public class LoginHandler implements ILoginHandler {
 
 	@Override
 	public void onLogin() throws Exception {
+		//ensure replication is disabled; we will enable later if required
+		Session s = HibernateManager.openSession();
+		try{
+			DerbyReplicationManager.INSTANCE.disableReplication(s);
+		}finally{
+			s.close();
+		}
+		
 		//never replicate multiple conservation areas
 		if (SmartDB.isMultipleAnalysis()) return ;
 		
 		ConnectServerStatus status;
-		
-		Session s = HibernateManager.openSession();
+		s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
 			status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
@@ -64,7 +71,7 @@ public class LoginHandler implements ILoginHandler {
 					return;
 				}
 				
-				SmartConnect connect = new SmartConnect(server.getServerUrl(), user.getConnectUsername(), user.getConnectPassword());
+				SmartConnect connect = new SmartConnect(server, user.getConnectUsername(), user.getConnectPassword());
 				//need to continue upload
 				UploadCaJob job = new UploadCaJob(connect, status);
 				job.schedule();

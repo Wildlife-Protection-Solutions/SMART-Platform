@@ -37,6 +37,7 @@ import org.eclipse.birt.report.engine.api.impl.ScalarParameterDefn;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.birt.ui.ReportEngineManager;
+import org.wcs.smart.report.ReportPlugIn;
 import org.wcs.smart.report.SmartReportParameters;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.internal.ui.viewer.parameter.BooleanParameterComponent;
@@ -90,7 +91,7 @@ public class ParameterCollecter {
 		
 		IReportEngine engine = ReportEngineManager.getBirtReportEngine();
 		
-		final IReportRunnable design = engine.openReportDesign(r.getFullReportFilename().getAbsolutePath());
+		final IReportRunnable design = engine.openReportDesign(ReportPlugIn.getDefault().getReportFile(r).getAbsolutePath());
 		final IGetParameterDefinitionTask paramDefnTask = engine.createGetParameterDefinitionTask( design );
 		Collection<?> parameters = paramDefnTask.getParameterDefns(true);
 		

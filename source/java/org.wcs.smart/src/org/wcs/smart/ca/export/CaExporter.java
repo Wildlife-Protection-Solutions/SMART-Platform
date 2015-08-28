@@ -58,24 +58,6 @@ import org.wcs.smart.util.ZipUtil;
 public class CaExporter {
 
 	/**
-	 * The name of the conservation area data file in the exported
-	 * data.
-	 */
-	public static final String CA_INFO_FILENAME = "conservationarea.dat"; //$NON-NLS-1$
-	
-	/**
-	 * The name of the directory where the database data is stored
-	 */
-	public static final String DATABASE_DIR = "database"; //$NON-NLS-1$
-	
-	/**
-	 * The name of the directory where the filestore data is 
-	 * stored
-	 */
-	public static final String FILESTORE_DIR = "filestore"; //$NON-NLS-1$
-	
-	
-	/**
 	 * Export code extension point
 	 */
 	private static final String EXPORT_EXTENSION_ID = "org.wcs.smart.ca.export"; //$NON-NLS-1$
@@ -157,7 +139,7 @@ public class CaExporter {
 	 * @throws IOException
 	 */
 	private void writeConservationAreaInfo(File directory, ConservationArea ca) throws IOException{
-		try(FileWriter fw = new FileWriter(new File(directory, CA_INFO_FILENAME))){
+		try(FileWriter fw = new FileWriter(new File(directory, ICaDataExportEngine.CA_INFO_FILENAME))){
 //			fw.write(SmartUtils.encodeHex(ca.getUuid()));
 			fw.write(UuidUtils.uuidToString(ca.getUuid()));
 			fw.write(SharedUtils.LINE_SEPARATOR);

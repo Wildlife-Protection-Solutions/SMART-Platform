@@ -17,6 +17,9 @@
             class="org.wcs.smart.connect.model.ConnectServerStatus"
             include_ca_export="false">
       </class>
+      <class
+            class="org.wcs.smart.connect.model.ConnectSyncHistoryRecord">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -28,6 +31,14 @@
             id="org.wcs.smart.connect.server.exportca"
             name="Export To SMART Connect">
       </command>
+      <command
+            id="org.wcs.smart.connect.server.changelog.up"
+            name="Upload Change Log">
+      </command>
+      <command
+            id="org.wcs.smart.connect.server.changelog.down"
+            name="Download Change Log">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -37,6 +48,14 @@
          <menu
                id="org.wcs.smart.connect.menu"
                label="CONNECT">
+            <command
+                  commandId="org.wcs.smart.connect.server.changelog.up"
+                  style="push">
+            </command>
+            <command
+                  commandId="org.wcs.smart.connect.server.changelog.down"
+                  style="push">
+            </command>
             <command
                   commandId="org.wcs.smart.connect.server.exportca"
                   style="push">
@@ -63,8 +82,16 @@
             commandId="org.wcs.smart.connect.configuration.show">
       </handler>
       <handler
-            class="org.wcs.smart.connect.ui.server.export.ExportCaHandler$ExportCaHandlerrWrapper"
+            class="org.wcs.smart.connect.ui.server.ExportCaHandler$ExportCaHandlerrWrapper"
             commandId="org.wcs.smart.connect.server.exportca">
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.replication.UploadChangeLogHandler$UploadChangeLogHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.changelog.up">
+      </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.replication.DownloadChangeLogHandler$DownloadChangeLogHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.changelog.down">
       </handler>
    </extension>
    <extension

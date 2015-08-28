@@ -37,6 +37,7 @@ import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.query.event.QueryEventManager;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.library.SmartBirtLibrary;
+import org.wcs.smart.report.model.Report;
 
 /**
  * SMART BIRT Reporting plugin
@@ -179,4 +180,10 @@ public class ReportPlugIn extends AbstractUIPlugin {
 
 	}
 	
+	/**
+	 * @return the full report filename including path
+	 */
+	public File getReportFile(Report r){
+		return new File(ReportPlugIn.getReportDirectory(r.getConservationArea()), r.getFilename());
+	}
 }

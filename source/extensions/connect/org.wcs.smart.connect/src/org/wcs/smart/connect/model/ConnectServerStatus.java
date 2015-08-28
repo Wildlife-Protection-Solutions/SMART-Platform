@@ -56,11 +56,9 @@ public class ConnectServerStatus {
 
 	private ConnectServer server;
 	
-	private UUID clientUuid;
-	
 	private UUID versionId;
 	
-	private Integer revision;
+	private Long server_revision;
 	
 	private Status status;
 	
@@ -92,14 +90,6 @@ public class ConnectServerStatus {
 		this.server = server;
 	}
 	
-	@Column(name="client_id")
-	public UUID getClientId(){
-		return this.clientUuid;
-	}
-	public void setClientId(UUID clientId){
-		this.clientUuid = clientId;
-	}
-	
 	@Column(name="version")
 	public UUID getVersion(){
 		return this.versionId;
@@ -108,13 +98,13 @@ public class ConnectServerStatus {
 		this.versionId = versionId;
 	}
 	
-	@Column(name="revision")
-	public Integer getRevision(){
-		return this.revision;
+	@Column(name="server_revision")
+	public Long getServerRevision(){
+		return this.server_revision;
 	}
 	
-	public void setRevision(Integer revision){
-		this.revision = revision;
+	public void setServerRevision(Long revision){
+		this.server_revision = revision;
 	}
 	
 	@Column(name="status")

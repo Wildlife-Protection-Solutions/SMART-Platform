@@ -37,7 +37,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
-import org.wcs.smart.ca.export.CaExporter;
+import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
@@ -153,7 +153,7 @@ public class HibernateDataImporter implements ICaDataImporter{
 	 * @throws Exception
 	 */
 	private HashMap<String, List<TableInfo>> scanTables(File dir) throws Exception{
-		File dataFileDir = new File(dir, CaExporter.DATABASE_DIR);
+		File dataFileDir = new File(dir, ICaDataExportEngine.DATABASE_DIR);
 		//list all .def file
 		String files[] = dataFileDir.list(new FilenameFilter() {
 			@Override

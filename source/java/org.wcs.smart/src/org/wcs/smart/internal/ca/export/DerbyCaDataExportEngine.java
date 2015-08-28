@@ -32,7 +32,6 @@ import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.util.SmartUtils;
@@ -190,7 +189,7 @@ public class DerbyCaDataExportEngine implements ICaDataExportEngine{
 	}
 	
 	private File createFileName(File destDir, String tableName){
-		File dir = new File(destDir, CaExporter.DATABASE_DIR);
+		File dir = new File(destDir, ICaDataExportEngine.DATABASE_DIR);
 		SmartUtils.createDirectory(dir);
 		File f = new File(dir, File.separator + tableName);
 		return f;

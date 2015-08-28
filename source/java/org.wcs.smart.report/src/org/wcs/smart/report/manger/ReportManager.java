@@ -136,12 +136,13 @@ public class ReportManager {
 		}finally{
 			session.close();
 		}	
-		if (!report.getFullReportFilename().exists()){
-			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotFound + report.getFullReportFilename().toString());
+		File f = ReportPlugIn.getDefault().getReportFile(report);
+		if (!f.exists()){
+			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotFound + f.toString());
 		}
 		try{
-			if (!report.getFullReportFilename().delete()){
-				throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemoved + report.getFullReportFilename().toString());
+			if (!f.delete()){
+				throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemoved + f.toString());
 			}
 		}catch (Exception ex){
 			throw new Exception(Messages.ReportManager_Deleteok_ReportFileNotRemovedB + ex.getLocalizedMessage(), ex);
@@ -234,7 +235,7 @@ public class ReportManager {
 		//create report file with default library
 		SessionHandle session = SessionHandleAdapter.getInstance().getSessionHandle();
 
-		ReportDesignHandle rdh = session.openDesign(report.getFullReportFilename().getAbsolutePath());
+		ReportDesignHandle rdh = session.openDesign(ReportPlugIn.getDefault().getReportFile(report).getAbsolutePath());
 		
 		List<?> datasets = rdh.getDataSets().getContents();
 		for (Iterator<?> iterator = datasets.iterator(); iterator.hasNext();) {

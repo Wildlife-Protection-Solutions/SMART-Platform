@@ -67,4 +67,9 @@ public class UuidUtils {
 	public static String getDirectoryPath(UUID uuid) {
 		return uuidToString(uuid);
 	}
+	
+	public static byte[] uuidToByte(UUID uuid){
+		return ByteBuffer.allocate(16).putLong(uuid.getMostSignificantBits())
+				.putLong(uuid.getLeastSignificantBits()).array();
+	}
 }
