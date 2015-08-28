@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +40,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
@@ -89,7 +89,7 @@ public class ConnectUserAction extends HttpServlet {
 		try{
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), UserAccountsAction.KEY)){
 				logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 		}finally{
 			s.getTransaction().commit();
@@ -128,7 +128,7 @@ public class ConnectUserAction extends HttpServlet {
 			return actionResources;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					Messages.getString("ConnectUserAction.ActionError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().commit();
@@ -170,7 +170,7 @@ public class ConnectUserAction extends HttpServlet {
 			return items;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR,
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR,
 					Messages.getString("ConnectUserAction.UserError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().commit();
@@ -226,16 +226,16 @@ public class ConnectUserAction extends HttpServlet {
 					.setProjection(Projections.rowCount()).uniqueResult();
 			if (adminCnt <= 0) {
 				throw new SmartConnectException(
-						HttpURLConnection.HTTP_BAD_REQUEST,
+						Response.Status.BAD_REQUEST,
 						Messages.getString("ConnectUserAction.AdminError", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					Messages.getString("ConnectUserAction.UserDeleteError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
-		}
+		}	
 	}
 	
 	
@@ -278,7 +278,7 @@ public class ConnectUserAction extends HttpServlet {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 	}

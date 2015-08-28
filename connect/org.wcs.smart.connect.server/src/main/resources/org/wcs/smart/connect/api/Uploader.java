@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
@@ -74,6 +73,8 @@ public class Uploader extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private final Logger logger = Logger.getLogger(Uploader.class.getName());
 	
+	public static final String DATASTORE_DIR = "uploads"; //$NON-NLS-1$
+	
 	public static final String PATH = "uploader"; //$NON-NLS-1$
 	
 	@Context private HttpHeaders headers;
@@ -95,7 +96,7 @@ public class Uploader extends HttpServlet {
 		try{
 			UploadItem item = (UploadItem) s.get(UploadItem.class, UUID.fromString(uuid));
 			if (item == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND);
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			UploadStatus status = new UploadStatus(item);
 			File f = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
@@ -111,7 +112,7 @@ public class Uploader extends HttpServlet {
 			return status;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR);
 		}finally{
 			s.getTransaction().commit();
 		}
@@ -140,13 +141,13 @@ public class Uploader extends HttpServlet {
 		try{
 			item = (UploadItem) s.get(UploadItem.class, UUID.fromString(uuid));
 			if (item == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND);
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 		}finally{
 			s.getTransaction().commit();
 		}
 		if (item.getStatus() != Status.UPLOADING){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("Uploader.Duplicate", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.Duplicate", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
 		}
 		
 		// validate content-type
@@ -158,7 +159,7 @@ public class Uploader extends HttpServlet {
 			}
 		}
 		if (!octet) {
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST
+			throw new SmartConnectException(Response.Status.BAD_REQUEST
 					,MessageFormat.format(Messages.getString("Uploader.ContentTypeRequired", SmartUtils.getRequestLocale(headers)), MediaType.APPLICATION_OCTET_STREAM )); //$NON-NLS-1$
 		}
 		
@@ -167,10 +168,10 @@ public class Uploader extends HttpServlet {
 		try{
 			length = Integer.valueOf(headers.getRequestHeader(HttpHeaders.CONTENT_LENGTH).get(0));
 		}catch (Exception ex){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("Uploader.InvalidLength", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.InvalidLength", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
 		}
 		if (length < 0){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("Uploader.InvalidLength", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("Uploader.InvalidLength", SmartUtils.getRequestLocale(headers))); //$NON-NLS-1$
 		}
 		
 		File datastoreFile = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());

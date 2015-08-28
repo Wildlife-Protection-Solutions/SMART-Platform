@@ -41,7 +41,8 @@ import javax.persistence.Table;
 public class UploadItem extends ConnectUuidItem {
 
 	public enum Type {
-		CA;
+		CA,
+		UP_SYNC;
 	}
 	
 	public enum Status{

@@ -21,7 +21,7 @@
  */
 package org.wcs.smart.connect.exceptions;
 
-import java.net.HttpURLConnection;
+import javax.ws.rs.core.Response;
 
 /**
  * A exception for SMART Connect that gets translated into the correct
@@ -39,7 +39,7 @@ public class SmartConnectException extends RuntimeException {
 	
 	private String message;
 	private String detail;
-	private int responseCode = HttpURLConnection.HTTP_INTERNAL_ERROR;
+	private Response.Status responseCode = Response.Status.INTERNAL_SERVER_ERROR;
 	
 	/**
 	 * Creates a exception that will return an internal error response code
@@ -47,14 +47,14 @@ public class SmartConnectException extends RuntimeException {
 	 * @param message
 	 */
 	public SmartConnectException(String message, Exception ex){
-		this(HttpURLConnection.HTTP_INTERNAL_ERROR, message, ex);
+		this(Response.Status.INTERNAL_SERVER_ERROR, message, ex);
 	}
 	
 	public SmartConnectException(String message){
-		this(HttpURLConnection.HTTP_INTERNAL_ERROR, message, null);
+		this(Response.Status.INTERNAL_SERVER_ERROR, message, null);
 	}
 	
-	public SmartConnectException(int responseCode, String message){
+	public SmartConnectException(Response.Status responseCode, String message){
 		this(responseCode, message, null);
 		
 	}
@@ -63,11 +63,11 @@ public class SmartConnectException extends RuntimeException {
 	 * with default server generated message
 	 * @param responseCode
 	 */
-	public SmartConnectException(int responseCode, Exception ex){
+	public SmartConnectException(Response.Status responseCode, Exception ex){
 		this(responseCode, null, ex);
 	}
 	
-	public SmartConnectException(int responseCode){
+	public SmartConnectException(Response.Status responseCode){
 		this(responseCode, null, null);
 	}
 	
@@ -76,7 +76,7 @@ public class SmartConnectException extends RuntimeException {
 	 * @param responseCode
 	 * @param message
 	 */
-	public SmartConnectException(int responseCode, String message, Exception ex){
+	public SmartConnectException(Response.Status responseCode, String message, Exception ex){
 		this.message = message;
 		this.responseCode = responseCode;
 		if (ex != null){
@@ -89,7 +89,7 @@ public class SmartConnectException extends RuntimeException {
 	}
 	
 	public int getResponseCode(){
-		return this.responseCode;
+		return this.responseCode.getStatusCode();
 	}
 	
 	public String getDescription(){

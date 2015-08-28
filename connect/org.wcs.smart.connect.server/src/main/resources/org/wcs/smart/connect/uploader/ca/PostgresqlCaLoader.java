@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.uploader;
+package org.wcs.smart.connect.uploader.ca;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -30,6 +30,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -60,6 +61,10 @@ public class PostgresqlCaLoader {
 	 */
 	public static final String DATABASE_DIR = "database"; //$NON-NLS-1$
 	
+	public static final String[] TABLES_TO_IGNORE = new String[]{"smart.connect_status", 
+		"smart.connect_change_log", 
+		"smart.connect_sync_history"};
+	
 	private Session session;
 	
 	public PostgresqlCaLoader(Session session){
@@ -79,6 +84,10 @@ public class PostgresqlCaLoader {
 	
 	private void processFilestore(File dir, ConservationAreaInfo ca) throws Exception{
 		File toDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(ca);
+		if (!toDir.exists()){
+			FileUtils.forceMkdir(toDir);
+		}
+		
 		File filestore = new File(dir, "filestore");
 		
 		for (File f: filestore.listFiles()){
@@ -114,6 +123,7 @@ public class PostgresqlCaLoader {
 		Queue<String> tablesToProcess = new LinkedList<String>();
 		tablesToProcess.addAll(tables.keySet());
 
+		List<String> toIngore = Arrays.asList(TABLES_TO_IGNORE);
 		String last = "";  		//used as a check here so we don't go on forever //$NON-NLS-1$
 		while(tablesToProcess.size() > 0){
 			String tableName = tablesToProcess.poll();
@@ -141,8 +151,12 @@ public class PostgresqlCaLoader {
 				List<TableInfo> infos = tables.get(tableName);
 				if (infos == null) throw new Exception("Could not get tableinfo for table. " + tableName);
 				for (TableInfo info : infos){
-					if (!info.getDataFile().exists()) throw new Exception(MessageFormat.format("Missing data file ({1}) for table {0}.", new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
-					importData(tableName, info.getColumns(), info.getDataFile() );
+					if (!info.getDataFile().exists()){
+						throw new Exception(MessageFormat.format("Missing data file ({1}) for table {0}.", new Object[]{ tableName, info.getDataFile().getAbsolutePath()}));
+					}
+					if (!toIngore.contains(tableName.toLowerCase())){
+						importData(tableName, info.getColumns(), info.getDataFile() );
+					}
 					processed.add(tableName);
 				}
 				last = ""; //$NON-NLS-1$

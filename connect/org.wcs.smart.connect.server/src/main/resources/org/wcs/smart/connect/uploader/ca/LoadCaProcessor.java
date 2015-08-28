@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.uploader;
+package org.wcs.smart.connect.uploader.ca;
 
 import java.util.List;
 import java.util.logging.Level;
@@ -32,6 +32,7 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.UploadItem;
 import org.wcs.smart.connect.model.UploadItem.Status;
 import org.wcs.smart.connect.model.UploadItem.Type;
+import org.wcs.smart.connect.uploader.IUploadItemProcessor;
 
 /**
  * A upload item processor that loads a conservation area export into

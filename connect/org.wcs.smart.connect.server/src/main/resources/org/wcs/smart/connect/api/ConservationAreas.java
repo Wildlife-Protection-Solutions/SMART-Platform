@@ -22,8 +22,10 @@
 package org.wcs.smart.connect.api;
 
 import java.io.File;
-import java.net.HttpURLConnection;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -39,6 +41,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -46,6 +49,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -63,6 +68,9 @@ import org.wcs.smart.connect.model.UploadItem;
 import org.wcs.smart.connect.model.UploadItem.Type;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
+import org.wcs.smart.connect.uploader.sync.ChangeLogPackager;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -111,7 +119,7 @@ public class ConservationAreas extends HttpServlet{
 				CaAction.VIEWCA_KEY,
 				info.getUuid())){
 			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
 	}
 	
@@ -124,7 +132,7 @@ public class ConservationAreas extends HttpServlet{
 				CaAction.DELETECA_KEY,
 				cauuid)){
 			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to delete ca."); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
 	}
 	
@@ -156,7 +164,7 @@ public class ConservationAreas extends HttpServlet{
 			return conservationAreas;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					Messages.getString("ConservationAreas.CaListError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().commit();
@@ -173,26 +181,95 @@ public class ConservationAreas extends HttpServlet{
 	 */
 	@GET
     @Path("/{cauuid}")
-    public ConservationAreaInfo getConservationArea(@PathParam("cauuid") String caUuid){
+    public Response getConservationArea(@PathParam("cauuid") String caUuid,
+    		@QueryParam("data") String data,
+    		@QueryParam("version") String version,
+    		@QueryParam("reversion") String revision){
+		if (data == null){
+			return getConservationAreaInfo(caUuid);
+		}
+		if (data != null && version != null && revision != null){
+			return getChangeLog(caUuid, version, revision);
+		}
+		if (data != null && version == null && revision == null){
+			//return entire conservation area
+		}
+		throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request");
+		
+	}
+	
+	private Response getChangeLog(String caUuid, String version, String revision){
+		UUID uca = null;
+		UUID uversion = null;
+		Long lrevision = -1l;
+		try{
+			uca = UuidUtils.stringToUuid(caUuid);
+			uversion = UuidUtils.stringToUuid(version);
+			lrevision = Long.valueOf(revision);
+		}catch (Exception ex){
+			//TODO: log me
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
+		}
+	
+		//package up change log
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			ConservationAreaInfo info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uca);
+			if (!info.getVersion().equals(uversion)){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid conservation area version.");	
+			}
+
+			Long currentRevision = ChangeLogManager.INSTANCE.getLastRevision(s, uca);
+			if (currentRevision < lrevision){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid revision request.");
+			}
+			
+			ChangeLogPackager packer = new ChangeLogPackager(s, uca, lrevision);
+			java.nio.file.Path zipFile = packer.createPackage();
+			s.getTransaction().commit();
+			
+			StreamingOutput stream = new StreamingOutput() {
+			      @Override
+			      public void write(OutputStream output) throws IOException {
+			        try {
+			        	Files.copy(zipFile, output);
+			        	Files.deleteIfExists(zipFile);
+			        } catch (Exception e) {
+			           e.printStackTrace();
+			        }
+			      }
+			    };
+			    
+			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM).build();
+		}catch (Exception ex){
+			//TODO: log me
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to create package", ex);
+		}finally{
+			s.close();
+		}
+	}
+	
+	
+	private Response getConservationAreaInfo(String caUuid){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
 			ConservationAreaInfo info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, UUID.fromString(caUuid));
 			if (info == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND);
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
-			return info;
+			return Response.ok().entity(info).build();
 		}catch (SmartConnectException ex){
 			throw ex;
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					Messages.getString("ConservationAreas.CaListError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}finally{
 			s.getTransaction().commit();
 		}
 	}
-	
 	/*
 	 * TODO: this might need to be done as a background process incase
 	 * deleting takes a long time
@@ -210,23 +287,23 @@ public class ConservationAreas extends HttpServlet{
     		@QueryParam("password") String password){
 		
 		if (username == null || password == null || username.length() == 0 || password.length() == 0){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Must resupply username and password and query parameter");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Must resupply username and password and query parameter");
 		}
 		
 		if (request.getSession(false) != null){
 			//valid user against current session
 			if (!username.equals(request.getUserPrincipal().getName())){
-				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 		}
 		boolean deleteAll = false;
 		if (dataonly == null || dataonly.length() == 0){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid value for query parameter dataonly");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid value for query parameter dataonly");
 		}
 		try{
 			deleteAll = !Boolean.valueOf(dataonly);
 		}catch (Exception ex){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid value for query parameter dataonly");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid value for query parameter dataonly");
 		}
 		
 		UUID caUuidToDelete = null;
@@ -235,10 +312,10 @@ public class ConservationAreas extends HttpServlet{
 		try{
 			SmartUser su = HibernateManager.getUser(s, username);
 			if (su == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 			if (!BCrypt.checkpw(password, su.getPassword())){
-				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 			
 			
@@ -247,7 +324,7 @@ public class ConservationAreas extends HttpServlet{
 			ConservationAreaInfo serverDelete = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
 					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
 			if (serverDelete == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.NOT_FOUND, Messages.getString("ConservationAreas.DoesNotExist", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			validateDelete(serverDelete.getUuid(), s);
 
@@ -272,7 +349,7 @@ public class ConservationAreas extends HttpServlet{
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
-			throw new SmartConnectException(HttpURLConnection.HTTP_INTERNAL_ERROR, 
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
 					Messages.getString("ConservationAreas.CouldNotDeleteCa", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
 		}
 		//delete all ca data and findstore
@@ -294,13 +371,13 @@ public class ConservationAreas extends HttpServlet{
 	@Path("/{cauuid}")
 	public String createAndUploadConservationArea(@PathParam("cauuid") String caUuid, @QueryParam("version") String versionUuid){
 		if (versionUuid == null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "A version must be supplied");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "A version must be supplied");
 		}
 		UUID version = null;
 		try{
 			version = UUID.fromString(versionUuid);
 		}catch (Exception ex){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "A version must be a valid uuid.");
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "A version must be a valid uuid.");
 		}
 		
 		Session s = HibernateManager.getSession(context);
@@ -313,16 +390,16 @@ public class ConservationAreas extends HttpServlet{
 					
 			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
 			if (lengthHeader == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
 			}
 			long totalBytes = -1;
 			try{
 				totalBytes = Long.parseLong(lengthHeader);
 			}catch (Exception ex){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "X-Upload-Content-Length invalid value", ex); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value", ex); //$NON-NLS-1$
 			}
 			if (totalBytes <= 0){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
 			}
 			
 			if (ca == null){
@@ -335,11 +412,12 @@ public class ConservationAreas extends HttpServlet{
 			}else{
 				if (ca.getStatus() == Status.NODATA){
 					//we can upload data
+					ca.setVersion(version);
 					ca.setStatus(Status.UPLOADING);
 					s.saveOrUpdate(ca);
 				}else{
 					//otherwise ca already exists
-					throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("ConservationAreas.CaExists", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConservationAreas.CaExists", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				}
 			}
 							
@@ -349,16 +427,16 @@ public class ConservationAreas extends HttpServlet{
 			up.setStatus(UploadItem.Status.UPLOADING);
 			up.setType(Type.CA);
 			up.setTotalBytes(totalBytes);
-			File caDir = DataStoreManager.INSTANCE.getConservationAreaFullPath(ca);
-			if (!caDir.exists()){
-				FileUtils.forceMkdir(caDir);
+			up.setLocalFilename("");
+			s.save(up);
+			
+			File updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
+			if (!updir.exists()){
+				FileUtils.forceMkdir(updir);
 			}
-			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(
-					DataStoreManager.INSTANCE.getConservationAreaFolder(ca)
-					+ File.separator + 
-					DataStoreManager.INSTANCE.getConservationAreaFolder(ca)
-					+ ".zip")); //$NON-NLS-1$
-		
+			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
+					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip"));
+			
 			s.save(up);
 			
 			//we have a file to uplodate and we expect more
@@ -384,5 +462,82 @@ public class ConservationAreas extends HttpServlet{
 		}
 		return ""; //$NON-NLS-1$
 		
+	}
+	
+	/**
+	 * Initiates an upload CA session.
+	 * 
+	 * @param caUuid
+	 * @return
+	 */
+	@PUT
+	@Path("/{cauuid}")
+	public String updateConservationArea(@PathParam("cauuid") String caUuid){
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			UUID uuid = UUID.fromString(caUuid);
+			ConservationAreaInfo ca = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
+					.add(Restrictions.eq("uuid", uuid)).uniqueResult(); //$NON-NLS-1$
+			if (ca == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found on server.");
+			}
+
+			
+			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
+			if (lengthHeader == null){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length not set"); //$NON-NLS-1$
+			}
+			long totalBytes = -1;
+			try{
+				totalBytes = Long.parseLong(lengthHeader);
+			}catch (Exception ex){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value", ex); //$NON-NLS-1$
+			}
+			if (totalBytes <= 0){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
+			}
+							
+			UploadItem up = new UploadItem();
+			up.setConservationAreaInfo(ca);
+			up.setStartTime(new Date());
+			up.setStatus(UploadItem.Status.UPLOADING);
+			up.setType(Type.UP_SYNC);
+			up.setTotalBytes(totalBytes);
+			up.setLocalFilename("");
+			s.save(up);
+			
+			File updir = DataStoreManager.INSTANCE.getFile(Uploader.DATASTORE_DIR);
+			if (!updir.exists()){
+				FileUtils.forceMkdir(updir);
+			}
+			up.setLocalFilename(DataStoreManager.INSTANCE.generateFileName(Uploader.DATASTORE_DIR 
+					+ File.separator + UuidUtils.uuidToString(up.getUuid()) + ".zip"));
+		
+			s.saveOrUpdate(up);
+			
+			//we have a file to uplodate and we expect more
+			String uploadURL = request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$
+					+ ":" + request.getServerPort()  //$NON-NLS-1$
+					+ request.getContextPath() 
+					+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
+					+ Uploader.PATH + "/" //$NON-NLS-1$
+					+ URLEncoder.encode(up.getUuid().toString(), ConnectRESTApplication.UTF8);
+			
+			response.setHeader(HttpHeaders.LOCATION, uploadURL);
+			response.setHeader(HttpHeaders.CONTENT_LENGTH, "0"); //$NON-NLS-1$
+			
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(Messages.getString("ConservationAreas.UploadErr", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+		}
+		return ""; //$NON-NLS-1$
 	}
 }

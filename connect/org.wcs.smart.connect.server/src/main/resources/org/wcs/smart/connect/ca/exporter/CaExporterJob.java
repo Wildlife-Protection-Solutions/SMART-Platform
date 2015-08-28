@@ -1,0 +1,122 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.connect.ca.exporter;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.UUID;
+
+import org.apache.commons.io.FileUtils;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.export.ICaDataExportEngine;
+import org.wcs.smart.connect.ZipUtil;
+import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.UploadItem;
+import org.wcs.smart.connect.model.UploadItem.Status;
+import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
+import org.wcs.smart.util.UuidUtils;
+
+/**
+ * Main process for exporting a conservation area.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ */
+public class CaExporterJob implements Runnable {
+
+	private ConservationAreaInfo info = null;
+	private UploadItem item = null;
+	private SessionFactory factory;
+	private Path destFile = null;
+	
+	public CaExporterJob(ConservationAreaInfo info, 
+			UploadItem item, 
+			SessionFactory factory){
+		this.info = info;
+		this.item = item;
+		this.factory = factory;
+	}
+
+
+	@Override
+	public void run() {
+		Session s = factory.openSession();
+		
+		//TODO: lock database until this is done 
+		long revision = ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid());
+		
+		String filename = UuidUtils.uuidToString(info.getUuid())
+				 +"." + UuidUtils.uuidToString(info.getVersion()) 
+				 + "." + String.valueOf(revision)
+				 + ".zip";
+		
+		destFile = DataStoreManager.INSTANCE
+				.getRootDirectory().toPath()
+				.resolve(DataStoreManager.CA_EXPORT_LOCATION)
+				.resolve(filename);
+		
+		if (Files.exists(destFile)){
+			item.setStatus(Status.COMPLETE);
+			item.setMessage("{\"file_url\": " + "<insert url here>}");
+			//TODO: save
+		}else{
+			try{
+				export(s, info.getUuid(), destFile);
+			
+				item.setStatus(Status.COMPLETE);
+				item.setMessage("{\"file_url\": " + "<insert url here>}");
+			}catch (Exception ex){
+				item.setStatus(Status.ERROR);
+				item.setMessage("{\"error\": " + "\"Error packaging conservation area for export. " + ex.getMessage() + "\"}");
+			}
+		}
+	}
+	
+
+	
+	/**
+	 * Exports the current conservation area to the given file.
+	 * @param destFile output file
+	 * @param monitor progress monitor
+	 * 
+	 * 
+	 */
+	public void export(Session session, UUID caUuid, Path destFile) throws Exception{
+	
+		ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, caUuid);
+		
+		File tempDir = DataStoreManager.INSTANCE.getTemporaryDirectory();
+		try{
+			ICaDataExportEngine engine = new PostgresqlCaDataExportEngine(tempDir, ca, session);
+			(new PostgresqlExporters()).exportAll(engine);
+			
+			ZipUtil.createZip(tempDir.listFiles(), destFile.toFile());
+		}finally{
+			FileUtils.deleteDirectory(tempDir);
+		}
+	
+	}
+}

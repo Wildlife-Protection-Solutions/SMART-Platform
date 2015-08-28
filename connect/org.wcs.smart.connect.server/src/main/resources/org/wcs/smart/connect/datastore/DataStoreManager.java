@@ -41,6 +41,8 @@ public enum DataStoreManager {
 	//TODO: this cannot be hard coded.  Should be configurable in web.xml???
 	private static final String DATASTORE_LOCATION = "C:\\data\\SMART\\Connect\\datastore\\";
 	
+	public static final String CA_EXPORT_LOCATION = "caexport";
+	
 	/**
 	 * Any files create in this directory should be considered temporary
 	 * and removed after finished.

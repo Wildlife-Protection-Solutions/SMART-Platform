@@ -34,11 +34,13 @@ public class UploadStatus extends ConnectUuidItem{
 	private UploadItem.Status status;
 	private long currentSize;
 	private long expectedSize;
+	private String message;
 	
 	public UploadStatus(UploadItem item){
 		setUuid(item.getUuid());
 		setExpectedSize(item.getTotalBytes());
 		setStatus(item.getStatus());
+		setMessage(item.getMessage());
 	}
 	
 	@JsonProperty("status")
@@ -63,5 +65,13 @@ public class UploadStatus extends ConnectUuidItem{
 	}
 	public void setExpectedSize(long size){
 		this.expectedSize = size;
+	}
+	
+	@JsonProperty("message")
+	public String getMessage(){
+		return this.message;
+	}
+	public void setMessage(String message){
+		this.message = message;
 	}
 }

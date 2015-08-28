@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.api;
 
-import java.net.HttpURLConnection;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Locale;
@@ -83,7 +82,7 @@ public class ConnectUser extends HttpServlet {
 		try{
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), UserAccountsAction.KEY)){
 				logger.info("User " + request.getUserPrincipal().getName() + " does not have user accounts permissions."); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 		}finally{
 			s.getTransaction().commit();
@@ -113,7 +112,7 @@ public class ConnectUser extends HttpServlet {
 			SmartUser su = HibernateManager.getUser(s, username);
 			if (su == null){
 				logger.info("User " + username + " not found."); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND);
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			return su;
 		}finally{
@@ -127,15 +126,15 @@ public class ConnectUser extends HttpServlet {
     		SmartUser newUser) {
 		validateUser();
 		if (newUser.getUsername() != null && newUser.getUsername().length() > 0 && !newUser.getUsername().equals(user)){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("ConnectUser.invalidusernames", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.invalidusernames", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 		}
 		String err = validateUserName(user, SmartUtils.getRequestLocale(request));
 		if (err != null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 		}
 		err = validatePassword(newUser.getPassword(), SmartUtils.getRequestLocale(request));
 		if (err != null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 		}
 		
 		SmartUser suser = new SmartUser();
@@ -152,7 +151,7 @@ public class ConnectUser extends HttpServlet {
 				.setProjection(Projections.rowCount()).uniqueResult();
 			
 			if (userCnt > 0){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, 
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, 
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), suser.getUsername())); //$NON-NLS-1$
 			}
 			
@@ -184,17 +183,17 @@ public class ConnectUser extends HttpServlet {
     		newUser.setUsername(newUser.getUsername().trim());
     		String err = validateUserName(newUser.getUsername(), SmartUtils.getRequestLocale(request));
     		if (err != null){
-    			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+    			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
     		}
     	}
 		if (newUser.getPassword() != null){
 			if (newUser.getOldpassword() == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("ConnectUser.PasswordNotProvided", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.PasswordNotProvided", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			
 			String err = validatePassword(newUser.getPassword(), SmartUtils.getRequestLocale(request));
 			if (err != null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 			}
 		}
 		
@@ -208,12 +207,12 @@ public class ConnectUser extends HttpServlet {
 			
 			if (newUser.getPassword() != null){
 				if (!BCrypt.checkpw(newUser.getOldpassword(), toUpdate.getPassword())){
-					throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, Messages.getString("ConnectUser.InvalidPassword", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
+					throw new SmartConnectException(Response.Status.BAD_REQUEST, Messages.getString("ConnectUser.InvalidPassword", SmartUtils.getRequestLocale(request)));	 //$NON-NLS-1$
 				}
 			}
 
 			if (toUpdate == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND, 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotFound", SmartUtils.getRequestLocale(request)), olduser)); //$NON-NLS-1$
 			}
 			
@@ -226,7 +225,7 @@ public class ConnectUser extends HttpServlet {
 			
 				if (userCnt > 0){
 					throw new SmartConnectException(
-							HttpURLConnection.HTTP_BAD_REQUEST,
+							Response.Status.BAD_REQUEST,
 							MessageFormat.format(Messages.getString("ConnectUser.UserNotUnique", SmartUtils.getRequestLocale(request)), newUser.getUsername())); //$NON-NLS-1$
 				}
 				toUpdate.setUsername(newUser.getUsername());
@@ -273,7 +272,7 @@ public class ConnectUser extends HttpServlet {
 		try{
 			toDelete = HibernateManager.getUser(s, username);
 			if (toDelete == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND, 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectUser.UserNotFound", SmartUtils.getRequestLocale(request)), username)); //$NON-NLS-1$
 			}
 			s.delete(toDelete);
@@ -284,7 +283,7 @@ public class ConnectUser extends HttpServlet {
 				.setProjection(Projections.rowCount())
 				.uniqueResult();
 			if (adminCnt <= 0){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST,
+				throw new SmartConnectException(Response.Status.BAD_REQUEST,
 						Messages.getString("ConnectUser.DeleteAdminErr", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 			}
 			s.getTransaction().commit();

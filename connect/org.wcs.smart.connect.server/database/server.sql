@@ -18,6 +18,7 @@ DROP TABLE IF EXISTS connect.upload_status;
 DROP TABLE IF EXISTS connect.upload_item;
 DROP TABLE IF EXISTS connect.map_layers;
 
+DROP TABLE IF EXISTS connect.change_log;
 
 /* Create Tables */
 CREATE TABLE connect.upload_item
@@ -37,7 +38,7 @@ ALTER TABLE connect.upload_item ADD CONSTRAINT status_chk
 CHECK (status IN ('UPLOADING', 'PROCESSING', 'COMPLETE', 'ERROR'));
 
 ALTER TABLE connect.upload_item ADD CONSTRAINT type_chk 
-CHECK (type IN ('CA'));
+CHECK (type IN ('CA', 'UP_SYNC'));
 
 	
 CREATE TABLE connect.ca_plugin_version
@@ -277,3 +278,19 @@ COMMENT ON COLUMN connect.user_roles.role IS 'The webserver role.';
 
 
 
+CREATE TABLE connect.change_log(
+	uuid UUID,
+	revision BIGSERIAL,
+	action varchar(15) CONSTRAINT action_check CHECK (action in ('INSERT', 'UPDATE', 'DELETE', 'FS_INSERT', 'FS_DELETE', 'FS_UPDATE')),
+	filename varchar(32672),
+	tablename varchar(256),
+	ca_uuid UUID,
+	key1_fieldname varchar(256),
+	key1 UUID,
+	key2_fieldname varchar(256),
+	key2_str varchar(256),
+	key2_uuid UUID,
+
+	primary key (revision)
+);
+ALTER TABLE connect.change_log ADD CONSTRAINT connect_changelog_ca_uuid_fk foreign key (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE restrict ON DELETE cascade;

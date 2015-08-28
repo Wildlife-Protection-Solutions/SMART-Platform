@@ -1,6 +1,5 @@
 package org.wcs.smart.connect.api;
 
-import java.net.HttpURLConnection;
 import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
@@ -25,11 +24,15 @@ import javax.ws.rs.core.Response;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
+import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.SmartUser;
@@ -37,8 +40,6 @@ import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
 import com.sun.istack.internal.logging.Logger;
-import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
-import org.json.*;
 
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlert.PATH)
 
@@ -60,7 +61,7 @@ public class ConnectAlert extends HttpServlet {
 		try{
 			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.KEY)){
 				logger.info("User " + request.getUserPrincipal().getName() + " does not have alert management permissions."); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new SmartConnectException(HttpURLConnection.HTTP_UNAUTHORIZED);
+				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 		}finally{
 			s.getTransaction().commit();
@@ -106,7 +107,7 @@ public class ConnectAlert extends HttpServlet {
 			Alert a = HibernateManager.getAlert(s, alertUuid);
 			if (a == null){
 				logger.info("Alert ID: " + alertUuid + " not found."); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND);
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			return a;
 		}finally{
@@ -125,7 +126,7 @@ public class ConnectAlert extends HttpServlet {
 			List<Alert> a = HibernateManager.getAlertsByCa(s, caUuid);
 			if (a == null){
 				logger.info("Not alerts found for CA ID: " + caUuid ); //$NON-NLS-1$ //$NON-NLS-2$
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND);
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
 			return a;
 		}finally{
@@ -142,7 +143,7 @@ public class ConnectAlert extends HttpServlet {
 		//validate usergenid, is it unique?
 		String err = validateUserGeneratedId(userGenId);
 		if (err != null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 		}
 		
 		validateAlertValues(newAlert);
@@ -213,7 +214,7 @@ public class ConnectAlert extends HttpServlet {
 					.uniqueResult();
 			
 			if (toUpdate == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND, 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertNotFound", SmartUtils.getRequestLocale(request)), oldAlertId)); //$NON-NLS-1$
 			}
 			
@@ -222,7 +223,7 @@ public class ConnectAlert extends HttpServlet {
 				Alert existingAlert = HibernateManager.getAlertByUserId(s,newAlert.getUserGeneratedId());
 				if (existingAlert != null){
 					throw new SmartConnectException(
-							HttpURLConnection.HTTP_BAD_REQUEST,
+							Response.Status.BAD_REQUEST,
 							MessageFormat.format(Messages.getString("ConnectAlert.AlertNotUnique", SmartUtils.getRequestLocale(request)), newAlert.getUserGeneratedId())); //$NON-NLS-1$
 				}
 				toUpdate.setUserGeneratedId(newAlert.getUserGeneratedId());
@@ -281,7 +282,7 @@ public class ConnectAlert extends HttpServlet {
 		try{
 			toDelete = HibernateManager.getAlert(s, alertUuid);
 			if (toDelete == null){
-				throw new SmartConnectException(HttpURLConnection.HTTP_NOT_FOUND, 
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
 						MessageFormat.format(Messages.getString("ConnectAlert.AlertNotFound", SmartUtils.getRequestLocale(request)), alertUuid)); //$NON-NLS-1$
 			}
 			s.delete(toDelete);
@@ -368,23 +369,23 @@ public class ConnectAlert extends HttpServlet {
 		//validate type
 		String err = validateAlertType(newAlert.getTypeUuid());
 		if (err != null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 		}
 		
 		//validate alert CA UUID
 		err = validateCa(newAlert.getCaUuid());
 		if (err != null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, err);
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 		}
 		
 		//validate x,y are valid Lat-Long values
 		if (newAlert.getX() > 180 || newAlert.getX() < -180 || newAlert.getY() > 90 || newAlert.getY() < -90 || newAlert.getY() == null || newAlert.getX() == null){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid Longitude or Latitude :" + newAlert.getX() + "," + newAlert.getY() );
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Longitude or Latitude :" + newAlert.getX() + "," + newAlert.getY() );
 		}
 		
 		//validate Level
 		if (newAlert.getLevel() == null || newAlert.getLevel() < -32768 || newAlert.getLevel() > 32767){
-			throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid Level (must be a an integer between -32768 and 32767):" + newAlert.getLevel());
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid Level (must be a an integer between -32768 and 32767):" + newAlert.getLevel());
 		}
 		
 	}
@@ -429,7 +430,7 @@ public class ConnectAlert extends HttpServlet {
     	        }
     	        
     	    } catch (JSONException e) {
-    	    	throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "can't save json object: "+e.toString());
+    	    	throw new SmartConnectException(Response.Status.BAD_REQUEST, "can't save json object: "+e.toString());
     	    }
     	 return featureCollection;
     }

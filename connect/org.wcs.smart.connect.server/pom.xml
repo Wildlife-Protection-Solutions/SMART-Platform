@@ -182,6 +182,11 @@
     			<artifactId>org.wcs.smart.query</artifactId>
     			<version>${smart.version}</version>
 		</dependency>
+				<dependency>
+    			<groupId>org.wcs.smart</groupId>
+    			<artifactId>org.wcs.smart.report</artifactId>
+    			<version>${smart.version}</version>
+		</dependency>
 		<dependency>
     			<groupId>org.wcs.smart</groupId>
     			<artifactId>org.wcs.smart.observation.query</artifactId>

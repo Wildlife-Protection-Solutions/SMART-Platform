@@ -28,6 +28,8 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.connect.model.UploadItem;
 import org.wcs.smart.connect.model.UploadItem.Status;
+import org.wcs.smart.connect.uploader.ca.LoadCaProcessor;
+import org.wcs.smart.connect.uploader.sync.SyncUploadCaProcessor;
 
 /**
  * Manages the processing of uploaded items.
@@ -42,23 +44,28 @@ public enum ItemProcessManager {
 	private static List<IUploadItemProcessor> processors = new ArrayList<IUploadItemProcessor>();
 	static{
 		processors.add(new LoadCaProcessor());
+		processors.add(new SyncUploadCaProcessor());
 	};
 	
 	
 	public void processItem(UploadItem item, Session session) throws Exception{
-		
 		//update status
 		session.beginTransaction();
 		session.update(item);
 		item.setStatus(Status.PROCESSING);
 		session.getTransaction().commit();
-		
+			
+		//process item
 		IUploadItemProcessor processor = findProcessor(item);
 		if (processor == null){
+			session.beginTransaction();
 			item.setStatus(Status.ERROR);
 			item.setMessage(MessageFormat.format("No processor found for the file type {0}", item.getType().toString()));
+			session.getTransaction().commit();
+			return;
+		}else{
+			processor.processItem(item, session);
 		}
-		processor.processItem(item, session);
 	}
 	
 	private IUploadItemProcessor findProcessor(UploadItem item){
