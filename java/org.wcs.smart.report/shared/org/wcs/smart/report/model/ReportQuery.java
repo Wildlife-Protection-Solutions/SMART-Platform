@@ -22,7 +22,6 @@
 package org.wcs.smart.report.model;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.UUID;
 
 import javax.persistence.AssociationOverride;

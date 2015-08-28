@@ -32,8 +32,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.Platform;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.wcs.smart.ca.ConservationArea;
@@ -47,7 +45,7 @@ import org.wcs.smart.ca.NamedItem;
  */
 @Entity
 @Table(name="smart.report_folder")
-public class ReportFolder extends NamedItem implements IAdaptable {
+public class ReportFolder extends NamedItem {
 
 	private ReportFolder parentFolder;
 	private Employee employee;
@@ -120,16 +118,6 @@ public class ReportFolder extends NamedItem implements IAdaptable {
 	 */
 	public void setChildren(List<ReportFolder> children){
 		this.childrenFolders = children;
-	}
-	
-	/**
-	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
-	 */
-	@SuppressWarnings("rawtypes")
-	@Override
-	@Transient
-	public Object getAdapter(Class adapter) {
-		return Platform.getAdapterManager().getAdapter(this, adapter);
 	}
 	
 	/**

@@ -8,6 +8,8 @@ import java.util.UUID;
 
 public class ChangeLogItem implements Externalizable{
 
+	private static final long serialVersionUID = 01L;
+	
 	public enum Action{
 		INSERT,
 		UPDATE,
@@ -16,7 +18,7 @@ public class ChangeLogItem implements Externalizable{
 		FS_UPDATE,
 		FS_DELETE
 	}
-	
+	private UUID uuid;
 	private long revision;
 	private Action action;
 	private String fileName;
@@ -30,6 +32,13 @@ public class ChangeLogItem implements Externalizable{
 	private String key2str;
 	
 	private UUID caUuid;
+	
+	public UUID getUuid(){
+		return this.uuid;
+	}
+	public void setUuid(UUID uuid){
+		this.uuid = uuid;
+	}
 	
 	public Long getRevision(){
 		return this.revision;
@@ -79,13 +88,13 @@ public class ChangeLogItem implements Externalizable{
 		return this.fieldName2;
 	}
 	public void setFieldName2(String fieldName1){
-		this.fieldName1 = fieldName2;
+		this.fieldName2 = fieldName2;
 	}
 	public UUID getKey2(){
 		return this.key2;
 	}
 	public void setKey2(UUID key1){
-		this.key1 = key2;
+		this.key2 = key2;
 	}
 	public String getKey2String(){
 		return this.key2str;
@@ -104,20 +113,28 @@ public class ChangeLogItem implements Externalizable{
 	@Override
 	public void readExternal(ObjectInput oi) throws IOException,
 			ClassNotFoundException {
+		uuid = (UUID) oi.readObject();
 		revision = oi.readLong();
 		action = Action.valueOf((String)oi.readObject());
 		fileName = (String)oi.readObject();
 		tableName = (String)oi.readObject();
 		fieldName1 = (String)oi.readObject();
-		key1 = UUID.fromString((String)oi.readObject());
+		String obj = (String) oi.readObject();
+		if (obj != null){
+			key1 = UUID.fromString(obj);
+		}
 		fieldName2 = (String)oi.readObject();
-		key2 = UUID.fromString((String)oi.readObject());;
+		obj = (String) oi.readObject();
+		if (obj != null){
+			key2 = UUID.fromString(obj);
+		}
 		key2str = (String)oi.readObject();
 		caUuid = UUID.fromString((String)oi.readObject());
 	}
 
 	@Override
 	public void writeExternal(ObjectOutput oo) throws IOException {
+		oo.writeObject(uuid);
 		oo.writeLong(revision);
 		oo.writeObject(action.name());
 		oo.writeObject(fileName);

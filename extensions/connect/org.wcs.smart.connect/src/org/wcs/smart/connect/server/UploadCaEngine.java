@@ -42,10 +42,13 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
+import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
+import org.wcs.smart.util.ZipUtil;
 
 /**
  * Upload ca engine that processes the initial upload request,
@@ -77,6 +80,7 @@ public class UploadCaEngine {
 		ConnectServerStatus localStatus = null;
 		Session s = HibernateManager.openSession();
 
+		//TODO: validate plugin versions
 		try{
 			s.beginTransaction();
 			localStatus = getLocalStatus(s);
@@ -116,6 +120,10 @@ public class UploadCaEngine {
 				localStatus = createNewLocalStatus(server, s);
 				localStatus.setLocalFile(getExportFilename());
 				s.save(localStatus);
+				
+				//clean up change log and upload table
+				ChangeLogTableManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
+				SyncHistoryManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
 			}
 			
 			s.getTransaction().commit();
@@ -198,14 +206,11 @@ public class UploadCaEngine {
 		uuidGenerator.configure(new UUIDBinaryType(), prop, null);
 		
 		ConnectServerStatus status = new ConnectServerStatus();
-		
-		UUID client = (UUID) uuidGenerator.generate((SessionImplementor) s, status);
-		status.setClientId(client);
 	
 		UUID version = (UUID) uuidGenerator.generate((SessionImplementor) s, status);
 		status.setVersion(version);
 	
-		status.setRevision(null);
+		status.setServerRevision(-1l);
 		status.setServer(server);
 		status.setConservationArea(SmartDB.getCurrentConservationArea());
 		status.setStatus(ConnectServerStatus.Status.ACTIVE);

@@ -88,7 +88,7 @@ public class ReportDefintionExporter implements IReportExporter {
 
 			//add report file
 			monitor.subTask(Messages.ReportDefintionExporter_Progress_Definition);
-			addFile(report.getFullReportFilename(), report.getFilename(), zout);
+			addFile(ReportPlugIn.getDefault().getReportFile(report), report.getFilename(), zout);
 			monitor.worked(1);
 			
 			//add report info file

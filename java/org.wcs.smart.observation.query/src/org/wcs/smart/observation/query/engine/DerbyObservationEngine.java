@@ -217,8 +217,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 				for (int i = 0; i <  depth; i++) {
 					statement.setString(i+1, names[i]);
 				}
-				statement.setBytes(depth+1, ByteBuffer.allocate(16).putLong(((UUID)uuid).getMostSignificantBits())
-        				.putLong(((UUID)uuid).getLeastSignificantBits()).array());
+				statement.setBytes(depth+1, UuidUtils.uuidToByte((UUID)uuid));
 				statement.executeUpdate();
 			}
 		}
@@ -311,8 +310,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 				
 				if (name != null) {
 					observerSt.setString(1, name);
-					observerSt.setBytes(2, ByteBuffer.allocate(16).putLong(((UUID)uuid).getMostSignificantBits())
-	        				.putLong(((UUID)uuid).getLeastSignificantBits()).array());
+					observerSt.setBytes(2, UuidUtils.uuidToByte((UUID)uuid));
 					observerSt.addBatch();
 					cnt++;
 					if (cnt >= 100){
@@ -393,8 +391,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 				
 				UUID cauuid = UuidUtils.byteToUUID(rs.getBytes(2));
 				String value = linkedData.getLabel(session, cauuid, uuid);
-				statement.setBytes(1, ByteBuffer.allocate(16).putLong(((UUID)uuid).getMostSignificantBits())
-	        			.putLong(((UUID)uuid).getLeastSignificantBits()).array());
+				statement.setBytes(1,  UuidUtils.uuidToByte((UUID)uuid));
 				statement.setString(2, value);
 				statement.addBatch();
 				count++;

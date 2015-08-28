@@ -279,7 +279,7 @@ public class ExportReportEngine {
 			return;
 		}
 		
-		File reportFile = 	report.getFullReportFilename();;
+		File reportFile = ReportPlugIn.getDefault().getReportFile(report);
 	
 		if (reportFile == null ){
 			throw new Exception("Cannot run report."); //$NON-NLS-1$

@@ -103,12 +103,8 @@ public class FileStoreWatcher implements Runnable{
 				PreparedStatement ps = connection.prepareStatement(sql);
 				ps.setString(1, ftype);
 				ps.setString(2, fRelative);
-				UUID value = SmartDB.getCurrentConservationArea().getUuid();
-				byte[] uuid = 
-						ByteBuffer.allocate(16).putLong(((UUID)value).getMostSignificantBits())
-						.putLong(((UUID)value).getLeastSignificantBits()).array();
-				
-				ps.setObject(3,uuid);
+				UUID value = SmartDB.getCurrentConservationArea().getUuid();		
+				ps.setObject(3, UuidUtils.uuidToByte(value));
 				ps.executeUpdate();
 				
 				connection.commit();

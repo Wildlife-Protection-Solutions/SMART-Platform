@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.wcs.smart.util.UuidUtils;
+
 /**
  * <p>This class allows for the use of named parameters in sql queries.</p>
  * <p>
@@ -150,9 +152,7 @@ public class NamedPreparedStatement {
     public void setObject(String name, Object value) throws SQLException {
         for(int i: getIndexes(name)) {
         	if (value instanceof UUID){
-        		statement.setBytes(i, 
-        				ByteBuffer.allocate(16).putLong(((UUID)value).getMostSignificantBits())
-        				.putLong(((UUID)value).getLeastSignificantBits()).array());
+        		statement.setBytes(i, UuidUtils.uuidToByte((UUID)value));
         	}else{
         		statement.setObject(i, value);
         	}

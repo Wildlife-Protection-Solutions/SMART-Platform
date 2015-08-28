@@ -46,7 +46,7 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.export.CaExporter;
+import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
@@ -225,7 +225,7 @@ public class CaImporter {
 	 * @throws Exception
 	 */
 	private UUID validateConservationAreaInfo(File dir, Session session) throws Exception{
-		File caInfo = new File(dir, CaExporter.CA_INFO_FILENAME);
+		File caInfo = new File(dir, ICaDataExportEngine.CA_INFO_FILENAME);
 		String dbVersion = Messages.SmartPlugIn_UnknownVersion;
 		UUID uuid = null;
 		
@@ -283,7 +283,7 @@ public class CaImporter {
 	 * @throws Exception
 	 */
 	private boolean validatePlugInConfiguration(File dir, Session session) throws Exception{
-		File caInfo = new File(new File(dir, CaExporter.DATABASE_DIR), PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"); //$NON-NLS-1$
+		File caInfo = new File(new File(dir, ICaDataExportEngine.DATABASE_DIR), PlugInConfigurationExporter.CONFIG_TABLE_NAME + ".dat"); //$NON-NLS-1$
 		
 		HashMap<String, String> versions = new HashMap<String, String>();
 		try(CSVReader reader = new CSVReader(new FileReader(caInfo))){

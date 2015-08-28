@@ -76,6 +76,10 @@ public interface ConnectClient {
 			@PathParam("cauuid") String caUuid,
 			@QueryParam("version") String versionUuid);
 	
+	@PUT
+	@Path("/" + CA_PATH + "/{cauuid}")
+	public Response updateConservationArea(@HeaderParam("X-Upload-Content-Length") Long length, @PathParam("cauuid") String caUuid);
+	
 //	@POST
 //    @Path("/{username}")
 //	@Produces(MediaType.APPLICATION_JSON)

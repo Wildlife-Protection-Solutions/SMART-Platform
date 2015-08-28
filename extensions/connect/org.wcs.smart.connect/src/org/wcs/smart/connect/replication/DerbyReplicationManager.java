@@ -22,15 +22,16 @@ public enum DerbyReplicationManager {
 
 	private Thread fileStoreReplication;
 	private FileStoreWatcher watcher;
+	
 	public void enableReplication(Session session) throws Exception{
 		setReplicationEnabled(session, true);
 		
-		watcher = new FileStoreWatcher();
-		watcher.register( new File(SmartContext.INSTANCE.getFilestoreLocation()).toPath() );
-
-		//run filestore watcher in new thread (background)		
-		fileStoreReplication = new Thread(watcher);
-		fileStoreReplication.start();
+//		watcher = new FileStoreWatcher();
+//		watcher.register( new File(SmartContext.INSTANCE.getFilestoreLocation()).toPath() );
+//
+//		//run filestore watcher in new thread (background)		
+//		fileStoreReplication = new Thread(watcher);
+//		fileStoreReplication.start();
 	}
 	
 	public void disableReplication(Session session) throws Exception{
@@ -52,7 +53,7 @@ public enum DerbyReplicationManager {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
-				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "false") + ")");
+				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "null") + ")");
 			}});
 	}
 	

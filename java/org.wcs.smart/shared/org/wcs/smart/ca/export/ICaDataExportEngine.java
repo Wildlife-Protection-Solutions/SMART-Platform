@@ -34,6 +34,22 @@ import org.wcs.smart.ca.ConservationArea;
 public interface ICaDataExportEngine {
 
 	/**
+	 * The name of the conservation area data file in the exported
+	 * data.
+	 */
+	public static final String CA_INFO_FILENAME = "conservationarea.dat"; //$NON-NLS-1$
+	/**
+	 * The name of the directory where the database data is stored
+	 */
+	public static final String DATABASE_DIR = "database"; //$NON-NLS-1$
+	/**
+	 * The name of the directory where the filestore data is 
+	 * stored
+	 */
+	public static final String FILESTORE_DIR = "filestore"; //$NON-NLS-1$
+
+
+	/**
 	 * @return the conservation area being exported
 	 */
 	public ConservationArea getConservationArea();

@@ -22,10 +22,12 @@
 package org.wcs.smart.connect;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.UUID;
 
@@ -50,6 +52,7 @@ import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.api.model.UploadStatus;
+import org.wcs.smart.connect.model.ConnectServer;
 
 /**
  * Class to interface with a SMART Connect server.
@@ -63,8 +66,8 @@ public class SmartConnect implements AutoCloseable {
 
 	public final static String API_URL = "/api";
 	
-	private String url;
 	private String username;
+	private ConnectServer server;
 	
 	private ResteasyClient client; 
 	
@@ -74,12 +77,16 @@ public class SmartConnect implements AutoCloseable {
 	 * @param username
 	 * @param password
 	 */
-	public SmartConnect(String url, String username, String password){
-		this.url = url;
+	public SmartConnect(ConnectServer server, String username, String password){
+		this.server = server;
 		this.username = username;
 		
 		client = new ResteasyClientBuilder().build();
 		client.register(new AddAuthHeadersRequestFilter(username, password));
+	}
+	
+	public ConnectServer getServer(){
+		return this.server;
 	}
 	
 	@Override
@@ -94,7 +101,7 @@ public class SmartConnect implements AutoCloseable {
 	 */
 	public String validateUser(){
 		try{
-			ResteasyWebTarget target = client.target(url + API_URL);
+			ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
 			ConnectClient simple = target.proxy(ConnectClient.class);
 			simple.getUser(username);
@@ -113,10 +120,34 @@ public class SmartConnect implements AutoCloseable {
 	 * @return the upload url for the new conservation area
 	 */
 	public String getCaUploadUrl(UUID caUuid, UUID version, File f) throws Exception{
-		ResteasyWebTarget target = client.target(url + API_URL);
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
 		ConnectClient simple = target.proxy(ConnectClient.class);
 		Response r = simple.getDataUploadUrl(f.length(), caUuid.toString(), version.toString());
+		try{
+			if (r.getStatus() == HttpStatus.SC_OK){
+				return r.getHeaderString(HttpHeaders.LOCATION);
+			}else{
+				throw new WebApplicationException(r);
+			}
+		}finally{
+			r.close();
+		}
+	}
+	
+	/**
+	 * Gets the url for uploading conservation area data to 
+	 * a connect server.  This will create a new ca on the server
+	 * if necessary.
+	 * 
+	 * @param caUuid
+	 * @return the upload url for the new conservation area
+	 */
+	public String getSyncUploadUrl(UUID caUuid, Path file) throws Exception{
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
+		
+		ConnectClient simple = target.proxy(ConnectClient.class);
+		Response r = simple.updateConservationArea(Files.size(file), caUuid.toString());
 		try{
 			if (r.getStatus() == HttpStatus.SC_OK){
 				return r.getHeaderString(HttpHeaders.LOCATION);
@@ -136,7 +167,7 @@ public class SmartConnect implements AutoCloseable {
 	 * @return ConservationAreaInfo or null if not found
 	 */
 	public ConservationAreaInfo getCaInfo(UUID caUuid) throws Exception{
-		ResteasyWebTarget target = client.target(url + API_URL);
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
 		ConnectClient simple = target.proxy(ConnectClient.class);
 		try{
@@ -180,7 +211,7 @@ public class SmartConnect implements AutoCloseable {
 	 * @return the upload url for the new conservation area
 	 */
 	//TODO: look into socket exceptions
-	public void uploadFile(String url, File f, long startByte) throws Exception{
+	public void uploadFile(String url, Path f, long startByte) throws Exception{
         
 		//ensure we do not retry, retrying is a problem
 		HttpClient lclient = ((ApacheHttpClient4Engine) client.httpEngine()).getHttpClient();
@@ -189,7 +220,7 @@ public class SmartConnect implements AutoCloseable {
         
         ConnectClient service =  client.target(url).proxy(ConnectClient.class);
 		
-		try(FileInputStream fis = new FileInputStream(f)){
+		try(InputStream fis = Files.newInputStream(f)){
 			fis.skip(startByte);
 			service.updateFile(fis);
 		}
@@ -233,7 +264,7 @@ public class SmartConnect implements AutoCloseable {
 	
 	public final String processException (Throwable ex){
 		if (ex instanceof NotFoundException){
-			String msg = MessageFormat.format("Could not connect to ({0}).", new Object[]{url});
+			String msg = MessageFormat.format("Could not connect to ({0}).", new Object[]{server.getServerUrl()});
 			ConnectPlugIn.log(msg, ex);
 			return msg;
 		}else if (ex instanceof NotAuthorizedException){

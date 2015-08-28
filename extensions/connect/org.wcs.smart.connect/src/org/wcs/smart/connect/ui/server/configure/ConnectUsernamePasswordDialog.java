@@ -88,7 +88,7 @@ public class ConnectUsernamePasswordDialog extends TitleAreaDialog{
 			return;
 		}
 		String error = null;
-		try(SmartConnect sc = new SmartConnect(server.getServerUrl(), username, password)){
+		try(SmartConnect sc = new SmartConnect(server, username, password)){
 			error = sc.validateUser();
 		}
 		

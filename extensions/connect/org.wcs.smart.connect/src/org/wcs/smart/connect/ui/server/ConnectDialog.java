@@ -1,33 +1,7 @@
-/*
- * Copyright (C) 2012 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-package org.wcs.smart.connect.ui.server.export;
+package org.wcs.smart.connect.ui.server;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -41,21 +15,14 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
-import org.wcs.smart.connect.server.UploadCaEngine;
 import org.wcs.smart.connect.ui.server.configure.ShowServerConfigurationHandler;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
-/**
- * Export Conservation Area to SMART Connect server UI Dialog.
- * @author Emily
- *
- */
-public class ExportCaDialog extends TitleAreaDialog {
+public abstract class ConnectDialog extends TitleAreaDialog {
 
 	private Label lblServer;
 	
@@ -65,7 +32,7 @@ public class ExportCaDialog extends TitleAreaDialog {
 	ConnectServer cs = null;
 	ConnectUser user = null;
 	
-	public ExportCaDialog(Shell parentShell) {
+	public ConnectDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
@@ -105,9 +72,6 @@ public class ExportCaDialog extends TitleAreaDialog {
 		
 		initData();
 		
-		setTitle("Export Conservation Area to CONNECT");
-		getShell().setText("Export Conservation Area to CONNECT");
-		setMessage("Export the entire conservation area to a SMART Connect instance.");
 		return parent;
 	}
 	
@@ -146,7 +110,7 @@ public class ExportCaDialog extends TitleAreaDialog {
 	}
 	
 	public void okPressed(){
-		final String server = lblServer.getText().trim();
+		final String server = cs.getServerUrl();
 		final String user = txtUser.getText().trim();
 		final String pass = txtPassword.getText().trim();
 		if (server.isEmpty()){
@@ -162,7 +126,7 @@ public class ExportCaDialog extends TitleAreaDialog {
 			return;
 		}
 		
-		try(SmartConnect connect = new SmartConnect(server, user, pass)){
+		try(SmartConnect connect = new SmartConnect(cs, user, pass)){
 			String error = connect.validateUser();
 			if (error != null){
 				MessageDialog.openError(getShell(), "Error", error);
@@ -170,25 +134,11 @@ public class ExportCaDialog extends TitleAreaDialog {
 			}
 		}
 		
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					UploadCaEngine engine = new UploadCaEngine();
-					try{
-						engine.upload(cs,  new SmartConnect(server, user, pass), monitor);
-					}catch (Exception ex){
-						ConnectPlugIn.displayLog(ex.getMessage(), ex);
-					}
-				}
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			ConnectPlugIn.displayLog(e.getMessage(), e);
-			return;
-		}
+		SmartConnect connect = new SmartConnect(cs, user, pass);
+		onComplete(connect);
+		
 		super.okPressed();
 	}
+	
+	protected abstract void onComplete(SmartConnect connect);
 }

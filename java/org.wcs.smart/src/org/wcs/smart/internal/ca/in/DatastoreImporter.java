@@ -34,7 +34,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.SmartProperties;
-import org.wcs.smart.ca.export.CaExporter;
+import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.internal.Messages;
@@ -81,7 +81,7 @@ public class DatastoreImporter implements ICaDataImporter {
 	 */
 	private void importFileStore(File dir, UUID cauuid, IProgressMonitor monitor) throws IOException{
 		monitor.setTaskName(Messages.CaImporter_Progress_ImportingFileStore);
-		File sourceFile = new File(dir, CaExporter.FILESTORE_DIR);
+		File sourceFile = new File(dir, ICaDataExportEngine.FILESTORE_DIR);
 		
 		
 		String filestore = SmartProperties.getInstance().getProperty(SmartProperties.PROP_FILESTORE);

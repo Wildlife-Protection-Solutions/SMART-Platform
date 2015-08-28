@@ -68,7 +68,7 @@ public class RunReportJob extends Job {
 		super(MessageFormat.format(Messages.RunReportJob_JobName, new Object[]{report.getName()}));
 		
 		this.report = report;
-		this.reportFile = report.getFullReportFilename();
+		this.reportFile = ReportPlugIn.getDefault().getReportFile(report);
 		this.outputFile = file;
 		this.info = info;
 		this.reportParameters = reportParams;

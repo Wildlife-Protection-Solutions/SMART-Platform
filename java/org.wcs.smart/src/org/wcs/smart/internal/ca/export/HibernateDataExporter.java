@@ -26,6 +26,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataExporter;
+import org.wcs.smart.ca.export.TableInfo;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.internal.Messages;
