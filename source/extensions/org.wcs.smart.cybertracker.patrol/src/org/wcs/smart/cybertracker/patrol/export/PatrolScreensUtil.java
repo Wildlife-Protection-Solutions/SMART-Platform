@@ -276,6 +276,27 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return result;
 	}
 
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps) {
+		List<String> nextTaskOptions = new ArrayList<String>();
+		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
+		
+		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
+		nodeIds.add(dmRootId);
+		
+		nextTaskOptions.add(Messages.PatrolScreens_EndPatrol);
+		nodeIds.add(createEndTripNodes(container, startId, Messages.PatrolScreens_ConfirmMessage));
+		
+		if (ctProps.isCanPause()) {
+			nextTaskOptions.add(Messages.PatrolScreens_PausePatrol);
+			PauseNodesLabels labels = new PauseNodesLabels();
+			labels.resumeOption = Messages.PatrolScreens_ResumePatrol;
+			labels.resumeScreenTitle = Messages.PatrolScreens_Paused;
+			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
+		}
+		
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps);
+	}
+	
 	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<ScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
 		//TYPE is visible						- PILOT displayed with navigation formula
 		//TYPE is not visible (set to GROUND)	- PILOT in not displayed
