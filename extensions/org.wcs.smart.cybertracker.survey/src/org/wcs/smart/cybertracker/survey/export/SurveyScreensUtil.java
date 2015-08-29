@@ -39,7 +39,12 @@ import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
+import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.SamplingUnit;
+import org.wcs.smart.er.model.SamplingUnit.State;
+import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -59,6 +64,8 @@ public class SurveyScreensUtil extends ScreensUtil {
 	public static final String RESULT_MISSION_LEADER = "#Leader"; //$NON-NLS-1$
 	public static final String RESULT_MISSION_COMMENTS = "#Comments"; //$NON-NLS-1$
 	
+	public static final String RESULT_MISSION_SAMPLING_UNIT = "#SamplingUnit"; //$NON-NLS-1$
+
 	public static final String DATATYPE_SURVEY = "survey"; //$NON-NLS-1$
 
 	protected SurveyScreensUtil(CyberTrackerUtil ctUtil) {
@@ -105,12 +112,57 @@ public class SurveyScreensUtil extends ScreensUtil {
 		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_MISSION_LEADER, memberIds, filter);
 
 		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
-		
-		addTaskNode(id, result, elements, startId, dmRootId, ctProps);
+
+		CyberTrackerId suScreenId = id;
+		String sdKey = getSurveyDesignKeyId(elements);
+		SurveyDesign surveyDesign = SurveyHibernateManager.getInstance().getSurveyDesign(sdKey, session);
+		List<SamplingUnit> samplingUnits = SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, session, State.ACTIVE);
+		SamplingUnit noneSu = new SamplingUnit();
+		noneSu.setId("None");
+		samplingUnits.add(noneSu);
+		List<CyberTrackerId> cyberTrackerIds = suToCtIds(elements, samplingUnits);
+		id = addSimpleNextRadioNode(id, result, elements, "Sampling Unit", RESULT_MISSION_SAMPLING_UNIT, cyberTrackerIds, true);
+
+		addTaskNode(id, result, elements, startId, dmRootId, suScreenId, ctProps);
 		result.rootId = id;
 		return result;
 	}
+
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerId suId, CyberTrackerProperties ctProps) {
+		List<String> nextTaskOptions = new ArrayList<String>();
+		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
+		
+		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
+		nodeIds.add(dmRootId);
+		
+		nextTaskOptions.add("Start New Sampling Unit");
+		nodeIds.add(suId);
+		
+		
+		nextTaskOptions.add("End Survey");
+		nodeIds.add(createEndTripNodes(container, startId, "Press 'Save' to confirm ending survey or use back button"));
+		
+		if (ctProps.isCanPause()) {
+			nextTaskOptions.add("Pause Survey (Rest)");
+			PauseNodesLabels labels = new PauseNodesLabels();
+			labels.resumeOption = "Resume Survey";
+			labels.resumeScreenTitle = "Paused Survey";
+			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
+		}
+		
+		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps);
+	}
 	
+	//Not the best design, but we can obtain required data from Elements in this case
+	private String getSurveyDesignKeyId(Elements elements) {
+		for (Item item : elements.getList().getItems().getItem()) {
+			if (SurveyScreensUtil.RESULT_SURVEY_DESIGN.equals(item.getName())) {
+				return item.getTag0();
+			}
+		}
+		return null;
+	}
+
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
 		StartScreenLabels labels = new StartScreenLabels();
 		labels.startItemLabel = "Start New Survey";
@@ -119,4 +171,13 @@ public class SurveyScreensUtil extends ScreensUtil {
 		return addStartScreen(id, container, elements, ctProps, labels);
 	}
 
+	private List<CyberTrackerId> suToCtIds(Elements elements, List<SamplingUnit> items) {
+		List<String> labelValues = new ArrayList<String>();
+		List<String> tag0Values = new ArrayList<String>();
+		for (SamplingUnit su : items) {
+			labelValues.add(su.getId());
+			tag0Values.add(UuidUtils.uuidToString(su.getUuid()));
+		}
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+	}
 }

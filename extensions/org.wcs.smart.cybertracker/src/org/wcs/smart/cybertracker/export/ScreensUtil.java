@@ -129,7 +129,10 @@ public class ScreensUtil {
 		return idsBegin.get(0);
 	}
 
-	protected void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerProperties ctProps) {
+	protected void buildNextTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, List<String> nextTaskOptions, List<CyberTrackerId> nodeIds, CyberTrackerProperties ctProps) {
+		if (nextTaskOptions.size() != nodeIds.size()) {
+			throw new IllegalArgumentException("Unable to build next task node. Number of task options is not equal to the number of referenced nodes."); //$NON-NLS-1$
+		}
 		StringBuilder defaults = new StringBuilder();
 		for (Iterator<String> i = container.defaultValues.iterator(); i.hasNext();) {
 			defaults.append(i.next());
@@ -138,45 +141,13 @@ public class ScreensUtil {
 		}
 		String defaultValues = defaults.toString();
 		
-		boolean canPause = ctProps.isCanPause();
-		
-		CyberTrackerId resumeId = new CyberTrackerId();
-		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ResumePatrol);
-		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
-		String resScrTrElements = ctUtil.translateElements(resScrIds);
-		StringBuilder resScrLinks = new StringBuilder();
-		// "Resume Patrol" leads to "Next Task" screen
-		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(id.getNodeTranslatedId());
-		Node resumeNode = screensFactory.createNodeRadio(resumeId.getNodeId(), Messages.PatrolScreens_Paused, resScrValues, resScrTrElements, resScrLinks.toString(), null);
-		addGpsConfiguration(resumeNode, ctProps, 0);
-		
-		CyberTrackerId confId = new CyberTrackerId();
-		Node confirmNode = screensFactory.createNodeMsgText(confId.getNodeId(), Messages.PatrolScreens_Confirm, Messages.PatrolScreens_ConfirmMessage);
-		//disable next button, enable save button,navigate on save to start point
-		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
-		control2.setShowNext("False"); //$NON-NLS-1$
-		control2.setShowMajor("True"); //$NON-NLS-1$
-		control2.setTranslateMajorScreenId(startId.getNodeId());
-
-		List<String> nextTaskOptions = new ArrayList<String>();
-		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
-		nextTaskOptions.add(Messages.PatrolScreens_EndPatrol);
-		if (canPause) {
-			nextTaskOptions.add(Messages.PatrolScreens_PausePatrol);
-		}
-		
 		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, nextTaskOptions.toArray(new String[nextTaskOptions.size()]));
 		List<String> values = ctUtil.listItemIds(ids);
 		String trElements = ctUtil.translateElements(ids);
 		//custom translate links logic
 		StringBuilder links = new StringBuilder();
-		// "Make observations" leads to datamodel root
-		links.append(ids.get(0).getItemTranslatedId()).append(dmRootId.getNodeTranslatedId());
-		// "End Patrol" leads to confirmation screen
-		links.append(ids.get(1).getItemTranslatedId()).append(confId.getNodeTranslatedId());
-		// "Pause Patrol (Rest)" leads to "Paused" screen
-		if (canPause) {
-			links.append(ids.get(2).getItemTranslatedId()).append(resumeId.getNodeTranslatedId());
+		for (int i = 0; i < ids.size(); i++) {
+			links.append(ids.get(i).getItemTranslatedId()).append(nodeIds.get(i).getNodeTranslatedId());
 		}
 		Node node = screensFactory.createNodeRadio(id.getNodeId(), Messages.PatrolScreens_NextTask, values, trElements, links.toString(), null);
 		if (defaultValues != null && !defaultValues.isEmpty()) {
@@ -188,7 +159,7 @@ public class ScreensUtil {
 		}
 		
 		CyberTrackerProperties properties = ctUtil.getCtProperties();
-		control2 = ScreensObjectFactory.getNavigationControl(node);
+		Control control2 = ScreensObjectFactory.getNavigationControl(node);
 		control2.setShowBack("False"); //$NON-NLS-1$
 		if (properties.isShowEdit()) {
 			control2.setShowEdit("True"); //$NON-NLS-1$
@@ -199,12 +170,37 @@ public class ScreensUtil {
 		
 		addGpsConfiguration(node, ctProps);
 		container.screenNodes.add(node);
-		if (canPause) {
-			container.screenNodes.add(resumeNode);
-		}
-		container.screenNodes.add(confirmNode);
 	}
 	
+	protected CyberTrackerId createEndTripNodes(MetaExportResult container, CyberTrackerId appStartId, String confirmMsg) {
+		CyberTrackerId endId = new CyberTrackerId();
+		Node confirmNode = screensFactory.createNodeMsgText(endId.getNodeId(), Messages.PatrolScreens_Confirm, confirmMsg);
+		//disable next button, enable save button,navigate on save to start point
+		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
+		control2.setShowNext("False"); //$NON-NLS-1$
+		control2.setShowMajor("True"); //$NON-NLS-1$
+		control2.setTranslateMajorScreenId(appStartId.getNodeId());
+		container.screenNodes.add(confirmNode);
+		return endId;
+	}
+
+	protected CyberTrackerId createPauseTripNodes(MetaExportResult container, Elements elements, CyberTrackerId nextTaskId, CyberTrackerProperties ctProps, PauseNodesLabels labels) {
+		if (!ctProps.isCanPause()) {
+			return null;
+		}
+		CyberTrackerId resumeId = new CyberTrackerId();
+		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, labels.resumeOption);
+		List<String> resScrValues = ctUtil.listItemIds(resScrIds);
+		String resScrTrElements = ctUtil.translateElements(resScrIds);
+		StringBuilder resScrLinks = new StringBuilder();
+		// "Resume" leads to "Next Task" screen
+		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(nextTaskId.getNodeTranslatedId());
+		Node resumeNode = screensFactory.createNodeRadio(resumeId.getNodeId(), labels.resumeScreenTitle, resScrValues, resScrTrElements, resScrLinks.toString(), null);
+		addGpsConfiguration(resumeNode, ctProps, 0);
+		container.screenNodes.add(resumeNode);
+		return resumeId;
+	}
+
 	/**
 	 * @param name
 	 * @param elements
@@ -377,4 +373,9 @@ public class ScreensUtil {
 		ScreensObjectFactory.addControlToNode(node, msgControl);
 	}
 
+	protected class PauseNodesLabels {
+		public String resumeScreenTitle = "Paused"; //$NON-NLS-1$
+		public String resumeOption = "Resume"; //$NON-NLS-1$
+		public PauseNodesLabels() {}
+	}
 }
