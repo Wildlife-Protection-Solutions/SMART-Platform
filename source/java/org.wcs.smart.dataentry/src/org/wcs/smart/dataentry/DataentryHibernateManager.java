@@ -34,7 +34,6 @@ import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
  * Dataentry related database functions.
