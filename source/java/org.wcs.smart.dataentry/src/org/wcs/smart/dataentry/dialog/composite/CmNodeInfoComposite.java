@@ -63,6 +63,8 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 
 	private Button btnPhoto;
 	private Button btnPhotoRequired;
+	private Button btnCollectMultiple;
+	private Button btnSingleGpsPoint;
 	private boolean isGroup;
 	
 	public CmNodeInfoComposite(Composite parent, ConfigurableModel model, Session session, boolean isGroup) {
@@ -142,6 +144,32 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 		});
 		
 		
+		label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmNodeInfoComposite_CollectMultiplObservations);
+		label.setToolTipText(Messages.CmNodeInfoComposite_CollectMultiplObservationsTooltip);
+		btnCollectMultiple = new Button(container, SWT.CHECK);
+		btnCollectMultiple.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getSourceObject().setCollectMultipleObservations(btnCollectMultiple.getSelection());
+				btnSingleGpsPoint.setEnabled(getSourceObject().isCollectMultipleObservations());
+				fireModelChanged();
+			}
+		});
+
+		
+		label = new Label(container, SWT.NONE);
+		label.setText(Messages.CmNodeInfoComposite_RecordSingleGpsPoint);
+		label.setToolTipText(Messages.CmNodeInfoComposite_RecordSingleGpsPointTooltip);
+		btnSingleGpsPoint = new Button(container, SWT.CHECK);
+		btnSingleGpsPoint.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				getSourceObject().setUseSingleGpsPoint(btnSingleGpsPoint.getSelection());
+				fireModelChanged();
+			}
+		});
+
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
@@ -157,6 +185,12 @@ public class CmNodeInfoComposite extends AbstractInfoComposite {
 					if (btnPhotoRequired != null) {
 						btnPhotoRequired.setSelection(n.isPhotoRequired());
 						btnPhotoRequired.setEnabled(n.isPhotoAllowed());
+					}
+					if (btnCollectMultiple != null)
+						btnCollectMultiple.setSelection(n.isCollectMultipleObservations());
+					if (btnSingleGpsPoint != null) {
+						btnSingleGpsPoint.setSelection(n.isUseSingleGpsPoint());
+						btnSingleGpsPoint.setEnabled(n.isCollectMultipleObservations());
 					}
 					CmNodeInfoComposite.this.layout(true, true);
 				}
