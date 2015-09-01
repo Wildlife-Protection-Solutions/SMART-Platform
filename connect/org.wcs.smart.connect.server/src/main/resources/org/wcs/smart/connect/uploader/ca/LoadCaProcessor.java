@@ -47,7 +47,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 	
 	@Override
 	public Type getSupportedType() {
-		return UploadItem.Type.CA;
+		return UploadItem.Type.UP_CA;
 	}
 
 	@Override

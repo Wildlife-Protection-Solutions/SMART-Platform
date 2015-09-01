@@ -149,7 +149,6 @@ public class MapLayers extends HttpServlet {
     	
     	MapLayer toUpdate = null;
     	Session s = HibernateManager.getSession(context);
-		s.beginTransaction();
 		try{
 			toUpdate = (MapLayer)s.createCriteria(MapLayer.class)
 					.add(Restrictions.eq("uuid", oldUuid)) //$NON-NLS-1$
@@ -176,16 +175,16 @@ public class MapLayers extends HttpServlet {
 
 			//validate values
 			if(toUpdate.getLayerType() < 0 || toUpdate.getLayerType() > 10){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Invalid layerType provided");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid layerType provided");
 			}
 			if(toUpdate.getMapboxId().length() > 64){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "mapboxId must be < 64 characters");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "mapboxId must be < 64 characters");
 			}
 			if(toUpdate.getToken().length() > 256){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Token must be < 256 characters");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Token must be < 256 characters");
 			}
 			if(toUpdate.getLayerName().length() > 32){
-				throw new SmartConnectException(HttpURLConnection.HTTP_BAD_REQUEST, "Layer Name must be < 32 characters");
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Layer Name must be < 32 characters");
 			}
 
 			

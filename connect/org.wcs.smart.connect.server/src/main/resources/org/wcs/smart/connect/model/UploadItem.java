@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.model;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -30,6 +32,11 @@ import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+import javax.servlet.http.HttpServletRequest;
+
+import org.wcs.smart.connect.api.ConnectRESTApplication;
+import org.wcs.smart.connect.api.Uploader;
 
 /**
  * Smart connect upload item entity.
@@ -41,8 +48,9 @@ import javax.persistence.Table;
 public class UploadItem extends ConnectUuidItem {
 
 	public enum Type {
-		CA,
-		UP_SYNC;
+		UP_CA,
+		UP_SYNC,
+		DOWN_CA;
 	}
 	
 	public enum Status{
@@ -121,5 +129,14 @@ public class UploadItem extends ConnectUuidItem {
 		this.message = message;
 	}
 	
+	@Transient
+	public String getStatusURL(HttpServletRequest request) throws UnsupportedEncodingException{
+		return request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$
+				+ ":" + request.getServerPort()  //$NON-NLS-1$
+				+ request.getContextPath() 
+				+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
+				+ Uploader.PATH + "/" //$NON-NLS-1$
+				+ URLEncoder.encode(getUuid().toString(), ConnectRESTApplication.UTF8);
+	}
 }
 

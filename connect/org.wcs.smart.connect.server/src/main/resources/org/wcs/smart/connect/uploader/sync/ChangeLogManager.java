@@ -22,8 +22,11 @@ public enum ChangeLogManager {
 		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :ca";
 		SQLQuery q = s.createSQLQuery(sql);
 		q.setParameter("ca", ca, PostgresUUIDType.INSTANCE);
-		Long bi = ((BigInteger)q.uniqueResult()).longValueExact();
-		return bi;
+		Object rev = q.uniqueResult();
+		if (rev == null){
+			return -1;
+		}
+		return ((BigInteger)rev).longValueExact();
 	}
 	
 	public void insertItem(Session s, ChangeLogItem item){

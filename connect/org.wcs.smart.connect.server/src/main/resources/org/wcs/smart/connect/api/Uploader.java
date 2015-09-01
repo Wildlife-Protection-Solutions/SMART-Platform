@@ -101,7 +101,7 @@ public class Uploader extends HttpServlet {
 			UploadStatus status = new UploadStatus(item);
 			File f = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
 			
-			if (!f.exists()){
+			if (item.getLocalFilename().isEmpty() || !f.exists()){
 				System.out.println("UPLOADED FILE SIZE: 0 (status)");
 				status.setCurrentSize(0);
 			}else{

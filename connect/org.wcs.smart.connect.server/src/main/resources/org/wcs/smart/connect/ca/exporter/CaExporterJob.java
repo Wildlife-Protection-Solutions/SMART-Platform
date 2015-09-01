@@ -25,6 +25,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -32,6 +34,7 @@ import org.hibernate.SessionFactory;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.ZipUtil;
+import org.wcs.smart.connect.api.ConservationAreas;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.UploadItem;
@@ -46,17 +49,21 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 public class CaExporterJob implements Runnable {
-
+	private final Logger logger = Logger.getLogger(CaExporterJob.class.getName());
+	
 	private ConservationAreaInfo info = null;
 	private UploadItem item = null;
 	private SessionFactory factory;
 	private Path destFile = null;
+	private String fileurl;
 	
 	public CaExporterJob(ConservationAreaInfo info, 
 			UploadItem item, 
+			String fileurl,
 			SessionFactory factory){
 		this.info = info;
 		this.item = item;
+		this.fileurl = fileurl;
 		this.factory = factory;
 	}
 
@@ -64,38 +71,58 @@ public class CaExporterJob implements Runnable {
 	@Override
 	public void run() {
 		Session s = factory.openSession();
+		s.beginTransaction();
+		try{
+			//TODO: lock database until this is done 
+			long revision = ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid());
 		
-		//TODO: lock database until this is done 
-		long revision = ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid());
-		
-		String filename = UuidUtils.uuidToString(info.getUuid())
+			String filename = UuidUtils.uuidToString(info.getUuid())
 				 +"." + UuidUtils.uuidToString(info.getVersion()) 
 				 + "." + String.valueOf(revision)
 				 + ".zip";
 		
-		destFile = DataStoreManager.INSTANCE
+			destFile = DataStoreManager.INSTANCE
 				.getRootDirectory().toPath()
 				.resolve(DataStoreManager.CA_EXPORT_LOCATION)
 				.resolve(filename);
-		
-		if (Files.exists(destFile)){
-			item.setStatus(Status.COMPLETE);
-			item.setMessage("{\"file_url\": " + "<insert url here>}");
-			//TODO: save
-		}else{
-			try{
-				export(s, info.getUuid(), destFile);
-			
-				item.setStatus(Status.COMPLETE);
-				item.setMessage("{\"file_url\": " + "<insert url here>}");
-			}catch (Exception ex){
-				item.setStatus(Status.ERROR);
-				item.setMessage("{\"error\": " + "\"Error packaging conservation area for export. " + ex.getMessage() + "\"}");
+			if (!Files.exists(destFile.getParent())){
+				Files.createDirectories(destFile.getParent());
 			}
+			
+			item.setLocalFilename(DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(destFile).toString());
+			
+			if (Files.exists(destFile)){
+				
+				item.setStatus(Status.COMPLETE);
+				item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
+				s.saveOrUpdate(item);
+				s.getTransaction().commit();
+			}else{
+				try{
+					export(s, info.getUuid(), destFile);
+					item.setStatus(Status.COMPLETE);
+					item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
+					s.saveOrUpdate(item);
+					s.getTransaction().commit();
+				}catch (Exception ex){
+					logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
+					
+					//open a new transaction to update db state
+					s.getTransaction().rollback();
+					s.beginTransaction();
+					s.saveOrUpdate(item);
+					item.setStatus(Status.ERROR);
+					item.setMessage("{\"error\": " + "\"Error packaging conservation area for export. " + ex.getMessage() + "\"}");
+					s.getTransaction().commit();
+				}
+			}
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
+		}finally{
+			if (s.isOpen())	s.close();
 		}
 	}
 	
-
 	
 	/**
 	 * Exports the current conservation area to the given file.
@@ -108,14 +135,17 @@ public class CaExporterJob implements Runnable {
 	
 		ConservationArea ca = (ConservationArea) session.get(ConservationArea.class, caUuid);
 		
-		File tempDir = DataStoreManager.INSTANCE.getTemporaryDirectory();
+		Path tempDir = new File(DataStoreManager.INSTANCE.getTemporaryDirectory().getAbsoluteFile(), System.nanoTime()+"").toPath();
+		if (!Files.exists(tempDir)){
+			Files.createDirectories(tempDir);
+		}
 		try{
-			ICaDataExportEngine engine = new PostgresqlCaDataExportEngine(tempDir, ca, session);
+			ICaDataExportEngine engine = new PostgresqlCaDataExportEngine(tempDir.toFile(), ca, session);
 			(new PostgresqlExporters()).exportAll(engine);
 			
-			ZipUtil.createZip(tempDir.listFiles(), destFile.toFile());
+			ZipUtil.createZip(tempDir.toFile().listFiles(), destFile.toFile());
 		}finally{
-			FileUtils.deleteDirectory(tempDir);
+			FileUtils.deleteDirectory(tempDir.toFile());
 		}
 	
 	}

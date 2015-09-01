@@ -36,6 +36,7 @@
 		<div class="table-cell smart-table-cell">Status</div>
 		<div class="table-cell smart-table-cell">Version</div>
 		<div class="table-cell smart-table-cell"></div>
+		<div class="table-cell smart-table-cell"></div>
 	</div>
 	<c:forEach var="ca" items="${cas}" varStatus="count">
 		<div data-cauuid ="${ca.getUuid()}" class="carow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
@@ -44,6 +45,7 @@
 			<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
 			<div class="table-cell smart-table-cell">${ca.getVersion().toString()}</div>
 			<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" title="delete conservation area" class="deleteca delete-icon"></a></div>
+			<div class="table-cell smart-table-cell "><a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca">downloadca</a></div>
 		</div>
 	</c:forEach>
 	</div>  

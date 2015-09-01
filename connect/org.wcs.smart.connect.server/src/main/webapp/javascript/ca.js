@@ -7,6 +7,16 @@ window.onload = function(){
 	for (var i = 0; i < elements.length; i ++){
 		elements[i].onclick=confirmdeleteca;
 	}
+	
+	elements = document.querySelectorAll(".downloadca");
+	for (var i = 0; i < elements.length; i ++){
+		elements[i].onclick=downloadca;
+	}
+}
+function downloadca(){
+	alert('download');
+	var cauuid = this.dataset.cauuid;
+	window.open('https://localhost:8443/server/api/conservationarea/' + cauuid + '?data=all', '_blank');
 }
 
 function confirmdeleteca(){
@@ -144,5 +154,15 @@ function createCaTable(){
  		deleteicon.onclick = confirmdeleteca;
  		deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);
+ 		
+ 		var downloadca = document.createElement("a");
+ 		deleteicon.className="downloadca";
+ 		deleteicon.title="downloadca";
+ 		deleteicon.dataset.cauuid = cas[i].uuid;
+ 		deleteicon.onclick = downloadca;
+ 		deleteicon.href="";
+ 		row.childNodes[4].appendChild(downloadca);
+ 		
+ 		
  	}
 }

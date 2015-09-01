@@ -27,7 +27,9 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,13 +41,17 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.hibernate.type.PostgresUUIDType;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 /**
  * Loads a conservation area export into the postgresql
@@ -61,7 +67,8 @@ public class PostgresqlCaLoader {
 	 */
 	public static final String DATABASE_DIR = "database"; //$NON-NLS-1$
 	
-	public static final String[] TABLES_TO_IGNORE = new String[]{"smart.connect_status", 
+	public static final String[] TABLES_TO_IGNORE = new String[]{
+		"smart.connect_status", 
 		"smart.connect_change_log", 
 		"smart.connect_sync_history"};
 	
@@ -76,6 +83,7 @@ public class PostgresqlCaLoader {
 		try{
 			ZipUtil.unzipFolder(zipFile, tempDir);
 			processDatabaseFiles(tempDir);
+			inportPlugInVersionFile(tempDir, ca);
 			processFilestore(tempDir, ca);
 		}finally{
 			tempDir.delete();
@@ -167,6 +175,21 @@ public class PostgresqlCaLoader {
 		}
 	}
 
+	private void inportPlugInVersionFile(File dir, ConservationAreaInfo info) throws Exception{
+		File f = new File(new File(dir, DATABASE_DIR), "db_versions.dat");
+		
+		try(CSVReader reader = new CSVReader(new FileReader(f))){
+			String[] data = null;
+			while((data = reader.readNext()) != null){
+				SQLQuery insert = session.createSQLQuery("INSERT INTO connect.ca_plugin_version (ca_uuid, plugin_id, version) values (?, ?, ?)");
+				insert.setParameter(0, info.getUuid(), PostgresUUIDType.INSTANCE);
+				insert.setParameter(1, data[0]);
+				insert.setParameter(2, data[1]);
+				insert.executeUpdate();
+			}
+		}	
+	}
+	
 	/**
 	 * Scans the directory/database for all table definition 
 	 * files (*.def).

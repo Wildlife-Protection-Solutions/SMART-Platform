@@ -165,8 +165,12 @@ public class PostgresqlExporters {
 		Map<String, ClassMetadata> x = engine.getSession().getSessionFactory().getAllClassMetadata();
 		
 		for (SmartTable st : SmartTable.values()){
-			ClassMetadata metadata = x.get(st.hibernateClass.getSimpleName());
-			
+			ClassMetadata metadata = x.get(st.hibernateClass.getName());
+			if (metadata == null || metadata.hasSubclasses()){
+				//this is not mapped to a db table
+				System.out.println("NOT MAPPED:" + st.hibernateClass.getName());
+				continue;
+			}
 			String tableName = ((AbstractEntityPersister)metadata).getTableName();
 			
 			PostgresqlTableInfo info = new PostgresqlTableInfo(st.hibernateClass, tableName);
