@@ -54,6 +54,8 @@ public class CmNode extends NamedItem {
 	private List<CmAttribute> cmAttributes;
 	private boolean photoAllowed = false;
 	private boolean photoRequired = true;
+	private boolean collectMultipleObservations = false;
+	private boolean useSingleGpsPoint = false;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="cm_uuid", referencedColumnName="uuid")
@@ -135,6 +137,22 @@ public class CmNode extends NamedItem {
 		this.photoRequired = !Boolean.FALSE.equals(photoRequired); //null <==> true
 	}
 	
+	@Column(name = "collect_multiple_obs")
+	public boolean isCollectMultipleObservations() {
+		return collectMultipleObservations;
+	}
+	public void setCollectMultipleObservations(Boolean collectMultipleObservations) {
+		this.collectMultipleObservations = Boolean.TRUE.equals(collectMultipleObservations); //null <==> false
+	}
+
+	@Column(name = "use_single_gps_point")
+	public boolean isUseSingleGpsPoint() {
+		return useSingleGpsPoint;
+	}	
+	public void setUseSingleGpsPoint(Boolean useSingleGpsPoint) {
+		this.useSingleGpsPoint = Boolean.TRUE.equals(useSingleGpsPoint); //null <==> false
+	}
+
 	@Transient
 	public boolean isGroup() {
 		return category == null;
