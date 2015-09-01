@@ -1,6 +1,7 @@
 package org.wcs.smart.entity.query.model.columns;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -128,7 +129,7 @@ public class EntityQueryColumnCache {
 					int numCategory = QueryDataModelManager.getInstance()
 							.getActiveDepth();
 					for (int i = 0; i < numCategory; i++) {
-						cols.add(new EtCategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader, i));
+						cols.add(new EtCategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader, i), i));
 					}
 
 					// sort attributes alphabetically

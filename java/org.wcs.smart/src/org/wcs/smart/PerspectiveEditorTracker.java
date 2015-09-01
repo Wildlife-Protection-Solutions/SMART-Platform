@@ -31,6 +31,8 @@ import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.advanced.MArea;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainer;
+import org.eclipse.e4.ui.model.application.ui.basic.MPartSashContainerElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MPartStack;
 import org.eclipse.e4.ui.model.application.ui.basic.MStackElement;
 import org.eclipse.e4.ui.model.application.ui.basic.MWindow;
@@ -99,7 +101,16 @@ public class PerspectiveEditorTracker implements EventHandler {
 	 */
 	public MStackElement getActivePart(){
 		if (editorArea == null) return null;
-		MStackElement lastPart = ((MPartStack)editorArea.getChildren().get(0)).getSelectedElement();
+		
+		MPartSashContainerElement element = editorArea.getChildren().get(0);
+		MStackElement lastPart = null;
+		if (element instanceof MPartSashContainer){
+			element = ((MPartSashContainer)element).getSelectedElement();
+		}
+		if (element instanceof MPartStack){
+			lastPart = ((MPartStack)element).getSelectedElement();
+		}
+		
 		if (lastPart != null && lastPart.isVisible()){
 			return lastPart;
 		}
@@ -108,13 +119,21 @@ public class PerspectiveEditorTracker implements EventHandler {
 	
 	public void selectStackElement(MPart activate){
 		if (editorArea == null) return;
-		if (!((MPartStack)editorArea.getChildren().get(0)).getTags().contains(IPresentationEngine.NO_AUTO_COLLAPSE)){
-			((MPartStack)editorArea.getChildren().get(0)).getTags().add(IPresentationEngine.NO_AUTO_COLLAPSE);
+		MPartStack pstack = null;
+		MPartSashContainerElement element = editorArea.getChildren().get(0);
+		if (element instanceof MPartSashContainer){
+			element = ((MPartSashContainer)element).getSelectedElement();
+		}
+		if (element instanceof MPartStack){
+			pstack = (MPartStack)element;
+		}
+		if (pstack != null && !(pstack.getTags().contains(IPresentationEngine.NO_AUTO_COLLAPSE))){
+			pstack.getTags().add(IPresentationEngine.NO_AUTO_COLLAPSE);
 		}
 		
-		((MPartStack)editorArea.getChildren().get(0)).setSelectedElement(null);
+		pstack.setSelectedElement(null);
 		if (activate != null && activate.getWidget() == null) return;
-		((MPartStack)editorArea.getChildren().get(0)).setSelectedElement(activate);
+		pstack.setSelectedElement(activate);
 	}
 
 }

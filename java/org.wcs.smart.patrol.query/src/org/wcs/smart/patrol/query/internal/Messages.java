@@ -160,7 +160,7 @@ public class Messages extends NLS {
 	public static String Query_DefaultQueryName;
 	public static String QueryColumn_LoadingObservationColumnJobName;
 	public static String QueryColumn_LoadingPatrolColumnJobName;
-	public static String QueryColumn_ObservationCategoryTableHeader;
+	public static String QueryColumn_ObservationCategoryTableHeader1;
 	public static String QueryColumnCache_LoadingWPQueryColumnJobName;
 	public static String QueryDataSource_SchemaError;
 	public static String QueryDataSourceFactory_Description;
