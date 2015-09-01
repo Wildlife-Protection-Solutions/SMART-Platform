@@ -1,6 +1,7 @@
 package org.wcs.smart.patrol.query.model.observation;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -144,9 +145,9 @@ public class PatrolQueryColumnCache {
 				
 				
 				// add data model category columns
-				int numCategory =QueryDataModelManager.getInstance().getActiveDepth();
+				int numCategory = QueryDataModelManager.getInstance().getActiveDepth();
 				for (int i = 0; i < numCategory; i++) {
-					cols.add(new PatrolCategoryQueryColumn(Messages.QueryColumn_ObservationCategoryTableHeader + i, i));
+					cols.add(new PatrolCategoryQueryColumn(MessageFormat.format(Messages.QueryColumn_ObservationCategoryTableHeader1, i), i));
 				}
 					
 				//sort attributes alphabetically

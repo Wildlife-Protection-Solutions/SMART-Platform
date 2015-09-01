@@ -818,8 +818,6 @@ public class DataModelPropertyPage  extends AbstractPropertyJHeaderDialog{
 	 * adds an attribute
 	 */
 	private void addAttribute(){
-		
-		
 		Object o = ((IStructuredSelection)viewer.getSelection()).getFirstElement();
 		if (! (o instanceof Category)){
 			return;

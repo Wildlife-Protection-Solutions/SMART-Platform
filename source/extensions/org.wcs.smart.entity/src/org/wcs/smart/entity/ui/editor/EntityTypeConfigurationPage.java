@@ -710,8 +710,11 @@ public class EntityTypeConfigurationPage extends EditorPart implements IEntityTy
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
 						monitor.beginTask(Messages.EntityTypeConfigurationPage_LoadAttributeProgressName, 1);
-				
-						Criteria c = s.createCriteria(Attribute.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));	 //$NON-NLS-1$
+						//we do this to ensure the local is setup propery as this thread is not
+						//the same thread as the sesssion <s> was opened in.
+						HibernateManager.initContext();
+						Criteria c = s.createCriteria(Attribute.class)
+								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()));	 //$NON-NLS-1$
 						@SuppressWarnings("unchecked")
 						List<Attribute> atts = c.list();
 						dmAttributes.addAll(atts);

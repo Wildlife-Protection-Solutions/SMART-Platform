@@ -83,7 +83,7 @@ import org.wcs.smart.util.I18nUtil;
  */
 public class HibernateManager extends SmartHibernateManager{
 	
-	private static void initContext(){
+	public static void initContext(){
 		if (SmartDB.getCurrentLanguage() != null){
 			I18nUtil.setLocale(SmartDB.getCurrentLanguage().getUuid());
 		}

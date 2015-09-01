@@ -233,7 +233,11 @@ public class RecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					QueryPlugIn.logSql(sql.toString());
 					try(PreparedStatement psq = c.prepareStatement(sql.toString())){
 						for (int i = 0; i < parameterValues.size(); i ++){
-							psq.setObject(i+1, parameterValues.get(i));
+							if (parameterValues.get(i) instanceof UUID){
+								psq.setBytes(i+1, UuidUtils.uuidToByte(((UUID)parameterValues.get(i))));
+							}else{
+								psq.setObject(i+1, parameterValues.get(i));
+							}
 						}
 						psq.executeUpdate();
 					}
