@@ -1,5 +1,6 @@
 package org.wcs.smart.connect.model;
 
+import java.nio.file.FileSystems;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -12,16 +13,16 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.eclipse.core.runtime.Path;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.util.UuidUtils;
 
 @Entity
 @Table(name="smart.connect_sync_history")
 public class ConnectSyncHistoryRecord extends UuidItem{
 
+	public static final String CONNECT_FILESTORE_DIR = "smart_connect"; //$NON-NLS-1$
+	
 	public enum Type{
 		UPLOAD,
 		DOWNLOAD
@@ -124,7 +125,7 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	 */
 	@Transient
 	private String getChangeLogFilePrefix(){
-		return ConnectPlugIn.CONNECT_FILESTORE_DIR + Path.SEPARATOR + UuidUtils.uuidToString(getUuid());
+		return CONNECT_FILESTORE_DIR + FileSystems.getDefault().getSeparator() + UuidUtils.uuidToString(getUuid());
 	}
 	@Transient
 	public String getChangeLogZipFile(){

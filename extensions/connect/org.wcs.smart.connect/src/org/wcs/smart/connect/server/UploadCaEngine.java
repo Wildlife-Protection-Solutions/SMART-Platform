@@ -42,6 +42,7 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
 import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -179,7 +180,7 @@ public class UploadCaEngine {
 	 * @return
 	 */
 	private String getExportFilename(){
-		return ConnectPlugIn.CONNECT_FILESTORE_DIR + File.separator + "sc_" +UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid())+ "_" + System.nanoTime() + ".zip";
+		return ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + File.separator + "sc_" +UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid())+ "_" + System.nanoTime() + ".zip";
 	}
 
 	/**

@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.wcs.smart.ca.ConservationAreaManager;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -39,7 +40,6 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	// The shared instance
 	private static ConnectPlugIn plugin;
 	
-	public static final String CONNECT_FILESTORE_DIR = "smart_connect"; //$NON-NLS-1$
 	/**
 	 * The constructor
 	 */
@@ -51,6 +51,9 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
+		
+		ConservationAreaManager.getInstance().addDeleteHandler(new CaConnectDeleteHandler(), CaConnectDeleteHandler.EXECUTE_ORDER);
+		
 		super.start(context);
 		plugin = this;
 	}
