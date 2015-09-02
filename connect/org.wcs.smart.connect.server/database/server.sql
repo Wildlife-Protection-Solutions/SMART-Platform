@@ -38,7 +38,7 @@ ALTER TABLE connect.upload_item ADD CONSTRAINT status_chk
 CHECK (status IN ('UPLOADING', 'PROCESSING', 'COMPLETE', 'ERROR'));
 
 ALTER TABLE connect.upload_item ADD CONSTRAINT type_chk 
-CHECK (type IN ('CA', 'UP_SYNC'));
+CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_UP', 'DOWN_SYNC'));
 
 	
 CREATE TABLE connect.ca_plugin_version

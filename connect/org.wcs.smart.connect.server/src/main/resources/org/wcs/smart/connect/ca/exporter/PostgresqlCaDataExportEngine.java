@@ -23,22 +23,22 @@ package org.wcs.smart.connect.ca.exporter;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.file.FileSystems;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.hibernate.Query;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.hql.spi.QueryTranslator;
@@ -74,12 +74,12 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	public String[] getTableColumns(String tableName)
 			throws Exception {
 		/* write column listing to file */
-		String sql = "select attname " +
-				"FROM pg_attribute " +
-				" WHERE attrelid = cast('" + tableName.toLowerCase() + "' as regclass)" +
-				" AND attnum > 0 " +
-				" AND NOT attisdropped " +
-				" ORDER BY attnum"; 
+		String sql = "select column_name " +
+				"FROM information_schema.columns " +
+				" WHERE table_schema || '.' || table_name = '" + tableName.toLowerCase() + "'  " +
+				" AND ( column_default is null or (column_default is not null and " +
+				" column_default not like 'nextval(%::regclass)')) " +
+				" ORDER BY ordinal_position"; 
 		
 		@SuppressWarnings("unchecked")
 		List<String> data = getSession().createSQLQuery(sql).list();
@@ -96,13 +96,13 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	@Override
 	public void writeTableDefinitionFile(String tableName, String hibernateClass,
 			String[] columns) throws Exception {
-		File columnFile = createFileName(getExportLocation(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
-		try(BufferedWriter writer = new BufferedWriter(new FileWriter(columnFile))){
-			writer.write(tableName);
+		Path columnFile = createFileName( getExportLocation().toPath(), tableName + "." + hibernateClass + ".def"); //$NON-NLS-1$ //$NON-NLS-2$
+		try(BufferedWriter writer = Files.newBufferedWriter(columnFile, StandardCharsets.UTF_8)){
+			writer.write(tableName.toUpperCase());
 			writer.newLine();
 			StringBuilder record = new StringBuilder();
 			for (int i = 0; i < columns.length; i ++){
-				record.append(columns[i]);
+				record.append(columns[i].toUpperCase());
 				if (i != columns.length - 1){
 					record.append(","); //$NON-NLS-1$
 				}
@@ -190,16 +190,53 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 	}
 
 	/**
+	 * @throws IOException 
 	 * @see org.wcs.smart.ca.export.ICaDataExportEngine#writeQuery(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void writeQuery(String fileName, String query){
-		final String sql = ("COPY (" + query + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false)");
-		final Path outputFile = FileSystems.getDefault().getPath(getExportLocation().getAbsolutePath(), fileName + ".dat");
+	public void writeQuery(String fileName, String query) throws IOException{
+		
+		final Path outputFile = createFileName(getExportLocation().toPath(), fileName + ".dat");
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
 				
+				String mdquery = query;
+				if (mdquery.toUpperCase().contains(" WHERE ")){
+					mdquery += " AND false";
+				}else{
+					mdquery += " WHERE false";
+				}
+				ResultSet rs = connection.createStatement().executeQuery(mdquery);
+				ResultSetMetaData md = rs.getMetaData();
+				String[] parts = query.substring(query.toUpperCase().indexOf("SELECT") + "SELECT".length(), query.toUpperCase().indexOf(" FROM ")).split(",");
+				
+				
+				for (int i = 0; i < md.getColumnCount(); i ++){
+					String classname = md.getColumnClassName(i+1);
+					if (classname.equals(UUID.class.getName())){
+//					if (md.getColumnType(i) == -2){
+						//TODO: assume uuid type ?? probably not correct
+						parts[i] = " replace(cast(" + parts[i] + " as varchar), '-', '')";	
+					}else if (classname.equals(Boolean.class.getName())){
+						parts[i] = " case when " + parts[i] + " then 'true' else 'false' end";
+					}else if (classname.equals(byte[].class.getName())){
+						parts[i] = " encode (" + parts[i] + ", 'hex')";
+					}
+				}
+				String newQuery = "SELECT ";
+				for (String x : parts){
+					newQuery += x + ",";
+				}
+				newQuery = newQuery.substring(0, newQuery.length() - 1);
+				newQuery = newQuery + query.substring(query.toUpperCase().indexOf(" FROM "));
+		
+				System.out.println("----");
+				System.out.println(query);
+				System.out.println(newQuery);
+				System.out.println("----");
+				
+				String sql = ("COPY (" + newQuery + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false, QUOTE '\"', FORCE_QUOTE *)");
 				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)connection).getConnection());
 				try(OutputStream out = Files.newOutputStream(outputFile)){
 					copy.copyOut(sql, out);
@@ -211,16 +248,10 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 		});
 	}
 	
-	private File createFileName(File destDir, String tableName){
-		File dir = new File(destDir, DATABASE_DIR);
-		try {
-			Files.createDirectories(dir.toPath());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		File f = new File(dir, File.separator + tableName);
-		return f;
+	private Path createFileName(Path destDir, String tableName) throws IOException{
+		Path dir = destDir.resolve(DATABASE_DIR);
+		Files.createDirectories(dir);
+		return dir.resolve(tableName);
 	}
 
 	/**

@@ -24,6 +24,9 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.ca.datamodel.CategoryAttribute;
 import org.wcs.smart.ca.datamodel.DmObject;
+import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeItem;
 import org.wcs.smart.dataentry.model.CmAttributeListItem;
@@ -136,7 +139,10 @@ public enum SmartTable {
 	CMATTRIBUTETREENODE(CmAttributeTreeNode.class,".configurableModel.conservationArea"),
 	CMNODE(CmNode.class,".model.conservationArea"),
 	CONFIGURABLEMODEL(ConfigurableModel.class,null),
+	CONNECTSERVER(ConnectServer.class, null),
+	CONNECTUSER(ConnectUser.class, ".server.conservationArea"),
 	CONSERVATIONAREA(ConservationArea.class,".uuid"),
+	CYBERTRACKERPROPERTIESOPTION(CyberTrackerPropertiesOption.class, null),
 	DMOBJECT(DmObject.class,null),
 	ENTITY(Entity.class,".entityType.conservationArea"),
 	ENTITYATTRIBUTE(EntityAttribute.class,".entityType.conservationArea"),
@@ -217,7 +223,7 @@ public enum SmartTable {
 	SURVEY(Survey.class,".surveyDesign.conservationArea"),
 	SURVEYDESIGN(SurveyDesign.class,null),
 	SURVEYDESIGNPROPERTY(SurveyDesignProperty.class,".surveyDesign.conservationArea"),
-	SURVEYDESIGNSAMPLINGUNITATTRIBUTE(SurveyDesignSamplingUnitAttribute.class,null),
+	SURVEYDESIGNSAMPLINGUNITATTRIBUTE(SurveyDesignSamplingUnitAttribute.class,".id.surveyDesign.conservationArea"),
 	SURVEYGRIDDEDQUERY(SurveyGriddedQuery.class,null),
 	SURVEYOBSERVATIONQUERY(SurveyObservationQuery.class,null),
 	SURVEYSUMMARYQUERY(SurveySummaryQuery.class,null),

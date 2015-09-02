@@ -26,10 +26,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,6 +55,7 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 
 import au.com.bytecode.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVWriter;
 
 /**
  * Loads a conservation area export into the postgresql
@@ -262,11 +266,28 @@ public class PostgresqlCaLoader {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
+		
+				String metadataqueryquery = "SELECT " + columns + "  FROM " + tableName + " WHERE false";
+				ResultSet rs = connection.createStatement().executeQuery(metadataqueryquery);
+				ResultSetMetaData md = rs.getMetaData();
+				List<Integer> colsToModified = new ArrayList<Integer>();
+				for (int i = 0; i < md.getColumnCount(); i ++){
+					String x = md.getColumnTypeName(i+1);
+					String y = md.getColumnClassName(i+1);
+					if (x.equals("bytea") && y.equals(byte[].class.getName())){
+						colsToModified.add(i);
+					}
+				}
 				
 				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)connection).getConnection());
 				try{
+					if (colsToModified.size() > 0){
+						fixHexData(dataFile, colsToModified);
+					}
+					
+					
 					copy.copyIn(query.toString(), new FileReader(dataFile));
-				}catch(IOException ex){
+				}catch(Exception ex){
 					throw new SQLException(ex);
 				}
 					
@@ -274,6 +295,28 @@ public class PostgresqlCaLoader {
 		});
 	}
 	
+	private void fixHexData(File dataFile, List<Integer> colsToModify ) throws Exception{
+		Path tempFile = FileSystems.getDefault().getPath(dataFile.getAbsolutePath() + ".temp");
+		
+		try(CSVReader reader = new CSVReader(Files.newBufferedReader(dataFile.toPath()));
+				CSVWriter writer = new CSVWriter(Files.newBufferedWriter(tempFile)) ){
+			
+			String[] line = null;
+			while( (line = reader.readNext()) != null){
+				for (int i : colsToModify){
+					line[i] = "\\x" + line[i];
+				}
+				for (int i = 0; i < line.length; i ++){
+					if (line[i].length() == 0) line[i]=null;
+				}
+				writer.writeNext(line);
+			}
+		}
+		
+		Files.delete(dataFile.toPath());
+		Files.move(tempFile, dataFile.toPath());
+		
+	}
 	/**
 	 * Determines the foreign key constraints in the database. 
 	 *  
