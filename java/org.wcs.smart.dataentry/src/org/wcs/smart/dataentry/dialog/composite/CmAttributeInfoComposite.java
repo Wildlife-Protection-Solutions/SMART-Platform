@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.dataentry.CmAttributeOptionLabelProvider;
 import org.wcs.smart.dataentry.dialog.ConfigurableModelEditDialog;
 import org.wcs.smart.dataentry.internal.CmAttributeOptionFactory;
 import org.wcs.smart.dataentry.internal.Messages;
@@ -143,7 +144,7 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		enterOncesCombo.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
 				if (element instanceof EnterOnceType){
-					return ((EnterOnceType)element).getGuiName();
+					return CmAttributeOptionLabelProvider.INSTANCE.getGuiName(((EnterOnceType)element));
 				}
 				return ""; //$NON-NLS-1$
 			}
