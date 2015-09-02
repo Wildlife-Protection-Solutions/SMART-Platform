@@ -33,7 +33,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.dataentry.internal.Messages;
 
 /**
  * @author elitvin
@@ -52,17 +51,9 @@ public class CmAttributeOption extends UuidItem {
 	public static final String ID_ENTER_ONCES = "ENTER_ONCE"; //$NON-NLS-1$
 	
 	public static enum EnterOnceType {
-		NONE(Messages.CmAttributeOption_EnterOnceType_NONE),
-		START(Messages.CmAttributeOption_EnterOnceType_START),
-		END(Messages.CmAttributeOption_EnterOnceType_END);
-
-		private String guiName;
-		private EnterOnceType(String guiName) {
-			this.guiName = guiName;
-		}
-		public String getGuiName() {
-			return guiName;
-		}
+		NONE,//Messages.CmAttributeOption_EnterOnceType_NONE),
+		START,//Messages.CmAttributeOption_EnterOnceType_START),
+		END;//Messages.CmAttributeOption_EnterOnceType_END);
 	}
 	
 	private CmAttribute cmAttribute;
