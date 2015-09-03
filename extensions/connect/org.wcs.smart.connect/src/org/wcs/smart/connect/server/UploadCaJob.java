@@ -31,7 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.UploadStatus;
+import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -109,13 +109,13 @@ public class UploadCaJob extends FileUploaderJob {
 
 
 	@Override
-	protected void onUploadComplete(UploadStatus upstatus) {
+	protected void onUploadComplete(WorkItemStatus upstatus) {
 		deleteLocalFile();
 	}
 
 
 	@Override
-	protected void onProcessingComplete(UploadStatus upstatus) {
+	protected void onProcessingComplete(WorkItemStatus upstatus) {
 		this.status.setStatus(ConnectServerStatus.Status.DONE);
 		saveStatus();
 		
@@ -127,7 +127,7 @@ public class UploadCaJob extends FileUploaderJob {
 
 
 	@Override
-	protected void onError(UploadStatus upstatus) {
+	protected void onError(WorkItemStatus upstatus) {
 		this.status.setStatus(ConnectServerStatus.Status.ERROR);
 		saveStatus();
 		displayComplete();	

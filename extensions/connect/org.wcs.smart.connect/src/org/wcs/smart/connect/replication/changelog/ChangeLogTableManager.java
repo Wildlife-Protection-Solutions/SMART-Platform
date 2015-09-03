@@ -33,6 +33,11 @@ public enum ChangeLogTableManager {
 		query.executeUpdate();
 	}
 	
+	public Long getMaxRevision(Session s, ConservationArea ca){
+		SQLQuery query = s.createSQLQuery("SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = ?");
+		query.setBinary(0, UuidUtils.uuidToByte(ca.getUuid()));
+		return ((BigInteger) query.uniqueResult()).longValue();
+	}
 	/**
 	 * Load all change log items associated with a given conservation area.
 	 * 

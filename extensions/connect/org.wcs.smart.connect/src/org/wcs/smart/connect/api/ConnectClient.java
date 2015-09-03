@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.api;
 
 import java.io.InputStream;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -36,7 +37,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
-import org.wcs.smart.connect.api.model.UploadStatus;
+import org.wcs.smart.connect.api.model.WorkItemStatus;
 
 /**
  * JAX-RS REST client api for SMART Connect requests 
@@ -50,20 +51,30 @@ public interface ConnectClient {
 	public static final String CA_PATH = "conservationarea";
 	public static final String UPLOAD_PATH = "uploader";
 	
+	public static final String DATA_PARAM_ALL = "all";
+		
 	@GET
     @Path("/" + USER_PATH + "/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
     String getUser(@PathParam("username") String username);
 	
+	@GET
+    @Path("/" + CA_PATH )
+    public List<ConservationAreaInfo> getConservationAreas();
+	
 	
 	@GET
     @Path("/" + CA_PATH + "/{cauuid}")
     public ConservationAreaInfo getConservationArea(@PathParam("cauuid") String caUuid);
+
+	@GET
+    @Path("/" + CA_PATH + "/{cauuid}")
+    public Response downloadConservationArea(@PathParam("cauuid") String caUuid, @QueryParam("data") String data);
 	
 	@GET
 	@Path("/" + UPLOAD_PATH + "/{uploaduuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
-	public UploadStatus getStatus(@PathParam("uploaduuid") String uuid);
+	public WorkItemStatus getStatus(@PathParam("uploaduuid") String uuid);
 	
 	@PUT
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)

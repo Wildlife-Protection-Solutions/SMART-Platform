@@ -31,7 +31,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author Emily
  *
  */
-public class UploadStatus {
+public class WorkItemStatus {
 
 	public enum Status{
 		UPLOADING,

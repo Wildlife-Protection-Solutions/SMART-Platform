@@ -100,5 +100,11 @@
             clazz="org.wcs.smart.connect.replication.LoginHandler">
       </loginHandler>
    </extension>
+   <extension
+         point="org.wcs.smart.startupoption">
+      <StartUpOption
+            clazz="org.wcs.smart.connect.ui.startup.ImportFromConnectStartupOption">
+      </StartUpOption>
+   </extension>
 
 </plugin>

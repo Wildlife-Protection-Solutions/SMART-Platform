@@ -39,8 +39,8 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class ConnectServerWizard extends Wizard {
 
-	private ServerWizardPage page1;
-	private UserWizardPage page2;
+	protected ServerWizardPage page1;
+	protected UserWizardPage page2;
 	
 	public ConnectServerWizard(){
 		super();

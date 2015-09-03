@@ -11,7 +11,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.UploadStatus;
+import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.server.FileUploaderJob;
@@ -78,13 +78,13 @@ public class UploadSyncJob extends FileUploaderJob {
 	
 	
 	@Override
-	protected void onUploadComplete(UploadStatus upstatus) {
+	protected void onUploadComplete(WorkItemStatus upstatus) {
 		deleteLocalFile();
 	}
 
 	
 	@Override
-	protected void onProcessingComplete(UploadStatus upstatus) {
+	protected void onProcessingComplete(WorkItemStatus upstatus) {
 		try{
 			String message = upstatus.getMessage();
 			JsonNode nd = (new ObjectMapper()).readTree(message);
@@ -114,7 +114,7 @@ public class UploadSyncJob extends FileUploaderJob {
 	}
 
 	@Override
-	protected void onError(UploadStatus upstatus) {
+	protected void onError(WorkItemStatus upstatus) {
 		item.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
 		saveHistoryRecord();
 		deleteLocalFile();
