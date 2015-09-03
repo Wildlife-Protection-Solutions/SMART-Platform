@@ -21,7 +21,7 @@ DROP TABLE IF EXISTS connect.map_layers;
 DROP TABLE IF EXISTS connect.change_log;
 
 /* Create Tables */
-CREATE TABLE connect.upload_item
+CREATE TABLE connect.work_item
 (
 	uuid uuid NOT NULL,
 	ca_uuid uuid NOT NULL,

@@ -23,6 +23,7 @@ package org.wcs.smart.connect.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.file.Files;
@@ -34,6 +35,8 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -55,6 +58,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.mindrot.jbcrypt.BCrypt;
@@ -68,11 +72,10 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConservationAreaInfo.Status;
 import org.wcs.smart.connect.model.SmartUser;
-import org.wcs.smart.connect.model.UploadItem;
-import org.wcs.smart.connect.model.UploadItem.Type;
+import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.connect.uploader.UploaderProcessor;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.connect.uploader.sync.ChangeLogPackager;
 import org.wcs.smart.util.UuidUtils;
@@ -198,6 +201,7 @@ public class ConservationAreas extends HttpServlet{
     		@QueryParam("data") String data,
     		@QueryParam("version") String version,
     		@QueryParam("reversion") String revision){
+		
 		if (data == null){
 			return getConservationAreaInfo(caUuid);
 		}else if (data != null){
@@ -208,7 +212,7 @@ public class ConservationAreas extends HttpServlet{
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request.  Version and revision are required for change log request.");			
 				}
 			}else if (data.equalsIgnoreCase(DATA_PARAM_ALL_VALUE)){
-				return getConservationAreaExport(caUuid);
+				return buildConservationAreaExport(caUuid);
 			}else if (data.equalsIgnoreCase(DATA_PARAM_CAPACKAGE_VALUE)){
 				return getConservationAreaExportFile(version);
 			}else{
@@ -218,6 +222,7 @@ public class ConservationAreas extends HttpServlet{
 		//required for compile??
 		return null;
 	}
+	
 	private Response getConservationAreaExportFile(String statusUuid){
 		UUID uuid = null;
 		try{
@@ -227,35 +232,111 @@ public class ConservationAreas extends HttpServlet{
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
 		}
 	
-		//package up change log
-		UploadItem item = null;
+		WorkItem item = null;
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			item = (UploadItem) s.get(UploadItem.class, uuid);
+			item = (WorkItem) s.get(WorkItem.class, uuid);
 			if (item == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "Download package not found.");
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
 		}
+	
+		if (item.getType() != WorkItem.Type.DOWN_CA){
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid request.");
+		}
+		if (item.getStatus() != WorkItem.Status.COMPLETE){
+			throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area export not created.");
+		}
 		
 		final File toReturn = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
-		StreamingOutput stream = new StreamingOutput() {
-			@Override
-			public void write(OutputStream output) throws IOException {
-				try {
-					Files.copy(toReturn.toPath(), output);
-				} catch (Exception e) {
-					logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e);
+		if (!toReturn.exists()){
+			throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area export file not found.");
+		}
+		
+		String range = request.getHeader("Range");
+		long start = 0;
+		long end = toReturn.length()-1;
+		boolean hasRange = false;
+		if (range != null && range.length() > 0){
+			hasRange = true;
+			//parse the range
+			try{
+				String regex = "^bytes=([0-9]*)-([0-9]*)$";
+				Pattern p = Pattern.compile(regex);
+				Matcher m = p.matcher(range);
+				
+				String p1 = m.group(0);
+				String p2 = m.group(1);
+				if (!p1.isEmpty()){
+					start = Long.parseLong(p1);
 				}
+				if (!p2.isEmpty()){
+					end = Long.parseLong(p2);
+				}
+				
+				if (end > toReturn.length()-1){
+					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "Range exceeds the maximum file length.");	
+				}
+				if (start > end){
+					throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "start byte is greater than end byte.");
+				}
+			}catch (Exception ex){
+				throw new SmartConnectException(Response.Status.REQUESTED_RANGE_NOT_SATISFIABLE, "Range could not be parsed.");
 			}
-	    };
-		    
-		return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM).build();
+		}
+
+		if (!hasRange){
+			StreamingOutput stream = new StreamingOutput() {
+				@Override
+				public void write(OutputStream output) throws IOException {
+					try {
+						Files.copy(toReturn.toPath(), output);
+					} catch (Exception e) {
+						logger.log(Level.SEVERE, "Error writing to output stream." + e.getMessage(), e);
+					}
+				}
+		    };
+			    
+			return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM)
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"")
+					.header(HttpHeaders.CONTENT_LENGTH, toReturn.length())
+					.header("Accept-Ranges", "bytes")
+					.build();
+		}else{
+			final long startat = start;
+			final long endat = end;
+			StreamingOutput stream = new StreamingOutput() {
+				@Override
+				public void write(OutputStream output) throws IOException {
+					try (InputStream in = Files.newInputStream(toReturn.toPath())){
+						IOUtils.copyLarge(in, output, startat, endat - startat + 1);
+					}
+				}
+		    };
+			    
+			return Response.status(Response.Status.PARTIAL_CONTENT)
+					.entity(stream)
+					.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM)
+					.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + toReturn.getName() + "\"")
+					.header(HttpHeaders.CONTENT_LENGTH, end - start + 1)
+					.header("Accept-Ranges", "bytes")
+					.header("Content-Range", "bytes " + start + "-" + end + "/" + toReturn.length())
+					.build();
+		}
 	}
 	
-	private Response getConservationAreaExport(String caUuid){
+	/**
+	 * Initiates the process to build a conservation area extract
+	 * and returns the location of a status url where the status
+	 * can be retrieved and when complete the download url.
+	 * 
+	 * @param caUuid
+	 * @return
+	 */
+	private Response buildConservationAreaExport(String caUuid){
 		UUID uca = null;
 		try{
 			uca = UuidUtils.stringToUuid(caUuid);
@@ -263,7 +344,7 @@ public class ConservationAreas extends HttpServlet{
 			logger.log(Level.SEVERE, "Invalid uuid: " + caUuid + ". " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
 		}
-		UploadItem item = null;
+		WorkItem item = null;
 		ConservationAreaInfo info = null;
 		//package up change log
 		Session s = HibernateManager.getSession(context);
@@ -275,14 +356,14 @@ public class ConservationAreas extends HttpServlet{
 			}
 
 			//create a new download item
-			item = new UploadItem();
+			item = new WorkItem();
 			item.setConservationAreaInfo(info);
 			item.setLocalFilename("");
 			item.setMessage(null);
 			item.setStartTime(new Date());
-			item.setStatus(UploadItem.Status.PROCESSING);
+			item.setStatus(WorkItem.Status.PROCESSING);
 			item.setTotalBytes(-1);
-			item.setType(UploadItem.Type.DOWN_CA);
+			item.setType(WorkItem.Type.DOWN_CA);
 			
 			s.save(item);
 
@@ -305,7 +386,10 @@ public class ConservationAreas extends HttpServlet{
 			executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context)));
 				
 			String url = item.getStatusURL(request);
-			return Response.ok().header(HttpHeaders.LOCATION, url).entity("{\"location\": \"" + url + "\"}").build();
+			return Response
+					.status(Response.Status.ACCEPTED)
+					.header(HttpHeaders.LOCATION, url)
+					.entity("{\"location\": \"" + url + "\"}").build();
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Unable to start download conservation area process. " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Unable to create package", ex);
@@ -536,10 +620,10 @@ public class ConservationAreas extends HttpServlet{
 				}
 			}
 							
-			UploadItem up = new UploadItem();
+			WorkItem up = new WorkItem();
 			up.setConservationAreaInfo(ca);
 			up.setStartTime(new Date());
-			up.setStatus(UploadItem.Status.UPLOADING);
+			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_CA);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename("");
@@ -608,10 +692,10 @@ public class ConservationAreas extends HttpServlet{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, "X-Upload-Content-Length invalid value"); //$NON-NLS-1$
 			}
 							
-			UploadItem up = new UploadItem();
+			WorkItem up = new WorkItem();
 			up.setConservationAreaInfo(ca);
 			up.setStartTime(new Date());
-			up.setStatus(UploadItem.Status.UPLOADING);
+			up.setStatus(WorkItem.Status.UPLOADING);
 			up.setType(Type.UP_SYNC);
 			up.setTotalBytes(totalBytes);
 			up.setLocalFilename("");

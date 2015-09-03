@@ -55,8 +55,8 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.hibernate.HibernateSessionFactoryListener;
 import org.wcs.smart.connect.i18n.Messages;
-import org.wcs.smart.connect.model.UploadItem;
-import org.wcs.smart.connect.model.UploadItem.Status;
+import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.UploadStatus;
 import org.wcs.smart.connect.uploader.UploaderProcessor;
 
@@ -94,7 +94,7 @@ public class Uploader extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			UploadItem item = (UploadItem) s.get(UploadItem.class, UUID.fromString(uuid));
+			WorkItem item = (WorkItem) s.get(WorkItem.class, UUID.fromString(uuid));
 			if (item == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
@@ -102,11 +102,9 @@ public class Uploader extends HttpServlet {
 			File f = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
 			
 			if (item.getLocalFilename().isEmpty() || !f.exists()){
-				System.out.println("UPLOADED FILE SIZE: 0 (status)");
 				status.setCurrentSize(0);
 			}else{
 				Long size = Files.size(f.toPath());
-				System.out.println("UPLOADED FILE SIZE: " + f.length() + " (status)");
 				status.setCurrentSize(size);
 			}
 			return status;
@@ -133,13 +131,13 @@ public class Uploader extends HttpServlet {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response updateFile(@PathParam("uploaduuid") String uuid, InputStream data) throws IOException{
-		UploadItem item = null;
+		WorkItem item = null;
 		
 		//get upload item
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			item = (UploadItem) s.get(UploadItem.class, UUID.fromString(uuid));
+			item = (WorkItem) s.get(WorkItem.class, UUID.fromString(uuid));
 			if (item == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}

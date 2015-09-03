@@ -26,8 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
-import org.wcs.smart.connect.model.UploadItem;
-import org.wcs.smart.connect.model.UploadItem.Status;
+import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.uploader.ca.LoadCaProcessor;
 import org.wcs.smart.connect.uploader.sync.SyncUploadCaProcessor;
 
@@ -48,7 +48,7 @@ public enum ItemProcessManager {
 	};
 	
 	
-	public void processItem(UploadItem item, Session session) throws Exception{
+	public void processItem(WorkItem item, Session session) throws Exception{
 		//update status
 		session.beginTransaction();
 		session.update(item);
@@ -68,7 +68,7 @@ public enum ItemProcessManager {
 		}
 	}
 	
-	private IUploadItemProcessor findProcessor(UploadItem item){
+	private IUploadItemProcessor findProcessor(WorkItem item){
 		for (IUploadItemProcessor p : processors){
 			if (p.getSupportedType().equals(item.getType())){
 				return p;

@@ -2119,19 +2119,3 @@ primary key(employee_uuid, connect_uuid));
 
 alter table smart.connect_account add constraint connect_employee_uuid_fk foreign key (employee_uuid) 
 references smart.employee (uuid) on update restrict on delete cascade;
-
-
-create table smart.connect_status(
-ca_uuid UUID not null,
-connect_uuid UUID not null,
-client_id UUID not null,
-version UUID,
-revision bigint,
-status varchar(6),
-uploadurl varchar,
-localfile varchar,
-primary key (ca_uuid));
-
-alter table smart.connect_status add constraint connect_status_ca_uuid_fk foreign key (ca_uuid) references smart.conservation_area (uuid) on update restrict on delete cascade;
-
-alter table smart.connect_status add constraint connect_status_connect_uuid_fk foreign key (connect_uuid) references smart.connect_server (uuid) on update restrict on delete cascade;

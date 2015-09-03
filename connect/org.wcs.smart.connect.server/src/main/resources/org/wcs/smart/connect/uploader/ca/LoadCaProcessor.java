@@ -29,9 +29,9 @@ import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.UploadItem;
-import org.wcs.smart.connect.model.UploadItem.Status;
-import org.wcs.smart.connect.model.UploadItem.Type;
+import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItem.Status;
+import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.IUploadItemProcessor;
 
 /**
@@ -47,11 +47,11 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 	
 	@Override
 	public Type getSupportedType() {
-		return UploadItem.Type.UP_CA;
+		return WorkItem.Type.UP_CA;
 	}
 
 	@Override
-	public void processItem(UploadItem item, Session session) {
+	public void processItem(WorkItem item, Session session) {
 		session.beginTransaction();
 		
 		try{

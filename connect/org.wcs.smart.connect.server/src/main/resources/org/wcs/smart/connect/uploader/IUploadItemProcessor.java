@@ -22,7 +22,7 @@
 package org.wcs.smart.connect.uploader;
 
 import org.hibernate.Session;
-import org.wcs.smart.connect.model.UploadItem;
+import org.wcs.smart.connect.model.WorkItem;
 
 /**
  * Item processor.
@@ -36,7 +36,7 @@ public interface IUploadItemProcessor {
 	 * 
 	 * @return the type this processor supports
 	 */
-	public UploadItem.Type getSupportedType();
+	public WorkItem.Type getSupportedType();
 	
 	/**
 	 * Processes the given item.
@@ -44,5 +44,5 @@ public interface IUploadItemProcessor {
 	 * @param item
 	 * @param session
 	 */
-	public void processItem(UploadItem item, Session session);
+	public void processItem(WorkItem item, Session session);
 }

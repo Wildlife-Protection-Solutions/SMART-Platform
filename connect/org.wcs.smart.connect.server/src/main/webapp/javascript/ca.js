@@ -1,4 +1,5 @@
 var CAURL = "../api/conservationarea/";
+var DOWNLOADCA = false;
 
 /* configure events on html elements */
 window.onload = function(){
@@ -13,10 +14,69 @@ window.onload = function(){
 		elements[i].onclick=downloadca;
 	}
 }
+
+function cancelCaDownload(){
+	DOWNLOADCA = false;
+	closeDialog('downloadDialog')
+	return false;
+}
 function downloadca(){
-	alert('download');
+	DOWNLOADCA = true;
+	displayDialog('downloadDialog', 'main');
+	
 	var cauuid = this.dataset.cauuid;
-	window.open('https://localhost:8443/server/api/conservationarea/' + cauuid + '?data=all', '_blank');
+	var geturl = CAURL + encodeURIComponent(cauuid) + '?data=all';
+	var oReq = new XMLHttpRequest();
+	oReq.onload = updateDownloadProgress;
+	oReq.cauuid=cauuid;
+	oReq.open("GET", geturl, true);
+	oReq.send();
+	return false;
+}
+
+function updateDownloadProgress(){
+	if (!DOWNLOADCA) return false;
+	document.querySelector("#downloadDialog > #statusurl").innerHTML = this.getResponseHeader ("<url>");
+	if (this.status == 202) {
+		var location = this.getResponseHeader ("Location");
+		document.querySelector("#downloadDialog > #dialogerror").style.display = "none";
+		document.querySelector("#downloadDialog > #statusurl").innerHTML = location;
+
+		var onReq = new XMLHttpRequest();
+		onReq.onload = updateDownloadStatus;
+		onReq.open("GET", location);
+		onReq.send();
+		
+	} else {
+		document.querySelector("#downloadDialog > #dialogerror").style.display = "block";
+		document.querySelector("#downloadDialog > #dialogerror").innerHTML = "Error occurred.";	
+	}	
+}
+
+function updateDownloadStatus(){
+	if (!DOWNLOADCA) return false;
+	if (this.status == 200){
+		var statusobj = JSON.parse(this.responseText);
+		if (statusobj.status == "COMPLETE"){
+			var url = JSON.parse(statusobj.message).file_url;
+			window.open(url, "_self");
+			
+			closeDialog('downloadDialog');
+		}else{
+			var url = this.responseURL;
+			//wait 1 second then re-request
+			setTimeout(function(){
+				var onReq = new XMLHttpRequest();
+				onReq.onload = updateDownloadStatus;
+				onReq.open("GET", url);
+				onReq.send();
+			}, 1000);
+			//wait and re-request status
+			
+
+		}
+	}
+	
 }
 
 function confirmdeleteca(){
@@ -42,7 +102,7 @@ function confirmdeleteca(){
 
 function deleteca(){
 
-	document.querySelector("#dialogerror").style.display = "none";
+	document.querySelector("#deleteDialog > #dialogerror").style.display = "none";
 	
 	var cauuid = document.querySelector("#deleteform > input[name=cauuid]").value;
 	var username = document.querySelector("#deleteform > input[name=username]").value;
@@ -58,13 +118,13 @@ function deleteca(){
 	}
 	
 	if (username.length == 0){
-		document.querySelector("#dialogerror").style.display = "block";
-		document.querySelector("#dialogerror").innerHTML = "Username required.";
+		document.querySelector("#deleteDialog > #dialogerror").style.display = "block";
+		document.querySelector("#deleteDialog > #dialogerror").innerHTML = "Username required.";
 		return false;
 	}
 	if (password.length == 0){
-		document.querySelector("#dialogerror").style.display = "block";
-		document.querySelector("#dialogerror").innerHTML = "Password required.";
+		document.querySelector("#deleteDialog > #dialogerror").style.display = "block";
+		document.querySelector("#deleteDialog > #dialogerror").innerHTML = "Password required.";
 		return false;
 	}
 	
@@ -146,8 +206,17 @@ function createCaTable(){
  		
  		row.dataset.cauuid = cas[i].uuid;
  		
+ 		var downloadca = document.createElement("a");
+ 		deleteicon.className="downloadca download-icon";
+ 		deleteicon.title="downloadca";
+ 		deleteicon.dataset.cauuid = cas[i].uuid;
+ 		deleteicon.onclick = downloadca;
+ 		deleteicon.href="";
+ 		row.childNodes[4].appendChild(downloadca);
+ 		
+ 		
  		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
+ 		deleteicon.className="deleteca delete-icon";
  		deleteicon.title="delete conservation area";
  		deleteicon.dataset.cauuid = cas[i].uuid;
  		deleteicon.dataset.status = cas[i].status;
@@ -155,14 +224,7 @@ function createCaTable(){
  		deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);
  		
- 		var downloadca = document.createElement("a");
- 		deleteicon.className="downloadca";
- 		deleteicon.title="downloadca";
- 		deleteicon.dataset.cauuid = cas[i].uuid;
- 		deleteicon.onclick = downloadca;
- 		deleteicon.href="";
- 		row.childNodes[4].appendChild(downloadca);
- 		
+
  		
  	}
 }

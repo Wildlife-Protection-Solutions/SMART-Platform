@@ -44,8 +44,8 @@
 			<div class="table-cell smart-table-cell">${ca.getUuid()}</div>
 			<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
 			<div class="table-cell smart-table-cell">${ca.getVersion().toString()}</div>
+			<div class="table-cell smart-table-cell "><a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca download-icon"></a></div>
 			<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" title="delete conservation area" class="deleteca delete-icon"></a></div>
-			<div class="table-cell smart-table-cell "><a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca">downloadca</a></div>
 		</div>
 	</c:forEach>
 	</div>  
@@ -79,6 +79,17 @@
      <input class="button" type="button" value="Cancel" onclick="closeDialog('deleteDialog')" />
     </div>
   </form>
+  </div>
+  
+  
+  <div id="downloadDialog" style="display: none;" class="dialog">
+    <div class="dialog-title">Download Conservation Area</div>
+    <div id="dialogerror" class="errorsection"></div>
+    <p>Processing download request.  You will be automatically redirected once the download is ready.</p>
+   	<div id="statusurl" style="font-size:0.8em"></div>
+   	<div class="block top-spacer" style="text-align:right">
+     <input class="button" type="button" value="Cancel" onclick="return cancelCaDownload();" />
+    </div>
   </div>
 </body>
 </html>

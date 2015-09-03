@@ -9,8 +9,8 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConservationAreaInfo.Status;
-import org.wcs.smart.connect.model.UploadItem;
-import org.wcs.smart.connect.model.UploadItem.Type;
+import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.IUploadItemProcessor;
 
 public class SyncUploadCaProcessor  implements IUploadItemProcessor {
@@ -19,11 +19,11 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 	
 	@Override
 	public Type getSupportedType() {
-		return UploadItem.Type.UP_SYNC;
+		return WorkItem.Type.UP_SYNC;
 	}
 
 	@Override
-	public void processItem(UploadItem item, Session session) {
+	public void processItem(WorkItem item, Session session) {
 		session.beginTransaction();
 		
 		try{
@@ -44,7 +44,7 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 			long revision = ChangeLogManager.INSTANCE.getLastRevision(session, info.getUuid());
 			item.setMessage("{\"server_revision\": " + revision + "}");
 			
-			item.setStatus(org.wcs.smart.connect.model.UploadItem.Status.COMPLETE);
+			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.COMPLETE);
 			
 			session.getTransaction().commit();
 		}catch (Exception ex){
@@ -52,7 +52,7 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 			session.getTransaction().rollback();
 			
 			session.beginTransaction();
-			item.setStatus(org.wcs.smart.connect.model.UploadItem.Status.ERROR);
+			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
 			item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage()));
 			session.getTransaction().commit();
 		}

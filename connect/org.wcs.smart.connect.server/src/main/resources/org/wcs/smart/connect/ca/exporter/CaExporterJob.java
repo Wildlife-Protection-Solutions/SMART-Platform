@@ -37,8 +37,8 @@ import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.api.ConservationAreas;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.UploadItem;
-import org.wcs.smart.connect.model.UploadItem.Status;
+import org.wcs.smart.connect.model.WorkItem;
+import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.util.UuidUtils;
 
@@ -52,13 +52,13 @@ public class CaExporterJob implements Runnable {
 	private final Logger logger = Logger.getLogger(CaExporterJob.class.getName());
 	
 	private ConservationAreaInfo info = null;
-	private UploadItem item = null;
+	private WorkItem item = null;
 	private SessionFactory factory;
 	private Path destFile = null;
 	private String fileurl;
 	
 	public CaExporterJob(ConservationAreaInfo info, 
-			UploadItem item, 
+			WorkItem item, 
 			String fileurl,
 			SessionFactory factory){
 		this.info = info;

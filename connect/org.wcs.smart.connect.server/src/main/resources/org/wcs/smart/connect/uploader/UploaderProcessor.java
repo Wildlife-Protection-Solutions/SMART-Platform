@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.wcs.smart.connect.model.UploadItem;
+import org.wcs.smart.connect.model.WorkItem;
 
 /**
  * Thread for running processing tasks for processing uploaded items.
@@ -38,11 +38,11 @@ public class UploaderProcessor implements Runnable {
 
 	private final Logger logger = Logger.getLogger(UploaderProcessor.class.getName());
 	
-	private UploadItem item;
+	private WorkItem item;
 	private Session session;
 	private SessionFactory factory;
 	
-	public UploaderProcessor(UploadItem item, SessionFactory factory){
+	public UploaderProcessor(WorkItem item, SessionFactory factory){
 		this.item = item;
 		this.factory = factory;
 	}

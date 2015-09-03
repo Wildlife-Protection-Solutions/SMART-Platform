@@ -42,7 +42,7 @@ import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.StyleConfiguration;
-import org.wcs.smart.connect.model.UploadItem;
+import org.wcs.smart.connect.model.WorkItem;
 
 /**
  * Web listener to configure the hibernate connection on start up and shut down.
@@ -89,7 +89,7 @@ public class HibernateSessionFactoryListener implements ServletContextListener{
 		config.addAnnotatedClass(ConnectUuidItem.class);
 		config.addAnnotatedClass(SmartUserAction.class);
 		config.addAnnotatedClass(ConservationAreaInfo.class);
-		config.addAnnotatedClass(UploadItem.class);
+		config.addAnnotatedClass(WorkItem.class);
 		config.addAnnotatedClass(StyleConfiguration.class);
 		config.addAnnotatedClass(AlertType.class);
 		config.addAnnotatedClass(Alert.class);

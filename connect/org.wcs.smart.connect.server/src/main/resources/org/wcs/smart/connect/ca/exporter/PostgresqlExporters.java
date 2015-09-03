@@ -17,6 +17,8 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.SmartTable;
+import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.util.UuidUtils;
 
@@ -32,6 +34,8 @@ public class PostgresqlExporters {
 		exportAttAggMapTable(exportEngine);
 		exportPlugInConfiguration(exportEngine);
 		exportDataStore(exportEngine);
+		
+		exportServerStatus(exportEngine);
 	}
 	
 	private void exportDataStore(ICaDataExportEngine exportEngine) throws Exception {
@@ -75,6 +79,23 @@ public class PostgresqlExporters {
 		exportEngine.writeQuery(CONFIG_TABLE_NAME, "SELECT plugin_id, version FROM " + PLUGIN_VERSION_TBL + " WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "'"); //$NON-NLS-1$
 	}
 	
+	private void exportServerStatus(ICaDataExportEngine exportEngine) throws Exception {
+		
+		String tableName = "smart.connect_status";
+		exportEngine.writeTableDefinitionFile(tableName, ConnectServerStatus.class.getSimpleName(), new String[]{"CA_UUID", "CONNECT_UUID", "VERSION", "SERVER_REVISION", "STATUS", "UPLOADURL", "LOCALFILE"});
+		
+		String filename = tableName + "." + ConnectServerStatus.class.getSimpleName();
+		StringBuilder sb = new StringBuilder();
+		sb.append("SELECT a.ca_uuid, b.uuid, a.version, ");
+		sb.append(" case when c.max_revision is null then -1 else c.max_revision end, 'DONE', null, null ");
+		sb.append("FROM connect.ca_info a, smart.connect_server b left join ");
+		sb.append(" (SELECT max(revision) as max_revision, ca_uuid as ca_uuid FROM connect.change_log WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' GROUP BY ca_uuid) c");
+		sb.append(" on b.ca_uuid = c.ca_uuid ");
+		sb.append("WHERE b.ca_uuid = a.ca_uuid and a.ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString()  + "'");
+		
+		System.out.println(sb.toString());
+		exportEngine.writeQuery(filename, sb.toString());
+	}
 
 	private void exportAttAggMapTable(ICaDataExportEngine exportEngine) throws Exception{
 		String tableName = "smart.dm_att_agg_map"; //$NON-NLS-1$

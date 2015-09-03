@@ -230,11 +230,6 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 				}
 				newQuery = newQuery.substring(0, newQuery.length() - 1);
 				newQuery = newQuery + query.substring(query.toUpperCase().indexOf(" FROM "));
-		
-				System.out.println("----");
-				System.out.println(query);
-				System.out.println(newQuery);
-				System.out.println("----");
 				
 				String sql = ("COPY (" + newQuery + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false, QUOTE '\"', FORCE_QUOTE *)");
 				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)connection).getConnection());
