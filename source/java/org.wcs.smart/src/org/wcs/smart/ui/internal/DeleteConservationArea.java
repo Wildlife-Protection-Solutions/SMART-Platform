@@ -101,7 +101,7 @@ public class DeleteConservationArea {
 				monitor.setTaskName(Messages.DeleteConservationArea_Progress_DeletingCa);
 				ConservationArea ca = SmartDB.getCurrentConservationArea();
 				try{
-					ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor);
+					ConservationAreaManager.getInstance().deleteConservationArea(ca, monitor, true);
 				}catch (final Exception ex){
 					activeShell.getDisplay().syncExec(new Runnable(){
 						@Override

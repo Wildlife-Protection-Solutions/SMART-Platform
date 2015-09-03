@@ -86,7 +86,7 @@ public class ConservationAreaManager {
 	 * @param monitor the progress monitor; cannot be null
 	 * @throws Exception if conservation area not deleted
 	 */
-	public void deleteConservationArea(ConservationArea ca, IProgressMonitor monitor) throws Exception{
+	public void deleteConservationArea(ConservationArea ca, IProgressMonitor monitor, boolean restart) throws Exception{
 		
 		int work = 1;
 		for (ArrayList<ICaDeleteHandler> data : deleteListeners.values()){
@@ -128,12 +128,14 @@ public class ConservationAreaManager {
 		}finally{
 			session.close();
 		}
-		//logout
-		Display.getDefault().syncExec(new Runnable(){
-			@Override
-			public void run() {
-				PlatformUI.getWorkbench().restart();
-			}});
+		if (restart){
+			//logout
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					PlatformUI.getWorkbench().restart();
+				}});
+		}
 	}
 	
 	/**
