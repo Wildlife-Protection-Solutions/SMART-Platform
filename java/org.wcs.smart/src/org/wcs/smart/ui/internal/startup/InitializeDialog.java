@@ -89,6 +89,7 @@ public abstract class InitializeDialog  extends Dialog {
 			for (Button b : btnOps){
 				if (b.getSelection()){
 					doSelection((IAdvancedStartupOption)b.getData());
+					return;
 				}
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
