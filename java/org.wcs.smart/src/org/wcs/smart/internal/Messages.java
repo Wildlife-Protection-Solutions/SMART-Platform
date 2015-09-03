@@ -740,6 +740,7 @@ public class Messages extends NLS {
 	public static String InitializeDialog_Error_SystemRestore;
 	public static String InitializeDialog_Import_Label;
 	public static String InitializeDialog_Restore_Label;
+	public static String InitializeDialog_StartupError;
 	public static String InteractiveSplashHandler_Advanced_Label;
 	public static String InteractiveSplashHandler_Ca_Label;
 	public static String InteractiveSplashHandler_Error_AuthenticationFailure;

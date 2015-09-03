@@ -21,6 +21,15 @@
  */
 package org.wcs.smart.ui.internal.startup;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtension;
+import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.swt.SWT;
@@ -34,9 +43,8 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.startup.SmartStartUp;
-import org.wcs.smart.ui.internal.backup.ImportCaHandler;
-import org.wcs.smart.ui.internal.backup.RestoreHandler;
+import org.wcs.smart.ui.IAdvancedStartupOption;
+import org.wcs.smart.ui.IAdvancedStartupOption.Status;
 
 /**
  * Abstract dialog for start-up smart dialogs.
@@ -52,9 +60,7 @@ public abstract class InitializeDialog  extends Dialog {
 
 	public static int RESTART = -2;
 	
-	private Button opCreateNew;
-	private Button opRestore;
-	private Button opImport;
+	private Button[] btnOps;
 	
 	protected InitializeDialog(Shell parent) {
 		super(parent);
@@ -80,12 +86,10 @@ public abstract class InitializeDialog  extends Dialog {
 	@Override
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
-			if (opCreateNew.getSelection()) {
-				createConservationArea();
-			} else if (opRestore.getSelection()) {
-				restoreBackup();
-			}else if (opImport.getSelection()){
-				importCa();
+			for (Button b : btnOps){
+				if (b.getSelection()){
+					doSelection((IAdvancedStartupOption)b.getData());
+				}
 			}
 		} else if (IDialogConstants.CANCEL_ID == buttonId) {
 			super.cancelPressed();
@@ -124,16 +128,16 @@ public abstract class InitializeDialog  extends Dialog {
 		gl.marginLeft = 20;
 		opComp.setLayout(gl);
 		
-		opCreateNew = new Button(opComp, SWT.RADIO);
-		opCreateNew.setText(Messages.InitializeDialog_CreateCa_Label);
-		opCreateNew.setSelection(true);
-		
-
-		opRestore = new Button(opComp, SWT.RADIO);
-		opRestore.setText(Messages.InitializeDialog_Restore_Label);
-
-		opImport = new Button(opComp, SWT.RADIO);
-		opImport.setText(Messages.InitializeDialog_Import_Label);
+		List<IAdvancedStartupOption> ops = getStartUpOptions();
+		btnOps = new Button[ops.size()];
+		int i = 0;
+		for (IAdvancedStartupOption op : ops){
+			Button btnop = new Button(opComp, SWT.RADIO);
+			btnop.setText(op.getLabel());
+			btnop.setData(op);
+			btnOps[i++] = btnop;
+		}
+		btnOps[0].setSelection(true);
 		
 		Label lbl = new Label(parent, SWT.SEPARATOR | SWT.HORIZONTAL);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true,false));
@@ -147,50 +151,25 @@ public abstract class InitializeDialog  extends Dialog {
 				
 		return parent;
 	}
-	
-	/**
-	 * Opens the new conservation area wizard.
-	 */
-	private void createConservationArea() {
-		if (SmartStartUp.openCreateNewCaWizard(getParentShell())){
-			super.setReturnCode(OK);
-			close();
-		}
-	}
-	
+
 	
 	/**
 	 * Starts the process for restoring a database
 	 */
-	private void restoreBackup(){
-		boolean restart = false;
-		RestoreHandler handler = new RestoreHandler();
+	private void doSelection(IAdvancedStartupOption op){
 		try{
-			restart = handler.execute(getShell());
-			if (restart){
+			IAdvancedStartupOption.Status status = op.performTask(getShell());
+			if (status == Status.RESTART){
 				super.setReturnCode(RESTART);
 			}else{
 				super.setReturnCode(OK);
 			}
 			close();
 		}catch (Exception ex){
-			SmartPlugIn.displayLog(Messages.InitializeDialog_Error_SystemRestore + ex.getLocalizedMessage(), ex);
+			SmartPlugIn.displayLog(Messages.InitializeDialog_StartupError + ex.getLocalizedMessage(), ex);
 		}
 	}
-	
-	/**
-	 * Starts the process for restoring a database
-	 */
-	private void importCa(){
-		ImportCaHandler handler = new ImportCaHandler();
-		try{
-			handler.execute(getShell());
-			super.setReturnCode(OK);
-			close();
-		}catch(Exception ex){
-			SmartPlugIn.displayLog(Messages.InitializeDialog_Error_ImportCa + ex.getLocalizedMessage(), ex);
-		}
-	}
+
 	
 	/**
 	 * Code executed when cancelled pressed
@@ -211,4 +190,29 @@ public abstract class InitializeDialog  extends Dialog {
 	 * @return the dialog title text
 	 */
 	public abstract String getDialogText();
+	
+	private static List<IAdvancedStartupOption> getStartUpOptions(){
+		List<IAdvancedStartupOption> opts = new ArrayList<IAdvancedStartupOption>();
+		IExtensionPoint point = Platform.getExtensionRegistry().getExtensionPoint(IAdvancedStartupOption.EXTENSION_ID);
+		for (IExtension ext : point.getExtensions()){
+			for (IConfigurationElement e : ext.getConfigurationElements()){
+				try{
+					IAdvancedStartupOption op =  (IAdvancedStartupOption) e.createExecutableExtension("clazz"); //$NON-NLS-1$
+					opts.add(op);
+				}catch (Exception ex){
+					SmartPlugIn.log("Error loading startup options", ex); //$NON-NLS-1$
+				}
+			}
+		}
+		
+		Collections.sort(opts, new Comparator<IAdvancedStartupOption>() {
+			@Override
+			public int compare(IAdvancedStartupOption o1,
+					IAdvancedStartupOption o2) {
+				return ((Integer)o1.getOrder()).compareTo(o2.getOrder());
+			}
+		});
+		return opts;
+		   
+	}
 }
