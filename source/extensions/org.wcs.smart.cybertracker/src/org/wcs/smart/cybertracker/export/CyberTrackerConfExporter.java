@@ -289,7 +289,7 @@ public class CyberTrackerConfExporter {
 		List<CmAttribute> invisibleList = new ArrayList<CmAttribute>();
 		split(fullList, toShow, invisibleList);
 		
-		return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode.isPhotoAllowed(), cmNode.isPhotoRequired(), null, recordDefaultValues(invisibleList));
+		return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode, null, recordDefaultValues(invisibleList));
 	}
 
 	private List<CyberTrackerId> addListElements(CmAttribute cmAttr) {
@@ -363,7 +363,7 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, boolean addPhoto, boolean photoRequired, String label, String defaultValues) throws Exception {
+	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, CmNode cmNode, String label, String defaultValues) throws Exception {
 		List<Node> result = new ArrayList<Node>();
 		if (label == null)
 			label = ""; //$NON-NLS-1$
@@ -393,9 +393,9 @@ public class CyberTrackerConfExporter {
 				List<CmAttribute> toShow = attrList.subList(cutIndex, attrList.size()); //sublist of everything after multi-select / numeric multi-select
 				List<IAttributeListItemProxy> activeItems = getActiveListItems(cmAttr);
 				for (int x = 0; x < multiIds.size(); x++) {
-					result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, addPhoto, photoRequired, " ("+activeItems.get(x).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
+					result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, cmNode, " ("+activeItems.get(x).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
 				}
-				result.addAll(createLastNodes(nextId, startId, defaultValues, addPhoto, photoRequired));
+				result.addAll(createLastNodes(nextId, startId, defaultValues, cmNode));
 				return result;
 			}
 			//end of multi-select / numeric multi-select block
@@ -496,7 +496,7 @@ public class CyberTrackerConfExporter {
 			}
 		}
 		if (terminate) {
-			result.addAll(createLastNodes(id, startId, defaultValues, addPhoto, photoRequired));
+			result.addAll(createLastNodes(id, startId, defaultValues, cmNode));
 		}
 		return result;
 	}
@@ -815,7 +815,9 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, boolean addPhoto, boolean photoRequired) {
+	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, CmNode cmNode) {
+		final boolean addPhoto = cmNode.isPhotoAllowed();
+		final boolean photoRequired = cmNode.isPhotoRequired();
 		List<Node> nodeList = new ArrayList<Node>();
 		if (addPhoto) {
 			id = addPhotos(id, nodeList, photoRequired, ctUtil.getCtProperties().getMaxPhotoCount());
