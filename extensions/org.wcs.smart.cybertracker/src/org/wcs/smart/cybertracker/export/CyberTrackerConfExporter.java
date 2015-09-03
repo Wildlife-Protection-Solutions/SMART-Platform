@@ -822,6 +822,18 @@ public class CyberTrackerConfExporter {
 		if (addPhoto) {
 			id = addPhotos(id, nodeList, photoRequired, ctUtil.getCtProperties().getMaxPhotoCount());
 		}
+		nodeList.addAll(createSaveWaypointNodes(id, startId, defaultAttrValues));
+		return nodeList;
+	}
+
+	/**
+	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
+	 * 
+	 * @param id
+	 * @param startId
+	 */
+	private List<Node> createSaveWaypointNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues) {
+		List<Node> nodeList = new ArrayList<Node>();
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
 //		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
 //		ScreensObjectFactory.addControlToNode(node, menoControl);
@@ -841,7 +853,7 @@ public class CyberTrackerConfExporter {
 //		control2.setTranslateMinorScreenId(startId.getNodeId());
 		nodeList.add(node);
 		return nodeList;
-	}
+	}	
 
 	private CyberTrackerId addPhotos(CyberTrackerId id, List<Node> nodeList, boolean photoRequired, int count) {
 		List<CyberTrackerId> ctIdList = new ArrayList<CyberTrackerId>(2*count);
