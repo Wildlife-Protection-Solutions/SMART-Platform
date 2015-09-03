@@ -289,7 +289,19 @@ public class CyberTrackerConfExporter {
 		List<CmAttribute> invisibleList = new ArrayList<CmAttribute>();
 		split(fullList, toShow, invisibleList);
 		
-		return buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, cmNode, null, recordDefaultValues(invisibleList));
+		List<Node> nodeList = new ArrayList<Node>();
+		//adding all attributes that are supposed to be displayed
+		BuildAttributeNodesResult buildResult = buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, null);
+		nodeList.addAll(buildResult.getNodes());
+		CyberTrackerId nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
+		//add photo nodes if required
+		if (cmNode.isPhotoAllowed()) {
+			nextId = addPhotos(nextId, nodeList, cmNode.isPhotoRequired(), ctUtil.getCtProperties().getMaxPhotoCount());
+		}
+		//adding nodes with final "save" button for observation or observation group
+		String defaultAttrValues = recordDefaultValues(invisibleList);
+		nodeList.addAll(createSaveWaypointNodes(nextId, startId, defaultAttrValues));
+		return nodeList;
 	}
 
 	private List<CyberTrackerId> addListElements(CmAttribute cmAttr) {
@@ -363,7 +375,7 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private List<Node> buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, CmNode cmNode, String label, String defaultValues) throws Exception {
+	private BuildAttributeNodesResult buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, String label) throws Exception {
 		List<Node> result = new ArrayList<Node>();
 		if (label == null)
 			label = ""; //$NON-NLS-1$
@@ -393,10 +405,10 @@ public class CyberTrackerConfExporter {
 				List<CmAttribute> toShow = attrList.subList(cutIndex, attrList.size()); //sublist of everything after multi-select / numeric multi-select
 				List<IAttributeListItemProxy> activeItems = getActiveListItems(cmAttr);
 				for (int x = 0; x < multiIds.size(); x++) {
-					result.addAll(buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, cmNode, " ("+activeItems.get(x).getName()+")", null)); //$NON-NLS-1$ //$NON-NLS-2$
+					BuildAttributeNodesResult buildResult = buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, " ("+activeItems.get(x).getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
+					result.addAll(buildResult.getNodes());
 				}
-				result.addAll(createLastNodes(nextId, startId, defaultValues, cmNode));
-				return result;
+				return new BuildAttributeNodesResult(nextId, result);
 			}
 			//end of multi-select / numeric multi-select block
 			
@@ -495,10 +507,7 @@ public class CyberTrackerConfExporter {
 				}
 			}
 		}
-		if (terminate) {
-			result.addAll(createLastNodes(id, startId, defaultValues, cmNode));
-		}
-		return result;
+		return new BuildAttributeNodesResult(id, result);
 	}
 
 	/**
@@ -815,23 +824,6 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private List<Node> createLastNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues, CmNode cmNode) {
-		final boolean addPhoto = cmNode.isPhotoAllowed();
-		final boolean photoRequired = cmNode.isPhotoRequired();
-		List<Node> nodeList = new ArrayList<Node>();
-		if (addPhoto) {
-			id = addPhotos(id, nodeList, photoRequired, ctUtil.getCtProperties().getMaxPhotoCount());
-		}
-		nodeList.addAll(createSaveWaypointNodes(id, startId, defaultAttrValues));
-		return nodeList;
-	}
-
-	/**
-	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
-	 * 
-	 * @param id
-	 * @param startId
-	 */
 	private List<Node> createSaveWaypointNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues) {
 		List<Node> nodeList = new ArrayList<Node>();
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
@@ -949,7 +941,12 @@ public class CyberTrackerConfExporter {
 		}
 		return dataProvider.getActiveTreeNodes();
 	}
-	
+
+	/**
+	 * Comparator that sorts TreeNodes ({@link IAttributeTreeNodeProxy}) alphabetically
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
 	private final class NameTreeNodeComparator implements Comparator<IAttributeTreeNodeProxy> {
 		@Override
 		public int compare(IAttributeTreeNodeProxy arg0, IAttributeTreeNodeProxy arg1) {
@@ -960,4 +957,29 @@ public class CyberTrackerConfExporter {
 		}
 	}
 
+	/**
+	 * Result of nodes generation for given list.
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	private final class BuildAttributeNodesResult {
+		/** id for next node in sequence */
+		private CyberTrackerId nextId;
+		
+		/** list of nodes generated for passed attributes */
+		private List<Node> nodes;
+
+		public BuildAttributeNodesResult(CyberTrackerId nextId, List<Node> nodes) {
+			this.nextId = nextId;
+			this.nodes = nodes;
+		}
+		
+		public CyberTrackerId getNextId() {
+			return nextId;
+		}
+		
+		public List<Node> getNodes() {
+			return nodes;
+		}
+	}
 }
