@@ -24,7 +24,6 @@ package org.wcs.smart.cybertracker.model;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 
@@ -34,7 +33,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
  * @author elitvin
  * @since 1.0.0
  */
-public class CyberTrackerProperties extends UuidItem {
+public class CyberTrackerProperties {
 
 	public static final int STORAGE_TIME_MIN_VALUE = 0;
 	public static final int STORAGE_TIME_MAX_VALUE = 365;
