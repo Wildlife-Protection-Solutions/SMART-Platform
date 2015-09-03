@@ -375,10 +375,10 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private BuildAttributeNodesResult buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, String label) throws Exception {
+	private BuildAttributeNodesResult buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, String namePostfix) throws Exception {
 		List<Node> result = new ArrayList<Node>();
-		if (label == null)
-			label = ""; //$NON-NLS-1$
+		if (namePostfix == null)
+			namePostfix = ""; //$NON-NLS-1$
 		
 		List<CyberTrackerId> boolRqAttrElementIDs = null;
 		CyberTrackerId id = startId;
@@ -417,7 +417,7 @@ public class CyberTrackerConfExporter {
 			switch (attribute.getType()) {
 			case NUMERIC:
 			{
-				Node numberNode = screensFactory.createNodeNumber(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, resultElementId.getItemId());
+				Node numberNode = screensFactory.createNodeNumber(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, resultElementId.getItemId());
 				if (attribute.getIsRequired()) {
 					Control numControl = ScreensObjectFactory.getNumberMainControl(numberNode);
 					numControl.setRequireSetValue(ICyberTrackerConstants.STR_TRUE);
@@ -427,7 +427,7 @@ public class CyberTrackerConfExporter {
 			}
 			case TEXT:
 			{
-				Node textNode = screensFactory.createNodeNote(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, resultElementId.getItemId());
+				Node textNode = screensFactory.createNodeNote(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, resultElementId.getItemId());
 				Control textControl = ScreensObjectFactory.getNoteMainControl(textNode);
 				if (attribute.getIsRequired()) {
 					textControl.setRequired(ICyberTrackerConstants.STR_TRUE);
@@ -442,7 +442,7 @@ public class CyberTrackerConfExporter {
 				List<String> values = ctUtil.listItemIds(ids);
 				String trElements = ctUtil.translateElements(ids);
 				String trLinks = ctUtil.translateLinks(ids, false);
-				Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, values, trElements, trLinks, resultElementId.getItemId());
+				Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId());
 				if (!attribute.getIsRequired()) {
 					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -457,7 +457,7 @@ public class CyberTrackerConfExporter {
 					List<String> values = ctUtil.listItemIds(ids);
 					String trElements = ctUtil.translateElements(ids);
 					String trLinks = ctUtil.translateLinks(ids, false);
-					Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, values, trElements, trLinks, resultElementId.getItemId());
+					Node node = screensFactory.createNodeRadio(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, values, trElements, trLinks, resultElementId.getItemId());
 					if (!attribute.getIsRequired()) {
 						Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 						control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -466,7 +466,7 @@ public class CyberTrackerConfExporter {
 				} else {
 					String nodeId = id.getNodeId();
 					id = linkToNext ? new CyberTrackerId() : null; //this id will be used for next screen
-					result.addAll(buildAttributeTreeNodes(cmAttr, nodeId, id, resultElementId.getItemId(), label, terminate));
+					result.addAll(buildAttributeTreeNodes(cmAttr, nodeId, id, resultElementId.getItemId(), namePostfix, terminate));
 					linkToNext = false; //for this case we track linking separately, we don't want any linking logic to be executed further for this attribute
 				}
 				break;
@@ -476,7 +476,7 @@ public class CyberTrackerConfExporter {
 				if (boolRqAttrElementIDs == null) {
 					boolRqAttrElementIDs = ElementsUtil.buildBooleanElements(elements);
 				}
-				Node node = ctUtil.createRadioNode(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, boolRqAttrElementIDs, resultElementId.getItemId());
+				Node node = ctUtil.createRadioNode(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, boolRqAttrElementIDs, resultElementId.getItemId());
 				if (!attribute.getIsRequired()) {
 					Control control7 = ScreensObjectFactory.getRadioMainControl(node);
 					control7.setRadioBlockNext(ICyberTrackerConstants.STR_FALSE);
@@ -486,7 +486,7 @@ public class CyberTrackerConfExporter {
 			}
 			case DATE:
 			{
-				Node dateNode = screensFactory.createDate(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + label, resultElementId.getItemId(), attribute.getIsRequired());
+				Node dateNode = screensFactory.createDate(id.getNodeId(), LanguageUtil.getName(cmAttr, currentLanguage) + namePostfix, resultElementId.getItemId(), attribute.getIsRequired());
 				result.add(dateNode);
 				break;
 			}
