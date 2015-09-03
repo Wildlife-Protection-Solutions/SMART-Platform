@@ -45,16 +45,22 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
+import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * SMART Plan Configuration Preference Page
@@ -75,6 +81,10 @@ public class ConnectServerDialog extends TitleAreaDialog {
 	private Button btnDelete;
 	private TableViewer tblUsers;
 	
+	private Label lblServerVersion;
+	private Label lblServerRevision;
+	private Label lblLocalChanges;
+	
 	/**
 	 * Default constructor
 	 */
@@ -91,17 +101,22 @@ public class ConnectServerDialog extends TitleAreaDialog {
 		parent = (Composite) super.createDialogArea(parent);
 		
 		final Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(3, false));
+		main.setLayout(new GridLayout());
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
-		Label lblServer = new Label(main, SWT.NONE);
+		Group g = new Group(main, SWT.FLAT );
+		g.setText("Connect Server");
+		g.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		g.setLayout(new GridLayout(3, false));
+		
+		Label lblServer = new Label(g, SWT.NONE);
 		lblServer.setText("URL:");
 		
-		txtServer = new Label(main, SWT.NONE);
+		txtServer = new Label(g, SWT.NONE);
 		txtServer.setText("<Server URL>");
 		txtServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		btnSet = new Button(main, SWT.PUSH);
+		btnSet = new Button(g, SWT.PUSH);
 		btnSet.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -109,12 +124,13 @@ public class ConnectServerDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Label lblAccts = new Label(main, SWT.NONE);
-		lblAccts.setText("User Accounts:");
-		lblAccts.setLayoutData(new GridData(SWT.FILL ,SWT.FILL, true, false, 3, 1));
+		g = new Group(main, SWT.FLAT );
+		g.setText("User Accounts");
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		g.setLayout(new GridLayout(2, false));
 		
-		Composite tableComposite = new Composite(main, SWT.NONE);
-		tableComposite.setLayoutData(new GridData(SWT.FILL ,SWT.FILL, true, true, 2, 1));
+		Composite tableComposite = new Composite(g, SWT.NONE);
+		tableComposite.setLayoutData(new GridData(SWT.FILL ,SWT.FILL, true, true, 1, 1));
 		TableColumnLayout layout = new TableColumnLayout();
 		tableComposite.setLayout( layout );
 		tblUsers = new TableViewer(tableComposite, SWT.BORDER | SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION);
@@ -161,7 +177,7 @@ public class ConnectServerDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Composite btnComp = new Composite(main, SWT.NONE);
+		Composite btnComp = new Composite(g, SWT.NONE);
 		btnComp.setLayout(new GridLayout());
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
@@ -200,6 +216,27 @@ public class ConnectServerDialog extends TitleAreaDialog {
 				btnDelete.setEnabled(!tblUsers.getSelection().isEmpty());
 			}
 		});
+
+		g = new Group(main, SWT.FLAT );
+		g.setText("Replication Information");
+		g.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		g.setLayout(new GridLayout(2, false));
+		
+		Label l = new Label(g, SWT.NONE);
+		l.setText("Server Version:");
+		lblServerVersion = new Label(g, SWT.NONE);
+		lblServerVersion.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
+		
+		l = new Label(g, SWT.NONE);
+		l.setText("Last Server Revision:");
+		lblServerRevision = new Label(g, SWT.NONE);
+		lblServerRevision.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
+		
+		l = new Label(g, SWT.NONE);
+		l.setText("Local Changes:");
+		lblLocalChanges = new Label(g, SWT.NONE);
+		lblLocalChanges.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
+		
 		
 		initControls();
 		
@@ -225,6 +262,10 @@ public class ConnectServerDialog extends TitleAreaDialog {
 				btnAdd.setEnabled(false);
 				tblUsers.setInput(new Object[]{});
 				tblUsers.getTable().setEnabled(false);
+				
+				lblLocalChanges.setText("N/A");
+				lblServerVersion.setText("N/A");
+				lblServerRevision.setText("N/A");
 			}else{
 				toUpdate = server;
 				txtServer.setText(server.getServerUrl());
@@ -235,6 +276,35 @@ public class ConnectServerDialog extends TitleAreaDialog {
 						.list();
 				tblUsers.setInput(users);
 				tblUsers.getTable().setEnabled(true);
+				
+				ConnectServerStatus status = (ConnectServerStatus) session.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
+				if (status == null){
+					lblLocalChanges.setText("unknown");
+					lblServerVersion.setText("unknown");
+					lblServerRevision.setText("unknown");
+				}else{
+					lblServerVersion.setText( UuidUtils.uuidToString(status.getVersion()));
+					lblServerRevision.setText( status.getServerRevision().toString() );
+					
+					ConnectSyncHistoryRecord  rec = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, SmartDB.getCurrentConservationArea(), ConnectSyncHistoryRecord.Type.UPLOAD);
+					Long currentRevision = ChangeLogTableManager.INSTANCE.getMaxRevision(session, SmartDB.getCurrentConservationArea());
+					if (rec == null && currentRevision == null){
+						lblLocalChanges.setText("None");
+					}else if (rec == null && currentRevision != null){
+						lblLocalChanges.setText("Yes");
+					}else if (rec != null && currentRevision == null){
+						lblLocalChanges.setText("ERROR");
+					}else if (rec != null && currentRevision != null){
+						if (currentRevision > rec.getEndRevision()){
+							lblLocalChanges.setText("Yes");
+						}else if (currentRevision == rec.getEndRevision()){
+							lblLocalChanges.setText("No");
+						}else{
+							lblLocalChanges.setText("ERROR");
+						}
+					}
+					
+				}
 			}
 			
 			

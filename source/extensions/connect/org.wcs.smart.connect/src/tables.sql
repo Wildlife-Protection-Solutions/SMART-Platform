@@ -30,9 +30,7 @@ CREATE TABLE smart.connect_status(
 	localfile long varchar,
 	primary key (ca_uuid)
 );
-
 ALTER TABLE smart.connect_status ADD CONSTRAINT connect_status_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE restrict ON DELETE restrict;
-
 ALTER TABLE smart.connect_status ADD CONSTRAINT connect_status_connect_uuid_fk foreign key (connect_uuid) REFERENCES smart.connect_server (uuid) ON UPDATE restrict ON DELETE restrict;
 
 

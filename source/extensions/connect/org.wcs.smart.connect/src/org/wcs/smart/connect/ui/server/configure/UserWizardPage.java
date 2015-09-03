@@ -12,11 +12,13 @@ import org.eclipse.swt.widgets.Text;
 
 public class UserWizardPage extends WizardPage implements ModifyListener{
 
+	public static final String NAME = "USER";
+	
 	private Text txtUser;
 	private Text txtPass;
 	
 	public UserWizardPage(){
-		super("USER");
+		super(NAME);
 	}
 	
 	@Override

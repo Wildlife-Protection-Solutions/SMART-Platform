@@ -50,16 +50,21 @@ public enum SyncHistoryManager {
 		
 		Session s = HibernateManager.openSession();
 		try{
-			ConnectSyncHistoryRecord record = (ConnectSyncHistoryRecord) (ConnectSyncHistoryRecord)s.createCriteria(ConnectSyncHistoryRecord.class)
-					.add(Restrictions.eq("conservationArea", ca))
-					.add(Restrictions.eq("type", type))
-					.add(Restrictions.in("status", new Object[]{Status.ACTIVE, Status.DONE}))
-					.addOrder(Order.desc("endRevision"))
-					.setMaxResults(1).uniqueResult();
-			if (record != null) record.getServer().getConservationArea().getUuid();
-			return record;
+			return getLastNonErrorSyncRecord(s, ca, type);
 		}finally{
 			s.close();
 		}
+	}
+	public ConnectSyncHistoryRecord getLastNonErrorSyncRecord(Session session, ConservationArea ca,
+			ConnectSyncHistoryRecord.Type type){
+		
+		ConnectSyncHistoryRecord record = (ConnectSyncHistoryRecord) (ConnectSyncHistoryRecord)session.createCriteria(ConnectSyncHistoryRecord.class)
+				.add(Restrictions.eq("conservationArea", ca))
+				.add(Restrictions.eq("type", type))
+				.add(Restrictions.in("status", new Object[]{Status.ACTIVE, Status.DONE}))
+				.addOrder(Order.desc("endRevision"))
+				.setMaxResults(1).uniqueResult();
+		if (record != null) record.getServer().getConservationArea().getUuid();
+		return record;
 	}
 }

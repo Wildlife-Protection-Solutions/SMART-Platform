@@ -26,9 +26,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
+import java.util.List;
 import java.util.UUID;
 
 import javax.ws.rs.ClientErrorException;
@@ -49,10 +51,12 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
-import org.wcs.smart.connect.api.model.UploadStatus;
+import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 
 /**
  * Class to interface with a SMART Connect server.
@@ -178,13 +182,87 @@ public class SmartConnect implements AutoCloseable {
 	}
 	
 	/**
+	 * Gets the information on a connect server related to the
+	 * all conservation areas
+	 * 
+	 * @param caUuid
+	 * @return ConservationAreaInfo or null if not found
+	 */
+	public List<ConservationAreaInfo> getConservationAreas() throws Exception{
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
+		
+		ConnectClient simple = target.proxy(ConnectClient.class);
+		try{
+			return simple.getConservationAreas();
+		}catch (NotFoundException ex){
+			return null;
+		}
+	}
+	
+	public String startConservationAreaDownload(UUID caUuid) throws Exception{
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
+		ConnectClient simple = target.proxy(ConnectClient.class);
+		Response r = null;
+		try{
+			r = simple.downloadConservationArea(caUuid.toString(), ConnectClient.DATA_PARAM_ALL);
+			
+			return r.getHeaderString(HttpHeaders.LOCATION);
+		}catch (NotFoundException ex){
+			return null;
+		}finally{
+			if (r != null){
+				r.close();
+			}
+		}
+	}
+	
+	public Path downloadConservationArea(String url) throws Exception{
+		ResteasyWebTarget target = client.target(url);
+		Response r = target.request().get();
+		
+		
+		if (r.getStatus() == HttpURLConnection.HTTP_OK){
+			String name = r.getHeaderString(HttpHeaders.CONTENT_DISPOSITION);
+			Long size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+			
+			String key = "filename=";
+			int index = name.indexOf(key);
+			if (index > 0){
+				name = name.substring(index + key.length()+1, name.length() - 1);
+			}else{
+				name = String.valueOf( System.nanoTime() );
+			}
+			Path filestore = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation());
+			filestore = filestore.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
+			filestore = filestore.resolve(name);
+			
+				//parse target
+			try(InputStream is = r.readEntity(InputStream.class)){
+				Files.copy(is, filestore);
+			}
+			
+			if (Files.size(filestore) == size){
+				return filestore;
+			}
+			throw new Exception("Filesizes don't match");
+		}else{
+			//TODO:
+			throw new Exception("Some error.");
+		}
+		
+		
+		
+	}
+	
+	
+	/**
 	 * Gets the status of an smart connect upload url.
 	 * 
 	 * @param url
 	 * @return
 	 * @throws Exception
 	 */
-	public UploadStatus getUploadStatus(String url) throws Exception{
+	public WorkItemStatus getWorkItemStatus(String url) throws Exception{
 		ResteasyWebTarget target = client.target(url);
 		
 		Response r = target.request().get();
@@ -192,7 +270,7 @@ public class SmartConnect implements AutoCloseable {
 			if (r.getStatus() == HttpURLConnection.HTTP_OK){
 				//parse target
 				
-				return r.readEntity(UploadStatus.class);
+				return r.readEntity(WorkItemStatus.class);
 				
 			}else if (r.getStatus() == HttpURLConnection.HTTP_UNAUTHORIZED){
 				throw new NotAuthorizedException(r);

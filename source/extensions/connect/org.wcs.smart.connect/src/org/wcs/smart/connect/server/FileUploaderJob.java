@@ -8,8 +8,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.UploadStatus;
-import org.wcs.smart.connect.api.model.UploadStatus.Status;
+import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.api.model.WorkItemStatus.Status;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 
 public abstract class FileUploaderJob extends Job {
@@ -33,7 +33,7 @@ public abstract class FileUploaderJob extends Job {
 	
 	protected void uploadFile( IProgressMonitor monitor) throws Exception{
 		// get current status
-		UploadStatus serverStatus = connect.getUploadStatus(url);
+		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 		if (checkServerStatus(serverStatus, monitor)){
 			return ;
 		}
@@ -48,7 +48,7 @@ public abstract class FileUploaderJob extends Job {
 				//we failed;
 				ConnectPlugIn.log(ex.getMessage(), ex);
 			}
-					serverStatus = connect.getUploadStatus(url);
+					serverStatus = connect.getWorkItemStatus(url);
 			if (checkServerStatus(serverStatus, monitor)){
 				return ;
 			}
@@ -70,7 +70,7 @@ public abstract class FileUploaderJob extends Job {
 		}
 	}
 	
-	protected boolean checkServerStatus(UploadStatus serverStatus,
+	protected boolean checkServerStatus(WorkItemStatus serverStatus,
 			IProgressMonitor monitor) throws Exception{
 		monitor.subTask("Checking server status");
 		if (serverStatus.getStatus() == Status.COMPLETE){
@@ -112,7 +112,7 @@ public abstract class FileUploaderJob extends Job {
 		Long currentTime = System.nanoTime();
 		while( (currentTime - startTime) < MAX_WAIT){
 			Thread.sleep(STATUS_WAIT_TIME);
-			UploadStatus serverStatus = connect.getUploadStatus(url);
+			WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 			
 			if(serverStatus.getStatus() == Status.COMPLETE){
 				onProcessingComplete(serverStatus);
@@ -126,9 +126,9 @@ public abstract class FileUploaderJob extends Job {
 		return false;
 	}
 	
-	protected abstract void onUploadComplete(UploadStatus status);
+	protected abstract void onUploadComplete(WorkItemStatus status);
 	
-	protected abstract void onProcessingComplete(UploadStatus status);
+	protected abstract void onProcessingComplete(WorkItemStatus status);
 	
-	protected abstract void onError(UploadStatus status);
+	protected abstract void onError(WorkItemStatus status);
 }

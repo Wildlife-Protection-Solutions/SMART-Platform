@@ -39,10 +39,12 @@ import org.eclipse.swt.widgets.Text;
  */
 public class ServerWizardPage extends WizardPage implements ModifyListener {
 
+	public static final String NAME = "SERVER";
+	
 	private Text txtServer;
 	
 	public ServerWizardPage(){
-		super("SERVER");
+		super(NAME);
 	}
 	@Override
 	public void createControl(Composite parent) {
