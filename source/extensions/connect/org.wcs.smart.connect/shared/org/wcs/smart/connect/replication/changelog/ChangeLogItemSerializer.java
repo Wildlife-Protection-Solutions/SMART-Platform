@@ -1,9 +1,28 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.replication.changelog;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectOutputStream;
-import java.nio.ByteBuffer;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -17,10 +36,16 @@ import org.apache.commons.io.IOUtils;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
 import org.wcs.smart.util.UuidUtils;
 
-public class ChangeLogItemDataSerializer {
+/**
+ * Tool for serializing change log items and associated data.
+ * 
+ * @author Emily
+ *
+ */
+public class ChangeLogItemSerializer {
 
 	
-	public static void serializeData(ObjectOutputStream stream,
+	public static void serialize(ObjectOutputStream stream,
 			ChangeLogItem item, Connection c) throws SQLException, IOException{
 		
 		if (item.getAction() == Action.FS_DELETE || 
@@ -31,7 +56,10 @@ public class ChangeLogItemDataSerializer {
 		}
 			
 		//do not record data for delete actions
-		if (item.getAction()== Action.DELETE) return;
+		if (item.getAction()== Action.DELETE){
+			stream.writeObject(item);
+			return;
+		}
 		
 		if (item.getFieldName2() != null 
 				&& (item.getKey2() == null && item.getKey2String() == null)){
@@ -47,6 +75,7 @@ public class ChangeLogItemDataSerializer {
 		sb.append(" WHERE ");
 		sb.append(item.getFieldName1() + " = ? ");
 		if (item.getFieldName2() != null){
+			sb.append(" AND ");
 			sb.append(item.getFieldName2() + " = ? " );
 		}
 		PreparedStatement ps = c.prepareStatement(sb.toString());
@@ -61,9 +90,19 @@ public class ChangeLogItemDataSerializer {
 		
 		ResultSet rs = ps.executeQuery();
 		if (!rs.next()){
-			throw new SQLException("Not value found for object: " + item.getTableName() + " _ " + item.getFieldName1() + " _ " + item.getKey1().toString());
+			//throw new SQLException("Not value found for object: " + item.getTableName() + " _ " + item.getFieldName1() + " _ " + item.getKey1().toString());
+			//not data was found for the object;
+			//this should be because it is deleted later in the change log history
+			//TODO: for validation purposes we could valid this is the case
+			item.setAction(Action.DELETE);
+			stream.writeObject(item);
+			return;
 		}
 		
+		//serialize change log item
+		stream.writeObject(item);
+		
+		//serialize data
 		ResultSetMetaData md = rs.getMetaData();
 		int colCnt = md.getColumnCount();
 		stream.writeInt(colCnt);

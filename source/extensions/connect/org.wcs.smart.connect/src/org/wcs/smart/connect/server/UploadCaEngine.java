@@ -37,19 +37,18 @@ import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.export.CaExporter;
-import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
 import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
-import org.wcs.smart.util.ZipUtil;
 
 /**
  * Upload ca engine that processes the initial upload request,
@@ -93,13 +92,19 @@ public class UploadCaEngine {
 				
 				if (serverInfo.getStatus() == ConservationAreaInfo.Status.UPLOADING){
 					//somebody is uploading data;  is it us (check versions)?
-					if (localStatus == null || !(localStatus.getVersion().equals(serverInfo.getVersion()))){
+					if (localStatus == null 
+							|| !(localStatus.getVersion().equals(serverInfo.getVersion()))){
 						throw new Exception("Another desktop client is currently uploading this ConservationArea to the server.  You cannot upload your data at the same time.");
 					}
 					//continue using local file
 					if (localStatus != null){
+						if (localStatus.getStatus() == Status.ERROR || 
+								localStatus.getStatus() == Status.BACKUP){
+							//clear this file because we want to start over
+							throw new Exception("Conservation Area is already being processed on the server.  You may need to delete the conservation area from the connect server then try again.");
+						}
 						if (localStatus.getLocalFile() == null){
-						//we have a problem because we do not have a local file to upload anymore
+							//we have a problem because we do not have a local file to upload anymore
 							throw new Exception("Could not resume upload as local file could not be found.");
 						}else{
 							File f = new File(SmartContext.INSTANCE.getFilestoreLocation(), localStatus.getLocalFile());
@@ -140,6 +145,16 @@ public class UploadCaEngine {
 			if (localStatus.getUploadUrl() == null){
 				monitor.subTask("Exporting conservation area for upload.");
 				packageCa(localStatus.getLocalFile(), new SubProgressMonitor(monitor, 1));
+				
+				localStatus.setStatus(Status.UPLOAD);
+				s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					s.saveOrUpdate(localStatus);
+					s.getTransaction().commit();
+				}finally{
+					s.close();
+				}
 				
 				String uploadURL = connect.getCaUploadUrl(localStatus.getUuid(), 
 						localStatus.getVersion(), 
@@ -214,7 +229,7 @@ public class UploadCaEngine {
 		status.setServerRevision(-1l);
 		status.setServer(server);
 		status.setConservationArea(SmartDB.getCurrentConservationArea());
-		status.setStatus(ConnectServerStatus.Status.ACTIVE);
+		status.setStatus(ConnectServerStatus.Status.BACKUP);
 		return status;
 
 	}

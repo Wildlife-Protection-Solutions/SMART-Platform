@@ -46,7 +46,6 @@ public class Messages extends NLS {
 	public static String AttributeValueDropItem_NoAggregationOptionFound;
 	public static String AttributeValueItem_attributenotfound;
 	public static String AttributeValueItem_categorynotfound;
-	public static String AttributeValueItem_InvalidTreeorItemNode;
 	public static String AttributeValueItem_listitemnotfound;
 	public static String AttributeValueItem_NonNumericAttributeInvalid;
 	public static String AttributeValueItem_treenodenotfound;

@@ -1,5 +1,28 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.replication;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ILoginHandler;
@@ -7,11 +30,19 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.server.UploadCaJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
+/**
+ * Login handler to clean up SMART connect processes in cases
+ * where SMART terminates in the middle of a background job.
+ * 
+ * @author Emily
+ *
+ */
 public class LoginHandler implements ILoginHandler {
 
 	@Override
@@ -35,24 +66,40 @@ public class LoginHandler implements ILoginHandler {
 			if (status == null){
 				return;
 			}
-			if (status.getStatus() == ConnectServerStatus.Status.ACTIVE ||
+			if (status.getStatus() == ConnectServerStatus.Status.UPLOAD ||
 				status.getStatus() == ConnectServerStatus.Status.DONE ){
 				DerbyReplicationManager.INSTANCE.enableReplication(s);
 			}
-			
-			
-		}catch (Exception ex){
-			throw ex;
 		}finally{
 			s.close();
 		}
 		
+		processCaUploadEvents(status);
+		//TODO: upload sync events also need checking to clean up
+	}
+
+	/*
+	 * checks for ca upload task and performs necessary checks to invalidate
+	 * or continue process
+	 */
+	private void processCaUploadEvents(ConnectServerStatus status){
+		if (status.getStatus() == ConnectServerStatus.Status.DONE || 
+				status.getStatus() == ConnectServerStatus.Status.ERROR){
+			return;
+		}
 		
-		//TODO: test this
-		s = HibernateManager.openSession();
+		Session s = HibernateManager.openSession();
 		try{
-			s.beginTransaction();
-			if (status.getStatus() == ConnectServerStatus.Status.ACTIVE){
+			
+			if (status.getStatus() == ConnectServerStatus.Status.BACKUP){
+				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Export To Connect", "SMART was terminated before the export to SMART Conenct to be initiated.  You will need to re-export to SMART Connect if you want to upload your conservation area.");
+				
+				s.beginTransaction();
+				s.saveOrUpdate(status);
+				status.setStatus(Status.ERROR);
+				s.getTransaction().commit();
+				return;
+			}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){				
 				ConnectServer server = (ConnectServer) s.createCriteria(ConnectServer.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
 							.uniqueResult();
@@ -61,27 +108,31 @@ public class LoginHandler implements ILoginHandler {
 					return;
 				}
 				
-				ConnectUser user = (ConnectUser) s.createCriteria(ConnectUser.class)
-					.add(Restrictions.eq("smartUser", SmartDB.getCurrentEmployee()))
-					.uniqueResult();
+				ConnectUser user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
 				if (user == null){
 					//this user does not have the ability to update conservation
 					//area to smart connect so we have to do something here
 					//do we want to warn the user or what??
 					return;
 				}
-				
-				SmartConnect connect = new SmartConnect(server, user.getConnectUsername(), user.getConnectPassword());
-				//need to continue upload
-				UploadCaJob job = new UploadCaJob(connect, status);
-				job.schedule();
+				if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Export To Connect", 
+						"SMART was terminated before the export to SMART Conenct was completed.  Do you want resume the upload process?")){
+					SmartConnect connect = new SmartConnect(server, user.getConnectUsername(), user.getConnectPassword());
+					//need to continue upload
+					UploadCaJob job = new UploadCaJob(connect, status);
+					job.schedule();
+				}else{
+					s.beginTransaction();
+					status.setStatus(Status.ERROR);
+					s.saveOrUpdate(status);
+					s.getTransaction().commit();
+					return;
+				}
 			}
-			s.getTransaction().commit();
 		}catch (Exception ex){
 			ConnectPlugIn.log("Error continuing connect upload", ex);
 		}finally{
 			s.close();
 		}
 	}
-
 }

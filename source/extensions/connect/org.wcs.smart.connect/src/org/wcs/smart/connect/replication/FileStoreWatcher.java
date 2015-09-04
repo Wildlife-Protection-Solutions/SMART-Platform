@@ -1,8 +1,27 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.replication;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -15,22 +34,24 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.replication.changelog.ChangeLogItem;
+import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
-import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Watcher for managing filestore changes that need to 
+ * be replicated to connect. 
+ * 
+ * @author Emily
+ *
+ */
 public class FileStoreWatcher implements Runnable{
 
     private final WatchService watcher;
@@ -76,107 +97,95 @@ public class FileStoreWatcher implements Runnable{
 
     
     private void processEvent(Path p, Kind<?> kind){
-    	String type ="FS_INSERT";
+    	System.out.println("event");
+    	ChangeLogItem.Action type = ChangeLogItem.Action.FS_INSERT;
     	if (kind == StandardWatchEventKinds.ENTRY_CREATE){
-    		type = "FS_INSERT";
+    		type = ChangeLogItem.Action.FS_INSERT;
     	}else if (kind == StandardWatchEventKinds.ENTRY_MODIFY){
-    		type = "FS_UPDATE";
+    		type = ChangeLogItem.Action.FS_UPDATE;
     	}else if(kind == StandardWatchEventKinds.ENTRY_DELETE){
-    		type = "FS_DELETE";
+    		type = ChangeLogItem.Action.FS_DELETE;
     	}
-    	final String ftype = type;
     	
+    	final String relativeFileName = FileSystems.getDefault()
+    			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
+    			.relativize(p)
+    			.toString();
     	
-    	Path filestore = (new File(SmartContext.INSTANCE.getFilestoreLocation())).toPath();
-    	Path relativeFile = filestore.relativize(p);
-    	final String fRelative = relativeFile.toString();
-    	
-    	System.out.println("DO:" + ftype + ":" + fRelative);
-    	
-    	Session s = HibernateManager.openSession();
-    	s.doWork(new Work(){
+    	ChangeLogItem item = new ChangeLogItem();
+    	item.setAction(type);
+    	item.setConservationArea(SmartDB.getCurrentConservationArea().getUuid());
+    	item.setFileName(relativeFileName);
 
-			@Override
-			public void execute(Connection connection) throws SQLException {
-				// TODO deal with exceptions
-				String sql = "INSERT INTO smart.connect_change_log (action, filename, ca_uuid) values (?, ?, ?)";
-				PreparedStatement ps = connection.prepareStatement(sql);
-				ps.setString(1, ftype);
-				ps.setString(2, fRelative);
-				UUID value = SmartDB.getCurrentConservationArea().getUuid();		
-				ps.setObject(3, UuidUtils.uuidToByte(value));
-				ps.executeUpdate();
-				
-				connection.commit();
-    
-			}
-    		
-    	});
-    	s.close();
+    	Session s = HibernateManager.openSession();
+    	try{
+    		s.beginTransaction();
+    		ChangeLogTableManager.INSTANCE.addItem(s, item);
+    		s.getTransaction().commit();
+    	}finally{
+    		s.close();
+    	}
     }
 
 	@Override
 	public void run() {
-		 for (;;) {
-	            // wait for key to be signalled
-	            WatchKey key;
-	            try {
-	                key = watcher.take();
-	            } catch (InterruptedException x) {
-	                return;
-	            }
+		for (;;) {
+			// wait for key to be signalled
+			WatchKey key;
+			try {
+				key = watcher.take();
+			} catch (InterruptedException x) {
+				return;
+			}
 
-	            Path dir = keys.get(key);
-	            if (dir == null) {
-	                System.err.println("WatchKey not recognized!!");
-	                continue;
-	            }
+			Path dir = keys.get(key);
+			if (dir == null) {
+				System.err.println("WatchKey not recognized!!");
+				continue;
+			}
 
-	            for (WatchEvent<?> event: key.pollEvents()) {
-	                Kind<?> kind = event.kind();
+			for (WatchEvent<?> event : key.pollEvents()) {
+				Kind<?> kind = event.kind();
 
-	                // TBD - provide example of how OVERFLOW event is handled
-	                if (kind == StandardWatchEventKinds.OVERFLOW) {
-	                    continue;
-	                }
+				// TODO: - provide example of how OVERFLOW event is handled
+				if (kind == StandardWatchEventKinds.OVERFLOW) {
+					ConnectPlugIn.log("OVERFLOW FILE SYSTEM EVENTS", null);
+					continue;
+				}
 
-	                // Context for directory entry event is the file name of entry
-	                WatchEvent<Path> ev = (WatchEvent<Path>) event;
-	                Path name = ev.context();
-	                Path child = dir.resolve(name);
+				// Context for directory entry event is the file name of entry
+				WatchEvent<Path> ev = (WatchEvent<Path>) event;
+				Path name = ev.context();
+				Path child = dir.resolve(name);
 
-	                // print out event
-//	                System.out.format("%s: %s\n", event.kind().name(), child);
+				// if directory is created, and watching recursively, then
+				// register it and its sub-directories
+				if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+					try {
+						if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
+							register(child);
+						}
+					} catch (IOException x) {
+						// ignore to keep sample readbale
+					}
+				}
+				try {
+					processEvent(child, kind);
+				} catch (Throwable t) {
+					ConnectPlugIn.log("Error processing filestore event", t);
+				}
+			}
 
-	                // if directory is created, and watching recursively, then
-	                // register it and its sub-directories
-	                if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-	                    try {
-	                        if (Files.isDirectory(child, LinkOption.NOFOLLOW_LINKS)) {
-	                            register(child);
-	                        }
-	                    } catch (IOException x) {
-	                        // ignore to keep sample readbale
-	                    }
-	                }
-	                try {
-	                	processEvent(child, kind);
-	                }catch (Throwable t){
-	                	//TODO: deal with this
-	                	t.printStackTrace();
-	                }
-	            }
+			// reset key and remove from set if directory no longer accessible
+			boolean valid = key.reset();
+			if (!valid) {
+				keys.remove(key);
 
-	            // reset key and remove from set if directory no longer accessible
-	            boolean valid = key.reset();
-	            if (!valid) {
-	                keys.remove(key);
-
-	                // all directories are inaccessible
-	                if (keys.isEmpty()) {
-	                    break;
-	                }
-	            }
-	        }
+				// all directories are inaccessible
+				if (keys.isEmpty()) {
+					break;
+				}
+			}
+		}
 	}
 }
