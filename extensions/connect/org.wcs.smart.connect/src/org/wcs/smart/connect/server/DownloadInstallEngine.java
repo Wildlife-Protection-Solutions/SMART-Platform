@@ -1,15 +1,15 @@
-package org.wcs.smart.connect.ui.startup;
+package org.wcs.smart.connect.server;
 
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
@@ -19,6 +19,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.ca.in.CaImporter;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
@@ -31,6 +33,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class DownloadInstallEngine {
 
+	public static final long MAX_WAIT = 5 * 60 * 1000000000l;  //5 minutes in nano seconds
+	public static final long STATUS_RETY_WAIT = 1000;
+	
 	private ConservationAreaInfo info;
 	private SmartConnect connect;
 	
@@ -39,30 +44,53 @@ public class DownloadInstallEngine {
 		this.connect = connect;
 	}
 	
-	public void download() throws Exception{
-		String statusUrl = connect.startConservationAreaDownload(info.getUuid());
+	public boolean download(IProgressMonitor monitor) throws Exception{
+		monitor.beginTask("Download & Install Conservation Area", 4);
 		
-		WorkItemStatus status = connect.getWorkItemStatus(statusUrl);
-		while(status.getStatus() == WorkItemStatus.Status.PROCESSING || 
-				status.getStatus() == WorkItemStatus.Status.PROCESSING ){
-			
-			System.out.println("checking status");
-			Thread.sleep(1000);
-			status = connect.getWorkItemStatus(statusUrl);
-			
+		/* request ca */
+		monitor.subTask("Initializing download");
+		String statusUrl = connect.startConservationAreaDownload(info.getUuid());
+		monitor.worked(1);
+		if (monitor.isCanceled()) return false;
+		
+		/* wait for ca export to be created */
+		monitor.subTask("Waiting for export to processes");
+		Long start = System.nanoTime();
+		WorkItemStatus status = null ;
+		while(status == null || (status.getStatus() == WorkItemStatus.Status.PROCESSING || 
+				status.getStatus() == WorkItemStatus.Status.PROCESSING)){
+			Long current = System.nanoTime();
+			if ( current - start > MAX_WAIT) throw new Exception("Timed out waiting for export to process.");
+			Thread.sleep(STATUS_RETY_WAIT);
+			try{
+				status = connect.getWorkItemStatus(statusUrl);
+			}catch (Exception ex){
+				ConnectPlugIn.log("Error requesting ca download status.", ex);
+			}
+			if (monitor.isCanceled()) return false;
 		}
+		monitor.worked(1);
 		
 		if (status.getStatus() == WorkItemStatus.Status.ERROR){
 			throw new Exception("error downloading item");
 		}
-		
-		//done
+
+		/* download file */
+		monitor.subTask("Downloading Conservation Area");
 		String message = status.getMessage();
 		JsonNode nd = (new ObjectMapper()).readTree(message);
 		String downloadUrl = nd.get("file_url").asText();
-		
+		if (monitor.isCanceled()) return false;
 		Path p = connect.downloadConservationArea(downloadUrl);
-		System.out.println(p.toString());
+		monitor.worked(1);
+		
+		/* import file */
+		monitor.subTask("Installing Conservation Area");
+		if (monitor.isCanceled()) return false;
+		CaImporter.importCa(p.toFile(), new SubProgressMonitor(monitor, 1));
+		
+		monitor.done();
+		return true;
 	}
 	/**
 	 * 

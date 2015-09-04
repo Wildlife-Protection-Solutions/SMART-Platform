@@ -33,8 +33,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.application.DisplayAccess;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.in.CaImporter;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.internal.ca.in.CaImporter;
 
 /**
  * Handler for importing a conservation area.

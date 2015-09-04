@@ -10,7 +10,6 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.api.model.WorkItemStatus.Status;
-import org.wcs.smart.connect.model.ConnectServerStatus;
 
 public abstract class FileUploaderJob extends Job {
 	

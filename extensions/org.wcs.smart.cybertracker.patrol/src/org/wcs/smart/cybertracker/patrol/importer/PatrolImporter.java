@@ -63,11 +63,11 @@ public class PatrolImporter extends AbstractPatrolImporter {
 			if(!fixTransportError(ctPatrol))
 				return null;
 		}
-		
+		Patrol patrol = null;
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
 		try {
 			session.beginTransaction();
-			Patrol patrol = buildPatrol(ctPatrol, session);
+			patrol = buildPatrol(ctPatrol, session);
 			
 			//check if duplicate of existing patrol
 			if (!checkDuplicate(ctPatrol, patrol, session)){
@@ -93,8 +93,6 @@ public class PatrolImporter extends AbstractPatrolImporter {
 
 			PatrolHibernateManager.savePatrol(patrol, session, true);
 			session.getTransaction().commit();
-			PatrolEventManager.getInstance().patrolAdded(patrol);
-			return patrol;
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
 			Display.getDefault().syncExec(new Runnable() {
@@ -104,10 +102,12 @@ public class PatrolImporter extends AbstractPatrolImporter {
 				}
 			});
 			return null;
-		}
-		finally {
+		}finally {
 			session.close();
 		}
+		//fire events
+		PatrolEventManager.getInstance().patrolAdded(patrol);
+		return patrol;
 	}
 	
 	private Patrol buildPatrol(CyberTrackerPatrol ctPatrol, Session session) {

@@ -15,13 +15,10 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.ui.server.configure.ServerWizardPage;
-import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
 
 public class CaListPage extends WizardPage implements ISelectionChangedListener{
 

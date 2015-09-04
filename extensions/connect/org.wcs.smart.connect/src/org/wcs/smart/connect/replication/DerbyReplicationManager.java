@@ -1,6 +1,27 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.replication;
 
-import java.io.File;
+import java.nio.file.FileSystems;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,12 +31,17 @@ import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 
+/**
+ * Manager for starting and stopping the derby change logging.
+ * 
+ * @author Emily
+ *
+ */
 public enum DerbyReplicationManager {
  
 	INSTANCE;
 	
-	DerbyReplicationManager(){
-		
+	DerbyReplicationManager(){		
 	}
 
 	public static final String LOGGING_DB_PROPERTY = "org.wcs.smart.isLogging";
@@ -25,13 +51,13 @@ public enum DerbyReplicationManager {
 	
 	public void enableReplication(Session session) throws Exception{
 		setReplicationEnabled(session, true);
-		
-//		watcher = new FileStoreWatcher();
-//		watcher.register( new File(SmartContext.INSTANCE.getFilestoreLocation()).toPath() );
-//
-//		//run filestore watcher in new thread (background)		
-//		fileStoreReplication = new Thread(watcher);
-//		fileStoreReplication.start();
+
+		//file watch for changes to file store
+		watcher = new FileStoreWatcher();
+		watcher.register( FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation()) );
+		//run filestore watcher in new thread (background)		
+		fileStoreReplication = new Thread(watcher);
+		fileStoreReplication.start();
 	}
 	
 	public void disableReplication(Session session) throws Exception{

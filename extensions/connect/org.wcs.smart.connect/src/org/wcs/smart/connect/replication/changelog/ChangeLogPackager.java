@@ -8,22 +8,17 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
-import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.MetadataPackager;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
 public class ChangeLogPackager {
@@ -98,8 +93,7 @@ public class ChangeLogPackager {
 						ObjectOutputStream oout = new ObjectOutputStream(fout)){
 					oout.writeInt(items.size());
 					for (ChangeLogItem i : items){
-						oout.writeObject(i);
-						ChangeLogItemDataSerializer.serializeData(oout, i, connection);
+						ChangeLogItemSerializer.serialize(oout, i, connection);
 					}
 				}catch (Exception ex){		
 					throw new SQLException (ex);

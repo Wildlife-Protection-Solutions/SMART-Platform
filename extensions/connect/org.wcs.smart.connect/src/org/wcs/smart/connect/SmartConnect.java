@@ -24,11 +24,13 @@ package org.wcs.smart.connect;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
@@ -39,10 +41,12 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.AbstractHttpClient;
@@ -69,6 +73,8 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 public class SmartConnect implements AutoCloseable {
 
 	public final static String API_URL = "/api";
+	
+	public static final int MAX_RETRY_DOWNLOAD = 10;
 	
 	private String username;
 	private ConnectServer server;
@@ -217,43 +223,86 @@ public class SmartConnect implements AutoCloseable {
 	}
 	
 	public Path downloadConservationArea(String url) throws Exception{
-		ResteasyWebTarget target = client.target(url);
-		Response r = target.request().get();
+		int tryCount = 0;
 		
+		//download file name
+		Path filestore = FileSystems.getDefault()
+			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
+			.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR)
+			.resolve(System.nanoTime() + ".temp.zip");
 		
-		if (r.getStatus() == HttpURLConnection.HTTP_OK){
-			String name = r.getHeaderString(HttpHeaders.CONTENT_DISPOSITION);
-			Long size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+		Long size = null;
+		
+		//first request; this one gives us the requested size
+		while(size == null && tryCount < MAX_RETRY_DOWNLOAD){
+			Response r = null;
+			try{
+				ResteasyWebTarget target = client.target(url);
+				r = target.request().get();
 			
-			String key = "filename=";
-			int index = name.indexOf(key);
-			if (index > 0){
-				name = name.substring(index + key.length()+1, name.length() - 1);
-			}else{
-				name = String.valueOf( System.nanoTime() );
+				if (r.getStatus() == HttpURLConnection.HTTP_OK){
+				
+					size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+							
+					//parse target
+					try(InputStream is = r.readEntity(InputStream.class)){
+						Files.copy(is, filestore);
+					}	
+					if (Files.size(filestore) > size){
+						throw new Exception("Downloaded file size greater than expected file size.");
+					}
+					if (Files.size(filestore) == size){
+						return filestore;
+					}
+				}
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+			}finally{
+				if (r != null) r.close();
 			}
-			Path filestore = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation());
-			filestore = filestore.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
-			filestore = filestore.resolve(name);
+			tryCount ++;
+		}
+		
+		//try a maximum of 10 times
+		while(tryCount < MAX_RETRY_DOWNLOAD){
+			downloadRequest(filestore, url, size);
 			
-				//parse target
-			try(InputStream is = r.readEntity(InputStream.class)){
-				Files.copy(is, filestore);
+			if (Files.size(filestore) > size){
+				throw new Exception("Downloaded file size greater than expected file size.");
 			}
-			
 			if (Files.size(filestore) == size){
 				return filestore;
 			}
-			throw new Exception("Filesizes don't match");
-		}else{
-			//TODO:
-			throw new Exception("Some error.");
+			tryCount++;
 		}
-		
-		
-		
+		throw new Exception("Failed to download conservation export from server.");
 	}
 	
+	private void downloadRequest(Path p, String url, long maxLength) throws Exception{
+		ResteasyWebTarget target = client.target(url);
+		Response r = null;
+		try {
+			Long start = Files.size(p);
+			Long end = maxLength;
+			
+			Builder requestBuilder = target.request();
+			if (start != 0 && end != maxLength){
+				requestBuilder.header("Range", "bytes=" + start + "-" + end);
+			}
+			
+			r = target.request().get();
+			if (r.getStatus() == HttpURLConnection.HTTP_OK){
+				try(InputStream is = r.readEntity(InputStream.class);
+						OutputStream out = Files.newOutputStream(p, StandardOpenOption.CREATE, StandardOpenOption.APPEND)){
+					IOUtils.copyLarge(is, out);
+				}
+			}
+		}catch (Exception ex){
+			ConnectPlugIn.log(ex.getMessage(), ex);
+		}finally{
+			r.close();
+		}
+	}
 	
 	/**
 	 * Gets the status of an smart connect upload url.

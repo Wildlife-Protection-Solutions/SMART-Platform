@@ -35,9 +35,6 @@ import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.hibernate.HibernateManager;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Job to upload conservation area export to connect server
  * and monitor results until complete.
@@ -73,7 +70,7 @@ public class UploadCaJob extends FileUploaderJob {
 
 	}
 	
-	private void displayComplete(){
+	private void displayComplete(final String msg){
 		Display.getDefault().syncExec(new Runnable(){
 
 			@Override
@@ -81,11 +78,13 @@ public class UploadCaJob extends FileUploaderJob {
 				if (status.getStatus() == org.wcs.smart.connect.model.ConnectServerStatus.Status.DONE){
 					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
 						"SMART Connect Upload", 
-						"Upload to SMART Connect complete.");
+						"Upload to SMART Connect complete." +
+						(msg != null ? "\n" + msg : ""));
 				}else if (status.getStatus() == org.wcs.smart.connect.model.ConnectServerStatus.Status.ERROR){
 					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
 							"SMART Connect Upload", 
-							"An error occurred during uploading Conservation Area to SMART Connect. Check status on SMART Connect.");
+							"An error occurred uploading Conservation Area to SMART Connect." +
+							(msg != null ? "\n" + msg : ""));
 				}
 			}});
 	}
@@ -120,7 +119,7 @@ public class UploadCaJob extends FileUploaderJob {
 		saveStatus();
 		
 		deleteLocalFile();	
-		displayComplete();
+		displayComplete(null);
 		
 		super.connect.close();
 	}
@@ -130,7 +129,7 @@ public class UploadCaJob extends FileUploaderJob {
 	protected void onError(WorkItemStatus upstatus) {
 		this.status.setStatus(ConnectServerStatus.Status.ERROR);
 		saveStatus();
-		displayComplete();	
+		displayComplete(upstatus.getMessage());	
 		
 		super.connect.close();
 	}

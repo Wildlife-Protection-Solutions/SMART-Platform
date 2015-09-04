@@ -47,7 +47,8 @@ import org.wcs.smart.ca.ConservationArea;
 public class ConnectServerStatus {
 
 	public enum Status{
-		ACTIVE, 
+		BACKUP,
+		UPLOAD,
 		DONE,
 		ERROR
 	}

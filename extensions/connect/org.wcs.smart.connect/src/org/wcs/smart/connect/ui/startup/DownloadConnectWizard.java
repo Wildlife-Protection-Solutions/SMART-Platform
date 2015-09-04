@@ -1,25 +1,22 @@
 package org.wcs.smart.connect.ui.startup;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IPageChangingListener;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.PageChangingEvent;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
-import org.hibernate.Session;
-import org.wcs.smart.SmartPlugIn;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.server.DownloadInstallEngine;
 import org.wcs.smart.connect.ui.server.configure.ConnectServerWizard;
 import org.wcs.smart.connect.ui.server.configure.ServerWizardPage;
 import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
-import org.wcs.smart.hibernate.HibernateManager;
 
 public class DownloadConnectWizard extends ConnectServerWizard implements IPageChangingListener{
 
@@ -37,12 +34,11 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 		((WizardDialog)getContainer()).addPageChangingListener(this);
 		super.addPages();
 	}
+	
 	@Override
 	public boolean performFinish() {
-		
 		ConservationAreaInfo info = page3.getSelection();
-		
-		
+
 		if (info == null) return false;
 		
 		String url = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getServerName();
@@ -53,14 +49,32 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 		server.setServerUrl(url);
 		try(SmartConnect connect = new SmartConnect(server, user, pass)){
 		
-			DownloadInstallEngine installer = new DownloadInstallEngine(info, connect);
+			final DownloadInstallEngine installer = new DownloadInstallEngine(info, connect);
 			installer.preDownload(getShell());
 		
+			final List<Exception> errors = new ArrayList<Exception>();
 			try{
-				installer.download();
+				getContainer().run(true, true, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
+							InterruptedException {
+						try{
+							if (!installer.download(monitor)){
+								errors.add(new Exception("Process cancelled by user."));
+							}
+							
+						}catch (Exception ex){
+							errors.add(ex);
+						}
+					}
+				});
 			}catch (Exception ex){
-				SmartPlugIn.displayLog(ex.getMessage(), ex);
+				errors.add(ex);
 			}
+			if (errors.isEmpty()){
+				return true;
+			}
+			ConnectPlugIn.displayLog("Error downloading and importing conservation area." + "\n\n" + errors.get(0).getMessage(), errors.get(0));
 		}
 		return false;
 	}

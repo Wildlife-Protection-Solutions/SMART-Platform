@@ -8,8 +8,10 @@ import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.type.StringType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
+import org.wcs.smart.util.DerbyUtils;
 import org.wcs.smart.util.UuidUtils;
 
 public enum ChangeLogTableManager {
@@ -33,37 +35,86 @@ public enum ChangeLogTableManager {
 		query.executeUpdate();
 	}
 	
+	public void addItem(Session s, ChangeLogItem item){
+		StringBuilder sb = new StringBuilder();
+		sb.append("INSERT INTO ");
+		sb.append(CHANGE_LOG_TABLE);
+		sb.append(" (uuid, action, filename, tablename, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid, ca_uuid) ");
+		sb.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		
+		SQLQuery query = s.createSQLQuery(sb.toString());
+		query.setBinary(0, DerbyUtils.createUuid());
+		query.setString(1, item.getAction().name());
+		query.setParameter(2, item.getFileName());
+		query.setParameter(3, item.getTableName(),StringType.INSTANCE);
+		query.setParameter(4, item.getFieldName1(),StringType.INSTANCE);
+		query.setBinary(5, item.getKey1() == null ? null : UuidUtils.uuidToByte(item.getKey1()));
+		query.setParameter(6, item.getFieldName2(),StringType.INSTANCE);
+		query.setParameter(7, item.getKey2String(),StringType.INSTANCE);
+		query.setBinary(8, item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2()));
+		query.setBinary(9, UuidUtils.uuidToByte(item.getConservationArea()));
+		
+		query.executeUpdate();		
+	}
+	
+	/**
+	 * 
+	 * @param s
+	 * @param ca
+	 * 
+	 * @return the current maximum revision number from the change long table for the conservation area or null
+	 * if there is nothing in the change log table for the conservation area
+	 */
 	public Long getMaxRevision(Session s, ConservationArea ca){
 		SQLQuery query = s.createSQLQuery("SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = ?");
 		query.setBinary(0, UuidUtils.uuidToByte(ca.getUuid()));
-		return ((BigInteger) query.uniqueResult()).longValue();
+		Object x = query.uniqueResult();
+		if (x == null){
+			return null;
+		}
+		return ((BigInteger) x).longValue();
 	}
 	/**
 	 * Load all change log items associated with a given conservation area.
 	 * 
 	 * @param s
 	 * @param ca
-	 * @param startRevision exclusive revision to start at (returns everything >= revision)
+	 * @param startRevision exclusive revision to start at (returns everything > revision)
 	 * @return
 	 */
 	public List<ChangeLogItem> getAll(Session s, ConservationArea ca, long startRevision){
+		
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT uuid, revision, action, filename, tablename, ");
-		query.append("key1_fieldname, key1, key2_fieldname, key2_str, ");
-		query.append("key2_uuid, ca_uuid ");
-		query.append("FROM smart.connect_change_log ");
-		query.append("where ca_uuid = :ca");
-		query.append(" AND revision IN (");
-		query.append("select max(revision) as revision ");
-		query.append(" from smart.CONNECT_CHANGE_LOG ");
-		query.append("group by filename,  tablename, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid)");			
-		query.append(" AND revision > :revision");
-		query.append(" ORDER BY revision ");
+		query.append("SELECT a.uuid, a.revision, a.action, a.filename, a.tablename, ");
+		query.append("a.key1_fieldname, a.key1, a.key2_fieldname, a.key2_str, a.key2_uuid, a.ca_uuid "); 
+		query.append("FROM smart.connect_change_log a,"); 
+		query.append("( SELECT max(revision) as maxrevision, ");
+		query.append("action, filename, tablename, key1_fieldname, key1,"); 
+		query.append("key2_fieldname, key2_str, key2_uuid  FROM ");
+		query.append(CHANGE_LOG_TABLE);
+		query.append(" WHERE ca_uuid = :ca1 ");
+		query.append(" AND revision > :revision1 ");
+		query.append("GROUP BY action, filename, tablename, key1_fieldname, key1,"); 
+		query.append("key2_fieldname, key2_str, key2_uuid) c ");
+		query.append("where a.ca_uuid = :ca2 "); 
+		query.append("and a.action = c.action ");
+		query.append("and (a.filename = c.filename or (a.filename is null and c.filename is null)) ");
+		query.append("and (a.tablename = c.tablename or (a.tablename is null and c.tablename is null)) ");
+		query.append("and (a.key1_fieldname = c.key1_fieldname or (a.key1_fieldname is null and c.key1_fieldname is null)) ");
+		query.append("and (a.key1 = c.key1 or (a.key1 is null and c.key1 is null)) ");
+		query.append("and (a.key2_fieldname = c.key2_fieldname or (a.key2_fieldname is null and c.key2_fieldname is null)) ");
+		query.append("and (a.key2_uuid = c.key2_uuid or (a.key2_uuid is null and c.key2_uuid is null)) ");
+		query.append("and (a.key2_str = c.key2_str or (a.key2_str is null and c.key2_str is null)) ");
+		query.append("and c.maxrevision = a.revision ");
+		query.append("AND a.revision > :revision2 ORDER BY c.maxrevision ");
+		System.out.println(query.toString());
 		
 		SQLQuery hquery = s.createSQLQuery(query.toString());
-		hquery.setBinary("ca", UuidUtils.uuidToByte(ca.getUuid()));
-		hquery.setLong("revision", startRevision);
-
+		hquery.setBinary("ca1", UuidUtils.uuidToByte(ca.getUuid()));
+		hquery.setLong("revision1", startRevision);
+		hquery.setBinary("ca2", UuidUtils.uuidToByte(ca.getUuid()));
+		hquery.setLong("revision2", startRevision);
+		
 		ScrollableResults results = hquery.scroll(ScrollMode.FORWARD_ONLY);
 		List<ChangeLogItem> items = new ArrayList<ChangeLogItem>();
 		
