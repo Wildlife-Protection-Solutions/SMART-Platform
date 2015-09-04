@@ -44,7 +44,12 @@
 			<div class="table-cell smart-table-cell">${ca.getUuid()}</div>
 			<div class="table-cell smart-table-cell">${ca.getStatus()}</div>
 			<div class="table-cell smart-table-cell">${ca.getVersion().toString()}</div>
-			<div class="table-cell smart-table-cell "><a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca download-icon"></a></div>
+			<div class="table-cell smart-table-cell ">
+				<c:if test="${ca.getStatus() == 'DATA'}">
+					<a href=""  data-cauuid = "${ca.getUuid()}" title="downloadca" class="downloadca download-icon"></a>
+				</c:if>
+			</div>
+					
 			<div class="table-cell smart-table-cell "><a href=""  data-status = "${ca.getStatus()}" data-cauuid = "${ca.getUuid()}" title="delete conservation area" class="deleteca delete-icon"></a></div>
 		</div>
 	</c:forEach>

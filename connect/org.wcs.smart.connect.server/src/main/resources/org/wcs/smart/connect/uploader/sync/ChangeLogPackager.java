@@ -15,7 +15,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItem;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItemDataSerializer;
+import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.connect.uploader.PackageMetadata;
 import org.wcs.smart.util.UuidUtils;
 
@@ -84,8 +84,7 @@ public class ChangeLogPackager {
 						ObjectOutputStream oout = new ObjectOutputStream(fout)){
 					oout.writeInt(items.size());
 					for (ChangeLogItem i : items){
-						oout.writeObject(i);
-						ChangeLogItemDataSerializer.serializeData(oout, i, connection);
+						ChangeLogItemSerializer.serialize(oout, i, connection);
 					}
 				}catch (Exception ex){		
 					throw new SQLException (ex);

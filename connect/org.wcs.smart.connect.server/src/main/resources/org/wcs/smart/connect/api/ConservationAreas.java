@@ -59,8 +59,10 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.PostgresUUIDType;
 import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.ca.exporter.CaExporterJob;
@@ -528,8 +530,16 @@ public class ConservationAreas extends HttpServlet{
 			validateDelete(serverDelete.getUuid(), s);
 
 			//delete desktop data
-			String query = "DELETE FROM smart.conservation_area WHERE uuid = '" + serverDelete.getUuid().toString() + "'";
-			s.createSQLQuery(query).executeUpdate();
+			String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid";
+			Query q = s.createSQLQuery(query);
+			q.setParameter("uuid", serverDelete.getUuid(), PostgresUUIDType.INSTANCE);
+			q.executeUpdate();
+			
+			//delete plugin data
+			q = s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca");
+			q.setParameter("ca", serverDelete.getUuid());
+			q.executeUpdate();
+			
 			caUuidToDelete = serverDelete.getUuid();
 			
 			if (deleteAll){

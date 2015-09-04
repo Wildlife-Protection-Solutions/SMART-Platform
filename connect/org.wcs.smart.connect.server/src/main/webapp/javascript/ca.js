@@ -201,19 +201,20 @@ function createCaTable(){
  	var cas = JSON.parse(this.responseText);
  	for (var i = 0; i < cas.length; i ++){
  		var row = tableCreateRow(parent, 
- 				[cas[i].label, cas[i].uuid, cas[i].status, cas[i].version, null], 
+ 				[cas[i].label, cas[i].uuid, cas[i].status, cas[i].version, null, null], 
  				"carow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		
  		row.dataset.cauuid = cas[i].uuid;
  		
- 		var downloadca = document.createElement("a");
- 		deleteicon.className="downloadca download-icon";
- 		deleteicon.title="downloadca";
- 		deleteicon.dataset.cauuid = cas[i].uuid;
- 		deleteicon.onclick = downloadca;
- 		deleteicon.href="";
- 		row.childNodes[4].appendChild(downloadca);
- 		
+ 		if (cas[i].status == "DATA"){
+	 		var downloadca = document.createElement("a");
+	 		deleteicon.className="downloadca download-icon";
+	 		deleteicon.title="downloadca";
+	 		deleteicon.dataset.cauuid = cas[i].uuid;
+	 		deleteicon.onclick = downloadca;
+	 		deleteicon.href="";
+	 		row.childNodes[4].appendChild(downloadca);
+ 		} 		
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="deleteca delete-icon";
@@ -222,7 +223,7 @@ function createCaTable(){
  		deleteicon.dataset.status = cas[i].status;
  		deleteicon.onclick = confirmdeleteca;
  		deleteicon.href="";
- 		row.childNodes[4].appendChild(deleteicon);
+ 		row.childNodes[5].appendChild(deleteicon);
  		
 
  		

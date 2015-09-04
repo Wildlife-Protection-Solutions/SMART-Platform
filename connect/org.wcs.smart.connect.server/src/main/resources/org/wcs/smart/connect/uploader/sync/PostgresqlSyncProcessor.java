@@ -157,9 +157,12 @@ public class PostgresqlSyncProcessor {
 			ps.setString(2, item.getKey2String());
 		}
 		int up = ps.executeUpdate();
-		if (up != 1){
-			throw new SQLException("Invalid number of row deleted.");
-		}
+		//this check is not valid as we only provide the last change in the change log.  if and
+		//item is created then deleted we will only provide the delete event
+		//in the change log which will have nothing to delete here.
+//		if (up != 1){
+//			throw new SQLException("Invalid number of row deleted.");
+//		}
 	}
 	
 	private void processUpdate(ChangeLogItem item, ObjectInputStream is, Connection c) throws Exception{

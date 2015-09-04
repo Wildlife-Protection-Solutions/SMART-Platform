@@ -89,7 +89,7 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 				
 				session.update(item);
 				item.setStatus(Status.ERROR);
-				item.setMessage("Error extracting data, " + ex.getMessage());
+				item.setMessage("Error extracting data: " + ex.getMessage());
 				session.getTransaction().commit();
 			}catch (Exception ex2){
 				logger.log(Level.SEVERE, ex2.getMessage(), ex2);

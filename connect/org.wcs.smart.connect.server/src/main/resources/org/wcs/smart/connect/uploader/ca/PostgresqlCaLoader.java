@@ -44,14 +44,18 @@ import java.util.Queue;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.Query;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.hibernate.type.PostgresUUIDType;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.model.CaPluginVersion;
+import org.wcs.smart.connect.model.ConnectPluginVersion;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 
 import au.com.bytecode.opencsv.CSVReader;
@@ -88,6 +92,7 @@ public class PostgresqlCaLoader {
 			ZipUtil.unzipFolder(zipFile, tempDir);
 			processDatabaseFiles(tempDir);
 			inportPlugInVersionFile(tempDir, ca);
+			validatePluginVersions(ca);
 			processFilestore(tempDir, ca);
 		}finally{
 			tempDir.delete();
@@ -185,15 +190,44 @@ public class PostgresqlCaLoader {
 		try(CSVReader reader = new CSVReader(new FileReader(f))){
 			String[] data = null;
 			while((data = reader.readNext()) != null){
-				SQLQuery insert = session.createSQLQuery("INSERT INTO connect.ca_plugin_version (ca_uuid, plugin_id, version) values (?, ?, ?)");
-				insert.setParameter(0, info.getUuid(), PostgresUUIDType.INSTANCE);
-				insert.setParameter(1, data[0]);
-				insert.setParameter(2, data[1]);
-				insert.executeUpdate();
+				
+				CaPluginVersion v = new CaPluginVersion();
+				v.setConservationAreaUuid(info.getUuid());
+				v.setPluginId(data[0]);
+				v.setVersion(data[1]);
+				
+				session.save(v);
 			}
 		}	
 	}
 	
+	private void validatePluginVersions(ConservationAreaInfo info) throws Exception{
+		List<CaPluginVersion> caPlugins = session.createCriteria(CaPluginVersion.class)
+				.add(Restrictions.eq("id.conservationAreaUuid", info.getUuid())).list();
+		
+		List<ConnectPluginVersion>  connectVersions = (List<ConnectPluginVersion>)session.createCriteria(ConnectPluginVersion.class).list();
+		HashMap<String, String> connect = new HashMap<String, String>();
+		for (ConnectPluginVersion v : connectVersions){
+			connect.put(v.getPluginId(), v.getVersion());
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		for (CaPluginVersion v : caPlugins){
+			String sv = connect.get(v.getPluginId());
+			if (sv == null){
+				sb.append(v.getPluginId() + ": Not supported on connect.");
+			}else if (!sv.equals(v.getVersion())){
+				sb.append(v.getPluginId() + " [Desktop: " + v.getVersion() + "; Server:" + sv + "], ");
+			}
+		}
+		
+		if (sb.length() > 0){
+			sb.deleteCharAt(sb.length()-1);
+			sb.deleteCharAt(sb.length()-1);
+			throw new Exception("Connect does not support the following plugin versions: " + sb.toString());
+		}
+		
+	}
 	/**
 	 * Scans the directory/database for all table definition 
 	 * files (*.def).
