@@ -33,7 +33,6 @@ import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption;
 import org.wcs.smart.cybertracker.model.CyberTrackerPropertiesOption.OptionID;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
