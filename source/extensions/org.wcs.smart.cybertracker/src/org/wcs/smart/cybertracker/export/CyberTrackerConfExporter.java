@@ -283,11 +283,10 @@ public class CyberTrackerConfExporter {
 		if (cmNode.isGroup())
 			return result;
 		
-		List<CmAttribute> fullList = cmNode.getCmAttributes();
 		CyberTrackerId startId = keyMap.get(cmNode);
-		List<CmAttribute> toShow = new ArrayList<CmAttribute>();
-		List<CmAttribute> invisibleList = new ArrayList<CmAttribute>();
-		split(fullList, toShow, invisibleList);
+		AttributeSplitResult splitResult = splitAttributes(cmNode);
+		List<CmAttribute> toShow = splitResult.getToShow();
+		List<CmAttribute> invisibleList = splitResult.getInvisibleList();
 		
 		List<Node> nodeList = new ArrayList<Node>();
 		//adding all attributes that are supposed to be displayed
@@ -888,10 +887,17 @@ public class CyberTrackerConfExporter {
 		return photoResultIds.get(index);
 	}
 
-	private void split(List<CmAttribute> fullList, List<CmAttribute> toShow, List<CmAttribute> invisibleList) {
+	private AttributeSplitResult splitAttributes(CmNode cmNode) {
+		List<CmAttribute> fullList = cmNode.getCmAttributes();
+		List<CmAttribute> invisibleList = new ArrayList<CmAttribute>();
+		List<CmAttribute> toShow = new ArrayList<CmAttribute>();
+		List<CmAttribute> toShowOncesBefore = new ArrayList<CmAttribute>();
+		List<CmAttribute> toShowOncesAfter = new ArrayList<CmAttribute>();
+		
 		for (CmAttribute attr : fullList) {
 			if (attr.isVisible()) {
 				Attribute attribute = attr.getAttribute();
+				//validation logic
 				switch (attribute.getType()) {
 				case LIST:
 				{
@@ -913,11 +919,29 @@ public class CyberTrackerConfExporter {
 				default:
 					break;
 				}
-				toShow.add(attr);
+
+				//actual assignment to a split group
+				if (!cmNode.isCollectMultipleObservations()) {
+					toShow.add(attr);
+				} else {
+					switch (attr.getEnterOnce()) {
+					case NONE:
+						toShow.add(attr);
+						break;
+					case START:
+						toShowOncesBefore.add(attr);
+						break;
+					case END:
+						toShowOncesAfter.add(attr);
+						break;
+					}
+				}
 			} else {
 				invisibleList.add(attr);
 			}
 		}
+		
+		return new AttributeSplitResult(invisibleList, toShow, toShowOncesBefore, toShowOncesAfter);
 	}
 
 	private List<IAttributeListItemProxy> getActiveListItems(CmAttribute attribute) {
@@ -982,4 +1006,40 @@ public class CyberTrackerConfExporter {
 			return nodes;
 		}
 	}
+
+	/**
+	 * Result of split for a {@link CmNode} attributes based on their properties.
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	private final class AttributeSplitResult {
+		private List<CmAttribute> invisibleList;
+		private List<CmAttribute> toShow;
+		private List<CmAttribute> toShowOncesBefore;
+		private List<CmAttribute> toShowOncesAfter;
+
+		public AttributeSplitResult(List<CmAttribute> invisibleList,
+				List<CmAttribute> toShow,
+				List<CmAttribute> toShowOncesBefore,
+				List<CmAttribute> toShowOncesAfter) {
+			this.invisibleList = invisibleList;
+			this.toShow = toShow;
+			this.toShowOncesBefore = toShowOncesBefore;
+			this.toShowOncesAfter = toShowOncesAfter;
+		}
+
+		public List<CmAttribute> getInvisibleList() {
+			return invisibleList;
+		}
+		public List<CmAttribute> getToShow() {
+			return toShow;
+		}
+		public List<CmAttribute> getToShowOncesBefore() {
+			return toShowOncesBefore;
+		}
+		public List<CmAttribute> getToShowOncesAfter() {
+			return toShowOncesAfter;
+		}
+	}
+
 }
