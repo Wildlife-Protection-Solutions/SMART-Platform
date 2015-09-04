@@ -53,15 +53,16 @@ import org.wcs.smart.util.UuidUtils;
  * @since 4.0.0
  */
 public class ScreensUtil {
-
-	public static final String RESULT_ID = "#ID"; //$NON-NLS-1$
-	public static final String RESULT_START_DATE = "#StartDate"; //$NON-NLS-1$
-	public static final String RESULT_START_TIME = "#StartTime"; //$NON-NLS-1$
+	
+	//NOTE: Naming with "Patrol" are required for backward compatibility with CT exports from version 3.2 or lower
+	public static final String RESULT_ID = "#PatrolID"; //$NON-NLS-1$
+	public static final String RESULT_START_DATE = "#PatrolStartDate"; //$NON-NLS-1$
+	public static final String RESULT_START_TIME = "#PatrolStartTime"; //$NON-NLS-1$
 
 	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
 	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
 
-	public static final String RESULT_DEFAULT_META_VALUES = "#DefaultMetaValues"; //$NON-NLS-1$
+	public static final String RESULT_DEFAULT_META_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
 
 	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
 	
