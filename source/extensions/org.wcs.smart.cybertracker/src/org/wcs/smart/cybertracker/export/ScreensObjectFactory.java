@@ -683,6 +683,7 @@ public class ScreensObjectFactory {
         <DisplayHeight>50</DisplayHeight>
         <MinValue>0</MinValue>
         <MaxValue>99999999</MaxValue>
+        <Decimals>8</Decimals>
         <Translate__Element>???</Translate__Element>
     </Control>
 	 */
@@ -705,6 +706,7 @@ public class ScreensObjectFactory {
 		control.setDisplayHeight(50);
 		control.setMinValue(0);
 		control.setMaxValue(99999999);
+		control.setDecimals(8);
 		control.setTranslateElement(element);
 		return control;
 	}
