@@ -413,6 +413,7 @@ public class PatrolScreensUtil {
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		container.screenNodes.add(nodeMain);
 		addGpsConfiguration(nodeMain, ctProps, 0);
+		addBatteryControl(nodeMain);
 
 		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin);
 		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), Messages.PatrolScreens_Begin_Title, idsBegin, null, true);
@@ -602,6 +603,7 @@ public class PatrolScreensUtil {
 			Control defaultAttr = screensFactory.createAttrubuteControl14(defId.getItemId(), false, defaultValues);
 			ScreensObjectFactory.addControlToNode(node, defaultAttr);
 		}
+		addBatteryControl(node);
 		
 		CyberTrackerProperties properties = ctUtil.getCtProperties();
 		control2 = ScreensObjectFactory.getNavigationControl(node);
@@ -732,4 +734,8 @@ public class PatrolScreensUtil {
 		ScreensObjectFactory.addControlToNode(node, msgControl);
 	}
 
+	private void addBatteryControl(Node node) {
+		Control stateControl = screensFactory.createSystemStateControl19();
+		ScreensObjectFactory.addControlToNode(node, stateControl);
+	}
 }

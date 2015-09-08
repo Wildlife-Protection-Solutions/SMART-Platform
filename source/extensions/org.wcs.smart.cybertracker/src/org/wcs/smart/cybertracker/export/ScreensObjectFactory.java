@@ -174,7 +174,7 @@ public class ScreensObjectFactory {
         </Items>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>18</NextId>
+            <NextId>20</NextId>
             <TemplateId>{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -194,7 +194,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 		
 		Node.Data data = new Node.Data();
-		data.setNextId(18);
+		data.setNextId(20);
 		data.setTemplateId("{A049074A-8769-4A9C-AFC4-EC1B1A213B2C}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
@@ -1090,6 +1090,35 @@ public class ScreensObjectFactory {
 		return control;
 	}
 	
+	/**
+    <Control>
+	    <Type>{0BC657FA-C6C4-4348-9905-20202341662C}</Type>
+	    <Id>19</Id>
+	    <BorderStyle>0</BorderStyle> <!-- no border -->
+	    <Align>1</Align>
+	    <Left>0</Left>
+	    <Top>34</Top>
+	    <Width>240</Width>
+	    <Height>25</Height>
+	    <Alignment>1</Alignment> <!-- alignment right -->
+	    <Style>0</Style> <!-- means "battery" -->
+	</Control>
+	 */
+	public Controls.Control createSystemStateControl19() {
+		Controls.Control control = new Controls.Control();
+		control.setType("{0BC657FA-C6C4-4348-9905-20202341662C}"); //$NON-NLS-1$
+		control.setId(19);
+		control.setBorderStyle(0);
+		control.setAlign(1);
+		control.setLeft(0);
+		control.setTop(34);
+		control.setWidth(240);
+		control.setHeight(25);
+		control.setAlignment(1);
+		control.setStyle(0);
+		return control;
+	}
+
 	//Util methods
 	public static Controls.Control getNavigationControl(Node node) {
 		return node.getData().getControls().getControl().get(CONTROL_2_INDEX);
