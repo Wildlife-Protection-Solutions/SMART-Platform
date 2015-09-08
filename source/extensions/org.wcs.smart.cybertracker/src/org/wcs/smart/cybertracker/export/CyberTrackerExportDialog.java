@@ -183,7 +183,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				selectedModel = ((IStructuredSelection)modelViewer.getSelection()).getFirstElement();
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				updateExportButtonState();
 			}
 		});
 
@@ -244,11 +244,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		txtFile.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
-					if (getButton(IDialogConstants.OK_ID) != null) {
-						getButton(IDialogConstants.OK_ID).setEnabled(true);
-					}
-				}
+				updateExportButtonState();
 			}
 		});
 		
@@ -267,7 +263,7 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 				String f = fd.open();
 				if (f != null) {
 					txtFile.setText(f);
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
+					updateExportButtonState();
 				}
 			}
 		});
@@ -285,12 +281,24 @@ public class CyberTrackerExportDialog extends TitleAreaDialog {
 		super.setTitleImage(CyberTrackerPlugIn.getDefault().getImageRegistry().get(CyberTrackerPlugIn.CT_WIZARD_BANNER));
 		return composite;
 	}
-	
+
 	private void exportOptionChanged() {
 		lblFile.setEnabled(btnToFile.getSelection());
 		txtFile.setEnabled(btnToFile.getSelection());
 		btnBrowse.setEnabled(btnToFile.getSelection());
 		btnLaunchCT.setEnabled(btnToFile.getSelection());
+		updateExportButtonState();
+	}
+	
+	private void updateExportButtonState() {
+		boolean enabled = false;
+		if (selectedModel != null) {
+			enabled = btnToDevice.getSelection() || (btnToFile.getSelection() && txtFile.getText() != null && !txtFile.getText().isEmpty());
+		}
+		if (getButton(IDialogConstants.OK_ID) != null) {
+			getButton(IDialogConstants.OK_ID).setEnabled(enabled);
+		}
+		
 	}
 	
 	/**
