@@ -416,6 +416,8 @@ public class PatrolScreensUtil {
 
 		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin);
 		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), Messages.PatrolScreens_Begin_Title, idsBegin, null, true);
+		Control begenControl2 = ScreensObjectFactory.getNavigationControl(nodeBegin);
+		begenControl2.setShowGPS(ICyberTrackerConstants.STR_TRUE);
 		container.screenNodes.add(nodeBegin);
 		
 		String resultId = createResultElement(RESULT_PATROL_ID, elements);
