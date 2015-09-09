@@ -43,6 +43,7 @@ import org.hibernate.annotations.OrderBy;
 import org.hibernate.annotations.Where;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
 
 /**
  * @author elitvin
@@ -209,4 +210,9 @@ public class CmAttribute extends NamedItem {
 		return option != null && Boolean.TRUE.equals(option.getBooleanValue());
 	}
 	
+	@Transient
+	public EnterOnceType getEnterOnce() {
+		CmAttributeOption option = getCmAttributeOptions().get(CmAttributeOption.ID_ENTER_ONCES);
+		return option != null && option.getStringValue() != null ? EnterOnceType.valueOf(option.getStringValue()) : EnterOnceType.NONE;
+	}
 }
