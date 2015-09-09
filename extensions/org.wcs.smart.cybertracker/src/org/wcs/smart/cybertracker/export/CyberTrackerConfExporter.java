@@ -96,6 +96,9 @@ public class CyberTrackerConfExporter {
 	private CyberTrackerId newWpResultId;
 	private List<CyberTrackerId> newWpElementsIds;
 	
+	private CyberTrackerId wpEndGroupResultId;
+	private List<CyberTrackerId> wpEndGroupElementsIds;
+
 	private CyberTrackerId defaultAttrValuesResultId;
 	
 	private List<CyberTrackerId> photoResultIds;
@@ -132,6 +135,9 @@ public class CyberTrackerConfExporter {
 			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_DEFAULT_ATTRIBUTE_VALUES, defaultAttrValuesResultId.getItemId(), null, ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG);
 			photoResultIds = new ArrayList<CyberTrackerId>();
 			addPhotoElementIds = ElementsUtil.buildBooleanElements(elements);
+			wpEndGroupResultId = new CyberTrackerId();
+			ElementsUtil.addElementsItem(elements, ScreensUtil.RESULT_ENG_WAYPOINT_GROUP, wpEndGroupResultId.getItemId());
+			wpEndGroupElementsIds = createEndWpGroupElementsIds(elements);
 			processExportSource(elements, cmProvider.getExportSource());
 			return performExport(destFolder, monitor);
 		} finally {
@@ -141,6 +147,10 @@ public class CyberTrackerConfExporter {
 			defaultAttrValuesResultId = null;
 			newWpResultId = null;
 			newWpElementsIds = null;
+			wpEndGroupResultId = null;
+			wpEndGroupElementsIds = null;
+			photoResultIds = null;
+			addPhotoElementIds = null;
 			elements = null;
 			rootId = null;
 			attr2resultId.clear();
@@ -284,21 +294,50 @@ public class CyberTrackerConfExporter {
 			return result;
 		
 		CyberTrackerId startId = keyMap.get(cmNode);
-		AttributeSplitResult splitResult = splitAttributes(cmNode);
-		List<CmAttribute> toShow = splitResult.getToShow();
-		List<CmAttribute> invisibleList = splitResult.getInvisibleList();
+		AttributeSplitResult splitResult = splitAttributes(cmNode); //NOTE: showOncesBefore/showOnceAfter will be empty if collectMultipleObservations is not set! this is important for logic below
 		
 		List<Node> nodeList = new ArrayList<Node>();
-		//adding all attributes that are supposed to be displayed
-		BuildAttributeNodesResult buildResult = buildBasicAttributeNodes(toShow, keyMap, startId, 0, true, null);
+		BuildNodesResult buildResult = null;
+		CyberTrackerId nextId = startId;
+		
+		if (cmNode.isUseSingleGpsPoint()) {
+			CyberTrackerId saveTargetId = new CyberTrackerId();
+			Node singleGpsNode = ctUtil.createSaveNode(nextId, saveTargetId, "Single GPS Point", "This category will use single GPS point for all observations. Press \"Save\" to record a point.", true);
+			nodeList.add(singleGpsNode);
+			nextId = saveTargetId;
+		}
+		
+		//showOncesBefore will be empty if collectMultipleObservations is not set!!!
+		buildResult = buildBasicAttributeNodes(splitResult.getToShowOncesBefore(), keyMap, nextId, 0, true, null);
+		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
 		nodeList.addAll(buildResult.getNodes());
-		CyberTrackerId nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
+		
+		//adding all attributes that are supposed to be displayed
+		CyberTrackerId loopBackId = nextId;
+		buildResult = buildBasicAttributeNodes(splitResult.getToShow(), keyMap, nextId, 0, true, null);
+		nodeList.addAll(buildResult.getNodes());
+		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
+		
+		
 		//add photo nodes if required
 		if (cmNode.isPhotoAllowed()) {
 			nextId = addPhotos(nextId, nodeList, cmNode.isPhotoRequired(), ctUtil.getCtProperties().getMaxPhotoCount());
 		}
+		
+		if (cmNode.isCollectMultipleObservations()) {
+			//loop for collecting multiple observations
+			buildResult = createEndGroupNodes(nextId, loopBackId, !cmNode.isUseSingleGpsPoint());
+			nodeList.addAll(buildResult.getNodes());
+			nextId = buildResult.getNextId(); //id for next screen
+		}
+		
+		//showOncesAfter will be empty if collectMultipleObservations is not set!!!
+		buildResult = buildBasicAttributeNodes(splitResult.getToShowOncesAfter(), keyMap, nextId, 0, true, null);
+		nodeList.addAll(buildResult.getNodes());
+		nextId = buildResult.getNextId(); //id for next screen that will follow this group of attributes
+		
 		//adding nodes with final "save" button for observation or observation group
-		String defaultAttrValues = recordDefaultValues(invisibleList);
+		String defaultAttrValues = recordDefaultValues(splitResult.getInvisibleList());
 		nodeList.addAll(createSaveWaypointNodes(nextId, startId, defaultAttrValues));
 		return nodeList;
 	}
@@ -374,7 +413,7 @@ public class CyberTrackerConfExporter {
 		return defaultValues;
 	}
 	
-	private BuildAttributeNodesResult buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, String namePostfix) throws Exception {
+	private BuildNodesResult buildBasicAttributeNodes(List<CmAttribute> attrList, Map<CmNode, CyberTrackerId> keyMap, CyberTrackerId startId, int index, boolean terminate, String namePostfix) throws Exception {
 		List<Node> result = new ArrayList<Node>();
 		if (namePostfix == null)
 			namePostfix = ""; //$NON-NLS-1$
@@ -404,10 +443,10 @@ public class CyberTrackerConfExporter {
 				List<CmAttribute> toShow = attrList.subList(cutIndex, attrList.size()); //sublist of everything after multi-select / numeric multi-select
 				List<IAttributeListItemProxy> activeItems = getActiveListItems(cmAttr);
 				for (int x = 0; x < multiIds.size(); x++) {
-					BuildAttributeNodesResult buildResult = buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, " ("+activeItems.get(x).getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
+					BuildNodesResult buildResult = buildBasicAttributeNodes(toShow, keyMap, multiIds.get(x), x, false, " ("+activeItems.get(x).getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
 					result.addAll(buildResult.getNodes());
 				}
-				return new BuildAttributeNodesResult(nextId, result);
+				return new BuildNodesResult(nextId, result);
 			}
 			//end of multi-select / numeric multi-select block
 			
@@ -506,7 +545,7 @@ public class CyberTrackerConfExporter {
 				}
 			}
 		}
-		return new BuildAttributeNodesResult(id, result);
+		return new BuildNodesResult(id, result);
 	}
 
 	/**
@@ -664,6 +703,16 @@ public class CyberTrackerConfExporter {
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add("true"); //$NON-NLS-1$
 		tag0Values.add("false"); //$NON-NLS-1$
+		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
+	}
+
+	private List<CyberTrackerId> createEndWpGroupElementsIds(Elements elements2) {
+		List<String> labelValues = new ArrayList<String>();
+		labelValues.add("Make Another Observation");
+		labelValues.add("End Observation Group");
+		List<String> tag0Values = new ArrayList<String>();
+		tag0Values.add("false"); //$NON-NLS-1$
+		tag0Values.add("true"); //$NON-NLS-1$
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 	}
 
@@ -846,6 +895,31 @@ public class CyberTrackerConfExporter {
 		return nodeList;
 	}	
 
+	/**
+	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
+	 * 
+	 * @param id
+	 * @param startId
+	 */
+	private BuildNodesResult createEndGroupNodes(CyberTrackerId id, CyberTrackerId loopBackId, boolean takeGPsReading) {
+		List<Node> nodeList = new ArrayList<Node>(2);
+		CyberTrackerId nextId = new CyberTrackerId();
+		CyberTrackerId loopSaveId = new CyberTrackerId();
+		
+		Node loopSaveNode = ctUtil.createSaveNode(loopSaveId, loopBackId, "Save Group Observation", "Confirm saving group observation and preceed to record observations in the same group.", takeGPsReading);
+
+		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
+		ids.add(new CyberTrackerIdMap(loopSaveId, wpEndGroupElementsIds.get(0))); //"Make Another Observation" navigate loop start screen
+		ids.add(new CyberTrackerIdMap(nextId, wpEndGroupElementsIds.get(1))); //"End Group" navigate to to next screen (exit from loop)
+
+		Node groupTaskNode = ctUtil.createRadioNode(id.getNodeId(), "Next Group Task", ids, wpEndGroupResultId.getItemId(), true);
+		
+		nodeList.add(groupTaskNode);
+		nodeList.add(loopSaveNode);
+		
+		return new BuildNodesResult(nextId, nodeList);
+	}	
+
 	private CyberTrackerId addPhotos(CyberTrackerId id, List<Node> nodeList, boolean photoRequired, int count) {
 		List<CyberTrackerId> ctIdList = new ArrayList<CyberTrackerId>(2*count);
 		for (int i = 0; i < 2*count; i++) {
@@ -982,18 +1056,18 @@ public class CyberTrackerConfExporter {
 	}
 
 	/**
-	 * Result of nodes generation for given list.
+	 * Result of nodes generation for a sequence of screens.
 	 * @author elitvin
 	 * @since 4.0.0
 	 */
-	private final class BuildAttributeNodesResult {
+	private final class BuildNodesResult {
 		/** id for next node in sequence */
 		private CyberTrackerId nextId;
 		
 		/** list of nodes generated for passed attributes */
 		private List<Node> nodes;
 
-		public BuildAttributeNodesResult(CyberTrackerId nextId, List<Node> nodes) {
+		public BuildNodesResult(CyberTrackerId nextId, List<Node> nodes) {
 			this.nextId = nextId;
 			this.nodes = nodes;
 		}

@@ -60,6 +60,7 @@ public class ScreensUtil {
 	public static final String RESULT_START_TIME = "#PatrolStartTime"; //$NON-NLS-1$
 
 	public static final String RESULT_NEW_WAYPOINT = "#NewWaypoint"; //$NON-NLS-1$
+	public static final String RESULT_ENG_WAYPOINT_GROUP = "#WaypointGroupEnd"; //$NON-NLS-1$
 	public static final String RESULT_DEFAULT_ATTRIBUTE_VALUES = "#DefaultAttributeValues"; //$NON-NLS-1$
 
 	public static final String RESULT_DEFAULT_META_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
@@ -175,12 +176,8 @@ public class ScreensUtil {
 	
 	protected CyberTrackerId createEndTripNodes(MetaExportResult container, CyberTrackerId appStartId, String confirmMsg) {
 		CyberTrackerId endId = new CyberTrackerId();
-		Node confirmNode = screensFactory.createNodeMsgText(endId.getNodeId(), Messages.PatrolScreens_Confirm, confirmMsg);
-		//disable next button, enable save button,navigate on save to start point
-		Control control2 = ScreensObjectFactory.getNavigationControl(confirmNode);
-		control2.setShowNext("False"); //$NON-NLS-1$
-		control2.setShowMajor("True"); //$NON-NLS-1$
-		control2.setTranslateMajorScreenId(appStartId.getNodeId());
+		//navigate on save to start point
+		Node confirmNode = ctUtil.createSaveNode(endId, appStartId, Messages.PatrolScreens_Confirm, confirmMsg, true);
 		container.screenNodes.add(confirmNode);
 		return endId;
 	}
