@@ -111,7 +111,7 @@ CREATE TYPE alert_status AS ENUM ('ACTIVE', 'DISABLED');
 CREATE TABLE connect.alerts
 (
 	-- A unqiue identifier for hibernate.
-	alert_id uuid NOT NULL,
+	uuid uuid NOT NULL,
 	-- A unqiue identifier that the user generates.
 	user_generated_id varchar NOT NULL,
 	-- The date/time the alert was created.
@@ -132,7 +132,7 @@ CREATE TABLE connect.alerts
 	y double precision NOT NULL,
 	-- A link to the user who created the alert.  The user will always be able to modify the alert.
 	creator_uuid uuid NOT NULL,
-	PRIMARY KEY (alert_id)
+	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
 
 CREATE TABLE connect.alert_types(
