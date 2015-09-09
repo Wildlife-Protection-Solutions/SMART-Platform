@@ -30,8 +30,10 @@ import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -229,4 +231,16 @@ public class CyberTrackerUtil {
 	public String getName(NamedItem i) {
 		return LanguageUtil.getName(i, currentLanguage);
 	}
+	
+	public Node createSaveNode(CyberTrackerId id, CyberTrackerId saveTargetId, String title, String msg, boolean takeGpsReading) {
+		Node saveNode = screensFactory.createNodeMsgText(id.getNodeId(), title, msg);
+		//disable next button, enable save button, navigate on save to target point
+		Control control2 = ScreensObjectFactory.getNavigationControl(saveNode);
+		control2.setShowNext("False"); //$NON-NLS-1$
+		control2.setShowMajor("True"); //$NON-NLS-1$
+		control2.setTranslateMajorScreenId(saveTargetId.getNodeId());
+		control2.setTakeGPS(takeGpsReading ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+		return saveNode;
+	}
+	
 }
