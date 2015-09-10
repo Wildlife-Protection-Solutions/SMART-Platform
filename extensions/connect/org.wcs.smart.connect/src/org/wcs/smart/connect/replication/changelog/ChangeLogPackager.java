@@ -17,7 +17,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
-import org.wcs.smart.connect.replication.MetadataPackager;
+import org.wcs.smart.connect.replication.DerbyMetadataPackager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.ZipUtil;
 
@@ -70,7 +70,7 @@ public class ChangeLogPackager {
 	private void packageMetadata() throws Exception{
 		Session s = HibernateManager.openSession();
 		try{
-			MetadataPackager.generateMetadata(s, record.getServer(), metadataFile, record.getStartRevision());
+			DerbyMetadataPackager.generateMetadata(s, record.getServer(), metadataFile, record.getStartRevision());
 		}finally{
 			s.close();
 		}

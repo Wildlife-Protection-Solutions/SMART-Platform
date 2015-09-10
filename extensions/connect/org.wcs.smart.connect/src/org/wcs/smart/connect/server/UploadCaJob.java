@@ -48,13 +48,11 @@ public class UploadCaJob extends FileUploaderJob {
 	public static final int STATUS_WAIT_TIME = 1000; //1 sec
 	public static final long MAX_WAIT = 5 * 60 * 1000000000l;  //5 minutes in nano seconds
 	
-	private SmartConnect connect;
 	private ConnectServerStatus status;
 	
 	public UploadCaJob(SmartConnect connect, ConnectServerStatus status){
 		super(status.getUploadUrl(), FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), status.getLocalFile()), connect, "Upload Conservation Area To SMART Connect");
 	
-		this.connect = connect;
 		this.status = status;
 	}
 	

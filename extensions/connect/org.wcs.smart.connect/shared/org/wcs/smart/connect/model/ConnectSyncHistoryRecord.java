@@ -127,6 +127,7 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	private String getChangeLogFilePrefix(){
 		return CONNECT_FILESTORE_DIR + FileSystems.getDefault().getSeparator() + UuidUtils.uuidToString(getUuid());
 	}
+	
 	@Transient
 	public String getChangeLogZipFile(){
 		return getChangeLogFilePrefix() + ".changelog.zip";

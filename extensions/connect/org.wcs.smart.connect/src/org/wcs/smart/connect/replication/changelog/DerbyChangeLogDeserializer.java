@@ -21,62 +21,59 @@
  */
 package org.wcs.smart.connect.replication.changelog;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.hibernate.Session;
-import org.hibernate.jdbc.Work;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.UuidUtils;
 
-public class ChangeLogApplier {
+public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 
-	public static void applyChangeLog(){
-		Session s = HibernateManager.openSession();
-		s.doWork(new Work(){
+	public DerbyChangeLogDeserializer(Path changeLogFile) {
+		super(changeLogFile);
+	}
 
-			@Override
-			public void execute(Connection connection) throws SQLException {
-				try(FileInputStream fin = new FileInputStream("C:\\temp\\smartchangelog.log");
-						ObjectInputStream oin = new ObjectInputStream(fin)){
-					int size = oin.readInt();
-				
-					for (int i = 0; i < size; i ++){
-						ChangeLogItem it = (ChangeLogItem) oin.readObject();
-						
-						System.out.println(it.getAction().name() + ":  " + it.getTableName() + ":" + it.getFieldName1() + ":" + it.getKey1().toString());
-						
-						if (it.getAction() == Action.DELETE){
-							processDelete(it, connection);
-						}else if (it.getAction() == Action.INSERT){
-							processInsert(it, oin, connection);
-						}else if (it.getAction() == Action.UPDATE){
-							processUpdate(it, oin, connection);
-						}else{
-							//filestore type do nothing with database
-						}
-					}
-				}catch (Exception ex){
-					throw new SQLException (ex);
-				}
-				connection.commit();
-			}
-			
-		});
-		
-		
+	@Override
+	public void processFile(final Session session) throws Exception{
+		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();
+		super.processFile(session);
 	}
 	
-	private static void processDelete(ChangeLogItem item, Connection c) throws SQLException{
+	@Override
+	protected void processFileDelete(ChangeLogItem arg0, Connection arg1)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processFileInsert(ChangeLogItem arg0, Connection arg1)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void processFileUpdate(ChangeLogItem arg0, Connection arg1)
+			throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	protected void saveItem(ChangeLogItem item, Session s) throws Exception {
+		ChangeLogTableManager.INSTANCE.addItem(s, item);
+	}
+	
+	@Override
+	protected void processDataDelete(ChangeLogItem item, Connection c) throws SQLException{
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("DELETE FROM " + item.getTableName());
@@ -92,32 +89,27 @@ public class ChangeLogApplier {
 			ps.setString(2, item.getKey2String());
 		}
 		int up = ps.executeUpdate();
+		//not a valid check as item may been previously removed
 		if (up != 1){
 			throw new SQLException("Invalid number of row deleted.");
 		}
 	}
 	
-	private static void processUpdate(ChangeLogItem item, ObjectInputStream is, Connection c) throws ClassNotFoundException, IOException, SQLException{
+	@Override
+	protected void processDataUpdate(ChangeLogItem item, HashMap<String, Object> data, Connection c) throws ClassNotFoundException, IOException, SQLException{
 		StringBuilder sb = new StringBuilder();
 		sb.append("UPDATE " + item.getTableName());
 		sb.append("SET ");
 		
-		int numCols = is.readInt();
 		List<Object> params = new ArrayList<Object>();
-		for (int i = 0; i < numCols; i ++){
-			String name = (String) is.readObject();
-			int type = is.readInt();
-			sb.append(name + " = ?");
-			
-			if (type == Types.BLOB){
-				long length = is.readLong();
-				byte[] data = new byte[(int)length];
-				is.readFully(data);
-				params.add(data);
-			}else{
-				params.add(is.readObject());
-			}
+		for(Entry<String, Object> dataitem : data.entrySet()){
+			String colName = dataitem.getKey();
+			Object obj = dataitem.getValue();	
+			sb.append(colName + " = ?, ");
+			params.add(obj);
 		}
+		sb.deleteCharAt(sb.length() - 1);
+		sb.deleteCharAt(sb.length() - 1);
 		
 		sb.append(" WHERE " + item.getFieldName1() + " = ?");
 		if (item.getFieldName2() != null){
@@ -133,29 +125,21 @@ public class ChangeLogApplier {
 		}
 	}
 	
-	private static void processInsert(ChangeLogItem item, ObjectInputStream is, Connection c) throws ClassNotFoundException, IOException, SQLException{
+	@Override
+	protected void processDataInsert(ChangeLogItem item, HashMap<String, Object> data, Connection c) throws ClassNotFoundException, IOException, SQLException{
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO " + item.getTableName() + "(");
 		
 		StringBuilder values = new StringBuilder();
 		values.append("VALUES(");
 		
-		int numCols = is.readInt();
 		List<Object> params = new ArrayList<Object>();
-		for (int i = 0; i < numCols; i ++){
-			String name = (String) is.readObject();
-			int type = is.readInt();
-			sb.append(name + ",");
+		for(Entry<String, Object> dataitem : data.entrySet()){
+			String colName = dataitem.getKey();
+			Object obj = dataitem.getValue();	
+			sb.append(colName + ",");
 			values.append("?,");
-			
-			if (type == Types.BLOB){
-				long length = is.readLong();
-				byte[] data = new byte[(int)length];
-				is.readFully(data);
-				params.add(data);
-			}else{
-				params.add(is.readObject());
-			}
+			params.add(obj);
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		values.deleteCharAt(values.length() - 1);

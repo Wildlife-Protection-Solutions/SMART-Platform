@@ -44,6 +44,7 @@ import org.wcs.smart.connect.replication.changelog.ChangeLogItem;
 import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Watcher for managing filestore changes that need to 
@@ -97,7 +98,17 @@ public class FileStoreWatcher implements Runnable{
 
     
     private void processEvent(Path p, Kind<?> kind){
-    	System.out.println("event");
+    	
+    	Path relativePath = FileSystems.getDefault()
+    			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
+    			.relativize(p);
+    	if (!relativePath.getName(0).toString().matches(UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid() ))){
+    		//not in the current conservation area folder.  We just
+    		//don't care.
+    		//TODO: document this 
+    		return;
+    	}
+    	
     	ChangeLogItem.Action type = ChangeLogItem.Action.FS_INSERT;
     	if (kind == StandardWatchEventKinds.ENTRY_CREATE){
     		type = ChangeLogItem.Action.FS_INSERT;
