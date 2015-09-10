@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.entity.feature.nl.th"
       label="SMART Entity Tracker Thai Language Pack"
-      version="3.2.0"
+      version="3.2.1"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 
@@ -21,6 +21,7 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+
    <plugin
          id="org.wcs.smart.entity.query.nl_th"
          download-size="0"
@@ -36,4 +37,5 @@
          version="0.0.0"
          fragment="true"
          unpack="false"/>
+
 </feature>
