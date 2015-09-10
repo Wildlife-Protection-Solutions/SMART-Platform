@@ -393,7 +393,8 @@ public class CTPatrolTableContainer extends Composite {
 					if (count > 0) {
 						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, MessageFormat.format(Messages.CTPatrolTableContainer_ImportCompleted, count));
 					} else {
-						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, getEmptyDownloadMessage(code));
+						String msg = fromPda ? getEmptyDownloadMessage(code) : Messages.CTPatrolTableContainer_NoDataImported;
+						CyberTrackerPlugIn.displayInfo(Messages.CTPatrolTableContainer_InfoDialog_Title, msg);
 					}
 				}
 
@@ -413,7 +414,7 @@ public class CTPatrolTableContainer extends Composite {
 		case ICyberTrackerConstants.DOWNLOAD_CODE_SUCCESS:
 			return Messages.CTPatrolTableContainer_DownloadCode_302;
 		default:
-			return Messages.CTPatrolTableContainer_NoDataImported;
+			return MessageFormat.format(Messages.CTPatrolTableContainer_DownloadCode_Unknown, code);
 		}
 	}
 	
