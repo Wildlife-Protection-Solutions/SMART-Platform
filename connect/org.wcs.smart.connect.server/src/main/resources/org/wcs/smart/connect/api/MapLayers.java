@@ -149,6 +149,7 @@ public class MapLayers extends HttpServlet {
     	
     	MapLayer toUpdate = null;
     	Session s = HibernateManager.getSession(context);
+    	s.beginTransaction();
 		try{
 			toUpdate = (MapLayer)s.createCriteria(MapLayer.class)
 					.add(Restrictions.eq("uuid", oldUuid)) //$NON-NLS-1$

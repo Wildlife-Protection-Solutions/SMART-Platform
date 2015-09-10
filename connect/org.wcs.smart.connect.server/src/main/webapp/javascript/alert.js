@@ -18,21 +18,33 @@ window.onload = function(){
     
 //------------------------------------------------------------
 //Setup map layers
-    // The real-time layer that auto-refreshes to show alerts
-    realtime = L.realtime({
+    // The real-time layer that auto-refreshes to show alert
+	
+	var a = new Array();
+	var b = new Array();
+	
+	a['name'] = "status";
+	a['value'] = "ACTIVE";
+	b['name'] = "level";
+	b['value'] = "1";
+	
+	var filter_list ={a,b}
+	
+	realtime = L.realtime({
     	  url: ALERT_URL,
         crossOrigin: true,
-        type: 'json'
+        type: 'json',
+//        options: filter_list
     }, {
         interval: interval
     });
-
+   
     realtime.on('update', function(e) {
         var coordPart = function(v, dirs) {
                 return dirs.charAt(v >= 0 ? 0 : 1) +
                     (Math.round(Math.abs(v) * 100) / 100).toString();
             },
-            popupContent = function(fId) {
+	            popupContent = function(fId) {
                 var feature = e.features[fId],
                     c = feature.geometry.coordinates;
                 return 'Event: ' + feature.properties.type + " - " + feature.properties.id + 
@@ -46,8 +58,6 @@ window.onload = function(){
             updateFeaturePopup = function(fId) {
                 realtime.getLayer(fId).getPopup().setContent(popupContent(fId));
             };
-
-
         Object.keys(e.enter).forEach(bindFeaturePopup);
         Object.keys(e.update).forEach(updateFeaturePopup);
     });
@@ -58,11 +68,11 @@ window.onload = function(){
 	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});		
 	
 	var baseMaps = {
-//			"OSM basemap": osm
+			"OSM basemap": osm
 	};
 	
 	var dataLayers = {
-			"OSM basemap": osm,
+//			"OSM basemap": osm,
 			"Events": realtime
 	};
 	
@@ -75,19 +85,29 @@ window.onload = function(){
 			var accesstoken = mapLayers[i][1];
 			var mapboxId = mapLayers[i][2];
 
-			var layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-			    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-			    maxZoom: 18,
-			    id: mapboxId,
-			    accessToken: accesstoken
-			});
+			L.mapbox.accessToken = accesstoken;
+			var layer = L.mapbox.tileLayer(mapboxId)
+			var flayer = L.mapbox.featureLayer(mapboxId)
+			
+			
+			
+			//This way doesn't get features, just the basemap.
+//			var layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+//			    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
+//			    maxZoom: 18,
+//			    id: mapboxId,
+//			    accessToken: accesstoken
+//			});
 
 			//add the new layer to the list of datalayers
-			dataLayers[mapLayers[i][4]] = layer;
+			baseMaps[mapLayers[i][4]] = layer;
+			dataLayers[mapLayers[i][4]] = flayer;
+			
 			
 			//add to layer list so it is active to start with
 			if(mapLayers[i][5] == "true"){
-				activeLayers.push(layer);
+//				activeLayers.push(layer);
+				activeLayers.push(flayer);
 			}
 		
 			//GIScloud layer type
@@ -103,11 +123,11 @@ window.onload = function(){
 			    attribution: "giscloud.com"
 			});
 			dataLayers[mapLayers[i][4]] = giscloud;
-			
 			//add to layer list so it is active to start with
 			if(mapLayers[i][5] == "true"){
 				activeLayers.push(giscloud);
 			}
+
 		}
 	    
 	}
@@ -117,7 +137,7 @@ window.onload = function(){
 	var map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8, layers: activeLayers});
 	
 	//add layer control to map
-	L.control.layers(baseMaps, dataLayers).addTo(map);
+	L.control.layers(baseMaps, dataLayers, {position: 'topleft'}).addTo(map);
 	
 //Map setup complete.
 //--------------------------------------------------	
@@ -469,4 +489,15 @@ function AlertUpdated(){
 	
 	closeDialog('updateAlertDialog');
 	refreshAlerts();
+}
+
+function hideShowFilters(){
+	var current = document.getElementById('filter-form').style.display;
+	if(current == "none" || current == ""){
+		document.getElementById('filter-form').style.display = "block";
+		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>Hide Filters';
+	}else{
+		document.getElementById('filter-form').style.display = "none";
+		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>Show Filters';
+	}
 }

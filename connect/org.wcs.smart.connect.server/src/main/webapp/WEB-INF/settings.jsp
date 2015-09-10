@@ -25,7 +25,7 @@
   <div>
     <div id="message" class="msgsection"></div>
     <div id="error" class="errorsection"></div>
-    	<button id="btnNewStyle" class="block button top-spacer">Create New Style</button>
+<!--     	<button id="btnNewStyle" class="block button top-spacer">Create New Style</button> -->
     </div>
 
 
@@ -39,25 +39,25 @@
 </div>
 
   
-<div class="top-spacer"  style="margin-left: -20px" >
-  <div class="styleTable table-cell smart-table">
-  	<div class="table-row smart-table-header">
-			<div class="table-cell smart-table-cell">Style Id</div>
-			<div class="table-cell smart-table-cell">Active?</div>
-			<div class="table-cell smart-table-cell">Server Name</div>
-			<div class="table-cell smart-table-cell">Footer Text</div>
-			<div class="table-cell smart-table-cell">Actions</div>
-		</div>
-	<c:forEach var="style" items="${styles}" varStatus="count">
-		<div data-username ="${style.getStyleId()}" class="smartuser styleRow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}">
-			<div class="table-cell smart-table-cell">${style.getStyleId()}</div>
-			<div class="table-cell smart-table-cell">${style.getActive()}</div>
-			<div class="table-cell smart-table-cell">${style.getServerName()}</div>
-			<div class="table-cell smart-table-cell">${style.getFooterText()}</div>
-			<div class="table-cell smart-table-cell "><a href="" data-id = "${style.getStyleId()}" title="delete style" class="deleteuser delete-icon"></a></div>
-		</div>
-	</c:forEach>  
-  </div>
+<!-- <div class="top-spacer"  style="margin-left: -20px" > -->
+<!--   <div class="styleTable table-cell smart-table"> -->
+<!--   	<div class="table-row smart-table-header"> -->
+<!-- 			<div class="table-cell smart-table-cell">Style Id</div> -->
+<!-- 			<div class="table-cell smart-table-cell">Active?</div> -->
+<!-- 			<div class="table-cell smart-table-cell">Server Name</div> -->
+<!-- 			<div class="table-cell smart-table-cell">Footer Text</div> -->
+<!-- 			<div class="table-cell smart-table-cell">Actions</div> -->
+<!-- 		</div> -->
+<%-- 	<c:forEach var="style" items="${styles}" varStatus="count"> --%>
+<%-- 		<div data-username ="${style.getStyleId()}" class="smartuser styleRow table-row ${count.index % 2 == 0 ? 'smart-table-rowon' : 'smart-table-rowoff'}"> --%>
+<%-- 			<div class="table-cell smart-table-cell">${style.getStyleId()}</div> --%>
+<%-- 			<div class="table-cell smart-table-cell">${style.getActive()}</div> --%>
+<%-- 			<div class="table-cell smart-table-cell">${style.getServerName()}</div> --%>
+<%-- 			<div class="table-cell smart-table-cell">${style.getFooterText()}</div> --%>
+<%-- 			<div class="table-cell smart-table-cell "><a href="" data-id = "${style.getStyleId()}" title="delete style" class="deleteuser delete-icon"></a></div> --%>
+<!-- 		</div> -->
+<%-- 	</c:forEach>   --%>
+<!--   </div> -->
 
 
 </div>

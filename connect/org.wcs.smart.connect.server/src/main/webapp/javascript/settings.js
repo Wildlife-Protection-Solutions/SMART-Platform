@@ -8,21 +8,21 @@ var allActions = null;
 /* configure events on html elements */
 window.onload = function(){
 	//add new user
-	document.querySelector("#btnNewStyle").onclick=clearAndShowNewStyleDialog;
-	if(numStyles > 0){
-		document.getElementById("btnNewStyle").style.display = "none";
-	}
+//	document.querySelector("btnNewStyle").onclick=clearAndShowNewStyleDialog;
+//	if(numStyles > 0){
+//		document.getElementById("btnNewStyle").style.display = "none";
+//	}
 	//delete style
-	elements = document.querySelectorAll(".deleteStyle");
-	for (var i = 0; i < elements.length; i ++){
-		elements[i].onclick=deleteStyle;
-	}
-	
-	//new style dialog
-	document.getElementById("cancelNewStyle").onclick = function(){
-		closeDialog('newStyleDialog');
-	};
-	document.getElementById("newstyleform").onsubmit = createNewStyle;
+//	elements = document.querySelectorAll(".deleteStyle");
+//	for (var i = 0; i < elements.length; i ++){
+//		elements[i].onclick=deleteStyle;
+//	}
+//	
+//	//new style dialog
+//	document.getElementById("cancelNewStyle").onclick = function(){
+//		closeDialog('newStyleDialog');
+//	};
+//	document.getElementById("newstyleform").onsubmit = createNewStyle;
 	
 	
 	

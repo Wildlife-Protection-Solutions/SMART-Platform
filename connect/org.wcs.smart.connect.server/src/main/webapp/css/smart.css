@@ -1,3 +1,7 @@
+/*
+see "article.tabs" below to change height of maps/tabs/etc on the alerts page. 
+*/
+
 html {
   font-family: 'Crimson Text', Georgia, Times, serif;
   font-size: 1em;
@@ -5,12 +9,12 @@ html {
 
 body {
 	background-image: url(../css/background.jpg);
+	margin: 0px;
 }
 
 p{
   font-size: 1em;
 }
-
 h2{
 	font-size: 1.1em;
 	font-weight: bold;
@@ -35,7 +39,7 @@ h2{
      padding: 2px; 
 }
 .button:focus{
-	border: 1px solid #21B6E3 !important; 
+	border: 1px solid #72A6C8 !important; 
 }
 .button{
 	border-radius: 3px;
@@ -48,7 +52,7 @@ h2{
 .button:hover{
 	/*background-color: #4F5F88;*/
 	color: white;
-	background-color: #21B6E3;
+	background-color: #72A6C8;
 }
 
 #mainheader{
@@ -88,7 +92,8 @@ h2{
 	display:table-row;
 }
 .formtext:focus{
-	border: 1px solid #21B6E3; /*#4F5F88;*/
+	border: 1px solid #72A6C8;/*#21B6E3;*/ /*#4F5F88;*/
+	
 }
 .label-header{
 	font-weight: bold;
@@ -150,7 +155,7 @@ h2{
 }
 
 .menuitem:hover{
-	background-color: #21B6E3;
+	background-color: #72A6C8;
 	border-radius: 3px;
 	color: white;
 }
@@ -255,12 +260,39 @@ h2{
 }
 
 .selecteduser{
-	background-color: #21B6E3;
+	background-color: #72A6C8;
 }
 
 
 #map { 
-	height: 525px;
+	height: 100%;
+}
+
+#filter-controls{
+	border-top: 1px solid #ddd;
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	position: absolute;
+    right: 10px;
+    top: 10px;
+    z-index: 10;
+    max-height:93%;
+    overflow:auto;
+    font-size: 0.85em;
+}
+   
+#filter-link{
+	float: right;
+    margin:5px;
+}
+#filter-form{
+	margin-right: 5px;
+	margin-left: 5px;
+	display: none;
+}
+#filter-button{
+	content:url("hourglass.png");
 }
 
 .overflow{
@@ -287,10 +319,10 @@ div.scrollable {
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/
 article.tabs{
+	height: 650px;
 	position: relative;
 	display: block;
 	width: 100%;
-	height: 525px;
 	margin: 2em auto;
 }
 
@@ -300,7 +332,7 @@ article.tabs section{
 	top: 1.8em;
 	left: 0;
 	width: 100%;
-	height: 525px;
+	height: 100%;
 	background-color: #ddd;
 	border-radius: 5px;
 	box-shadow: 0 3px 3px rgba(0,0,0,0.1);

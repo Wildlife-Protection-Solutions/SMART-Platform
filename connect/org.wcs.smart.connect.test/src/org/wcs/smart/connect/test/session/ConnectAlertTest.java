@@ -71,18 +71,22 @@ public class ConnectAlertTest {
 	
 	@Test
 	public void testAlert() throws Exception{
-		getCaUuid(); //gets the first CA uuid so we have a valid one for testing
-		testGetAlertTypes(); //gets the first alert type uuid so we have a valid one for testing
-		testCreateAlert();
-		testGetAllAlerts();
-		testGetAlert();
-		testUpdateAlert();
-		testUpdateAlertInvalidAlert();
-		testUpdateAlertInvalidType();
-		testGetAlertInvalidCa();
-		testGetAlertsFromCa();
-		testDeleteAlert();
+//		getCaUuid(); //gets the first CA uuid so we have a valid one for testing
+//		testGetAlertTypes(); //gets the first alert type uuid so we have a valid one for testing
+//		testCreateAlert();
+//		testGetAllAlerts();
+//		testGetAlert();
+//		testUpdateAlert();
+//		testUpdateAlertInvalidAlert();
+//		testUpdateAlertInvalidType();
+//		testGetAlertInvalidCa();
+//		testGetAlertsFromCa();
+//		testDeleteAlert();
+		
+		testGetAlertsLevel("4");
+		testGetAlertsTextSearch("descript");		
 	}
+	
 	public void getCaUuid() throws Exception{
 		URIBuilder builder = new URIBuilder(SmartConnect.CA_API_URL );
 		
@@ -539,4 +543,89 @@ public class ConnectAlertTest {
 			}
 		});
 	}
+	
+	private void testGetAlertsLevel(String level) throws Exception{
+		
+		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "?levelFilter=" + level);
+		
+		// Login 
+		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
+		HttpGet get = new HttpGet(builder.build());
+		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
+		get.addHeader("Authorization", "basic " + info);
+		
+		httpClient.execute(get, new ResponseHandler<String>() {
+
+			@Override
+			public String handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
+				String userObject = EntityUtils.toString(response.getEntity());
+				System.out.println("13)" + userObject);
+				Assert.assertEquals("OK expected", HttpURLConnection.HTTP_OK, 
+						response.getStatusLine().getStatusCode());
+				String contentType = null;
+				for (Header h : response.getAllHeaders()){
+					if (h.getName().equalsIgnoreCase("Content-Type")){
+						Assert.assertNull("Duplicate content type headers provided.", contentType);
+						contentType = h.getValue();
+					}
+				}
+				Assert.assertEquals("Json expected", SmartConnect.MT_APPLICATION_JSON, contentType);
+				
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode n = mapper.readTree(userObject);
+				Assert.assertTrue("Validating at least on user", n.size() > 0);
+				
+				 
+				Assert.assertTrue("Correct level property in alert?", n.get("features").get(0).get("properties").get("level").asInt() == Integer.parseInt(level) );
+				Assert.assertTrue("Valid x property in first geojson feature?", n.get("features").get(0).get("properties").get("x").asInt() > -181  && n.get("features").get(0).get("properties").get("x").asInt() < 181);
+				Assert.assertTrue("Valid y property in first geojson feature?", n.get("features").get(0).get("properties").get("y").asInt() > -91  && n.get("features").get(0).get("properties").get("y").asInt() < 91);
+				
+				return null;
+			}
+		});
+	
+	}
+	
+	private void testGetAlertsTextSearch(String text) throws Exception{
+		
+		URIBuilder builder = new URIBuilder(SmartConnect.ALERT_API_URL + "?textSearchFilter=" + text);
+		
+		// Login 
+		CloseableHttpClient httpClient = SmartConnect.createHttpClient();
+		HttpGet get = new HttpGet(builder.build());
+		String info = Base64.encode( (SmartConnect.USERNAME + ":" + SmartConnect.PASSWORD).getBytes() );
+		get.addHeader("Authorization", "basic " + info);
+		
+		httpClient.execute(get, new ResponseHandler<String>() {
+
+			@Override
+			public String handleResponse(HttpResponse response)
+					throws ClientProtocolException, IOException {
+				String userObject = EntityUtils.toString(response.getEntity());
+				System.out.println("14)" + userObject);
+				Assert.assertEquals("OK expected", HttpURLConnection.HTTP_OK, 
+						response.getStatusLine().getStatusCode());
+				String contentType = null;
+				for (Header h : response.getAllHeaders()){
+					if (h.getName().equalsIgnoreCase("Content-Type")){
+						Assert.assertNull("Duplicate content type headers provided.", contentType);
+						contentType = h.getValue();
+					}
+				}
+				Assert.assertEquals("Json expected", SmartConnect.MT_APPLICATION_JSON, contentType);
+				
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode n = mapper.readTree(userObject);
+				Assert.assertTrue("Validating at least on user", n.size() > 0);
+				
+				 
+				Assert.assertTrue("Correct text search in alert?", n.get("features").get(0).get("properties").get("desc").asText().contains(text) || n.get("features").get(0).get("properties").get("userGeneratedId").asText().contains(text));
+				Assert.assertTrue("Valid x property in first geojson feature?", n.get("features").get(0).get("properties").get("x").asInt() > -181  && n.get("features").get(0).get("properties").get("x").asInt() < 181);
+				Assert.assertTrue("Valid y property in first geojson feature?", n.get("features").get(0).get("properties").get("y").asInt() > -91  && n.get("features").get(0).get("properties").get("y").asInt() < 91);
+				
+				return null;
+			}
+		});
+	}	
 }

@@ -2,6 +2,7 @@
 package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -46,6 +47,12 @@ public class AlertServlet extends HttpServlet{
 		request.setAttribute("cas", cas); //$NON-NLS-1$
 		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$
 		request.setAttribute("mapLayers", mapLayers); //$NON-NLS-1$
+		
+		List<String>status = new ArrayList<String>();
+		for (Alert.AlertStatusEnum x : Alert.AlertStatusEnum.values()) {
+			status.add(x.getValue());
+		}
+		request.setAttribute("status", status);
 
 		
 		//allow using "...alert?tab=2#tab2" on the url to specify whether to start on a tab other than the default

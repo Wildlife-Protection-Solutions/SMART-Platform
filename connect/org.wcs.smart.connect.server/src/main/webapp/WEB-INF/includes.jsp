@@ -5,6 +5,7 @@
 <fmt:setBundle basename="org.wcs.smart.connect.i18n.web_messages" />
 <meta charset="UTF-8" />
 <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/smart.css"/>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/leaflet.css"/>
 <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
 <link href="//fonts.googleapis.com/css?family=Crimson+Text" rel="stylesheet" type="text/css">
 <link href="//fonts.googleapis.com/css?family=Allerta" rel="stylesheet" type="text/css">

@@ -115,9 +115,6 @@ import org.wcs.smart.query.common.model.WaypointQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.StyledQuery;
-import org.wcs.smart.report.model.Report;
-import org.wcs.smart.report.model.ReportFolder;
-import org.wcs.smart.report.model.ReportQuery;
 
 public enum SmartTable {
 
@@ -206,9 +203,9 @@ public enum SmartTable {
 	QUERY(Query.class,null),
 	QUERYFOLDER(QueryFolder.class,null),
 	RANK(Rank.class,".agency.conservationArea"),
-	REPORT(Report.class, null),
-	REPORTFOLDER(ReportFolder.class, null),
-	REPORTQUERY(ReportQuery.class, ".id.report.conservationArea"),
+//	REPORT(Report.class, null),
+//	REPORTFOLDER(ReportFolder.class, null),
+//	REPORTQUERY(ReportQuery.class, ".id.report.conservationArea"),
 	SAMPLINGUNIT(SamplingUnit.class,".surveyDesign.conservationArea"),
 	SAMPLINGUNITATTRIBUTE(SamplingUnitAttribute.class,".conservationArea"),
 	SAMPLINGUNITATTRIBUTELISTITEM(SamplingUnitAttributeListItem.class,".attribute.conservationArea"),

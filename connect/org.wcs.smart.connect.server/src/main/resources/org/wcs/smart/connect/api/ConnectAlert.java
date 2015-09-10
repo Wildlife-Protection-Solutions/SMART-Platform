@@ -11,12 +11,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -29,6 +31,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.filter.AlertFilter;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
@@ -84,13 +87,22 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String getAllAlerts(){
+    public String getAllAlerts( @QueryParam(value="levelFilter") int levelFilter, 
+    			@QueryParam(value="typeUuidFilter") UUID typeUuidFilter,
+    			@QueryParam(value="statusFilter") AlertStatusEnum statusFilter,    		
+    			@QueryParam(value="caUuidFilter") UUID caUuidFilter, 
+    			@QueryParam(value="startDateFilter") Date startDateFilter,
+    			@QueryParam(value="endDateFilter") Date endDateFilter,
+    			@QueryParam(value="textSearchFilter") String textSearchFilter
+    			){
+    	    
+		AlertFilter af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, caUuidFilter, startDateFilter, endDateFilter, textSearchFilter);
+		
 		validateUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			List<Alert> list = HibernateManager.getAlerts(s);
-			
+			List<Alert> list = af.getAlerts(s);
 			return convertToGeoJson(s, list).toString();
 		}finally{
 			s.getTransaction().commit();
@@ -101,6 +113,7 @@ public class ConnectAlert extends HttpServlet {
     @Path("/{alertUuid}")
     public Alert getAlert(@PathParam("alertUuid") UUID alertUuid){
 		validateUser();
+
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
