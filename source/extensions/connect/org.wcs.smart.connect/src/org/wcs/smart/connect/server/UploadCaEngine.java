@@ -36,17 +36,17 @@ import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
-import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
 import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
@@ -73,7 +73,7 @@ public class UploadCaEngine {
 
 		monitor.beginTask("Uploading Conservation Area to SMART Connect", 3);
 		monitor.subTask("Connecting to SMART Connect");
-		ConservationAreaInfo serverInfo = connect.getCaInfo(SmartDB.getCurrentConservationArea().getUuid());
+		ConservationAreaInfo serverInfo = connect.getCaInfo(server.getConservationArea().getUuid());
 		monitor.worked(1);
 		
 		monitor.subTask("Configuring upload");
@@ -83,7 +83,7 @@ public class UploadCaEngine {
 		//TODO: validate plugin versions
 		try{
 			s.beginTransaction();
-			localStatus = getLocalStatus(s);
+			localStatus = getLocalStatus(s, server.getConservationArea());
 	
 			if (serverInfo != null){
 				if (serverInfo.getStatus() == ConservationAreaInfo.Status.DATA){
@@ -124,12 +124,12 @@ public class UploadCaEngine {
 					localStatus = null;
 				}
 				localStatus = createNewLocalStatus(server, s);
-				localStatus.setLocalFile(getExportFilename());
+				localStatus.setLocalFile(getExportFilename(server.getConservationArea()));
 				s.save(localStatus);
 				
 				//clean up change log and upload table
-				ChangeLogTableManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
-				SyncHistoryManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
+				ChangeLogTableManager.INSTANCE.deleteAll(s, server.getConservationArea());
+				SyncHistoryManager.INSTANCE.deleteAll(s, server.getConservationArea());
 			}
 			
 			s.getTransaction().commit();
@@ -194,8 +194,8 @@ public class UploadCaEngine {
 	 * The export filename.
 	 * @return
 	 */
-	private String getExportFilename(){
-		return ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + File.separator + "sc_" +UuidUtils.uuidToString(SmartDB.getCurrentConservationArea().getUuid())+ "_" + System.nanoTime() + ".zip";
+	private String getExportFilename(ConservationArea ca){
+		return ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + File.separator + "sc_" +UuidUtils.uuidToString(ca.getUuid())+ "_" + System.nanoTime() + ".zip";
 	}
 
 	/**
@@ -203,8 +203,8 @@ public class UploadCaEngine {
 	 * @param s
 	 * @return
 	 */
-	private ConnectServerStatus getLocalStatus(Session s){
-		return (ConnectServerStatus) s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
+	private ConnectServerStatus getLocalStatus(Session s, ConservationArea ca){
+		return (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
 	}
 	
 	/**
@@ -228,7 +228,7 @@ public class UploadCaEngine {
 	
 		status.setServerRevision(-1l);
 		status.setServer(server);
-		status.setConservationArea(SmartDB.getCurrentConservationArea());
+		status.setConservationArea(server.getConservationArea());
 		status.setStatus(ConnectServerStatus.Status.BACKUP);
 		return status;
 

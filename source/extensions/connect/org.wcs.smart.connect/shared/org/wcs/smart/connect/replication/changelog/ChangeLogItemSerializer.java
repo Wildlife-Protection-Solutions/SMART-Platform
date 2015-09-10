@@ -52,6 +52,7 @@ public class ChangeLogItemSerializer {
 				item.getAction() == Action.FS_UPDATE || 
 				item.getAction() == Action.FS_INSERT ){
 			//TODO: ignore for now
+			stream.writeObject(item);
 			return;
 		}
 			

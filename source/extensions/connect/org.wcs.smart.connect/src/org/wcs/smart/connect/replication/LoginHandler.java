@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.replication;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
@@ -31,7 +32,11 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
+import org.wcs.smart.connect.replication.changelog.UploadSyncEngine;
 import org.wcs.smart.connect.server.UploadCaJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -75,6 +80,7 @@ public class LoginHandler implements ILoginHandler {
 		}
 		
 		processCaUploadEvents(status);
+		processUploadSync();
 		//TODO: upload sync events also need checking to clean up
 	}
 
@@ -99,25 +105,11 @@ public class LoginHandler implements ILoginHandler {
 				status.setStatus(Status.ERROR);
 				s.getTransaction().commit();
 				return;
-			}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){				
-				ConnectServer server = (ConnectServer) s.createCriteria(ConnectServer.class)
-							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-							.uniqueResult();
-				if (server == null){
-					//no server configured; this should NEVER happen
-					return;
-				}
-				
-				ConnectUser user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
-				if (user == null){
-					//this user does not have the ability to update conservation
-					//area to smart connect so we have to do something here
-					//do we want to warn the user or what??
-					return;
-				}
+			}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){		
+				SmartConnect connect = getSmartConnect(s);
+				if (connect == null) return;
 				if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Export To Connect", 
 						"SMART was terminated before the export to SMART Conenct was completed.  Do you want resume the upload process?")){
-					SmartConnect connect = new SmartConnect(server, user.getConnectUsername(), user.getConnectPassword());
 					//need to continue upload
 					UploadCaJob job = new UploadCaJob(connect, status);
 					job.schedule();
@@ -134,5 +126,87 @@ public class LoginHandler implements ILoginHandler {
 		}finally{
 			s.close();
 		}
+	}
+	
+	
+	/*
+	 * checks for ca any upload sync events which may not have completed
+	 */
+	private void processUploadSync(){
+		ConnectSyncHistoryRecord record = null;
+		try{
+			Session s = HibernateManager.openSession();
+			try{
+				record = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(s, SmartDB.getCurrentConservationArea(),Type.UPLOAD);
+			}finally{
+				s.close();
+			}
+			
+			if (record == null) return;
+				
+			if (record.getStatus() == ConnectSyncHistoryRecord.Status.DONE){
+				return;
+			}
+			if (record.getStatus() == ConnectSyncHistoryRecord.Status.ERROR){
+				return;
+			}
+				
+			if (record.getStatus() == ConnectSyncHistoryRecord.Status.ACTIVE){
+				if (record.getStatusUrl() == null){
+					//never got a url from the server
+					//lets warn user; set status to error and return
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could be initiated.  You must manually resync changes.");
+					
+					s = HibernateManager.openSession();
+					s.beginTransaction();
+					try{
+						record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+						s.getTransaction().commit();
+					}finally{
+						s.close();
+					}
+					
+					return;
+				}else{
+					SmartConnect connect = null;
+					s = HibernateManager.openSession();
+					try{
+						connect = getSmartConnect(s);
+					}finally{
+						s.close();
+					}
+					if (connect == null ) return;
+						
+					//continue job waiting for
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could finish.  The job will resume and you will be notified when complete.");
+					
+					UploadSyncEngine e = new UploadSyncEngine(connect);
+					e.syncUpload(new NullProgressMonitor());
+				}
+			}
+		}catch (Exception ex){
+			ConnectPlugIn.log("Error continuing connect sync upload", ex);
+		}
+	}
+	
+	
+	
+	private SmartConnect getSmartConnect(Session s){
+		ConnectServer server = (ConnectServer) s.createCriteria(ConnectServer.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+				.uniqueResult();
+		if (server == null){
+			//no server configured; this should NEVER happen
+			return null;
+		}
+	
+		ConnectUser user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
+		if (user == null){
+			//this user does not have the ability to update conservation
+			//area to smart connect so we have to do something here
+			//TODO: do we want to warn the user or what??
+			return null;
+		}
+		return new SmartConnect(server, user.getConnectUsername(), user.getConnectPassword());
 	}
 }

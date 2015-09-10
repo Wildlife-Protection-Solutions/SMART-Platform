@@ -20,20 +20,31 @@ import org.wcs.smart.hibernate.HibernateManager;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/** 
+ * This job is managed by the UploadSynEngine and
+ * is configured so that only one will be running
+ * at a time. 
+ * 
+ * @author Emily
+ *
+ */
 public class UploadSyncJob extends FileUploaderJob {
 
 	private ConnectSyncHistoryRecord item;
-	
+
 	public UploadSyncJob(ConnectSyncHistoryRecord item, 
 			SmartConnect connect) {
 		super(null, FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getChangeLogZipFile()),
 				connect, "Upload changes to SMART Connect");
 		this.item = item;
-		
 	}
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		//reload item to ensure status is not done
+		//that will happen if another job was processing the item
+		//before this job started.
+		
 		String url = null;
 		try{
 			url = connect.getSyncUploadUrl(item.getConservationArea().getUuid(), file);

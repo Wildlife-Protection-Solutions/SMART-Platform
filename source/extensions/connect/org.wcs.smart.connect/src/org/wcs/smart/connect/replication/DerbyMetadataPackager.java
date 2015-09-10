@@ -21,32 +21,26 @@
  */
 package org.wcs.smart.connect.replication;
 
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Properties;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.replication.metadata.MetadataPackager;
+import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Metadata packager which accompanies all upload and downloads from the server.
  * @author Emily
  *
  */
-public class MetadataPackager {
+public enum DerbyMetadataPackager {
 
-	public static final String CA_UUID_KEY = "conservationareauuid";
-	public static final String VERSION_KEY = "version";
-	public static final String CLIENT_REVISION_KEY = "client_revision";
-	public static final String SERVER_REVISION_KEY = "server_revision";
-	public static final String PLUGIN_KEY_PREFIX = "pluginid.";
+	INSTANCE;
 	
 	public static void generateMetadata(Session session, ConnectServer server, 
 			Path file, long revision) throws Exception{
@@ -58,21 +52,19 @@ public class MetadataPackager {
 			 throw new Exception("Could not determine server status.");
 		}
 		
-		Properties prop = new Properties();
-		prop.setProperty(CA_UUID_KEY, UuidUtils.uuidToString(ca.getUuid()));
-		prop.setProperty(VERSION_KEY, UuidUtils.uuidToString(status.getVersion()));
-		prop.setProperty(CLIENT_REVISION_KEY, String.valueOf(revision));
-		prop.setProperty(SERVER_REVISION_KEY, String.valueOf(status.getServerRevision()));
-				
+		PackageMetadata metadata = new PackageMetadata();
+		metadata.setConservationArea(ca.getUuid());
+		metadata.setVersion(status.getVersion());
+		metadata.setClientRevision(revision);
+		metadata.setServerRevision(status.getServerRevision());
+		
 		//plugin versions
 		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL);
 		List<Object[]> plugins = q.list();
 		for (Object[] version : plugins){
-			prop.setProperty(PLUGIN_KEY_PREFIX + (String)version[1], (String)version[0]);
+			metadata.setPluginVersion((String)version[1], (String)version[0]);
 		}
 		
-		try(OutputStream out = Files.newOutputStream(file)){
-			prop.store(out, "");
-		}
+		MetadataPackager.INSTANCE.writeMetadata(file, metadata);
 	}
 }
