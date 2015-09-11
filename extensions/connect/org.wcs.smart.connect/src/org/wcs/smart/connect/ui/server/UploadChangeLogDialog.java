@@ -10,12 +10,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.replication.changelog.UploadSyncEngine;
+import org.wcs.smart.connect.replication.changelog.UploadChangeLogEngine;
 
-public class SyncCaDialog extends ConnectDialog {
+public class UploadChangeLogDialog extends ConnectDialog {
 
 	
-	public SyncCaDialog(Shell parentShell) {
+	public UploadChangeLogDialog(Shell parentShell) {
 		super(parentShell);
 	}
 
@@ -36,7 +36,7 @@ public class SyncCaDialog extends ConnectDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					UploadSyncEngine engine = new UploadSyncEngine(connect);
+					UploadChangeLogEngine engine = new UploadChangeLogEngine(connect);
 					
 					try{
 						engine.syncUpload(monitor);

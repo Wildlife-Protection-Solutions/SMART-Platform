@@ -28,11 +28,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Emily
  *
  */
-public class UploadSyncJob extends FileUploaderJob {
+public class UploadChangeLogJob extends FileUploaderJob {
 
 	private ConnectSyncHistoryRecord item;
 
-	public UploadSyncJob(ConnectSyncHistoryRecord item, 
+	public UploadChangeLogJob(ConnectSyncHistoryRecord item, 
 			SmartConnect connect) {
 		super(null, FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getChangeLogZipFile()),
 				connect, "Upload changes to SMART Connect");

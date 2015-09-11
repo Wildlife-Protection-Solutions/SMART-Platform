@@ -34,18 +34,18 @@ import org.eclipse.swt.widgets.Shell;
  * @author Emily
  *
  */
-public class ExportCaHandler {
+public class UploadCaHandler {
 
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) throws ExecutionException {
-		ExportCaDialog dialog = new ExportCaDialog(activeShell);
+		UploadCaDialog dialog = new UploadCaDialog(activeShell);
 		dialog.open(); 
 	}
 
 	// E3
-	public static class ExportCaHandlerrWrapper extends DIHandler<ExportCaHandler> {
+	public static class ExportCaHandlerrWrapper extends DIHandler<UploadCaHandler> {
 		public ExportCaHandlerrWrapper() {
-			super(ExportCaHandler.class);
+			super(UploadCaHandler.class);
 		}
 	}
 }

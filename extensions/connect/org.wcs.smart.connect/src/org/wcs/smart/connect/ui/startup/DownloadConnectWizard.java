@@ -13,7 +13,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.server.DownloadInstallEngine;
+import org.wcs.smart.connect.server.DownloadCaEngine;
 import org.wcs.smart.connect.ui.server.configure.ConnectServerWizard;
 import org.wcs.smart.connect.ui.server.configure.ServerWizardPage;
 import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
@@ -49,7 +49,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 		server.setServerUrl(url);
 		try(SmartConnect connect = new SmartConnect(server, user, pass)){
 		
-			final DownloadInstallEngine installer = new DownloadInstallEngine(info, connect);
+			final DownloadCaEngine installer = new DownloadCaEngine(info, connect);
 			installer.preDownload(getShell());
 		
 			final List<Exception> errors = new ArrayList<Exception>();

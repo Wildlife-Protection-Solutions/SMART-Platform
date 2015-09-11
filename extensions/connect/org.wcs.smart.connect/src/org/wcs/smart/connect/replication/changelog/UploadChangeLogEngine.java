@@ -20,13 +20,13 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
-public class UploadSyncEngine {
+public class UploadChangeLogEngine {
 
-	private static final Semaphore UPLOAD_LOCK = new Semaphore(1);
+	public static final Semaphore UPLOAD_LOCK = new Semaphore(1);
 	
 	private SmartConnect connect;
 	
-	public UploadSyncEngine(SmartConnect connect){
+	public UploadChangeLogEngine(SmartConnect connect){
 		this.connect = connect;
 	}
 	
@@ -111,7 +111,7 @@ public class UploadSyncEngine {
 			monitor.worked(1);
 			
 			//upload package to server
-			UploadSyncJob upload = new UploadSyncJob(current, connect);
+			UploadChangeLogJob upload = new UploadChangeLogJob(current, connect);
 			upload.addJobChangeListener(new JobChangeAdapter() {
 				@Override
 				public void done(IJobChangeEvent event) {

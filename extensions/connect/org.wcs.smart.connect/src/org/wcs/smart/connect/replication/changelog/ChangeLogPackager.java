@@ -70,7 +70,7 @@ public class ChangeLogPackager {
 	private void packageMetadata() throws Exception{
 		Session s = HibernateManager.openSession();
 		try{
-			DerbyMetadataPackager.generateMetadata(s, record.getServer(), metadataFile, record.getStartRevision());
+			DerbyMetadataPackager.INSTANCE.generateMetadata(s, record.getServer(), metadataFile, record.getStartRevision());
 		}finally{
 			s.close();
 		}

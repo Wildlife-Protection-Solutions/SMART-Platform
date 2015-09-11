@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
@@ -83,6 +85,8 @@ import org.wcs.smart.util.I18nUtil;
  */
 public class HibernateManager extends SmartHibernateManager{
 	
+	
+	
 	public static void initContext(){
 		if (SmartDB.getCurrentLanguage() != null){
 			I18nUtil.setLocale(SmartDB.getCurrentLanguage().getUuid());
@@ -91,10 +95,49 @@ public class HibernateManager extends SmartHibernateManager{
 			I18nUtil.setCa(SmartDB.getCurrentConservationArea().getUuid());
 		}
 	}
+	
+	public static Session lockDatabase(){
+		try {
+			thisLock.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		int cnt = 0;
+		while(allSessions.size() > 0 && cnt < 10){
+			//wait for thread to be closed
+			try {
+				Thread.sleep( 1000 );
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			cnt++;
+		}
+		for(Session s : allSessions){
+			s.close();
+		}
+		initContext();
+		SmartHibernateManager.endSessionFactory();
+		return SmartHibernateManager.openSession();
+	}
+	public static void unlockDatabase(){
+		thisLock.release();
+	}
+	private static Semaphore thisLock = new Semaphore(1);
 	public synchronized static Session openSession(){
+		try {
+			thisLock.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		thisLock.release();
 		initContext();
 		
 		Session session = SmartHibernateManager.openSession();
+		
 		return session;
 	}
 	

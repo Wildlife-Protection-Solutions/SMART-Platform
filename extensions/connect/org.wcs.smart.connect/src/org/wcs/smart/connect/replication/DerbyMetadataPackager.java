@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.replication;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 
 import org.hibernate.SQLQuery;
@@ -42,7 +43,7 @@ public enum DerbyMetadataPackager {
 
 	INSTANCE;
 	
-	public static void generateMetadata(Session session, ConnectServer server, 
+	public void generateMetadata(Session session, ConnectServer server, 
 			Path file, long revision) throws Exception{
 		
 		ConservationArea ca = (ConservationArea) session.load(ConservationArea.class, server.getConservationArea().getUuid());
@@ -59,6 +60,7 @@ public enum DerbyMetadataPackager {
 		metadata.setServerRevision(status.getServerRevision());
 		
 		//plugin versions
+		metadata.setPluginVersions(getLocalPluginVersions(session));
 		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL);
 		List<Object[]> plugins = q.list();
 		for (Object[] version : plugins){
@@ -66,5 +68,15 @@ public enum DerbyMetadataPackager {
 		}
 		
 		MetadataPackager.INSTANCE.writeMetadata(file, metadata);
+	}
+	
+	public HashMap<String, String> getLocalPluginVersions(Session session){
+		HashMap<String, String> plugins = new HashMap<String, String>();
+		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL);
+		List<Object[]> plugin = q.list();
+		for (Object[] version : plugin){
+			plugins.put((String)version[1], (String)version[0]);
+		}
+		return plugins;
 	}
 }

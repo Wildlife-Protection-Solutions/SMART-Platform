@@ -52,6 +52,7 @@ public interface ConnectClient {
 	public static final String UPLOAD_PATH = "uploader";
 	
 	public static final String DATA_PARAM_ALL = "all";
+	public static final String DATA_PARAM_PACKAGE = "changelog";
 		
 	@GET
     @Path("/" + USER_PATH + "/{username}")
@@ -70,6 +71,11 @@ public interface ConnectClient {
 	@GET
     @Path("/" + CA_PATH + "/{cauuid}")
     public Response downloadConservationArea(@PathParam("cauuid") String caUuid, @QueryParam("data") String data);
+	
+	@GET
+    @Path("/" + CA_PATH + "/{cauuid}")
+    public Response downloadChangeLog(@PathParam("cauuid") String caUuid, @QueryParam("data") String data, @QueryParam("version") String version, @QueryParam("revision") String revision);
+	
 	
 	@GET
 	@Path("/" + UPLOAD_PATH + "/{uploaduuid}")

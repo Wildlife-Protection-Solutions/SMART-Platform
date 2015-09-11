@@ -44,6 +44,7 @@ import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
@@ -61,6 +62,9 @@ import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Class to interface with a SMART Connect server.
@@ -211,8 +215,10 @@ public class SmartConnect implements AutoCloseable {
 		Response r = null;
 		try{
 			r = simple.downloadConservationArea(caUuid.toString(), ConnectClient.DATA_PARAM_ALL);
-			
-			return r.getHeaderString(HttpHeaders.LOCATION);
+			if (r.getStatus() == Status.ACCEPTED.getStatusCode()){
+				return r.getHeaderString(HttpHeaders.LOCATION);
+			}
+			throw new Exception("Error connecting to Connect Server. " + r.getStatus() + ": " + r.getStatusInfo().getReasonPhrase());
 		}catch (NotFoundException ex){
 			return null;
 		}finally{
@@ -221,8 +227,25 @@ public class SmartConnect implements AutoCloseable {
 			}
 		}
 	}
-	
-	public Path downloadConservationArea(String url) throws Exception{
+	public String startChangeLogDownload(UUID caUuid, UUID version, Long revision) throws Exception{
+		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
+		ConnectClient simple = target.proxy(ConnectClient.class);
+		Response r = null;
+		try{
+			r = simple.downloadChangeLog(caUuid.toString(), ConnectClient.DATA_PARAM_PACKAGE, version.toString(), String.valueOf(revision));
+			if (r.getStatus() == Status.ACCEPTED.getStatusCode()){
+				return r.getHeaderString(HttpHeaders.LOCATION);
+			}
+			throw new Exception("Error connecting to Connect Server. " + r.getStatus() + ": " + r.getStatusInfo().getReasonPhrase());
+		}catch (NotFoundException ex){
+			return null;
+		}finally{
+			if (r != null){
+				r.close();
+			}
+		}
+	}
+	public Path downloadFileFromUrl(String url) throws Exception{
 		int tryCount = 0;
 		
 		//download file name
@@ -389,6 +412,14 @@ public class SmartConnect implements AutoCloseable {
 //		return null;
 	}
 	
+	public static String parseErrorMessage(String json){
+		try{
+			return (new ObjectMapper()).readTree(json).get("error").textValue();
+		}catch (Exception ex){
+			return null;
+		}
+	}
+	
 	public final String processException (Throwable ex){
 		if (ex instanceof NotFoundException){
 			String msg = MessageFormat.format("Could not connect to ({0}).", new Object[]{server.getServerUrl()});
@@ -427,4 +458,6 @@ public class SmartConnect implements AutoCloseable {
 	        requestContext.getHeaders().add("Authorization", "Basic " + base64Token);
 	    }
 	}
+	
+	
 }
