@@ -203,6 +203,7 @@ public class DownloadChangeLogEngine {
 				if (session.getTransaction().isActive()){
 					session.getTransaction().rollback();
 				}
+				throw ex;
 			}finally{
 				HibernateManager.unlockDatabase();
 				session.close();

@@ -8,7 +8,10 @@ import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
+import org.hibernate.type.BinaryType;
+import org.hibernate.type.CharacterArrayType;
 import org.hibernate.type.StringType;
+import org.hibernate.type.descriptor.java.UUIDTypeDescriptor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
 import org.wcs.smart.util.DerbyUtils;
@@ -41,7 +44,7 @@ public enum ChangeLogTableManager {
 		
 		List<?> data = query.list();
 		if (data.size() != 1){ return false; }
-		if ( (Long)data.get(0)  > 0) return true;
+		if ( (Integer)data.get(0)  > 0) return true;
 		return false;
 		
 	}
@@ -53,9 +56,13 @@ public enum ChangeLogTableManager {
 		sb.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		
 		SQLQuery query = s.createSQLQuery(sb.toString());
-		query.setBinary(0, DerbyUtils.createUuid());
+		if (item.getUuid() == null){
+			item.setUuid(UuidUtils.byteToUUID(DerbyUtils.createUuid()));
+		}
+		
+		query.setBinary(0, UuidUtils.uuidToByte(item.getUuid()));
 		query.setString(1, item.getAction().name());
-		query.setParameter(2, item.getFileName());
+		query.setParameter(2, item.getFileName(),StringType.INSTANCE);
 		query.setParameter(3, item.getTableName(),StringType.INSTANCE);
 		query.setParameter(4, item.getFieldName1(),StringType.INSTANCE);
 		query.setBinary(5, item.getKey1() == null ? null : UuidUtils.uuidToByte(item.getKey1()));
