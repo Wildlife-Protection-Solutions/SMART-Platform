@@ -38,10 +38,10 @@ import org.wcs.smart.connect.server.UploadCaEngine;
  * @author Emily
  *
  */
-public class ExportCaDialog extends ConnectDialog {
+public class UploadCaDialog extends ConnectDialog {
 
 	
-	public ExportCaDialog(Shell parentShell) {
+	public UploadCaDialog(Shell parentShell) {
 		super(parentShell);
 	}
 

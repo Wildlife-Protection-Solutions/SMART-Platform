@@ -17,6 +17,7 @@ import org.wcs.smart.util.UuidUtils;
 public abstract class ChangeLogDeserializer {
 
 	protected Path changeLogFile;
+	protected Session session;
 	
 	public ChangeLogDeserializer(Path changeLogFile){
 		this.changeLogFile = changeLogFile;
@@ -24,6 +25,7 @@ public abstract class ChangeLogDeserializer {
 	
 	
 	public void processFile(final Session session) throws Exception{
+		this.session = session;
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection connection) throws SQLException {
@@ -36,6 +38,8 @@ public abstract class ChangeLogDeserializer {
 					for (int i = 0; i < size; i ++){
 						ChangeLogItem it = (ChangeLogItem) oin.readObject();
 	
+						if (!shouldProcess(it)) continue;
+						
 						if (it.getAction() == Action.DELETE){
 							processDataDelete(it, connection);
 						}else if (it.getAction() == Action.INSERT){
@@ -57,6 +61,8 @@ public abstract class ChangeLogDeserializer {
 			}
 		});
 	}
+	
+	protected abstract boolean shouldProcess(ChangeLogItem item);
 
 	public HashMap<String, Object> readObject(ObjectInputStream is) throws Exception{
 		int numCols = is.readInt();

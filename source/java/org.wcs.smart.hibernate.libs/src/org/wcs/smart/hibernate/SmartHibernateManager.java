@@ -27,8 +27,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
+import org.hibernate.BaseSessionEventListener;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
+import org.hibernate.SessionEventListener;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -54,7 +56,8 @@ public class SmartHibernateManager {
 	private static  String passWord = "smrt"; //$NON-NLS-1$
 	private static String databaseLocation = ""; //$NON-NLS-1$
 	
-	public static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
+	private static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
+	protected static final List<Session> allSessions = new ArrayList<Session>();
 	
 	//TODO: perhaps this can be replaced with
 	//hibernate.current_session_context_class=thread
@@ -112,6 +115,7 @@ public class SmartHibernateManager {
 				//fail
 				throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
 			}
+			sessionFactory.getStatistics().setStatisticsEnabled(true);
 			
 		}
 	}
@@ -151,6 +155,14 @@ public class SmartHibernateManager {
 		if (session == null || !session.isOpen() ){
 			session = sessionFactory.openSession();
 			sessionMapsThreadLocal.set(session);
+			allSessions.add(session);
+			final Session tmp = session;
+			session.addEventListeners(new BaseSessionEventListener() {
+				@Override
+				public void end() {
+					allSessions.remove(tmp)	;
+				}	
+			});
 		}
 		return session;
 	}
@@ -173,6 +185,14 @@ public class SmartHibernateManager {
 		if (session == null || !session.isOpen() ){
 			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
 			sessionMapsThreadLocal.set(session);
+			allSessions.add(session);
+			final Session tmp = session;
+			session.addEventListeners(new BaseSessionEventListener() {
+				@Override
+				public void end() {
+					allSessions.remove(tmp)	;
+				}	
+			});
 		}
 		
 		return session;

@@ -82,15 +82,15 @@
             commandId="org.wcs.smart.connect.configuration.show">
       </handler>
       <handler
-            class="org.wcs.smart.connect.ui.server.ExportCaHandler$ExportCaHandlerrWrapper"
+            class="org.wcs.smart.connect.ui.server.UploadCaHandler$ExportCaHandlerrWrapper"
             commandId="org.wcs.smart.connect.server.exportca">
       </handler>
       <handler
-            class="org.wcs.smart.connect.ui.replication.UploadChangeLogHandler$UploadChangeLogHandlerWrapper"
+            class="org.wcs.smart.connect.ui.server.UploadChangeLogHandler$UploadChangeLogHandlerWrapper"
             commandId="org.wcs.smart.connect.server.changelog.up">
       </handler>
       <handler
-            class="org.wcs.smart.connect.ui.replication.DownloadChangeLogHandler$DownloadChangeLogHandlerWrapper"
+            class="org.wcs.smart.connect.ui.server.DownloadChangeLogHandler$DownloadChangeLogHandlerWrapper"
             commandId="org.wcs.smart.connect.server.changelog.down">
       </handler>
    </extension>

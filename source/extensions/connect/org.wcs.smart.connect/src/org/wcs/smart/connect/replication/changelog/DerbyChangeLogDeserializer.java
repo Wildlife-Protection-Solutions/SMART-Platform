@@ -46,6 +46,15 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		super.processFile(session);
 	}
 	
+	public boolean shouldProcess(ChangeLogItem it){
+		if (ChangeLogTableManager.INSTANCE.constains(session, it)){
+			//we already have this item
+			return false;
+		}
+		//TODO: look for conflict; throw exception if conflict
+		
+		return true;
+	}
 	@Override
 	protected void processFileDelete(ChangeLogItem arg0, Connection arg1)
 			throws Exception {

@@ -129,7 +129,8 @@ public class Upgrader310To320 implements IDatabaseUpgrader {
 				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_cm_attribute_uuid_fk FOREIGN KEY (CM_ATTRIBUTE_UUID) REFERENCES smart.cm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
 				"ALTER TABLE smart.cm_attribute_tree_node ADD CONSTRAINT cm_attribute_tree_node_dm_attribute_uuid_fk FOREIGN KEY (DM_ATTRIBUTE_UUID) REFERENCES smart.dm_attribute (UUID) ON UPDATE RESTRICT ON DELETE CASCADE", //$NON-NLS-1$
 		
-				//fix constraint cascade options; we have to use the restrict for deleting data model elements; but this must be done after waypoint ca cascade delete foreign key constraint 
+				//fix constraint cascade options; we have to use the restrict for deleting data model elements; but this must be done after 
+				//waypoint ca cascade delete foreign key constraint 
 				"ALTER TABLE smart.wp_observation_attributes DROP CONSTRAINT observation_attribute_att_uuid_fk", //$NON-NLS-1$
 				"ALTER TABLE smart.wp_observation_attributes DROP CONSTRAINT observation_attribute_att_list_uuid_fk", //$NON-NLS-1$
 				"ALTER TABLE smart.wp_observation_attributes DROP CONSTRAINT observation_attribute_att_tree_uuid_fk", //$NON-NLS-1$

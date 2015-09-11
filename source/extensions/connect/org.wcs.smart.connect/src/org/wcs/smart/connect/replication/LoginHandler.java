@@ -36,7 +36,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
-import org.wcs.smart.connect.replication.changelog.UploadSyncEngine;
+import org.wcs.smart.connect.replication.changelog.UploadChangeLogEngine;
 import org.wcs.smart.connect.server.UploadCaJob;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -180,7 +180,7 @@ public class LoginHandler implements ILoginHandler {
 					//continue job waiting for
 					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could finish.  The job will resume and you will be notified when complete.");
 					
-					UploadSyncEngine e = new UploadSyncEngine(connect);
+					UploadChangeLogEngine e = new UploadChangeLogEngine(connect);
 					e.syncUpload(new NullProgressMonitor());
 				}
 			}

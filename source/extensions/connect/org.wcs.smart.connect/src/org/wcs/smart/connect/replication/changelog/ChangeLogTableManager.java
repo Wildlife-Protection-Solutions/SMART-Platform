@@ -35,6 +35,16 @@ public enum ChangeLogTableManager {
 		query.executeUpdate();
 	}
 	
+	public boolean constains(Session s, ChangeLogItem item){
+		SQLQuery query = s.createSQLQuery("SELECT count(*) from " + CHANGE_LOG_TABLE + " WHERE uuid = ?");
+		query.setBinary(0, UuidUtils.uuidToByte(item.getUuid()));
+		
+		List<?> data = query.list();
+		if (data.size() != 1){ return false; }
+		if ( (Long)data.get(0)  > 0) return true;
+		return false;
+		
+	}
 	public void addItem(Session s, ChangeLogItem item){
 		StringBuilder sb = new StringBuilder();
 		sb.append("INSERT INTO ");
@@ -79,7 +89,7 @@ public enum ChangeLogTableManager {
 	 * 
 	 * @param s
 	 * @param ca
-	 * @param startRevision exclusive revision to start at (returns everything > revision)
+	 * @param startRevision exclusive revision to start at (returns everything > startRevision)
 	 * @return
 	 */
 	public List<ChangeLogItem> getAll(Session s, ConservationArea ca, long startRevision){
@@ -87,7 +97,7 @@ public enum ChangeLogTableManager {
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT a.uuid, a.revision, a.action, a.filename, a.tablename, ");
 		query.append("a.key1_fieldname, a.key1, a.key2_fieldname, a.key2_str, a.key2_uuid, a.ca_uuid "); 
-		query.append("FROM smart.connect_change_log a,"); 
+		query.append("FROM " + CHANGE_LOG_TABLE + " a,"); 
 		query.append("( SELECT max(revision) as maxrevision, ");
 		query.append("action, filename, tablename, key1_fieldname, key1,"); 
 		query.append("key2_fieldname, key2_str, key2_uuid  FROM ");
@@ -107,7 +117,7 @@ public enum ChangeLogTableManager {
 		query.append("and (a.key2_str = c.key2_str or (a.key2_str is null and c.key2_str is null)) ");
 		query.append("and c.maxrevision = a.revision ");
 		query.append("AND a.revision > :revision2 ORDER BY c.maxrevision ");
-		System.out.println(query.toString());
+//		System.out.println(query.toString());
 		
 		SQLQuery hquery = s.createSQLQuery(query.toString());
 		hquery.setBinary("ca1", UuidUtils.uuidToByte(ca.getUuid()));
