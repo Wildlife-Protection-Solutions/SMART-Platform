@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.util.UuidUtils;
@@ -108,7 +109,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	protected void processDataUpdate(ChangeLogItem item, HashMap<String, Object> data, Connection c) throws ClassNotFoundException, IOException, SQLException{
 		StringBuilder sb = new StringBuilder();
 		sb.append("UPDATE " + item.getTableName());
-		sb.append("SET ");
+		sb.append(" SET ");
 		
 		List<Object> params = new ArrayList<Object>();
 		for(Entry<String, Object> dataitem : data.entrySet()){
@@ -124,10 +125,22 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		if (item.getFieldName2() != null){
 			sb.append(" AND " + item.getFieldName2()  + " = ?");
 		}
+		System.out.println(sb.toString());
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		for (int i = 1; i <= params.size(); i ++){
-			ps.setObject(i, params.get(i-1));
+			if (params.get(i-1) instanceof UUID){
+				ps.setBytes(i,  UuidUtils.uuidToByte(((UUID)params.get(i-1))) );
+			}else{
+				ps.setObject(i, params.get(i-1));
+			}
 		}
+		ps.setObject(params.size() + 1, UuidUtils.uuidToByte(item.getKey1()));
+		if (item.getKey2() != null){
+			ps.setObject(params.size() + 2, UuidUtils.uuidToByte(item.getKey2()));
+		}else if (item.getKey2String() != null){
+			ps.setString(params.size() + 2, item.getKey2String());
+		}
+		
 		int cnt = ps.executeUpdate();
 		if (cnt != 1){
 			throw new SQLException("Invalid number of rows updated.");
@@ -158,7 +171,11 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		sb.append(")");
 		PreparedStatement ps = c.prepareStatement(sb.toString() );
 		for (int i = 1; i <= params.size(); i ++){
-			ps.setObject(i, params.get(i-1));
+			if (params.get(i-1) instanceof UUID){
+				ps.setBytes(i,  UuidUtils.uuidToByte(((UUID)params.get(i-1))) );
+			}else{
+				ps.setObject(i, params.get(i-1));
+			}
 		}
 		int cnt = ps.executeUpdate();
 		if (cnt != 1){

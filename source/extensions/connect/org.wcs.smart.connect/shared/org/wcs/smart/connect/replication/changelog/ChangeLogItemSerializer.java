@@ -34,7 +34,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
-import org.wcs.smart.util.UuidUtils;
+
 
 /**
  * Tool for serializing change log items and associated data.
@@ -42,10 +42,11 @@ import org.wcs.smart.util.UuidUtils;
  * @author Emily
  *
  */
-public class ChangeLogItemSerializer {
+public abstract class ChangeLogItemSerializer {
 
+	public abstract void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException;
 	
-	public static void serialize(ObjectOutputStream stream,
+	public void serialize(ObjectOutputStream stream,
 			ChangeLogItem item, Connection c) throws SQLException, IOException{
 		
 		if (item.getAction() == Action.FS_DELETE || 
@@ -81,10 +82,12 @@ public class ChangeLogItemSerializer {
 		}
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		UUID key1 = item.getKey1();
-		ps.setBytes(1, UuidUtils.uuidToByte(key1));
+//		ps.setBytes(1, UuidUtils.uuidToByte(key1));
+		prepareUuid(ps, 1, key1);
 		if (item.getKey2() != null){
 			UUID key2 = item.getKey2();
-			ps.setBytes(2, UuidUtils.uuidToByte(key2));
+//			ps.setBytes(2, UuidUtils.uuidToByte(key2));
+			prepareUuid(ps, 2, key2);
 		}else if (item.getKey2String() != null){
 			ps.setString(2, item.getKey2String());
 		}
