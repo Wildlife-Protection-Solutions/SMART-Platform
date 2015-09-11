@@ -34,7 +34,6 @@ import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.util.GeometryUtils;
 
 /**
  * Result set of patrol waypoint queries.

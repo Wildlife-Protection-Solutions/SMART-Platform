@@ -22,8 +22,8 @@
 package org.wcs.smart.connect.hibernate;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.Locale;
+import java.util.UUID;
 
 import javax.servlet.ServletContext;
 

@@ -16,6 +16,7 @@ DROP TABLE IF EXISTS connect.users;
 DROP TABLE IF EXISTS connect.user_roles;
 DROP TABLE IF EXISTS connect.upload_status;
 DROP TABLE IF EXISTS connect.upload_item;
+DROP TABLE IF EXISTS connect.work_item;
 DROP TABLE IF EXISTS connect.map_layers;
 
 DROP TABLE IF EXISTS connect.change_log;
@@ -34,10 +35,10 @@ CREATE TABLE connect.work_item
 	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
 
-ALTER TABLE connect.upload_item ADD CONSTRAINT status_chk 
+ALTER TABLE connect.work_item ADD CONSTRAINT status_chk 
 CHECK (status IN ('UPLOADING', 'PROCESSING', 'COMPLETE', 'ERROR'));
 
-ALTER TABLE connect.upload_item ADD CONSTRAINT type_chk 
+ALTER TABLE connect.work_item ADD CONSTRAINT type_chk 
 CHECK (type IN ('UP_CA', 'UP_SYNC', 'DOWN_UP', 'DOWN_SYNC'));
 
 	
@@ -172,7 +173,7 @@ CREATE TABLE connect.map_layers(
 
 
 /* Create Foreign Keys */
-ALTER TABLE connect.upload_item
+ALTER TABLE connect.work_item
 	ADD FOREIGN KEY (ca_uuid)
 	REFERENCES connect.ca_info (ca_uuid)
 	ON UPDATE RESTRICT
@@ -241,15 +242,15 @@ AFTER INSERT OR UPDATE OR DELETE ON connect.users
 
 
 /* Comments */
-COMMENT ON TABLE connect.upload_item IS 'A table for tracking uploads and supporting upload apis.';
-COMMENT ON COLUMN connect.upload_item.uuid IS 'A unique system generated identifier.';
-COMMENT ON COLUMN connect.upload_item.ca_uuid IS 'The unique Conservation Area identifier.';
-COMMENT ON COLUMN connect.upload_item.start_datetime IS 'The start time of the upload.';
-COMMENT ON COLUMN connect.upload_item.total_bytes IS 'Total number of bytes to upload.';
-COMMENT ON COLUMN connect.upload_item.local_filename IS 'Name of the file in the local filestore.';
-COMMENT ON COLUMN connect.upload_item.type IS 'File type.';
-COMMENT ON COLUMN connect.upload_item.status IS 'Status of upload and processing';
-COMMENT ON COLUMN connect.upload_item.message IS 'Error message or other info message asociated with upload.';
+COMMENT ON TABLE connect.work_item IS 'A table for tracking uploads and supporting upload apis.';
+COMMENT ON COLUMN connect.work_item.uuid IS 'A unique system generated identifier.';
+COMMENT ON COLUMN connect.work_item.ca_uuid IS 'The unique Conservation Area identifier.';
+COMMENT ON COLUMN connect.work_item.start_datetime IS 'The start time of the upload.';
+COMMENT ON COLUMN connect.work_item.total_bytes IS 'Total number of bytes to upload.';
+COMMENT ON COLUMN connect.work_item.local_filename IS 'Name of the file in the local filestore.';
+COMMENT ON COLUMN connect.work_item.type IS 'File type.';
+COMMENT ON COLUMN connect.work_item.status IS 'Status of upload and processing';
+COMMENT ON COLUMN connect.work_item.message IS 'Error message or other info message asociated with upload.';
 COMMENT ON TABLE connect.ca_info IS 'Contains server details for Conservation Areas.';
 COMMENT ON COLUMN connect.ca_info.ca_uuid IS 'The unique Conservation Area identifier.';
 COMMENT ON COLUMN connect.ca_info.version IS 'The version of the data for the conservation area.';

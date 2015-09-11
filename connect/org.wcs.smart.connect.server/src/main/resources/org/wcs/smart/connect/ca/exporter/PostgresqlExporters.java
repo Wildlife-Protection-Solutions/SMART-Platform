@@ -17,7 +17,6 @@ import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.SmartTable;
-import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.util.UuidUtils;

@@ -111,7 +111,7 @@ public class HibernateSessionFactoryListener implements ServletContextListener{
 		logger.info("Hibernate SessionFactory Configured successfully"); //$NON-NLS-1$
 		
 		//start executor for running background jobs
-		ExecutorService scheduler = Executors.newSingleThreadExecutor();
+		ExecutorService scheduler = Executors.newFixedThreadPool(4);
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, scheduler);
 	}
 

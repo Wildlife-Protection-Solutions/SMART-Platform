@@ -46,6 +46,7 @@ public class UploaderProcessor implements Runnable {
 		this.item = item;
 		this.factory = factory;
 	}
+	
 	@Override
 	public void run() {
 		session = factory.openSession();

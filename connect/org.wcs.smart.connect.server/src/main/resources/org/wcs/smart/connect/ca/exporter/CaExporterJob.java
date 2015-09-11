@@ -24,6 +24,7 @@ package org.wcs.smart.connect.ca.exporter;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +35,7 @@ import org.hibernate.SessionFactory;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.connect.ZipUtil;
-import org.wcs.smart.connect.api.ConservationAreas;
+import org.wcs.smart.connect.database.LockManager;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
@@ -71,55 +72,78 @@ public class CaExporterJob implements Runnable {
 	@Override
 	public void run() {
 		Session s = factory.openSession();
-		s.beginTransaction();
+		
 		try{
-			//TODO: lock database until this is done 
-			long revision = ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid());
-		
-			String filename = UuidUtils.uuidToString(info.getUuid())
-				 +"." + UuidUtils.uuidToString(info.getVersion()) 
-				 + "." + String.valueOf(revision)
-				 + ".zip";
-		
-			destFile = DataStoreManager.INSTANCE
-				.getRootDirectory().toPath()
-				.resolve(DataStoreManager.CA_EXPORT_LOCATION)
-				.resolve(filename);
-			if (!Files.exists(destFile.getParent())){
-				Files.createDirectories(destFile.getParent());
-			}
+			//lock database for conservation area
+			LockManager.INSTANCE.lockDatabase(s, item.getConservationAreaInfo().getUuid());
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Could not lock database to create conservation area download package. " + item.getUuid());
 			
-			item.setLocalFilename(DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(destFile).toString());
+			//set error status
+			s.beginTransaction();
+			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
+			item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage()));
+			s.getTransaction().commit();
 			
-			if (Files.exists(destFile)){
+			return;
+		}
+		
+		try{
+			s.beginTransaction();
+			try{
+				long revision = ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid());
+			
+				String filename = UuidUtils.uuidToString(info.getUuid())
+					 +"." + UuidUtils.uuidToString(info.getVersion()) 
+					 + "." + String.valueOf(revision)
+					 + ".zip";
+			
+				destFile = DataStoreManager.INSTANCE
+					.getRootDirectory().toPath()
+					.resolve(DataStoreManager.CA_EXPORT_LOCATION)
+					.resolve(filename);
+				if (!Files.exists(destFile.getParent())){
+					Files.createDirectories(destFile.getParent());
+				}
 				
-				item.setStatus(Status.COMPLETE);
-				item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
-				s.saveOrUpdate(item);
-				s.getTransaction().commit();
-			}else{
-				try{
-					export(s, info.getUuid(), destFile);
+				item.setLocalFilename(DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(destFile).toString());
+				
+				if (Files.exists(destFile)){
+					
 					item.setStatus(Status.COMPLETE);
 					item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
 					s.saveOrUpdate(item);
 					s.getTransaction().commit();
-				}catch (Exception ex){
-					logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
-					
-					//open a new transaction to update db state
-					s.getTransaction().rollback();
-					s.beginTransaction();
-					s.saveOrUpdate(item);
-					item.setStatus(Status.ERROR);
-					item.setMessage("{\"error\": " + "\"Error packaging conservation area for export. " + ex.getMessage() + "\"}");
-					s.getTransaction().commit();
+				}else{
+					try{
+						export(s, info.getUuid(), destFile);
+						item.setStatus(Status.COMPLETE);
+						item.setMessage("{\"file_url\": " + "\"" + fileurl + "\"}");
+						s.saveOrUpdate(item);
+						s.getTransaction().commit();
+					}catch (Exception ex){
+						logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
+						
+						//open a new transaction to update db state
+						s.getTransaction().rollback();
+						s.beginTransaction();
+						s.saveOrUpdate(item);
+						item.setStatus(Status.ERROR);
+						item.setMessage("{\"error\": " + "\"Error packaging conservation area for export. " + ex.getMessage() + "\"}");
+						s.getTransaction().commit();
+					}
 				}
+			}catch (Exception ex){
+				logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
+			}finally{
+				if (s.isOpen())	s.close();
 			}
-		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
 		}finally{
-			if (s.isOpen())	s.close();
+			try{
+				LockManager.INSTANCE.releaseDatabase(s, item.getConservationAreaInfo().getUuid());
+			}catch (Exception ex){
+				logger.log(Level.SEVERE, "Could not release database lock after creating conservation area download package. " + item.getUuid());
+			}
 		}
 	}
 	

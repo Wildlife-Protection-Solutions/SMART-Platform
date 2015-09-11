@@ -55,9 +55,9 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.hibernate.HibernateSessionFactoryListener;
 import org.wcs.smart.connect.i18n.Messages;
+import org.wcs.smart.connect.model.UploadStatus;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
-import org.wcs.smart.connect.model.UploadStatus;
 import org.wcs.smart.connect.uploader.UploaderProcessor;
 
 

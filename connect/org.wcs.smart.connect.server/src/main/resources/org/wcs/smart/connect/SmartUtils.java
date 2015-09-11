@@ -24,18 +24,9 @@ package org.wcs.smart.connect;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Properties;
-import java.util.UUID;
 
 import javax.servlet.ServletRequest;
 import javax.ws.rs.core.HttpHeaders;
-
-import org.hibernate.Session;
-import org.hibernate.engine.spi.SessionImplementor;
-import org.hibernate.id.UUIDGenerationStrategy;
-import org.hibernate.id.UUIDGenerator;
-import org.hibernate.id.uuid.StandardRandomStrategy;
-import org.hibernate.type.UUIDBinaryType;
 
 /**
  * A collection of utility functions
