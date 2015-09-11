@@ -82,11 +82,10 @@ public abstract class ChangeLogItemSerializer {
 		}
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		UUID key1 = item.getKey1();
-//		ps.setBytes(1, UuidUtils.uuidToByte(key1));
 		prepareUuid(ps, 1, key1);
+		
 		if (item.getKey2() != null){
 			UUID key2 = item.getKey2();
-//			ps.setBytes(2, UuidUtils.uuidToByte(key2));
 			prepareUuid(ps, 2, key2);
 		}else if (item.getKey2String() != null){
 			ps.setString(2, item.getKey2String());
