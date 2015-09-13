@@ -199,6 +199,11 @@ public class MappingValidator {
 				categoryAttributes.add(attr);
 			}
 		}
+		
+		if (categoryAttributes.isEmpty()) {
+			errors.add("No attributes mapped to category are defined. You should have at least one attribute that indicates the category from datamodel which will be used to record each observation.");
+			return errors;
+		}
 
 		try {
 			Connection c = ConnectionUtil.getConnection();
