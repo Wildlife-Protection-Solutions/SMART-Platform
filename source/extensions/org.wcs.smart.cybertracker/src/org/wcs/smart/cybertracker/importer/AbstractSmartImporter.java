@@ -68,7 +68,7 @@ public abstract class AbstractSmartImporter {
 	
 	public static final int WARN_WP_TIME_FRAME = 10; //in minutes
 	
-	private DateFormat fnDateFormat = new SimpleDateFormat("yyyy_MM_dd"); //$NON-NLS-1$
+	private DateFormat filenameDateFormat = new SimpleDateFormat("yyyy_MM_dd"); //$NON-NLS-1$
 
 	private List<String> warnings = new ArrayList<String>();
 
@@ -77,8 +77,8 @@ public abstract class AbstractSmartImporter {
 		return formatter;
 	}
 	
-	protected DateFormat getFDateFormat() {
-		return fnDateFormat;
+	protected DateFormat getFilenameDateFormat() {
+		return filenameDateFormat;
 	}
 
 	public static Date combine(Date date, Time time) {

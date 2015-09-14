@@ -202,7 +202,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		
 		Waypoint wp = findOrAddWaypoint(legDay, s, eMap);
 		addObservations(wp, s, eMap, session);
-		String prefix = getFDateFormat().format(legDay.getDate()) + "_Leg_"+leg.getId(); //$NON-NLS-1$
+		String prefix = getFilenameDateFormat().format(legDay.getDate()) + "_Leg_"+leg.getId(); //$NON-NLS-1$
 		addAttachments(wp, s, eMap, prefix);
 	}
 
