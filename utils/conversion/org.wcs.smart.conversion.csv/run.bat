@@ -1,1 +1,1 @@
-javaw -cp %CP1%;%CP2% org.wcs.smart.conversion.csv.Csv2SmartMatcher
+javaw -cp %CP1%;%CP2% org.wcs.smart.conversion.csv.Csv2SmartMatcher > csv2smart.log
