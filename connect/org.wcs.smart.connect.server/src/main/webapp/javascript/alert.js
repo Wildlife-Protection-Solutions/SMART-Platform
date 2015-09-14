@@ -68,6 +68,7 @@ window.onload = function(){
 	var osm = new L.TileLayer(osmUrl, {minZoom: 1, maxZoom: 18, attribution: osmAttrib});		
 	
 	var baseMaps = {
+			"Basemap Off": L.tileLayer(''),
 			"OSM basemap": osm
 	};
 	
