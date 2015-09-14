@@ -101,7 +101,7 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 		});
 		
 		extraAttrCmp = new Ct2AttributeEAComposite(group, lookup);
-		valueMapCmp = new ValueMapComposite(group, lookup);
+		valueMapCmp = new ValueMapComposite(group, lookup, connection);
 		
 	}
 
