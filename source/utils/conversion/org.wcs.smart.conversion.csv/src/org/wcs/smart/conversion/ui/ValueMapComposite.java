@@ -25,6 +25,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -61,9 +66,12 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 	
 	private Ct2AttributeValueLabelProvider valLabelProvider;
 
-	public ValueMapComposite(Composite parent, DataModelLookup lookup) {
+	private Connection connection;
+
+	public ValueMapComposite(Composite parent, DataModelLookup lookup, Connection c) {
 		super(parent, SWT.NONE);
 		this.lookup = lookup;
+		this.connection = c;
 		
 		GridLayout gd = new GridLayout(2, false);
 		gd.marginBottom = 0;
@@ -87,7 +95,10 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		tgridData.heightHint = 150;
 		viewer.getControl().setLayoutData(tgridData);
 
-		Button btnCsvExport = new Button(this, SWT.PUSH);
+		Composite btnCmp = new Composite(this, SWT.NONE);
+		btnCmp.setLayout(new GridLayout(1, false));
+		btnCmp.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
+		Button btnCsvExport = new Button(btnCmp, SWT.PUSH);
 		btnCsvExport.setText("Csv Export");
 		btnCsvExport.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -96,6 +107,14 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 			}
 		});
 		
+		Button btnReload = new Button(btnCmp, SWT.PUSH);
+		btnReload.setText("Reload Values");
+		btnReload.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				reloadValues();
+			}
+		});
 	}
 
 	protected void exportCsv() {
@@ -139,8 +158,32 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 				ex.printStackTrace();
 			}
 		}
-		
-		
+	}
+
+	protected void reloadValues() {
+		List<MappedAttributeValue> valuesBackup = new ArrayList<MappedAttributeValue>(attribute.getMappedAttributeValue());
+		attribute.getMappedAttributeValue().clear();
+		try {
+			ResultSet attrRs = connection.createStatement().executeQuery("select id, n from CSV_TO_SMART.ATTRIBUTES where n = '" + attribute.getI() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			if (attrRs.next()) {
+				String valuesSql = "select distinct a"+attrRs.getString(1)+" from CSV_TO_SMART.CSV"; //$NON-NLS-1$ //$NON-NLS-2$
+				ResultSet valRs = connection.createStatement().executeQuery(valuesSql);
+				while (valRs.next()) {
+					MappedAttributeValue ctAttrValue = new MappedAttributeValue();
+					ctAttrValue.setI(valRs.getString(1));
+//					ctAttrValue.setN(s);
+					ctAttrValue.setMapTo("");
+					attribute.getMappedAttributeValue().add(ctAttrValue);
+				}
+				MessageDialog.openInformation(getShell(), "Reload values", "Values sucessfully reloaded.");
+			}
+		} catch (SQLException e) {
+			attribute.getMappedAttributeValue().clear();
+			attribute.getMappedAttributeValue().addAll(valuesBackup);
+			e.printStackTrace();
+			MessageDialog.openError(getShell(), "Reload values", "Failed to reloaded attribute values. See console or log for details.");
+		}
+		setInput(attribute);
 	}
 
 	public void setInput(MappedAttribute attribute) {
