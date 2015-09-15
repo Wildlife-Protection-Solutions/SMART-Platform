@@ -338,7 +338,15 @@ public class CyberTrackerConfExporter {
 		
 		//adding nodes with final "save" button for observation or observation group
 		String defaultAttrValues = recordDefaultValues(splitResult.getInvisibleList());
-		nodeList.addAll(createSaveWaypointNodes(nextId, startId, defaultAttrValues));
+		if (cmNode.isCollectMultipleObservations()) {
+			//this is observation group and we show simple "save" screen as it will always be added as new waypoint
+			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, "End observation group", "Press \"Save\" to confirm the end of entering data for this observation group", !cmNode.isUseSingleGpsPoint());
+			addAttributesDefaultValues(saveGrpNode, defaultAttrValues);
+			nodeList.add(saveGrpNode);
+		} else {
+			//this is a regular single observation -> show "save as new" / "add to last" options
+			nodeList.addAll(createSaveWaypointNodes(nextId, defaultAttrValues));
+		}
 		return nodeList;
 	}
 
@@ -872,7 +880,8 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private List<Node> createSaveWaypointNodes(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues) {
+	private List<Node> createSaveWaypointNodes_old(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues) {
+		//TODO:
 		List<Node> nodeList = new ArrayList<Node>();
 		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
 //		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
@@ -901,12 +910,41 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
+	private List<Node> createSaveWaypointNodes(CyberTrackerId id, String defaultAttrValues) {
+		List<Node> nodeList = new ArrayList<Node>();
+		
+		CyberTrackerId saveAsNewId = new CyberTrackerId();
+		Node saveAsNewNode = ctUtil.createSaveNode(saveAsNewId, rootId, Messages.CyberTrackerExporter_Waypoint_SaveAsNew, "Save as new taking new GPS reading", true);
+		
+		CyberTrackerId addToLastId = new CyberTrackerId();
+		Node addToLastNode = ctUtil.createSaveNode(addToLastId, rootId, Messages.CyberTrackerExporter_Waypoint_AddToLast, "Add to last without GPS reading", false);
+
+		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
+		ids.add(new CyberTrackerIdMap(saveAsNewId, newWpElementsIds.get(0)));
+		ids.add(new CyberTrackerIdMap(addToLastId, newWpElementsIds.get(1)));
+
+		Node node = ctUtil.createRadioNode(id.getNodeId(),  Messages.CyberTrackerExporter_Waypoint_ScreenTitle, ids, newWpResultId.getItemId(), true);
+		addAttributesDefaultValues(node, defaultAttrValues);
+		
+		nodeList.add(node);
+		nodeList.add(saveAsNewNode);
+		nodeList.add(addToLastNode);
+		
+		return nodeList;
+	}	
+
+	/**
+	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
+	 * 
+	 * @param id
+	 * @param startId
+	 */
 	private BuildNodesResult createEndGroupNodes(CyberTrackerId id, CyberTrackerId loopBackId, boolean takeGPsReading) {
 		List<Node> nodeList = new ArrayList<Node>(2);
 		CyberTrackerId nextId = new CyberTrackerId();
 		CyberTrackerId loopSaveId = new CyberTrackerId();
 		
-		Node loopSaveNode = ctUtil.createSaveNode(loopSaveId, loopBackId, "Save Group Observation", "Confirm saving group observation and preceed to record observations in the same group.", takeGPsReading);
+		Node loopSaveNode = ctUtil.createSaveNode(loopSaveId, loopBackId, "Save Group Observation", "Press \"Save\" to confirm saving current observation and proceed to record observations for this group.", takeGPsReading);
 
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 		ids.add(new CyberTrackerIdMap(loopSaveId, wpEndGroupElementsIds.get(0))); //"Make Another Observation" navigate loop start screen
@@ -961,6 +999,13 @@ public class CyberTrackerConfExporter {
 		return photoResultIds.get(index);
 	}
 
+	private void addAttributesDefaultValues(Node node, String defaultAttrValues) {
+		if (defaultAttrValues != null && !defaultAttrValues.isEmpty()) {
+			Control defaultAttr = screensFactory.createAttrubuteControl14(defaultAttrValuesResultId.getItemId(), false, defaultAttrValues);
+			ScreensObjectFactory.addControlToNode(node, defaultAttr);
+		}
+	}
+	
 	private AttributeSplitResult splitAttributes(CmNode cmNode) {
 		List<CmAttribute> fullList = cmNode.getCmAttributes();
 		List<CmAttribute> invisibleList = new ArrayList<CmAttribute>();
