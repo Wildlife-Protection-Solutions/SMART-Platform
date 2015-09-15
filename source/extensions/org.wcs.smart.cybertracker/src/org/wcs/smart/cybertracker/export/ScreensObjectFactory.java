@@ -342,7 +342,7 @@ public class ScreensObjectFactory {
         <Name>???</Name>
         <DataClass>TctScreen</DataClass>
         <Data>
-            <NextId>14</NextId>
+            <NextId>15</NextId>
             <TemplateId>{8A40BEBA-3329-41EE-B03E-E41D85EB7DCE}</TemplateId>
             <Name>???</Name>
             <Controls>
@@ -358,7 +358,7 @@ public class ScreensObjectFactory {
 		node.setDataClass("TctScreen"); //$NON-NLS-1$
 
 		Node.Data data = new Node.Data();
-		data.setNextId(14);
+		data.setNextId(15);
 		data.setTemplateId("{8A40BEBA-3329-41EE-B03E-E41D85EB7DCE}"); //$NON-NLS-1$
 		data.setName(name);
 		Controls controls = new Controls();
