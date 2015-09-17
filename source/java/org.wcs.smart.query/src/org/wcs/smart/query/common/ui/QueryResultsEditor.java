@@ -22,7 +22,6 @@
 package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
-import java.util.Collection;
 import java.util.Locale;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -51,7 +50,6 @@ import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
-import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.ObservationQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.WaypointQuery;

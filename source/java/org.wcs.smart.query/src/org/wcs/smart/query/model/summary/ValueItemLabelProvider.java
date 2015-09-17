@@ -35,7 +35,7 @@ public class ValueItemLabelProvider {
 		}else if (item instanceof CombinedValueItem){
 			return getFullName((CombinedValueItem)item, session);
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public String getFullName(IValueItem item, Session session){
@@ -46,7 +46,7 @@ public class ValueItemLabelProvider {
 		}else if (item instanceof CombinedValueItem){
 			return getFullName((CombinedValueItem)item, session);
 		}
-		return "";		
+		return "";		 //$NON-NLS-1$
 	}
 	
 	public String getLabel(ValueType type){
@@ -55,7 +55,7 @@ public class ValueItemLabelProvider {
 		}else if (type == ValueType.WAYPOINT){
 			return Messages.CategoryValueItem_CountIncidentLabel;
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IValueItem#getName(org.hibernate.Session)

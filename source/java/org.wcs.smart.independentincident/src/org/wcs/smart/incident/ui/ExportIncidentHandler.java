@@ -42,7 +42,6 @@ import org.wcs.smart.incident.IncidentPlugIn;
 import org.wcs.smart.incident.internal.Messages;
 import org.wcs.smart.incident.xml.IncidentExporter;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**

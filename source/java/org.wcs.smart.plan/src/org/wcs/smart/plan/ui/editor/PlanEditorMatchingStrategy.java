@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.plan.ui.editor;
 
-import java.util.Arrays;
 import java.util.UUID;
 
 import org.eclipse.ui.IEditorInput;

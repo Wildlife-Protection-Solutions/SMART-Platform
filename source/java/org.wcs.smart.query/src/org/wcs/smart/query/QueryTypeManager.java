@@ -203,7 +203,7 @@ public enum QueryTypeManager {
 							isValid = true;
 						}
 					}
-					executors.put(qType, (Class<? extends IQueryEngine>)e.createExecutableExtension("executor").getClass());
+					executors.put(qType, (Class<? extends IQueryEngine>)e.createExecutableExtension("executor").getClass()); //$NON-NLS-1$
 					if (isValid){
 						aTypes.add(qType);
 					

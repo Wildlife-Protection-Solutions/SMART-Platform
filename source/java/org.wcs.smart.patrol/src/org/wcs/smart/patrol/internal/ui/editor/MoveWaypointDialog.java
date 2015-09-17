@@ -51,7 +51,6 @@ import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * Dialog to select a patrol leg day.

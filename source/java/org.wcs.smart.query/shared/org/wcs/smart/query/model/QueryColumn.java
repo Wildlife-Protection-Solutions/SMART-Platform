@@ -21,11 +21,6 @@
  */
 package org.wcs.smart.query.model;
 
-import java.text.DateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-
 import org.wcs.smart.query.common.engine.IResultItem;
 
 

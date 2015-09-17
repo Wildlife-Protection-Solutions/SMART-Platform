@@ -23,7 +23,6 @@ package org.wcs.smart.observation.model;
 
 import java.io.File;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
@@ -34,7 +33,6 @@ import javax.persistence.Transient;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.util.UuidUtils;
 

@@ -35,7 +35,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.part.MultiPageEditorPart;
 import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;

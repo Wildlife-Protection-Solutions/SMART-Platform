@@ -194,6 +194,8 @@ public class Messages extends NLS {
 	public static String PatrolDayEditor_LegSectionNamePrefix;
 	public static String PatrolDayEditorInput_DayEditor_Tooltip;
 	public static String PatrolDayEditorInput_DayEditorName_Prefix;
+	public static String PatrolEditor_1;
+	public static String PatrolEditor_AttachmentError;
 	public static String PatrolEditor_DeleteWaypointsError;
 	public static String PatrolEditor_EditError_InsufficientPrivledges;
 	public static String PatrolEditor_EditError_PatrolToOld;
@@ -602,6 +604,7 @@ public class Messages extends NLS {
 	public static String TransportTypeWizardPage_PageMessage;
 	public static String TransportTypeWizardPage_Title;
 	public static String XmlExtraDataContributionFactory_ErrorParsingExtraData;
+	public static String XmlToPatrolConverter_attachmentError;
 	public static String XmlToPatrolConverter_DayOutsideLegRange;
 	public static String XmlToPatrolConverter_DuplicateAttributesError;
 	public static String XmlToPatrolConverter_Error_DuplicateAttributes;

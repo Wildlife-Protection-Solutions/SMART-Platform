@@ -26,7 +26,6 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQuery;

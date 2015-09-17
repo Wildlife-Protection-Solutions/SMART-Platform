@@ -23,7 +23,6 @@ package org.wcs.smart.reporttable.patrol;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;

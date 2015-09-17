@@ -60,7 +60,7 @@ public class MapToolComposite {
 	public static final String UDIG_ZOOM_IN_ID = "org.locationtech.udig.tool.default.ZoomIn"; //$NON-NLS-1$
 	public static final String UDIG_ZOOM_OUT_ID = "org.locationtech.udig.tool.default.ZoomOut"; //$NON-NLS-1$
 	
-	private String tools[] = new String[]{AddLayerTool.ID,  //$NON-NLS-1$
+	private String tools[] = new String[]{AddLayerTool.ID, 
 			SetBasemapTool.ID, 
 			UDIG_ZOOM_EXTENT_ID,
 			UDIG_PAN_ID,

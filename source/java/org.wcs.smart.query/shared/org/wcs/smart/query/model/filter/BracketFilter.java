@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.model.filter;
 
-import org.hibernate.Session;
 
 
 /**

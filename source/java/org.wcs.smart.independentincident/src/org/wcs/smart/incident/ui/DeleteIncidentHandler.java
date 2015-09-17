@@ -39,7 +39,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.incident.IncidentPlugIn;
@@ -100,7 +99,7 @@ public class DeleteIncidentHandler{
 						FileUtils.forceDelete(f);
 					}catch(Exception ex){
 						IncidentPlugIn.displayLog(
-								MessageFormat.format("Could not delete incident attachment folder: {0}.", f.getAbsolutePath()), ex);
+								MessageFormat.format(Messages.DeleteIncidentHandler_DeleteError, f.getAbsolutePath()), ex);
 					}
 				}
 			}

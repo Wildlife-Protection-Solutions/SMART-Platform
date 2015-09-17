@@ -24,7 +24,6 @@ package org.wcs.smart.hibernate;
 import java.io.File;
 import java.util.List;
 
-import org.geotools.referencing.CRS;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -234,22 +233,6 @@ public class SmartDB {
 			return null;
 		}
 		return caConfig.getLanguage();
-//		if (currentLanguage == null){
-//			Locale l = Locale.getDefault();
-//			try{
-//				l = SmartUtils.stringToLocale(Platform.getNL());
-//			}catch (Exception ex){
-//				//eatme
-//			}
-//			currentLanguage = HibernateManager.findLanguage(l, getCurrentConservationArea());
-//			if (currentLanguage == null){
-//				Language temp = new Language();
-//				temp.setUuid(null);
-//				currentLanguage = temp;
-//			}
-//		}
-//		return currentLanguage;
-		
 	}
 	
 }

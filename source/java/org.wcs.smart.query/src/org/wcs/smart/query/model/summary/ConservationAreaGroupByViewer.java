@@ -29,7 +29,6 @@ import java.util.List;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;

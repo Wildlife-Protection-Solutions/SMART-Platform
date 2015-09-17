@@ -66,9 +66,9 @@ public class SmartLayerStyle extends StyleContent {
 	@Override
 	public Object load(IMemento memento) {
 		try{
-			String uuid = memento.getString("uuid");
+			String uuid = memento.getString("uuid"); //$NON-NLS-1$
 			if (uuid == null || uuid.length() != 32) return null;
-			return UuidUtils.stringToUuid(uuid); //$NON-NLS-1$
+			return UuidUtils.stringToUuid(uuid);
 		}catch (Exception ex){
 			SmartPlugIn.log(ex.getMessage(), ex);
 		}

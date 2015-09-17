@@ -25,7 +25,6 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.gce.arcgrid.ArcGridWriter;
 import org.geotools.gce.geotiff.GeoTiffFormat;

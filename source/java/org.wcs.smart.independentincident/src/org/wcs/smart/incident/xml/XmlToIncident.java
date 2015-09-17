@@ -178,7 +178,7 @@ public class XmlToIncident {
 						try{
 							att.setObservation(ob);
 						}catch (Exception ex){
-							warnings.add(MessageFormat.format("Could not configure attachment {0}. {1}", filename, ex.getMessage()));
+							warnings.add(MessageFormat.format(Messages.XmlToIncident_CouldNotConfigureAttachment, filename, ex.getMessage()));
 						}
 					}
 				}

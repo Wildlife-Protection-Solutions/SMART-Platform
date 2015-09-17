@@ -97,7 +97,7 @@ public enum Operator {
 	/**
 	 * Brackets items 
 	 */
-	BRACKETS("()"); //$NON-NLS-1$ //$NON-NLS-2$
+	BRACKETS("()"); //$NON-NLS-1$ 
 	/**
 	 * Valid numeric operators
 	 */

@@ -31,6 +31,7 @@ import java.util.Locale;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.patrol.model.Track;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.model.NumericPlanTarget.Operator;
 import org.wcs.smart.plan.model.NumericPlanTarget.TargetType;
 import org.wcs.smart.plan.model.PlanTargetStatus.Status;

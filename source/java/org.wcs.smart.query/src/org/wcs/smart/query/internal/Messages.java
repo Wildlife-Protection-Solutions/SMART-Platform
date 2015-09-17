@@ -402,6 +402,7 @@ public class Messages extends NLS {
 	public static String QueryEditorTableContent_QueryLabel;
 	public static String QueryEditorTableContent_QueryPropertiesLable;
 	public static String QueryEditorTableContent_RunQueryLink;
+	public static String QueryExecutor_QueryEngineNotFound;
 	public static String QueryLazyResultsContentProvider_Loading;
 	public static String QueryLazyResultsContentProvider_LoadJob_Title;
 	public static String QueryMapPageEditor_AddLayerJobName;

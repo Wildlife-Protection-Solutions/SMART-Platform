@@ -27,12 +27,10 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
-import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.internal.Messages;

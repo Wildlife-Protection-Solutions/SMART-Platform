@@ -23,7 +23,6 @@ package org.wcs.smart.query.common.ui;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;

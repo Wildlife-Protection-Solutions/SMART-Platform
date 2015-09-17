@@ -84,7 +84,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
-	private static final UUID DEFAULT_BASEMAP = UuidUtils.stringToUuid("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"); 
+	private static final UUID DEFAULT_BASEMAP = UuidUtils.stringToUuid("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");  //$NON-NLS-1$
 	
 	private static final String ERROR_DIALOG_TITLE = Messages.SmartLayersPage_ErrorDialog_Title;
 	public static final String PAGE_KEY = "MapLayers"; //$NON-NLS-1$

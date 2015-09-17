@@ -24,13 +24,13 @@ package org.wcs.smart.hibernate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
 import org.hibernate.BaseSessionEventListener;
 import org.hibernate.Interceptor;
 import org.hibernate.Session;
-import org.hibernate.SessionEventListener;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
@@ -47,6 +47,18 @@ import org.hibernate.service.ServiceRegistryBuilder;
  * @since 1.0.0
  */
 public class SmartHibernateManager {
+
+	//TODO: make these configurable
+	/*
+	 * Amount of time to wait between checking if session
+	 * has completed in millisecons
+	 */
+	private static final long SESSION_CLOSE_WAIT = 1000;
+	/*
+	 * Number of tries before forcing close of sessions 
+	 */
+	private static final long SESSION_WAIT_COUNT = 10;
+	
 	
 	protected static SessionFactory sessionFactory = null;
 
@@ -57,11 +69,17 @@ public class SmartHibernateManager {
 	private static String databaseLocation = ""; //$NON-NLS-1$
 	
 	private static final ThreadLocal<Session> sessionMapsThreadLocal = new ThreadLocal<Session>();
-	protected static final List<Session> allSessions = new ArrayList<Session>();
+
+	/*
+	 * collection of all sessions opened 
+	 */
+	private static final List<Session> allSessions = Collections.synchronizedList(new ArrayList<Session>());
 	
-	//TODO: perhaps this can be replaced with
-	//hibernate.current_session_context_class=thread
-	//hibernate.transaction.factory_class=JDBCTransactionFactory
+	/*
+	 * Lock for database locking.  This is necessary
+	 * when applying changes or packaging changes.
+	 */
+	private static Semaphore thisLock = new Semaphore(1);
 	
 	/**
 	 * Sets the database connection parameters.
@@ -143,28 +161,56 @@ public class SmartHibernateManager {
 	}
 	
 	/**
+	 * Locks the database by waiting for active sessions
+	 * to complete or closing them automatically and preventing
+	 * any other sessions from being granted.  MUST call unlock 
+	 * database when complete.
+	 * @return
+	 */
+	public static Session lockDatabase() throws Exception{
+		//acquire lock
+		thisLock.acquire();
+		
+		//finish or close all sessions
+		int cnt = 0;
+		while(allSessions.size() > 0 && cnt < SESSION_WAIT_COUNT){
+			//wait for thread to be closed
+			try {
+				Thread.sleep( SESSION_CLOSE_WAIT );
+			} catch (InterruptedException e) {}
+			cnt++;
+		}
+		if (allSessions.size() > 0){
+			//TODO: warn users or log???
+			System.out.println("SESSIONS NOT CLOSED - FORCING CLOSE");
+			synchronized (allSessions) {
+				for(Session s : allSessions){
+					s.close();
+				}
+			}
+		}
+		
+		//ensure all sessions are closed
+		SmartHibernateManager.endSessionFactory();
+		
+		//open new session
+		return SmartHibernateManager.openSession();
+	}
+	
+	/**
+	 * Unlocks the database allowing other 
+	 * sessions to be granted.
+	 */
+	public static void unlockDatabase(){
+		thisLock.release();
+	}
+	
+	/**
 	 * Users are required to close the session when they are done with it.
 	 * @return
 	 */
 	protected synchronized static Session openSession(){
-		
-		if (sessionFactory == null){
-			createSessionFactory();
-		}
-		Session session = (Session) sessionMapsThreadLocal.get();
-		if (session == null || !session.isOpen() ){
-			session = sessionFactory.openSession();
-			sessionMapsThreadLocal.set(session);
-			allSessions.add(session);
-			final Session tmp = session;
-			session.addEventListeners(new BaseSessionEventListener() {
-				@Override
-				public void end() {
-					allSessions.remove(tmp)	;
-				}	
-			});
-		}
-		return session;
+		return openSession(null);
 	}
 	
 	/**
@@ -177,17 +223,34 @@ public class SmartHibernateManager {
 	 * @return
 	 */
 	protected synchronized static Session openSession(Interceptor interceptor){
+		//ensure the database is not locked then acquire session
+		try {
+			thisLock.acquire();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		thisLock.release();
+				
 		if (sessionFactory == null){
 			createSessionFactory();
 		}
 		Session session = (Session) sessionMapsThreadLocal.get();
 		
 		if (session == null || !session.isOpen() ){
-			session = sessionFactory.withOptions().interceptor(interceptor).openSession();
+			if (interceptor == null){
+				session = sessionFactory.openSession();
+			}else{
+				session = sessionFactory.withOptions().interceptor(interceptor).openSession();
+			}
+			//add to thread
 			sessionMapsThreadLocal.set(session);
+			
+			//add to session collection with listener to remove when closed
 			allSessions.add(session);
 			final Session tmp = session;
 			session.addEventListeners(new BaseSessionEventListener() {
+				private static final long serialVersionUID = 1L;
 				@Override
 				public void end() {
 					allSessions.remove(tmp)	;

@@ -29,7 +29,6 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.internal.Messages;
-import org.wcs.smart.query.model.filter.IGroupByVisitor;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.ListItem;
 import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
