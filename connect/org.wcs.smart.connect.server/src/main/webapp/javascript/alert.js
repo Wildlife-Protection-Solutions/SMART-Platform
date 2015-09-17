@@ -1,6 +1,6 @@
 var ALERT_URL = "../api/connectalert/";
 var USER_URL = "../api/connectuser/";
-var interval = 30000; //# of seconds between map refresh on the alert layer
+var interval = 8000; //# of seconds between map refresh on the alert layer
 
 
 window.onload = function(){
@@ -245,6 +245,8 @@ function settab(tab){
 	remove_all_tab_classes();
 	switch(tab){
 		case 2:
+			document.getElementById("filter-controls").style.display = "none";
+			
 			document.getElementById("tab2").style.zIndex = 2;
 			document.getElementById('tab2').className += "selectedTab";
 			document.getElementById('tab2text').className += "selectedTab";
@@ -255,6 +257,8 @@ function settab(tab){
 			document.getElementById('tab3text').className += "unselectedTab";
 			break;
 		case 3:
+			document.getElementById("filter-controls").style.display = "block";
+			
 			document.getElementById("tab3").style.zIndex = 2;
 			document.getElementById('tab3').className += "selectedTab";
 			document.getElementById('tab3text').className += "selectedTab";
@@ -265,6 +269,8 @@ function settab(tab){
 			document.getElementById('tab2text').className += "unselectedTab";
 			break;
 		default:
+			document.getElementById("filter-controls").style.display = "block";
+			
 			document.getElementById("tab1").style.zIndex = 2;
 			document.getElementById('tab1').className += "selectedTab";
 			document.getElementById('tab1text').className += "selectedTab";

@@ -48,51 +48,6 @@
   </div>
   <article id="tabs" class="tabs">
 	<section id="tab1" class="">
-		<div id="filter-controls">
-			<a id="filter-link" onClick="hideShowFilters()"><image id="filter-button"/>Show Filters</a>
-			<form id="filter-form" name="filter-form">
-
-			<select name="time_filter">
-			<option value=1>within 1 hour</option>
-			<option value=3>within 3 hours</option>
-			<option value=12>within 12 hours</option>
-			<option value=24>within 24 hours</option>
-			<option value=48>within 2 days</option>
-			<option value=72>within 3 days</option>
-			<option value=168>within an week</option>
-			<option value=744>within an month</option>
-			<option value=876000 selected>All dates</option>
-			</select>
-
-			<p>Include Types:<br>
-			<c:forEach var="type" items="${alertTypes}" varStatus="count">
-     			<input name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox" checked> ${type.getLabel()} </input><br> 
-			</c:forEach> 
-			</p>
-			
-			<p>Status:<br>
-			<c:forEach var="s" items="${status}" varStatus="count">
-				<input name="${s}" value="${s}" type="checkbox" checked>${s}</input><br>
-			</c:forEach>
-			
-			<p>Include Importance:<br>
-			<input type="checkbox" name="level1" value=1 checked>1(Highest)</input><br>
-			<input type="checkbox" name="level2" value=2 checked>2</input><br>
-			<input type="checkbox" name="level3" value=3 checked>3</input><br>
-			<input type="checkbox" name="level4" value=4 checked>4</input><br>
-			<input type="checkbox" name="level5" value=5 checked>5(Lowest)</input><br>
-			</p>
-			<p>Include data from CA:<br>
-			<c:forEach var="ca" items="${cas}" varStatus="count">
-				<input name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox" checked>${ca.getLabel()}</input><br>
-			</c:forEach>
-			</p>
-			<p>
-			Contains Text:<br>
-			<input name="textFilter" type="text"></input>
-			</p> 
-			</form>
-		</div>
 		<h2 id="tab1text" class=""><a onclick="settab(1)">Operational Map</a></h2>
 		<div id="map">
 		</div>
@@ -137,13 +92,59 @@
 	</section>
 	
 	<section id="tab3" class="">
+		
 		<h2 id="tab3text" class=" "><a onclick="settab(3)">View/Manage Alerts</a></h2>
 		<div class="overflow"><table id="alerttable">
 		<tr class="table-row smart-table-header"><th>Type</th><th>Alert Id</th><th>Date</th><th>Description</th><th>Level</th><th>Status</th><th>Location</th><th>Action</th></tr>
 		</table>
 		</div> 
 	</section>
+	
+	<div id="filter-controls">
+			<a id="filter-link" onClick="hideShowFilters()"><image id="filter-button"/>Show Filters</a>
+			<form id="filter-form" name="filter-form">
 
+			<select name="time_filter">
+			<option value=1>within 1 hour</option>
+			<option value=3>within 3 hours</option>
+			<option value=12>within 12 hours</option>
+			<option value=24>within 24 hours</option>
+			<option value=48>within 2 days</option>
+			<option value=72>within 3 days</option>
+			<option value=168>within an week</option>
+			<option value=744>within an month</option>
+			<option value=876000 selected>All dates</option>
+			</select>
+
+			<p>Include Types:<br>
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+     			<input name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox" checked> ${type.getLabel()} </input><br> 
+			</c:forEach> 
+			</p>
+			
+			<p>Status:<br>
+			<c:forEach var="s" items="${status}" varStatus="count">
+				<input name="${s}" value="${s}" type="checkbox" checked>${s}</input><br>
+			</c:forEach>
+			
+			<p>Include Importance:<br>
+			<input type="checkbox" name="level1" value=1 checked>1(Highest)</input><br>
+			<input type="checkbox" name="level2" value=2 checked>2</input><br>
+			<input type="checkbox" name="level3" value=3 checked>3</input><br>
+			<input type="checkbox" name="level4" value=4 checked>4</input><br>
+			<input type="checkbox" name="level5" value=5 checked>5(Lowest)</input><br>
+			</p>
+			<p>Include data from CA:<br>
+			<c:forEach var="ca" items="${cas}" varStatus="count">
+				<input name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox" checked>${ca.getLabel()}</input><br>
+			</c:forEach>
+			</p>
+			<p>
+			Contains Text:<br>
+			<input name="textFilter" type="text"></input>
+			</p> 
+			</form>
+	</div>
   </article>
 	
 </div>
