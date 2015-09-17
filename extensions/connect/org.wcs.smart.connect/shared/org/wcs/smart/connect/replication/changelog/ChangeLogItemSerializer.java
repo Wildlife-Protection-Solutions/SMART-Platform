@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.replication.changelog;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.sql.Blob;
@@ -34,6 +35,7 @@ import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
+import org.wcs.smart.util.UuidUtils;
 
 
 /**
@@ -45,6 +47,8 @@ import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
 public abstract class ChangeLogItemSerializer {
 
 	public abstract void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException;
+	
+	protected abstract int convertType(int type, int precision);
 	
 	public void serialize(ObjectOutputStream stream,
 			ChangeLogItem item, Connection c) throws SQLException, IOException{
@@ -111,17 +115,36 @@ public abstract class ChangeLogItemSerializer {
 		stream.writeInt(colCnt);
 		for (int i = 1; i <= colCnt; i ++){
 			stream.writeObject(md.getColumnName(i));
-			stream.writeInt(md.getColumnType(i));
+			int type = convertType(md.getColumnType(i), md.getPrecision(i));
+			stream.writeInt(type);
 			
-			if (md.getColumnType(i) == Types.BLOB){
+			if (type == Types.BLOB){
 				Blob b = rs.getBlob(i);
 				stream.writeLong(b.length());
 				IOUtils.copy(b.getBinaryStream(), stream);
+			}else if (type == Types.BINARY){
+					
+				byte[] parts = rs.getBytes(i);
+				stream.writeLong(parts.length);
+				try(ByteArrayInputStream bis = new ByteArrayInputStream(parts)){
+					IOUtils.copy(bis, stream);
+				}
+			}else if (type == Types.OTHER){
+				//uuid
+				Object data = rs.getObject(i);
+				if (data == null){
+					stream.writeObject((UUID)null);
+				}else if (data instanceof UUID){
+					stream.writeObject((UUID)data);
+				}else if (data instanceof byte[]){
+					stream.writeObject( UuidUtils.byteToUUID((byte[])data) );
+				}else{
+					throw new IllegalStateException("Invalid representation of UUID.");
+				}
 			}else{
 				Object x = rs.getObject(i);
 				stream.writeObject(x);	
 			}
 		}
 	}
-	
 }

@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
@@ -38,7 +39,14 @@ public abstract class ChangeLogDeserializer {
 					for (int i = 0; i < size; i ++){
 						ChangeLogItem it = (ChangeLogItem) oin.readObject();
 	
-						if (!shouldProcess(it)) continue;
+						if (!shouldProcess(it)){
+							if (it.getAction() == Action.INSERT ||
+									it.getAction() == Action.UPDATE){
+								//read the remaining data and ingore
+								readObject(oin);
+							}
+							continue;
+						}
 						
 						if (it.getAction() == Action.DELETE){
 							processDataDelete(it, connection);
@@ -64,24 +72,24 @@ public abstract class ChangeLogDeserializer {
 	
 	protected abstract boolean shouldProcess(ChangeLogItem item);
 
-	public HashMap<String, Object> readObject(ObjectInputStream is) throws Exception{
+	private HashMap<String, Object> readObject(ObjectInputStream is) throws Exception{
 		int numCols = is.readInt();
 		HashMap<String, Object> data = new HashMap<String, Object>();
 	
 		for (int i = 0; i < numCols; i ++){
 			String colName = (String) is.readObject();
-		
 			int type = is.readInt();
 		
-			if (type == Types.BLOB){
+			if (type == Types.BLOB ||
+					type == Types.BINARY){
 				long length = is.readLong();
 				byte[] bytes = new byte[(int)length];
-				
+				is.readFully(bytes);
 				data.put(colName, bytes);
-			}else if (type == Types.BINARY){
-				//TODO: I don't think we can guarentee a binary is a uuid
-				byte[] uuid = (byte[]) is.readObject();
-				data.put(colName, UuidUtils.byteToUUID(uuid));
+			}else if (type == Types.OTHER){
+				//uuid
+				UUID uuid = (UUID) is.readObject();
+				data.put(colName, uuid);
 			}else{
 				data.put(colName, is.readObject());
 			}

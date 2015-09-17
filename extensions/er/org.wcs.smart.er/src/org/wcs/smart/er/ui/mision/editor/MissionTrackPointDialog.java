@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.ui.map.TrackPointDialog;
@@ -101,7 +102,7 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 				job = new SaveMissionTracksJob(track);
 			}
 		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog("Error reading track geometry.", ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.MissionTrackPointDialog_GeometryError, ex);
 			
 		}
 

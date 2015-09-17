@@ -125,7 +125,6 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		if (item.getFieldName2() != null){
 			sb.append(" AND " + item.getFieldName2()  + " = ?");
 		}
-		System.out.println(sb.toString());
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		for (int i = 1; i <= params.size(); i ++){
 			if (params.get(i-1) instanceof UUID){

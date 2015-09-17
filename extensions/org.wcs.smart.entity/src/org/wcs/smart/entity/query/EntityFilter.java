@@ -23,12 +23,10 @@ package org.wcs.smart.entity.query;
 
 import java.util.List;
 
-import org.hibernate.Session;
 import org.wcs.smart.entity.internal.Messages;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilterVisitor;
-import org.wcs.smart.query.ui.model.DropItem;
 
 /**
  * Filter for filtering individual entities.

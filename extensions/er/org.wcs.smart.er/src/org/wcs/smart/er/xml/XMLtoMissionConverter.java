@@ -363,7 +363,7 @@ public class XMLtoMissionConverter {
 							att.setObservation(ob);
 						} catch (Exception e) {
 							warnings.add(MessageFormat.format(
-									"Can not import attachment {0}: {1}", filename, e.getMessage()));
+									Messages.XMLtoMissionConverter_AttachmentError, filename, e.getMessage()));
 						}
 					}
 				}

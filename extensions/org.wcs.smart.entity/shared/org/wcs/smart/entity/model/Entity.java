@@ -22,7 +22,6 @@
 package org.wcs.smart.entity.model;
 
 import java.util.List;
-import java.util.Locale;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -36,10 +35,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
-import org.wcs.smart.entity.IEntityLabelProvider;
 
 /**
  * An entity object.  This represents a particular

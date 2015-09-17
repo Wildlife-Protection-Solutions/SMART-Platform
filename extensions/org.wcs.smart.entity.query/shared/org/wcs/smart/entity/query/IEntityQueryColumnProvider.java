@@ -21,11 +21,7 @@
  */
 package org.wcs.smart.entity.query;
 
-import java.util.Locale;
-
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
-import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * Column provider for entity queries.

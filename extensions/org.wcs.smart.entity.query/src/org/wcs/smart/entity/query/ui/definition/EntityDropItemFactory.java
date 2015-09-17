@@ -358,7 +358,7 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 		IWaypointSource src = WaypointSourceEngine.INSTANCE.getSource(filter.getWaypointSourceKey());
 		DropItem di;
 		if (src == null){
-			di = new ErrorDropItem(MessageFormat.format("Waypoint source {0} not found.", new Object[]{filter.getWaypointSourceKey()}));
+			di = new ErrorDropItem(MessageFormat.format(Messages.EntityDropItemFactory_SourceNotFound, new Object[]{filter.getWaypointSourceKey()}));
 		}else{
 	
 			di = new WaypointSourceFilterDropItem();

@@ -28,6 +28,7 @@ import java.util.Locale;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 
@@ -138,7 +139,7 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 						}
 					}catch (Exception ex){
 						EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-						return "Error computing length";
+						return Messages.SamplingUnitColumnLabelProvider_LengthError;
 					}
 				}else if (key.equals(FixedColumns.STATE.name())){
 					return su.getState().getGuiName(Locale.getDefault());
@@ -177,7 +178,7 @@ public class SamplingUnitColumnLabelProvider extends ColumnLabelProvider {
 					}
 				}catch (Exception ex){
 					EcologicalRecordsPlugIn.log(ex.getMessage(), ex);
-					return "Error computing length";
+					return Messages.SamplingUnitColumnLabelProvider_LengthError;
 				}
 			}else if (key.equals(FixedColumns.STATE.name())){
 				return su.getState().getGuiName(Locale.getDefault());
