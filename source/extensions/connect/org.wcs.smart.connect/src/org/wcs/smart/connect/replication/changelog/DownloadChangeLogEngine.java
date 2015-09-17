@@ -172,6 +172,10 @@ public class DownloadChangeLogEngine {
 			}
 			
 			//check revision
+			if (metadata.getServerRevision() == info.getServerRevision()){
+				//nothing to do
+				return;
+			}
 			if (metadata.getServerRevision() <= info.getServerRevision() ){
 				throw new Exception("Invalid server revision (the local server revision is less than or equal to the package server revision).  Cannot apply change log package");
 			}
