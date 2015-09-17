@@ -39,6 +39,7 @@ import org.wcs.smart.util.UuidUtils;
  * tag0 - listAttrValue/treeAttrValue uuid, may be also a key to patrol or transport type or other element related to current item
  * tag1 - identifier (attribute/category/member/multiselect/defaultValue)
  * tag2 - order (for multiselect list it is possible to have same attribute several times, this is why we need several result ids to handle that case; order show for which entry in multiselect list this attribute belong)
+ *        also used to store default values
  * tag3 - reference to listAttr in Elements.xml (used in multiselect)
  * tag4 - reference to numAttr in Elements.xml (used in multiselect)
  * 
