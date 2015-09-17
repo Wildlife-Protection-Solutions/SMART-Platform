@@ -1,6 +1,8 @@
 package org.wcs.smart.connect.database;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import org.hibernate.Session;
@@ -8,8 +10,9 @@ import org.hibernate.Session;
 public enum LockManager {
 
 	INSTANCE;
-	
-	private HashMap<UUID, Integer> lockKeys = new HashMap<UUID, Integer>();
+	//TODO: figure out if we can use the uuid here in some way so 
+	//that other processes can also lock database if necessary
+	private Map<UUID, Integer> lockKeys = Collections.synchronizedMap(new HashMap<UUID, Integer>());
 	
 	public void lockDatabase(Session session, UUID caUuid) throws Exception{
 		Integer bigInt = null;

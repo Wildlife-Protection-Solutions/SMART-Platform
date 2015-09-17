@@ -24,6 +24,19 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();
 		super.processFile(session);
 	}
+	
+	@Override
+	protected boolean shouldProcess(ChangeLogItem it) {
+		//TODO: review this
+		if (ChangeLogManager.INSTANCE.constains(session, it)){
+			//we already have this item
+			return false;
+		}
+		//TODO: look for conflict; throw exception if conflict
+		
+		return true;
+	}
+	
 	@Override
 	protected void processFileDelete(ChangeLogItem arg0, Connection arg1)
 			throws Exception {

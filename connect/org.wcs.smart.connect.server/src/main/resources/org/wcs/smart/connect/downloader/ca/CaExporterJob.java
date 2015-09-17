@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.ca.exporter;
+package org.wcs.smart.connect.downloader.ca;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -135,8 +135,6 @@ public class CaExporterJob implements Runnable {
 				}
 			}catch (Exception ex){
 				logger.log(Level.SEVERE, "Error exporting conservation area data. " + ex.getMessage(), ex);
-			}finally{
-				if (s.isOpen())	s.close();
 			}
 		}finally{
 			try{
@@ -144,6 +142,7 @@ public class CaExporterJob implements Runnable {
 			}catch (Exception ex){
 				logger.log(Level.SEVERE, "Could not release database lock after creating conservation area download package. " + item.getUuid());
 			}
+			if (s.isOpen())	s.close();
 		}
 	}
 	

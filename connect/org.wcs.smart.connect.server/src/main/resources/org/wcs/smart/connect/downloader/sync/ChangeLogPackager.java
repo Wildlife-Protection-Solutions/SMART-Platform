@@ -1,4 +1,4 @@
-package org.wcs.smart.connect.uploader.sync;
+package org.wcs.smart.connect.downloader.sync;
 
 import java.io.File;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
@@ -14,9 +15,11 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.ZipUtil;
+import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItem;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
-import org.wcs.smart.connect.uploader.PackageMetadata;
+import org.wcs.smart.connect.uploader.PostgresqlMetadataCreator;
+import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.util.UuidUtils;
 
 public class ChangeLogPackager {
@@ -39,8 +42,8 @@ public class ChangeLogPackager {
 		
 		File tempDir = ZipUtil.createTemporaryDirectory();
 		
-		changelogFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.metadata");
-		metadataFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog");
+		metadataFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.metadata");
+		changelogFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog");
 		zipFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.zip");
 	}
 	
@@ -50,15 +53,22 @@ public class ChangeLogPackager {
 		Files.deleteIfExists(metadataFile);
 	}
 	
+	/**
+	 * 
+	 * @return the relative file of the change log packag
+	 * @throws Exception
+	 */
 	public Path createPackage() throws Exception{
 		try{
-			packageMetadata();
 			packageChangLog();
+			packageMetadata();
+			
 			zipPackage();
 		}finally{
 			cleanUp();
 		}
-		return zipFile;
+		
+		return DataStoreManager.INSTANCE.getRootDirectory().toPath().relativize(zipFile);
 	}
 	
 	private void zipPackage() throws Exception{
@@ -66,7 +76,7 @@ public class ChangeLogPackager {
 	}
 	
 	private void packageMetadata() throws Exception{
-		PackageMetadata.generateMetadata(session, caUuid, metadataFile, endRevision);
+		PostgresqlMetadataCreator.generateMetadata(session, caUuid, metadataFile, endRevision);
 	}
 	
 	private void packageChangLog() throws Exception{
@@ -83,8 +93,16 @@ public class ChangeLogPackager {
 				try(OutputStream fout = Files.newOutputStream(changelogFile);
 						ObjectOutputStream oout = new ObjectOutputStream(fout)){
 					oout.writeInt(items.size());
+					ChangeLogItemSerializer serializer = new ChangeLogItemSerializer() {
+						
+						@Override
+						public void prepareUuid(PreparedStatement ps, int index, UUID value)
+								throws SQLException {
+							ps.setObject(index, value);							
+						}
+					};
 					for (ChangeLogItem i : items){
-						ChangeLogItemSerializer.serialize(oout, i, connection);
+						serializer.serialize(oout, i, connection);
 					}
 				}catch (Exception ex){		
 					throw new SQLException (ex);

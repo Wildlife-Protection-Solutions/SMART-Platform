@@ -11,7 +11,8 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.uploader.PackageMetadata;
+import org.wcs.smart.connect.replication.metadata.MetadataPackager;
+import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 
 public class PostgresqlSyncProcessor {
 	
@@ -52,7 +53,7 @@ public class PostgresqlSyncProcessor {
 				throw new Exception("Invalid sync package, no change log file provided.");
 			}
 			//check metadata
-			metadata = PackageMetadata.readMeadata(metadataFile);
+			metadata = MetadataPackager.INSTANCE.readMetadata(metadataFile);
 			//check ca
 			if (!info.getUuid().equals(metadata.getConservationArea())){
 				throw new Exception("Conservation area uuids do not match");
@@ -79,7 +80,8 @@ public class PostgresqlSyncProcessor {
 			for (Object[] plugin : plugins){
 				dbVersions.put((String)plugin[0], (String)plugin[1]);
 			}
-			for(String pluginid : metadata.getPlugins()){
+			
+			for(String pluginid : metadata.getPluginVersions().keySet()){
 				String version = metadata.getPluginVersion(pluginid);
 				String dbVersion = dbVersions.get(pluginid);
 				if (dbVersion == null){

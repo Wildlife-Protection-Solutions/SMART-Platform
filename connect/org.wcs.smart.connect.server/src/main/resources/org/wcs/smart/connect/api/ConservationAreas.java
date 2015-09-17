@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -65,8 +66,10 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.PostgresUUIDType;
 import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.connect.SmartUtils;
-import org.wcs.smart.connect.ca.exporter.CaExporterJob;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.downloader.ca.CaExporterJob;
+import org.wcs.smart.connect.downloader.sync.CaChangeLogPackageJob;
+import org.wcs.smart.connect.downloader.sync.ChangeLogPackager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.hibernate.HibernateSessionFactoryListener;
@@ -79,7 +82,6 @@ import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
-import org.wcs.smart.connect.uploader.sync.ChangeLogPackager;
 import org.wcs.smart.util.UuidUtils;
 
 
@@ -96,7 +98,7 @@ public class ConservationAreas extends HttpServlet{
 	
 	private static final String DATA_PARAM_CHANGELOG_VALUE = "changelog";
 	private static final String DATA_PARAM_ALL_VALUE = "all";
-	private static final String DATA_PARAM_CAPACKAGE_VALUE = "capackage";
+	private static final String DATA_PARAM_PACKAGE_VALUE = "package";
 
 	public static final String PATH = "conservationarea"; //$NON-NLS-1$
 	
@@ -202,21 +204,21 @@ public class ConservationAreas extends HttpServlet{
     public Response getConservationArea(@PathParam("cauuid") String caUuid,
     		@QueryParam("data") String data,
     		@QueryParam("version") String version,
-    		@QueryParam("reversion") String revision){
+    		@QueryParam("revision") String revision){
 		
 		if (data == null){
 			return getConservationAreaInfo(caUuid);
 		}else if (data != null){
 			if (data.equalsIgnoreCase(DATA_PARAM_CHANGELOG_VALUE)){
 				if (version != null && revision != null){
-					return getChangeLog(caUuid, version, revision);
+					return buildChangeLog(caUuid, version, revision);
 				}else{
 					throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request.  Version and revision are required for change log request.");			
 				}
 			}else if (data.equalsIgnoreCase(DATA_PARAM_ALL_VALUE)){
 				return buildConservationAreaExport(caUuid);
-			}else if (data.equalsIgnoreCase(DATA_PARAM_CAPACKAGE_VALUE)){
-				return getConservationAreaExportFile(version);
+			}else if (data.equalsIgnoreCase(DATA_PARAM_PACKAGE_VALUE)){
+				return getExportFile(version);
 			}else{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format("Bad request.  '{0}' not a valid value for data parameter.  Must be one of {{1} or {2}}.", data, DATA_PARAM_ALL_VALUE, DATA_PARAM_CHANGELOG_VALUE));			
 			}
@@ -225,7 +227,7 @@ public class ConservationAreas extends HttpServlet{
 		return null;
 	}
 	
-	private Response getConservationAreaExportFile(String statusUuid){
+	private Response getExportFile(String statusUuid){
 		UUID uuid = null;
 		try{
 			uuid= UuidUtils.stringToUuid(statusUuid);
@@ -246,11 +248,12 @@ public class ConservationAreas extends HttpServlet{
 		}catch (Exception ex){
 		}
 	
-		if (item.getType() != WorkItem.Type.DOWN_CA){
+		if (item.getType() != WorkItem.Type.DOWN_CA &&
+				item.getType() != WorkItem.Type.DOWN_SYNC){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid request.");
 		}
 		if (item.getStatus() != WorkItem.Status.COMPLETE){
-			throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area export not created.");
+			throw new SmartConnectException(Response.Status.NOT_FOUND, "Package not created.");
 		}
 		
 		final File toReturn = DataStoreManager.INSTANCE.getFile(item.getLocalFilename());
@@ -382,7 +385,7 @@ public class ConservationAreas extends HttpServlet{
 					+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
 					+ ConservationAreas.PATH + "/" //$NON-NLS-1$
 					+ URLEncoder.encode(uca.toString(), ConnectRESTApplication.UTF8)
-					+ "?data=" + DATA_PARAM_CAPACKAGE_VALUE + "&version=" + item.getUuid().toString();
+					+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString();
 	
 			ExecutorService executor = (ExecutorService) context.getAttribute(HibernateSessionFactoryListener.EXECUTOR_KEY);
 			executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context)));
@@ -397,58 +400,75 @@ public class ConservationAreas extends HttpServlet{
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Unable to create package", ex);
 		}
 	}
-	private Response getChangeLog(String caUuid, String version, String revision){
+	
+	private Response buildChangeLog(String caUuid, String version, String revision) {
+		
 		UUID uca = null;
 		UUID uversion = null;
 		Long lrevision = -1l;
+		
 		try{
-			uca = UuidUtils.stringToUuid(caUuid);
 			uversion = UuidUtils.stringToUuid(version);
 			lrevision = Long.valueOf(revision);
+			uca = UuidUtils.stringToUuid(caUuid);
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Cannot convert parameters. " + ex.getMessage(), ex);
+			logger.log(Level.SEVERE, "Invalid parameters.  Cannot parse one of the conservation area uuid, version uuid or revision number. " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Bad request", ex);
 		}
-	
+		WorkItem item = null;
+		ConservationAreaInfo info = null;
 		//package up change log
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
-		java.nio.file.Path zipFile = null; 
 		try{
-			ConservationAreaInfo info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uca);
-			if (!info.getVersion().equals(uversion)){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid conservation area version.");	
+			info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uca);
+			if (info == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found.");	
 			}
 
-			Long currentRevision = ChangeLogManager.INSTANCE.getLastRevision(s, uca);
-			if (currentRevision < lrevision){
-				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid revision request.");
+			if (!info.getVersion().equals(uversion)){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area versions do not match.");
 			}
 			
-			ChangeLogPackager packer = new ChangeLogPackager(s, uca, lrevision);
-			zipFile = packer.createPackage();
+			//create a new download item
+			item = new WorkItem();
+			item.setConservationAreaInfo(info);
+			item.setLocalFilename("");
+			item.setMessage(null);
+			item.setStartTime(new Date());
+			item.setStatus(WorkItem.Status.PROCESSING);
+			item.setTotalBytes(-1);
+			item.setType(WorkItem.Type.DOWN_SYNC);
+			
+			s.save(item);
+
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			logger.log(Level.SEVERE, "Unable to create change log download package. " + ex.getMessage(), ex);
+			logger.log(Level.SEVERE, "Unable to start conservation area change log download. " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to create package", ex);
-		}finally{
 		}
-		
-		final java.nio.file.Path zipFile1 = zipFile; 
-		StreamingOutput stream = new StreamingOutput() {
-	      @Override
-	      public void write(OutputStream output) throws IOException {
-	        try {
-	        	Files.copy(zipFile1, output);
-	        	Files.deleteIfExists(zipFile1);
-	        } catch (Exception e) {
-	           e.printStackTrace();
-	        }
-	      }
-	    };
-		    
-	    return Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM).build();
+		try{
+			String finishurl = 	request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$
+				+ ":" + request.getServerPort()  //$NON-NLS-1$
+				+ request.getContextPath() 
+				+ ConnectRESTApplication.PATH_SEPERATOR + ConnectRESTApplication.APP_PATH + ConnectRESTApplication.PATH_SEPERATOR
+				+ ConservationAreas.PATH + "/" //$NON-NLS-1$
+				+ URLEncoder.encode(uca.toString(), ConnectRESTApplication.UTF8)
+				+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString();
 
+			CaChangeLogPackageJob job = new CaChangeLogPackageJob(info, item, finishurl, lrevision, s.getSessionFactory());
+			ExecutorService executor = (ExecutorService) context.getAttribute(HibernateSessionFactoryListener.EXECUTOR_KEY);
+			executor.execute(job);
+		
+			String url = item.getStatusURL(request);
+			return Response
+				.status(Response.Status.ACCEPTED)
+				.header(HttpHeaders.LOCATION, url)
+				.entity("{\"location\": \"" + url + "\"}").build();
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Unable to start conservation area change log package process. " + ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Unable to create package", ex);
+		}
 	}
 	
 	

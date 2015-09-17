@@ -1,4 +1,4 @@
-package org.wcs.smart.connect.ca.exporter;
+package org.wcs.smart.connect.downloader.ca;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

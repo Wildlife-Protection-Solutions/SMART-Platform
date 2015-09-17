@@ -50,7 +50,8 @@ public class WorkItem extends ConnectUuidItem {
 	public enum Type {
 		UP_CA,
 		UP_SYNC,
-		DOWN_CA;
+		DOWN_CA,
+		DOWN_SYNC;
 	}
 	
 	public enum Status{
