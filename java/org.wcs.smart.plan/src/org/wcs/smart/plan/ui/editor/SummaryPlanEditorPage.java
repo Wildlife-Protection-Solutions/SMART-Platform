@@ -73,7 +73,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.plan.PlanEventManager;
 import org.wcs.smart.plan.PlanHibernateManager;
-import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.internal.PlanLabelProvider;
 import org.wcs.smart.plan.model.Plan;

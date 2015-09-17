@@ -909,12 +909,14 @@ public class Messages extends NLS {
 	public static String SmartServiceInfo_Keyword2;
 	public static String SmartServiceInfo_Title;
 	public static String SmartStartUp_AnalysisLoginSepeartor;
+	public static String SmartStartUp_CannotLogin;
 	public static String SmartStartUp_ConnectError;
 	public static String SmartStartUp_Error_LoginError;
 	public static String SmartStartUp_Error_LoginFail;
 	public static String SmartStartUp_Error_NoSmartDb;
 	public static String SmartStartUp_ErrorDialog_Title;
 	public static String SmartStartUp_ErrorDialogTitle;
+	public static String SmartStartUp_LoginHandlerError;
 	public static String SmartStartUp_MultiConnectError;
 	public static String SmartStartUp_NoCaAccess;
 	public static String SmartStartUp_SingleCaAccess;

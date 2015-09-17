@@ -35,8 +35,8 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.query.model.AllCategory;
 import org.wcs.smart.query.model.summary.IValueItem;
-import org.wcs.smart.query.model.summary.ValueItemLabelProvider;
 import org.wcs.smart.query.model.summary.IValueItem.ValueType;
+import org.wcs.smart.query.model.summary.ValueItemLabelProvider;
 
 /**
  * A drop item for a category value item.

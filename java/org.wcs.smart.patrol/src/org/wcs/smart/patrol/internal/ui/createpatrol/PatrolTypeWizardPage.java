@@ -36,7 +36,6 @@ import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.ui.LabelConstants;
 import org.wcs.smart.patrol.ui.NewPatrolWizardPage;
 
 /**

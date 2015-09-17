@@ -44,7 +44,6 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.ui.LabelConstants;
 
 /**
  * Filter dialog for filtering the patrols displayed in the patrol list view.

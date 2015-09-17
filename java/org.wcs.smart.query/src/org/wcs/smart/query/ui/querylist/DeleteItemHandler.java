@@ -22,7 +22,6 @@
 package org.wcs.smart.query.ui.querylist;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;

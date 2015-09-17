@@ -236,7 +236,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 					}
 				}
 			} catch (Exception e) {
-				SmartPatrolPlugIn.displayLog("Error loading attachment locations." + e.getMessage(), e);
+				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 			}
 			session.getTransaction().commit();
 			if (ops == null){

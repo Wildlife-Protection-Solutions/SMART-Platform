@@ -24,7 +24,6 @@ package org.wcs.smart.query.ui.importexport;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 

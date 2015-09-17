@@ -93,7 +93,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		}else if (type == FilterType.OBSERVATION){
 			return Messages.IFilter_ObservationFilterName;
 		}
-		throw new IllegalStateException("Invalid filter type.");
+		throw new IllegalStateException("Invalid filter type."); //$NON-NLS-1$
 	}
 	
 	

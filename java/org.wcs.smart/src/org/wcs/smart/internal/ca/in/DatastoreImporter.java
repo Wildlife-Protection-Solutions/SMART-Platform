@@ -38,8 +38,6 @@ import org.wcs.smart.ca.export.ICaDataExportEngine;
 import org.wcs.smart.ca.export.ICaDataImportEngine;
 import org.wcs.smart.ca.export.ICaDataImporter;
 import org.wcs.smart.internal.Messages;
-import org.wcs.smart.util.SharedUtils;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**

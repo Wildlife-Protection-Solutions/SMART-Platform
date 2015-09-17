@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.model.summary;
 
-import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.query.model.filter.IValueVisitor;

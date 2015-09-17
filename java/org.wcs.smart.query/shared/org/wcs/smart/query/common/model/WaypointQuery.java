@@ -21,17 +21,11 @@
  */
 package org.wcs.smart.query.common.model;
 
-import java.util.List;
-import java.util.Locale;
-
 import javax.persistence.Entity;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
-import javax.persistence.Transient;
 
-import org.hibernate.Session;
 import org.wcs.smart.query.model.IPagedQuery;
-import org.wcs.smart.query.model.QueryColumn;
 
 /**
  * A class to represent an waypoint query.

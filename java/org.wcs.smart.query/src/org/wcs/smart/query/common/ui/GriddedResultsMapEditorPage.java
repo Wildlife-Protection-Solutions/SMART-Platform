@@ -22,9 +22,7 @@
 
 package org.wcs.smart.query.common.ui;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -57,7 +55,6 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
-import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.udig.RasterService;
 import org.wcs.smart.query.internal.Messages;

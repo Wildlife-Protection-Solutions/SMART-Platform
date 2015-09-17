@@ -7,6 +7,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
+import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 
@@ -17,7 +18,7 @@ public enum QueryExecutor {
 		IQueryType type = QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey());
 		IQueryEngine engine = findQueryEnginge(type);
 		if (engine == null){
-			throw new Exception(MessageFormat.format("No query engine found for query type {0}", type.getGuiName()));
+			throw new Exception(MessageFormat.format(Messages.QueryExecutor_QueryEngineNotFound, type.getGuiName()));
 		}
 		Session lSession = session;
 		if (lSession == null){

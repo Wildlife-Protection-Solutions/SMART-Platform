@@ -13,6 +13,7 @@ public class Messages extends NLS {
 	public static String DateTimeComposite_TimeLabel;
 	public static String DeleteIncidentHandler_ConfirmLabel;
 	public static String DeleteIncidentHandler_ConfirmMessage;
+	public static String DeleteIncidentHandler_DeleteError;
 	public static String DeleteIncidentHandler_Error1;
 	public static String DeleteIncidentHandler_Error2;
 	public static String DistanceDirectionComposite_Description;
@@ -146,6 +147,7 @@ public class Messages extends NLS {
 	public static String XmlToIncident_AttachmentNotImported;
 	public static String XmlToIncident_AttributeNotFound;
 	public static String XmlToIncident_CategoryNotFound;
+	public static String XmlToIncident_CouldNotConfigureAttachment;
 	public static String XmlToIncident_DataError;
 	public static String XmlToIncident_DoubleValueNotFound;
 	public static String XmlToIncident_InvalidDateString;

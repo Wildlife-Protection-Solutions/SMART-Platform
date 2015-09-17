@@ -22,7 +22,6 @@
 package org.wcs.smart.patrol.ui;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
 

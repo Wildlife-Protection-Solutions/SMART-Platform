@@ -22,7 +22,6 @@
 package org.wcs.smart.query.ui;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;

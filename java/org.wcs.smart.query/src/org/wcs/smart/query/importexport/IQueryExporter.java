@@ -24,7 +24,6 @@ package org.wcs.smart.query.importexport;
 import java.io.File;
 import java.util.HashMap;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;

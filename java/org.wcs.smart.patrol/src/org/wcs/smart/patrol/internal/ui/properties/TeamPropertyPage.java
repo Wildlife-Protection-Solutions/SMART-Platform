@@ -81,7 +81,6 @@ import org.hibernate.id.UUIDGenerator;
 import org.hibernate.id.uuid.StandardRandomStrategy;
 import org.hibernate.type.UUIDBinaryType;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.advisors.DeleteManager;
 import org.wcs.smart.ca.datamodel.DataModelManager;
 import org.wcs.smart.hibernate.SmartDB;

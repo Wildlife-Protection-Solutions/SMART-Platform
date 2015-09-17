@@ -284,13 +284,13 @@ public class SmartStartUp {
 		try{
 			IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(LOGIN_EXT_ID);
 			for (IConfigurationElement e : config) {	
-				if (e.getName().equals("loginHandler")){
-					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("clazz");
+				if (e.getName().equals("loginHandler")){ //$NON-NLS-1$
+					ILoginHandler handler = (ILoginHandler) e.createExecutableExtension("clazz"); //$NON-NLS-1$
 					handlers.add(handler);
 				}
 			}
 		}catch (Exception ex){
-			String error = MessageFormat.format("Cannot log into Conservation Area {0}." + "\n\n" + "{1}.", ca.getName(), ex.getMessage());
+			String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + "{1}.", ca.getName(), ex.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			SmartPlugIn.displayLog(error, ex);
 			return false;
 		}
@@ -298,7 +298,7 @@ public class SmartStartUp {
 			try{
 				h.onLogin();
 			}catch (Exception ex){
-				String error = MessageFormat.format("Cannot log into Conservation Area {0}." + "\n\n" + "Could not run login handler {1}. {2}", ca.getName(), h.getClass().getName(), ex.getMessage());
+				String error = MessageFormat.format(Messages.SmartStartUp_CannotLogin + "\n\n" + Messages.SmartStartUp_LoginHandlerError, ca.getName(), h.getClass().getName(), ex.getMessage()); //$NON-NLS-1$
 				SmartPlugIn.displayLog(error, ex);
 				return false;
 			}

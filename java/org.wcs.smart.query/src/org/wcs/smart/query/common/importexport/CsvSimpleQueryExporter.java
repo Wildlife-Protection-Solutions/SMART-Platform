@@ -24,7 +24,6 @@ package org.wcs.smart.query.common.importexport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 

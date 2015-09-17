@@ -42,7 +42,6 @@ import org.wcs.smart.plan.internal.Messages;
 import org.wcs.smart.plan.map.geotools.PlanTargetDataSource;
 import org.wcs.smart.plan.map.geotools.PlanTargetDataSourceFactory;
 import org.wcs.smart.plan.model.Plan;
-import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**

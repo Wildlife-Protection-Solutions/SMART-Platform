@@ -35,7 +35,6 @@ import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.date.Last30DaysDateFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
-import org.wcs.smart.report.query.PatrolQueryReportPlugIn;
 import org.wcs.smart.report.query.internal.Messages;
 
 /**

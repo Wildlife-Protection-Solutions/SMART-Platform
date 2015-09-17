@@ -43,7 +43,6 @@ import org.wcs.smart.ui.internal.ca.CaInfoComposite;
 import org.wcs.smart.util.I18nUtil;
 import org.wcs.smart.util.LocaleComparator;
 import org.wcs.smart.util.LocaleLabelProvider;
-import org.wcs.smart.util.SmartUtils;
 
 /**
  * The first page of the create conservation 

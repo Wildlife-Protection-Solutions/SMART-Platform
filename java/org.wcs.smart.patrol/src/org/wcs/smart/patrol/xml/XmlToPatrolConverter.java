@@ -400,7 +400,7 @@ public class XmlToPatrolConverter {
 							att.setObservation(ob);
 						} catch (Exception e) {
 							SmartPatrolPlugIn.log(e.getMessage(), e);
-							warnings.add("Error configuring attachment.  " + e.getMessage());
+							warnings.add(Messages.XmlToPatrolConverter_attachmentError + e.getMessage());
 						}
 					}
 				}
