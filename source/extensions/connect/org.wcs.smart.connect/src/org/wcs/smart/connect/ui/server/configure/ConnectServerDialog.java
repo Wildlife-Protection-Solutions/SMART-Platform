@@ -295,9 +295,9 @@ public class ConnectServerDialog extends TitleAreaDialog {
 					}else if (rec != null && currentRevision == null){
 						lblLocalChanges.setText("ERROR");
 					}else if (rec != null && currentRevision != null){
-						if (currentRevision > rec.getEndRevision()){
+						if (currentRevision.longValue() > rec.getEndRevision().longValue()){
 							lblLocalChanges.setText("Yes");
-						}else if (currentRevision == rec.getEndRevision()){
+						}else if (currentRevision.longValue() == rec.getEndRevision().longValue()){
 							lblLocalChanges.setText("No");
 						}else{
 							lblLocalChanges.setText("ERROR");

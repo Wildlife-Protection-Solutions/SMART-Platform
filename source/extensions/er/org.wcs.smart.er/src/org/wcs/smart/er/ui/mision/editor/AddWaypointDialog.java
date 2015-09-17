@@ -183,7 +183,7 @@ public class AddWaypointDialog extends TitleAreaDialog{
 							c = lil.extractPoint(su.getGeometry().getLength() / 2);
 						}
 					}catch (Exception ex){
-						EcologicalRecordsPlugIn.displayLog("Error reading geometry." , ex);
+						EcologicalRecordsPlugIn.displayLog(Messages.AddWaypointDialog_GeometryError , ex);
 					}
 					if (c == null) return;
 

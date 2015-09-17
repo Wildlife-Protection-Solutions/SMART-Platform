@@ -10,6 +10,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
@@ -100,6 +101,15 @@ public class ChangeLogPackager {
 						@Override
 						public void prepareUuid(PreparedStatement ps, int index, UUID value) throws SQLException{
 							ps.setBytes(index, UuidUtils.uuidToByte(value));
+						}
+
+						@Override
+						protected int convertType(int type, int precision) {
+							if (type == Types.BINARY && precision == 16){
+								//uuid
+								return Types.OTHER;
+							}
+							return type;
 						}
 					};
 					for (ChangeLogItem i : items){

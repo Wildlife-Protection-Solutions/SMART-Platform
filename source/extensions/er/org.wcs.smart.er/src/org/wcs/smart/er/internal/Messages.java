@@ -11,6 +11,8 @@ public class Messages extends NLS {
 	public static String AddWaypointDialog_EmptyWaypointIDError;
 	public static String AddWaypointDialog_EmptyXError;
 	public static String AddWaypointDialog_EmptyYError;
+
+	public static String AddWaypointDialog_GeometryError;
 	public static String AddWaypointDialog_InvalidWaypointIDError;
 	public static String AddWaypointDialog_InvalidXError;
 	public static String AddWaypointDialog_InvalidXYError;
@@ -452,6 +454,8 @@ public class Messages extends NLS {
 	public static String MissionTrackFromWaypointEngine_SingleDayMessage;
 
 	public static String MissionTrackFromWaypointEngine_TwoPointsRequired;
+
+	public static String MissionTrackPointDialog_GeometryError;
 	public static String MoveWaypointDialog_Description;
 	public static String MoveWaypointDialog_MoveToLabel;
 	public static String MoveWaypointDialog_Title;
@@ -506,6 +510,8 @@ public class Messages extends NLS {
 	public static String SamplingUnitAttributeListItemDeleteAdvisor_InvalidObjectError;
 	public static String SamplingUnitCellEditor_LoadJobTitle;
 	public static String SamplingUnitCellEditor_None;
+
+	public static String SamplingUnitColumnLabelProvider_LengthError;
 	public static String SamplingUnitDataSource_TypeNotSupported;
 	public static String SamplingUnitDeleteAdvisor_TrackError;
 	public static String SamplingUnitDeleteAdvisor_WaypointError;
@@ -725,6 +731,8 @@ public class Messages extends NLS {
 	public static String TemplateWizardPage_SurveyDesign;
 	public static String TemplateWizardPage_TemplateDesign;
 	public static String TemplateWizardPage_Title;
+	public static String TracksComposite_CouldNotParseLinestring;
+
 	public static String TracksComposite_CouldNotSplit;
 	public static String TracksComposite_CurrentDayRule;
 	public static String TracksComposite_deleteLabel;
@@ -795,6 +803,8 @@ public class Messages extends NLS {
 	public static String XMLtoMissionConverter_7;
 	public static String XMLtoMissionConverter_8;
 	public static String XMLtoMissionConverter_9;
+
+	public static String XMLtoMissionConverter_AttachmentError;
 
 	public static String XMLtoMissionConverter_ObserverNotFound;
 	

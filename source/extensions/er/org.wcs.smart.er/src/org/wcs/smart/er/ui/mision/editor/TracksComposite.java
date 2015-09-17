@@ -694,7 +694,7 @@ public class TracksComposite extends Composite implements MapPart{
 		
 			refresh(true);
 		}catch (Exception ex){
-			EcologicalRecordsPlugIn.displayLog("Could not parse linestring", ex);
+			EcologicalRecordsPlugIn.displayLog(Messages.TracksComposite_CouldNotParseLinestring, ex);
 		}
 	}
 	
@@ -731,7 +731,7 @@ public class TracksComposite extends Composite implements MapPart{
 						try{
 							ls1 = trackToSplit.getLineString();
 						}catch (Exception ex){
-							setError("Could not parse track.");
+							setError(Messages.TracksComposite_CouldNotParseLinestring);
 							return;
 						}
 						
@@ -860,7 +860,7 @@ public class TracksComposite extends Composite implements MapPart{
 				MissionTrackPointDialog tpd = new MissionTrackPointDialog(getShell(), track);
 				tpd.open();
 			}catch (Exception ex){
-				EcologicalRecordsPlugIn.displayLog("Could not parse linestring", ex);
+				EcologicalRecordsPlugIn.displayLog(Messages.TracksComposite_CouldNotParseLinestring, ex);
 			}
 			ApplicationGIS.getToolManager().setCurrentEditor(this);
 			toolComp.selectLastTool();
@@ -880,7 +880,7 @@ public class TracksComposite extends Composite implements MapPart{
 					env.expandToInclude(track.getLineString().getEnvelopeInternal());
 				}
 			}catch (Exception ex){
-				EcologicalRecordsPlugIn.displayLog("Could not parse linestring", ex);
+				EcologicalRecordsPlugIn.displayLog(Messages.TracksComposite_CouldNotParseLinestring, ex);
 			}
 			
 		}

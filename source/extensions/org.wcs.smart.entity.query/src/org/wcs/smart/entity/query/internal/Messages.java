@@ -90,6 +90,7 @@ public class Messages extends NLS {
 	public static String EntityAttributeTreeGroupByDropItem_FiltersLabel;
 	public static String EntityAttributeTreeGroupByDropItem_IncludedLabel;
 	public static String EntityAttributeTreeGroupByDropItem_LevelLabel;
+	public static String EntityDropItemFactory_SourceNotFound;
 	public static String EntityGridQueryType_Name;
 	public static String EntityObservationQueryType_Name;
 	public static String EntityQueryColumnCache_jobname;

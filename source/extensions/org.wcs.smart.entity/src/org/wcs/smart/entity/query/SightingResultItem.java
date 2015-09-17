@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.entity.model.EntityType;
 import org.wcs.smart.entity.model.Status;
 import org.wcs.smart.query.common.engine.IResultItem;
 
