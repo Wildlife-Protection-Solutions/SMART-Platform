@@ -698,7 +698,7 @@ public class CyberTrackerConfExporter {
 	}
 	
 	private String recordDefaultValue(Attribute attribute, String defaultValue) {
-		//tag0 - key (attribute uuid); tag1 - value (default value for this attribute in given observation)
+		//tag0 - key (attribute uuid); tag2 - value (default value for this attribute in given observation)
 		String ctid = (new CyberTrackerId()).getItemId();
 		ElementsUtil.addElementsItem(elements, LanguageUtil.getName(attribute, currentLanguage), ctid, UuidUtils.uuidToString(attribute.getUuid()), null, defaultValue);
 		return ctid;
