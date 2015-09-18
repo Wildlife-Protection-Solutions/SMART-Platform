@@ -194,7 +194,7 @@ public class SmartHibernateManager {
 		SmartHibernateManager.endSessionFactory();
 		
 		//open new session
-		return SmartHibernateManager.openSession();
+		return openSessionOnly(null);
 	}
 	
 	/**
@@ -231,7 +231,11 @@ public class SmartHibernateManager {
 			e.printStackTrace();
 		}
 		thisLock.release();
-				
+		return openSessionOnly(interceptor);
+		
+	}
+	
+	private static Session openSessionOnly(Interceptor interceptor){
 		if (sessionFactory == null){
 			createSessionFactory();
 		}
@@ -259,8 +263,8 @@ public class SmartHibernateManager {
 		}
 		
 		return session;
+		
 	}
-	
 	/**
 	 * Closes the current session factory.
 	 */
