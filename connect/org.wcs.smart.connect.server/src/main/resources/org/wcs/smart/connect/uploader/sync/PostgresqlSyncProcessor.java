@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ZipUtil;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
@@ -37,6 +38,7 @@ public class PostgresqlSyncProcessor {
 
 			Path metadataFile = null;
 			Path changeLogFile = null;
+			Path filestoreDir = tempDir.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			try(DirectoryStream<Path> files = Files.newDirectoryStream(tempDir)){
 				for (Path file : files){
 					if (file.getFileName().toString().endsWith(".changelog.metadata")){
@@ -94,16 +96,15 @@ public class PostgresqlSyncProcessor {
 			
 			
 			//apply change log
-			applyChangeLog(changeLogFile);
+			applyChangeLog(changeLogFile, filestoreDir);
 		
 		}finally{
 			FileUtils.deleteDirectory(tempDir.toFile());
 		}
 	}
-	
-	private void applyChangeLog(final Path file) throws Exception{
-		PostgresqlChangeLogDeserializer processor = new PostgresqlChangeLogDeserializer(file);
+
+	private void applyChangeLog(Path changelogFile, Path changelogFilestore) throws Exception{
+		PostgresqlChangeLogDeserializer processor = new PostgresqlChangeLogDeserializer(changelogFile, changelogFilestore);
 		processor.processFile(session);
 	}
-	
 }

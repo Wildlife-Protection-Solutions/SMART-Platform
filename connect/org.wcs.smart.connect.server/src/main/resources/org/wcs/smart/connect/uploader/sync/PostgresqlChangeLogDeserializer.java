@@ -1,5 +1,7 @@
 package org.wcs.smart.connect.uploader.sync;
 
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,13 +12,14 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 
 public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 
-	public PostgresqlChangeLogDeserializer(Path changeLogFile) {
-		super(changeLogFile);
+	public PostgresqlChangeLogDeserializer(Path changeLogFile, Path changeLogFilestore) {
+		super(changeLogFile, changeLogFilestore);
 	}
 
 	@Override
@@ -38,24 +41,32 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 	}
 	
 	@Override
-	protected void processFileDelete(ChangeLogItem arg0, Connection arg1)
+	protected void processFileDelete(ChangeLogItem item, Connection c)
 			throws Exception {
-		// TODO Auto-generated method stub
+		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
+		Files.delete(toPath);
 		
 	}
 
 	@Override
-	protected void processFileInsert(ChangeLogItem arg0, Connection arg1)
+	protected void processFileInsert(ChangeLogItem item, Path changeLogFilestore, Connection c)
 			throws Exception {
-		// TODO Auto-generated method stub
-		
+		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
+		Path fromPath = changeLogFilestore.resolve(item.getFileName());
+		if (Files.isDirectory(fromPath)){
+			Files.createDirectories(toPath);
+		}else{
+			if (!Files.exists(toPath)){
+				Files.copy(fromPath, toPath);
+			}
+		}
 	}
 
 	@Override
-	protected void processFileUpdate(ChangeLogItem arg0, Connection arg1)
+	protected void processFileUpdate(ChangeLogItem item, Path changeLogFilestore,  Connection c)
 			throws Exception {
-		// TODO Auto-generated method stub
-		
+		//same as insert
+		processFileInsert(item, changeLogFilestore, c);
 	}
 
 	@Override

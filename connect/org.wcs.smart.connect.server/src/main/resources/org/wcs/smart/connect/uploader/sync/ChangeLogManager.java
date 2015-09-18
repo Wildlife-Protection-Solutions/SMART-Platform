@@ -37,7 +37,6 @@ public enum ChangeLogManager {
 		if (data.size() != 1){ return false; }
 		if ( ((BigInteger)data.get(0)).longValueExact()  > 0) return true;
 		return false;
-		
 	}
 	
 	public void insertItem(Session s, ChangeLogItem item){

@@ -17,6 +17,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.connect.uploader.PostgresqlMetadataCreator;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
@@ -32,6 +33,7 @@ public class ChangeLogPackager {
 	private Path changelogFile;
 	private Path metadataFile;
 	private Path zipFile;
+	private Path filestorePath;
 	
 	private Session session;
 	
@@ -41,7 +43,7 @@ public class ChangeLogPackager {
 		this.caUuid = caUuid;
 		
 		File tempDir = ZipUtil.createTemporaryDirectory();
-		
+		filestorePath = tempDir.toPath().resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 		metadataFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.metadata");
 		changelogFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog");
 		zipFile = tempDir.toPath().resolve(UuidUtils.uuidToString(caUuid) + "." + System.nanoTime() + ".changelog.zip");
@@ -72,7 +74,7 @@ public class ChangeLogPackager {
 	}
 	
 	private void zipPackage() throws Exception{
-		ZipUtil.createZip(new File[]{changelogFile.toFile(), metadataFile.toFile()}, zipFile.toFile());
+		ZipUtil.createZip(new File[]{changelogFile.toFile(), metadataFile.toFile(), filestorePath.toFile()}, zipFile.toFile());
 	}
 	
 	private void packageMetadata() throws Exception{
@@ -107,7 +109,7 @@ public class ChangeLogPackager {
 						}
 					};
 					for (ChangeLogItem i : items){
-						serializer.serialize(oout, i, connection);
+						serializer.serialize(oout, i, filestorePath, connection);
 					}
 				}catch (Exception ex){		
 					throw new SQLException (ex);
