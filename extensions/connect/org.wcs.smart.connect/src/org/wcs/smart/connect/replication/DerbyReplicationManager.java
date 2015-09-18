@@ -49,6 +49,11 @@ public enum DerbyReplicationManager {
 	private Thread fileStoreReplication;
 	private FileStoreWatcher watcher;
 	
+	/**
+	 * This MUST BE wrapped in a transaction that is committed
+	 * @param session
+	 * @throws Exception
+	 */
 	public void enableReplication(Session session) throws Exception{
 		setReplicationEnabled(session, true);
 
@@ -60,6 +65,11 @@ public enum DerbyReplicationManager {
 		fileStoreReplication.start();
 	}
 	
+	/**
+	 * This MUST BE wrapped in a transaction that is committed
+	 * @param session
+	 * @throws Exception
+	 */
 	public void disableReplication(Session session) throws Exception{
 		setReplicationEnabled(session, false);
 		
@@ -74,7 +84,12 @@ public enum DerbyReplicationManager {
 		}
 		
 	}
-	
+
+	/**
+	 * This MUST BE wrapped in a transaction that is committed
+	 * @param session
+	 * @param isEnabled
+	 */
 	private void setReplicationEnabled(Session session, final boolean isEnabled){
 		session.doWork(new Work(){
 			@Override

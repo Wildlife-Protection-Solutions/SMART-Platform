@@ -284,13 +284,17 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 					lblServerRevision.setText( status.getServerRevision().toString() );
 					
 					ConnectSyncHistoryRecord  rec = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, SmartDB.getCurrentConservationArea(), ConnectSyncHistoryRecord.Type.UPLOAD);
-					Long currentRevision = ChangeLogTableManager.INSTANCE.getMaxRevision(session, SmartDB.getCurrentConservationArea());
+					Long currentRevision = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, SmartDB.getCurrentConservationArea());
 					if (rec == null && currentRevision == null){
-						lblLocalChanges.setText("None");
+						lblLocalChanges.setText("No");
 					}else if (rec == null && currentRevision != null){
 						lblLocalChanges.setText("Yes");
 					}else if (rec != null && currentRevision == null){
-						lblLocalChanges.setText("ERROR");
+						if (rec.getEndRevision().longValue() != -1){
+							lblLocalChanges.setText("Error");
+						}else{
+							lblLocalChanges.setText("No");
+						}
 					}else if (rec != null && currentRevision != null){
 						if (currentRevision.longValue() > rec.getEndRevision().longValue()){
 							lblLocalChanges.setText("Yes");

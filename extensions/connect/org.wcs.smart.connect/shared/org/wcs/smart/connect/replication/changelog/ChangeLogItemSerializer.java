@@ -24,6 +24,9 @@ package org.wcs.smart.connect.replication.changelog;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,6 +37,7 @@ import java.sql.Types;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 import org.wcs.smart.util.UuidUtils;
@@ -52,13 +56,30 @@ public abstract class ChangeLogItemSerializer {
 	protected abstract int convertType(int type, int precision);
 	
 	public void serialize(ObjectOutputStream stream,
-			ChangeLogItem item, Connection c) throws SQLException, IOException{
+			ChangeLogItem item, 
+			Path packageFileLocation, Connection c) throws SQLException, IOException{
 		
-		if (item.getAction() == Action.FS_DELETE || 
-				item.getAction() == Action.FS_UPDATE || 
-				item.getAction() == Action.FS_INSERT ){
-			//TODO: ignore for now
+		if (item.getAction() == Action.FS_DELETE){
 			stream.writeObject(item);
+			return;
+		}
+		if (item.getAction() == Action.FS_UPDATE || 
+			item.getAction() == Action.FS_INSERT ){
+			stream.writeObject(item);
+			
+			//copy file
+			Path sourcePath = FileSystems.getDefault()
+					.getPath(SmartContext.INSTANCE.getFilestoreLocation())
+					.resolve(item.getFileName());
+			if (!Files.isDirectory(sourcePath)){
+				Path toPath = packageFileLocation.resolve(item.getFileName());
+				Files.createDirectories(toPath.getParent());
+				if(!Files.exists(toPath)){
+					if (Files.exists(sourcePath)){
+						Files.copy(sourcePath, toPath);
+					}
+				}
+			}
 			return;
 		}
 			

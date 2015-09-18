@@ -48,6 +48,8 @@ import org.wcs.smart.util.UuidUtils;
 @Table(name="smart.connect_sync_history")
 public class ConnectSyncHistoryRecord extends UuidItem{
 
+	public static final String PACKAGE_FILESTORE_DIR = "filestore"; //$NON-NLS-1$
+	
 	public static final String CONNECT_FILESTORE_DIR = "smart_connect"; //$NON-NLS-1$
 	
 	public enum Type{

@@ -129,6 +129,12 @@ public class UploadChangeLogEngine {
 						//update sync record revision
 						current.setEndRevision(packer.getLastRevision());
 					}
+					
+					//throw exception if necessary
+					if(current.getStartRevision().longValue() == packer.getLastRevision()){
+						throw new NothingToUpdateException("Conservation up to date. Nothing to sync");
+					}
+					
 					//save record
 					Session s = HibernateManager.openSession();
 					try{
@@ -138,10 +144,7 @@ public class UploadChangeLogEngine {
 					}finally{
 						s.close();
 					}
-					//throw exception if necessary
-					if(current.getStartRevision() == packer.getLastRevision()){
-						throw new NothingToUpdateException("Conservation up to date. Nothing to sync");
-					}
+
 				}
 			}
 			

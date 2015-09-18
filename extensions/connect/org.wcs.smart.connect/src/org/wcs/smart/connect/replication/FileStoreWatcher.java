@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.replication;
 
 import java.io.IOException;
+import java.nio.file.ClosedWatchServiceException;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -41,6 +42,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.model.ChangeLogItem.Source;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -127,6 +129,7 @@ public class FileStoreWatcher implements Runnable{
     	item.setAction(type);
     	item.setConservationArea(SmartDB.getCurrentConservationArea().getUuid());
     	item.setFileName(relativeFileName);
+    	item.setSource(Source.LOCAL);
 
     	Session s = HibernateManager.openSession();
     	try{
@@ -146,6 +149,10 @@ public class FileStoreWatcher implements Runnable{
 			try {
 				key = watcher.take();
 			} catch (InterruptedException x) {
+				return;
+			} catch (ClosedWatchServiceException x){
+				//we have disabled replication so don't worry about
+				//this event
 				return;
 			}
 

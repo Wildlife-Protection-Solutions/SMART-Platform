@@ -56,7 +56,9 @@ public class LoginHandler implements ILoginHandler {
 		//ensure replication is disabled; we will enable later if required
 		Session s = HibernateManager.openSession();
 		try{
+			s.beginTransaction();
 			DerbyReplicationManager.INSTANCE.disableReplication(s);
+			s.getTransaction().commit();
 		}finally{
 			s.close();
 		}
@@ -76,6 +78,7 @@ public class LoginHandler implements ILoginHandler {
 				status.getStatus() == ConnectServerStatus.Status.DONE ){
 				DerbyReplicationManager.INSTANCE.enableReplication(s);
 			}
+			s.getTransaction().commit();
 		}finally{
 			s.close();
 		}
