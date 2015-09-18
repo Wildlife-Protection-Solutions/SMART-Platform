@@ -32,6 +32,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.util.DerbyUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -64,8 +65,41 @@ public enum ChangeLogTableManager {
 		return true;
 	}
 	
+	/**
+	 * Insert item into table.
+	 * @param s
+	 * @param item
+	 */
 	public void addItem(Session s, ChangeLogItem item){
-		s.saveOrUpdate(item);	
+		//i tired doing just a s.save(item) however I could not
+		//get this to work with the revision identify field
+		String tableName = ((AbstractEntityPersister)s.getSessionFactory()
+				.getClassMetadata(ChangeLogItem.class))
+				.getTableName();
+		
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append(" INSERT INTO ");
+		sb.append(tableName);
+		sb.append(" (uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid, source)");
+		sb.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		
+		SQLQuery query = s.createSQLQuery(sb.toString());
+		if (item.getUuid() == null){
+			item.setUuid( UuidUtils.byteToUUID(DerbyUtils.createUuid()));
+		}
+		query.setBinary(0, UuidUtils.uuidToByte(item.getUuid()));
+		query.setString(1, item.getAction().name());
+		query.setString(2, item.getFileName());
+		query.setString(3, item.getTableName());
+		query.setBinary(4, UuidUtils.uuidToByte(item.getConservationArea()));
+		query.setString(5, item.getFieldName1());
+		query.setBinary(6, item.getKey1() == null ? null : UuidUtils.uuidToByte(item.getKey1()));
+		query.setString(7, item.getFieldName2());
+		query.setString(8, item.getKey2String());
+		query.setBinary(9, item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2()));
+		query.setString(10, item.getSource().name());
+		query.executeUpdate();
 	}
 	
 	/**
@@ -73,16 +107,18 @@ public enum ChangeLogTableManager {
 	 * @param s
 	 * @param ca
 	 * 
-	 * @return the current maximum revision number from the change long table for the conservation area or null
+	 * @return the current maximum revision number from the change log 
+	 * table for the conservation area or null
 	 * if there is nothing in the change log table for the conservation area
 	 */
-	public Long getMaxRevision(Session s, ConservationArea ca){
-		BigInteger x = (BigInteger)s.createCriteria(ChangeLogItem.class)
-				.add(Restrictions.eq("caUuid", ca.getUuid()))
+	public Long getMaxLocalRevision(Session s, ConservationArea ca){
+		Long x = (Long)s.createCriteria(ChangeLogItem.class)
+				.add(Restrictions.eq("conservationArea", ca.getUuid()))
+				.add(Restrictions.eq("source", ChangeLogItem.Source.LOCAL))
 				.setProjection(Projections.max("revision"))
 				.uniqueResult();
 		if (x == null) return null;
-		return x.longValue();
+		return x;
 	}
 	
 	/**
@@ -98,7 +134,7 @@ public enum ChangeLogTableManager {
 		
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT a.uuid, a.revision, a.action, a.filename, a.tablename, ");
-		query.append("a.key1_fieldname, a.key1, a.key2_fieldname, a.key2_str, a.key2_uuid, a.ca_uuid "); 
+		query.append("a.key1_fieldname, a.key1, a.key2_fieldname, a.key2_str, a.key2_uuid, a.ca_uuid, a.source "); 
 		query.append("FROM " + tableName + " a,"); 
 		query.append("( SELECT max(revision) as maxrevision, ");
 		query.append("action, filename, tablename, key1_fieldname, key1,"); 
@@ -106,6 +142,7 @@ public enum ChangeLogTableManager {
 		query.append(tableName);
 		query.append(" WHERE ca_uuid = :ca1 ");
 		query.append(" AND revision > :revision1 ");
+		query.append(" AND source = '" + ChangeLogItem.Source.LOCAL + "'");
 		query.append("GROUP BY action, filename, tablename, key1_fieldname, key1,"); 
 		query.append("key2_fieldname, key2_str, key2_uuid) c ");
 		query.append("where a.ca_uuid = :ca2 "); 
@@ -114,6 +151,7 @@ public enum ChangeLogTableManager {
 		query.append("and (a.tablename = c.tablename or (a.tablename is null and c.tablename is null)) ");
 		query.append("and (a.key1_fieldname = c.key1_fieldname or (a.key1_fieldname is null and c.key1_fieldname is null)) ");
 		query.append("and (a.key1 = c.key1 or (a.key1 is null and c.key1 is null)) ");
+		query.append("and (a.source = '" + ChangeLogItem.Source.LOCAL + "') ");
 		query.append("and (a.key2_fieldname = c.key2_fieldname or (a.key2_fieldname is null and c.key2_fieldname is null)) ");
 		query.append("and (a.key2_uuid = c.key2_uuid or (a.key2_uuid is null and c.key2_uuid is null)) ");
 		query.append("and (a.key2_str = c.key2_str or (a.key2_str is null and c.key2_str is null)) ");

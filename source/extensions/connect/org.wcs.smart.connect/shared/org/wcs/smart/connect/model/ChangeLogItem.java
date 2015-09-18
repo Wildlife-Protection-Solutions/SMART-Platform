@@ -31,6 +31,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Table;
 
 import org.wcs.smart.ca.UuidItem;
@@ -56,6 +58,11 @@ public class ChangeLogItem extends UuidItem implements Externalizable{
 		FS_DELETE
 	}
 	
+	public enum Source{
+		LOCAL,
+		SERVER
+	}
+	
 	private long revision;
 	private Action action;
 	private String fileName;
@@ -69,6 +76,7 @@ public class ChangeLogItem extends UuidItem implements Externalizable{
 	private String key2str;
 	
 	private UUID caUuid;
+	private Source source; 
 	
 	@Column(name="revision")
 	public Long getRevision(){
@@ -153,6 +161,15 @@ public class ChangeLogItem extends UuidItem implements Externalizable{
 		this.caUuid = ca;
 	}
 
+	@Column(name="source")
+	@Enumerated(EnumType.STRING)
+	public Source getSource(){
+		return this.source;
+	}
+	public void setSource(Source source){
+		this.source = source;
+	}
+	
 	@Override
 	public void readExternal(ObjectInput oi) throws IOException,
 			ClassNotFoundException {

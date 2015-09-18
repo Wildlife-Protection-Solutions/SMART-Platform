@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
+import org.wcs.smart.connect.model.ChangeLogItem.Source;
 
 /**
  * Class for deserializing a change log.
@@ -45,10 +46,12 @@ import org.wcs.smart.connect.model.ChangeLogItem.Action;
 public abstract class ChangeLogDeserializer {
 
 	protected Path changeLogFile;
+	protected Path changeLogFilestoreDir;
 	protected Session session;
 	
-	public ChangeLogDeserializer(Path changeLogFile){
+	public ChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir){
 		this.changeLogFile = changeLogFile;
+		this.changeLogFilestoreDir = changeLogFilestoreDir;
 	}
 	
 	
@@ -84,10 +87,11 @@ public abstract class ChangeLogDeserializer {
 						}else if(it.getAction() == Action.FS_DELETE){
 							processFileDelete(it, connection);
 						}else if(it.getAction() == Action.FS_UPDATE){
-							processFileUpdate(it, connection);
+							processFileUpdate(it, changeLogFilestoreDir, connection);
 						}else if(it.getAction() == Action.FS_INSERT){
-							processFileInsert(it, connection);
+							processFileInsert(it, changeLogFilestoreDir, connection);
 						}
+						it.setSource(Source.SERVER);
 						saveItem(it, session);
 					}
 				}catch (Exception ex){
@@ -134,7 +138,7 @@ public abstract class ChangeLogDeserializer {
 	
 	protected abstract void processFileDelete(ChangeLogItem item, Connection c) throws Exception;
 	
-	protected abstract void processFileUpdate(ChangeLogItem item, Connection c) throws Exception;
+	protected abstract void processFileUpdate(ChangeLogItem item, Path packageFilestoreDir, Connection c) throws Exception;
 		
-	protected abstract void processFileInsert(ChangeLogItem item, Connection c) throws Exception;
+	protected abstract void processFileInsert(ChangeLogItem item, Path packageFilestoreDir, Connection c) throws Exception;
 }

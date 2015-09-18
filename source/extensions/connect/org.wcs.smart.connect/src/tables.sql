@@ -27,7 +27,7 @@ CREATE TABLE smart.connect_status(
 	server_revision bigint not null,
 	status varchar(6),
 	uploadurl long varchar,
-	localfile long varchar,
+	localfile long varchar
 	primary key (ca_uuid)
 );
 ALTER TABLE smart.connect_status ADD CONSTRAINT connect_status_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE restrict ON DELETE restrict;
@@ -46,6 +46,7 @@ revision BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT B
 	key2_str varchar(256),
 	key2_uuid char(16) for bit data,
 	ca_uuid char(16) for bit data,
+	source varchar(6) default 'LOCAL'
 	primary key (revision)
 );
 ALTER TABLE smart.connect_change_log ADD CONSTRAINT connect_changelog_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE cascade;

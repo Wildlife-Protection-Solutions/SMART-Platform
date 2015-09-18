@@ -22,6 +22,8 @@
 package org.wcs.smart.connect.server.replication;
 
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,6 +35,8 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 import org.wcs.smart.util.UuidUtils;
@@ -44,8 +48,8 @@ import org.wcs.smart.util.UuidUtils;
 public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 
 	
-	public DerbyChangeLogDeserializer(Path changeLogFile) {
-		super(changeLogFile);
+	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir) {
+		super(changeLogFile, changeLogFilestoreDir);
 	}
 
 	/**
@@ -66,25 +70,33 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		
 		return true;
 	}
+	
 	@Override
-	protected void processFileDelete(ChangeLogItem arg0, Connection arg1)
+	protected void processFileDelete(ChangeLogItem item, Connection c)
 			throws Exception {
-		// TODO Auto-generated method stub
-		
+		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
+		Files.delete(toPath);
 	}
 
 	@Override
-	protected void processFileInsert(ChangeLogItem arg0, Connection arg1)
+	protected void processFileInsert(ChangeLogItem item, Path packageFilestoreDir, Connection c)
 			throws Exception {
-		// TODO Auto-generated method stub
-		
+		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
+		Path fromPath = packageFilestoreDir.resolve(item.getFileName());
+		if (Files.isDirectory(fromPath)){
+			Files.createDirectories(toPath);
+		}else{
+			if (!Files.exists(toPath)){
+				Files.copy(fromPath, toPath);
+			}	
+		}
 	}
 
 	@Override
-	protected void processFileUpdate(ChangeLogItem arg0, Connection arg1)
+	protected void processFileUpdate(ChangeLogItem item, Path packageFilestoreDir, Connection c)
 			throws Exception {
-		// TODO Auto-generated method stub
-		
+		//same as insert
+		processFileInsert(item, packageFilestoreDir, c);
 	}
 
 	@Override

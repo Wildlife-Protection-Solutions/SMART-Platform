@@ -30,13 +30,17 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.PlatformUI;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.replication.DerbyMetadataPackager;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -84,16 +88,29 @@ public class DownloadChangeLogEngine {
 			});	
 			return false;
 		}
+
+		//create sync history record for database
+		ConnectSyncHistoryRecord record = SyncHistoryManager.INSTANCE.create(connect.getServer().getConservationArea(), connect.getServer(), ConnectSyncHistoryRecord.Type.DOWNLOAD);
+		
 		try{
 			/* the ca info */
 			ConservationArea ca = SmartDB.getCurrentConservationArea();
 			if (SmartDB.isMultipleAnalysis()) throw new Exception("Cross-ca analysis can not be syncronized with server.");
-		
+			
+			ConnectServerStatus serverStatus = null;
 			Session s = HibernateManager.openSession();
-			s.beginTransaction();
-			ConnectServerStatus serverStatus = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
-			s.getTransaction().commit();
-			s.close();
+			try{
+				s.beginTransaction();
+				serverStatus = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
+				s.save(record);
+				s.getTransaction().commit();
+			}finally{
+				s.close();
+			}
+			
+			if (serverStatus == null){
+				throw new Exception("SMART Connect server not found.");
+			}
 			
 			/* request ca */
 			monitor.subTask("Initializing download");
@@ -136,6 +153,7 @@ public class DownloadChangeLogEngine {
 			monitor.subTask("Applying Updates");
 			if (monitor.isCanceled()) return false;
 			
+		
 			try{
 				applyFile(p, serverStatus);
 			}catch (NothingToUpdateException ex){
@@ -143,8 +161,33 @@ public class DownloadChangeLogEngine {
 			}catch (Exception ex){
 				throw new Exception("Unable to apply change log file. " + ex.getMessage(), ex);
 			}
+
+			record.setStatus(Status.DONE);
+			s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				s.saveOrUpdate(record);
+				s.getTransaction().commit();
+			}finally{
+				s.close();
+			}
 			
 			monitor.done();
+		}catch (Exception ex){
+			//some error
+			try{
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					record.setStatus(Status.ERROR);
+					s.getTransaction().commit();
+				}finally{
+					s.close();
+				}
+			}catch (Exception ex2){
+				ConnectPlugIn.log("Could not set download record status to error: " + ex2.getMessage(), ex2);
+			}
+			throw ex;
 		}finally{
 			UploadChangeLogEngine.UPLOAD_LOCK.release();
 		}
@@ -164,6 +207,7 @@ public class DownloadChangeLogEngine {
 
 			Path metadataFile = null;
 			Path changeLogFile = null;
+			Path filestoreDir = tempDir.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			try(DirectoryStream<Path> files = Files.newDirectoryStream(tempDir)){
 				for (Path file : files){
 					if (file.getFileName().toString().endsWith(".changelog.metadata")){
@@ -201,6 +245,11 @@ public class DownloadChangeLogEngine {
 			Session session = HibernateManager.lockDatabase();
 			try{
 				session.beginTransaction();
+				
+				//disable replication
+				/* disable replication in db so we don't log items twice */
+				DerbyReplicationManager.INSTANCE.disableReplication(session);
+				
 				//check plugin versions
 				HashMap<String, String> localPlugins = DerbyMetadataPackager.INSTANCE.getLocalPluginVersions(session);
 				
@@ -215,7 +264,7 @@ public class DownloadChangeLogEngine {
 					}
 				}
 				//apply change log
-				applyChangeLog(session, changeLogFile);
+				applyChangeLog(changeLogFile, filestoreDir, session);
 				
 				//update server revision
 				info.setServerRevision(metadata.getServerRevision());
@@ -229,6 +278,24 @@ public class DownloadChangeLogEngine {
 			}finally{
 				HibernateManager.unlockDatabase();
 				session.close();
+				
+				session = HibernateManager.openSession();
+				try{
+					session.beginTransaction();
+					DerbyReplicationManager.INSTANCE.enableReplication(session);
+					session.getTransaction().commit();
+				}catch(Exception ex){
+					//replication could not be re-enabled.  This needs to kill the
+					//application and restart
+					ConnectPlugIn.displayLog("Replication could not be enabled after applying changes.  This application will restart.", ex);
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							PlatformUI.getWorkbench().restart();
+						}});
+				}finally{
+					session.close();
+				}
 			}
 		
 		}finally{
@@ -236,8 +303,8 @@ public class DownloadChangeLogEngine {
 		}
 	}
 	
-	private void applyChangeLog(Session session, final Path file) throws Exception{
-		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(file);
+	private void applyChangeLog(Path changelogFile, Path changelogFilestore, Session session) throws Exception{
+		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changelogFile, changelogFilestore);
 		processor.processFile(session);
 	}
 	

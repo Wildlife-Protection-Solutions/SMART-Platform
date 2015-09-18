@@ -63,12 +63,12 @@ public class ChangeLogPackager {
 	
 	private Path changelogFile;
 	private Path metadataFile;
-	
+	private Path filestorePath;
 	private Path zipFile;
 	
 	public ChangeLogPackager(ConnectSyncHistoryRecord record){
 		this.record = record;
-		
+		filestorePath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 		changelogFile = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogFile());
 		metadataFile = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogMetadataFile() );
 		zipFile = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile());
@@ -116,7 +116,9 @@ public class ChangeLogPackager {
 	 * Zips changelog file and metadata file
 	 */
 	private void zipPackage(IProgressMonitor monitor) throws Exception{
-		ZipUtil.createZip(new File[]{changelogFile.toFile(), metadataFile.toFile()}, zipFile.toFile(), monitor);
+		ZipUtil.createZip(new File[]{changelogFile.toFile(), 
+				metadataFile.toFile(),
+				filestorePath.toFile()}, zipFile.toFile(), monitor);
 	}
 	
 	/*
@@ -148,6 +150,7 @@ public class ChangeLogPackager {
 
 			@Override
 			public void execute(Connection connection) throws SQLException {
+
 				try(OutputStream fout = Files.newOutputStream(changelogFile);
 						ObjectOutputStream oout = new ObjectOutputStream(fout)){
 					oout.writeInt(items.size());
@@ -168,7 +171,7 @@ public class ChangeLogPackager {
 						}
 					};
 					for (ChangeLogItem i : items){
-						serializer.serialize(oout, i, connection);
+						serializer.serialize(oout, i, filestorePath, connection);
 					}
 				}catch (Exception ex){		
 					throw new SQLException (ex);
