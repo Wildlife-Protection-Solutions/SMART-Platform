@@ -2184,7 +2184,7 @@ create table smart.connect_server(
 uuid UUID not null,
 ca_uuid UUID,
 url varchar(2064),
-timeout bigint,
+options varchar(32600),
 PRIMARY KEY (uuid));
 
 alter table smart.connect_server add constraint server_ca_uuid_fk foreign key (ca_uuid) 

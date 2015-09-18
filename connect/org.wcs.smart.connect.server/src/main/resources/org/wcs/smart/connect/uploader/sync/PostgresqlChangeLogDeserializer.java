@@ -10,8 +10,8 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItem;
 
 public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 

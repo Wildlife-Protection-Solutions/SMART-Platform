@@ -10,8 +10,8 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItem;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
+import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.model.ChangeLogItem.Action;
 
 public enum ChangeLogManager {
 	INSTANCE;

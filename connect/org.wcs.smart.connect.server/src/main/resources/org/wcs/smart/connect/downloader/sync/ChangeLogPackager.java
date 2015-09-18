@@ -16,7 +16,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.datastore.DataStoreManager;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItem;
+import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.connect.uploader.PostgresqlMetadataCreator;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
@@ -99,6 +99,11 @@ public class ChangeLogPackager {
 						public void prepareUuid(PreparedStatement ps, int index, UUID value)
 								throws SQLException {
 							ps.setObject(index, value);							
+						}
+
+						@Override
+						protected int convertType(int type, int precision) {
+							return type;
 						}
 					};
 					for (ChangeLogItem i : items){
