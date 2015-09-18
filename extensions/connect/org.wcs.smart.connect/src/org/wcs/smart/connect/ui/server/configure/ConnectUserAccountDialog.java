@@ -59,7 +59,7 @@ import org.wcs.smart.ui.SmartLabelProvider;
  * @author Emily
  *
  */
-public class ConnectUsernamePasswordDialog extends TitleAreaDialog{
+public class ConnectUserAccountDialog extends TitleAreaDialog{
 
 	private Text txtUser;
 	private Text txtPass;
@@ -69,7 +69,7 @@ public class ConnectUsernamePasswordDialog extends TitleAreaDialog{
 	
 	private ConnectServer server;
 	
-	public ConnectUsernamePasswordDialog(Shell parentShell, ConnectServer server, List<ConnectUser> toUpdate) {
+	public ConnectUserAccountDialog(Shell parentShell, ConnectServer server, List<ConnectUser> toUpdate) {
 		super(parentShell);
 		
 		this.toUpdate = toUpdate;

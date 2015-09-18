@@ -2,7 +2,7 @@ CREATE TABLE smart.connect_server(
 	uuid char(16) for bit data not null,
 	ca_uuid char(16) for bit data,
 	url varchar(2064),
-	timeout bigint,
+	options varchar(32600),
 	PRIMARY KEY (uuid)
 );
 

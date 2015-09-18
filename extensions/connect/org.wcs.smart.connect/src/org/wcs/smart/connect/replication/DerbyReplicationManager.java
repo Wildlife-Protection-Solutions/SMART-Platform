@@ -85,7 +85,6 @@ public enum DerbyReplicationManager {
 	
 	public boolean isReplicationEnabled(Session session){
 		return session.doReturningWork(new ReturningWork<Boolean>() {
-
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
 				String sql = "values syscs_util.syscs_get_database_property( '" + LOGGING_DB_PROPERTY + "' )";

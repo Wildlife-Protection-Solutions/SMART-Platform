@@ -38,7 +38,7 @@ public class ShowServerConfigurationHandler{
 	
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
-		ConnectServerDialog dialog = new ConnectServerDialog(activeShell);
+		ConnectServerInfoDialog dialog = new ConnectServerInfoDialog(activeShell);
 		dialog.open();
 	}
 	

@@ -26,7 +26,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Upload status object.
+ * Work item status object.
  * 
  * @author Emily
  *

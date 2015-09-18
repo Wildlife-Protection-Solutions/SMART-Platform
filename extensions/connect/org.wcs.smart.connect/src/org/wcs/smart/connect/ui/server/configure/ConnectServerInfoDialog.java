@@ -55,20 +55,17 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectUser;
-import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
-import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
+import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
+import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * SMART Plan Configuration Preference Page
- * 
- * @author elitvin
- * @since 1.0.0
+ * Connect server info dialog.
  */
-public class ConnectServerDialog extends TitleAreaDialog {
+public class ConnectServerInfoDialog extends TitleAreaDialog {
 
 	public static final String ID = "org.wcs.smart.preference.connect.ServerConfiguration"; //$NON-NLS-1$
 	
@@ -88,7 +85,7 @@ public class ConnectServerDialog extends TitleAreaDialog {
 	/**
 	 * Default constructor
 	 */
-	public ConnectServerDialog(Shell parent) {
+	public ConnectServerInfoDialog(Shell parent) {
 		super(parent);
 	}
 
@@ -342,7 +339,7 @@ public class ConnectServerDialog extends TitleAreaDialog {
 		if (toUpdate == null) return;
 		if (users.size() == 0) return;
 		
-		ConnectUsernamePasswordDialog d = new ConnectUsernamePasswordDialog(getParentShell(), toUpdate, users);
+		ConnectUserAccountDialog d = new ConnectUserAccountDialog(getParentShell(), toUpdate, users);
 		if (d.open() == Dialog.OK){
 			initControls();
 		}
@@ -351,7 +348,7 @@ public class ConnectServerDialog extends TitleAreaDialog {
 	}
 	private void addAccountInfo(){
 		if (toUpdate == null) return;
-		ConnectUsernamePasswordDialog d = new ConnectUsernamePasswordDialog(getParentShell(), toUpdate, null);
+		ConnectUserAccountDialog d = new ConnectUserAccountDialog(getParentShell(), toUpdate, null);
 		if (d.open() == Dialog.OK){
 			initControls();
 		}

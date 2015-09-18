@@ -34,7 +34,8 @@ import java.sql.Types;
 import java.util.UUID;
 
 import org.apache.commons.io.IOUtils;
-import org.wcs.smart.connect.replication.changelog.ChangeLogItem.Action;
+import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.model.ChangeLogItem.Action;
 import org.wcs.smart.util.UuidUtils;
 
 

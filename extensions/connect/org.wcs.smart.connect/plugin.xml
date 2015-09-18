@@ -20,6 +20,10 @@
       <class
             class="org.wcs.smart.connect.model.ConnectSyncHistoryRecord">
       </class>
+      <class
+            ca_property=".conservationArea"
+            class="org.wcs.smart.connect.model.ChangeLogItem">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.commands">

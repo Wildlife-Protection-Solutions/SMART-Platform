@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.replication.changelog;
+package org.wcs.smart.connect.server.replication;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -33,14 +33,24 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 import org.wcs.smart.util.UuidUtils;
 
+/**
+ * Derserialize and apply the change log file.
+ * 
+ */
 public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 
+	
 	public DerbyChangeLogDeserializer(Path changeLogFile) {
 		super(changeLogFile);
 	}
 
+	/**
+	 * Processes the change log file, updating the database as necessary.
+	 */
 	@Override
 	public void processFile(final Session session) throws Exception{
 		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();

@@ -28,8 +28,8 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
-import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
-import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
+import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
+import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 
 /**
  * Delete handler for deleting smart connect information attached to conservation area.

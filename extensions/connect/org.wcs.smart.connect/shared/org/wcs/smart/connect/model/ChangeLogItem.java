@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.replication.changelog;
+package org.wcs.smart.connect.model;
 
 import java.io.Externalizable;
 import java.io.IOException;
@@ -27,13 +27,23 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.util.UUID;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
+
+import org.wcs.smart.ca.UuidItem;
+
 /**
  * Change log item.
  * 
  * @author Emily
  *
  */
-public class ChangeLogItem implements Externalizable{
+@Entity
+@Table(name="smart.connect_change_log")
+public class ChangeLogItem extends UuidItem implements Externalizable{
 
 	private static final long serialVersionUID = 01L;
 	
@@ -45,7 +55,7 @@ public class ChangeLogItem implements Externalizable{
 		FS_UPDATE,
 		FS_DELETE
 	}
-	private UUID uuid;
+	
 	private long revision;
 	private Action action;
 	private String fileName;
@@ -60,13 +70,7 @@ public class ChangeLogItem implements Externalizable{
 	
 	private UUID caUuid;
 	
-	public UUID getUuid(){
-		return this.uuid;
-	}
-	public void setUuid(UUID uuid){
-		this.uuid = uuid;
-	}
-	
+	@Column(name="revision")
 	public Long getRevision(){
 		return this.revision;
 	}
@@ -75,6 +79,8 @@ public class ChangeLogItem implements Externalizable{
 		this.revision = revision;
 	}
 	
+	@Column(name="action")
+	@Enumerated(EnumType.STRING)
 	public Action getAction(){
 		return this.action;
 	}
@@ -83,6 +89,7 @@ public class ChangeLogItem implements Externalizable{
 		this.action = action;
 	}
 	
+	@Column(name="filename")
 	public String getFileName(){
 		return this.fileName;
 	}
@@ -90,6 +97,7 @@ public class ChangeLogItem implements Externalizable{
 		this.fileName = filename;
 	}
 	
+	@Column(name="tablename")
 	public String getTableName(){
 		return this.tableName;
 	}
@@ -97,6 +105,7 @@ public class ChangeLogItem implements Externalizable{
 		this.tableName = tablename;
 	}
 	
+	@Column(name="key1_fieldname")
 	public String getFieldName1(){
 		return this.fieldName1;
 	}
@@ -104,6 +113,7 @@ public class ChangeLogItem implements Externalizable{
 		this.fieldName1 = fieldName1;
 	}
 	
+	@Column(name="key1")
 	public UUID getKey1(){
 		return this.key1;
 	}
@@ -111,18 +121,23 @@ public class ChangeLogItem implements Externalizable{
 		this.key1 = key1;
 	}
 	
+	@Column(name="key2_fieldname")
 	public String getFieldName2(){
 		return this.fieldName2;
 	}
 	public void setFieldName2(String fieldName2){
 		this.fieldName2 = fieldName2;
 	}
+	
+	@Column(name="key2_uuid")
 	public UUID getKey2(){
 		return this.key2;
 	}
 	public void setKey2(UUID key2){
 		this.key2 = key2;
 	}
+	
+	@Column(name="key2_str")
 	public String getKey2String(){
 		return this.key2str;
 	}
@@ -130,6 +145,7 @@ public class ChangeLogItem implements Externalizable{
 		this.key2str = key2str;
 	}
 	
+	@Column(name="ca_uuid")
 	public UUID getConservationArea(){
 		return this.caUuid;
 	}
@@ -140,7 +156,7 @@ public class ChangeLogItem implements Externalizable{
 	@Override
 	public void readExternal(ObjectInput oi) throws IOException,
 			ClassNotFoundException {
-		uuid = (UUID) oi.readObject();
+		setUuid((UUID) oi.readObject());
 		revision = oi.readLong();
 		action = Action.valueOf((String)oi.readObject());
 		fileName = (String)oi.readObject();
@@ -161,7 +177,7 @@ public class ChangeLogItem implements Externalizable{
 
 	@Override
 	public void writeExternal(ObjectOutput oo) throws IOException {
-		oo.writeObject(uuid);
+		oo.writeObject(getUuid());
 		oo.writeLong(revision);
 		oo.writeObject(action.name());
 		oo.writeObject(fileName);
@@ -179,11 +195,7 @@ public class ChangeLogItem implements Externalizable{
 		}else{
 			oo.writeObject(key2.toString());
 		}
-
 		oo.writeObject(key2str);
-		oo.writeObject(caUuid.toString());
-		
+		oo.writeObject(caUuid.toString());	
 	}
-	
-	
 }
