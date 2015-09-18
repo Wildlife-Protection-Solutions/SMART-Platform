@@ -59,7 +59,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 					public void run(IProgressMonitor monitor) throws InvocationTargetException,
 							InterruptedException {
 						try{
-							if (!installer.download(monitor)){
+							if (!installer.downloadImport(monitor)){
 								errors.add(new Exception("Process cancelled by user."));
 							}
 							

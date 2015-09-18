@@ -44,25 +44,22 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
-import org.wcs.smart.connect.replication.changelog.ChangeLogTableManager;
-import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
+import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
+import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Upload ca engine that processes the initial upload request,
- * checking server status and packaging ca export.
+ * Upload Conservation Area engine that exports
+ * the Conservation Area, uploading it to the server.
  * 
  * @author Emily
  *
  */
 public class UploadCaEngine {
-
-	
-	
 	/**
-	 * Creates necessary local database records 
+	 * Creates local database records 
 	 * and starts a job to upload the export to the server  
 	 * 
 	 * @param sc
@@ -80,11 +77,11 @@ public class UploadCaEngine {
 		ConnectServerStatus localStatus = null;
 		Session s = HibernateManager.openSession();
 
-		//TODO: validate plugin versions
 		try{
 			s.beginTransaction();
 			localStatus = getLocalStatus(s, server.getConservationArea());
 	
+			//check status
 			if (serverInfo != null){
 				if (serverInfo.getStatus() == ConservationAreaInfo.Status.DATA){
 					throw new Exception("This conservation area already exists on the server.  You cannot upload to the server again without removing it from the server first.");
@@ -116,6 +113,7 @@ public class UploadCaEngine {
 				}
 			}
 			
+			//create db records
 			if (serverInfo == null || 
 					(serverInfo != null && serverInfo.getStatus() == ConservationAreaInfo.Status.NODATA)){
 				//update ca to server (new ca will be created if required; otherwise we update existing)
@@ -141,6 +139,8 @@ public class UploadCaEngine {
 		}finally{
 			s.close();
 		}
+		
+		//create export package
 		try{
 			if (localStatus.getUploadUrl() == null){
 				monitor.subTask("Exporting conservation area for upload.");

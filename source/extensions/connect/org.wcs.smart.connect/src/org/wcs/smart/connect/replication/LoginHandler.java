@@ -35,9 +35,10 @@ import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.model.ConnectUser;
-import org.wcs.smart.connect.replication.changelog.SyncHistoryManager;
-import org.wcs.smart.connect.replication.changelog.UploadChangeLogEngine;
 import org.wcs.smart.connect.server.UploadCaJob;
+import org.wcs.smart.connect.server.replication.NothingToUpdateException;
+import org.wcs.smart.connect.server.replication.SyncHistoryManager;
+import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -81,7 +82,6 @@ public class LoginHandler implements ILoginHandler {
 		
 		processCaUploadEvents(status);
 		processUploadSync();
-		//TODO: upload sync events also need checking to clean up
 	}
 
 	/*
@@ -181,7 +181,11 @@ public class LoginHandler implements ILoginHandler {
 					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could finish.  The job will resume and you will be notified when complete.");
 					
 					UploadChangeLogEngine e = new UploadChangeLogEngine(connect);
-					e.syncUpload(new NullProgressMonitor());
+					try{
+						e.createUpload(new NullProgressMonitor());
+					}catch (NothingToUpdateException ex){
+						//consume this exception
+					}
 				}
 			}
 		}catch (Exception ex){

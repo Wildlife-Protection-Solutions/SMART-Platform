@@ -96,15 +96,5 @@ public interface ConnectClient {
 	@PUT
 	@Path("/" + CA_PATH + "/{cauuid}")
 	public Response updateConservationArea(@HeaderParam("X-Upload-Content-Length") Long length, @PathParam("cauuid") String caUuid);
-	
-//	@POST
-//    @Path("/{username}")
-//	@Produces(MediaType.APPLICATION_JSON)
-//    String addUser(@PathParam("username") String user, SmartUser newUser);
-// 
-//    @PUT
-//    @Path("/{username}")
-//    String updateUser(
-//    		@PathParam("username") String olduser,
-//    		SmartUser newUser);
+
 }

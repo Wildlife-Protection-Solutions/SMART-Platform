@@ -1,4 +1,25 @@
-package org.wcs.smart.connect.replication.changelog;
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+package org.wcs.smart.connect.server.replication;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,12 +40,21 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyMetadataPackager;
+import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.UuidUtils;
 import org.wcs.smart.util.ZipUtil;
 
+/**
+ * Packager for packing up change log file and related
+ * metadata.
+ * 
+ * @author Emily
+ *
+ */
 public class ChangeLogPackager {
 
 	private ConnectSyncHistoryRecord record;
@@ -44,15 +74,30 @@ public class ChangeLogPackager {
 		zipFile = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile());
 	}
 	
+	/**
+	 * 
+	 * @return the last revision number in the change log file
+	 */
 	public long getLastRevision(){
 		return endRevision;
 	}
 	
+	/**
+	 * Removes temporary files created during packaging process.
+	 *  
+	 * @throws IOException
+	 */
 	public void cleanUp() throws IOException{
 		Files.deleteIfExists(changelogFile);
 		Files.deleteIfExists(metadataFile);
 	}
 	
+	/**
+	 * Packages metadata and change log.
+	 * 
+	 * @param monitor
+	 * @throws Exception
+	 */
 	public void createPackage(IProgressMonitor monitor) throws Exception{
 		monitor.beginTask("Creating change log package", 3);
 		try{
@@ -67,10 +112,16 @@ public class ChangeLogPackager {
 		}
 	}
 	
+	/*
+	 * Zips changelog file and metadata file
+	 */
 	private void zipPackage(IProgressMonitor monitor) throws Exception{
 		ZipUtil.createZip(new File[]{changelogFile.toFile(), metadataFile.toFile()}, zipFile.toFile(), monitor);
 	}
 	
+	/*
+	 * Creates metadata package
+	 */
 	private void packageMetadata() throws Exception{
 		Session s = HibernateManager.openSession();
 		try{
@@ -79,6 +130,10 @@ public class ChangeLogPackager {
 			s.close();
 		}
 	}
+	
+	/*
+	 * Creates change log package
+	 */
 	private void packageChangLog() throws Exception{
 		final List<ChangeLogItem> items = getChangeLogItems();
 		if (items.size() == 0){

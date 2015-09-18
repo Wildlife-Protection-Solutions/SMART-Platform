@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.server;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,10 +52,16 @@ import org.wcs.smart.ui.UserNamePasswordDialog;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Engine for downloading and installing a Conservation Area.
+ * 
+ * This works in the display thread; other tasks cannot be completed
+ * while this task is working.
+ * 
+ * @author Emily
+ *
+ */
 public class DownloadCaEngine {
-
-	public static final long MAX_WAIT = 5 * 60 * 1000000000l;  //5 minutes in nano seconds
-	public static final long STATUS_RETY_WAIT = 1000;
 	
 	private ConservationAreaInfo info;
 	private SmartConnect connect;
@@ -44,24 +71,30 @@ public class DownloadCaEngine {
 		this.connect = connect;
 	}
 	
-	public boolean download(IProgressMonitor monitor) throws Exception{
+	/**
+	 * Downloads the Conservation Area export package and imports it.
+	 * 
+	 * @param monitor
+	 * @return true if download and install completed. false if user cancelled
+	 * @throws Exception
+	 */
+	public boolean downloadImport(IProgressMonitor monitor) throws Exception{
 		monitor.beginTask("Download & Install Conservation Area", 4);
 		
 		/* request ca */
-		monitor.subTask("Initializing download");
+		monitor.subTask("Initializing Conservation Area Download");
 		String statusUrl = connect.startConservationAreaDownload(info.getUuid());
 		monitor.worked(1);
 		if (monitor.isCanceled()) return false;
 		
 		/* wait for ca export to be created */
-		monitor.subTask("Waiting for export to processes");
+		monitor.subTask("Waiting for Conservation Area Export");
 		Long start = System.nanoTime();
 		WorkItemStatus status = null ;
-		while(status == null || (status.getStatus() == WorkItemStatus.Status.PROCESSING || 
-				status.getStatus() == WorkItemStatus.Status.PROCESSING)){
+		while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
 			Long current = System.nanoTime();
-			if ( current - start > MAX_WAIT) throw new Exception("Timed out waiting for export to process.");
-			Thread.sleep(STATUS_RETY_WAIT);
+			if ( current - start > connect.getServer().getWaitProcessingTime()) throw new Exception("Timed out waiting for export to process.");
+			Thread.sleep(connect.getServer().getRetryWaitTime());
 			try{
 				status = connect.getWorkItemStatus(statusUrl);
 			}catch (Exception ex){
@@ -76,7 +109,7 @@ public class DownloadCaEngine {
 		}
 
 		/* download file */
-		monitor.subTask("Downloading Conservation Area");
+		monitor.subTask("Downloading Conservation Area Export");
 		String message = status.getMessage();
 		JsonNode nd = (new ObjectMapper()).readTree(message);
 		String downloadUrl = nd.get("file_url").asText();
@@ -92,10 +125,14 @@ public class DownloadCaEngine {
 		monitor.done();
 		return true;
 	}
+	
 	/**
+	 * To be executed before downloading and importing
+	 * Conservation Area engine. This ensure the Conservation Area
+	 * does not already exist.
 	 * 
 	 * @param activeShell
-	 * @return true if continue, false if done
+	 * @return true if download install process should continue, false if we should stop
 	 */
 	public boolean preDownload(final Shell activeShell){
 		ConservationArea desktopCa;
@@ -158,31 +195,29 @@ public class DownloadCaEngine {
 			HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 			
 			final ConservationArea fdesktopCa = desktopCa;
+		
+			//delete ca
 			ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
+			final boolean[] cont = new boolean[]{true};
 			try{
-			pmd.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					DisplayAccess.accessDisplayDuringStartup();
-					
-					monitor.setTaskName("Deleting Conservation Area");
-					
-					try{
-						ConservationAreaManager.getInstance().deleteConservationArea(fdesktopCa, monitor, false);
-					}catch (final Exception ex){
-						//TODO: figure out how to return false to surrounding function
-						SmartPlugIn.displayLog("Failed to delete conservation area.", ex);
-						
+				pmd.run(true, false, new IRunnableWithProgress() {
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						DisplayAccess.accessDisplayDuringStartup();
+						monitor.setTaskName("Deleting Conservation Area");
+						try{
+							ConservationAreaManager.getInstance().deleteConservationArea(fdesktopCa, monitor, false);
+						}catch (final Exception ex){
+							cont[0] = false;
+							SmartPlugIn.displayLog("Failed to delete conservation area.", ex);	
+						}		
 					}
-					
-				}
-			});
+				});
 			}catch (Exception ex){
 				SmartPlugIn.displayLog( "Failed to delete conservation area.", ex);
 				return false;
 			}
+			if (!cont[0]) return false;
 		}
 		
 		//ensure ca is removed

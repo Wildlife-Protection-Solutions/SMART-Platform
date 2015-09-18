@@ -36,6 +36,7 @@ import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Metadata packager which accompanies all upload and downloads from the server.
+ * 
  * @author Emily
  *
  */
@@ -61,11 +62,6 @@ public enum DerbyMetadataPackager {
 		
 		//plugin versions
 		metadata.setPluginVersions(getLocalPluginVersions(session));
-		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL);
-		List<Object[]> plugins = q.list();
-		for (Object[] version : plugins){
-			metadata.setPluginVersion((String)version[1], (String)version[0]);
-		}
 		
 		MetadataPackager.INSTANCE.writeMetadata(file, metadata);
 	}

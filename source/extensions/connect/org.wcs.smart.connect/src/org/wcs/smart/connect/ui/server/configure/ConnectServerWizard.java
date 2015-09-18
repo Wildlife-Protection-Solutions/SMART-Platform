@@ -62,8 +62,8 @@ public class ConnectServerWizard extends Wizard {
 		ConnectServer server = new ConnectServer();
 		server.setConservationArea(SmartDB.getCurrentConservationArea());
 		server.setServerUrl(url);
-		server.setTimeout(120);
-		
+		server.initalizeOptions();
+				
 		try(SmartConnect cs = new SmartConnect(server, username, password)){
 			error = cs.validateUser();
 		}
@@ -91,7 +91,5 @@ public class ConnectServerWizard extends Wizard {
 			s.close();
 		}
 		return true;
-		
 	}
-
 }

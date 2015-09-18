@@ -44,10 +44,6 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class UploadCaJob extends FileUploaderJob {
 
-	public static final int MAX_RETRY = 100;
-	public static final int STATUS_WAIT_TIME = 1000; //1 sec
-	public static final long MAX_WAIT = 5 * 60 * 1000000000l;  //5 minutes in nano seconds
-	
 	private ConnectServerStatus status;
 	
 	public UploadCaJob(SmartConnect connect, ConnectServerStatus status){
