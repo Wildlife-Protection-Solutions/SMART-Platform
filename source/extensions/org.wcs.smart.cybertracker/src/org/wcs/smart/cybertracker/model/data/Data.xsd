@@ -17,6 +17,7 @@
                       <xs:attribute type="xs:string" name="Tag_2" use="optional"/>
                       <xs:attribute type="xs:string" name="Tag_3" use="optional"/>
                       <xs:attribute type="xs:string" name="Tag_4" use="optional"/>
+                      <xs:attribute type="xs:string" name="Tag_5" use="optional"/>
                     </xs:extension>
                   </xs:simpleContent>
                 </xs:complexType>

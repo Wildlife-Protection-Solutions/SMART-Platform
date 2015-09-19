@@ -709,8 +709,8 @@ public class CyberTrackerConfExporter {
 		labelValues.add(Messages.CyberTrackerExporter_Waypoint_SaveAsNew);
 		labelValues.add(Messages.CyberTrackerExporter_Waypoint_AddToLast);
 		List<String> tag0Values = new ArrayList<String>();
-		tag0Values.add("true"); //$NON-NLS-1$
-		tag0Values.add("false"); //$NON-NLS-1$
+		tag0Values.add(ElementsUtil.BOOL_TRUE);
+		tag0Values.add(ElementsUtil.BOOL_FALSE);
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 	}
 
@@ -719,8 +719,8 @@ public class CyberTrackerConfExporter {
 		labelValues.add("Make Another Observation");
 		labelValues.add("End Observation Group");
 		List<String> tag0Values = new ArrayList<String>();
-		tag0Values.add("false"); //$NON-NLS-1$
-		tag0Values.add("true"); //$NON-NLS-1$
+		tag0Values.add(ElementsUtil.BOOL_FALSE);
+		tag0Values.add(ElementsUtil.BOOL_TRUE);
 		return ElementsUtil.addCustomElements(elements, labelValues, tag0Values);
 	}
 
