@@ -111,7 +111,7 @@ public abstract class CyberTrackerDataBuilder {
 		for (S.A a : s.getA()) {
 			E e = eMap.get(a.getI());
 			if (e != null) {
-				if (ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1()) || ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
+				if (ElementsUtil.isCategoryResultElement(e) || ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1()))
 					return true;
 			}
 		}

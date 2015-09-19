@@ -175,7 +175,7 @@ public abstract class AbstractSmartImporter {
 			if (e == null)
 				continue; //skip invalid records
 			
-			if (ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1())) {
+			if (ElementsUtil.isCategoryResultElement(e)) {
 				categories.add(a);
 			} else if (ElementsUtil.ATTRIBUTE_ELEMENT_TAG.equals(e.getTag1())) {
 				Integer tag2 = e.getTag2() != null ? Integer.valueOf(e.getTag2()) : 0;
@@ -348,7 +348,7 @@ public abstract class AbstractSmartImporter {
 		int vIndex = -1;
 		for (A a : aList) {
 			E iE = eMap.get(a.getI());
-			if (iE != null && ElementsUtil.CATEGORY_ELEMENT_TAG.equals(iE.getTag1())) {
+			if (ElementsUtil.isCategoryResultElement(iE)) {
 				int index = Integer.valueOf(iE.getTag0());
 				if (index > vIndex) {
 					vIndex = index;

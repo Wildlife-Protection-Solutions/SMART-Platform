@@ -29,6 +29,7 @@ import java.util.Set;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
@@ -37,11 +38,12 @@ import org.wcs.smart.util.UuidUtils;
 /**
  * Util for manipulations with {@link Elements} object
  * tag0 - listAttrValue/treeAttrValue uuid, may be also a key to patrol or transport type or other element related to current item
- * tag1 - identifier (attribute/category/member/multiselect/defaultValue)
+ * tag1 - identifier (attribute/category/member/multiselect/defaultValue); mainly used for result elements
  * tag2 - order (for multiselect list it is possible to have same attribute several times, this is why we need several result ids to handle that case; order show for which entry in multiselect list this attribute belong)
  *        also used to store default values
  * tag3 - reference to listAttr in Elements.xml (used in multiselect)
  * tag4 - reference to numAttr in Elements.xml (used in multiselect)
+ * tag5 - used to indicate specific settings for category (multiple observations and single gps point)
  * 
  * @author elitvin
  * @since 1.0.0
@@ -59,6 +61,9 @@ public class ElementsUtil {
 	public static final String MULISELECT_ELEMENT_TAG = "s"; //$NON-NLS-1$
 	public static final String DEFAULT_VALUES_ELEMENT_TAG = "d"; //$NON-NLS-1$
 	
+	public static final String CATEGORY_MULTI_OBS_SINGLE_GPS = "MS"; //$NON-NLS-1$
+	public static final String CATEGORY_MULTI_OBS_MULTI_GPS = "MM"; //$NON-NLS-1$
+
 	public static Elements buildEmptyElements() {
 		Elements elements = new Elements();
 		Elements.List list = new Elements.List();
@@ -104,22 +109,26 @@ public class ElementsUtil {
 	}
 	
 	public static void addElementsItem(Elements elements, String name, String id) {
-		addElementsItem(elements, name, id, null, null, null, null, null);
+		addElementsItem(elements, name, id, null, null, null, null, null, null);
 	}
 
 	public static void addElementsItem(Elements elements, String name, String id, String tag0) {
-		addElementsItem(elements, name, id, tag0, null, null, null, null);
+		addElementsItem(elements, name, id, tag0, null, null, null, null, null);
 	}
 
 	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1) {
-		addElementsItem(elements, name, id, tag0, tag1, null, null, null);
+		addElementsItem(elements, name, id, tag0, tag1, null, null, null, null);
 	}
 
 	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2) {
-		addElementsItem(elements, name, id, tag0, tag1, tag2, null, null);
+		addElementsItem(elements, name, id, tag0, tag1, tag2, null, null, null);
 	}
 	
 	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2, String tag3, String tag4) {
+		addElementsItem(elements, name, id, tag0, tag1, tag2, tag3, tag4, null);
+	}
+
+	public static void addElementsItem(Elements elements, String name, String id, String tag0, String tag1, String tag2, String tag3, String tag4, String tag5) {
 		Elements.List.Items.Item item = new Elements.List.Items.Item();
 		item.setName(name);
 		item.setId(id);
@@ -128,6 +137,7 @@ public class ElementsUtil {
 		item.setTag2(tag2);
 		item.setTag3(tag3);
 		item.setTag4(tag4);
+		item.setTag5(tag5);
 		elements.getList().getItems().getItem().add(item);
 	}
 
@@ -153,8 +163,27 @@ public class ElementsUtil {
 		for (CmNode node : keys) {
 			//no need for tag0 in case of group cause we should not relay on any uuids from configurable model
 			String tag0 = node.isGroup() ? null :UuidUtils.uuidToString(node.getCategory().getUuid());
-			addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0);
+			String tag5 = null;
+			if (node.isCollectMultipleObservations()) {
+				tag5 = node.isUseSingleGpsPoint() ? CATEGORY_MULTI_OBS_SINGLE_GPS : CATEGORY_MULTI_OBS_SINGLE_GPS;
+			}
+			addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0, null, null, null, null, tag5);
 		}
 	}
 	
+	public static boolean isCategoryResultElement(E e) {
+		return e != null && ElementsUtil.CATEGORY_ELEMENT_TAG.equals(e.getTag1());
+	}
+
+	public static boolean isCategoryMultiObs(E e) {
+		return isCategoryMultiObsSingleGps(e) || isCategoryMultiObsMultiGps(e);
+	}
+
+	public static boolean isCategoryMultiObsSingleGps(E e) {
+		return e != null && ElementsUtil.CATEGORY_MULTI_OBS_SINGLE_GPS.equals(e.getTag5());
+	}
+
+	public static boolean isCategoryMultiObsMultiGps(E e) {
+		return e != null && ElementsUtil.CATEGORY_MULTI_OBS_MULTI_GPS.equals(e.getTag5());
+	}
 }
