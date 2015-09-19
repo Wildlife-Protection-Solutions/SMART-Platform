@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.ImportWarningDialog;
@@ -256,7 +257,7 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 				wp.setX(Double.valueOf(a.getV()));
 			} else if (ScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
 				E e = eMap.get(a.getV());
-				newWp = "true".equals(e.getTag0()); //$NON-NLS-1$
+				newWp = ElementsUtil.BOOL_TRUE.equals(e.getTag0());
 			}
 		}
 
