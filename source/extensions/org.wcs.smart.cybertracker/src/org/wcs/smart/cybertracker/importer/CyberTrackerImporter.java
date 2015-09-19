@@ -60,6 +60,9 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class CyberTrackerImporter {
 	
+	//this key should be mapped to patrol to support backward compatibility with versions 3.2.1 or less
+	private static final String NO_DATTYPE_NAME = "null"; //$NON-NLS-1$
+	
 	private Map<String, CyberTrackerDataBuilder> dataBuilderMap = new HashMap<String, CyberTrackerDataBuilder>();
 	
 	public CyberTrackerImporter() {
@@ -182,7 +185,7 @@ public class CyberTrackerImporter {
 				return dataBuilderMap.get(datatype);
 			}
 		}
-		return null;
+		return dataBuilderMap.get(NO_DATTYPE_NAME);
 	}
 
 	private File extractRawXml(String ctPath, File ctxFile, File destFolder)  throws Exception {
