@@ -50,6 +50,11 @@
             importEditorContent="org.wcs.smart.cybertracker.patrol.importer.PatrolCTImportEditorContent"
             name="patrol">
       </datasource>
+      <datasource
+            dataBuilder="org.wcs.smart.cybertracker.patrol.importer.PatrolCTDataBuilder"
+            importEditorContent="org.wcs.smart.cybertracker.patrol.importer.PatrolCTImportEditorContent"
+            name="null">
+      </datasource>
    </extension>
 
 </plugin>
