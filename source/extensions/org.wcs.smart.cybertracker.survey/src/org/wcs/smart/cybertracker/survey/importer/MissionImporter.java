@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
@@ -46,6 +47,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
+import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -54,6 +56,7 @@ import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
@@ -98,7 +101,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			List<S> sList = SightsMultiObsUtil.convertMultiObs(ctSurvey);
 			for (S s : sList) {
 				MissionDay mday = findOrAddMissionDay(mission, s);
-				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap());
+				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
 				addObservations(wp, s, ctSurvey.getElementsMap(), session);
 			}
 
@@ -213,7 +216,7 @@ public class MissionImporter extends AbstractSmartImporter {
 		return mday;
 	}
 
-	private Waypoint findOrAddWaypoint(MissionDay mday, S s, Map<String, E> eMap) {
+	private Waypoint findOrAddWaypoint(MissionDay mday, S s, Map<String, E> eMap, Session session) {
 		if (mday.getWaypoints() == null)
 			mday.setWaypoints(new ArrayList<SurveyWaypoint>());
 
@@ -239,6 +242,12 @@ public class MissionImporter extends AbstractSmartImporter {
 			} else if (ScreensUtil.RESULT_NEW_WAYPOINT.equals(a.getN())) {
 				E e = eMap.get(a.getV());
 				newWp = ElementsUtil.BOOL_TRUE.equals(e.getTag0());
+			} else if (SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT.equals(a.getN())) {
+				E e = eMap.get(a.getV());
+				if (e != null) {
+					SamplingUnit su = CyberTrackerHibernateManager.fetchByUuid(SamplingUnit.class, e.getTag0(), session);
+					swp.setSamplingUnit(su);
+				}
 			}
 		}
 
