@@ -105,6 +105,7 @@ public class ScreensUtil {
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		container.screenNodes.add(nodeMain);
 		addGpsConfiguration(nodeMain, ctProps, 0);
+		addBatteryControl(nodeMain);
 
 		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, labels.beginTitle);
 		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), labels.beginItemLabel, idsBegin, null, true);
@@ -161,6 +162,7 @@ public class ScreensUtil {
 			Control defaultAttr = screensFactory.createAttrubuteControl14(defId.getItemId(), false, defaultValues);
 			ScreensObjectFactory.addControlToNode(node, defaultAttr);
 		}
+		addBatteryControl(node);
 		
 		CyberTrackerProperties properties = ctUtil.getCtProperties();
 		Control control2 = ScreensObjectFactory.getNavigationControl(node);
@@ -371,6 +373,11 @@ public class ScreensUtil {
 	protected void addGPSRequiredWarning(Node node) {
 		Control msgControl = screensFactory.createBottomMemoControl17(Messages.PatrolScreens_Begin_GPSRequiredMessage);
 		ScreensObjectFactory.addControlToNode(node, msgControl);
+	}
+
+	private void addBatteryControl(Node node) {
+		Control stateControl = screensFactory.createSystemStateControl19();
+		ScreensObjectFactory.addControlToNode(node, stateControl);
 	}
 
 	protected class PauseNodesLabels {
