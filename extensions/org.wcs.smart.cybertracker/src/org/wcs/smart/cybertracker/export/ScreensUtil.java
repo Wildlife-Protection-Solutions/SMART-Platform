@@ -108,6 +108,8 @@ public class ScreensUtil {
 
 		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, labels.beginTitle);
 		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), labels.beginItemLabel, idsBegin, null, true);
+		Control beginControl2 = ScreensObjectFactory.getNavigationControl(nodeBegin);
+		beginControl2.setShowGPS(ICyberTrackerConstants.STR_TRUE);
 		container.screenNodes.add(nodeBegin);
 		
 		String resultId = createResultElement(RESULT_ID, elements);
