@@ -204,11 +204,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 		txtFile.addModifyListener(new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
-				if (txtFile.getText() != null && !txtFile.getText().isEmpty()) {
-					if (getButton(IDialogConstants.OK_ID) != null) {
-						getButton(IDialogConstants.OK_ID).setEnabled(true);
-					}
-				}
+				updateExportButtonState();
 			}
 		});
 		
@@ -227,7 +223,7 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 				String f = fd.open();
 				if (f != null) {
 					txtFile.setText(f);
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
+					updateExportButtonState();
 				}
 			}
 		});
@@ -247,6 +243,8 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 	}
 
 	protected abstract void addModelSourceControl(Composite parent);
+
+    protected abstract boolean isValidExportSource();
 	
     protected abstract IConfigurableModelProvider getConfigurableModelProvider();
 
@@ -257,6 +255,17 @@ public abstract class CyberTrackerExportDialog extends TitleAreaDialog {
 		txtFile.setEnabled(btnToFile.getSelection());
 		btnBrowse.setEnabled(btnToFile.getSelection());
 		btnLaunchCT.setEnabled(btnToFile.getSelection());
+		updateExportButtonState();
+	}
+
+	protected void updateExportButtonState() {
+		boolean enabled = false;
+		if (isValidExportSource()) {
+			enabled = btnToDevice.getSelection() || (btnToFile.getSelection() && txtFile.getText() != null && !txtFile.getText().isEmpty());
+		}
+		if (getButton(IDialogConstants.OK_ID) != null) {
+			getButton(IDialogConstants.OK_ID).setEnabled(enabled);
+		}
 	}
 	
 	/**
