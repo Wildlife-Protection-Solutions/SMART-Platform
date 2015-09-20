@@ -117,7 +117,7 @@ public class PatrolCTExportDialog extends CyberTrackerExportDialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				selectedModel = ((IStructuredSelection)modelViewer.getSelection()).getFirstElement();
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				updateExportButtonState();
 			}
 		});
 	}
@@ -141,6 +141,11 @@ public class PatrolCTExportDialog extends CyberTrackerExportDialog {
 			modelList.add(new DataModelWrapper());
 		}
 		return modelList;
+	}
+
+	@Override
+	protected boolean isValidExportSource() {
+		return selectedModel != null;
 	}
 
 }

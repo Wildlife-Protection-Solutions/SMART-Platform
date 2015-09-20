@@ -89,7 +89,7 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
 				selectedDesign = ((IStructuredSelection)designsViewer.getSelection()).getFirstElement();
-				getButton(IDialogConstants.OK_ID).setEnabled(true);
+				updateExportButtonState();
 			}
 		});
 	}
@@ -108,6 +108,11 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 			s.close();
 		}
 		return modelList;
+	}
+
+	@Override
+	protected boolean isValidExportSource() {
+		return selectedDesign != null;
 	}
 
 }
