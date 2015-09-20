@@ -165,7 +165,7 @@ public class ElementsUtil {
 			String tag0 = node.isGroup() ? null :UuidUtils.uuidToString(node.getCategory().getUuid());
 			String tag5 = null;
 			if (node.isCollectMultipleObservations()) {
-				tag5 = node.isUseSingleGpsPoint() ? CATEGORY_MULTI_OBS_SINGLE_GPS : CATEGORY_MULTI_OBS_SINGLE_GPS;
+				tag5 = node.isUseSingleGpsPoint() ? CATEGORY_MULTI_OBS_SINGLE_GPS : CATEGORY_MULTI_OBS_MULTI_GPS;
 			}
 			addElementsItem(elements, LanguageUtil.getName(node, language), map.get(node).getItemId(), tag0, null, null, null, null, tag5);
 		}
