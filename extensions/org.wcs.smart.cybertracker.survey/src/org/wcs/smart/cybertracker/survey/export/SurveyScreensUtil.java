@@ -35,11 +35,14 @@ import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
+import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
+import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.SamplingUnit;
@@ -122,6 +125,9 @@ public class SurveyScreensUtil extends ScreensUtil {
 		samplingUnits.add(noneSu);
 		List<CyberTrackerId> cyberTrackerIds = suToCtIds(elements, samplingUnits);
 		id = addSimpleNextRadioNode(id, result, elements, "Sampling Unit", RESULT_MISSION_SAMPLING_UNIT, cyberTrackerIds, true);
+		Node suNode = result.screenNodes.get(result.screenNodes.size()-1);
+		Control control2 = ScreensObjectFactory.getNavigationControl(suNode);
+		control2.setShowBack("False"); //$NON-NLS-1$
 
 		addTaskNode(id, result, elements, startId, dmRootId, suScreenId, ctProps);
 		result.rootId = id;
@@ -140,7 +146,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		
 		
 		nextTaskOptions.add("End Survey");
-		nodeIds.add(createEndTripNodes(container, startId, "Press 'Save' to confirm ending survey or use back button"));
+		nodeIds.add(createEndTripNodes(container, startId, "Press 'Save' to confirm ending survey or use back button."));
 		
 		if (ctProps.isCanPause()) {
 			nextTaskOptions.add("Pause Survey (Rest)");
