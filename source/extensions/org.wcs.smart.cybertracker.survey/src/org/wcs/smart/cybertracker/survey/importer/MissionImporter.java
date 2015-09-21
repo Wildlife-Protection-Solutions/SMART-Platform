@@ -65,6 +65,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.util.SharedUtils;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -76,7 +77,7 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class MissionImporter extends AbstractSmartImporter {
 
-	public Mission importData(CyberTrackerSurvey ctSurvey, Survey survey) {
+	public Mission importData(CyberTrackerSurvey ctSurvey, Survey survey, Mission mission) {
 		clearWarning();
 		
 		for (String warning : ctSurvey.getWarnings()) {
@@ -84,9 +85,22 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 		
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		boolean fireSurveyAdded = false;
 		try {
 			session.beginTransaction();
-			Mission mission = buildMission(ctSurvey, survey, session);
+			if (survey == null) {
+				//this mean that user wants a new survey to be created
+				survey = createNewSurvey(ctSurvey);
+				session.save(survey);
+				fireSurveyAdded = true;
+			}
+			if (mission == null) {
+				//this mean that user wants a new mission to be created
+				mission = createNewMission(ctSurvey, survey, session);
+			} else {
+				mission = (Mission) session.load(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
+				//TODO: validate mission!!!
+			}
 			
 			//check if duplicate of existing Mission
 			if (!checkDuplicate(ctSurvey, mission, session)){
@@ -110,6 +124,9 @@ public class MissionImporter extends AbstractSmartImporter {
 
 			SurveyHibernateManager.saveMission(mission, session, true);
 			session.getTransaction().commit();
+			if (fireSurveyAdded) {
+				SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_ADDED, survey);
+			}
 			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_ADDED, mission);
 			return mission;
 		} catch (final Exception e) {
@@ -127,7 +144,16 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 	}
 
-	private Mission buildMission(CyberTrackerSurvey ctSurvey, Survey survey, Session session) {
+	private Survey createNewSurvey(CyberTrackerSurvey ctSurvey) {
+		Survey survey = new Survey();
+		survey.setSurveyDesign(ctSurvey.getSurveyDesign());
+		survey.setStartDate(ctSurvey.getStartDate());
+		survey.setEndDate(ctSurvey.getEndDate());
+		survey.setId("auto-survey"); //TODO: generation or user input?
+		return survey;
+	}
+
+	private Mission createNewMission(CyberTrackerSurvey ctSurvey, Survey survey, Session session) {
 		Mission m = new Mission();
 		m.setSurvey(survey);
 		m.setComment(ctSurvey.getComment());
@@ -199,7 +225,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			return null;
 		
 		for (MissionDay pld : mission.getMissionDays()) {
-			if (pld.getDate().equals(date)) {
+			if (SharedUtils.isSameDate(pld.getDate(), date)) {
 				return pld;
 			}
 		}
