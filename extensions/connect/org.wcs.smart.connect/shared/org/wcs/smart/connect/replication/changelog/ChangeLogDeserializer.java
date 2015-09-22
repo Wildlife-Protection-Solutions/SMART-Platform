@@ -37,7 +37,6 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
-import org.wcs.smart.connect.server.replication.ConflictException;
 
 /**
  * Class for deserializing a change log.

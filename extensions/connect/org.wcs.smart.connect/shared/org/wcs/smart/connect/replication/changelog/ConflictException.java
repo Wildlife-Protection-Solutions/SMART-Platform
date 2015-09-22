@@ -1,4 +1,4 @@
-package org.wcs.smart.connect.server.replication;
+package org.wcs.smart.connect.replication.changelog;
 
 import org.wcs.smart.connect.model.ChangeLogItem;
 

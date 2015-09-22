@@ -21,12 +21,24 @@
  */
 package org.wcs.smart.connect.ui.server;
 
+import java.lang.reflect.InvocationTargetException;
+
 import javax.inject.Named;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.server.replication.NothingToUpdateException;
+import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
 
 /**
  * Upload change log handler.
@@ -39,9 +51,40 @@ public class UploadChangeLogHandler {
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 		UploadChangeLogDialog dialog = new UploadChangeLogDialog(activeShell);
-		dialog.open();
+		if (dialog.open() == Window.OK){
+			uploadChangeLog(activeShell, dialog.getConnection());
+		}
 	}
 
+	public void uploadChangeLog(Shell activeShell, final SmartConnect connect){
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
+		try {
+			pmd.run(true, false, new IRunnableWithProgress() {
+					
+					@Override
+					public void run(IProgressMonitor monitor) throws InvocationTargetException,
+							InterruptedException {
+						UploadChangeLogEngine engine = new UploadChangeLogEngine(connect);
+						
+						try{
+							engine.createUpload(monitor);
+						}catch (final NothingToUpdateException ex){
+							Display.getDefault().syncExec(new Runnable(){
+								@Override
+								public void run() {
+									MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Upload Changes", ex.getMessage());
+								}
+								
+							});
+						}catch (Exception ex){
+							ConnectPlugIn.displayLog(ex.getMessage(), ex);
+						}
+					}
+				});
+		} catch (InvocationTargetException | InterruptedException e) {
+			ConnectPlugIn.displayLog(e.getMessage(), e);
+		}
+	}
 
 	public static class UploadChangeLogHandlerWrapper extends DIHandler<UploadChangeLogHandler>{
 		public UploadChangeLogHandlerWrapper() {

@@ -66,10 +66,13 @@ public class UploadCaEngine {
 	 * @param monitor
 	 * @throws Exception 
 	 */
-	public void upload(ConnectServer server, SmartConnect connect, IProgressMonitor monitor) throws Exception{
+	public void upload(SmartConnect connect, IProgressMonitor monitor) throws Exception{
 
 		monitor.beginTask("Uploading Conservation Area to SMART Connect", 3);
 		monitor.subTask("Connecting to SMART Connect");
+		
+		ConnectServer server = connect.getServer();
+		
 		ConservationAreaInfo serverInfo = connect.getCaInfo(server.getConservationArea().getUuid());
 		monitor.worked(1);
 		

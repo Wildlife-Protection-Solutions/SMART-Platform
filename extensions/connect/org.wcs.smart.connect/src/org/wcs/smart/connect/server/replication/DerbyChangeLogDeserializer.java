@@ -45,6 +45,7 @@ import org.wcs.smart.connect.model.ChangeLogItem.Source;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
+import org.wcs.smart.connect.replication.changelog.ConflictException;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
