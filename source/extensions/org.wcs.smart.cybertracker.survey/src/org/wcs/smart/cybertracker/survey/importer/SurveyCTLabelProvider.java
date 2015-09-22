@@ -19,40 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.cybertracker.importer;
+package org.wcs.smart.cybertracker.survey.importer;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.cybertracker.importer.CyberTrackerImportComposite.CTTableColumn;
-import org.wcs.smart.cybertracker.model.ICyberTrackerData;
+import org.wcs.smart.cybertracker.importer.CtStringUtil;
+import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 
 /**
- * Label provider dor cells from table containing data for imported records
- * 
+ * Label provider for details panel fields
  * @author elitvin
- * @since 1.0.0
+ * @since 4.0.0
  */
-public class CyberTrackerImportTableCellLabelProvider extends ColumnLabelProvider {
+public class SurveyCTLabelProvider {
+
+	/**
+	 * Metadata for patrols that is displayed in details window.
+	 * 
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	public enum CTSurveyUIMeta {
+		START_DATE,
+		END_DATE,
+		COMMENT,
+		LEADER,
+		MEMBERS,
+		SIGHT_COUNT;
+	}
+
+	private CTSurveyUIMeta column;
 	
-	private CTTableColumn column;
-	
-	public CyberTrackerImportTableCellLabelProvider(CTTableColumn column) {
+	public SurveyCTLabelProvider(CTSurveyUIMeta column) {
 		this.column = column;
 	}
 	
-	@Override
 	public String getText(Object element) {
-		if (element instanceof ICyberTrackerData) {
-			ICyberTrackerData ctData = (ICyberTrackerData) element;
+		if (element instanceof CyberTrackerSurvey) {
+			CyberTrackerSurvey ctSurvey = (CyberTrackerSurvey) element;
 			switch (column) {
-			case IMPORT_NOTE: return ""; //$NON-NLS-1$
-			case START_DATE:return CtStringUtil.dateAsString(ctData.getStartDate());
-			case END_DATE: 	return CtStringUtil.dateAsString(ctData.getEndDate());
-			case TYPE: 		return ctData.getDisplayType() != null ? ctData.getDisplayType() : ""; //$NON-NLS-1$
-			case DETAILS:	return ctData.getDetails() != null ? ctData.getDetails() : ""; //$NON-NLS-1$
-			case SIGHT_COUNT:return String.valueOf(ctData.getSData().size());
+			case START_DATE:return CtStringUtil.dateAsString(ctSurvey.getStartDate());
+			case END_DATE: 	return CtStringUtil.dateAsString(ctSurvey.getEndDate());
+			case COMMENT:	return ctSurvey.getComment();
+			case LEADER:	return ctSurvey.getCtLeader();
+			case MEMBERS:	return CtStringUtil.listAsString(ctSurvey.getCtMembers(), ", "); //$NON-NLS-1$
+			case SIGHT_COUNT:return String.valueOf(ctSurvey.getSData().size());
 			}
 		}
-		return super.getText(element);
+		return "unknown meta: " + column; //$NON-NLS-1$
 	}
-
+	
 }

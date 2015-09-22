@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.cybertracker.patrol.model;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +33,12 @@ import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
+import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider;
+import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider.CTPatrolUIMeta;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.Team;
-
-import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Model representing single patrol imported from CyberTracker application
@@ -239,8 +240,14 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 
 	@Override
 	public String getDetails() {
-		// TODO Auto-generated method stub
-		return "PLACE PATROL DETAILS HERE!!!!";
+		String trns = (new PatrolCTLabelProvider(CTPatrolUIMeta.TRANSPORT)).getText(this);
+		String tp = (new PatrolCTLabelProvider(CTPatrolUIMeta.TYPE)).getText(this);
+		String a = (new PatrolCTLabelProvider(CTPatrolUIMeta.ARMED)).getText(this);
+		String tm = (new PatrolCTLabelProvider(CTPatrolUIMeta.TEAM)).getText(this);
+		String st = (new PatrolCTLabelProvider(CTPatrolUIMeta.STATION)).getText(this);
+		String l = (new PatrolCTLabelProvider(CTPatrolUIMeta.LEADER)).getText(this);
+		String m = (new PatrolCTLabelProvider(CTPatrolUIMeta.MEMBERS)).getText(this);
+		return MessageFormat.format("Transport: {0}({1}); Armed: {2}; Team: {3}; Station: {4}; Leader: {5}; Members: {6}", trns, tp, a, tm, st, l, m);
 	}
 	
 }
