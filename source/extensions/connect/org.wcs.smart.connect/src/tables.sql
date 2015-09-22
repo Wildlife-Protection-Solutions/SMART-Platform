@@ -27,7 +27,7 @@ CREATE TABLE smart.connect_status(
 	server_revision bigint not null,
 	status varchar(6),
 	uploadurl long varchar,
-	localfile long varchar
+	localfile long varchar,
 	primary key (ca_uuid)
 );
 ALTER TABLE smart.connect_status ADD CONSTRAINT connect_status_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE restrict ON DELETE restrict;

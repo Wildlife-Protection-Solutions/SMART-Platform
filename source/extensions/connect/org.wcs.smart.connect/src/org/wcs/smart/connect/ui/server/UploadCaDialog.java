@@ -21,17 +21,9 @@
  */
 package org.wcs.smart.connect.ui.server;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.connect.ConnectPlugIn;
-import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.server.UploadCaEngine;
 
 /**
  * Export Conservation Area to SMART Connect server UI Dialog.
@@ -52,27 +44,5 @@ public class UploadCaDialog extends ConnectDialog {
 		setMessage("Export the entire conservation area to a SMART Connect instance.");
 		
 		return super.createDialogArea(parent);
-	}
-	
-	protected void onComplete(final SmartConnect connect){
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				
-				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					UploadCaEngine engine = new UploadCaEngine();
-					try{
-						engine.upload(cs,  connect, monitor);
-					}catch (Exception ex){
-						ConnectPlugIn.displayLog(ex.getMessage(), ex);
-					}
-				}
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			ConnectPlugIn.displayLog(e.getMessage(), e);
-			return;
-		}
 	}
 }

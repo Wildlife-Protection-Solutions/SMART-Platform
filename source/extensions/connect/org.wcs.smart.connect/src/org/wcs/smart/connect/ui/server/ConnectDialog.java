@@ -35,7 +35,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
@@ -49,15 +48,17 @@ import org.wcs.smart.hibernate.SmartDB;
  * @author Emily
  *
  */
-public abstract class ConnectDialog extends TitleAreaDialog {
+public class ConnectDialog extends TitleAreaDialog {
 
 	private Label lblServer;
 	
 	private Text txtUser;
 	private Text txtPassword;
 	
-	ConnectServer cs = null;
-	ConnectUser user = null;
+	protected ConnectServer cs = null;
+	protected ConnectUser user = null;
+	
+	private SmartConnect connect;
 	
 	public ConnectDialog(Shell parentShell) {
 		super(parentShell);
@@ -107,9 +108,7 @@ public abstract class ConnectDialog extends TitleAreaDialog {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			cs = (ConnectServer) s.createCriteria(ConnectServer.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.uniqueResult();
+			cs = (ConnectServer)s.get(ConnectServer.class, SmartDB.getCurrentConservationArea().getUuid());
 			
 			user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
 					
@@ -136,7 +135,7 @@ public abstract class ConnectDialog extends TitleAreaDialog {
 		return true;
 	}
 	
-	public void okPressed(){
+	protected void okPressed(){
 		final String server = cs.getServerUrl();
 		final String user = txtUser.getText().trim();
 		final String pass = txtPassword.getText().trim();
@@ -161,11 +160,11 @@ public abstract class ConnectDialog extends TitleAreaDialog {
 			}
 		}
 		
-		SmartConnect connect = new SmartConnect(cs, user, pass);
-		onComplete(connect);
-		
+		connect = new SmartConnect(cs, user, pass);
 		super.okPressed();
 	}
 	
-	protected abstract void onComplete(SmartConnect connect);
+	public SmartConnect getConnection(){
+		return this.connect;
+	}
 }
