@@ -22,15 +22,12 @@
 package org.wcs.smart.cybertracker.patrol.importer;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -58,6 +55,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.ImportError;
 import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
+import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider.CTPatrolUIMeta;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol.PatrolMeta;
 import org.wcs.smart.patrol.model.Patrol;
@@ -102,35 +100,12 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 	private ControlDecoration cdLeader;
 	private ControlDecoration cdPilot;
 	
-	private Map<CTPatrolUIMeta, EditorContentLabelProvider> labelProviderMap = new HashMap<CTPatrolUIMeta, EditorContentLabelProvider>();
+	private Map<CTPatrolUIMeta, PatrolCTLabelProvider> labelProviderMap = new HashMap<CTPatrolUIMeta, PatrolCTLabelProvider>();
 
-	/**
-	 * Metadata for patrols that is displayed in details window.
-	 * 
-	 * @author elitvin
-	 * @since 4.0.0
-	 */
-	private enum CTPatrolUIMeta {
-		START_DATE,
-		END_DATE,
-		TYPE,
-		TRANSPORT,
-		ARMED,
-//		MANDATE,
-		TEAM,
-		STATION	,
-//		OBJECTIVE,
-		COMMENT,
-		LEADER,
-		PILOT,
-		MEMBERS,
-		SIGHT_COUNT;
-	}
-	
-	private EditorContentLabelProvider getLabelProvider(CTPatrolUIMeta column) {
-		EditorContentLabelProvider lp = labelProviderMap.get(column);
+	private PatrolCTLabelProvider getLabelProvider(CTPatrolUIMeta column) {
+		PatrolCTLabelProvider lp = labelProviderMap.get(column);
 		if (lp == null) {
-			lp = new EditorContentLabelProvider(column);
+			lp = new PatrolCTLabelProvider(column);
 			labelProviderMap.put(column, lp);
 		}
 		return lp;
@@ -435,59 +410,4 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 		return processedList;
 	}
 	
-
-	/**
-	 * Label provider for details panel fields
-	 * @author elitvin
-	 * @since 4.0.0
-	 */
-	private class EditorContentLabelProvider {
-
-		private CTPatrolUIMeta column;
-		
-		public EditorContentLabelProvider(CTPatrolUIMeta column) {
-			this.column = column;
-		}
-		public String getText(Object element) {
-			if (element instanceof CyberTrackerPatrol) {
-				CyberTrackerPatrol ctPatrol = (CyberTrackerPatrol) element;
-				switch (column) {
-				case START_DATE:return dateAsString(ctPatrol.getStartDate());
-				case END_DATE: 	return dateAsString(ctPatrol.getEndDate());
-				case TYPE: 		return ctPatrol.getPatrolType() != null ? ctPatrol.getPatrolType().getGuiName(Locale.getDefault()) : ""; //$NON-NLS-1$
-				case TRANSPORT:	return ctPatrol.getCtTransport();
-				case ARMED: 	return ctPatrol.isArmed() ? Messages.CTPatrolTableCellLabelProvider_Armed_Yes : Messages.CTPatrolTableCellLabelProvider_Armed_No;
-//				case MANDATE:	return asString(ctPatrol.getMandate());
-				case TEAM: 		return ctPatrol.getCtTeam();
-				case STATION:	return ctPatrol.getCtStation();
-//				case OBJECTIVE: return ctPatrol.getObjective();
-				case COMMENT:	return ctPatrol.getComment();
-				case LEADER:	return ctPatrol.getCtLeader();
-				case PILOT:		return ctPatrol.getCtPilot();
-				case MEMBERS:	return asString(ctPatrol.getCtMembers(), "; "); //$NON-NLS-1$
-				case SIGHT_COUNT:return String.valueOf(ctPatrol.getSData().size());
-				}
-			}
-			return "unknown meta: " + column; //$NON-NLS-1$
-		}
-		
-		private String asString(List<String> members, String separator) {
-			StringBuilder result = new StringBuilder();
-			for (Iterator<String> i = members.iterator(); i.hasNext();) {
-				String e = i.next();
-				result.append(e);
-				if (i.hasNext())
-					result.append(separator);
-			}
-			return result.toString();
-		}
-
-		private String dateAsString(Date date) {
-			if (date == null) {
-				return ""; //$NON-NLS-1$
-			}
-			return DateFormat.getDateTimeInstance().format(date);
-		}
-		
-	}
 }

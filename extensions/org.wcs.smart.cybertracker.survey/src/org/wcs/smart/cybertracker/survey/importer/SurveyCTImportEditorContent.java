@@ -22,10 +22,8 @@
 package org.wcs.smart.cybertracker.survey.importer;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -56,6 +54,7 @@ import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.ImportError;
 import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
+import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider.CTSurveyUIMeta;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.model.Mission;
@@ -87,27 +86,13 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 	private ControlDecoration cdComment;
 	private ControlDecoration cdLeader;
 	
-	private Map<CTSurveyUIMeta, EditorContentLabelProvider> labelProviderMap = new HashMap<CTSurveyUIMeta, EditorContentLabelProvider>();
+	private Map<CTSurveyUIMeta, SurveyCTLabelProvider> labelProviderMap = new HashMap<CTSurveyUIMeta, SurveyCTLabelProvider>();
 
-	/**
-	 * Metadata for patrols that is displayed in details window.
-	 * 
-	 * @author elitvin
-	 * @since 4.0.0
-	 */
-	private enum CTSurveyUIMeta {
-		START_DATE,
-		END_DATE,
-		COMMENT,
-		LEADER,
-		MEMBERS,
-		SIGHT_COUNT;
-	}
 	
-	private EditorContentLabelProvider getLabelProvider(CTSurveyUIMeta column) {
-		EditorContentLabelProvider lp = labelProviderMap.get(column);
+	private SurveyCTLabelProvider getLabelProvider(CTSurveyUIMeta column) {
+		SurveyCTLabelProvider lp = labelProviderMap.get(column);
 		if (lp == null) {
-			lp = new EditorContentLabelProvider(column);
+			lp = new SurveyCTLabelProvider(column);
 			labelProviderMap.put(column, lp);
 		}
 		return lp;
@@ -364,52 +349,5 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		}
 		return null;
 	}
-	
-	/**
-	 * Label provider for details panel fields
-	 * @author elitvin
-	 * @since 4.0.0
-	 */
-	private class EditorContentLabelProvider {
 
-		private CTSurveyUIMeta column;
-		
-		public EditorContentLabelProvider(CTSurveyUIMeta column) {
-			this.column = column;
-		}
-		public String getText(Object element) {
-			if (element instanceof CyberTrackerSurvey) {
-				CyberTrackerSurvey ctSurvey = (CyberTrackerSurvey) element;
-				switch (column) {
-				case START_DATE:return dateAsString(ctSurvey.getStartDate());
-				case END_DATE: 	return dateAsString(ctSurvey.getEndDate());
-				case COMMENT:	return ctSurvey.getComment();
-				case LEADER:	return ctSurvey.getCtLeader();
-				case MEMBERS:	return asString(ctSurvey.getCtMembers(), "; "); //$NON-NLS-1$
-				case SIGHT_COUNT:return String.valueOf(ctSurvey.getSData().size());
-				}
-			}
-			return "unknown meta: " + column; //$NON-NLS-1$
-		}
-		
-		private String asString(List<String> members, String separator) {
-			StringBuilder result = new StringBuilder();
-			for (Iterator<String> i = members.iterator(); i.hasNext();) {
-				String e = i.next();
-				result.append(e);
-				if (i.hasNext())
-					result.append(separator);
-			}
-			return result.toString();
-		}
-
-		private String dateAsString(Date date) {
-			if (date == null) {
-				return ""; //$NON-NLS-1$
-			}
-			return DateFormat.getDateTimeInstance().format(date);
-		}
-		
-	}
-	
 }

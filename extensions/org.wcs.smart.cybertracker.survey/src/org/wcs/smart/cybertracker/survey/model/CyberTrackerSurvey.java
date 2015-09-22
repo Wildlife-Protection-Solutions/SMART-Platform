@@ -21,16 +21,20 @@
  */
 package org.wcs.smart.cybertracker.survey.model;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.cybertracker.importer.CtStringUtil;
 import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
+import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider;
+import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider.CTSurveyUIMeta;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -131,7 +135,10 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 	
 	@Override
 	public String getDetails() {
-		return "MUST BE SOME SURVEY DETAILS!!!";
+		String sdName = surveyDesign != null ? surveyDesign.getName() : ""; //$NON-NLS-1$
+		String l = (new SurveyCTLabelProvider(CTSurveyUIMeta.LEADER)).getText(this);
+		String m = (new SurveyCTLabelProvider(CTSurveyUIMeta.MEMBERS)).getText(this);
+		return MessageFormat.format("SurveyDesign: {0}; Leader: {1}; Members: {2}", sdName, l, m);
 	}
 
 }

@@ -21,38 +21,35 @@
  */
 package org.wcs.smart.cybertracker.importer;
 
-import org.eclipse.jface.viewers.ColumnLabelProvider;
-import org.wcs.smart.cybertracker.importer.CyberTrackerImportComposite.CTTableColumn;
-import org.wcs.smart.cybertracker.model.ICyberTrackerData;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 /**
- * Label provider dor cells from table containing data for imported records
+ * Generic util to convert passed data to string.
  * 
  * @author elitvin
- * @since 1.0.0
+ * @since 4.0.0
  */
-public class CyberTrackerImportTableCellLabelProvider extends ColumnLabelProvider {
-	
-	private CTTableColumn column;
-	
-	public CyberTrackerImportTableCellLabelProvider(CTTableColumn column) {
-		this.column = column;
-	}
-	
-	@Override
-	public String getText(Object element) {
-		if (element instanceof ICyberTrackerData) {
-			ICyberTrackerData ctData = (ICyberTrackerData) element;
-			switch (column) {
-			case IMPORT_NOTE: return ""; //$NON-NLS-1$
-			case START_DATE:return CtStringUtil.dateAsString(ctData.getStartDate());
-			case END_DATE: 	return CtStringUtil.dateAsString(ctData.getEndDate());
-			case TYPE: 		return ctData.getDisplayType() != null ? ctData.getDisplayType() : ""; //$NON-NLS-1$
-			case DETAILS:	return ctData.getDetails() != null ? ctData.getDetails() : ""; //$NON-NLS-1$
-			case SIGHT_COUNT:return String.valueOf(ctData.getSData().size());
-			}
+public class CtStringUtil {
+
+	public static final String listAsString(List<String> members, String separator) {
+		StringBuilder result = new StringBuilder();
+		for (Iterator<String> i = members.iterator(); i.hasNext();) {
+			String e = i.next();
+			result.append(e);
+			if (i.hasNext())
+				result.append(separator);
 		}
-		return super.getText(element);
+		return result.toString();
 	}
 
+	public static final String dateAsString(Date date) {
+		if (date == null) {
+			return ""; //$NON-NLS-1$
+		}
+		return DateFormat.getDateTimeInstance().format(date);
+	}
+	
 }
