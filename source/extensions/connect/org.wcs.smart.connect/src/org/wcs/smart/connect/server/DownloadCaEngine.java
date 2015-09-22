@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.server;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 
@@ -119,8 +120,12 @@ public class DownloadCaEngine {
 		
 		/* import file */
 		monitor.subTask("Installing Conservation Area");
-		if (monitor.isCanceled()) return false;
-		CaImporter.importCa(p.toFile(), new SubProgressMonitor(monitor, 1));
+		try{
+			if (monitor.isCanceled()) return false;
+			CaImporter.importCa(p.toFile(), new SubProgressMonitor(monitor, 1));
+		}finally{
+			Files.delete(p);
+		}
 		
 		monitor.done();
 		return true;

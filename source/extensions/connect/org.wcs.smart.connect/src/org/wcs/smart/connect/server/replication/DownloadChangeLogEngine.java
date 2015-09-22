@@ -74,7 +74,7 @@ public class DownloadChangeLogEngine {
 	 * @throws Exception
 	 */
 	public boolean downloadInstall(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Download & Install Data Updates", 4);
+		monitor.beginTask("Download && Install Data Updates", 4);
 		
 		//acquire lock
 		if (!UploadChangeLogEngine.UPLOAD_LOCK.tryAcquire()){
@@ -149,17 +149,17 @@ public class DownloadChangeLogEngine {
 			Path p = connect.downloadFileFromUrl(downloadUrl);
 			monitor.worked(1);
 			
-			/* import file */
-			monitor.subTask("Applying Updates");
-			if (monitor.isCanceled()) return false;
-			
-		
 			try{
+				/* import file */
+				monitor.subTask("Applying Updates");
+				if (monitor.isCanceled()) return false;
 				applyFile(p, serverStatus);
 			}catch (NothingToUpdateException ex){
 				
 			}catch (Exception ex){
-				throw new Exception("Unable to apply change log file. " + ex.getMessage(), ex);
+				throw new Exception("Unable to apply changes from server:" + "\n\n" + ex.getMessage(), ex);
+			}finally{
+				Files.delete(p);
 			}
 
 			record.setStatus(Status.DONE);
@@ -210,9 +210,9 @@ public class DownloadChangeLogEngine {
 			Path filestoreDir = tempDir.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			try(DirectoryStream<Path> files = Files.newDirectoryStream(tempDir)){
 				for (Path file : files){
-					if (file.getFileName().toString().endsWith(".changelog.metadata")){
+					if (file.getFileName().toString().endsWith(ConnectSyncHistoryRecord.METADATA_FILE_SUFFIX)){
 						metadataFile = file;
-					}else if (file.getFileName().toString().endsWith(".changelog")){
+					}else if (file.getFileName().toString().endsWith(ConnectSyncHistoryRecord.CHANGELOG_FILE_SUFFIX)){
 						changeLogFile = file;
 					}
 				}
@@ -306,6 +306,7 @@ public class DownloadChangeLogEngine {
 	private void applyChangeLog(Path changelogFile, Path changelogFilestore, Session session) throws Exception{
 		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changelogFile, changelogFilestore);
 		processor.processFile(session);
+		
 	}
 	
 }

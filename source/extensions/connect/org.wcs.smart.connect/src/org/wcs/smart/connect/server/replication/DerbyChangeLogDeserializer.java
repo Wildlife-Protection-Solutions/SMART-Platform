@@ -34,11 +34,18 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ChangeLogItem;
+import org.wcs.smart.connect.model.ChangeLogItem.Action;
+import org.wcs.smart.connect.model.ChangeLogItem.Source;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
+import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -47,7 +54,7 @@ import org.wcs.smart.util.UuidUtils;
  */
 public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 
-	
+	private Long lastUploadRevision = null;
 	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir) {
 		super(changeLogFile, changeLogFilestoreDir);
 	}
@@ -58,16 +65,57 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	@Override
 	public void processFile(final Session session) throws Exception{
 		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();
+		
+		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, SmartDB.getCurrentConservationArea(), Type.UPLOAD);
+		lastUploadRevision = lastUpload.getEndRevision();
+		
 		super.processFile(session);
 	}
 	
-	public boolean shouldProcess(ChangeLogItem it){
+	public boolean shouldProcess(ChangeLogItem it) throws ConflictException{
 		if (ChangeLogTableManager.INSTANCE.constains(session, it)){
 			//we already have this item
 			return false;
 		}
-		//TODO: look for conflict; throw exception if conflict
-		
+
+		if (it.getAction() == Action.FS_DELETE || 
+				it.getAction() == Action.FS_INSERT ||
+				it.getAction() == Action.FS_UPDATE){
+			//TODO: determine if files need to checked for conflicts
+			return true;
+		}
+
+		/* 
+		 * Conflict checking 
+		 */
+		Criteria c = session.createCriteria(ChangeLogItem.class);
+		c.add(Restrictions.eq("tableName", it.getTableName()));
+		c.add(Restrictions.eq("conservationArea", it.getConservationArea()));
+		if (it.getFieldName1() != null){
+			c.add(Restrictions.eq("fieldName1", it.getFieldName1()));
+			c.add(Restrictions.eq("key1", it.getKey1()));
+		}
+		if (it.getFieldName2() != null){
+			c.add(Restrictions.eq("fieldName2", it.getFieldName2()));
+			if (it.getKey2() != null){
+				c.add(Restrictions.eq("key2", it.getKey2()));
+				c.add(Restrictions.isNull("key2String"));
+			}else if (it.getKey2String() != null){
+				c.add(Restrictions.eq("key2String", it.getKey2String()));
+				c.add(Restrictions.isNull("key2"));
+			}else{
+				//this case should not happen
+				throw new IllegalStateException("Invalid change log record.  Second key table provide but value not set");
+			}
+		}
+		c.add(Restrictions.gt("revision", lastUploadRevision));
+		c.add(Restrictions.eq("source", Source.LOCAL));
+
+		c.setProjection(Projections.rowCount());
+		Long cnt = (Long) c.uniqueResult();
+		if (cnt > 0){
+			throw new ConflictException(it);
+		}
 		return true;
 	}
 	

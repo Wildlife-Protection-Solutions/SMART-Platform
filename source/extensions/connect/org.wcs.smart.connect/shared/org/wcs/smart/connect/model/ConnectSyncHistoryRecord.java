@@ -51,6 +51,9 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	public static final String PACKAGE_FILESTORE_DIR = "filestore"; //$NON-NLS-1$
 	
 	public static final String CONNECT_FILESTORE_DIR = "smart_connect"; //$NON-NLS-1$
+
+	public static final String METADATA_FILE_SUFFIX = ".changelog.metadata"; //$NON-NLS-1$
+	public static final String CHANGELOG_FILE_SUFFIX = ".changelog"; //$NON-NLS-1$
 	
 	public enum Type{
 		UPLOAD,
@@ -123,8 +126,10 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 		this.statusUrl = statusUrl;
 	}
 	
-	/*
-	 * end revision is inclusive.  Includes everything including the end revision
+	/**
+	 * The last revision included in the package.
+	 * End revision is inclusive (the packaged included
+	 * everything up to and including the end revision).
 	 */
 	@Column(name="end_revision")
 	public Long getEndRevision() {
@@ -156,17 +161,20 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	private String getChangeLogFilePrefix(){
 		return CONNECT_FILESTORE_DIR + FileSystems.getDefault().getSeparator() + UuidUtils.uuidToString(getUuid());
 	}
-	
+	@Transient
+	public String getFilestoreDirectory(){
+		return getChangeLogFilePrefix() + FileSystems.getDefault().getSeparator() + PACKAGE_FILESTORE_DIR;
+	}
 	@Transient
 	public String getChangeLogZipFile(){
 		return getChangeLogFilePrefix() + ".changelog.zip";
 	}
 	@Transient
 	public String getChangeLogFile(){
-		return getChangeLogFilePrefix() + ".changelog";
+		return getChangeLogFilePrefix() + CHANGELOG_FILE_SUFFIX;
 	}
 	@Transient
 	public String getChangeLogMetadataFile(){
-		return getChangeLogFilePrefix() + ".changelog.metadata";
+		return getChangeLogFilePrefix() + METADATA_FILE_SUFFIX;
 	}
 }
