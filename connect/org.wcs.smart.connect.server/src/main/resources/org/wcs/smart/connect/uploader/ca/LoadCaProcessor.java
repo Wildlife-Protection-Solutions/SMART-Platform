@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.uploader.ca;
 
+import java.nio.file.Files;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;

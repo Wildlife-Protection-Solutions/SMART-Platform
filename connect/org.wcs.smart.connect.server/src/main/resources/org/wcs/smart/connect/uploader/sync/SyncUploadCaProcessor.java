@@ -1,5 +1,6 @@
 package org.wcs.smart.connect.uploader.sync;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.logging.Level;
@@ -69,7 +70,7 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 				
 				session.beginTransaction();
 				item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
-				item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage()));
+				item.setMessage(MessageFormat.format("Error processing work item: {0}", ex.getMessage()));
 				session.getTransaction().commit();
 			}
 		}finally{

@@ -121,7 +121,8 @@ public class ZipUtil {
                     }
                 }
             }else{
-            	throw new IllegalStateException(MessageFormat.format("Error creating zip file. {0}", new Object[]{path.toString()}));
+            	//empty directory; this should be ok; just skip
+            	//throw new IllegalStateException(MessageFormat.format("Error creating zip file. {0}", new Object[]{path.toString()}));
             }
         }
         return true;
