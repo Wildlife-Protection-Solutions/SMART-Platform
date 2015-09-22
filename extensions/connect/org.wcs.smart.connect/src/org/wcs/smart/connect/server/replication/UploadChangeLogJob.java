@@ -100,9 +100,9 @@ public class UploadChangeLogJob extends FileUploaderJob {
 						"SMART Connect Sync Upload", 
 						"Sync upload to SMART Connect complete."  + (msg == null ? "" : "\n\n" + msg));
 				}else if (item.getStatus() == ConnectSyncHistoryRecord.Status.ERROR){
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
+					MessageDialog.openError(Display.getDefault().getActiveShell(), 
 							"SMART Connect Sync Upload", 
-							"An error occurred during syncing changes to SMART Connect."  + (msg == null ? "" : "\n\n" + msg));
+							"An error occurred uploading changes to SMART Connect."  + (msg == null ? "" : "\n\n" + msg));
 				}
 			}});
 	}

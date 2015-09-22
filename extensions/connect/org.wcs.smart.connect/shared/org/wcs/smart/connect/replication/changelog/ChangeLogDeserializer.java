@@ -32,10 +32,12 @@ import java.util.HashMap;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.exception.GenericJDBCException;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
+import org.wcs.smart.connect.server.replication.ConflictException;
 
 /**
  * Class for deserializing a change log.
@@ -56,6 +58,7 @@ public abstract class ChangeLogDeserializer {
 	
 	
 	public void processFile(final Session session) throws Exception{
+		try{
 		this.session = session;
 		session.doWork(new Work() {
 			@Override
@@ -99,9 +102,20 @@ public abstract class ChangeLogDeserializer {
 				}
 			}
 		});
+		}catch(GenericJDBCException ex){
+			//try to find the originating exception
+			Throwable t = ex.getCause();
+			if (t instanceof SQLException){
+				if (t.getCause() instanceof ConflictException){
+					throw (ConflictException)t.getCause();
+				}
+				throw (SQLException)t;
+			}
+			throw ex;
+		}
 	}
 	
-	protected abstract boolean shouldProcess(ChangeLogItem item);
+	protected abstract boolean shouldProcess(ChangeLogItem item) throws ConflictException;
 
 	private HashMap<String, Object> readObject(ObjectInputStream is) throws Exception{
 		int numCols = is.readInt();

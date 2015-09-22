@@ -68,7 +68,7 @@ public class ChangeLogPackager {
 	
 	public ChangeLogPackager(ConnectSyncHistoryRecord record){
 		this.record = record;
-		filestorePath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
+		filestorePath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getFilestoreDirectory());
 		changelogFile = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogFile());
 		metadataFile = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogMetadataFile() );
 		zipFile = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile());
@@ -115,10 +115,20 @@ public class ChangeLogPackager {
 	/*
 	 * Zips changelog file and metadata file
 	 */
+	/*
+	 * Zips changelog file and metadata file
+	 */
 	private void zipPackage(IProgressMonitor monitor) throws Exception{
-		ZipUtil.createZip(new File[]{changelogFile.toFile(), 
-				metadataFile.toFile(),
-				filestorePath.toFile()}, zipFile.toFile(), monitor);
+		File[] filesToZip;
+		if (Files.exists(filestorePath)){
+			filesToZip = new File[]{changelogFile.toFile(), 
+					metadataFile.toFile(),
+					filestorePath.toFile()};
+		}else{
+			filesToZip = new File[]{changelogFile.toFile(), 
+					metadataFile.toFile()};
+		}
+		ZipUtil.createZip(filesToZip, zipFile.toFile(), monitor);
 	}
 	
 	/*
