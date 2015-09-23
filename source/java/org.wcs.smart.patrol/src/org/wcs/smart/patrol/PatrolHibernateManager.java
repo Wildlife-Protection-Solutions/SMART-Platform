@@ -327,13 +327,13 @@ public class PatrolHibernateManager extends HibernateManager{
 	 * @return patrol id for given patrol
 	 */
 	public static String generatePatrolId(Patrol p, Session s) {
+		
 		StringBuilder sb = new StringBuilder();
-
 		sb.append(p.getConservationArea().getId());
 
 		Query q = s
-				.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca ORDER BY id desc"); //$NON-NLS-1$
-		q.setParameter("id", sb.toString() + "%"); //$NON-NLS-1$ //$NON-NLS-2$
+				.createQuery("SELECT id FROM Patrol WHERE id like :id and conservationArea = :ca"); //$NON-NLS-1$
+		q.setParameter("id", sb.toString() + "%_%"); //$NON-NLS-1$ //$NON-NLS-2$
 		q.setParameter("ca", p.getConservationArea()); //$NON-NLS-1$
 
 		long idNumber = 0;
@@ -341,9 +341,14 @@ public class PatrolHibernateManager extends HibernateManager{
 		for (Iterator<?> iterator = results.iterator(); iterator.hasNext();) {
 			String localId = (String) iterator.next();
 			try {
-				idNumber = Integer.parseInt(localId.substring(localId
-						.lastIndexOf('_') + 1));
-				break;
+				int idx = localId.lastIndexOf('_');
+				String keypart = localId.substring(0, idx);
+				if (keypart.equalsIgnoreCase(p.getConservationArea().getId())){
+					String numpart = localId.substring(idx+1);
+					long tmp = Integer.parseInt(numpart);
+					if (tmp > idNumber) idNumber = tmp;
+				}
+				//break;
 			} catch (Exception ex) {
 				// not of the form CAID_# skip this one
 			}
