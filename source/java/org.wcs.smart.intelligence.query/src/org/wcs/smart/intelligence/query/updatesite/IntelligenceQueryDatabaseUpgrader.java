@@ -21,13 +21,16 @@
  */
 package org.wcs.smart.intelligence.query.updatesite;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.internal.Messages;
+import org.wcs.smart.intelligence.updatesite.OnInstallAction;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -55,15 +58,68 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 			if (currentVersion == null) {
 				//Entity doesn't present in this configuration
 				//we need to perform install database support for the plug-in
-			
-				//this will install and upgrade to current version
 				monitor.subTask(Messages.IntelligenceQueryDatabaseUpgrader_InstallStatu);
 				OnInstallAction install = new OnInstallAction();
 				install.execute(null);
+			}else{
+				try{
+					upgrade(currentVersion, s);
+				}catch (final Throwable t){
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							IntelligenceQueryPlugIn.displayLog(MessageFormat.format(
+									"Error upgrading the intelligence query plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, IntelligenceQueryPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					});
+				}
 			}
 		}finally{
 			s.close();
 		}
+	}
+	
+	/**
+	 * Upgrades from the currentVersion to the most recent version.
+	 * @param currentVersion
+	 * @param session
+	 */
+	public static final void upgrade(String currentVersion, Session session){
+		if (currentVersion.equals(IntelligenceQueryPlugIn.DB_VERSION_1)){
+			upgradeV1ToV2(session);
+		}
+	}
+	
+	private static void upgradeV1ToV2(Session session) {
 		
+		String[] sql = new String[] {
+				"ALTER TABLE SMART.INTEL_RECORD_QUERY DROP CONSTRAINT INTEL_RECORD_QUERY_CA_UUID_FK",
+				"ALTER TABLE SMART.INTEL_RECORD_QUERY DROP CONSTRAINT INTEL_RECORD_QUERY_CREATOR_UUID_FK",
+				"ALTER TABLE SMART.INTEL_RECORD_QUERY DROP CONSTRAINT INTEL_RECORD_QUERY_FOLDER_UUID_FK",
+				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY DROP CONSTRAINT INTEL_SUMMARY_QUERY_CA_UUID_FK",
+				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY DROP CONSTRAINT INTEL_SUMMARY_QUERY_CREATOR_UUID_FK",
+				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY DROP CONSTRAINT INTEL_SUMMARY_QUERY_FOLDER_UUID_FK",
+
+				"ALTER TABLE SMART.INTEL_RECORD_QUERY ADD CONSTRAINT INTEL_RECORD_QUERY_CREATOR_UUID_FK FOREIGN KEY (CREATOR_UUID) REFERENCES SMART.EMPLOYEE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.INTEL_RECORD_QUERY ADD CONSTRAINT INTEL_RECORD_QUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
+				"ALTER TABLE SMART.INTEL_RECORD_QUERY ADD CONSTRAINT INTEL_RECORD_QUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY ADD CONSTRAINT INTEL_SUMMARY_QUERY_CREATOR_UUID_FK FOREIGN KEY (CREATOR_UUID) REFERENCES SMART.EMPLOYEE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY ADD CONSTRAINT INTEL_SUMMARY_QUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
+				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY ADD CONSTRAINT INTEL_SUMMARY_QUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE" 
+		};
+		
+		session.beginTransaction();
+		try{
+			for (String s : sql){
+				session.createSQLQuery(s).executeUpdate();
+			}
+		
+			HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_2, session);
+			session.getTransaction().commit();
+		}finally{
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
+		}
 	}
 }

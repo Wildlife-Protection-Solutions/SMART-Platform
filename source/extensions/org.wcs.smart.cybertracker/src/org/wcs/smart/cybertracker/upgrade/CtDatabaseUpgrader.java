@@ -21,9 +21,11 @@
  */
 package org.wcs.smart.cybertracker.upgrade;
 
+import java.text.MessageFormat;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.internal.Messages;
@@ -47,22 +49,66 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 		Session s = HibernateManager.openSession();
 		try{
 			versions = UpgradeEngine.getVersions(s);
+			
+			if (versions == null) {
+				//we don't know what is happening with database
+				//it is some kind of error or wrong database version
+				return;
+			}
+			final String currentVersion = versions.get(CyberTrackerPlugIn.PLUGIN_ID);
+			if (versions.get(CyberTrackerPlugIn.PLUGIN_ID) == null) {
+				//CyberTracker doesn't present in this configuration
+				//we need to perform install database support for the plug-in
+				monitor.subTask(Messages.CtDatabaseUpgrader_UpgradeTask);
+				OnInstallAction install = new OnInstallAction();
+				install.execute(null);
+			}else{
+				try{
+					upgrade(currentVersion, s);
+				}catch (final Throwable t){
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							CyberTrackerPlugIn.displayError("Upgrade Error", MessageFormat.format(
+									"Error upgrading the cybertracker plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, CyberTrackerPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+					});
+				}
+			}
 		}finally{
 			s.close();
 		}
-		
-		if (versions == null) {
-			//we don't know what is happening with database
-			//it is some kind of error or wrong database version
-			return;
-		}
-		if (versions.get(CyberTrackerPlugIn.PLUGIN_ID) == null) {
-			//CyberTracker doesn't present in this configuration
-			//we need to perform install database support for the plug-in
-			monitor.subTask(Messages.CtDatabaseUpgrader_UpgradeTask);
-			OnInstallAction install = new OnInstallAction();
-			install.execute(null);
-		}
 	}
 
+	/**
+	 * Upgrades from the currentVersion to the most recent version.
+	 * @param currentVersion
+	 * @param session
+	 */
+	public static final void upgrade(String currentVersion, Session session){
+		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_1)){
+			upgradeV1ToV2(session);
+		}
+	}
+	
+	private static void upgradeV1ToV2(Session session){
+		String[] sql = new String[]{
+			"ALTER TABLE SMART.CT_PROPERTIES_OPTION DROP CONSTRAINT CT_PROPERTIES_OPTION_CA_UUID_FK",
+			"ALTER TABLE SMART.CT_PROPERTIES_OPTION ADD CONSTRAINT CT_PROPERTIES_OPTION_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE" 
+		};
+		
+		session.beginTransaction();
+		try{
+			for (String s : sql){
+				session.createSQLQuery(s).executeUpdate();
+			}
+		
+			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_2, session);
+			session.getTransaction().commit();
+		}finally{
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
+		}
+	}
 }

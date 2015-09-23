@@ -36,6 +36,7 @@ import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 import org.wcs.smart.plan.internal.Messages;
+import org.wcs.smart.plan.upgrade.PlanDatabaseUpgrader;
 
 public class AddPlanJob extends Job {
 
@@ -50,8 +51,9 @@ public class AddPlanJob extends Job {
 				
 		final PlanTablesMarkers mark = new PlanTablesMarkers();
 		Session session = HibernateManager.openSession();
+		String currentVersion= null;
 		try{
-			String currentVersion = HibernateManager.getPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, session);
+			 currentVersion = HibernateManager.getPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, session);
 			if (currentVersion != null && currentVersion.equals(SmartPlanPlugIn.DB_VERSION)){
 				//db version matches current version; we are ok
 				return Status.OK_STATUS;
@@ -101,7 +103,9 @@ public class AddPlanJob extends Job {
 			if (!mark.patrol_plan) {
 				createPatrolPlanTable(session);
 			}			
-			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, SmartPlanPlugIn.DB_VERSION, session);
+			HibernateManager.setPlugInVersion(SmartPlanPlugIn.PLUGIN_ID, SmartPlanPlugIn.DB_VERSION_1, session);
+			
+			PlanDatabaseUpgrader.upgrade(SmartPlanPlugIn.DB_VERSION_1, session);
 			session.getTransaction().commit();
 		} catch (final Exception ex) {
 			Display.getDefault().syncExec(new Runnable(){

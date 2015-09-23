@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
@@ -79,31 +80,35 @@ public class AddIntelligenceQueriesJob extends Job {
 		Session session = HibernateManager.openSession();	
 		
 		try{
+							
 			String currentVersion = HibernateManager.getPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, session);
 			if (currentVersion == null){
-				createDatabaseTables(session);
+				session.beginTransaction();
+				try{
+					createDatabaseTables(session);
+					HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_1, session);
+					session.getTransaction().commit();
+				}catch(final Exception ex){
+					session.getTransaction().rollback();
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openError(Display.getDefault().getActiveShell(),
+									Messages.AddIntelligenceQueriesJob_JobName,
+									Messages.AddIntelligenceQueriesJob_Error1 + ex.getMessage());
+						}
+						
+					});
+					return new Status(Status.ERROR,IntelligenceQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
+				}	
 				currentVersion = IntelligenceQueryPlugIn.DB_VERSION_1;
 			}
-		}catch(final Throwable e){
-			//TODO: figure out what to do here, because this will install the new 
-			//version anyways
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					IntelligenceQueryPlugIn.displayLog(Messages.AddIntelligenceQueriesJob_Error1 + e.getLocalizedMessage(), e);
-				}
-			});
-			return new Status(Status.ERROR, IntelligenceQueryPlugIn.PLUGIN_ID,Messages.AddIntelligenceQueriesJob_Error2, e);
+					//run the upgrader to upgrade to the current version
+			IntelligenceQueryDatabaseUpgrader.upgrade(currentVersion, session);					
 		}finally{
-			try{
-				session.close();
-			}catch (Exception ex){
-				//eat this
-			}
+			session.close();
 		}
-		
 		return Status.OK_STATUS;
-		
 	}
 	
 	private void createDatabaseTables(Session session){

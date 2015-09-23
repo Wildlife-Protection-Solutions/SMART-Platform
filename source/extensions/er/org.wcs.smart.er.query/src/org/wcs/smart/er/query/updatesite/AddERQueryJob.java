@@ -28,12 +28,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.upgrade.ERDatabaseUpgrader;
+import org.wcs.smart.er.query.upgrade.ERQueryDatabaseUpgrader;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -65,11 +67,21 @@ public class AddERQueryJob extends Job {
 					session.getTransaction().commit();
 				}catch(Exception ex){
 					session.getTransaction().rollback();
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openError(Display.getDefault().getActiveShell(),
+									"Error",
+									"An error occurred while installing the ecological records query module (failed to create required database tables). Please restart the system, uninstall the module, then try reinstalling the module.  If the problem persists contact your system administrator.");
+						}
+						
+					});
+					return new Status(Status.ERROR,ERQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
 				}	
 				currentVersion = ERQueryPlugIn.DB_VERSION_1;
 			}
 			//run the upgrader to upgrade to the current version
-			ERDatabaseUpgrader.upgrade(currentVersion, session);
+			ERQueryDatabaseUpgrader.upgrade(currentVersion, session);
 			
 		}finally{
 			session.close();
@@ -127,16 +139,12 @@ public class AddERQueryJob extends Job {
 		};
 		
 		session.doWork(new Work() {
-			
 			@Override
 			public void execute(Connection c) throws SQLException {
 				for (int i = 0; i < sql.length; i ++){
 					c.createStatement().execute(sql[i]);
-				}
-				
+				}	
 			}
 		});
-		
 	}
-	
 }

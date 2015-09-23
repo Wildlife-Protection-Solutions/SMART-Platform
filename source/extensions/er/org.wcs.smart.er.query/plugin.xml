@@ -341,7 +341,7 @@
    <extension
          point="org.wcs.smart.dbUpgrage">
       <dbUpgrader
-            upgrader="org.wcs.smart.er.query.upgrade.ERDatabaseUpgrader">
+            upgrader="org.wcs.smart.er.query.upgrade.ERQueryDatabaseUpgrader">
       </dbUpgrader>
    </extension>
 

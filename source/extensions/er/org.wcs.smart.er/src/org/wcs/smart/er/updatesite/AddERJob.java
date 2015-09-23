@@ -28,12 +28,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.internal.Messages;
+import org.wcs.smart.er.upgrade.ERDatabaseUpgrader;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -52,47 +54,41 @@ public class AddERJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
-				
-		String currentVersion = null;
+						
 		Session session = HibernateManager.openSession();
 		try{
-			currentVersion = HibernateManager.getPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, session);
-			if (currentVersion != null && currentVersion.equals(EcologicalRecordsPlugIn.DB_VERSION)){
-				//db version matches current version; we are ok
-				return Status.OK_STATUS;
+			String currentVersion = HibernateManager.getPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, session);
+			if (currentVersion == null){
+				session.beginTransaction();
+				try{
+					createTables(session);
+					HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_1, session);
+					session.getTransaction().commit();
+				}catch(Exception ex){
+					session.getTransaction().rollback();
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							MessageDialog.openError(Display.getDefault().getActiveShell(),
+									"Error",
+									"An error occurred while installing the ecological records module (failed to create required database tables). Please restart the system, uninstall the module, then try reinstalling the module.  If the problem persists contact your system administrator.");
+						}
+						
+					});
+					return new Status(Status.ERROR,EcologicalRecordsPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
+				}	
+				currentVersion = EcologicalRecordsPlugIn.DB_VERSION_1;
 			}
+			//run the upgrader to upgrade to the current version
+			ERDatabaseUpgrader.upgrade(currentVersion, session);
+					
 		}finally{
 			session.close();
 		}
-
-		session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			if (currentVersion == null){
-				createTables(session);
-				HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION, session);
-			}
-			session.getTransaction().commit();
-		} catch (final Exception ex) {
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					EcologicalRecordsPlugIn.displayLog(Messages.AddERJob_InstallError, ex);
-				}
-			});
-			return new Status(IStatus.ERROR, EcologicalRecordsPlugIn.PLUGIN_ID, 1, Messages.AddERJob_InstallError, ex); 
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
-			if (session.isOpen()) {
-				session.close();
-			}
-		}
-
 		return Status.OK_STATUS;
-	}
-
+	}	
+	
+	
 	private void createTables(Session session){
 		final String[] sql = new String[]{
 				"CREATE TABLE SMART.MISSION(UUID CHAR(16) FOR BIT DATA NOT NULL,SURVEY_UUID CHAR(16) FOR BIT DATA NOT NULL,ID VARCHAR(128) NOT NULL,START_DATETIME TIMESTAMP NOT NULL,END_DATETIME TIMESTAMP NOT NULL,COMMENT LONG VARCHAR,PRIMARY KEY (UUID))", //$NON-NLS-1$
@@ -210,16 +206,13 @@ public class AddERJob extends Job {
 		};
 		
 		session.doWork(new Work() {
-			
 			@Override
 			public void execute(Connection c) throws SQLException {
 				for (int i = 0; i < sql.length; i ++){
 					c.createStatement().execute(sql[i]);
-				}
-				
+				}				
 			}
 		});
-		
 	}
 	
 }

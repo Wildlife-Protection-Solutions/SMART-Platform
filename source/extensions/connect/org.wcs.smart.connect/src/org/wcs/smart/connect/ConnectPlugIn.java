@@ -37,6 +37,9 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.connect"; //$NON-NLS-1$
 
+	public static final String DB_VERSION_1 = "1.0";
+	public static final String DB_VERSION = DB_VERSION_1; //current version
+	
 	// The shared instance
 	private static ConnectPlugIn plugin;
 	
