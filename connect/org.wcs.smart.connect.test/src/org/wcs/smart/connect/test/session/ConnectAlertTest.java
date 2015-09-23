@@ -512,7 +512,7 @@ public class ConnectAlertTest {
 			}
 		});
 		
-		//lets get the alert; this should fail as alertshould be deleted
+		//lets get the alert; this should fail as alert should be deleted
 		HttpGet get = new HttpGet(builder.build());
 		get.addHeader("Authorization", "basic " + info);
 		httpClient.execute(get, new ResponseHandler<String>() {

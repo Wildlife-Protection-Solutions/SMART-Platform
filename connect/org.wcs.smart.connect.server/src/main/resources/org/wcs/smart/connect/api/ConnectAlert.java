@@ -87,16 +87,20 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String getAllAlerts( @QueryParam(value="levelFilter") int levelFilter, 
-    			@QueryParam(value="typeUuidFilter") UUID typeUuidFilter,
-    			@QueryParam(value="statusFilter") AlertStatusEnum statusFilter,    		
-    			@QueryParam(value="caUuidFilter") UUID caUuidFilter, 
+    public String getAllAlerts( @QueryParam(value="levelFilter") String levelFilter, 
+    			@QueryParam(value="typeUuidFilter") String typeUuidFilter,
+    			@QueryParam(value="statusFilter") String statusFilter,    		
+    			@QueryParam(value="caUuidFilter") String caUuidFilter, 
     			@QueryParam(value="startDateFilter") Date startDateFilter,
     			@QueryParam(value="endDateFilter") Date endDateFilter,
     			@QueryParam(value="textSearchFilter") String textSearchFilter
     			){
-    	    
-		AlertFilter af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, caUuidFilter, startDateFilter, endDateFilter, textSearchFilter);
+		AlertFilter af;
+		try{
+			af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, caUuidFilter, startDateFilter, endDateFilter, textSearchFilter);
+		}catch (Exception e){
+			throw e;
+		}
 		
 		validateUser();
 		Session s = HibernateManager.getSession(context);

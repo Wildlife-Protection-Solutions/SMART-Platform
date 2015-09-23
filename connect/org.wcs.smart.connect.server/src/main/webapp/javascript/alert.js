@@ -1,9 +1,14 @@
 var ALERT_URL = "../api/connectalert/";
-var USER_URL = "../api/connectuser/";
-var interval = 8000; //# of seconds between map refresh on the alert layer
+var interval = 7000; //# of seconds between map refresh on the alert layer
+var realtime;
+var map;
 
 
 window.onload = function(){
+//	document.getElementById('updatealertform').addEventListener("submit", function(evt){
+//        evt.preventDefault();
+//    }, true);
+//	addEventListener("submit", formEnterCallback, false);
 	//Hide header/footer and menu if mobile parameter is set:
 	if(mobile == "true"){
 		document.getElementById('mainheader').style.display = 'none';
@@ -14,53 +19,18 @@ window.onload = function(){
 	}
 
 	
+	//setup onChange events for filter buttons
+	var items = document.getElementsByClassName("updateChange");
+	for (var i = 0; i < items.length; i++){
+		items[i].addEventListener("change", refreshAlerts);
+	}
+	
    
     
 //------------------------------------------------------------
 //Setup map layers
     // The real-time layer that auto-refreshes to show alert
-	
-	var a = new Array();
-	var b = new Array();
-	
-	a['name'] = "status";
-	a['value'] = "ACTIVE";
-	b['name'] = "level";
-	b['value'] = "1";
-	
-	var filter_list ={a,b}
-	
-	realtime = L.realtime({
-    	  url: ALERT_URL,
-        crossOrigin: true,
-        type: 'json',
-//        options: filter_list
-    }, {
-        interval: interval
-    });
-   
-    realtime.on('update', function(e) {
-        var coordPart = function(v, dirs) {
-                return dirs.charAt(v >= 0 ? 0 : 1) +
-                    (Math.round(Math.abs(v) * 100) / 100).toString();
-            },
-	            popupContent = function(fId) {
-                var feature = e.features[fId],
-                    c = feature.geometry.coordinates;
-                return 'Event: ' + feature.properties.type + " - " + feature.properties.id + 
-                	"<br>Reported time: " + feature.properties.date +
-                	"<br>Location: " +
-                    coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW');
-            },
-            bindFeaturePopup = function(fId) {
-                realtime.getLayer(fId).bindPopup(popupContent(fId));
-            },
-            updateFeaturePopup = function(fId) {
-                realtime.getLayer(fId).getPopup().setContent(popupContent(fId));
-            };
-        Object.keys(e.enter).forEach(bindFeaturePopup);
-        Object.keys(e.update).forEach(updateFeaturePopup);
-    });
+
     
     //OSM Basemap Layer - the only Hardcoded basemap
     var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -74,10 +44,11 @@ window.onload = function(){
 	
 	var dataLayers = {
 //			"OSM basemap": osm,
-			"Events": realtime
+//			"Events": realtime
 	};
 	
-	var activeLayers = [osm, realtime];
+//	var activeLayers = [osm, realtime];
+	var activeLayers = [osm];
 
 	//Load all saved, active layers
 	for (i = 0; i < mapLayers.length; ++i) {
@@ -135,7 +106,10 @@ window.onload = function(){
 
 			
 	//initialize the map
-	var map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8, layers: activeLayers});
+	map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8, layers: activeLayers});
+	
+	//add realtime layer to map 
+	updateRealtimeLayer(ALERT_URL);
 	
 	//add layer control to map
 	L.control.layers(baseMaps, dataLayers, {position: 'topleft'}).addTo(map);
@@ -165,6 +139,8 @@ window.onload = function(){
 	refreshAlerts();
 	
 }
+
+
 
 
 //creates a new user
@@ -209,7 +185,7 @@ function createNewAlert() {
 
 	var oReq = new XMLHttpRequest();
 	oReq.onload = alertCreated;
-	oReq.open("POST", ALERT_URL + encodeURIComponent(usergenid), true);
+	oReq.open("POST", ALERT_URL  + encodeURIComponent(usergenid), true);
 	oReq.setRequestHeader("Content-type", "application/json");
 	oReq.send(JSON.stringify(jsonData));
 	return false;
@@ -217,6 +193,8 @@ function createNewAlert() {
 
 //callback for creating user 
 function alertCreated() {
+	refreshAlerts();
+	
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
@@ -224,8 +202,7 @@ function alertCreated() {
 	} else {
 		displayError(parseError("Error creating Alert", this.responseText));
 	}
-	
-	refreshAlerts();
+
 }
 
 function showLatLong(position){
@@ -320,7 +297,7 @@ function deleteAlert(){
 	var oReq = new XMLHttpRequest();
 	oReq.onload = alertDeleted;
 //	oReq.smartuser=username;
-	oReq.open("DELETE", ALERT_URL + encodeURIComponent(uuid), true);
+	oReq.open("DELETE", ALERT_URL  + encodeURIComponent(uuid), true);
 	oReq.send();
 	return false;	
 }
@@ -340,6 +317,10 @@ function alertDeleted() {
 /* reload alert table */
 function refreshAlerts(){
 	//clear current table
+	hideInfo();
+	hideError();
+	
+	
 	var objects = document.querySelectorAll("tr.alertrow");
 	for (var i = 0; i < objects.length; i++){
 		var ele = objects[i];
@@ -351,10 +332,14 @@ function refreshAlerts(){
 	row.className="alertrow";
 	row.innerHTML="Refreshing Alert Table...";
 	parent.appendChild(row);
-		
+	
+	var filteredUrl = getFilteredUrl(ALERT_URL);
+	
+	updateRealtimeLayer(filteredUrl);
+	
  	var oReq = new XMLHttpRequest();
  	oReq.onload = createAlertTable;
- 	oReq.open("Get", ALERT_URL, true);
+ 	oReq.open("Get", filteredUrl , true);
  	oReq.send();
 }
 
@@ -365,7 +350,10 @@ function createAlertTable(){
 		var msg = "Error: ";
 		if (this.status == 401){
 			msg += "Unauthorized";
+		}else if (this.status == 404){
+			msg += "Invalid URL, URL not Found";
 		}
+		
 		try {
 			msg = JSON.parse(this.responseText).error
 		} catch (err) {
@@ -381,32 +369,43 @@ function createAlertTable(){
 	}
 	
 	var parent = document.getElementById("alerttable");
- 	var geojson = JSON.parse(this.responseText);
- 	var alerts = geojson.features;
- 	for (var i = 0; i < alerts.length; i ++){
- 		var d = new Date(alerts[i].properties.date);
- 		var row = tableCreateRowTDs(parent,
- 				[alerts[i].properties.type, alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
- 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
- 		row.id = "alertRow" + i;
- 		row.dataset.uuid = alerts[i].properties.uuid;
+ 	
+	try{
+		var geojson = JSON.parse(this.responseText);
+	 	var alerts = geojson.features;
+	 	for (var i = 0; i < alerts.length; i ++){
+	 		var d = new Date(alerts[i].properties.date);
+	 		var row = tableCreateRowTDs(parent,
+	 				[alerts[i].properties.type, alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
+	 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+	 		row.id = "alertRow" + i;
+	 		row.dataset.uuid = alerts[i].properties.uuid;
 
- 		//update goes first, shows second, since it floats right in the css...
- 		var updateicon = document.createElement("a");
- 		updateicon.className="update-icon";
- 		updateicon.title="update alert";
- 		updateicon.onclick = updateAlert;
- 		updateicon.href="";
- 		row.childNodes[7].appendChild(updateicon);
- 		
- 		var deleteicon = document.createElement("a");
- 		deleteicon.className="delete-icon";
- 		deleteicon.title="delete alert";
- 		deleteicon.onclick = deleteAlert;
- 		deleteicon.href="";
- 		row.childNodes[7].appendChild(deleteicon);
- 		
- 	}
+	 		//update goes first, shows second, since it floats right in the css...
+	 		var updateicon = document.createElement("a");
+	 		updateicon.className="update-icon";
+	 		updateicon.title="update alert";
+	 		updateicon.onclick = updateAlert;
+	 		updateicon.href="";
+	 		row.childNodes[7].appendChild(updateicon);
+	 		
+	 		var deleteicon = document.createElement("a");
+	 		deleteicon.className="delete-icon";
+	 		deleteicon.title="delete alert";
+	 		deleteicon.onclick = deleteAlert;
+	 		deleteicon.href="";
+	 		row.childNodes[7].appendChild(deleteicon);
+	 		
+	 	}
+	}catch(err) {
+ 		var newRow = parent.insertRow(-1);
+ 		newRow.style.backgroundColor = "#F00";
+ 		newRow.className = "alertrow";
+ 	    var oCell = newRow.insertCell(0);
+ 	    oCell.colSpan = 10;
+ 	    oCell.innerHTML = "No alerts meeting your filter criteria were found";
+	}
+
 }
 
 
@@ -420,7 +419,7 @@ function updateAlert(){
 	
 	var oReq = new XMLHttpRequest();
 	oReq.onload = showCurrentAlert;
-	oReq.open("GET", ALERT_URL + encodeURIComponent(uuid), true);
+	oReq.open("GET", ALERT_URL  + encodeURIComponent(uuid), true);
 	oReq.send();
 	return false;	
 }
@@ -479,7 +478,7 @@ function submitUpdatedAlert(){
 		    };
 	var oReq = new XMLHttpRequest();
 	oReq.onload = AlertUpdated;
-	oReq.open("PUT", ALERT_URL + encodeURIComponent(userId), true);
+	oReq.open("PUT", ALERT_URL  + encodeURIComponent(userId), true);
 	oReq.setRequestHeader("Accept","application/json");
 	oReq.setRequestHeader("Content-Type","application/json");
 	oReq.send(JSON.stringify(data));
@@ -507,4 +506,119 @@ function hideShowFilters(){
 		document.getElementById('filter-form').style.display = "none";
 		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>Show Filters';
 	}
+}
+
+
+function getFilteredUrl(base){
+	var filteredUrl = base;
+
+	var started = {value: false};//using an object so it can be modified in the function calls easily (objects are pass-by-reference)
+
+	filteredUrl += getFilter("filterType", started, "typeUuidFilter");
+	filteredUrl += getFilter("filterStatus", started, "statusFilter");
+	filteredUrl += getFilter("filterImportance", started, "levelFilter");
+	filteredUrl += getFilter("filterCa", started, "caUuidFilter");
+	
+	filteredUrl += "&textSearchFilter=" +  document.getElementById("filterText").value;
+	
+	return filteredUrl;
+}
+
+
+function getFilter(classname, started, filterName){
+	var url = "";
+	var filterString = "";
+	var options = document.getElementsByClassName(classname);
+	for (var i = 0; i < options.length; i++){
+		if(options[i].checked){
+			filterString += options[i].value + ",";
+		}
+	}
+	if(started.value == false){
+		started.value = true;
+		url += "?";
+	}else{
+		url += "&";
+	}
+	url += filterName + "=" + encodeURI(filterString);
+	return url;
+}
+
+function updateRealtimeLayer(updatedUrl){
+	if(map.hasLayer(realtime)){
+		realtime.stop();
+		map.removeLayer(realtime);
+	}
+	
+	var url = getFilteredUrl(ALERT_URL) + "&"; //the "&" stops any additional data from messing up the last filter parameter in the url.
+	
+	realtime = L.realtime({
+    	url: url,
+        crossOrigin: true,
+        type: 'json'
+    }, {
+        interval: interval,
+        filter: eventFilter
+//        filter: function(feature, layer) {
+//        	return true;
+//        }
+    });
+   
+    realtime.on('update', function(e) {
+        var coordPart = function(v, dirs) {
+                return dirs.charAt(v >= 0 ? 0 : 1) +
+                    (Math.round(Math.abs(v) * 100) / 100).toString();
+            },
+	            popupContent = function(fId) {
+                var feature = e.features[fId],
+                    c = feature.geometry.coordinates;
+                return 'Event: ' + feature.properties.type + " - " + feature.properties.id + 
+                	"<br>Reported time: " + feature.properties.date +
+                	"<br>Location: " +
+                    coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW');
+            }
+            ,
+            bindFeaturePopup = function(fId) {
+                realtime.getLayer(fId).bindPopup(popupContent(fId));
+            },
+            updateFeaturePopup = function(fId) {
+                realtime.getLayer(fId).getPopup().setContent(popupContent(fId));
+            };
+        Object.keys(e.enter).forEach(bindFeaturePopup);
+        Object.keys(e.update).forEach(updateFeaturePopup);
+    });
+    
+    realtime.addTo(map);
+}
+
+
+//----------------------------------------------------------------------------
+//javascript client-side filtering.
+
+function eventFilter(feature, layer){
+	if(applyFilter("filterImportance",feature.properties.level)
+			&& applyFilter("filterType",feature.properties.typeuuid) 
+			&& applyFilter("filterStatus",feature.properties.status)
+			&& applyFilter("filterCa",feature.properties.cauuid)
+			&& (applyTextFilter("filterText",feature.properties.desc) || applyTextFilter("filterText",feature.properties.id))
+			){
+		return true;
+	}
+	return false;
+}
+
+function applyFilter(classname, value){
+	var options = document.getElementsByClassName(classname);
+	for (var i = 0; i < options.length; i++){
+		if(options[i].checked){
+			if(options[i].value == value) return true;
+		}
+	}
+	return false;
+}
+function applyTextFilter(id, value){
+	var search = document.getElementById(id);
+	if(search.value == "") return true; //blank text search shows everything.
+	if(search.value.search(value) > 0 ) return true;
+	return false;
 }

@@ -102,9 +102,9 @@
 	
 	<div id="filter-controls">
 			<a id="filter-link" onClick="hideShowFilters()"><image id="filter-button"/>Show Filters</a>
-			<form id="filter-form" name="filter-form">
+			<form id="filter-form" name="filter-form" onsubmit="return false;">
 
-			<select name="time_filter">
+			<select id='filterDate' class='updateChange' name="time_filter">
 			<option value=1>within 1 hour</option>
 			<option value=3>within 3 hours</option>
 			<option value=12>within 12 hours</option>
@@ -118,30 +118,30 @@
 
 			<p>Include Types:<br>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
-     			<input name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox" checked> ${type.getLabel()} </input><br> 
+     			<input class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox" checked> ${type.getLabel()} </input><br> 
 			</c:forEach> 
 			</p>
 			
 			<p>Status:<br>
 			<c:forEach var="s" items="${status}" varStatus="count">
-				<input name="${s}" value="${s}" type="checkbox" checked>${s}</input><br>
+				<input class='filterStatus updateChange' name="${s}" value="${s}" type="checkbox" checked>${s}</input><br>
 			</c:forEach>
 			
 			<p>Include Importance:<br>
-			<input type="checkbox" name="level1" value=1 checked>1(Highest)</input><br>
-			<input type="checkbox" name="level2" value=2 checked>2</input><br>
-			<input type="checkbox" name="level3" value=3 checked>3</input><br>
-			<input type="checkbox" name="level4" value=4 checked>4</input><br>
-			<input type="checkbox" name="level5" value=5 checked>5(Lowest)</input><br>
+			<input class='filterImportance updateChange' type="checkbox" name="level1" value=1 checked>1(Highest)</input><br>
+			<input class='filterImportance updateChange' type="checkbox" name="level2" value=2 checked>2</input><br>
+			<input class='filterImportance updateChange' type="checkbox" name="level3" value=3 checked>3</input><br>
+			<input class='filterImportance updateChange' type="checkbox" name="level4" value=4 checked>4</input><br>
+			<input class='filterImportance updateChange' type="checkbox" name="level5" value=5 checked>5(Lowest)</input><br>
 			</p>
 			<p>Include data from CA:<br>
 			<c:forEach var="ca" items="${cas}" varStatus="count">
-				<input name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox" checked>${ca.getLabel()}</input><br>
+				<input class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox" checked>${ca.getLabel()}</input><br>
 			</c:forEach>
 			</p>
 			<p>
 			Contains Text:<br>
-			<input name="textFilter" type="text"></input>
+			<input id='filterText' class='updateChange' name="textFilter" type="text"></input>
 			</p> 
 			</form>
 	</div>
@@ -156,7 +156,7 @@
   <div class="dialog-title">Update Alert</div>
   <div id="dialogerror" class="errorsection"></div>
   <div>Update Alert</div>
-	<form id="updatealertform">
+	<form id="updatealertform" name="updatealertform">
      		<div id="error" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
      		<label class="top-spacer block">Conservation Area:</label>
      		<input type="hidden" name="uuid" value="" />
