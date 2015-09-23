@@ -32,8 +32,10 @@ public class SmartPlanPlugIn extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.wcs.smart.plan"; //$NON-NLS-1$
 	
 	// The current supported DB Version
-	public static final String DB_VERSION = "3.0"; //$NON-NLS-1$
-
+	public static final String DB_VERSION_1 = "3.0"; //$NON-NLS-1$
+	public static final String DB_VERSION_2 = "4.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_2; 
+	
 	// The shared instance
 	private static SmartPlanPlugIn plugin;
 	

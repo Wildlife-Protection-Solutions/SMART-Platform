@@ -45,6 +45,8 @@ public class IntelligenceQueryPlugIn extends AbstractUIPlugin {
 	public static final String INTEL_RECORD_ICON = "org.wcs.smart.intelligence.query.record"; //$NON-NLS-1$
 	
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
+	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_2; //current version
 	
 	// The shared instance
 	private static IntelligenceQueryPlugIn plugin;

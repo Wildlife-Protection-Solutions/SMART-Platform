@@ -23,6 +23,8 @@ public class ERQueryPlugIn extends AbstractUIPlugin {
 	//The current db version
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION_3 = "3.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_3; //current
 
 	public static final String OBSERVATION_ICON = "org.wcs.smart.er.query.observation"; //$NON-NLS-1$
 	public static final String WAYPOINT_ICON = "org.wcs.smart.er.query.waypoint"; //$NON-NLS-1$

@@ -28,7 +28,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
+import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.upgrade.CtDatabaseUpgrader;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -111,7 +113,9 @@ public class AddCyberTrackerJob extends Job {
 				session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
 				session.createSQLQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
 			}
-			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION, session);
+			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_1, session);
+			
+			CtDatabaseUpgrader.upgrade(CyberTrackerPlugIn.DB_VERSION_1, session);
 			session.getTransaction().commit();
 		} catch (Exception ex) {
 			session.getTransaction().rollback();

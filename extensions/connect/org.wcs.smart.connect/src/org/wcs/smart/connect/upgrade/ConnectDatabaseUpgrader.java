@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.upgrade;
+package org.wcs.smart.connect.upgrade;
 
 import java.text.MessageFormat;
 import java.util.Map;
@@ -27,21 +27,23 @@ import java.util.Map;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.wcs.smart.er.query.ERQueryPlugIn;
-import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.updatesite.OnInstallAction;
+import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.updatesite.OnInstallAction;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
 /**
- * Ecological Records Query upgrade operations while upgrade/restore backup.
+ * Entity upgrade operations while upgrade/restore backup.
  * 
  * @author elitvin
- * @since 1.0.0
+ * @since 3.0.0
  */
-public class ERDatabaseUpgrader implements IDatabaseUpgrader {
+public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 
+	/* (non-Javadoc)
+	 * @see org.wcs.smart.upgrade.IDatabaseUpgrader#upgrade(org.hibernate.Session, org.eclipse.core.runtime.IProgressMonitor)
+	 */
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
 		Map<String, String> versions = null;
@@ -54,13 +56,11 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 				//it is some kind of error or wrong database version
 				return;
 			}
-			final String currentVersion = versions.get(ERQueryPlugIn.PLUGIN_ID);
+			final String currentVersion = versions.get(ConnectPlugIn.PLUGIN_ID);
 			if (currentVersion == null) {
 				//Entity doesn't present in this configuration
 				//we need to perform install database support for the plug-in
-			
-				//this will install and upgrade to current version
-				monitor.subTask(Messages.ERDatabaseUpgrader_Info);
+				monitor.subTask("Installing Connect PlugIn database tables.");
 				OnInstallAction install = new OnInstallAction();
 				install.execute(null);
 			}else{
@@ -70,8 +70,8 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
-							ERQueryPlugIn.displayLog(MessageFormat.format(
-									"Error upgrading the ecological records query plugin from version {0} to version {1}.", new Object[]{currentVersion, ERQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
+							ConnectPlugIn.displayLog(MessageFormat.format(
+									"Error upgrading the connect plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, ConnectPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 					});
 				}
@@ -81,39 +81,8 @@ public class ERDatabaseUpgrader implements IDatabaseUpgrader {
 		}
 	}
 	
-	/**
-	 * Upgrades from the currentVersion to the most recent version.
-	 * @param currentVersion
-	 * @param session
-	 */
-	public static final void upgrade(String currentVersion, Session session){
-		if (currentVersion.equals(ERQueryPlugIn.DB_VERSION_1)){
-			upgradeV1ToV2(session);
-		}
-	}
 	
-	private static void upgradeV1ToV2(Session session){
-		String[] sql = new String[]{
-				"alter table smart.survey_observation_query add column style long varchar", //$NON-NLS-1$
-				"alter table smart.survey_waypoint_query add column style long varchar", //$NON-NLS-1$
-				"alter table smart.survey_mission_track_query add column style long varchar", //$NON-NLS-1$
-				"alter table smart.survey_mission_query add column style long varchar", //$NON-NLS-1$
-				"alter table smart.survey_gridded_query add column style long varchar"}; //$NON-NLS-1$
-		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				ERQueryPlugIn.log(s, null);
-				session.createSQLQuery(s).executeUpdate();
-			}
-		
-			HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_2, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
-		}
+	public static final void upgrade(String currentVersion, Session session){
 	}
 
 }
