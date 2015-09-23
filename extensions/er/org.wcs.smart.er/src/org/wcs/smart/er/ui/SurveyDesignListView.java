@@ -52,7 +52,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
@@ -185,10 +188,24 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 		lstViewer.getControl().setMenu(menu);
 		designViewer.getControl().setMenu(menu);
 		
-		
+		/* selection */
 		ViewerSelectionListener sel = new ViewerSelectionListener(selService);
 		lstViewer.addSelectionChangedListener(sel);
 		designViewer.addSelectionChangedListener(sel);
+		bar.addSelectionListener(new SelectionAdapter() {
+			//ensure correct selection is made when tab changed
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Viewer active = null;
+				if (bar.getSelectionIndex() == 0){
+					active = lstViewer;
+					
+				}else{
+					active = designViewer;
+				}
+				active.setSelection(active.getSelection());
+			}
+		});
 	}
 
 	@Focus
