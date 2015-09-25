@@ -7,6 +7,100 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION smart.pointinpolygon(x double precision ,y double precision, geom bytea) RETURNS BOOLEAN AS $$
+BEGIN
+	RETURN ST_INTERSECTS(ST_MAKEPOINT(x, y), st_geomfromwkb(geom));
+
+END;
+$$LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION smart.intersects(geom1 bytea, geom2 bytea) RETURNS BOOLEAN AS $$
+BEGIN
+	RETURN ST_INTERSECTS(st_geomfromwkb(geom1), st_geomfromwkb(geom2));
+
+END;
+$$LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION smart.distanceInMeter(geom bytea) RETURNS DOUBLE PRECISION AS $$
+BEGIN
+	RETURN ST_Length2D_Spheroid(st_geomfromwkb(geom), 'SPHEROID["WGS 84",6378137,298.257223563]');
+
+END;
+$$LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION smart.intersection(geom1 bytea, geom2 bytea) RETURNS bytea AS $$
+BEGIN
+	RETURN st_asewkb(ST_INTERSECTION(st_geomfromwkb(geom1), st_geomfromwkb(geom2)), 'XDR');
+
+END;
+$$LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION smart.computeHoursPoly(polygon bytea, linestring bytea) RETURNS double precision AS $$
+DECLARE
+  ls geometry;
+  p geometry;
+  value double precision;
+  i integer;
+  pnttemp geometry;
+  pnttemp2 geometry;
+  lstemp geometry;
+BEGIN
+	ls := st_geomfromwkb(linestring);
+	p := st_geomfromwkb(polygon);
+	
+	--wholly contained use entire time
+	IF (st_contains(p, ls)) THEN
+		return (st_z(st_endpoint(ls)) - st_z(st_startpoint(ls))) / 3600000.0;
+	END IF;
+	
+	value := 0;
+	FOR i in 1..ST_NumPoints(ls)-1 LOOP
+		pnttemp := st_pointn(ls, i);
+		pnttemp2 := st_pointn(ls, i+1);
+		lstemp := st_makeline(pnttemp, pnttemp2);	
+		IF (NOT st_intersects(st_envelope(ls), st_envelope(lstemp))) THEN
+			--do nothing; outside envelope
+		ELSE
+			IF (ST_COVERS(p, lstemp)) THEN
+				value := value + st_z(pnttemp2) - st_z(pnttemp);
+			ELSE
+				--part in part out so linearly interpolate
+				value := value + ((st_z(pnttemp2) - st_z(pnttemp)) * (st_length(st_intersection(p, lstemp)) / st_distance(pnttemp, pnttemp2)));
+			END IF;
+		END IF;
+	END LOOP;
+	RETURN value / 3600000.0;
+END;
+$$LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION smart.computeHours(geometry bytea, linestring bytea) RETURNS double precision AS $$
+DECLARE
+  type varchar;
+  value double precision;
+  i integer;
+  p geometry;
+BEGIN
+	p := st_geomfromwkb(geometry);
+	type := st_geometrytype(p);
+	IF (upper(type) = 'ST_POLYGON') THEN
+		RETURN smart.computeHoursPoly(geometry, linestring);
+	ELSIF (upper(type) = 'ST_MULTIPOLYGON') THEN
+		value := 0;
+		FOR i in 1..ST_NumGeometries(p) LOOP
+			value := value + computeHoursPoly( st_asewkb(ST_GeometryN(p, i), 'XDR'), linestring);
+		END LOOP;
+		RETURN value;
+	ELSIF (upper(type) = 'ST_GEOMETRYCOLLECTION') THEN
+		value := 0;
+		FOR i in 1..ST_NumGeometries(p) LOOP
+			value := value + computeHours(ST_GeometryN(p, i), linestring);
+		END LOOP;
+		RETURN value;
+	END IF;
+	RETURN 0;
+
+END;
+$$LANGUAGE plpgsql;
 
 CREATE TABLE smart.agency
 (
@@ -91,6 +185,8 @@ CREATE TABLE smart.cm_node
    NODE_ORDER smallint,
    PHOTO_ALLOWED boolean,
    PHOTO_REQUIRED boolean,
+   COLLECT_MULTIPLE_OBS boolean,
+   USE_SINGLE_GPS_POINT boolean,
    PRIMARY KEY (UUID)
 );
 
@@ -2144,6 +2240,24 @@ ALTER TABLE smart.WP_OBSERVATION_ATTRIBUTES
 ADD CONSTRAINT OBSERVATION_ATTRIBUTE_ATT_UUID_FK
 FOREIGN KEY (ATTRIBUTE_UUID)
 REFERENCES smart.DM_ATTRIBUTE(UUID) ON DELETE CASCADE DEFERRABLE;
+
+-- Unique Constraints
+alter table smart.PATROL_MANDATE add constraint patrol_mandate_keyid_unq UNIQUE(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.PATROL_TRANSPORT add constraint patrol_transport_keyid_unq UNIQUE(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.TEAM add constraint team_keyid_unq UNIQUE(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.DM_ATTRIBUTE add constraint dm_attribute_keyid_unq UNIQUE(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.DM_ATTRIBUTE_LIST add constraint dm_attribute_list_keyid_unq UNIQUE(attribute_uuid, keyid) DEFERRABLE ;
+alter table smart.DM_CATEGORY add constraint dm_category_keyid_unq UNIQUE(ca_uuid, hkey) DEFERRABLE ;
+alter table smart.DM_ATTRIBUTE_TREE add constraint dm_attribute_tree_keyid_unq UNIQUE(attribute_uuid, hkey) DEFERRABLE ;
+alter table smart.INTELLIGENCE_SOURCE add constraint intell_source_keyid_unq unique(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.ENTITY_ATTRIBUTE add constraint entity_attribute_keyid_unq unique(entity_type_uuid, keyid) DEFERRABLE ;
+alter table smart.ENTITY_TYPE add constraint entity_type_keyid_unq unique(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.MISSION_ATTRIBUTE add constraint mission_attribute_keyid_unq unique(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.MISSION_ATTRIBUTE_LIST add constraint mission_attribute_list_keyid_unq unique(mission_attribute_uuid, keyid) DEFERRABLE ;
+alter table smart.SAMPLING_UNIT_ATTRIBUTE add constraint su_attribute_keyid_unq unique(ca_uuid, keyid) DEFERRABLE ;
+alter table smart.SAMPLING_UNIT_ATTRIBUTE_LIST add constraint su_list_attribute_keyid_unq unique(sampling_unit_attribute_uuid, keyid) DEFERRABLE ;
+alter table smart.SURVEY_DESIGN add constraint survey_design_keyid_unq unique(ca_uuid, keyid) DEFERRABLE ;
+
 
 insert into smart.dm_aggregation(name) values ('sum');
 insert into smart.dm_aggregation(name) values ('avg');

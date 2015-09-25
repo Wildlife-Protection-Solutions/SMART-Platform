@@ -4,15 +4,16 @@ insert into connect.user_actions(uuid, username, action) values ('a0eebc99-9c0b-
 
 insert into connect.ca_info values('a0eedf99-9c0c-4ef8-bb6d-6bb9bd340a36','b0efdf99-9c0c-4ee4-bb6d-6bb9bd340a36','test ca 1','NODATA');
 
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart', '3.2.1');
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.intelligence', '3.2');
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.intelligence.query', '1.0');
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.plan', '3.0');
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.cybertracker', '3.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart', '4.0.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.intelligence', '4.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.intelligence.query', '2.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.plan', '4.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.cybertracker', '4.0');
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.entity.query', '2.0');
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.entity', '1.0');
-insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er', '1.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.entity', '2.0');
+insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er', '2.0');
 insert into connect.connect_plugin_version (plugin_id, version) values ('org.wcs.smart.er.query', '2.0');
+
 
 insert into connect.alert_types values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a50', 'emergency', 'Emergency');
 insert into connect.alert_types values('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51', 'observation', 'Observation');

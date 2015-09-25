@@ -4,6 +4,8 @@ import java.text.MessageFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -42,15 +44,13 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
-import com.sun.istack.internal.logging.Logger;
-
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlert.PATH)
 
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class ConnectAlert extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(ConnectAlert.class);
+	private final Logger logger = Logger.getLogger(ConnectAlert.class.getName());
 	
 	public static final String PATH = "connectalert"; //$NON-NLS-1$
 
@@ -201,11 +201,11 @@ public class ConnectAlert extends HttpServlet {
 			response.flushBuffer();
 
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
@@ -277,11 +277,11 @@ public class ConnectAlert extends HttpServlet {
 			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
@@ -306,11 +306,11 @@ public class ConnectAlert extends HttpServlet {
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
