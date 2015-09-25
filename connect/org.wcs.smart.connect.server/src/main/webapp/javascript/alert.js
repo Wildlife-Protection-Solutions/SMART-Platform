@@ -1,14 +1,13 @@
 var ALERT_URL = "../api/connectalert/";
+var FILTER_URL = "../api/connectalertfilterdefault/";
 var interval = 7000; //# of seconds between map refresh on the alert layer
 var realtime;
 var map;
 
 
 window.onload = function(){
-//	document.getElementById('updatealertform').addEventListener("submit", function(evt){
-//        evt.preventDefault();
-//    }, true);
-//	addEventListener("submit", formEnterCallback, false);
+	
+
 	//Hide header/footer and menu if mobile parameter is set:
 	if(mobile == "true"){
 		document.getElementById('mainheader').style.display = 'none';
@@ -24,9 +23,30 @@ window.onload = function(){
 	for (var i = 0; i < items.length; i++){
 		items[i].addEventListener("change", refreshAlerts);
 	}
+	document.getElementById('filterDate').addEventListener("change", checkForCustomDates);
+
 	
-   
-    
+	
+	//setup date picker for alert filters
+
+	var picker = new Pikaday({
+		field: document.getElementById('datePickerFrom'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        maxDate: new Date('2050-12-31'),
+        yearRange: [2000,2020]
+	});
+
+	var picker = new Pikaday({
+		field: document.getElementById('datePickerTo'),
+		firstDay: 1,
+        minDate: new Date('2000-01-01'),
+        maxDate: new Date('2050-12-31'),
+        yearRange: [2000,2020]
+	});
+
+
+	
 //------------------------------------------------------------
 //Setup map layers
     // The real-time layer that auto-refreshes to show alert
@@ -108,8 +128,9 @@ window.onload = function(){
 	//initialize the map
 	map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8, layers: activeLayers});
 	
-	//add realtime layer to map 
-	updateRealtimeLayer(ALERT_URL);
+ 
+	getMapFilters();//get the map filter defaults and set them before we make the first call to get alerts/events
+	//also it add the realtime layer to map once the map filter defaults are setup.
 	
 	//add layer control to map
 	L.control.layers(baseMaps, dataLayers, {position: 'topleft'}).addTo(map);
@@ -498,6 +519,8 @@ function AlertUpdated(){
 }
 
 function hideShowFilters(){
+
+
 	var current = document.getElementById('filter-form').style.display;
 	if(current == "none" || current == ""){
 		document.getElementById('filter-form').style.display = "block";
@@ -558,10 +581,8 @@ function updateRealtimeLayer(updatedUrl){
         type: 'json'
     }, {
         interval: interval,
-        filter: eventFilter
-//        filter: function(feature, layer) {
-//        	return true;
-//        }
+        filter: eventFilter,
+        pointToLayer: stylePoints
     });
    
     realtime.on('update', function(e) {
@@ -618,7 +639,127 @@ function applyFilter(classname, value){
 }
 function applyTextFilter(id, value){
 	var search = document.getElementById(id);
-	if(search.value == "") return true; //blank text search shows everything.
+	if(search.value == "") return true; //blank text search = show everything.
 	if(search.value.search(value) > 0 ) return true;
 	return false;
+}
+
+function stylePoints(feature, latlng) {
+	var color = styleColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
+	var fillColor = styleFillColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
+	var opacity = styleOpacity[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
+	
+	var size = 11 - (feature.properties.level * 1.5);
+	
+	if(color == "")color="#000000";
+	if(fillColor == "")fillColor="#0000ff";
+	if(opacity == "")opacity="0.5";
+	var geojsonMarkerOptions = {
+		    radius: size,
+		    fillColor: fillColor,
+		    color: color,
+		    weight: 1,
+		    opacity: 1,
+		    fillOpacity: opacity
+		};
+    return L.circleMarker(latlng, geojsonMarkerOptions);
+}
+
+
+function getMapFilters(){
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = setMapFilters;
+ 	oReq.open("Get", FILTER_URL, true);
+ 	oReq.send();
+}
+
+
+function setMapFilters(){
+	if (this.status != 200 && this.status != 201 ) {
+		var msg = "Error: ";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}else if (this.status == 404){
+			msg += "Invalid URL, URL not Found";
+		}
+		
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return false;
+	}
+	
+
+	var geojson = JSON.parse(this.responseText);
+ 	var defaults = geojson[0];
+ 	
+ 	var filter_form = document.getElementById('filter-form');
+ 	
+ 	document.getElementById('filterDate').value = defaults.defaultPastHours;
+ 	
+ 	var statuses = document.getElementsByClassName('filterStatus');
+ 	for(var x=0 ; x < statuses.length; x++){
+ 		if(statuses[x].name = "ACTIVE"){
+ 			statuses[x].checked = defaults.default_active;
+ 		}
+ 		if(statuses[x].name = "DISABLED"){
+ 			statuses[x].checked = defaults.default_active;
+ 		}
+ 	}
+ 	var levels = document.getElementsByClassName('filterImportance');
+ 	for(x=0 ; x < levels.length; x++){
+ 		switch (levels[x].name){
+ 		case 'level1':
+ 			levels[x].checked = defaults.defaultLevel1;
+ 			break;
+ 		case 'level2':
+ 			levels[x].checked = defaults.defaultLevel2;
+ 			break;
+ 		case 'level3':
+ 			levels[x].checked = defaults.defaultLevel3;
+ 			break;
+ 		case 'level4':
+ 			levels[x].checked = defaults.defaultLevel4;
+ 			break;
+ 		case 'level5':
+ 			levels[x].checked = defaults.defaultLevel5;
+ 			break;
+ 		}
+ 	}
+ 	document.getElementById('filterDate').value = defaults.defaultPastHours;
+ 	
+ 	var str = defaults.defaultTypeUuids;
+ 	var typeUuids = str.split(',');
+ 	for(x=0 ; x < typeUuids.length; x++){
+ 		if(filter_form[typeUuids[x]] != null){
+ 			filter_form[typeUuids[x]].checked = true;
+ 		}
+ 	}
+ 	
+ 	var str = defaults.defaultCaUuids;
+ 	var caUuids = str.split(',');
+ 	for(x=0 ; x < caUuids.length; x++){
+ 		if(filter_form[caUuids[x]] != null){
+ 			filter_form[caUuids[x]].checked = true;
+ 		}
+ 	}
+ 	
+ 	checkForCustomDates();
+ 	
+ 	//run the map query to update the points to match the new filters.
+ 	updateRealtimeLayer(ALERT_URL);
+}
+
+//check if the user selected or deselected "custom dates" and grey/de-grey the custom inputs. 
+function checkForCustomDates(){
+	var date = document.getElementById('filterDate');
+	if(date.value == -1){
+		document.getElementById('datePickerFrom').disabled = false;
+		document.getElementById('datePickerTo').disabled = false;
+	}else{
+		document.getElementById('datePickerFrom').disabled = true;
+		document.getElementById('datePickerTo').disabled = true;
+	}
 }

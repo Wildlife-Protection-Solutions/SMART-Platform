@@ -290,6 +290,7 @@ h2{
 	margin-right: 5px;
 	margin-left: 5px;
 	display: none;
+	clear:both;
 }
 #filter-button{
 	content:url("hourglass.png");
@@ -314,6 +315,18 @@ div.scrollable {
     margin: 0;
     padding: 0;
     overflow: auto;
+}
+
+.white{
+	background-color: white
+}
+
+.date-input{
+	width: 8em;
+	float: left;
+}
+.date-text{
+	float: left;
 }
 
 /*----------------------------------------------------------------------*/

@@ -85,6 +85,136 @@ public class ConnectAlert extends HttpServlet {
 	}
 	
 	@GET
+    @Path("/alertTypes/{uuid}")
+    public AlertType getAlertType(@PathParam("uuid") UUID uuid){
+		validateUser();
+
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			AlertType a = HibernateManager.getAlertType(s, uuid);
+			if (a == null){
+				logger.info("Alert ID: " + uuid + " not found."); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new SmartConnectException(Response.Status.NOT_FOUND);
+			}
+			return a;
+		}finally{
+			s.getTransaction().commit();
+		}
+	}
+	
+	@PUT
+    @Path("/alertTypes/{uuid}")
+    public AlertType updateAlertType(@PathParam("uuid") UUID uuid, AlertType newAlertType) {
+    	validateUser();
+    	
+    	AlertType toUpdate = null;
+    	Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			toUpdate = (AlertType)s.createCriteria(AlertType.class)
+					.add(Restrictions.eq("uuid", uuid)) //$NON-NLS-1$
+					.uniqueResult();
+			
+			if (toUpdate == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
+						MessageFormat.format(Messages.getString("ConnectAlert.AlertTypeNotFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
+			}
+			
+			if (newAlertType.getLabel() != null){
+				toUpdate.setLabel(newAlertType.getLabel());
+			}
+			if (newAlertType.getColor() != null){
+				toUpdate.setColor(newAlertType.getColor());
+			}
+			if (newAlertType.getFillColor() != null){
+				toUpdate.setFillColor(newAlertType.getFillColor());
+			}
+			if (newAlertType.getOpacity() != null){
+				toUpdate.setOpacity(newAlertType.getOpacity());
+			}
+			
+			s.update(toUpdate);
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.warning(ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.severe(ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(ex.getMessage(), ex);
+		}finally{
+		}
+		return toUpdate;
+    }
+	
+	@POST
+    @Path("/alertTypes/{label}")
+    public AlertType addAlertType(@PathParam("label") String label, AlertType newAlertType) {
+		validateUser();
+			
+		AlertType a = new AlertType();
+
+		a.setLabel(newAlertType.getLabel());
+		a.setColor(newAlertType.getColor());
+		a.setFillColor(newAlertType.getFillColor());
+		a.setOpacity(newAlertType.getOpacity());
+		
+		Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			s.save(a);
+			s.getTransaction().commit();
+			response.setStatus(Response.Status.CREATED.getStatusCode());
+			response.flushBuffer();
+
+		}catch (SmartConnectException ex){
+			logger.warning(ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.severe(ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(ex.getMessage(), ex);
+		}finally{
+			
+		}
+		
+		return a;
+	}
+	
+	@DELETE
+    @Path("/alertTypes/{uuid}")
+    public AlertType removeAlertType(@PathParam("uuid") UUID uuid) {
+    	validateUser();
+    	AlertType toDelete = null;
+    	Session s = HibernateManager.getSession(context);
+		s.beginTransaction();
+		try{
+			toDelete = HibernateManager.getAlertType(s, uuid);
+			if (toDelete == null){
+				throw new SmartConnectException(Response.Status.NOT_FOUND, 
+						MessageFormat.format(Messages.getString("ConnectAlert.AlertTypeNotFound", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
+			}
+			s.delete(toDelete);
+			s.flush();
+			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			logger.warning(ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw ex;
+		}catch (Exception ex){
+			logger.severe(ex.getMessage(), ex);
+			s.getTransaction().rollback();
+			throw new SmartConnectException(ex.getMessage(), ex);
+		}finally{
+		}
+		return toDelete;
+    }
+	
+	
+	@GET
     @Path("")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public String getAllAlerts( @QueryParam(value="levelFilter") String levelFilter, 
@@ -291,7 +421,7 @@ public class ConnectAlert extends HttpServlet {
  
     @DELETE
     @Path("/{alertUuid}")
-    public Alert removeUser(@PathParam("alertUuid") UUID alertUuid) {
+    public Alert removeAlert(@PathParam("alertUuid") UUID alertUuid) {
     	validateUser();
     	Alert toDelete = null;
     	Session s = HibernateManager.getSession(context);

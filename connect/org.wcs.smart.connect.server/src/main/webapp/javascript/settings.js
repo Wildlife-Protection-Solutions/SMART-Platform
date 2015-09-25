@@ -1,5 +1,6 @@
 var STYLE_URL = "../api/connectstyle/";
 var LAYER_URL = "../api/maplayer/";
+var TYPE_URL = "../api/connectalert/alertTypes/";
 var ACTION_URL = STYLE_URL + "actions/";
 var allActions = null;
 
@@ -41,8 +42,24 @@ window.onload = function(){
 	document.getElementById("updateLayerButton").addEventListener("click", submitUpdateLayer);
 	
 	
+	document.getElementById("btnNewType").onclick = function(){
+	 	displayDialog('typeDialog', 'main');
+	 	document.getElementById("updateTypeButton").classList.remove("show");
+		document.getElementById("updateTypeButton").classList.add("hide");
+		document.getElementById("newTypeButton").classList.remove("hide");
+		document.getElementById("newTypeButton").classList.add("show");
+	} 
+	document.getElementById("cancelType").onclick = function(){
+		closeDialog('typeDialog');
+	};
+	document.getElementById("newTypeButton").addEventListener("click", createNewType);
+	document.getElementById("updateTypeButton").addEventListener("click", submitUpdateType);
+	
+	
 	//Layer table and actions
 	refreshLayers();
+	
+	refreshTypes();
 
 }
 
@@ -52,46 +69,6 @@ function clearAndShowNewStyleDialog(){
  	document.querySelector("input[name=style_id]").value = "";
  	document.querySelector("#dialogerror").style.display = "none";
  	displayDialog('newStyleDialog', 'main');
-}
-
-/* delete user */
-function deleteUser(){
-	var username = this.dataset.username;
-	var ok = window.confirm("Are you sure you want to delete the selected style?");
-	if (!ok) return;
-	
-	hideInfo();
-	hideError();
-	
-/*	
- * TODO - fill out proper URL etc
- * 
- * var oReq = new XMLHttpRequest();
-	oReq.onload = userDeleted;
-	oReq.smartuser=username;
-	oReq.open("DELETE", USER_URL + encodeURIComponent(username), true);
-	oReq.send();
-	return false;
-	
-		*/
-}
-
-
-
-//callback for delete user  
-function userDeleted() {
-	if (this.status == 200) {
-		displayInfo(this.smartuser + " deleted");
-	} else {
-		displayError(parseError("Error deleting account " + this.smartuser, this.responseText));
-	}
-	refreshUsers();
-	
-	//if delete the logged in user; refresh page to auto logout
-	var currentUser = document.querySelector("#userlogin");
-	if (currentUser != null && currentUser.dataset.username != null && this.smartuser === currentUser.dataset.username){
-		location.reload(true);
-	} 
 }
 
 
@@ -392,8 +369,297 @@ function layerUpdated(){
 		var user = JSON.parse(this.responseText);
 		displayInfo("Layer Update");
 	} else {
-		displayError("Error creating Layer;  " + this.responseText + "; " + this.statusText);
+		displayError("Error updating Layer;  " + this.responseText + "; " + this.statusText);
 	}
 	refreshLayers();
 	closeDialog('layerDialog');
 }
+
+/* reload map types table */
+function refreshTypes(){
+	//clear current types table
+	var objects = document.querySelectorAll("tr.typerow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+
+	var parent = document.getElementById("typetable");
+	var row = document.createElement("tr");
+	row.className="typerow";
+	row.innerHTML="Refreshing Type Table...";
+	parent.appendChild(row);
+		
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createTypeTable;
+ 	oReq.open("Get", TYPE_URL, true);
+ 	oReq.send();
+}
+
+/* callback that displays all type info */
+function createTypeTable(){
+	
+	if (this.status != 200 && this.status != 201 ) {
+		var msg = "Error: ";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table of the "refreshing..." message, so this isn't a total duplication of effort.
+	var objects = document.querySelectorAll("tr.typerow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.getElementById("typetable");
+ 	var types = JSON.parse(this.responseText);
+ 	for (var i = 0; i < types.length; i ++){
+ 		var label = types[i].label;
+ 		var color = types[i].color;
+ 		var fillColor = types[i].fillColor;
+ 		var opacity = types[i].opacity;
+ 		var row = tableCreateRowTDs(parent,
+ 				[label, color, fillColor, opacity, null], 
+ 				"white typerow");
+ 		row.id = "typerow" + i;
+ 		row.dataset.uuid = types[i].uuid;
+ 	
+ 		row.childNodes[1].style.backgroundColor = color;
+ 		if(color == "#000000"){
+ 			row.childNodes[1].style.color = "#ffffff";
+ 		}
+ 		row.childNodes[2].style.backgroundColor = fillColor;
+ 		row.childNodes[2].style.opacity = opacity;
+ 		row.childNodes[3].style.backgroundColor = fillColor;
+ 		row.childNodes[3].style.opacity = opacity;
+ 		
+ 		//update goes first, shows second, since it floats right in the css...
+ 		var updateicon = document.createElement("a");
+ 		updateicon.className="update-icon";
+ 		updateicon.title="update type";
+ 		updateicon.onclick = updateType;
+ 		updateicon.href="";
+ 		row.childNodes[4].appendChild(updateicon);
+
+ 		var deleteicon = document.createElement("a");
+ 		deleteicon.className="delete-icon";
+ 		deleteicon.title="delete Alert Type";
+ 		deleteicon.onclick = deleteType;
+ 		deleteicon.href="";
+ 		row.childNodes[4].appendChild(deleteicon);
+ 	}
+}
+
+function updateType(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	document.getElementById("alerttypesform").uuid.value = uuid;
+	
+	hideInfo();
+	hideError();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = showCurrentType;
+	oReq.open("GET", TYPE_URL + encodeURIComponent(uuid), true);
+	oReq.send();
+	return false;
+}
+
+function showCurrentType() {
+	if (this.status == 200 ) {
+		var r = JSON.parse(this.response);
+	} else {
+		displayError(parseError("Error getting details for alert type from server; alert: " + this.label));
+	}
+	
+	document.querySelector("#dialogerror").style.display = "none";
+	
+	var form = document.getElementById("alerttypesform");
+	
+	form.type_label.value = r.label;
+	form.type_color.value = r.color;
+	form.type_fillcolor.value = r.fillColor;
+	form.type_opacity.value = r.opacity;
+	
+	document.getElementById("updateTypeButton").classList.remove("hide");
+	document.getElementById("updateTypeButton").classList.add("show");
+	
+	document.getElementById("newTypeButton").classList.remove("show");
+	document.getElementById("newTypeButton").classList.add("hide");
+	
+	displayDialog('typeDialog', 'main');
+}
+
+function deleteType(){
+	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
+	var ok = window.confirm("Are you sure you want to delete the type?");
+	if (!ok) return;
+	
+	hideInfo();
+	hideError();
+	
+	var oReq = new XMLHttpRequest();
+	oReq.onload = typeDeleted;
+	oReq.open("DELETE", TYPE_URL + encodeURIComponent(uuid), true);
+	oReq.send();
+	return false;
+}
+
+function typeDeleted(){
+	if (this.status == 200  && this.status != 201 ) {
+		var r = JSON.parse(this.response);
+		displayInfo("Deleted Type: " + r.label);
+	} else {
+		displayError(parseError("Error deleting type" + this.label));
+	}
+	refreshTypes();
+}
+
+function createNewType(){
+	
+	var typeLabel = document.querySelector("input[name=type_label]").value;
+	var typeColor = document.querySelector("input[name=type_color]").value;
+	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
+	var typeOpacity = document.querySelector("input[name=type_opacity]").value;
+	
+	var jsonData = {
+		"label" : typeLabel,
+		"color" : typeColor,
+		"fillColor" : typeFillColor,
+		"opacity" : typeOpacity
+	};
+
+	//make ajax call
+	hideError();
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	var oReq = new XMLHttpRequest();
+	oReq.onload = typeCreated;
+	oReq.open("POST", TYPE_URL + encodeURIComponent(typeLabel), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.send(JSON.stringify(jsonData));
+	return false;
+}
+
+
+function typeCreated(){
+	if (this.status == 201) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("Type created");
+	} else {
+		displayError("Error creating Type;  " + this.responseText + "; " + this.statusText);
+	}
+	refreshTypes();
+	closeDialog('typeDialog');
+}
+
+function submitUpdateType(){
+	var uuid = document.getElementById("alerttypesform").uuid.value;
+		
+	var typeLabel = document.querySelector("input[name=type_label]").value;
+	var typeColor = document.querySelector("input[name=type_color]").value;
+	var typeFillColor = document.querySelector("input[name=type_fillcolor]").value;
+	var typeOpacity = document.querySelector("input[name=type_opacity]").value;
+	
+	var jsonData = {
+		"label" : typeLabel,
+		"color" : typeColor,
+		"fillColor" : typeFillColor,
+		"opacity" : typeOpacity
+	};
+	//make ajax call
+	hideError();
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	var oReq = new XMLHttpRequest();
+	oReq.onload = typeUpdated;
+	oReq.open("PUT", TYPE_URL + encodeURIComponent(uuid), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.setRequestHeader("Accept","application/json");
+	oReq.send(JSON.stringify(jsonData));
+}
+
+function typeUpdated(){
+	if (this.status == 200) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("Alert Type Updated");
+	} else {
+		displayError("Error Updating Type;  " + this.responseText + "; " + this.statusText);
+	}
+	refreshTypes();
+	closeDialog('typeDialog');
+}
+
+
+//
+//createFilterDefaultTable(){
+//	if (this.status != 200 && this.status != 201 ) {
+//		var msg = "Error: ";
+//		if (this.status == 401){
+//			msg += "Unauthorized";
+//		}else if (this.status == 404){
+//			msg += "Invalid URL, URL not Found";
+//		}
+//		
+//		try {
+//			msg = JSON.parse(this.responseText).error
+//		} catch (err) {
+//		}
+//		displayError(msg);
+//		return;
+//	}
+//	//clear current table
+//	var objects = document.querySelectorAll("tr.filterrow");
+//	for (var i = 0; i < objects.length; i++){
+//		var ele = objects[i];
+//		ele.parentElement.removeChild(ele);
+//	}
+//	
+//	var parent = document.getElementById("filtertable");
+// 	
+//	try{
+//		var geojson = JSON.parse(this.responseText);
+//	 	var list = geojson.features;
+//	 	for (var i = 0; i < list.length; i ++){
+//	 		var row = tableCreateRowTDs(parent,
+//	 				[list[i].defaultLevel1, null], 
+//	 				"white filterrow");
+//	 		row.id = "typerow" + i;
+//	 		row.dataset.uuid = list[i].uuid;
+//
+//
+//	 		//update goes first, shows second, since it floats right in the css...
+//	 		var updateicon = document.createElement("a");
+//	 		updateicon.className="update-icon";
+//	 		updateicon.title="update alert";
+//	 		updateicon.onclick = updateAlert;
+//	 		updateicon.href="";
+//	 		row.childNodes[7].appendChild(updateicon);
+//	 		
+//	 		var deleteicon = document.createElement("a");
+//	 		deleteicon.className="delete-icon";
+//	 		deleteicon.title="delete alert";
+//	 		deleteicon.onclick = deleteAlert;
+//	 		deleteicon.href="";
+//	 		row.childNodes[7].appendChild(deleteicon);
+//	 		
+//	 	}
+//	}catch(err) {
+// 		var newRow = parent.insertRow(-1);
+// 		newRow.style.backgroundColor = "#F00";
+// 		newRow.className = "alertrow";
+// 	    var oCell = newRow.insertCell(0);
+// 	    oCell.colSpan = 10;
+// 	    oCell.innerHTML = "No defaults were found";
+//	}
+//}

@@ -9,6 +9,9 @@ import javax.persistence.Table;
 public class AlertType extends ConnectUuidItem{
 	private String key;
 	private String label;
+	private String color;
+	private String fillColor;
+	private String opacity;
 	
 	
 	@Column(name="key")
@@ -25,5 +28,29 @@ public class AlertType extends ConnectUuidItem{
 	}
 	public void setLabel(String label) {
 		this.label = label;
+	}
+	
+	@Column(name="color")
+	public String getColor() {
+		return color;
+	}
+	public void setColor(String color) {
+		this.color = color;
+	}
+	
+	@Column(name="fillColor")
+	public String getFillColor() {
+		return fillColor;
+	}
+	public void setFillColor(String fillColor) {
+		this.fillColor = fillColor;
+	}
+	
+	@Column(name="opacity")
+	public String getOpacity() {
+		return opacity;
+	}
+	public void setOpacity(String opacity) {
+		this.opacity = opacity;
 	}
 }

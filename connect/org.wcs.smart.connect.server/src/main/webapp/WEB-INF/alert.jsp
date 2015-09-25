@@ -6,17 +6,34 @@
 
 <%@include file="includes.jsp" %>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+<link rel="stylesheet" href="${pageContext.request.contextPath}/css/pikaday.css" />
 
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/alert.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/table.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/dialog.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/pickaday.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/leaflet-src.js"></script>
 <script type="text/javascript" src='https://api.mapbox.com/mapbox.js/v2.2.2/mapbox.js'></script>
 
 <script type="text/javascript" >
 	var mobile="${mobile}";
 	var tab = ${tab};
+	var styleColors = {
+		<c:forEach var="type" items="${alertTypes}" varStatus="count">
+ 			"${type.getUuid()}" : "${type.getColor()}", 
+		</c:forEach> 
+	};
+	var styleFillColors = {
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}" : "${type.getFillColor()}", 
+			</c:forEach> 
+		};
+	var styleOpacity = {
+			<c:forEach var="type" items="${alertTypes}" varStatus="count">
+	 			"${type.getUuid()}" : "${type.getOpacity()}", 
+			</c:forEach> 
+		};
 	
 	<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 	var mapLayers = [ 
@@ -102,23 +119,29 @@
 	
 	<div id="filter-controls">
 			<a id="filter-link" onClick="hideShowFilters()"><image id="filter-button"/>Show Filters</a>
+
 			<form id="filter-form" name="filter-form" onsubmit="return false;">
 
 			<select id='filterDate' class='updateChange' name="time_filter">
 			<option value=1>within 1 hour</option>
-			<option value=3>within 3 hours</option>
+			<option value=2>within 2 hours</option>
+			<option value=4>within 4 hours</option>
+			<option value=8>within 8 hours</option>
 			<option value=12>within 12 hours</option>
 			<option value=24>within 24 hours</option>
 			<option value=48>within 2 days</option>
-			<option value=72>within 3 days</option>
-			<option value=168>within an week</option>
-			<option value=744>within an month</option>
-			<option value=876000 selected>All dates</option>
+			<option value=168>within a week</option>
+			<option value=744>within a month</option>
+			<option value=-99 selected>All dates</option>
+			<option value=-1 selected>Custom Dates</option>
 			</select>
+
+			<br><input type="text" id="datePickerFrom" class="date-input">
+			<font class="date-text">to </font><input type="text" id="datePickerTo" class="date-input">
 
 			<p>Include Types:<br>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
-     			<input class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox" checked> ${type.getLabel()} </input><br> 
+     			<input class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox"> ${type.getLabel()} </input><br> 
 			</c:forEach> 
 			</p>
 			
@@ -136,7 +159,7 @@
 			</p>
 			<p>Include data from CA:<br>
 			<c:forEach var="ca" items="${cas}" varStatus="count">
-				<input class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox" checked>${ca.getLabel()}</input><br>
+				<input class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox">${ca.getLabel()}</input><br>
 			</c:forEach>
 			</p>
 			<p>
@@ -144,6 +167,7 @@
 			<input id='filterText' class='updateChange' name="textFilter" type="text"></input>
 			</p> 
 			</form>
+
 	</div>
   </article>
 	
@@ -201,8 +225,6 @@
    			 </div>
     	</form>
   </div>
-
-
 
 </body>
 </html>

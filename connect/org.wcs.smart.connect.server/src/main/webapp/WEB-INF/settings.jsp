@@ -38,6 +38,16 @@
 	</table>
 </div>
 
+
+<div class="overflow">
+	<div class="block" style="text-align:left"><b>Alert Types and Styles</b> <button class="button top-spacer" id="btnNewType">Add New Alert Type</button>
+	</div>
+	<table id="typetable">
+		<tr class="table-type-row smart-table-header"><th>Alert Type</th><th>Outline Color(#RRGGBB)</th><th>Fill Color(#RRGGBB)</th><th>Opacity(0-1)</th><th>Actions</th>
+		</tr>
+	</table>
+</div>
+
   
 <!-- <div class="top-spacer"  style="margin-left: -20px" > -->
 <!--   <div class="styleTable table-cell smart-table"> -->
@@ -122,6 +132,34 @@
   </div>
 
 
+
+<div id="typeDialog" style="display: none;" class="dialog">
+  <div class="type-title">Alert Type</div>
+  <div id="layerdialogerror" class="errorsection"></div>
+	<form id="alerttypesform">
+     		<div id="layererror" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
+     		<label class="top-spacer block">Type Name:</label>
+     		<input class="type_field" type=text name="type_label" value="" maxlength="32"/>
+     		
+     		<input type="hidden" name="uuid" value="" />
+     		
+     		
+     		<label class="top-spacer block">Outline Color:</label>
+			<input class="type_field" type=text name="type_color" value="" maxlength="16"/>
+    
+      		<label class="top-spacer block">Fill Color:</label>
+			<input class="type_field" type=text name="type_fillcolor" value="" maxlength="16"/>
+    
+      		<label class="top-spacer block">Opacity:</label>
+			<input class="type_field" type=text name="type_opacity" value="" maxlength="8"/>
+     		
+       		<div class="top-spacer block">
+     			<input id="newTypeButton" class="button" type="button" value="Create Type" />
+     			<input id="updateTypeButton" class="button" type="button" value="Update Type" />
+     			<input class="button" type="button" id="cancelType" value="Cancel" />
+     		</div>
+    	</form>
+  </div>
 
 </body>
 </html>

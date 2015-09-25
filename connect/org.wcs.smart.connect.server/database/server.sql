@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS connect.ca_info;
 DROP TABLE IF EXISTS connect.alerts;
 DROP TABLE IF EXISTS connect.alert_types;
 DROP TABLE IF EXISTS connect.style_configuration;
+DROP TABLE IF EXISTS connect.alert_filter_defaults;
 DROP TABLE IF EXISTS connect.plugin_version;
 DROP TABLE IF EXISTS connect.connect_plugin_version;
 DROP TABLE IF EXISTS connect.user_actions;
@@ -143,6 +144,9 @@ CREATE TABLE connect.alert_types(
 	key varchar(32),
 	-- A link to the alert type.
 	label varchar(64),
+	color varchar(16),
+	fillColor varchar(16),
+	opacity varchar(8),
 	PRIMARY KEY (uuid)
 ) WITHOUT OIDS;
 
@@ -170,6 +174,24 @@ CREATE TABLE connect.map_layers(
 	wms_layer_list text,
 	layer_name varchar(32)
 ) WITHOUT OIDS;
+
+CREATE TABLE connect.alert_filter_defaults(
+	uuid uuid NOT NULL,
+	default_past_hours int,
+	default_type_uuids varchar(925), --max 25 types to default to on, comma separated.
+	default_active boolean,
+	default_disabled boolean,
+	default_level1 boolean,
+	default_level2 boolean,
+	default_level3 boolean,
+	default_level4 boolean,
+	default_level5 boolean,
+	default_ca_uuids varchar(925),--max 25 uuids, comma separated.
+	default_text varchar(128)
+)WITHOUT OIDS;
+
+insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, false, false, false, true,'','');
+
 
 
 /* Create Foreign Keys */

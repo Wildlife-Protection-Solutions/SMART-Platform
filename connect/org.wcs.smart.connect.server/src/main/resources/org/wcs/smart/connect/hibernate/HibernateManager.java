@@ -32,6 +32,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.model.Alert;
+import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
@@ -191,5 +192,11 @@ public class HibernateManager {
 				.add(Restrictions.eq("layerName", layerName)) //$NON-NLS-1$
 				.uniqueResult();
 		return m;
+	}
+
+	public static List<AlertFilterDefault> getAlertFilterDefaults(Session session) {
+		return (List<AlertFilterDefault>)session
+				.createCriteria(AlertFilterDefault.class)
+				.list();
 	}	
 }
