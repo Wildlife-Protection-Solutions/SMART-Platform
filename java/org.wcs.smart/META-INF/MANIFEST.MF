@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART
 Bundle-SymbolicName: org.wcs.smart;singleton:=true
-Bundle-Version: 3.2.1
+Bundle-Version: 4.0.0
 Bundle-ClassPath: .,
  lib/opencsv-2.3.jar,
  lib/commons-compress-1.5.jar,
@@ -21,6 +21,7 @@ Export-Package: au.com.bytecode.opencsv,
  org.wcs.smart.ca.datamodel,
  org.wcs.smart.ca.export,
  org.wcs.smart.ca.in,
+ org.wcs.smart.changetracking,
  org.wcs.smart.common.attachment,
  org.wcs.smart.common.celleditor,
  org.wcs.smart.common.control,

@@ -26,6 +26,7 @@ public class Messages extends NLS {
 	public static String IntelligenceFilterOption_PatrolIdOption;
 	public static String IntelligenceFilterOption_SoureOption;
 	public static String IntelligenceQueryDatabaseUpgrader_InstallStatu;
+	public static String IntelligenceQueryDatabaseUpgrader_UpgradeError;
 	public static String IntelligenceQueryFactory_DefaultNameRecord;
 	public static String IntelligenceQueryFactory_DefaultNameSummary;
 	public static String IntelligenceQueryPlugIn_ErrorDialogTitle;

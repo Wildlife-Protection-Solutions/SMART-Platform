@@ -28,7 +28,9 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -54,6 +56,7 @@ public class RemoveConnectJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		
 		return dropTables();
 	}
 
@@ -62,19 +65,21 @@ public class RemoveConnectJob extends Job {
 		Session session = HibernateManager.openSession();
 		try {
 			session.beginTransaction();
-//			for (int i = 0; i < SQL.length; i ++){
-//				if (SQL[i].equals("")) continue; //$NON-NLS-1$
-//				
-//				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
-//					session.createSQLQuery(SQL[i]).executeUpdate();
-//				}
-//			}
+			//disable replication
+			DerbyReplicationManager.INSTANCE.disableReplication(session);
 			
+			//uninstall any triggers
+			ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(session);
+
+			//drop all tables
 			for (int i = 0; i < TABLES.length; i ++){
 				if (DerbyHibernateExtensions.tableExists(session, TABLES[i])){
 					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
 				}
 			}
+			session.createSQLQuery("DROP FUNCTION smart.uuid").executeUpdate();
+			
+			//clear version
 			HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, null, session);
 			session.getTransaction().commit();
 		} catch (final Exception e) {

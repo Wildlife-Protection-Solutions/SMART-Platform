@@ -12,6 +12,7 @@
  <extension-point id="org.wcs.smart.backup" name="System Backup" schema="schema/org.wcs.smart.backup.exsd"/>
  <extension-point id="org.wcs.smart.ca.login" name="org.wcs.smart.ca.login" schema="schema/org.wcs.smart.ca.login.exsd"/>
  <extension-point id="org.wcs.smart.startupoption" name="Advanced Start Up Option" schema="schema/org.wcs.smart.startupoption.exsd"/>
+ <extension-point id="org.wcs.smart.changelog.installer" name="ChangeLog Tracker" schema="schema/org.wcs.smart.changelog.installer.exsd"/>
    <extension
          id="org.wcs.smart"
          name="Smart Application"
@@ -1319,6 +1320,12 @@
       <StartUpOption
             clazz="org.wcs.smart.ui.internal.startup.RestoreStartUpOption">
       </StartUpOption>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.upgrade.SmartChangeLogTracker">
+      </ChangeLogTracker>
    </extension>
 
 </plugin>

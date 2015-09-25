@@ -44,4 +44,9 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 		}
 	}
 
+	@Override
+	protected String getPluginId() {
+		return ConnectPlugIn.PLUGIN_ID;
+	}
+
 }

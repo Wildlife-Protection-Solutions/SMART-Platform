@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: org.wcs.smart.reporttable Malay NLS Support
 Bundle-SymbolicName: org.wcs.smart.reporttable.nl_ms
-Bundle-Version: 3.2.0
-Fragment-Host: org.wcs.smart.reporttable;bundle-version="3.2.0"
+Bundle-Version: 4.0.0
+Fragment-Host: org.wcs.smart.reporttable;bundle-version="4.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: org.wcs.smart

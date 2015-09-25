@@ -48,6 +48,7 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.upgrade.IntelligenceDatabaseUpgrader;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Job removes adds intelligence related tabled to the database
@@ -71,35 +72,32 @@ public class AddIntelligenceJob extends Job {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		Session session = HibernateManager.openSession();
 		try{
-					
+			session.beginTransaction();		
 			String currentVersion = HibernateManager.getPlugInVersion(IntelligencePlugIn.PLUGIN_ID, session);
 			if (currentVersion == null){
-				session.beginTransaction();
-				try{
-					createTables(session);
-					HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_31, session);
-					session.getTransaction().commit();
-				}catch(Exception ex){
-					session.getTransaction().rollback();
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-									Messages.AddIntelligenceJob_Title,
-									Messages.AddIntelligenceJob_Error);
-						}
-						
-					});
-					return new Status(Status.ERROR,IntelligencePlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
-				}	
+				createTables(session);
+				HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_31, session);
 				currentVersion = IntelligencePlugIn.DB_VERSION_31;
 			}
 			//run the upgrader to upgrade to the current version
 			IntelligenceDatabaseUpgrader.upgrade(currentVersion, session);
-					
+			session.getTransaction().commit();
+		}catch(Exception ex){
+			if (session.getTransaction().isActive()) session.getTransaction().rollback();
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					MessageDialog.openError(Display.getDefault().getActiveShell(),
+							Messages.AddIntelligenceJob_Title,
+							Messages.AddIntelligenceJob_Error);
+				}
+				
+			});
+			return new Status(Status.ERROR,IntelligencePlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
 		}finally{
 			session.close();
 		}
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 	
@@ -109,7 +107,6 @@ public class AddIntelligenceJob extends Job {
 		//currently there is no upgrade required
 		final IntelligenceTablesMarkers mark = new IntelligenceTablesMarkers();
 		try {
-			session.beginTransaction();
 			mark.intelligence = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE"); //$NON-NLS-1$
 			mark.intelligence_source = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_SOURCE"); //$NON-NLS-1$
 			mark.intelligence_point = DerbyHibernateExtensions.tableExists(session, "INTELLIGENCE_POINT"); //$NON-NLS-1$
@@ -117,14 +114,9 @@ public class AddIntelligenceJob extends Job {
 			mark.patrol_intelligence = DerbyHibernateExtensions.tableExists(session, "PATROL_INTELLIGENCE"); //$NON-NLS-1$
 		} catch (final Exception e) {
 			throw new Exception(Messages.AddIntelligenceJob_Error, e);
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
 		}
 		
 		try {
-			session.beginTransaction();
 			if (!mark.intelligence_source) {
 				createIntelligenceSourceTable(session);
 			}
@@ -141,15 +133,8 @@ public class AddIntelligenceJob extends Job {
 				createPatrolIntelligenceTable(session);
 			}
 			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_31, session);
-
-			session.getTransaction().commit();
-			
 		} catch (final Exception ex) {
 			throw new Exception(Messages.AddIntelligenceJob_Error, ex);
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().rollback();
-			}
 		}
 	}
 
@@ -339,16 +324,16 @@ public class AddIntelligenceJob extends Job {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				PreparedStatement pst = c.prepareStatement("INSERT INTO smart.intelligence_source (UUID, CA_UUID, KEYID, IS_ACTIVE) VALUES (?, ?, ?, ?)"); //$NON-NLS-1$
-				pst.setObject(1, uuid);
+				pst.setObject(1, UuidUtils.uuidToByte(uuid));
 				//TODO: set this
-				pst.setObject(2, ca.getUuid());
+				pst.setObject(2, UuidUtils.uuidToByte(ca.getUuid()));
 				pst.setString(3, keyId);
 				pst.setBoolean(4, true);
 				pst.execute();
 				
 				pst = c.prepareStatement("INSERT INTO smart.I18N_LABEL (LANGUAGE_UUID, ELEMENT_UUID, VALUE) VALUES (?, ?, ?)"); //$NON-NLS-1$
-				pst.setObject(1, ca.getDefaultLanguage().getUuid());
-				pst.setObject(2, uuid);
+				pst.setObject(1, UuidUtils.uuidToByte(ca.getDefaultLanguage().getUuid()));
+				pst.setObject(2, UuidUtils.uuidToByte(uuid));
 				pst.setString(3, name);
 				pst.execute();
 			}

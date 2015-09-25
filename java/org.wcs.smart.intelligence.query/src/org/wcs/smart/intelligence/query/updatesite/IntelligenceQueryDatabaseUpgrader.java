@@ -30,7 +30,6 @@ import org.hibernate.Session;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.query.IntelligenceQueryPlugIn;
 import org.wcs.smart.intelligence.query.internal.Messages;
-import org.wcs.smart.intelligence.updatesite.OnInstallAction;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.upgrade.UpgradeEngine;
 
@@ -44,45 +43,51 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
-		Map<String, String> versions = null;
+		
+		String currentPluginVersion = null;
+		
 		Session s = HibernateManager.openSession();
 		try{
-			versions = UpgradeEngine.getVersions(s);
-		
-			if (versions == null) {
-				//we don't know what is happening with database
-				//it is some kind of error or wrong database version
-				return;
-			}
-			final String currentVersion = versions.get(IntelligenceQueryPlugIn.PLUGIN_ID);
-			if (currentVersion == null) {
-				//Entity doesn't present in this configuration
-				//we need to perform install database support for the plug-in
-				monitor.subTask(Messages.IntelligenceQueryDatabaseUpgrader_InstallStatu);
-				OnInstallAction install = new OnInstallAction();
-				install.execute(null);
-			}else{
-				try{
-					upgrade(currentVersion, s);
-				}catch (final Throwable t){
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							IntelligenceQueryPlugIn.displayLog(MessageFormat.format(
-									"Error upgrading the intelligence query plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, IntelligenceQueryPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
-						}
-					});
-				}
-			}
+			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			currentPluginVersion = versions.get(IntelligenceQueryPlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
 		}
+		
+		if (currentPluginVersion == null) {
+			//Entity doesn't present in this configuration
+			//we need to perform install database support for the plug-in
+			monitor.subTask(Messages.IntelligenceQueryDatabaseUpgrader_InstallStatu);
+			OnInstallAction install = new OnInstallAction();
+			install.execute(null);
+		
+		}else{
+			s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				upgrade(currentPluginVersion, s);
+				s.getTransaction().commit();
+			}catch (final Throwable t){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				final String msg = MessageFormat.format(Messages.IntelligenceQueryDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, IntelligenceQueryPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
+				Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+						IntelligenceQueryPlugIn.displayLog(msg, t);
+					}
+				});
+			}finally{
+				s.close();
+			}
+		}
+
 	}
 	
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
 	 * @param currentVersion
-	 * @param session
+	 * @param session in active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(IntelligenceQueryPlugIn.DB_VERSION_1)){
@@ -92,6 +97,7 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 	
 	private static void upgradeV1ToV2(Session session) {
 		
+		@SuppressWarnings("nls")
 		String[] sql = new String[] {
 				"ALTER TABLE SMART.INTEL_RECORD_QUERY DROP CONSTRAINT INTEL_RECORD_QUERY_CA_UUID_FK",
 				"ALTER TABLE SMART.INTEL_RECORD_QUERY DROP CONSTRAINT INTEL_RECORD_QUERY_CREATOR_UUID_FK",
@@ -107,19 +113,9 @@ public class IntelligenceQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY ADD CONSTRAINT INTEL_SUMMARY_QUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
 				"ALTER TABLE SMART.INTEL_SUMMARY_QUERY ADD CONSTRAINT INTEL_SUMMARY_QUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE" 
 		};
-		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				session.createSQLQuery(s).executeUpdate();
-			}
-		
-			HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_2, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (String s : sql){
+			session.createSQLQuery(s).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_2, session);
 	}
 }

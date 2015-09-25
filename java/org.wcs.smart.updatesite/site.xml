@@ -1,19 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.intelligence.feature_3.2.1.jar" id="org.wcs.smart.intelligence.feature" version="3.2.1">
-      <category name="intelligence"/>
+   <feature url="features/org.wcs.smart.connect.feature_4.0.0.jar" id="org.wcs.smart.connect.feature" version="4.0.0">
+      <category name="connect"/>
    </feature>
-   <feature url="features/org.wcs.smart.plan.feature_3.2.1.jar" id="org.wcs.smart.plan.feature" version="3.2.1">
-      <category name="planning"/>
-   </feature>
-   <feature url="features/org.wcs.smart.entity.feature_3.2.1.jar" id="org.wcs.smart.entity.feature" version="3.2.1">
-      <category name="entity"/>
-   </feature>
-   <feature url="features/org.wcs.smart.er.feature_3.2.1.jar" id="org.wcs.smart.er.feature" version="3.2.1">
+   <feature url="features/org.wcs.smart.er.feature_4.0.0.jar" id="org.wcs.smart.er.feature" version="4.0.0">
       <category name="ecologicalrecords"/>
    </feature>
-   <feature url="features/org.wcs.smart.independentincident.feature_3.2.1.jar" id="org.wcs.smart.independentincident.feature" version="3.2.1">
+   <feature url="features/org.wcs.smart.entity.feature_4.0.0.jar" id="org.wcs.smart.entity.feature" version="4.0.0">
+      <category name="entity"/>
+   </feature>
+   <feature url="features/org.wcs.smart.independentincident.feature_4.0.0.jar" id="org.wcs.smart.independentincident.feature" version="4.0.0">
       <category name="independentincident"/>
+   </feature>
+   <feature url="features/org.wcs.smart.intelligence.feature_4.0.0.jar" id="org.wcs.smart.intelligence.feature" version="4.0.0">
+      <category name="intelligence"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.feature_4.0.0.jar" id="org.wcs.smart.cybertracker.feature" version="4.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.plan.feature_4.0.0.jar" id="org.wcs.smart.plan.feature" version="4.0.0">
+      <category name="planning"/>
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
@@ -38,6 +44,16 @@
    <category-def name="ecologicalrecords" label="SMART Ecological Records Plug-in">
       <description>
          The ecological records plugin provides the ability to create, manage and query surveys.
+      </description>
+   </category-def>
+   <category-def name="connect" label="SMART Connect">
+      <description>
+         Plugin to allow SMART Desktop to communicate with a SMART Connect Server.
+      </description>
+   </category-def>
+   <category-def name="cybertracker" label="SMART Cybertracker">
+      <description>
+         SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
       </description>
    </category-def>
 </site>

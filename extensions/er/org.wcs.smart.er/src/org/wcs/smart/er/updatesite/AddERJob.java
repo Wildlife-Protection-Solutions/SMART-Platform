@@ -58,33 +58,33 @@ public class AddERJob extends Job {
 		Session session = HibernateManager.openSession();
 		try{
 			String currentVersion = HibernateManager.getPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, session);
-			if (currentVersion == null){
-				session.beginTransaction();
-				try{
+			session.beginTransaction();
+			try{
+				if (currentVersion == null){
 					createTables(session);
 					HibernateManager.setPlugInVersion(EcologicalRecordsPlugIn.PLUGIN_ID, EcologicalRecordsPlugIn.DB_VERSION_1, session);
-					session.getTransaction().commit();
-				}catch(Exception ex){
-					session.getTransaction().rollback();
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-									"Error",
-									"An error occurred while installing the ecological records module (failed to create required database tables). Please restart the system, uninstall the module, then try reinstalling the module.  If the problem persists contact your system administrator.");
-						}
-						
-					});
-					return new Status(Status.ERROR,EcologicalRecordsPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
-				}	
-				currentVersion = EcologicalRecordsPlugIn.DB_VERSION_1;
-			}
-			//run the upgrader to upgrade to the current version
-			ERDatabaseUpgrader.upgrade(currentVersion, session);
+					currentVersion = EcologicalRecordsPlugIn.DB_VERSION_1;
+				}
+				//run the upgrader to upgrade to the current version
+				ERDatabaseUpgrader.upgrade(currentVersion, session);
+				session.getTransaction().commit();
+			}catch(Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(),
+								Messages.AddERJob_ErrorTitle,
+								Messages.AddERJob_ErrorMsg);
+					}
 					
+				});
+				return new Status(Status.ERROR,EcologicalRecordsPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
+			}					
 		}finally{
 			session.close();
 		}
+		monitor.done();
 		return Status.OK_STATUS;
 	}	
 	

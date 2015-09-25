@@ -323,6 +323,7 @@ public class DerbyGridEngine extends DerbyPatrolQueryEngine{
 						sql.append(".wp_uuid as " + strAggValue);  //$NON-NLS-1$
 					}
 				}
+				
 				String p1 = addParameterValue(gridDef.getCrs().toWKT());
 				String p2 = addParameterValue(minX);
 				String p3 = addParameterValue(minY);

@@ -6,6 +6,8 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.query.internal.messages"; //$NON-NLS-1$
 	public static String AbstractSurveyPagedResult_missionAttributeTypeNotSupportedSort;
 	public static String AbstractSurveyPagedResult_suAttributeTypeNotSupportedSort;
+	public static String AddERQueryJob_ErrorMsg;
+	public static String AddERQueryJob_Errortitle;
 	public static String AddERQueryJob_JobName;
 	public static String AddSamplingUnitLayersJob_SdNotFound;
 	public static String CmAttributeListDropItem_loadModelAttributeJobName;
@@ -49,6 +51,7 @@ public class Messages extends NLS {
 	public static String DerbyWaypointEngine_ProgressMissionProperties;
 	public static String DerbyWaypointEngine_RunQueryProgress;
 	public static String ERDatabaseUpgrader_Info;
+	public static String ERQueryDatabaseUpgrader_UogradeError;
 	public static String ERQueryPlugIn_ErrorDialogTitle;
 	public static String FilterContentProvider_loadingSuAttributeJobName;
 	public static String FilterContentProvider_LoadSuJobName;

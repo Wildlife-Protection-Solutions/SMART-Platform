@@ -5,6 +5,10 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.er.internal.messages"; //$NON-NLS-1$
 
+	public static String AddERJob_ErrorMsg;
+
+	public static String AddERJob_ErrorTitle;
+
 	public static String AddERJob_InstallError;
 	public static String AddERJob_Title;
 	public static String AddWaypointDialog_EmptyProjectionError;
@@ -162,6 +166,8 @@ public class Messages extends NLS {
 	public static String EditSurveyElementHandler_MissionError;
 	public static String EmployeeDeleteAdvisor_DeleteError;
 	public static String EmployeeDeleteAdvisor_InvalidObject;
+	public static String ERDatabaseUpgrader_UpgradeError;
+
 	public static String ERDatabaseUpgrader_UpgradeTask;
 	public static String ExportWizard_DirectoryMessage;
 	public static String ExportWizard_ExportDialogTitle;

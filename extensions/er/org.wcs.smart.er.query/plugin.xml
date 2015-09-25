@@ -299,7 +299,7 @@
             class="org.wcs.smart.er.query.updatesite.OnInstallAction"
             name="onInstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -308,7 +308,7 @@
             class="org.wcs.smart.er.query.updatesite.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -343,6 +343,12 @@
       <dbUpgrader
             upgrader="org.wcs.smart.er.query.upgrade.ERQueryDatabaseUpgrader">
       </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.er.query.updatesite.ChangeTrackerInstaller">
+      </ChangeLogTracker>
    </extension>
 
 </plugin>

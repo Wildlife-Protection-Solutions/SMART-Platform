@@ -25,10 +25,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
-import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.upgrade.CtDatabaseUpgrader;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
@@ -50,78 +50,91 @@ public class AddCyberTrackerJob extends Job {
 		//required if run during restore to ensure Display.syncexec calls don't block
 		DisplayAccess.accessDisplayDuringStartup();
 		
-		buildTables();
+		monitor.beginTask(Messages.AddCyberTrackerJob_Progress1, 1);
+		
+		//this must be run as Admin User
+		//AND only admin users should be able to install plugins in the first place.
+		//so we shouldn't need to do this
+		//HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
+		Session session = HibernateManager.openSession();	
+				
+		try{
+			String currentVersion = HibernateManager.getPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, session);
+			session.beginTransaction();
+			if (currentVersion == null){
+				buildTables(session);
+				currentVersion = CyberTrackerPlugIn.DB_VERSION_1;
+			}
+			//run the upgrader to upgrade to the current version
+			CtDatabaseUpgrader.upgrade(currentVersion, session);
+			session.getTransaction().commit();
+		}catch(final Throwable e){
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
+			//TODO: figure out what to do here, because this will install the new 
+			//version anyways
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					CyberTrackerPlugIn.displayError(Messages.AddCyberTrackerJob_ErrorTitle, Messages.AddCyberTrackerJob_ErrorMsg + e.getLocalizedMessage(), e);
+				}
+			});
+			return new Status(Status.ERROR, CyberTrackerPlugIn.PLUGIN_ID, "Error installing cybertracker plugin", e); //$NON-NLS-1$
+		}finally{
+			session.close();
+		}
+		
+		monitor.worked(1);
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 	
 	/**
 	 * Ensures that required tables are present in database and add them is case they are not present
 	 */
-	private void buildTables() {
+	private void buildTables(Session session) {
 		final boolean tables[] = {false, false}; //properties table
 		
 		//check is required table exists
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		try {
-			tables[0] = DerbyHibernateExtensions.tableExists(session, "CYBERTRACKER_PROPERTIES"); //$NON-NLS-1$
-			tables[1] = DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_OPTION"); //$NON-NLS-1$
-		} catch (Exception e) {
-			session.getTransaction().rollback();
-			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to obtain information about CyberTracker plugin tables.", e)); //$NON-NLS-1$
-		} finally {
-			session.close();
-		}
+		tables[0] = DerbyHibernateExtensions.tableExists(session, "CYBERTRACKER_PROPERTIES"); //$NON-NLS-1$
+		tables[1] = DerbyHibernateExtensions.tableExists(session, "CT_PROPERTIES_OPTION"); //$NON-NLS-1$
+		
 
 		//this must be run as Admin User
 		//AND only admin users should be able to install plugins in the first place.
 		//so we shouldn't need to do this (if we bring this back we need to make sure
 		//to reconnect back to the correct user)
 		//HibernateManager.setUserName(DbUser.ADMIN.getUserName(), DbUser.ADMIN.getPassword());
-		session = HibernateManager.openSession();
-		try {
-			session.beginTransaction();
-			
-			if (tables[0]) {
-				//old table present, need to drop it
-				String dropSql = "DROP TABLE smart.cybertracker_properties"; //$NON-NLS-1$
-				session.createSQLQuery(dropSql).executeUpdate();
-			}
+		if (tables[0]) {
+			//old table present, need to drop it
+			String dropSql = "DROP TABLE smart.cybertracker_properties"; //$NON-NLS-1$
+			session.createSQLQuery(dropSql).executeUpdate();
+		}
 								
-			if (!tables[1]) {
-				String createSql = "CREATE TABLE smart.ct_properties_option ("+ //$NON-NLS-1$
-						"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
-						"ca_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
-						"OPTION_ID VARCHAR(32) NOT NULL, "+ //$NON-NLS-1$
-						"DOUBLE_VALUE DOUBLE, "+ //$NON-NLS-1$
-						"INTEGER_VALUE INTEGER, "+ //$NON-NLS-1$
-						"STRING_VALUE VARCHAR(1024), "+ //$NON-NLS-1$
-						"PRIMARY KEY (UUID))"; //$NON-NLS-1$
-
+		if (!tables[1]) {
+			String createSql = "CREATE TABLE smart.ct_properties_option ("+ //$NON-NLS-1$
+					"uuid CHAR(16) for bit data NOT NULL, "+ //$NON-NLS-1$
+					"ca_uuid CHAR(16) for bit data  NOT NULL, "+ //$NON-NLS-1$
+					"OPTION_ID VARCHAR(32) NOT NULL, "+ //$NON-NLS-1$
+					"DOUBLE_VALUE DOUBLE, "+ //$NON-NLS-1$
+					"INTEGER_VALUE INTEGER, "+ //$NON-NLS-1$
+					"STRING_VALUE VARCHAR(1024), "+ //$NON-NLS-1$
+					"PRIMARY KEY (UUID))"; //$NON-NLS-1$
 				String alterSql = "ALTER TABLE smart.ct_properties_option "+ //$NON-NLS-1$
-						"ADD CONSTRAINT ct_properties_option_ca_uuid_fk FOREIGN KEY (CA_UUID) "+ //$NON-NLS-1$
-						"REFERENCES smart.conservation_area(UUID) "+ //$NON-NLS-1$
-						"ON UPDATE RESTRICT "+ //$NON-NLS-1$
-						"ON DELETE CASCADE"; //$NON-NLS-1$
-
-				session.createSQLQuery(createSql).executeUpdate();
-				session.createSQLQuery(alterSql).executeUpdate();
+					"ADD CONSTRAINT ct_properties_option_ca_uuid_fk FOREIGN KEY (CA_UUID) "+ //$NON-NLS-1$
+					"REFERENCES smart.conservation_area(UUID) "+ //$NON-NLS-1$
+					"ON UPDATE RESTRICT "+ //$NON-NLS-1$
+					"ON DELETE CASCADE"; //$NON-NLS-1$
+			session.createSQLQuery(createSql).executeUpdate();
+			session.createSQLQuery(alterSql).executeUpdate();
 				
 						
-				session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to data_entry").executeUpdate(); //$NON-NLS-1$
-				session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to manager").executeUpdate(); //$NON-NLS-1$
-				session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
-				session.createSQLQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
-			}
-			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_1, session);
-			
-			CtDatabaseUpgrader.upgrade(CyberTrackerPlugIn.DB_VERSION_1, session);
-			session.getTransaction().commit();
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			CyberTrackerPlugIn.getDefault().getLog().log(new Status(IStatus.ERROR, CyberTrackerPlugIn.PLUGIN_ID, IStatus.OK, "Failed to create CyberTracker plugin tables.", ex)); //$NON-NLS-1$
-		} finally {
-			session.close();
+			session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to data_entry").executeUpdate(); //$NON-NLS-1$
+			session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to manager").executeUpdate(); //$NON-NLS-1$
+			session.createSQLQuery("GRANT ALL PRIVILEGES ON smart.ct_properties_option to analyst").executeUpdate(); //$NON-NLS-1$
+			session.createSQLQuery("GRANT SELECT ON smart.ct_properties_option to login").executeUpdate(); //$NON-NLS-1$
 		}
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_1, session);
 	}
 }

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART uDig Customization
 Bundle-SymbolicName: org.wcs.smart.udig.customization
-Bundle-Version: 3.2.1
+Bundle-Version: 4.0.0
 Bundle-Activator: org.wcs.smart.udig.customization.Activator
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

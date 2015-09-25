@@ -43,5 +43,8 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			EcologicalRecordsPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 	}
-
+	@Override
+	protected String getPluginId() {
+		return EcologicalRecordsPlugIn.PLUGIN_ID;
+	}
 }

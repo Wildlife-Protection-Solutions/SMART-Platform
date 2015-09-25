@@ -110,5 +110,29 @@
             clazz="org.wcs.smart.connect.ui.startup.ImportFromConnectStartupOption">
       </StartUpOption>
    </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.updatesite.OnInstallAction"
+            name="onInstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.eclipse.equinox.p2.engine.actions">
+      <action
+            class="org.wcs.smart.connect.updatesite.OnUninstallAction"
+            name="onUninstall"
+            touchpointType="org.eclipse.equinox.p2.osgi"
+            version="4.0.0">
+      </action>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.connect.updatesite.ChangeTrackerInstaller">
+      </ChangeLogTracker>
+   </extension>
 
 </plugin>

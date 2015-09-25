@@ -43,5 +43,8 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			IntelligenceQueryPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 	}
-
+	@Override
+	protected String getPluginId() {
+		return IntelligenceQueryPlugIn.PLUGIN_ID;
+	}
 }

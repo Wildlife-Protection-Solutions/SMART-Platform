@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.updatesite;
 
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.query.ERQueryPlugIn;
 import org.wcs.smart.p2.common.updatesite.UninstallProvisioningAction;
 
 /**
@@ -43,5 +44,8 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			EcologicalRecordsPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 	}
-
+	@Override
+	protected String getPluginId() {
+		return ERQueryPlugIn.PLUGIN_ID;
+	}
 }

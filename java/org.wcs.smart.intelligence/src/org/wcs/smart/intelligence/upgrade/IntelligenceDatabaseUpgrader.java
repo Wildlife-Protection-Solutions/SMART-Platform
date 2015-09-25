@@ -47,44 +47,49 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 	 */
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
-		Map<String, String> versions = null;
+
+		String currentPluginVersion = null;
+		
 		Session s = HibernateManager.openSession();
 		try{
-			versions = UpgradeEngine.getVersions(s);
-		
-			if (versions == null) {
-				//we don't know what is happening with database
-				//it is some kind of error or wrong database version
-				return;
-			}
-			final String currentVersion = versions.get(IntelligencePlugIn.PLUGIN_ID);
-			if (currentVersion == null) {
-				//Entity doesn't present in this configuration
-				//we need to perform install database support for the plug-in
-				monitor.subTask(Messages.IntelligenceDatabaseUpgrader_UpgradeTask);
-				OnInstallAction install = new OnInstallAction();
-				install.execute(null);
-			}else{
-				try{
-					upgrade(currentVersion, s);
-				}catch (final Throwable t){
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							IntelligencePlugIn.displayLog(MessageFormat.format(
-									"Error upgrading the intelligence plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, IntelligencePlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
-						}
-					});
-				}
-			}
+			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			currentPluginVersion = versions.get(IntelligencePlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
+		}
+		
+		if (currentPluginVersion == null) {
+			//Entity doesn't present in this configuration
+			//we need to perform install database support for the plug-in
+			monitor.subTask(Messages.IntelligenceDatabaseUpgrader_UpgradeTask);
+			OnInstallAction install = new OnInstallAction();
+			install.execute(null);
+		
+		}else{
+			s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				upgrade(currentPluginVersion, s);
+				s.getTransaction().commit();
+			}catch (final Throwable t){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				final String msg = MessageFormat.format(Messages.IntelligenceDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, IntelligencePlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						IntelligencePlugIn.displayLog(msg, t);
+					}
+				});
+			}finally{
+				s.close();
+			}
 		}
 	}
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
 	 * @param currentVersion
-	 * @param session
+	 * @param session in active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(IntelligencePlugIn.DB_VERSION_31)){
@@ -107,22 +112,14 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE smart.intelligence ADD CONSTRAINT intelligence_informant_uuid_fk FOREIGN KEY (INFORMANT_UUID) REFERENCES smart.informant(UUID) ON UPDATE RESTRICT ON DELETE RESTRICT" //$NON-NLS-1$
 		};
 		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				session.createSQLQuery(s).executeUpdate();
-			}
-		
-			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_32, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (String s : sql){
+			session.createSQLQuery(s).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_32, session);
 	}
 	
 	private static void upgradeV32ToV40(Session session){
+		@SuppressWarnings("nls")
 		String[] sql = new String[] {
 				"alter table smart.INTELLIGENCE_SOURCE add constraint intell_source_keyid_unq unique(ca_uuid, keyid) DEFERRABLE INITIALLY IMMEDIATE", //$NON-NLS-1$
 				
@@ -150,19 +147,9 @@ public class IntelligenceDatabaseUpgrader implements IDatabaseUpgrader {
 				"ALTER TABLE SMART.PATROL_INTELLIGENCE ADD CONSTRAINT PATROL_INTELLIGENCE_PATROL_UUID_FK FOREIGN KEY (PATROL_UUID) REFERENCES SMART.PATROL(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
 				"ALTER TABLE SMART.PATROL_INTELLIGENCE ADD CONSTRAINT PATROL_INTELLIGENCE_INTELLIGENCE_UUID_FK FOREIGN KEY (INTELLIGENCE_UUID) REFERENCES SMART.INTELLIGENCE(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
 		};
-		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				session.createSQLQuery(s).executeUpdate();
-			}
-		
-			HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_40, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (String s : sql){
+			session.createSQLQuery(s).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(IntelligencePlugIn.PLUGIN_ID, IntelligencePlugIn.DB_VERSION_40, session);
 	}
 }
