@@ -28,11 +28,17 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.equinox.internal.p2.engine.InstallableUnitOperand;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.hibernate.HibernateManager;
 
 
 /**
  * Action that is called when some plug-in is being uninstalled.
  * Class contains logic that allows to distinguish if this is plug-in removal or upgrade.
+ * All plugins should extend this class to ensure change log tracking is
+ * also removed if required.
  * 
  * @author elitvin
  * @since 3.0.0
@@ -53,7 +59,20 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 		}
 		if (upgradeTo == null) {
 			// We have an unistallation, not an upgrade
-			performRemove();
+			try{
+				//remove all change log tracking 
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s, getPluginId());
+					s.getTransaction().commit();
+				}finally{
+					s.close();
+				}
+				performRemove();
+			}catch (Exception ex){
+				SmartPlugIn.log("Error uninstalled plugin.", ex); //$NON-NLS-1$
+			}
 		} else {
 			performUpgrade();
 		}
@@ -65,8 +84,21 @@ public abstract class UninstallProvisioningAction extends ProvisioningAction {
 		return Status.OK_STATUS;
 	}
 
+	/**
+	 * Remove all database tables/requirements 
+	 */
 	protected abstract void performRemove();
+	
+	/**
+	 * 
+	 * @return the plugin id being processed
+	 */
+	protected abstract String getPluginId();
 
+	/**
+	 * We do nothing here by default as this will be dealt with on the install
+	 * action.
+	 */
 	protected void performUpgrade() {
 		//nothing by default
 	}

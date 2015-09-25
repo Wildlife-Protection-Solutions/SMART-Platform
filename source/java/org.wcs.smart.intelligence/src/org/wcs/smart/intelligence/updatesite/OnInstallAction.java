@@ -26,9 +26,9 @@ import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
+import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
 
 /**
  * Action that is called when Intelligence plug-in is installed
@@ -36,10 +36,10 @@ import org.wcs.smart.intelligence.IntelligencePlugIn;
  * @author elitvin
  * @since 3.0.0
  */
-public class OnInstallAction extends ProvisioningAction {
+public class OnInstallAction extends InstallProvisioningAction {
 
 	@Override
-	public IStatus execute(Map<String, Object> parameters) {
+	public IStatus executeInternal(Map<String, Object> parameters) {
 		Job job = new AddIntelligenceJob();
 		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		job.schedule();
@@ -54,6 +54,11 @@ public class OnInstallAction extends ProvisioningAction {
 	@Override
 	public IStatus undo(Map<String, Object> parameters) {
 		return Status.OK_STATUS;
+	}
+
+	@Override
+	protected String getPluginId() {
+		return IntelligencePlugIn.PLUGIN_ID;
 	}
 
 }

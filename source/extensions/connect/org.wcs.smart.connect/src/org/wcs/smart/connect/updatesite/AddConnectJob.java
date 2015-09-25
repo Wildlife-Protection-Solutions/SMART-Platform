@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.application.DisplayAccess;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.upgrade.ConnectDatabaseUpgrader;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -62,6 +63,8 @@ public class AddConnectJob extends Job {
 				session.beginTransaction();
 				try{
 					createTables(session);
+					ChangeLogInstaller.INSTANCE.setEnabled(true);
+					ChangeLogInstaller.INSTANCE.installChangeLogTracking(session);
 					HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, ConnectPlugIn.DB_VERSION_1, session);
 					session.getTransaction().commit();
 				}catch(Exception ex){

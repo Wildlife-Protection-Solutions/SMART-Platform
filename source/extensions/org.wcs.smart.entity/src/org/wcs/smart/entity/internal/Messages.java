@@ -5,6 +5,8 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.entity.internal.messages"; //$NON-NLS-1$
 	public static String AddEntityJob_Error;
+	public static String AddEntityJob_ErrorMsg;
+	public static String AddEntityJob_ErrorTitle;
 	public static String AddEntityJob_InstallError;
 	public static String AddEntityJob_InstallError2;
 	public static String AddEntityJob_JobName;
@@ -97,6 +99,7 @@ public class Messages extends NLS {
 	public static String EntityCsvImporter_XRequired;
 	public static String EntityCsvImporter_YCannotBeParsed;
 	public static String EntityCsvImporter_YRequired;
+	public static String EntityDatabaseUpgrader_UpgradeError;
 	public static String EntityDatabaseUpgrader_UpgradeTask;
 	public static String EntityEditPanelComposite_IdError;
 	public static String EntityEditPanelComposite_LocationLabel;

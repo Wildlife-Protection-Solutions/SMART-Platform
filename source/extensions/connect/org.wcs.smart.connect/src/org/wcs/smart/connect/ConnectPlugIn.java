@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -56,7 +57,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaConnectDeleteHandler(), CaConnectDeleteHandler.EXECUTE_ORDER);
-		
+		ChangeLogInstaller.INSTANCE.setEnabled(true);
 		super.start(context);
 		plugin = this;
 	}

@@ -43,5 +43,8 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			SmartPlanPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 	}
-
+	@Override
+	protected String getPluginId() {
+		return SmartPlanPlugIn.PLUGIN_ID;
+	}
 }

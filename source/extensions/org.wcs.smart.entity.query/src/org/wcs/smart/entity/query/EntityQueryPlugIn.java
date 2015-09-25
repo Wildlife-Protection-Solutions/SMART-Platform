@@ -44,6 +44,8 @@ public class EntityQueryPlugIn extends AbstractUIPlugin {
 	//The current db version
 	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
 	public static final String DB_VERSION_2 = "2.0"; //$NON-NLS-1$
+	public static final String DB_VERSION_3 = "3.0"; //$NON-NLS-1$
+	public static final String DB_VERSION = DB_VERSION_3; //current version
 	
 	/**
 	 * Entity grid query icon

@@ -26,8 +26,8 @@ import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
 import org.wcs.smart.plan.SmartPlanPlugIn;
 
 /**
@@ -36,10 +36,10 @@ import org.wcs.smart.plan.SmartPlanPlugIn;
  * @author elitvin
  * @since 3.0.0
  */
-public class OnInstallAction extends ProvisioningAction {
+public class OnInstallAction extends InstallProvisioningAction {
 
 	@Override
-	public IStatus execute(Map<String, Object> parameters) {
+	public IStatus executeInternal(Map<String, Object> parameters) {
 		Job job = new AddPlanJob();
 		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		job.schedule();
@@ -52,8 +52,8 @@ public class OnInstallAction extends ProvisioningAction {
 	}
 
 	@Override
-	public IStatus undo(Map<String, Object> parameters) {
-		return Status.OK_STATUS;
+	protected String getPluginId() {
+		return SmartPlanPlugIn.PLUGIN_ID;
 	}
 
 }

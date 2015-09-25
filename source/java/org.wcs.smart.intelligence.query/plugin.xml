@@ -120,7 +120,7 @@
             class="org.wcs.smart.intelligence.query.updatesite.OnInstallAction"
             name="onInstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -129,7 +129,7 @@
             class="org.wcs.smart.intelligence.query.updatesite.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -171,6 +171,12 @@
                id="org.wcs.smart.QueryCloner">
          </require>
       </templateCloner>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.intelligence.query.updatesite.ChangeTrackerInstaller">
+      </ChangeLogTracker>
    </extension>
 
 </plugin>

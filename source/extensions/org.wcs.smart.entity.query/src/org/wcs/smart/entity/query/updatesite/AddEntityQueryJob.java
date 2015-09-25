@@ -90,14 +90,18 @@ public class AddEntityQueryJob extends Job {
 		
 		try{
 			String currentVersion = HibernateManager.getPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, session);
+			session.beginTransaction();
 			if (currentVersion == null){
 				createDatabaseTables(session);
 				currentVersion = EntityQueryPlugIn.DB_VERSION_1;
 			}
 			//run the upgrader to upgrade to the current version
 			EntityQueryDatabaseUpgrader.upgrade(currentVersion, session);
-			
+			session.getTransaction().commit();
 		}catch(final Throwable e){
+			if (session.getTransaction().isActive()){
+				session.getTransaction().rollback();
+			}
 			//TODO: figure out what to do here, because this will install the new 
 			//version anyways
 			Display.getDefault().syncExec(new Runnable(){
@@ -114,26 +118,17 @@ public class AddEntityQueryJob extends Job {
 				//eat this
 			}
 		}
-		
+		monitor.done();
 		return Status.OK_STATUS;
 		
 	}
 	
 	private void createDatabaseTables(Session session){
 		//check is required table exists		
-		session.beginTransaction();
-		try{
-			
-			for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
-				EntityQueryPlugIn.log(CREATE_TABLE_SQL[i], null);
-				session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
-			}
-			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_1, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
+			EntityQueryPlugIn.log(CREATE_TABLE_SQL[i], null);
+			session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_1, session);
 	}
 }

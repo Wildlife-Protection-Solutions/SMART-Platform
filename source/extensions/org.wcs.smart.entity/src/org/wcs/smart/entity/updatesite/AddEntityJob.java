@@ -57,35 +57,34 @@ public class AddEntityJob extends Job {
 				
 		Session session = HibernateManager.openSession();
 		try{
-			
 			String currentVersion = HibernateManager.getPlugInVersion(EntityPlugIn.PLUGIN_ID, session);
-			if (currentVersion == null){
+			try{
 				session.beginTransaction();
-				try{
+				if (currentVersion == null){
 					createTables(session);
 					HibernateManager.setPlugInVersion(EntityPlugIn.PLUGIN_ID, EntityPlugIn.DB_VERSION_1, session);
-					session.getTransaction().commit();
-				}catch(Exception ex){
-					session.getTransaction().rollback();
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-									"Error",
-									"An error occurred while installing the ecological records query module (failed to create required database tables). Please restart the system, uninstall the module, then try reinstalling the module.  If the problem persists contact your system administrator.");
-						}
-						
-					});
-					return new Status(Status.ERROR,EntityPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
-				}	
-				currentVersion = EntityPlugIn.DB_VERSION_1;
+					currentVersion = EntityPlugIn.DB_VERSION_1;
+				}
+					//run the upgrader to upgrade to the current version
+				EntityDatabaseUpgrader.upgrade(currentVersion, session);
+				session.getTransaction().commit();
+			}catch(Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						MessageDialog.openError(Display.getDefault().getActiveShell(),
+								Messages.AddEntityJob_ErrorTitle,
+								Messages.AddEntityJob_ErrorMsg);
+					}	
+				});
+				return new Status(Status.ERROR,EntityPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
+					
 			}
-			//run the upgrader to upgrade to the current version
-			EntityDatabaseUpgrader.upgrade(currentVersion, session);
-			
 		}finally{
 			session.close();
 		}
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 

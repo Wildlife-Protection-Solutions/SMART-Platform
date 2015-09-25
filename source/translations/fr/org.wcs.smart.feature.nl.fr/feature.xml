@@ -2,7 +2,7 @@
 <feature
       id="org.wcs.smart.fr"
       label="SMART French Language Pack"
-      version="3.2.0"
+      version="4.0.0"
       provider-name="org.wcs.smart"
       license-feature="org.wcs.smart.smart.feature">
 

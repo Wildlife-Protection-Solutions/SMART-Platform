@@ -44,47 +44,50 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
-		Map<String, String> versions = null;
+		
+String currentPluginVersion = null;
+		
 		Session s = HibernateManager.openSession();
 		try{
-			versions = UpgradeEngine.getVersions(s);
-		
-			if (versions == null) {
-				//we don't know what is happening with database
-				//it is some kind of error or wrong database version
-				return;
-			}
-			final String currentVersion = versions.get(ERQueryPlugIn.PLUGIN_ID);
-			if (currentVersion == null) {
-				//Entity doesn't present in this configuration
-				//we need to perform install database support for the plug-in
-			
-				//this will install and upgrade to current version
-				monitor.subTask(Messages.ERDatabaseUpgrader_Info);
-				OnInstallAction install = new OnInstallAction();
-				install.execute(null);
-			}else{
-				try{
-					upgrade(currentVersion, s);
-				}catch (final Throwable t){
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							ERQueryPlugIn.displayLog(MessageFormat.format(
-									"Error upgrading the ecological records query plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, ERQueryPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
-						}
-					});
-				}
-			}
+			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			currentPluginVersion = versions.get(ERQueryPlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
+		}
+		
+		if (currentPluginVersion == null) {
+			//Entity doesn't present in this configuration
+			//we need to perform install database support for the plug-in
+			monitor.subTask(Messages.ERDatabaseUpgrader_Info);
+			OnInstallAction install = new OnInstallAction();
+			install.execute(null);
+		
+		}else{
+			s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				upgrade(currentPluginVersion, s);
+				s.getTransaction().commit();
+			}catch (final Throwable t){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				final String msg = MessageFormat.format(Messages.ERQueryDatabaseUpgrader_UogradeError, new Object[]{currentPluginVersion, ERQueryPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
+				Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					ERQueryPlugIn.displayLog(msg, t);
+					}
+				});
+			}finally{
+				s.close();
+			}
 		}
 	}
 	
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
 	 * @param currentVersion
-	 * @param session
+	 * @param session in active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(ERQueryPlugIn.DB_VERSION_1)){
@@ -103,23 +106,15 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.survey_mission_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.survey_gridded_query add column style long varchar"}; //$NON-NLS-1$
 		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				ERQueryPlugIn.log(s, null);
-				session.createSQLQuery(s).executeUpdate();
-			}
-		
-			HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_2, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (String s : sql){
+			ERQueryPlugIn.log(s, null);
+			session.createSQLQuery(s).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_2, session);
 	}
 	
 	private static void upgradeV2ToV3(Session session){
+		@SuppressWarnings("nls")
 		String[] sql = new String[]{
 			"ALTER TABLE SMART.SURVEY_GRIDDED_QUERY DROP CONSTRAINT SVY_GRIDDED_CA_UUID_FK",
 			"ALTER TABLE SMART.SURVEY_GRIDDED_QUERY DROP CONSTRAINT SVY_GRIDDED_CREATOR_UUID_FK",
@@ -160,20 +155,10 @@ public class ERQueryDatabaseUpgrader implements IDatabaseUpgrader {
 			"ALTER TABLE SMART.SURVEY_WAYPOINT_QUERY ADD CONSTRAINT SVY_WAYPOINT_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE"
 		}; 
 		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				ERQueryPlugIn.log(s, null);
-				session.createSQLQuery(s).executeUpdate();
-			}
-		
-			HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_3, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (String s : sql){
+			ERQueryPlugIn.log(s, null);
+			session.createSQLQuery(s).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_3, session);
 	}
-
 }

@@ -57,35 +57,32 @@ public class AddERQueryJob extends Job {
 				
 		Session session = HibernateManager.openSession();
 		try{
-			
+			session.beginTransaction();
 			String currentVersion = HibernateManager.getPlugInVersion(ERQueryPlugIn.PLUGIN_ID, session);
+			
 			if (currentVersion == null){
-				session.beginTransaction();
-				try{
-					createTables(session);
-					HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_1, session);
-					session.getTransaction().commit();
-				}catch(Exception ex){
-					session.getTransaction().rollback();
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-									"Error",
-									"An error occurred while installing the ecological records query module (failed to create required database tables). Please restart the system, uninstall the module, then try reinstalling the module.  If the problem persists contact your system administrator.");
-						}
-						
-					});
-					return new Status(Status.ERROR,ERQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
-				}	
+				createTables(session);
+				HibernateManager.setPlugInVersion(ERQueryPlugIn.PLUGIN_ID, ERQueryPlugIn.DB_VERSION_1, session);
 				currentVersion = ERQueryPlugIn.DB_VERSION_1;
 			}
-			//run the upgrader to upgrade to the current version
 			ERQueryDatabaseUpgrader.upgrade(currentVersion, session);
-			
+			session.getTransaction().commit();
+		}catch(Exception ex){
+			if (session.getTransaction().isActive()) session.getTransaction().rollback();
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					MessageDialog.openError(Display.getDefault().getActiveShell(),
+							Messages.AddERQueryJob_Errortitle,
+							Messages.AddERQueryJob_ErrorMsg);
+				}
+				
+			});
+			return new Status(Status.ERROR,ERQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex); //$NON-NLS-1$
 		}finally{
 			session.close();
 		}
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 

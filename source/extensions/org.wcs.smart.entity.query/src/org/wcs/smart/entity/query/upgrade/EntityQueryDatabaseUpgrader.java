@@ -44,51 +44,56 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
-		Map<String, String> versions = null;
+		String currentPluginVersion = null;
+		
 		Session s = HibernateManager.openSession();
 		try{
-			versions = UpgradeEngine.getVersions(s);
-		
-			if (versions == null) {
-				//we don't know what is happening with database
-				//it is some kind of error or wrong database version
-				return;
-			}
-			final String currentVersion = versions.get(EntityQueryPlugIn.PLUGIN_ID);
-			if (currentVersion == null) {
-				//Entity doesn't present in this configuration
-				//we need to perform install database support for the plug-in
-			
-				//this will install and upgrade to current version
-				monitor.subTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask);
-				OnInstallAction install = new OnInstallAction();
-				install.execute(null);
-			}else{
-				try{
-					upgrade(currentVersion, s);
-				}catch (final Throwable t){
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							EntityQueryPlugIn.displayLog(MessageFormat.format(Messages.EntityQueryDatabaseUpgrader_QueryUpdateError, new Object[]{currentVersion, EntityQueryPlugIn.DB_VERSION_2}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$
-						}
-					});
-				}
-			}
+			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			currentPluginVersion = versions.get(EntityQueryPlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
 		}
 		
+		if (currentPluginVersion == null) {
+			//Entity doesn't present in this configuration
+			//we need to perform install database support for the plug-in
+			monitor.subTask(Messages.EntityQueryDatabaseUpgrader_UpgradeTask);
+			OnInstallAction install = new OnInstallAction();
+			install.execute(null);
+		
+		}else{
+			s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				upgrade(currentPluginVersion, s);
+				s.getTransaction().commit();
+			}catch (final Throwable t){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				final String msg = MessageFormat.format(Messages.EntityQueryDatabaseUpgrader_QueryUpdateError, new Object[]{currentPluginVersion, EntityQueryPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						EntityQueryPlugIn.displayLog(msg, t);
+					}
+				});
+			}finally{
+				s.close();
+			}
+		}
 	}
 	
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
 	 * @param currentVersion
-	 * @param session
+	 * @param session in active transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(EntityQueryPlugIn.DB_VERSION_1)){
 			upgradeV1ToV2(session);
+			upgradeV2ToV3(session);
+		}else if (currentVersion.equals(EntityQueryPlugIn.DB_VERSION_2)){
+			upgradeV2ToV3(session);
 		}
 	}
 	
@@ -98,20 +103,49 @@ public class EntityQueryDatabaseUpgrader implements IDatabaseUpgrader {
 				"alter table smart.entity_waypoint_query add column style long varchar", //$NON-NLS-1$
 				"alter table smart.entity_gridded_query add column style long varchar"}; //$NON-NLS-1$
 		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				EntityQueryPlugIn.log(s, null);
-				session.createSQLQuery(s).executeUpdate();
-			}
 		
-			HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_2, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (String s : sql){
+			EntityQueryPlugIn.log(s, null);
+			session.createSQLQuery(s).executeUpdate();
 		}
+		
+		HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_2, session);
 	}
-
+	
+	private static void upgradeV2ToV3(Session session){
+		@SuppressWarnings("nls")
+		String[] sql = new String[]{
+				"ALTER TABLE SMART.ENTITY_GRIDDED_QUERY DROP CONSTRAINT ENTITY_GRIDDED_QUERY_CA_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_GRIDDED_QUERY DROP CONSTRAINT ENTITY_GRIDDED_QUERY_CREATOR_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_GRIDDED_QUERY DROP CONSTRAINT ENTITY_GRIDDED_QUERY_FOLDER_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_OBSERVATION_QUERY DROP CONSTRAINT ENTITY_OBSERVATION_QUERY_CA_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_OBSERVATION_QUERY DROP CONSTRAINT ENTITY_OBSERVATION_QUERY_FOLDER_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_SUMMARY_QUERY DROP CONSTRAINT ENTITY_SUMMARY_QUERY_CA_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_SUMMARY_QUERY DROP CONSTRAINT ENTITY_SUMMARY_QUERY_CREATOR_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_SUMMARY_QUERY DROP CONSTRAINT ENTITY_SUMMARY_QUERY_FOLDER_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_WAYPOINT_QUERY DROP CONSTRAINT ENTITY_WAYPOINT_QUERY_CA_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_WAYPOINT_QUERY DROP CONSTRAINT ENTITY_WAYPOINT_QUERY_FOLDER_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_OBSERVATION_QUERY DROP CONSTRAINT ENTITYOBSERVATION_QUERY_CREATOR_UUID_FK",
+				"ALTER TABLE SMART.ENTITY_WAYPOINT_QUERY DROP CONSTRAINT ENTITYWAYPOINT_QUERY_CREATOR_UUID_FK",
+				
+				"ALTER TABLE SMART.ENTITY_GRIDDED_QUERY ADD CONSTRAINT ENTITY_GRIDDED_QUERY_CREATOR_UUID_FK FOREIGN KEY (CREATOR_UUID) REFERENCES SMART.EMPLOYEE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_GRIDDED_QUERY ADD CONSTRAINT ENTITY_GRIDDED_QUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_GRIDDED_QUERY ADD CONSTRAINT ENTITY_GRIDDED_QUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_OBSERVATION_QUERY ADD CONSTRAINT ENTITYOBSERVATION_QUERY_CREATOR_UUID_FK FOREIGN KEY (CREATOR_UUID) REFERENCES SMART.EMPLOYEE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_OBSERVATION_QUERY ADD CONSTRAINT ENTITY_OBSERVATION_QUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_OBSERVATION_QUERY ADD CONSTRAINT ENTITY_OBSERVATION_QUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_SUMMARY_QUERY ADD CONSTRAINT ENTITY_SUMMARY_QUERY_CREATOR_UUID_FK FOREIGN KEY (CREATOR_UUID) REFERENCES SMART.EMPLOYEE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_SUMMARY_QUERY ADD CONSTRAINT ENTITY_SUMMARY_QUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_SUMMARY_QUERY ADD CONSTRAINT ENTITY_SUMMARY_QUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_WAYPOINT_QUERY ADD CONSTRAINT ENTITYWAYPOINT_QUERY_CREATOR_UUID_FK FOREIGN KEY (CREATOR_UUID) REFERENCES SMART.EMPLOYEE(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_WAYPOINT_QUERY ADD CONSTRAINT ENTITY_WAYPOINT_QUERY_FOLDER_UUID_FK FOREIGN KEY (FOLDER_UUID) REFERENCES SMART.QUERY_FOLDER(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				"ALTER TABLE SMART.ENTITY_WAYPOINT_QUERY ADD CONSTRAINT ENTITY_WAYPOINT_QUERY_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE"	
+				}; 
+		
+		for (String s : sql){
+			EntityQueryPlugIn.log(s, null);
+			session.createSQLQuery(s).executeUpdate();
+		}
+		HibernateManager.setPlugInVersion(EntityQueryPlugIn.PLUGIN_ID, EntityQueryPlugIn.DB_VERSION_3, session);
+	}
 }

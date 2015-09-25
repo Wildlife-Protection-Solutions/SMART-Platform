@@ -139,7 +139,7 @@
             class="org.wcs.smart.cybertracker.updatesite.OnInstallAction"
             name="onInstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="2.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -148,7 +148,7 @@
             class="org.wcs.smart.cybertracker.updatesite.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="2.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -162,6 +162,12 @@
       <dbUpgrader
             upgrader="org.wcs.smart.cybertracker.upgrade.CtDatabaseUpgrader">
       </dbUpgrader>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.cybertracker.updatesite.ChangeTrackerInstaller">
+      </ChangeLogTracker>
    </extension>
 
 </plugin>

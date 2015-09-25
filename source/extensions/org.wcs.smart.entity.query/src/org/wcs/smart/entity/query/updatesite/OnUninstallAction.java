@@ -43,5 +43,8 @@ public class OnUninstallAction extends UninstallProvisioningAction {
 			EntityQueryPlugIn.log(ex.getLocalizedMessage(), ex);
 		}
 	}
-
+	@Override
+	protected String getPluginId() {
+		return EntityQueryPlugIn.PLUGIN_ID;
+	}
 }

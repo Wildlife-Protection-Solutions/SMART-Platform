@@ -25,53 +25,72 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.equinox.internal.p2.engine.InstallableUnitOperand;
 import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
-import org.eclipse.equinox.p2.metadata.IInstallableUnit;
+import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
- * Action that is called when some plug-in is being installed.
- * Class contains logic that allows to distinguish if this is plug-in fresh install or upgrade.
+ * Action that is called when some plug-in is being installed. 
+ * All plugins should extend to ensure change log tracking is installed
+ * if necessary.
  * 
- * Plugins should extend InstallProvisioningAction only if there 
- * is a difference in install and upgrade otherwise they should extend
- * ProvisioningAction directly. If you extend InstallProvisioningAction you 
- * will have to implement both performUpgrade() and performNewInstall() to do the same item. 
-
  * @author elitvin
  * @since 3.0.0
  */
-@SuppressWarnings("restriction")
 public abstract class InstallProvisioningAction extends ProvisioningAction {
 
 	@Override
 	public IStatus execute(Map<String, Object> parameters) {
-		IInstallableUnit iu = (IInstallableUnit) parameters.get("iu"); //$NON-NLS-1$
-		IInstallableUnit upgradeFrom = null;
-		Object operand = parameters.get("operand"); //$NON-NLS-1$
-		try {
-			if (operand instanceof InstallableUnitOperand)
-				upgradeFrom = ((InstallableUnitOperand) operand).first();
+		SmartPlugIn.log("Installing PlugIn: " + getPluginId(), null); //$NON-NLS-1$
+		try{
+			//remove any existing change log tracking
+			//this is done so any alter table statements are not
+			//prevented from running because of the triggers
+			Session s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				ChangeLogInstaller.INSTANCE.uninstallChangeLogTracking(s, getPluginId());
+				s.getTransaction().commit();
+			}finally{
+				s.close();
+			}
+			
+			//execute install/upgrade
+			IStatus temp = executeInternal(parameters);
+			
+			//add back all change log tracking if necessary.
+			s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				ChangeLogInstaller.INSTANCE.installChangeLogTracking(s, getPluginId());
+				s.getTransaction().commit();
+			}finally{
+				s.close();
+			}
+			return temp;
+		}catch (Exception ex){
+			return new Status(Status.ERROR, SmartPlugIn.PLUGIN_ID, "Could not install plugin.", ex); //$NON-NLS-1$
 		}
-		catch (Throwable e) {
-			// Ignore class not found in case InstallableUnitOperand is missing
-		}
-		if (upgradeFrom != null) {
-			performUpgrade(iu, upgradeFrom);
-		} else {
-			performNewInstall(iu);
-		}
-		return Status.OK_STATUS;
 	}
-
-	protected abstract void performUpgrade(IInstallableUnit iu, IInstallableUnit oldIu);
 	
-	protected abstract void performNewInstall(IInstallableUnit iu);
-
+	
 	@Override
 	public IStatus undo(Map<String, Object> parameters) {
 		return Status.OK_STATUS;
 	}
+	
+	/**
+	 * Install or upgrade the plugin
+	 * @param parameters
+	 * @return
+	 */
+	protected abstract IStatus executeInternal(Map<String, Object> parameters);
 
-
+	/**
+	 * 
+	 * @return the plugin id being installed
+	 */
+	protected abstract String getPluginId();
 }

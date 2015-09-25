@@ -46,42 +46,50 @@ public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 	 */
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
-		Map<String, String> versions = null;
+		String currentPluginVersion = null;
+		
 		Session s = HibernateManager.openSession();
 		try{
-			versions = UpgradeEngine.getVersions(s);
-		
-			if (versions == null) {
-				//we don't know what is happening with database
-				//it is some kind of error or wrong database version
-				return;
-			}
-			final String currentVersion = versions.get(ConnectPlugIn.PLUGIN_ID);
-			if (currentVersion == null) {
-				//Entity doesn't present in this configuration
-				//we need to perform install database support for the plug-in
-				monitor.subTask("Installing Connect PlugIn database tables.");
-				OnInstallAction install = new OnInstallAction();
-				install.execute(null);
-			}else{
-				try{
-					upgrade(currentVersion, s);
-				}catch (final Throwable t){
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							ConnectPlugIn.displayLog(MessageFormat.format(
-									"Error upgrading the connect plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, ConnectPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
-						}
-					});
-				}
-			}
+			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy
+			currentPluginVersion = versions.get(ConnectPlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
 		}
+		
+		if (currentPluginVersion == null) {
+			//Entity doesn't present in this configuration
+			//we need to perform install database support for the plug-in
+			monitor.subTask("Installing Connect PlugIn database tables.");
+			OnInstallAction install = new OnInstallAction();
+			install.execute(null);
+		
+		}else{
+			s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				upgrade(currentPluginVersion, s);
+				s.getTransaction().commit();
+			}catch (final Throwable t){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				final String msg = MessageFormat.format("Error upgrading the connect plugin database tables from version {0} to version {1}.", new Object[]{currentPluginVersion, ConnectPlugIn.DB_VERSION}) + " \n\n" + t.getMessage();
+				Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					ConnectPlugIn.displayLog(msg, t);
+					}
+				});
+			}finally{
+				s.close();
+			}
+		}
 	}
 	
-	
+	/**
+	 * 
+	 * @param currentVersion
+	 * @param session in active transaction
+	 */
 	public static final void upgrade(String currentVersion, Session session){
 	}
 

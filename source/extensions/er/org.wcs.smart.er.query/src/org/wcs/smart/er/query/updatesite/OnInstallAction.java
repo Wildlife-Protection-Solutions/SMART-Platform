@@ -26,9 +26,10 @@ import java.util.Map;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.equinox.p2.engine.spi.ProvisioningAction;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
+import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.p2.common.updatesite.InstallProvisioningAction;
 
 /**
  * Action that is called when Ecological Records plug-in is installed or upgraded using update site
@@ -36,10 +37,10 @@ import org.wcs.smart.er.EcologicalRecordsPlugIn;
  * @author elitvin
  * @since 1.0.0
  */
-public class OnInstallAction extends ProvisioningAction {
+public class OnInstallAction extends InstallProvisioningAction {
 
 	@Override
-	public IStatus execute(Map<String, Object> parameters) {
+	public IStatus executeInternal(Map<String, Object> parameters) {
 		Job job = new AddERQueryJob();
 		job.setRule(SmartPlugIn.PLUGIN_START_MUTEX);
 		job.schedule();
@@ -52,8 +53,8 @@ public class OnInstallAction extends ProvisioningAction {
 	}
 	
 	@Override
-	public IStatus undo(Map<String, Object> parameters) {
-		return Status.OK_STATUS;
+	protected String getPluginId() {
+		return ERQueryPlugIn.PLUGIN_ID;
 	}
 
 }

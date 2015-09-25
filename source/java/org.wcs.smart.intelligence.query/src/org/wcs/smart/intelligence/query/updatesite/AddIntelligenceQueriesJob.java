@@ -80,52 +80,40 @@ public class AddIntelligenceQueriesJob extends Job {
 		Session session = HibernateManager.openSession();	
 		
 		try{
-							
+			session.beginTransaction();
 			String currentVersion = HibernateManager.getPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, session);
+			
 			if (currentVersion == null){
-				session.beginTransaction();
-				try{
-					createDatabaseTables(session);
-					HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_1, session);
-					session.getTransaction().commit();
-				}catch(final Exception ex){
-					session.getTransaction().rollback();
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							MessageDialog.openError(Display.getDefault().getActiveShell(),
-									Messages.AddIntelligenceQueriesJob_JobName,
-									Messages.AddIntelligenceQueriesJob_Error1 + ex.getMessage());
-						}
-						
-					});
-					return new Status(Status.ERROR,IntelligenceQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);
-				}	
+				createDatabaseTables(session);
 				currentVersion = IntelligenceQueryPlugIn.DB_VERSION_1;
 			}
-					//run the upgrader to upgrade to the current version
-			IntelligenceQueryDatabaseUpgrader.upgrade(currentVersion, session);					
+			//run the upgrader to upgrade to the current version
+			IntelligenceQueryDatabaseUpgrader.upgrade(currentVersion, session);
+			session.getTransaction().commit();
+		}catch(final Exception ex){
+			if (session.getTransaction().isActive()) session.getTransaction().rollback();
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					MessageDialog.openError(Display.getDefault().getActiveShell(),
+							Messages.AddIntelligenceQueriesJob_JobName,
+							Messages.AddIntelligenceQueriesJob_Error1 + ex.getMessage());
+				}	
+			});
+			return new Status(Status.ERROR,IntelligenceQueryPlugIn.PLUGIN_ID, "Error installing plugin tables.", ex);					 //$NON-NLS-1$
 		}finally{
 			session.close();
 		}
+		monitor.done();
 		return Status.OK_STATUS;
 	}
 	
 	private void createDatabaseTables(Session session){
-		//check is required table exists		
-		session.beginTransaction();
-		try{
-			
-			for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
-				IntelligenceQueryPlugIn.log(CREATE_TABLE_SQL[i], null);
-				session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
-			}
-			HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_1, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		//check is required table exists
+		for (int i = 0; i < CREATE_TABLE_SQL.length; i ++){
+			IntelligenceQueryPlugIn.log(CREATE_TABLE_SQL[i], null);
+			session.createSQLQuery(CREATE_TABLE_SQL[i]).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(IntelligenceQueryPlugIn.PLUGIN_ID, IntelligenceQueryPlugIn.DB_VERSION_1, session);
 	}
 }

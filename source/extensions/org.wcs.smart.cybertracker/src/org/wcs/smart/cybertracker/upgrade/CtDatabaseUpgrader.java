@@ -44,46 +44,49 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 
 	@Override
 	public void upgrade(IProgressMonitor monitor) {
-		Map<String, String> versions = null;
+String currentPluginVersion = null;
 		
 		Session s = HibernateManager.openSession();
 		try{
-			versions = UpgradeEngine.getVersions(s);
-			
-			if (versions == null) {
-				//we don't know what is happening with database
-				//it is some kind of error or wrong database version
-				return;
-			}
-			final String currentVersion = versions.get(CyberTrackerPlugIn.PLUGIN_ID);
-			if (versions.get(CyberTrackerPlugIn.PLUGIN_ID) == null) {
-				//CyberTracker doesn't present in this configuration
-				//we need to perform install database support for the plug-in
-				monitor.subTask(Messages.CtDatabaseUpgrader_UpgradeTask);
-				OnInstallAction install = new OnInstallAction();
-				install.execute(null);
-			}else{
-				try{
-					upgrade(currentVersion, s);
-				}catch (final Throwable t){
-					Display.getDefault().syncExec(new Runnable(){
-						@Override
-						public void run() {
-							CyberTrackerPlugIn.displayError("Upgrade Error", MessageFormat.format(
-									"Error upgrading the cybertracker plugin database tables from version {0} to version {1}.", new Object[]{currentVersion, CyberTrackerPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(), t); //$NON-NLS-1$ //$NON-NLS-2$
-						}
-					});
-				}
-			}
+			Map<String, String> versions = UpgradeEngine.getVersions(s);
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
+			currentPluginVersion = versions.get(CyberTrackerPlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
+		}
+		
+		if (currentPluginVersion == null) {
+			//Entity doesn't present in this configuration
+			//we need to perform install database support for the plug-in
+			monitor.subTask(Messages.CtDatabaseUpgrader_UpgradeTask);
+			OnInstallAction install = new OnInstallAction();
+			install.execute(null);
+		
+		}else{
+			s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				upgrade(currentPluginVersion, s);
+				s.getTransaction().commit();
+			}catch (final Throwable t){
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				final String msg = MessageFormat.format(Messages.CtDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, CyberTrackerPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						CyberTrackerPlugIn.displayError(Messages.CtDatabaseUpgrader_ErrorTitle, msg, t);
+					}
+				});
+			}finally{
+				s.close();
+			}		
 		}
 	}
 
 	/**
 	 * Upgrades from the currentVersion to the most recent version.
 	 * @param currentVersion
-	 * @param session
+	 * @param session in current transaction
 	 */
 	public static final void upgrade(String currentVersion, Session session){
 		if (currentVersion.equals(CyberTrackerPlugIn.DB_VERSION_1)){
@@ -92,23 +95,14 @@ public class CtDatabaseUpgrader implements IDatabaseUpgrader {
 	}
 	
 	private static void upgradeV1ToV2(Session session){
+		@SuppressWarnings("nls")
 		String[] sql = new String[]{
 			"ALTER TABLE SMART.CT_PROPERTIES_OPTION DROP CONSTRAINT CT_PROPERTIES_OPTION_CA_UUID_FK",
 			"ALTER TABLE SMART.CT_PROPERTIES_OPTION ADD CONSTRAINT CT_PROPERTIES_OPTION_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE" 
 		};
-		
-		session.beginTransaction();
-		try{
-			for (String s : sql){
-				session.createSQLQuery(s).executeUpdate();
-			}
-		
-			HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_2, session);
-			session.getTransaction().commit();
-		}finally{
-			if (session.getTransaction().isActive()){
-				session.getTransaction().rollback();
-			}
+		for (String s : sql){
+			session.createSQLQuery(s).executeUpdate();
 		}
+		HibernateManager.setPlugInVersion(CyberTrackerPlugIn.PLUGIN_ID, CyberTrackerPlugIn.DB_VERSION_2, session);
 	}
 }

@@ -7,7 +7,7 @@
             class="org.wcs.smart.er.updatesite.OnInstallAction"
             name="onInstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -16,7 +16,7 @@
             class="org.wcs.smart.er.updatesite.OnUninstallAction"
             name="onUninstall"
             touchpointType="org.eclipse.equinox.p2.osgi"
-            version="1.0.0">
+            version="4.0.0">
       </action>
    </extension>
    <extension
@@ -1090,5 +1090,11 @@
             file="help/toc.xml"
             primary="false">
       </toc>
+   </extension>
+   <extension
+         point="org.wcs.smart.changelog.installer">
+      <ChangeLogTracker
+            clazz="org.wcs.smart.er.updatesite.ChangeTrackerInstaller">
+      </ChangeLogTracker>
    </extension>
 </plugin>

@@ -288,6 +288,8 @@ public class Messages extends NLS {
 
 	public static String IntelligenceCaCloner_ProgressMessage;
 
+	public static String IntelligenceDatabaseUpgrader_UpgradeError;
+
 	public static String IntelligenceDatabaseUpgrader_UpgradeTask;
 
 	public static String IntelligenceDataSource_SchemaNotSupported;
