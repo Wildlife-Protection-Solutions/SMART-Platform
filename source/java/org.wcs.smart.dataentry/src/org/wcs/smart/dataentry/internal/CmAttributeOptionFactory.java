@@ -27,6 +27,7 @@ import java.util.Map;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.dataentry.model.CmAttribute;
 import org.wcs.smart.dataentry.model.CmAttributeOption;
+import org.wcs.smart.dataentry.model.CmAttributeOption.EnterOnceType;
 
 /**
  * Factory provides common set of options used for different attributes
@@ -99,6 +100,14 @@ public class CmAttributeOptionFactory {
 		option.setCmAttribute(attribute);
 		option.setOptionId(CmAttributeOption.ID_CUSTOM_CONFIG);
 		option.setDoubleValue(0.0); //false by default
+		return option;
+	}
+
+	public static CmAttributeOption createEnterOnceOption(CmAttribute attribute) {
+		CmAttributeOption option = new CmAttributeOption();
+		option.setCmAttribute(attribute);
+		option.setOptionId(CmAttributeOption.ID_ENTER_ONCES);
+		option.setStringValue(EnterOnceType.NONE.toString()); //not enabled by default
 		return option;
 	}
 }
