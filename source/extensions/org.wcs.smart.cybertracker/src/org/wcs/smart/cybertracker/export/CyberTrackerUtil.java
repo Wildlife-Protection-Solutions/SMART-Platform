@@ -26,16 +26,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.Session;
 import org.wcs.smart.ca.Language;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.ca.datamodel.DataModel;
-import org.wcs.smart.cybertracker.export.PatrolScreensUtil.ParolFilledDataContainer;
 import org.wcs.smart.cybertracker.export.data.IAttributeTreeNodeProxy;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
-import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.util.LanguageUtil;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
@@ -86,17 +84,12 @@ public class CyberTrackerUtil {
 		}
 	}
 
-	private CyberTrackerProperties ctProperties;
-	
 	private ScreensObjectFactory screensFactory;
-	private PatrolScreensUtil screensUtil;
 	private Language currentLanguage;
 	
-	public CyberTrackerUtil(CyberTrackerProperties properties, Language language) {
-		ctProperties = properties;
+	public CyberTrackerUtil(ScreensObjectFactory screensFactory, Language language) {
+		this.screensFactory = screensFactory;
 		currentLanguage = language;
-		this.screensFactory = new ScreensObjectFactory(properties);
-		this.screensUtil = new PatrolScreensUtil(this);
 	}
 	
 	public ScreensObjectFactory getScreensFactory() {
@@ -104,20 +97,9 @@ public class CyberTrackerUtil {
 	}
 
 	public CyberTrackerProperties getCtProperties() {
-		return ctProperties;
+		return screensFactory.getCtProperties();
 	}
 	
-	public ParolFilledDataContainer buildPatrolNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
-		return screensUtil.buildPatrolNodes(elements, dmRootId, session);
-	}
-	
-	public Category buildRoot(DataModel dataModel) {
-		Category fakeRoot = new Category();
-		fakeRoot.setName("Data Model"); //$NON-NLS-1$
-		fakeRoot.setActiveChildren(dataModel.getActiveCategories());
-		return fakeRoot;
-	}
-
 	public Map<Category, CyberTrackerId> buildMap(Category category) {
 		Map<Category, CyberTrackerId> map = new HashMap<Category, CyberTrackerId>();
 		map.put(category, new CyberTrackerId());
@@ -249,4 +231,16 @@ public class CyberTrackerUtil {
 	public String getName(NamedItem i) {
 		return LanguageUtil.getName(i, currentLanguage);
 	}
+	
+	public Node createSaveNode(CyberTrackerId id, CyberTrackerId saveTargetId, String title, String msg, boolean takeGpsReading) {
+		Node saveNode = screensFactory.createNodeMsgText(id.getNodeId(), title, msg);
+		//disable next button, enable save button, navigate on save to target point
+		Control control2 = ScreensObjectFactory.getNavigationControl(saveNode);
+		control2.setShowNext("False"); //$NON-NLS-1$
+		control2.setShowMajor("True"); //$NON-NLS-1$
+		control2.setTranslateMajorScreenId(saveTargetId.getNodeId());
+		control2.setTakeGPS(takeGpsReading ? "True" : "False"); //$NON-NLS-1$ //$NON-NLS-2$
+		return saveNode;
+	}
+	
 }

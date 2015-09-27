@@ -66,6 +66,7 @@ import org.wcs.smart.patrol.model.Patrol;
 public class PatrolFilteredComboViewer extends Composite implements IPatrolFilteringView {
 
     private ComboViewer viewer;
+    private Button btnFilter;
 
     private PatrolViewFilter filter = new PatrolViewFilter();
 	private LoadPatrolIdJob loadPatrolIdJob = new LoadPatrolIdJob();
@@ -101,7 +102,7 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 			}
 		});
 
-		Button btnFilter = new Button(this, SWT.PUSH);
+		btnFilter = new Button(this, SWT.PUSH);
 		Image image = SmartPatrolPlugIn.getDefault().getImageRegistry().get(SmartPatrolPlugIn.PATROL_FILTER_ICON);		
 		btnFilter.setImage(image);
 		btnFilter.setToolTipText(Messages.PatrolFilteredComboViewerComposite_Filter_Tooltip);
@@ -121,6 +122,11 @@ public class PatrolFilteredComboViewer extends Composite implements IPatrolFilte
 		return viewer.getControl();
 	}
 
+	public void setControlsEnabled(boolean enabled) {
+		viewer.getControl().setEnabled(enabled);
+		btnFilter.setEnabled(enabled);
+	}
+	
 	@Override
 	public void updateContent() {
 		loadPatrolIdJob.cancel();

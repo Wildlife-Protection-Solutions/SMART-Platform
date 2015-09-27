@@ -24,7 +24,7 @@ package org.wcs.smart.cybertracker.importer;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
+import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 
 /**
  * Result of CyberTrackerImport
@@ -35,7 +35,7 @@ import org.wcs.smart.cybertracker.model.CyberTrackerPatrol;
 public class CyberTrackerImportResult {
 
 	private int returnCode;
-	private List<CyberTrackerPatrol> data;
+	private List<ICyberTrackerData> data;
 	
 	public int getReturnCode() {
 		return returnCode;
@@ -44,12 +44,12 @@ public class CyberTrackerImportResult {
 		this.returnCode = returnCode;
 	}
 	
-	public List<CyberTrackerPatrol> getData() {
+	public List<ICyberTrackerData> getData() {
 		if (data == null)
-			data = new ArrayList<CyberTrackerPatrol>();
+			data = new ArrayList<ICyberTrackerData>();
 		return data;
 	}
-	public void setData(List<CyberTrackerPatrol> data) {
+	public void setData(List<ICyberTrackerData> data) {
 		this.data = data;
 	}
 	

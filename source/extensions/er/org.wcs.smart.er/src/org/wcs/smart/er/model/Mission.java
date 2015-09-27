@@ -119,6 +119,9 @@ public class Mission extends UuidItem{
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="mission", cascade = {CascadeType.ALL})
 	@OrderBy("mission_day asc")
 	public List<MissionDay> getMissionDays() {
+		if (this.days == null) {
+			this.days = new ArrayList<MissionDay>();
+		}
 		return this.days;
 	}
 	

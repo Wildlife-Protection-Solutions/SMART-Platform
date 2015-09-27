@@ -47,7 +47,7 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 	public static final String ID = "org.wcs.smart.cybertracker.CyberTrackerImportEditor"; //$NON-NLS-1$
 
 	private FormToolkit toolkit;
-	private CTPatrolTableContainer tableContainer;
+	private CyberTrackerImportComposite tableContainer;
 	
 	@Override
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
@@ -63,7 +63,7 @@ public class CyberTrackerImportEditor extends EditorPart implements ISaveablePar
 		GridLayout layout = new GridLayout();
 		form.getBody().setLayout(layout);
 		
-		tableContainer = new CTPatrolTableContainer(form.getBody(), SWT.NONE, toolkit);
+		tableContainer = new CyberTrackerImportComposite(form.getBody(), SWT.NONE, toolkit);
 		tableContainer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
 	
