@@ -75,7 +75,7 @@ public class UploadCaJob extends FileUploaderJob {
 						"Upload to SMART Connect complete." +
 						(msg != null ? "\n" + msg : ""));
 				}else if (status.getStatus() == org.wcs.smart.connect.model.ConnectServerStatus.Status.ERROR){
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
+					MessageDialog.openError(Display.getDefault().getActiveShell(), 
 							"SMART Connect Upload", 
 							"An error occurred uploading Conservation Area to SMART Connect." +
 							(msg != null ? "\n" + msg : ""));
@@ -123,7 +123,7 @@ public class UploadCaJob extends FileUploaderJob {
 	protected void onError(WorkItemStatus upstatus) {
 		this.status.setStatus(ConnectServerStatus.Status.ERROR);
 		saveStatus();
-		displayComplete(upstatus.getMessage());	
+		displayComplete(upstatus == null ? "Local error uploading file." : upstatus.getMessage());	
 		
 		super.connect.close();
 	}

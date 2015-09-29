@@ -117,7 +117,7 @@ public class ConnectServer extends UuidItem{
 	private void parseOptions(){
 		options = new HashMap<ConnectServer.Option, String>();
 		if (getServerOptions() == null) return;
-		String[] parts = getServerOptions().split("|");
+		String[] parts = getServerOptions().split("\\|");
 		for(String part : parts){
 			String[] bits = part.split("=");
 			for (Option o : Option.values()){

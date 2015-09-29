@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
@@ -106,9 +107,11 @@ public class ConnectDialog extends TitleAreaDialog {
 	private void initData(){
 
 		Session s = HibernateManager.openSession();
-		s.beginTransaction();
 		try{
-			cs = (ConnectServer)s.get(ConnectServer.class, SmartDB.getCurrentConservationArea().getUuid());
+			s.beginTransaction();
+			cs = (ConnectServer)s.createCriteria(ConnectServer.class)
+					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
+					.uniqueResult();
 			
 			user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
 					
