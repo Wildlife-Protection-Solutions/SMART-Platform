@@ -68,7 +68,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();
 		
 		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, SmartDB.getCurrentConservationArea(), Type.UPLOAD);
-		lastUploadRevision = lastUpload.getEndRevision();
+		lastUploadRevision = lastUpload == null ? -1 : lastUpload.getEndRevision();
 		
 		super.processFile(session);
 	}
