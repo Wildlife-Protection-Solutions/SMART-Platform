@@ -137,11 +137,11 @@ public class ConnectAlert extends HttpServlet {
 			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
@@ -170,11 +170,11 @@ public class ConnectAlert extends HttpServlet {
 			response.flushBuffer();
 
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
@@ -201,11 +201,11 @@ public class ConnectAlert extends HttpServlet {
 			s.flush();
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{

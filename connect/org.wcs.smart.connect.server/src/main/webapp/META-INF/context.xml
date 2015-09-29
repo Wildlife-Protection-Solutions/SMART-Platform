@@ -1,15 +1,15 @@
-<Context >
+<Context>
   <Resource name="jdbc/smart"
             auth="Container"
             type="javax.sql.DataSource"
-            username="smart"
-            password=""
+            username="postgres"
+            password="sql"
             driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://turtle:9944/connect"
+            url="jdbc:postgresql://localhost:5432/connect"
             maxActive="20"
             maxIdle="10"
             factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"/>
-            
+           
 	<Realm className="org.apache.catalina.realm.LockOutRealm">
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"
 			dataSourceName="jdbc/smart"
@@ -19,4 +19,8 @@
 				<CredentialHandler className="org.wcs.smart.connect.apache.BcryptCredentialHandler"/>
 		</Realm>
   	</Realm>
+  	
+  	<!-- environment variables -->
+  	<!-- SMART Filestore Location -->
+  	<Environment name="filestorelocation" value="C:\\temp\\connect_datastore\\" type="java.lang.String" override="false"/>
 </Context>

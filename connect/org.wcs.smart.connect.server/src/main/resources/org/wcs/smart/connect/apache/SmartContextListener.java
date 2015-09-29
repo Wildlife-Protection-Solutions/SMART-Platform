@@ -23,6 +23,7 @@ package org.wcs.smart.connect.apache;
 
 import java.io.File;
 
+import javax.naming.NamingException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -114,13 +115,18 @@ public class SmartContextListener implements ServletContextListener{
 		SmartContext.INSTANCE.setClass(IObservationQueryColumnProvider.class, new ObservationQueryColumnProvider());
 		SmartContext.INSTANCE.setClass(IPatrolQueryColumnProvider.class, new PatrolQueryColumnProvider());
 		SmartContext.INSTANCE.setClass(ISurveyQueryColumnProvider.class, new SurveyQueryColumnProvider());
-		
 		SmartContext.INSTANCE.setClass(IPatrolContributionFinder.class, new PatrolContributionFinder());
-		
 		SmartContext.INSTANCE.setClass(IWaypointSourceEngine.class, WaypointSourceEngine.INSTANCE);
-		SmartContext.INSTANCE.setFilestoreLocation(DataStoreManager.INSTANCE.getRootDirectory().getAbsolutePath());
-		//System.out.println(((File)arg0.getServletContext().getAttribute(ServletContext.TEMPDIR)).toString());
+		
+		/* filestore configurations */
 		SmartContext.INSTANCE.setTempFilestoreLocation((File)arg0.getServletContext().getAttribute(ServletContext.TEMPDIR));
+		try{
+			DataStoreManager.INSTANCE.initDatastore();
+		}catch(NamingException ex){
+			//TODO: log me
+			throw new IllegalStateException("Cannot initialize datastore.");
+		}
+		SmartContext.INSTANCE.setFilestoreLocation(DataStoreManager.INSTANCE.getRootDirectory().getAbsolutePath());
 	}
 
 

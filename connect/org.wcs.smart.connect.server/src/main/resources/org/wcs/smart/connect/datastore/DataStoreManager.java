@@ -25,6 +25,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+
 import org.apache.commons.io.FileUtils;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.util.UuidUtils;
@@ -39,9 +43,19 @@ public enum DataStoreManager {
 	INSTANCE;
 	
 	//TODO: this cannot be hard coded.  Should be configurable in web.xml???
-	private static final String DATASTORE_LOCATION = "C:\\data\\SMART\\Connect\\datastore\\";
+	private static String datastoreLocation;
 	
 	public static final String CA_EXPORT_LOCATION = "caexport";
+	
+	/**
+	 * Initialize the location of the datastore;  This should be called
+	 * once on startup of web app.
+	 * @param datastoreLocation
+	 * @throws NamingException 
+	 */
+	public void initDatastore() throws NamingException{
+		datastoreLocation = (String)((Context)new InitialContext().lookup("java:comp/env")).lookup("filestorelocation");
+	}
 	
 	/**
 	 * Any files create in this directory should be considered temporary
@@ -107,7 +121,7 @@ public enum DataStoreManager {
 		int cnt = 0;
 		while(f.exists()){
 			cnt++;
-			f = new File(DATASTORE_LOCATION, name + "." + cnt + "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
+			f = new File(datastoreLocation, name + "." + cnt + "." + ext); //$NON-NLS-1$ //$NON-NLS-2$
 			
 		}
 		return name + "." + cnt + "." + ext; //$NON-NLS-1$ //$NON-NLS-2$
@@ -122,7 +136,7 @@ public enum DataStoreManager {
 	 * @return
 	 */
 	public File getFile(String fileName){
-		return new File(DATASTORE_LOCATION, fileName);
+		return new File(datastoreLocation, fileName);
 	}
 	
 	/**
@@ -130,7 +144,7 @@ public enum DataStoreManager {
 	 * @return the root filestore location
 	 */
 	public File getRootDirectory(){
-		return new File(DATASTORE_LOCATION);
+		return new File(datastoreLocation);
 	}
 	
 	/**
