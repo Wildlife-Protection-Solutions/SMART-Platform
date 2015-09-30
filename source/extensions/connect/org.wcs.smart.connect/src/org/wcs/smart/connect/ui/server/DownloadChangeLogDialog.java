@@ -41,8 +41,8 @@ public class DownloadChangeLogDialog extends ConnectDialog {
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		setTitle("Download changes from CONNECT");
-		getShell().setText("Download local changes FROM CONNECT");
-		setMessage("Download changes from a CONNECT instance to your local database.");
+		getShell().setText("Download changes from CONNECT");
+		setMessage("Download changes from CONNECT and apply to your local database.");
 		
 		return super.createDialogArea(parent);
 	}	

@@ -24,6 +24,7 @@ package org.wcs.smart.connect.server.replication;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
@@ -157,6 +158,22 @@ public class DownloadChangeLogEngine {
 			}catch (NothingToUpdateException ex){
 				
 			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+
+				//look for unique constraint errors; likely due to duplicate keys 
+				Throwable parent = ex;
+				Exception constraint = null;
+				while(parent != null){
+					if (parent instanceof SQLIntegrityConstraintViolationException){
+						constraint = (Exception) parent;
+						break;
+					}
+					if (parent == parent.getCause()) break;	//TODO: test this
+					parent = parent.getCause();
+				}
+				if (constraint != null){
+					throw new Exception("Unable to apply changes from server due to constraint violation.  This is likely a result of another user creating the same key for an object (ex. same data model category or patrol team key). You will need to delete your item and redownload updates or delete your conservation area and download a fresh copy from SMART Connect." + "\n\n" + constraint.getMessage());   
+				}
 				throw new Exception("Unable to apply changes from server:" + "\n\n" + ex.getMessage(), ex);
 			}finally{
 				Files.delete(p);
