@@ -171,9 +171,9 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		}
 		int up = ps.executeUpdate();
 		//not a valid check as item may been previously removed
-		if (up != 1){
-			throw new SQLException("Invalid number of row deleted.");
-		}
+		//if (up != 1){
+		//	throw new SQLException("Invalid number of row deleted.");
+		//}
 	}
 	
 	@Override
