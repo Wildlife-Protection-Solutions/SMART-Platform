@@ -33,15 +33,15 @@
       </command>
       <command
             id="org.wcs.smart.connect.server.exportca"
-            name="Export To SMART Connect">
+            name="Upload Conservation Area to Connect">
       </command>
       <command
             id="org.wcs.smart.connect.server.changelog.up"
-            name="Upload Change Log">
+            name="Upload Changes To Connect">
       </command>
       <command
             id="org.wcs.smart.connect.server.changelog.down"
-            name="Download Change Log">
+            name="Download Changes From Connect">
       </command>
    </extension>
    <extension
@@ -51,7 +51,7 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.report">
          <menu
                id="org.wcs.smart.connect.menu"
-               label="CONNECT">
+               label="Connect">
             <command
                   commandId="org.wcs.smart.connect.server.changelog.up"
                   style="push">
@@ -60,6 +60,10 @@
                   commandId="org.wcs.smart.connect.server.changelog.down"
                   style="push">
             </command>
+            <separator
+                  name="org.wcs.smart.connect.separator1"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.connect.server.exportca"
                   style="push">
