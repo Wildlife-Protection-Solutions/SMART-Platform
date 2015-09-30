@@ -138,5 +138,20 @@
             clazz="org.wcs.smart.connect.updatesite.ChangeTrackerInstaller">
       </ChangeLogTracker>
    </extension>
+   <extension
+         point="org.eclipse.ui.commandImages">
+      <image
+            commandId="org.wcs.smart.connect.server.changelog.up"
+            icon="images/icons/obj16/server_upload.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.changelog.down"
+            icon="images/icons/obj16/server_download.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.configuration.show"
+            icon="images/icons/obj16/server.png">
+      </image>
+   </extension>
 
 </plugin>
