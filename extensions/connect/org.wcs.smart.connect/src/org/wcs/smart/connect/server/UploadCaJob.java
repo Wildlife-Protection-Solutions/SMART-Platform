@@ -33,6 +33,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -57,8 +58,7 @@ public class UploadCaJob extends FileUploaderJob {
 		try{
 			super.uploadFile(monitor);
 		}catch (Exception ex){
-			ConnectPlugIn.log("Error uplodaing to connect.", ex);
-			onError(null);
+			ConnectPlugIn.log("Error uploading conservation area to connect.", ex);
 		}
 		return org.eclipse.core.runtime.Status.OK_STATUS;
 
@@ -109,13 +109,24 @@ public class UploadCaJob extends FileUploaderJob {
 
 	@Override
 	protected void onProcessingComplete(WorkItemStatus upstatus) {
-		this.status.setStatus(ConnectServerStatus.Status.DONE);
-		saveStatus();
-		
-		deleteLocalFile();	
-		displayComplete(null);
-		
-		super.connect.close();
+		try{
+			this.status.setStatus(ConnectServerStatus.Status.DONE);
+			saveStatus();
+			deleteLocalFile();	
+			super.connect.close();
+			
+			Session s = HibernateManager.openSession();
+			try{
+				s.beginTransaction();
+				DerbyReplicationManager.INSTANCE.enableReplication(s);
+				s.getTransaction().commit();
+			}finally{
+				s.close();
+			}
+			displayComplete(null);
+		}catch (Exception ex){
+			ConnectPlugIn.displayLog("Replication could not be enabled.  Changes will not be sent to connect server.  SMART should be restarted to prevent future replication errors.", ex);
+		}
 	}
 
 

@@ -35,6 +35,7 @@ import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.server.UploadCaEngine;
 import org.wcs.smart.connect.server.UploadCaJob;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
@@ -114,8 +115,7 @@ public class LoginHandler implements ILoginHandler {
 				if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Export To Connect", 
 						"SMART was terminated before the export to SMART Conenct was completed.  Do you want resume the upload process?")){
 					//need to continue upload
-					UploadCaJob job = new UploadCaJob(connect, status);
-					job.schedule();
+					(new UploadCaEngine()).continueUpload(connect, status);
 				}else{
 					s.beginTransaction();
 					status.setStatus(Status.ERROR);

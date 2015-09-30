@@ -51,11 +51,16 @@ public class ConnectServer extends UuidItem{
 		MAX_RETRY_DOWNLOAD (10),
 		MAX_RETRY_UPLOAD(100),
 		RETY_WAIT_TIME(500),
-		MAX_PROCESSING_WAIT_TIME(5 * 60 * 1000000000l);
+		MAX_PROCESSING_WAIT_TIME(5 * 60 * 1000);
 		
 		Object defaultValue;
+		
 		private Option(Object defaultValue){
 			this.defaultValue = defaultValue;
+		}
+		
+		public String getDefaultValueAsString(){
+			return this.defaultValue.toString();
 		}
 	}
 	
@@ -156,8 +161,9 @@ public class ConnectServer extends UuidItem{
 		return Integer.valueOf(x);
 	}
 	/**
-	 * Initial time to wait between retrys.  The retry wait
-	 * time should be exponentially longer.
+	 * Initial time to wait between retrys in milliseconds.
+	 * 
+	 * Second and third wait times should double previous value.
 	 */
 	@Transient
 	public int getRetryWaitTime(){
@@ -166,7 +172,7 @@ public class ConnectServer extends UuidItem{
 		return Integer.valueOf(x);
 	}
 	/**
-	 * Maximum wait time for processing item.
+	 * Maximum wait time for processing item in milliseconds.
 	 */
 	@Transient
 	public long getWaitProcessingTime(){

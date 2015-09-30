@@ -82,7 +82,7 @@ public class WorkItemStatus {
 	public String getMessage(){
 		return this.message;
 	}
-	public String setMessage(){
-		return this.message;
+	public void setMessage(String message){
+		this.message = message;
 	}
 }

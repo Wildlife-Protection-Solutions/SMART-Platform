@@ -40,7 +40,8 @@ import org.wcs.smart.hibernate.SmartDB;
 public class ConnectServerWizard extends Wizard {
 
 	protected ServerWizardPage page1;
-	protected UserWizardPage page2;
+	protected UserWizardPage page3;
+	protected ServerOptionsWizardPage page2;
 	
 	public ConnectServerWizard(){
 		super();
@@ -48,14 +49,15 @@ public class ConnectServerWizard extends Wizard {
 		setWindowTitle("Configure SMART Connect Server");
 		
 		addPage(page1 = new ServerWizardPage());
-		addPage(page2 = new UserWizardPage());
+		addPage(page2 = new ServerOptionsWizardPage());
+		addPage(page3 = new UserWizardPage());
 	}
 
 	@Override
 	public boolean performFinish() {
 		String url = page1.getServerName();
-		String username = page2.getUsername();
-		String password = page2.getPassword();
+		String username = page3.getUsername();
+		String password = page3.getPassword();
 		
 		String error = null;
 		
@@ -63,7 +65,8 @@ public class ConnectServerWizard extends Wizard {
 		server.setConservationArea(SmartDB.getCurrentConservationArea());
 		server.setServerUrl(url);
 		server.initalizeOptions();
-				
+		page2.updateServer(server);
+		
 		try(SmartConnect cs = new SmartConnect(server, username, password)){
 			error = cs.validateUser();
 		}
@@ -72,7 +75,7 @@ public class ConnectServerWizard extends Wizard {
 			MessageDialog.openError(getShell(), "Error", error);
 			return false;
 		}
-			
+		
 		ConnectUser user = new ConnectUser();
 		user.setConnectPassword(password);
 		user.setConnectUsername(username);

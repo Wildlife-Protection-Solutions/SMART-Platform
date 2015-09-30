@@ -81,7 +81,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (event.getCurrentPage() == page2 && event.getTargetPage() == page3){
+		if (event.getCurrentPage() == page3 && event.getTargetPage() == page3){
 			final String url = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getServerName();
 			final String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 			final String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
@@ -103,7 +103,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 			}
 			
 		}
-		if (event.getCurrentPage() == page3 && event.getTargetPage() == page2){
+		if (event.getCurrentPage() == page3 && event.getTargetPage() == page3){
 			page3.clearList();
 		}
 	}

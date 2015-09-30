@@ -21,15 +21,21 @@
  */
 package org.wcs.smart.connect.ui.server.configure;
 
+import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.jface.layout.TableColumnLayout;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -48,19 +54,21 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServer.Option;
 import org.wcs.smart.connect.model.ConnectServerStatus;
-import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
-import org.wcs.smart.util.UuidUtils;
 
 /**
  * Connect server info dialog.
@@ -73,15 +81,14 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 	
 	private ConnectServer toUpdate;
 	private Button btnSet;
+	private Button btnEditServer;
 	private Button btnEdit;
 	private Button btnAdd;
 	private Button btnDelete;
+	private Button btnShowReplication;
 	private TableViewer tblUsers;
-	
-	private Label lblServerVersion;
-	private Label lblServerRevision;
-	private Label lblLocalChanges;
-	
+		
+	private HashMap<Option, Label> optionCntrls;
 	/**
 	 * Default constructor
 	 */
@@ -91,8 +98,14 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 
 	public int open(){
 		return super.open();
+		
 	}
 
+	@Override
+	protected void createButtonsForButtonBar(Composite parent){
+		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CLOSE_LABEL, true);
+	}
+	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
@@ -113,13 +126,48 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		txtServer.setText("<Server URL>");
 		txtServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		btnSet = new Button(g, SWT.PUSH);
+
+		Composite btnPanel = new Composite(g, SWT.NONE);
+		btnPanel.setLayout(new GridLayout());
+		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 2));
+		
+		btnSet = new Button(btnPanel, SWT.PUSH);
+		btnSet.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)btnSet.getLayoutData()).widthHint = 50;
 		btnSet.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				setUrl();
+				setServer();
 			}
 		});
+		
+		btnEditServer = new Button(btnPanel, SWT.PUSH);
+		btnEditServer.setText("Edit");
+		btnEditServer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		btnEditServer.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				editServer();
+			}
+		});
+		
+		Composite c = new Composite(g, SWT.FLAT );
+		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		
+		c.setLayout(new GridLayout(4, false));
+		((GridLayout)c.getLayout()).marginWidth = 0;
+		((GridLayout)c.getLayout()).marginHeight = 7;
+		
+		optionCntrls = new HashMap<ConnectServer.Option, Label>();
+		for (ConnectServer.Option op : ConnectServer.Option.values()){
+			Label l = new Label(c, SWT.NONE);
+			l.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(op) + ":");
+			l.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(op));
+			
+			Label lblValue = new Label(c, SWT.NONE);
+			optionCntrls.put(op, lblValue);
+			lblValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		}
 		
 		g = new Group(main, SWT.FLAT );
 		g.setText("User Accounts");
@@ -214,26 +262,16 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 		});
 
-		g = new Group(main, SWT.FLAT );
-		g.setText("Replication Information");
-		g.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		g.setLayout(new GridLayout(2, false));
-		
-		Label l = new Label(g, SWT.NONE);
-		l.setText("Server Version:");
-		lblServerVersion = new Label(g, SWT.NONE);
-		lblServerVersion.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
-		
-		l = new Label(g, SWT.NONE);
-		l.setText("Last Server Revision:");
-		lblServerRevision = new Label(g, SWT.NONE);
-		lblServerRevision.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
-		
-		l = new Label(g, SWT.NONE);
-		l.setText("Local Changes:");
-		lblLocalChanges = new Label(g, SWT.NONE);
-		lblLocalChanges.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
-		
+		btnShowReplication = new Button(main, SWT.PUSH);
+		btnShowReplication.setText("View Replication Information");
+		btnShowReplication.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ReplicationInfoDialog dialog = new ReplicationInfoDialog(getShell());
+				dialog.open();
+			}
+		});
 		
 		initControls();
 		
@@ -256,17 +294,21 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				toUpdate = null;
 				txtServer.setText("<Not Set>");
 				btnSet.setText("Set");
+				btnEditServer.setEnabled(false);
 				btnAdd.setEnabled(false);
 				tblUsers.setInput(new Object[]{});
 				tblUsers.getTable().setEnabled(false);
 				
-				lblLocalChanges.setText("N/A");
-				lblServerVersion.setText("N/A");
-				lblServerRevision.setText("N/A");
+				for (Label l : optionCntrls.values()){
+					l.setText("N/A");
+				}
 			}else{
 				toUpdate = server;
 				txtServer.setText(server.getServerUrl());
-				btnSet.setText("Change");
+				btnSet.setText("Re-Set");
+				btnEditServer.setEnabled(true);
+				
+				
 				btnAdd.setEnabled(true);
 				List<?> users= session.createCriteria(ConnectUser.class)
 						.add(Restrictions.eq("server", toUpdate))
@@ -274,59 +316,123 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				tblUsers.setInput(users);
 				tblUsers.getTable().setEnabled(true);
 				
-				ConnectServerStatus status = (ConnectServerStatus) session.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
-				if (status == null){
-					lblLocalChanges.setText("unknown");
-					lblServerVersion.setText("unknown");
-					lblServerRevision.setText("unknown");
-				}else{
-					lblServerVersion.setText( UuidUtils.uuidToString(status.getVersion()));
-					lblServerRevision.setText( status.getServerRevision().toString() );
-					
-					ConnectSyncHistoryRecord  rec = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, SmartDB.getCurrentConservationArea(), ConnectSyncHistoryRecord.Type.UPLOAD);
-					Long currentRevision = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, SmartDB.getCurrentConservationArea());
-					if (rec == null && currentRevision == null){
-						lblLocalChanges.setText("No");
-					}else if (rec == null && currentRevision != null){
-						lblLocalChanges.setText("Yes");
-					}else if (rec != null && currentRevision == null){
-						if (rec.getEndRevision().longValue() != -1){
-							lblLocalChanges.setText("Error");
-						}else{
-							lblLocalChanges.setText("No");
-						}
-					}else if (rec != null && currentRevision != null){
-						if (currentRevision.longValue() > rec.getEndRevision().longValue()){
-							lblLocalChanges.setText("Yes");
-						}else if (currentRevision.longValue() == rec.getEndRevision().longValue()){
-							lblLocalChanges.setText("No");
-						}else{
-							lblLocalChanges.setText("ERROR");
-						}
-					}
-					
+				for (Option o : ConnectServer.Option.values()){
+					String value = ServerOptionLabelProvider.INSTANCE.getValueInDisplayUnits(o, toUpdate);
+					optionCntrls.get(o).setText(value);
 				}
 			}
-			
-			
 		}finally{
 			session.close();
 		}
 	}
 	
-	private void setUrl(){
+	private void setServer(){
 		if (toUpdate != null){
 			//we need to display a warning that all user and replication information will be lost
-			if (!MessageDialog.openQuestion(getShell(), "Connect Server", "Modifying the SMART Connect Server will remove all associated account and replication data from your local database. Are you sure you want to continue?" )){
+			MessageDialog md = new MessageDialog(
+					getShell(), "ReSet Server", null, 
+					"Resetting the SMART Connect Server will delete all current server configuration.  You will no longer be able to sync changes.  Only do this if you want to upload the Conservation Area to a new SMART Connect server.  If you just want to modify this information cancel this dialog and use the Edit button instead.\n\nAre you sure you want to continue?",
+					MessageDialog.WARNING, 
+					new String[]{IDialogConstants.YES_LABEL, IDialogConstants.CANCEL_LABEL}, 1);
+			if (md.open() == 1){
 				return;
 			}
+			//delete all existing server information
+			if (!deleteServerInfo()) return;
 		}
-		
+
+		//get new server information
 		ConnectServerWizard wz = new ConnectServerWizard();
 		WizardDialog wd = new WizardDialog(getShell(), wz);
-		if (wd.open() == Dialog.OK){
-			initControls();
+		wd.open();
+		initControls();
+	}
+	
+	private boolean deleteServerInfo(){
+		//turn off replication
+		//delete all change log items
+		//delete all status records
+		//delete all history records
+		//delete a connect users
+		//delete all server information
+		final boolean[] ret = new boolean[]{true};
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+		pmd.run(true, true, new IRunnableWithProgress() {
+			
+			@Override
+			public void run(IProgressMonitor monitor) throws InvocationTargetException,
+					InterruptedException {
+				monitor.beginTask("Deleting Existing Server Configuration", 7);
+				
+				Session s = HibernateManager.openSession();
+				try{
+					s.beginTransaction();
+					
+					monitor.subTask("Disable replication");
+					DerbyReplicationManager.INSTANCE.disableReplication(s);
+					monitor.worked(1);
+					if (monitor.isCanceled()) return;
+					
+					ConservationArea ca = SmartDB.getCurrentConservationArea();
+					monitor.subTask("Removing change log items");
+					ChangeLogTableManager.INSTANCE.deleteAll(s, ca);
+					monitor.worked(1);
+					if (monitor.isCanceled()) return;
+					
+					monitor.subTask("Removing sync history records");
+					SyncHistoryManager.INSTANCE.deleteAll(s, ca);
+					monitor.worked(1);
+					if (monitor.isCanceled()) return;
+					
+					monitor.subTask("Removing status record");
+					ConnectServerStatus status = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
+					if (status != null){
+						s.delete(status);
+					}
+					monitor.worked(1);
+					if (monitor.isCanceled()) return;
+					
+					monitor.subTask("Removing accounts");
+					Query q = s.createQuery("DELETE FROM ConnectUser WHERE server = :server");
+					q.setParameter("server", toUpdate);
+					q.executeUpdate();
+					monitor.worked(1);
+					if (monitor.isCanceled()) return;
+					
+					monitor.subTask("Removing server");
+					s.delete(s.get(toUpdate.getClass(), toUpdate.getUuid()));
+					
+					monitor.worked(1);
+					if (monitor.isCanceled()) return;
+					
+					s.getTransaction().commit();
+					toUpdate = null;
+				}catch (Exception ex){
+					ret[0] = false;
+					ConnectPlugIn.displayLog("Could not remove current server configurations." + "\n\n" + ex.getMessage(), ex);				
+				}finally{
+					if (s.getTransaction().isActive()){
+						s.getTransaction().rollback();
+					}
+					s.close();
+				}
+					
+				monitor.done();
+			}
+		});
+		}catch(Exception ex){
+			ConnectPlugIn.displayLog("Could not remove current server configurations." + "\n\n" + ex.getMessage(), ex);
+			ret[0] = false;
 		}
+		return ret[0];
+	}
+	private void editServer(){
+		if (toUpdate == null) return;
+		
+		EditConnectServerInfoDialog dialog = new EditConnectServerInfoDialog(getShell(),toUpdate);
+		dialog.open();
+		initControls();
 	}
 	
 	@Override

@@ -34,6 +34,7 @@ import java.nio.file.StandardOpenOption;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Semaphore;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
@@ -79,7 +80,13 @@ public class SmartConnect implements AutoCloseable {
 	private String username;
 	private String password;
 	private ConnectServer server;
-	private ResteasyClient client; 
+	private ResteasyClient client;
+
+	/**
+	 * Lock to ensure only one upload or download change log 
+	 * task is being performed at any given time.
+	 */
+	public static final Semaphore UPLOAD_LOCK = new Semaphore(1); 
 	
 	/**
 	 * 

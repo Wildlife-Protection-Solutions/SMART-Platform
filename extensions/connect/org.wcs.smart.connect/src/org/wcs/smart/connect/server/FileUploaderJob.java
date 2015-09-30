@@ -63,31 +63,37 @@ public abstract class FileUploaderJob extends Job {
 	protected void uploadFile( IProgressMonitor monitor) throws Exception{
 		// get current status
 		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
-		if (checkServerStatus(serverStatus, monitor)){
-			return ;
-		}
-		int cnt = 0;
-		long waitTime = connect.getServer().getRetryWaitTime();
-		while(cnt < connect.getServer().getMaxRetryUpload()){
-			//upload file
-			try{
-				cnt++;
-				connect.uploadFile(url, file, 
-						serverStatus.getCurrentSize());
-			}catch (Exception ex){
-				ConnectPlugIn.log(ex.getMessage(), ex);
-			}
-			
-			serverStatus = connect.getWorkItemStatus(url);
+		try{
 			if (checkServerStatus(serverStatus, monitor)){
 				return ;
 			}
-			
-			Thread.sleep(waitTime);
-			waitTime = waitTime * 2;
+			int cnt = 0;
+			long waitTime = connect.getServer().getRetryWaitTime();
+			while(cnt < connect.getServer().getMaxRetryUpload()){
+				//upload file
+				try{
+					cnt++;
+					connect.uploadFile(url, file, 
+							serverStatus.getCurrentSize());
+				}catch (Exception ex){
+					ConnectPlugIn.log(ex.getMessage(), ex);
+				}
+				
+				serverStatus = connect.getWorkItemStatus(url);
+				if (checkServerStatus(serverStatus, monitor)){
+					return ;
+				}
+				
+				Thread.sleep(waitTime);
+				waitTime = waitTime * 2;
+			}
+			//if we are here we have tried max_retry times and the file has still not been uploaded
+			throw new Exception(MessageFormat.format("Upload reached max tries of {0}.  Please validate server connection and try again.", connect.getServer().getMaxRetryUpload()));
+		}catch(Exception ex){
+			serverStatus.setMessage(ex.getMessage());
+			onError(serverStatus);
+			throw ex;
 		}
-		//if we are here we have tried max_retry times and the file has still not been uploaded
-		throw new Exception(MessageFormat.format("Upload reached max tries of {0}.  Please validate server connection and try again.", connect.getServer().getMaxRetryUpload()));
 	}
 	
 	
@@ -122,7 +128,9 @@ public abstract class FileUploaderJob extends Job {
 			//upload was successful but we need to wait for processing
 			if (!waitProcessing(monitor)){
 				//we waited 5 minutes and we do not know how to proceed
-				throw new Exception("Server unable to process file after 5 minutes.  Check status on SMART Connect");
+				throw new Exception(
+						MessageFormat.format(
+								"Server unable to process file after {0} minutes.  Check status on SMART Connect", connect.getServer().getWaitProcessingTime() / (1000 *60.0) ));
 			}
 			return true;
 			
@@ -146,7 +154,7 @@ public abstract class FileUploaderJob extends Job {
 		Long startTime = System.nanoTime();
 		Long currentTime = System.nanoTime();
 		long waitTime = connect.getServer().getRetryWaitTime();
-		while( (currentTime - startTime) < connect.getServer().getWaitProcessingTime()){
+		while( (currentTime - startTime)  < connect.getServer().getWaitProcessingTime() * 1000000){
 			Thread.sleep(waitTime);
 			WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 			

@@ -23,7 +23,6 @@ package org.wcs.smart.connect.server.replication;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.util.concurrent.Semaphore;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -38,6 +37,7 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -49,12 +49,6 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class UploadChangeLogEngine {
 
-	/**
-	 * Lock to ensure only one upload or download change log 
-	 * task is being performed at any given time.
-	 */
-	public static final Semaphore UPLOAD_LOCK = new Semaphore(1);
-	
 	private SmartConnect connect;
 	
 	public UploadChangeLogEngine(SmartConnect connect){
@@ -69,7 +63,7 @@ public class UploadChangeLogEngine {
 	 * @throws Exception
 	 */
 	public void createUpload(IProgressMonitor monitor) throws Exception{
-		if (!UPLOAD_LOCK.tryAcquire()){
+		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -81,6 +75,15 @@ public class UploadChangeLogEngine {
 		}
 		
 		try{
+			Session session = HibernateManager.openSession();
+			try{
+				if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
+					throw new Exception("Replication not enabled.  Cannot upload changes from server.");
+				}
+			}finally{
+				session.close();
+			}
+
 			monitor.beginTask("Creating sync package", 3);
 			//check to ensure 
 			ConservationArea ca = SmartDB.getCurrentConservationArea();
@@ -132,18 +135,13 @@ public class UploadChangeLogEngine {
 					
 					//throw exception if necessary
 					if(current.getStartRevision().longValue() == packer.getLastRevision()){
+						current.setStatus(Status.NODATA);
+						saveRecord(current);	
 						throw new NothingToUpdateException("Conservation up to date. Nothing to sync");
 					}
 					
 					//save record
-					Session s = HibernateManager.openSession();
-					try{
-						s.beginTransaction();
-						s.saveOrUpdate(current);
-						s.getTransaction().commit();
-					}finally{
-						s.close();
-					}
+					saveRecord(current);
 
 				}
 			}
@@ -155,13 +153,24 @@ public class UploadChangeLogEngine {
 			upload.addJobChangeListener(new JobChangeAdapter() {
 				@Override
 				public void done(IJobChangeEvent event) {
-					UPLOAD_LOCK.release();
+					SmartConnect.UPLOAD_LOCK.release();
 				}
 			});
 			upload.schedule();
 		}catch (Exception ex){
-			UPLOAD_LOCK.release();
+			SmartConnect.UPLOAD_LOCK.release();
 			throw ex;
+		}
+	}
+	
+	private void saveRecord(ConnectSyncHistoryRecord current){
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			s.saveOrUpdate(current);
+			s.getTransaction().commit();
+		}finally{
+			s.close();
 		}
 	}
 }
