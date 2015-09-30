@@ -27,10 +27,18 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import jdk.nashorn.internal.ir.annotations.Ignore;
+
+import org.hibernate.annotations.Generated;
+import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.Type;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Simple Connect conservation area info object.
@@ -52,6 +60,7 @@ public class ConservationAreaInfo {
 	private String label;
 	private UUID caUuid;
 	private Status status;
+	private int lockKey;
 	
 	public ConservationAreaInfo(){
 	}
@@ -95,5 +104,20 @@ public class ConservationAreaInfo {
 	}
 	public void setStatus(Status status){
 		this.status = status;
+	}
+	
+	/**
+	 * 
+	 * @return the key used to lock the conservation area
+	 */
+	@Column(name="lock_key")
+	@Generated(GenerationTime.INSERT)
+	@JsonIgnore
+	public int getLockKey(){
+		return this.lockKey;
+	}
+	
+	protected void setLockKey(int key){
+		this.lockKey = key;
 	}
 }

@@ -2,10 +2,10 @@
   <Resource name="jdbc/smart"
             auth="Container"
             type="javax.sql.DataSource"
-            username="postgres"
-            password="sql"
+            username="smart"
+            password=""
             driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://localhost:5432/connect"
+            url="jdbc:postgresql://turtle:9944/connect"
             maxActive="20"
             maxIdle="10"
             factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"/>
@@ -22,5 +22,7 @@
   	
   	<!-- environment variables -->
   	<!-- SMART Filestore Location -->
-  	<Environment name="filestorelocation" value="C:\\temp\\connect_datastore\\" type="java.lang.String" override="false"/>
+  	<Environment name="filestorelocation" value="C:\data\SMART\Connect\datastore" type="java.lang.String" override="false"/>
+  	
+  	<Environment name="number_background_threads" value="4" type="java.lang.Integer" override="false"/>
 </Context>

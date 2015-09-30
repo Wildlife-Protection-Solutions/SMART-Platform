@@ -23,6 +23,7 @@ package org.wcs.smart.connect.hibernate;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContextEvent;
@@ -34,6 +35,7 @@ import org.hibernate.annotations.common.reflection.MetadataProviderInjector;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
+import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
@@ -113,7 +115,13 @@ public class HibernateSessionFactoryListener implements ServletContextListener{
 		logger.info("Hibernate SessionFactory Configured successfully"); //$NON-NLS-1$
 		
 		//start executor for running background jobs
-		ExecutorService scheduler = Executors.newFixedThreadPool(4);
+		int numthreads = 1;
+		try{
+			numthreads = (Integer) EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.NUM_BACK_THREADS);
+		}catch(Exception ex){
+			logger.log(Level.WARNING, "Could not read variable " + EnvironmentVariables.Variable.NUM_BACK_THREADS.key + " from context.xml.", ex);
+		}
+		ExecutorService scheduler = Executors.newFixedThreadPool(numthreads);
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, scheduler);
 	}
 

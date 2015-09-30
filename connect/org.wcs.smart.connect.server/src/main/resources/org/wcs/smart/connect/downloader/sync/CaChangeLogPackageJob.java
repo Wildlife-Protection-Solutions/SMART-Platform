@@ -41,7 +41,7 @@ public class CaChangeLogPackageJob implements Runnable {
 		
 		try{
 			//lock database for conservation area
-			LockManager.INSTANCE.lockDatabase(s, item.getConservationAreaInfo().getUuid());
+			LockManager.INSTANCE.lockDatabase(s, item.getConservationAreaInfo());
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Could not lock database to create conservation change log package. " + item.getUuid());
 			
@@ -81,7 +81,7 @@ public class CaChangeLogPackageJob implements Runnable {
 		}finally{
 			
 			try{
-				LockManager.INSTANCE.releaseDatabase(s, item.getConservationAreaInfo().getUuid());
+				LockManager.INSTANCE.releaseDatabase(s, item.getConservationAreaInfo());
 			}catch (Exception ex){
 				logger.log(Level.SEVERE, "Could not release database lock after creating conservation area download package. " + item.getUuid());
 			}

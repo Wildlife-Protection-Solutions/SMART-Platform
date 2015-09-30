@@ -25,11 +25,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.commons.io.FileUtils;
+import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.util.UuidUtils;
 
@@ -54,7 +53,7 @@ public enum DataStoreManager {
 	 * @throws NamingException 
 	 */
 	public void initDatastore() throws NamingException{
-		datastoreLocation = (String)((Context)new InitialContext().lookup("java:comp/env")).lookup("filestorelocation");
+		datastoreLocation = (String)EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.DATASTORE_LOCATION);
 	}
 	
 	/**

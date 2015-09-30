@@ -58,6 +58,8 @@ CREATE TABLE connect.ca_info
 	version uuid,
 	label varchar not null,
 	status varchar not null,
+	lock_key serial not null,
+	unique(lock_key);
 	PRIMARY KEY (ca_uuid)
 ) WITHOUT OIDS;
 

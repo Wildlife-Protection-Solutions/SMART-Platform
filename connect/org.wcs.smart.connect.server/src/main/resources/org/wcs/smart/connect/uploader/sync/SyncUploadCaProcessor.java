@@ -27,7 +27,7 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 	@Override
 	public void processItem(WorkItem item, Session session) {
 		try{
-			LockManager.INSTANCE.lockDatabase(session, item.getConservationAreaInfo().getUuid());
+			LockManager.INSTANCE.lockDatabase(session, item.getConservationAreaInfo());
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Could not lock database to apply upload changelog. " + item.getUuid());
 			
@@ -75,7 +75,7 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 			}
 		}finally{
 			try{
-				LockManager.INSTANCE.releaseDatabase(session, item.getConservationAreaInfo().getUuid());
+				LockManager.INSTANCE.releaseDatabase(session, item.getConservationAreaInfo());
 			}catch (Exception ex){
 				logger.log(Level.SEVERE, "Could not release database lock after applying upload changes. " + item.getUuid());
 			}
