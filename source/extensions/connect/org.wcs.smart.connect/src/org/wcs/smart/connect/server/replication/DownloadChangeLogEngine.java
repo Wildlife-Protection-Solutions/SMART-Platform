@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
+import org.hibernate.Hibernate;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -75,10 +76,11 @@ public class DownloadChangeLogEngine {
 	 * @throws Exception
 	 */
 	public boolean downloadInstall(IProgressMonitor monitor) throws Exception{
+
 		monitor.beginTask("Download && Install Data Updates", 4);
 		
 		//acquire lock
-		if (!UploadChangeLogEngine.UPLOAD_LOCK.tryAcquire()){
+		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -90,10 +92,21 @@ public class DownloadChangeLogEngine {
 			return false;
 		}
 
-		//create sync history record for database
-		ConnectSyncHistoryRecord record = SyncHistoryManager.INSTANCE.create(connect.getServer().getConservationArea(), connect.getServer(), ConnectSyncHistoryRecord.Type.DOWNLOAD);
-		
+
+		ConnectSyncHistoryRecord record = null;
 		try{
+			Session session = HibernateManager.openSession();
+			try{
+				if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
+					throw new Exception("Replication not enabled.  Cannot download changes from server.");
+				}
+			}finally{
+				session.close();
+			}
+
+			//create sync history record for database
+			record = SyncHistoryManager.INSTANCE.create(connect.getServer().getConservationArea(), connect.getServer(), ConnectSyncHistoryRecord.Type.DOWNLOAD);
+			
 			/* the ca info */
 			ConservationArea ca = SmartDB.getCurrentConservationArea();
 			if (SmartDB.isMultipleAnalysis()) throw new Exception("Cross-ca analysis can not be syncronized with server.");
@@ -103,7 +116,7 @@ public class DownloadChangeLogEngine {
 			try{
 				s.beginTransaction();
 				serverStatus = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
-				s.save(record);
+				s.update(record);
 				s.getTransaction().commit();
 			}finally{
 				s.close();
@@ -155,8 +168,9 @@ public class DownloadChangeLogEngine {
 				monitor.subTask("Applying Updates");
 				if (monitor.isCanceled()) return false;
 				applyFile(p, serverStatus);
+				record.setStatus(Status.DONE);
 			}catch (NothingToUpdateException ex){
-				
+				record.setStatus(Status.NODATA);
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
 
@@ -179,7 +193,6 @@ public class DownloadChangeLogEngine {
 				Files.delete(p);
 			}
 
-			record.setStatus(Status.DONE);
 			s = HibernateManager.openSession();
 			try{
 				s.beginTransaction();
@@ -193,24 +206,26 @@ public class DownloadChangeLogEngine {
 		}catch (Exception ex){
 			//some error
 			try{
-				Session s = HibernateManager.openSession();
-				try{
-					s.beginTransaction();
-					record.setStatus(Status.ERROR);
-					s.getTransaction().commit();
-				}finally{
-					s.close();
+				if (record != null){
+					Session s = HibernateManager.openSession();
+					try{
+						s.beginTransaction();
+						record.setStatus(Status.ERROR);
+						s.getTransaction().commit();
+					}finally{
+						s.close();
+					}
 				}
 			}catch (Exception ex2){
 				ConnectPlugIn.log("Could not set download record status to error: " + ex2.getMessage(), ex2);
 			}
 			throw ex;
 		}finally{
-			UploadChangeLogEngine.UPLOAD_LOCK.release();
+			SmartConnect.UPLOAD_LOCK.release();
 		}
 		return true;
 	}
-	
+
 	/*
 	 * applies change log file
 	 */
@@ -259,6 +274,7 @@ public class DownloadChangeLogEngine {
 				throw new Exception("Invalid server revision (the local server revision is less than or equal to the package server revision).  Cannot apply change log package");
 			}
 			
+			//close all editors
 			Session session = HibernateManager.lockDatabase();
 			try{
 				session.beginTransaction();

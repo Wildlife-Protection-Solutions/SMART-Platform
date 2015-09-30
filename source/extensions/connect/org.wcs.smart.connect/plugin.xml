@@ -150,7 +150,11 @@
       </image>
       <image
             commandId="org.wcs.smart.connect.configuration.show"
-            icon="images/icons/obj16/server.png">
+            icon="images/icons/obj16/server_configure.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.exportca"
+            icon="images/icons/obj16/server_ca_upload.png">
       </image>
    </extension>
 

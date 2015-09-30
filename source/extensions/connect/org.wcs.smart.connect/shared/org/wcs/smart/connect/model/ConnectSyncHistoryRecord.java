@@ -62,7 +62,8 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	public enum Status{
 		ACTIVE,
 		ERROR,
-		DONE
+		DONE,
+		NODATA
 	};
 	
 	private ConservationArea ca;

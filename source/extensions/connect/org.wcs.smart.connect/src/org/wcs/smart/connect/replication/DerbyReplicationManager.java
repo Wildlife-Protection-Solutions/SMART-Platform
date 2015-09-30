@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.connect.ConnectPlugIn;
 
 /**
  * Manager for starting and stopping the derby change logging.
@@ -106,9 +107,13 @@ public enum DerbyReplicationManager {
 				
 				ResultSet rs = connection.createStatement().executeQuery(sql);
 				if (rs.next()){
-					Object x = rs.getObject(1);
-					if (x == null) return false;
-					if (x instanceof Boolean && ((Boolean)x)) return true;
+					try{
+						Boolean x = rs.getBoolean(1);
+						return x;
+					}catch(Exception ex){
+						ConnectPlugIn.log(ex.getMessage(), ex);
+						return false;
+					}
 				}
 				return false;
 			}

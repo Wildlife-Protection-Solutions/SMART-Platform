@@ -83,7 +83,6 @@ public class UploadChangeLogJob extends FileUploaderJob {
 			super.uploadFile(monitor);
 		} catch (Exception e) {
 			ConnectPlugIn.log(e.getMessage(), e);
-			onError(null);
 			return Status.OK_STATUS;
 		}
 		
