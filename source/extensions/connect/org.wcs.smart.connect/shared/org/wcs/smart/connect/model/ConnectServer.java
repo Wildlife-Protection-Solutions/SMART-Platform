@@ -51,7 +51,7 @@ public class ConnectServer extends UuidItem{
 		MAX_RETRY_DOWNLOAD (10),
 		MAX_RETRY_UPLOAD(100),
 		RETY_WAIT_TIME(500),
-		MAX_PROCESSING_WAIT_TIME(5 * 60 * 1000);
+		MAX_PROCESSING_WAIT_TIME(5 * 60 * 1000l);
 		
 		Object defaultValue;
 		

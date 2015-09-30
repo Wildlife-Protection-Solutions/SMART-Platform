@@ -20,12 +20,12 @@ import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
 
 public class DownloadConnectWizard extends ConnectServerWizard implements IPageChangingListener{
 
-	protected CaListPage page3;
+	protected CaListPage page4;
 	
 	public DownloadConnectWizard(){
 		super();
 		setWindowTitle("Download from SMART Connect Server");
-		addPage(page3 = new CaListPage());
+		addPage(page4 = new CaListPage());
 		setNeedsProgressMonitor(true);
 		
 	}
@@ -37,7 +37,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 	
 	@Override
 	public boolean performFinish() {
-		ConservationAreaInfo info = page3.getSelection();
+		ConservationAreaInfo info = page4.getSelection();
 
 		if (info == null) return false;
 		
@@ -81,7 +81,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (event.getCurrentPage() == page3 && event.getTargetPage() == page3){
+		if (event.getCurrentPage() == page3 && event.getTargetPage() == page4){
 			final String url = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getServerName();
 			final String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 			final String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
@@ -94,7 +94,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 							InterruptedException {
 						monitor.beginTask("Loading Conservation Areas", 2);
 						monitor.worked(1);
-						page3.initList(url, user, pass);
+						page4.initList(url, user, pass);
 						monitor.done();
 					}
 				});
@@ -103,8 +103,8 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 			}
 			
 		}
-		if (event.getCurrentPage() == page3 && event.getTargetPage() == page3){
-			page3.clearList();
+		if (event.getCurrentPage() == page4 && event.getTargetPage() == page3){
+			page4.clearList();
 		}
 	}
 }
