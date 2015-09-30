@@ -23,10 +23,14 @@ package org.wcs.smart.connect.uploader.ca;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -314,9 +318,7 @@ public class PostgresqlCaLoader {
 					if (colsToModified.size() > 0){
 						fixHexData(dataFile, colsToModified);
 					}
-					
-					
-					copy.copyIn(query.toString(), new FileReader(dataFile));
+					copy.copyIn(query.toString(), new InputStreamReader(new FileInputStream(dataFile), "UTF-8"));
 				}catch(Exception ex){
 					throw new SQLException(ex);
 				}

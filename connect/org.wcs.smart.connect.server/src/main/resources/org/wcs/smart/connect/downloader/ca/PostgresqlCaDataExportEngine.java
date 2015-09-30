@@ -23,8 +23,12 @@ package org.wcs.smart.connect.downloader.ca;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -233,7 +237,9 @@ public class PostgresqlCaDataExportEngine implements ICaDataExportEngine{
 				
 				String sql = ("COPY (" + newQuery + ") TO STDOUT WITH (FORMAT CSV, ENCODING 'utf-8', HEADER false, QUOTE '\"', FORCE_QUOTE *)");
 				CopyManager copy = new CopyManager((BaseConnection) ((javax.sql.PooledConnection)connection).getConnection());
-				try(OutputStream out = Files.newOutputStream(outputFile)){
+				
+				
+				try(BufferedWriter out = Files.newBufferedWriter(outputFile, Charset.forName("UTF-8"))){
 					copy.copyOut(sql, out);
 				}catch(IOException ex){
 					throw new SQLException(ex);
