@@ -41,11 +41,11 @@ public enum MetadataPackager {
 	
 	INSTANCE;
 	
-	public static final String CA_UUID_KEY = "conservationareauuid";
-	public static final String VERSION_KEY = "version";
-	public static final String CLIENT_REVISION_KEY = "client_revision";
-	public static final String SERVER_REVISION_KEY = "server_revision";
-	public static final String PLUGIN_KEY_PREFIX = "pluginid.";
+	public static final String CA_UUID_KEY = "conservationareauuid"; //$NON-NLS-1$
+	public static final String VERSION_KEY = "version"; //$NON-NLS-1$
+	public static final String CLIENT_REVISION_KEY = "client_revision"; //$NON-NLS-1$
+	public static final String SERVER_REVISION_KEY = "server_revision"; //$NON-NLS-1$
+	public static final String PLUGIN_KEY_PREFIX = "pluginid."; //$NON-NLS-1$
 	
 	public void writeMetadata(Path output, PackageMetadata metadata) throws Exception{
 		Properties prop = new Properties();
@@ -60,7 +60,7 @@ public enum MetadataPackager {
 		}
 		
 		try(OutputStream out = Files.newOutputStream(output)){
-			prop.store(out, "");
+			prop.store(out, ""); //$NON-NLS-1$
 		}
 	}
 	

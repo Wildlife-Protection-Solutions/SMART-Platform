@@ -36,7 +36,6 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.server.UploadCaEngine;
-import org.wcs.smart.connect.server.UploadCaJob;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;

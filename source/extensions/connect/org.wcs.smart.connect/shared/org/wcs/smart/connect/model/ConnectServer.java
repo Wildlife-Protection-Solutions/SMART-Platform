@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.connect.model;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -44,6 +47,7 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.connect_server")
 public class ConnectServer extends UuidItem{
 
+	private static final String SSH_CERTIFICATE_FILENAME = "certificate.crt"; //$NON-NLS-1$
 	/*
 	 * server connection options
 	 */
@@ -68,8 +72,9 @@ public class ConnectServer extends UuidItem{
 	private String serverUrl;
 	private String serverOptions;
 	private HashMap<Option, String> options;
+	private String certificate;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
 		return ca;
@@ -97,6 +102,47 @@ public class ConnectServer extends UuidItem{
 		this.serverOptions = options;
 	}
 
+	@Column(name="certificate")
+	public String getCertificateFileName(){
+		return this.certificate;
+	}
+	public void setCertificateFileName(String certificate){
+		this.certificate = certificate;
+	}
+	
+	/**
+	 * Copies the certificate file into the filestore, replacing any
+	 * existing certificate files; then updates the files name
+	 * 
+	 * @param newFile the new file location or null if we should delete
+	 * the existing certificate
+	 */
+	@Transient
+	public void setCertificateFile(Path newFile) throws Exception{
+		if (getCertificateFileName() != null){
+			//delete existing file
+			Path p = Paths.get(getConservationArea().getFileDataStoreLocation(), getCertificateFileName());
+			Files.deleteIfExists(p);
+		}
+		
+		if (newFile == null){
+			setCertificateFileName(null);
+			return;
+		}
+		
+		Path copyToFile = Paths.get(getConservationArea().getFileDataStoreLocation(),
+				ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR, SSH_CERTIFICATE_FILENAME);
+		
+		Path copyFrom = newFile;
+
+		Files.createDirectories(copyToFile.getParent());
+		if (Files.exists(copyToFile)){
+			//old certificate; delete me
+			Files.delete(copyToFile);
+		}
+		Files.copy(copyFrom, copyToFile);
+		setCertificateFileName(Paths.get(getConservationArea().getFileDataStoreLocation()).relativize(copyToFile).toString());
+	}
 	@Transient
 	public void setOption(Option op, String value){
 		if (options == null) parseOptions();
@@ -113,7 +159,7 @@ public class ConnectServer extends UuidItem{
 	private String encodeOptions(){
 		StringBuilder str = new StringBuilder();
 		for (Entry<Option,String> item : options.entrySet()){
-			str.append(item.getKey().name() + "=" + item.getValue() + "|");
+			str.append(item.getKey().name() + "=" + item.getValue() + "|"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return str.toString();
 	}
@@ -122,9 +168,9 @@ public class ConnectServer extends UuidItem{
 	private void parseOptions(){
 		options = new HashMap<ConnectServer.Option, String>();
 		if (getServerOptions() == null) return;
-		String[] parts = getServerOptions().split("\\|");
+		String[] parts = getServerOptions().split("\\|"); //$NON-NLS-1$
 		for(String part : parts){
-			String[] bits = part.split("=");
+			String[] bits = part.split("="); //$NON-NLS-1$
 			for (Option o : Option.values()){
 				if (o.name().equals(bits[0])){
 					options.put(o, bits[1]);

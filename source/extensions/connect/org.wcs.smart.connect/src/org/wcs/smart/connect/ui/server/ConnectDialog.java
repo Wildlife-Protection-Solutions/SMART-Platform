@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
@@ -156,9 +157,14 @@ public class ConnectDialog extends TitleAreaDialog {
 		}
 		
 		try(SmartConnect connect = new SmartConnect(cs, user, pass)){
-			String error = connect.validateUser();
-			if (error != null){
-				MessageDialog.openError(getShell(), "Error", error);
+			try{
+				String error = connect.validateUser();
+				if (error != null){
+					MessageDialog.openError(getShell(), "Error", error);
+					return;
+				}
+			}catch (Exception ex){
+				ConnectPlugIn.displayLog(ex.getMessage(), ex);
 				return;
 			}
 		}

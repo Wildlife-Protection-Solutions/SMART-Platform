@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,12 +31,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
@@ -101,9 +111,56 @@ public class SmartConnect implements AutoCloseable {
 	}
 	
 	private void createClient(){
-		client = new ResteasyClientBuilder().build();
-		client.register(new AddAuthHeadersRequestFilter(username, password));
+
+		// load the keystore that includes self-signed cert as a "trusted" entry
+		try{
+			
+			X509TrustManager trustManager = getTrustManager(); 
+			SSLContext ctx = SSLContext.getInstance("TLS"); //$NON-NLS-1$
+			ctx.init(null, new TrustManager[]{trustManager}, null);
+		
+			client = new ResteasyClientBuilder()
+				.sslContext(ctx)
+				.build();
+		
+			client.register(new AddAuthHeadersRequestFilter(username, password));
+		}catch (Exception ex){
+			throw new RuntimeException(ex);
+		}
 	}
+	
+	private X509TrustManager getTrustManager() throws Exception{
+		//get default jvm trust manager
+		if (server.getCertificateFileName() == null){
+			//use the default jvm trust manager
+			TrustManagerFactory factory = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+			factory.init((KeyStore)null);
+			for (TrustManager t : factory.getTrustManagers()){
+				if (t instanceof X509TrustManager){
+					return (X509TrustManager) t;
+				}
+			}
+			throw new RuntimeException("Could not find SSH TrustFactory");
+		}
+
+		//build a trust manager using the locally provided certificate
+		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+		keyStore.load(null, null);
+		Path certpath = Paths.get(server.getConservationArea().getFileDataStoreLocation(), server.getCertificateFileName());
+		try(InputStream is = new BufferedInputStream(Files.newInputStream(certpath))){
+			Certificate cr = CertificateFactory.getInstance("X.509").generateCertificate(is);
+			keyStore.setCertificateEntry("smart-" + server.getConservationArea().getUuid().toString(), cr);
+		}
+		TrustManagerFactory factory = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		factory.init(keyStore);
+		for (TrustManager t : factory.getTrustManagers()){
+			if (t instanceof X509TrustManager){
+				return (X509TrustManager) t;
+			}
+		}
+		throw new RuntimeException("Could not find SSH TrustFactory for self signed certificate");
+	}
+	
 	
 	public ConnectServer getServer(){
 		return this.server;
@@ -441,19 +498,18 @@ public class SmartConnect implements AutoCloseable {
 	}
 
 	private String processException (Throwable ex){
+		String msg = null;
 		if (ex instanceof NotFoundException){
-			String msg = MessageFormat.format("Could not connect to ({0}).", new Object[]{server.getServerUrl()});
-			ConnectPlugIn.log(msg, ex);
-			return msg;
+			msg = MessageFormat.format("Could not connect to ({0}).", new Object[]{server.getServerUrl()});
 		}else if (ex instanceof NotAuthorizedException){
-			String msg = "Invalid SMART Connect username or password.";
-			ConnectPlugIn.log(msg, ex);
-			return msg;
+			msg = "Invalid SMART Connect username or password.";
+		}else if (ex.getCause() instanceof javax.net.ssl.SSLHandshakeException){
+			msg = "Could not connect to server: " + ex.getCause().getMessage();
 		}else{
-			String msg = "Could not connect to server: " + ex.getMessage();
-			ConnectPlugIn.log(msg, ex);
-			return msg;
+			msg = "Could not connect to server: " + ex.getMessage();
 		}
+		ConnectPlugIn.log(msg, ex);
+		return msg;
 	}
 	
 	/**

@@ -168,7 +168,7 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	}
 	@Transient
 	public String getChangeLogZipFile(){
-		return getChangeLogFilePrefix() + ".changelog.zip";
+		return getChangeLogFilePrefix() + ".changelog.zip"; //$NON-NLS-1$
 	}
 	@Transient
 	public String getChangeLogFile(){

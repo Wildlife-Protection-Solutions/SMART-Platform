@@ -21,12 +21,18 @@
  */
 package org.wcs.smart.connect;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
@@ -73,6 +79,11 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		q.setParameter("ca", ca); //$NON-NLS-1$
 		q.executeUpdate();
 		
+		//delete files from file store
+		Path fs = Paths.get(ca.getFileDataStoreLocation(), ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
+		if (Files.exists(fs)){
+			FileUtils.forceDelete(fs.toFile());
+		}
 	}
 
 }
