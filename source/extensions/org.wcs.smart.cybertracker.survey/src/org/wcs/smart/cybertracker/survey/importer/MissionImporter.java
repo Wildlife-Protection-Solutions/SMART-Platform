@@ -55,6 +55,7 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
@@ -114,12 +115,22 @@ public class MissionImporter extends AbstractSmartImporter {
 					return null;
 				}
 			}
+			
+			//import mission properties
+			for (MissionPropertyValue mpv : ctSurvey.getMissionProperties()) {
+				mpv.setMission(mission);
+				mission.getMissionPropertyValues().add(mpv);
+			}
+			
+			//import observations
 			List<S> sList = SightsMultiObsUtil.convertMultiObs(ctSurvey);
 			for (S s : sList) {
 				MissionDay mday = findOrAddMissionDay(mission, s);
 				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
 				addObservations(wp, s, ctSurvey.getElementsMap(), session);
 			}
+
+			//TODO: import tracks
 
 			if (!displayWarnings(ctSurvey))
 				return null;

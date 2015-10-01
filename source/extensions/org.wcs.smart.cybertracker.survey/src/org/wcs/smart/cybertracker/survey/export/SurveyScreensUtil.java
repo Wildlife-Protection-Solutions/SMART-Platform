@@ -71,6 +71,8 @@ public class SurveyScreensUtil extends ScreensUtil {
 	
 	public static final String RESULT_MISSION_SAMPLING_UNIT = "#SamplingUnit"; //$NON-NLS-1$
 
+	public static final String RESULT_MISSION_PROPETY_PREFIX = "#MP#"; //$NON-NLS-1$
+	
 	public static final String DATATYPE_SURVEY = "survey"; //$NON-NLS-1$
 
 	protected SurveyScreensUtil(CyberTrackerUtil ctUtil) {
@@ -126,7 +128,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		for (MissionProperty missionProperty : missionProperties) {
 			MissionAttribute missionAttribute = missionProperty.getAttribute();
 			String tag0 = missionAttribute.getKeyId();
-			String resultElName = "MP#"+missionAttribute.getKeyId(); //$NON-NLS-1$
+			String resultElName = RESULT_MISSION_PROPETY_PREFIX + missionAttribute.getKeyId();
 			if (missionAttribute.getType() != null) {
 				switch (missionAttribute.getType()) {
 				case LIST:
