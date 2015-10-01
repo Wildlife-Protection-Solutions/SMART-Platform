@@ -3,6 +3,7 @@ CREATE TABLE smart.connect_server(
 	ca_uuid char(16) for bit data,
 	url varchar(2064),
 	options varchar(32600),
+	certificate varchar(32000),
 	PRIMARY KEY (uuid)
 );
 
@@ -18,7 +19,7 @@ CREATE TABLE smart.connect_account(
 );
 
 ALTER TABLE smart.connect_account ADD CONSTRAINT connect_employee_uuid_fk foreign key (employee_uuid) REFERENCES smart.employee (uuid) ON UPDATE restrict ON DELETE restrict;
-
+ALTER TABLE smart.connect_account ADD CONSTRAINT connect_connect_uuid_fk foreign key (connect_uuid) REFERENCES smart.connect_server (uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE
 
 CREATE TABLE smart.connect_status(
 	ca_uuid char(16) for bit data not null,

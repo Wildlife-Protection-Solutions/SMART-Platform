@@ -94,7 +94,7 @@ public class AddConnectJob extends Job {
 	
 	private void createTables(Session session){
 		final String[] sql = new String[]{
-			"CREATE TABLE SMART.CONNECT_SERVER(uuid char(16) for bit data not null, ca_uuid char(16) for bit data, url varchar(2064), options varchar(32600), PRIMARY KEY (uuid))",
+			"CREATE TABLE SMART.CONNECT_SERVER(uuid char(16) for bit data not null, ca_uuid char(16) for bit data, url varchar(2064), options varchar(32600), certificate varchar(32000), PRIMARY KEY (uuid))",
 			"ALTER TABLE smart.connect_server ADD CONSTRAINT server_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",
 			"CREATE TABLE smart.connect_account( employee_uuid char(16) for bit data not null, connect_uuid char(16) for bit data not null, connect_user varchar(32), connect_pass varchar(60), primary key(employee_uuid, connect_uuid))",
 			"ALTER TABLE smart.connect_account ADD CONSTRAINT connect_employee_uuid_fk foreign key (employee_uuid) REFERENCES smart.employee (uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",

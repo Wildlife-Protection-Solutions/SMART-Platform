@@ -96,10 +96,22 @@
       <handler
             class="org.wcs.smart.connect.ui.server.UploadChangeLogHandler$UploadChangeLogHandlerWrapper"
             commandId="org.wcs.smart.connect.server.changelog.up">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.connect.replication.isEnabled"
+                  value="true">
+            </test>
+         </enabledWhen>
       </handler>
       <handler
             class="org.wcs.smart.connect.ui.server.DownloadChangeLogHandler$DownloadChangeLogHandlerWrapper"
             commandId="org.wcs.smart.connect.server.changelog.down">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.connect.replication.isEnabled"
+                  value="true">
+            </test>
+         </enabledWhen>
       </handler>
    </extension>
    <extension
@@ -156,6 +168,16 @@
             commandId="org.wcs.smart.connect.server.exportca"
             icon="images/icons/obj16/server_ca_upload.png">
       </image>
+   </extension>
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.wcs.smart.connect.replication.ReplicationEnabledPropertyTester"
+            id="org.wcs.smart.connect.replication"
+            namespace="org.wcs.smart.connect.replication"
+            properties="isEnabled"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 
 </plugin>

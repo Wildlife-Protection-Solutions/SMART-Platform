@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.ui.server.configure;
 
+import java.nio.file.Paths;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
 import org.hibernate.Session;
@@ -58,6 +60,7 @@ public class ConnectServerWizard extends Wizard {
 		String url = page1.getServerName();
 		String username = page3.getUsername();
 		String password = page3.getPassword();
+		String certificateFile = page1.getCertificateFile();
 		
 		String error = null;
 		
@@ -67,11 +70,21 @@ public class ConnectServerWizard extends Wizard {
 		server.initalizeOptions();
 		page2.updateServer(server);
 		
+		if (!certificateFile.trim().isEmpty()){
+			try{
+				server.setCertificateFile(Paths.get(certificateFile));
+			}catch (Exception ex){
+				ConnectPlugIn.displayLog("Could not copy certificate file to filestore." + "\n\n" + ex.getMessage(), ex);
+				return false;
+			}
+		}
+		
 		try(SmartConnect cs = new SmartConnect(server, username, password)){
 			error = cs.validateUser();
 		}
 		
 		if (error != null){
+			//TODO on error; remove copied certificate file
 			MessageDialog.openError(getShell(), "Error", error);
 			return false;
 		}

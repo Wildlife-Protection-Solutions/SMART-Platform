@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -54,24 +55,22 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.CaConnectDeleteHandler;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServer.Option;
-import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
-import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
-import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
- * Connect server info dialog.
+ * Connect server info dialog for displaying server details.
+ * 
  */
 public class ConnectServerInfoDialog extends TitleAreaDialog {
 
@@ -375,36 +374,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 					if (monitor.isCanceled()) return;
 					
 					ConservationArea ca = SmartDB.getCurrentConservationArea();
-					monitor.subTask("Removing change log items");
-					ChangeLogTableManager.INSTANCE.deleteAll(s, ca);
-					monitor.worked(1);
-					if (monitor.isCanceled()) return;
-					
-					monitor.subTask("Removing sync history records");
-					SyncHistoryManager.INSTANCE.deleteAll(s, ca);
-					monitor.worked(1);
-					if (monitor.isCanceled()) return;
-					
-					monitor.subTask("Removing status record");
-					ConnectServerStatus status = (ConnectServerStatus) s.get(ConnectServerStatus.class, ca.getUuid());
-					if (status != null){
-						s.delete(status);
-					}
-					monitor.worked(1);
-					if (monitor.isCanceled()) return;
-					
-					monitor.subTask("Removing accounts");
-					Query q = s.createQuery("DELETE FROM ConnectUser WHERE server = :server");
-					q.setParameter("server", toUpdate);
-					q.executeUpdate();
-					monitor.worked(1);
-					if (monitor.isCanceled()) return;
-					
-					monitor.subTask("Removing server");
-					s.delete(s.get(toUpdate.getClass(), toUpdate.getUuid()));
-					
-					monitor.worked(1);
-					if (monitor.isCanceled()) return;
+					(new CaConnectDeleteHandler()).beforeDelete(ca, s, new SubProgressMonitor(monitor, 6));
 					
 					s.getTransaction().commit();
 					toUpdate = null;

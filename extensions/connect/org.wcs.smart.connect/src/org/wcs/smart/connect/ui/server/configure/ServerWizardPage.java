@@ -28,8 +28,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.connect.model.ConnectServer;
 
 /**
  * Wizard page to enter SMART Connect server name.
@@ -41,7 +40,7 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 
 	public static final String NAME = "SERVER";
 	
-	private Text txtServer;
+	private ServerPanel panel;
 	
 	public ServerWizardPage(){
 		super(NAME);
@@ -52,17 +51,10 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 		outer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		outer.setLayout(new GridLayout());
 		
-		Composite inner = new Composite(outer, SWT.NONE);
-		inner.setLayout(new GridLayout(2, false));
-		inner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
-		
-		Label l = new Label(inner, SWT.NONE);
-		l.setText("Server URL:");
-		
-		txtServer = new Text(inner, SWT.BORDER);
-		txtServer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		txtServer.setText("https://localhost:8443/server");
-		txtServer.addModifyListener(this);
+		panel = new ServerPanel(outer);
+		panel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
+		panel.addChangeListener(this);
+		panel.initValues(new ConnectServer());
 		
 		setTitle("SMART Connect Server");
 		setMessage("Enter the URL to the SMART Connect Server.  (example: https://www.smartconnect.org/server/)");
@@ -72,20 +64,26 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 	}
 	
 	public boolean isPageComplete(){
+		setErrorMessage(null);
 		if (!super.isPageComplete()){
 			return false;
 		}
-		return !getServerName().isEmpty();
+		return panel.isValid();
 	}
 	
 	public String getServerName(){
-		return txtServer.getText().trim();
-		
+		return panel.getServerUrl();
+	}
+	
+	public String getCertificateFile(){
+		return panel.getCertificateFile();
 	}
 	
 	@Override
 	public void modifyText(ModifyEvent e) {
-		getWizard().getContainer().updateButtons();
+		if (getWizard().getContainer().getCurrentPage() != null){
+			getWizard().getContainer().updateButtons();
+		}
 	}
 
 }

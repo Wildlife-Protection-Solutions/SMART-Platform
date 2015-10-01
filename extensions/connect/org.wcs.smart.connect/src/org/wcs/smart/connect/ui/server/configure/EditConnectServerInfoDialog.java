@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.connect.ui.server.configure;
 
+import java.nio.file.Paths;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
 import org.eclipse.swt.SWT;
@@ -32,11 +34,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
+
 /**
  * Dialog for modifying connect server account details.
  * 
@@ -45,7 +47,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class EditConnectServerInfoDialog extends TitleAreaDialog{
 
-	private Text url;
+	private ServerPanel serverpnl;
 	private ServerOptionsPanel options;
 	private ConnectServer server;
 	
@@ -60,9 +62,25 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			server.setServerUrl(url.getText());
-			options.updateServer(server);
 			s.saveOrUpdate(server);
+			
+			server.setServerUrl(serverpnl.getServerUrl());
+			
+			if (serverpnl.getCertificateFile() != null){
+				String certificateFile = serverpnl.getCertificateFile();
+				if (certificateFile.trim().isEmpty()){
+					//clear
+					certificateFile = null;
+				}
+				try{
+					server.setCertificateFile(certificateFile == null ?  null : Paths.get(certificateFile));
+				}catch (Exception ex){
+					ConnectPlugIn.displayLog("Could not copy certificate file to filestore." + "\n\n" + ex.getMessage(), ex);
+					return;
+				}
+			}
+			options.updateServer(server);
+			
 			s.getTransaction().commit();
 		}catch (Exception ex){
 			ConnectPlugIn.displayLog("Could not update connect server information." + "\n\n" + ex.getMessage(), ex);
@@ -79,7 +97,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		parent = (Composite) super.createDialogArea(parent);
 		
 		Composite main = new Composite(parent, SWT.NONE);
-		main.setLayout(new GridLayout(2, false));
+		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label l = new Label(main, SWT.NONE);
@@ -92,13 +110,15 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 			}
 		};
 		
-		url = new Text(main, SWT.BORDER);
-		url.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		url.setText(server.getServerUrl());
-		url.addModifyListener(validateListener);
+		serverpnl = new ServerPanel(main);
+		serverpnl.addChangeListener(validateListener);
+		serverpnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		options = new ServerOptionsPanel(parent);
-		options.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 2, 1));
+		options.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 		options.addChangeListener(validateListener);
+		
+		serverpnl.initValues(server);
 		options.initValues(server);
 		
 		setTitle("Update SMART Connect Server Configuration");
@@ -119,15 +139,16 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 			enableOk(false);
 			return;
 		}
-		if (url.getText().trim().isEmpty()){
+		
+		if (!serverpnl.isValid()){
 			enableOk(false);
 			return;
 		}
-		if (!url.getText().trim().startsWith("https://")){
-			setErrorMessage("URL must start with https://");
-			enableOk(false);
-			return;
-		}
+//		if (!url.getText().trim().startsWith("https://")){
+//			setErrorMessage("URL must start with https://");
+//			enableOk(false);
+//			return;
+//		}
 		enableOk(true);
 		
 	}
