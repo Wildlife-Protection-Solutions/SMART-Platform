@@ -1,17 +1,19 @@
 package org.wcs.smart.connect.model;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
 import javax.ws.rs.core.Response;
-
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.MatchMode;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.SimpleExpression;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
@@ -26,9 +28,12 @@ public class AlertFilter {
 	private Date endDateFilter;
 	
 	private String textSearchFilter;
+	private String sortBy;
+	
+	private boolean sortAscending; 
 	
 	
-	public AlertFilter(String levelFilter, String typeUuidFilter, String statusFilter, String caUuidFilter, Date startDateFilter, Date endDateFilter, String textSearchFilter){
+	public AlertFilter(String levelFilter, String typeUuidFilter, String statusFilter, String caUuidFilter, String startDateFilter, String endDateFilter, String textSearchFilter, String sortBy, Boolean sortAscending){
 		//level
 		if(levelFilter != null){
 			this.levelFilter = new ArrayList<Integer>();
@@ -91,11 +96,24 @@ public class AlertFilter {
 				}
 			}
 		}
-
-		this.startDateFilter = startDateFilter;
-		this.endDateFilter = endDateFilter;
 		
+		//date filters
+		if(startDateFilter != null && !startDateFilter.equals("")			
+			&& endDateFilter != null && !endDateFilter.equals("") ){
+			try {		
+				this.startDateFilter = new Date(Long.parseLong(startDateFilter));
+				this.endDateFilter = new Date(Long.parseLong(endDateFilter));
+			} catch (Exception e) {
+				throw new SmartConnectException(Response.Status.BAD_REQUEST + "; Invalid Date format in filters, should be a valid unix-timestamp");
+			}
+		}
+		
+		
+		//Text filter
 		this.textSearchFilter = textSearchFilter;
+		
+		this.sortBy = sortBy;
+		this.sortAscending = sortAscending;
 	}
 	
 	public List<Alert> getAlerts(Session session){
@@ -158,7 +176,12 @@ public class AlertFilter {
 		if(textSearchFilter != null){
 			c.add(Restrictions.or(Restrictions.ilike("userGeneratedId", textSearchFilter, MatchMode.ANYWHERE), Restrictions.like("description", textSearchFilter, MatchMode.ANYWHERE)) );
 		}
-		
+
+		if(sortAscending){
+			c.addOrder(Order.asc(sortBy));
+		}else{
+			c.addOrder(Order.desc(sortBy));
+		}
 		return (List<Alert>)c.list();
 	}
 	

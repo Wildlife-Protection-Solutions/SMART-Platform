@@ -1,8 +1,10 @@
 var ALERT_URL = "../api/connectalert/";
 var FILTER_URL = "../api/connectalertfilterdefault/";
-var interval = 7000; //# of seconds between map refresh on the alert layer
+var interval = 7000; //# of milli-seconds between map refresh on the alert layer,
+					//overridden by the defaults once they load
 var realtime;
 var map;
+var layerControl;  
 
 
 window.onload = function(){
@@ -24,6 +26,8 @@ window.onload = function(){
 		items[i].addEventListener("change", refreshAlerts);
 	}
 	document.getElementById('filterDate').addEventListener("change", checkForCustomDates);
+	document.getElementById('datePickerFrom').addEventListener("change", refreshAlerts);
+	document.getElementById('datePickerTo').addEventListener("change", refreshAlerts);
 
 	
 	
@@ -59,15 +63,12 @@ window.onload = function(){
 	
 	var baseMaps = {
 			"Basemap Off": L.tileLayer(''),
-			"OSM basemap": osm
+			"OSM basemap": osm,
 	};
 	
-	var dataLayers = {
-//			"OSM basemap": osm,
-//			"Events": realtime
+	dataLayers = {
 	};
 	
-//	var activeLayers = [osm, realtime];
 	var activeLayers = [osm];
 
 	//Load all saved, active layers
@@ -80,16 +81,6 @@ window.onload = function(){
 			L.mapbox.accessToken = accesstoken;
 			var layer = L.mapbox.tileLayer(mapboxId)
 			var flayer = L.mapbox.featureLayer(mapboxId)
-			
-			
-			
-			//This way doesn't get features, just the basemap.
-//			var layer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-//			    attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="http://mapbox.com">Mapbox</a>',
-//			    maxZoom: 18,
-//			    id: mapboxId,
-//			    accessToken: accesstoken
-//			});
 
 			//add the new layer to the list of datalayers
 			baseMaps[mapLayers[i][4]] = layer;
@@ -98,12 +89,10 @@ window.onload = function(){
 			
 			//add to layer list so it is active to start with
 			if(mapLayers[i][5] == "true"){
-//				activeLayers.push(layer);
 				activeLayers.push(flayer);
 			}
-		
-			//GIScloud layer type
-		}else if(mapLayers[i][0] == 2){
+
+		}else if(mapLayers[i][0] == 2){	//GIScloud layer type
 
 			var token = mapLayers[i][1];
 		    var layerName =  mapLayers[i][3];
@@ -120,7 +109,27 @@ window.onload = function(){
 				activeLayers.push(giscloud);
 			}
 
+		}else if(mapLayers[i][0] == 3){ //WMS type
+			var token = mapLayers[i][1];
+		    var layerName =  mapLayers[i][3];
+		    
+		    var wmsLayer = L.tileLayer.wms(token, {
+		    	layers: layerName,
+		    	tiled: true,
+		    	format: 'image/png',
+		    	transparent: true,
+		    	maxZoom: 14,
+		        minZoom: 0,
+		        continuousWorld: true
+		    });
+		
+		    dataLayers[mapLayers[i][4]] = wmsLayer;
+			//add to layer list so it is active to start with
+			if(mapLayers[i][5] == "true"){
+				activeLayers.push(wmsLayer);
+			}
 		}
+
 	    
 	}
 
@@ -133,7 +142,8 @@ window.onload = function(){
 	//also it add the realtime layer to map once the map filter defaults are setup.
 	
 	//add layer control to map
-	L.control.layers(baseMaps, dataLayers, {position: 'topleft'}).addTo(map);
+	layerControl = L.control.layers(baseMaps, dataLayers, {position: 'topleft'});
+	layerControl.addTo(map);
 	
 //Map setup complete.
 //--------------------------------------------------	
@@ -154,9 +164,6 @@ window.onload = function(){
 		closeDialog('updateAlertDialog');
 	};
 
-	
-	//draw the alerts table listing all current alerts
-	//TODO - probably need to default this to "last 48 hours" or something once API supports date filters.
 	refreshAlerts();
 	
 }
@@ -373,7 +380,10 @@ function createAlertTable(){
 			msg += "Unauthorized";
 		}else if (this.status == 404){
 			msg += "Invalid URL, URL not Found";
+		}else if (this.status == 500){
+			msg += "HTTP code 500, server error. Something is wrong with the server or a request on this page was formatted incorrectly.";
 		}
+		
 		
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -424,7 +434,7 @@ function createAlertTable(){
  		newRow.className = "alertrow";
  	    var oCell = newRow.insertCell(0);
  	    oCell.colSpan = 10;
- 	    oCell.innerHTML = "No alerts meeting your filter criteria were found";
+ 	    oCell.innerHTML = "No alerts meeting your filter criteria were found. " + err;
 	}
 
 }
@@ -544,6 +554,31 @@ function getFilteredUrl(base){
 	
 	filteredUrl += "&textSearchFilter=" +  document.getElementById("filterText").value;
 	
+	
+	
+	var dateSelect = document.getElementById("filterDate").value;
+	hideError();	
+	if(dateSelect == -1){//custom dates
+		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();
+		var to = new Date(document.getElementById('datePickerTo').value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
+		if(isNaN(to) || isNaN(from) || from > to){
+			displayError("Invalid custom dates. No date filter was applied to events.");
+		}else{
+			filteredUrl += "&startDateFilter=" + from;  //substring(4) drops the "Wed " from the field, which isnt' a valid date string. 
+			filteredUrl += "&endDateFilter=" + to 
+		}
+	}else if(dateSelect == -99){//all-time
+		//do nothing, no filter gives all dates back.
+	}else if(dateSelect >0){ //number of trailing hours from now
+		var now = new Date();
+		var start = new Date()
+		start.setHours(now.getHours() - dateSelect);
+		
+		filteredUrl += "&startDateFilter=" +  start.getTime(); 
+		filteredUrl += "&endDateFilter=" + now.getTime();
+	}
+
+	filteredUrl += "&sortBy=" + document.getElementById('sortBy').value + "&sortAscending=" + document.getElementById('sortAscending').value;
 	return filteredUrl;
 }
 
@@ -571,9 +606,15 @@ function updateRealtimeLayer(updatedUrl){
 	if(map.hasLayer(realtime)){
 		realtime.stop();
 		map.removeLayer(realtime);
+//		layerControl.removeLayer(realtime);//doesn't quite work nicely, when you have it unselected it doesn't work.	
 	}
 	
+	
+	
 	var url = getFilteredUrl(ALERT_URL) + "&"; //the "&" stops any additional data from messing up the last filter parameter in the url.
+	
+	
+
 	
 	realtime = L.realtime({
     	url: url,
@@ -581,7 +622,7 @@ function updateRealtimeLayer(updatedUrl){
         type: 'json'
     }, {
         interval: interval,
-        filter: eventFilter,
+//        filter: eventFilter,   //client side-filtering, not using this for now.
         pointToLayer: stylePoints
     });
    
@@ -610,39 +651,43 @@ function updateRealtimeLayer(updatedUrl){
     });
     
     realtime.addTo(map);
+//    layerControl.addOverlay(realtime);
 }
 
 
 //----------------------------------------------------------------------------
 //javascript client-side filtering.
 
-function eventFilter(feature, layer){
-	if(applyFilter("filterImportance",feature.properties.level)
-			&& applyFilter("filterType",feature.properties.typeuuid) 
-			&& applyFilter("filterStatus",feature.properties.status)
-			&& applyFilter("filterCa",feature.properties.cauuid)
-			&& (applyTextFilter("filterText",feature.properties.desc) || applyTextFilter("filterText",feature.properties.id))
-			){
-		return true;
-	}
-	return false;
-}
+//function eventFilter(feature, layer){
+//	if(applyFilter("filterImportance",feature.properties.level)
+//			&& applyFilter("filterType",feature.properties.typeuuid) 
+//			&& applyFilter("filterStatus",feature.properties.status)
+//			&& applyFilter("filterCa",feature.properties.cauuid)
+//			&& (applyTextFilter("filterText",feature.properties.desc) || applyTextFilter("filterText",feature.properties.id))
+//			){
+//		return true;
+//	}
+//	return false;
+//}
+//
+//function applyFilter(classname, value){
+//	var options = document.getElementsByClassName(classname);
+//	for (var i = 0; i < options.length; i++){
+//		if(options[i].checked){
+//			if(options[i].value == value) return true;
+//		}
+//	}
+//	return false;
+//}
+//function applyTextFilter(id, value){
+//	var search = document.getElementById(id);
+//	if(search.value == "") return true; //blank text search = show everything.
+//	if(search.value.search(value) > 0 ) return true;
+//	return false;
+//}
+//----------------------------
 
-function applyFilter(classname, value){
-	var options = document.getElementsByClassName(classname);
-	for (var i = 0; i < options.length; i++){
-		if(options[i].checked){
-			if(options[i].value == value) return true;
-		}
-	}
-	return false;
-}
-function applyTextFilter(id, value){
-	var search = document.getElementById(id);
-	if(search.value == "") return true; //blank text search = show everything.
-	if(search.value.search(value) > 0 ) return true;
-	return false;
-}
+
 
 function stylePoints(feature, latlng) {
 	var color = styleColors[feature.properties.typeuuid]; //styleColors is defined in alert.jsp's <head>
@@ -695,17 +740,20 @@ function setMapFilters(){
 	var geojson = JSON.parse(this.responseText);
  	var defaults = geojson[0];
  	
+ 	interval = defaults.secondsRefresh * 1000;
+ 	
+ 	
  	var filter_form = document.getElementById('filter-form');
  	
  	document.getElementById('filterDate').value = defaults.defaultPastHours;
  	
  	var statuses = document.getElementsByClassName('filterStatus');
  	for(var x=0 ; x < statuses.length; x++){
- 		if(statuses[x].name = "ACTIVE"){
- 			statuses[x].checked = defaults.default_active;
+ 		if(statuses[x].name == "ACTIVE"){
+ 			statuses[x].checked = defaults.defaultActive;
  		}
- 		if(statuses[x].name = "DISABLED"){
- 			statuses[x].checked = defaults.default_active;
+ 		if(statuses[x].name == "DISABLED"){
+ 			statuses[x].checked = defaults.defaultDisabled;
  		}
  	}
  	var levels = document.getElementsByClassName('filterImportance');
@@ -745,11 +793,20 @@ function setMapFilters(){
  			filter_form[caUuids[x]].checked = true;
  		}
  	}
+
+ 	document.getElementById('filterText').value = defaults.defaultText;
+ 	
+ 	
+ 	//default custom dates so they are not blank to start
+ 	var today = getTodayAsString();
+    document.getElementById("datePickerFrom").value = today;
+    document.getElementById("datePickerTo").value = today;
+ 	
+
  	
  	checkForCustomDates();
  	
- 	//run the map query to update the points to match the new filters.
- 	updateRealtimeLayer(ALERT_URL);
+ 	refreshAlerts();
 }
 
 //check if the user selected or deselected "custom dates" and grey/de-grey the custom inputs. 
@@ -762,4 +819,64 @@ function checkForCustomDates(){
 		document.getElementById('datePickerFrom').disabled = true;
 		document.getElementById('datePickerTo').disabled = true;
 	}
+}
+
+
+function getTodayAsString(){
+ 	var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1; //January is 0!
+
+    var yyyy = today.getFullYear();
+    if(dd<10){
+        dd='0'+dd
+    } 
+    if(mm<10){
+        mm='0'+mm
+    } 
+    
+    var weekday = new Array(7);
+    weekday[0]=  "Sun";
+    weekday[1] = "Mon";
+    weekday[2] = "Tue";
+    weekday[3] = "Wed";
+    weekday[4] = "Thu";
+    weekday[5] = "Fri";
+    weekday[6] = "Sat";
+    
+    var monthText= new Array(12);
+    monthText[0] = "Jan";
+    monthText[1] = "Feb";
+    monthText[2] = "Mar";
+    monthText[3] = "Apr";
+    monthText[4] = "May";
+    monthText[5] = "Jun";
+    monthText[6] = "Jul";
+    monthText[7] = "Aug";
+    monthText[8] = "Sep";
+    monthText[9] = "Oct";
+    monthText[10] = "Nov";
+    monthText[11] = "Dec";
+    
+
+    var n = weekday[today.getDay()];
+    var month = monthText[today.getMonth()];
+
+    return n + ' ' + month + ' ' + dd + ' ' + yyyy;
+}
+
+function sort(str){
+	var asc = document.getElementById('sortAscending').value;
+	var cur = document.getElementById('sortBy').value; 
+	if( cur == str){
+		if(asc == "true"){
+			document.getElementById('sortAscending').value = "false";
+		}else{
+			document.getElementById('sortAscending').value = "true";
+		}
+	}else{
+		document.getElementById('sortBy').value = str;
+	}
+	
+	refreshAlerts();
 }

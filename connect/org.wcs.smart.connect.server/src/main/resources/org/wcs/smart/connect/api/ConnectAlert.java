@@ -221,13 +221,15 @@ public class ConnectAlert extends HttpServlet {
     			@QueryParam(value="typeUuidFilter") String typeUuidFilter,
     			@QueryParam(value="statusFilter") String statusFilter,    		
     			@QueryParam(value="caUuidFilter") String caUuidFilter, 
-    			@QueryParam(value="startDateFilter") Date startDateFilter,
-    			@QueryParam(value="endDateFilter") Date endDateFilter,
-    			@QueryParam(value="textSearchFilter") String textSearchFilter
+    			@QueryParam(value="startDateFilter") String startDateFilter,
+    			@QueryParam(value="endDateFilter") String endDateFilter,
+    			@QueryParam(value="textSearchFilter") String textSearchFilter,
+    			@QueryParam(value="sortBy") String sortBy,
+    			@QueryParam(value="sortAscending") Boolean sortAscending
     			){
 		AlertFilter af;
 		try{
-			af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, caUuidFilter, startDateFilter, endDateFilter, textSearchFilter);
+			af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, caUuidFilter, startDateFilter, endDateFilter, textSearchFilter, sortBy, sortAscending);
 		}catch (Exception e){
 			throw e;
 		}

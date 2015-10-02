@@ -2,6 +2,7 @@ package org.wcs.smart.connect.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -16,6 +17,9 @@ import org.apache.commons.io.IOUtils;
 import org.hibernate.Session;
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.Alert;
+import org.wcs.smart.connect.model.AlertType;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.StyleConfiguration;
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "settings")
@@ -31,16 +35,29 @@ public class SettingsServlet extends HttpServlet{
 		
 		List<StyleConfiguration> styles = null;
 		List<MapLayer> layers = null;
+		List<ConservationAreaInfo> cas = null;
+		List<AlertType> alertTypes = null;
+		
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
 		try{
 			styles = HibernateManager.getStyleConfigurations(session);
+			cas = HibernateManager.getConservationAreaInfos(session);
+			alertTypes = HibernateManager.getAlertTypes(session);
 		}finally{
 			session.getTransaction().rollback();
 		}
 		
+		List<String>status = new ArrayList<String>();
+		for (Alert.AlertStatusEnum x : Alert.AlertStatusEnum.values()) {
+			status.add(x.getValue());
+		}
+		request.setAttribute("status", status);
+		
 		request.setAttribute("styles", styles); //$NON-NLS-1$
 		request.setAttribute("numstyles", styles.size()); //$NON-NLS-1$
+		request.setAttribute("cas", cas); //$NON-NLS-1$
+		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$
 		
 		request.getRequestDispatcher("/WEB-INF/settings.jsp").forward(request, response); //$NON-NLS-1$
 		

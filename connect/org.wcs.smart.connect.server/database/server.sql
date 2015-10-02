@@ -174,7 +174,8 @@ CREATE TABLE connect.map_layers(
 	token varchar(256),
 	mapboxid varchar(64),
 	wms_layer_list text,
-	layer_name varchar(32)
+	layer_name varchar(32),
+	layer_order int
 ) WITHOUT OIDS;
 
 CREATE TABLE connect.alert_filter_defaults(
@@ -189,10 +190,11 @@ CREATE TABLE connect.alert_filter_defaults(
 	default_level4 boolean,
 	default_level5 boolean,
 	default_ca_uuids varchar(925),--max 25 uuids, comma separated.
-	default_text varchar(128)
+	default_text varchar(128),
+	seconds_refresh int
 )WITHOUT OIDS;
 
-insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, false, false, false, true,'','');
+insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, true, true, true, true,'','');
 
 
 

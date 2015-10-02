@@ -329,6 +329,13 @@ div.scrollable {
 	float: left;
 }
 
+.settingsTable{
+    border-style: outset;
+    border-color: cornsilk;
+    margin: 10px 5px 0px 0px;
+    padding: 3px 3px;
+}
+
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/
 article.tabs{

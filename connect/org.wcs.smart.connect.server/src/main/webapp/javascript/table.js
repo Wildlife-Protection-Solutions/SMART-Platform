@@ -47,7 +47,7 @@ function tableCreateRowTDs(table, values, rowstyle){
 	for (var i = 0; i < values.length; i ++){
 		cell = document.createElement("td");
 		cell.className="table-cell smart-table-cell";
-		if (values[i] != null && values[i].length > 0){
+		if (values[i] != null){
 			cell.innerHTML=values[i];
 		}
 		row.appendChild(cell);

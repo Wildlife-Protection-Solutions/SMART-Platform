@@ -1,6 +1,7 @@
 var STYLE_URL = "../api/connectstyle/";
 var LAYER_URL = "../api/maplayer/";
 var TYPE_URL = "../api/connectalert/alertTypes/";
+var DEFAULTS_URL = "../api/connectalertfilterdefault/";
 var ACTION_URL = STYLE_URL + "actions/";
 var allActions = null;
 
@@ -54,13 +55,15 @@ window.onload = function(){
 	};
 	document.getElementById("newTypeButton").addEventListener("click", createNewType);
 	document.getElementById("updateTypeButton").addEventListener("click", submitUpdateType);
-	
+//	document.getElementById("btnResetDefaults").addEventListener("click", refreshDefaults);
+	document.getElementById("btnUpdateDefaults").addEventListener("click", saveDefaults);
 	
 	//Layer table and actions
 	refreshLayers();
 	
 	refreshTypes();
 
+	refreshDefaults();
 }
 
 
@@ -155,6 +158,8 @@ function createLayerTable(){
 		var msg = "Error: ";
 		if (this.status == 401){
 			msg += "Unauthorized";
+		}else{
+			msg += "Unexpected Error. Something is wrong with the server or the request sent by this page.";
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -179,13 +184,15 @@ function createLayerTable(){
  			typeText = "Mapbox.com";
  		}else if(type == 2){
  			typeText = "GISCloud.com";
+ 		}else if (type==3){
+ 			typeText = "WMS";
  		}
  		var active = "False";
  		if (layers[i].active){
  			active = "True";
  		}
  		var row = tableCreateRowTDs(parent,
- 				[layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null, null], 
+ 				[layers[i].layerOrder, layers[i].layerName, typeText , active, layers[i].mapboxId, layers[i].wmsLayerList, null, null], 
  				"layerrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
  		row.id = "layerRow" + i;
  		row.dataset.uuid = layers[i].uuid;
@@ -193,7 +200,7 @@ function createLayerTable(){
  	    var scrollable = document.createElement("div");
  	    scrollable.className = "scrollable";
  	    scrollable.innerHTML = layers[i].token;
- 		row.childNodes[5].appendChild(scrollable);
+ 		row.childNodes[6].appendChild(scrollable);
 
  	
  		//update goes first, shows second, since it floats right in the css...
@@ -202,14 +209,14 @@ function createLayerTable(){
  		updateicon.title="update layer";
  		updateicon.onclick = updateLayer;
  		updateicon.href="";
- 		row.childNodes[6].appendChild(updateicon);
+ 		row.childNodes[7].appendChild(updateicon);
 
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
  		deleteicon.title="delete layer";
  		deleteicon.onclick = deleteLayer;
  		deleteicon.href="";
- 		row.childNodes[6].appendChild(deleteicon);
+ 		row.childNodes[7].appendChild(deleteicon);
  	}
 }
 
@@ -243,6 +250,7 @@ function layerDeleted() {
 
 function createNewLayer(){
 	
+	var layer_order = document.querySelector("input[name=layer_order]").value;
 	var layer_name = document.querySelector("input[name=layer_name]").value;
 	var layer_mapbox_id = document.querySelector("input[name=layer_mapbox_id]").value;
 	var layer_list = document.querySelector("input[name=layer_list]").value;
@@ -252,6 +260,7 @@ function createNewLayer(){
 	
 	
 	var jsonData = {
+		"layerOrder" : layer_order,
 		"layerName" : layer_name,
 		"wmsLayerList" : layer_list,
 		"layerType" : layer_type,
@@ -313,6 +322,7 @@ function showCurrentLayer() {
 	
 	var form = document.getElementById("maplayersform");
 	
+	form.layer_order.value = r.layerOrder;
 	form.layer_name.value = r.layerName;
 	form.layer_type.value = r.layerType;
 	form.layer_status.value = r.active;
@@ -333,6 +343,7 @@ function showCurrentLayer() {
 function submitUpdateLayer(){
 	var uuid = document.getElementById("maplayersform").uuid.value;
 	
+	var layer_order = document.querySelector("input[name=layer_order]").value;
 	var layer_name = document.querySelector("input[name=layer_name]").value;
 	var layer_mapbox_id = document.querySelector("input[name=layer_mapbox_id]").value;
 	var layer_list = document.querySelector("input[name=layer_list]").value;
@@ -342,6 +353,7 @@ function submitUpdateLayer(){
 	
 	
 	var jsonData = {
+		"layerOrder" : layer_order,
 		"layerName" : layer_name,
 		"wmsLayerList" : layer_list,
 		"layerType" : layer_type,
@@ -601,65 +613,144 @@ function typeUpdated(){
 }
 
 
+/* reload filter defaults table */
+function refreshDefaults(){
+	//clear current defaults table
+	var elem = document.getElementById('filter-form').elements;
+    for(var i = 0; i < elem.length; i++){
+    	elem[i].checked = false;
+    }
+	
+ 	var oReq = new XMLHttpRequest();
+ 	oReq.onload = createDefaultsTable;
+ 	oReq.open("Get", DEFAULTS_URL, true);
+ 	oReq.send();
+}
+
 //
-//createFilterDefaultTable(){
-//	if (this.status != 200 && this.status != 201 ) {
-//		var msg = "Error: ";
-//		if (this.status == 401){
-//			msg += "Unauthorized";
-//		}else if (this.status == 404){
-//			msg += "Invalid URL, URL not Found";
-//		}
-//		
-//		try {
-//			msg = JSON.parse(this.responseText).error
-//		} catch (err) {
-//		}
-//		displayError(msg);
-//		return;
-//	}
-//	//clear current table
-//	var objects = document.querySelectorAll("tr.filterrow");
-//	for (var i = 0; i < objects.length; i++){
-//		var ele = objects[i];
-//		ele.parentElement.removeChild(ele);
-//	}
-//	
-//	var parent = document.getElementById("filtertable");
-// 	
-//	try{
-//		var geojson = JSON.parse(this.responseText);
-//	 	var list = geojson.features;
-//	 	for (var i = 0; i < list.length; i ++){
-//	 		var row = tableCreateRowTDs(parent,
-//	 				[list[i].defaultLevel1, null], 
-//	 				"white filterrow");
-//	 		row.id = "typerow" + i;
-//	 		row.dataset.uuid = list[i].uuid;
-//
-//
-//	 		//update goes first, shows second, since it floats right in the css...
-//	 		var updateicon = document.createElement("a");
-//	 		updateicon.className="update-icon";
-//	 		updateicon.title="update alert";
-//	 		updateicon.onclick = updateAlert;
-//	 		updateicon.href="";
-//	 		row.childNodes[7].appendChild(updateicon);
-//	 		
-//	 		var deleteicon = document.createElement("a");
-//	 		deleteicon.className="delete-icon";
-//	 		deleteicon.title="delete alert";
-//	 		deleteicon.onclick = deleteAlert;
-//	 		deleteicon.href="";
-//	 		row.childNodes[7].appendChild(deleteicon);
-//	 		
-//	 	}
-//	}catch(err) {
-// 		var newRow = parent.insertRow(-1);
-// 		newRow.style.backgroundColor = "#F00";
-// 		newRow.className = "alertrow";
-// 	    var oCell = newRow.insertCell(0);
-// 	    oCell.colSpan = 10;
-// 	    oCell.innerHTML = "No defaults were found";
-//	}
-//}
+function createDefaultsTable(){
+	if (this.status != 200 && this.status != 201 ) {
+		var msg = "Error: ";
+		if (this.status == 401){
+			msg += "Unauthorized";
+		}else if (this.status == 404){
+			msg += "Invalid URL, URL not Found";
+		}else{
+			msg += "Unexpected error, something is wrong with the server or the connection to the server.";
+		}
+		
+		try {
+			msg = JSON.parse(this.responseText).error
+		} catch (err) {
+		}
+		displayError(msg);
+		return;
+	}
+	//clear current table
+	var objects = document.querySelectorAll("tr.defaultsrow");
+	for (var i = 0; i < objects.length; i++){
+		var ele = objects[i];
+		ele.parentElement.removeChild(ele);
+	}
+	
+	var parent = document.getElementById("defaultstable");
+ 	
+	var list = JSON.parse(this.responseText);
+	document.getElementById('filterDate').value = list[0].defaultPastHours;
+		
+	var types = list[0].defaultTypeUuids.split(',');
+	for(x=0 ; x < types.length; x++){
+		var type = document.getElementById(types[x])
+		if(type != null){
+			type.checked = true;
+		}
+	}
+	document.getElementById('status_ACTIVE').checked = list[0].defaultActive;
+	document.getElementById('status_DISABLED').checked = list[0].defaultDisabled;
+
+	document.getElementById('level1').checked = list[0].defaultLevel1;
+	document.getElementById('level2').checked = list[0].defaultLevel2;
+	document.getElementById('level3').checked = list[0].defaultLevel3;
+	document.getElementById('level4').checked = list[0].defaultLevel4;
+	document.getElementById('level5').checked = list[0].defaultLevel5;
+
+	var cas = list[0].defaultCaUuids.split(',');
+	for(x=0 ; x < cas.length; x++){
+		var ca = document.getElementById(cas[x])
+		if(ca != null){
+			ca.checked = true;
+		}
+	}
+
+	if(list[0].defaultText != null){
+		document.getElementById('filterText').value = list[0].defaultText;
+	}
+	
+	document.getElementById('secondsRefresh').value = list[0].secondsRefresh;
+	
+	document.getElementById("filter_uuid").value = list[0].uuid;
+}
+
+function saveDefaults(){
+	var json = getFilterJSON();
+	var uuid = document.getElementById("filter_uuid").value;
+	
+	//make ajax call
+	hideError();
+	hideInfo();
+	document.querySelector("#message").style.display = "none";
+
+	var oReq = new XMLHttpRequest();
+	oReq.onload = defaultsUpdated;
+	oReq.open("PUT", DEFAULTS_URL + encodeURIComponent(uuid), true);
+	oReq.setRequestHeader("Content-type", "application/json");
+	oReq.setRequestHeader("Accept","application/json");
+	oReq.send(JSON.stringify(json));
+}
+
+
+function getFilterJSON(){
+	var json = "";
+	var date = document.getElementById("filterDate").value;
+
+	var types = getCommaSeparatedList("filterType");
+	var cas = getCommaSeparatedList("filterCa");
+
+	json = {
+			"defaultPastHours" : document.getElementById("filterDate").value,
+			"defaultTypeUuids" :types, 
+			"defaultActive" : document.getElementById("status_ACTIVE").checked,
+			"defaultDisabled" : document.getElementById("status_DISABLED").checked, 
+			"defaultLevel1" : document.getElementById("level1").checked,
+			"defaultLevel2" : document.getElementById("level2").checked,
+			"defaultLevel3" : document.getElementById("level3").checked,
+			"defaultLevel4" : document.getElementById("level4").checked,
+			"defaultLevel5" : document.getElementById("level5").checked,
+			"defaultCaUuids" : cas,
+			"defaultText" : document.getElementById("filterText").value,
+			"secondsRefresh" : document.getElementById("secondsRefresh").value
+			
+		};
+	return json;
+}
+
+function defaultsUpdated(){
+	if (this.status == 200) {
+		//ok
+		var user = JSON.parse(this.responseText);
+		displayInfo("Default Filters Updated");
+	} else {
+		displayError("Error Updating Filter Defaults;  " + this.responseText + "; " + this.statusText);
+	}
+}
+
+function getCommaSeparatedList(classname){
+	var str = "";
+	var options = document.getElementsByClassName(classname);
+	for (var i = 0; i < options.length; i++){
+		if(options[i].checked){
+			str += options[i].value + ",";
+		}
+	}
+	return str;
+}

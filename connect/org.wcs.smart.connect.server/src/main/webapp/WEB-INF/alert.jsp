@@ -112,7 +112,7 @@
 		
 		<h2 id="tab3text" class=" "><a onclick="settab(3)">View/Manage Alerts</a></h2>
 		<div class="overflow"><table id="alerttable">
-		<tr class="table-row smart-table-header"><th>Type</th><th>Alert Id</th><th>Date</th><th>Description</th><th>Level</th><th>Status</th><th>Location</th><th>Action</th></tr>
+		<tr class="table-row smart-table-header"><th><a onclick="sort('typeUuid')" href="#">Type</a></th><th><a onclick="sort('userGeneratedId')" href="#">Alert Id</a></th><th><a onclick="sort('date')" href="#">Date</a></th><th><a onclick="sort('description')" href="#">Description</a></th><th><a onclick="sort('level')" href="#">Level</a></th><th><a onclick="sort('status')" href="#">Status</a></th><th><a onclick="sort('x')" href="#">Location</a></th><th>Action</th></tr>
 		</table>
 		</div> 
 	</section>
@@ -121,6 +121,8 @@
 			<a id="filter-link" onClick="hideShowFilters()"><image id="filter-button"/>Show Filters</a>
 
 			<form id="filter-form" name="filter-form" onsubmit="return false;">
+			<input id="sortBy" type="hidden" name="sortBy" value="userGeneratedId"/>
+			<input id="sortAscending" type="hidden" name="sortAscending"  value="true"/>
 
 			<select id='filterDate' class='updateChange' name="time_filter">
 			<option value=1>within 1 hour</option>
@@ -132,8 +134,8 @@
 			<option value=48>within 2 days</option>
 			<option value=168>within a week</option>
 			<option value=744>within a month</option>
-			<option value=-99 selected>All dates</option>
-			<option value=-1 selected>Custom Dates</option>
+			<option value=-99>All dates</option>
+			<option value=-1>Custom Dates</option>
 			</select>
 
 			<br><input type="text" id="datePickerFrom" class="date-input">

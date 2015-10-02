@@ -100,13 +100,15 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 			if (newDefault.getDefaultTypeUuids()!= null){
 				toUpdate.setDefaultTypeUuids(newDefault.getDefaultTypeUuids());
 			}
-			toUpdate.setDefault_active(newDefault.isDefault_active());
-			toUpdate.setDefault_disabled(newDefault.isDefault_disabled());
+			toUpdate.setDefaultActive(newDefault.isDefaultActive());
+			toUpdate.setDefaultDisabled(newDefault.isDefaultDisabled());
 			toUpdate.setDefaultLevel1(newDefault.isDefaultLevel1());
 			toUpdate.setDefaultLevel2(newDefault.isDefaultLevel2());
 			toUpdate.setDefaultLevel3(newDefault.isDefaultLevel3());
 			toUpdate.setDefaultLevel4(newDefault.isDefaultLevel4());
 			toUpdate.setDefaultLevel5(newDefault.isDefaultLevel5());
+			
+			toUpdate.setSecondsRefresh(newDefault.getSecondsRefresh());
 			
 			s.update(toUpdate);
 			s.getTransaction().commit();

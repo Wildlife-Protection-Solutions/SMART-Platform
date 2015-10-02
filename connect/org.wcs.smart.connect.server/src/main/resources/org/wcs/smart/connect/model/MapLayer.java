@@ -14,7 +14,7 @@ public class MapLayer extends ConnectUuidItem{
 	private String wmsLayerList;
 	private String layerName;
 	private boolean active;
-	
+	private int layerOrder;
 	
 	@Column(name="layer_type")
 	public Integer getLayerType() {
@@ -62,5 +62,13 @@ public class MapLayer extends ConnectUuidItem{
 	}
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	@Column(name="layer_order")
+	public int getLayerOrder() {
+		return layerOrder;
+	}
+	public void setLayerOrder(int layerOrder) {
+		this.layerOrder = layerOrder;
 	}	
 }

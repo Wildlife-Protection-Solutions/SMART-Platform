@@ -132,6 +132,7 @@ public class HibernateManager {
 	public static List<AlertType> getAlertTypes(Session session) {
 		return (List<AlertType>)session
 				.createCriteria(AlertType.class)
+				.addOrder(Order.asc("label"))
 				.list();
 	}
 
@@ -175,6 +176,7 @@ public class HibernateManager {
 	public static List<MapLayer> getMapLayers(Session session) {
 		return (List<MapLayer>)session
 				.createCriteria(MapLayer.class)
+				.addOrder(Order.asc("layerOrder"))
 				.list();
 	}
 

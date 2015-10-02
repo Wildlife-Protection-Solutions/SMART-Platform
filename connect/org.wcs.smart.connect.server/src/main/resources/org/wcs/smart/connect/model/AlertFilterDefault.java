@@ -22,6 +22,7 @@ public class AlertFilterDefault extends ConnectUuidItem{
 	private boolean defaultLevel5;
 	private String defaultCaUuids;
 	private String defaultText;
+	private int secondsRefresh;
 	
 	
 	@Column(name="default_past_hours")
@@ -41,19 +42,19 @@ public class AlertFilterDefault extends ConnectUuidItem{
 	}
 	
 	@Column(name="default_active")
-	public boolean isDefault_active() {
+	public boolean isDefaultActive() {
 		return defaultActive;
 	}
-	public void setDefault_active(boolean default_active) {
-		this.defaultActive = default_active;
+	public void setDefaultActive(boolean defaultActive) {
+		this.defaultActive = defaultActive;
 	}
 	
 	@Column(name="default_disabled")
-	public boolean isDefault_disabled() {
+	public boolean isDefaultDisabled() {
 		return defaultDisabled;
 	}
-	public void setDefault_disabled(boolean default_disabled) {
-		this.defaultDisabled = default_disabled;
+	public void setDefaultDisabled(boolean defaultDisabled) {
+		this.defaultDisabled = defaultDisabled;
 	}
 	
 	@Column(name="default_level1")
@@ -111,5 +112,15 @@ public class AlertFilterDefault extends ConnectUuidItem{
 	public void setDefaultText(String defaultText) {
 		this.defaultText = defaultText;
 	}
+	
+	@Column(name="seconds_refresh")
+	public int getSecondsRefresh() {
+		return secondsRefresh;
+	}
+	public void setSecondsRefresh(int secondsRefresh) {
+		this.secondsRefresh = secondsRefresh;
+	}
+	
+	
 	
 }

@@ -32,13 +32,13 @@ import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
-@Path(ConnectRESTApplication.PATH_SEPERATOR + MapLayers.PATH)
+@Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectMapLayers.PATH)
 
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
-public class MapLayers extends HttpServlet {
+public class ConnectMapLayers extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(MapLayers.class.getName());
+	private final Logger logger = Logger.getLogger(ConnectMapLayers.class.getName());
 	
 	public static final String PATH = "maplayer"; //$NON-NLS-1$
 
@@ -110,6 +110,7 @@ public class MapLayers extends HttpServlet {
 		
 		MapLayer m = new MapLayer();
 		
+		m.setLayerOrder(newLayer.getLayerOrder());
 		m.setActive(newLayer.isActive());
 		m.setLayerName(newLayer.getLayerName());
 		m.setMapboxId(newLayer.getMapboxId());
@@ -158,7 +159,10 @@ public class MapLayers extends HttpServlet {
 			if (toUpdate == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "Could not find Map Layer");
 			}
-					
+			
+			
+			toUpdate.setLayerOrder(newLayer.getLayerOrder());
+
 			if (newLayer.getLayerType() != null){
 				toUpdate.setLayerType(newLayer.getLayerType());
 			}
