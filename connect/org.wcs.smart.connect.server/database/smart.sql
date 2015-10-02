@@ -2299,6 +2299,7 @@ uuid UUID not null,
 ca_uuid UUID,
 url varchar(2064),
 options varchar(32600),
+certificate varchar(32000),
 PRIMARY KEY (uuid));
 
 alter table smart.connect_server add constraint server_ca_uuid_fk foreign key (ca_uuid) 
