@@ -72,7 +72,11 @@ public class LoadBasemapHandler {
 		if (def == null){
 			return;
 		}
+		loadBasemap(map, def);
 		
+	}
+	
+	public static void loadBasemap(final Map map, final BasemapDefinition def){
 		Job loadMap = new Job(Messages.LoadBasemapHandler_JobName){
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {

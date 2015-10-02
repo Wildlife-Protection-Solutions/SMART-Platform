@@ -264,6 +264,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		//session may be closed by new survey design wizard
 		if (!session.isOpen()){
 			session = HibernateManager.openSession();
+			session.update(parentDesign);
 		}
 		
 		//update design with page values

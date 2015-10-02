@@ -25,13 +25,16 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
+import org.apache.commons.collections.list.LazyList;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
@@ -53,10 +56,10 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.ui.menus.IMenuService;
 import org.osgi.service.event.Event;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
 import org.wcs.smart.report.IReportListener;
 import org.wcs.smart.report.ReportEventManager;
@@ -87,7 +90,7 @@ public class ReportListView {
 	@Inject private MPart part;
 	@Inject private IMenuService menuService;
 	@Inject private ESelectionService selService;
-	
+	@Inject private UISynchronize ui;
 	/*
 	 * listener for report chaning events
 	 */
@@ -104,13 +107,18 @@ public class ReportListView {
 	public ReportListView(){
 	}
 
+	@Optional
+	@Inject
+	private void dbModified(@UIEventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
+		reportList.refresh();
+	}
+	
 	/*
 	 * Updates the tree when an object is modified
 	 */
 	private void refreshTree(final Object o, final EventType type){
-		Display d = part.getContext().get(Display.class);
 		if (type == EventType.REPORT_UPDATED || type == EventType.FOLDER_UPDATED){
-			d.syncExec(new Runnable(){
+			ui.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					reportList.update(o, null);
@@ -122,7 +130,7 @@ public class ReportListView {
 				}
 			});
 		}else if (type == EventType.REPORT_ADDED || type == EventType.REPORT_DELETED){
-			d.syncExec(new Runnable(){
+			ui.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					ReportFolder rf = ((Report)o).getFolder();
@@ -137,7 +145,7 @@ public class ReportListView {
 				}
 			});
 		}else if (type == EventType.FOLDER_ADDED || type == EventType.FOLDER_DELETED){
-			d.syncExec(new Runnable(){
+			ui.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					ReportFolder rf = (ReportFolder)o;
@@ -165,7 +173,7 @@ public class ReportListView {
 				}
 			});
 		}else{
-			d.syncExec(new Runnable(){
+			ui.syncExec(new Runnable(){
 				@Override
 				public void run() {
 					reportList.refresh();	

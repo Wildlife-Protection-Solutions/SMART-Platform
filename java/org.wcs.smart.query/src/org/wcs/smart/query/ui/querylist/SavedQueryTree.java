@@ -30,7 +30,12 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.e4.core.contexts.EclipseContextFactory;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.hibernate.Session;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import org.wcs.smart.SmartEventConstants;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.IQueryFolderListener;
 import org.wcs.smart.query.IQueryHibernateManager;
@@ -201,6 +206,13 @@ public class SavedQueryTree {
 			loadData();
 		}
 		return folders;		
+	}
+	
+	public synchronized void clearData(){
+		synchronized (instance) {
+			folders = null;
+			queries = null;	
+		}
 	}
 	
 	/**

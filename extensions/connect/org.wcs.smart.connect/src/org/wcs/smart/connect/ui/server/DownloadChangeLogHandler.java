@@ -22,20 +22,30 @@
 package org.wcs.smart.connect.ui.server;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collection;
 
 import javax.inject.Named;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
+import org.wcs.smart.util.E3Utils;
 
 /**
  * Download change log handler.
@@ -45,27 +55,36 @@ import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
  */
 public class DownloadChangeLogHandler {
 
+	
+	
 	@Execute
-	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
+	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, 
+			final EPartService pService, IEventBroker events) {
 		DownloadChangeLogDialog dialog = new DownloadChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
-			downloadChangeLog(activeShell, dialog.getConnection());
+			downloadChangeLog(activeShell, pService, dialog.getConnection(), events);
 		}
 	}
 
-	public void downloadChangeLog(Shell activeShell, final SmartConnect connect){
+	private void downloadChangeLog(Shell activeShell, final EPartService pService, 
+			final SmartConnect connect, final IEventBroker events){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
 				@Override
-				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+				public void run(final IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
+					monitor.beginTask("Download and Apply Changelog", 2);
 					DownloadChangeLogEngine engine = new DownloadChangeLogEngine(connect);
 					try{
-						engine.downloadInstall(monitor);
+						if (engine.downloadInstall(pService, new SubProgressMonitor(monitor, 1))){
+							//refresh ui
+							refreshUi(pService, events, monitor);
+						}
 					}catch (Exception ex){
 						ConnectPlugIn.displayLog(ex.getMessage(), ex);
 					}
+					monitor.done();
 				}
 			});
 		} catch (InvocationTargetException | InterruptedException e) {
@@ -73,6 +92,36 @@ public class DownloadChangeLogHandler {
 		}
 	}
 
+	private void refreshUi(final EPartService pService,
+			final IEventBroker events,
+			final IProgressMonitor monitor) {
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				monitor.subTask("Refreshing UI");
+				MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Download Complete", "Download complete.");
+				
+				events.post(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, null);
+				
+				//find all editors, close and reopen
+				Collection<MPart> parts = pService.getParts();
+				for (MPart part : parts){
+					if (E3Utils.isCompatibilityEditor(part)){
+						pService.hidePart(part, true);
+						
+						PartState state = PartState.ACTIVATE;
+						if (pService.isPartVisible(part)){
+							state = PartState.VISIBLE;
+						}
+						pService.showPart(part, state);
+					}
+				}
+			}
+			
+		});
+	}
+	
 	public static class DownloadChangeLogHandlerWrapper extends DIHandler<DownloadChangeLogHandler>{
 		public DownloadChangeLogHandlerWrapper() {
 			super(DownloadChangeLogHandler.class);

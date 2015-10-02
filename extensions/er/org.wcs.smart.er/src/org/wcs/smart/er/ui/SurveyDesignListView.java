@@ -37,6 +37,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -66,6 +67,7 @@ import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.IUpdatableView;
 import org.wcs.smart.er.EcologicalRecordsPlugIn;
 import org.wcs.smart.er.ISurveyEventListener;
@@ -118,6 +120,11 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	public void dispose() {
 	}
 	
+	@Optional
+	@Inject
+	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
+		updateContent();
+	}
 	
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent, EPartService pService){

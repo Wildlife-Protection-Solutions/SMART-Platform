@@ -135,6 +135,7 @@ public class MapSettings {
 	 * 
 	 */
 	public static final String BASEMAP_BLACKBOARD_KEY = "org.wcs.smart.basemaplayers"; //$NON-NLS-1$
+	public static final String BASEMAP_BLACKBOARD_UUID_KEY = "org.wcs.smart.basemap.uuid"; //$NON-NLS-1$
 
 	public static final String MAP_DIRECTORY = "maps"; //$NON-NLS-1$
 	
@@ -429,7 +430,7 @@ public class MapSettings {
 			// update basemap layer settings
 			ArrayList<ILayer> basemapCopy = new ArrayList<ILayer>(basemapLayers);
 			currentMap.getBlackboard().put(BASEMAP_BLACKBOARD_KEY, basemapCopy);
-
+			currentMap.getBlackboard().put(BASEMAP_BLACKBOARD_UUID_KEY, baseMap.getUuid());
 			// updates the map with the user settings
 			updateMap(currentMap, userMap);
 

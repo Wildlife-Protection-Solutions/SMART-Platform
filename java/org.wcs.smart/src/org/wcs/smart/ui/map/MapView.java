@@ -14,11 +14,15 @@
  */
 package org.wcs.smart.ui.map;
 
+import java.util.UUID;
+
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -30,6 +34,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.hibernate.Session;
 import org.locationtech.udig.internal.ui.IDropTargetProvider;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.internal.ProjectFactory;
@@ -42,9 +47,14 @@ import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.BasemapDefinition;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
+import org.wcs.smart.map.internal.LoadBasemapHandler;
 import org.wcs.smart.map.internal.ZoomHandler;
+import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.util.E3Utils;
 
 /**
@@ -162,6 +172,33 @@ public class MapView implements IDropTargetProvider, MapPart, IAdaptable {
     		setTool(activeTool.getId());
     	}
     }
+    
+    @Optional
+    @Inject
+	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
+    	//what we need to do is reload the current selected basemap
+    	//load it from the database; and apply it to the map
+    	UUID basemapuuid = (UUID) mapviewer.getMap().getBlackboard().get(MapSettings.BASEMAP_BLACKBOARD_UUID_KEY);
+    	BasemapDefinition def = null;
+    	if (basemapuuid != null){
+    		
+    		Session s = HibernateManager.openSession();
+    		try{
+    			def = (BasemapDefinition) s.get(BasemapDefinition.class, basemapuuid);
+    		}finally{
+    			s.close();
+    		}
+    	}
+    	if (def == null){
+    		//reload default basemap
+    		LoadDefaultLayersJob job = new LoadDefaultLayersJob(getMap());
+    		job.schedule();
+    	}else{
+    		LoadBasemapHandler.loadBasemap(mapviewer.getMap(), def);
+    	}
+    	
+		mapviewer.getRenderManager().refresh(null);
+	}
     
     @Focus
     public void setFocus() {

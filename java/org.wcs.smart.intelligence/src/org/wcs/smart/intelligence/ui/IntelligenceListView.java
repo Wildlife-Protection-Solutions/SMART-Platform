@@ -39,6 +39,7 @@ import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -65,6 +66,7 @@ import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.common.filter.StringFilterComposite.StringComparison;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
@@ -106,6 +108,12 @@ public class IntelligenceListView implements IIntelligenceFilteringView {
 			updateContent();
 		}
 	};
+	
+	@Optional
+	@Inject
+	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
+		updateContent();
+	}
 	
 	@Inject
 	private void partActivated(@Optional @UIEventTopic(UIEvents.UILifeCycle.ACTIVATE) Event partEvent){
