@@ -21,13 +21,16 @@
  */
 package org.wcs.smart.connect.replication.changelog;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Reader;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +38,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
+
+import javax.sql.rowset.serial.SerialClob;
 
 import org.apache.commons.io.IOUtils;
 import org.wcs.smart.SmartContext;
@@ -162,6 +167,12 @@ public abstract class ChangeLogItemSerializer {
 					stream.writeObject( UuidUtils.byteToUUID((byte[])data) );
 				}else{
 					throw new IllegalStateException("Invalid representation of UUID.");
+				}
+			}else if (type == Types.CLOB){
+				Clob clob = rs.getClob(i);
+				stream.writeLong(clob.length());
+				try(Reader reader = clob.getCharacterStream() ){
+					IOUtils.copy(reader, stream);
 				}
 			}else{
 				Object x = rs.getObject(i);

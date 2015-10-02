@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -61,6 +62,7 @@ import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.event.EntityEventManager;
 import org.wcs.smart.entity.event.IEntityListener;
@@ -167,7 +169,12 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 		}
 	};
 	
-
+	@Optional
+	@Inject
+	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
+		updateContent(100);
+	}
+	
 	/**
 	 * activated events
 	 * @param partEvent

@@ -40,6 +40,7 @@ import org.eclipse.e4.core.contexts.EclipseContextFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -68,6 +69,7 @@ import org.eclipse.ui.menus.IMenuService;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.patrol.PatrolEventManager;
 import org.wcs.smart.patrol.PatrolEventManager.EventType;
 import org.wcs.smart.patrol.PatrolEventManager.IPatrolEventListener;
@@ -172,6 +174,11 @@ public class PatrolListView implements IPatrolFilteringView {
 		}
 	}
 	
+	@Optional
+	@Inject
+	private void dbModified(@EventTopic(SmartPlugIn.E4_DATABASE_CHANGED_EVENT) Object data){
+		updateContent(100);
+	}
 	
 	@PreDestroy
 	public void dispose() {		

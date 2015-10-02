@@ -188,6 +188,17 @@ public class SmartPlugIn extends AbstractUIPlugin {
 	};
 
 	public BasemapDefinition defaultDefinition = null;
+
+	/**
+	 * IEventBroker event topic that is fired when 
+	 * data is changed in the database without details about the 
+	 * specific data that was change.  This is currently used
+	 * by the replication process after replicated data
+	 * is applied to the database.
+	 * 
+	 * Payload is undefined.
+	 */
+	public static final String E4_DATABASE_CHANGED_EVENT = "SMARTDATA"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor

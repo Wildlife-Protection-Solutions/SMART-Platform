@@ -29,6 +29,8 @@ import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.e4.ui.di.UISynchronize;
+import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -74,7 +76,7 @@ public class DownloadChangeLogEngine {
 	 * @return
 	 * @throws Exception
 	 */
-	public boolean downloadInstall(IProgressMonitor monitor) throws Exception{
+	public boolean downloadInstall(final EPartService pService, IProgressMonitor monitor) throws Exception{
 
 		monitor.beginTask("Download && Install Data Updates", 4);
 		
@@ -91,9 +93,23 @@ public class DownloadChangeLogEngine {
 			return false;
 		}
 
-
+		
 		ConnectSyncHistoryRecord record = null;
 		try{
+			//prompt to save or close all dirty editors
+			final boolean[] cont = new boolean[]{true};
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					if (!pService.saveAll(true)){
+						cont[0] = false;
+					}		
+				}
+			});
+			if (!cont[0] || pService.getDirtyParts().size() > 0){
+				throw new Exception("All dirty parts must be saved before you can download from the server.");
+			}
+			
 			Session session = HibernateManager.openSession();
 			try{
 				if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){

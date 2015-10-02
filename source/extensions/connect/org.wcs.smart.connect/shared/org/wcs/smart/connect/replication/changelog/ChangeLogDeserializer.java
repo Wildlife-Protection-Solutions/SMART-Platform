@@ -126,10 +126,17 @@ public abstract class ChangeLogDeserializer {
 		
 			if (type == Types.BLOB ||
 					type == Types.BINARY){
+				//TODO: both (blob and clob) of these are going to cause problems if the 
+				//length is greater than integer max value
 				long length = is.readLong();
 				byte[] bytes = new byte[(int)length];
 				is.readFully(bytes);
 				data.put(colName, bytes);
+			}else if (type == Types.CLOB){
+				long length = is.readLong();
+				byte[] cdata = new byte[(int)length];
+				is.readFully(cdata);
+				data.put(colName, new String(cdata));
 			}else if (type == Types.OTHER){
 				//uuid
 				UUID uuid = (UUID) is.readObject();
