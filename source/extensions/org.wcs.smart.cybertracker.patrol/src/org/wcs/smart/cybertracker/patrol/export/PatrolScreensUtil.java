@@ -48,17 +48,17 @@ import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
+import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolType.Type;
-import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
-import org.wcs.smart.patrol.model.ScreenOptionUuid;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.util.SmartUtils;
 
@@ -107,7 +107,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		Map<ScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
+		Map<PatrolScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
 		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
 		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps);
 		//patrol type & transport
@@ -119,7 +119,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 		id = addTypeTransportNodes(id, result, elements, patrolTypes, screenOptions, session);
 		//patrol armed
-		so = screenOptions.get(ScreenOptionMeta.ARMED);
+		so = screenOptions.get(PatrolScreenOptionMeta.ARMED);
 		if (so == null || so.isVisible()) {
 			List<CyberTrackerId> armedIds = ElementsUtil.buildBooleanElements(elements);
 			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_IsArmed, RESULT_ARMED, armedIds, false);
@@ -130,7 +130,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			result.defaultValues.add(createDefaultResultElement(RESULT_ARMED, elements, elId));
 		}
 
-		so = screenOptions.get(ScreenOptionMeta.TEAM);
+		so = screenOptions.get(PatrolScreenOptionMeta.TEAM);
 		if (so == null || so.isVisible()) {
 			List<Team> teams = PatrolHibernateManager.getActiveTeams(ca, session);
 			cyberTrackerIds = toCyberTrackerIds(elements, teams);
@@ -146,7 +146,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			result.defaultValues.add(createDefaultResultElement(RESULT_TEAM, elements, elId));
 		}
 
-		so = screenOptions.get(ScreenOptionMeta.STATION);
+		so = screenOptions.get(PatrolScreenOptionMeta.STATION);
 		if (so == null || so.isVisible()) {
 			List<Station> stations = PatrolHibernateManager.getActiveStations(ca, session);
 			cyberTrackerIds = toCyberTrackerIds(elements, stations);
@@ -162,7 +162,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			result.defaultValues.add(createDefaultResultElement(RESULT_STATION, elements, elId));
 		}
 
-		so = screenOptions.get(ScreenOptionMeta.MANDATE);
+		so = screenOptions.get(PatrolScreenOptionMeta.MANDATE);
 		if (so == null || so.isVisible()) {
 			List<PatrolMandate> mandates = PatrolHibernateManager.getActiveMandates(ca, session);
 			cyberTrackerIds = toCyberTrackerIds(elements, mandates);
@@ -179,14 +179,14 @@ public class PatrolScreensUtil extends ScreensUtil {
 			result.defaultValues.add(createDefaultResultElement(RESULT_MANDATE, elements, elId));
 		}
 
-		so = screenOptions.get(ScreenOptionMeta.OBJECTIVE);
+		so = screenOptions.get(PatrolScreenOptionMeta.OBJECTIVE);
 		if (so == null || so.isVisible()) {
 			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Objective, RESULT_OBJECTIVE, Patrol.MAX_OBJECTIVE_LENGTH);
 		} else {
 			result.defaultValues.add(createDefaultResultElement(RESULT_OBJECTIVE, elements, so.getStringValue()));
 		}
 
-		so = screenOptions.get(ScreenOptionMeta.COMMENT);
+		so = screenOptions.get(PatrolScreenOptionMeta.COMMENT);
 		if (so == null || so.isVisible()) {
 			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_COMMENTS, Patrol.MAX_COMMENT_LENGTH);
 		} else {
@@ -200,7 +200,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 				return Collator.getInstance().compare(e1.getFullLabel(), e2.getFullLabel());
 			}
 		});
-		so = screenOptions.get(ScreenOptionMeta.MEMBERS);
+		so = screenOptions.get(PatrolScreenOptionMeta.MEMBERS);
 		if (so == null || so.isVisible()) {
 			//getting all members names
 			//displaying all screens
@@ -225,8 +225,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 			id = addPilotScreen(id, result, elements, screenOptions, memberIds, patrolTypes, filter);
 		} else {
 			//adding default members
-			ScreenOption leader_so = screenOptions.get(ScreenOptionMeta.LEADER);
-			ScreenOption pilot_so = screenOptions.get(ScreenOptionMeta.PILOT);
+			ScreenOption leader_so = screenOptions.get(PatrolScreenOptionMeta.LEADER);
+			ScreenOption pilot_so = screenOptions.get(PatrolScreenOptionMeta.PILOT);
 			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
 			CyberTrackerId leaderCtId = null;
 			CyberTrackerId pilotCtId = null;
@@ -295,11 +295,11 @@ public class PatrolScreensUtil extends ScreensUtil {
 		buildNextTaskNode(id, container, elements, nextTaskOptions, nodeIds, ctProps);
 	}
 	
-	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<ScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
+	private CyberTrackerId addPilotScreen(CyberTrackerId id, MetaExportResult container, Elements elements, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, List<CyberTrackerId> memberIds, List<PatrolType> patrolTypes, String filter) {
 		//TYPE is visible						- PILOT displayed with navigation formula
 		//TYPE is not visible (set to GROUND)	- PILOT in not displayed
 		//TYPE is not visible (set to !GROUND)	- PILOT displayed without navigation formula
-		ScreenOption type_so = screenOptions.get(ScreenOptionMeta.TYPE);
+		ScreenOption type_so = screenOptions.get(PatrolScreenOptionMeta.TYPE);
 		if (type_so == null || type_so.isVisible()) {
 			String pilotNodeId = id.getNodeId();
 			id = addSimpleNextRadioNode(id, container, elements, Messages.PatrolScreens_Pilot, RESULT_PILOT, memberIds, filter);
@@ -369,8 +369,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return list;
 	}
 	
-	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, List<PatrolType> pTypes, Map<ScreenOptionMeta, ScreenOption> screenOptions, Session session) {
-		ScreenOption typeOption = screenOptions.get(ScreenOptionMeta.TYPE);
+	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, List<PatrolType> pTypes, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
+		ScreenOption typeOption = screenOptions.get(PatrolScreenOptionMeta.TYPE);
 		if (typeOption == null || typeOption.isVisible()) {
 			List<String> types = new ArrayList<String>();
 			List<String> tag0Types = new ArrayList<String>();
@@ -402,7 +402,7 @@ public class PatrolScreensUtil extends ScreensUtil {
 			ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
 			container.defaultValues.add(createDefaultResultElement(RESULT_PATROL_TYPE, elements, elId));
 			
-			ScreenOption trOption = screenOptions.get(ScreenOptionMeta.TRANSPORT);
+			ScreenOption trOption = screenOptions.get(PatrolScreenOptionMeta.TRANSPORT);
 			if (trOption == null || trOption.isVisible()) {
 				PatrolType pType = null;
 				for (PatrolType pt : pTypes) {

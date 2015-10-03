@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.model;
+package org.wcs.smart.dataentry.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -37,7 +35,6 @@ import javax.persistence.Table;
 
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.patrol.internal.Messages;
 
 
 /**
@@ -50,34 +47,8 @@ import org.wcs.smart.patrol.internal.Messages;
 @Table(name = "smart.screen_option")
 public class ScreenOption extends UuidItem {
 
-	public enum ScreenOptionMeta {
-//		START_DATE("Start Date"),
-//		END_DATE("End Date"),
-		TYPE(Messages.ScreenOption_PatrolType),
-		TRANSPORT(Messages.ScreenOption_TransportType),
-		ARMED(Messages.ScreenOption_Armed),
-		STATION(Messages.ScreenOption_Station),
-		TEAM(Messages.ScreenOption_Team),
-		MANDATE(Messages.ScreenOption_Mandate),
-		OBJECTIVE(Messages.ScreenOption_Objective),
-		COMMENT(Messages.ScreenOption_Comment),
-		MEMBERS(Messages.ScreenOption_Members),
-		LEADER(Messages.ScreenOption_Leader),
-		PILOT(Messages.ScreenOption_Pilot);
-		
-		private String guiLabel;
-		
-		private ScreenOptionMeta(String guiLabel) {
-			this.guiLabel = guiLabel;
-		}
-		
-		public String getGuiLabel() {
-			return guiLabel;
-		}
-	}
-
 	private ConservationArea ca;
-	private ScreenOptionMeta type;
+	private String type;
 	private boolean visible = true;
 	private String stringValue;
 	private Boolean booleanValue;
@@ -95,11 +66,11 @@ public class ScreenOption extends UuidItem {
 	}
 	
 	@Column(name="type")
-	@Enumerated(EnumType.STRING)
-	public ScreenOptionMeta getType() {
+//	@Enumerated(EnumType.STRING)
+	public String getType() {
 		return type;
 	}
-	public void setType(ScreenOptionMeta type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 	

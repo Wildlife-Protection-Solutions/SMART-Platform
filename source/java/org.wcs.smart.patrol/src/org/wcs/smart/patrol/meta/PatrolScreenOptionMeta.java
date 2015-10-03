@@ -21,45 +21,20 @@
  */
 package org.wcs.smart.patrol.meta;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-
 /**
- * Common class for all screen options
- * 
+ * Meta options for patrol screens
  * @author elitvin
- * @since 2.0.0
  */
-public abstract class ScreenOptionComposite extends Composite {
-
-	List<IScreenOptionChangeListener> listeners = new ArrayList<IScreenOptionChangeListener>();
-
-	public ScreenOptionComposite(Composite parent) {
-		super(parent, SWT.NONE);
-		this.setLayout(new GridLayout(1, false));
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-	}
-
-	public void addScreenOptionListener(IScreenOptionChangeListener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeScreenOptionListener(IScreenOptionChangeListener listener) {
-		listeners.remove(listener);
-	}
-	
-	protected void fireScreenOptionListeners() {
-		for (IScreenOptionChangeListener listener : listeners) {
-			listener.screenOptionChanged();
-		}
-	}
-	
-	public String validate() {
-		return null;
-	}
+public enum PatrolScreenOptionMeta {
+	TYPE,
+	TRANSPORT,
+	ARMED,
+	STATION,
+	TEAM,
+	MANDATE,
+	OBJECTIVE,
+	COMMENT,
+	MEMBERS,
+	LEADER,
+	PILOT;
 }

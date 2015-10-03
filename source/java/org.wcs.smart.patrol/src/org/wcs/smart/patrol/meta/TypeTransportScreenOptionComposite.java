@@ -38,9 +38,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
+import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
+import org.wcs.smart.dataentry.meta.ScreenOptionGroup;
+import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.ScreenOption;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
@@ -67,9 +69,9 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 		this.transportOption = transportOption;
 		this.patrolTypes = patrolTypes;
 		
-		new TypeOptionGroup(this, this.typeOption);
+		new TypeOptionGroup(this, this.typeOption, MetaLabelUtil.getLabel(PatrolScreenOptionMeta.TYPE));
 		
-		transportGroup = new TransportOptionGroup(this, this.transportOption);
+		transportGroup = new TransportOptionGroup(this, this.transportOption, MetaLabelUtil.getLabel(PatrolScreenOptionMeta.TRANSPORT));
 		
 		if (typeOption.isVisible()) {
 			transportGroup.setEnabled(false);
@@ -99,8 +101,8 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 	
 	private class TypeOptionGroup extends ScreenOptionGroup {
 
-		public TypeOptionGroup(Composite parent, ScreenOption option) {
-			super(parent, option);
+		public TypeOptionGroup(Composite parent, ScreenOption option, String title) {
+			super(parent, option, title);
 		}
 
 		@Override
@@ -188,8 +190,8 @@ public class TypeTransportScreenOptionComposite extends ScreenOptionComposite {
 
 	private class TransportOptionGroup extends ScreenOptionGroup {
 
-		public TransportOptionGroup(Composite parent, ScreenOption option) {
-			super(parent, option);
+		public TransportOptionGroup(Composite parent, ScreenOption option, String title) {
+			super(parent, option, title);
 		}
 
 		@Override

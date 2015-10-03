@@ -43,11 +43,12 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
+import org.wcs.smart.dataentry.meta.ScreenOptionGroup;
+import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.EmployeeLabelProvider;
-import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
-import org.wcs.smart.patrol.model.ScreenOptionUuid;
 
 /**
  * Patrol Members/Leader/Pilot screens configuration.
@@ -71,17 +72,17 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 	/**
 	 * @param parent
 	 */
-	public EmployeeScreenOptionComposite(Composite parent, Map<ScreenOptionMeta, ScreenOption> options, List<Employee> members) {
+	public EmployeeScreenOptionComposite(Composite parent, Map<PatrolScreenOptionMeta, ScreenOption> options, List<Employee> members) {
 		super(parent);
 		this.members = members;
 		
-		membersOption = options.get(ScreenOptionMeta.MEMBERS);
-		leaderOption = options.get(ScreenOptionMeta.LEADER);
-		pilotOption = options.get(ScreenOptionMeta.PILOT);
+		membersOption = options.get(PatrolScreenOptionMeta.MEMBERS);
+		leaderOption = options.get(PatrolScreenOptionMeta.LEADER);
+		pilotOption = options.get(PatrolScreenOptionMeta.PILOT);
 
-		new MemberOptionGroup(this, membersOption);
-		leaderGroup = new EmployeeDropOptionGroup(this, leaderOption);
-		pilotGroup = new EmployeeDropOptionGroup(this, pilotOption);
+		new MemberOptionGroup(this, membersOption, MetaLabelUtil.getLabel(PatrolScreenOptionMeta.MEMBERS));
+		leaderGroup = new EmployeeDropOptionGroup(this, leaderOption, MetaLabelUtil.getLabel(PatrolScreenOptionMeta.LEADER));
+		pilotGroup = new EmployeeDropOptionGroup(this, pilotOption, MetaLabelUtil.getLabel(PatrolScreenOptionMeta.PILOT));
 
 		if (membersOption.isVisible()) {
 			leaderGroup.setEnabled(false);
@@ -138,8 +139,8 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 	
 	private class MemberOptionGroup extends ScreenOptionGroup {
 
-		public MemberOptionGroup(Composite parent, ScreenOption option) {
-			super(parent, option);
+		public MemberOptionGroup(Composite parent, ScreenOption option, String title) {
+			super(parent, option, title);
 		}
 
 		@Override
@@ -210,8 +211,8 @@ public class EmployeeScreenOptionComposite extends ScreenOptionComposite {
 
 		private ComboViewer viewer;
 		
-		public EmployeeDropOptionGroup(Composite parent, ScreenOption option) {
-			super(parent, option);
+		public EmployeeDropOptionGroup(Composite parent, ScreenOption option, String title) {
+			super(parent, option, title);
 		}
 
 		@Override

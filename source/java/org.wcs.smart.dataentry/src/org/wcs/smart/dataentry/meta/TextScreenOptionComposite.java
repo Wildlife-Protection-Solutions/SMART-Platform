@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.dataentry.meta;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -29,7 +29,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
-import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
+import org.wcs.smart.dataentry.model.ScreenOption;
 
 /**
  * Screen option with text control for default value.
@@ -42,9 +43,9 @@ public class TextScreenOptionComposite extends ScreenOptionComposite {
 	/**
 	 * @param parent
 	 */
-	public TextScreenOptionComposite(Composite parent, ScreenOption model) {
+	public TextScreenOptionComposite(Composite parent, ScreenOption model, String title) {
 		super(parent);
-		TextScreenOptionGroup grp = new TextScreenOptionGroup(this, model);
+		TextScreenOptionGroup grp = new TextScreenOptionGroup(this, model, title);
 		grp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 	}
 
@@ -52,8 +53,8 @@ public class TextScreenOptionComposite extends ScreenOptionComposite {
 
 		private Text text;
 
-		public TextScreenOptionGroup(Composite parent, ScreenOption option) {
-			super(parent, option);
+		public TextScreenOptionGroup(Composite parent, ScreenOption option, String title) {
+			super(parent, option, title);
 		}
 
 		@Override

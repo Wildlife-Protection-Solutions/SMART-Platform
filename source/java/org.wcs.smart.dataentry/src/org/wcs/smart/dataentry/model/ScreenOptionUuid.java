@@ -19,16 +19,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.dataentry.model;
 
-import org.wcs.smart.ca.NamedItem;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.wcs.smart.ca.UuidItem;
 
 /**
- * LabelProvider for {@link NamedItem}
+ * Uuid option for {@link ScreenOption}
  * 
  * @author elitvin
  * @since 2.0.0
  */
-public interface IScreenOptionChangeListener {
-	public void screenOptionChanged();
+@Entity
+@Table(name = "smart.screen_option_uuid")
+public class ScreenOptionUuid extends UuidItem {
+	
+	private ScreenOption screenOption;
+	private byte[] uuidValue;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="option_uuid", referencedColumnName="uuid")
+	public ScreenOption getScreenOption() {
+		return screenOption;
+	}
+	public void setScreenOption(ScreenOption screenOption) {
+		this.screenOption = screenOption;
+	}
+	
+	@Column(name="uuid_value")
+	public byte[] getUuidValue() {
+		return uuidValue;
+	}
+	public void setUuidValue(byte[] uuidValue) {
+		this.uuidValue = uuidValue;
+	}
+	
+	
 }

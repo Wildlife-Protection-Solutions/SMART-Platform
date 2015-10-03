@@ -587,13 +587,6 @@
             class="org.wcs.smart.patrol.model.Track">
       </class>
       <class
-            class="org.wcs.smart.patrol.model.ScreenOption">
-      </class>
-      <class
-            ca_property=".screenOption.conservationArea"
-            class="org.wcs.smart.patrol.model.ScreenOptionUuid">
-      </class>
-      <class
             ca_property=".id.waypoint.conservationArea"
             class="org.wcs.smart.patrol.model.PatrolWaypoint">
       </class>

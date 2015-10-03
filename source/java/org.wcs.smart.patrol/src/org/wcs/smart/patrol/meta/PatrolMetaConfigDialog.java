@@ -28,35 +28,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.dataentry.meta.DropdownScreenOptionComposite;
+import org.wcs.smart.dataentry.meta.IScreenOptionChangeListener;
+import org.wcs.smart.dataentry.meta.MetaConfigDialog;
+import org.wcs.smart.dataentry.meta.ScreenOptionComposite;
+import org.wcs.smart.dataentry.meta.TextScreenOptionComposite;
+import org.wcs.smart.dataentry.meta.YesNoScreenOptionComposite;
+import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
-import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.patrol.model.Team;
-import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
 
 /**
  * The CyberTracker dialog for managing patrol meta screen
@@ -65,22 +56,24 @@ import org.wcs.smart.ui.properties.AbstractPropertyJHeaderDialog;
  * @author elitvin
  * @since 2.0.0
  */
-public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
+public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionMeta> {
 
-	private ScreenOptionMeta[] optionsToShow = {
-			ScreenOptionMeta.TYPE,
-			ScreenOptionMeta.TRANSPORT,
-			ScreenOptionMeta.ARMED,
-			ScreenOptionMeta.TEAM,
-			ScreenOptionMeta.STATION,
-			ScreenOptionMeta.MANDATE,
-			ScreenOptionMeta.OBJECTIVE,
-			ScreenOptionMeta.COMMENT,
-			ScreenOptionMeta.MEMBERS,
-			ScreenOptionMeta.LEADER,
-			ScreenOptionMeta.PILOT };
+	private PatrolScreenOptionMeta[] optionsToShow = {
+			PatrolScreenOptionMeta.TYPE,
+			PatrolScreenOptionMeta.TRANSPORT,
+			PatrolScreenOptionMeta.ARMED,
+			PatrolScreenOptionMeta.TEAM,
+			PatrolScreenOptionMeta.STATION,
+			PatrolScreenOptionMeta.MANDATE,
+			PatrolScreenOptionMeta.OBJECTIVE,
+			PatrolScreenOptionMeta.COMMENT,
+			PatrolScreenOptionMeta.MEMBERS,
+			PatrolScreenOptionMeta.LEADER,
+			PatrolScreenOptionMeta.PILOT };
 
-	private Map<ScreenOptionMeta, ScreenOption> options;
+	private Map<PatrolScreenOptionMeta, ScreenOption> options;
+	
+	private LabelProvider metaScreenLabelProvider = new PatrolMetaScreenLabelProvider();
 	
 	private List<PatrolType> patrolTypes;
 	private List<Team> teams;
@@ -88,15 +81,8 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	private List<PatrolMandate> mandates;
 	private List<Employee> members;
 	
-	private TableViewer modelListViewer;
-
-	private Composite infoInnerPanel;
-	private Composite emptyComposite;
-
-	private Map<ScreenOptionMeta, Composite> screenComposites;
-	
 	public PatrolMetaConfigDialog(Shell shell) {
-		super(shell, Messages.PatrolMetaConfigDialog_ShellTitle);
+		super(shell, Messages.PatrolMetaConfigDialog_ShellTitle, Messages.PatrolMetaConfigDialog_DialogMessage);
 		initData();
 	}
 
@@ -105,12 +91,12 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		options = PatrolHibernateManager.getScreenOptions(ca, session);
 		//creating missing options
-		for (ScreenOptionMeta meta : optionsToShow) {
+		for (PatrolScreenOptionMeta meta : optionsToShow) {
 			ScreenOption cto = options.get(meta);
 			if (cto == null) {
 				cto = new ScreenOption();
 				cto.setConservationArea(ca);
-				cto.setType(meta);
+				cto.setType(meta.name());
 				options.put(meta, cto);
 			}
 		}
@@ -132,155 +118,68 @@ public class PatrolMetaConfigDialog extends AbstractPropertyJHeaderDialog {
 	}
 
 	@Override
-	protected Composite createContent(Composite parent) {
+	protected Map<PatrolScreenOptionMeta, ScreenOption> getOptionsMap() {
+		return options;
+	}
+
+	@Override
+	protected PatrolScreenOptionMeta[] getOptionsToShow() {
+		return optionsToShow;
+	}
+
+	@Override
+	protected Map<PatrolScreenOptionMeta, ScreenOptionComposite> buildOptionComposites(Composite infoInnerPanel, IScreenOptionChangeListener listener) {
+		Map<PatrolScreenOptionMeta, ScreenOptionComposite> screenComposites = new HashMap<PatrolScreenOptionMeta, ScreenOptionComposite>();
+
+		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.TYPE), options.get(PatrolScreenOptionMeta.TRANSPORT), patrolTypes);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(PatrolScreenOptionMeta.TYPE,      soc);
+		screenComposites.put(PatrolScreenOptionMeta.TRANSPORT, soc);
 		
-		SashForm container = new SashForm(parent, SWT.HORIZONTAL);
+		soc = new YesNoScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.ARMED), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.ARMED));
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(PatrolScreenOptionMeta.ARMED, soc);
 
-		modelListViewer = new TableViewer(container, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
-		modelListViewer.setLabelProvider(new PatrolMetaScreenLabelProvider());
-		modelListViewer.setContentProvider(ArrayContentProvider.getInstance());
-		modelListViewer.setInput(optionsToShow);
-		modelListViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		modelListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			@Override
-			public void selectionChanged(SelectionChangedEvent event) {
-				updateRightPanel();
-			}
-		});
+		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.TEAM), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.TEAM), teams);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(PatrolScreenOptionMeta.TEAM, soc);
 
-		Composite rightPanel = new Composite(container, SWT.NONE);
-		rightPanel.setLayout(new GridLayout(1, false));
-		rightPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.STATION), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.STATION), stations);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(PatrolScreenOptionMeta.STATION, soc);
 
-		infoInnerPanel = new Composite(rightPanel, SWT.NONE);
-		infoInnerPanel.setLayout(new StackLayout());
-		infoInnerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-		emptyComposite = new Composite(infoInnerPanel, SWT.NONE);
-		emptyComposite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-
-		IScreenOptionChangeListener listener = new IScreenOptionChangeListener() {
-			@Override
-			public void screenOptionChanged() {
-				setChangesMade(true);
-				StackLayout stackLayout = ((StackLayout)infoInnerPanel.getLayout());
-				updateMessage((Composite)stackLayout.topControl);
-			}
-		};
+		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.MANDATE), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.MANDATE), mandates);
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(PatrolScreenOptionMeta.MANDATE, soc);
 		
-		screenComposites = new HashMap<ScreenOptionMeta, Composite>();
+		soc = new TextScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.OBJECTIVE), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.OBJECTIVE));
+		soc.addScreenOptionListener(listener);
+		screenComposites.put(PatrolScreenOptionMeta.OBJECTIVE, soc);
 
-		ScreenOptionComposite soc  = new TypeTransportScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TYPE), options.get(ScreenOptionMeta.TRANSPORT), patrolTypes);
+		soc = new TextScreenOptionComposite(infoInnerPanel, options.get(PatrolScreenOptionMeta.COMMENT), metaScreenLabelProvider.getText(PatrolScreenOptionMeta.COMMENT));
 		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.TYPE,      soc);
-		screenComposites.put(ScreenOptionMeta.TRANSPORT, soc);
-		
-		soc = new ArmedScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.ARMED));
-		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.ARMED, soc);
-
-		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.TEAM), teams);
-		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.TEAM, soc);
-
-		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.STATION), stations);
-		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.STATION, soc);
-
-		soc = new DropdownScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.MANDATE), mandates);
-		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.MANDATE, soc);
-		
-		soc = new TextScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.OBJECTIVE));
-		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.OBJECTIVE, soc);
-
-		soc = new TextScreenOptionComposite(infoInnerPanel, options.get(ScreenOptionMeta.COMMENT));
-		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.COMMENT, soc);
+		screenComposites.put(PatrolScreenOptionMeta.COMMENT, soc);
 
 		soc = new EmployeeScreenOptionComposite(infoInnerPanel, options, members);
 		soc.addScreenOptionListener(listener);
-		screenComposites.put(ScreenOptionMeta.MEMBERS, soc);
-		screenComposites.put(ScreenOptionMeta.LEADER, soc);
-		screenComposites.put(ScreenOptionMeta.PILOT, soc);
+		screenComposites.put(PatrolScreenOptionMeta.MEMBERS, soc);
+		screenComposites.put(PatrolScreenOptionMeta.LEADER, soc);
+		screenComposites.put(PatrolScreenOptionMeta.PILOT, soc);
 		
-		container.setWeights(new int[]{40,60});
-		
-		setTitle(Messages.PatrolMetaConfigDialog_DialogTitle);
-		setMessage(Messages.PatrolMetaConfigDialog_DialogMessage);
-		return container;
+		return screenComposites;
 	}
 
-	private void updateRightPanel() {
-		IStructuredSelection selection = (IStructuredSelection) modelListViewer.getSelection();
-		Object obj = selection.getFirstElement();
-
-		StackLayout stackLayout = ((StackLayout)infoInnerPanel.getLayout());
-		if (obj instanceof ScreenOptionMeta) {
-			ScreenOptionMeta meta = (ScreenOptionMeta) obj;
-			Composite cmp = screenComposites.get(meta);
-			updateMessage(cmp);
-			stackLayout.topControl = cmp;
-		} else {
-			stackLayout.topControl = emptyComposite;
-		}
-		infoInnerPanel.layout();
-	}
-
-	private void updateMessage(Composite editComposite) {
-		if (editComposite instanceof ScreenOptionComposite) {
-			ScreenOptionComposite soc = (ScreenOptionComposite) editComposite;
-			String msg = soc.validate();
-			if (msg != null) {
-				setMessage(msg, IMessageProvider.ERROR);
-				return;
-			}
-		}
-		setMessage(Messages.PatrolMetaConfigDialog_DialogMessage);
-	}
-	
-	private boolean validate() {
-		for (ScreenOptionMeta option : optionsToShow) {
-			Composite cmp = screenComposites.get(option);
-			if (cmp instanceof ScreenOptionComposite) {
-				ScreenOptionComposite soc = (ScreenOptionComposite) cmp;
-				if (soc.validate() != null) {
-					modelListViewer.setSelection(new StructuredSelection(option));
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	
 	@Override
-	protected boolean performSave() {
-		if (!validate())
-			return false;
-		
-		Session session = getSession();
-		session.beginTransaction();
-		try {
-			for (ScreenOption so : options.values()) {
-				session.saveOrUpdate(so);
-			}
-			session.getTransaction().commit();
-			setChangesMade(false);
-			return true;
-		} catch (Exception ex) {
-			session.getTransaction().rollback();
-			SmartPatrolPlugIn.displayLog(Messages.PatrolMetaConfigDialog_ErrorMessage + "\n"+ ex.getLocalizedMessage(), ex); //$NON-NLS-1$
-			return false;
-		}
+	protected LabelProvider getMetaTypeLabelProvider() {
+		return metaScreenLabelProvider;
 	}
 
 	private class PatrolMetaScreenLabelProvider extends LabelProvider {
 		@Override
 		public String getText(Object element) {
-			if (element instanceof ScreenOptionMeta) {
-				ScreenOptionMeta i = (ScreenOptionMeta)element;
-				return i.getGuiLabel();
+			if (element instanceof PatrolScreenOptionMeta) {
+				PatrolScreenOptionMeta i = (PatrolScreenOptionMeta)element;
+				return MetaLabelUtil.getLabel(i);
 			}
 			return super.getText(element);
 		}
