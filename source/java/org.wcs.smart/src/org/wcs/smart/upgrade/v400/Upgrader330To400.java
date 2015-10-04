@@ -36,13 +36,14 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
 /**
  * Upgrades from database version 320 to 321.
  *
+ * @author Emily
  * @author elitvin
  * @since 3.2.0
  */
-public class Upgrader321To400 implements IDatabaseUpgrader {
+public class Upgrader330To400 implements IDatabaseUpgrader {
 	
 	public void upgrade(final IProgressMonitor monitor) {
-		monitor.subTask("Upgrading from 3.2.1 to 4.0.0");
+		monitor.subTask("Upgrading from 3.3.0 to 4.0.0");
 		final Session s = HibernateManager.openSession();
 		try{
 			s.doWork(new Work() {
