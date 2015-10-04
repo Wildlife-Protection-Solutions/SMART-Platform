@@ -55,7 +55,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 						Display.getDefault().syncExec(new Runnable(){
 							@Override
 							public void run() {
-								SmartPlugIn.displayLog("Error upgrading from 3.2.1 to 4.0.0", e);
+								SmartPlugIn.displayLog("Error upgrading from 3.3.0 to 4.0.0", e);
 							}
 						});
 					}
