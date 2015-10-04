@@ -89,7 +89,7 @@ public class DropdownScreenOptionComposite extends ScreenOptionComposite {
 			viewer.setInput(ddInput);
 			UUID uuid = getModel().getUuidValue();
 			for (NamedItem item : ddInput) {
-				if (uuid == item.getUuid() || item.getUuid().equals(uuid)) {
+				if (uuid == item.getUuid() || (uuid != null && uuid.equals(item.getUuid()))) {
 					viewer.setSelection(new StructuredSelection(item));
 					break;
 				}
