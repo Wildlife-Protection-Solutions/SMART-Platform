@@ -30,7 +30,7 @@ import org.wcs.smart.upgrade.v310.Upgrader302To310;
 import org.wcs.smart.upgrade.v320.Upgrader310To320;
 import org.wcs.smart.upgrade.v321.Upgrader320To321;
 import org.wcs.smart.upgrade.v330.Upgrader321To330;
-import org.wcs.smart.upgrade.v400.Upgrader321To400;
+import org.wcs.smart.upgrade.v400.Upgrader330To400;
 
 /**
  * Check if provided backup requires update to satisfy current SMART configuration
@@ -52,7 +52,7 @@ public class UpgradeEngine {
 		V310("3.1.0", Upgrader310To320.class), //$NON-NLS-1$
 		V320("3.2.0", Upgrader320To321.class), //$NON-NLS-1$
 		V330("3.2.1", Upgrader321To330.class), //$NON-NLS-1$
-		V400("3.3.0", Upgrader321To400.class); //$NON-NLS-1$
+		V400("3.3.0", Upgrader330To400.class); //$NON-NLS-1$
 		
 		public String versionString;
 		public Class<? extends IDatabaseUpgrader> upgradeEngine;
