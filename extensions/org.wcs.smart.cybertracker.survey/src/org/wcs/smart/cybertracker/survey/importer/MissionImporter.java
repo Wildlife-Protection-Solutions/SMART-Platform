@@ -55,6 +55,7 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
@@ -77,7 +78,10 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class MissionImporter extends AbstractSmartImporter {
 
-	public Mission importData(CyberTrackerSurvey ctSurvey, Survey survey, Mission mission) {
+	/**
+	 * If survey is provided that it is used as a target survey, otherwise new survey with passed newSurveyId will be created
+	 */
+	public Mission importData(CyberTrackerSurvey ctSurvey, Mission mission, Survey survey, String newSurveyId) {
 		clearWarning();
 		
 		for (String warning : ctSurvey.getWarnings()) {
@@ -90,7 +94,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			session.beginTransaction();
 			if (survey == null) {
 				//this mean that user wants a new survey to be created
-				survey = createNewSurvey(ctSurvey);
+				survey = createNewSurvey(ctSurvey, newSurveyId);
 				session.save(survey);
 				fireSurveyAdded = true;
 			}
@@ -112,12 +116,22 @@ public class MissionImporter extends AbstractSmartImporter {
 					return null;
 				}
 			}
+			
+			//import mission properties
+			for (MissionPropertyValue mpv : ctSurvey.getMissionProperties()) {
+				mpv.setMission(mission);
+				mission.getMissionPropertyValues().add(mpv);
+			}
+			
+			//import observations
 			List<S> sList = SightsMultiObsUtil.convertMultiObs(ctSurvey);
 			for (S s : sList) {
 				MissionDay mday = findOrAddMissionDay(mission, s);
 				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
 				addObservations(wp, s, ctSurvey.getElementsMap(), session);
 			}
+
+			//TODO: import tracks
 
 			if (!displayWarnings(ctSurvey))
 				return null;
@@ -144,12 +158,12 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 	}
 
-	private Survey createNewSurvey(CyberTrackerSurvey ctSurvey) {
+	private Survey createNewSurvey(CyberTrackerSurvey ctSurvey, String id) {
 		Survey survey = new Survey();
 		survey.setSurveyDesign(ctSurvey.getSurveyDesign());
 		survey.setStartDate(ctSurvey.getStartDate());
 		survey.setEndDate(ctSurvey.getEndDate());
-		survey.setId("auto-survey"); //TODO: generation or user input?
+		survey.setId(id);
 		return survey;
 	}
 

@@ -45,6 +45,10 @@ import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
+import org.wcs.smart.er.model.MissionProperty;
+import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -192,6 +196,59 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			if (emp != null) {
 				ctSurvey.getMembers().add(emp);
 			}
-		}		
+		} else if (n != null && n.startsWith(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX)) {
+			String tag0 = i != null ? i.getTag0() : null;
+			MissionAttribute ma = tag0 != null ? SurveyHibernateManager.getInstance().getMissionAttributeByKey(tag0, session) : null;
+			if (ma == null) {
+				ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Conservation area doesn''t contain mission property with key = ''{0}''. Mission property will not be recorded.", tag0));
+				return;
+			}
+			//if everything is ok, that survey design should be already in place
+			SurveyDesign sd = ctSurvey.getSurveyDesign();
+			if (sd!= null && sd.getMissionProperties() != null) {
+				boolean found = false;
+				for (MissionProperty mp : sd.getMissionProperties()) {
+					if (ma.equals(mp.getAttribute())) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Survey design ''{0}'' doesn''t contain mission property with key = ''{1}''. Mission property will not be recorded.", sd.getName(), tag0));
+					return;
+				}
+			}
+			if (ma.getType() != null) {
+				MissionPropertyValue mpv = new MissionPropertyValue();
+				mpv.setMissionAttribute(ma);
+				switch (ma.getType()) {
+				case LIST:
+				{
+					E itemE = eMap.get(v);
+					MissionAttributeListItem item = fetchFromTag0(MissionAttributeListItem.class, itemE, session);
+					if (item != null) {
+						mpv.setAttributeListItem(item);
+						ctSurvey.getMissionProperties().add(mpv);
+					} else {
+						String itemName = itemE != null ? itemE.getN() : v;
+						ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Mission property with key = ''{0}'' do not contain list item ''{1}''. Mission property will not be recorded.", tag0, itemName));
+					}
+					return;
+					
+				}
+				case TEXT:
+					mpv.setStringValue(v);
+					ctSurvey.getMissionProperties().add(mpv);
+					return;
+				case NUMERIC:
+					mpv.setNumberValue(Double.valueOf(v));
+					ctSurvey.getMissionProperties().add(mpv);
+					return;
+				default:
+					break;
+				}
+			}
+			ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Unsupported mission attribute type ''{0}'' for mission property with key = ''{1}''. Mission property will not be recorded.", ma.getType(), tag0));
+		}
 	}
 }

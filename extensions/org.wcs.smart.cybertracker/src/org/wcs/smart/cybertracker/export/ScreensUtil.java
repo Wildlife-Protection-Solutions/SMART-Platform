@@ -214,6 +214,12 @@ public class ScreensUtil {
 		return resultId.getItemId();
 	}
 
+	protected String createResultElement(String name, Elements elements, String tag0) {
+		CyberTrackerId resultId = new CyberTrackerId();
+		ElementsUtil.addElementsItem(elements, name, resultId.getItemId(), tag0);
+		return resultId.getItemId();
+	}
+	
 	protected String createDefaultResultElement(String name, Elements elements, String defaultValue) {
 		CyberTrackerId resultId = new CyberTrackerId();
 		ElementsUtil.addElementsItem(elements, name, resultId.getItemId(), null, null, defaultValue);
@@ -245,7 +251,11 @@ public class ScreensUtil {
 	}
 	
 	protected CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, MetaExportResult container, Elements elements, String name, String resultElName,  List<CyberTrackerId> ids, boolean canSkip) {
-		String resultId = createResultElement(resultElName, elements);
+		return addSimpleNextRadioNode(id, container, elements, name, resultElName, null, ids, canSkip);
+	}
+
+	protected CyberTrackerId addSimpleNextRadioNode(CyberTrackerId id, MetaExportResult container, Elements elements, String name, String resultElName, String tag0, List<CyberTrackerId> ids, boolean canSkip) {
+		String resultId = createResultElement(resultElName, elements, tag0);
 		Node node = ctUtil.createRadioNode(id.getNodeId(), name, ids, resultId);
 		container.screenNodes.add(node);
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
@@ -260,9 +270,13 @@ public class ScreensUtil {
 		container.resultElements.add(new IdNamePair(resultId, resultElName));
 		return toNextScreen(node);
 	}
-	
+
 	protected CyberTrackerId addNoteNextNode(CyberTrackerId id, MetaExportResult container, Elements elements, String name, String resultElName, int maxLength) {
-		String resultId = createResultElement(resultElName, elements);
+		return addNoteNextNode(id, container, elements, name, resultElName, null, maxLength);
+	}
+	
+	protected CyberTrackerId addNoteNextNode(CyberTrackerId id, MetaExportResult container, Elements elements, String name, String resultElName, String tag0, int maxLength) {
+		String resultId = createResultElement(resultElName, elements, tag0);
 		Node node = screensFactory.createNodeNote(id.getNodeId(), name,  resultId);
 		
 		Control textControl = ScreensObjectFactory.getNoteMainControl(node);
@@ -273,6 +287,14 @@ public class ScreensUtil {
 		return toNextScreen(node);
 	}
 	
+	protected CyberTrackerId addNumberNode(CyberTrackerId id, MetaExportResult container, Elements elements, String name, String resultElName, String tag0) {
+		String resultId = createResultElement(resultElName, elements, tag0);
+		Node node = screensFactory.createNodeNumber(id.getNodeId(), name,  resultId);
+		container.screenNodes.add(node);
+		container.resultElements.add(new IdNamePair(resultId, resultElName));
+		return toNextScreen(node);
+	}
+
 	protected CyberTrackerId addMembersNode(CyberTrackerId id, MetaExportResult container, List<CyberTrackerId> memberIds) {
 		List<String> values = ctUtil.listItemIds(memberIds);
 		String trElements = ctUtil.translateElements(memberIds);

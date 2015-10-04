@@ -32,6 +32,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -39,7 +41,9 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.er.model.Survey;
@@ -56,7 +60,9 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 
 	private SurveyDesign surveyDesign;
 
-	private ComboViewer surveyId;
+	private Text surveyNewId;
+	private ComboViewer surveyComboViewer;
+	private String newId;
 	private Survey survey;
 	private boolean isNew;
 	
@@ -90,9 +96,27 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				optionChanged();
+				stateChanged();
 			}
 		});
+
+		Composite newCmp = new Composite(main, SWT.NONE);
+		GridLayout newCmpLayout = new GridLayout(2, false);
+		newCmpLayout.marginLeft = 25;
+		newCmp.setLayout(newCmpLayout);
+		newCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		Label lbl = new Label(newCmp, SWT.NONE);
+		lbl.setText("Survey name:");
+		surveyNewId = new Text(newCmp, SWT.BORDER);
+		surveyNewId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		surveyNewId.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				stateChanged();
+			}
+		});
+
 		
 		btnAppend = new Button(main, SWT.RADIO);
 		btnAppend.setSelection(false);
@@ -103,7 +127,7 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 		btnAppend.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				optionChanged();
+				stateChanged();
 			}
 		});
 
@@ -114,18 +138,16 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 		appendCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		
-        surveyId = new ComboViewer(appendCmp);
-        surveyId.getControl().setEnabled(false);
-        surveyId.addSelectionChangedListener(new ISelectionChangedListener() {
+        surveyComboViewer = new ComboViewer(appendCmp);
+        surveyComboViewer.getControl().setEnabled(false);
+        surveyComboViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (getButton(IDialogConstants.OK_ID) != null) {
-					getButton(IDialogConstants.OK_ID).setEnabled(true);
-				}
+				stateChanged();
 			}
 		});
-        surveyId.setContentProvider(ArrayContentProvider.getInstance());
-        surveyId.setLabelProvider(new LabelProvider() {
+        surveyComboViewer.setContentProvider(ArrayContentProvider.getInstance());
+        surveyComboViewer.setLabelProvider(new LabelProvider() {
         	@Override
         	public String getText(Object element) {
         		if (element instanceof Survey) {
@@ -135,7 +157,7 @@ public class SurveySelectorDialog extends TitleAreaDialog {
         	}
         	
         });
-        surveyId.setInput(loadSurveys());
+        surveyComboViewer.setInput(loadSurveys());
 
 		setTitle("survey selection");
 		setMessage("Select a target survey to which selected data will be added");
@@ -146,14 +168,15 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 	@Override
 	protected Control createContents(Composite parent) {
 		Control control = super.createContents(parent);
-		getShell().setSize(getShell().computeSize(440, 200));
+		getShell().setSize(getShell().computeSize(440, 230));
 		return control;
 	}	
 	
-	protected void optionChanged() {
-		boolean enable = btnNew.getSelection() || !surveyId.getSelection().isEmpty();
+	protected void stateChanged() {
+		boolean enable = (btnNew.getSelection() && !surveyNewId.getText().isEmpty()) || (btnAppend.getSelection() && !surveyComboViewer.getSelection().isEmpty());
 		getButton(IDialogConstants.OK_ID).setEnabled(enable);
-		surveyId.getControl().setEnabled(btnAppend.getSelection());
+		surveyComboViewer.getControl().setEnabled(btnAppend.getSelection());
+		surveyNewId.setEnabled(btnNew.getSelection());
 	}
 
 	/**
@@ -175,7 +198,8 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 	protected void buttonPressed(int buttonId) {
 		if (IDialogConstants.OK_ID == buttonId) {
 			isNew = btnNew.getSelection();
-			survey = isNew ? null : (Survey) ((IStructuredSelection) surveyId.getSelection()).getFirstElement();
+			survey = isNew ? null : (Survey) ((IStructuredSelection) surveyComboViewer.getSelection()).getFirstElement();
+			newId = isNew ? surveyNewId.getText() : null;
 			setReturnCode(IDialogConstants.OK_ID);
 		}
 		close();
@@ -201,5 +225,9 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 	public Survey getSelectedSurvey() {
 		return survey;
 
+	}
+	
+	public String getNewId() {
+		return newId;
 	}
 }

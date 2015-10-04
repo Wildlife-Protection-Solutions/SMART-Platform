@@ -181,19 +181,18 @@ public abstract class AbstractPatrolImporter extends AbstractSmartImporter {
 		leg.createLegDays(session);
 		
 		List<Coordinate> timerTrackList = ctPatrol.getTimerTrackList();
-		if (timerTrackList == null || timerTrackList.isEmpty())
-			return;
-		for (PatrolLegDay pld : leg.getPatrolLegDays()) {
-			Date from = combine(pld.getDate(), pld.getStartTime());
-			Date to = combine(pld.getDate(), pld.getEndTime());
-			List<Coordinate> coordinates = listPart(timerTrackList, from, to);
-			Track track = PatrolUtils.convertToTrack(coordinates);
-			if (track != null) {
-				track.setPatrolLegDay(pld);
-				pld.setTrack(track);
+		if (timerTrackList != null && !timerTrackList.isEmpty()) {
+			for (PatrolLegDay pld : leg.getPatrolLegDays()) {
+				Date from = combine(pld.getDate(), pld.getStartTime());
+				Date to = combine(pld.getDate(), pld.getEndTime());
+				List<Coordinate> coordinates = listPart(timerTrackList, from, to);
+				Track track = PatrolUtils.convertToTrack(coordinates);
+				if (track != null) {
+					track.setPatrolLegDay(pld);
+					pld.setTrack(track);
+				}
 			}
 		}
-	
 	}
 	
 	protected void addObservations(PatrolLeg leg, S s, Map<String, E> eMap, Session session) {
