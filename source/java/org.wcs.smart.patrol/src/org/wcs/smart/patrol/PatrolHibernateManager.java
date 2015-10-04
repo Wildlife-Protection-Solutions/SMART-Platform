@@ -36,7 +36,9 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.IWaypointSource;
@@ -45,6 +47,7 @@ import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -53,8 +56,6 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.PatrolWaypointSource;
-import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.model.ScreenOption.ScreenOptionMeta;
 import org.wcs.smart.patrol.model.Team;
 
 
@@ -460,12 +461,17 @@ public class PatrolHibernateManager extends HibernateManager{
 		}
 	}
 
-	public static Map<ScreenOptionMeta, ScreenOption> getScreenOptions(ConservationArea ca, Session session) {
+	public static Map<PatrolScreenOptionMeta, ScreenOption> getScreenOptions(ConservationArea ca, Session session) {
 		@SuppressWarnings("unchecked")
 		List<ScreenOption> results = session.createCriteria(ScreenOption.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
-		Map<ScreenOptionMeta, ScreenOption> options = new HashMap<ScreenOptionMeta, ScreenOption>();
+		Map<PatrolScreenOptionMeta, ScreenOption> options = new HashMap<PatrolScreenOptionMeta, ScreenOption>();
 		for (ScreenOption screenOption : results) {
-			options.put(screenOption.getType(), screenOption);
+			try {
+				options.put(PatrolScreenOptionMeta.valueOf(screenOption.getType()), screenOption);
+			} catch (IllegalArgumentException e) {
+				//ignore unexpected screen type
+				SmartPlugIn.log("Unexpected type for patrol meta screen.", e); //$NON-NLS-1$
+			}
 		}
 		return options;
 	}

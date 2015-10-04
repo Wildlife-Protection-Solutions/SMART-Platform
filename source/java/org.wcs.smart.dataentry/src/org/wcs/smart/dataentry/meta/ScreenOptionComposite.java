@@ -19,16 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.dataentry.meta;
 
-import org.wcs.smart.ca.NamedItem;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
 
 /**
- * LabelProvider for {@link NamedItem}
+ * Common class for all screen options
  * 
  * @author elitvin
  * @since 2.0.0
  */
-public interface IScreenOptionChangeListener {
-	public void screenOptionChanged();
+public abstract class ScreenOptionComposite extends Composite {
+
+	List<IScreenOptionChangeListener> listeners = new ArrayList<IScreenOptionChangeListener>();
+
+	public ScreenOptionComposite(Composite parent) {
+		super(parent, SWT.NONE);
+		this.setLayout(new GridLayout(1, false));
+		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+	}
+
+	public void addScreenOptionListener(IScreenOptionChangeListener listener) {
+		listeners.add(listener);
+	}
+
+	public void removeScreenOptionListener(IScreenOptionChangeListener listener) {
+		listeners.remove(listener);
+	}
+	
+	protected void fireScreenOptionListeners() {
+		for (IScreenOptionChangeListener listener : listeners) {
+			listener.screenOptionChanged();
+		}
+	}
+	
+	public String validate() {
+		return null;
+	}
 }

@@ -117,6 +117,7 @@ public class Messages extends NLS {
 	public static String DatamodelCatecorySelectorDialog_Button_Add;
 	public static String DatamodelCatecorySelectorDialog_Message;
 	public static String DatamodelCatecorySelectorDialog_Title;
+	public static String DropdownScreenOptionComposite_EmptyValue;
 	public static String EditTreeDialog_AddGroup;
 	public static String EditTreeDialog_AddNodeButton;
 	public static String EditTreeDialog_AddNodeTooltip;
@@ -140,11 +141,14 @@ public class Messages extends NLS {
 	public static String ListAttributeInfoComposite_Values;
 	public static String ListAttributeInfoComposite_WarnDialogMessage;
 	public static String ListAttributeInfoComposite_WarnDialogTitle;
+	public static String MetaConfigDialog_SaveError;
 	public static String NumericAttributeInfoComposite_defaultTooltip;
 	public static String NumericAttributeInfoComposite_ErrorDialogTitle;
 	public static String NumericAttributeInfoComposite_numericOpTooltip;
 	public static String NumericAttributeInfoComposite_previousInfo;
 	public static String RenameListDialog_DialogMessage;
+	public static String ScreenOptionGroup_DefaultValue;
+	public static String ScreenOptionGroup_PageVisible;
 	public static String ShowConfigurableModelHandler_LoadDataModel;
 	public static String ShowConfigurableModelHandler_LoadDataModel_Error;
 	public static String ShowConfigurableModelHandler_NoDmDialog_Message;
@@ -165,6 +169,8 @@ public class Messages extends NLS {
 	public static String TreeAttributeInfoComposite_valueLabel;
 	public static String TreeAttributeInfoComposite_WarnMessage1;
 	public static String TreeAttributeInfoComposite_WarnTitle;
+	public static String YesNoScreenOptionComposite_No;
+	public static String YesNoScreenOptionComposite_Yes;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.dataentry.meta;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -29,8 +29,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.ScreenOption;
 
 /**
  * Screen armed option configuration panel.
@@ -38,11 +38,11 @@ import org.wcs.smart.patrol.model.ScreenOption;
  * @author elitvin
  * @since 2.0.0
  */
-public class ArmedScreenOptionComposite extends ScreenOptionComposite {
+public class YesNoScreenOptionComposite extends ScreenOptionComposite {
 
-	public ArmedScreenOptionComposite(Composite parent, ScreenOption model) {
+	public YesNoScreenOptionComposite(Composite parent, ScreenOption model, String title) {
 		super(parent);
-		new BooleanScreenOptionGroup(this, model);
+		new BooleanScreenOptionGroup(this, model, title);
 	}
 
 	private class BooleanScreenOptionGroup extends ScreenOptionGroup {
@@ -50,8 +50,8 @@ public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 		private Button btnYes;
 		private Button btnNo;
 		
-		public BooleanScreenOptionGroup(Composite parent, ScreenOption option) {
-			super(parent, option);
+		public BooleanScreenOptionGroup(Composite parent, ScreenOption option, String title) {
+			super(parent, option, title);
 		}
 
 		@Override
@@ -69,7 +69,7 @@ public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 			
 			
 			btnYes = new Button(container, SWT.RADIO);
-			btnYes.setText(Messages.ArmedScreenOptionComposite_Armed_Yes);
+			btnYes.setText(Messages.YesNoScreenOptionComposite_Yes);
 			btnYes.setEnabled(!getModel().isVisible());
 			btnYes.setSelection(Boolean.TRUE.equals(getModel().getBooleanValue()));
 			btnYes.addSelectionListener(new SelectionAdapter() {
@@ -81,7 +81,7 @@ public class ArmedScreenOptionComposite extends ScreenOptionComposite {
 			});
 			
 			btnNo = new Button(container, SWT.RADIO);
-			btnNo.setText(Messages.ArmedScreenOptionComposite_Armed_No);
+			btnNo.setText(Messages.YesNoScreenOptionComposite_No);
 			btnNo.setEnabled(!getModel().isVisible());
 			btnNo.setSelection(!Boolean.TRUE.equals(getModel().getBooleanValue()));
 			btnNo.addSelectionListener(new SelectionAdapter() {

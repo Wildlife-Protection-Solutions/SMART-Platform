@@ -19,47 +19,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.dataentry.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.UUID;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+
+import org.wcs.smart.ca.UuidItem;
 
 /**
- * Common class for all screen options
+ * Uuid option for {@link ScreenOption}
  * 
  * @author elitvin
  * @since 2.0.0
  */
-public abstract class ScreenOptionComposite extends Composite {
-
-	List<IScreenOptionChangeListener> listeners = new ArrayList<IScreenOptionChangeListener>();
-
-	public ScreenOptionComposite(Composite parent) {
-		super(parent, SWT.NONE);
-		this.setLayout(new GridLayout(1, false));
-		this.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+@Entity
+@Table(name = "smart.screen_option_uuid")
+public class ScreenOptionUuid extends UuidItem {
+	
+	private ScreenOption screenOption;
+	private UUID uuidValue;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name="option_uuid", referencedColumnName="uuid")
+	public ScreenOption getScreenOption() {
+		return screenOption;
 	}
-
-	public void addScreenOptionListener(IScreenOptionChangeListener listener) {
-		listeners.add(listener);
-	}
-
-	public void removeScreenOptionListener(IScreenOptionChangeListener listener) {
-		listeners.remove(listener);
+	public void setScreenOption(ScreenOption screenOption) {
+		this.screenOption = screenOption;
 	}
 	
-	protected void fireScreenOptionListeners() {
-		for (IScreenOptionChangeListener listener : listeners) {
-			listener.screenOptionChanged();
-		}
+	@Column(name="uuid_value")
+	public UUID getUuidValue() {
+		return uuidValue;
+	}
+	public void setUuidValue(UUID uuidValue) {
+		this.uuidValue = uuidValue;
 	}
 	
-	public String validate() {
-		return null;
-	}
+	
 }

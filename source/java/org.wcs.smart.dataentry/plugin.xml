@@ -26,6 +26,13 @@
             ca_property=".configurableModel.conservationArea"
             class="org.wcs.smart.dataentry.model.CmAttributeListItem">
       </class>
+      <class
+            class="org.wcs.smart.dataentry.model.ScreenOption">
+      </class>
+      <class
+            ca_property=".screenOption.conservationArea"
+            class="org.wcs.smart.dataentry.model.ScreenOptionUuid">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.menus">

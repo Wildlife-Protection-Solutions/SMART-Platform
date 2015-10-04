@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.model;
+package org.wcs.smart.dataentry.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +28,6 @@ import java.util.UUID;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -50,22 +48,8 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name = "smart.screen_option")
 public class ScreenOption extends UuidItem {
 
-	public enum ScreenOptionMeta {
-		TYPE,
-		TRANSPORT,
-		ARMED,
-		STATION,
-		TEAM,
-		MANDATE,
-		OBJECTIVE,
-		COMMENT,
-		MEMBERS,
-		LEADER,
-		PILOT;
-	}
-
 	private ConservationArea ca;
-	private ScreenOptionMeta type;
+	private String type;
 	private boolean visible = true;
 	private String stringValue;
 	private Boolean booleanValue;
@@ -83,11 +67,11 @@ public class ScreenOption extends UuidItem {
 	}
 	
 	@Column(name="type")
-	@Enumerated(EnumType.STRING)
-	public ScreenOptionMeta getType() {
+//	@Enumerated(EnumType.STRING)
+	public String getType() {
 		return type;
 	}
-	public void setType(ScreenOptionMeta type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 	
