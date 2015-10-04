@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.dataentry.meta;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -30,9 +30,8 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.ui.LabelConstants;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.ScreenOption;
 
 /**
  * Container for group common logic.
@@ -55,7 +54,7 @@ public abstract class ScreenOptionGroup extends Composite {
 	 * @param parent
 	 * @param style
 	 */
-	public ScreenOptionGroup(Composite parent, ScreenOption option) {
+	public ScreenOptionGroup(Composite parent, ScreenOption option, String title) {
 		super(parent, SWT.NONE);
 		this.model = option;
 
@@ -72,10 +71,10 @@ public abstract class ScreenOptionGroup extends Composite {
 		group = new Group(this,  SWT.NONE);
 		group.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		group.setLayout(new GridLayout(2, false));
-		group.setText(LabelConstants.getLabel(model));
+		group.setText(title);
 
 		label1 = new Label(group, SWT.NONE);
-		label1.setText(Messages.ScreenOptionComposite_DisplayPage);
+		label1.setText(Messages.ScreenOptionGroup_PageVisible);
 		
 		btnDisplayPage = new Button(group, SWT.CHECK);
 		btnDisplayPage.setSelection(model.isVisible());
@@ -87,7 +86,7 @@ public abstract class ScreenOptionGroup extends Composite {
 		});
 		
 		label2 = new Label(group, SWT.NONE);
-		label2.setText(Messages.ScreenOptionComposite_DefaultValue);
+		label2.setText(Messages.ScreenOptionGroup_DefaultValue);
 		
 		createDefaultControl(group);
 	}
@@ -117,7 +116,7 @@ public abstract class ScreenOptionGroup extends Composite {
 		return model;
 	}
 	
-	protected Button getBtnDisplayPage() {
+	public Button getBtnDisplayPage() {
 		return btnDisplayPage;
 	}
 }

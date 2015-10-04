@@ -1,8 +1,8 @@
 package org.wcs.smart.patrol.ui;
 
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.meta.PatrolScreenOptionMeta;
 import org.wcs.smart.patrol.model.PatrolType;
-import org.wcs.smart.patrol.model.ScreenOption;
 
 public class LabelConstants {
 
@@ -49,10 +49,7 @@ public class LabelConstants {
 		return null;
 	}
 	
-	public static String getLabel(ScreenOption op){
-		return getLabel(op.getType());
-	}
-	public static String getLabel(ScreenOption.ScreenOptionMeta op){
+	public static String getLabel(PatrolScreenOptionMeta op){
 		switch(op){
 		case ARMED:return SC_OP_ARMED;
 		case COMMENT: return SC_OP_COMMENT;

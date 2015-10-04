@@ -24,8 +24,6 @@ public class Messages extends NLS {
 	public static String ArmedComposite_OpNo;
 	public static String ArmedComposite_OpYes;
 	public static String ArmedComposite_Title;
-	public static String ArmedScreenOptionComposite_Armed_No;
-	public static String ArmedScreenOptionComposite_Armed_Yes;
 	public static String CombinedReportBuilder_DateTime;
 	public static String CombinedReportBuilder_FilesLabel;
 	public static String CombinedReportBuilder_Id;
@@ -427,7 +425,6 @@ public class Messages extends NLS {
 	public static String PatrolMemberWizardPage_Title;
 	public static String PatrolMetaConfigDialog_DialogMessage;
 	public static String PatrolMetaConfigDialog_DialogTitle;
-	public static String PatrolMetaConfigDialog_ErrorMessage;
 	public static String PatrolMetaConfigDialog_ShellTitle;
 	public static String PatrolObjectiveWizardPage_PageMessage;
 	public static String PatrolObjectiveWizardPage_Title;
@@ -552,9 +549,6 @@ public class Messages extends NLS {
 	public static String ScreenOption_Station;
 	public static String ScreenOption_Team;
 	public static String ScreenOption_TransportType;
-	public static String ScreenOptionComposite_DefaultValue;
-	public static String ScreenOptionComposite_DisplayPage;
-	public static String ScreenOptionComposite_Dropdown_NoValue;
 	public static String SmartPatrolPlugIn_Error_DialogMessage1;
 	public static String SmartPatrolPlugIn_Error_DialogMessage2;
 	public static String SmartServiceInfo_PatrolService_Description;

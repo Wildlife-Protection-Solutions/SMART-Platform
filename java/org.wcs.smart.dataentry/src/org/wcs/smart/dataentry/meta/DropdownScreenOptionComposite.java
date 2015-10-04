@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.dataentry.meta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +37,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 import org.wcs.smart.ca.NamedItem;
 import org.wcs.smart.ca.UuidItem;
-import org.wcs.smart.patrol.internal.Messages;
-import org.wcs.smart.patrol.model.ScreenOption;
+import org.wcs.smart.dataentry.internal.Messages;
+import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.ui.NamedItemLabelProvider;
 
 /**
@@ -54,28 +54,28 @@ public class DropdownScreenOptionComposite extends ScreenOptionComposite {
 			return null;
 		}
 		public String getName() {
-			return Messages.ScreenOptionComposite_Dropdown_NoValue;
+			return Messages.DropdownScreenOptionComposite_EmptyValue;
 		}
 	};
 
 	private List<NamedItem> ddInput;
 	
-	public DropdownScreenOptionComposite(Composite parent, ScreenOption model, List<? extends NamedItem> cInput) {
+	public DropdownScreenOptionComposite(Composite parent, ScreenOption model, String title, List<? extends NamedItem> cInput) {
 		super(parent);
 
 		ddInput = new ArrayList<NamedItem>();
 		ddInput.add(EMPTY_DROP_OPTION);
 		ddInput.addAll(cInput);
 
-		new DropdownScreenOptionGroup(this, model);
+		new DropdownScreenOptionGroup(this, model, title);
 	}
 
 	private class DropdownScreenOptionGroup extends ScreenOptionGroup {
 
 		private ComboViewer viewer;
 
-		public DropdownScreenOptionGroup(Composite parent, ScreenOption option) {
-			super(parent, option);
+		public DropdownScreenOptionGroup(Composite parent, ScreenOption option, String title) {
+			super(parent, option, title);
 		}
 
 		@Override
