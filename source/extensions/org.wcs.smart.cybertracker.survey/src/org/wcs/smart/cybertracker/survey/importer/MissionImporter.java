@@ -67,6 +67,10 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.util.SmartUtils;
+import org.wcs.smart.util.TrackUtil;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Imports from {@link CyberTrackerSurvey} to {@link Mission} object
@@ -105,6 +109,7 @@ public class MissionImporter extends AbstractSmartImporter {
 				//TODO: validate mission!!!
 			}
 			
+			//TODO: not all logic needs to work in case we use existing mission!!!!!
 			//check if duplicate of existing Mission
 			if (!checkDuplicate(ctSurvey, mission, session)){
 				return null;
@@ -130,7 +135,8 @@ public class MissionImporter extends AbstractSmartImporter {
 				addObservations(wp, s, ctSurvey.getElementsMap(), session);
 			}
 
-			//TODO: import tracks
+			//import tracks
+			appendTracks(ctSurvey, mission);
 
 			if (!displayWarnings(ctSurvey))
 				return null;
@@ -317,6 +323,25 @@ public class MissionImporter extends AbstractSmartImporter {
 		return lastWp.getWaypoint();
 	}	
 
+	private void appendTracks(CyberTrackerSurvey ctSurvey, Mission mission) {
+		List<Coordinate> timerTrackList = ctSurvey.getTimerTrackList();
+		if (timerTrackList != null && !timerTrackList.isEmpty()) {
+			for (MissionDay md : mission.getMissionDays()) {
+				Date from = combine(md.getDate(), md.getStartTime());
+				Date to = combine(md.getDate(), md.getEndTime());
+				List<Coordinate> coordinates = listPart(timerTrackList, from, to);
+				LineString track = TrackUtil.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
+				if (track != null) {
+					MissionTrack t = new MissionTrack();
+					md.getTracks().add(t);
+					t.setMissionDay(md);
+					t.setLineString(track);
+					t.setId("Track" + md.getTracks().size());
+				}
+			}
+		}
+	}
+	
 	private Time createTime(int hours, int minute, int second){
 		Calendar cForProcessing = Calendar.getInstance();
 		cForProcessing.setTimeInMillis(0);
