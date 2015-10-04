@@ -22,12 +22,14 @@
 package org.wcs.smart.cybertracker.survey.export;
 
 import java.text.Collator;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
@@ -45,6 +47,8 @@ import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -69,6 +73,8 @@ public class SurveyScreensUtil extends ScreensUtil {
 	
 	public static final String RESULT_MISSION_SAMPLING_UNIT = "#SamplingUnit"; //$NON-NLS-1$
 
+	public static final String RESULT_MISSION_PROPETY_PREFIX = "#MP#"; //$NON-NLS-1$
+	
 	public static final String DATATYPE_SURVEY = "survey"; //$NON-NLS-1$
 
 	protected SurveyScreensUtil(CyberTrackerUtil ctUtil) {
@@ -79,6 +85,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 	public MetaExportResult buildMetaNodes(Elements elements, CyberTrackerId dmRootId, Session session) {
 		registerDatatype(elements, DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
+		List<CyberTrackerId> cyberTrackerIds;
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
 		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
@@ -116,14 +123,39 @@ public class SurveyScreensUtil extends ScreensUtil {
 
 		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
 
-		CyberTrackerId suScreenId = id;
 		String sdKey = getSurveyDesignKeyId(elements);
 		SurveyDesign surveyDesign = SurveyHibernateManager.getInstance().getSurveyDesign(sdKey, session);
+		
+		List<MissionProperty> missionProperties = surveyDesign.getMissionProperties();
+		for (MissionProperty missionProperty : missionProperties) {
+			MissionAttribute missionAttribute = missionProperty.getAttribute();
+			String tag0 = missionAttribute.getKeyId();
+			String resultElName = RESULT_MISSION_PROPETY_PREFIX + missionAttribute.getKeyId();
+			if (missionAttribute.getType() != null) {
+				switch (missionAttribute.getType()) {
+				case LIST:
+					cyberTrackerIds = toCyberTrackerIds(elements, missionAttribute.getAttributeList());
+					id = addSimpleNextRadioNode(id, result, elements, missionAttribute.getName(), resultElName, tag0, cyberTrackerIds, true);
+					continue;
+				case NUMERIC:
+					id = addNumberNode(id, result, elements, missionAttribute.getName(), resultElName, tag0);
+					continue;
+				case TEXT:
+					id = addNoteNextNode(id, result, elements, missionAttribute.getName(), resultElName, tag0, Mission.MAX_LENGTH_COMMENT);
+					continue;
+				default:
+					break;
+				}
+			}
+			SmartPlugIn.displayLog(MessageFormat.format("SMART CyberTracker plugin do not support mission properties of type {0}. Property ''{1}'' will be ignored.", missionAttribute.getType(), missionAttribute.getName()), null);
+		}
+		
 		List<SamplingUnit> samplingUnits = SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, session, State.ACTIVE);
 		SamplingUnit noneSu = new SamplingUnit();
 		noneSu.setId("None");
 		samplingUnits.add(noneSu);
-		List<CyberTrackerId> cyberTrackerIds = suToCtIds(elements, samplingUnits);
+		cyberTrackerIds = suToCtIds(elements, samplingUnits);
+		CyberTrackerId suScreenId = id;
 		id = addSimpleNextRadioNode(id, result, elements, "Sampling Unit", RESULT_MISSION_SAMPLING_UNIT, cyberTrackerIds, true);
 		Node suNode = result.screenNodes.get(result.screenNodes.size()-1);
 		Control control2 = ScreensObjectFactory.getNavigationControl(suNode);

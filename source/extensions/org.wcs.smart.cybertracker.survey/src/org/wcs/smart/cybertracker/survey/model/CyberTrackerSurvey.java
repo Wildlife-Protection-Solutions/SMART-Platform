@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.cybertracker.importer.CtStringUtil;
 import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
@@ -35,6 +34,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider.CTSurveyUIMeta;
+import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -51,13 +51,15 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 		SURVEY_DESIGN,
 		COMMENT,
 		LEADER,
-		MEMBERS
+		MEMBERS,
+		MISSION_PROPERTY
 	}
 	
 	private String comment;
 	private Employee leader;
 	private List<Employee> members;
 	private SurveyDesign surveyDesign;
+	private List<MissionPropertyValue> missionProperties;
 	
 	//used only for gui representation after initial load
 	private String ctLeader;
@@ -111,6 +113,12 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 		this.ctMembers = ctMembers;
 	}
 
+	public List<MissionPropertyValue> getMissionProperties() {
+		if (missionProperties == null)
+			missionProperties = new ArrayList<MissionPropertyValue>();
+		return missionProperties;
+	}
+	
 	public SurveyDesign getSurveyDesign() {
 		return surveyDesign;
 	}
