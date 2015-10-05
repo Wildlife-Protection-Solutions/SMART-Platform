@@ -54,7 +54,7 @@ public class EmployeeSelectComposite extends MultipleSelectComposite<Employee> {
 			}
 		});
 		setLabelAllText(Messages.EmployeeSelectComposite_AddEmployee_Label);
-		setLabelSelectedText(Messages.EmployeeSelectComposite_AddEmployee_Label);
+		setLabelSelectedText(Messages.EmployeeSelectComposite_SelectedEmployees);
 	}
 
 }
