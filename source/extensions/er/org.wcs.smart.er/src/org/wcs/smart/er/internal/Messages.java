@@ -261,6 +261,10 @@ public class Messages extends NLS {
 	public static String LocationPage_ErrorMessage;
 	public static String LocationPage_Message;
 	public static String LocationPage_Title;
+	public static String MembersScreenOptionComposite_LeaderRequired;
+
+	public static String MembersScreenOptionComposite_MemberRequired;
+
 	public static String MissionAttributeDeleteAdvisor_DeleteError;
 	public static String MissionAttributeDeleteAdvisor_InvalidType;
 	public static String MissionAttributeDialog_CloseDialogTitle;
@@ -407,6 +411,10 @@ public class Messages extends NLS {
 	public static String MissionMapPage_AddLayersJob_Title;
 	public static String MissionMapPage_RefreshLayersJob_Error;
 	public static String MissionMapPage_RefreshLayersJob_Title;
+	public static String MissionMetaConfigDialog_Message;
+
+	public static String MissionMetaConfigDialog_Title;
+
 	public static String MissionPropertiesComposite_AllMissionAttributes;
 	public static String MissionPropertiesComposite_DeleteWarning;
 	public static String MissionPropertiesComposite_Description;
@@ -417,6 +425,12 @@ public class Messages extends NLS {
 
 	public static String MissionPropertyValuesComposite_NoPropertiesDefined;
 	public static String MissionPropertyValuesComposite_Title;
+	public static String MissionScreenOption_Comment;
+
+	public static String MissionScreenOption_Leader;
+
+	public static String MissionScreenOption_Members;
+
 	public static String MissionServiceInfo_Description;
 	public static String MissionServiceInfo_Keyword1;
 	public static String MissionServiceInfo_Keyword2;

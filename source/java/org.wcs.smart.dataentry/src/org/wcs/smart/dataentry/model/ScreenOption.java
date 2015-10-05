@@ -49,6 +49,7 @@ public class ScreenOption extends UuidItem {
 
 	private ConservationArea ca;
 	private String type;
+	private String resource;
 	private boolean visible = true;
 	private String stringValue;
 	private Boolean booleanValue;
@@ -74,6 +75,14 @@ public class ScreenOption extends UuidItem {
 		this.type = type;
 	}
 	
+	@Column(name="resource")
+	public String getResource() {
+		return resource;
+	}
+	public void setResource(String resource) {
+		this.resource = resource;
+	}
+
 	@Column(name="is_visible")
 	public boolean isVisible() {
 		return visible;

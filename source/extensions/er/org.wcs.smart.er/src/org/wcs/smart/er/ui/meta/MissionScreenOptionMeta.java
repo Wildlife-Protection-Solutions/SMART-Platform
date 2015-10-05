@@ -19,24 +19,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.er.ui.meta;
 
 /**
- * Meta options for patrol screens
+ * Meta options for mission screens
  * @author elitvin
  */
-public enum PatrolScreenOptionMeta {
-	TYPE,
-	TRANSPORT,
-	ARMED,
-	STATION,
-	TEAM,
-	MANDATE,
-	OBJECTIVE,
+public enum MissionScreenOptionMeta {
 	COMMENT,
 	MEMBERS,
-	LEADER,
-	PILOT;
-
-	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
+	LEADER;
+	
+	public static final String MISSION_RESOURCE_ID = "mission"; //$NON-NLS-1$
 }

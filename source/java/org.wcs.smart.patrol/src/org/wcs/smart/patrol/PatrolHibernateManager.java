@@ -447,7 +447,10 @@ public class PatrolHibernateManager extends HibernateManager{
 
 	public static Map<PatrolScreenOptionMeta, ScreenOption> getScreenOptions(ConservationArea ca, Session session) {
 		@SuppressWarnings("unchecked")
-		List<ScreenOption> results = session.createCriteria(ScreenOption.class).add(Restrictions.eq("conservationArea", ca)).list(); //$NON-NLS-1$
+		List<ScreenOption> results = session.createCriteria(ScreenOption.class)
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("resource", PatrolScreenOptionMeta.PATROL_RESOURCE_ID)) //$NON-NLS-1$
+				.list();
 		Map<PatrolScreenOptionMeta, ScreenOption> options = new HashMap<PatrolScreenOptionMeta, ScreenOption>();
 		for (ScreenOption screenOption : results) {
 			try {

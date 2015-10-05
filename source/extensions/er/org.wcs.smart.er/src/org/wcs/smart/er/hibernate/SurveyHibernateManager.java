@@ -23,19 +23,24 @@ package org.wcs.smart.er.hibernate;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.SurveyWaypoint;
 import org.wcs.smart.er.model.SurveyWaypointSource;
+import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.model.ObservationAttachment;
 import org.wcs.smart.observation.model.WaypointAttachment;
@@ -160,5 +165,22 @@ public class SurveyHibernateManager {
 		return sb.toString();
 	}
 
-
+	public static Map<MissionScreenOptionMeta, ScreenOption> getMissionScreenOptions(ConservationArea ca, Session session) {
+		@SuppressWarnings("unchecked")
+		List<ScreenOption> results = session.createCriteria(ScreenOption.class)
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("resource", MissionScreenOptionMeta.MISSION_RESOURCE_ID)) //$NON-NLS-1$
+				.list();
+		Map<MissionScreenOptionMeta, ScreenOption> options = new HashMap<MissionScreenOptionMeta, ScreenOption>();
+		for (ScreenOption screenOption : results) {
+			try {
+				options.put(MissionScreenOptionMeta.valueOf(screenOption.getType()), screenOption);
+			} catch (IllegalArgumentException e) {
+				//ignore unexpected screen type
+				SmartPlugIn.log("Unexpected type for mission meta screen.", e); //$NON-NLS-1$
+			}
+		}
+		return options;
+	}
+	
 }
