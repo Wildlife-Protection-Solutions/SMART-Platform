@@ -16,7 +16,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.cybertracker.menu?before=org.wcs.smart.cybertracker.surveymetaseparator">
          <command
-               commandId="org.wcs.smart.patrol.patrolScreens"
+               commandId="org.wcs.smart.er.missionScreens"
                label="%command.cybertracker.survey.meta.export.label"
                style="push">
          </command>

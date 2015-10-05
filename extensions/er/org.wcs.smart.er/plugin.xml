@@ -865,6 +865,10 @@
             class="org.wcs.smart.er.ui.handlers.MissionImportHandler$MissionImportHandlerWrapper"
             commandId="org.wcs.smart.er.missionImportHandler">
       </handler>
+      <handler
+            class="org.wcs.smart.er.ui.handlers.MissionScreenOptionsMetaHandler$MissionScreenOptionsMetaHandlerWrapper"
+            commandId="org.wcs.smart.er.missionScreens">
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -915,6 +919,10 @@
       <command
             id="org.wcs.smart.er.missionImportHandler"
             name="%mission.import.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.er.missionScreens"
+            name="%mission.screenconfig.command.name">
       </command>
    </extension>
    <extension

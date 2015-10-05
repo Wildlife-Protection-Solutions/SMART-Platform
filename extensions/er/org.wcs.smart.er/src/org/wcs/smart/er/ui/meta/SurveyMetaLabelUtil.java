@@ -19,24 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.er.ui.meta;
+
+import org.wcs.smart.er.internal.Messages;
 
 /**
- * Meta options for patrol screens
  * @author elitvin
+ * @since 3.3.0
  */
-public enum PatrolScreenOptionMeta {
-	TYPE,
-	TRANSPORT,
-	ARMED,
-	STATION,
-	TEAM,
-	MANDATE,
-	OBJECTIVE,
-	COMMENT,
-	MEMBERS,
-	LEADER,
-	PILOT;
+public class SurveyMetaLabelUtil {
 
-	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
+	public static final String MISSION_COMMENT = Messages.MissionScreenOption_Comment;
+	public static final String MISSION_MEMBERS = Messages.MissionScreenOption_Members;
+	public static final String MISSION_LEADER = Messages.MissionScreenOption_Leader;
+
+	public static String getLabel(MissionScreenOptionMeta op) {
+		switch(op){
+		case COMMENT: return MISSION_COMMENT;
+		case LEADER:return MISSION_LEADER;
+		case MEMBERS:return MISSION_MEMBERS;
+		default:
+			return null;
+			
+		}
+	}
 }

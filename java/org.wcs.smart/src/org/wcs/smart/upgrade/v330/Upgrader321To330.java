@@ -72,7 +72,10 @@ public class Upgrader321To330 implements IDatabaseUpgrader {
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		String[] sql = new String[]{
 				"ALTER TABLE smart.CM_NODE ADD COLUMN collect_multiple_obs BOOLEAN", //$NON-NLS-1$
-				"ALTER TABLE smart.CM_NODE ADD COLUMN use_single_gps_point BOOLEAN" //$NON-NLS-1$
+				"ALTER TABLE smart.CM_NODE ADD COLUMN use_single_gps_point BOOLEAN", //$NON-NLS-1$
+
+				"ALTER TABLE smart.screen_option ADD COLUMN resource VARCHAR(10)", //$NON-NLS-1$
+				"update smart.screen_option set resource = 'patrol'" //$NON-NLS-1$
 		};
 		
 		for (String s : sql){
