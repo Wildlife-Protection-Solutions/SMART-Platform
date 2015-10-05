@@ -98,6 +98,7 @@ public class PatrolMetaConfigDialog extends MetaConfigDialog<PatrolScreenOptionM
 			if (cto == null) {
 				cto = new ScreenOption();
 				cto.setConservationArea(ca);
+				cto.setResource(PatrolScreenOptionMeta.PATROL_RESOURCE_ID);
 				cto.setType(meta.name());
 				options.put(meta, cto);
 			}

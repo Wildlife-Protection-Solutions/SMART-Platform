@@ -19,24 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.meta;
+package org.wcs.smart.er.ui.handlers;
+
+import org.eclipse.e4.core.di.annotations.Execute;
+import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.er.ui.meta.MissionMetaConfigDialog;
 
 /**
- * Meta options for patrol screens
+ * Handler for opening dialog to edit mission screens meta information.
+ * 
  * @author elitvin
+ * @since 3.3.0
  */
-public enum PatrolScreenOptionMeta {
-	TYPE,
-	TRANSPORT,
-	ARMED,
-	STATION,
-	TEAM,
-	MANDATE,
-	OBJECTIVE,
-	COMMENT,
-	MEMBERS,
-	LEADER,
-	PILOT;
+public class MissionScreenOptionsMetaHandler  {
 
-	public static final String PATROL_RESOURCE_ID = "patrol"; //$NON-NLS-1$
+	@Execute
+	public void execute(Shell activeShell){
+		Dialog dialog = new MissionMetaConfigDialog(activeShell);
+		dialog.open();
+	}
+	
+	public static class MissionScreenOptionsMetaHandlerWrapper extends DIHandler<MissionScreenOptionsMetaHandler>{
+		public MissionScreenOptionsMetaHandlerWrapper(){
+			super(MissionScreenOptionsMetaHandler.class);
+		}
+	}
 }
