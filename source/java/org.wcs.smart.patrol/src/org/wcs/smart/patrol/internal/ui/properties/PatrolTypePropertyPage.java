@@ -572,7 +572,7 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 							Integer matches = 0;
 							for (Iterator<PatrolTransportType> itr = pt.getTransportTypes().iterator(); itr.hasNext();) {
 								PatrolTransportType a = itr.next();
-								if( a != element && a.findName(languageViewer.getCurrentSelection()).equals(((String)value).trim())){
+								if( a != element && a.findName(languageViewer.getCurrentSelection()).equalsIgnoreCase(((String)value).trim())){
 									matches++;
 								}
 							} 
