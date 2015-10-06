@@ -38,7 +38,7 @@ public interface IGroupBy {
 	 * @since 1.0.0
 	 */
 	public enum GroupByType{
-		STRING, BYTE, DATE, KEY
+		STRING, BYTE, DATE, KEY, TIME
 	}
 	
 	/**

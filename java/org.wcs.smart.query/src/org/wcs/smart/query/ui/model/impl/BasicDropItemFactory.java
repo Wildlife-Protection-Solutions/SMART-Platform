@@ -697,7 +697,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 		return findViewer(gb).asDropItem(session);
 	}
 	
-	public IGroupByViewer findViewer(IGroupBy groupBy){
+	public IGroupByViewer<?> findViewer(IGroupBy groupBy){
 		if (groupBy instanceof AreaGroupBy){
 			return  new AreaGroupByViewer((AreaGroupBy) groupBy);
 		}else if(groupBy instanceof AttributeGroupBy){

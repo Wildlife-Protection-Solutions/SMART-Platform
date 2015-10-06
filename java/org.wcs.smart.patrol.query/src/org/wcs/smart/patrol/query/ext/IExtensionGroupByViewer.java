@@ -25,10 +25,8 @@ import java.sql.SQLException;
 
 import org.eclipse.swt.graphics.Image;
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
-import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.summary.IGroupBy;
 import org.wcs.smart.query.model.summary.IGroupByViewer;
 import org.wcs.smart.query.model.summary.IValueItem;

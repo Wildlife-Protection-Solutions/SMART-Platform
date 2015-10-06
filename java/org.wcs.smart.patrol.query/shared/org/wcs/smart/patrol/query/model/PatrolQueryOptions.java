@@ -27,8 +27,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 
 /**
@@ -140,6 +142,8 @@ public class PatrolQueryOptions {
 	};
 
 	public static IDateGroupBy[] DATE_GROUBY_OPS = new IDateGroupBy[]{
+		StartHourGroupBy.INSTANCE,
+		EndHourGroupBy.INSTANCE,
 		DayDateGroupBy.INSTANCE,
 		MonthDateGroupBy.INSTANCE,
 		YearDateGroupBy.INSTANCE

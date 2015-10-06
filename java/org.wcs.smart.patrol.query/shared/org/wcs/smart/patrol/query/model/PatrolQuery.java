@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.query.model;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -34,7 +33,6 @@ import org.wcs.smart.patrol.query.parser.internal.parser.Parser;
 import org.wcs.smart.query.common.model.IQueryColumnProvider;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.IMemoryQuery;
-import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 

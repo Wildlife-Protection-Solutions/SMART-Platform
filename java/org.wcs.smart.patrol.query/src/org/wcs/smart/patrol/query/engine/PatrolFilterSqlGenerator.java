@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.patrol.query.engine;
 
-
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Locale;
@@ -34,7 +32,6 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
-import org.wcs.smart.patrol.query.ext.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
@@ -166,7 +163,7 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 				return contrib.asSql(engine, ((IPatrolQueryEngine)engine).getCurrentConnection(), filter);
 			}
 		}
-		throw new IllegalStateException(MessageFormat.format("Filter {0} not supported.", filter.asString()));	
+		throw new IllegalStateException(MessageFormat.format("Filter {0} not supported.", filter.asString()));	 //$NON-NLS-1$
 	}
 	/*
 	 * Patrol Filter

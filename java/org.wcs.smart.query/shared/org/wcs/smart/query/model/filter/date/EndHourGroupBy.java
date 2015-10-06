@@ -19,14 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine;
+package org.wcs.smart.query.model.filter.date;
 
+import java.util.Locale;
 
-import org.hibernate.Session;
-import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.SmartContext;
+import org.wcs.smart.query.model.summary.IGroupBy.GroupByType;
 
-public interface IPatrolQueryEngine extends IQueryEngine {
+/**
+ * End hour group by. Groups in half hour increments.
+ * 
+ * @author Emily
+ *
+ */
+public enum EndHourGroupBy implements IDateGroupBy {
 	
-	public Session getCurrentConnection();
+	INSTANCE;
 	
+	@Override
+	public String getKey() {
+		return "endhour"; //$NON-NLS-1$
+	}
+
+	@Override
+	public String getGuiName(Locale l) {
+		return SmartContext.INSTANCE.getClass(IQueryDateLabelProvider.class).getLabel(this, l);
+	}
+
+	@Override
+	public GroupByType getType() {
+		return GroupByType.TIME;
+	}
 }
