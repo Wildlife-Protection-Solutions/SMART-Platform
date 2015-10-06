@@ -318,8 +318,10 @@ public class HibernateManager extends SmartHibernateManager{
 	public static boolean validateUserIdUnique(String userName, ConservationArea ca, Session session){
 		Transaction tx = session.beginTransaction();
 		try{
-			String query = "select count(*) from Employee where conservationArea = :ca and smartUserId = :userId"; //$NON-NLS-1$
-			List<?> cnt = session.createQuery(query).setEntity("ca", ca).setString("userId", userName).list(); //$NON-NLS-1$ //$NON-NLS-2$
+			String query = "select count(*) from Employee where conservationArea = :ca and UPPER(smartUserId) = :userId"; //$NON-NLS-1$
+			List<?> cnt = session.createQuery(query)
+					.setEntity("ca", ca) //$NON-NLS-1$
+					.setString("userId", userName.toUpperCase()).list(); //$NON-NLS-1$ 
 			boolean ok = false;
 			if ( (Long) cnt.get(0) > 0){
 				ok = false;
