@@ -7,6 +7,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.query.toolbar.menu.create?before=org.wcs.smart.query.createunknown.separator2">
          <menu
+               icon="images/icons/obj16/intelligence.png"
                id="org.wcs.smart.intelligence.query.createquery"
                label="%intelquery.menu.label">
             <command
@@ -37,6 +38,7 @@
             allPopups="false"
             locationURI="menu:org.wcs.smart.menu.query.newquery?before=org.wcs.smart.query.newquery.separator2">
          <menu
+               icon="images/icons/obj16/intelligence.png"
                id="org.wcs.smart.intelligence.query.createquery"
                label="%intelquery1.menu.label">
          </menu>
