@@ -52,8 +52,6 @@ import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupBy;
-import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
-import org.wcs.smart.patrol.query.ext.PatrolContributionFactory;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.internal.PatrolValueItemLabelProvider;
@@ -85,8 +83,10 @@ import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -921,6 +921,13 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 					case DATE:
 						key += rs.getDate(rsindex++).toString();
 						break;
+					case TIME:
+						int mins = rs.getInt(rsindex++);
+						int hrs = mins / 60;
+						mins = mins % 60;
+						key += String.format("%d:%02d", hrs, mins); //$NON-NLS-1$
+						System.out.println(key);
+						break;
 					case KEY:
 						key += rs.getString(rsindex++);
 						break;
@@ -1223,6 +1230,12 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					groupByInnerSql.append("YEAR(pld_patrol_day) as datePart_" + itemcnt); //$NON-NLS-1$
+				}else if (op.getClass().equals(StartHourGroupBy.class)){
+					groupBySql.append("startminute_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("pld_uuid,((hour(pld_start_time) * 60 + minute(pld_start_time)) / 30)* 30 as startminute_" + itemcnt); //$NON-NLS-1$
+				}else if (op.getClass().equals(EndHourGroupBy.class)){
+					groupBySql.append("endminute_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("pld_uuid,((hour(pld_end_time) * 60 + minute(pld_end_time)) / 30)* 30 as endminute_" + itemcnt); //$NON-NLS-1$
 				}
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);
@@ -1624,6 +1637,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		sql.append(tablePrefix(PatrolLeg.class) + ".end_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegDay.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class) + ".start_time, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class) + ".end_time, "); //$NON-NLS-1$
 		
 		if (includeObservations){
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -1659,6 +1674,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		sql.append("pl_end_date date,"); //$NON-NLS-1$
 		sql.append("pld_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("pld_patrol_day date,"); //$NON-NLS-1$
+		sql.append("pld_start_time time,"); //$NON-NLS-1$
+		sql.append("pld_end_time time,"); //$NON-NLS-1$
 		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
 		sql.append("plm_leader char(16) for bit data,"); //$NON-NLS-1$

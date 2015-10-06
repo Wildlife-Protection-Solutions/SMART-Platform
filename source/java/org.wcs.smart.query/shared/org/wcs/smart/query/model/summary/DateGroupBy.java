@@ -34,21 +34,22 @@ import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
  * Date Group By option.
  * @author egouge
  * @since 1.0.0
+ * 
  */
 public class DateGroupBy implements IGroupBy {
 
 	
-	private static IDateGroupBy[] GROUPBYS = {
+	protected static IDateGroupBy[] GROUPBYS = {
 		DayDateGroupBy.INSTANCE,
 		MonthDateGroupBy.INSTANCE,
 		YearDateGroupBy.INSTANCE
 	};
 	
-	public static final DateGroupBy createGroupBy(String key){
+	public static DateGroupBy createGroupBy(String key){
 		return new DateGroupBy(key);
 	}
 	
-	private IDateGroupBy op;
+	protected IDateGroupBy op;
 	
 	/**
 	 * Creates a new date group by part.
@@ -59,7 +60,7 @@ public class DateGroupBy implements IGroupBy {
 		if (opPart.contains(":")){ //$NON-NLS-1$
 			opPart = key.split(":")[1];		 //$NON-NLS-1$
 		}
-		for (IDateGroupBy pg : GROUPBYS){
+		for (IDateGroupBy pg : getSupportedGroupBys()){
 			if (pg.getKey().equals(opPart)){
 				this.op = pg;
 			}
@@ -69,6 +70,9 @@ public class DateGroupBy implements IGroupBy {
 		}
 	}
 	
+	protected IDateGroupBy[] getSupportedGroupBys(){
+		return GROUPBYS;
+	}
 	/**
 	 * @see org.wcs.smart.query.parser.internal.summary.IGroupBy#getKeyPart()
 	 */

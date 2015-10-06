@@ -49,8 +49,6 @@ import org.wcs.smart.query.model.filter.QueryFilter;
 public class PatrolObservationQuery extends ObservationQuery{
 
 	public static final String KEY = "patrolobservation"; //$NON-NLS-1$
-	
-	private Object LOCK = new Object();
 
 	/**
 	 * 

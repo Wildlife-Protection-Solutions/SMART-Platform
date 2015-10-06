@@ -45,7 +45,6 @@ import org.wcs.smart.patrol.query.internal.Messages;
 import org.wcs.smart.patrol.query.model.IPatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.ui.IPatrolOptionData;
-import org.wcs.smart.patrol.query.ui.PatrolOptionData;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.ui.model.DropItem;
 import org.wcs.smart.query.ui.model.IGroupByDropItem;

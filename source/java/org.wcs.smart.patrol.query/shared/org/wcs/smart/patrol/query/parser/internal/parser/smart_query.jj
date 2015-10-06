@@ -5,6 +5,8 @@ import java.util.*;import org.wcs.smart.patrol.query.parser.internal.filter.*;
 import org.wcs.smart.patrol.query.parser.internal.summary.*;
 import org.wcs.smart.query.model.filter.*;
 import org.wcs.smart.query.model.summary.*;
+import org.wcs.smart.patrol.query.model.*;
+import org.wcs.smart.patrol.query.ext.*;
 
 public class Parser{}PARSER_END(Parser)SKIP :{  " "| "\t"| "\r"| "\n"}/*--------- Comments  -----------------*/SPECIAL_TOKEN :{  < LINE_COMMENT : "//" (~[ "\r", "\n" ])* >| < MULTI_LINE_COMMENT :    "/*" (~[ "*" ])* "*"    (      "*"    |      (        ~[ "*", "/" ] (~[ "*" ])* "*"      )    )*    "/" >}/*--------- Keywords  -----------------*/TOKEN [ IGNORE_CASE ] :{  < K_AND : "and" >| < K_NOT : "not" >| < K_OR : "or" >}
 
@@ -83,7 +85,7 @@ TOKEN :
 |    < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
 |    < SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
 |    < AGG  : ("sum" | "avg" | "min" | "max" ) >
-| 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" ) >
+| 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" | "starthour" | "endhour" ) >
 |    < QUERY_SPLITTER : "|" >
 |    < PATROL_UUID_GROUPBY_OPTION :(
   			< PATROL_STATION_KEY > |
@@ -328,7 +330,7 @@ IGroupBy GroupByItem() :
 	|
 		< DATE_GROUPBY_ITEM >
 		{
-		  	item = DateGroupBy.createGroupBy(token.image);		}
+		  	item = PatrolDateGroupBy.createGroupBy(token.image);		}
 	|
 		< CATEGORY_GROUPBY_ITEM >
 		{		  

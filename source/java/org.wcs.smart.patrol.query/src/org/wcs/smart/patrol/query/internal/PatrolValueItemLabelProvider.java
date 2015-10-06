@@ -3,7 +3,6 @@ package org.wcs.smart.patrol.query.internal;
 import java.util.Locale;
 
 import org.hibernate.Session;
-import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.model.summary.IValueItem;
 import org.wcs.smart.query.model.summary.ValueItemLabelProvider;

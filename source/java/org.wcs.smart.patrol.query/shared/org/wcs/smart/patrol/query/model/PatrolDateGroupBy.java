@@ -19,14 +19,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.patrol.query.engine;
+package org.wcs.smart.patrol.query.model;
 
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
+import org.wcs.smart.query.model.filter.date.IDateGroupBy;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
+import org.wcs.smart.query.model.summary.DateGroupBy;
 
-import org.hibernate.Session;
-import org.wcs.smart.query.common.engine.IQueryEngine;
+/**
+ * Patrol group by date options.  This adds patrol start time
+ * and end time to default date group by options.
+ * 
+ * @author egouge
+ * @since 1.0.0
+ * 
+ */
+public class PatrolDateGroupBy extends DateGroupBy {
 
-public interface IPatrolQueryEngine extends IQueryEngine {
+	private static IDateGroupBy[] GROUPBYS = {
+		StartHourGroupBy.INSTANCE,
+		EndHourGroupBy.INSTANCE
+	};
 	
-	public Session getCurrentConnection();
+	public static DateGroupBy createGroupBy(String key){
+		return new PatrolDateGroupBy(key);
+	}
 	
+	public PatrolDateGroupBy(String key) {
+		super(key);
+	}
+	
+	@Override
+	protected IDateGroupBy[] getSupportedGroupBys(){
+		IDateGroupBy[] all = new IDateGroupBy[GROUPBYS.length + DateGroupBy.GROUPBYS.length];
+		int i = 0;
+		for (IDateGroupBy b : DateGroupBy.GROUPBYS){
+			all[i++] = b;
+		}
+		for (IDateGroupBy b : GROUPBYS){
+			all[i++] = b;
+		}
+		return all;
+	}
+
 }

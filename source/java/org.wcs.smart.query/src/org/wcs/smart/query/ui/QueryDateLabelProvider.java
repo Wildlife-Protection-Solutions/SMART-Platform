@@ -29,6 +29,7 @@ import org.wcs.smart.query.model.filter.date.AllDatesFilter;
 import org.wcs.smart.query.model.filter.date.CurrentQuarterDateFilter;
 import org.wcs.smart.query.model.filter.date.CustomDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IQueryDateLabelProvider;
 import org.wcs.smart.query.model.filter.date.Last30DaysDateFilter;
 import org.wcs.smart.query.model.filter.date.Last60DaysDateFilter;
@@ -37,6 +38,7 @@ import org.wcs.smart.query.model.filter.date.LastQuarterDateFilter;
 import org.wcs.smart.query.model.filter.date.LastYearDateFilter;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthToDateDateFilter;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.filter.date.YearToDateDateFilter;
@@ -66,6 +68,8 @@ public class QueryDateLabelProvider implements IQueryDateLabelProvider {
 		labels.put(MonthDateGroupBy.class, Messages.MonthDateGroupBy_MonthGroupByName);
 		labels.put(YearDateGroupBy.class, Messages.YearDateGroupBy_GroupByYearLabel);
 		labels.put(WaypointDateField.class, Messages.WaypointDateField_WaypointDateFieldName);
+		labels.put(StartHourGroupBy.class, Messages.QueryDateLabelProvider_StartHourLabel);
+		labels.put(EndHourGroupBy.class, Messages.QueryDateLabelProvider_EndHourLabel);
 	}
 	
 	private String getStartEndDateErrorStr(){

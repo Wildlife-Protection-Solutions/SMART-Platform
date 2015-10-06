@@ -50,6 +50,7 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.query.ext.IExtensionGroupByViewer;
 import org.wcs.smart.patrol.query.ext.PatrolContributionFinder;
 import org.wcs.smart.patrol.query.internal.Messages;
+import org.wcs.smart.patrol.query.model.PatrolDateGroupBy;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.query.QueryDataModelManager;
 import org.wcs.smart.query.common.ui.itempanel.AreaTreeNode;
@@ -60,7 +61,9 @@ import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeContentProvider;
 import org.wcs.smart.query.common.ui.itempanel.ItemTreeNodeTree;
 import org.wcs.smart.query.model.filter.date.DateGroupByViewer;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.ui.itempanel.AbstractQueryItemPanel;
@@ -175,9 +178,11 @@ public class SummaryFilterPanel extends AbstractQueryItemPanel{
 			input.put(DataModelTreeNode.KEY,  QueryDataModelManager.getInstance().getDataModel());
 			
 			List<DateGroupByViewer> dates = new ArrayList<DateGroupByViewer>();
+			dates.add(new DateGroupByViewer(new PatrolDateGroupBy(StartHourGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new PatrolDateGroupBy(EndHourGroupBy.INSTANCE.getKey())));
 			dates.add(new DateGroupByViewer(new DateGroupBy(DayDateGroupBy.INSTANCE.getKey())));
 			dates.add(new DateGroupByViewer(new DateGroupBy(MonthDateGroupBy.INSTANCE.getKey())));
-			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));
+			dates.add(new DateGroupByViewer(new DateGroupBy(YearDateGroupBy.INSTANCE.getKey())));			
 			input.put(DateTreeNode.KEY, dates);
 			
 			

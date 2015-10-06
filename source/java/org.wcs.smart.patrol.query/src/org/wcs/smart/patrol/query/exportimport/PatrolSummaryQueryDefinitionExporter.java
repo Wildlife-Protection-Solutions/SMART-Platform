@@ -23,7 +23,6 @@ package org.wcs.smart.patrol.query.exportimport;
 
 import org.hibernate.Session;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
-import org.wcs.smart.patrol.query.model.PatrolQueryOptions;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionExporter;

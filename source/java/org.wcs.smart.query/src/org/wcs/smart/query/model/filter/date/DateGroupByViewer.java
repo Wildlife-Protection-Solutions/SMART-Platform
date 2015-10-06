@@ -34,6 +34,9 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 			return getMonthItems(session, groupBy.getDateFilter());
 		} else if (groupBy.getOption() instanceof YearDateGroupBy) {
 			return getYearItems(session, groupBy.getDateFilter());
+		} else if (groupBy.getOption() instanceof StartHourGroupBy ||
+				groupBy.getOption() instanceof EndHourGroupBy){
+			return getHourItems(session, null);
 		}
 		return null;
 	}
@@ -48,8 +51,29 @@ public class DateGroupByViewer extends AbstractGroupByViewer<DateGroupBy> {
 		} else if (groupBy.getOption() instanceof YearDateGroupBy) {
 			return QueryPlugIn.getDefault().getImageRegistry()
 					.get(QueryPlugIn.CALENDAR_YEAR_ICON);
+		} else if (groupBy.getOption() instanceof StartHourGroupBy){
+			return QueryPlugIn.getDefault().getImageRegistry()
+					.get(QueryPlugIn.START_HOUR_ICON);
+		} else if (groupBy.getOption() instanceof EndHourGroupBy){
+			return QueryPlugIn.getDefault().getImageRegistry()
+					.get(QueryPlugIn.END_HOUR_ICON);
 		}
 		return null;
+	}
+
+	public List<ListItem> getHourItems(Session session, IDateFilter dateFilter) {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		for (int i = 0 ; i < 48; i ++){
+			String key = String.valueOf(i/2);
+			if (i % 2 == 0){
+				key += ":00"; //$NON-NLS-1$
+			}else{
+				key += ":30"; //$NON-NLS-1$
+			}
+			items.add(new ListItem(null, key, key ));
+		}
+		return items;
+		
 	}
 
 	public List<ListItem> getDayItems(Session session, IDateFilter dateFilter) {
