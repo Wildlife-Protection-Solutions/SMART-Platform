@@ -427,7 +427,7 @@ public class StationListPropertyPage extends AbstractPropertyJHeaderDialog {
 					Integer matches = 0;
 					for (Iterator<Station> itr = stations.iterator(); itr.hasNext();) {
 						Station a = itr.next();
-						if( !a.equals(station) && a.findName(cmbLanguage.getCurrentSelection()).equals(newName.trim())){
+						if( !a.equals(station) && a.findName(cmbLanguage.getCurrentSelection()).equalsIgnoreCase(newName.trim())){
 							matches++;
 						}
 					} 
