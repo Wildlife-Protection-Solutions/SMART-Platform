@@ -507,7 +507,7 @@ public class TeamPropertyPage extends AbstractPropertyJHeaderDialog {
 					Integer matches = 0;
 					for (Iterator<Team> itr = teams.iterator(); itr.hasNext();) {
 						Team a = itr.next();
-						if( !a.equals(team) && a.findName(languageViewer.getCurrentSelection()).equals(newName.trim())){
+						if( !a.equals(team) && a.findName(languageViewer.getCurrentSelection()).equalsIgnoreCase(newName.trim())){
 							matches++;
 						}
 					} 
