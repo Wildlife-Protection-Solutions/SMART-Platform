@@ -145,7 +145,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		tblLayers.getTable().setHeaderVisible(true);
 		tblLayers.getTable().setLinesVisible(true);
 		
-		
 		//dataset column
 		final TableViewerColumn col1 = new TableViewerColumn(tblLayers, SWT.DEFAULT);
 		col1.getColumn().setText(Messages.SmartLayersPage_ReportDataset_ColumnName);
@@ -267,7 +266,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				}
 			}
 		});
-        
+		tblLayers.getTable().pack();
 		Composite btnPanel = toolkit.createComposite(contentpane);
 		GridLayout gl = new GridLayout(1, true);
 		gl.marginHeight = 0;
@@ -471,8 +470,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 				}else{
 					mapItem.setMapBounds((ReferencedEnvelope)txtBounds.getData());
 				}
-				
 			}
+			
 		} catch (Exception ex) {
 			SmartMapItemPlugIn.displayLog(
 					Messages.SmartLayersPage_Error_SettingMapProperty + ex.getMessage(), ex);
@@ -612,7 +611,8 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			txtBounds.setText(env.getCoordinateReferenceSystem().getName().getCode() + ": (" + env.getMinX() + "," + env.getMinY() + "),(" + env.getMaxX() + "," + env.getMaxY() + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		//for mac ui table issue see smart bug 1349
-		tblLayers.getTable().pack();
+		//putting this here causes error in layout in window so I've moved this above; after table created.
+		//tblLayers.getTable().pack();
 	}
 	
 	@Override
@@ -685,7 +685,16 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		
 		LayerDefinition ld = new LayerDefinition();
 		ld.handle = dialog.getValue();
-		ld.name = ld.handle.getDisplayName();
+		
+		// attempt to parse id out of name; users do not want ids appearing the legends on maps
+		//#1051
+		String name = ld.handle.getDisplayName();
+		int start = name.lastIndexOf('[');
+		int end = name.lastIndexOf(']');
+		if (start >= 0 && end >= 0 && start < end){
+			name = name.substring(0, start);
+		}
+		ld.name = name;
 		
 		layerItems.add(ld);
 		tblLayers.refresh();
