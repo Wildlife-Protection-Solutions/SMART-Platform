@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.querylist;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -119,6 +120,45 @@ public class SavedQueryTree {
 						}
 					}
 				}
+				for (Entry<UUID, List<QueryEditorInput>> ins : queries.entrySet()){
+					UUID folder = ins.getKey();
+					boolean found = false;
+					for (QueryEditorInput input : ins.getValue()){
+						if ( input.getUuid().equals(query.getUuid()) ){
+							input.setQueryName(query.getName());
+							
+							UUID folderUuid = null;
+							if (query.getFolder()!=null){
+								folderUuid = query.getFolder().getUuid();
+							}else{
+								if (query.getIsShared()){
+									folderUuid = IQueryHibernateManager.CA_QUERY_KEY;
+								}else{
+									folderUuid = IQueryHibernateManager.USER_QUERY_KEY;
+								}
+							}
+							
+							//TODO: root folders
+							if (!folderUuid.equals(folder)){
+								//remove from existing list
+								ins.getValue().remove(input);
+								//add to new list
+								
+								List<QueryEditorInput> newFolderList = queries.get(folderUuid);
+								if (newFolderList == null){
+									newFolderList = new ArrayList<QueryEditorInput>();
+									queries.put(folderUuid, newFolderList);
+								}
+								newFolderList.add(input);
+							}		
+							found = true;
+							break;
+						}
+					}
+					if (found) break;
+					
+				}
+				
 			}else if (eventType == IQueryListener.QUERY_ADDED){
 				Query query = (Query)object;			
 				UUID key = null;

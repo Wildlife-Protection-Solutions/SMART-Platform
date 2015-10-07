@@ -126,10 +126,11 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 					firePropertyChange(PROP_DIRTY);
 				}else if (eventType == IQueryListener.QUERY_NAME_MODIFIED){
 					boolean lIsDirty = isDirty;
-					QueryResultsEditor.this.getQuery().setName(getQuery().getName());
-					QueryResultsEditor.this.getQuery().setNames(getQuery().getNames());
+					Query updatedQuery = (Query) object;
+					QueryResultsEditor.this.getQuery().setName(updatedQuery.getName());
+					QueryResultsEditor.this.getQuery().setNames(updatedQuery.getNames());
+					((QueryEditorInput)getEditorInput()).setQueryName(updatedQuery.getName());
 					
-					((QueryEditorInput)getEditorInput()).setQueryName(getQuery().getName());
 					updatePartName();
 					page1.updateQueryName();
 					

@@ -52,8 +52,14 @@ public interface IQueryHibernateManager {
 	 */
 	public static final String CONSERVATION_AREA_QUERIES_NAME = Messages.QueryHibernateManager_CaQueryFolderName;
 	
+	/**
+	 * Conservation Area (shared queries) "Root Folder" UUID
+	 */
 	public static final UUID CA_QUERY_KEY = UuidUtils.stringToUuid("00000000000000000000000000000001"); //$NON-NLS-1$
 	
+	/**
+	 * My queries "Root Folder" UUID
+	 */
 	public static final UUID USER_QUERY_KEY = UuidUtils.stringToUuid("00000000000000000000000000000002"); //$NON-NLS-1$
 	
 	

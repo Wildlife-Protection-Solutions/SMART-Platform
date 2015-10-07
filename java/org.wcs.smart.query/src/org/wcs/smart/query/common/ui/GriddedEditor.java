@@ -96,9 +96,10 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 					firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
 				}else if (eventType == IQueryListener.QUERY_NAME_MODIFIED){
 					boolean lIsDirty = isDirty;
-					GriddedEditor.this.getQuery().setName(getQuery().getName());
-					GriddedEditor.this.getQuery().setNames(getQuery().getNames());
-					((QueryEditorInput)getEditorInput()).setQueryName(getQuery().getName());
+					Query updatedQuery = (Query) object;
+					GriddedEditor.this.getQuery().setName(updatedQuery.getName());
+					GriddedEditor.this.getQuery().setNames(updatedQuery.getNames());
+					((QueryEditorInput)getEditorInput()).setQueryName(updatedQuery.getName());
 					updatePartName();
 					resultPage.updateQueryName();
 					

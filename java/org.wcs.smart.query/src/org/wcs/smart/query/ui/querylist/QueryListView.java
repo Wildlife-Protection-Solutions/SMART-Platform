@@ -41,6 +41,7 @@ import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.UIEvents;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditor;
 import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
@@ -54,6 +55,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
 import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -204,6 +207,20 @@ public class QueryListView {
 
 		queryList.setInput(Messages.QueryListView_LoadingLabel);
 
+		/* dnd support */
+		int operations = DND.DROP_COPY | DND.DROP_MOVE ;
+		Transfer[] transferTypes = new Transfer[]{LocalSelectionTransfer.getTransfer()};
+		queryList.addDragSupport(operations, transferTypes , new QueryListDragListener(queryList));
+		queryList.addDropSupport(operations, transferTypes, new QueryListDropListener(queryList){
+			@Override
+			public boolean performDrop(Object data) {
+				boolean ok = super.performDrop(data);
+//				if (ok){
+//					setChangesMade(true);
+//				}
+				return ok;
+			}
+		});
 		
 		/* add right click context menu */
 		MenuManager menuManager = new MenuManager();
