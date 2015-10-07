@@ -41,6 +41,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.internal.Messages;
@@ -96,7 +97,8 @@ public class GriddedTableContent {
 	}
 	
 	public void setQueryName(GriddedQuery query){
-		compQueryName.setText(query.getName(), query.getId());
+		compQueryName.setText(query.getName(), query.getId(),
+				QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getGuiName());
 	}
 
 	/**
@@ -184,8 +186,7 @@ public class GriddedTableContent {
 	}
 		
 	private void createNameHeader(Composite main, FormToolkit toolkit) {
-		compQueryName = new QueryHeaderComposite(main,Messages.GriddedTableContent_QueryLabel, 
-				toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
+		compQueryName = new QueryHeaderComposite(main, toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compQueryName.addListener(SWT.Selection, new Listener(){
 			@Override

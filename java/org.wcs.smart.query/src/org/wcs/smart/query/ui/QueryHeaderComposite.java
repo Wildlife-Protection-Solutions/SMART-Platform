@@ -25,6 +25,8 @@ import java.text.MessageFormat;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -33,6 +35,7 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -65,26 +68,29 @@ public class QueryHeaderComposite extends Composite {
 	private Text txtName;
 	
 	private Label lblId;
-		
+	private Label lblType;
 	
 	private String name = null;
 	private String id = null;
+	private String type = null;
+	
 	private boolean cancelled = false;
 	/**
 	 * 
 	 */
-	public QueryHeaderComposite(Composite parent, String fixedName, 
-			FormToolkit toolkit, Font headerFont, Color headerColor) {
+	public QueryHeaderComposite(Composite parent, FormToolkit toolkit, Font headerFont, Color headerColor) {
 		
 		super(parent, SWT.NONE);
 		toolkit.adapt(this);
-		createComposite(fixedName, headerFont, headerColor, toolkit);
+		createComposite(headerFont, headerColor, toolkit);
 	}
 
-	public void setText(String text, String id){
+	public void setText(String text, String id, String type){
 		this.name = text;
 		this.id = id;
+		this.type = type;
 		lblName.setText(this.name);
+		lblType.setText(type);
 		if (this.id != null){
 			lblId.setText(ID_LABEL + this.id);
 		}else{
@@ -94,21 +100,36 @@ public class QueryHeaderComposite extends Composite {
 	}
 	
 	
-	private void createComposite(String fixedName, Font headerFont, Color headerColor, FormToolkit toolkit) {
+	private void createComposite(Font headerFont, Color headerColor, FormToolkit toolkit) {
 		GridLayout gl = new GridLayout(3, false);
+		gl.marginHeight = 0;
+		gl.verticalSpacing = 0;
 		setLayout(gl);
-
-		Label lblSummary = toolkit.createLabel(this, fixedName);
+		lblType = toolkit.createLabel(this, "");
+		lblType.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
+		FontData[] fd = lblType.getFont().getFontData();
+		fd[0].setHeight(fd[0].getHeight()-1);
+		final Font f = new Font(lblType.getDisplay(), fd[0]);
+		lblType.setFont(f);
+		lblType.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				f.dispose();
+			}
+		});
+		Label lblSummary = toolkit.createLabel(this, "Query Name:");
 		lblSummary.setForeground(headerColor);
 		lblSummary.setFont(headerFont);
 		
 		final Composite it = toolkit.createComposite(this);
 		it.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		it.addListener(SWT.Resize, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				Point p = txtName.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-				lblName.setBounds(0, 5, it.getBounds().width, p.y);
+				Point p = lblName.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+				lblName.setBounds(0, 0, it.getBounds().width, p.y);
 				txtName.setBounds(0, 0, it.getBounds().width, p.y);
 
 			}
@@ -127,10 +148,12 @@ public class QueryHeaderComposite extends Composite {
 		lblId.setForeground(headerColor);
 		lblName.setForeground(headerColor);
 
-		Point p = txtName.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-		lblName.setBounds(0, 5, it.getBounds().width, p.y);
+		Point p = lblName.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		lblName.setBounds(0, 0, it.getBounds().width, p.y);
 		txtName.setBounds(0, 0, it.getBounds().width, p.y);
 
+		
+		
 		txtName.addFocusListener(new FocusListener() {
 			@Override
 			public void focusLost(FocusEvent e) {
@@ -200,7 +223,7 @@ public class QueryHeaderComposite extends Composite {
 	}
 	
 	private void fireNameChange(){
-		setText(this.name, this.id);
+		setText(this.name, this.id, this.type);
 		Listener[] listeners = getListeners(SWT.Selection);
 		for (int i = 0; i < listeners.length; i ++){
 			Event e = new Event();
