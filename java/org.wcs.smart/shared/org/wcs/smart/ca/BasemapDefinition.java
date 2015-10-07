@@ -118,8 +118,8 @@ public class BasemapDefinition extends NamedItem{
 		if (getClass() != obj.getClass())
 			return false;
 		BasemapDefinition other = (BasemapDefinition) obj;
-		if (!getUuid().equals(other.getUuid()))
-			return false;
-		return true;
+		if (getUuid() == null && other.getUuid() == null) return true;
+		if (getUuid() != null && getUuid().equals(other.getUuid())) return true;
+		return false;
 	}
 }
