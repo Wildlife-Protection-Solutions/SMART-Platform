@@ -26,14 +26,19 @@ import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
@@ -92,6 +97,11 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 		
 		Session session = HibernateManager.openSession(new WaypointAttachmentInterceptor());
+		//check if duplicate any of existing mission
+		if (!checkDuplicate(ctSurvey, session)){
+			return null;
+		}
+
 		boolean fireSurveyAdded = false;
 		try {
 			session.beginTransaction();
@@ -110,10 +120,6 @@ public class MissionImporter extends AbstractSmartImporter {
 			}
 			
 			//TODO: not all logic needs to work in case we use existing mission!!!!!
-			//check if duplicate of existing Mission
-			if (!checkDuplicate(ctSurvey, mission, session)){
-				return null;
-			}
 			
 			if (mission.getLeader() == null){
 				if (!fixLeaderError(mission, ctSurvey, session)){
@@ -191,8 +197,63 @@ public class MissionImporter extends AbstractSmartImporter {
 		return m;
 	}
 
-	protected boolean checkDuplicate(final CyberTrackerSurvey ctSurvey, Mission m, final Session session) {
-		//TODO: implement!!!
+	protected boolean checkDuplicate(final CyberTrackerSurvey ctSurvey, final Session session) {
+		Criteria c = session.createCriteria(Mission.class);
+		c.add(Restrictions.eq("startDate", ctSurvey.getStartDate())); //$NON-NLS-1$
+		c.add(Restrictions.eq("endDate", ctSurvey.getEndDate())); //$NON-NLS-1$
+		@SuppressWarnings("unchecked")
+		List<Mission> missions = c.list(); 
+
+		Mission duplicate = null;
+		if (missions.size() > 0) {
+			//we need a comparator to sort employee no matter how, but fast
+			Comparator<Employee> comparator = new Comparator<Employee>() {
+				@Override
+				public int compare(Employee o1, Employee o2) {
+					byte[] b1 = o1.getUuid();
+					byte[] b2 = o2.getUuid();
+					for (int i = 0; i < b1.length; i++) {
+						int x = b1[i] - b2[i];
+						if (x != 0) {
+							return x;
+						}
+					}
+					return 0;
+				}
+			};
+			TreeSet<Employee> membersSet = new TreeSet<Employee>(comparator);
+			membersSet.addAll(ctSurvey.getMembers());
+			//ensure that it is really a duplicate
+			for (Mission m : missions) {
+				if (m.getMembers().size() == ctSurvey.getMembers().size()) {
+					Set<Employee> copy = new TreeSet<Employee>(membersSet);
+					for (MissionMember mm : m.getMembers()) {
+						if (!copy.remove(mm.getMember())) {
+							break;
+						}
+					}
+					if (copy.isEmpty()) {
+						duplicate = m;
+						break;
+					}
+				}
+			}
+		}
+		
+		if (duplicate != null) {
+			final boolean[] ret = new boolean[]{false};
+			final String duplicateId = duplicate.getId(); 
+			Display.getDefault().syncExec(new Runnable(){
+				@Override
+				public void run() {
+					ret[0] = MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
+						Messages.PatrolImporter_ImportDialogTitle, 
+						MessageFormat.format("The CyberTracker survey {0} looks to be a duplicate of the existing SMART survey {1}.  By importing you may potentially be duplicating data.  Do you want to continue?", getMissionIdentifier(ctSurvey), duplicateId)
+						);
+				}});
+			return ret[0];
+		}
+		
 		return true;
 	}
 	
@@ -204,7 +265,7 @@ public class MissionImporter extends AbstractSmartImporter {
 					MessageDialog.openError(Display.getDefault().getActiveShell(), 
 							"Import Error", 
 							MessageFormat.format("The CyberTracker survey ({0}) does not have any valid employees and cannot be imported into SMART.", 
-								new Object[]{getPatrolIdentifier(ctSurvey)}));
+								new Object[]{getMissionIdentifier(ctSurvey)}));
 				}				
 			});
 			return false;
@@ -221,7 +282,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			public void run() {
 				LeaderSelectorDialog dialog = new LeaderSelectorDialog(
 						Display.getDefault().getActiveShell(), 
-						MessageFormat.format(Messages.SmartImporter_LeaderTitle, getPatrolIdentifier(ctSurvey)),
+						MessageFormat.format(Messages.SmartImporter_LeaderTitle, getMissionIdentifier(ctSurvey)),
 						MessageFormat.format(Messages.SmartImporter_SelectLeaderMessage, new Object[]{ctSurvey.getCtLeader() }),
 						m);
 				dialog.open();
@@ -364,7 +425,7 @@ public class MissionImporter extends AbstractSmartImporter {
 				public void run() {
 					ImportWarningDialog wdialog = new ImportWarningDialog(Display.getDefault().getActiveShell(), 
 							"Warning", 
-							MessageFormat.format("The following warnings were generated during the import of CyberTracker survey ''{0}'':", getPatrolIdentifier(ctSurvey)), 
+							MessageFormat.format("The following warnings were generated during the import of CyberTracker survey ''{0}'':", getMissionIdentifier(ctSurvey)), 
 							getWarnings());
 					isOk[0] = wdialog.open() == IDialogConstants.OK_ID;
 				}
@@ -373,7 +434,7 @@ public class MissionImporter extends AbstractSmartImporter {
 		return isOk[0];
 	}
 	
-	protected String getPatrolIdentifier(CyberTrackerSurvey ctSurvey){
+	protected String getMissionIdentifier(CyberTrackerSurvey ctSurvey){
 		return DateFormat.getDateTimeInstance().format(ctSurvey.getStartDate()) + "  [" + ctSurvey.getSurveyDesignKey() + "]"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
