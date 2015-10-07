@@ -39,6 +39,7 @@ import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Hyperlink;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.internal.Messages;
@@ -103,7 +104,8 @@ public class QueryEditorTableContent {
 	}
 	
 	public void setQueryName(SimpleQuery query){
-		compQueryName.setText(query.getName(), query.getId());
+		compQueryName.setText(query.getName(), query.getId(),
+				QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getGuiName());
 	}
 	/**
 	 * @return the date filter
@@ -193,8 +195,7 @@ public class QueryEditorTableContent {
 	}
 		
 	private void createNameHeader(Composite main, FormToolkit toolkit) {
-		compQueryName = new QueryHeaderComposite(main,Messages.QueryEditorTableContent_QueryLabel, 
-				toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
+		compQueryName = new QueryHeaderComposite(main, toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compQueryName.addListener(SWT.Selection, new Listener(){
 			@Override

@@ -51,6 +51,7 @@ import org.wcs.smart.ca.IAreaModifiedListener;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.QueryExecutor;
 import org.wcs.smart.query.common.model.SummaryQuery;
@@ -108,7 +109,8 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 					SummaryEditor.this.getQuery().setNames(updatedQuery.getNames());
 					((QueryEditorInput)getEditorInput()).setQueryName(updatedQuery.getName());
 					updatePartName();
-					compQueryName.setText(getQuery().getName(), getQuery().getId());
+					compQueryName.setText(getQuery().getName(), getQuery().getId(), 
+							QueryTypeManager.INSTANCE.findQueryType(getQuery().getTypeKey()).getGuiName());
 					
 					isDirty = lIsDirty;
 					firePropertyChange(MultiPageEditorPart.PROP_DIRTY);
@@ -254,7 +256,8 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 	protected abstract IDateFieldFilter[] getValidDateFilters();
 	
 	private void initQuery(){
-		compQueryName.setText(getQuery().getName(), getQuery().getId());
+		compQueryName.setText(getQuery().getName(), getQuery().getId(), 
+				QueryTypeManager.INSTANCE.findQueryType(getQuery().getTypeKey()).getGuiName());
 	}
 
 	/**
@@ -446,7 +449,7 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 	}
 
 	private void createNameHeader(Composite main, FormToolkit toolkit) {
-		compQueryName = new QueryHeaderComposite(main, Messages.SummaryEditor_SummaryQueryLabel, 
+		compQueryName = new QueryHeaderComposite(main, 
 				toolkit, frmSummaryArea.getFont(), 
 				frmSummaryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));

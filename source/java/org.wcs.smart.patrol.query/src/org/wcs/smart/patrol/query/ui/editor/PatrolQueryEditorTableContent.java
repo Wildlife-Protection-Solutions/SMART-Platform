@@ -48,6 +48,7 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryResultItem;
 import org.wcs.smart.patrol.query.model.types.PatrolQueryType;
 import org.wcs.smart.patrol.query.ui.querytable.PatrolTableColumn;
+import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.ui.QueryResultsTable;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -108,7 +109,8 @@ public class PatrolQueryEditorTableContent {
 	 * @param query
 	 */
 	public void updateName(PatrolQuery query){
-		compQueryName.setText(query.getName(), query.getId());
+		compQueryName.setText(query.getName(), query.getId(),
+				QueryTypeManager.INSTANCE.findQueryType(query.getTypeKey()).getGuiName());
 	}
 	/**
 	 * @return the date filter
@@ -210,7 +212,7 @@ public class PatrolQueryEditorTableContent {
 	}
 		
 	private void createNameHeader(Composite main, FormToolkit toolkit) {
-		compQueryName = new QueryHeaderComposite(main,Messages.PatrolQueryEditorTableContent_PatrolQueryLabel, 
+		compQueryName = new QueryHeaderComposite(main, 
 				toolkit, frmQueryArea.getFont(), frmQueryArea.getForeground());
 		compQueryName.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		compQueryName.addListener(SWT.Selection, new Listener(){
