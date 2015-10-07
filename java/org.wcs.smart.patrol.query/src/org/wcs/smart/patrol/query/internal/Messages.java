@@ -70,7 +70,9 @@ public class Messages extends NLS {
 	public static String PatrolAttributeValueItem_TreeNodeNotFound;
 	public static String PatrolCategoryValueItem_CategoryNotFound;
 	public static String PatrolContributionFactory_ParseContribution_Error;
+	public static String PatrolDropItemFactory_AgencyNotFound;
 	public static String PatrolDropItemFactory_ProcessError;
+	public static String PatrolDropItemFactory_RankNotFound;
 	public static String PatrolFilter_EmployeeNotFound;
 	public static String PatrolFilter_InvalidPrefix;
 	public static String PatrolFilter_MandateNotFound;
@@ -102,6 +104,8 @@ public class Messages extends NLS {
 	public static String PatrolQueryEditorTableContent_PatrolQueryLabel;
 	public static String PatrolQueryEditorTableContent_QueryPropertiesLabel;
 	public static String PatrolQueryEditorTableContent_RunQueryLink;
+	public static String PatrolQueryLabelProvider_AgencyLabel;
+	public static String PatrolQueryLabelProvider_RankLabel;
 	public static String PatrolQueryOptions_CaGroupByOptionName;
 	public static String PatrolQueryOptions_DateOp_Last30;
 	public static String PatrolQueryOptions_DateOpAll;

@@ -76,6 +76,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(AttributeTreeNode.class, "atn"); //$NON-NLS-1$
 		tablePrefix.put(AttributeListItem.class, "ali"); //$NON-NLS-1$
 		tablePrefix.put(Area.class, "ar"); //$NON-NLS-1$
+		tablePrefix.put(Employee.class, "e"); //$NON-NLS-1$
 	}
 
 	
@@ -94,6 +95,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(AttributeTreeNode.class, "smart.dm_attribute_tree"); //$NON-NLS-1$
 		tableNames.put(AttributeListItem.class, "smart.dm_attribute_list"); //$NON-NLS-1$
 		tableNames.put(Area.class, "smart.area_geometries"); //$NON-NLS-1$
+		tableNames.put(Employee.class, "smart.employee"); //$NON-NLS-1$
 	}
 		
 	/**

@@ -25,10 +25,12 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.Locale;
 
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.ext.IExtensionFilterViewer;
@@ -171,24 +173,50 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 	protected String asSql(PatrolFilter filter, IQueryEngine engine) throws SQLException{
 		PatrolQueryOption option = filter.getPatrolOption();
 		if (option.isEmployeeItem()){
-			String prefix = engine.tablePrefix(PatrolLeg.class);
-			String x = prefix + ".uuid IN ( select patrol_leg_uuid from smart.patrol_leg_members "  //$NON-NLS-1$
-					+ " where "; //$NON-NLS-1$
-			if (option == PatrolQueryOption.LEADER) {
-				x += " is_leader  AND "; //$NON-NLS-1$
-			} else if (option == PatrolQueryOption.PILOT) {
-				x += " is_pilot AND "; //$NON-NLS-1$
+			if (option == PatrolQueryOption.AGENCY ||
+					option == PatrolQueryOption.RANK){
+				try {
+					String field = option == PatrolQueryOption.AGENCY ? "agency_uuid" : "rank_uuid"; //$NON-NLS-1$ //$NON-NLS-2$
+					
+					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(SharedUtils.stripQuotes(filter.getValue())));
+					StringBuilder sb = new StringBuilder();
+					sb.append(engine.tablePrefix(PatrolLeg.class));
+					sb.append(".uuid IN (SELECT patrol_leg_uuid FROM "); //$NON-NLS-1$
+					sb.append(engine.tableNamePrefix(PatrolLegMember.class));
+					sb.append(","); //$NON-NLS-1$
+					sb.append(engine.tableNamePrefix(Employee.class));
+					sb.append(" WHERE "); //$NON-NLS-1$
+					sb.append(engine.tablePrefix(PatrolLegMember.class));
+					sb.append(".employee_uuid = "); //$NON-NLS-1$
+					sb.append(engine.tablePrefix(Employee.class));
+					sb.append(".uuid AND e." + field + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+					sb.append(p1);
+					sb.append(")"); //$NON-NLS-1$
+					return sb.toString();
+				} catch (Exception e) {
+					throw new SQLException(e);
+				}
+			}else{
+				String prefix = engine.tablePrefix(PatrolLeg.class);
+				String x = prefix + ".uuid IN ( select patrol_leg_uuid from " //$NON-NLS-1$
+						+ engine.tableName(PatrolLegMember.class) 
+						+ " where "; //$NON-NLS-1$
+				if (option == PatrolQueryOption.LEADER) {
+					x += " is_leader  AND "; //$NON-NLS-1$
+				} else if (option == PatrolQueryOption.PILOT) {
+					x += " is_pilot AND "; //$NON-NLS-1$
+				}
+				
+				String value2 = SharedUtils.stripQuotes((String)filter.getValue());
+				try {
+					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
+					x += " employee_uuid = " + p1 + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				} catch (Exception e) {
+					throw new SQLException(e);
+				}
+				return x;	
 			}
-			
-			String value2 = SharedUtils.stripQuotes((String)filter.getValue());
-			try {
-				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
-				x += " employee_uuid = " + p1 + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (Exception e) {
-				throw new SQLException(e);
-			}
-			 
-			return x;			
+					
 		}		
 		String prefix = engine.tablePrefix(option.getPatrolAttributeClass());
 		if (prefix == null){

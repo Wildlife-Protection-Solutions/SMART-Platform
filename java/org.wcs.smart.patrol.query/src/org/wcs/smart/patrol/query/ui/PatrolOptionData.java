@@ -32,10 +32,13 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.Station;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.patrol.PatrolHibernateManager;
 import org.wcs.smart.patrol.model.Patrol;
@@ -194,6 +197,18 @@ public class PatrolOptionData implements IPatrolOptionData{
 			for (Employee t : employees){
 				items.add(new ListItem(t.getUuid(), SmartLabelProvider.getFullLabel(t) ));
 			}
+		}else if (option == PatrolQueryOption.AGENCY){
+			List<Agency> agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), session);
+			for (Agency a : agencies){
+				items.add(new ListItem(a.getUuid(), a.getName()));
+			}
+		}else if (option == PatrolQueryOption.RANK){
+			List<Agency> agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), session);
+			for (Agency a : agencies){
+				for (Rank r : a.getRanks()){
+					items.add(new ListItem(r.getUuid(), r.getName() + " - " + a.getName())); //$NON-NLS-1$
+				}
+			}
 		}
 		Collections.sort(items);
 		return items;
@@ -203,11 +218,4 @@ public class PatrolOptionData implements IPatrolOptionData{
 	public ListItem getDefaultListItem() {
 		return null;
 	}
-
-//	@Override
-//	public Image getImage() {
-//		return PatrolQueryLabelProvider.getImage(option);
-//	}
-
-
 }
