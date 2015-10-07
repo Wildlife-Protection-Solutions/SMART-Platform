@@ -118,9 +118,10 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 					firePropertyChange(PROP_DIRTY);
 				}else if (eventType == IQueryListener.QUERY_NAME_MODIFIED){
 					boolean lIsDirty = isDirty;
-					PatrolQueryResultsEditor.this.getQuery().setName(getQuery().getName());
-					PatrolQueryResultsEditor.this.getQuery().setNames(getQuery().getNames());
-					((QueryEditorInput)getEditorInput()).setQueryName(getQuery().getName());
+					Query updatedQuery = (Query) object;
+					PatrolQueryResultsEditor.this.getQuery().setName(updatedQuery.getName());
+					PatrolQueryResultsEditor.this.getQuery().setNames(updatedQuery.getNames());
+					((QueryEditorInput)getEditorInput()).setQueryName(updatedQuery.getName());
 					updatePartName();
 					page1.updateQueryName();
 					

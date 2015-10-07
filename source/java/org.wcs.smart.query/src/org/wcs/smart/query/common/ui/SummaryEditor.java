@@ -103,9 +103,10 @@ public abstract class SummaryEditor extends EditorPart implements IQueryEditor, 
 					firePropertyChange(PROP_DIRTY);
 				}else if (eventType == IQueryListener.QUERY_NAME_MODIFIED){
 					boolean lIsDirty = isDirty;
-					SummaryEditor.this.getQuery().setName(getQuery().getName());
-					SummaryEditor.this.getQuery().setNames(getQuery().getNames());
-					getInputInternal().setQueryName(getQuery().getName());
+					Query updatedQuery = (Query) object;
+					SummaryEditor.this.getQuery().setName(updatedQuery.getName());
+					SummaryEditor.this.getQuery().setNames(updatedQuery.getNames());
+					((QueryEditorInput)getEditorInput()).setQueryName(updatedQuery.getName());
 					updatePartName();
 					compQueryName.setText(getQuery().getName(), getQuery().getId());
 					
