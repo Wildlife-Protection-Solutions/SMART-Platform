@@ -32,12 +32,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Class that acts as a provider of {@link ConfigurableModel} for survey CyberTracker plugin.
  * @author elitvin
  * @since 4.0.0
  */
