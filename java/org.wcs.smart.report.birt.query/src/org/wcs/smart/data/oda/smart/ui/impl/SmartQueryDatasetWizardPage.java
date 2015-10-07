@@ -82,6 +82,7 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 
 	private TreeViewer queryTree;
 	private boolean hideUserQueries = false;
+	
 	private Job loadQueriesJob = new Job(Messages.CustomDataSetWizardPage_LoadQueryJobName) {
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -386,7 +387,6 @@ public class SmartQueryDatasetWizardPage extends DataSetWizardPage {
 		String lname = smartQuery.getName();
 		lname = lname.replaceAll("[/\\\\.!;,]", "_");  //$NON-NLS-1$//$NON-NLS-2$
 		dataSetDesign.setDisplayName(lname + " [" + smartQuery.getId() + "]"); //$NON-NLS-1$ //$NON-NLS-2$
-		dataSetDesign.setName(lname);
 	}
 
 	/**
