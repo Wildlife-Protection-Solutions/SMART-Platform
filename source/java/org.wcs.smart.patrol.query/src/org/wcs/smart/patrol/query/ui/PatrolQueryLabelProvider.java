@@ -110,6 +110,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case PATROL_TRANSPORT_TYPE: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case PATROL_TRANSPORT_TYPE_KEY: return Messages.PatrolQueryOptions_QueryOpTransportType;
 				case CONSERVATION_AREA: return Messages.PatrolQueryOptions_CaGroupByOptionName;
+				case AGENCY: return Messages.PatrolQueryLabelProvider_AgencyLabel;
+				case RANK: return Messages.PatrolQueryLabelProvider_RankLabel;
 			}
 		}
 		if (item instanceof PatrolEndDateField){

@@ -66,6 +66,8 @@ TOKEN :
  | < PATROLLEG_LEADER_KEY : "patrol:leader" >
  | < PATROLLEG_PILOT_KEY : "patrol:pilot" >
  | < PATROLLEG_MEMBER_KEY : "patrol:member" >
+ | < PATROLLEG_AGENCY_KEY : "patrol:agency" >
+ | < PATROLLEG_RANK_KEY : "patrol:rank" >
  | < PATROL_CONTRIBUTION : "patrol:contribution" >
  | < PATROL_CONTRIBUTION_BOOL_KEY : (< PATROL_CONTRIBUTION > ":boolean:"(< LETTER >)*) >
  | < PATROL_CONTRIBUTION_STRING_KEY : (< PATROL_CONTRIBUTION >":string:"(< LETTER >)*) >
@@ -615,7 +617,10 @@ IFilter StringExpression():
  				< PATROLLEG_TRANSPORT_KEY_KEY > |
  				< PATROLLEG_LEADER_KEY > |
  				< PATROLLEG_PILOT_KEY > |
- 				< PATROLLEG_MEMBER_KEY >
+ 				< PATROLLEG_MEMBER_KEY > |
+ 				< PATROLLEG_AGENCY_KEY > |
+ 				< PATROLLEG_RANK_KEY > 
+ 				
  			) 
  			{key = token.image;}
 	     	op = StringOp()

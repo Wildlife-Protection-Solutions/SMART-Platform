@@ -28,8 +28,10 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.Area.AreaType;
+import org.wcs.smart.ca.Rank;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
@@ -93,6 +95,7 @@ import org.wcs.smart.query.ui.model.impl.BasicDropItemFactory;
 import org.wcs.smart.query.ui.model.impl.CategoryValueDropItem;
 import org.wcs.smart.query.ui.model.impl.ErrorDropItem;
 import org.wcs.smart.util.SharedUtils;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Drop item factory for patrol queries.
@@ -717,6 +720,27 @@ public class PatrolDropItemFactory extends BasicDropItemFactory implements IDrop
 			} else {
 				it.initializeData(new Object[]{new PatrolOptionData(option), m});
 			}
+		} else if (option == PatrolQueryOption.AGENCY){
+			Agency ag = (Agency) session.get(Agency.class, UuidUtils.stringToUuid(value1));
+			if (ag == null){
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolDropItemFactory_AgencyNotFound,
+						new Object[] { value1 }));
+			}else{
+				ListItem init = new ListItem(ag.getUuid(), ag.getName());
+				it.initializeData(new Object[]{new PatrolOptionData(option), init});
+			}
+						
+		}else if (option == PatrolQueryOption.RANK){
+			Rank ag = (Rank) session.get(Rank.class, UuidUtils.stringToUuid(value1));
+			if (ag == null){
+				it = new ErrorDropItem(MessageFormat.format(
+						Messages.PatrolDropItemFactory_RankNotFound,
+						new Object[] { value1 }));
+			}else{
+				ListItem init = new ListItem(ag.getUuid(), ag.getName());
+				it.initializeData(new Object[]{new PatrolOptionData(option), init});
+			}			
 		}
 		return new DropItem[] { it };
 	}

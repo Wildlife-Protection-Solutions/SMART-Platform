@@ -82,7 +82,9 @@ public class PatrolQueryOptions {
 			PatrolQueryOption.PATROL_TRANSPORT_TYPE, 
 			PatrolQueryOption.LEADER,
 			PatrolQueryOption.PILOT,
-			PatrolQueryOption.EMPLOYEE
+			PatrolQueryOption.EMPLOYEE,
+			PatrolQueryOption.AGENCY,
+			PatrolQueryOption.RANK
 	};
 	
 	/**

@@ -55,6 +55,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
     case AREA_KEY:
@@ -98,6 +100,8 @@ public class Parser implements ParserConstants {
       case PATROLLEG_LEADER_KEY:
       case PATROLLEG_PILOT_KEY:
       case PATROLLEG_MEMBER_KEY:
+      case PATROLLEG_AGENCY_KEY:
+      case PATROLLEG_RANK_KEY:
       case PATROL_CONTRIBUTION_BOOL_KEY:
       case PATROL_CONTRIBUTION_STRING_KEY:
       case AREA_KEY:
@@ -158,6 +162,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
     case AREA_KEY:
@@ -199,6 +205,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
     case AREA_KEY:
@@ -492,6 +500,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_BOOL_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
       filter = AttributeExpression();
@@ -597,6 +607,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_RANK_KEY:
     case PATROL_CONTRIBUTION_STRING_KEY:
       /* String comparison */
               filter = StringExpression();
@@ -735,6 +747,8 @@ public class Parser implements ParserConstants {
     case PATROLLEG_LEADER_KEY:
     case PATROLLEG_PILOT_KEY:
     case PATROLLEG_MEMBER_KEY:
+    case PATROLLEG_AGENCY_KEY:
+    case PATROLLEG_RANK_KEY:
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case PATROL_ID_KEY:
         jj_consume_token(PATROL_ID_KEY);
@@ -771,6 +785,12 @@ public class Parser implements ParserConstants {
         break;
       case PATROLLEG_MEMBER_KEY:
         jj_consume_token(PATROLLEG_MEMBER_KEY);
+        break;
+      case PATROLLEG_AGENCY_KEY:
+        jj_consume_token(PATROLLEG_AGENCY_KEY);
+        break;
+      case PATROLLEG_RANK_KEY:
+        jj_consume_token(PATROLLEG_RANK_KEY);
         break;
       default:
         jj_la1[21] = jj_gen;
@@ -935,7 +955,7 @@ public class Parser implements ParserConstants {
       jj_la1_1 = new int[] {0xfbfcbfff,0xfbfcbfff,0x0,0xfbfcbfff,0xfbfcbfff,0x8000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xfbfc3fff,0x2208,0x104,0xfbfc3ffe,0x1040,0xfbf40000,0xfbfc0082,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_2() {
-      jj_la1_2 = new int[] {0x16,0x16,0x20000,0x16,0x16,0x0,0x7e80,0x0,0x0,0x7e80,0x1fd0000,0x0,0x140000,0x1fd0000,0x0,0x0,0x16,0x2,0x0,0x6,0x0,0x0,0x4,0x0,0x0,0x0,0x0,};
+      jj_la1_2 = new int[] {0x5b,0x5b,0x80000,0x5b,0x5b,0x0,0x1fa00,0x0,0x0,0x1fa00,0x7f40000,0x0,0x500000,0x7f40000,0x0,0x0,0x5b,0x8,0x0,0x1b,0x0,0x3,0x13,0x0,0x0,0x0,0x0,};
    }
 
   /** Constructor with InputStream. */
@@ -1052,7 +1072,7 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[90];
+    boolean[] la1tokens = new boolean[92];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
@@ -1072,7 +1092,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 90; i++) {
+    for (int i = 0; i < 92; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
