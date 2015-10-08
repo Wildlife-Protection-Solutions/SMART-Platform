@@ -159,6 +159,7 @@
             </command>
             <command
                   commandId="org.wcs.smart.command.showperspective"
+                  icon="images/etool16/intelligence.png"
                   label="%view.command.label"
                   style="push"
                   tooltip="%command.perspective.tooltip">
