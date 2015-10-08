@@ -69,11 +69,11 @@ public class ObserverGroupByViewer extends AbstractGroupByViewer<ObserverGroupBy
 			Collections.sort(es, new Comparator<Employee>() {
 				@Override
 				public int compare(Employee arg0, Employee arg1) {
-					return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(arg0).toUpperCase(), SmartLabelProvider.getFullLabel(arg1).toUpperCase());
+					return Collator.getInstance().compare(SmartLabelProvider.getShortLabel(arg0).toUpperCase(), SmartLabelProvider.getFullLabel(arg1).toUpperCase());
 				}
 			});
 			for (Employee e : es){
-				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullLabel(e)));
+				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getShortLabel(e)));
 			}
 		}
 		return items;

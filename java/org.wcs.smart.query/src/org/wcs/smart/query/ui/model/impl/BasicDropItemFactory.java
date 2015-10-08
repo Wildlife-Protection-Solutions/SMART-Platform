@@ -575,7 +575,7 @@ public class BasicDropItemFactory implements IDropItemFactory{
 			di = new ErrorDropItem(MessageFormat.format(Messages.ObserverFilter_EmployeeNotFound, new Object[]{filter.getValue()}));
 		}else{
 			e.getUuid();
-			SmartLabelProvider.getFullLabel(e);
+			SmartLabelProvider.getShortLabel(e);
 			
 			di = BasicDropItemFactory.INSTANCE.createObserverDropItem();
 			di.initializeData(e);
