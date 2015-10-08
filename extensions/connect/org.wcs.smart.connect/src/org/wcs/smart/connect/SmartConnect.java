@@ -370,7 +370,7 @@ public class SmartConnect implements AutoCloseable {
 		
 		Long size = null;
 		
-		long waitTime = server.getWaitProcessingTime();
+		long waitTime = server.getRetryWaitTime();
 		//first request; this one gives us the requested size
 		while(size == null && tryCount < server.getMaxRetryDownload()){
 			Response r = null;
