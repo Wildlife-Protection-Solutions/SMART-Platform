@@ -132,12 +132,22 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 			throws Exception {
 		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
 		Path fromPath = packageFilestoreDir.resolve(item.getFileName());
+		if (!Files.exists(fromPath)){
+			return;
+		}
+		
 		if (Files.isDirectory(fromPath)){
 			Files.createDirectories(toPath);
 		}else{
-			if (!Files.exists(toPath)){
-				Files.copy(fromPath, toPath);
-			}	
+			//ensure all parent directories are created
+			Files.createDirectories(toPath.getParent());
+			//delete existing file
+			if (!Files.isDirectory(toPath) && Files.exists(toPath)){
+				Files.delete(toPath);
+			}
+			//copy file
+			Files.copy(fromPath, toPath);
+			
 		}
 	}
 

@@ -179,5 +179,11 @@
             type="java.lang.Object">
       </propertyTester>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.filestoredir">
+      <FilestoreDirectory
+            directory="smart_connect">
+      </FilestoreDirectory>
+   </extension>
 
 </plugin>

@@ -146,10 +146,14 @@ public class SmartConnect implements AutoCloseable {
 		//build a trust manager using the locally provided certificate
 		KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
 		keyStore.load(null, null);
-		Path certpath = Paths.get(server.getConservationArea().getFileDataStoreLocation(), server.getCertificateFileName());
+		Path certpath = server.getLocalCertificateFile();
 		try(InputStream is = new BufferedInputStream(Files.newInputStream(certpath))){
 			Certificate cr = CertificateFactory.getInstance("X.509").generateCertificate(is);
-			keyStore.setCertificateEntry("smart-" + server.getConservationArea().getUuid().toString(), cr);
+			String key = "smart-";
+			if (server.getConservationArea() != null){
+				key += server.getConservationArea().getUuid().toString();
+			}
+			keyStore.setCertificateEntry(key, cr);
 		}
 		TrustManagerFactory factory = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		factory.init(keyStore);
@@ -361,6 +365,8 @@ public class SmartConnect implements AutoCloseable {
 			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
 			.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR)
 			.resolve(System.nanoTime() + ".temp");
+		//create necessary dirs
+		Files.createDirectories(filestore.getParent());
 		
 		Long size = null;
 		

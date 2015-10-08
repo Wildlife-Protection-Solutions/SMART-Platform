@@ -108,7 +108,7 @@ public class DownloadChangeLogHandler {
 				Collection<MPart> parts = pService.getParts();
 				for (MPart part : parts){
 					if (E3Utils.isCompatibilityEditor(part)){
-						pService.hidePart(part, true);
+						pService.hidePart(part, false);
 						
 						PartState state = PartState.ACTIVATE;
 						if (pService.isPartVisible(part)){

@@ -106,6 +106,10 @@ public class ConnectServer extends UuidItem{
 	public String getCertificateFileName(){
 		return this.certificate;
 	}
+	/**
+	 * relative file location of the certificate file in the filestore
+	 * @param certificate
+	 */
 	public void setCertificateFileName(String certificate){
 		this.certificate = certificate;
 	}
@@ -143,6 +147,18 @@ public class ConnectServer extends UuidItem{
 		Files.copy(copyFrom, copyToFile);
 		setCertificateFileName(Paths.get(getConservationArea().getFileDataStoreLocation()).relativize(copyToFile).toString());
 	}
+	
+	/**
+	 * 
+	 * @return the full absolute path to the certificate file in 
+	 * the local filestore
+	 */
+	@Transient
+	public Path getLocalCertificateFile(){
+		return Paths.get(ca.getFileDataStoreLocation(),
+				getCertificateFileName());
+	}
+	
 	@Transient
 	public void setOption(Option op, String value){
 		if (options == null) parseOptions();
