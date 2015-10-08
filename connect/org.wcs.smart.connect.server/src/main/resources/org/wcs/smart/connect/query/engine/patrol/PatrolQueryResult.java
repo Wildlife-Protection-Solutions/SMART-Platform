@@ -50,7 +50,7 @@ public class PatrolQueryResult implements IDbTableResultSet {
 	}
 	
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
-		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable());
+		return c.createStatement().executeQuery(engine.getDataQuery());
 	}
 
 	
@@ -113,8 +113,7 @@ public class PatrolQueryResult implements IDbTableResultSet {
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE.getKey())){
 			return rs.getString("p_transporttype");
 		}else if (columnKey.equals("track")){
-			//return GeometryUtils.gFromWKB(rs.getBytes("r_track")).toText();
-			return "TODO: track and unique values";
+			return rs.getString("track");
 		}
 		return null;
 	}

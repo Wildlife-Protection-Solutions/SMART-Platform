@@ -212,6 +212,7 @@ public class QueryApi extends HttpServlet{
 			//f.delete();
 			return rs;
 		}catch (Exception ex){
+			//TODO: log me
 			String error = MessageFormat.format("Error executing query: {0}", ex.getMessage());
 			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, error);
 		}finally{
