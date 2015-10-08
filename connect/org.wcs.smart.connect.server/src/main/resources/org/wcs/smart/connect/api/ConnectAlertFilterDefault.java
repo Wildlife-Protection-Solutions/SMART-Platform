@@ -3,6 +3,8 @@ package org.wcs.smart.connect.api;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
@@ -28,15 +30,16 @@ import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
-import com.sun.istack.internal.logging.Logger;
 
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlertFilterDefault.PATH)
 
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class ConnectAlertFilterDefault extends HttpServlet {
+	
 	private static final long serialVersionUID = 1L;
-	private final Logger logger = Logger.getLogger(ConnectAlertFilterDefault.class);
+	
+	private final Logger logger = Logger.getLogger(ConnectAlertFilterDefault.class.getName());
 	
 	public static final String PATH = "connectalertfilterdefault"; //$NON-NLS-1$
 
@@ -113,11 +116,11 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 			s.update(toUpdate);
 			s.getTransaction().commit();
 		}catch (SmartConnectException ex){
-			logger.warning(ex.getMessage(), ex);
+			logger.log(Level.WARNING, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw ex;
 		}catch (Exception ex){
-			logger.severe(ex.getMessage(), ex);
+			logger.log(Level.SEVERE, ex.getMessage(), ex);
 			s.getTransaction().rollback();
 			throw new SmartConnectException(ex.getMessage(), ex);
 		}finally{
