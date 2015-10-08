@@ -31,6 +31,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.internal.Map;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
+import org.wcs.smart.common.attachment.ISmartAttachment;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager;
 import org.wcs.smart.intelligence.IntelligenceEventManager.EventType;
@@ -132,7 +133,13 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 				intelligence.getSource().getNames().size();
 			}
 			intelligence.getPoints().size();
-			intelligence.getAttachments().size();
+			for (ISmartAttachment a : intelligence.getAttachments()){
+				try {
+					a.computeFileLocation(session);
+				} catch (Exception e) {
+					IntelligencePlugIn.log(e.getMessage(), e);
+				}
+			}
 			session.getTransaction().commit();
 			session.close();
 		}
