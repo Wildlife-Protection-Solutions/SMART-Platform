@@ -15,6 +15,10 @@
 	<version>4.0-SNAPSHOT</version>
 	<name>SMART Connect Server</name>
 
+	<properties>
+		<smart.env>devel</smart.env>
+    	</properties>
+    	
 	<build>
 		<sourceDirectory>src/main/resources</sourceDirectory>
 		<finalName>server</finalName>
@@ -50,6 +54,14 @@
 				<version>2.6</version>
 				<configuration>
 					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+					<warSourceExcludes>**/context.xml</warSourceExcludes>
+					<webResources>
+						<resource>
+							<directory>conf/${smart.env}</directory>
+							<targetPath>META-INF</targetPath>
+							<includes><include>**/context.xml</include></includes>
+						</resource>
+					</webResources>
 				</configuration>
       		</plugin>
 		</plugins>

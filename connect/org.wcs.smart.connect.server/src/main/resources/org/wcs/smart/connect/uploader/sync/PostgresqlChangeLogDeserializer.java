@@ -35,8 +35,6 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 			//we already have this item
 			return false;
 		}
-		//TODO: look for conflict; throw exception if conflict
-		
 		return true;
 	}
 	
@@ -53,12 +51,22 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 			throws Exception {
 		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
 		Path fromPath = changeLogFilestore.resolve(item.getFileName());
+		if (!Files.exists(fromPath)){
+			//source path doesn't exist; probably deleted last so ignore this
+			return;
+		}
 		if (Files.isDirectory(fromPath)){
 			Files.createDirectories(toPath);
 		}else{
-			if (!Files.exists(toPath)){
-				Files.copy(fromPath, toPath);
+			//ensure all parent directories are created
+			Files.createDirectories(toPath.getParent());
+			//delete existing file
+			if (!Files.isDirectory(toPath) && Files.exists(toPath)){
+				Files.delete(toPath);
 			}
+			//copy file
+			Files.copy(fromPath, toPath);
+			
 		}
 	}
 

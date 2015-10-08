@@ -59,7 +59,7 @@ CREATE TABLE connect.ca_info
 	label varchar not null,
 	status varchar not null,
 	lock_key serial not null,
-	unique(lock_key);
+	unique(lock_key),
 	PRIMARY KEY (ca_uuid)
 ) WITHOUT OIDS;
 
@@ -109,7 +109,7 @@ CREATE TABLE connect.user_roles
 	PRIMARY KEY (username, role)
 ) WITHOUT OIDS;
 
-CREATE TYPE alert_status AS ENUM ('ACTIVE', 'DISABLED');
+CREATE TYPE connect.alert_status AS ENUM ('ACTIVE', 'DISABLED');
 
 -- A list of all alerts in the system
 CREATE TABLE connect.alerts
@@ -129,7 +129,7 @@ CREATE TABLE connect.alerts
 	-- Associated Conservation Area UUID
 	ca_uuid uuid NOT NULL,
 	--alert status, custom enum type defined above
-	status alert_status NOT NULL,
+	status connect.alert_status NOT NULL,
 	-- the longitude of the alert location
 	x double precision NOT NULL,
 	-- the latitude of the alert location

@@ -34,6 +34,8 @@ import org.wcs.smart.dataentry.model.CmAttributeOption;
 import org.wcs.smart.dataentry.model.CmAttributeTreeNode;
 import org.wcs.smart.dataentry.model.CmNode;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
+import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -91,8 +93,6 @@ import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
 import org.wcs.smart.patrol.model.PatrolWaypoint;
-import org.wcs.smart.patrol.model.ScreenOption;
-import org.wcs.smart.patrol.model.ScreenOptionUuid;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
@@ -114,6 +114,9 @@ import org.wcs.smart.query.common.model.WaypointQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.model.StyledQuery;
+import org.wcs.smart.report.model.Report;
+import org.wcs.smart.report.model.ReportFolder;
+import org.wcs.smart.report.model.ReportQuery;
 
 public enum SmartTable {
 
@@ -202,9 +205,9 @@ public enum SmartTable {
 	QUERY(Query.class,null),
 	QUERYFOLDER(QueryFolder.class,null),
 	RANK(Rank.class,".agency.conservationArea"),
-//	REPORT(Report.class, null),
-//	REPORTFOLDER(ReportFolder.class, null),
-//	REPORTQUERY(ReportQuery.class, ".id.report.conservationArea"),
+	REPORT(Report.class, null),
+	REPORTFOLDER(ReportFolder.class, null),
+	REPORTQUERY(ReportQuery.class, ".id.report.conservationArea"),
 	SAMPLINGUNIT(SamplingUnit.class,".surveyDesign.conservationArea"),
 	SAMPLINGUNITATTRIBUTE(SamplingUnitAttribute.class,".conservationArea"),
 	SAMPLINGUNITATTRIBUTELISTITEM(SamplingUnitAttributeListItem.class,".attribute.conservationArea"),
