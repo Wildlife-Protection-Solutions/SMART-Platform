@@ -154,7 +154,7 @@ public class DownloadChangeLogEngine {
 			while(status == null || (status.getStatus() == WorkItemStatus.Status.PROCESSING || 
 					status.getStatus() == WorkItemStatus.Status.PROCESSING)){
 				Long current = System.nanoTime();
-				if ( current - start > connect.getServer().getWaitProcessingTime()) throw new Exception("Timed out waiting for export to process.");
+				if ( current - start > connect.getServer().getWaitProcessingTime() * 1000000) throw new Exception("Timed out waiting for export to process.");
 				Thread.sleep(connect.getServer().getRetryWaitTime());
 				try{
 					status = connect.getWorkItemStatus(statusUrl);
