@@ -131,6 +131,8 @@ public class Messages extends NLS {
 	public static String AttributeInfoPanel_Required_Label;
 	public static String AttributeInfoPanel_SaveErrorMessage;
 	public static String AttributeInfoPanel_SavingProgressMessage;
+	public static String AttributeInfoPanel_SortButton;
+	public static String AttributeInfoPanel_SortButtonTooltip;
 	public static String AttributeInfoPanel_Type_Label;
 	public static String AttributeInfoPanel_ValuesLabel;
 	public static String AttributeItemDialog_Dialog_Message1;
@@ -151,6 +153,8 @@ public class Messages extends NLS {
 	public static String AttributeTree_ImportButtonTooltip;
 	public static String AttributeTree_LoadAttributeTreeMessage;
 	public static String AttributeTree_Loading;
+	public static String AttributeTree_SortAllButton;
+	public static String AttributeTree_SortAllTooltip;
 	public static String AttributeTreeLabelProvider_RootNode_Label;
 	public static String AttributeTreeNodeDMAdvisor_Error_NotTreeNode;
 	public static String AttributeTreeNodeDMAdvisor_Error_TreeNodeReferenced;

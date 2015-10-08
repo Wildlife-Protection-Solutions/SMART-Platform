@@ -22,8 +22,11 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -334,6 +337,28 @@ public class AttributeTree {
 				}
 			});
 			
+			final Button btnSort = new Button(buttonPanel, SWT.NONE);
+			btnSort.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+			btnSort.setText(Messages.AttributeTree_SortAllButton);
+			btnSort.setToolTipText(Messages.AttributeTree_SortAllTooltip);
+			btnSort.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					List<AttributeTreeNode> nodes = (List<AttributeTreeNode>) viewer.getInput();
+					List<AttributeTreeNode> toSort = new ArrayList<AttributeTreeNode>();
+					Language lang = ((AttributeTreeLabelProvider)viewer.getLabelProvider()).getLanguage();
+					
+					sortNodes(nodes, lang);
+					toSort.addAll(nodes);
+					while(toSort.size() > 0){
+						AttributeTreeNode p = toSort.remove(0);
+						sortNodes(p.getChildren(), lang);
+						toSort.addAll(p.getChildren());
+					}
+					refreshTree();
+				}
+			});
+			
 			Label lbl = new Label(buttonPanel, SWT.SEPARATOR | SWT.HORIZONTAL);
 			lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 			
@@ -438,7 +463,18 @@ public class AttributeTree {
 		return comp;
 	}
 	
-	
+	private void sortNodes(List<AttributeTreeNode> nodes, final Language lang){
+		Collections.sort(nodes, new Comparator<AttributeTreeNode>() {
+			@Override
+			public int compare(AttributeTreeNode o1,
+					AttributeTreeNode o2) {
+				return Collator.getInstance().compare(o1.findName(lang).toUpperCase(), o2.findName(lang).toUpperCase());
+			}
+		});
+		for (int i = 0; i < nodes.size();i++){
+			nodes.get(i).setNodeOrder(i);
+		}
+	}
 	
 	private void deleteNodes() {
 		

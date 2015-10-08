@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.ca.properties;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -132,6 +133,7 @@ public class AttributeInfoPanel extends Composite {
 	private Button btnDeleteListItem;
 	private Button btnMoveUp;
 	private Button btnMoveDown;
+	private Button btnSort;
 	
 	private List<NamedKeyItem> attributeList = new ArrayList<NamedKeyItem>();
 	
@@ -139,6 +141,7 @@ public class AttributeInfoPanel extends Composite {
 	private Session currentSession = null;
 	
 	private boolean canEdit = false;
+	
 	/**
 	 * Creates a new attribute panel
 	 * @param parent parent composite
@@ -467,6 +470,28 @@ public class AttributeInfoPanel extends Composite {
 					attributeList.remove(it);
 					attributeList.add(index, it);
 					for (int i = 0; i < attributeList.size(); i++){
+						((AttributeListItem)attributeList.get(i)).setListOrder(i);
+					}
+					lstAttributeList.refresh();
+				}
+			});
+			
+			btnSort = new Button(buttonPanel, SWT.NONE);
+			btnSort.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+			btnSort.setText(Messages.AttributeInfoPanel_SortButton);
+			btnSort.setToolTipText(Messages.AttributeInfoPanel_SortButtonTooltip);
+			btnSort.setEnabled(true);
+			btnSort.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e){
+					Comparator<NamedKeyItem> c = new Comparator<NamedKeyItem>(){
+						@Override
+						public int compare(NamedKeyItem arg0, NamedKeyItem arg1) {
+							return Collator.getInstance().compare(arg0.findName(currentDisplayLang).toUpperCase(), arg1.findName(currentDisplayLang).toUpperCase());
+						}};
+					
+					Collections.sort(attributeList, c);
+					for (int i = 0; i < attributeList.size(); i ++){
 						((AttributeListItem)attributeList.get(i)).setListOrder(i);
 					}
 					lstAttributeList.refresh();
