@@ -46,6 +46,7 @@ import org.locationtech.udig.project.ui.internal.tool.display.ToolProxy;
 import org.locationtech.udig.project.ui.tool.IMapEditorSelectionProvider;
 import org.locationtech.udig.project.ui.tool.IToolManager;
 import org.locationtech.udig.project.ui.viewers.MapViewer;
+import org.locationtech.udig.tools.internal.ZoomHandler;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
@@ -53,7 +54,6 @@ import org.wcs.smart.ca.BasemapDefinition;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.map.internal.LoadBasemapHandler;
-import org.wcs.smart.map.internal.ZoomHandler;
 import org.wcs.smart.map.internal.settings.MapSettings;
 import org.wcs.smart.util.E3Utils;
 
@@ -150,7 +150,7 @@ public class MapView implements IDropTargetProvider, MapPart, IAdaptable {
 		
 		new MapInfoAreaComposite(parent, SWT.NONE, mapviewer);
 
-        setTool(ZoomHandler.ZoomToolId);
+        setTool("org.locationtech.udig.tools.Zoom");
         
         UDIGDragDropUtilities.addDropSupport(mapviewer.getViewport().getControl(), this);
         

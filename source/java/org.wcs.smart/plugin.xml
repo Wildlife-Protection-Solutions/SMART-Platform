@@ -532,39 +532,69 @@
                visible="true">
          </separator>
          <command
-               commandId="org.wcs.smart.command.map.pan"
+               commandId="org.wcs.smart.map.tool"
+               icon="images/icons/etool16/measure_tool.png"
+               label="Distance Tool"
+               style="radio">
+            <parameter
+                  name="org.wcs.smart.map.toolid"
+                  value="org.wcs.smart.map.tool.distance">
+            </parameter>
+         </command>
+         <command
+               commandId="org.wcs.smart.map.tool"
                icon="images/icons/elcl16/pan_tool.png"
                label="%pan.command.label"
                style="radio"
                tooltip="%pan.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.map.toolid"
+                  value="org.locationtech.udig.tools.Pan">
+            </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.command.map.zoom"
+               commandId="org.wcs.smart.map.tool"
                icon="images/icons/elcl16/zoom_tool.png"
                label="%zoom.command.label"
                style="radio"
                tooltip="%zoom.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.map.toolid"
+                  value="org.locationtech.udig.tools.Zoom">
+            </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.command.map.zoomout"
+               commandId="org.wcs.smart.map.tool"
                icon="images/icons/elcl16/zoom_out_co.gif"
                label="%zoomout.command.label"
                style="push"
                tooltip="%zoomout.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.map.toolid"
+                  value="org.locationtech.udig.tool.default.ZoomOut">
+            </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.command.map.zoomin"
+               commandId="org.wcs.smart.map.tool"
                icon="images/icons/elcl16/zoom_in_co.gif"
                label="%zoomin.command.label"
                style="push"
                tooltip="%zoomin.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.map.toolid"
+                  value="org.locationtech.udig.tool.default.ZoomIn">
+            </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.command.map.zoomextents"
+               commandId="org.wcs.smart.map.tool"
                icon="images/icons/elcl16/zoom_layers.png"
                label="%zoomextents.command.label"
                style="push"
                tooltip="%zoomextents.command.tooltip">
+            <parameter
+                  name="org.wcs.smart.map.toolid"
+                  value="org.locationtech.udig.tools.ZoomExtent">
+            </parameter>
          </command>
          <separator
                name="org.wcs.smart.map.separator1"
@@ -683,34 +713,12 @@
             name="%savebasemap.command.name">
       </command>
       <command
-            categoryId="org.wcs.smart.command.category.maptools"
-            id="org.wcs.smart.command.map.pan"
-            name="%pan.command.name">
-      </command>
-      <command
-            categoryId="org.wcs.smart.command.category.maptools"
-            id="org.wcs.smart.command.map.zoom"
-            name="%zoom.command.name">
-      </command>
-      <command
-            id="org.wcs.smart.command.map.zoomextents"
-            name="%zoomextents.command.name">
-      </command>
-      <command
             id="org.wcs.smart.command.map.addlayer"
             name="%addlayer.command.name">
       </command>
       <command
             id="org.wcs.smart.command.map.selectbasemap"
             name="%selectbasemap.command.name">
-      </command>
-      <command
-            id="org.wcs.smart.command.map.zoomin"
-            name="%zoomin.command.name">
-      </command>
-      <command
-            id="org.wcs.smart.command.map.zoomout"
-            name="%zoomout.command.name">
       </command>
       <command
             id="org.wcs.smart.command.ca.projections.show"
@@ -740,6 +748,15 @@
       <command
             id="org.wcs.smart.command.map.style"
             name="%style.command.name">
+      </command>
+      <command
+            id="org.wcs.smart.map.tool"
+            name="Activate Map Tool">
+         <commandParameter
+               id="org.wcs.smart.map.toolid"
+               name="MapTool Id"
+               optional="true">
+         </commandParameter>
       </command>
    </extension>
    <extension
@@ -862,32 +879,12 @@
             commandId="org.wcs.smart.command.ca.basemaps.save">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.PanMapHandler$PanMapHandlerWrapper"
-            commandId="org.wcs.smart.command.map.pan">
-      </handler>
-      <handler
-            class="org.wcs.smart.map.internal.ZoomHandler$ZoomHandlerWrapper"
-            commandId="org.wcs.smart.command.map.zoom">
-      </handler>
-      <handler
             class="org.wcs.smart.map.internal.AddLayerHandler$AddLayerHandlerWrapper"
             commandId="org.wcs.smart.command.map.addlayer">
       </handler>
       <handler
-            class="org.wcs.smart.map.internal.ZoomExtentsHandler$ZoomExtentsHandlerWrapper"
-            commandId="org.wcs.smart.command.map.zoomextents">
-      </handler>
-      <handler
             class="org.wcs.smart.map.internal.LoadBasemapHandler$LoadBasemapHandlerWrapper"
             commandId="org.wcs.smart.command.map.selectbasemap">
-      </handler>
-      <handler
-            class="org.wcs.smart.map.internal.ZoomInHandler$ZoomInHandlerWrapper"
-            commandId="org.wcs.smart.command.map.zoomin">
-      </handler>
-      <handler
-            class="org.wcs.smart.map.internal.ZoomOutHandler$ZoomOutHandlerWrapper"
-            commandId="org.wcs.smart.command.map.zoomout">
       </handler>
       <handler
             class="org.wcs.smart.ui.internal.ca.properties.handlers.ShowProjectionsPageHandler$ShowProjectionsPageHandlerWrapper"
@@ -924,6 +921,10 @@
                </iterate>
             </with>
          </enabledWhen>
+      </handler>
+      <handler
+            class="org.wcs.smart.map.internal.ActivateMapToolHandler"
+            commandId="org.wcs.smart.map.tool">
       </handler>
    </extension>
    <extension
@@ -1181,6 +1182,20 @@
             onToolbar="false"
             tooltip="%clearselectiontool.tooltip">
       </actionTool>
+      <modalTool
+            categoryId="org.wcs.smart.location.maptools"
+            class="org.wcs.smart.udig.SmartDistanceTool"
+            icon="images/icons/etool16/measure_tool.png"
+            id="org.wcs.smart.map.tool.distance"
+            onToolbar="true"
+            toolCursorId="org.wcs.smart.cross">
+      </modalTool>
+      <toolCursor
+            hotspotX="16"
+            hotspotY="16"
+            id="org.wcs.smart.cross"
+            image="images/pointers/cursor.png">
+      </toolCursor>
    </extension>
    <extension
          point="org.wcs.smart.ca.export">
