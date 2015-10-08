@@ -38,6 +38,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -120,10 +121,10 @@ public class FileStoreWatcher implements Runnable{
     		type = ChangeLogItem.Action.FS_DELETE;
     	}
     	
-    	final String relativeFileName = FileSystems.getDefault()
+    	final String relativeFileName = FilenameUtils.separatorsToUnix(FileSystems.getDefault()
     			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
     			.relativize(p)
-    			.toString();
+    			.toString());
     	
     	ChangeLogItem item = new ChangeLogItem();
     	item.setAction(type);

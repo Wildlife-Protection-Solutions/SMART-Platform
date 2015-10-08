@@ -116,6 +116,7 @@ public abstract class ChangeLogDeserializer {
 	
 	protected abstract boolean shouldProcess(ChangeLogItem item) throws ConflictException;
 
+	
 	private HashMap<String, Object> readObject(ObjectInputStream is) throws Exception{
 		int numCols = is.readInt();
 		HashMap<String, Object> data = new HashMap<String, Object>();

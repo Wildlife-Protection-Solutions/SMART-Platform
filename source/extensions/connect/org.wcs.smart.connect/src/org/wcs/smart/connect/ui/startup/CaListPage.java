@@ -1,5 +1,6 @@
 package org.wcs.smart.connect.ui.startup;
 
+import java.nio.file.Path;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -19,6 +20,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
 
 public class CaListPage extends WizardPage implements ISelectionChangedListener{
 
@@ -58,13 +60,8 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 		setControl(outer);
 	}
 
-	public void initList(String url, String user, String pass){
-		
-		ConnectServer temp = new ConnectServer();
-		temp.setServerUrl(url);
-	
-		
-		try(SmartConnect connect = new SmartConnect(temp, user, pass)){		
+	public void initList(ConnectServer temp, String username, String password){
+		try(SmartConnect connect = new SmartConnect(temp, username, password)){		
 			setErrorMessage(null);
 			final List<ConservationAreaInfo> data = connect.getConservationAreas();
 			Display.getDefault().syncExec(new Runnable(){
@@ -79,7 +76,7 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 				@Override
 				public void run() {
 					cmbList.setInput(new String[]{"Error"});
-					setErrorMessage("Could not connect to server.  Ensure the url, username and password are valid.");
+					setErrorMessage("Could not connect to server.  Ensure the url, certificate file, username and password are valid.");
 				}
 			});
 			

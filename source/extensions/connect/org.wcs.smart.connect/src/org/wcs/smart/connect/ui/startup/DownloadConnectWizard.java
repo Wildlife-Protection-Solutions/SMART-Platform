@@ -1,6 +1,8 @@
 package org.wcs.smart.connect.ui.startup;
 
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ import org.wcs.smart.connect.api.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.server.DownloadCaEngine;
 import org.wcs.smart.connect.ui.server.configure.ConnectServerWizard;
+import org.wcs.smart.connect.ui.server.configure.ServerOptionsWizardPage;
 import org.wcs.smart.connect.ui.server.configure.ServerWizardPage;
 import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
 
@@ -35,22 +38,41 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 		super.addPages();
 	}
 	
+	public ConnectServer createServer(){
+		String url = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getServerName();
+		String certificateFile = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getCertificateFile();
+				
+		ConnectServer server = new ConnectServer(){
+			public Path getLocalCertificateFile(){
+				return Paths.get(getCertificateFileName());
+			}
+		};
+		server.setServerUrl(url);
+		server.initalizeOptions();
+		((ServerOptionsWizardPage)getPage(ServerOptionsWizardPage.NAME)).updateServer(server);
+		if (!certificateFile.trim().isEmpty()){
+			server.setCertificateFileName(certificateFile);
+		}
+		
+		return server;
+	}
+	
 	@Override
 	public boolean performFinish() {
 		ConservationAreaInfo info = page4.getSelection();
 
 		if (info == null) return false;
-		
-		String url = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getServerName();
+	
+		ConnectServer server = createServer();
 		String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 		String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
 		
-		ConnectServer server = new ConnectServer();
-		server.setServerUrl(url);
 		try(SmartConnect connect = new SmartConnect(server, user, pass)){
 		
 			final DownloadCaEngine installer = new DownloadCaEngine(info, connect);
-			installer.preDownload(getShell());
+			if (!installer.preDownload(getShell())){
+				return false;
+			}
 		
 			final List<Exception> errors = new ArrayList<Exception>();
 			try{
@@ -82,10 +104,10 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
 		if (event.getCurrentPage() == page3 && event.getTargetPage() == page4){
-			final String url = ((ServerWizardPage)getPage(ServerWizardPage.NAME)).getServerName();
+			final ConnectServer temp = createServer();
 			final String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 			final String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
-
+			
 			
 			try{
 				getContainer().run(true, true, new IRunnableWithProgress() {
@@ -94,7 +116,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 							InterruptedException {
 						monitor.beginTask("Loading Conservation Areas", 2);
 						monitor.worked(1);
-						page4.initList(url, user, pass);
+						page4.initList(temp, user, pass);
 						monitor.done();
 					}
 				});
