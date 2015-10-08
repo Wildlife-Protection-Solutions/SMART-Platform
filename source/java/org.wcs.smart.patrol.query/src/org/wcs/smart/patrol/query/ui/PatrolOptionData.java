@@ -102,7 +102,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 				}else if (object instanceof Employee){
 					Employee e = (Employee)object;
 					if (e.getConservationArea().equals(SmartDB.getCurrentConservationArea())){
-						results.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullLabel((Employee) e)));
+						results.add(new ListItem(e.getUuid(), SmartLabelProvider.getShortLabel((Employee) e)));
 					}
 				}else if (object instanceof ConservationArea){
 					ConservationArea ca = (ConservationArea)object;
@@ -195,7 +195,7 @@ public class PatrolOptionData implements IPatrolOptionData{
 						option == PatrolQueryOption.EMPLOYEE){
 			List<Employee> employees = PatrolHibernateManager.getActiveEmployees(SmartDB.getCurrentConservationArea(), session);
 			for (Employee t : employees){
-				items.add(new ListItem(t.getUuid(), SmartLabelProvider.getFullLabel(t) ));
+				items.add(new ListItem(t.getUuid(), SmartLabelProvider.getShortLabel(t) ));
 			}
 		}else if (option == PatrolQueryOption.AGENCY){
 			List<Agency> agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), session);

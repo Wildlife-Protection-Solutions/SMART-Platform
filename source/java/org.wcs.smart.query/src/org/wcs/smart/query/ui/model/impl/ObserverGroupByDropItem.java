@@ -227,6 +227,6 @@ public class ObserverGroupByDropItem extends DropItem implements IGroupByDropIte
 	}
 	
 	protected String getLabel(Employee e){
-		return SmartLabelProvider.getFullLabel(e);
+		return SmartLabelProvider.getShortLabel(e);
 	}
 }

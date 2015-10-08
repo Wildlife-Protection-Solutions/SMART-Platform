@@ -230,6 +230,6 @@ public class ObserverDropItem extends DropItem implements IFilterDropItem{
 	}
 	
 	protected String getLabel(Employee e){
-		return SmartLabelProvider.getFullLabel(e);
+		return SmartLabelProvider.getShortLabel(e);
 	}
 }

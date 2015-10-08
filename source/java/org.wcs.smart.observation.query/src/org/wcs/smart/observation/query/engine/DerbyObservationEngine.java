@@ -235,7 +235,7 @@ public class DerbyObservationEngine extends AbstractDerbyObservationQueryEngine 
 		if (uuid != null){
 			Employee x = (Employee) session.load(Employee.class, uuid);
 			if (x != null) {
-				return SmartLabelProvider.getFullLabel(x);
+				return SmartLabelProvider.getShortLabel(x);
 			}
 		}
 		return null;
