@@ -25,12 +25,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
-import org.apache.commons.collections.list.LazyList;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.e4.core.di.annotations.Optional;
-import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.e4.tools.compat.parts.DIViewPart;
 import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
@@ -160,15 +158,19 @@ public class ReportListView {
 					}
 					
 					if (type == EventType.FOLDER_ADDED){
-						IJobChangeListener listener = new JobChangeAdapter() {
-							@Override
-							public void done(IJobChangeEvent event) {
-								((LazyReportContentProvider)reportList.getContentProvider()).removeUpdateCompleteListener(this);
-								editElement(o);
-								
-							}
-						};
-						((LazyReportContentProvider)reportList.getContentProvider()).addUpdateCompleteListener(listener);
+						if (reportList.getTree().isFocusControl()){
+							//we want to initiate editing if this 
+							//tree is the focus
+							IJobChangeListener listener = new JobChangeAdapter() {
+								@Override
+								public void done(IJobChangeEvent event) {
+									((LazyReportContentProvider)reportList.getContentProvider()).removeUpdateCompleteListener(this);
+									editElement(o);
+									
+								}
+							};
+							((LazyReportContentProvider)reportList.getContentProvider()).addUpdateCompleteListener(listener);
+						}
 					}
 				}
 			});

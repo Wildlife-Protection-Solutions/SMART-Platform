@@ -44,7 +44,7 @@ import org.wcs.smart.report.model.RootReportFolder;
  */
 public class LazyReportContentProvider extends BaseWorkbenchContentProvider{
 	
-	private DeferredTreeContentManager manager;
+	public DeferredTreeContentManager manager;
 
 	private RootReportFolder userFolder;
 	private RootReportFolder caFolder;

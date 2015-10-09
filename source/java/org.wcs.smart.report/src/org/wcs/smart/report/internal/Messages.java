@@ -12,6 +12,7 @@ public class Messages extends NLS {
 	public static String CreateReportDialog_Error_InvalidReportName;
 	public static String CreateReportDialog_Error_ReportNameBlank;
 	public static String CreateReportDialog_LoadingLabel;
+	public static String CreateReportDialog_NewFolderButton;
 	public static String CreateReportDialog_PageTitle;
 	public static String CreateReportDialog_ReportNameLabel;
 	public static String CreateReportDialog_SaveLocationLabel;
