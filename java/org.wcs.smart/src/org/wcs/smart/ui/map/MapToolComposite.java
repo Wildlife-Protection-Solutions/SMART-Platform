@@ -106,9 +106,6 @@ public class MapToolComposite {
 		
 		for (int i = 0; i < tools.length; i ++){
 			ToolProxy found = ((ToolManager)toolManager).findToolProxy(tools[i]);
-			if (found.getId().equals(SmartDistanceTool.ID)){
-				System.out.println("found");
-			}
 			if (found instanceof ModalTool){
 				int style = SWT.CHECK;
 				 if (found.getType() != 1){	//modal tool proxy
