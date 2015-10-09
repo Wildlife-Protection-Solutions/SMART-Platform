@@ -83,7 +83,7 @@ public class LeaderSelectorDialog extends TitleAreaDialog{
         employeeViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof MissionMember){
-					return SmartLabelProvider.getFullLabel( ((MissionMember) element).getMember() );
+					return SmartLabelProvider.getShortLabel( ((MissionMember) element).getMember() );
 				}
 				return super.getText(element);
 			}

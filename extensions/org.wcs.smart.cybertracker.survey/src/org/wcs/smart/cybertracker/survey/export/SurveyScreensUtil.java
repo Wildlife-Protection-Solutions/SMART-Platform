@@ -97,7 +97,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		Collections.sort(employees, new Comparator<Employee>() {
 			@Override
 			public int compare(Employee e1, Employee e2) {
-				return Collator.getInstance().compare(SmartLabelProvider.getFullLabel(e1), SmartLabelProvider.getFullLabel(e2));
+				return Collator.getInstance().compare(SmartLabelProvider.getShortLabel(e1), SmartLabelProvider.getShortLabel(e2));
 			}
 		});
 		
@@ -106,9 +106,9 @@ public class SurveyScreensUtil extends ScreensUtil {
 		List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
 		List<String> members = new ArrayList<String>();
 		for (Employee i : employees) {
-			members.add(SmartLabelProvider.getFullLabel(i));
+			members.add(SmartLabelProvider.getShortLabel(i));
 			CyberTrackerId mctid = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, SmartLabelProvider.getFullLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+			ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
 			memberIds.add(mctid);
 			
 		}

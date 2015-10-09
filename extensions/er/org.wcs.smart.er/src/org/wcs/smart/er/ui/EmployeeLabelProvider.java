@@ -46,7 +46,7 @@ public class EmployeeLabelProvider extends LabelProvider {
 		}
 	}
 	
-	private EmployeeLabelProvider() {
+	protected EmployeeLabelProvider() {
 	}
 
 

@@ -33,6 +33,7 @@ import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
@@ -49,6 +50,7 @@ import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.er.internal.Messages;
 import org.wcs.smart.er.ui.EmployeeLabelProvider;
+import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Patrol Members/Leader screens configuration.
@@ -66,6 +68,15 @@ public class MembersScreenOptionComposite extends ScreenOptionComposite {
 	private CheckboxTableViewer membersViewer;
 	
 	private EmployeeDropOptionGroup leaderGroup;
+	private LabelProvider employeeLblProvider = new EmployeeLabelProvider(){
+		@Override
+		public String getText(Object element) {
+			if (element instanceof Employee) {
+				return SmartLabelProvider.getShortLabel((Employee) element);
+			}
+			return super.getText(element);
+		}
+	};
 	
 	/**
 	 * @param parent
@@ -139,7 +150,7 @@ public class MembersScreenOptionComposite extends ScreenOptionComposite {
 			membersViewer.getControl().setLayoutData(gd);
 			membersViewer.getControl().setEnabled(!membersOption.isVisible());
 			membersViewer.setContentProvider(ArrayContentProvider.getInstance());
-			membersViewer.setLabelProvider(EmployeeLabelProvider.getInstance());
+			membersViewer.setLabelProvider(employeeLblProvider);
 			membersViewer.setInput(members);
 			
 			//set current value
@@ -200,7 +211,7 @@ public class MembersScreenOptionComposite extends ScreenOptionComposite {
 			viewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 			viewer.getControl().setEnabled(!getModel().isVisible());
 			viewer.setContentProvider(ArrayContentProvider.getInstance());
-			viewer.setLabelProvider(EmployeeLabelProvider.getInstance());
+			viewer.setLabelProvider(employeeLblProvider);
 			Object[] pickedMembers = membersViewer.getCheckedElements();
 			viewer.setInput(pickedMembers);
 			

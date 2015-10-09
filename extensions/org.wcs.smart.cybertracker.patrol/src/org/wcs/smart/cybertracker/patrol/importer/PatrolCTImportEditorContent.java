@@ -254,11 +254,11 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 			
 			lblObjective.setText(patrol.getObjective()==null?"":patrol.getObjective());			 //$NON-NLS-1$
 			lblMandate.setText(patrol.getMandate() == null ? "" : patrol.getMandate().getName()); //$NON-NLS-1$
-			lblLeader.setText(patrol.getLeader() == null ? "" : SmartLabelProvider.getFullLabel( patrol.getLeader() )); //$NON-NLS-1$
-			lblPilot.setText(patrol.getPilot() == null ? "" : SmartLabelProvider.getFullLabel(patrol.getPilot())); //$NON-NLS-1$
+			lblLeader.setText(patrol.getLeader() == null ? "" : SmartLabelProvider.getShortLabel( patrol.getLeader() )); //$NON-NLS-1$
+			lblPilot.setText(patrol.getPilot() == null ? "" : SmartLabelProvider.getShortLabel(patrol.getPilot())); //$NON-NLS-1$
 			StringBuilder sbMembers = new StringBuilder();
 			for (Employee e : ((CyberTrackerPatrol) selection).getMembers()){
-				sbMembers.append(SmartLabelProvider.getFullLabel(e));
+				sbMembers.append(SmartLabelProvider.getShortLabel(e));
 				sbMembers.append("\n"); //$NON-NLS-1$
 			}
 			lblMembers.setText(sbMembers.toString());
