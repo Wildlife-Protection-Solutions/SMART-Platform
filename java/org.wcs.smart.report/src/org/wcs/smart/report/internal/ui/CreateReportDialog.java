@@ -23,24 +23,40 @@ package org.wcs.smart.report.internal.ui;
 
 import java.text.MessageFormat;
 
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditor;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationEvent;
+import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.TreeViewerEditor;
+import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.query.ui.querylist.MultiFocusCellOwnerDrawHighlighter;
+import org.wcs.smart.report.IReportListener;
+import org.wcs.smart.report.ReportEventManager;
+import org.wcs.smart.report.ReportEventManager.EventType;
 import org.wcs.smart.report.internal.Messages;
 import org.wcs.smart.report.model.Report;
 import org.wcs.smart.report.model.ReportFolder;
@@ -65,6 +81,25 @@ public class CreateReportDialog extends TitleAreaDialog {
 	private String reportName = null;
 	private TreeViewer reportList;
 	private boolean includeName;
+	private Button btnNewFolder;
+	private IReportListener folderListener = new IReportListener() {
+		
+		@Override
+		public void reportEvent(final Object o, EventType eventType) {
+			if (eventType == ReportEventManager.EventType.FOLDER_ADDED){
+				reportFolderAdded((ReportFolder)o);
+			}else if (eventType == ReportEventManager.EventType.FOLDER_UPDATED){
+				Display.getDefault().syncExec(new Runnable(){
+					@Override
+					public void run() {
+						ReportFolder rf = (ReportFolder)o;
+						reportList.refresh(rf.getParentFolder());
+					}
+				});
+				
+			}
+		}
+	};
 	
 	/**
 	 * @param parent
@@ -86,6 +121,8 @@ public class CreateReportDialog extends TitleAreaDialog {
 		}else{
 			this.reportName = Messages.CreateReportDialog_DefaultReportName;
 		}
+		
+		ReportEventManager.getInstance().addReportListener(folderListener);
 	}
 
 	/**
@@ -96,8 +133,14 @@ public class CreateReportDialog extends TitleAreaDialog {
 	public CreateReportDialog(Shell parent, 
 			Object rootFolder) {
 		this(parent, rootFolder, null, true);
+		
 	}
 	
+	@Override
+	public boolean close(){
+		ReportEventManager.getInstance().removeReportListener(folderListener);
+		return super.close();
+	}
 	/**
 	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
 	 */
@@ -167,46 +210,90 @@ public class CreateReportDialog extends TitleAreaDialog {
 		reportList.setContentProvider(new LazyReportContentProvider(
 				(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER || SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN) ? RootType.ALL : RootType.USER_ONLY));
 		reportList.setLabelProvider(new ReportLabelProvider());
+		
 		reportList.setInput(Messages.CreateReportDialog_LoadingLabel);
-		reportList.getTree().addSelectionListener(new SelectionListener() {
+
+		
+		reportList.setCellEditors(new CellEditor[] { new TextCellEditor(reportList.getTree()) });
+		reportList.setColumnProperties(new String[] { "col1" }); //$NON-NLS-1$
+		reportList.setCellModifier(new ReportItemNameCellEditor(true));
+		
+		new TreeViewerFocusCellManager
+				(reportList, new MultiFocusCellOwnerDrawHighlighter(reportList));
+		ColumnViewerEditorActivationStrategy actSupport = new ColumnViewerEditorActivationStrategy(
+				reportList) {
+			
+			protected boolean isEditorActivationEvent(
+					ColumnViewerEditorActivationEvent event) {
+						return event.eventType == ColumnViewerEditorActivationEvent.MOUSE_DOUBLE_CLICK_SELECTION ||
+								event.eventType == ColumnViewerEditorActivationEvent.PROGRAMMATIC;
+			}
+		};
+		TreeViewerEditor.create(reportList, actSupport, ColumnViewerEditor.DEFAULT);
+		
+		btnNewFolder = new Button(main, SWT.PUSH);
+		btnNewFolder.setText(Messages.CreateReportDialog_NewFolderButton);
+		btnNewFolder.setEnabled(false);
+		btnNewFolder.addSelectionListener(new SelectionAdapter(){
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				(new NewFolderHandler()).execute(new StructuredSelection(selectedItem));
+			}
+		});
+		
+		reportList.getTree().addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				selectedItem = ((IStructuredSelection) reportList
 						.getSelection()).getFirstElement();
+
 				validate();
 			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e) {
-			}
 		});
+		
 		((GridData)reportList.getTree().getLayoutData()).heightHint = 300;
 
 		if (selectedItem instanceof RootReportFolder){
 			reportList.setSelection(new StructuredSelection(selectedItem));
+			reportList.expandToLevel(2);
 		}else if (selectedItem instanceof ReportFolder){
 			//TODO: fix this code somehow
-//			ReportFolder folder = ((ReportFolder) selectedItem);
-//			Stack<ReportFolder> folders = new Stack<ReportFolder>();
-////			Report r = (Report)selectedItem;
-//			while(folder != null){
-//				folders.push(folder);
-//				folder = folder.getParentFolder();
-//			}
-//			Object[] path = new Object[folders.size()+1];
-//			int index = 0;
-//			path[index++] = ((ReportFolder)selectedItem).getEmployee() == null ? RootReportFolder.CA_ROOT_FOLDER : RootReportFolder.USER_ROOT_FOLDER; 
-//			while(!folders.isEmpty()){
-//				Object x = folders.pop();
-//				reportList.setExpandedState(x, true);
-//			}
-////			TreePath p = new TreePath(path);
-////			reportList.expandToLevel(p, 1);
-//			reportList.setSelection(new StructuredSelection(selectedItem));
+			//auto open and select the selecte ditem
+			//i have tried this more than one way; the deferredtree seems to
+			//not allow you to expend a path.
+			reportList.expandToLevel(2);
 		}
 		return main;
 	}
 
+	private void reportFolderAdded(final ReportFolder rf){
+		getShell().getDisplay().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				if (rf.getParentFolder() != null){
+					reportList.refresh(rf.getParentFolder());
+				}else if (rf.getDeletedParent() !=null){
+					reportList.refresh(rf.getDeletedParent());
+				}else if (rf.getEmployee() == null){
+					reportList.refresh(RootReportFolder.CA_ROOT_FOLDER);
+				}else{
+					reportList.refresh(RootReportFolder.USER_ROOT_FOLDER);
+				}
+				
+				reportList.expandToLevel(rf, 0);
+				
+				IJobChangeListener listener = new JobChangeAdapter() {
+					@Override
+					public void done(IJobChangeEvent event) {
+						((LazyReportContentProvider)reportList.getContentProvider()).removeUpdateCompleteListener(this);
+						reportList.editElement(rf, 0);
+					}
+				};
+				((LazyReportContentProvider)reportList.getContentProvider()).addUpdateCompleteListener(listener);
+			}});		
+	}
+	
 	/*
 	 * Validate the user input
 	 */
@@ -229,10 +316,14 @@ public class CreateReportDialog extends TitleAreaDialog {
 		}
 		if (selectedItem == null) {
 			ok = false;
+			btnNewFolder.setEnabled(false);
 		}else{
 			if (selectedItem.getClass() != ReportFolder.class && 
 					selectedItem.getClass() != RootReportFolder.class){
 				ok = false;
+				btnNewFolder.setEnabled(false);
+			}else{
+				btnNewFolder.setEnabled(true);
 			}
 		}
 		getButton(IDialogConstants.OK_ID).setEnabled(ok);

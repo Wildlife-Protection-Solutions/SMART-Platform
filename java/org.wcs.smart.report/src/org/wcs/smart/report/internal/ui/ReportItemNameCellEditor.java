@@ -44,10 +44,21 @@ import org.wcs.smart.report.model.ReportFolder;
  */
 public class ReportItemNameCellEditor implements ICellModifier {
 
+	private boolean folderOnly = false;
+	
 	/**
 	 * Creates a new cell editor
 	 */
 	public ReportItemNameCellEditor(){
+		this(false);
+	}
+	
+	/**
+	 * Creates a new cell editor that only allows you to edit folders
+	 * not other items
+	 */
+	public ReportItemNameCellEditor(boolean folderOnly){
+		this.folderOnly = folderOnly;
 	}
 	
 	@Override
@@ -56,7 +67,7 @@ public class ReportItemNameCellEditor implements ICellModifier {
 		element = ((Item) element).getData();
 		if (element instanceof ReportFolder) {
 			updateReportFolder((ReportFolder) element, value.toString());
-		}else if (element instanceof Report){
+		}else if (!folderOnly && element instanceof Report){
 			updateReport((Report) element, value.toString());
 		}
 	}
@@ -118,16 +129,15 @@ public class ReportItemNameCellEditor implements ICellModifier {
 					folder.updateName(SmartDB.getCurrentLanguage(), value);
 					folder.setName(value);
 					session.getTransaction().commit();
-					ReportEventManager.getInstance().fireReportFolderModified(folder);
 				} catch (Exception ex) {
-					session.getTransaction().rollback();
+					if (session.getTransaction().isActive()) session.getTransaction().rollback();
 					ReportPlugIn.displayLog(
 							Messages.ReportItemNameCellEditor_Error_CouldNoSaveFolder
 									+ ex.getLocalizedMessage(), ex);
 				} finally {
 					session.close();
 				}
-
+				ReportEventManager.getInstance().fireReportFolderModified(folder);
 				return Status.OK_STATUS;
 			}
 		};
@@ -145,6 +155,6 @@ public class ReportItemNameCellEditor implements ICellModifier {
 
 	@Override
 	public boolean canModify(Object element, String property) {
-		return  (element instanceof ReportFolder || element instanceof Report );
+		return  (element instanceof ReportFolder || (!folderOnly && element instanceof Report) );
 	}
 }
