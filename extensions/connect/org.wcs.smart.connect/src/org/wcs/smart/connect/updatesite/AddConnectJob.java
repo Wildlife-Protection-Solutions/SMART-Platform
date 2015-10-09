@@ -92,6 +92,7 @@ public class AddConnectJob extends Job {
 	}	
 	
 	
+	@SuppressWarnings("nls")
 	private void createTables(Session session){
 		final String[] sql = new String[]{
 			"CREATE TABLE SMART.CONNECT_SERVER(uuid char(16) for bit data not null, ca_uuid char(16) for bit data, url varchar(2064), options varchar(32600), certificate varchar(32000), PRIMARY KEY (uuid))",
@@ -109,7 +110,42 @@ public class AddConnectJob extends Job {
 			"ALTER TABLE smart.connect_sync_history ADD CONSTRAINT connect_sync_history_connect_uuid_fk foreign key (connect_uuid) REFERENCES smart.connect_server(uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",
 			"CREATE FUNCTION smart.uuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT",
 			
-			"ALTER TABLE smart.connect_server ADD CONSTRAINT connect_server_ca_unq UNIQUE(ca_uuid)"
+			"ALTER TABLE smart.connect_server ADD CONSTRAINT connect_server_ca_unq UNIQUE(ca_uuid)",
+			
+			"GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY TO ANALYST",
+			"GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY TO MANAGER",
+			"GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY TO ADMIN",
+			"GRANT EXECUTE ON PROCEDURE SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY TO DATAENTRY",
+			
+			"GRANT EXECUTE ON FUNCTION SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY TO ANALYST",
+			"GRANT EXECUTE ON FUNCTION SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY TO MANAGER",
+			"GRANT EXECUTE ON FUNCTION SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY TO ADMIN",
+			"GRANT EXECUTE ON FUNCTION SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY TO DATAENTRY",
+			
+			"GRANT SELECT ON SMART.CONNECT_SERVER TO ANALYST",
+			"GRANT SELECT ON SMART.CONNECT_SERVER TO DATAENTRY",
+			"GRANT ALL PRIVILEGES ON SMART.CONNECT_SERVER TO MANAGER",
+
+			"GRANT SELECT ON SMART.connect_account TO ANALYST",
+			"GRANT SELECT ON SMART.connect_account TO DATAENTRY",
+			"GRANT ALL PRIVILEGES  ON SMART.connect_account TO MANAGER",
+
+			"GRANT ALL PRIVILEGES ON SMART.connect_status TO ANALYST",
+			"GRANT ALL PRIVILEGES ON SMART.connect_status TO DATAENTRY",
+			"GRANT ALL PRIVILEGES ON SMART.connect_status TO MANAGER",
+
+			"GRANT ALL PRIVILEGES ON SMART.connect_change_log TO ANALYST",
+			"GRANT ALL PRIVILEGES ON SMART.connect_change_log TO DATAENTRY",
+			"GRANT ALL PRIVILEGES ON SMART.connect_change_log TO MANAGER",
+
+			"GRANT ALL PRIVILEGES ON SMART.connect_sync_history TO ANALYST",
+			"GRANT ALL PRIVILEGES ON SMART.connect_sync_history TO DATAENTRY",
+			"GRANT ALL PRIVILEGES ON SMART.connect_sync_history TO MANAGER",
+
+			"GRANT EXECUTE ON FUNCTION SMART.uuid TO ANALYST",
+			"GRANT EXECUTE ON FUNCTION SMART.uuid TO DATAENTRY",
+			"GRANT EXECUTE ON FUNCTION SMART.uuid TO MANAGER"
+			
 		};
 		
 		session.doWork(new Work() {
