@@ -48,6 +48,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
 /**
  * Command handler for importing patrol data from xml file.
@@ -187,7 +188,7 @@ public class ImportPatrolHandler {
 									IEclipseContext ctx = EclipseContextFactory.create();
 									ctx.set(ShowFieldDataPerspective.FOCUS_VIEW, PatrolListView.ID);
 									ctx.setParent(context);
-									ctx.set(OpenPatrolHandler.UUID_PARAM, p.getUuid());
+									ctx.set(OpenPatrolHandler.PATROL_PARAM, new PatrolEditorInput(p));
 									
 									ContextInjectionFactory.invoke(new ShowFieldDataPerspective(), Execute.class, ctx);
 									ContextInjectionFactory.invoke(new OpenPatrolHandler(), Execute.class, ctx);

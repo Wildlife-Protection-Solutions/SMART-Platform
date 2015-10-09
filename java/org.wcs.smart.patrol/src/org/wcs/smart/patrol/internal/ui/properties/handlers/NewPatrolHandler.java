@@ -39,6 +39,7 @@ import org.wcs.smart.patrol.internal.Messages;
 import org.wcs.smart.patrol.internal.ui.createpatrol.CreatePatrolWizard;
 import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 
 /**
  * Handler to display new patrol wizard.
@@ -79,7 +80,7 @@ public class NewPatrolHandler {
 		if (dialog != null) {
 			if (dialog.open() == Window.OK){
 				//open patrol
-				(new OpenPatrolHandler()).openPatrol(wizard.getPatrol().getUuid(), activeWindow);
+				(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(wizard.getPatrol()), activeWindow);
 			}
 		}
 	}

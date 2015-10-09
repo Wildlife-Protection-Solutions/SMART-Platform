@@ -255,7 +255,7 @@ public class PatrolListView implements IPatrolFilteringView {
 				PatrolEditorInput p = (PatrolEditorInput)selection;
 				if (p != null){
 					IEclipseContext localCtx = EclipseContextFactory.create();
-					localCtx.set("patroluuid", p.getUuid()); //$NON-NLS-1$
+					localCtx.set(OpenPatrolHandler.PATROL_PARAM, p); 
 					localCtx.setParent(localPart.getContext());
 					ContextInjectionFactory.invoke(new OpenPatrolHandler(), Execute.class, localCtx);
 				}				

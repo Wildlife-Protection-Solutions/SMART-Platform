@@ -30,6 +30,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 import org.wcs.smart.patrol.PatrolUtils;
 import org.wcs.smart.patrol.internal.Messages;
+import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolType;
 
 /**
@@ -56,8 +57,8 @@ public class PatrolEditorInput implements IEditorInput {
 	 * Creates a new input from the uuid only.
 	 * @param uuid
 	 */
-	public PatrolEditorInput(UUID uuid){
-		this.patrolUuid = uuid;
+	public PatrolEditorInput(Patrol p){
+		this(p.getUuid(), p.getId(), p.getPatrolType(), p.getStartDate(), p.getEndDate());
 	}
 	
 	/**

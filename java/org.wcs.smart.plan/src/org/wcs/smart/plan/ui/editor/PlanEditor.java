@@ -272,7 +272,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	}
 	
 	public void openPatrol(PatrolEditorInput p){
-		(new OpenPatrolHandler()).openPatrol(p.getUuid(), ((IEclipseContext)getSite().getService(IEclipseContext.class)).get(MWindow.class));
+		(new OpenPatrolHandler()).openPatrol(p, ((IEclipseContext)getSite().getService(IEclipseContext.class)).get(MWindow.class));
 	}
 
 	/**

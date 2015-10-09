@@ -70,6 +70,7 @@ import org.wcs.smart.intelligence.ui.panel.IntelligenceCompositeFactory.PanelTyp
 import org.wcs.smart.patrol.SmartPatrolPlugIn;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.OpenPatrolHandler;
+import org.wcs.smart.patrol.ui.PatrolEditorInput;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.ui.TranslateSimpleListItemDialog;
 import org.wcs.smart.ui.map.location.SmartPointLabelProvider;
@@ -356,7 +357,7 @@ public class IntelligenceSummaryEditorPage extends EditorPart {
 	private void openPatrol(Patrol p){
 		if (p == null) return;
 		MWindow activeWindow = ((IEclipseContext)getSite().getService(IEclipseContext.class)).get(MWindow.class);
-		(new OpenPatrolHandler()).openPatrol(p.getUuid(), activeWindow);
+		(new OpenPatrolHandler()).openPatrol(new PatrolEditorInput(p), activeWindow);
 	}
 
 	protected void openInformant(Informant i) {
