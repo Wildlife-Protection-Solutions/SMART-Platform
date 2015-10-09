@@ -111,7 +111,7 @@ public class AreaTreeNode implements IItemTreeNode{
 	}
 	
 	public void clearAreas(){
-		provider.clearAreas();
+		if (provider != null) provider.clearAreas();
 	}
 	
 	private class AreaContentProvider implements ITreeContentProvider{

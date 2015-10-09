@@ -62,7 +62,7 @@ public class SmartGeoResource extends IGeoResource {
 		
 	}
 	
-	/*
+	/**
 	 * clears any info cached with resource
 	 */
 	public void reset(){
