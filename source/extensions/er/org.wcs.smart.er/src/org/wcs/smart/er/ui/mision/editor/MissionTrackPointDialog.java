@@ -54,7 +54,7 @@ public class MissionTrackPointDialog extends TrackPointDialog {
 	 * @param t the track to display
 	 */
 	public MissionTrackPointDialog(Shell parentShell, MissionTrack t) throws Exception {
-		super(parentShell);
+		super(parentShell, true);	//dialog only ever display if can edit
 		this.track = t;
 		
 		editTrack = new MissionTrack();
