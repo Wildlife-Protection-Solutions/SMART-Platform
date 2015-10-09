@@ -52,9 +52,10 @@ public class PatrolTrackPointDialog extends TrackPointDialog {
 	/**
 	 * @param parentShell parent shell
 	 * @param t the track to display
+	 * @param canEdit if the track can be editted
 	 */
-	public PatrolTrackPointDialog(Shell parentShell, Track t) {
-		super(parentShell);
+	public PatrolTrackPointDialog(Shell parentShell, Track t, boolean canEdit) {
+		super(parentShell, canEdit);
 		this.track = t;
 		
 		editTrack = new Track();

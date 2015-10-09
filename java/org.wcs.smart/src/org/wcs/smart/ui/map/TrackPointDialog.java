@@ -155,13 +155,13 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 	private Button btnUndo;
 	private List<List<Coordinate>> undo = new ArrayList<List<Coordinate>>();
 	private boolean isModified = false;
-		
+	private boolean canEdit;
 	
 	/**
 	 * @param parentShell parent shell
-	 * @param t the track to display
+	 * @param canEdit if the track can be modified
 	 */
-	public TrackPointDialog(Shell parentShell) {
+	public TrackPointDialog(Shell parentShell, boolean canEdit) {
 		super(parentShell);
 		DATEFORMAT.setTimeZone(getTrackZTimezone());
 		
@@ -314,16 +314,17 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		column.getColumn().setMoveable(false);
 		column.getColumn().setWidth(150);
 		
-		final DeletePointAction deletePointAction = new DeletePointAction();
-		final MenuManager contextMenu = new MenuManager();
-        contextMenu.add(deletePointAction);
-        contextMenu.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager mgr) {
-				((ActionContributionItem)contextMenu.getItems()[0]).update();
-			}
-		});
-        trackviewer.getTable().setMenu(contextMenu.createContextMenu(trackviewer.getTable()));
-        
+		if (canEdit){
+			final DeletePointAction deletePointAction = new DeletePointAction();
+			final MenuManager contextMenu = new MenuManager();
+	        contextMenu.add(deletePointAction);
+	        contextMenu.addMenuListener(new IMenuListener() {
+				public void menuAboutToShow(IMenuManager mgr) {
+					((ActionContributionItem)contextMenu.getItems()[0]).update();
+				}
+			});
+	        trackviewer.getTable().setMenu(contextMenu.createContextMenu(trackviewer.getTable()));
+		}
 		trackviewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -353,27 +354,29 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		buttonPanel.setLayout(new GridLayout(2, false));
 		buttonPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		btnUndo = new Button(buttonPanel, SWT.NONE);
-		btnUndo.setText(Messages.TrackPointDialog_UndoButtonText);
-		btnUndo.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
-		btnUndo.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				undoDelete();
-			}
-		});
-		btnUndo.setEnabled(false);
-		
-		Button btnDelete = new Button(buttonPanel, SWT.NONE);
-		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
-		btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
-		btnDelete.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				deleteSelectedPoints();
-				
-			}
-		});
+		if (canEdit){
+			btnUndo = new Button(buttonPanel, SWT.NONE);
+			btnUndo.setText(Messages.TrackPointDialog_UndoButtonText);
+			btnUndo.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, true, false));
+			btnUndo.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					undoDelete();
+				}
+			});
+			btnUndo.setEnabled(false);
+			
+			Button btnDelete = new Button(buttonPanel, SWT.NONE);
+			btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
+			btnDelete.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+			btnDelete.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					deleteSelectedPoints();
+					
+				}
+			});
+		}
 	}
 
 	@Override
@@ -435,7 +438,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 			SmartPlugIn.displayLog(Messages.TrackPointDialog_UpdatePointLayerError + "\n\n" + e1.getMessage(), e1);  //$NON-NLS-1$
 		}
 		
-		btnUndo.setEnabled(undo.size() > 0);
+		if (btnUndo != null) btnUndo.setEnabled(undo.size() > 0);
 	}
 	
 	
@@ -466,7 +469,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		}
 		if (deleted.size() > 0){
 			undo.add(deleted);
-			btnUndo.setEnabled(true);
+			if (btnUndo != null) btnUndo.setEnabled(true);
 		}
 		
 		if (newc.length == 0){
@@ -534,20 +537,19 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		mapViewer.getMap().getViewportModelInternal().setCRS(ViewportModel.BAD_DEFAULT);
 		mapViewer.getMap().getViewportModelInternal().setCRS(GeometryUtils.SMART_CRS);
 		
-		final DeletePointAction deletePointAction = new DeletePointAction();
-		final MenuManager contextMenu = new MenuManager();
-        contextMenu.add(deletePointAction);
-        contextMenu.addMenuListener(new IMenuListener() {
-			public void menuAboutToShow(IMenuManager mgr) {
-				((ActionContributionItem)contextMenu.getItems()[0]).update();
-			}
-		});
-
-        // Create menu.
-       Menu menu = contextMenu.createContextMenu(mapViewer.getViewport().getControl());
-       mapViewer.setMenu(menu);
-		
-		
+		if (canEdit){
+			final DeletePointAction deletePointAction = new DeletePointAction();
+			final MenuManager contextMenu = new MenuManager();
+	        contextMenu.add(deletePointAction);
+	        contextMenu.addMenuListener(new IMenuListener() {
+				public void menuAboutToShow(IMenuManager mgr) {
+					((ActionContributionItem)contextMenu.getItems()[0]).update();
+				}
+			});
+	        // Create menu.
+	        Menu menu = contextMenu.createContextMenu(mapViewer.getViewport().getControl());
+	        mapViewer.setMenu(menu);
+		}
 		
 		final LoadDefaultLayersJob defaultLayer = new LoadDefaultLayersJob(mapViewer.getMap());
 		// we need to do this because this map is in a dialog box and
@@ -570,6 +572,7 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 		
 		
 		ApplicationGIS.getToolManager().setCurrentEditor(this);
+		
 		String[] thisTools = new String[] {
 				MapToolComposite.UDIG_ZOOM_EXTENT_ID,
 				MapToolComposite.UDIG_PAN_ID,
@@ -577,6 +580,14 @@ public abstract class TrackPointDialog extends TitleAreaDialog implements MapPar
 				MapToolComposite.UDIG_ZOOM_IN_ID,
 				MapToolComposite.UDIG_ZOOM_OUT_ID,
 				TrackPointSelectionTool.ID};
+		if (!canEdit){
+			thisTools = new String[] {
+					MapToolComposite.UDIG_ZOOM_EXTENT_ID,
+					MapToolComposite.UDIG_PAN_ID,
+					MapToolComposite.UDIG_ZOOM_ID,
+					MapToolComposite.UDIG_ZOOM_IN_ID,
+					MapToolComposite.UDIG_ZOOM_OUT_ID};
+		}
 
 		MapToolComposite tools = new MapToolComposite(thisTools);
 		tools.createComposite(mapComp);
