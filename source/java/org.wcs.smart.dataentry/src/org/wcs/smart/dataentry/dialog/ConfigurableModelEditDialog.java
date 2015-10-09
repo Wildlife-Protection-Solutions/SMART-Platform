@@ -267,6 +267,11 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 		session.saveOrUpdate(model); 
 		session.flush();
 		
+		//set  language
+		((ConfigurableModelLabelProvider)modelTreeViewer.getLabelProvider()).setLanguage(languageViewer.getCurrentSelection());
+		modelTreeViewer.refresh();
+		updateRightPanelState();
+		
 		return container;
 	}
 
