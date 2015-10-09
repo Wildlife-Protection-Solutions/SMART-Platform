@@ -532,17 +532,18 @@
                visible="true">
          </separator>
          <command
-               commandId="org.wcs.smart.map.tool"
+               commandId="org.wcs.smart.command.maptool.activate"
                icon="images/icons/etool16/measure_tool.png"
-               label="Distance Tool"
-               style="radio">
+               label="%distancetool.command.label"
+               style="radio"
+               tooltip="%distancetool.command.tooltip">
             <parameter
                   name="org.wcs.smart.map.toolid"
                   value="org.wcs.smart.map.tool.distance">
             </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.map.tool"
+               commandId="org.wcs.smart.command.maptool.activate"
                icon="images/icons/elcl16/pan_tool.png"
                label="%pan.command.label"
                style="radio"
@@ -553,7 +554,7 @@
             </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.map.tool"
+               commandId="org.wcs.smart.command.maptool.activate"
                icon="images/icons/elcl16/zoom_tool.png"
                label="%zoom.command.label"
                style="radio"
@@ -564,7 +565,7 @@
             </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.map.tool"
+               commandId="org.wcs.smart.command.maptool.activate"
                icon="images/icons/elcl16/zoom_out_co.gif"
                label="%zoomout.command.label"
                style="push"
@@ -575,7 +576,7 @@
             </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.map.tool"
+               commandId="org.wcs.smart.command.maptool.activate"
                icon="images/icons/elcl16/zoom_in_co.gif"
                label="%zoomin.command.label"
                style="push"
@@ -586,7 +587,7 @@
             </parameter>
          </command>
          <command
-               commandId="org.wcs.smart.map.tool"
+               commandId="org.wcs.smart.command.maptool.activate"
                icon="images/icons/elcl16/zoom_layers.png"
                label="%zoomextents.command.label"
                style="push"
@@ -750,8 +751,8 @@
             name="%style.command.name">
       </command>
       <command
-            id="org.wcs.smart.map.tool"
-            name="Activate Map Tool">
+            id="org.wcs.smart.command.maptool.activate"
+            name="%activemaptool.command.name">
          <commandParameter
                id="org.wcs.smart.map.toolid"
                name="MapTool Id"
@@ -924,7 +925,7 @@
       </handler>
       <handler
             class="org.wcs.smart.map.internal.ActivateMapToolHandler"
-            commandId="org.wcs.smart.map.tool">
+            commandId="org.wcs.smart.command.maptool.activate">
       </handler>
    </extension>
    <extension
@@ -1187,8 +1188,10 @@
             class="org.wcs.smart.udig.SmartDistanceTool"
             icon="images/icons/etool16/measure_tool.png"
             id="org.wcs.smart.map.tool.distance"
+            name="%distance.maptool.name"
             onToolbar="true"
-            toolCursorId="org.wcs.smart.cross">
+            toolCursorId="org.wcs.smart.cross"
+            tooltip="%distance.maptool.tooltip">
       </modalTool>
       <toolCursor
             hotspotX="16"

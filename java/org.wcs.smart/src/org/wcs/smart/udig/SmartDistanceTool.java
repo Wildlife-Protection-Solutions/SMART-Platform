@@ -72,6 +72,7 @@ public class SmartDistanceTool extends SimpleTool implements KeyListener {
 	     */
 	private void disposeCommand() {
 		if (command != null) {
+			points.clear();
 			command.setValid(false);
 			Rectangle area = command.getValidArea();
 			if (area != null)
