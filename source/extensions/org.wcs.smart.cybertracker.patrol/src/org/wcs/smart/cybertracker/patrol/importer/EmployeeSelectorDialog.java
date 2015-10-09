@@ -99,7 +99,7 @@ public class EmployeeSelectorDialog extends TitleAreaDialog{
         employeeViewer.setLabelProvider(new LabelProvider(){
 			public String getText(Object element) {
 				if (element instanceof PatrolLegMember){
-					return SmartLabelProvider.getFullLabel( ((PatrolLegMember) element).getMember() );
+					return SmartLabelProvider.getShortLabel( ((PatrolLegMember) element).getMember() );
 				}
 				return super.getText(element);
 			}
