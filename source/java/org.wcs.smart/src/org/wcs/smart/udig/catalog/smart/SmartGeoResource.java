@@ -62,6 +62,12 @@ public class SmartGeoResource extends IGeoResource {
 		
 	}
 	
+	/*
+	 * clears any info cached with resource
+	 */
+	public void reset(){
+		this.info = null;
+	}
 	
 	public Area.AreaType getType(){
 		return areaType;

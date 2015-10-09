@@ -69,6 +69,9 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		String[] sql = new String[]{
+			/* core db changes */
+			"alter table smart.area_geometries drop column pid",
+			
 			/* cm model changes */
 			"ALTER TABLE smart.CM_NODE ADD COLUMN collect_multiple_obs BOOLEAN",
 			"ALTER TABLE smart.CM_NODE ADD COLUMN use_single_gps_point BOOLEAN",
@@ -81,7 +84,8 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			"alter table smart.DM_ATTRIBUTE_LIST add constraint dm_attribute_list_keyid_unq UNIQUE(attribute_uuid, keyid) DEFERRABLE INITIALLY IMMEDIATE",
 			"alter table smart.DM_CATEGORY add constraint dm_category_keyid_unq UNIQUE(ca_uuid, hkey) DEFERRABLE INITIALLY IMMEDIATE",
 			"alter table smart.DM_ATTRIBUTE_TREE add constraint dm_attribute_tree_keyid_unq UNIQUE(attribute_uuid, hkey) DEFERRABLE INITIALLY IMMEDIATE",
-		
+			"alter table smart.AREA_GEOMETRIES add constraint area_geom_key_ca_type_unq UNIQUE(keyid, ca_uuid, area_type) DEFERRABLE INITIALLY IMMEDIATE",
+			
 			/* drop all constraints and make deferrable for SMART connect */
 			"ALTER TABLE SMART.AGENCY DROP CONSTRAINT AGENCY_CA_UUID_FK",
 			"ALTER TABLE SMART.AREA_GEOMETRIES DROP CONSTRAINT AREA_GEOMETRIES_CA_UUID_FK",

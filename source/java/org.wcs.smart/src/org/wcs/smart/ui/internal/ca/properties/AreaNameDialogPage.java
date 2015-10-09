@@ -104,7 +104,9 @@ public class AreaNameDialogPage extends TitleAreaDialog {
 	private void loadAreaTypes(){
 		Session session = getSession();
 		session.beginTransaction();
-		List<?> areas = session.createCriteria(Area.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).add(Restrictions.eq("type", type)).list(); //$NON-NLS-1$ //$NON-NLS-2$
+		List<?> areas = session.createCriteria(Area.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.add(Restrictions.eq("type", type)).list(); //$NON-NLS-1$
 		
 		tableViewer.setInput(areas.toArray());
 		tableViewer.refresh();
