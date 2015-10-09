@@ -46,6 +46,7 @@ import org.wcs.smart.query.model.filter.BooleanExpression;
 import org.wcs.smart.query.model.filter.BracketFilter;
 import org.wcs.smart.query.model.filter.CategoryAttributeFilter;
 import org.wcs.smart.query.model.filter.CategoryFilter;
+import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.NotExpression;
@@ -347,6 +348,8 @@ public class BasicDropItemFactory implements IDropItemFactory{
 			return createDropItems((NotExpression)f, session);
 		}else if (f instanceof ObserverFilter){
 			return createDropItems((ObserverFilter)f, session);
+		}else if (f instanceof EmptyFilter){
+			return new DropItem[]{};
 		}
 		return null;
 		
