@@ -33,6 +33,9 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -65,9 +68,11 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.referencing.operation.MathTransform;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
+import org.wcs.smart.ca.Area.AreaType;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.udig.catalog.smart.SmartGeoResource;
@@ -148,7 +153,6 @@ public class AreaPropertyPage extends AbstractPropertyJHeaderDialog {
 	 * @param updated if the udig service needs to be reset; otherwise the existing service will be used
 	 */
 	private void initLayers(boolean updated, IProgressMonitor monitor) {
-		
 		monitor.beginTask(Messages.AreaPropertyPage_Progress_RefreshingCounts, Area.AreaType.values().length);
 		
 		// find smart service for given conservation area

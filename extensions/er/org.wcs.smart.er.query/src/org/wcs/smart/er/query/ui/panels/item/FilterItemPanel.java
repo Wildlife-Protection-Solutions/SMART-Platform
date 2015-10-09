@@ -221,6 +221,7 @@ public class FilterItemPanel extends AbstractQueryItemPanel implements ISurveyPa
 	@Override
 	public void refreshPanel(){
 		if (filterTreeViewer != null){
+			areaNode.clearAreas();
 			filterTreeViewer.setInput(LOADING_TEXT);
 			filterTreeViewer.refresh();
 			refreshJob.cancel();

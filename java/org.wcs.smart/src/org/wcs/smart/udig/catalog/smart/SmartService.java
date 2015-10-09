@@ -32,10 +32,15 @@ import java.util.concurrent.locks.Lock;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.e4.core.contexts.IEclipseContext;
+import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.ui.PlatformUI;
 import org.locationtech.udig.catalog.IGeoResource;
 import org.locationtech.udig.catalog.IService;
 import org.locationtech.udig.catalog.IServiceInfo;
 import org.locationtech.udig.ui.UDIGDisplaySafeLock;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.geotools.data.smart.SmartDataSource;
@@ -63,10 +68,28 @@ public class SmartService extends IService {
 	private SmartDataSource ds = null;
 	private Lock dsInstantiationLock = new UDIGDisplaySafeLock();
 	
+	//listeners to ensure service is refreshed when data is modified
+	private IEventBroker eb ;
+	private EventHandler dataChangeEventHandler = new EventHandler(){
+		@Override
+		public void handleEvent(Event event) {
+			SmartService.this.info = null;
+			if (members != null){
+				for (SmartGeoResource r : members){
+					r.reset();
+				}
+			}
+		}
+	};
 	
 	public SmartService(Map<String, Serializable> params) {
 		this.params = params;
 		this.url = SmartServiceExtension.createURL(this.params);
+		
+		//on reset info
+		IEclipseContext ctx =(IEclipseContext) PlatformUI.getWorkbench().getService(IEclipseContext.class);
+		eb = (IEventBroker) ctx.get(IEventBroker.class.getName());
+		eb.subscribe(SmartPlugIn.E4_DATABASE_CHANGED_EVENT, null, dataChangeEventHandler, true);
 	}
 	
 	
@@ -145,6 +168,9 @@ public class SmartService extends IService {
 
 	@Override
 	public void dispose( IProgressMonitor monitor ) {
+
+		eb.unsubscribe(dataChangeEventHandler);
+		
         if (members == null)
             return;
 

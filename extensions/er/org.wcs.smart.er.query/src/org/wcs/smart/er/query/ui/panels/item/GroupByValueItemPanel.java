@@ -162,6 +162,7 @@ public class GroupByValueItemPanel extends AbstractQueryItemPanel implements ISu
 	@Override
 	public void refreshPanel(){
 		if (filterTreeViewer != null){
+			areaTreeNode.clearAreas();
 			filterTreeViewer.setInput(LOADING_TEXT);
 			filterTreeViewer.refresh();
 			refreshJob.schedule();
