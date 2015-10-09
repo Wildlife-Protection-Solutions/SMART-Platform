@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.patrol.ui;
 
-import java.util.UUID;
-
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
@@ -44,20 +42,20 @@ import org.wcs.smart.patrol.internal.ui.views.PatrolListView;
  */
 public class OpenPatrolHandler {
 
-	public static final String UUID_PARAM = "patroluuid"; //$NON-NLS-1$
+	public static final String PATROL_PARAM = "patrolinput"; //$NON-NLS-1$
 	
 	@Execute
-	public void openPatrol(@Optional @Named(UUID_PARAM) UUID patrolUuid,
+	public void openPatrol(@Optional @Named(PATROL_PARAM) PatrolEditorInput patrolInput,
 			MWindow activeWindow){
 		
-		if (patrolUuid == null) return;
+		if (patrolInput == null) return;
 		
 		(new ShowFieldDataPerspective()).execute(PatrolListView.ID,activeWindow);
 		
 		try {
 			IWorkbenchWindow window = PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 			IWorkbenchPage page = window.getActivePage();
-			page.openEditor(new PatrolEditorInput(patrolUuid), PatrolEditor.ID);
+			page.openEditor(patrolInput, PatrolEditor.ID);
 		} catch (PartInitException e) {
 			SmartPatrolPlugIn.displayLog(Messages.OpenPatrolHandler_OpenPatrolError + e.getLocalizedMessage(), e);
 		}
