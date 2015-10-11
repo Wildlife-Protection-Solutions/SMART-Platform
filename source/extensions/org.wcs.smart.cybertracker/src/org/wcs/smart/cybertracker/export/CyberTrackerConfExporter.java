@@ -438,7 +438,7 @@ public class CyberTrackerConfExporter {
 			}
 
 			//block to check for multi-select / numeric multi-select
-			if (cmAttr.isMultiselect() && cmAttr.isVisible() && AttributeType.LIST.equals(attribute.getType())) {
+			if (cmAttr.isMultiselect() && cmAttr.isVisible() && AttributeType.LIST.equals(attribute.getType()) && !cmAttr.getNode().isCollectMultipleObservations()) {
 				CmAttribute numAttr = attrList.size() > i+1 && attrList.get(i+1).isNumeric() ? attrList.get(i+1) : null;
 				List<CyberTrackerId> multiIds = addListElements(cmAttr, true, numAttr); 
 				Node mNode = buildMultiSelectNode(cmAttr, id, multiIds, numAttr != null);

@@ -19,6 +19,7 @@ public class Messages extends NLS {
 	public static String CmAttributeInfoComposite_enabledTooltip;
 	public static String CmAttributeInfoComposite_EnableOnce_Tooltip;
 	public static String CmAttributeInfoComposite_Key;
+	public static String CmAttributeInfoComposite_NotAllowedInMultiObservationMode;
 	public static String CmAttributeInfoComposite_Option_DefaultValue;
 	public static String CmAttributeInfoComposite_Option_EnableOnce;
 	public static String CmAttributeInfoComposite_Option_FlattenTree;
