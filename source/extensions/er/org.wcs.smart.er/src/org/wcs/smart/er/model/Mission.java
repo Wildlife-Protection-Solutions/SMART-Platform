@@ -149,6 +149,9 @@ public class Mission extends UuidItem{
 	
 	@OneToMany(fetch = FetchType.LAZY, mappedBy="id.mission", orphanRemoval = true, cascade={CascadeType.ALL})
 	public List<MissionMember> getMembers(){
+		if (this.members == null) {
+			this.members = new ArrayList<MissionMember>();
+		}
 		return this.members;
 	}
 	

@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +80,7 @@ import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Imports from {@link CyberTrackerSurvey} to {@link Mission} object
- * and saves imported result as new mission in database.
+ * and saves the result in database.
  * 
  * @author elitvin
  * @since 4.0.0
@@ -103,6 +104,7 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 
 		boolean fireSurveyAdded = false;
+		boolean fireMissionAdded = false;
 		try {
 			session.beginTransaction();
 			if (survey == null) {
@@ -114,23 +116,22 @@ public class MissionImporter extends AbstractSmartImporter {
 			if (mission == null) {
 				//this mean that user wants a new mission to be created
 				mission = createNewMission(ctSurvey, survey, session);
+				fireMissionAdded = true;
+
+				//import mission properties
+				for (MissionPropertyValue mpv : ctSurvey.getMissionProperties()) {
+					mpv.setMission(mission);
+					mission.getMissionPropertyValues().add(mpv);
+				}
 			} else {
 				mission = (Mission) session.load(Mission.class, mission.getUuid()); //reloading mission object to avoid lazy initialization exception
-				//TODO: validate mission!!!
+				validateExistingMission(ctSurvey, mission, session);
 			}
-			
-			//TODO: not all logic needs to work in case we use existing mission!!!!!
 			
 			if (mission.getLeader() == null){
 				if (!fixLeaderError(mission, ctSurvey, session)){
 					return null;
 				}
-			}
-			
-			//import mission properties
-			for (MissionPropertyValue mpv : ctSurvey.getMissionProperties()) {
-				mpv.setMission(mission);
-				mission.getMissionPropertyValues().add(mpv);
 			}
 			
 			//import observations
@@ -152,7 +153,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			if (fireSurveyAdded) {
 				SurveyEventHandler.getInstance().fireEvent(EventType.SURVEY_ADDED, survey);
 			}
-			SurveyEventHandler.getInstance().fireEvent(EventType.MISSION_ADDED, mission);
+			SurveyEventHandler.getInstance().fireEvent(fireMissionAdded ? EventType.MISSION_ADDED : EventType.MISSION_MODIFIED, mission);
 			return mission;
 		} catch (final Exception e) {
 			session.getTransaction().rollback();
@@ -256,6 +257,81 @@ public class MissionImporter extends AbstractSmartImporter {
 		
 		return true;
 	}
+
+	/**
+	 * Method is called when we add to existing mission. We heed to check that this operation occurs fine.
+	 */
+	private void validateExistingMission(CyberTrackerSurvey ctSurvey, Mission mission, Session session) {
+		boolean daysChanged = false;
+		if (mission.getStartDate().getTime() > ctSurvey.getStartDate().getTime()) {
+			if (!isValidTimeDelta(ctSurvey.getEndDate(), mission.getStartDate()))
+				addWarning(MessageFormat.format("Existing mission start date ({0}) and new mission day end date ({1}) have a difference of more than a day. This will introduce a time gap in resulting mission.", DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getEndDate())));
+			mission.setStartDate(ctSurvey.getStartDate());
+			daysChanged = true;
+		}
+
+		if (mission.getEndDate().getTime() < ctSurvey.getEndDate().getTime()) {
+			if (!isValidTimeDelta(mission.getEndDate(), ctSurvey.getStartDate()))
+				addWarning(MessageFormat.format("Existing mission end date ({0}) and new mission day start date ({1}) have a difference of more than a day. This will introduce a time gap in resulting mission.", DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getStartDate())));
+			mission.setEndDate(ctSurvey.getEndDate());
+			daysChanged = true;
+		}
+		
+		if (daysChanged) {
+			createMissingMissionDays(mission);
+		}
+
+		//validate members and add mission people
+		Set<Employee> members = new HashSet<Employee>(ctSurvey.getMembers());
+		for (MissionMember mm : mission.getMembers()) {
+			members.remove(mm.getMember());
+		}
+		for (Employee e : members) {
+			addWarning(MessageFormat.format("Member {0} is not in a list of members in existing mission. Member will be added to the list of members.", e.getFullLabel()));
+			MissionMember plm = new MissionMember();
+			plm.setMission(mission);
+			plm.setMember(e);
+			mission.getMembers().add(plm);
+		}
+	}
+
+	//ensures that gap between dates is less than a day
+	//(in this case we will not have a gap after adding ctSurvey to the mission)
+	private boolean isValidTimeDelta(Date from, Date to) {
+		from = SmartUtils.getDatePart(from, false);
+		to = SmartUtils.getDatePart(to, false);
+		long delta = to.getTime() - from.getTime();
+		return delta <= 1000 * 60 * 60 * 24; //more that a day
+	}
+
+	private void createMissingMissionDays(Mission m) {
+		Set<Calendar> existingDays = new HashSet<Calendar>();
+		for (MissionDay md : m.getMissionDays()) {
+			existingDays.add(SmartUtils.convertDate(md.getDate()));
+		}
+		
+		Calendar calStart = SmartUtils.convertDate(m.getStartDate());
+		calStart.set(Calendar.HOUR, 0);
+		calStart.set(Calendar.MINUTE, 0);
+		calStart.set(Calendar.SECOND, 0);
+		calStart.set(Calendar.MILLISECOND, 0);
+		
+		Calendar calEnd = SmartUtils.convertDate(m.getEndDate());
+		while (calStart.before(calEnd) || calStart.equals(calEnd)) {
+			if (!existingDays.contains(calStart)) {
+				MissionDay md = new MissionDay();
+				md.setDate(SmartUtils.getDatePart(calStart.getTime(), false));
+				md.setStartTime(createTime(0, 0, 0));
+				md.setEndTime(createTime(23, 59, 59));
+				md.setRestMinutes(0);
+				md.setTracks(new ArrayList<MissionTrack>());
+				md.setWaypoints(new ArrayList<SurveyWaypoint>());
+				md.setMission(m);
+				m.getMissionDays().add(md);
+			}
+			calStart.add(Calendar.DAY_OF_MONTH, 1);
+		}
+	}
 	
 	private boolean checkEmployees(final Mission m, final CyberTrackerSurvey ctSurvey){
 		if (m.getMembers().size() == 0){
@@ -291,7 +367,7 @@ public class MissionImporter extends AbstractSmartImporter {
 	}
 
 	private MissionDay findOrAddMissionDay(Mission mission, S s) {
-		//TODO: do we need to check for big gaps?
+		//we don't need to check for big gaps as this validation is done by validateExistingMission(...)
 		Date date = null;
 		for (A a : s.getA()) {
 			String i = a.getI();
@@ -312,7 +388,6 @@ public class MissionImporter extends AbstractSmartImporter {
 		MissionDay mday = new MissionDay();
 		mday.setMission(mission);
 		mday.setDate(date);
-		//TODO: start time/end time; maybe not from 00:00 to 23:59? 
 		mday.setStartTime(createTime(0, 0, 0));
 		mday.setEndTime(createTime(23, 59, 59));
 		mday.setRestMinutes(0);
