@@ -27,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerHibernateManager;
+import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil;
 import org.wcs.smart.cybertracker.export.CyberTrackerUtil.CyberTrackerId;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
@@ -43,8 +45,10 @@ import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
-import org.wcs.smart.cybertracker.model.screens.Node;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
+import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.dataentry.model.ScreenOption;
+import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -52,6 +56,7 @@ import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SamplingUnit.State;
 import org.wcs.smart.er.model.SurveyDesign;
+import org.wcs.smart.er.ui.meta.MissionScreenOptionMeta;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -86,6 +91,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		registerDatatype(elements, DATATYPE_SURVEY);
 		MetaExportResult result = new MetaExportResult();
 		List<CyberTrackerId> cyberTrackerIds;
+		ScreenOption so;
 		//start node
 		CyberTrackerId startId = new CyberTrackerId();
 		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
@@ -93,6 +99,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		
 		
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		Map<MissionScreenOptionMeta, ScreenOption> screenOptions = SurveyHibernateManager.getMissionScreenOptions(ca, session);
 		List<Employee> employees = HibernateManager.getActiveEmployees(ca, session);
 		Collections.sort(employees, new Comparator<Employee>() {
 			@Override
@@ -101,27 +108,62 @@ public class SurveyScreensUtil extends ScreensUtil {
 			}
 		});
 		
-		//getting all members names
-		//displaying all screens
-		List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
-		List<String> members = new ArrayList<String>();
-		for (Employee i : employees) {
-			members.add(SmartLabelProvider.getShortLabel(i));
-			CyberTrackerId mctid = new CyberTrackerId();
-			ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
-			memberIds.add(mctid);
+		so = screenOptions.get(MissionScreenOptionMeta.MEMBERS);
+		if (so == null || so.isVisible()) {
+			//getting all members names
+			//displaying all screens
+			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
+			List<String> members = new ArrayList<String>();
+			for (Employee i : employees) {
+				members.add(SmartLabelProvider.getShortLabel(i));
+				CyberTrackerId mctid = new CyberTrackerId();
+				ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(i), mctid.getItemId(), UuidUtils.uuidToString(i.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+				memberIds.add(mctid);
+			}
 			
+			String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
+			if (filter != null) {
+				filter = SmartUtils.encodeGeometry(filter.getBytes());
+			}
+			
+			id = addMembersNode(id, result, memberIds);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_MISSION_LEADER, memberIds, filter);
+		} else {
+			//adding default members
+			ScreenOption leader_so = screenOptions.get(MissionScreenOptionMeta.LEADER);
+			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
+			CyberTrackerId leaderCtId = null;
+			for (ScreenOptionUuid sou : so.getUuidList()) {
+				for (Employee e : employees) {
+					if (e.getUuid().equals(sou.getUuidValue())) {
+						CyberTrackerId mctid = new CyberTrackerId();
+						ElementsUtil.addElementsItem(elements, SmartLabelProvider.getShortLabel(e), mctid.getItemId(), UuidUtils.uuidToString(e.getUuid()), ElementsUtil.MEMBER_ELEMENT_TAG);
+						result.defaultValues.add(mctid.getItemId());
+						memberIds.add(mctid);
+						if (leader_so.getUuidValue() != null && leader_so.getUuidValue().equals(e.getUuid())) {
+							leaderCtId = mctid;
+						}
+					}
+				}
+			}
+			
+			if (leader_so == null || leader_so.isVisible()) {
+				id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_MISSION_LEADER, memberIds, false);
+			} else {
+				if (leaderCtId == null) {
+					CyberTrackerPlugIn.displayError("Error", "Screen option for 'Mission Leader' refers to item that is not part of 'Mission Members'. Please fix screen setup first.", null);
+					return null;
+				}
+				result.defaultValues.add(createDefaultResultElement(RESULT_MISSION_LEADER, elements, leaderCtId.getItemId()));
+			}
 		}
-		
-		String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
-		if (filter != null) {
-			filter = SmartUtils.encodeGeometry(filter.getBytes());
-		}
-		
-		id = addMembersNode(id, result, memberIds);
-		id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_MISSION_LEADER, memberIds, filter);
 
-		id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
+		so = screenOptions.get(MissionScreenOptionMeta.COMMENT);
+		if (so == null || so.isVisible()) {
+			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
+		} else {
+			result.defaultValues.add(createDefaultResultElement(RESULT_MISSION_COMMENTS, elements, so.getStringValue()));
+		}
 
 		String sdKey = getSurveyDesignKeyId(elements);
 		SurveyDesign surveyDesign = SurveyHibernateManager.getInstance().getSurveyDesign(sdKey, session);
