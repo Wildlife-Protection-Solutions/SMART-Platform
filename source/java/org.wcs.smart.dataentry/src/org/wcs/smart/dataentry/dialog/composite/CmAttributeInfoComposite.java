@@ -61,6 +61,9 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	private Label lblAttribute;
 	private Label lblKey;
 	
+	private Label lblEnterOnces;
+	private ComboViewer enterOncesComboViewer;
+	
 	public CmAttributeInfoComposite(Composite parent, ConfigurableModel model, Session session) {
 		super(parent, model, session);
 		createControls();
@@ -96,7 +99,12 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		lblKey = new Label(container, SWT.NONE);
 		lblKey.setText(""); //$NON-NLS-1$
 		
-		final ComboViewer enterOncesComboViewer = createEnterOnceControl(container);
+		lblEnterOnces = new Label(container, SWT.NONE);
+		lblEnterOnces.setText(Messages.CmAttributeInfoComposite_Option_EnableOnce);
+		lblEnterOnces.setToolTipText(Messages.CmAttributeInfoComposite_EnableOnce_Tooltip);
+		lblEnterOnces.setLayoutData(new GridData(SWT.NONE, SWT.NONE, false, false));
+		
+		enterOncesComboViewer = createEnterOnceControl(container);
 		
 		addSourceObjectChangedListener(new ISourceObjectChangedListener() {
 			@Override
@@ -116,7 +124,8 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 						lblKey.setText(attr.getAttribute().getKeyId());
 					
 					if (enterOncesComboViewer != null) {
-						CmAttributeOption op = getSourceObject().getCmAttributeOptions().get(CmAttributeOption.ID_ENTER_ONCES);
+						setEnterOncesIncluded(attr.getNode().isCollectMultipleObservations());
+						CmAttributeOption op = attr.getCmAttributeOptions().get(CmAttributeOption.ID_ENTER_ONCES);
 						if (op != null && op.getStringValue() != null){
 							enterOncesComboViewer.setSelection(new StructuredSelection(EnterOnceType.valueOf(op.getStringValue())));
 						}else{
@@ -134,10 +143,6 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 	protected abstract void createTypeSpecificControls(Composite container);
 
 	protected ComboViewer createEnterOnceControl(Composite parent) {
-		final Label label = new Label(parent, SWT.NONE);
-		label.setText(Messages.CmAttributeInfoComposite_Option_EnableOnce);
-		label.setToolTipText(Messages.CmAttributeInfoComposite_EnableOnce_Tooltip);
-		
 		final ComboViewer enterOncesCombo = new ComboViewer(parent, SWT.DROP_DOWN | SWT.READ_ONLY | SWT.BORDER);
 		enterOncesCombo.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		enterOncesCombo.setContentProvider(ArrayContentProvider.getInstance());
@@ -173,6 +178,23 @@ public abstract class CmAttributeInfoComposite extends AbstractInfoComposite {
 		});
 		return enterOncesCombo;
 		
+	}
+
+	public void setEnterOncesIncluded(boolean isShow) {
+		if (lblEnterOnces != null) {
+			lblEnterOnces.setVisible(isShow);
+			if (lblEnterOnces.getLayoutData() instanceof GridData) {
+				GridData gd = (GridData) lblEnterOnces.getLayoutData();
+				gd.exclude = !isShow;
+			}
+		}
+		if (enterOncesComboViewer != null) {
+			enterOncesComboViewer.getControl().setVisible(isShow);
+			if (enterOncesComboViewer.getControl().getLayoutData() instanceof GridData) {
+				GridData gd = (GridData) enterOncesComboViewer.getControl().getLayoutData();
+				gd.exclude = !isShow;
+			}
+		}
 	}
 	
 	protected Button createIsVisibleControl(Composite container) {

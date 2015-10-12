@@ -128,18 +128,29 @@ public class ListAttributeInfoComposite extends CmAttributeInfoComposite {
 
 	private void updateMultiselectControl() {
 		CmAttribute cmAttr = getSourceObject();
-		CmAttribute cmMultiAttr = getMulultiSelectedAttr(cmAttr.getNode());
-		boolean isEnabled = cmMultiAttr == null || cmAttr.equals(cmMultiAttr);
+		String disabledText = getMulultiSelectDisableText(cmAttr);
+		boolean isEnabled = disabledText.isEmpty();
 		CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_MULTISELECT);
 		lblMulti.setVisible(option != null);
 		btnMulti.setVisible(option != null);
 		btnMulti.setEnabled(isEnabled);
-		btnMulti.setText(isEnabled ? "" : MessageFormat.format(Messages.ListAttributeInfoComposite_MultiselectHint, cmMultiAttr.findNameNull(currentLanguage))); //$NON-NLS-1$
+		btnMulti.setText(disabledText);
 		if (option != null && isEnabled) {
 			btnMulti.setSelection(option.getBooleanValue());
 		} else {
 			btnMulti.setSelection(false);
 		}
+	}
+
+	private String getMulultiSelectDisableText(CmAttribute cmAttr) {
+		if (cmAttr.getNode().isCollectMultipleObservations()) {
+			return Messages.CmAttributeInfoComposite_NotAllowedInMultiObservationMode;
+		}
+		CmAttribute cmMultiAttr = getMulultiSelectedAttr(cmAttr.getNode());
+		if (cmMultiAttr != null && !cmAttr.equals(cmMultiAttr)) {
+			return MessageFormat.format(Messages.ListAttributeInfoComposite_MultiselectHint, cmMultiAttr.findNameNull(currentLanguage));
+		}
+		return ""; //$NON-NLS-1$
 	}
 	
 	private CmAttribute getMulultiSelectedAttr(CmNode cmNode) {

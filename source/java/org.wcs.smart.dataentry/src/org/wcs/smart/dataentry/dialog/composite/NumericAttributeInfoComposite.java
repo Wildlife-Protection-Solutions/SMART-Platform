@@ -180,11 +180,8 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 			@Override
 			public void sourceObjectChanged(Object newObject, Language language) {
 				CmAttribute cmAttr = getSourceObject();
-				boolean isEnabled = false;
-				if (cmAttr.getOrder() > 0) {
-					CmAttribute prevAttr = cmAttr.getNode().getCmAttributes().get(cmAttr.getOrder()-1);
-					isEnabled = prevAttr.isMultiselect() && prevAttr.isVisible();
-				}
+				String disabledText = getNumericDisableText(cmAttr);
+				boolean isEnabled = disabledText.isEmpty();
 				CmAttributeOption option = cmAttr.getCmAttributeOptions().get(CmAttributeOption.ID_NUMERIC);
 				btnBool.setVisible(option != null);
 				label.setVisible(option != null);
@@ -195,15 +192,23 @@ public class NumericAttributeInfoComposite extends CmAttributeInfoComposite {
 				} else {
 					btnBool.setSelection(false);
 				}
-				
-				if (isEnabled){
-					btnBool.setText(""); //$NON-NLS-1$
-				}else{
-					btnBool.setText(Messages.NumericAttributeInfoComposite_previousInfo);
-				}
+				btnBool.setText(disabledText);
 				btnBool.getParent().layout();
 			}
 		});
+	}
+
+	private String getNumericDisableText(CmAttribute cmAttr) {
+		if (cmAttr.getNode().isCollectMultipleObservations()) {
+			return Messages.CmAttributeInfoComposite_NotAllowedInMultiObservationMode;
+		}
+		if (cmAttr.getOrder() > 0) {
+			CmAttribute prevAttr = cmAttr.getNode().getCmAttributes().get(cmAttr.getOrder()-1);
+			if (!prevAttr.isMultiselect() || !prevAttr.isVisible()) {
+				return Messages.NumericAttributeInfoComposite_previousInfo;
+			}
+		}
+		return ""; //$NON-NLS-1$
 	}
 	
 }
