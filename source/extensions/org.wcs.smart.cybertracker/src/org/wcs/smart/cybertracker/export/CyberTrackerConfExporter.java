@@ -880,36 +880,6 @@ public class CyberTrackerConfExporter {
 	 * @param id
 	 * @param startId
 	 */
-	private List<Node> createSaveWaypointNodes_old(CyberTrackerId id, CyberTrackerId startId, String defaultAttrValues) {
-		//TODO:
-		List<Node> nodeList = new ArrayList<Node>();
-		Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerExporter_Waypoint_ScreenTitle, newWpElementsIds, newWpResultId.getItemId());
-//		Control menoControl = screensFactory.createBottomMemoControl13(Messages.CyberTrackerExporter_SaveButtonsInfo);
-//		ScreensObjectFactory.addControlToNode(node, menoControl);
-
-		if (defaultAttrValues != null && !defaultAttrValues.isEmpty()) {
-			Control defaultAttr = screensFactory.createAttrubuteControl14(defaultAttrValuesResultId.getItemId(), false, defaultAttrValues);
-			ScreensObjectFactory.addControlToNode(node, defaultAttr);
-		}
-		
-		Control control2 = ScreensObjectFactory.getNavigationControl(node);
-		//this is the last screen and we need to show "Save" button
-		control2.setShowMajor("True"); //$NON-NLS-1$
-//		control2.setShowMinor("True"); //$NON-NLS-1$
-		control2.setShowNext("False"); //$NON-NLS-1$
-		control2.setTranslateNextScreenId(null); //no next button at last screen
-		control2.setTranslateMajorScreenId(rootId.getNodeId());
-//		control2.setTranslateMinorScreenId(startId.getNodeId());
-		nodeList.add(node);
-		return nodeList;
-	}	
-
-	/**
-	 * Creates last node where user can specify if he want to save observation as new waypoint or attach to previous
-	 * 
-	 * @param id
-	 * @param startId
-	 */
 	private List<Node> createSaveWaypointNodes(CyberTrackerId id, String defaultAttrValues) {
 		List<Node> nodeList = new ArrayList<Node>();
 		
