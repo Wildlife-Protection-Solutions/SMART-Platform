@@ -26,7 +26,17 @@ import org.eclipse.osgi.util.NLS;
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.patrol.internal.messages"; //$NON-NLS-1$
 	public static String CyberTrackerExportHandler_ErrDialog_Title;
+	public static String CyberTrackerPatrol_Error_Transport;
+	public static String CyberTrackerPatrol_Warn_Leader;
+	public static String CyberTrackerPatrol_Warn_Mandate;
+	public static String CyberTrackerPatrol_Warn_Member;
+	public static String CyberTrackerPatrol_Warn_Pilot;
+	public static String CyberTrackerPatrol_Warn_Station;
+	public static String CyberTrackerPatrol_Warn_Team;
 	public static String DataModelWrapper_Dropdown_Label;
+	public static String EmployeeSelectorDialog_DialogTitle;
+	public static String EmployeeSelectorDialog_LeaderType;
+	public static String EmployeeSelectorDialog_PilotType;
 	public static String PatrolCTExportDialog_ConfigurableModel;
 	public static String PatrolCTExportDialog_LoadConfModels_Error;
 	public static String PatrolScreens_Begin;
@@ -63,6 +73,27 @@ public class Messages extends NLS {
 	public static String PatrolScreensUtil_Error_Meta_Transport;
 	public static String PatrolScreensUtil_Error_TransportNotSet;
 	public static String PatrolScreensUtil_Error_TypesNotSet;
+	public static String SmartImporter_ImportErrorDialogTitle;
+	public static String SmartImporter_LeaderTitle;
+	public static String SmartImporter_NoEmployeesErrorMessage;
+	public static String SmartImporter_PilotTitle;
+	public static String SmartImporter_SelectLeaderMessage;
+	public static String SmartImporter_SelectPilotTitle;
+	public static String SmartImporter_Transport_Load_Error;
+	public static String SmartImporter_Warn_AddToWaypointTimeframe;
+	public static String SmartImporter_Warn_AttributeTag0_Missing;
+	public static String SmartImporter_Warn_CannotParseDate;
+	public static String SmartImporter_Warn_CategoryTag0_Missing;
+	public static String SmartImporter_Warn_ElementNotDefined;
+	public static String SmartImporter_Warn_ExportMedia_FileNotFound;
+	public static String SmartImporter_Warn_ExportMedia_UnknownFolder;
+	public static String SmartImporter_Warn_NoAttributeInDatamodel;
+	public static String SmartImporter_Warn_NoCategoryInDatamodel;
+	public static String SmartImporter_Warn_NoListAttrItemInDatamodel;
+	public static String SmartImporter_Warn_NoTreeAttrItemInDatamodel;
+	public static String SmartImporter_Warn_WrongFirstWaypoint;
+	public static String SmartImporter_WarnDialog_Message;
+	public static String SmartImporter_WarnDialog_Title;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
