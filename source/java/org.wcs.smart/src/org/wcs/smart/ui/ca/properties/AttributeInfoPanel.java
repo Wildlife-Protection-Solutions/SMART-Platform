@@ -223,7 +223,7 @@ public class AttributeInfoPanel extends Composite {
 		lblAggregations.setToolTipText(Messages.AttributeInfoPanel_Aggregations_ToolTip);
 		
 		Composite compAggs = new Composite(numericComposite, SWT.NONE);
-		GridLayout ll = new GridLayout(2, true);
+		GridLayout ll = new GridLayout(2, false);
 		ll.marginTop = 0;
 		compAggs.setLayout(ll);
 		compAggs.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));

@@ -22,6 +22,7 @@
 package org.wcs.smart.upgrade.v400;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,7 +30,9 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB.DbUser;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
 
@@ -41,6 +44,8 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
  * @since 3.2.0
  */
 public class Upgrader330To400 implements IDatabaseUpgrader {
+	
+	private String dbUrl = null;
 	
 	public void upgrade(final IProgressMonitor monitor) {
 		monitor.subTask("Upgrading from 3.3.0 to 4.0.0");
@@ -65,10 +70,27 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 		}finally{
 			s.close();
 		}
+		
+		/* do a hard derby upgrade to version 10.12.1.1 */ 
+		try{
+			//disconnect 
+			HibernateManager.endSessionFactory(true);
+			//perform hard upgrade
+			DriverManager.getConnection(dbUrl + ";create=false;upgrade=true;user=" + DbUser.ADMIN.getUserName() + ";password=" + DbUser.ADMIN.getPassword()); //$NON-NLS-1$ //$NON-NLS-2$ 
+			DerbyHibernateExtensions.shutDown(true);
+		}catch(Exception ex){
+			SmartPlugIn.log("Could not perform hard derby upgrade.", ex); //$NON-NLS-1$
+		}
 	}
 
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		String[] sql = new String[]{
+			/* aggregations */
+			"insert into smart.dm_aggregation values ('stddev_pop')",
+			"insert into smart.dm_aggregation values ('var_pop')",
+			"insert into smart.dm_aggregation_i18n values ('stddev_pop', 'en', 'standard deviation (pop.)')",
+			"insert into smart.dm_aggregation_i18n values ('var_pop', 'en', 'variance (pop.)')",
+			
 			/* core db changes */
 			"alter table smart.area_geometries drop column pid",
 			

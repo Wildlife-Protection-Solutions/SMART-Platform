@@ -86,7 +86,7 @@ TOKEN :
 |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
 |    < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY : "attribute:" ("t" | "l") ":sum:" ("obs" | "wp") ":" < DM_KEY > >
 |    < SUM_CAT_ATT_VALUE_LISTTREE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_LISTTREE_KEY > >
-|    < AGG  : ("sum" | "avg" | "min" | "max" ) >
+|    < AGG  : ("sum" | "avg" | "min" | "max" | "var_pop" | "stddev_pop" ) >
 | 	 < DATE_GROUPBY_ITEM : "date:" ("day" | "week" | "month" | "quarter" | "year" | "starthour" | "endhour" ) >
 |    < QUERY_SPLITTER : "|" >
 |    < PATROL_UUID_GROUPBY_OPTION :(
