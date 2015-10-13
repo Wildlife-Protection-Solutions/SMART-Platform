@@ -50,7 +50,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.IImportEditorContent;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.ImportError;
