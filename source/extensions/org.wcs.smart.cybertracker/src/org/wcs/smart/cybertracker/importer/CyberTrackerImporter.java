@@ -75,7 +75,7 @@ public class CyberTrackerImporter {
 					dataBuilderMap.put(name, builder);
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog("Error getting CyberTracker extensions", ex);
+				SmartPlugIn.displayLog(Messages.CyberTrackerImportComposite_ExtensionsError, ex);
 			}
 		}
 	}

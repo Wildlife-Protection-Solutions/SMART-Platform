@@ -29,6 +29,7 @@ import java.util.Map;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.AbstractCyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
@@ -72,7 +73,7 @@ public class SightsMultiObsUtil {
 					if (groupCategory != catE) {
 						//this should never happen
 						//TODO: error: unexpected end of multiple observations group in category groupCategory
-						SmartPlugIn.displayLog("New group detacted while previous group was not ended.", null);
+						SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_NonendedGroup, null);
 					}
 				}
 				groupCategory = catE;
@@ -83,7 +84,7 @@ public class SightsMultiObsUtil {
 						result.addAll(adoptMultiGps(adoptList, s, fakeData));
 					} else {
 						//TODO: unexpected group type
-						SmartPlugIn.displayLog("Mutli-observation category of unknown type exist in current file.", null);
+						SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_UnknownCategory, null);
 						result.addAll(adoptList);
 						result.add(s);
 					}
@@ -97,7 +98,7 @@ public class SightsMultiObsUtil {
 				if (!adoptList.isEmpty()) {
 					//TODO: error: observations group in category groupCategory was not ended properly
 					//need to end group
-					SmartPlugIn.displayLog("Observation group was not ended properly.", null);
+					SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_GroupNotEndedProperly, null);
 					result.addAll(adoptList);
 					adoptList.clear();
 				}
@@ -108,7 +109,7 @@ public class SightsMultiObsUtil {
 		if (!adoptList.isEmpty()) {
 			//TODO: error: observations group in category groupCategory was not ended properly
 			//need to end group
-			SmartPlugIn.displayLog("Observation group was not ended properly in the end of file.", null);
+			SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_GroupNotEndedProperlyEOF, null);
 			result.addAll(adoptList);
 			adoptList.clear();
 		}
@@ -130,7 +131,7 @@ public class SightsMultiObsUtil {
 		} else {
 			//observation group contain single (lastS) record
 			//NOTE: this is invalid case because GPS data need to e recorded separately
-			SmartPlugIn.displayLog("Looks like GPS data was not recorded for single GPS observation group.", null);
+			SmartPlugIn.displayLog(Messages.SightsMultiObsUtil_SigleGpsGroup_NoGps, null);
 			result.add(cloneS(lastS, fakeData.aAddAsNew));
 		}
 		return result;
