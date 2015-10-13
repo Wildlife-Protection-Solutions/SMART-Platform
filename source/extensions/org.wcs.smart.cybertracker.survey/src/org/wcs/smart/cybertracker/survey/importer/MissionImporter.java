@@ -48,12 +48,12 @@ import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.ImportWarningDialog;
 import org.wcs.smart.cybertracker.importer.SightsMultiObsUtil;
-import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.er.SurveyEventHandler;
 import org.wcs.smart.er.SurveyEventHandler.EventType;
@@ -160,7 +160,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog("Failed to save mission.", e);
+					SmartPlugIn.displayLog(Messages.MissionImporter_SaveError, e);
 				}
 			});
 			return null;
@@ -248,8 +248,8 @@ public class MissionImporter extends AbstractSmartImporter {
 				@Override
 				public void run() {
 					ret[0] = MessageDialog.openConfirm(Display.getDefault().getActiveShell(),
-						Messages.PatrolImporter_ImportDialogTitle, 
-						MessageFormat.format("The CyberTracker survey {0} looks to be a duplicate of the existing SMART survey {1}.  By importing you may potentially be duplicating data.  Do you want to continue?", getMissionIdentifier(ctSurvey), duplicateId)
+						Messages.MissionImporter_ConfirmDialogTitle, 
+						MessageFormat.format(Messages.MissionImporter_Warn_SurveyDuplicate, getMissionIdentifier(ctSurvey), duplicateId)
 						);
 				}});
 			return ret[0];
@@ -265,14 +265,14 @@ public class MissionImporter extends AbstractSmartImporter {
 		boolean daysChanged = false;
 		if (mission.getStartDate().getTime() > ctSurvey.getStartDate().getTime()) {
 			if (!isValidTimeDelta(ctSurvey.getEndDate(), mission.getStartDate()))
-				addWarning(MessageFormat.format("Existing mission start date ({0}) and new mission day end date ({1}) have a difference of more than a day. This will introduce a time gap in resulting mission.", DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getEndDate())));
+				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_TimeGap_Before, DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getStartDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getEndDate())));
 			mission.setStartDate(ctSurvey.getStartDate());
 			daysChanged = true;
 		}
 
 		if (mission.getEndDate().getTime() < ctSurvey.getEndDate().getTime()) {
 			if (!isValidTimeDelta(mission.getEndDate(), ctSurvey.getStartDate()))
-				addWarning(MessageFormat.format("Existing mission end date ({0}) and new mission day start date ({1}) have a difference of more than a day. This will introduce a time gap in resulting mission.", DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getStartDate())));
+				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_TimeGap_After, DateFormat.getDateInstance(DateFormat.MEDIUM).format(mission.getEndDate()), DateFormat.getDateInstance(DateFormat.MEDIUM).format(ctSurvey.getStartDate())));
 			mission.setEndDate(ctSurvey.getEndDate());
 			daysChanged = true;
 		}
@@ -287,7 +287,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			members.remove(mm.getMember());
 		}
 		for (Employee e : members) {
-			addWarning(MessageFormat.format("Member {0} is not in a list of members in existing mission. Member will be added to the list of members.", e.getFullLabel()));
+			addWarning(MessageFormat.format(Messages.MissionImporter_Warn_Member, e.getFullLabel()));
 			MissionMember plm = new MissionMember();
 			plm.setMission(mission);
 			plm.setMember(e);
@@ -339,8 +339,8 @@ public class MissionImporter extends AbstractSmartImporter {
 				@Override
 				public void run() {
 					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							"Import Error", 
-							MessageFormat.format("The CyberTracker survey ({0}) does not have any valid employees and cannot be imported into SMART.", 
+							Messages.MissionImporter_ErrorDialog_Title, 
+							MessageFormat.format(Messages.MissionImporter_Err_NoEmployees, 
 								new Object[]{getMissionIdentifier(ctSurvey)}));
 				}				
 			});
@@ -358,8 +358,8 @@ public class MissionImporter extends AbstractSmartImporter {
 			public void run() {
 				LeaderSelectorDialog dialog = new LeaderSelectorDialog(
 						Display.getDefault().getActiveShell(), 
-						MessageFormat.format(Messages.SmartImporter_LeaderTitle, getMissionIdentifier(ctSurvey)),
-						MessageFormat.format(Messages.SmartImporter_SelectLeaderMessage, new Object[]{ctSurvey.getCtLeader() }),
+						MessageFormat.format(Messages.MissionImporter_LeaderDialog_Ttitle, getMissionIdentifier(ctSurvey)),
+						MessageFormat.format(Messages.MissionImporter_LeaderDialog_Message, new Object[]{ctSurvey.getCtLeader() }),
 						m);
 				dialog.open();
 			}});
@@ -441,7 +441,7 @@ public class MissionImporter extends AbstractSmartImporter {
 		
 		//below is "Add To Last Waypoint" case
 		if (mday.getWaypoints().isEmpty()) {
-			addWarning(Messages.SmartImporter_Warn_WrongFirstWaypoint);
+			addWarning(Messages.MissionImporter_Warn_FirstWaypoint);
 			mday.getWaypoints().add(swp);
 			return wp;
 		}
@@ -453,7 +453,7 @@ public class MissionImporter extends AbstractSmartImporter {
 			
 			long delta = Math.abs(wp.getDateTime().getTime() - lastWp.getWaypoint().getDateTime().getTime());
 			if (delta > WARN_WP_TIME_FRAME * 60 * 1000) {
-				addWarning(MessageFormat.format(Messages.SmartImporter_Warn_AddToWaypointTimeframe, lastWp.getId(), WARN_WP_TIME_FRAME));
+				addWarning(MessageFormat.format(Messages.MissionImporter_Warn_WaypointTimeframe, lastWp.getId(), WARN_WP_TIME_FRAME));
 			}
 		}
 		return lastWp.getWaypoint();
@@ -472,7 +472,7 @@ public class MissionImporter extends AbstractSmartImporter {
 					md.getTracks().add(t);
 					t.setMissionDay(md);
 					t.setLineString(track);
-					t.setId("Track" + md.getTracks().size());
+					t.setId(Messages.MissionImporter_TrackPrefix + md.getTracks().size());
 				}
 			}
 		}
@@ -499,8 +499,8 @@ public class MissionImporter extends AbstractSmartImporter {
 				@Override
 				public void run() {
 					ImportWarningDialog wdialog = new ImportWarningDialog(Display.getDefault().getActiveShell(), 
-							"Warning", 
-							MessageFormat.format("The following warnings were generated during the import of CyberTracker survey ''{0}'':", getMissionIdentifier(ctSurvey)), 
+							Messages.MissionImporter_WarnDialog_Title, 
+							MessageFormat.format(Messages.MissionImporter_WarnDialog_Message, getMissionIdentifier(ctSurvey)), 
 							getWarnings());
 					isOk[0] = wdialog.open() == IDialogConstants.OK_ID;
 				}
