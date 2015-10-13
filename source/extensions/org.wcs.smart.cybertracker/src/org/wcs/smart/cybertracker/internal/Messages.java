@@ -44,6 +44,11 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_SupportedFiles;
 	public static String CTPatrolTableContainer_TeamLabel;
 	public static String CTPatrolTableContainer_TransportTypeLabel;
+	public static String CTTableColumn_Count;
+	public static String CTTableColumn_Details;
+	public static String CTTableColumn_End;
+	public static String CTTableColumn_Start;
+	public static String CTTableColumn_Type;
 	public static String CyberTrackerCaDeleteHandler_DeleteProperties;
 	public static String CyberTrackerCaDeleteHandler_DeleteRegistryKey;
 	public static String CyberTrackerConfExporter_AttributeTypeNotSupported;
@@ -125,6 +130,11 @@ public class Messages extends NLS {
 	public static String CyberTrackerFileImportDialog_Message;
 	public static String CyberTrackerFileImportDialog_OtherFile;
 	public static String CyberTrackerFileImportDialog_Title;
+	public static String CyberTrackerImportComposite_Add;
+	public static String CyberTrackerImportComposite_Error;
+	public static String CyberTrackerImportComposite_ExtensionsError;
+	public static String CyberTrackerImportComposite_NoDataSelected;
+	public static String CyberTrackerImportComposite_UnableToImportMultitype;
 	public static String CyberTrackerImportDialog_AllFiles;
 	public static String CyberTrackerImportDialog_Button_Import;
 	public static String CyberTrackerImportDialog_Button_ImportFromDevice;
@@ -270,6 +280,11 @@ public class Messages extends NLS {
 	public static String PatrolScreensUtil_Error_TypesNotSet;
 	public static String RemoveCyberTrackerTablesJob_Error;
 	public static String RemoveCyberTrackerTablesJob_Title;
+	public static String SightsMultiObsUtil_GroupNotEndedProperly;
+	public static String SightsMultiObsUtil_GroupNotEndedProperlyEOF;
+	public static String SightsMultiObsUtil_NonendedGroup;
+	public static String SightsMultiObsUtil_SigleGpsGroup_NoGps;
+	public static String SightsMultiObsUtil_UnknownCategory;
 	public static String SmartImporter_ImportErrorDialogTitle;
 	public static String SmartImporter_LeaderTitle;
 	public static String SmartImporter_NoEmployeesErrorMessage;
