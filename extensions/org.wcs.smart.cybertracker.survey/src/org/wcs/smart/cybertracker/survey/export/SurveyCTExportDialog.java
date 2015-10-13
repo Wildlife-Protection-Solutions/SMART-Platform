@@ -24,7 +24,6 @@ package org.wcs.smart.cybertracker.survey.export;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -45,7 +44,6 @@ import org.wcs.smart.er.hibernate.SurveyHibernateManager;
 import org.wcs.smart.er.ui.SurveyDesignLabelProvider;
 import org.wcs.smart.er.ui.surveydesign.editor.SurveyDesignEditorInput;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartHibernateManager;
 
 /**
  * Dialog for exporting Survey Designs to CyberTracker application.

@@ -34,7 +34,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.ui.PatrolFilteredComboViewer;
 
@@ -76,7 +76,7 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 		btnNew.setLayoutData(gd);
 		
 		btnNew.setSelection(true);
-		btnNew.setText("Add as new patrol");
+		btnNew.setText(Messages.PatrolSelectorDialog_AddAsPatrol);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -89,7 +89,7 @@ public class PatrolSelectorDialog extends TitleAreaDialog {
 		gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
 		gd.horizontalIndent = 10;
 		btnAppend.setLayoutData(gd);
-		btnAppend.setText("Add as leg to existing patrol");
+		btnAppend.setText(Messages.PatrolSelectorDialog_AddAsLeg);
 		btnAppend.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {

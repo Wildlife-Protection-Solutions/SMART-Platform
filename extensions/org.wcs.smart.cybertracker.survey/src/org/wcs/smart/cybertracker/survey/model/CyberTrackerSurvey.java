@@ -34,6 +34,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider.CTSurveyUIMeta;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SurveyDesign;
 
@@ -138,7 +139,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 
 	@Override
 	public String getDisplayType() {
-		return "Survey";
+		return Messages.CyberTrackerSurvey_DisplayType;
 	}
 	
 	@Override
@@ -146,7 +147,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 		String sdName = surveyDesign != null ? surveyDesign.getName() : ""; //$NON-NLS-1$
 		String l = (new SurveyCTLabelProvider(CTSurveyUIMeta.LEADER)).getText(this);
 		String m = (new SurveyCTLabelProvider(CTSurveyUIMeta.MEMBERS)).getText(this);
-		return MessageFormat.format("SurveyDesign: {0}; Leader: {1}; Members: {2}", sdName, l, m);
+		return MessageFormat.format(Messages.CyberTrackerSurvey_Details, sdName, l, m);
 	}
 
 }

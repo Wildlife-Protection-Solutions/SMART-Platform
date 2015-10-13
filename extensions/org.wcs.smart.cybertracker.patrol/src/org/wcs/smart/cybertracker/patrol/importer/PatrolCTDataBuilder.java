@@ -37,7 +37,7 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.CyberTrackerDataBuilder;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;

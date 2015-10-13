@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.ui.SmartLabelProvider;
@@ -66,7 +67,7 @@ public class LeaderSelectorDialog extends TitleAreaDialog{
 		Composite composite = (Composite) super.createDialogArea(parent);
 
 		setTitle(title);
-		getShell().setText("Import");
+		getShell().setText(Messages.LeaderSelectorDialog_Title);
 		setMessage(message);
 		
 		Composite main = new Composite(composite, SWT.NONE);
@@ -74,7 +75,7 @@ public class LeaderSelectorDialog extends TitleAreaDialog{
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
         Label patrolLabel = new Label(main, SWT.NONE);
-        patrolLabel.setText("Leader:");
+        patrolLabel.setText(Messages.LeaderSelectorDialog_Leader);
         patrolLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false));
 
         employeeViewer = new ComboViewer(main, SWT.DROP_DOWN | SWT.READ_ONLY);

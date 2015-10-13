@@ -91,11 +91,11 @@ public class CyberTrackerImportComposite extends Composite {
 	 */
 	public enum CTTableColumn {
 		IMPORT_NOTE ("",	20), //$NON-NLS-1$
-		START_DATE	("Start Date and Time",	120),
-		END_DATE	("End Date and Time",		120),
-		TYPE		("Type", 		60),
-		SIGHT_COUNT	("Observations Count", 	50),
-		DETAILS		("Details", 	300);
+		START_DATE	(Messages.CTTableColumn_Start,	120),
+		END_DATE	(Messages.CTTableColumn_End,		120),
+		TYPE		(Messages.CTTableColumn_Type, 		60),
+		SIGHT_COUNT	(Messages.CTTableColumn_Count, 	50),
+		DETAILS		(Messages.CTTableColumn_Details, 	300);
 		
 		private String guiName;
 		private int width;
@@ -145,7 +145,7 @@ public class CyberTrackerImportComposite extends Composite {
 					contentMap.put(name, content);
 				}
 			}catch (Exception ex){
-				SmartPlugIn.displayLog("Error getting CyberTracker extensions", ex);
+				SmartPlugIn.displayLog(Messages.CyberTrackerImportComposite_ExtensionsError, ex);
 			}
 		}
 	}
@@ -221,7 +221,7 @@ public class CyberTrackerImportComposite extends Composite {
 			}
 		});
 		final MenuManager mgr = new MenuManager();
-		Action addAction = new Action("Add"){
+		Action addAction = new Action(Messages.CyberTrackerImportComposite_Add){
 			@Override
 			public void run() {
 				handleAdd();
@@ -249,7 +249,7 @@ public class CyberTrackerImportComposite extends Composite {
 		buttons = new Composite(dataComp, SWT.NONE);
 		buttons.setLayout(new GridLayout(3, true));
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
-		btnAdd = toolkit.createButton(buttons,"Add", SWT.PUSH);
+		btnAdd = toolkit.createButton(buttons,Messages.CyberTrackerImportComposite_Add, SWT.PUSH);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -469,14 +469,14 @@ public class CyberTrackerImportComposite extends Composite {
 			List<ICyberTrackerData> processedItems = getEditorContent(datatype).handleAdd(getShell(), selection);
 			tableInputData.removeAll(processedItems);
 		} else {
-			MessageDialog.openError(getShell(), "Error", validationError);
+			MessageDialog.openError(getShell(), Messages.CyberTrackerImportComposite_Error, validationError);
 		}
 		refreshViewer();
 	}
 
 	protected String validateSelection(IStructuredSelection selection) {
 		if (selection.isEmpty()) {
-			return "No data is selected for import.";
+			return Messages.CyberTrackerImportComposite_NoDataSelected;
 		}
 		
 		//validate that all selected data for import is of the same type
@@ -490,7 +490,7 @@ public class CyberTrackerImportComposite extends Composite {
 			}
 		}
 		if (!isSame) {
-			return "Unable to import selected data. Please select data of the same type for importing.";
+			return Messages.CyberTrackerImportComposite_UnableToImportMultitype;
 		}
 		return null;
 	}

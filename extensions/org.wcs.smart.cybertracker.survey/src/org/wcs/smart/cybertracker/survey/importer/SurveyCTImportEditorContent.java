@@ -49,12 +49,12 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.cybertracker.CyberTrackerPlugIn;
 import org.wcs.smart.cybertracker.importer.IImportEditorContent;
-import org.wcs.smart.cybertracker.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.IDataMeta;
 import org.wcs.smart.cybertracker.model.ImportError;
 import org.wcs.smart.cybertracker.model.ImportError.ErrorType;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider.CTSurveyUIMeta;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.model.Mission;
@@ -113,35 +113,35 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		int indent = 10;
-		toolkit.createLabel(left, "Survey Design");
+		toolkit.createLabel(left, Messages.SurveyCTImportEditorContent_SurveyDesign);
 		lblSurveyDesign = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblSurveyDesign.setEditable(false);
 		lblSurveyDesign.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblSurveyDesign.getLayoutData()).horizontalIndent = indent;
 		cdSurveyDesign = createDecoration(lblSurveyDesign);
 
-		toolkit.createLabel(left, Messages.CTPatrolTableContainer_StartDateLabel);
+		toolkit.createLabel(left, Messages.SurveyCTImportEditorContent_StartDate);
 		lblStartDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblStartDate.setEditable(false);
 		lblStartDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblStartDate.getLayoutData()).horizontalIndent = indent;
 		cdStartDate = createDecoration(lblStartDate);
 		
-		toolkit.createLabel(left, Messages.CTPatrolTableContainer_EndDateLabel);
+		toolkit.createLabel(left, Messages.SurveyCTImportEditorContent_EndDate);
 		lblEndDate = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblEndDate.setEditable(false);
 		lblEndDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblEndDate.getLayoutData()).horizontalIndent = indent;
 		cdEndDate = createDecoration(lblEndDate);
 		
-		toolkit.createLabel(left, Messages.CTPatrolTableContainer_LeaderLabel);
+		toolkit.createLabel(left, Messages.SurveyCTImportEditorContent_Leader);
 		lblLeader = toolkit.createText(left, ""); //$NON-NLS-1$
 		lblLeader.setEditable(false);
 		lblLeader.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		((GridData)lblLeader.getLayoutData()).horizontalIndent = indent;
 		cdLeader = createDecoration(lblLeader);
 		
-		Label l = toolkit.createLabel(left, Messages.CTPatrolTableContainer_MembersLabel);
+		Label l = toolkit.createLabel(left, Messages.SurveyCTImportEditorContent_Members);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		lblMembers = toolkit.createText(left, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		lblMembers.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -151,7 +151,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		lblMembers.setEditable(false);
 		cdMembers = createDecoration(lblMembers);
 		
-		l = toolkit.createLabel(right, Messages.CTPatrolTableContainer_CommentLabel);
+		l = toolkit.createLabel(right, Messages.SurveyCTImportEditorContent_Comment);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		lblComment = toolkit.createText(right, "", SWT.WRAP | SWT.V_SCROLL); //$NON-NLS-1$
 		lblComment.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -251,7 +251,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		final List<ICyberTrackerData> processedList = new ArrayList<ICyberTrackerData>();
 		String validationError = validateSelection(selection);
 		if (validationError != null) {
-			MessageDialog.openError(shell, "Error", validationError);
+			MessageDialog.openError(shell, Messages.SurveyCTImportEditorContent_Error, validationError);
 			return processedList;
 		}
 
@@ -295,9 +295,9 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					int missionsCount = selection.size();
 					int counter = 1;
-					monitor.beginTask("Adding new missions...", missionsCount);
+					monitor.beginTask(Messages.SurveyCTImportEditorContent_TaskName_AddMissions, missionsCount);
 					for (Iterator<?> i = selection.iterator(); i.hasNext();) {
-						monitor.subTask(MessageFormat.format("Adding mission {0} out of {1}.", counter, missionsCount));
+						monitor.subTask(MessageFormat.format(Messages.SurveyCTImportEditorContent_Task_AddMission, counter, missionsCount));
 						CyberTrackerSurvey ctp = (CyberTrackerSurvey) i.next();
 						Mission p = missionImporter.importData(ctp, targetMission, targetSurvey, idForNewSurvey);
 						if (p != null) {
@@ -311,7 +311,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 				}
 			});
 		} catch (Exception e) {
-			CyberTrackerPlugIn.displayError("Error","Add mission operation was aborted", e);
+			CyberTrackerPlugIn.displayError(Messages.SurveyCTImportEditorContent_Error,Messages.SurveyCTImportEditorContent_AboartErrorMessage, e);
 		}
 		
 		if (!addedList.isEmpty()) {
@@ -322,7 +322,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 				if (i.hasNext())
 					ids += ", "; //$NON-NLS-1$
 			}
-			MessageDialog.openInformation(shell, "Add Mission", MessageFormat.format("Mission(s) with following id(s) were successfully added: {0}", ids)); 
+			MessageDialog.openInformation(shell, Messages.SurveyCTImportEditorContent_SuccessDialog_Title, MessageFormat.format(Messages.SurveyCTImportEditorContent_SuccessDialog_Message, ids)); 
 		}
 		return processedList;
 	}
@@ -347,7 +347,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 			}
 		}
 		if (!isSame) {
-			return "Unable to import selected data. Please select surveys that belong to the same survey design.";
+			return Messages.SurveyCTImportEditorContent_UnableToImport;
 		}
 		return null;
 	}

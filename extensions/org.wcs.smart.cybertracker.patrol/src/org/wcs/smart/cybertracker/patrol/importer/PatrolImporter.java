@@ -32,7 +32,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.cybertracker.importer.SightsMultiObsUtil;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 import org.wcs.smart.hibernate.HibernateManager;

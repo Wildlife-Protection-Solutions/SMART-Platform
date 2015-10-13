@@ -41,7 +41,7 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
 import org.wcs.smart.cybertracker.model.elements.Elements.List.Items.Item;
@@ -127,7 +127,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 			}
 			
 			id = addMembersNode(id, result, memberIds);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_MISSION_LEADER, memberIds, filter);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, RESULT_MISSION_LEADER, memberIds, filter);
 		} else {
 			//adding default members
 			ScreenOption leader_so = screenOptions.get(MissionScreenOptionMeta.LEADER);
@@ -148,10 +148,10 @@ public class SurveyScreensUtil extends ScreensUtil {
 			}
 			
 			if (leader_so == null || leader_so.isVisible()) {
-				id = addSimpleNextRadioNode(id, result, elements, Messages.PatrolScreens_Leader, RESULT_MISSION_LEADER, memberIds, false);
+				id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, RESULT_MISSION_LEADER, memberIds, false);
 			} else {
 				if (leaderCtId == null) {
-					CyberTrackerPlugIn.displayError("Error", "Screen option for 'Mission Leader' refers to item that is not part of 'Mission Members'. Please fix screen setup first.", null);
+					CyberTrackerPlugIn.displayError(Messages.SurveyScreensUtil_ErrorDialog_Title, Messages.SurveyScreensUtil_Error_Leader, null);
 					return null;
 				}
 				result.defaultValues.add(createDefaultResultElement(RESULT_MISSION_LEADER, elements, leaderCtId.getItemId()));
@@ -160,7 +160,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 
 		so = screenOptions.get(MissionScreenOptionMeta.COMMENT);
 		if (so == null || so.isVisible()) {
-			id = addNoteNextNode(id, result, elements, Messages.PatrolScreens_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
+			id = addNoteNextNode(id, result, elements, Messages.SurveyScreensUtil_Comments, RESULT_MISSION_COMMENTS, Mission.MAX_LENGTH_COMMENT);
 		} else {
 			result.defaultValues.add(createDefaultResultElement(RESULT_MISSION_COMMENTS, elements, so.getStringValue()));
 		}
@@ -189,16 +189,16 @@ public class SurveyScreensUtil extends ScreensUtil {
 					break;
 				}
 			}
-			SmartPlugIn.displayLog(MessageFormat.format("SMART CyberTracker plugin do not support mission properties of type {0}. Property ''{1}'' will be ignored.", missionAttribute.getType(), missionAttribute.getName()), null);
+			SmartPlugIn.displayLog(MessageFormat.format(Messages.SurveyScreensUtil_Error_InvalidMissionPropertyType, missionAttribute.getType(), missionAttribute.getName()), null);
 		}
 		
 		List<SamplingUnit> samplingUnits = SurveyHibernateManager.getInstance().getSamplingUnits(surveyDesign, session, State.ACTIVE);
 		SamplingUnit noneSu = new SamplingUnit();
-		noneSu.setId("None");
+		noneSu.setId(Messages.SurveyScreensUtil_NoSamplingUnit);
 		samplingUnits.add(noneSu);
 		cyberTrackerIds = suToCtIds(elements, samplingUnits);
 		CyberTrackerId suScreenId = id;
-		id = addSimpleNextRadioNode(id, result, elements, "Sampling Unit", RESULT_MISSION_SAMPLING_UNIT, cyberTrackerIds, true);
+		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_SamplingUnit, RESULT_MISSION_SAMPLING_UNIT, cyberTrackerIds, true);
 		Node suNode = result.screenNodes.get(result.screenNodes.size()-1);
 		Control control2 = ScreensObjectFactory.getNavigationControl(suNode);
 		control2.setShowBack("False"); //$NON-NLS-1$
@@ -212,21 +212,21 @@ public class SurveyScreensUtil extends ScreensUtil {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		
-		nextTaskOptions.add(Messages.PatrolScreens_NewObservation);
+		nextTaskOptions.add(Messages.SurveyScreensUtil_NewObservation);
 		nodeIds.add(dmRootId);
 		
-		nextTaskOptions.add("Start New Sampling Unit");
+		nextTaskOptions.add(Messages.SurveyScreensUtil_NewSamplingUnit);
 		nodeIds.add(suId);
 		
 		
-		nextTaskOptions.add("End Survey");
-		nodeIds.add(createEndTripNodes(container, startId, "Press 'Save' to confirm ending survey or use back button."));
+		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSurvey);
+		nodeIds.add(createEndTripNodes(container, startId, Messages.SurveyScreensUtil_EndSurveyMessage));
 		
 		if (ctProps.isCanPause()) {
-			nextTaskOptions.add("Pause Survey (Rest)");
+			nextTaskOptions.add(Messages.SurveyScreensUtil_PauseSurvey);
 			PauseNodesLabels labels = new PauseNodesLabels();
-			labels.resumeOption = "Resume Survey";
-			labels.resumeScreenTitle = "Paused Survey";
+			labels.resumeOption = Messages.SurveyScreensUtil_ResumeSurvey;
+			labels.resumeScreenTitle = Messages.SurveyScreensUtil_PausedSurveyTitle;
 			nodeIds.add(createPauseTripNodes(container, elements, id, ctProps, labels));
 		}
 		
@@ -245,9 +245,9 @@ public class SurveyScreensUtil extends ScreensUtil {
 
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
 		StartScreenLabels labels = new StartScreenLabels();
-		labels.startItemLabel = "Start New Survey";
-		labels.beginTitle = "Survey Start";
-		labels.beginItemLabel = "Begin Survey";
+		labels.startItemLabel = Messages.SurveyScreensUtil_StartSurvey;
+		labels.beginTitle = Messages.SurveyScreensUtil_StartSurveyTitle;
+		labels.beginItemLabel = Messages.SurveyScreensUtil_BeginSurvey;
 		return addStartScreen(id, container, elements, ctProps, labels);
 	}
 
