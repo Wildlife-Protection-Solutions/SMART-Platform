@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
@@ -88,7 +89,7 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 		btnNew.setLayoutData(gd);
 		
 		btnNew.setSelection(true);
-		btnNew.setText("Create a new mission");
+		btnNew.setText(Messages.MissionSelectorDialog_CreateMission);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -101,7 +102,7 @@ public class MissionSelectorDialog extends TitleAreaDialog {
 		gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
 		gd.horizontalIndent = 10;
 		btnAppend.setLayoutData(gd);
-		btnAppend.setText("Add to existing mission");
+		btnAppend.setText(Messages.MissionSelectorDialog_AddToMission);
 		btnAppend.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -139,9 +140,9 @@ public class MissionSelectorDialog extends TitleAreaDialog {
         });
         missionId.setInput(loadMissions());
 
-		setTitle("Mission selection");
-		setMessage("Select a target mission to which selected data will be added");
-		super.getShell().setText("Mission selection");
+		setTitle(Messages.MissionSelectorDialog_Title);
+		setMessage(Messages.MissionSelectorDialog_Message);
+		super.getShell().setText(Messages.MissionSelectorDialog_Title);
 		return composite;
 	}
 

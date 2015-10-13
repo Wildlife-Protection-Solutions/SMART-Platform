@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.cybertracker.export.IConfigurableModelProvider;
 import org.wcs.smart.cybertracker.export.data.DataModelWrapper;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.dataentry.DataentryHibernateManager;
 import org.wcs.smart.dataentry.model.ConfigurableModel;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
@@ -55,7 +56,7 @@ public class SurveyConfigurableModelProvider implements IConfigurableModelProvid
 		SurveyDesign sd = SurveyHibernateManager.getInstance().getSurveyDesign(input.getSurveyDesignKey(), session);
 		if (sd != null) {
 			if (sd.getConfigurableModel() != null) {
-				monitor.subTask("Fetching configurable model...");
+				monitor.subTask(Messages.SurveyConfigurableModelProvider_Task_FetchConfigurableModel);
 				return DataentryHibernateManager.getFullConfigurableModel(sd.getConfigurableModel().getUuid(), session);
 			} else {
 				if (dmWrapper == null) {
