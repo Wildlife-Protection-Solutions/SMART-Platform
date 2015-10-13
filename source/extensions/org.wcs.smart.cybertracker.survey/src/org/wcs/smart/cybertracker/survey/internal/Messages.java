@@ -4,6 +4,14 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.survey.internal.messages"; //$NON-NLS-1$
+	public static String CyberTrackerSurvey_Err_SurveyDesignMissing;
+	public static String CyberTrackerSurvey_Err_SurveyDesignNotFound;
+	public static String CyberTrackerSurvey_Warn_Leader;
+	public static String CyberTrackerSurvey_Warn_Member;
+	public static String CyberTrackerSurvey_Warn_MissionPropertyListItem;
+	public static String CyberTrackerSurvey_Warn_MissionPropertyNotFound;
+	public static String CyberTrackerSurvey_Warn_MissionPropertyNotInDesign;
+	public static String CyberTrackerSurvey_Warn_UnsupportedAttribute;
 	public static String SurveyCTExportDialog_LoadSurveyDesigns_Error;
 	public static String SurveyCTExportDialog_SurveyDesign;
 	public static String SurveyScreensUtil_BeginSurvey;

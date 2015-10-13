@@ -36,7 +36,7 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.CyberTrackerDataBuilder;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
@@ -161,12 +161,12 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 				if (sd != null) {
 					ctSurvey.setSurveyDesign(sd);
 				} else {
-					ctSurvey.addError(SurveyMeta.SURVEY_DESIGN, MessageFormat.format("Survey Design not found. Conservation area doesn''t contain survey design with key = ''{0}''.", e.getN()));
+					ctSurvey.addError(SurveyMeta.SURVEY_DESIGN, MessageFormat.format(Messages.CyberTrackerSurvey_Err_SurveyDesignNotFound, e.getN()));
 				}
 				return;
 			}
 		}
-		ctSurvey.addError(SurveyMeta.SURVEY_DESIGN, "Reference to Survey Design is missing in imported file");
+		ctSurvey.addError(SurveyMeta.SURVEY_DESIGN, Messages.CyberTrackerSurvey_Err_SurveyDesignMissing);
 	}
 	
 	private void recordSurveyData(CyberTrackerSurvey ctSurvey, E i, String v, Map<String, E> eMap, Session session) {
@@ -185,13 +185,13 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			E e = eMap.get(v);
 			Employee emp = fetchFromTag0(Employee.class, e, session);
 			if (emp == null && e.getTag0() != null)
-				ctSurvey.addError(SurveyMeta.LEADER, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Leader, e.getN()));
+				ctSurvey.addError(SurveyMeta.LEADER, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_Leader, e.getN()));
 			ctSurvey.setCtLeader(e.getN());
 			ctSurvey.setLeader(emp);
 		} else if (ElementsUtil.MEMBER_ELEMENT_TAG.equals(i.getTag1())) { //check that this is a member record
 			Employee emp = fetchFromTag0(Employee.class, i, session);
 			if (emp == null && i.getTag0() != null)
-				ctSurvey.addWarning(SurveyMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerPatrol_Warn_Member, i.getN()));
+				ctSurvey.addWarning(SurveyMeta.MEMBERS, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_Member, i.getN()));
 			ctSurvey.getCtMembers().add(i.getN());
 			if (emp != null) {
 				ctSurvey.getMembers().add(emp);
@@ -200,7 +200,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			String tag0 = i != null ? i.getTag0() : null;
 			MissionAttribute ma = tag0 != null ? SurveyHibernateManager.getInstance().getMissionAttributeByKey(tag0, session) : null;
 			if (ma == null) {
-				ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Conservation area doesn''t contain mission property with key = ''{0}''. Mission property will not be recorded.", tag0));
+				ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_MissionPropertyNotFound, tag0));
 				return;
 			}
 			//if everything is ok, that survey design should be already in place
@@ -214,7 +214,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 					}
 				}
 				if (!found) {
-					ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Survey design ''{0}'' doesn''t contain mission property with key = ''{1}''. Mission property will not be recorded.", sd.getName(), tag0));
+					ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_MissionPropertyNotInDesign, sd.getName(), tag0));
 					return;
 				}
 			}
@@ -231,7 +231,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 						ctSurvey.getMissionProperties().add(mpv);
 					} else {
 						String itemName = itemE != null ? itemE.getN() : v;
-						ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Mission property with key = ''{0}'' do not contain list item ''{1}''. Mission property will not be recorded.", tag0, itemName));
+						ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_MissionPropertyListItem, tag0, itemName));
 					}
 					return;
 					
@@ -248,7 +248,7 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 					break;
 				}
 			}
-			ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format("Unsupported mission attribute type ''{0}'' for mission property with key = ''{1}''. Mission property will not be recorded.", ma.getType(), tag0));
+			ctSurvey.addWarning(SurveyMeta.MISSION_PROPERTY, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_UnsupportedAttribute, ma.getType(), tag0));
 		}
 	}
 }
