@@ -195,7 +195,11 @@ public class IncidentSummaryPage extends EditorPart {
 			ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
 			CoordinateReferenceSystem crs = null;
 			try{
-				crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+				if (observationOptions.getViewProjection() != null){
+					crs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+				}else{
+					crs = SmartDB.DATABASE_CRS;
+				}
 			}catch(FactoryException ex){
 				IncidentPlugIn.log(ex.getMessage(), ex);
 			}
