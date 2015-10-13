@@ -182,11 +182,14 @@ public class SmartHibernateManager {
 		}
 		if (allSessions.size() > 0){
 			//TODO: warn users or log???
-			System.out.println("SESSIONS NOT CLOSED - FORCING CLOSE");
+			List<Session> toClose = new ArrayList<Session>();
 			synchronized (allSessions) {
-				for(Session s : allSessions){
-					s.close();
-				}
+				toClose.addAll(allSessions);
+			}
+			for(Session s : toClose){
+				//a listener on the session removes it from the all
+				//sessions variable
+				s.close();
 			}
 		}
 		

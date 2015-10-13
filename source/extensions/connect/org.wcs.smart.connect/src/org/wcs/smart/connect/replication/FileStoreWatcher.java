@@ -35,6 +35,7 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,7 +63,7 @@ public class FileStoreWatcher implements Runnable{
     private final Map<WatchKey,Path> keys;
 	
     public FileStoreWatcher() throws IOException{
-    	keys = new HashMap<WatchKey, Path>();
+    	keys = Collections.synchronizedMap(new HashMap<WatchKey, Path>());
     	watcher = FileSystems.getDefault().newWatchService();
     }
 	
@@ -93,9 +94,11 @@ public class FileStoreWatcher implements Runnable{
      * Deregister all listeners and closes the watcher
      */
     public void deregister() throws IOException {
-    	for (WatchKey key : keys.keySet()){
-    		key.cancel();
-    	}
+    	synchronized (keys) {
+    		for (WatchKey key : keys.keySet()){
+        		key.cancel();
+        	}	
+		}
     	watcher.close();
     }
 
@@ -159,7 +162,7 @@ public class FileStoreWatcher implements Runnable{
 
 			Path dir = keys.get(key);
 			if (dir == null) {
-				System.err.println("WatchKey not recognized!!");
+				ConnectPlugIn.log("Watchkey not recongized!", null);
 				continue;
 			}
 
