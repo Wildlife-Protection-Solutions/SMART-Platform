@@ -6,8 +6,6 @@ public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.internal.messages"; //$NON-NLS-1$
 	public static String AddCyberTrackerJob_InstallCtJobName;
 	public static String CtDatabaseUpgrader_UpgradeTask;
-	public static String CTPatrolTableCellLabelProvider_Armed_No;
-	public static String CTPatrolTableCellLabelProvider_Armed_Yes;
 	public static String CTPatrolTableContainer_AddLeg_SubTaskName;
 	public static String CTPatrolTableContainer_AddLeg_TaskName;
 	public static String CTPatrolTableContainer_AddPatrol_SubTaskName;
@@ -225,22 +223,6 @@ public class Messages extends NLS {
 	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;
-	public static String PatrolImporter_DuplicateMessage;
-	public static String PatrolImporter_ImportDialogTitle;
-	public static String PatrolImporter_Save_Error;
-	public static String PatrolLegImporter_DuplicateDialogTitle;
-	public static String PatrolLegImporter_DuplicateMessage;
-	public static String PatrolLegImporter_ErrorDialog_Message;
-	public static String PatrolLegImporter_MemberOverlapError_Message;
-	public static String PatrolLegImporter_MemberOverlapError_Title;
-	public static String PatrolLegImporter_MetaWarning_IsArmed;
-	public static String PatrolLegImporter_MetaWarning_Mandate;
-	public static String PatrolLegImporter_MetaWarning_Station;
-	public static String PatrolLegImporter_MetaWarning_Team;
-	public static String PatrolLegImporter_TypeError_Message;
-	public static String PatrolLegImporter_TypeError_Title;
-	public static String PatrolLegImporter_Warn_TimeGap_End;
-	public static String PatrolLegImporter_Warn_TimeGap_Start;
 	public static String PatrolScreens_Begin;
 	public static String PatrolScreens_Begin_GPSRequiredMessage;
 	public static String PatrolScreens_Begin_Title;
