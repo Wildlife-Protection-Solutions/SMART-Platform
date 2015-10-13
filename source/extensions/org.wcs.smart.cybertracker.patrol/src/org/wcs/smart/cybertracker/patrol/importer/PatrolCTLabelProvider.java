@@ -22,7 +22,7 @@
 package org.wcs.smart.cybertracker.patrol.importer;
 
 import org.wcs.smart.cybertracker.importer.CtStringUtil;
-import org.wcs.smart.cybertracker.internal.Messages;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.cybertracker.patrol.model.CyberTrackerPatrol;
 
 /**
