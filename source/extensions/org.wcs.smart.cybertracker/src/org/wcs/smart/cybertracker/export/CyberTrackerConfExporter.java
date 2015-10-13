@@ -302,7 +302,7 @@ public class CyberTrackerConfExporter {
 		
 		if (cmNode.isUseSingleGpsPoint()) {
 			CyberTrackerId saveTargetId = new CyberTrackerId();
-			Node singleGpsNode = ctUtil.createSaveNode(nextId, saveTargetId, "Single GPS Point", "This category will use single GPS point for all observations. Press \"Save\" to record a point.", true);
+			Node singleGpsNode = ctUtil.createSaveNode(nextId, saveTargetId, Messages.CyberTrackerConfExporter_SingleGps, Messages.CyberTrackerConfExporter_SingleGpsMessage, true);
 			nodeList.add(singleGpsNode);
 			nextId = saveTargetId;
 		}
@@ -340,7 +340,7 @@ public class CyberTrackerConfExporter {
 		String defaultAttrValues = recordDefaultValues(splitResult.getInvisibleList());
 		if (cmNode.isCollectMultipleObservations()) {
 			//this is observation group and we show simple "save" screen as it will always be added as new waypoint
-			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, "End observation group", "Press \"Save\" to confirm the end of entering data for this observation group", !cmNode.isUseSingleGpsPoint());
+			Node saveGrpNode = ctUtil.createSaveNode(nextId, rootId, Messages.CyberTrackerConfExporter_EndGroup, Messages.CyberTrackerConfExporter_EndGroupMessage, !cmNode.isUseSingleGpsPoint());
 			addAttributesDefaultValues(saveGrpNode, defaultAttrValues);
 			nodeList.add(saveGrpNode);
 		} else {
@@ -716,8 +716,8 @@ public class CyberTrackerConfExporter {
 
 	private List<CyberTrackerId> createEndWpGroupElementsIds(Elements elements2) {
 		List<String> labelValues = new ArrayList<String>();
-		labelValues.add("Make Another Observation");
-		labelValues.add("End Observation Group");
+		labelValues.add(Messages.CyberTrackerConfExporter_ResumeObservationGroup);
+		labelValues.add(Messages.CyberTrackerConfExporter_EndObservationGroup);
 		List<String> tag0Values = new ArrayList<String>();
 		tag0Values.add(ElementsUtil.BOOL_FALSE);
 		tag0Values.add(ElementsUtil.BOOL_TRUE);
@@ -914,10 +914,10 @@ public class CyberTrackerConfExporter {
 		List<Node> nodeList = new ArrayList<Node>();
 		
 		CyberTrackerId saveAsNewId = new CyberTrackerId();
-		Node saveAsNewNode = ctUtil.createSaveNode(saveAsNewId, rootId, Messages.CyberTrackerExporter_Waypoint_SaveAsNew, "Save as new taking new GPS reading", true);
+		Node saveAsNewNode = ctUtil.createSaveNode(saveAsNewId, rootId, Messages.CyberTrackerExporter_Waypoint_SaveAsNew, Messages.CyberTrackerConfExporter_SaveAndGps, true);
 		
 		CyberTrackerId addToLastId = new CyberTrackerId();
-		Node addToLastNode = ctUtil.createSaveNode(addToLastId, rootId, Messages.CyberTrackerExporter_Waypoint_AddToLast, "Add to last without GPS reading", false);
+		Node addToLastNode = ctUtil.createSaveNode(addToLastId, rootId, Messages.CyberTrackerExporter_Waypoint_AddToLast, Messages.CyberTrackerConfExporter_SaveWithoutGps, false);
 
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 		ids.add(new CyberTrackerIdMap(saveAsNewId, newWpElementsIds.get(0)));
@@ -944,13 +944,13 @@ public class CyberTrackerConfExporter {
 		CyberTrackerId nextId = new CyberTrackerId();
 		CyberTrackerId loopSaveId = new CyberTrackerId();
 		
-		Node loopSaveNode = ctUtil.createSaveNode(loopSaveId, loopBackId, "Save Group Observation", "Press \"Save\" to confirm saving current observation and proceed to record observations for this group.", takeGPsReading);
+		Node loopSaveNode = ctUtil.createSaveNode(loopSaveId, loopBackId, Messages.CyberTrackerConfExporter_SaveGroup, Messages.CyberTrackerConfExporter_SaveGroupMessage, takeGPsReading);
 
 		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>(2);
 		ids.add(new CyberTrackerIdMap(loopSaveId, wpEndGroupElementsIds.get(0))); //"Make Another Observation" navigate loop start screen
 		ids.add(new CyberTrackerIdMap(nextId, wpEndGroupElementsIds.get(1))); //"End Group" navigate to to next screen (exit from loop)
 
-		Node groupTaskNode = ctUtil.createRadioNode(id.getNodeId(), "Next Group Task", ids, wpEndGroupResultId.getItemId(), true);
+		Node groupTaskNode = ctUtil.createRadioNode(id.getNodeId(), Messages.CyberTrackerConfExporter_NextGroupTask, ids, wpEndGroupResultId.getItemId(), true);
 		
 		nodeList.add(groupTaskNode);
 		nodeList.add(loopSaveNode);

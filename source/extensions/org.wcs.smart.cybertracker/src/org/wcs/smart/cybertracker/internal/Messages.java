@@ -49,6 +49,17 @@ public class Messages extends NLS {
 	public static String CyberTrackerConfExporter_AttributeTypeNotSupported;
 	public static String CyberTrackerConfExporter_DefaultValue_List_Error;
 	public static String CyberTrackerConfExporter_DefaultValue_Tree_Error;
+	public static String CyberTrackerConfExporter_EndGroup;
+	public static String CyberTrackerConfExporter_EndGroupMessage;
+	public static String CyberTrackerConfExporter_EndObservationGroup;
+	public static String CyberTrackerConfExporter_NextGroupTask;
+	public static String CyberTrackerConfExporter_ResumeObservationGroup;
+	public static String CyberTrackerConfExporter_SaveAndGps;
+	public static String CyberTrackerConfExporter_SaveGroup;
+	public static String CyberTrackerConfExporter_SaveGroupMessage;
+	public static String CyberTrackerConfExporter_SaveWithoutGps;
+	public static String CyberTrackerConfExporter_SingleGps;
+	public static String CyberTrackerConfExporter_SingleGpsMessage;
 	public static String CyberTrackerExportDialog_AllFiles;
 	public static String CyberTrackerExportDialog_Button_Browse;
 	public static String CyberTrackerExportDialog_Button_Export;
