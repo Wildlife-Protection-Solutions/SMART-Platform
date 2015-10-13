@@ -25,9 +25,44 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.patrol.internal.messages"; //$NON-NLS-1$
+	public static String CyberTrackerExportHandler_ErrDialog_Title;
 	public static String DataModelWrapper_Dropdown_Label;
 	public static String PatrolCTExportDialog_ConfigurableModel;
 	public static String PatrolCTExportDialog_LoadConfModels_Error;
+	public static String PatrolScreens_Begin;
+	public static String PatrolScreens_Begin_GPSRequiredMessage;
+	public static String PatrolScreens_Begin_Title;
+	public static String PatrolScreens_Comments;
+	public static String PatrolScreens_Confirm;
+	public static String PatrolScreens_ConfirmMessage;
+	public static String PatrolScreens_EndPatrol;
+	public static String PatrolScreens_Exit_Title;
+	public static String PatrolScreens_ExitCyberTracker;
+	public static String PatrolScreens_IsArmed;
+	public static String PatrolScreens_Leader;
+	public static String PatrolScreens_Mandate;
+	public static String PatrolScreens_Members;
+	public static String PatrolScreens_NewObservation;
+	public static String PatrolScreens_NextTask;
+	public static String PatrolScreens_Objective;
+	public static String PatrolScreens_PatrolType;
+	public static String PatrolScreens_Paused;
+	public static String PatrolScreens_PausePatrol;
+	public static String PatrolScreens_Pilot;
+	public static String PatrolScreens_ResumePatrol;
+	public static String PatrolScreens_Start_Title;
+	public static String PatrolScreens_StartPatrol;
+	public static String PatrolScreens_Station;
+	public static String PatrolScreens_Team;
+	public static String PatrolScreens_Transport;
+	public static String PatrolScreensUtil_Error_Meta_Leader;
+	public static String PatrolScreensUtil_Error_Meta_Mandate;
+	public static String PatrolScreensUtil_Error_Meta_Pilot;
+	public static String PatrolScreensUtil_Error_Meta_Station;
+	public static String PatrolScreensUtil_Error_Meta_Team;
+	public static String PatrolScreensUtil_Error_Meta_Transport;
+	public static String PatrolScreensUtil_Error_TransportNotSet;
+	public static String PatrolScreensUtil_Error_TypesNotSet;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
