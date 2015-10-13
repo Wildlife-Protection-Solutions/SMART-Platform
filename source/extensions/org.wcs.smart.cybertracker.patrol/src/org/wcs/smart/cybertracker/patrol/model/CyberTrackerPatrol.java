@@ -35,6 +35,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.patrol.export.PatrolScreensUtil;
 import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider;
 import org.wcs.smart.cybertracker.patrol.importer.PatrolCTLabelProvider.CTPatrolUIMeta;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.patrol.model.PatrolMandate;
 import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
@@ -235,7 +236,7 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 
 	@Override
 	public String getDisplayType() {
-		return "Patrol";
+		return Messages.CyberTrackerPatrol_DisplayType;
 	}
 
 	@Override
@@ -247,7 +248,7 @@ public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 		String st = (new PatrolCTLabelProvider(CTPatrolUIMeta.STATION)).getText(this);
 		String l = (new PatrolCTLabelProvider(CTPatrolUIMeta.LEADER)).getText(this);
 		String m = (new PatrolCTLabelProvider(CTPatrolUIMeta.MEMBERS)).getText(this);
-		return MessageFormat.format("Transport: {0}({1}); Armed: {2}; Team: {3}; Station: {4}; Leader: {5}; Members: {6}", trns, tp, a, tm, st, l, m);
+		return MessageFormat.format(Messages.CyberTrackerPatrol_Details, trns, tp, a, tm, st, l, m);
 	}
 	
 }

@@ -66,6 +66,8 @@ public class Messages extends NLS {
 	public static String CTPatrolTableContainer_TeamLabel;
 	public static String CTPatrolTableContainer_TransportTypeLabel;
 	public static String CyberTrackerExportHandler_ErrDialog_Title;
+	public static String CyberTrackerPatrol_Details;
+	public static String CyberTrackerPatrol_DisplayType;
 	public static String CyberTrackerPatrol_Error_Transport;
 	public static String CyberTrackerPatrol_Warn_Leader;
 	public static String CyberTrackerPatrol_Warn_Mandate;
@@ -79,6 +81,7 @@ public class Messages extends NLS {
 	public static String EmployeeSelectorDialog_PilotType;
 	public static String PatrolCTExportDialog_ConfigurableModel;
 	public static String PatrolCTExportDialog_LoadConfModels_Error;
+	public static String PatrolCTExportDialog_Task_FetchConfigurableModel;
 	public static String PatrolImporter_DuplicateMessage;
 	public static String PatrolImporter_ImportDialogTitle;
 	public static String PatrolImporter_Save_Error;

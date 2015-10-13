@@ -73,7 +73,7 @@ public class PatrolCTExportDialog extends CyberTrackerExportDialog {
     		@Override
     		public ConfigurableModel getConfigurableModel(Session session, IProgressMonitor monitor) {
     			if (src instanceof ConfigurableModel) {
-    				monitor.subTask("Fetching configurable model...");
+    				monitor.subTask(Messages.PatrolCTExportDialog_Task_FetchConfigurableModel);
     				ConfigurableModel model = (ConfigurableModel) src;
     				return DataentryHibernateManager.getFullConfigurableModel(model.getUuid(), session);
     			} else if (src instanceof DataModelWrapper) {
