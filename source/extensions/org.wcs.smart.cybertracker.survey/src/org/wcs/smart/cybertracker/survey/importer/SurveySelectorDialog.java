@@ -46,6 +46,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -92,7 +93,7 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 		btnNew.setLayoutData(gd);
 		
 		btnNew.setSelection(true);
-		btnNew.setText("Create a new survey");
+		btnNew.setText(Messages.SurveySelectorDialog_NewSurvey);
 		btnNew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -107,7 +108,7 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 		newCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		Label lbl = new Label(newCmp, SWT.NONE);
-		lbl.setText("Survey name:");
+		lbl.setText(Messages.SurveySelectorDialog_SyrveyName);
 		surveyNewId = new Text(newCmp, SWT.BORDER);
 		surveyNewId.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		surveyNewId.addModifyListener(new ModifyListener() {
@@ -123,7 +124,7 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 		gd = new GridData(SWT.FILL, SWT.CENTER,true, false);
 		gd.horizontalIndent = 10;
 		btnAppend.setLayoutData(gd);
-		btnAppend.setText("Add to existing survey");
+		btnAppend.setText(Messages.SurveySelectorDialog_AddToSurvey);
 		btnAppend.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -159,9 +160,9 @@ public class SurveySelectorDialog extends TitleAreaDialog {
         });
         surveyComboViewer.setInput(loadSurveys());
 
-		setTitle("survey selection");
-		setMessage("Select a target survey to which selected data will be added");
-		super.getShell().setText("survey selection");
+		setTitle(Messages.SurveySelectorDialog_Title);
+		setMessage(Messages.SurveySelectorDialog_Message);
+		super.getShell().setText(Messages.SurveySelectorDialog_Title);
 		return composite;
 	}
 

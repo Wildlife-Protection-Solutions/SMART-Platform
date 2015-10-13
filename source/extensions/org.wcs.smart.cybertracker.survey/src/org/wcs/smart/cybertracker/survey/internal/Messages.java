@@ -4,6 +4,8 @@ import org.eclipse.osgi.util.NLS;
 
 public class Messages extends NLS {
 	private static final String BUNDLE_NAME = "org.wcs.smart.cybertracker.survey.internal.messages"; //$NON-NLS-1$
+	public static String CyberTrackerSurvey_Details;
+	public static String CyberTrackerSurvey_DisplayType;
 	public static String CyberTrackerSurvey_Err_SurveyDesignMissing;
 	public static String CyberTrackerSurvey_Err_SurveyDesignNotFound;
 	public static String CyberTrackerSurvey_Warn_Leader;
@@ -66,6 +68,11 @@ public class Messages extends NLS {
 	public static String SurveyScreensUtil_SamplingUnit;
 	public static String SurveyScreensUtil_StartSurvey;
 	public static String SurveyScreensUtil_StartSurveyTitle;
+	public static String SurveySelectorDialog_AddToSurvey;
+	public static String SurveySelectorDialog_Message;
+	public static String SurveySelectorDialog_NewSurvey;
+	public static String SurveySelectorDialog_SyrveyName;
+	public static String SurveySelectorDialog_Title;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
