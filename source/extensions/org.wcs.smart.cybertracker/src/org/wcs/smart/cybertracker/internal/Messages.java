@@ -257,9 +257,6 @@ public class Messages extends NLS {
 	public static String PatrolScreensUtil_Error_Meta_Transport;
 	public static String PatrolScreensUtil_Error_TransportNotSet;
 	public static String PatrolScreensUtil_Error_TypesNotSet;
-	public static String PatrolSelectorDialog_Message;
-	public static String PatrolSelectorDialog_PatrolID;
-	public static String PatrolSelectorDialog_Title;
 	public static String RemoveCyberTrackerTablesJob_Error;
 	public static String RemoveCyberTrackerTablesJob_Title;
 	public static String SmartImporter_ImportErrorDialogTitle;
@@ -283,10 +280,6 @@ public class Messages extends NLS {
 	public static String SmartImporter_Warn_WrongFirstWaypoint;
 	public static String SmartImporter_WarnDialog_Message;
 	public static String SmartImporter_WarnDialog_Title;
-	public static String TransportSelectorDialog_Message;
-	public static String TransportSelectorDialog_SpecifyTransport_Label;
-	public static String TransportSelectorDialog_Title;
-	public static String TransportSelectorDialog_TransportType;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, Messages.class);
