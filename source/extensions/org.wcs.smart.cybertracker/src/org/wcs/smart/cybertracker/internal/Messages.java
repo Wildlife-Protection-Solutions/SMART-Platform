@@ -132,13 +132,6 @@ public class Messages extends NLS {
 	public static String CyberTrackerImporter_Read_Xml;
 	public static String CyberTrackerImporter_Task_Download;
 	public static String CyberTrackerImporter_Task_ExtractRawData;
-	public static String CyberTrackerPatrol_Error_Transport;
-	public static String CyberTrackerPatrol_Warn_Leader;
-	public static String CyberTrackerPatrol_Warn_Mandate;
-	public static String CyberTrackerPatrol_Warn_Member;
-	public static String CyberTrackerPatrol_Warn_Pilot;
-	public static String CyberTrackerPatrol_Warn_Station;
-	public static String CyberTrackerPatrol_Warn_Team;
 	public static String CyberTrackerPlugIn_InitJob_Title;
 	public static String CyberTrackerProperties_ProjectonFormat_DecemalDegree;
 	public static String CyberTrackerProperties_ProjectonFormat_DegreeMinSec;
@@ -232,9 +225,6 @@ public class Messages extends NLS {
 	public static String DataModelWrapper_Name;
 	public static String Elements_BooleanAttribute_No;
 	public static String Elements_BooleanAttribute_Yes;
-	public static String EmployeeSelectorDialog_DialogTitle;
-	public static String EmployeeSelectorDialog_LeaderType;
-	public static String EmployeeSelectorDialog_PilotType;
 	public static String PatrolImporter_DuplicateMessage;
 	public static String PatrolImporter_ImportDialogTitle;
 	public static String PatrolImporter_Save_Error;
