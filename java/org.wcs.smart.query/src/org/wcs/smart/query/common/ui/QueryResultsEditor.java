@@ -340,6 +340,7 @@ public abstract class QueryResultsEditor extends MultiPageEditorPart implements 
 			j.schedule();
 		} catch (final Throwable t) {
 			QueryPlugIn.log("Could not open query editor", t); //$NON-NLS-1$
+			throw new RuntimeException("Could not open query editor" + t.getMessage(), t); //$NON-NLS-1$
 		}finally{
 			showBusy(false);
 		}

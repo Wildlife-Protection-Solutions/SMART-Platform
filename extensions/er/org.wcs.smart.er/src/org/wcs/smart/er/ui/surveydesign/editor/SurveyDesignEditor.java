@@ -139,6 +139,7 @@ public class SurveyDesignEditor extends MultiPageEditorPart implements MapPart{
 			super.setPartName(getSurveyDesign().getName());
 		}catch (Exception ex) {
 			EcologicalRecordsPlugIn.log(Messages.SurveyDesignEditor_Error_Pages, ex);
+			throw new RuntimeException(Messages.SurveyDesignEditor_Error_Pages + ex.getMessage(), ex);
 		}
 		
 	}

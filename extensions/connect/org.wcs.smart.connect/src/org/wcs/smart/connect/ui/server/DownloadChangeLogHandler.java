@@ -41,6 +41,8 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.internal.ErrorEditorPart;
+import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
@@ -114,7 +116,18 @@ public class DownloadChangeLogHandler {
 						if (pService.isPartVisible(part)){
 							state = PartState.VISIBLE;
 						}
-						pService.showPart(part, state);
+						try{
+							pService.showPart(part, state);
+							Object e3part = E3Utils.getSourceObject(part);
+//							if (e3part instanceof EditorPart && )
+							if (e3part instanceof ErrorEditorPart){
+//								System.out.println(((EditorPart) e3part).getEditorSite().getId());
+								pService.hidePart(part, true);
+							}
+						}catch (Throwable ex){
+							//eat me; likely the input behind the part was removed
+							pService.hidePart(part, true);
+						}
 					}
 				}
 			}

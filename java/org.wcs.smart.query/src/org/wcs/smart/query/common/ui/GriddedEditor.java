@@ -335,6 +335,7 @@ public abstract class GriddedEditor extends MultiPageEditorPart implements MapPa
 			setTitleImage(input.getType().getImage());
 		} catch (final Throwable t) {
 			QueryPlugIn.log(Messages.GriddedEditor_Error_CouldNotOpen, t);
+			throw new RuntimeException(Messages.GriddedEditor_Error_CouldNotOpen + t.getMessage(), t);
 		}finally{
 			showBusy(false);
 		}

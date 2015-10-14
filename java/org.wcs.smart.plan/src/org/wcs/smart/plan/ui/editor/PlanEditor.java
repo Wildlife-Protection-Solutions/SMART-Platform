@@ -362,6 +362,7 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 			
 		}catch (Exception ex){
 			SmartPlanPlugIn.displayLog(Messages.PlanEditor_ErrorOpeningPlanEditor + ex.getMessage(), ex);
+			throw new RuntimeException(Messages.PlanEditor_ErrorOpeningPlanEditor + ex.getMessage(), ex);
 		}
 		initEditor();
 	}

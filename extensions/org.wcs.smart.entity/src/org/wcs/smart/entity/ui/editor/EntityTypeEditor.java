@@ -196,9 +196,10 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 			index = addPage(sightingsMapPage, getEditorInput());
 			super.setPageText(index, Messages.EntityTypeEditor_MapPageName);
 			super.setPageImage(index, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
-					
+	
 		}catch (Exception ex){
 			EntityPlugIn.displayLog(Messages.EntityTypeEditor_ErrorOpeningEditor + ex.getMessage(), ex);
+			throw new RuntimeException(Messages.EntityTypeEditor_ErrorOpeningEditor + ex.getMessage(), ex);
 		}
 		initEditor(new IEntityTypeEditorPage[]{entityPage, configPage, sightingsPage, sightingsMapPage}, true);
 		
@@ -310,7 +311,8 @@ public class EntityTypeEditor extends MultiPageEditorPart implements MapPart, IA
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try{
-			et = (EntityType) session.load(EntityType.class, uuid);
+			et = (EntityType) session.get(EntityType.class, uuid);
+			if (et == null) throw new RuntimeException(MessageFormat.format("Entity type not found ({0})", uuid.toString())); //$NON-NLS-1$
 			et.getDmAttribute().getName();
 			et.getName();
 			

@@ -23,7 +23,7 @@ public class ConflictException extends Exception{
 		sb.append(item.getFieldName1() + ": " + item.getKey1().toString());
 		if (item.getFieldName2() != null){
 			sb.append("\n");
-			sb.append(item.getFieldName1() + ": " );
+			sb.append(item.getFieldName2() + ": " );
 			if (item.getKey2() != null){
 				sb.append(item.getKey2().toString());	
 			}else{

@@ -302,6 +302,7 @@ public class PatrolQueryResultsEditor extends MultiPageEditorPart implements Map
 			setPageImage(1, SmartPlugIn.getDefault().getImageRegistry().get(SmartPlugIn.MAP_ICON));
 		} catch (final Throwable t) {
 			QueryPlugIn.log("Could not open query editor", t); //$NON-NLS-1$
+			throw new RuntimeException("Could not open query editor" + t.getMessage(), t); //$NON-NLS-1$
 		}finally{
 			showBusy(false);
 		}
