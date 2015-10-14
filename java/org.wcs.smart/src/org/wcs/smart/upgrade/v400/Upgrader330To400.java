@@ -86,11 +86,29 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 	private void upgrade(Connection c, Session session, IProgressMonitor monitor) throws Exception {
 		String[] sql = new String[]{
 			/* aggregations */
-			"insert into smart.dm_aggregation values ('stddev_pop')",
-			"insert into smart.dm_aggregation values ('var_pop')",
-			"insert into smart.dm_aggregation_i18n values ('stddev_pop', 'en', 'standard deviation (pop.)')",
-			"insert into smart.dm_aggregation_i18n values ('var_pop', 'en', 'variance (pop.)')",
-			
+			"alter table smart.dm_aggregation_i18n drop constraint dm_aggregation_i18n_fk",
+			"alter table smart.DM_ATT_AGG_MAP drop constraint dm_att_agg_map_agg_name_fk",
+
+			"alter table smart.dm_aggregation alter column name set data type varchar(16);",
+			"alter table smart.DM_AGGREGATION_I18N alter column name set data type varchar(16)",
+			"alter table smart.DM_ATT_AGG_MAP alter column agg_name set data type varchar(16)",
+			"ALTER TABLE SMART.DM_AGGREGATION_I18N ADD CONSTRAINT DM_AGGREGATION_I18N_FK FOREIGN KEY (NAME) REFERENCES SMART.DM_AGGREGATION(NAME)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+			"ALTER TABLE SMART.DM_ATT_AGG_MAP ADD CONSTRAINT DM_ATT_AGG_MAP_AGG_NAME_FK FOREIGN KEY (AGG_NAME) REFERENCES SMART.DM_AGGREGATION(NAME)  ON DELETE RESTRICT ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
+				
+			"insert into smart.dm_aggregation values ('stddev_samp')",
+			"insert into smart.dm_aggregation values ('var_samp')",
+			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'en', 'standard deviation (samp.)')",
+			"insert into smart.dm_aggregation_i18n values ('var_samp', 'en', 'variance (samp.)')",
+				
+			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'es', 'Desviación estándar')",
+			"insert into smart.dm_aggregation_i18n values ('var_samp', 'es', 'Varianza')",
+				
+			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'fr', 'Ecart type')",
+			"insert into smart.dm_aggregation_i18n values ('var_samp', 'fr', 'Variance')",
+
+			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'vi', 'Độ lệch chuẩn')",
+			"insert into smart.dm_aggregation_i18n values ('var_samp', 'vi', 'Phương sai')",
+
 			/* core db changes */
 			"alter table smart.area_geometries drop column pid",
 			
