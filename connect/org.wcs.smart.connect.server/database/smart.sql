@@ -1,4 +1,4 @@
-drop schema smart cascade;
+﻿drop schema smart cascade;
 create schema smart; 
 
 CREATE OR REPLACE FUNCTION smart.trimhkeytolevel(level integer, str varchar) RETURNS VARCHAR AS $$
@@ -2263,6 +2263,9 @@ insert into smart.dm_aggregation(name) values ('sum');
 insert into smart.dm_aggregation(name) values ('avg');
 insert into smart.dm_aggregation(name) values ('min');
 insert into smart.dm_aggregation(name) values ('max');
+insert into smart.dm_aggregation(name) values ('stddev_pop');
+insert into smart.dm_aggregation(name) values ('var_pop');
+
 
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','en','sum');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','en','minimum');
