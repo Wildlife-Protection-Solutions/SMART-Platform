@@ -252,7 +252,7 @@ public class IncidentEditor extends MultiPageEditorPart implements MapPart{ //,I
 
 						}
 			});
-
+			throw new RuntimeException(Messages.IncidentEditor_EditorError2 + t.getMessage(), t);
 		}finally{
 			showBusy(false);
 		}

@@ -361,7 +361,7 @@ public class MissionEditor extends MultiPageEditorPart implements MapPart, IAdap
 
 						}
 			});
-
+			throw new RuntimeException(Messages.MissionEditor_EditorError2 + t.getMessage(), t);
 		}finally{
 			showBusy(false);
 		}

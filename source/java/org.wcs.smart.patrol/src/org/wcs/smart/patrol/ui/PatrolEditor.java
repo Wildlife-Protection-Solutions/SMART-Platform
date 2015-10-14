@@ -293,7 +293,7 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 
 						}
 			});
-
+			throw new RuntimeException(Messages.PatrolEditor_LoadEditorError_Other + t.getMessage(), t);
 		}finally{
 			showBusy(false);
 		}
