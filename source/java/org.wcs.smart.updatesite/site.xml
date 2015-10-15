@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.wcs.smart.cybertracker.feature_3.3.0.jar" id="org.wcs.smart.cybertracker.feature" version="3.3.0">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.feature.nl.es_3.2.0.jar" id="org.wcs.smart.cybertracker.feature.nl.es" version="3.2.0">
       <category name="cybertracker"/>
    </feature>
@@ -184,6 +181,12 @@
       <category name="cybertracker"/>
    </feature>
    <feature url="features/org.wcs.smart.cybertracker.feature.nl.th_3.2.1.jar" id="org.wcs.smart.cybertracker.feature.nl.th" version="3.2.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_3.3.0.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="3.3.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature_3.3.0.jar" id="org.wcs.smart.cybertracker.survey.feature" version="3.3.0">
       <category name="cybertracker"/>
    </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
