@@ -177,9 +177,6 @@
    <feature url="features/org.wcs.smart.intelligence.feature.nl.th_3.2.1.jar" id="org.wcs.smart.intelligence.feature.nl.th" version="3.2.1">
       <category name="intelligence"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.feature_3.3.0.jar" id="org.wcs.smart.cybertracker.feature" version="3.3.0">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.cybertracker.feature.nl.th_3.2.1.jar" id="org.wcs.smart.cybertracker.feature.nl.th" version="3.2.1">
       <category name="cybertracker"/>
    </feature>
