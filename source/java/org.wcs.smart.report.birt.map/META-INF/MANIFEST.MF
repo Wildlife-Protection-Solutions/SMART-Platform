@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SMART BIRT Map Item
 Bundle-SymbolicName: org.wcs.smart.report.birt.map;singleton:=true
-Bundle-Version: 3.2.1
+Bundle-Version: 3.3.0
 Bundle-Activator: org.wcs.smart.report.birt.map.SmartMapItemPlugIn
 Require-Bundle: org.eclipse.birt.report.designer.ui;visibility:=reexport,
  org.eclipse.birt.report.engine;visibility:=reexport,
