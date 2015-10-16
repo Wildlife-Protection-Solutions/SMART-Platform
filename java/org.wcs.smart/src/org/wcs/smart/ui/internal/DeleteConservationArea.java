@@ -39,6 +39,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
@@ -74,8 +75,7 @@ public class DeleteConservationArea {
 		}
 		
 		if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
-			&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)){
-			
+				&& HibernateManager.validatePassword(dialog.getPassword(), SmartDB.getCurrentEmployee()))){
 			MessageDialog.openError(activeShell, Messages.DeleteConservationArea_Error_DialogTitle, Messages.DeleteConservationArea_Error_Username_DialogMessage);
 			return;
 		}

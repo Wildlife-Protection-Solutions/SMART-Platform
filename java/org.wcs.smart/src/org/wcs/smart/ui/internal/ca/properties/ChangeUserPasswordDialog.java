@@ -81,7 +81,6 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 	 */
 	public ChangeUserPasswordDialog(Shell parent) {
 		super(parent, Messages.ChangeUserPasswordDialog_DialogTitle);
-		
 		toUpdate = SmartDB.getCurrentEmployee();
 	}
 
@@ -304,12 +303,12 @@ public class ChangeUserPasswordDialog extends AbstractPropertyJHeaderDialog{
 		setErrorMessage(null);
 		if (txtPassword1.getText().equals(txtPassword2.getText())){
 			//check to ensure old password is correct
-			if (txtCurrentPassword.getText().equals(toUpdate.getSmartPassword())){
+			if (HibernateManager.validatePassword(txtCurrentPassword.getText(), toUpdate)){
 				String old = toUpdate.getSmartPassword();
 				try {
 					getSession().beginTransaction();
 					getSession().update(toUpdate);
-					toUpdate.setSmartPassword(txtPassword1.getText());
+					toUpdate.setSmartPassword(HibernateManager.generatePassword(txtPassword1.getText()));
 					getSession().getTransaction().commit();
 					
 					MessageDialog.openInformation(ChangeUserPasswordDialog.this.getShell(), Messages.ChangeUserPasswordDialog_Updated_DialogTitle, Messages.ChangeUserPasswordDialog_Updated_DialogMessage);

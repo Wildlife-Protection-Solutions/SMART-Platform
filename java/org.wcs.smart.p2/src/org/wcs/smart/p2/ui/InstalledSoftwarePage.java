@@ -71,6 +71,7 @@ import org.eclipse.ui.menus.AbstractContributionFactory;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.wcs.smart.SmartApp;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.p2.internal.Messages;
 import org.wcs.smart.ui.UserNamePasswordDialog;
@@ -266,7 +267,7 @@ public class InstalledSoftwarePage extends InstallationPage implements ICopyable
 		}
 		
 		if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
-			&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)){
+			&& HibernateManager.validatePassword(dialog.getPassword(), SmartDB.getCurrentEmployee()))){
 			
 			MessageDialog.openError(Display.getCurrent().getActiveShell(),
 					Messages.InstalledSoftwarePage_ErrordialogTitle, 

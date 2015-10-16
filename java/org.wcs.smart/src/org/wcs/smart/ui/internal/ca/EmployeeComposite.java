@@ -43,6 +43,8 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -61,12 +63,14 @@ import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.ca.Agency;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.Rank;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 public class EmployeeComposite extends Composite {
 
+	private static final String MODIFIED_KEY = "modified";
 	/* ui components */
 	protected Text txtGivenName = null;
 	protected Text txtFamilyName = null;
@@ -107,7 +111,8 @@ public class EmployeeComposite extends Composite {
 	 * @param style
 	 */
 	public EmployeeComposite(Composite parent, int style,
-			boolean includeAgencyRank, boolean includeEnd, boolean includeUserLevel, List<Agency> agencies) {
+			boolean includeAgencyRank, boolean includeEnd, 
+			boolean includeUserLevel, List<Agency> agencies) {
 		super(parent, style);
 
 		this.agencies = agencies;
@@ -265,9 +270,6 @@ public class EmployeeComposite extends Composite {
 			updateRanks();
 		}
 		
-		
-		
-		
 		smartc = new Group(this, SWT.NONE );
 		smartc.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		smartc.setLayout(new GridLayout(2, false));
@@ -286,20 +288,6 @@ public class EmployeeComposite extends Composite {
 				validate();
 			}
 		});
-		
-		smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
-		createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER + ":"); //$NON-NLS-1$
-		txtSmartId = createTextField(smartc, SWT.NONE,
-				Employee.MAX_SMART_ID_LENGTH, validate);
-
-		createLabelField(smartc, Messages.EmployeeComposite_Password_Label);
-		txtSmartPassword = createTextField(smartc, SWT.PASSWORD,
-				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
-
-		createLabelField(smartc, Messages.EmployeeComposite_Password2_Label);
-		txtSmartPassword2 = createTextField(smartc, SWT.PASSWORD,
-				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
-
 		if (includeUserLevel){
 			createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER_LEVEL + ":"); //$NON-NLS-1$
 			cmbSmartUserLevel = new ComboViewer(smartc , SWT.READ_ONLY | SWT.BORDER);
@@ -320,8 +308,30 @@ public class EmployeeComposite extends Composite {
 					validate();
 				}
 			});
-			
+			((GridData)cmbSmartUserLevel.getCombo().getLayoutData()).horizontalIndent = 10;
 		}
+		
+		smartc.setText(Messages.EmployeeComposite_SmartUser_Label);
+		createLabelField(smartc, SmartLabelProvider.EMP_SMART_USER + ":"); //$NON-NLS-1$
+		txtSmartId = createTextField(smartc, SWT.NONE,
+				Employee.MAX_SMART_ID_LENGTH, validate);
+
+		
+		createLabelField(smartc, Messages.EmployeeComposite_Password_Label);
+		txtSmartPassword = createTextField(smartc, SWT.PASSWORD,
+				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
+		txtSmartPassword.setData(MODIFIED_KEY, Boolean.FALSE);
+		txtSmartPassword.addModifyListener(new ModifyListener() {
+			@Override
+			public void modifyText(ModifyEvent e) {
+				txtSmartPassword.setData(MODIFIED_KEY, Boolean.TRUE);
+			}
+		});
+		
+		createLabelField(smartc, Messages.EmployeeComposite_Password2_Label);
+		txtSmartPassword2 = createTextField(smartc, SWT.PASSWORD,
+				Employee.MAX_SMART_PASSWORD_LENGTH, validate);
+		
 		enableSmartUser(false);
 		chSmartUser.setSelection(false);
 		
@@ -619,6 +629,7 @@ public class EmployeeComposite extends Composite {
 			}
 		}
 		enableFields(!chNotActive.getSelection());
+		txtSmartPassword.setData(MODIFIED_KEY, false);
 		validate();
 	}
 	private void enableFields(boolean enable){
@@ -627,8 +638,6 @@ public class EmployeeComposite extends Composite {
 				this.txtGivenName,
 				this.txtStaffId,
 				this.txtSmartId,
-				this.txtSmartPassword,
-				this.txtSmartPassword2,
 				this.dtBirthDate,
 //				this.dtEmploymentEnd,
 				this.dtEmploymentStart,
@@ -651,8 +660,7 @@ public class EmployeeComposite extends Composite {
 	
 	protected void enableSmartUser(boolean enable){
 		txtSmartId.setEditable(enable);
-		txtSmartPassword.setEnabled(enable);
-		txtSmartPassword2.setEnabled(enable);
+		
 		if (cmbSmartUserLevel != null){
 			cmbSmartUserLevel.getCombo().setEnabled(enable);
 		}
@@ -708,11 +716,12 @@ public class EmployeeComposite extends Composite {
 				}
 			}
 		}
-		e.setSmartPassword(null);
-		e.setSmartUserId(null);
-		e.setSmartUserLevel(null);
+		
 		if (chSmartUser.getSelection()){
-			e.setSmartPassword(txtSmartPassword.getText());
+			if ((Boolean)txtSmartPassword.getData(MODIFIED_KEY)){
+				//if password was modified then update it otherwise leave it alone
+				e.setSmartPassword(HibernateManager.generatePassword(txtSmartPassword.getText()));
+			}
 			e.setSmartUserId(txtSmartId.getText().trim());
 			if (cmbSmartUserLevel != null){
 				IStructuredSelection a = (IStructuredSelection) cmbSmartUserLevel.getSelection();
@@ -720,7 +729,11 @@ public class EmployeeComposite extends Composite {
 					e.setSmartUserLevel( ((Employee.SmartUserLevel)a.getFirstElement())  );
 				}
 			}
-		}		
+		}else{
+			e.setSmartUserId(null);
+			e.setSmartUserLevel(null);
+			e.setSmartPassword(null);
+		}
 	}
 	
 

@@ -172,7 +172,7 @@ public class DownloadCaEngine {
 						.add(Restrictions.eq("conservationArea", desktopCa))
 						.add(Restrictions.eq("smartUserId", userName))
 						.uniqueResult();
-				if (smartUser != null && smartUser.getSmartPassword().equals(password)){
+				if (smartUser != null &&  HibernateManager.validatePassword(password, smartUser)){
 					break;
 				}else if (smartUser != null && smartUser.getSmartUserLevel() != SmartUserLevel.ADMIN){
 					MessageDialog.openError(activeShell, "Error", "Admin permissions required to delete a conservation area.");
