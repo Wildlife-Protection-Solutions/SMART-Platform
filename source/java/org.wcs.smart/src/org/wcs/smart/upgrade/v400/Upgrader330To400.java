@@ -23,18 +23,22 @@ package org.wcs.smart.upgrade.v400;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.UUID;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.mindrot.jbcrypt.BCrypt;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB.DbUser;
-import org.wcs.smart.internal.Messages;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Upgrades from database version 320 to 321.
@@ -108,6 +112,15 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 
 			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'vi', 'Độ lệch chuẩn')",
 			"insert into smart.dm_aggregation_i18n values ('var_samp', 'vi', 'Phương sai')",
+
+			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'th', 'ส่วนเบี่ยงเบนมาตรฐาน')",
+			"insert into smart.dm_aggregation_i18n values ('var_samp', 'th', 'ค่าความแปรปรวน')",
+
+			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'zh', '标准差')",
+			"insert into smart.dm_aggregation_i18n values ('var_samp', 'zh', '方差')",
+
+			"insert into smart.dm_aggregation_i18n values ('stddev_samp', 'in', 'Standar Deviasi')",
+			"insert into smart.dm_aggregation_i18n values ('var_samp', 'in', 'Varians')",		
 
 			/* core db changes */
 			"alter table smart.area_geometries drop column pid",
@@ -338,11 +351,31 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			"ALTER TABLE SMART.CM_NODE ADD CONSTRAINT CM_NODE_CATEGORY_UUID_FK FOREIGN KEY (CATEGORY_UUID) REFERENCES SMART.DM_CATEGORY(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
 			"ALTER TABLE SMART.CONFIGURABLE_MODEL ADD CONSTRAINT CONFIGURABLE_MODEL_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
 			"ALTER TABLE SMART.WAYPOINT ADD CONSTRAINT WAYPOINT_CA_UUID_FK FOREIGN KEY (CA_UUID) REFERENCES SMART.CONSERVATION_AREA(UUID)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE", 
+		
+			"alter table smart.employee alter column smartpassword set data type varchar(256)"
 		};
 		
 		for (String s : sql){
 			c.createStatement().execute(s);
 		}
+		/* UPDATE PASSWORDS */
+		String querysql = "select uuid, smartpassword from smart.employee where smartpassword is not null";
+		String upsql = "UPDATE smart.employee set smartpassword = ? where uuid = ?";
+		
+		try(ResultSet rs = c.createStatement().executeQuery(querysql);
+				PreparedStatement ps = c.prepareStatement(upsql);){
+			while(rs.next()){
+				byte[] uuid = rs.getBytes(1);
+				String pass = rs.getString(2);
+				
+				ps.setBytes(1, uuid);
+				ps.setString(2, BCrypt.hashpw(pass, BCrypt.gensalt(20)));
+				ps.executeUpdate();
+			}
+		}
+		
+		
+		
 				
 		/* VERSION UDATE */ 
 		String ssql = "update smart.db_version set version = '4.0.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
