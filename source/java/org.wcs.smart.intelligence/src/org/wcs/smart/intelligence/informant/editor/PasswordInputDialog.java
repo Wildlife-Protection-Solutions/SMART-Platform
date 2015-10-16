@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.internal.Messages;
@@ -129,8 +130,8 @@ public class PasswordInputDialog extends Dialog {
 			}
 			
 			if (!(dialog.getUserName().equalsIgnoreCase(SmartDB.getCurrentEmployee().getSmartUserId())
-				&& dialog.getPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())	)) {
-				
+				&& HibernateManager.validatePassword(dialog.getPassword(), SmartDB.getCurrentEmployee()))) {
+	
 				MessageDialog.openError(Display.getCurrent().getActiveShell(), 
 						Messages.InformantDataEditor_ConfirmationError_Title, 
 						Messages.InformantDataEditor_ConfirmationError_Message);

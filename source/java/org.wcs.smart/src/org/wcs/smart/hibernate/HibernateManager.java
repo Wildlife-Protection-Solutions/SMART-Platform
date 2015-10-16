@@ -51,6 +51,7 @@ import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.metadata.ClassMetadata;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hibernate.persister.entity.Joinable;
+import org.mindrot.jbcrypt.BCrypt;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Agency;
@@ -356,12 +357,20 @@ public class HibernateManager extends SmartHibernateManager{
 		Session x = HibernateManager.openSession();
 		Transaction tx = x.beginTransaction();
 		try{
-			String hql = "SELECT e.conservationArea from Employee e where smartUserId = :userid and smartPassword = :password and smartUserLevel IN (:users) ORDER BY e.conservationArea.name"; //$NON-NLS-1$
+			String hql = "SELECT e.conservationArea, e.smartPassword from Employee e where smartUserId = :userid and smartUserLevel IN (:users) ORDER BY e.conservationArea.name"; //$NON-NLS-1$
 			Query q = x.createQuery(hql);
 			q.setParameter("userid", userName); //$NON-NLS-1$
-			q.setParameter("password", password); //$NON-NLS-1$
 			q.setParameterList("users", new Integer[]{Employee.SmartUserLevel.ADMIN.ordinal(), Employee.SmartUserLevel.ANALYST.ordinal(), Employee.SmartUserLevel.MANAGER.ordinal()}); //$NON-NLS-1$
-			List<ConservationArea> areas = q.list(); 
+			
+			List data = q.list();
+			List<ConservationArea> areas = new ArrayList<ConservationArea>();
+			for(Object v : data){
+				ConservationArea ca = (ConservationArea) ((Object[])v)[0];
+				String pass = (String) ((Object[])v)[1];
+				if (validatePassword(password, pass)){
+					areas.add(ca);
+				}
+			}
 			return areas;
 			
 		}catch (Exception ex){
@@ -372,7 +381,17 @@ public class HibernateManager extends SmartHibernateManager{
 		}
 	}
 	
+	public static boolean validatePassword(String password, Employee e){
+		return validatePassword(password, e.getSmartPassword());
+	}
 	
+	private static boolean validatePassword(String password, String employeePassword){
+		return BCrypt.checkpw(password, employeePassword);
+	}
+	
+	public static String generatePassword(String password){
+		return BCrypt.hashpw(password, BCrypt.gensalt(13));
+	}
 	/**
 	 * Validates the username and password for a given conservation area.
 	 * 
@@ -386,25 +405,28 @@ public class HibernateManager extends SmartHibernateManager{
 		Session x = HibernateManager.openSession();
 		Transaction tx = x.beginTransaction();
 		try{
+			
 			Criteria employee = x.createCriteria(Employee.class);
 			employee.add( Restrictions.eq("smartUserId", userName).ignoreCase()); //$NON-NLS-1$
-			employee.add( Restrictions.eq("smartPassword", password)); //$NON-NLS-1$
 			employee.add( Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
 			employee.add(Restrictions.isNull("endEmploymentDate")); //$NON-NLS-1$
 			
 			@SuppressWarnings("unchecked")
 			List<Employee> people = employee.list();
-			tx.commit();
 			if (people.size() == 1){
-				return people.get(0);
+				Employee user = people.get(0);
+				if (validatePassword(password, user)){
+					return user;
+				}
+				return null;
 			}else{
 				return null;
 			}
 			
 		}catch (Exception ex){
-			tx.rollback();
 			throw ex;
 		}finally{
+			tx.rollback();
 			x.close();
 		}
 	}

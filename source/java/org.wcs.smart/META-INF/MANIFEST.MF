@@ -6,7 +6,8 @@ Bundle-Version: 4.0.0
 Bundle-ClassPath: .,
  lib/opencsv-2.3.jar,
  lib/commons-compress-1.5.jar,
- lib/gson-2.2.4.jar
+ lib/gson-2.2.4.jar,
+ lib/jBCrypt-0.4.jar
 Bundle-Activator: org.wcs.smart.SmartPlugIn
 Bundle-Vendor: org.wcs.smart
 Bundle-Localization: plugin

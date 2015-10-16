@@ -60,7 +60,6 @@ public class EmployeeDialog extends Dialog {
 	private List<Agency> agencies;
 	
 	private String title = null;
-	private Session session = null;
 	
 	public static String AUTO_GENERATE = "system-generated"; //$NON-NLS-1$
 	
@@ -86,7 +85,6 @@ public class EmployeeDialog extends Dialog {
 		this.toUpdate = toUpdate;
 		this.agencies = agencies;
 		this.ca = ca;
-		this.session = session;
 	}
 
 	@Override
@@ -113,8 +111,6 @@ public class EmployeeDialog extends Dialog {
 	@Override
 	public Control createDialogArea(Composite parent){
 		Composite composite = (Composite) super.createDialogArea(parent);
-		 
-		
 		eComposite = new EmployeeComposite(composite, SWT.NONE, true, toUpdate!=null, true, agencies){
 			@Override
 			public boolean validate(){
@@ -132,7 +128,6 @@ public class EmployeeDialog extends Dialog {
 		}		
 		
 		return parent;
-		
 	}
 	
 	
@@ -142,7 +137,6 @@ public class EmployeeDialog extends Dialog {
 		Button btn = createButton(parent, IDialogConstants.OK_ID, Messages.EmployeeDialog_SaveButton, true);
 		btn.setEnabled(false);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-		
 	}
 	
 	@Override
@@ -168,11 +162,15 @@ public class EmployeeDialog extends Dialog {
 					return true;
 				}					
 			}
-			
-			if (!HibernateManager.validateUserIdUnique(smartUser,ca, session)){
+			Session tmp = HibernateManager.openSession();
+			try{
+			if (!HibernateManager.validateUserIdUnique(smartUser, ca, tmp)){
 				MessageDialog.openError(this.getShell(), Messages.EmployeeDialog_Error_InvalidUserId_DialogTitle1, 
 						MessageFormat.format(Messages.EmployeeDialog_Error_InvalidUserId_DialogMessage1, new Object[]{smartUser}));
 				return false;
+			}
+			}finally{
+				tmp.close();
 			}
 		}
 		return true;
@@ -192,8 +190,9 @@ public class EmployeeDialog extends Dialog {
 			}
 			eComposite.updateEmploye(toUpdate);
 			
-			Transaction tx = session.beginTransaction();
+			Session session = HibernateManager.openSession();
 			try{
+				session.beginTransaction();
 				if (toUpdate.getId().equals(AUTO_GENERATE)){
 					//if they left the default "automatic", auto-generate an id for them
 					HibernateManager.generateEmployeeId(toUpdate, session);
@@ -203,7 +202,7 @@ public class EmployeeDialog extends Dialog {
 					//in the database
 					String error = HibernateManager.validateSmartUserChanges(session, toUpdate);
 					if (error != null){
-						tx.rollback();
+						session.getTransaction().rollback();
 						session.refresh(toUpdate);
 						SmartPlugIn.displayLog(error, null);
 						return false;
@@ -211,13 +210,15 @@ public class EmployeeDialog extends Dialog {
 				}
 				//save results to database
 				session.saveOrUpdate(toUpdate);
-				tx.commit();
+				session.getTransaction().commit();
 				return true;
 			}catch (RuntimeException ex){
-				tx.rollback();
+				session.getTransaction().rollback();
 				session.close();
 				SmartPlugIn.displayLog(Messages.EmployeeDialog_Error_SaveError + ex.getLocalizedMessage(), ex);
 				return false;
+			}finally{
+				session.close();
 			}
 		}
 		return false;

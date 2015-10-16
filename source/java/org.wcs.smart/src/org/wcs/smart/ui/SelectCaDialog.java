@@ -174,7 +174,9 @@ public class SelectCaDialog extends TitleAreaDialog {
 		
 		
 		try {
-			List<ConservationArea> cas = HibernateManager.findConservationAreas(SmartDB.getCurrentEmployee().getSmartUserId(), SmartDB.getCurrentEmployee().getSmartPassword());
+			List<ConservationArea> cas = HibernateManager
+					.findConservationAreas(SmartDB.getCurrentEmployee().getSmartUserId(), 
+							SmartDB.getCurrentEmployee().getSmartPassword());
 			caList.setInput(cas);
 		} catch (Exception e) {
 			SmartPlugIn.log(e.getMessage(), e);
