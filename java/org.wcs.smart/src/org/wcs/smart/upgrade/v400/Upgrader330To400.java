@@ -41,7 +41,7 @@ import org.wcs.smart.upgrade.IDatabaseUpgrader;
 import org.wcs.smart.util.UuidUtils;
 
 /**
- * Upgrades from database version 320 to 321.
+ * Upgrades from database version 330 to 400.
  *
  * @author Emily
  * @author elitvin
@@ -125,10 +125,6 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			/* core db changes */
 			"alter table smart.area_geometries drop column pid",
 			
-			/* cm model changes */
-			"ALTER TABLE smart.CM_NODE ADD COLUMN collect_multiple_obs BOOLEAN",
-			"ALTER TABLE smart.CM_NODE ADD COLUMN use_single_gps_point BOOLEAN",
-				
 			/* unique constraints for connect error checking */
 			"alter table smart.PATROL_MANDATE add constraint patrol_mandate_keyid_unq UNIQUE(ca_uuid, keyid) DEFERRABLE INITIALLY IMMEDIATE",
 			"alter table smart.PATROL_TRANSPORT add constraint patrol_transport_keyid_unq UNIQUE(ca_uuid, keyid) DEFERRABLE INITIALLY IMMEDIATE",
