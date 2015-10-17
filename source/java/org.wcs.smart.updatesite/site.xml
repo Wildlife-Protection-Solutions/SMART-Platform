@@ -15,11 +15,14 @@
    <feature url="features/org.wcs.smart.intelligence.feature_4.0.0.jar" id="org.wcs.smart.intelligence.feature" version="4.0.0">
       <category name="intelligence"/>
    </feature>
-   <feature url="features/org.wcs.smart.cybertracker.feature_4.0.0.jar" id="org.wcs.smart.cybertracker.feature" version="4.0.0">
-      <category name="cybertracker"/>
-   </feature>
    <feature url="features/org.wcs.smart.plan.feature_4.0.0.jar" id="org.wcs.smart.plan.feature" version="4.0.0">
       <category name="planning"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_4.0.0.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="4.0.0">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature_4.0.0.jar" id="org.wcs.smart.cybertracker.survey.feature" version="4.0.0">
+      <category name="cybertracker"/>
    </feature>
    <category-def name="intelligence" label="SMART Intelligence Plug-in">
       <description>
