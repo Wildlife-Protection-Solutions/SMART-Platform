@@ -64,6 +64,8 @@ public class Messages extends NLS {
 	public static String CmXmlToSmartImporter_Problem_Category;
 	public static String CmXmlToSmartImporter_Problem_ListItem;
 	public static String CmXmlToSmartImporter_Problem_TreeNode;
+	public static String CmXmlToSmartImporter_Problem_TreeNodeMultipleMatches;
+	public static String CmXmlToSmartImporter_Problem_TreeNodeNotFoundHkey;
 	public static String CmXmlToSmartImporter_ProblemDialog_Message;
 	public static String CmXmlToSmartImporter_ProblemDialog_Title;
 	public static String CmXmlToSmartImporter_ReadFile_Error;

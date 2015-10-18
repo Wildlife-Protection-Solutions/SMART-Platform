@@ -94,6 +94,7 @@ elementFormDefault="qualified">
     	<attribute name="stringValue" type="string"></attribute>
     	<attribute name="doubleValue" type="double"></attribute>
     	<attribute name="keyRef" type="string"></attribute>
+    	<attribute name="hkeyRef" type="string"></attribute>
     </complexType>
 
     <complexType name="AttributeListItemTypeList">
@@ -136,6 +137,7 @@ elementFormDefault="qualified">
     	</sequence>
     	<attribute name="attributeKey" type="string"></attribute>
     	<attribute name="keyRef" type="string"></attribute>
+    	<attribute name="hkeyRef" type="string"></attribute>
     	<attribute name="isActive" type="boolean"></attribute>
     </complexType>
 

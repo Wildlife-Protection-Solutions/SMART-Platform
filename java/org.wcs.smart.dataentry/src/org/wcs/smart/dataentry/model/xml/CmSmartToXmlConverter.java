@@ -120,8 +120,10 @@ public class CmSmartToXmlConverter {
 			xmlNode.setIsActive(cmNode.getIsActive());
 			if (cmNode.getDmTreeNode() == null){
 				xmlNode.setKeyRef(null);
+				xmlNode.setHkeyRef(null);
 			}else{
 				xmlNode.setKeyRef(cmNode.getDmTreeNode().getKeyId());
+				xmlNode.setHkeyRef(cmNode.getDmTreeNode().getHkey());
 			}
 			Attribute dmAttribute = cmNode.getDmAttribute();
 			if (dmAttribute != null) {
@@ -205,6 +207,7 @@ public class CmSmartToXmlConverter {
 							AttributeListItem item = (AttributeListItem) query.uniqueResult();
 							if (item != null) {
 								aot.setKeyRef(item.getKeyId());
+								aot.setHkeyRef(null); //not relevant for list items attributes
 							}
 							break;
 						}
@@ -214,6 +217,7 @@ public class CmSmartToXmlConverter {
 							AttributeTreeNode item = (AttributeTreeNode) query.uniqueResult();
 							if (item != null) {
 								aot.setKeyRef(item.getKeyId());
+								aot.setHkeyRef(item.getHkey());
 							}
 							break;
 						}
