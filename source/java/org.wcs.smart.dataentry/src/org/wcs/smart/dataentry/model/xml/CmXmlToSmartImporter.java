@@ -219,11 +219,11 @@ public class CmXmlToSmartImporter {
 				//this is default mapping and it MUST be provided with datamodel attribute key
 				Attribute dmAttribute = fetchAttribute(xmlNode.getAttributeKey());
 				node.setDmAttribute(dmAttribute);
-				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), dmAttribute));
+				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), dmAttribute));
 			} else {
 				//this is custom mapping and datamodel attribute key MUST be null
 				node.setAttribute(cmAttribute);
-				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), cmAttribute.getAttribute()));
+				node.setDmTreeNode(fetchAttributeTreeNode(xmlNode.getKeyRef(), xmlNode.getHkeyRef(), cmAttribute.getAttribute()));
 			}
 			node.setParent(parent);
 			node.setNodeOrder(result.size());
@@ -279,7 +279,8 @@ public class CmXmlToSmartImporter {
 			item.setConfigurableModel(cm);
 			updateNames(item, xmlItem.getName());
 			item.setIsActive(xmlItem.isIsActive());
-			item.setDmTreeNode(fetchAttributeTreeNode(xmlItem.getRefKey(), fetchAttribute(xmlItem.getAttributeKey())));
+			//NOTE: hkey support was added in version 3.3.0, this code is conversion from version less than 3.2 (before configurable trees), this is why we pass hkey=null
+			item.setDmTreeNode(fetchAttributeTreeNode(xmlItem.getRefKey(), null, fetchAttribute(xmlItem.getAttributeKey())));
 			result.add(item);
 		}
 		return result;
@@ -355,7 +356,7 @@ public class CmXmlToSmartImporter {
 				}
 				case TREE:
 				{
-					AttributeTreeNode item = fetchAttributeTreeNode(xmlOption.getKeyRef(), parent.getAttribute());
+					AttributeTreeNode item = fetchAttributeTreeNode(xmlOption.getKeyRef(), xmlOption.getHkeyRef(), parent.getAttribute());
 					if (item != null) {
 						cmOption.setUuidValue(item.getUuid());
 					}
@@ -422,19 +423,41 @@ public class CmXmlToSmartImporter {
 		return a;
 	}
 
-	private AttributeTreeNode fetchAttributeTreeNode(String key, Attribute attribute) {
+	private AttributeTreeNode fetchAttributeTreeNode(String key, String hkey, Attribute attribute) {
+		//NOTE: we need to be able to work with keyId for backward compatibility, as before 3.3.0 hkey was not exported
 		if (key == null || key.isEmpty() || attribute == null)
 			return null;
-		AttributeTreeNode a = treeNodeLookup.get(key);
+		String mapKey = hkey != null ? hkey : key;
+		AttributeTreeNode a = treeNodeLookup.get(mapKey);
 		if (a == null) {
 			Criteria query = session.createCriteria(AttributeTreeNode.class)
 					.add(Restrictions.eq("attribute", attribute)) //$NON-NLS-1$
 					.add(Restrictions.eq("keyId", key)); //$NON-NLS-1$
-			a = (AttributeTreeNode) query.uniqueResult();
-			treeNodeLookup.put(key, a);
+			if (hkey != null) {
+				query = query.add(Restrictions.eq("hkey", hkey)); //$NON-NLS-1$
+			}
+			List<?> lst = query.list();
+			if (lst.size() > 0) {
+				a = (AttributeTreeNode) lst.get(0);
+				treeNodeLookup.put(mapKey, a);
+			}
+			if (lst.size() > 1) {
+				StringBuilder sb = new StringBuilder();
+				for (Object object : lst) {
+					AttributeTreeNode n = (AttributeTreeNode) object;
+					if (sb.length() > 0) {
+						sb.append("; "); //$NON-NLS-1$
+					}
+					sb.append(n.getHkey());
+				}
+				warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_TreeNodeMultipleMatches, key, attribute.getKeyId(), sb.toString()));
+			}
 		}
 		if (a == null) {
-			warnings.add(MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_TreeNode, key, attribute.getKeyId()));
+			String warnMsg = hkey == null ?
+					MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_TreeNode, key, attribute.getKeyId()) :
+					MessageFormat.format(Messages.CmXmlToSmartImporter_Problem_TreeNodeNotFoundHkey, key, hkey, attribute.getKeyId());
+			warnings.add(warnMsg);
 		}
 		return a;
 	}
