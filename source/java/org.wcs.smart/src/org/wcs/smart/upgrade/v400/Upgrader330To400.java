@@ -93,7 +93,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 			"alter table smart.dm_aggregation_i18n drop constraint dm_aggregation_i18n_fk",
 			"alter table smart.DM_ATT_AGG_MAP drop constraint dm_att_agg_map_agg_name_fk",
 
-			"alter table smart.dm_aggregation alter column name set data type varchar(16);",
+			"alter table smart.dm_aggregation alter column name set data type varchar(16)",
 			"alter table smart.DM_AGGREGATION_I18N alter column name set data type varchar(16)",
 			"alter table smart.DM_ATT_AGG_MAP alter column agg_name set data type varchar(16)",
 			"ALTER TABLE SMART.DM_AGGREGATION_I18N ADD CONSTRAINT DM_AGGREGATION_I18N_FK FOREIGN KEY (NAME) REFERENCES SMART.DM_AGGREGATION(NAME)  ON DELETE CASCADE ON UPDATE RESTRICT DEFERRABLE INITIALLY IMMEDIATE",
@@ -352,6 +352,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
+			System.out.println(s);
 			c.createStatement().execute(s);
 		}
 		/* UPDATE PASSWORDS */
