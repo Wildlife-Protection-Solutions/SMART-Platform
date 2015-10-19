@@ -422,7 +422,6 @@ public class Messages extends NLS {
 	public static String PatrolMemberWizardPage_SelectEmployees_Label;
 	public static String PatrolMemberWizardPage_Title;
 	public static String PatrolMetaConfigDialog_DialogMessage;
-	public static String PatrolMetaConfigDialog_DialogTitle;
 	public static String PatrolMetaConfigDialog_ShellTitle;
 	public static String PatrolObjectiveWizardPage_PageMessage;
 	public static String PatrolObjectiveWizardPage_Title;
