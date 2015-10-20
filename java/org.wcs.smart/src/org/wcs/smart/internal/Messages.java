@@ -860,6 +860,7 @@ public class Messages extends NLS {
 	public static String SaveMapHandler_OverwriteMessage;
 	public static String SaveMapHandler_SaveOkDialogTitle;
 	public static String SaveMapHandler_SaveOkMessage;
+	public static String ScaleRatioComposite_ErrorString;
 	public static String SearchTextBox_ClearSearchTooltip;
 	public static String SearchTextBox_SearchInfoTest;
 	public static String SelectCaDialog_CaError;

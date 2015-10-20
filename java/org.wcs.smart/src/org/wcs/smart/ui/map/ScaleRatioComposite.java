@@ -26,6 +26,7 @@ import org.locationtech.udig.project.internal.commands.SetScaleCommand;
 import org.locationtech.udig.project.render.IViewportModelListener;
 import org.locationtech.udig.project.render.ViewportModelEvent;
 import org.locationtech.udig.project.render.ViewportModelEvent.EventType;
+import org.wcs.smart.internal.Messages;
 
 /**
  * Adapted from org.locationtech.udig.project.ui.controls.ScaleRatioLabel
@@ -151,7 +152,11 @@ public class ScaleRatioComposite extends Composite implements FocusListener, Key
                 String item = toLabel( scaleDenominator );
                 combo.add( item );
             }
-            combo.setText( toLabel(map.getViewportModel().getScaleDenominator())); 
+            try{
+            	combo.setText( toLabel(map.getViewportModel().getScaleDenominator()));
+            }catch (Throwable ex){
+            	combo.setText(Messages.ScaleRatioComposite_ErrorString);
+            }
             combo.setToolTipText(combo.getText());
         } else {
             combo.setText(""); //$NON-NLS-1$
