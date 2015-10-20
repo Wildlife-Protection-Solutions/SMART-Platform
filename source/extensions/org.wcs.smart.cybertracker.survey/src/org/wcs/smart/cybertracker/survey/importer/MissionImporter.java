@@ -86,12 +86,17 @@ import com.vividsolutions.jts.geom.LineString;
  * @since 4.0.0
  */
 public class MissionImporter extends AbstractSmartImporter {
+	
+	private SamplingUnit currentSamplingUnit;
+	private List<Date> suTimeCuts;
 
 	/**
 	 * If survey is provided that it is used as a target survey, otherwise new survey with passed newSurveyId will be created
 	 */
 	public Mission importData(CyberTrackerSurvey ctSurvey, Mission mission, Survey survey, String newSurveyId) {
 		clearWarning();
+		currentSamplingUnit = ctSurvey.getStartSamplingUnit();
+		suTimeCuts = new ArrayList<>();
 		
 		for (String warning : ctSurvey.getWarnings()) {
 			addWarning(warning);
@@ -139,7 +144,9 @@ public class MissionImporter extends AbstractSmartImporter {
 			for (S s : sList) {
 				MissionDay mday = findOrAddMissionDay(mission, s);
 				Waypoint wp = findOrAddWaypoint(mday, s, ctSurvey.getElementsMap(), session);
-				addObservations(wp, s, ctSurvey.getElementsMap(), session);
+				if (wp != null) {
+					addObservations(wp, s, ctSurvey.getElementsMap(), session);
+				}
 			}
 
 			//import tracks
@@ -426,12 +433,24 @@ public class MissionImporter extends AbstractSmartImporter {
 			} else if (SurveyScreensUtil.RESULT_MISSION_SAMPLING_UNIT.equals(a.getN())) {
 				E e = eMap.get(a.getV());
 				if (e != null) {
-					SamplingUnit su = CyberTrackerHibernateManager.fetchByUuid(SamplingUnit.class, e.getTag0(), session);
-					swp.setSamplingUnit(su);
+					SamplingUnit su = null;
+					if (e.getTag0() != null) {
+						su = CyberTrackerHibernateManager.fetchByUuid(SamplingUnit.class, e.getTag0(), session);
+						if (su == null) {
+							addWarning(MessageFormat.format(Messages.MissionImporter_Warn_NoSamplingUnit, e.getN()));
+						}
+					}
+					if ((su == null && currentSamplingUnit != null) || (su != null && !su.equals(currentSamplingUnit))) {
+						//this is not the same sampling unit
+						currentSamplingUnit = su;
+						suTimeCuts.add(wp.getDateTime()); //this must be already calculated
+					}
+					return null; //special case: we don't add waypoint when record SamplingUnit change
 				}
 			}
 		}
 
+		swp.setSamplingUnit(currentSamplingUnit);
 		swp.setWaypoint(wp);
 		swp.setMissionDay(mday);
 		if (newWp) {
