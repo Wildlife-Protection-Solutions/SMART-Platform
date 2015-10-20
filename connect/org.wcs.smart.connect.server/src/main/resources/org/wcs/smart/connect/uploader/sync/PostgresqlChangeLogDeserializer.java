@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.model.ChangeLogItem;
@@ -42,7 +43,11 @@ public class PostgresqlChangeLogDeserializer extends ChangeLogDeserializer {
 	protected void processFileDelete(ChangeLogItem item, Connection c)
 			throws Exception {
 		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
-		Files.delete(toPath);
+		if (Files.isDirectory(toPath)){
+			FileUtils.deleteDirectory(toPath.toFile());
+		}else{
+			Files.deleteIfExists(toPath);
+		}
 		
 	}
 

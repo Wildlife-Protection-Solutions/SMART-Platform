@@ -111,7 +111,6 @@ CREATE TABLE smart.agency
 
 CREATE TABLE smart.area_geometries
 (
-   PID serial NOT NULL,
    UUID uuid NOT NULL,
    CA_UUID uuid NOT NULL,
    AREA_TYPE varchar(5) NOT NULL,
@@ -973,6 +972,7 @@ CREATE TABLE smart.screen_option
    STRING_VALUE varchar,
    BOOLEAN_VALUE boolean,
    UUID_VALUE uuid,
+   RESOURCE varchar(10),
    PRIMARY KEY (UUID)
 );
 
