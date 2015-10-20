@@ -194,7 +194,7 @@ CREATE TABLE connect.alert_filter_defaults(
 	seconds_refresh int
 )WITHOUT OIDS;
 
-insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, true, true, true, true,'','');
+insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, true, true, true, true,'','', 30);
 
 
 

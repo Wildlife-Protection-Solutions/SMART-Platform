@@ -225,13 +225,13 @@ CREATE TABLE smart.db_version
 
 CREATE TABLE smart.dm_aggregation
 (
-   NAME varchar(10) NOT NULL,
+   NAME varchar(16) NOT NULL,
    PRIMARY KEY (NAME)
 );
 
 CREATE TABLE smart.dm_aggregation_i18n
 (
-   NAME varchar(10) NOT NULL,
+   NAME varchar(16) NOT NULL,
    LANG_CODE varchar(5) NOT NULL,
    GUI_NAME varchar(48) NOT NULL,
    PRIMARY KEY (NAME,LANG_CODE)
@@ -240,7 +240,7 @@ CREATE TABLE smart.dm_aggregation_i18n
 CREATE TABLE smart.dm_att_agg_map
 (
    ATTRIBUTE_UUID uuid NOT NULL,
-   AGG_NAME varchar(10) NOT NULL,
+   AGG_NAME varchar(16) NOT NULL,
    PRIMARY KEY (ATTRIBUTE_UUID,AGG_NAME)
 );
 
@@ -314,7 +314,7 @@ CREATE TABLE smart.employee
    BIRTHDATE date,
    GENDER char(1) NOT NULL,
    SMARTUSERID varchar(16),
-   SMARTPASSWORD varchar(16),
+   SMARTPASSWORD varchar(256),
    SMARTUSERLEVEL smallint,
    AGENCY_UUID uuid,
    RANK_UUID uuid,
@@ -2263,10 +2263,25 @@ insert into smart.dm_aggregation(name) values ('sum');
 insert into smart.dm_aggregation(name) values ('avg');
 insert into smart.dm_aggregation(name) values ('min');
 insert into smart.dm_aggregation(name) values ('max');
-insert into smart.dm_aggregation(name) values ('stddev_pop');
-insert into smart.dm_aggregation(name) values ('var_pop');
+insert into smart.dm_aggregation(name) values ('stddev_samp');
+insert into smart.dm_aggregation(name) values ('var_samp');
 
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'en', 'standard deviation (samp.)');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'en', 'variance (samp.)');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'es', 'Desviación estándar');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'es', 'Varianza');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'fr', 'Ecart type');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'fr', 'Variance');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'vi', 'Độ lệch chuẩn');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'vi', 'Phương sai');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'th', 'ส่วนเบี่ยงเบนมาตรฐาน');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'th', 'ค่าความแปรปรวน');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'zh', '标准差');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'zh', '方差');
+insert into smart.dm_aggregation_i18n values ('stddev_samp', 'in', 'Standar Deviasi');
+insert into smart.dm_aggregation_i18n values ('var_samp', 'in', 'Varians');		
 
+			
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('sum','en','sum');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('min','en','minimum');
 insert into smart.DM_AGGREGATION_i18n (name, lang_code, gui_name) values ('max','en','maximum');
