@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
@@ -124,7 +125,11 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	protected void processFileDelete(ChangeLogItem item, Connection c)
 			throws Exception {
 		Path toPath = FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getFileName());
-		Files.delete(toPath);
+		if (Files.isDirectory(toPath)){
+			FileUtils.deleteDirectory(toPath.toFile());
+		}else{
+			Files.deleteIfExists(toPath);
+		}
 	}
 
 	@Override
