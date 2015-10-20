@@ -113,7 +113,11 @@ public class AttributeItemDialog  extends TitleAreaDialog{
 		// create OK and Cancel buttons by default
 		createButton(parent, IDialogConstants.OK_ID, DialogConstants.SAVE_TEXT, true);
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
-		comp.validate();
+		boolean ok = comp.validate();
+		Button btn = getButton(IDialogConstants.OK_ID);
+		if (btn != null){
+			btn.setEnabled(!ok);
+		}
 	}
 	
 	@Override
