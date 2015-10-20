@@ -16,3 +16,4 @@ Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.intelligence.query,
  org.wcs.smart.intelligence.query.map.udig,
  org.wcs.smart.intelligence.query.model
+Bundle-Vendor: org.wcs.smart

@@ -59,6 +59,8 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 				@Override
 				public void execute(Connection c) throws SQLException {
 					try {
+						dbUrl = c.getMetaData().getURL();
+						c.setAutoCommit(false);
 						upgrade(c, s, monitor);
 					} catch (final Exception e) {
 						Display.getDefault().syncExec(new Runnable(){
@@ -67,6 +69,8 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 								SmartPlugIn.displayLog("Error upgrading from 3.3.0 to 4.0.0", e);
 							}
 						});
+					}finally {
+						c.setAutoCommit(true);
 					}
 				}
 			});
