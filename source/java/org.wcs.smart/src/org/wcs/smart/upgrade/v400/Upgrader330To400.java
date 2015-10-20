@@ -352,7 +352,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 		};
 		
 		for (String s : sql){
-			System.out.println(s);
+			SmartPlugIn.logInfo(s);
 			c.createStatement().execute(s);
 		}
 		/* UPDATE PASSWORDS */
@@ -365,14 +365,12 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 				byte[] uuid = rs.getBytes(1);
 				String pass = rs.getString(2);
 				
-				ps.setBytes(1, uuid);
-				ps.setString(2, BCrypt.hashpw(pass, BCrypt.gensalt(20)));
+				ps.setString(1, BCrypt.hashpw(pass, BCrypt.gensalt(20)));
+				ps.setBytes(2, uuid);
+
 				ps.executeUpdate();
 			}
 		}
-		
-		
-		
 				
 		/* VERSION UDATE */ 
 		String ssql = "update smart.db_version set version = '4.0.0' where plugin_id = 'org.wcs.smart'"; //$NON-NLS-1$
