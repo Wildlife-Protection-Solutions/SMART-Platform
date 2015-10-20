@@ -104,15 +104,18 @@ public class DerbyRestoreEngine {
 				String username = dialog.getUserName();
 				String password = dialog.getPassword();
 
-				cnt = (Long) session
-						.createCriteria(Employee.class)
+				List<Employee> matching = session.createCriteria(Employee.class)
 						.add(Restrictions.eq("smartUserId", username).ignoreCase()) //$NON-NLS-1$
-						.add(Restrictions.eq("smartPassword", password)) //$NON-NLS-1$
-						.add(Restrictions.eq("smartUserLevel", //$NON-NLS-1$
-								SmartUserLevel.ADMIN))
-						.setProjection(Projections.rowCount()).uniqueResult();
-
-				if (cnt == 0) {
+						.add(Restrictions.eq("smartUserLevel", SmartUserLevel.ADMIN)).list(); //$NON-NLS-1$
+				
+				boolean found = false;
+				for (Employee e : matching){
+					if (HibernateManager.validatePassword(password, e)){
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
 					MessageDialog
 							.openError(
 									currentShell,
