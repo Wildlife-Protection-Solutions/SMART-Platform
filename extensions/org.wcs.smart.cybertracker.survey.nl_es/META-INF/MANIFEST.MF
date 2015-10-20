@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: SMART Spanish Cybertracker Survey Fragment
+Bundle-SymbolicName: org.wcs.smart.cybertracker.survey.nl_es
+Bundle-Version: 3.2.0
+Fragment-Host: org.wcs.smart.cybertracker;bundle-version="3.2.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-Vendor: org.wcs.smart
