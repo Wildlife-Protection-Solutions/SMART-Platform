@@ -8,7 +8,6 @@ var layerControl;
 
 
 window.onload = function(){
-	
 
 	//Hide header/footer and menu if mobile parameter is set:
 	if(mobile == "true"){
@@ -182,14 +181,13 @@ function createNewAlert() {
 	
 	var error = "";
 	if (long > 180 || long < -180 ) {
-		error = "Invalid Longitude (-180 < Long < 180)";
+		error = i18n("alert.invalidlong");
 	}else if (lat > 90 || lat < -90){
-		error = "Invalid Latitude(-90 < Lat < 90)";
+		error = i18n("alert.invalidlat");
 	}
 
 	if (error.length > 0){
-		document.querySelector("#dialogerror").innerHTML = error;
-		document.querySelector("#dialogerror").style.display = "block";
+		displayError(error);
 		return false;
 	}
 	usergenid = Math.random() * 1000000000;
@@ -226,9 +224,9 @@ function alertCreated() {
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("Alert created");
+		displayInfo(i18n("alert.alertcreated"));
 	} else {
-		displayError(parseError("Error creating Alert", this.responseText));
+		displayError(parseError(i18n("alert.errorcreatingalert"), this.responseText));
 	}
 
 }
@@ -240,7 +238,7 @@ function showLatLong(position){
 }
 
 function showError(error) {
-   	document.getElementById("long").value = "unable to auto-detect location";
+   	document.getElementById("long").value = i18n("alert.unabletodetectlocation");
 }
 
 function settab(tab){
@@ -316,8 +314,8 @@ function remove_class(id, classname){
 /* delete alert*/
 function deleteAlert(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm("Are you sure you want to delete the alert?");
-	if (!ok) return;
+	var ok = window.confirm(i18n("alert.areyousuredeletealert") );
+	if (!ok) return false;
 	
 	hideInfo();
 	hideError();
@@ -334,9 +332,9 @@ function deleteAlert(){
 function alertDeleted() {
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
-		displayInfo("Deleted Alert with UUID: " + r.uuid);
+		displayInfo(i18n("alert.deletealertwith") + r.uuid);
 	} else {
-		displayError(parseError("Error deleting alert " + this.uuid));
+		displayError(parseError(i18n("alert.deletealertwith") + this.uuid));
 	}
 	refreshAlerts();
 	
@@ -358,7 +356,7 @@ function refreshAlerts(){
 	var parent = document.getElementById("alerttable");
 	var row = document.createElement("tr");
 	row.className="alertrow";
-	row.innerHTML="Refreshing Alert Table...";
+	row.innerHTML= i18n("alert.refreshing");
 	parent.appendChild(row);
 	
 	var filteredUrl = getFilteredUrl(ALERT_URL);
@@ -377,11 +375,11 @@ function createAlertTable(){
 	if (this.status != 200 && this.status != 201 ) {
 		var msg = "Error: ";
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("alert.unathorized");
 		}else if (this.status == 404){
-			msg += "Invalid URL, URL not Found";
+			msg += i18n("alert.invalidurl");
 		}else if (this.status == 500){
-			msg += "HTTP code 500, server error. Something is wrong with the server or a request on this page was formatted incorrectly.";
+			msg += i18n("alert.servererror");
 		}
 		
 		
@@ -404,29 +402,37 @@ function createAlertTable(){
 	try{
 		var geojson = JSON.parse(this.responseText);
 	 	var alerts = geojson.features;
-	 	for (var i = 0; i < alerts.length; i ++){
-	 		var d = new Date(alerts[i].properties.date);
-	 		var row = tableCreateRowTDs(parent,
-	 				[alerts[i].properties.type, alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
-	 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
-	 		row.id = "alertRow" + i;
-	 		row.dataset.uuid = alerts[i].properties.uuid;
-
-	 		//update goes first, shows second, since it floats right in the css...
-	 		var updateicon = document.createElement("a");
-	 		updateicon.className="update-icon";
-	 		updateicon.title="update alert";
-	 		updateicon.onclick = updateAlert;
-	 		updateicon.href="";
-	 		row.childNodes[7].appendChild(updateicon);
-	 		
-	 		var deleteicon = document.createElement("a");
-	 		deleteicon.className="delete-icon";
-	 		deleteicon.title="delete alert";
-	 		deleteicon.onclick = deleteAlert;
-	 		deleteicon.href="";
-	 		row.childNodes[7].appendChild(deleteicon);
-	 		
+	 	if(typeof alerts === "undefined"){
+		 	var newRow = parent.insertRow(-1);
+	 		newRow.style.backgroundColor = "#F00";
+	 		newRow.className = "alertrow";
+	 	    var oCell = newRow.insertCell(0);
+	 	    oCell.colSpan = 10;
+	 	    oCell.innerHTML = i18n("alert.noalertsfound");
+		}else{
+		 	for (var i = 0; i < alerts.length; i ++){
+		 		var d = new Date(alerts[i].properties.date);
+		 		var row = tableCreateRowTDs(parent,
+		 				[alerts[i].properties.type, alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
+		 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
+		 		row.id = "alertRow" + i;
+		 		row.dataset.uuid = alerts[i].properties.uuid;
+	
+		 		//update goes first, shows second, since it floats right in the css...
+		 		var updateicon = document.createElement("a");
+		 		updateicon.className="update-icon";
+		 		updateicon.title="update alert";
+		 		updateicon.onclick = updateAlert;
+		 		updateicon.href="";
+		 		row.childNodes[7].appendChild(updateicon);
+		 		
+		 		var deleteicon = document.createElement("a");
+		 		deleteicon.className="delete-icon";
+		 		deleteicon.title="delete alert";
+		 		deleteicon.onclick = deleteAlert;
+		 		deleteicon.href="";
+		 		row.childNodes[7].appendChild(deleteicon);
+		 	}
 	 	}
 	}catch(err) {
  		var newRow = parent.insertRow(-1);
@@ -434,7 +440,7 @@ function createAlertTable(){
  		newRow.className = "alertrow";
  	    var oCell = newRow.insertCell(0);
  	    oCell.colSpan = 10;
- 	    oCell.innerHTML = "No alerts meeting your filter criteria were found. " + err;
+ 	    oCell.innerHTML = err;
 	}
 
 }
@@ -460,11 +466,11 @@ function showCurrentAlert() {
 	if (this.status == 200 ) {
 		var r = JSON.parse(this.response);
 	} else {
-		displayError(parseError("Error getting alert details for alert: " + this.uuid));
+		displayError(parseError(i18n("alert.errorgettingalert") + this.uuid));
 	}
 	
 	document.querySelector("#dialogerror").style.display = "none";
-	displayDialog('updateAlertDialog', 'main');
+	displayDialog('updateAlertDialog', 'alerttable');
 	
 	document.getElementById("updatealertform").user_id.value = r.userGeneratedId;
 	
@@ -484,10 +490,10 @@ function submitUpdatedAlert(){
 	var error = "";
 	
 	if( isNaN(form.update_long.value) || form.update_long.value < -180 || form.update_long.value > 180 ){
-		error += "Invalid longitude value;<br>";
+		error += i18n("alert.invalidlong") + "<br>";
 	}
 	if( isNaN(form.update_lat.value) || form.update_lat.value < -90 || form.update_lat.value > 90 ){
-		error += "Invalid latitude value;<br>";
+		error += i18n("alert.invalidlat") +"<br>";
 	}
 	if (error.length > 0){
 		document.querySelector("#dialogerror").innerHTML = error;
@@ -521,7 +527,7 @@ function AlertUpdated(){
 		var r = JSON.parse(this.response);
 		displayInfo("Alert with UUID " + r.uuid + " Updated.");
 	} else {
-		displayError(parseError("Error updating alert: " + this.statusText + "; " + this.responseText));
+		displayError(parseError(i18n("alert.errorupdating") + this.statusText + "; " + this.responseText));
 	}
 	
 	closeDialog('updateAlertDialog');
@@ -534,10 +540,10 @@ function hideShowFilters(){
 	var current = document.getElementById('filter-form').style.display;
 	if(current == "none" || current == ""){
 		document.getElementById('filter-form').style.display = "block";
-		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>Hide Filters';
+		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>' + i18n("alert.hidefilters");
 	}else{
 		document.getElementById('filter-form').style.display = "none";
-		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>Show Filters';
+		document.getElementById('filter-link').innerHTML = '<image id="filter-button"/>' + i18n("alert.showfilters");
 	}
 }
 
@@ -562,7 +568,7 @@ function getFilteredUrl(base){
 		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();
 		var to = new Date(document.getElementById('datePickerTo').value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
 		if(isNaN(to) || isNaN(from) || from > to){
-			displayError("Invalid custom dates. No date filter was applied to events.");
+			displayError(i18n("alert.invalidcustomdates"));
 		}else{
 			filteredUrl += "&startDateFilter=" + from;  //substring(4) drops the "Wed " from the field, which isnt' a valid date string. 
 			filteredUrl += "&endDateFilter=" + to 
@@ -642,12 +648,19 @@ function updateRealtimeLayer(updatedUrl){
             ,
             bindFeaturePopup = function(fId) {
                 realtime.getLayer(fId).bindPopup(popupContent(fId));
-            },
-            updateFeaturePopup = function(fId) {
-                realtime.getLayer(fId).getPopup().setContent(popupContent(fId));
             };
+            //,
+//            updateFeaturePopup = function(fId) {
+//                realtime.getLayer(fId).getPopup().setContent(popupContent(fId));
+//            };
         Object.keys(e.enter).forEach(bindFeaturePopup);
-        Object.keys(e.update).forEach(updateFeaturePopup);
+        //Object.keys(e.update).forEach(updateFeaturePopup);
+        var now = new Date();
+        var seconds = now.getSeconds();
+        var minutes = now.getMinutes();
+        if(minutes <10) minutes = "0" + minutes;
+        if(seconds<10) seconds = "0" + seconds;
+        document.getElementById("map-info-box").innerHTML = "Last Updated " + now.getDate() + "/" + now.getMonth() + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>update now</a>";
     });
     
     realtime.addTo(map);
@@ -721,11 +734,11 @@ function getMapFilters(){
 
 function setMapFilters(){
 	if (this.status != 200 && this.status != 201 ) {
-		var msg = "Error: ";
+		var msg = i18n("alert.errorlabel");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("alert.unathorized");
 		}else if (this.status == 404){
-			msg += "Invalid URL, URL not Found";
+			msg += i18n("alert.invalidurl");
 		}
 		
 		try {
@@ -835,8 +848,10 @@ function getTodayAsString(){
         mm='0'+mm
     } 
     
+    
+    //These all need to be converted back to dates and the conversion doesn't seem to work on other languages, so dates are English only.
     var weekday = new Array(7);
-    weekday[0]=  "Sun";
+    weekday[0] = "Sun";
     weekday[1] = "Mon";
     weekday[2] = "Tue";
     weekday[3] = "Wed";

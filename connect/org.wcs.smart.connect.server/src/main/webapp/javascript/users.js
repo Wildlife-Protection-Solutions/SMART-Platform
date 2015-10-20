@@ -65,7 +65,7 @@ function showUserInfo(){
 /* callback for showUserInfo which updates the info */
 function setUserDetails(){
 	if (this.status != 200){
-		displayError(parseError("Could not load user details: ", this.responseText));
+		displayError(parseError(i18n("users.couldnotloaduser"), this.responseText));
 		return;
 	}
 	var user = JSON.parse(this.responseText);
@@ -74,8 +74,8 @@ function setUserDetails(){
 	if (table != null){
 		table.parentElement.removeChild(table);
 	}
-	var html = "<div style='margin-top: 5px'><span class='label-header'>Username: </span><span>" + user.username + "</span></div>";
-	html +="<div style='margin-top: 5px; margin-bottom: 5px'><span class='label-header'>Email: </span><span>" + user.email + "</span></div>";
+	var html = "<div style='margin-top: 5px'><span class='label-header'>" + i18n("users.usernamelabel") + "</span><span>" + user.username + "</span></div>";
+	html +="<div style='margin-top: 5px; margin-bottom: 5px'><span class='label-header'>" + i18n("users.emaillabel") + "</span><span>" + user.email + "</span></div>";
 	ele.innerHTML = html;
 	
 	var oReq = new XMLHttpRequest();
@@ -96,7 +96,7 @@ function setUserActions(){
 	table.id = "actiontable";
 	ele.appendChild(table);
 	
-	tableAddHeader(table, ["Action", "Resource", ""]);
+	tableAddHeader(table, [i18n("users.action"), i18n("users.resource"), ""]);
 	
 	for (var i = 0; i < actions.length; i ++){
 		var row = tableCreateRow(table, 
@@ -206,7 +206,7 @@ function refreshUsers(){
 	var parent = document.querySelector("div.usertable");
 	var row = document.createElement("div");
 	row.className="userrow";
-	row.innerHTML="Refreshing User Table...";
+	row.innerHTML=i18n("users.refreshusertable");
 	parent.appendChild(row);
 		
  	var oReq = new XMLHttpRequest();
@@ -219,9 +219,9 @@ function refreshUsers(){
 function createUserTable(){
 	
 	if (this.status != 200) {
-		var msg = "Error: ";
+		var msg = i18n("alert.errorlabel");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("alert.unathorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -269,8 +269,8 @@ function clearAndShowNewUserDialog(){
 /* delete user */
 function deleteUser(){
 	var username = this.dataset.username;
-	var ok = window.confirm("Are you sure you want to delete the user " + username + "?");
-	if (!ok) return;
+	var ok = window.confirm(i18n("alert.confirmdeleteuser") + username + "?");
+	if (!ok) return false;
 	
 	hideInfo();
 	hideError();
@@ -331,7 +331,7 @@ function userDeleted() {
 	if (this.status == 200) {
 		displayInfo(this.smartuser + " deleted");
 	} else {
-		displayError(parseError("Error deleting account " + this.smartuser, this.responseText));
+		displayError(parseError(i18n("alert.errordeletingaccount") + this.smartuser, this.responseText));
 	}
 	refreshUsers();
 	
@@ -347,7 +347,7 @@ function actionDeleted() {
 	if (this.status == 204) {
 		displayInfo(this.smartuser + " updated");
 	} else {
-		displayError(parseError("Error deleting action " + this.smartuser, this.responseText));
+		displayError(parseError(i18n("alert.errordeletingaction") + this.smartuser, this.responseText));
 	}
 	showUserInfo.call(document.querySelector(".selecteduser"))
 }
@@ -357,7 +357,7 @@ function actionAdded(){
 	if (this.status == 204) {
 		displayInfo(this.smartuser + " updated");
 	} else {
-		displayError(parseError("Error adding action " + this.smartuser, this.responseText));
+		displayError(parseError(i18n("alert.erroraddingaction")+ this.smartuser, this.responseText));
 	}
 	showUserInfo.call(document.querySelector(".selecteduser"))
 }
@@ -370,11 +370,11 @@ function createNewUser() {
 	
 	var error = "";
 	if (user.length == 0 ) {
-		error = "Username required";
+		error = i18n("settings.usernamerequired");
 	}else if (pass1.length == 0){
-		error = "Password required";
+		error = i18n("settings.passwordrequired");
 	}else if (pass1 != pass2){
-		error = "Passwords do not match";
+		error = i18n("settings.passwordsdontmatch");
 	}
 
 	if (error.length > 0){
@@ -410,7 +410,7 @@ function userCreated() {
 		var user = JSON.parse(this.responseText);
 		displayInfo(user.username + " account created");
 	} else {
-		displayError(parseError("Error creating account", this.responseText));
+		displayError(parseError(i18n("users.errorcreatinguser"), this.responseText));
 	}
 	refreshUsers();
 }

@@ -111,6 +111,10 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 			toUpdate.setDefaultLevel4(newDefault.isDefaultLevel4());
 			toUpdate.setDefaultLevel5(newDefault.isDefaultLevel5());
 			
+			if(newDefault.getSecondsRefresh() < 5){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, 
+						MessageFormat.format(Messages.getString("ConnectAlertFilterDefaul.LessThanMinRefresh", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
+			}
 			toUpdate.setSecondsRefresh(newDefault.getSecondsRefresh());
 			
 			s.update(toUpdate);

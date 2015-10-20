@@ -30,7 +30,7 @@ window.onload = function(){
 	
 	//new Layers dialog
 	document.getElementById("btnNewLayer").onclick = function(){
-	 	displayDialog('layerDialog', 'main');
+	 	displayDialog('layerDialog', 'layertable');
 	 	document.getElementById("updateLayerButton").classList.remove("show");
 		document.getElementById("updateLayerButton").classList.add("hide");
 		document.getElementById("newLayerButton").classList.remove("hide");
@@ -44,7 +44,7 @@ window.onload = function(){
 	
 	
 	document.getElementById("btnNewType").onclick = function(){
-	 	displayDialog('typeDialog', 'main');
+	 	displayDialog('typeDialog', 'btnNewType');
 	 	document.getElementById("updateTypeButton").classList.remove("show");
 		document.getElementById("updateTypeButton").classList.add("hide");
 		document.getElementById("newTypeButton").classList.remove("hide");
@@ -67,12 +67,12 @@ window.onload = function(){
 }
 
 
-/* clears and displays new user dialog */
-function clearAndShowNewStyleDialog(){
- 	document.querySelector("input[name=style_id]").value = "";
- 	document.querySelector("#dialogerror").style.display = "none";
- 	displayDialog('newStyleDialog', 'main');
-}
+//
+//function clearAndShowNewStyleDialog(){
+// 	document.querySelector("input[name=style_id]").value = "";
+// 	document.querySelector("#dialogerror").style.display = "none";
+// 	displayDialog('newStyleDialog', 'btnNewType');
+//}
 
 
 //creates a new Style
@@ -84,11 +84,11 @@ function createNewStyle() {
 	
 	var error = "";
 	if (user.length == 0 ) {
-		error = "Username required";
+		error = i18n("settings.usernamerequired");
 	}else if (pass1.length == 0){
-		error = "Password required";
+		error = i18n("settings.passwordrequired");
 	}else if (pass1 != pass2){
-		error = "Passwords do not match";
+		error = i18n("settings.passwordsdontmatch");
 	}
 
 	if (error.length > 0){
@@ -122,9 +122,9 @@ function userCreated() {
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo(user.username + " account created");
+		displayInfo(user.username + i18n("settings.accountcreated"));
 	} else {
-		displayError(parseError("Error creating account", this.responseText));
+		displayError(parseError(i18n("settings.errorcreatingaccount"), this.responseText));
 	}
 	refreshUsers();
 }
@@ -142,7 +142,7 @@ function refreshLayers(){
 	var parent = document.getElementById("layertable");
 	var row = document.createElement("tr");
 	row.className="layerrow";
-	row.innerHTML="Refreshing Layer Table...";
+	row.innerHTML=i18n("settings.refreshinglayers");
 	parent.appendChild(row);
 		
  	var oReq = new XMLHttpRequest();
@@ -155,11 +155,11 @@ function refreshLayers(){
 function createLayerTable(){
 	
 	if (this.status != 200 && this.status != 201 ) {
-		var msg = "Error: ";
+		var msg = i18n("alert.errorlabel");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("alert.unathorized");
 		}else{
-			msg += "Unexpected Error. Something is wrong with the server or the request sent by this page.";
+			msg += i18n("alert.servererror");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -179,7 +179,7 @@ function createLayerTable(){
  	var layers = JSON.parse(this.responseText);
  	for (var i = 0; i < layers.length; i ++){
  		var type = layers[i].layerType;
- 		var typeText = "unknown";
+ 		var typeText = i18n("settings.unknown");
  		if(type == 1){
  			typeText = "Mapbox.com";
  		}else if(type == 2){
@@ -223,8 +223,8 @@ function createLayerTable(){
 /* delete layer*/
 function deleteLayer(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm("Are you sure you want to delete the layer?");
-	if (!ok) return;
+	var ok = window.confirm(i18n("settings.suredeletelayer"));
+	if (!ok) return false;
 	
 	hideInfo();
 	hideError();
@@ -240,9 +240,9 @@ function deleteLayer(){
 function layerDeleted() {
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
-		displayInfo("Deleted Layer: " + r.layerName);
+		displayInfo(i18n("settings.deletedlayer") + r.layerName);
 	} else {
-		displayError(parseError("Error deleting Layer " + this.uuid));
+		displayError(parseError(i18n("settings.errordeletinglayer") + this.uuid));
 	}
 	refreshLayers();
 	
@@ -287,9 +287,9 @@ function layerCreated(){
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("Layer created");
+		displayInfo(i18n("settings.layercreated"));
 	} else {
-		displayError("Error creating Layer;  " + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.errorcreatinglayer") + this.responseText + "; " + this.statusText);
 	}
 	refreshLayers();
 	closeDialog('layerDialog');
@@ -315,7 +315,7 @@ function showCurrentLayer() {
 	if (this.status == 200 ) {
 		var r = JSON.parse(this.response);
 	} else {
-		displayError(parseError("Error getting alert details for layer from server; layer uuid: " + this.uuid));
+		displayError(parseError(i18n("settings.errorcreatinglayer") + this.uuid));
 	}
 	
 	document.querySelector("#dialogerror").style.display = "none";
@@ -336,7 +336,7 @@ function showCurrentLayer() {
 	document.getElementById("newLayerButton").classList.remove("show");
 	document.getElementById("newLayerButton").classList.add("hide");
 	
-	displayDialog('layerDialog', 'main');
+	displayDialog('layerDialog', 'layertable');
 }
 
 
@@ -379,9 +379,9 @@ function layerUpdated(){
 	if (this.status == 200) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("Layer Update");
+		displayInfo(i18n("settings.layerupdated") );
 	} else {
-		displayError("Error updating Layer;  " + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.errorupdatinglayer")  + this.responseText + "; " + this.statusText);
 	}
 	refreshLayers();
 	closeDialog('layerDialog');
@@ -399,7 +399,7 @@ function refreshTypes(){
 	var parent = document.getElementById("typetable");
 	var row = document.createElement("tr");
 	row.className="typerow";
-	row.innerHTML="Refreshing Type Table...";
+	row.innerHTML=i18n("settings.refreshtypes");
 	parent.appendChild(row);
 		
  	var oReq = new XMLHttpRequest();
@@ -412,9 +412,9 @@ function refreshTypes(){
 function createTypeTable(){
 	
 	if (this.status != 200 && this.status != 201 ) {
-		var msg = "Error: ";
+		var msg = i18n("alert.errorlabel");
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("alert.unathorized");
 		}
 		try {
 			msg = JSON.parse(this.responseText).error
@@ -487,7 +487,7 @@ function showCurrentType() {
 	if (this.status == 200 ) {
 		var r = JSON.parse(this.response);
 	} else {
-		displayError(parseError("Error getting details for alert type from server; alert: " + this.label));
+		displayError(parseError(i18n("settings.errorgettingalert") + this.label));
 	}
 	
 	document.querySelector("#dialogerror").style.display = "none";
@@ -505,13 +505,13 @@ function showCurrentType() {
 	document.getElementById("newTypeButton").classList.remove("show");
 	document.getElementById("newTypeButton").classList.add("hide");
 	
-	displayDialog('typeDialog', 'main');
+	displayDialog('typeDialog', 'btnNewType');
 }
 
 function deleteType(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
-	var ok = window.confirm("Are you sure you want to delete the type?");
-	if (!ok) return;
+	var ok = window.confirm(i18n("settings.areyoursuredeletetype"));
+	if (!ok) return false;
 	
 	hideInfo();
 	hideError();
@@ -526,9 +526,9 @@ function deleteType(){
 function typeDeleted(){
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
-		displayInfo("Deleted Type: " + r.label);
+		displayInfo(i18n("settings.deletedtype") + r.label);
 	} else {
-		displayError(parseError("Error deleting type" + this.label));
+		displayError(parseError(i18n("settings.errordeletingtype") + this.label));
 	}
 	refreshTypes();
 }
@@ -565,9 +565,9 @@ function typeCreated(){
 	if (this.status == 201) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("Type created");
+		displayInfo(i18n("settings.errordeletingtype"));
 	} else {
-		displayError("Error creating Type;  " + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.errordeletingtype") + this.responseText + "; " + this.statusText);
 	}
 	refreshTypes();
 	closeDialog('typeDialog');
@@ -604,9 +604,9 @@ function typeUpdated(){
 	if (this.status == 200) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("Alert Type Updated");
+		displayInfo(i18n("settings.errordeletingtype"));
 	} else {
-		displayError("Error Updating Type;  " + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.errordeletingtype") + this.responseText + "; " + this.statusText);
 	}
 	refreshTypes();
 	closeDialog('typeDialog');
@@ -632,11 +632,11 @@ function createDefaultsTable(){
 	if (this.status != 200 && this.status != 201 ) {
 		var msg = "Error: ";
 		if (this.status == 401){
-			msg += "Unauthorized";
+			msg += i18n("alert.unathorized");
 		}else if (this.status == 404){
-			msg += "Invalid URL, URL not Found";
+			msg += i18n("alert.invalidurl");
 		}else{
-			msg += "Unexpected error, something is wrong with the server or the connection to the server.";
+			msg += i18n("alert.servererror");
 		}
 		
 		try {
@@ -738,9 +738,9 @@ function defaultsUpdated(){
 	if (this.status == 200) {
 		//ok
 		var user = JSON.parse(this.responseText);
-		displayInfo("Default Filters Updated");
+		displayInfo(i18n("settings.defaultfiltersupdates"));
 	} else {
-		displayError("Error Updating Filter Defaults;  " + this.responseText + "; " + this.statusText);
+		displayError(i18n("settings.errorupdaingdefaultfilters") + this.responseText + "; " + this.statusText);
 	}
 }
 

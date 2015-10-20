@@ -281,6 +281,20 @@ h2{
     overflow:auto;
     font-size: 0.85em;
 }
+
+#map-info-box{
+	border-top: 1px solid #ddd;
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	position: absolute;
+    right: 20px;
+    top: 00px;
+    z-index: 10;
+    max-height:93%;
+    overflow:auto;
+    font-size: 0.85em;
+}
    
 #filter-link{
 	float: right;

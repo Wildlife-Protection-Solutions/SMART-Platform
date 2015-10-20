@@ -119,16 +119,16 @@ function deleteca(){
 	
 	if (username.length == 0){
 		document.querySelector("#deleteDialog > #dialogerror").style.display = "block";
-		document.querySelector("#deleteDialog > #dialogerror").innerHTML = "Username required.";
+		document.querySelector("#deleteDialog > #dialogerror").innerHTML = i18n("settings.usernamerequired") ;
 		return false;
 	}
 	if (password.length == 0){
 		document.querySelector("#deleteDialog > #dialogerror").style.display = "block";
-		document.querySelector("#deleteDialog > #dialogerror").innerHTML = "Password required.";
+		document.querySelector("#deleteDialog > #dialogerror").innerHTML = i18n("settings.passwordrequired");
 		return false;
 	}
 	
-	var ok = window.confirm("Are you sure you want to the conservation area " + cauuid + "?");
+	var ok = window.confirm(i18n("ca.confirmdeleteca") + cauuid + "?");
 	if (!ok) return false;
 	
 	hideInfo();
@@ -149,9 +149,9 @@ function caDeleted(){
 	if (this.status == 204) {
 		displayInfo("Conservation area (" + this.cauuid + ") data deleted");
 	} else if (this.status == 401){
-		displayError(parseError("Error deleting conservation area " + this.cauuid + ". Unauthorized.", this.responseText));
+		displayError(parseError(i18n("ca.errordeletingca") + this.cauuid + ". Unauthorized.", this.responseText));
 	}else{
-		displayError(parseError("Error deleting conservation area " + this.cauuid, this.responseText));
+		displayError(parseError(i18n("ca.errordeletingca") + this.cauuid, this.responseText));
 	}
 	refreshCaList();
 }
@@ -168,7 +168,7 @@ function refreshCaList(){
 	var parent = document.querySelector("div.catable");
 	var row = document.createElement("div");
 	row.className="carow";
-	row.innerHTML="Refreshing Conservation Area Table...";
+	row.innerHTML=i18n("ca.refreshingcas");
 	parent.appendChild(row);
 		
  	var oReq = new XMLHttpRequest();

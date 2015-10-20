@@ -1,0 +1,22 @@
+labels_es= {
+"alert.errorcreatingalert": "Error creating Alert",
+"alert.invalidlong": "Invalid Longitude must be between -180 and 180.",
+"alert.invalidlat": "Invalid Latitude must be between -90 and 90.",
+"alert.alertcreated": "Alert created",
+"alert.unabletodetectlocation": "unable to auto-detect location",
+"alert.areyousuredeletealert": "Are you sure you want to delete the alert?",
+"alert.deletealertwith": "Deleted Alert with UUID: ",
+"alert.deletealertwith": "Error deleting alert ",
+"alert.unathorized": "Unauthorized",
+"alert.invalidurl": "Invalid URL, URL not Found",
+"alert.servererror": "HTTP code 500, server error. Something is wrong with the server or a request on this page was formatted incorrectly.",
+"alert.refreshing": "Refreshing Alert Table...",
+"alert.noalertsfound": "No alerts meeting your filter criteria were found. ",
+"alert.errorgettingalert": "Error getting alert details for alert: ",
+"alert.errorupdating": "Error updating alert: ",
+"alert.hidefilters": "Hide Filters",
+"alert.showfilters": "Show Filters",
+"alert.invalidcustomdates": "Invalid custom dates. No date filter was applied to events.",
+"alert.errorlabel": "Error: ",
+"":""
+}

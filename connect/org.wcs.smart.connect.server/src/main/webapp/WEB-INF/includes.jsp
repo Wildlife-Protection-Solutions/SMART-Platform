@@ -9,3 +9,6 @@
 <link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
 <link href="//fonts.googleapis.com/css?family=Crimson+Text" rel="stylesheet" type="text/css">
 <link href="//fonts.googleapis.com/css?family=Allerta" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n/labels_es.js"></script>
+<script type="text/javascript" src="${pageContext.request.contextPath}/javascript/i18n/labels_en.js"></script>

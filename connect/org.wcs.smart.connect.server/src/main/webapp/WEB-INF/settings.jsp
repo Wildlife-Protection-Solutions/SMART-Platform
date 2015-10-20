@@ -12,7 +12,7 @@
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/infoerror.js"></script>
 <script type="text/javascript" src="${pageContext.request.contextPath}/javascript/settings.js"></script>
 
-<title>SMART Connect - Settings</title>
+<title><fmt:message key="settings.title" /></title>
 </head>
 <body>
 <%@include file="header.jsp" %>
@@ -20,8 +20,7 @@
 
 <%@include file="menu.jsp" %>
 <div id="main">
-  <div class="pageheader">SMART Connect Settings</div>
-  <p class="infomessage">Manage SMART Connect Settings</p>
+  <div class="pageheader"><fmt:message key="settings.pageheader" /></div>
   <div>
     <div id="message" class="msgsection"></div>
     <div id="error" class="errorsection"></div>
@@ -30,77 +29,77 @@
 
 
 <div class="overflow settingsTable">
-	<div class="block" style="text-align:left"><b>Operational Map Layers Configuration</b> <button class="button top-spacer" id="btnNewLayer">Add New Layer</button>
+	<div class="block" style="text-align:left"><b><fmt:message key="settings.layerheader" /></b> <button class="button top-spacer" id="btnNewLayer"><fmt:message key="settings.newlayerbutton" /></button>
 	</div>
 	<table id="layertable">
-		<tr class="table-row smart-table-header"><th>Layer Order</th><th>Layer Name</th><th>Type</th><th>On by Default?</th><th>Mapbox ID</th><th>Layer List</th><th>Token</th><th>Actions</th>
+		<tr class="table-row smart-table-header"><th><fmt:message key="settings.layerorder" /></th><th><fmt:message key="settings.layername" /></th><th><fmt:message key="settings.type" /></th><th><fmt:message key="settings.onbydefault" /></th><th><fmt:message key="settings.mapboxid" /></th><th><fmt:message key="settings.layerlist" /></th><th><fmt:message key="settings.token" /></th><th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
 </div>
 
 
 <div class="overflow settingsTable">
-	<div class="block" style="text-align:left"><b>Alert Types and Styles</b> <button class="button top-spacer" id="btnNewType">Add New Alert Type</button>
+	<div class="block" style="text-align:left"><b><fmt:message key="settings.styleheader" /></b> <button class="button top-spacer" id="btnNewType"><fmt:message key="settings.addnewstyle" /></button>
 	</div>
 	<table id="typetable">
-		<tr class="table-type-row smart-table-header"><th>Alert Type</th><th>Outline Color(#RRGGBB)</th><th>Fill Color(#RRGGBB)</th><th>Opacity(0-1)</th><th>Actions</th>
+		<tr class="table-type-row smart-table-header"><th><fmt:message key="settings.alerttype" /></th><th><fmt:message key="settings.outlinecolor" /></th><th><fmt:message key="settings.fillcolor" /></th><th><fmt:message key="settings.opacity" /></th><th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
 </div>
 
 <div class="overflow settingsTable">
-	<div class="block" style="text-align:left"><b>Default Filter Settings</b>
+	<div class="block" style="text-align:left"><b><fmt:message key="settings.defaultsheader" /></b>
 	</div>
 	<table id="defaultstable">
 	<form id="filter-form" name="filter-form" onsubmit="return false;">
 	<input id="filter_uuid" type="hidden" name="uuid" />
 		
 		
-		<tr class="table-defaults-row smart-table-header"><th>Date/Time</th><th>Alert Types</th><th>Alert Status</th><th>Alert Level</th><th>CAs to Include</th><th>Text Filter</th><th>Actions</th>
+		<tr class="table-defaults-row smart-table-header"><th><fmt:message key="settings.datetime" /></th><th><fmt:message key="settings.alerttypes" /></th><th><fmt:message key="settings.alertstatus" /></th><th><fmt:message key="settings.alertlevel" /></th><th><fmt:message key="settings.castoinclude" /></th><th><fmt:message key="settings.textfilter" /></th><th><fmt:message key="actions" /></th>
 		</tr>
 		<tr class="smart-table-rowon">
 		<td>
 
 
 			<select id='filterDate' class='updateChange' name="time_filter">
-			<option value=1>within 1 hour</option>
-			<option value=2>within 2 hours</option>
-			<option value=4>within 4 hours</option>
-			<option value=8>within 8 hours</option>
-			<option value=12>within 12 hours</option>
-			<option value=24>within 24 hours</option>
-			<option value=48>within 2 days</option>
-			<option value=168>within a week</option>
-			<option value=744>within a month</option>
-			<option value=-99>All dates</option>
+			<option value=1><fmt:message key="alert.within1" /></option>
+			<option value=2><fmt:message key="alert.within2" /></option>
+			<option value=4><fmt:message key="alert.within4" /></option>
+			<option value=8><fmt:message key="alert.within8" /></option>
+			<option value=12><fmt:message key="alert.within12" /></option>
+			<option value=24><fmt:message key="alert.within24" /></option>
+			<option value=48><fmt:message key="alert.within48" /></option>
+			<option value=168><fmt:message key="alert.withinweek" /></option>
+			<option value=744><fmt:message key="alert.withinmonth" /></option>
+			<option value=-99><fmt:message key="alert.alldates" /></option>
 			</select>
 		</td>
 		<td>
 
-			<p>Include Types:<br>
+			<p><fmt:message key="alert.filters.types" /><br>
 			<c:forEach var="type" items="${alertTypes}" varStatus="count">
      			<input id= "${type.getUuid()}" class='filterType updateChange' name = "${type.getUuid()}" value="${type.getUuid()}" type="checkbox"> ${type.getLabel()} </input><br> 
 			</c:forEach> 
 			</p>
 		</td>
 		<td>
-			<p>Status:<br>
+			<p><fmt:message key="alert.filters.status" /><br>
 			<c:forEach var="s" items="${status}" varStatus="count">
 				<input id="status_${s}" class='filterStatus updateChange' name="${s}" value="${s}" type="checkbox">${s}</input><br>
 			</c:forEach>
 		</td>
 		<td>
-			<p>Include Importance:<br>
-			<input id="level1" class='filterImportance updateChange' type="checkbox" name="level1" value=1 >1(Highest)</input><br>
-			<input id="level2" class='filterImportance updateChange' type="checkbox" name="level2" value=2 >2</input><br>
-			<input id="level3" class='filterImportance updateChange' type="checkbox" name="level3" value=3 >3</input><br>
-			<input id="level4" class='filterImportance updateChange' type="checkbox" name="level4" value=4 >4</input><br>
-			<input id="level5" class='filterImportance updateChange' type="checkbox" name="level5" value=5 >5(Lowest)</input><br>
+			<p><fmt:message key="alert.filters.importance" /><br>
+			<input id="level1" class='filterImportance updateChange' type="checkbox" name="level1" value=1 ><fmt:message key="alert.eventimportance1" /></input><br>
+			<input id="level2" class='filterImportance updateChange' type="checkbox" name="level2" value=2 ><fmt:message key="alert.eventimportance2" /></input><br>
+			<input id="level3" class='filterImportance updateChange' type="checkbox" name="level3" value=3 ><fmt:message key="alert.eventimportance3" /></input><br>
+			<input id="level4" class='filterImportance updateChange' type="checkbox" name="level4" value=4 ><fmt:message key="alert.eventimportance4" /></input><br>
+			<input id="level5" class='filterImportance updateChange' type="checkbox" name="level5" value=5 ><fmt:message key="alert.eventimportance5" /></input><br>
 			</p>
 			
 		</td>
 		<td>
-			<p>Include data from CA:<br>
+			<p><fmt:message key="alert.filters.ca" /><br>
 			<c:forEach var="ca" items="${cas}" varStatus="count">
 				<input id="${ca.getUuid()}" class='filterCa updateChange' name="${ca.getUuid()}" value="${ca.getUuid()}" type="checkbox">${ca.getLabel()}</input><br>
 			</c:forEach>
@@ -108,18 +107,18 @@
 			<p>
 		</td>
 		<td>
-			Contains Text:<br>
+			<fmt:message key="alert.filters.text" /><br>
 			<input id='filterText' class='updateChange' name="textFilter" type="text"></input>
 			</p> 
 
 			
 		</td>
 		<td>
-			Events Layer refreshes every:<br>
-			<input id='secondsRefresh' class='updateChange' style='width:3.5em' 'name="secondsRefresh" type="number"></input> seconds
+			<fmt:message key="settings.refresh" /><br>
+			<input id='secondsRefresh' class='updateChange' style='width:3.5em' 'name="secondsRefresh" type="number" min=5></input> <fmt:message key="settings.seconds" />
 			</p> 
 
-		<button class="button top-spacer" id="btnUpdateDefaults">Save Updated Defaults</button>
+		<button class="button top-spacer" id="btnUpdateDefaults"><fmt:message key="settings.savedefaults" /></button>
 <!-- 		<button class="button top-spacer" id="btnResetDefaults">Reload Defaults</button> -->
 
 		</td>
@@ -155,57 +154,56 @@
 <%@include file="footer.jsp" %>
 
 
-<div id="newStyleDialog" style="display: none;" class="dialog">
-  <div class="dialog-title">Create a New Style</div>
-  <div id="dialogerror" class="errorsection"></div>
-  <div>Create a new SMART Connect Server Style</div>
-  <form id="newstyleform" action="settings" method="POST" enctype="multipart/form-data">
-    <label class="block top-spacer">Style Id:</label>
-    <input type="text" name="style_id" class="formtext block" />
-    <label class="block top-spacer">Background Image:</label>
-    <input type="file" name="bg_image" class="formtext block" />
-     <input class="button" type="submit" value="Create Style" />
-     <input class="button" type="button" id="cancelNewStyle" value="Cancel" />
-    </div>
-  </form>
-  </div>
+<!-- <div id="newStyleDialog" style="display: none;" class="dialog"> -->
+<!--   <div class="dialog-title">Create a New Style</div> -->
+<!--   <div id="dialogerror" class="errorsection"></div> -->
+<!--   <form id="newstyleform" action="settings" method="POST" enctype="multipart/form-data"> -->
+<!--     <label class="block top-spacer">Style Id:</label> -->
+<!--     <input type="text" name="style_id" class="formtext block" /> -->
+<!--     <label class="block top-spacer">Background Image:</label> -->
+<!--     <input type="file" name="bg_image" class="formtext block" /> -->
+<!--      <input class="button" type="submit" value="Create Style" /> -->
+<!--      <input class="button" type="button" id="cancelNewStyle" value="Cancel" /> -->
+<!--     </div> -->
+<!--   </form> -->
+<!--   </div> -->
 
 
 <div id="layerDialog" style="display: none;" class="dialog">
-  <div class="dialog-title">Map Layer Details</div>
+  <div class="dialog-title"><fmt:message key="settings.layeredit.title" /></div>
   <div id="layerdialogerror" class="errorsection"></div>
 	<form id="maplayersform">
      		<div id="layererror" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
-     		<label class="top-spacer block">Layer Order:</label>
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.orderlabel" /></label>
      		<input class="layer_order" type=number name="layer_order"/>
      		
-     		<label class="top-spacer block">Layer Name:</label>
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.namelabel" /></label>
      		<input class="layer_field" type=text name="layer_name" value="" maxlength="32"/>
      		
      		
      		<input type="hidden" name="uuid" value="" />
      		
      		
-     		<label class="top-spacer block">Layer Type:</label>
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.typelabel" /></label>
 			<select name="layer_type" class="block formtext alert-select">
-			<option value=1>Mapbox.com</option>
-			<option value=2>GisCloud.com</option>
-			<option value=3>WMS</option>
+			<option value=1><fmt:message key="settings.layeredit.mapbox" /></option>
+			<option value=2><fmt:message key="settings.layeredit.giscloud" /></option>
+			<option value=3><fmt:message key="settings.layeredit.wms" /></option>
 			</select>
      		
-     		<label class="top-spacer block">On By Default?:</label>
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.onbydefaultlabel" /></label>
      		<select name="layer_status" class="block formtext alert-select">
-			<option value="true">True</option>
-			<option value="false">False</option>
+			<option value="true"><fmt:message key="true" /></option>
+			<option value="false"><fmt:message key="false" /></option>
 			</select>
      		
-     		<label class="top-spacer block">Service Token or WMS URL (xyz.com/wms?):</label>
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.tokenorurl" /></label>
      		<input class="layer_field" type=text name="layer_token" value="" maxlength="256"/>
  		
-     		<label class="top-spacer block">MapBox ID (mapbox only):</label>
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.mapboxid" /></label>
      		<input class="layer_field" type=text name="layer_mapbox_id" value="" maxlength="64"/>
      		
-     		<label class="top-spacer block">WMS Layer List (GISCloud & WMS only):</label>
+     		<label class="top-spacer block"><fmt:message key="settings.layeredit.layerlist" /></label>
      		<input class="layer_field" type=text name="layer_list" value=""/>
      		<div class="top-spacer block">
      			<input id="newLayerButton" class="button" type="button" value="CreateLayer" />
@@ -218,23 +216,23 @@
 
 
 <div id="typeDialog" style="display: none;" class="dialog">
-  <div class="type-title">Alert Type</div>
+  <div class="dialog-title"><fmt:message key="settings.typeedit.title" /></div>
   <div id="layerdialogerror" class="errorsection"></div>
 	<form id="alerttypesform">
      		<div id="layererror" class="errorsection" style="display: ${alerterror == null ? "none" : "block"}">${alerterror}</div>
-     		<label class="top-spacer block">Type Name:</label>
+     		<label class="top-spacer block"><fmt:message key="settings.typeedit.typelabel" /></label>
      		<input class="type_field" type=text name="type_label" value="" maxlength="32"/>
      		
      		<input type="hidden" name="uuid" value="" />
      		
      		
-     		<label class="top-spacer block">Outline Color:</label>
+     		<label class="top-spacer block"><fmt:message key="settings.typeedit.outlinecolorlabel" /></label>
 			<input class="type_field" type=text name="type_color" value="" maxlength="16"/>
     
-      		<label class="top-spacer block">Fill Color:</label>
+      		<label class="top-spacer block"><fmt:message key="settings.typeedit.fillcolorlabel" /></label>
 			<input class="type_field" type=text name="type_fillcolor" value="" maxlength="16"/>
     
-      		<label class="top-spacer block">Opacity:</label>
+      		<label class="top-spacer block"><fmt:message key="settings.typeedit.opactiylabel" />Opacity:</label>
 			<input class="type_field" type=text name="type_opacity" value="" maxlength="8"/>
      		
        		<div class="top-spacer block">
