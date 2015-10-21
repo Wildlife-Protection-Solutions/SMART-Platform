@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.replication.changelog;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -38,8 +37,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.UUID;
-
-import javax.sql.rowset.serial.SerialClob;
 
 import org.apache.commons.io.IOUtils;
 import org.wcs.smart.SmartContext;

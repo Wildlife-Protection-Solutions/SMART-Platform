@@ -67,37 +67,35 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 		String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 		String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
 		
-		try(SmartConnect connect = new SmartConnect(server, user, pass)){
-		
-			final DownloadCaEngine installer = new DownloadCaEngine(info, connect);
-			if (!installer.preDownload(getShell())){
-				return false;
-			}
-		
-			final List<Exception> errors = new ArrayList<Exception>();
-			try{
-				getContainer().run(true, true, new IRunnableWithProgress() {
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException,
-							InterruptedException {
-						try{
-							if (!installer.downloadImport(monitor)){
-								errors.add(new Exception("Process cancelled by user."));
-							}
-							
-						}catch (Exception ex){
-							errors.add(ex);
-						}
-					}
-				});
-			}catch (Exception ex){
-				errors.add(ex);
-			}
-			if (errors.isEmpty()){
-				return true;
-			}
-			ConnectPlugIn.displayLog("Error downloading and importing conservation area." + "\n\n" + errors.get(0).getMessage(), errors.get(0));
+		SmartConnect connect = SmartConnect.findInstance(server, user, pass);
+		final DownloadCaEngine installer = new DownloadCaEngine(info, connect);
+		if (!installer.preDownload(getShell())){
+			return false;
 		}
+		final List<Exception> errors = new ArrayList<Exception>();
+		try{
+			getContainer().run(true, true, new IRunnableWithProgress() {
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					try{
+						if (!installer.downloadImport(monitor)){
+							errors.add(new Exception("Process cancelled by user."));
+						}
+						
+					}catch (Exception ex){
+						errors.add(ex);
+					}
+				}
+			});
+		}catch (Exception ex){
+			errors.add(ex);
+		}
+		if (errors.isEmpty()){
+			return true;
+		}
+		ConnectPlugIn.displayLog("Error downloading and importing conservation area." + "\n\n" + errors.get(0).getMessage(), errors.get(0));
+		
 		return false;
 	}
 

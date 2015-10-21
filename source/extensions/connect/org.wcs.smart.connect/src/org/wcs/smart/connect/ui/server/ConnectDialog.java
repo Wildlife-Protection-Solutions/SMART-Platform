@@ -21,8 +21,13 @@
  */
 package org.wcs.smart.connect.ui.server;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -140,37 +145,58 @@ public class ConnectDialog extends TitleAreaDialog {
 	}
 	
 	protected void okPressed(){
+		
+		final boolean[] ret = new boolean[]{false};
 		final String server = cs.getServerUrl();
 		final String user = txtUser.getText().trim();
 		final String pass = txtPassword.getText().trim();
-		if (server.isEmpty()){
-			MessageDialog.openError(getShell(), "Error", "Connect server required. User configure button to setup the connect server.");
-			return;
-		}
-		if (user.isEmpty()){
-			MessageDialog.openError(getShell(), "Error", "Connect user name required.");
-			return;
-		}
-		if (pass.isEmpty()){
-			MessageDialog.openError(getShell(), "Error", "Connect password required.");
-			return;
-		}
 		
-		try(SmartConnect connect = new SmartConnect(cs, user, pass)){
-			try{
-				String error = connect.validateUser();
-				if (error != null){
-					MessageDialog.openError(getShell(), "Error", error);
-					return;
+		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
+		try{
+			pmd.run(true, false, new IRunnableWithProgress() {
+				
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+					monitor.beginTask("Connecting to SMART Connect", 2);
+					monitor.worked(1);
+					
+					if (server.isEmpty()){
+						MessageDialog.openError(getShell(), "Error", "Connect server required. User configure button to setup the connect server.");
+						return;
+					}
+					if (user.isEmpty()){
+						MessageDialog.openError(getShell(), "Error", "Connect user name required.");
+						return;
+					}
+					if (pass.isEmpty()){
+						MessageDialog.openError(getShell(), "Error", "Connect password required.");
+						return;
+					}
+					
+					SmartConnect connect = SmartConnect.findInstance(cs, user, pass);
+					try{
+						String error = connect.validateUser();
+						if (error != null){
+							MessageDialog.openError(getShell(), "Error", error);
+							return;
+						}
+					}catch (Exception ex){
+						ConnectPlugIn.displayLog(ex.getMessage(), ex);
+						return;
+					}
+					
+					ConnectDialog.this.connect = SmartConnect.findInstance(cs, user, pass);
+					ret[0] = true;
+					monitor.done();
 				}
-			}catch (Exception ex){
-				ConnectPlugIn.displayLog(ex.getMessage(), ex);
-				return;
-			}
+			});
+		}catch(Exception ex){
+			ConnectPlugIn.displayLog(ex.getMessage(), ex);
+			return;
 		}
 		
-		connect = new SmartConnect(cs, user, pass);
-		super.okPressed();
+		if (ret[0]) super.okPressed();
 	}
 	
 	public SmartConnect getConnection(){

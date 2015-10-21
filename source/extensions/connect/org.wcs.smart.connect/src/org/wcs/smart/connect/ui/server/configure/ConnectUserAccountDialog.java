@@ -83,12 +83,12 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			MessageDialog.openError(getParentShell(), "Error", "Invalid username.");
 			return;
 		}
-		if (password.isEmpty()){
-			MessageDialog.openError(getParentShell(), "Error", "Invalid password.");
-			return;
-		}
+
+		
 		String error = null;
-		try(SmartConnect sc = new SmartConnect(server, username, password)){
+		if (password != null && !password.isEmpty()){
+			//validate username/password
+			SmartConnect sc = SmartConnect.findInstance(server, username, password);
 			error = sc.validateUser();
 		}
 		
@@ -187,6 +187,7 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
 			setMessage(sb.toString());
+			
 		}else{
 			setMessage("Link SMART Desktop accounts to a SMART Connect Account.");
 		}

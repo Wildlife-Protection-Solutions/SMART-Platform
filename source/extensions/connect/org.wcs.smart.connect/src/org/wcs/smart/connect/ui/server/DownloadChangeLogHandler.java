@@ -42,7 +42,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.ErrorEditorPart;
-import org.eclipse.ui.part.EditorPart;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
