@@ -48,7 +48,6 @@ import org.wcs.smart.hibernate.SmartDB;
 public class NewEntityTypeWizard extends Wizard implements IPageChangingListener {
 
 	private EntityType newType;
-	private Session session;
 	
 	public NewEntityTypeWizard(){
 		super();
@@ -61,8 +60,6 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		newType.setDateCreated(new Date());
 		newType.setStatus(Status.ACTIVE);
 		newType.setAttributes(new ArrayList<EntityAttribute>());
-
-		session = HibernateManager.openSession();
 	}
 
 	public EntityType getNewType(){
@@ -75,8 +72,9 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 		((NewEntityTypeWizardPage)this.getPages()[this.getPageCount()-1]).updateEntityType(newType);
 		
 		//save to db
-		session.beginTransaction();
+		Session session = HibernateManager.openSession();
 		try{
+			session.beginTransaction();
 			session.saveOrUpdate(newType.getDmAttribute());
 			session.save(newType);
 			session.getTransaction().commit();
@@ -84,6 +82,8 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 			session.getTransaction().rollback();
 			EntityPlugIn.displayLog(Messages.NewEntityTypeWizard_ErrorSavingEntityType + ex.getMessage(), ex);
 			return false;
+		}finally{
+			session.close();
 		}
 		
 		// fire events
@@ -99,9 +99,6 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 	@Override
 	public void dispose() {
 		super.dispose();
-		if (session != null && session.isOpen()) {
-			session.close();
-		}
 	}
 
 	@Override
@@ -128,7 +125,12 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 	 public void createPageControls(Composite pageContainer) {
 		super.createPageControls(pageContainer);
 	
-		((NewEntityTypeWizardPage)super.getPages()[0]).initPage(newType, session);
+		Session session = HibernateManager.openSession();
+		try{
+			((NewEntityTypeWizardPage)super.getPages()[0]).initPage(newType, session);
+		}finally{
+			session.close();
+		}
 	}
 	
 	@Override
@@ -147,7 +149,12 @@ public class NewEntityTypeWizard extends Wizard implements IPageChangingListener
 			page.updateEntityType(newType);
 			
 			//init the new page
-			next.initPage(newType, session);
+			Session session = HibernateManager.openSession();
+			try{
+				next.initPage(newType, session);
+			}finally{
+				session.close();
+			}
 			
 		}else{
 			//moving backwards so don't do any validation
