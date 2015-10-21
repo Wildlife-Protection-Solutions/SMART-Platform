@@ -60,7 +60,7 @@ public class StationCsvExporter implements ICsvDataExporter {
 			boolean headers, IProgressMonitor monitor, Session session) {
 		List<Language> languages = new ArrayList<Language>(ca.getLanguages());
 		try (CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), //$NON-NLS-1$ 
+					new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8),
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 			List<Station> stations = getStations(ca, session);
 

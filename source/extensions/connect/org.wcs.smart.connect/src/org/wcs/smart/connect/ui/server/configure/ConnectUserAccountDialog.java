@@ -62,7 +62,6 @@ import org.wcs.smart.ui.SmartLabelProvider;
 public class ConnectUserAccountDialog extends TitleAreaDialog{
 
 	private Text txtUser;
-	private Text txtPass;
 	private List<ConnectUser> toUpdate;
 
 	private CheckboxTableViewer lstUsers;
@@ -78,25 +77,11 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 
 	protected void okPressed() {
 		String username = txtUser.getText().trim();
-		String password = txtPass.getText().trim();
 		if (username.isEmpty()){
 			MessageDialog.openError(getParentShell(), "Error", "Invalid username.");
 			return;
 		}
 
-		
-		String error = null;
-		if (password != null && !password.isEmpty()){
-			//validate username/password
-			SmartConnect sc = SmartConnect.findInstance(server, username, password);
-			error = sc.validateUser();
-		}
-		
-		if (error != null){
-			MessageDialog.openError(getShell(), "Error", error);
-			return ;
-		}
-		
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
@@ -104,13 +89,11 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 				for (ConnectUser cu : toUpdate){
 					s.saveOrUpdate(cu);
 					cu.setConnectUsername(username);
-					cu.setConnectPassword(password);
 				}
 			}else{
 				for (Object e : lstUsers.getCheckedElements()){
 					if (! (e instanceof Employee) ) continue;
 					ConnectUser user = new ConnectUser();
-					user.setConnectPassword(password);
 					user.setConnectUsername(username);
 					user.setSmartUser((Employee)e);
 					user.setServer(server);
@@ -140,10 +123,16 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 		inner.setLayout(new GridLayout(2, false));
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
+		Label l = new Label(inner, SWT.NONE);
+		l.setText("Connect Username:");
+	
+		txtUser = new Text(inner, SWT.BORDER);
+		txtUser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
 		if (toUpdate == null){
 			inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			Label l = new Label(inner, SWT.NONE);
+			l = new Label(inner, SWT.NONE);
 			l.setText("SMART Desktop Accounts:");
 			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			lstUsers = CheckboxTableViewer.newCheckList(inner, SWT.BORDER | SWT.V_SCROLL);
@@ -164,17 +153,6 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			loadUsers.setSystem(true);
 			loadUsers.schedule();
 		}
-		Label l = new Label(inner, SWT.NONE);
-		l.setText("Connect Username:");
-	
-		txtUser = new Text(inner, SWT.BORDER);
-		txtUser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		
-		l = new Label(inner, SWT.NONE);
-		l.setText("Connect Password:");
-		
-		txtPass = new Text(inner, SWT.BORDER | SWT.PASSWORD);
-		txtPass.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		setTitle("Update SMART Connect Accounts");
 		getShell().setText("Update SMART Connect Accounts");

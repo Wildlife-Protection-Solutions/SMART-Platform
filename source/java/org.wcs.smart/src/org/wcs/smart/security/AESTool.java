@@ -1,3 +1,4 @@
+package org.wcs.smart.security;
 /*
  * Copyright (C) 2012 Wildlife Conservation Society
  *
@@ -19,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.informant.aes;
+
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

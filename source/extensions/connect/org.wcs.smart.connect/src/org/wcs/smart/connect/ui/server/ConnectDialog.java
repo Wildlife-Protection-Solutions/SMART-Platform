@@ -61,16 +61,23 @@ public class ConnectDialog extends TitleAreaDialog {
 	
 	private Text txtUser;
 	private Text txtPassword;
+	private Button chSavePassword;
 	
 	protected ConnectServer cs = null;
 	protected ConnectUser user = null;
 	
 	private SmartConnect connect;
+	private boolean hideConfigure;
 	
 	public ConnectDialog(Shell parentShell) {
-		super(parentShell);
+		this(parentShell, false);
 	}
 
+	public ConnectDialog(Shell parentShell, boolean hideConfigure) {
+		super(parentShell);
+		this.hideConfigure = hideConfigure;
+	}
+	
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
@@ -84,15 +91,19 @@ public class ConnectDialog extends TitleAreaDialog {
 		lblServer = new Label(main, SWT.NONE);
 		lblServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
-		Button btnConfigure = new Button(main, SWT.PUSH);
-		btnConfigure.setText("Configure...");
-		btnConfigure.addSelectionListener(new SelectionAdapter(){
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				(new ShowServerConfigurationHandler()).execute(getParentShell());
-				initData();
-			}
-		});
+		if (hideConfigure){
+			lblServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
+		}else{
+			Button btnConfigure = new Button(main, SWT.PUSH);
+			btnConfigure.setText("Configure...");
+			btnConfigure.addSelectionListener(new SelectionAdapter(){
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					(new ShowServerConfigurationHandler()).execute(getParentShell());
+					initData();
+				}
+			});
+		}
 		l = new Label(main, SWT.NONE);
 		l.setText("Username:");
 		
@@ -104,6 +115,12 @@ public class ConnectDialog extends TitleAreaDialog {
 		
 		txtPassword = new Text(main, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
+	
+		new Label(main, SWT.NONE);
+		chSavePassword = new Button(main, SWT.CHECK);
+		chSavePassword.setText("Save Password");
+		chSavePassword.setToolTipText("Selecting will save the password to the database, unselecting will clear the password");
+		chSavePassword.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		initData();
 		
@@ -120,7 +137,7 @@ public class ConnectDialog extends TitleAreaDialog {
 					.uniqueResult();
 			
 			user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
-					
+			
 			s.getTransaction().commit();
 		}finally{
 			s.close();
@@ -135,8 +152,22 @@ public class ConnectDialog extends TitleAreaDialog {
 		}
 		if (user != null){
 			txtUser.setText(user.getConnectUsername());
-			txtPassword.setText(user.getConnectPassword());
+			String decryptPass = "";
+			try{
+				decryptPass  = user.decryptPassword();
+			}catch (Exception ex){
+				ConnectPlugIn.log("Error decrypting password." + ex.getMessage(), ex);
+			}
+			if (decryptPass == null){
+				txtPassword.setText("");
+				txtPassword.setData("");
+				chSavePassword.setSelection(false);
+			}else{
+				txtPassword.setText(decryptPass);
+				chSavePassword.setSelection(true);
+			}
 		}
+		
 		
 	}
 	@Override
@@ -144,13 +175,20 @@ public class ConnectDialog extends TitleAreaDialog {
 		return true;
 	}
 	
+	private boolean strequals(String s1, String s2){
+		if (s1 == null && s2 == null) return true;
+		if (s1 != null && s2 != null) return s1.equals(s2);
+		return false;
+	}
+	
 	protected void okPressed(){
 		
-		final boolean[] ret = new boolean[]{false};
+		final String[] msgerror = new String[]{null};
 		final String server = cs.getServerUrl();
 		final String user = txtUser.getText().trim();
-		final String pass = txtPassword.getText().trim();
 		
+		final String pass = txtPassword.getText().trim();
+		final boolean savePass = chSavePassword.getSelection();
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(getShell());
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -162,15 +200,15 @@ public class ConnectDialog extends TitleAreaDialog {
 					monitor.worked(1);
 					
 					if (server.isEmpty()){
-						MessageDialog.openError(getShell(), "Error", "Connect server required. User configure button to setup the connect server.");
+						msgerror[0] = "Connect server required.  Use configure button to setup the connect server.";
 						return;
 					}
 					if (user.isEmpty()){
-						MessageDialog.openError(getShell(), "Error", "Connect user name required.");
+						msgerror[0] = "Connect user name required.";
 						return;
 					}
 					if (pass.isEmpty()){
-						MessageDialog.openError(getShell(), "Error", "Connect password required.");
+						msgerror[0] = "Connect password required.";
 						return;
 					}
 					
@@ -178,16 +216,42 @@ public class ConnectDialog extends TitleAreaDialog {
 					try{
 						String error = connect.validateUser();
 						if (error != null){
-							MessageDialog.openError(getShell(), "Error", error);
+							msgerror[0] = error;
 							return;
 						}
 					}catch (Exception ex){
-						ConnectPlugIn.displayLog(ex.getMessage(), ex);
+						ConnectPlugIn.log(ex.getMessage(), ex);
+						msgerror[0] = ex.getMessage();
 						return;
 					}
 					
-					ConnectDialog.this.connect = SmartConnect.findInstance(cs, user, pass);
-					ret[0] = true;
+					//save password
+					try{
+						String existingPassword = ConnectDialog.this.user.decryptPassword();
+						String newPassword = null;
+						if (savePass){
+							newPassword = ConnectDialog.this.user.encryptPassword(pass);
+						}
+						if (!strequals(existingPassword, newPassword == null ? null : pass)){
+							Session s = HibernateManager.openSession();
+							try{
+								s.beginTransaction();
+								ConnectDialog.this.user.setConnectPassword(newPassword);
+								s.saveOrUpdate(ConnectDialog.this.user);
+								s.getTransaction().commit();
+							}catch (Exception ex){
+								s.getTransaction().rollback();
+								throw ex;
+							}finally{
+								s.close();
+							}
+						}
+					}catch (Exception ex){
+						ConnectPlugIn.displayLog("Unable to save password." + "\n" + ex.getMessage(), ex);
+					}
+					
+					
+					ConnectDialog.this.connect = connect;
 					monitor.done();
 				}
 			});
@@ -196,7 +260,11 @@ public class ConnectDialog extends TitleAreaDialog {
 			return;
 		}
 		
-		if (ret[0]) super.okPressed();
+		if (msgerror[0] != null){
+			MessageDialog.openError(getShell(), "Error", msgerror[0]);
+			return;
+		}
+		super.okPressed();
 	}
 	
 	public SmartConnect getConnection(){

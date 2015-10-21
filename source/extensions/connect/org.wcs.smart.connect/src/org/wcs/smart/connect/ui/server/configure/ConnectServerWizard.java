@@ -60,6 +60,7 @@ public class ConnectServerWizard extends Wizard {
 		String url = page1.getServerName();
 		String username = page3.getUsername();
 		String password = page3.getPassword();
+		boolean savePassword = page3.getSavePassword();
 		String certificateFile = page1.getCertificateFile();
 		
 		String error = null;
@@ -90,7 +91,16 @@ public class ConnectServerWizard extends Wizard {
 		}
 		
 		ConnectUser user = new ConnectUser();
-		user.setConnectPassword(password);
+		
+		if (savePassword){
+			String encryptedPass = null;
+			try{
+				encryptedPass = user.encryptPassword(password);
+			}catch (Exception ex){
+				ConnectPlugIn.log("Error encrypting password." + ex.getMessage(), ex);
+			}
+			user.setConnectPassword(encryptedPass);
+		}
 		user.setConnectUsername(username);
 		user.setSmartUser(SmartDB.getCurrentEmployee());
 		user.setServer(server);

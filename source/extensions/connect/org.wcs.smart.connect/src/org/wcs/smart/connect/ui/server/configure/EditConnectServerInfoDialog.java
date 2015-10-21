@@ -32,7 +32,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -100,21 +100,25 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		main.setLayout(new GridLayout(1, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		Label l = new Label(main, SWT.NONE);
-		l.setText("URL:");
-		
 		ModifyListener validateListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				validate();
 			}
 		};
-		
-		serverpnl = new ServerPanel(main);
+		Group g = new Group(main, SWT.NONE);
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setText("Server Configuration");
+		serverpnl = new ServerPanel(g);
 		serverpnl.addChangeListener(validateListener);
 		serverpnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		options = new ServerOptionsPanel(parent);
+		g = new Group(main, SWT.NONE);
+		g.setLayout(new GridLayout());
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setText("Connection Options");
+		options = new ServerOptionsPanel(g);
 		options.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 		options.addChangeListener(validateListener);
 		

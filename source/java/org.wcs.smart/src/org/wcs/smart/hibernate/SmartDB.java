@@ -86,6 +86,7 @@ public class SmartDB {
 	//current database user account
 	private static DbUser current = DbUser.LOGIN;
 	private static Employee currentEmployee = null;
+	private static String plainTextPassword = null;
 	private static ConservationArea currentCa = null;
 	private static ConservationAreaConfiguration caConfig = null;
 	
@@ -180,10 +181,12 @@ public class SmartDB {
 	
 	
 	/**
-	 * Sets the configuration for cross conservation area analysis
+	 * Sets the login information
 	 * @param selectedCa
 	 */
-	public static void setConservationAreaConfiguration(Employee user, ConservationArea ca, ConservationAreaConfiguration configuration){
+	public static void setConservationAreaConfiguration(Employee user, String plainTextPassword,
+			ConservationArea ca, 
+			ConservationAreaConfiguration configuration){
 		currentCa = ca;
 		if (currentEmployee == null || !currentEmployee.equals(user)){
 			//new user
@@ -193,7 +196,12 @@ public class SmartDB {
 			current = null;
 		}
 		currentEmployee = user;
+		SmartDB.plainTextPassword = plainTextPassword;
 		caConfig = configuration;
+	}
+	
+	public static String getPlainTextPassword(){
+		return plainTextPassword;
 	}
 	
 	/**

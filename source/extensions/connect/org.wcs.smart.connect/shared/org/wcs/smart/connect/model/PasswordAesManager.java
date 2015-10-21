@@ -19,55 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.intelligence.informant.aes;
+package org.wcs.smart.connect.model;
 
-import java.io.Serializable;
+import org.wcs.smart.security.AESTool;
+import org.wcs.smart.security.EncryptedData;
+
 
 /**
- * Class represents encrypted data that can be serialised.
+ * Class that manages encrypting and decrypting smart connect passwords.
+ * Modeled after informant encrypting/decryption.
  *  
- * @author elitvin
- * @since 3.2.0
+ * @author egouge
  */
-public class EncryptedData implements Serializable {
+public final class PasswordAesManager {
 	
-	private static final long serialVersionUID = 1771476894573989245L;
-
-	private byte[] salt;
-	private byte[] iv;
-	private byte[] data;
+	private static final PasswordAesManager manager = new PasswordAesManager();
+	private static final AESTool aesTool = new AESTool();
 	
-	public EncryptedData() {
-	}
-
-	public EncryptedData(byte[] salt, byte[] iv, byte[] data) {
-		this.salt = salt;
-		this.iv = iv;
-		this.data = data;
+	private PasswordAesManager() {
+		//nothing
 	}
 	
-	public byte[] getSalt() {
-		return salt;
-	}
-	public void setSalt(byte[] salt) {
-		this.salt = salt;
+	public static final PasswordAesManager getInstance() {
+		return manager;
 	}
 	
-	public byte[] getIv() {
-		return iv;
-	}
-	public void setIv(byte[] iv) {
-		this.iv = iv;
+	public final String encryptPassword(String password, String key) throws Exception{
+		EncryptedData data = aesTool.encrypt(password, key.toCharArray());
+		return data.toString();
 	}
 	
-	public byte[] getData() {
-		return data;
+	public final String decryptPassword(String password, String key) throws Exception{
+		EncryptedData toDecrypt = EncryptedData.fromString(password);
+		String value = (String)aesTool.decrypt(toDecrypt, key.toCharArray());
+		return value;
 	}
-	public void setData(byte[] data) {
-		this.data = data;
-	}
-
-	public boolean isEmpty() {
-		return data == null;
-	}
+	
 }

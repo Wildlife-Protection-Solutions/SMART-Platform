@@ -29,6 +29,8 @@ import java.util.Set;
 
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
+import org.wcs.smart.security.AESTool;
+import org.wcs.smart.security.EncryptedData;
 
 /**
  * Class that manages secure data for informants
