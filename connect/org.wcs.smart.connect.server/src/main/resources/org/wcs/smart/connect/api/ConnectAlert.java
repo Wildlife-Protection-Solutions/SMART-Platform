@@ -575,8 +575,9 @@ public class ConnectAlert extends HttpServlet {
     	            feature.put("properties", properties);
     	            featureList.put(feature);
     	            feature.put("type", "Feature");
-    	            featureCollection.put("features", featureList);
+    	            
     	        }
+    	        featureCollection.put("features", featureList);
     	        
     	    } catch (JSONException e) {
     	    	throw new SmartConnectException(Response.Status.BAD_REQUEST, "can't save json object: "+e.toString());

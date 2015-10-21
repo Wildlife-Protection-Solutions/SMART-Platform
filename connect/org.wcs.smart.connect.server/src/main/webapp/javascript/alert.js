@@ -1,4 +1,5 @@
 var ALERT_URL = "../api/connectalert/";
+//var ALERT_URL = "../api/connectalertbrokenonpurposetoTest/";
 var FILTER_URL = "../api/connectalertfilterdefault/";
 var interval = 7000; //# of milli-seconds between map refresh on the alert layer,
 					//overridden by the defaults once they load
@@ -248,6 +249,7 @@ function settab(tab){
 	remove_all_tab_classes();
 	switch(tab){
 		case 2:
+			document.getElementById("map-info-box").style.display = "none";
 			document.getElementById("filter-controls").style.display = "none";
 			
 			document.getElementById("tab2").style.zIndex = 2;
@@ -260,6 +262,7 @@ function settab(tab){
 			document.getElementById('tab3text').className += "unselectedTab";
 			break;
 		case 3:
+			document.getElementById("map-info-box").style.display = "none";
 			document.getElementById("filter-controls").style.display = "block";
 			
 			document.getElementById("tab3").style.zIndex = 2;
@@ -272,6 +275,7 @@ function settab(tab){
 			document.getElementById('tab2text').className += "unselectedTab";
 			break;
 		default:
+			document.getElementById("map-info-box").style.display = "block";
 			document.getElementById("filter-controls").style.display = "block";
 			
 			document.getElementById("tab1").style.zIndex = 2;
@@ -376,10 +380,13 @@ function createAlertTable(){
 		var msg = "Error: ";
 		if (this.status == 401){
 			msg += i18n("alert.unathorized");
+			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}else if (this.status == 404){
 			msg += i18n("alert.invalidurl");
+			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}else if (this.status == 500){
 			msg += i18n("alert.servererror");
+			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}
 		
 		
@@ -409,7 +416,11 @@ function createAlertTable(){
 	 	    var oCell = newRow.insertCell(0);
 	 	    oCell.colSpan = 10;
 	 	    oCell.innerHTML = i18n("alert.noalertsfound");
+	 	    var str = document.getElementById("tab3text").innerHTML;
+			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1 ) + "(0)</a>";
 		}else{
+			var str = document.getElementById("tab3text").innerHTML;
+			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1) + "(" + alerts.length + ")</a>";
 		 	for (var i = 0; i < alerts.length; i ++){
 		 		var d = new Date(alerts[i].properties.date);
 		 		var row = tableCreateRowTDs(parent,
@@ -660,7 +671,7 @@ function updateRealtimeLayer(updatedUrl){
         var minutes = now.getMinutes();
         if(minutes <10) minutes = "0" + minutes;
         if(seconds<10) seconds = "0" + seconds;
-        document.getElementById("map-info-box").innerHTML = "Last Updated " + now.getDate() + "/" + now.getMonth() + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>update now</a>";
+        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + now.getMonth() + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>update now</a>";
     });
     
     realtime.addTo(map);

@@ -18,6 +18,7 @@ labels_en= {
 "alert.showfilters": "Show Filters",
 "alert.invalidcustomdates": "Invalid custom dates. No date filter was applied to events.",
 "alert.errorlabel": "Error: ",
+"alert.lastupdated": "Last Updated ",
 "settings.usernamerequired": "Username required",
 "settings.passwordrequired": "Password required",
 "settings.passwordsdontmatch": "Passwords do not match",
