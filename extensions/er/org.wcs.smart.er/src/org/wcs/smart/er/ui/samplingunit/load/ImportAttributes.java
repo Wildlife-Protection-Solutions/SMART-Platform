@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -118,7 +119,7 @@ public class ImportAttributes implements IRunnableWithProgress {
 			final List<String> warnings = new ArrayList<String>();
 			boolean changes = false;
 			
-			try( CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter)){ //$NON-NLS-1$
+			try( CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){ //$NON-NLS-1$
 				String[] headers = reader.readNext();
 				monitor.worked(1);
 				int idIndex = -1;
