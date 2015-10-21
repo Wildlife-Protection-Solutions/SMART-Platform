@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -95,7 +96,7 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 		
 		List<Employee> employees = new ArrayList<Employee>();
 		try(CSVReader reader = new CSVReader(
-				new InputStreamReader(new FileInputStream(file), "UTF-8"), delimiter)){ //$NON-NLS-1$
+				new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){ //$NON-NLS-1$
 			int line = 1;
 			if (skipHeader){
 				reader.readNext();

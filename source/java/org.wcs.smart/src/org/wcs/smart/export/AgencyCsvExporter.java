@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,7 +69,7 @@ public class AgencyCsvExporter implements ICsvDataExporter {
 
 		try (
 			CSVWriter writer = new CSVWriter(
-					new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+					new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8),
 					delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 			List<Agency> agencies = getAgencies(session);
 
