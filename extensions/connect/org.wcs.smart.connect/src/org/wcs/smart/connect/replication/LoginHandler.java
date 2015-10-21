@@ -213,6 +213,6 @@ public class LoginHandler implements ILoginHandler {
 			//TODO: do we want to warn the user or what??
 			return null;
 		}
-		return new SmartConnect(server, user.getConnectUsername(), user.getConnectPassword());
+		return SmartConnect.findInstance(server, user.getConnectUsername(), user.getConnectPassword());
 	}
 }

@@ -79,9 +79,9 @@ public class ConnectServerWizard extends Wizard {
 			}
 		}
 		
-		try(SmartConnect cs = new SmartConnect(server, username, password)){
-			error = cs.validateUser();
-		}
+		SmartConnect cs = SmartConnect.findInstance(server, username, password);
+		error = cs.validateUser();
+		
 		
 		if (error != null){
 			//TODO on error; remove copied certificate file

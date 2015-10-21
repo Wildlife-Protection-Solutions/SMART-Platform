@@ -31,7 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
@@ -83,7 +82,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Emily
  *
  */
-public class SmartConnect implements AutoCloseable {
+public class SmartConnect {
 
 	public final static String API_URL = "/api";
 	
@@ -98,20 +97,64 @@ public class SmartConnect implements AutoCloseable {
 	 */
 	public static final Semaphore UPLOAD_LOCK = new Semaphore(1); 
 	
+	
+	private static SmartConnect lastConnect;
+	
+	/**
+	 * Finds the connect instance reusing existing connection
+	 * if exists.
+	 * 
+	 * @param server the connect server
+	 * @param username the connect username
+	 * @param password the connect password
+	 * 
+	 * @return
+	 */
+	public static final SmartConnect findInstance(ConnectServer server, String username, String password){
+		if (lastConnect != null){
+			//if server; username; password and certification file are all the same
+			//we can reuse the last instance; otherwise we need to close and 
+			//create a new instance
+			if (lastConnect.server.equals(server) 
+					&& lastConnect.username.equals(username) 
+					&& lastConnect.password.equals(password)){
+				if (lastConnect.server.getCertificateFileName().equals(server.getCertificateFileName())){
+					lastConnect.server = server;
+					return lastConnect;
+				}
+			}
+		}
+		if (lastConnect != null){
+			lastConnect.close();
+		}
+		lastConnect = new SmartConnect(server, username, password);
+		return lastConnect;
+	}
+	
+	/**
+	 * Close all open Smart Connect instances
+	 */
+	public static final void closeAll(){
+		if (lastConnect != null){ 
+			lastConnect.close();
+			lastConnect = null;
+		}
+	}
+	
 	/**
 	 * 
 	 * @param url
 	 * @param username
 	 * @param password
 	 */
-	public SmartConnect(ConnectServer server, String username, String password){
+	private SmartConnect(ConnectServer server, String username, String password){
 		this.server = server;
 		this.username = username;
 		this.password = password;
 	}
 	
 	private void createClient(){
-
+		if (client != null) return;
 		// load the keystore that includes self-signed cert as a "trusted" entry
 		try{
 			
@@ -173,14 +216,12 @@ public class SmartConnect implements AutoCloseable {
 	/**
 	 * Closes connect to SMART Server
 	 */
-	@Override
 	public void close(){
 		if (client != null){
 			client.close();
 			client = null;
 		}
 	}
-	
 	/**
 	 * Validates the user/password/url associated.  
 	 * All errors are logged.
