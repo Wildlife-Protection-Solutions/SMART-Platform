@@ -75,12 +75,12 @@ import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.intelligence.IntelligenceHibernateManager;
 import org.wcs.smart.intelligence.IntelligencePlugIn;
 import org.wcs.smart.intelligence.informant.PersistentManager;
-import org.wcs.smart.intelligence.informant.aes.EncryptedData;
 import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.InformantDataKey;
 import org.wcs.smart.intelligence.model.IntelligenceSource;
+import org.wcs.smart.security.EncryptedData;
 
 /**
  * Editor for viewing informant application data.

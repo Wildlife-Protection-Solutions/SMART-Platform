@@ -40,7 +40,6 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.hibernate.SmartHibernateManager;
 import org.wcs.smart.intelligence.informant.PersistentManager;
-import org.wcs.smart.intelligence.informant.aes.EncryptedData;
 import org.wcs.smart.intelligence.internal.Messages;
 import org.wcs.smart.intelligence.model.Informant;
 import org.wcs.smart.intelligence.model.Intelligence;
@@ -48,6 +47,7 @@ import org.wcs.smart.intelligence.model.IntelligenceSource;
 import org.wcs.smart.intelligence.model.PatrolIntelligence;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.query.ui.model.ListItem;
+import org.wcs.smart.security.EncryptedData;
 import org.wcs.smart.util.UuidUtils;
 
 /**

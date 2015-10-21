@@ -23,22 +23,23 @@ package org.wcs.smart.connect.replication;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
-import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.server.UploadCaEngine;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
+import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -74,6 +75,22 @@ public class LoginHandler implements ILoginHandler {
 			if (status == null){
 				return;
 			}
+			s.getTransaction().commit();
+		}finally{
+			s.close();
+		}
+		
+		//process any existing ca upload task
+		processCaUploadEvents(status);
+		
+		//sort out replication
+		s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
+			if (status == null){
+				return;
+			}
 			if (status.getStatus() == ConnectServerStatus.Status.UPLOAD ||
 				status.getStatus() == ConnectServerStatus.Status.DONE ){
 				DerbyReplicationManager.INSTANCE.enableReplication(s);
@@ -83,7 +100,7 @@ public class LoginHandler implements ILoginHandler {
 			s.close();
 		}
 		
-		processCaUploadEvents(status);
+		//process any upload sync tasks
 		processUploadSync();
 	}
 
@@ -97,36 +114,45 @@ public class LoginHandler implements ILoginHandler {
 			return;
 		}
 		
-		Session s = HibernateManager.openSession();
-		try{
+		
+		if (status.getStatus() == ConnectServerStatus.Status.BACKUP){
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Export To Connect", "SMART was terminated before the export to SMART Conenct to be initiated.  You will need to re-export to SMART Connect if you want to upload your conservation area.");
 			
-			if (status.getStatus() == ConnectServerStatus.Status.BACKUP){
-				MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Export To Connect", "SMART was terminated before the export to SMART Conenct to be initiated.  You will need to re-export to SMART Connect if you want to upload your conservation area.");
-				
+			Session s = HibernateManager.openSession();
+			try{
 				s.beginTransaction();
 				s.saveOrUpdate(status);
 				status.setStatus(Status.ERROR);
 				s.getTransaction().commit();
 				return;
-			}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){		
-				SmartConnect connect = getSmartConnect(s);
-				if (connect == null) return;
-				if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Export To Connect", 
-						"SMART was terminated before the export to SMART Conenct was completed.  Do you want resume the upload process?")){
+			}finally{
+				s.close();
+			}
+				
+		}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){		
+			boolean cont = false;
+			if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Export To Connect", 
+					"SMART was terminated before the export to SMART Conenct was completed.  Do you want resume the upload process?")){
+				
+				SmartConnect connect = getSmartConnect();
+				if (connect != null){
 					//need to continue upload
-					(new UploadCaEngine()).continueUpload(connect, status);
-				}else{
+					cont = true;
+					(new UploadCaEngine()).continueUpload(connect, status);		
+				}
+			}
+			if (!cont){
+				Session s = HibernateManager.openSession();
+				try{
 					s.beginTransaction();
 					status.setStatus(Status.ERROR);
 					s.saveOrUpdate(status);
 					s.getTransaction().commit();
 					return;
+				}finally{
+					s.close();
 				}
 			}
-		}catch (Exception ex){
-			ConnectPlugIn.log("Error continuing connect upload", ex);
-		}finally{
-			s.close();
 		}
 	}
 	
@@ -169,24 +195,27 @@ public class LoginHandler implements ILoginHandler {
 					}
 					
 					return;
-				}else{
-					SmartConnect connect = null;
-					s = HibernateManager.openSession();
-					try{
-						connect = getSmartConnect(s);
-					}finally{
-						s.close();
-					}
-					if (connect == null ) return;
-						
+				}else{	
 					//continue job waiting for
 					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could finish.  The job will resume and you will be notified when complete.");
-					
-					UploadChangeLogEngine e = new UploadChangeLogEngine(connect);
-					try{
-						e.createUpload(new NullProgressMonitor());
-					}catch (NothingToUpdateException ex){
-						//consume this exception
+					SmartConnect connect = getSmartConnect();
+					if (connect != null){
+						UploadChangeLogEngine e = new UploadChangeLogEngine(connect);
+						try{
+							e.createUpload(new NullProgressMonitor());
+						}catch (NothingToUpdateException ex){
+							//consume this exception
+						}
+					}else{
+						s = HibernateManager.openSession();
+						try{
+							s.beginTransaction();
+							record.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+							s.saveOrUpdate(record);
+							s.getTransaction().commit();
+						}finally{
+							s.close();
+						}
 					}
 				}
 			}
@@ -197,22 +226,24 @@ public class LoginHandler implements ILoginHandler {
 	
 	
 	
-	private SmartConnect getSmartConnect(Session s){
-		ConnectServer server = (ConnectServer) s.createCriteria(ConnectServer.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.uniqueResult();
-		if (server == null){
-			//no server configured; this should NEVER happen
-			return null;
+	private SmartConnect getSmartConnect(){
+		final String title = "SMART Connect";
+		final String message = "Confirm SMART Connect credentials";
+				
+		ConnectDialog cd = new ConnectDialog(Display.getDefault().getActiveShell(), true){
+			@Override
+			protected Control createDialogArea(Composite parent) {
+				Control c = super.createDialogArea(parent);
+				getShell().setText(title);
+				setTitle(title);
+				setMessage(message);
+				return c;
+			}
+		};
+		
+		if (cd.open() == Window.OK){
+			return cd.getConnection();
 		}
-	
-		ConnectUser user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
-		if (user == null){
-			//this user does not have the ability to update conservation
-			//area to smart connect so we have to do something here
-			//TODO: do we want to warn the user or what??
-			return null;
-		}
-		return SmartConnect.findInstance(server, user.getConnectUsername(), user.getConnectPassword());
+		return null;		
 	}
 }

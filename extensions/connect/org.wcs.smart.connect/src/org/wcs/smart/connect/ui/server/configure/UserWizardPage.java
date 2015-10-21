@@ -27,9 +27,11 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Connect username/password wizard page.
@@ -43,6 +45,7 @@ public class UserWizardPage extends WizardPage implements ModifyListener{
 	
 	private Text txtUser;
 	private Text txtPass;
+	private Button btnSavePass;
 	
 	public UserWizardPage(){
 		super(NAME);
@@ -70,6 +73,12 @@ public class UserWizardPage extends WizardPage implements ModifyListener{
 		txtPass = new Text(inner, SWT.BORDER | SWT.PASSWORD);
 		txtPass.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
+		if (SmartDB.getCurrentEmployee() != null){
+			new Label(inner, SWT.NONE);
+			btnSavePass = new Button(inner, SWT.CHECK);
+			btnSavePass.setText("Save Password");
+		}
+		
 		txtPass.addModifyListener(this);
 		txtUser.addModifyListener(this);
 		
@@ -91,6 +100,13 @@ public class UserWizardPage extends WizardPage implements ModifyListener{
 	
 	public String getPassword(){
 		return this.txtPass.getText().trim();
+	}
+	
+	public boolean getSavePassword(){
+		if (btnSavePass == null){
+			return false;
+		}
+		return this.btnSavePass.getSelection();
 	}
 	
 	@Override

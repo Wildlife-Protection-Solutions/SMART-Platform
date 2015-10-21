@@ -86,7 +86,7 @@ public class StationCsvImporter implements ICsvDataImporter {
 		}
 		ArrayList<Station> stations = new ArrayList<Station>();
 		try(CSVReader reader = new CSVReader(
-				new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){ //$NON-NLS-1$
+				new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){
 			//reading the first line with language codes
 			String[] headerRow = reader.readNext();
 			List<String> langCodes = getLanguageCodes(headerRow);

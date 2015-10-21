@@ -369,7 +369,7 @@ public class Upgrader330To400 implements IDatabaseUpgrader {
 				byte[] uuid = rs.getBytes(1);
 				String pass = rs.getString(2);
 				
-				ps.setString(1, BCrypt.hashpw(pass, BCrypt.gensalt(20)));
+				ps.setString(1, HibernateManager.generatePassword(pass));
 				ps.setBytes(2, uuid);
 
 				ps.executeUpdate();

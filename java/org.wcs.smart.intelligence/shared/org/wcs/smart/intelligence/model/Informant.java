@@ -36,8 +36,8 @@ import javax.persistence.Transient;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.UuidItem;
 import org.wcs.smart.intelligence.informant.PersistentManager;
-import org.wcs.smart.intelligence.informant.aes.EncryptedData;
 import org.wcs.smart.intelligence.informant.aes.InformantAesManager;
+import org.wcs.smart.security.EncryptedData;
 import org.wcs.smart.util.UuidUtils;
 
 /**

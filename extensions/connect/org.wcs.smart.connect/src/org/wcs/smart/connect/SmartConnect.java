@@ -118,7 +118,7 @@ public class SmartConnect {
 			if (lastConnect.server.equals(server) 
 					&& lastConnect.username.equals(username) 
 					&& lastConnect.password.equals(password)){
-				if (lastConnect.server.getCertificateFileName().equals(server.getCertificateFileName())){
+				if (strEquals(lastConnect.server.getCertificateFileName(), server.getCertificateFileName())){
 					lastConnect.server = server;
 					return lastConnect;
 				}
@@ -131,6 +131,11 @@ public class SmartConnect {
 		return lastConnect;
 	}
 	
+	private static boolean strEquals(String s1, String s2){
+		if (s1 == null && s2 == null) return true;
+		if (s1 != null && s2 != null) return s1.equalsIgnoreCase(s2);
+		return false;
+	}
 	/**
 	 * Close all open Smart Connect instances
 	 */

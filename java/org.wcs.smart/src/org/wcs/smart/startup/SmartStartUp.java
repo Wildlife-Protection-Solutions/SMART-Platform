@@ -244,7 +244,7 @@ public class SmartStartUp {
 					Session s = HibernateManager.openSession();
 					try{
 						ConservationAreaConfiguration config = new ConservationAreaConfiguration(areas, users, s);
-						SmartDB.setConservationAreaConfiguration(users.get(0), ca, config);
+						SmartDB.setConservationAreaConfiguration(users.get(0), password, ca, config);
 					}finally{
 						if (s.isOpen()) s.close();
 					}
@@ -269,7 +269,7 @@ public class SmartStartUp {
 				try{
 					ConservationAreaConfiguration config = 
 							new ConservationAreaConfiguration(Collections.singleton(ca), Collections.singleton(e), s);
-					SmartDB.setConservationAreaConfiguration(e, ca, config);
+					SmartDB.setConservationAreaConfiguration(e, password, ca, config);
 				}finally{
 					if (s.isOpen()) s.close();
 				}
