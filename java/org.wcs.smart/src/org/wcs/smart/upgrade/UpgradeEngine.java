@@ -1,6 +1,7 @@
 package org.wcs.smart.upgrade;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -251,7 +252,7 @@ public class UpgradeEngine {
 	 */
 	public static void runScript(Connection databaseConnection, InputStream in) throws Exception{
 		try{
-			ij.runScript(databaseConnection, in, "utf-8", System.out, "utf-8");  //$NON-NLS-1$//$NON-NLS-2$
+			ij.runScript(databaseConnection, in, StandardCharsets.UTF_8.name(), System.out, StandardCharsets.UTF_8.name());
 		}finally{
 			in.close();
 		}

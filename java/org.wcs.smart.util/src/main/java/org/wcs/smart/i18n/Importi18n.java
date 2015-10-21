@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -76,7 +77,7 @@ public class Importi18n {
 		}finally{
 			fr.close();
 		}
-		InputStreamReader isr = new InputStreamReader(new FileInputStream(f), "UTF-8");
+		InputStreamReader isr = new InputStreamReader(new FileInputStream(f), StandardCharsets.UTF_8);
 		CSVReader reader = new CSVReader(isr);
 	
 		/* header line */
@@ -194,7 +195,7 @@ public class Importi18n {
 	 */
 	private void writeProperties(File f, HashMap<String,String> map) throws Exception{
 		System.out.println("Writing " + f.getPath());
-		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f), "UTF-8");
+		OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
 		writer.write("#Auto generated from conversion files on " + DateFormat.getDateTimeInstance().format(new Date()));
 		writer.write(Packagei18n.LINE_SEP);
 		TreeSet<String> keys = new TreeSet<String>(map.keySet());

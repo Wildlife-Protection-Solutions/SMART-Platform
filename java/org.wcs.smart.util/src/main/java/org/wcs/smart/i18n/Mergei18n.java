@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -212,7 +213,7 @@ public class Mergei18n {
             properties.put(key, values.get(key));
         }
 
-        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), "UTF-8");
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f.toString() + ".temp"), StandardCharsets.UTF_8);
         properties.store(writer, "Auto generated from conversion file on " + DateFormat.getDateTimeInstance().format(new Date()));
         writer.close();
 
@@ -225,7 +226,7 @@ public class Mergei18n {
         while(is.read() != -1){}
 
         ((new File(f.toString() + ".temp"))).delete();
-//        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f), "UTF-8");
+//        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(f), StandardCharsets.UTF_8);
 //        writer.write("#Auto generated from conversion files on " + DateFormat.getDateTimeInstance().format(new Date()));
 //        writer.write(Packagei18n.LINE_SEP);
 //        TreeSet<String> keys = new TreeSet<String>(values.keySet());

@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -97,7 +98,7 @@ public class InformantBackupContributor implements IBackupContributor {
         /* We want to read an existing ZIP File, so we set this to False */
         zip_properties.put("create", "false"); //$NON-NLS-1$ //$NON-NLS-2$
         /* Specify the encoding as UTF-8 */
-        zip_properties.put("encoding", "UTF-8");   //$NON-NLS-1$//$NON-NLS-2$
+        zip_properties.put("encoding", StandardCharsets.UTF_8.name());   //$NON-NLS-1$
         /* Specify the path to the ZIP File that you want to read as a File System */
         URI zip_disk = URI.create("jar:" + backupZipFile.toURI().toString()); //$NON-NLS-1$
         

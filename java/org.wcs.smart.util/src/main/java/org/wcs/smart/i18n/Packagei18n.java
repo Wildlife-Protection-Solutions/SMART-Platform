@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -196,7 +197,7 @@ public class Packagei18n {
 		File f = new File(OUT_DIR, determineOutFileName(inf));
 		//System.out.println("writing " + f.toString());
 		FileOutputStream fs = new FileOutputStream(f);
-		OutputStreamWriter writer = new OutputStreamWriter(fs, "UTF-8");
+		OutputStreamWriter writer = new OutputStreamWriter(fs, StandardCharsets.UTF_8);
 		
 		/* write header line */
 		StringBuilder s = new StringBuilder();

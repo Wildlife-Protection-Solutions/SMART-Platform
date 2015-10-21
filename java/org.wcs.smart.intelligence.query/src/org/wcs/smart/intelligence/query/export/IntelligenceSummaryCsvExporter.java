@@ -24,6 +24,7 @@ package org.wcs.smart.intelligence.query.export;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import org.wcs.smart.common.filter.ISmartProgressMonitor;
@@ -86,7 +87,7 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 		SummaryQueryResult results = (SummaryQueryResult) result;
 		//column headers
 		try(CSVWriter writer = new CSVWriter(
-				new OutputStreamWriter(new FileOutputStream(file), "UTF-8"), //$NON-NLS-1$ 
+				new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8),
 				delimiter, '"',SharedUtils.LINE_SEPARATOR)){ 
 		
 			for (int i = 0; i < results.getColumnHeaders().size(); i ++){
