@@ -227,7 +227,12 @@ public class ConnectDialog extends TitleAreaDialog {
 					
 					//save password
 					try{
-						String existingPassword = ConnectDialog.this.user.decryptPassword();
+						String existingPassword = null;
+						try{
+							existingPassword = ConnectDialog.this.user.decryptPassword();
+						}catch (Exception ex){
+							existingPassword = "";
+						}
 						String newPassword = null;
 						if (savePass){
 							newPassword = ConnectDialog.this.user.encryptPassword(pass);
