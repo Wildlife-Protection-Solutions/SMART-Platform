@@ -156,14 +156,18 @@ public abstract class FileUploaderJob extends Job {
 		long waitTime = connect.getServer().getRetryWaitTime();
 		while( (currentTime - startTime)  < connect.getServer().getWaitProcessingTime() * 1000000){
 			Thread.sleep(waitTime);
-			WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
+			try{
+				WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 			
-			if(serverStatus.getStatus() == Status.COMPLETE){
-				onProcessingComplete(serverStatus);
-				return true;
-			}else if (serverStatus.getStatus() == Status.ERROR){
-				onError(serverStatus);
-				return true;
+				if(serverStatus.getStatus() == Status.COMPLETE){
+					onProcessingComplete(serverStatus);
+					return true;
+				}else if (serverStatus.getStatus() == Status.ERROR){
+					onError(serverStatus);
+					return true;
+				}
+			}catch (Exception ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
 			}
 			currentTime = System.nanoTime();
 		}

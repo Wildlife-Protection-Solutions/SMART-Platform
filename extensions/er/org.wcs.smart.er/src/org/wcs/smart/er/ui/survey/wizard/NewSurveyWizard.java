@@ -153,7 +153,6 @@ public class NewSurveyWizard extends Wizard implements IPageChangingListener{
 		if (newSurvey.getSurveyDesign() == null){
 			return super.getStartingPage();
 		}
-		
 		return idPage;
 	}
 	

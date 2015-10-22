@@ -86,7 +86,9 @@ public class NewSurveyDesignWizard extends Wizard implements IPageChangingListen
 	@Override
 	public void dispose(){
 		super.dispose();
-		session.close();
+		if (session.isOpen()){
+			session.close();
+		}
 	}
 	
 	public SurveyDesign getNewSurveyDesign(){
