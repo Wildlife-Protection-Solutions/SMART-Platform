@@ -154,7 +154,7 @@ public class ConnectDialog extends TitleAreaDialog {
 			txtUser.setText(user.getConnectUsername());
 			String decryptPass = "";
 			try{
-				decryptPass  = user.decryptPassword();
+				decryptPass  = ConnectPlugIn.decryptPassword(user);
 			}catch (Exception ex){
 				ConnectPlugIn.log("Error decrypting password." + ex.getMessage(), ex);
 			}
@@ -229,13 +229,13 @@ public class ConnectDialog extends TitleAreaDialog {
 					try{
 						String existingPassword = null;
 						try{
-							existingPassword = ConnectDialog.this.user.decryptPassword();
+							existingPassword = ConnectPlugIn.decryptPassword(ConnectDialog.this.user);
 						}catch (Exception ex){
 							existingPassword = "";
 						}
 						String newPassword = null;
 						if (savePass){
-							newPassword = ConnectDialog.this.user.encryptPassword(pass);
+							newPassword = ConnectPlugIn.encryptPassword(pass);
 						}
 						if (!strequals(existingPassword, newPassword == null ? null : pass)){
 							Session s = HibernateManager.openSession();

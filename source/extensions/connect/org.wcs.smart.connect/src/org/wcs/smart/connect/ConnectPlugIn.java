@@ -29,6 +29,9 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.model.PasswordAesManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * The activator class controls the plug-in life cycle
@@ -107,5 +110,34 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 		int status = t instanceof Exception || message != null ? IStatus.ERROR : IStatus.WARNING;
 		log(status, message, t);
 	}
-	
+
+	/**
+	 * Decrypt a connect user password.
+	 * 
+	 * @param user
+	 * @return
+	 * @throws Exception
+	 */
+	public static String decryptPassword(ConnectUser user) throws Exception{
+		if (user.getConnectPassword() == null){
+			return null;
+		}
+		if (user.getConnectPassword().isEmpty()){
+			return user.getConnectPassword();
+		}
+		String key = SmartDB.getPlainTextPassword();
+		return PasswordAesManager.getInstance().decryptPassword(user.getConnectPassword(), key);
+	}
+
+	/**
+	 * Encrypt a password.
+	 * 
+	 * @param password
+	 * @return
+	 * @throws Exception
+	 */
+	public static String encryptPassword(String password) throws Exception{
+		String key = SmartDB.getPlainTextPassword();
+		return PasswordAesManager.getInstance().encryptPassword(password, key);
+	}
 }
