@@ -606,7 +606,7 @@ public class MapSettings {
 			
 				//when overwriting and existing file; this gets the
 				//files currently in the basemap; below we
-				//get the new files then delete any that don't eixst
+				//get the new files then delete any that don't exist
 				//in the new map
 				List<File> currentFiles = getFilesToDelete(s);
 			
@@ -733,7 +733,7 @@ public class MapSettings {
 			//this allows the file to be relative
 			//so if the data is copied to a new location
 			//the basemap files still work;
-			java.net.URI uri = new java.net.URI( SMARTBM_FILE_PROTOCOL, "//" + fileName, srcUri.getFragment()); //$NON-NLS-1$
+			java.net.URI uri = new java.net.URI( SMARTBM_FILE_PROTOCOL, "//" + fileName, FilenameUtils.getBaseName(fileName)); //$NON-NLS-1$
 			trgUri = uri;
 		} catch (Exception e) {
 			SmartPlugIn.displayLog(MessageFormat.format(Messages.MapSettings_FileImportError + "\n\n" + e.getMessage(), new Object[]{srcUri.getPath()}), e); //$NON-NLS-1$
@@ -798,7 +798,9 @@ public class MapSettings {
 	}
 	
 	/**
-	 * Delete any files associated with the map settings
+	 * Lists any files in the smart filestore that are 
+	 * associated with the current basemap definition
+	 * but not any other basemaps for the current conservation area.
 	 */
 	public ArrayList<File> getFilesToDelete(Session activeSession){
 		// get map definition selected
