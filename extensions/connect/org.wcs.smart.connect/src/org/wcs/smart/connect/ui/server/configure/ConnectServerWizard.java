@@ -95,7 +95,7 @@ public class ConnectServerWizard extends Wizard {
 		if (savePassword){
 			String encryptedPass = null;
 			try{
-				encryptedPass = user.encryptPassword(password);
+				encryptedPass = ConnectPlugIn.encryptPassword(password);
 			}catch (Exception ex){
 				ConnectPlugIn.log("Error encrypting password." + ex.getMessage(), ex);
 			}

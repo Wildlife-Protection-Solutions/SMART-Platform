@@ -32,10 +32,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.wcs.smart.ca.Employee;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Link between a SMART Connect server, a SMART user and 
@@ -106,23 +104,6 @@ public class ConnectUser {
 
 	public void setConnectPassword(String password) {
 		this.password = password;
-	}
-	
-	@Transient
-	public String decryptPassword() throws Exception{
-		if (getConnectPassword() == null){
-			return null;
-		}
-		if (getConnectPassword().isEmpty()){
-			return getConnectPassword();
-		}
-		String key = SmartDB.getPlainTextPassword();
-		return PasswordAesManager.getInstance().decryptPassword(getConnectPassword(), key);
-	}
-	@Transient
-	public String encryptPassword(String password) throws Exception{
-		String key = SmartDB.getPlainTextPassword();
-		return PasswordAesManager.getInstance().encryptPassword(password, key);
 	}
 	
 	@Override
