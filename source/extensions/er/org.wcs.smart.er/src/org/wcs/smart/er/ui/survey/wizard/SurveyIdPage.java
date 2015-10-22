@@ -78,6 +78,7 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 		
 		cdId = createDecoration(txtId);
 		cdId.hide();
+		txtId.setData(false);
 		
 		txtId.addModifyListener(new ModifyListener() {
 			
@@ -85,8 +86,10 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 			public void modifyText(ModifyEvent e) {
 				if (!SmartUtils.isSimpleString(txtId.getText(), RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX, Survey.ID_MAX_LENGTH)){
 					cdId.setDescriptionText(MessageFormat.format(Messages.SurveyIdPage_IdError, new Object[]{Survey.ID_MAX_LENGTH, RegExLevel.ALLOWED_CHARS_COMPLEX_REGEX.textDesc}));
+					txtId.setData(false);
 					cdId.show();
 				}else{
+					txtId.setData(true);
 					cdId.hide();
 				}
 				
@@ -104,7 +107,7 @@ public class SurveyIdPage extends WizardPage implements INewSurveyWizardPage{
 
 	@Override
 	public boolean isPageComplete(){
-		return !cdId.isVisible();
+		return (boolean)txtId.getData();
 	}
 	
 	@Override

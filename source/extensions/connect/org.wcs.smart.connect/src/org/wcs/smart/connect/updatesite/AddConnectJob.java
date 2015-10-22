@@ -109,6 +109,7 @@ public class AddConnectJob extends Job {
 			"ALTER TABLE smart.connect_sync_history ADD CONSTRAINT connect_sync_history_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area(uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",
 			"ALTER TABLE smart.connect_sync_history ADD CONSTRAINT connect_sync_history_connect_uuid_fk foreign key (connect_uuid) REFERENCES smart.connect_server(uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",
 			"CREATE FUNCTION smart.uuid() returns char(16) for bit data LANGUAGE JAVA NOT deterministic external name 'org.wcs.smart.util.DerbyUtils.createUuid' PARAMETER STYLE JAVA NO SQL RETURNS NULL ON NULL INPUT",
+			"CREATE INDEX connect_change_log_uuid_idx on smart.connect_change_log (uuid)",
 			
 			"ALTER TABLE smart.connect_server ADD CONSTRAINT connect_server_ca_unq UNIQUE(ca_uuid)",
 			

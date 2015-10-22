@@ -90,10 +90,10 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		session = HibernateManager.openSession();
 		
 		if (parentDesignUuid != null){
-			parentDesign = (SurveyDesign) session.load(SurveyDesign.class, parentDesignUuid);
+			parentDesign = (SurveyDesign) session.get(SurveyDesign.class, parentDesignUuid);
 		}
 		if (parentSurveyUuid != null){
-			parentSurvey = (Survey) session.load(Survey.class, parentSurveyUuid);
+			parentSurvey = (Survey) session.get(Survey.class, parentSurveyUuid);
 			parentDesign = parentSurvey.getSurveyDesign();
 			newMission.setSurvey(parentSurvey);
 			newMission.setStartDate(parentSurvey.getStartDate());
@@ -264,7 +264,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		//session may be closed by new survey design wizard
 		if (!session.isOpen()){
 			session = HibernateManager.openSession();
-			session.update(parentDesign);
+			this.parentDesign = (SurveyDesign) session.merge(parentDesign);
 		}
 		
 		//update design with page values
