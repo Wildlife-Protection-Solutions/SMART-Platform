@@ -318,7 +318,7 @@ function showCurrentLayer() {
 		displayError(parseError(i18n("settings.errorcreatinglayer") + this.uuid));
 	}
 	
-	document.querySelector("#dialogerror").style.display = "none";
+	document.querySelector("#error").style.display = "none";
 	
 	var form = document.getElementById("maplayersform");
 	
