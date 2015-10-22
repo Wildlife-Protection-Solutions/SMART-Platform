@@ -37,16 +37,14 @@ window.onload = function(){
 		field: document.getElementById('datePickerFrom'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
-        maxDate: new Date('2050-12-31'),
-        yearRange: [2000,2020]
+        yearRange: [2000,2050]
 	});
 
 	var picker = new Pikaday({
 		field: document.getElementById('datePickerTo'),
 		firstDay: 1,
         minDate: new Date('2000-01-01'),
-        maxDate: new Date('2050-12-31'),
-        yearRange: [2000,2020]
+        yearRange: [2000,2050]
 	});
 
 
@@ -135,7 +133,7 @@ window.onload = function(){
 
 			
 	//initialize the map
-	map = new L.Map('map', {center: new L.LatLng(-7.5, 34.44), zoom: 8, layers: activeLayers});
+	map = new L.Map('map', {center: new L.LatLng(startingLat, startingLong), zoom: startingZoom, layers: activeLayers});
 	
  
 	getMapFilters();//get the map filter defaults and set them before we make the first call to get alerts/events

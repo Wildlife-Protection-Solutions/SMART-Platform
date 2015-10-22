@@ -35,6 +35,11 @@
 			</c:forEach> 
 		};
 	
+	var startingZoom = ${startingZoom};
+	var startingLong = ${startingLong};
+	var startingLat = ${startingLat};
+	
+	
 	<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 	var mapLayers = [ 
 	  <c:forEach var="layer" items="${mapLayers}">

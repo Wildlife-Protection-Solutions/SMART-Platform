@@ -191,10 +191,13 @@ CREATE TABLE connect.alert_filter_defaults(
 	default_level5 boolean,
 	default_ca_uuids varchar(925),--max 25 uuids, comma separated.
 	default_text varchar(128),
-	seconds_refresh int
+	seconds_refresh int,
+	starting_zoom_level int,
+	starting_long real,
+	starting_lat real
 )WITHOUT OIDS;
 
-insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, true, true, true, true,'','', 30);
+insert into connect.alert_filter_defaults values( 'a1bcbc77-9c0b-4ef8-bb6d-6bb9bd380a53' , 24, '',true, true, true, true, true, true, true,'','', 30, 8 , -7.5, 34);
 
 
 

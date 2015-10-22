@@ -687,6 +687,9 @@ function createDefaultsTable(){
 	}
 	
 	document.getElementById('secondsRefresh').value = list[0].secondsRefresh;
+	document.getElementById('startingZoom').value = list[0].startingZoomLevel;
+	document.getElementById('startingLong').value = list[0].startingLong;
+	document.getElementById('startingLat').value = list[0].startingLat;
 	
 	document.getElementById("filter_uuid").value = list[0].uuid;
 }
@@ -728,7 +731,10 @@ function getFilterJSON(){
 			"defaultLevel5" : document.getElementById("level5").checked,
 			"defaultCaUuids" : cas,
 			"defaultText" : document.getElementById("filterText").value,
-			"secondsRefresh" : document.getElementById("secondsRefresh").value
+			"secondsRefresh" : document.getElementById("secondsRefresh").value,
+			"startingZoomLevel" : document.getElementById("startingZoom").value,
+			"startingLong" : document.getElementById("startingLong").value,
+			"startingLat" : document.getElementById("startingLat").value
 			
 		};
 	return json;

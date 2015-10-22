@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.hibernate.Session;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Alert;
+import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
@@ -31,6 +32,7 @@ public class AlertServlet extends HttpServlet{
 		List<AlertType> alertTypes = null;
 		List<Alert> alerts = null;
 		List<MapLayer> mapLayers = null;
+		List<AlertFilterDefault> defaults = null;
 		
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
@@ -39,6 +41,7 @@ public class AlertServlet extends HttpServlet{
 			cas = HibernateManager.getConservationAreaInfos(session);
 			alertTypes = HibernateManager.getAlertTypes(session);
 			mapLayers = HibernateManager.getMapLayers(session);
+			defaults = HibernateManager.getAlertFilterDefaults(session);
 		}finally{
 			session.getTransaction().rollback();
 		}
@@ -47,6 +50,9 @@ public class AlertServlet extends HttpServlet{
 		request.setAttribute("cas", cas); //$NON-NLS-1$
 		request.setAttribute("alertTypes", alertTypes); //$NON-NLS-1$
 		request.setAttribute("mapLayers", mapLayers); //$NON-NLS-1$
+		request.setAttribute("startingZoom", defaults.get(0).getStartingZoomLevel()); //$NON-NLS-1$
+		request.setAttribute("startingLong", defaults.get(0).getStartingLong()); //$NON-NLS-1$
+		request.setAttribute("startingLat", defaults.get(0).getStartingLat()); //$NON-NLS-1$
 		
 		List<String>status = new ArrayList<String>();
 		for (Alert.AlertStatusEnum x : Alert.AlertStatusEnum.values()) {

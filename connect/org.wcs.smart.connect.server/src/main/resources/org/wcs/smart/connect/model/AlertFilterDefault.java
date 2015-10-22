@@ -23,6 +23,9 @@ public class AlertFilterDefault extends ConnectUuidItem{
 	private String defaultCaUuids;
 	private String defaultText;
 	private int secondsRefresh;
+	private int startingZoomLevel;
+	private float startingLat;
+	private float startingLong;
 	
 	
 	@Column(name="default_past_hours")
@@ -121,6 +124,28 @@ public class AlertFilterDefault extends ConnectUuidItem{
 		this.secondsRefresh = secondsRefresh;
 	}
 	
+	@Column(name="starting_zoom_level")
+	public int getStartingZoomLevel() {
+		return startingZoomLevel;
+	}
+	public void setStartingZoomLevel(int startingZoomLevel) {
+		this.startingZoomLevel = startingZoomLevel;
+	}
 	
+	@Column(name="starting_lat")
+	public float getStartingLat() {
+		return startingLat;
+	}
+	public void setStartingLat(float startingLat) {
+		this.startingLat = startingLat;
+	}
+	
+	@Column(name="starting_long")
+	public float getStartingLong() {
+		return startingLong;
+	}
+	public void setStartingLong(float startingLong) {
+		this.startingLong = startingLong;
+	}	
 	
 }

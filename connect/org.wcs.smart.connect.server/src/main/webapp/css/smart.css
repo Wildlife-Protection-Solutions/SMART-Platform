@@ -350,6 +350,13 @@ div.scrollable {
     padding: 3px 3px;
 }
 
+.defaultLabel{
+	width: 10em;
+	display:inline-block;
+	text-align: right;
+}
+
+
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/
 article.tabs{

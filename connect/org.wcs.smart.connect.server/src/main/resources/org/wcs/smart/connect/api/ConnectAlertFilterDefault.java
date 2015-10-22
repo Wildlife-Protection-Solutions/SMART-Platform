@@ -116,6 +116,10 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 						MessageFormat.format(Messages.getString("ConnectAlertFilterDefaul.LessThanMinRefresh", SmartUtils.getRequestLocale(request)), uuid)); //$NON-NLS-1$
 			}
 			toUpdate.setSecondsRefresh(newDefault.getSecondsRefresh());
+
+			toUpdate.setStartingZoomLevel(newDefault.getStartingZoomLevel());
+			toUpdate.setStartingLong(newDefault.getStartingLong());
+			toUpdate.setStartingLat(newDefault.getStartingLat());  
 			
 			s.update(toUpdate);
 			s.getTransaction().commit();
