@@ -36,6 +36,7 @@ import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.server.UploadCaEngine;
+import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
@@ -55,11 +56,11 @@ public class LoginHandler implements ILoginHandler {
 	@Override
 	public void onLogin() throws Exception {
 		//ensure replication is disabled; we will enable later if required
+		//this should be done when db started up; but we'll redo it here to 
+		//be sure.
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			System.out.println("REPLICATION: " + DerbyReplicationManager.INSTANCE.isReplicationEnabled(s));
-			
 			DerbyReplicationManager.INSTANCE.disableReplication(s);
 			s.getTransaction().commit();
 		}finally{
@@ -96,6 +97,10 @@ public class LoginHandler implements ILoginHandler {
 			if (status.getStatus() == ConnectServerStatus.Status.UPLOAD ||
 				status.getStatus() == ConnectServerStatus.Status.DONE ){
 				DerbyReplicationManager.INSTANCE.enableReplication(s);
+			}else if (status.getStatus() == ConnectServerStatus.Status.ERROR){
+				//delete any replication records or sync history records
+				ChangeLogTableManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
+				SyncHistoryManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
 			}
 			s.getTransaction().commit();
 		}finally{

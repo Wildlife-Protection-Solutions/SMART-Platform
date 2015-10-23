@@ -46,8 +46,10 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
+import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
@@ -199,6 +201,17 @@ public class UploadCaEngine {
 				}
 				
 			});
+			
+			//enable replication so we catch any changes made while the ca is uploaded to server
+			s = HibernateManager.openSession();
+			s.beginTransaction();
+			try{
+				DerbyReplicationManager.INSTANCE.enableReplication(s);
+				s.getTransaction().commit();
+			}catch(Exception ex){
+				//this should fail
+				throw new Exception("Failed to enable replication.  Cannot upload to SMART Connect. " + ex.getMessage(), ex);
+			}
 			
 			UploadCaJob job = new UploadCaJob(connect, localStatus);
 			job.addJobChangeListener(new JobChangeAdapter() {

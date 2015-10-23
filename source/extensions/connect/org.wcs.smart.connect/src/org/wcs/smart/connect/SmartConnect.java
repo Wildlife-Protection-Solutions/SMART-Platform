@@ -59,8 +59,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -167,11 +171,17 @@ public class SmartConnect {
 			SSLContext ctx = SSLContext.getInstance("TLS"); //$NON-NLS-1$
 			ctx.init(null, new TrustManager[]{trustManager}, null);
 		
+			ClientConnectionManager cm = new PoolingClientConnectionManager();
+			HttpClient httpClient = new DefaultHttpClient(cm);
+			ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
+			
 			client = new ResteasyClientBuilder()
 				.sslContext(ctx)
+				.httpEngine(engine)
 				.build();
 		
 			client.register(new AddAuthHeadersRequestFilter(username, password));
+			
 		}catch (Exception ex){
 			throw new RuntimeException(ex);
 		}
