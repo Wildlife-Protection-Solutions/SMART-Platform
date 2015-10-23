@@ -30,7 +30,6 @@ import java.util.Locale;
 import org.apache.derby.iapi.error.StandardException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-//import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Display;
@@ -74,6 +73,7 @@ public class SmartStartUp {
 			throw new Exception (MessageFormat.format(Messages.SmartStartUp_Error_NoSmartDb, new Object[]{SmartProperties.getInstance().getProperty(SmartProperties.PROP_SMART_DB)}));
 		}
 		
+		//check version
 		try{
 			SmartPlugIn.versionCheck();
 		}catch (Exception ex){
@@ -83,6 +83,25 @@ public class SmartStartUp {
 				throw ex;
 			}
 		}
+		
+		//run any other start scripts
+		List<IDatabaseStartupRunner> runners = new ArrayList<IDatabaseStartupRunner>();
+		IConfigurationElement[] config = Platform.getExtensionRegistry().getConfigurationElementsFor(IDatabaseStartupRunner.EXTENSION_ID);
+		for (IConfigurationElement e : config) {	
+			if (e.getName().equals(IDatabaseStartupRunner.CLASS_ATTRIBUTE_NAME)){
+				IDatabaseStartupRunner runner = (IDatabaseStartupRunner) e.createExecutableExtension("class"); //$NON-NLS-1$
+				runners.add(runner);
+			}
+		}
+		for (IDatabaseStartupRunner runner: runners){
+			Session s = HibernateManager.openSession();
+			try{
+				runner.run(s);
+			}finally{
+				s.close();
+			}
+		}
+
 
 	}
 	

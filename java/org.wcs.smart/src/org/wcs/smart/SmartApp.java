@@ -27,6 +27,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.application.WorkbenchAdvisor;
+import org.hibernate.Session;
+import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Smart application 
@@ -42,7 +44,7 @@ public class SmartApp implements IApplication {
 	public Object start(IApplicationContext context) throws Exception {	
 		WorkbenchAdvisor workbenchAdvisor = new SmartWorkbenchAdvisor();
 		Display display = PlatformUI.createDisplay();
-		
+	
 		try {
 			int returnCode = PlatformUI.createAndRunWorkbench(display,
 					workbenchAdvisor);

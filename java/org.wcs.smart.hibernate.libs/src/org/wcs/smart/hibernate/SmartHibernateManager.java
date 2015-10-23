@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.hibernate;
 
+import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -112,7 +113,7 @@ public class SmartHibernateManager {
 	 * Creates a new session factory.
 	 * 
 	 */
-	public static synchronized final void createSessionFactory(){
+	private static synchronized final void createSessionFactory(){
 		
 		if (sessionFactory == null){
 			Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
@@ -120,7 +121,7 @@ public class SmartHibernateManager {
 			config.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
 			config.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
 			config.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			
+
 			//add mapping classes
 			for (Class<?> c: getMappings()){
 				config.addAnnotatedClass(c);
