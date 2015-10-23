@@ -51,12 +51,15 @@ public enum DerbyReplicationManager {
 	private Thread fileStoreReplication;
 	private FileStoreWatcher watcher;
 	
+	private Boolean enabledState = null;
+	
 	/**
 	 * This MUST BE wrapped in a transaction that is committed
 	 * @param session
 	 * @throws Exception
 	 */
 	public void enableReplication(Session session) throws Exception{
+		this.enabledState = true;
 		setReplicationEnabled(session, true);
 
 		//file watch for changes to file store
@@ -73,6 +76,7 @@ public enum DerbyReplicationManager {
 	 * @throws Exception
 	 */
 	public void disableReplication(Session session) throws Exception{
+		this.enabledState = false;
 		setReplicationEnabled(session, false);
 		
 		if (watcher != null){
@@ -114,6 +118,18 @@ public enum DerbyReplicationManager {
 		}
 	}
 	
+	public boolean getLocalReplicationState(){
+		if (enabledState == null){
+			return false;
+		}
+		return enabledState;
+	}
+	/**
+	 * Queries the database for the logging_db_property
+	 * 
+	 * @param session
+	 * @return
+	 */
 	public boolean isReplicationEnabled(Session session){
 		return session.doReturningWork(new ReturningWork<Boolean>() {
 			@Override
