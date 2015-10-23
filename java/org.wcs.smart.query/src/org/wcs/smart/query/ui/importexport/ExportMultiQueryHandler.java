@@ -21,18 +21,21 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.inject.Named;
 
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.query.model.Query;
-import org.wcs.smart.query.ui.editor.IQueryEditor;
-import org.wcs.smart.util.E3Utils;
+import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
  * Handler for the export query button.
@@ -40,36 +43,32 @@ import org.wcs.smart.util.E3Utils;
  * @author Emily
  * @since 1.0.0
  */
-public class ExportQueryHandler {
+public class ExportMultiQueryHandler {
 
 	@Execute
-	public void execute(EPartService pService, Shell activeShell, @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
+	public void execute(MPart activePart, Shell activeShell, @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
 		Query query = null;
-		//find any query editor part; get the parent stack; then get the 
-		//active child
-		for (MPart p : pService.getParts()){
-			Object src = E3Utils.getSourceObject(p);
-			if (src instanceof IQueryEditor){
-				Object x = p.getParent().getSelectedElement();
-				if (x instanceof MPart){
-					Object activeq = E3Utils.getSourceObject((MPart)x);
-					if (activeq instanceof IQueryEditor){
-						query = ((IQueryEditor)activeq).getQueryProxy().getQuery();
-						break;
+		List<QueryEditorInput> selectedQueries = null;
+		if (query == null){
+			selectedQueries =  new ArrayList<QueryEditorInput>();
+			// find all selected reports
+			if (thisSelection != null && thisSelection instanceof IStructuredSelection){
+				for (Iterator<?> iterator = ((IStructuredSelection)thisSelection).iterator(); iterator.hasNext();) {
+					Object type = (Object) iterator.next();
+					if (type instanceof QueryEditorInput){
+						selectedQueries.add((QueryEditorInput)type);
 					}
 				}
 			}
 		}
-		if (query == null) return;
-
-		ExportQueryWizard wizard = new ExportQueryWizard(query, null);
+		ExportQueryWizard wizard = new ExportQueryWizard(null, selectedQueries);
 		WizardDialog wd = new WizardDialog(activeShell, wizard);
 		wd.open();
 	}
 
-	public static class ExportQueryHandlerWrapper extends DIHandler<ExportQueryHandler>{
-		public ExportQueryHandlerWrapper(){
-			super(ExportQueryHandler.class);
+	public static class ExportMultiQueryHandlerWrapper extends DIHandler<ExportMultiQueryHandler>{
+		public ExportMultiQueryHandlerWrapper(){
+			super(ExportMultiQueryHandler.class);
 		}
 	}
 }
