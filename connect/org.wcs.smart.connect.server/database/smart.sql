@@ -2328,7 +2328,7 @@ create table smart.connect_account(
 employee_uuid UUID not null,
 connect_uuid UUID not null,
 connect_user varchar(32),
-connect_pass varchar(60),
+connect_pass varchar(1024),
 primary key(employee_uuid, connect_uuid));
 
 alter table smart.connect_account add constraint connect_employee_uuid_fk foreign key (employee_uuid) 

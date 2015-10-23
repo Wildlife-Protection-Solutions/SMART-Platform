@@ -208,13 +208,13 @@ function createCaTable(){
  		
  		if (cas[i].status == "DATA"){
 	 		var downloadca = document.createElement("a");
-	 		deleteicon.className="downloadca download-icon";
-	 		deleteicon.title="downloadca";
-	 		deleteicon.dataset.cauuid = cas[i].uuid;
-	 		deleteicon.onclick = downloadca;
-	 		deleteicon.href="";
+	 		downloadca.className="downloadca download-icon";
+	 		downloadca.title="downloadca";
+	 		downloadca.dataset.cauuid = cas[i].uuid;
+	 		downloadca.onclick = downloadca;
+	 		downloadca.href="";
 	 		row.childNodes[4].appendChild(downloadca);
- 		} 		
+ 		}
  		
  		var deleteicon = document.createElement("a");
  		deleteicon.className="deleteca delete-icon";
@@ -224,8 +224,5 @@ function createCaTable(){
  		deleteicon.onclick = confirmdeleteca;
  		deleteicon.href="";
  		row.childNodes[5].appendChild(deleteicon);
- 		
-
- 		
  	}
 }
