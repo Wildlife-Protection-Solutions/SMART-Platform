@@ -23,9 +23,6 @@
 package org.wcs.smart.connect.replication;
 
 import org.eclipse.core.expressions.PropertyTester;
-import org.hibernate.Session;
-import org.wcs.smart.connect.ConnectPlugIn;
-import org.wcs.smart.hibernate.HibernateManager;
 
 /**
  * Property tester for replication properties. 
@@ -41,17 +38,9 @@ public class ReplicationEnabledPropertyTester extends PropertyTester {
 			Object expectedValue) {
 
 		if (property.equals("isEnabled")){ //$NON-NLS-1$
-			Session s = HibernateManager.openSession();
-			try{
-				boolean isEnabled = DerbyReplicationManager.INSTANCE.isReplicationEnabled(s);
-				Boolean eV = (Boolean)expectedValue;
-				return eV == isEnabled;
-			}catch (Exception ex){
-				ConnectPlugIn.log(ex.getMessage(),  ex);
-				return false;
-			}finally{
-				s.close();
-		}		
+			//querying the database for the state causes session issues in other
+			//unless done in a job, and this is not necessary
+			return DerbyReplicationManager.INSTANCE.getLocalReplicationState();	
 		}return false;
 	}
 
