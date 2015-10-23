@@ -34,6 +34,7 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
+import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -115,14 +116,7 @@ public class UploadCaJob extends FileUploaderJob {
 			deleteLocalFile();	
 			super.connect.close();
 			
-			Session s = HibernateManager.openSession();
-			try{
-				s.beginTransaction();
-				DerbyReplicationManager.INSTANCE.enableReplication(s);
-				s.getTransaction().commit();
-			}finally{
-				s.close();
-			}
+			
 			displayComplete(null);
 		}catch (Exception ex){
 			ConnectPlugIn.displayLog("Replication could not be enabled.  SMART must be restarted to prevent future replication errors.", ex);
@@ -135,6 +129,23 @@ public class UploadCaJob extends FileUploaderJob {
 		this.status.setStatus(ConnectServerStatus.Status.ERROR);
 		saveStatus();
 		displayComplete(upstatus == null ? "Local error uploading file." : upstatus.getMessage());	
+		
+		//error disable and cleanup replication details
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			//disable replication 
+			DerbyReplicationManager.INSTANCE.disableReplication(s);
+
+			//clean up change log and upload table
+			ChangeLogTableManager.INSTANCE.deleteAll(s, connect.getServer().getConservationArea());
+			
+			s.getTransaction().commit();
+		}catch (Exception ex){
+			ConnectPlugIn.displayLog("Replication could not be disabled.  SMART must be restarted to prevent future replication errors.", ex);
+		}finally{
+			s.close();
+		}
 		
 		super.connect.close();
 	}
