@@ -118,6 +118,12 @@ public enum DerbyReplicationManager {
 		}
 	}
 	
+	/**
+	 * Determines if replication is enabled by tracking the calls
+	 * to disable and enable replication and not querying the 
+	 * database state.  Will return false if state is undetermined.
+	 * @return
+	 */
 	public boolean getLocalReplicationState(){
 		if (enabledState == null){
 			return false;
