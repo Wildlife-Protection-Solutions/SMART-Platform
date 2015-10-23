@@ -76,6 +76,7 @@ public class ChangeLogItem extends UuidItem implements Externalizable{
 	private UUID caUuid;
 	private Source source; 
 	
+	
 	@Column(name="revision")
 	public Long getRevision(){
 		return this.revision;

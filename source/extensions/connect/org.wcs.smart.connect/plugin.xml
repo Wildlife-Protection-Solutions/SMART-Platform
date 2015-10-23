@@ -185,5 +185,11 @@
             directory="smart_connect">
       </FilestoreDirectory>
    </extension>
+   <extension
+         point="org.wcs.smart.startup.db">
+      <StartUpRunner
+            class="org.wcs.smart.connect.replication.DerbyStartUpRunner">
+      </StartUpRunner>
+   </extension>
 
 </plugin>

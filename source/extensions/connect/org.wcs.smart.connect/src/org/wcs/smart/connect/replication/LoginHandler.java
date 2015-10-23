@@ -58,6 +58,8 @@ public class LoginHandler implements ILoginHandler {
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
+			System.out.println("REPLICATION: " + DerbyReplicationManager.INSTANCE.isReplicationEnabled(s));
+			
 			DerbyReplicationManager.INSTANCE.disableReplication(s);
 			s.getTransaction().commit();
 		}finally{

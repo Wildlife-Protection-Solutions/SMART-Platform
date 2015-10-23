@@ -125,7 +125,7 @@ public class UploadCaJob extends FileUploaderJob {
 			}
 			displayComplete(null);
 		}catch (Exception ex){
-			ConnectPlugIn.displayLog("Replication could not be enabled.  Changes will not be sent to connect server.  SMART should be restarted to prevent future replication errors.", ex);
+			ConnectPlugIn.displayLog("Replication could not be enabled.  SMART must be restarted to prevent future replication errors.", ex);
 		}
 	}
 

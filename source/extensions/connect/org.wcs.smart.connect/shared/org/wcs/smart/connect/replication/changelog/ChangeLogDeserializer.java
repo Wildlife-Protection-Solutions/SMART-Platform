@@ -69,7 +69,6 @@ public abstract class ChangeLogDeserializer {
 					int size = oin.readInt();
 					
 					for (int i = 0; i < size; i ++){
-						System.out.println(i + "/" + size);
 						ChangeLogItem it = (ChangeLogItem) oin.readObject();
 	
 						if (!shouldProcess(it)){
