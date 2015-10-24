@@ -53,6 +53,7 @@ import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S.A;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
+import org.wcs.smart.cybertracker.survey.importer.TimeDataContainer.TimeCut;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.er.SurveyEventHandler;
@@ -88,7 +89,7 @@ import com.vividsolutions.jts.geom.LineString;
 public class MissionImporter extends AbstractSmartImporter {
 	
 	private SamplingUnit currentSamplingUnit;
-	private List<Date> suTimeCuts;
+	private TimeDataContainer<SamplingUnit> suTimeDataContainer;
 
 	/**
 	 * If survey is provided that it is used as a target survey, otherwise new survey with passed newSurveyId will be created
@@ -96,7 +97,7 @@ public class MissionImporter extends AbstractSmartImporter {
 	public Mission importData(CyberTrackerSurvey ctSurvey, Mission mission, Survey survey, String newSurveyId) {
 		clearWarning();
 		currentSamplingUnit = ctSurvey.getStartSamplingUnit();
-		suTimeCuts = new ArrayList<>();
+		suTimeDataContainer = new TimeDataContainer<>(currentSamplingUnit);
 		
 		for (String warning : ctSurvey.getWarnings()) {
 			addWarning(warning);
@@ -443,7 +444,7 @@ public class MissionImporter extends AbstractSmartImporter {
 					if ((su == null && currentSamplingUnit != null) || (su != null && !su.equals(currentSamplingUnit))) {
 						//this is not the same sampling unit
 						currentSamplingUnit = su;
-						suTimeCuts.add(wp.getDateTime()); //this must be already calculated
+						suTimeDataContainer.add(currentSamplingUnit, wp.getDateTime()); //time must be already calculated
 					}
 					return null; //special case: we don't add waypoint when record SamplingUnit change
 				}
@@ -484,19 +485,24 @@ public class MissionImporter extends AbstractSmartImporter {
 			for (MissionDay md : mission.getMissionDays()) {
 				Date from = combine(md.getDate(), md.getStartTime());
 				Date to = combine(md.getDate(), md.getEndTime());
-				List<Coordinate> coordinates = listPart(timerTrackList, from, to);
-				LineString track = TrackUtil.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
-				if (track != null) {
-					MissionTrack t = new MissionTrack();
-					md.getTracks().add(t);
-					t.setMissionDay(md);
-					t.setLineString(track);
-					t.setId(Messages.MissionImporter_TrackPrefix + md.getTracks().size());
+				List<TimeCut<SamplingUnit>> cuts = suTimeDataContainer.getTimeCuts(from, to);
+				for (TimeCut<SamplingUnit> timeCut : cuts) {
+					List<Coordinate> coordinates = listPart(timerTrackList, timeCut.getStart(), timeCut.getEnd());
+					LineString track = TrackUtil.convertToLineString(coordinates, MissionTrack.ZTIMEZONE);
+					if (track != null) {
+						MissionTrack t = new MissionTrack();
+						md.getTracks().add(t);
+						t.setMissionDay(md);
+						t.setLineString(track);
+						t.setSamplingUnit(timeCut.getData());
+						t.setId(Messages.MissionImporter_TrackPrefix + md.getTracks().size());
+					}
+					
 				}
 			}
 		}
 	}
-	
+
 	private Time createTime(int hours, int minute, int second){
 		Calendar cForProcessing = Calendar.getInstance();
 		cForProcessing.setTimeInMillis(0);
