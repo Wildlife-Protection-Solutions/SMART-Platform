@@ -76,6 +76,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 	public static final String RESULT_MISSION_LEADER = "#Leader"; //$NON-NLS-1$
 	public static final String RESULT_MISSION_COMMENTS = "#Comments"; //$NON-NLS-1$
 	
+	public static final String RESULT_MISSION_START_SAMPLING_UNIT = "#StartSamplingUnit"; //$NON-NLS-1$
 	public static final String RESULT_MISSION_SAMPLING_UNIT = "#SamplingUnit"; //$NON-NLS-1$
 
 	public static final String RESULT_MISSION_PROPETY_PREFIX = "#MP#"; //$NON-NLS-1$
@@ -197,18 +198,14 @@ public class SurveyScreensUtil extends ScreensUtil {
 		noneSu.setId(Messages.SurveyScreensUtil_NoSamplingUnit);
 		samplingUnits.add(noneSu);
 		cyberTrackerIds = suToCtIds(elements, samplingUnits);
-		CyberTrackerId suScreenId = id;
-		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_SamplingUnit, RESULT_MISSION_SAMPLING_UNIT, cyberTrackerIds, true);
-		Node suNode = result.screenNodes.get(result.screenNodes.size()-1);
-		Control control2 = ScreensObjectFactory.getNavigationControl(suNode);
-		control2.setShowBack("False"); //$NON-NLS-1$
+		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_StartSamplingUnit, RESULT_MISSION_START_SAMPLING_UNIT, cyberTrackerIds, true);
 
-		addTaskNode(id, result, elements, startId, dmRootId, suScreenId, ctProps);
+		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, ctProps);
 		result.rootId = id;
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, CyberTrackerId suId, CyberTrackerProperties ctProps) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, CyberTrackerProperties ctProps) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		
@@ -216,7 +213,7 @@ public class SurveyScreensUtil extends ScreensUtil {
 		nodeIds.add(dmRootId);
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_NewSamplingUnit);
-		nodeIds.add(suId);
+		nodeIds.add(createSamplingUnitNodes(container, elements, id, ctElemIds));
 		
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSurvey);
@@ -243,6 +240,19 @@ public class SurveyScreensUtil extends ScreensUtil {
 		return null;
 	}
 
+
+	private CyberTrackerId createSamplingUnitNodes(MetaExportResult container, Elements elements, CyberTrackerId nextTaskId, List<CyberTrackerId> ctElemIds) {
+		CyberTrackerId id = new CyberTrackerId();
+		addSimpleNextRadioNode(id, container, elements, Messages.SurveyScreensUtil_SamplingUnit, RESULT_MISSION_SAMPLING_UNIT, ctElemIds, false);
+		Node suNode = container.screenNodes.get(container.screenNodes.size()-1);
+		Control control2 = ScreensObjectFactory.getNavigationControl(suNode);
+		control2.setShowNext("False"); //$NON-NLS-1$
+		control2.setShowMajor("True"); //$NON-NLS-1$
+		control2.setTranslateMajorScreenId(nextTaskId.getNodeId());
+		control2.setTakeGPS("False"); //$NON-NLS-1$
+		return id;
+	}
+	
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
 		StartScreenLabels labels = new StartScreenLabels();
 		labels.startItemLabel = Messages.SurveyScreensUtil_StartSurvey;

@@ -13,6 +13,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerSurvey_Warn_MissionPropertyListItem;
 	public static String CyberTrackerSurvey_Warn_MissionPropertyNotFound;
 	public static String CyberTrackerSurvey_Warn_MissionPropertyNotInDesign;
+	public static String CyberTrackerSurvey_Warn_NoSamplingUnit;
 	public static String CyberTrackerSurvey_Warn_UnsupportedAttribute;
 	public static String LeaderSelectorDialog_Leader;
 	public static String LeaderSelectorDialog_Title;
@@ -25,6 +26,7 @@ public class Messages extends NLS {
 	public static String MissionImporter_TrackPrefix;
 	public static String MissionImporter_Warn_FirstWaypoint;
 	public static String MissionImporter_Warn_Member;
+	public static String MissionImporter_Warn_NoSamplingUnit;
 	public static String MissionImporter_Warn_SurveyDuplicate;
 	public static String MissionImporter_Warn_TimeGap_After;
 	public static String MissionImporter_Warn_TimeGap_Before;
@@ -66,6 +68,7 @@ public class Messages extends NLS {
 	public static String SurveyScreensUtil_PauseSurvey;
 	public static String SurveyScreensUtil_ResumeSurvey;
 	public static String SurveyScreensUtil_SamplingUnit;
+	public static String SurveyScreensUtil_StartSamplingUnit;
 	public static String SurveyScreensUtil_StartSurvey;
 	public static String SurveyScreensUtil_StartSurveyTitle;
 	public static String SurveySelectorDialog_AddToSurvey;
