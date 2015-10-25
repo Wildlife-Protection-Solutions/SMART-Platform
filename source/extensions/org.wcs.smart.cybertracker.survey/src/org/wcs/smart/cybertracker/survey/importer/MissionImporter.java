@@ -319,7 +319,7 @@ public class MissionImporter extends AbstractSmartImporter {
 		}
 		
 		Calendar calStart = SmartUtils.convertDate(m.getStartDate());
-		calStart.set(Calendar.HOUR, 0);
+		calStart.set(Calendar.HOUR_OF_DAY, 0);
 		calStart.set(Calendar.MINUTE, 0);
 		calStart.set(Calendar.SECOND, 0);
 		calStart.set(Calendar.MILLISECOND, 0);
