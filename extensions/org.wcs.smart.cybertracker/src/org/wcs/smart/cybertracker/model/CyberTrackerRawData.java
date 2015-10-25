@@ -41,12 +41,8 @@ import org.wcs.smart.cybertracker.model.data.Data.Sightings;
 import com.vividsolutions.jts.geom.Coordinate;
 
 /**
- * TODO Purpose of 
- * <p>
- * <ul>
- * <li></li>
- * </ul>
- * </p>
+ * Raw data extracted from CyberTracker raw xml file.
+ * 
  * @author elitvin
  * @since 4.0.0
  */

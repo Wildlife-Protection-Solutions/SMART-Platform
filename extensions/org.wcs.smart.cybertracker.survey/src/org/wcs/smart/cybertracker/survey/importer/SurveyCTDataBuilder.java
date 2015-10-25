@@ -36,12 +36,12 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
 import org.wcs.smart.cybertracker.importer.AbstractSmartImporter;
 import org.wcs.smart.cybertracker.importer.CyberTrackerDataBuilder;
-import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.ICyberTrackerData;
 import org.wcs.smart.cybertracker.model.data.Data.Elements.E;
 import org.wcs.smart.cybertracker.model.data.Data.Sightings.S;
 import org.wcs.smart.cybertracker.survey.export.SurveyScreensUtil;
+import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey;
 import org.wcs.smart.cybertracker.survey.model.CyberTrackerSurvey.SurveyMeta;
 import org.wcs.smart.er.hibernate.SurveyHibernateManager;
@@ -49,6 +49,7 @@ import org.wcs.smart.er.model.MissionAttribute;
 import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -195,6 +196,16 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			ctSurvey.getCtMembers().add(i.getN());
 			if (emp != null) {
 				ctSurvey.getMembers().add(emp);
+			}
+		} else if (SurveyScreensUtil.RESULT_MISSION_START_SAMPLING_UNIT.equals(n)) {
+			E e = eMap.get(v);
+			if (e != null) {
+				if (e.getTag0() != null) {
+					SamplingUnit su = fetchFromTag0(SamplingUnit.class, e, session);
+					if (su == null)
+						ctSurvey.addWarning(SurveyMeta.START_SAMPLING_UNIT, MessageFormat.format(Messages.CyberTrackerSurvey_Warn_NoSamplingUnit, e.getN()));
+					ctSurvey.setStartSamplingUnit(su);
+				}
 			}
 		} else if (n != null && n.startsWith(SurveyScreensUtil.RESULT_MISSION_PROPETY_PREFIX)) {
 			String tag0 = i != null ? i.getTag0() : null;

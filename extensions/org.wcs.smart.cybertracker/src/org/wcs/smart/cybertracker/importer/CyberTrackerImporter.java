@@ -172,20 +172,22 @@ public class CyberTrackerImporter {
 		CyberTrackerRawData rawData = new CyberTrackerRawData(data);
 		data = null; //we don't need data object anymore
 
-		CyberTrackerDataBuilder dataBuilder = findDataBuilder(rawData);
+		final String datatype = getDataType(rawData);
+		CyberTrackerDataBuilder dataBuilder = dataBuilderMap.get(datatype);
+		if (dataBuilder == null) {
+			throw new Exception(MessageFormat.format(Messages.CyberTrackerImporter_DataType_Error, file.getName(), datatype));
+		}
 		List<ICyberTrackerData> records = dataBuilder.buildRecords(rawData);
 		return records;
 	}
 
-
-	private CyberTrackerDataBuilder findDataBuilder(CyberTrackerRawData rawData) {
+	private String getDataType(CyberTrackerRawData rawData) {
 		for (E e : rawData.elementsMap.values()) {
 			if (ScreensUtil.RESULT_DATATYPE.equals(e.getN())) {
-				String datatype = e.getTag0();
-				return dataBuilderMap.get(datatype);
+				return e.getTag0();
 			}
 		}
-		return dataBuilderMap.get(NO_DATTYPE_NAME);
+		return NO_DATTYPE_NAME;
 	}
 
 	private File extractRawXml(String ctPath, File ctxFile, File destFolder)  throws Exception {

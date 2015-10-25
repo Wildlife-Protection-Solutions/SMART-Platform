@@ -36,6 +36,7 @@ import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider;
 import org.wcs.smart.cybertracker.survey.importer.SurveyCTLabelProvider.CTSurveyUIMeta;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.er.model.MissionPropertyValue;
+import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.SurveyDesign;
 
 /**
@@ -53,6 +54,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 		COMMENT,
 		LEADER,
 		MEMBERS,
+		START_SAMPLING_UNIT,
 		MISSION_PROPERTY
 	}
 	
@@ -61,6 +63,7 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 	private List<Employee> members;
 	private SurveyDesign surveyDesign;
 	private List<MissionPropertyValue> missionProperties;
+	private SamplingUnit startSamplingUnit;
 	
 	//used only for gui representation after initial load
 	private String ctLeader;
@@ -130,6 +133,14 @@ public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 
 	public String getSurveyDesignKey() {
 		return surveyDesign != null ? surveyDesign.getKeyId() : null;
+	}
+	
+	public SamplingUnit getStartSamplingUnit() {
+		return startSamplingUnit;
+	}
+	
+	public void setStartSamplingUnit(SamplingUnit startSamplingUnit) {
+		this.startSamplingUnit = startSamplingUnit;
 	}
 	
 	@Override
