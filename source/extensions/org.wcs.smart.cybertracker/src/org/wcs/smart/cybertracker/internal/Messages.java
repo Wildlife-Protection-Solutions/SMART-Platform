@@ -123,6 +123,7 @@ public class Messages extends NLS {
 	public static String CyberTrackerImportEditor_ConfirmClose_Message;
 	public static String CyberTrackerImportEditor_ConfirmClose_Title;
 	public static String CyberTrackerImportEditor_ImportDataFormTitle;
+	public static String CyberTrackerImporter_DataType_Error;
 	public static String CyberTrackerImporter_Read_Error;
 	public static String CyberTrackerImporter_Read_Xml;
 	public static String CyberTrackerImporter_Task_Download;
