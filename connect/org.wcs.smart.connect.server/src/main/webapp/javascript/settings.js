@@ -202,8 +202,6 @@ function createLayerTable(){
  	    scrollable.innerHTML = layers[i].token;
  		row.childNodes[6].appendChild(scrollable);
 
- 	
- 		//update goes first, shows second, since it floats right in the css...
  		var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
  		updateicon.title="update layer";
@@ -452,7 +450,6 @@ function createTypeTable(){
  		row.childNodes[3].style.backgroundColor = fillColor;
  		row.childNodes[3].style.opacity = opacity;
  		
- 		//update goes first, shows second, since it floats right in the css...
  		var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
  		updateicon.title="update type";
@@ -490,7 +487,7 @@ function showCurrentType() {
 		displayError(parseError(i18n("settings.errorgettingalert") + this.label));
 	}
 	
-	document.querySelector("#dialogerror").style.display = "none";
+	document.querySelector("#error").style.display = "none";
 	
 	var form = document.getElementById("alerttypesform");
 	
