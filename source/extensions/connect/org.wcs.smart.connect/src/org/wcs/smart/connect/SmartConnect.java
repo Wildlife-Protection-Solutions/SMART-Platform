@@ -34,7 +34,9 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
@@ -60,6 +62,11 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
@@ -171,15 +178,18 @@ public class SmartConnect {
 			SSLContext ctx = SSLContext.getInstance("TLS"); //$NON-NLS-1$
 			ctx.init(null, new TrustManager[]{trustManager}, null);
 		
-			ClientConnectionManager cm = new PoolingClientConnectionManager();
+			SchemeRegistry registry = new SchemeRegistry();
+			SSLSocketFactory factory = new SSLSocketFactory(ctx);
+			registry.register(new Scheme("https", 443, factory));
+			
+			ClientConnectionManager cm = new PoolingClientConnectionManager(registry);
 			HttpClient httpClient = new DefaultHttpClient(cm);
 			ApacheHttpClient4Engine engine = new ApacheHttpClient4Engine(httpClient);
-			
+		
 			client = new ResteasyClientBuilder()
-				.sslContext(ctx)
 				.httpEngine(engine)
 				.build();
-		
+
 			client.register(new AddAuthHeadersRequestFilter(username, password));
 			
 		}catch (Exception ex){
