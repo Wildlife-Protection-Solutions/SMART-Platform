@@ -44,7 +44,6 @@ import org.wcs.smart.ca.Employee;
  */
 @Entity
 @Table(name="smart.connect_account")
-//TODO: we do not want to store connect server passwords in plain text!!!!
 public class ConnectUser {
 	
 	private UUID uuid;
@@ -67,7 +66,7 @@ public class ConnectUser {
 		this.uuid = uuid;
 	}
 	
-    @OneToOne  
+    @OneToOne
     @PrimaryKeyJoinColumn(name="employee_uuid")
 	public Employee getSmartUser() {
 		return smartUser;

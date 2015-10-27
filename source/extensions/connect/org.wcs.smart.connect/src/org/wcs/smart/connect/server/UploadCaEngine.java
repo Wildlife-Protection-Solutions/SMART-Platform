@@ -49,7 +49,6 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
-import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.util.SmartUtils;
 import org.wcs.smart.util.UuidUtils;
