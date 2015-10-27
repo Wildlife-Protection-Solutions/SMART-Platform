@@ -24,11 +24,16 @@ package org.wcs.smart.connect.ui.server;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.dialogs.TitleAreaDialog;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -66,6 +71,10 @@ public class ConnectDialog extends TitleAreaDialog {
 	protected ConnectServer cs = null;
 	protected ConnectUser user = null;
 	
+	private ControlDecoration cdUser;
+	private ControlDecoration cdPassword;
+	private ControlDecoration cdServer;
+	
 	private SmartConnect connect;
 	private boolean hideConfigure;
 	
@@ -79,6 +88,22 @@ public class ConnectDialog extends TitleAreaDialog {
 	}
 	
 	@Override
+	public void createButtonsForButtonBar(Composite parent){
+		super.createButtonsForButtonBar(parent);
+		validate();
+		
+	}
+	
+	protected ControlDecoration createControlDecoration(Control widget){
+		ControlDecoration cd = new ControlDecoration(widget, SWT.LEFT | SWT.TOP);
+		cd.setImage(FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_ERROR).getImage());
+		cd.setShowHover(true);
+		return cd;
+	}
+	
+	
+	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
 		
@@ -90,6 +115,8 @@ public class ConnectDialog extends TitleAreaDialog {
 		
 		lblServer = new Label(main, SWT.NONE);
 		lblServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		cdServer = createControlDecoration(lblServer);
+		cdServer.setDescriptionText("Connect server not configured.");
 		
 		if (hideConfigure){
 			lblServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
@@ -109,13 +136,17 @@ public class ConnectDialog extends TitleAreaDialog {
 		
 		txtUser = new Text(main, SWT.BORDER);
 		txtUser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
+		cdUser = createControlDecoration(txtUser);
+		cdUser.setDescriptionText("User required.");
 		
 		l = new Label(main, SWT.NONE);
 		l.setText("Password:");
 		
 		txtPassword = new Text(main, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
-	
+		cdPassword = createControlDecoration(txtPassword);
+		cdPassword.setDescriptionText("Password required.");
+		
 		new Label(main, SWT.NONE);
 		chSavePassword = new Button(main, SWT.CHECK);
 		chSavePassword.setText("Save Password");
@@ -124,9 +155,44 @@ public class ConnectDialog extends TitleAreaDialog {
 		
 		initData();
 		
+		ModifyListener validate = new ModifyListener() {
+			
+			@Override
+			public void modifyText(ModifyEvent e) {
+				validate();
+			}
+		};
+		txtPassword.addModifyListener(validate);
+		txtUser.addModifyListener(validate);
 		return parent;
 	}
-	
+
+	private void validate(){
+		boolean ok = true;
+		if (lblServer.getText().trim().isEmpty()){
+			ok = false;
+			cdServer.show();
+		}else{
+			cdServer.hide();
+		}
+		if (txtUser.getText().trim().isEmpty()){
+			ok = false;
+			cdUser.show();
+		}else{
+			cdUser.hide();
+		}
+		if (txtPassword.getText().trim().isEmpty()){
+			ok = false;
+			cdPassword.show();
+		}else{
+			cdPassword.hide();
+		}
+		
+		Button btn = getButton(IDialogConstants.OK_ID);
+		if (btn != null){
+			btn.setEnabled(ok);
+		}		
+	}
 	private void initData(){
 
 		Session s = HibernateManager.openSession();
@@ -168,7 +234,7 @@ public class ConnectDialog extends TitleAreaDialog {
 			}
 		}
 		
-		
+		validate();
 	}
 	@Override
 	public boolean isResizable(){
