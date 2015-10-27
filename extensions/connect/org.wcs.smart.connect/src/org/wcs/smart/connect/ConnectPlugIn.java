@@ -26,14 +26,12 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.hibernate.Session;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.connect.internal.EmployeeDeleteHandler;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;
-import org.wcs.smart.connect.replication.DerbyReplicationManager;
-import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -49,7 +47,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	
 	// The shared instance
 	private static ConnectPlugIn plugin;
-	
+	private EmployeeDeleteHandler employeeDelete = new EmployeeDeleteHandler();
 	/**
 	 * The constructor
 	 */
@@ -62,6 +60,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	 */
 	public void start(BundleContext context) throws Exception {
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaConnectDeleteHandler(), CaConnectDeleteHandler.EXECUTE_ORDER);
+		ConservationAreaManager.getInstance().addEmployeeListener(employeeDelete);
 		ChangeLogInstaller.INSTANCE.setEnabled(true);
 		super.start(context);
 		plugin = this;
@@ -74,6 +73,8 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
 		super.stop(context);
+		
+		ConservationAreaManager.getInstance().removeEmployeeListener(employeeDelete);
 		
 		SmartConnect.closeAll();
 	}
