@@ -96,7 +96,7 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 		
 		List<Employee> employees = new ArrayList<Employee>();
 		try(CSVReader reader = new CSVReader(
-				new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){ //$NON-NLS-1$
+				new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8), delimiter)){
 			int line = 1;
 			if (skipHeader){
 				reader.readNext();
@@ -295,8 +295,13 @@ public class EmployeeCsvImporter implements ICsvDataImporter {
 	public List<Agency> loadAgencies(Session session){
 		List<Agency> agencies = null;
 		session.beginTransaction();
-		agencies = session.createCriteria(Agency.class).add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-		session.getTransaction().commit();
+		try{
+			agencies = session.createCriteria(Agency.class)
+				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
+				.list(); 
+		}finally{
+			session.getTransaction().commit();
+		}
 		return agencies;
 	}
 }

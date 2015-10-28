@@ -261,8 +261,8 @@ public class ConfigurableModelEditDialog extends AbstractPropertyJHeaderDialog {
 
 		container.setWeights(new int[]{40,60});
 		
-		//initialize the session with the model being editted and 
-		//begin the translation
+		//initialize the session with the model being edited and 
+		//begin the transaction
 		session.beginTransaction();
 		session.saveOrUpdate(model); 
 		session.flush();

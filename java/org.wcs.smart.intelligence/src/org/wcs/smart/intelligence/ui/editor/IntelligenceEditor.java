@@ -121,26 +121,31 @@ public class IntelligenceEditor extends MultiPageEditorPart implements MapPart{
 			Session session = HibernateManager.openSession();
 			//load patrol items so don't have lazy loading issues later.
 			session.beginTransaction();
-			intelligence = (Intelligence) session.load(Intelligence.class, puuid);
-			if (intelligence.getPatrol() != null) {
-				intelligence.getPatrol().getId();
-			}
-			if (intelligence.getInformant() != null) {
-				intelligence.getInformant().getId();
-			}
-			intelligence.getNames().size();
-			if (intelligence.getSource() != null) {
-				intelligence.getSource().getNames().size();
-			}
-			intelligence.getPoints().size();
-			for (ISmartAttachment a : intelligence.getAttachments()){
-				try {
-					a.computeFileLocation(session);
-				} catch (Exception e) {
-					IntelligencePlugIn.log(e.getMessage(), e);
+			try{
+				intelligence = (Intelligence) session.load(Intelligence.class, puuid);
+				if (intelligence.getPatrol() != null) {
+					intelligence.getPatrol().getId();
 				}
+				if (intelligence.getInformant() != null) {
+					intelligence.getInformant().getId();
+				}
+				intelligence.getNames().size();
+				if (intelligence.getSource() != null) {
+					intelligence.getSource().getNames().size();
+				}
+				intelligence.getPoints().size();
+				for (ISmartAttachment a : intelligence.getAttachments()){
+					try {
+						a.computeFileLocation(session);
+					} catch (Exception e) {
+						IntelligencePlugIn.log(e.getMessage(), e);
+					}
+				}
+				session.getTransaction().commit();
+			}catch (Exception ex){
+				if (session.getTransaction().isActive()) session.getTransaction().rollback();
+				throw ex;
 			}
-			session.getTransaction().commit();
 			session.close();
 		}
 		return intelligence;

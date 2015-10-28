@@ -122,8 +122,11 @@ public class ShowDataModelPropertyPageHandler {
 					I18nUtil.setCa(SmartDB.getCurrentConservationArea().getUuid());
 					loadedSession = dialog.getSession();
 					loadedSession.beginTransaction();
-					dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), loadedSession);
-					loadedSession.getTransaction().rollback();
+					try{
+						dm = HibernateManager.loadDataModel(SmartDB.getCurrentConservationArea(), loadedSession);
+					}finally{
+						loadedSession.getTransaction().rollback();
+					}
 					monitor.done();					
 				}
 			});

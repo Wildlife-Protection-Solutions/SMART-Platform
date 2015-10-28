@@ -298,31 +298,35 @@ public class PlanEditor extends MultiPageEditorPart implements MapPart, IAdaptab
 	 * Will always get a new object.
 	 */
 	public Plan loadPlan(){
+		Plan p = null;
 		UUID puuid = ((PlanEditorInput) getEditorInput()).getUuid();
 		Session session = HibernateManager.openSession();
 		//load parent plan so don't have lazy loading issues later.
 		session.beginTransaction();
-		Plan p = (Plan) session.load(Plan.class, puuid);
-		if (p.getParent() != null) {
-			p.getParent().getId();
+		try{
+			p = (Plan) session.load(Plan.class, puuid);
+			if (p.getParent() != null) {
+				p.getParent().getId();
+			}
+			if(p.getTargets() != null){
+				p.getTargets().size();
+			}
+			Station st = p.getStation();
+			if(st != null){
+				st.getName();
+			}
+			p.getTeam();
+			Team t = p.getTeam();
+			if(t != null){
+				t.getName();
+			}
+			for (org.wcs.smart.ca.Label name : p.getNames()) {
+				name.getLanguage().getCode();
+			}
+		}finally{
+			session.getTransaction().rollback();
+			session.close();
 		}
-		if(p.getTargets() != null){
-			p.getTargets().size();
-		}
-		Station st = p.getStation();
-		if(st != null){
-			st.getName();
-		}
-		p.getTeam();
-		Team t = p.getTeam();
-		if(t != null){
-			t.getName();
-		}
-		for (org.wcs.smart.ca.Label name : p.getNames()) {
-			name.getLanguage().getCode();
-		}
-		session.getTransaction().rollback();
-		session.close();
 		return p;
 	}
 	

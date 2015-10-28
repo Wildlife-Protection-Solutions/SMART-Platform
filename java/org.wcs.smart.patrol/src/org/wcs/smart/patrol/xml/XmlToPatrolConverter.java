@@ -212,8 +212,12 @@ public class XmlToPatrolConverter {
 		boolean found = false;
 		
 		session.beginTransaction();
-		List<PatrolTransportType> types =  PatrolHibernateManager.getPatrolTransporationTypes(ca, session, patrol.getPatrolType());
-		session.getTransaction().rollback();
+		List<PatrolTransportType> types =  null;
+		try{
+			types =  PatrolHibernateManager.getPatrolTransporationTypes(ca, session, patrol.getPatrolType());
+		}finally{
+			session.getTransaction().rollback();
+		}
 		
 		for (PatrolTransportType t: types){
 			if (t.equals(ttype)){

@@ -97,7 +97,6 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try {
-			;
 			modelList.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null));
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.SurveyCTExportDialog_LoadSurveyDesigns_Error, ex);

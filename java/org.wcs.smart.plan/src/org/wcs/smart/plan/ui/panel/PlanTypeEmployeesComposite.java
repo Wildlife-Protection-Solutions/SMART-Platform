@@ -172,8 +172,11 @@ public class PlanTypeEmployeesComposite extends PlanComposite {
 		}else{
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
-			iActiveEmployees = HibernateManager.getActiveEmployees(plan.getConservationArea(), session).size();
-			session.getTransaction().rollback();
+			try{
+				iActiveEmployees = HibernateManager.getActiveEmployees(plan.getConservationArea(), session).size();
+			}finally{
+				session.getTransaction().rollback();
+			}
 			
 			activeEmployees.setText(String.valueOf(iActiveEmployees));
 		}

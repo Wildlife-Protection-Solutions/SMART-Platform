@@ -219,30 +219,39 @@ public class PatrolEditor extends MultiPageEditorPart implements MapPart, IAdapt
 			
 			UUID puuid = ((PatrolEditorInput) getEditorInput()).getUuid();
 			Session session = HibernateManager.openSession();
-			//load patrol items so don't have lazy loading issues later.
-			session.beginTransaction();
-			this.patrol = (Patrol) session.load(Patrol.class, puuid);
-			this.patrol.getLegs().size();
-			this.patrol.getPatrolDatastorePath();
-			List<Projection> tmp = HibernateManager.getCaProjectionList(session);
-			this.projections = tmp.toArray(new Projection[tmp.size()]);
-			
 			try{
-				for (PatrolLeg pl : patrol.getLegs()){
-					for (PatrolLegDay pld : pl.getPatrolLegDays()){
-						for (PatrolWaypoint pw : pld.getWaypoints()){
-							ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+				//load patrol items so don't have lazy loading issues later.
+				session.beginTransaction();
+				this.patrol = (Patrol) session.load(Patrol.class, puuid);
+				this.patrol.getLegs().size();
+				this.patrol.getPatrolDatastorePath();
+				List<Projection> tmp = HibernateManager.getCaProjectionList(session);
+				this.projections = tmp.toArray(new Projection[tmp.size()]);
+				
+				try{
+					for (PatrolLeg pl : patrol.getLegs()){
+						for (PatrolLegDay pld : pl.getPatrolLegDays()){
+							for (PatrolWaypoint pw : pld.getWaypoints()){
+								ObservationHibernateManager.computeAttachmentLocations(pw.getWaypoint(), session);
+							}
 						}
 					}
+				} catch (Exception e) {
+					SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
 				}
-			} catch (Exception e) {
-				SmartPatrolPlugIn.displayLog(Messages.PatrolEditor_AttachmentError + "\n\n" + e.getMessage(), e); //$NON-NLS-1$
+				session.getTransaction().commit();
+				if (ops == null){
+					ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
+				}
+			}catch (Exception ex){
+				if (session.getTransaction().isActive()){
+					session.getTransaction().rollback();
+				}
+				throw ex;
+			}finally{
+				session.close();	
 			}
-			session.getTransaction().commit();
-			if (ops == null){
-				ops = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(),session);
-			}
-			session.close();
+			
 		}
 		return this.patrol;
 	}

@@ -77,16 +77,19 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 			}
 		
 			//---- generate drop items for value filter
+			List<DropItem> copies = new ArrayList<DropItem>();
 			session = HibernateManager.openSession();
 			session.beginTransaction();
-			List<DropItem> copies = new ArrayList<DropItem>();
-			if (filterPart != null){
-				DropItem[] filterItems = PatrolDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), session);
-				for (int i = 0; i < filterItems.length; i ++){
-					copies.add(filterItems[i]);
+			try{
+				if (filterPart != null){
+					DropItem[] filterItems = PatrolDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), session);
+					for (int i = 0; i < filterItems.length; i ++){
+						copies.add(filterItems[i]);
+					}
 				}
+			}finally{
+				session.getTransaction().rollback();
 			}
-			session.getTransaction().rollback();
 			rateFilter.addItems(copies);
 			rateFilter.setFilterType(filterPart.getFilterType());
 		}catch (Exception ex){
