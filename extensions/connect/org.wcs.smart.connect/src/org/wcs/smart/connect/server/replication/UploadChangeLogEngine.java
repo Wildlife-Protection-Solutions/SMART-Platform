@@ -21,8 +21,11 @@
  */
 package org.wcs.smart.connect.server.replication;
 
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -33,6 +36,7 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
@@ -137,6 +141,14 @@ public class UploadChangeLogEngine {
 					if(current.getStartRevision().longValue() == packer.getLastRevision()){
 						current.setStatus(Status.NODATA);
 						saveRecord(current);	
+						
+						//delete file
+						try{
+							Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), current.getChangeLogZipFile());
+							Files.deleteIfExists(p);
+						}catch (IOException ex){
+							ConnectPlugIn.log("Could not delete ca uploader export file.", ex);
+						}		
 						throw new NothingToUpdateException("Conservation up to date. Nothing to sync");
 					}
 					

@@ -35,6 +35,7 @@ import java.sql.Types;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
@@ -90,6 +91,10 @@ public class ChangeLogPackager {
 	public void cleanUp() throws IOException{
 		Files.deleteIfExists(changelogFile);
 		Files.deleteIfExists(metadataFile);
+		
+		if (Files.exists(filestorePath.getParent())){
+			FileUtils.forceDelete(filestorePath.getParent().toFile());
+		}
 	}
 	
 	/**
