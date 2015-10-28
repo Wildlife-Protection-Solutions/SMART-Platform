@@ -264,8 +264,8 @@ function settab(tab){
 			document.getElementById("filter-controls").style.display = "block";
 			
 			document.getElementById("tab3").style.zIndex = 2;
-			document.getElementById('tab3').className += "selectedTab";
-			document.getElementById('tab3text').className += "selectedTab";
+			document.getElementById("tab3").className += "selectedTab";
+			document.getElementById("tab3text").className += "selectedTab";
 			
 			document.getElementById('tab1').className += "unselectedTab";
 			document.getElementById('tab1text').className += "unselectedTab";
@@ -288,18 +288,19 @@ function settab(tab){
 }
 
 function remove_all_tab_classes(){
-	remove_class("tab1", "selectedTab");	
-	remove_class("tab2", "selectedTab");
-	remove_class("tab3", "selectedTab");
-	remove_class("tab1text", "selectedTab");
-	remove_class("tab2text", "selectedTab");
-	remove_class("tab3text", "selectedTab");
 	remove_class("tab1", "unselectedTab");
 	remove_class("tab2", "unselectedTab");
 	remove_class("tab3", "unselectedTab");
 	remove_class("tab1text", "unselectedTab");
 	remove_class("tab2text", "unselectedTab");
 	remove_class("tab3text", "unselectedTab");
+	remove_class("tab1", "selectedTab");	
+	remove_class("tab2", "selectedTab");
+	remove_class("tab3", "selectedTab");
+	remove_class("tab1text", "selectedTab");
+	remove_class("tab2text", "selectedTab");
+	remove_class("tab3text", "selectedTab");
+
 	
 	document.getElementById("tab1").style.zIndex = 0;
 	document.getElementById("tab2").style.zIndex = 0
@@ -308,8 +309,8 @@ function remove_all_tab_classes(){
 }
 
 function remove_class(id, classname){
-	var regex = new RegExp("(?:^|\s)" + classname + "(?!\S)", "g");
-	document.getElementById(id).className = document.getElementById(id).className.replace( regex , '' )
+//	var regex = new RegExp("(?:^|\s)" + classname + "(?!\S)", "g");
+	document.getElementById(id).className = document.getElementById(id).className.replace( classname, '' )
 }
 
 
