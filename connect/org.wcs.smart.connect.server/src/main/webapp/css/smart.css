@@ -306,8 +306,21 @@ h2{
 	display: none;
 	clear:both;
 }
+
+/*Mozilla specific*/
+#filter-button:before{
+    background-image: url("hourglass.png");
+    display: block;
+    width: 15px;
+    height: 16px;
+    float: left;
+}
 #filter-button{
-	content:url("hourglass.png");
+    content: url("hourglass.png");
+    display: block;
+    width: 15px;
+    height: 16px;
+    float: left;
 }
 
 .overflow{
@@ -399,15 +412,14 @@ article.tabs section h2{
 	border-width: 1px 1px 0px 1px;
 	border-style: solid; 
 	border-color: black;
-	border
 }
 
 article.tabs section:nth-child(2) h2{
-	left: 12.0em;
+	left: 12.5em;
 }
 
 article.tabs section:nth-child(3) h2{
-	left: 23.4em;
+	left: 24.2em;
 }
 
 article.tabs section h2 a{

@@ -235,7 +235,7 @@
       		<label class="top-spacer block"><fmt:message key="settings.typeedit.fillcolorlabel" /></label>
 			<input class="type_field" type=text name="type_fillcolor" value="" maxlength="16"/>
     
-      		<label class="top-spacer block"><fmt:message key="settings.typeedit.opactiylabel" />Opacity:</label>
+      		<label class="top-spacer block"><fmt:message key="settings.typeedit.opactiylabel" /></label>
 			<input class="type_field" type=text name="type_opacity" value="" maxlength="8"/>
      		
        		<div class="top-spacer block">

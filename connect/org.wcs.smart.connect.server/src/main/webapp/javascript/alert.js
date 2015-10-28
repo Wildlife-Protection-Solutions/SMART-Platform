@@ -420,9 +420,11 @@ function createAlertTable(){
 			var str = document.getElementById("tab3text").innerHTML;
 			document.getElementById("tab3text").innerHTML = str.substring(0, str.indexOf(':(') +1) + "(" + alerts.length + ")</a>";
 		 	for (var i = 0; i < alerts.length; i ++){
-		 		var d = new Date(alerts[i].properties.date);
+		 		var date = alerts[i].properties.date;
+		 		var d = date.substr(0, date.length -4);
+
 		 		var row = tableCreateRowTDs(parent,
-		 				[alerts[i].properties.type, alerts[i].properties.id, d.toLocaleString() , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
+		 				[alerts[i].properties.type, alerts[i].properties.id, d , alerts[i].properties.desc, alerts[i].properties.level.toString(), alerts[i].properties.status, Math.round(alerts[i].properties.x * 100000)/100000 + " , " + Math.round(alerts[i].properties.y * 100000)/100000, null], 
 		 				"alertrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
@@ -649,10 +651,14 @@ function updateRealtimeLayer(updatedUrl){
 	            popupContent = function(fId) {
                 var feature = e.features[fId],
                     c = feature.geometry.coordinates;
-                return 'Event: ' + feature.properties.type + " - " + feature.properties.id + 
-                	"<br>Reported time: " + feature.properties.date +
+                var date = feature.properties.date;
+            	date = date.substr(0, date.length-4);
+                return 'Event: ' + feature.properties.type +  
+                	"<br>Reported time: " + date +
                 	"<br>Location: " +
-                    coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW');
+                    coordPart(c[1], 'NS') + ', ' + coordPart(c[0], 'EW') +
+                    "<br>Desc: " + feature.properties.desc + 
+                    "<br>Importance: " + feature.properties.level;
             }
             ,
             bindFeaturePopup = function(fId) {
@@ -667,9 +673,10 @@ function updateRealtimeLayer(updatedUrl){
         var now = new Date();
         var seconds = now.getSeconds();
         var minutes = now.getMinutes();
+        var month = now.getMonth() + 1;
         if(minutes <10) minutes = "0" + minutes;
         if(seconds<10) seconds = "0" + seconds;
-        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + now.getMonth() + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>update now</a>";
+        document.getElementById("map-info-box").innerHTML = i18n("alert.lastupdated") + now.getDate() + "/" + month + "/" + now.getFullYear() + " " + now.getHours() + ":" + minutes + ":" + seconds + "  <a href='javascript:refreshAlerts()'>update now</a>";
     });
     
     realtime.addTo(map);
