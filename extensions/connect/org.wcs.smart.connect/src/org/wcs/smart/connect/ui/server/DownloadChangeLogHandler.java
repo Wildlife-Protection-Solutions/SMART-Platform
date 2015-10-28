@@ -24,6 +24,7 @@ package org.wcs.smart.connect.ui.server;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Named;
 
@@ -32,8 +33,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
+import org.eclipse.e4.ui.model.application.ui.advanced.MArea;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -65,8 +68,6 @@ import org.wcs.smart.util.E3Utils;
  */
 public class DownloadChangeLogHandler {
 
-	
-	
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell, 
 			final EPartService pService, IEventBroker events) {
@@ -212,12 +213,11 @@ public class DownloadChangeLogHandler {
 				Collection<MPart> parts = pService.getParts();
 				for (MPart part : parts){
 					if (E3Utils.isCompatibilityEditor(part)){
-						pService.hidePart(part, false);
-						
-						PartState state = PartState.ACTIVATE;
+						PartState state = PartState.CREATE;
 						if (pService.isPartVisible(part)){
 							state = PartState.VISIBLE;
 						}
+						pService.hidePart(part, false);
 						try{
 							pService.showPart(part, state);
 							Object e3part = E3Utils.getSourceObject(part);
