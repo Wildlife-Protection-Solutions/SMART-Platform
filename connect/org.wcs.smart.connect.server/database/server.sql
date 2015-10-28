@@ -175,7 +175,7 @@ CREATE TABLE connect.map_layers(
 	mapboxid varchar(64),
 	wms_layer_list text,
 	layer_name varchar(32),
-	layer_order int
+	layer_order int NOT NULL
 ) WITHOUT OIDS;
 
 CREATE TABLE connect.alert_filter_defaults(

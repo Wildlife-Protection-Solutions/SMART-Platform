@@ -21,6 +21,6 @@ insert into connect.alert_types values('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380a53', '
 insert into connect.alerts values('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a21','mynewalert',to_date('05 Dec 2000', 'DD Mon YYYY'),'test description, some stuffsdfsdr drsdf','c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a51',2,'a0eedf99-9c0c-4ef8-bb6d-6bb9bd340a36','ACTIVE',12,23,'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a36');
 
 insert into connect.ca_info values('a0eedf99-9c0c-4ef8-bb6d-6bb9bd340a36','b0efdf99-9c0c-4ee4-bb6d-6bb9bd340a36','test ca 1','NODATA');
-insert into connect.map_layers values('c5aabc99-9c0b-4ef8-bf6d-6bb9bd350a80',1,true, 'pk.eyJ1IjoiamVmZmxvdW4iLCJhIjoiOTYyMGFkZDk5ZWM2ZDQ5NDc5Njc2Y2ZlOGM4YjQ1YWIifQ.R715pq8aRAM9hRdGcy10Xg', 'jeffloun.mp3jogfm','','streets');
-insert into connect.map_layers values('d5aabc99-9c0b-4ef8-bf6d-6bb9bd350a80',2,true, 'bdd66dd4ade33e6b69aed41b64b2b294', '','1084716:canada_major_lakes,1138164:bcschool','Schools and Lakes');
+insert into connect.map_layers values('c5aabc99-9c0b-4ef8-bf6d-6bb9bd350a80',1,true, 'pk.eyJ1IjoiamVmZmxvdW4iLCJhIjoiOTYyMGFkZDk5ZWM2ZDQ5NDc5Njc2Y2ZlOGM4YjQ1YWIifQ.R715pq8aRAM9hRdGcy10Xg', 'jeffloun.mp3jogfm','','streets',0);
+insert into connect.map_layers values('d5aabc99-9c0b-4ef8-bf6d-6bb9bd350a80',2,true, 'bdd66dd4ade33e6b69aed41b64b2b294', '','1084716:canada_major_lakes,1138164:bcschool','Schools and Lakes',1);
 
