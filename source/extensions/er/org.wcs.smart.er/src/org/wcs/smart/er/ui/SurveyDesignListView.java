@@ -115,6 +115,16 @@ public class SurveyDesignListView implements IDoubleClickListener, IUpdatableVie
 	
 	@PreDestroy
 	public void dispose() {
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_ADDED, listener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_MODIFIED, listener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DESIGN_DELETED, listener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_ADDED, listener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_MODIFIED, listener);
+		SurveyEventHandler.getInstance().removeListener(EventType.SURVEY_DELETED, listener);
+		
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_ADDED, listener);
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_DELETED, listener);
+		SurveyEventHandler.getInstance().removeListener(EventType.MISSION_MODIFIED, listener);
 	}
 	
 	
