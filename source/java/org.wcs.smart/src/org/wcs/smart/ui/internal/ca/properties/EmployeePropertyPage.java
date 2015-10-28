@@ -312,9 +312,12 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private void refreshEmployeeList() {
 		Session s = getSession();
 		s.beginTransaction();
-		employees = getSession().createCriteria(Employee.class)
+		try{
+			employees = getSession().createCriteria(Employee.class)
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
-		s.getTransaction().rollback();
+		}finally{
+			s.getTransaction().rollback();
+		}
 		tblEmployee.setInput(employees);
 		tblEmployee.refresh();
 
@@ -326,13 +329,16 @@ public class EmployeePropertyPage extends AbstractPropertyJHeaderDialog{
 	private List<Agency> getAgencies(){
 		if (agencies == null){
 			getSession().beginTransaction();
-			agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), getSession());
-			Collections.sort(agencies, new Comparator<Object>(){
-				@Override
-				public int compare(Object o1, Object o2) {
-					return Collator.getInstance().compare(((Agency)o1).getName(), ((Agency)o2).getName());
-			}});
-			getSession().getTransaction().rollback();
+			try{
+				agencies = HibernateManager.getAgencies(SmartDB.getCurrentConservationArea(), getSession());
+				Collections.sort(agencies, new Comparator<Object>(){
+					@Override
+					public int compare(Object o1, Object o2) {
+						return Collator.getInstance().compare(((Agency)o1).getName(), ((Agency)o2).getName());
+					}});
+			}finally{
+				getSession().getTransaction().rollback();
+			}
 		}
 		return agencies;
 	}

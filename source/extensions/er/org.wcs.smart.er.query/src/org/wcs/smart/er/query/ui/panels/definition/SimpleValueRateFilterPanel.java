@@ -102,14 +102,16 @@ public class SimpleValueRateFilterPanel extends ValueRateFilterDeifnitionPanel {
 			session = HibernateManager.openSession();
 			session.beginTransaction();
 			List<DropItem> copies = new ArrayList<DropItem>();
-			if (filterPart != null){
-				DropItem[] filterItems = SurveyDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), (session));
-				for (int i = 0; i < filterItems.length; i ++){
-					copies.add(filterItems[i]);
+			try{
+				if (filterPart != null){
+					DropItem[] filterItems = SurveyDropItemFactory.INSTANCE.filterToDropItem(filterPart.getFilter(), (session));
+					for (int i = 0; i < filterItems.length; i ++){
+						copies.add(filterItems[i]);
+					}	
 				}
-				
+			}finally{
+				session.getTransaction().rollback();
 			}
-			session.getTransaction().rollback();
 			
 			//update rate filter
 			rateFilter.addItems(copies);

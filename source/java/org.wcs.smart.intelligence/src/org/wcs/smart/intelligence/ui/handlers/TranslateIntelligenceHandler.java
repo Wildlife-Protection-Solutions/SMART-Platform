@@ -59,9 +59,12 @@ public class TranslateIntelligenceHandler extends TranslateNamesHandler {
 			UUID uuid = ((IntelligenceEditorInput) obj).getUuid();
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
-			intelligence = (Intelligence) session.load(Intelligence.class, uuid);
-			session.getTransaction().rollback();
-			session.close();
+			try{
+				intelligence = (Intelligence) session.load(Intelligence.class, uuid);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
+			}
 		} else if (obj instanceof Intelligence) {
 			intelligence = (Intelligence) obj;
 		}

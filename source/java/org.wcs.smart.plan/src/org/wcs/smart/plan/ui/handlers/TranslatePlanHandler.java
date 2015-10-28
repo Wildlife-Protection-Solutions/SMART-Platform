@@ -62,9 +62,12 @@ public class TranslatePlanHandler extends TranslateNamesHandler {
 			UUID uuid = ((PlanEditorInput) obj).getUuid();
 			Session session = HibernateManager.openSession();
 			session.beginTransaction();
-			plan = (Plan) session.load(Plan.class, uuid);
-			session.getTransaction().rollback();
-			session.close();
+			try{
+				plan = (Plan) session.load(Plan.class, uuid);
+			}finally{
+				session.getTransaction().rollback();
+				session.close();
+			}
 		} else if (obj instanceof Plan) {
 			plan = (Plan) obj;
 		}

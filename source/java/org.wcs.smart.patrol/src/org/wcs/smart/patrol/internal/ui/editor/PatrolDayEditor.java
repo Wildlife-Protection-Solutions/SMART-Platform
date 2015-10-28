@@ -107,39 +107,40 @@ public class PatrolDayEditor extends EditorPart {
 	public void createPartControl(Composite parent) {
 		toolkit = new FormToolkit(parent.getDisplay());
 		
-		Session session = HibernateManager.openSession();	
-		ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
-		if (observationOptions.getViewProjection() != null) {
-			observationOptions.getViewProjection().getDefinition(); //load lazy items
-		}
-
-		session.beginTransaction();
-		session.update(editor.getPatrol());
-		frmSummary = toolkit.createScrolledForm(parent);
-		
-		frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
-		
-		String canEdit = editor.canEdit();
-		if (canEdit != null){
-			Composite warning = toolkit.createComposite(frmSummary.getBody());
-			warning.setLayout(new GridLayout(2, false));
-			Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
-			Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
-			lblImage.setImage(x);
-			Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
-			lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol, new Object[]{canEdit})) ;
-		}
-		
-		SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
-		StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_PatrolDayTitle);
-		text.append(" "); //$NON-NLS-1$
-		text.append(dayFormat.format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
-		text.append(", "); //$NON-NLS-1$
-		text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
-		frmSummary.setText(text.toString());
-		frmSummary.getBody().setLayout(new GridLayout(1, false));
-		
+		Session session = HibernateManager.openSession();
 		try{
+			ObservationOptions observationOptions = ObservationHibernateManager.getPatrolOptions(SmartDB.getCurrentConservationArea(), session);
+			if (observationOptions.getViewProjection() != null) {
+				observationOptions.getViewProjection().getDefinition(); //load lazy items
+			}
+	
+			session.beginTransaction();
+			session.update(editor.getPatrol());
+			frmSummary = toolkit.createScrolledForm(parent);
+			
+			frmSummary.getBody().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+			
+			String canEdit = editor.canEdit();
+			if (canEdit != null){
+				Composite warning = toolkit.createComposite(frmSummary.getBody());
+				warning.setLayout(new GridLayout(2, false));
+				Label lblImage = toolkit.createLabel(warning, null, SWT.NONE);
+				Image x = editor.getSite().getWorkbenchWindow().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+				lblImage.setImage(x);
+				Label lblWarning = toolkit.createLabel(warning, "", SWT.NONE); //$NON-NLS-1$
+				lblWarning.setText(MessageFormat.format(Messages.PatrolDayEditor_CanNotEditPatrol, new Object[]{canEdit})) ;
+			}
+			
+			SimpleDateFormat dayFormat = new SimpleDateFormat("EEEE"); //$NON-NLS-1$
+			StringBuilder text = new StringBuilder(Messages.PatrolDayEditor_PatrolDayTitle);
+			text.append(" "); //$NON-NLS-1$
+			text.append(dayFormat.format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
+			text.append(", "); //$NON-NLS-1$
+			text.append(DateFormat.getDateInstance(DateFormat.MEDIUM).format(((PatrolDayEditorInput)getEditorInput()).getPatrolDay()));
+			frmSummary.setText(text.toString());
+			frmSummary.getBody().setLayout(new GridLayout(1, false));
+		
+	
 			//find all patrol legs for this day
 			List<PatrolLeg> legs = editor.getPatrol().getLegs();		
 			ArrayList<PatrolLegDay> plds = new ArrayList<PatrolLegDay>();

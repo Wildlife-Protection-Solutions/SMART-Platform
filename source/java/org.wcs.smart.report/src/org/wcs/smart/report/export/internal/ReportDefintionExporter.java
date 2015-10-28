@@ -117,8 +117,8 @@ public class ReportDefintionExporter implements IReportExporter {
 	private void writeReportInfo(File f, Report report) throws Exception{
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
-		s.saveOrUpdate(report);
 		try {
+			s.saveOrUpdate(report);
 			Properties prop = new Properties();
 			for (Label l : report.getNames()) {
 				prop.setProperty(
