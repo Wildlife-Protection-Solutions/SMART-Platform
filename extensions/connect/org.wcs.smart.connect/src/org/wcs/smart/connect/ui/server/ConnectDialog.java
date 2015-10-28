@@ -307,6 +307,14 @@ public class ConnectDialog extends TitleAreaDialog {
 								Session s = HibernateManager.openSession();
 								try{
 									s.beginTransaction();
+									if (ConnectDialog.this.user == null){
+										ConnectUser newuser = new ConnectUser();
+										newuser.setConnectUsername(user);
+										newuser.setServer(cs);
+										newuser.setSmartUser(SmartDB.getCurrentEmployee());
+										ConnectDialog.this.user = newuser;
+										s.save(newuser);
+									}
 									ConnectDialog.this.user.setConnectPassword(newPassword);
 									s.saveOrUpdate(ConnectDialog.this.user);
 									s.getTransaction().commit();

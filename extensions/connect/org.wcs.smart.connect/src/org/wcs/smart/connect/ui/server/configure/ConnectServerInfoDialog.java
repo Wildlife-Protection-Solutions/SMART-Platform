@@ -186,7 +186,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		TableViewerColumn colSmartUser = new TableViewerColumn(tblUsers, SWT.DEFAULT);
 		colSmartUser.getColumn().setText("SMART User ID");
 		
-		layout.setColumnData(colSmartUser.getColumn(), new ColumnWeightData(30, 100, true));
+		layout.setColumnData(colSmartUser.getColumn(), new ColumnWeightData(20, 100, true));
 		colSmartUser.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
@@ -198,7 +198,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		});
 		TableViewerColumn colSmartName = new TableViewerColumn(tblUsers, SWT.DEFAULT);
 		colSmartName.getColumn().setText("SMART Name");
-		layout.setColumnData(colSmartName.getColumn(), new ColumnWeightData(30, 100, true));
+		layout.setColumnData(colSmartName.getColumn(), new ColumnWeightData(40, 100, true));
 		colSmartName.setLabelProvider(new ColumnLabelProvider(){
 			@Override
 			public String getText(Object element){
