@@ -302,19 +302,20 @@ public class ConnectDialog extends TitleAreaDialog {
 						String newPassword = null;
 						if (savePass){
 							newPassword = ConnectPlugIn.encryptPassword(pass);
-						}
-						if (!strequals(existingPassword, newPassword == null ? null : pass)){
-							Session s = HibernateManager.openSession();
-							try{
-								s.beginTransaction();
-								ConnectDialog.this.user.setConnectPassword(newPassword);
-								s.saveOrUpdate(ConnectDialog.this.user);
-								s.getTransaction().commit();
-							}catch (Exception ex){
-								s.getTransaction().rollback();
-								throw ex;
-							}finally{
-								s.close();
+						
+							if (!strequals(existingPassword, newPassword == null ? null : pass)){
+								Session s = HibernateManager.openSession();
+								try{
+									s.beginTransaction();
+									ConnectDialog.this.user.setConnectPassword(newPassword);
+									s.saveOrUpdate(ConnectDialog.this.user);
+									s.getTransaction().commit();
+								}catch (Exception ex){
+									s.getTransaction().rollback();
+									throw ex;
+								}finally{
+									s.close();
+								}
 							}
 						}
 					}catch (Exception ex){
