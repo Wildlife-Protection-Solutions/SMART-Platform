@@ -82,6 +82,18 @@
             </visibleWhen>
          </menu>
       </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.trim.status">
+         <toolbar
+               id="org.wcs.smart.connect.status"
+               label="ConnectStatus">
+            <control
+                  class="org.wcs.smart.connect.ui.StatusLineControl"
+                  id="org.wcs.smart.connect.status.control">
+            </control>
+         </toolbar>
+      </menuContribution>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">

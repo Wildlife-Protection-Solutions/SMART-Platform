@@ -126,11 +126,11 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		IWizardPage start = getStartingPage();
 		
 		if (getStartingPage() instanceof MissionCompositeWizardPage){
-			((MissionCompositeWizardPage)getStartingPage()).initPage(newMission, parentDesign, session);
+			((MissionCompositeWizardPage)getStartingPage()).initPage(parentDesign, parentSurvey, newMission, session);
 		}
 		if (getPages()[0] != start){
 			if (getPages()[0] instanceof MissionCompositeWizardPage){
-				((MissionCompositeWizardPage)getPages()[0]).initPage(newMission, parentDesign, session);
+				((MissionCompositeWizardPage)getPages()[0]).initPage(parentDesign, parentSurvey, newMission, session);
 			}
 		}
 		
@@ -278,8 +278,7 @@ public class NewMissionWizard extends Wizard implements IPageChangingListener{
 		
 		//init target page
 		if (event.getTargetPage() instanceof MissionCompositeWizardPage){
-			((MissionCompositeWizardPage)event.getTargetPage()).initPage(newMission, parentDesign, session);
-			
+			((MissionCompositeWizardPage)event.getTargetPage()).initPage(parentDesign, newMission.getSurvey(), newMission, session);
 			canFinish = ((IWizardPage)event.getTargetPage()).getNextPage() == null;
 		}
 		
