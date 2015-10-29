@@ -65,6 +65,8 @@ public class ScreensUtil {
 
 	public static final String RESULT_DEFAULT_META_VALUES = "#DefaultPatrolValues"; //$NON-NLS-1$
 
+	public static final String RESULT_OBSERVER = "#Observer"; //$NON-NLS-1$
+
 	public static final String RESULT_PHOTO = "#Photo"; //$NON-NLS-1$
 	
 	public static final String RESULT_DATATYPE = "#DataType"; //$NON-NLS-1$

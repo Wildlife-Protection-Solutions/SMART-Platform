@@ -108,11 +108,12 @@ public class SurveyScreensUtil extends ScreensUtil {
 			}
 		});
 		
+		List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
+		String membersFilter = null;
 		so = screenOptions.get(MissionScreenOptionMeta.MEMBERS);
 		if (so == null || so.isVisible()) {
 			//getting all members names
 			//displaying all screens
-			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
 			List<String> members = new ArrayList<String>();
 			for (Employee i : employees) {
 				members.add(i.getFullLabel());
@@ -122,17 +123,16 @@ public class SurveyScreensUtil extends ScreensUtil {
 				
 			}
 			
-			String filter = buildMembersFilter(id.getNodeId(), memberIds, members);
-			if (filter != null) {
-				filter = SmartUtils.encodeHex(filter.getBytes());
+			membersFilter = buildMembersFilter(id.getNodeId(), memberIds, members);
+			if (membersFilter != null) {
+				membersFilter = SmartUtils.encodeHex(membersFilter.getBytes());
 			}
 			
 			id = addMembersNode(id, result, memberIds);
-			id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, RESULT_MISSION_LEADER, memberIds, filter);
+			id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_Leader, RESULT_MISSION_LEADER, memberIds, membersFilter);
 		} else {
 			//adding default members
 			ScreenOption leader_so = screenOptions.get(MissionScreenOptionMeta.LEADER);
-			List<CyberTrackerId> memberIds = new ArrayList<CyberTrackerId>();
 			CyberTrackerId leaderCtId = null;
 			for (ScreenOptionUuid sou : so.getUuidList()) {
 				for (Employee e : employees) {
@@ -200,17 +200,17 @@ public class SurveyScreensUtil extends ScreensUtil {
 		cyberTrackerIds = suToCtIds(elements, samplingUnits);
 		id = addSimpleNextRadioNode(id, result, elements, Messages.SurveyScreensUtil_StartSamplingUnit, RESULT_MISSION_START_SAMPLING_UNIT, cyberTrackerIds, true);
 
-		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, ctProps);
+		addTaskNode(id, result, elements, startId, dmRootId, cyberTrackerIds, surveyDesign.getTrackObserver(), memberIds, membersFilter, ctProps);
 		result.rootId = id;
 		return result;
 	}
 
-	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, CyberTrackerProperties ctProps) {
+	private void addTaskNode(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerId startId, CyberTrackerId dmRootId, List<CyberTrackerId> ctElemIds, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter, CyberTrackerProperties ctProps) {
 		List<String> nextTaskOptions = new ArrayList<String>();
 		List<CyberTrackerId> nodeIds = new ArrayList<CyberTrackerId>();
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_NewObservation);
-		nodeIds.add(dmRootId);
+		nodeIds.add(createPreDatamodelNodes(container, elements, dmRootId, trackObserver, memberIds, membersFilter));
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_NewSamplingUnit);
 		nodeIds.add(createSamplingUnitNodes(container, elements, id, ctElemIds));
@@ -240,6 +240,18 @@ public class SurveyScreensUtil extends ScreensUtil {
 		return null;
 	}
 
+	private CyberTrackerId createPreDatamodelNodes(MetaExportResult container, Elements elements, CyberTrackerId dmRootId, boolean trackObserver, List<CyberTrackerId> memberIds, String membersFilter) {
+		//create observer node
+		if (trackObserver) {
+			CyberTrackerId id = new CyberTrackerId();
+			addSimpleNextRadioNode(id, container, elements, Messages.SurveyScreensUtil_Observer, ScreensUtil.RESULT_OBSERVER, memberIds, membersFilter);
+			Node obsNode = container.screenNodes.get(container.screenNodes.size()-1);
+			Control control2 = ScreensObjectFactory.getNavigationControl(obsNode);
+			control2.setTranslateNextScreenId(dmRootId.getNodeId());
+			return id;
+		}
+		return dmRootId; //no need to track observer
+	}
 
 	private CyberTrackerId createSamplingUnitNodes(MetaExportResult container, Elements elements, CyberTrackerId nextTaskId, List<CyberTrackerId> ctElemIds) {
 		CyberTrackerId id = new CyberTrackerId();

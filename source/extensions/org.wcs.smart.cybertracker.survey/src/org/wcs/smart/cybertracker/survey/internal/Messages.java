@@ -64,6 +64,7 @@ public class Messages extends NLS {
 	public static String SurveyScreensUtil_NewObservation;
 	public static String SurveyScreensUtil_NewSamplingUnit;
 	public static String SurveyScreensUtil_NoSamplingUnit;
+	public static String SurveyScreensUtil_Observer;
 	public static String SurveyScreensUtil_PausedSurveyTitle;
 	public static String SurveyScreensUtil_PauseSurvey;
 	public static String SurveyScreensUtil_ResumeSurvey;
