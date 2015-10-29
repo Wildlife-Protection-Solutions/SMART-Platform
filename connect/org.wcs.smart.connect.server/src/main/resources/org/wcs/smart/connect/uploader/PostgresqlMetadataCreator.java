@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.type.PostgresUUIDType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
@@ -27,7 +28,8 @@ public class PostgresqlMetadataCreator {
 		metadata.setServerRevision(revision);
 		
 		//plugin versions
-		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM connect.connect_plugin_version");
+		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM connect.ca_plugin_version WHERE ca_uuid = :ca ");
+		q.setParameter("ca", ca.getUuid(), PostgresUUIDType.INSTANCE);
 		List<Object[]> plugins = q.list();
 		for (Object[] version : plugins){
 			metadata.setPluginVersion((String)version[1], (String)version[0]);
