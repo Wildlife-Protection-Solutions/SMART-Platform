@@ -190,6 +190,10 @@ public class SmartHibernateManager {
 			for(Session s : toClose){
 				//a listener on the session removes it from the all
 				//sessions variable
+				if (s.getTransaction().isActive()){
+					//TODO: log this case
+					s.getTransaction().rollback();
+				}
 				s.close();
 			}
 		}
