@@ -71,47 +71,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.chart.device.extension.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.chart.device.svg.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.chart.device.swt.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.chart.engine.extension.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.chart.engine.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.chart.reportitem.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -143,55 +103,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.core.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.core.ui.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.data.aggregation.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.data.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.data.adapter.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.data.bidi.utils.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.data.oda.jdbc.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -223,38 +135,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.report.designer.ui.editors.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.designer.ui.editors.schematic.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.designer.ui.lib.explorer.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.designer.ui.lib.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.report.designer.ui.nl_mn"
          download-size="0"
          install-size="0"
@@ -263,23 +143,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.report.designer.ui.views.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.birt.report.engine.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.item.crosstab.core.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -303,39 +167,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.resources.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.core.filebuffers.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.core.filesystem.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.core.resources.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ltk.core.refactoring.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -359,38 +191,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.core.databinding.beans.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.core.databinding.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.core.databinding.observable.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.core.databinding.property.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.core.expressions.nl_mn"
          download-size="0"
          install-size="0"
@@ -407,23 +207,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.core.net.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.core.runtime.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.core.variables.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -567,14 +351,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.help.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.help.ui.nl_mn"
          download-size="0"
          install-size="0"
@@ -607,14 +383,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.jface.text.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.osgi.nl_mn"
          download-size="0"
          install-size="0"
@@ -640,14 +408,6 @@
 
    <plugin
          id="org.eclipse.swt.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.text.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -695,14 +455,6 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ui.views.properties.tabbed.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.ui.workbench.nl_mn"
          download-size="0"
          install-size="0"
@@ -720,14 +472,6 @@
 
    <plugin
          id="org.eclipse.update.configurator.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.doc.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -919,159 +663,7 @@
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.html.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.engine.emitter.config.postscript.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.birt.report.model.adapter.oda.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.compare.core.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.core.commands.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.bindings.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.css.core.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.css.swt.theme.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.css.swt.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.di.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.model.workbench.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.services.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.widgets.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.workbench.addons.swt.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.workbench.renderers.swt.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.workbench.swt.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.workbench3.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.e4.ui.workbench.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.equinox.concurrent.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.equinox.event.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -1104,14 +696,6 @@
 
    <plugin
          id="org.eclipse.equinox.simpleconfigurator.nl_mn"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ui.themes.nl_mn"
          download-size="0"
          install-size="0"
          version="0.0.0"
