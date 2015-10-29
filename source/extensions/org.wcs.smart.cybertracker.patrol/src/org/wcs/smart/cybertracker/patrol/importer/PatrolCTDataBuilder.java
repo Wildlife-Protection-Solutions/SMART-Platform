@@ -162,7 +162,11 @@ public class PatrolCTDataBuilder extends CyberTrackerDataBuilder {
 			String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
 			for (String ctid : ctIdArray) {
 				E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
-				recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
+				if (di != null) {
+					recordPatrolData(ctPatrol, di, di.getTag2(), eMap, session);
+				} else {
+					ctPatrol.addError(PatrolMeta.GENERAL, MessageFormat.format(Messages.PatrolCTDataBuilder_Error_DefaultValue, ctid));
+				}
 			}
 		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctPatrol.setId(v);

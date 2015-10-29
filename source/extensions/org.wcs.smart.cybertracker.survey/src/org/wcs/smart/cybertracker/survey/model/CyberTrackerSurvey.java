@@ -48,6 +48,7 @@ import org.wcs.smart.er.model.SurveyDesign;
 public class CyberTrackerSurvey extends AbstractCyberTrackerData {
 
 	public enum SurveyMeta implements IDataMeta {
+		GENERAL,
 		START_DATE,
 		END_DATE,
 		SURVEY_DESIGN,

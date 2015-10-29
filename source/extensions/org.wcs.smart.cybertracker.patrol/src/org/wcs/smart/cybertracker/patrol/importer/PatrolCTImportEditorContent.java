@@ -85,6 +85,7 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 	private Text lblLeader;
 	private Text lblPilot;
 	
+	private ControlDecoration cdGeneral;
 	private ControlDecoration cdStartDate;
 	private ControlDecoration cdEndDate;
 	private ControlDecoration cdPatrolType;
@@ -118,6 +119,8 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 		Composite left = toolkit.createComposite(main);
 		left.setLayout(new GridLayout(2, false));
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)left.getLayoutData()).horizontalIndent = 5;
+		cdGeneral = createDecoration(left);
 		
 		Composite right = toolkit.createComposite(main);
 		right.setLayout(new GridLayout(2, false));
@@ -264,6 +267,7 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 			
 			
 			Map<IDataMeta, List<ImportError>> problems = ((CyberTrackerPatrol) selection).getProblems();
+			updateCd(cdGeneral, problems.get(PatrolMeta.GENERAL));
 			updateCd(cdStartDate, problems.get(PatrolMeta.START_DATE));
 			updateCd(cdEndDate, problems.get(PatrolMeta.END_DATE));
 			updateCd(cdPatrolType, problems.get(PatrolMeta.TYPE));
@@ -282,7 +286,7 @@ public class PatrolCTImportEditorContent implements IImportEditorContent {
 			for (int i = 0; i < lbls.length; i ++){
 				((Text)lbls[i]).setText(""); //$NON-NLS-1$
 			}
-			ControlDecoration[] cds = {cdStartDate, cdEndDate, cdPatrolType, cdTransportType, cdArmed, cdMandate, cdTeam, cdStation, cdObjective, cdComment, cdLeader, cdPilot, cdMembers};
+			ControlDecoration[] cds = {cdGeneral, cdStartDate, cdEndDate, cdPatrolType, cdTransportType, cdArmed, cdMandate, cdTeam, cdStation, cdObjective, cdComment, cdLeader, cdPilot, cdMembers};
 			for (int i = 0; i < cds.length; i ++){
 				cds[i].hide();
 			}
