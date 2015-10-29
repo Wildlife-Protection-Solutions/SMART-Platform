@@ -23,14 +23,11 @@ package org.wcs.smart.er.ui.handlers;
 
 import java.util.Iterator;
 
-import javax.inject.Named;
-
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Execute;
-import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
-import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
@@ -52,11 +49,12 @@ import org.wcs.smart.observation.ui.ShowFieldDataPerspective;
  */
 public class NewSurveyHandler {
 
+	//EG: See DeleteSurveyElementHandler for use of ESelectionService over ActiveSelection
 	@Execute
-	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, 
+	public void execute(ESelectionService selService, 
 			Shell activeShell,
 			IEclipseContext ctx){
-		
+		Object selection = selService.getSelection();
 		//search for a parent
 		byte[] parentDesign = null;
 		byte[] parentSurvey = null;
