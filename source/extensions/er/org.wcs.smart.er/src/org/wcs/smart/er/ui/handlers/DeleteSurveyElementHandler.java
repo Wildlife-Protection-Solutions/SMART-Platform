@@ -36,6 +36,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.tools.compat.parts.DIHandler;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -72,10 +73,16 @@ import org.wcs.smart.util.SmartUtils;
  */
 public class DeleteSurveyElementHandler {
 
+	//EG: instead of selectionService I originally made user of
+	//@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, 
+	//however this did not always provide the correct selection.  If you
+	//created a new survey design from scratch, then a new survey and
+	//try to delete the survey by right-clicking on it and selected delete it
+	//would try to delete the survey design not the survey.	
 	@Execute
-	public void execute(@Optional @Named(IServiceConstants.ACTIVE_SELECTION) Object selection, Shell activeShell){
+	public void execute(ESelectionService selectionService, Shell activeShell){
+			Object selection = selectionService.getSelection();
 		if (selection == null || !(selection instanceof StructuredSelection)) return;
-		
 		
 		final List<SurveyListTreeNode> nodes = new ArrayList<SurveyListTreeNode>();
 		final List<SurveyDesignEditorInput> designs = new ArrayList<SurveyDesignEditorInput>();
