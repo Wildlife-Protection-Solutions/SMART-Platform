@@ -30,6 +30,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.hibernate.Session;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.ui.mision.MissionComposite;
 import org.wcs.smart.er.ui.mision.MissionPropertyValuesComposite;
@@ -88,15 +89,23 @@ public class MissionCompositeWizardPage extends WizardPage {
 	 * 
 	 * @param design
 	 */
-	public void initPage(Mission mission, SurveyDesign survey, Session session){
+	public void initPage(SurveyDesign surveyDesign, Survey survey, Mission mission, Session session){
 		if (composite instanceof SurveyComposite){
-			((SurveyComposite)composite).init(mission, survey, session);
+			((SurveyComposite)composite).init(mission, surveyDesign, session);
 		}else{
 			composite.init(mission, session);
-			if (mission.getSurvey() != null){
-				sd.setText(mission.getSurvey().getId() + " - " + mission.getSurvey().getSurveyDesign().getName()); //$NON-NLS-1$
-				sd.getParent().layout();
-			}
+		}
+		String text = ""; //$NON-NLS-1$
+		if (survey != null ){
+			text += survey.getId();
+		}
+		if (surveyDesign != null){
+			if (!text.isEmpty()) text += " - "; //$NON-NLS-1$
+			text += surveyDesign.getName(); 
+		}
+		if (!text.isEmpty()){
+			sd.setText(text); 
+			sd.getParent().layout();
 		}
 	}
 	
