@@ -21,14 +21,28 @@
  */
 package org.wcs.smart.connect.replication;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ILoginHandler;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServerStatus;
@@ -47,6 +61,7 @@ import org.wcs.smart.hibernate.SmartDB;
 /**
  * Login handler to clean up SMART connect processes in cases
  * where SMART terminates in the middle of a background job.
+ * Also cleans out filestore.
  * 
  * @author Emily
  *
@@ -82,8 +97,10 @@ public class LoginHandler implements ILoginHandler {
 		}finally{
 			s.close();
 		}
-		
+
 		//process any existing ca upload task
+		//this may effect replication state which is why we disable/enable
+		//replication state again after completed
 		processCaUploadEvents(status);
 		
 		//sort out replication
@@ -109,6 +126,11 @@ public class LoginHandler implements ILoginHandler {
 		
 		//process any upload sync tasks
 		processUploadSync();
+		//cleanup download sync tasks
+		cleanUpDownloadEvents(status);
+
+		//cleanupfilestore
+		cleanUpFilestore();
 	}
 
 	/*
@@ -136,7 +158,7 @@ public class LoginHandler implements ILoginHandler {
 				s.close();
 			}
 				
-		}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){		
+		}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){
 			boolean cont = false;
 			if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Export To Connect", 
 					"SMART was terminated before the export to SMART Conenct was completed.  Do you want resume the upload process?")){
@@ -145,7 +167,15 @@ public class LoginHandler implements ILoginHandler {
 				if (connect != null){
 					//need to continue upload
 					cont = true;
-					(new UploadCaEngine()).continueUpload(connect, status);		
+					WorkbenchJob wj = new WorkbenchJob("resume upload job") {
+						@Override
+						public IStatus runInUIThread(IProgressMonitor monitor) {
+							(new UploadCaEngine()).continueUpload(connect, status);
+							return org.eclipse.core.runtime.Status.OK_STATUS;
+						}
+					};
+					wj.schedule();
+							
 				}
 			}
 			if (!cont){
@@ -163,26 +193,117 @@ public class LoginHandler implements ILoginHandler {
 		}
 	}
 	
+	/*
+	 * Here we are going to remove any files that are not associated with
+	 * 1) an active CA upload from ANY CA
+	 * -> localfilename from ConnectServerStatus
+	 * 2) and active sync download from ANY CA
+	 * 
+	 * All other files/directories will be removed.
+	 */
+	private void cleanUpFilestore(){
+		final List<Path> filesToKeep = new ArrayList<Path>();
+		
+		Session s = HibernateManager.openSession();
+		
+		try{
+			List<ConnectServerStatus> toKeep = s.createCriteria(ConnectServerStatus.class)
+					.add(Restrictions.eq("status", ConnectServerStatus.Status.UPLOAD))
+					.list();
+			for(ConnectServerStatus server : toKeep){
+				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), server.getLocalFile());
+				filesToKeep.add(fileToKeep);
+			}
+			
+			List<ConnectSyncHistoryRecord> upToKeep = s.createCriteria(ConnectSyncHistoryRecord.class)
+					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.ACTIVE))
+					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD))
+					.list();
+			for (ConnectSyncHistoryRecord syn : upToKeep){
+				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), syn.getChangeLogZipFile());
+				filesToKeep.add(fileToKeep);
+			}
+			
+		}finally{
+			s.close();
+		}
+		
+		//delete all files that are not in the filesToKeep Array
+		Path smartConnect = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR);
+		
+		try(DirectoryStream<Path> stream = Files.newDirectoryStream(smartConnect, new DirectoryStream.Filter<Path>(){
+			@Override
+			public boolean accept(Path entry) throws IOException {
+				return !filesToKeep.contains(entry);
+			}})){
+			
+			for (Path p : stream){
+				try{
+					if (Files.isDirectory(p)){
+						FileUtils.deleteDirectory(p.toFile());
+					}else if (Files.exists(p)){
+						Files.delete(p);
+					}
+				}catch (Exception ex){
+					ConnectPlugIn.log("Unable to delete file while cleaning up connect filestore directory. " + p.toString(), ex);
+				}
+			}
+			
+		}catch (Exception ex){
+			ConnectPlugIn.log("Unable to delete files while cleaning up connect filestore directory. ", ex);
+		}
+		
+	}
 	
+	/*
+	 * Any active download sync events are set to error
+	 * 
+	 * @param status
+	 */
+	private void cleanUpDownloadEvents(ConnectServerStatus status){
+		List<ConnectSyncHistoryRecord> items = SyncHistoryManager.INSTANCE.getActiveSyncRecords(SmartDB.getCurrentConservationArea(), Type.DOWNLOAD);
+
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			for (ConnectSyncHistoryRecord r : items){
+				r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+				s.saveOrUpdate(r);
+			}
+			s.getTransaction().commit();
+		}finally{
+			s.close();
+		}
+	}
 	/*
 	 * checks for ca any upload sync events which may not have completed
 	 */
 	private void processUploadSync(){
 		ConnectSyncHistoryRecord record = null;
 		try{
+			List<ConnectSyncHistoryRecord> allActive = SyncHistoryManager.INSTANCE.getActiveSyncRecords(SmartDB.getCurrentConservationArea(), Type.UPLOAD);
+			
 			Session s = HibernateManager.openSession();
 			try{
 				record = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(s, SmartDB.getCurrentConservationArea(),Type.UPLOAD);
+				
+				s.beginTransaction();
+				for (ConnectSyncHistoryRecord r : allActive){
+					if (r != record){
+						r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+						s.saveOrUpdate(r);
+					}
+				}
+				s.getTransaction().commit();
 			}finally{
 				s.close();
 			}
 			
-			if (record == null) return;
+			if (record == null ||
+				record.getStatus() == ConnectSyncHistoryRecord.Status.DONE || 
+				record.getStatus() == ConnectSyncHistoryRecord.Status.NODATA ||
+				record.getStatus() == ConnectSyncHistoryRecord.Status.ERROR){
 				
-			if (record.getStatus() == ConnectSyncHistoryRecord.Status.DONE){
-				return;
-			}
-			if (record.getStatus() == ConnectSyncHistoryRecord.Status.ERROR){
 				return;
 			}
 				

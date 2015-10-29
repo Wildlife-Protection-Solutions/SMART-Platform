@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.server.replication;
 
 import java.util.Date;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
@@ -102,6 +103,29 @@ public enum SyncHistoryManager {
 			s.close();
 		}
 	}
+	
+	/**
+	 * Gets the last non error sync record with the given type.
+	 * 
+	 * @param ca
+	 * @param type
+	 * @return
+	 */
+	public List<ConnectSyncHistoryRecord> getActiveSyncRecords(ConservationArea ca,
+			ConnectSyncHistoryRecord.Type type){
+		
+		Session session = HibernateManager.openSession();
+		try{
+			return session.createCriteria(ConnectSyncHistoryRecord.class)
+				.add(Restrictions.eq("conservationArea", ca))
+				.add(Restrictions.eq("type", type))
+				.add(Restrictions.eq("status", Status.ACTIVE))
+				.list();
+		}finally{
+			session.close();
+		}
+	}
+	
 	/**
 	 * Gets the last non error sync record with the given type.
 	 * 
@@ -112,7 +136,7 @@ public enum SyncHistoryManager {
 	public ConnectSyncHistoryRecord getLastNonErrorSyncRecord(Session session, ConservationArea ca,
 			ConnectSyncHistoryRecord.Type type){
 		
-		ConnectSyncHistoryRecord record = (ConnectSyncHistoryRecord) (ConnectSyncHistoryRecord)session.createCriteria(ConnectSyncHistoryRecord.class)
+		ConnectSyncHistoryRecord record = (ConnectSyncHistoryRecord) session.createCriteria(ConnectSyncHistoryRecord.class)
 				.add(Restrictions.eq("conservationArea", ca))
 				.add(Restrictions.eq("type", type))
 				.add(Restrictions.in("status", new Object[]{Status.ACTIVE, Status.DONE}))

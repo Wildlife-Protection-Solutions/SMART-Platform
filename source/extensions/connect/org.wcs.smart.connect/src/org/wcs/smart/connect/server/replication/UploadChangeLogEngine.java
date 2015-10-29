@@ -121,7 +121,7 @@ public class UploadChangeLogEngine {
 			}
 			
 			monitor.worked(1);
-			
+			 
 			//package changes
 			if (current.getStatusUrl() == null){
 				//upload has not started 
