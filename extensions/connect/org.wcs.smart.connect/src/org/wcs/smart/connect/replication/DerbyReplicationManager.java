@@ -25,12 +25,18 @@ import java.nio.file.FileSystems;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.List;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
+import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -53,6 +59,17 @@ public enum DerbyReplicationManager {
 	
 	private Boolean enabledState = null;
 	
+	private List<IReplicationEventListener> listeners = new ArrayList<IReplicationEventListener>();
+	
+	public void addListener(IReplicationEventListener listener){
+		listeners.add(listener);
+	}
+	
+	private void fireEvents(){
+		for (IReplicationEventListener l : listeners){
+			l.handleEvent();
+		}
+	}
 	/**
 	 * This MUST BE wrapped in a transaction that is committed
 	 * @param session
@@ -68,6 +85,8 @@ public enum DerbyReplicationManager {
 		//run filestore watcher in new thread (background)		
 		fileStoreReplication = new Thread(watcher);
 		fileStoreReplication.start();
+		
+		fireEvents();
 	}
 	
 	/**
@@ -88,6 +107,8 @@ public enum DerbyReplicationManager {
 			fileStoreReplication.interrupt();
 			fileStoreReplication = null;
 		}
+		
+		fireEvents();
 		
 	}
 
@@ -156,5 +177,40 @@ public enum DerbyReplicationManager {
 			}
 		});
 		
+	}
+	
+	public interface IReplicationEventListener{
+		public boolean handleEvent();
+	}
+	
+	public Boolean hasLocalChanges(Session session){
+		//replication not enabled
+		if (!enabledState) return null;
+		
+		ConnectSyncHistoryRecord  rec = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, 
+				SmartDB.getCurrentConservationArea(), ConnectSyncHistoryRecord.Type.UPLOAD);
+		Long currentRevision = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, 
+				SmartDB.getCurrentConservationArea());
+		
+		if (rec == null && currentRevision == null){
+			return Boolean.FALSE;
+		}else if (rec == null && currentRevision != null){
+			return Boolean.TRUE;
+		}else if (rec != null && currentRevision == null){
+			if (rec.getEndRevision().longValue() != -1){				
+				return null;	//unknown error
+			}else{
+				return Boolean.FALSE;
+			}
+		}else if (rec != null && currentRevision != null){
+			if (currentRevision.longValue() > rec.getEndRevision().longValue()){
+				return Boolean.TRUE;
+			}else if (currentRevision.longValue() == rec.getEndRevision().longValue()){
+				return Boolean.FALSE;
+			}else{
+				return null;	//unknown error
+			}
+		}
+		return null;
 	}
 }

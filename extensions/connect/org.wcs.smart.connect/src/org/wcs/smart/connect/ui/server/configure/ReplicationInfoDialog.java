@@ -206,28 +206,14 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 				lblServerVersion.setText( UuidUtils.uuidToString(status.getVersion()));
 				lblServerRevision.setText( status.getServerRevision().toString() );
 					
-				ConnectSyncHistoryRecord  rec = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, SmartDB.getCurrentConservationArea(), ConnectSyncHistoryRecord.Type.UPLOAD);
-				Long currentRevision = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, SmartDB.getCurrentConservationArea());
-				if (rec == null && currentRevision == null){
-					lblLocalChanges.setText("No");
-				}else if (rec == null && currentRevision != null){
+				Boolean hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
+				if (hasChanges == null){
+					lblLocalChanges.setText("Error");
+				}else if (hasChanges){
 					lblLocalChanges.setText("Yes");
-				}else if (rec != null && currentRevision == null){
-					if (rec.getEndRevision().longValue() != -1){
-						lblLocalChanges.setText("Error");
-					}else{
-						lblLocalChanges.setText("No");
-					}
-				}else if (rec != null && currentRevision != null){
-					if (currentRevision.longValue() > rec.getEndRevision().longValue()){
-						lblLocalChanges.setText("Yes");
-					}else if (currentRevision.longValue() == rec.getEndRevision().longValue()){
-						lblLocalChanges.setText("No");
-					}else{
-						lblLocalChanges.setText("ERROR");
-					}
-				}
-					
+				}else{
+					lblLocalChanges.setText("No");
+				}	
 			}
 			
 			List<?> input = session.createCriteria(ConnectSyncHistoryRecord.class).add(Restrictions.eq("conservationArea", server.getConservationArea())).list();

@@ -30,6 +30,7 @@ import java.util.Collections;
 import javax.inject.Named;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Execute;
 import org.eclipse.e4.core.services.events.IEventBroker;
@@ -53,6 +54,7 @@ import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
 import org.wcs.smart.hibernate.ConservationAreaConfiguration;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -77,37 +79,60 @@ public class DownloadChangeLogHandler {
 		}
 	}
 
-	private void downloadChangeLog(Shell activeShell, final EPartService pService, 
-			final SmartConnect connect, final IEventBroker events){
-		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
-		try {
-			pmd.run(true, false, new IRunnableWithProgress() {
-				@Override
-				public void run(final IProgressMonitor monitor) throws InvocationTargetException,
-						InterruptedException {
-					monitor.beginTask("Download and Apply Changelog", 3);
-					DownloadChangeLogEngine engine = new DownloadChangeLogEngine(connect);
-					try{
-						if (engine.downloadInstall(pService, new SubProgressMonitor(monitor, 1))){
-							//refresh ui
-							monitor.subTask("Updating Current User");
-							if (!checkUser()){
-								return;
-							}
-							monitor.worked(1);
-							monitor.subTask("Refreshing UI");
-							refreshUi(pService, events);
-							monitor.worked(1);
-							
-						}
-					}catch (Exception ex){
-						ConnectPlugIn.displayLog(ex.getMessage(), ex);
+	private void downloadChangeLog(Shell activeShell,
+			final EPartService pService, final SmartConnect connect,
+			final IEventBroker events) {
+		MessageDialog
+				.openInformation(
+						activeShell,
+						"Download",
+						"SMART will download changes in the background.  You will be prompted to apply changes once download complete.");
+		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(connect,
+				pService) {
+			protected void processComplete() {
+				super.processComplete();
+				if (record.getStatus() == Status.DONE) {
+					
+					//TODO: move this checkuser and refreshui code to the
+					//download change log engine class as this needs to
+					//be done always
+					if (!checkUser()) {
+						return;
 					}
-					monitor.done();
+					refreshUi(pService, events);
+				} else if (record.getStatus() == Status.NODATA) {
+					Display.getDefault().syncExec(new Runnable() {
+
+						@Override
+						public void run() {
+							MessageDialog
+									.openInformation(Display.getDefault()
+											.getActiveShell(),
+											"Download Error",
+											"Local database up-to-date. Nothing to apply.");
+						}
+
+					});
+				} else {
+					Display.getDefault().syncExec(new Runnable() {
+
+						@Override
+						public void run() {
+							MessageDialog.openError(Display.getDefault()
+									.getActiveShell(), "Download Error", record
+									.getErrorString());
+						}
+
+					});
+
 				}
-			});
-		} catch (InvocationTargetException | InterruptedException e) {
-			ConnectPlugIn.displayLog(e.getMessage(), e);
+			}
+		};
+
+		try {
+			engine.downloadInstall();
+		} catch (Exception ex) {
+			ConnectPlugIn.displayLog(ex.getMessage(), ex);
 		}
 	}
 
