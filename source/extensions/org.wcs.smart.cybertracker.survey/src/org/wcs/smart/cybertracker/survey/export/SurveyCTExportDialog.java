@@ -22,6 +22,8 @@
 package org.wcs.smart.cybertracker.survey.export;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -92,13 +94,19 @@ public class SurveyCTExportDialog extends CyberTrackerExportDialog {
 		});
 	}
 	
-	private List<?> getDesignsList() {
-		List<Object> modelList = new ArrayList<Object>();
+	private List<SurveyDesignEditorInput> getDesignsList() {
+		List<SurveyDesignEditorInput> modelList = new ArrayList<>();
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try {
 			;
 			modelList.addAll(SurveyHibernateManager.getInstance().getSurveyDesignEditorInputs(s, null));
+			Collections.sort(modelList, new Comparator<SurveyDesignEditorInput>() {
+				@Override
+				public int compare(SurveyDesignEditorInput s1, SurveyDesignEditorInput s2) {
+					return s1.getName().compareTo(s2.getName());
+				}
+			});
 		} catch (Exception ex) {
 			SmartPlugIn.displayLog(Messages.SurveyCTExportDialog_LoadSurveyDesigns_Error, ex);
 		} finally {
