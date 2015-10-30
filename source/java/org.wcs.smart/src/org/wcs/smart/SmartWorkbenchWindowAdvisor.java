@@ -27,6 +27,9 @@ import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
+import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
+import org.eclipse.e4.ui.model.application.ui.menu.impl.ToolControlImpl;
+import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.preference.IPreferenceNode;
@@ -43,6 +46,7 @@ import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
 import org.locationtech.udig.project.ui.internal.LayersView;
 import org.locationtech.udig.project.ui.internal.MapPart;
+import org.locationtech.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import org.locationtech.udig.tool.info.internal.InfoView2;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.wcs.smart.backup.AutoBackupEngine;
@@ -216,10 +220,17 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
 			element.getChildren().add(trg, e);
 		}
 		
-//		//this gets hidden by some visibility changes events that I don't have control over;
-//		//so instead we ensure it is visible here.
+		//this gets hidden by some visibility changes events that I don't have control over;
+		//so instead we ensure it is visible here.
 		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class)); //$NON-NLS-1$
-		statusBar.setVisible(true);	
+		statusBar.setVisible(true);
+		
+		//add a spacer so we can force items to be on the right
+		MToolControl tc = modelService.createModelElement(MToolControl.class);
+		tc.setElementId("org.wcs.smart.trim.status.spacer"); //$NON-NLS-1$
+		statusBar.getChildren().add(tc);
+		tc.getTags().add("stretch"); //$NON-NLS-1$
+		
     }
     
     
