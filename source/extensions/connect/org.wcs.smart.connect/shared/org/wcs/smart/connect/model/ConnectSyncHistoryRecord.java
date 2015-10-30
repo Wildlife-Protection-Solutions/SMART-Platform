@@ -75,6 +75,9 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	private Long startRevision;
 	private Long endRevision;
 	
+	@Transient
+	private String errorString;
+	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="ca_uuid", referencedColumnName="uuid")
 	public ConservationArea getConservationArea() {
@@ -177,5 +180,14 @@ public class ConnectSyncHistoryRecord extends UuidItem{
 	@Transient
 	public String getChangeLogMetadataFile(){
 		return getChangeLogFilePrefix() + METADATA_FILE_SUFFIX;
+	}
+	
+	@Transient
+	public String getErrorString(){
+		return this.errorString;
+	}
+	@Transient
+	public void setErrorString(String error){
+		this.errorString = error;
 	}
 }
