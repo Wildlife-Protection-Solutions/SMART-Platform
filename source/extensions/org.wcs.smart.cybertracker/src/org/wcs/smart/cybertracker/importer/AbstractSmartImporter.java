@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
@@ -137,10 +138,8 @@ public abstract class AbstractSmartImporter {
 	
 
 	protected void addObservations(Waypoint wp, S s, Map<String, E> eMap, Session session) {
-		List<List<A>> aList = splitObservationRecords(s, eMap);
-		if (aList.isEmpty())
-			return;
-		List<A> catList = aList.get(0);
+		ObservationSplitResult splitResult = splitObservationRecords(s, eMap);
+		List<A> catList = splitResult.getCategories();
 		if (catList.isEmpty())
 			return;
 		
@@ -148,11 +147,13 @@ public abstract class AbstractSmartImporter {
 		if (category == null)
 			return;
 		
-		for (int i = 1; i < aList.size(); i++) {
-			List<A> attrList = aList.get(i);
+		Employee observer = fetchObserver(splitResult.getObserver(), eMap, session);
+		
+		for (List<A> attrList : splitResult.getAttributes()) {
 			WaypointObservation obs = new WaypointObservation();
 			obs.setWaypoint(wp);
 			obs.setCategory(category);
+			obs.setObserver(observer);
 			obs.setAttributes(fetchAttributes(obs, attrList, eMap, session));
 			
 			wp.getObservations().add(obs);
@@ -162,14 +163,18 @@ public abstract class AbstractSmartImporter {
 	/**
 	 * @param s
 	 * @param eMap
-	 * @return First list is a list of categories, all the rest are list of attributes
+	 * @return data structure containing:
+	 *            - a list of A tags that define category
+	 *            - one or several list of A tags that define attributes in this category
+	 *            - observer information if it presents
 	 */
-	private List<List<A>> splitObservationRecords(S s, Map<String, E> eMap) {
+	private ObservationSplitResult splitObservationRecords(S s, Map<String, E> eMap) {
 		List<A> categories = new ArrayList<A>();
 		Map<Integer, List<A>> attributes = new HashMap<Integer, List<A>>();
 		List<A> preMsAtts = null;
 		boolean processMultiselect = true;
 		A defaultValue = null;
+		A observer = null;
 		for (A a : s.getA()) {
 			E e = eMap.get(a.getI());
 			if (e == null)
@@ -185,6 +190,8 @@ public abstract class AbstractSmartImporter {
 					attributes.put(tag2, aList);
 				}
 				aList.add(a);
+			} else if (ScreensUtil.RESULT_OBSERVER.equals(e.getN())) {
+				observer = a;
 			} else if (ElementsUtil.DEFAULT_VALUES_ELEMENT_TAG.equals(e.getTag1())) {
 				defaultValue = a;
 			} else if (ElementsUtil.MULISELECT_ELEMENT_TAG.equals(e.getTag1())) {
@@ -225,16 +232,15 @@ public abstract class AbstractSmartImporter {
 			}
 		}
 		
-		List<List<A>> result = new ArrayList<List<A>>();
-		result.add(categories);
+		List<List<A>> attrList = new ArrayList<List<A>>();
 		for (Integer i : attributes.keySet()) {
 			List<A> aList = attributes.get(i);
 			if (defaultValue != null) {
 				aList.add(defaultValue);
 			}
-			result.add(aList);
+			attrList.add(aList);
 		}
-		return result;
+		return new ObservationSplitResult(categories, attrList, observer);
 	}
 	
 	private List<WaypointObservationAttribute> fetchAttributes(WaypointObservation obs, List<A> aList, Map<String, E> eMap, Session session) {
@@ -378,6 +384,23 @@ public abstract class AbstractSmartImporter {
 		return category;
 	}
 
+	private Employee fetchObserver(A a, Map<String, E> eMap, Session session) {
+		if (a != null && a.getV() != null) {
+			E e = eMap.get(a.getV());
+			String tag0 = e != null ? e.getTag0() : null;
+			if (tag0 != null) {
+				Employee emp = CyberTrackerHibernateManager.fetchByUuid(Employee.class, tag0, session);
+				if (emp == null) {
+					addWarning(MessageFormat.format(Messages.AbstractSmartImporter_Observer_NotFound, e.getN(), e.getTag0()));
+				}
+				return emp;
+			} else {
+				addWarning(Messages.AbstractSmartImporter_Observer_InvalidData);
+				return null;
+			}
+		}
+		return null;
+	}
 	
 	protected Date toDate(String strDate) {
 		if (strDate == null)
