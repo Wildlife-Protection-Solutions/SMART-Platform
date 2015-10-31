@@ -79,6 +79,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 	private Text lblComment;
 	private Text lblLeader;
 	
+	private ControlDecoration cdGeneral;
 	private ControlDecoration cdStartDate;
 	private ControlDecoration cdEndDate;
 	private ControlDecoration cdSurveyDesign;
@@ -107,6 +108,8 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 		Composite left = toolkit.createComposite(main);
 		left.setLayout(new GridLayout(2, false));
 		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		((GridData)left.getLayoutData()).horizontalIndent = 5;
+		cdGeneral = createDecoration(left);
 		
 		Composite right = toolkit.createComposite(main);
 		right.setLayout(new GridLayout(2, false));
@@ -200,6 +203,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 			
 			
 			Map<IDataMeta, List<ImportError>> problems = ((CyberTrackerSurvey) selection).getProblems();
+			updateCd(cdGeneral, problems.get(SurveyMeta.GENERAL));
 			updateCd(cdStartDate, problems.get(SurveyMeta.START_DATE));
 			updateCd(cdEndDate, problems.get(SurveyMeta.END_DATE));
 			updateCd(cdSurveyDesign, problems.get(SurveyMeta.SURVEY_DESIGN));
@@ -211,7 +215,7 @@ public class SurveyCTImportEditorContent implements IImportEditorContent {
 			for (int i = 0; i < lbls.length; i ++){
 				((Text)lbls[i]).setText(""); //$NON-NLS-1$
 			}
-			ControlDecoration[] cds = {cdStartDate, cdEndDate, cdSurveyDesign, cdComment, cdLeader, cdMembers};
+			ControlDecoration[] cds = {cdGeneral, cdStartDate, cdEndDate, cdSurveyDesign, cdComment, cdLeader, cdMembers};
 			for (int i = 0; i < cds.length; i ++){
 				cds[i].hide();
 			}
