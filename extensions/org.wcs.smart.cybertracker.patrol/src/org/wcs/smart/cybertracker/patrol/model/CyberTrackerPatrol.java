@@ -50,6 +50,7 @@ import org.wcs.smart.patrol.model.Team;
 public class CyberTrackerPatrol extends AbstractCyberTrackerData {
 	
 	public enum PatrolMeta implements IDataMeta {
+		GENERAL,
 		START_DATE,
 		END_DATE,
 		TYPE,

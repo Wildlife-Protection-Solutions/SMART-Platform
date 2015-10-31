@@ -176,7 +176,11 @@ public class SurveyCTDataBuilder extends CyberTrackerDataBuilder {
 			String[] ctIdArray = v.split(ICyberTrackerConstants.ATTRIBUTE_DEFAULT_VALUES_SEPATATOR);
 			for (String ctid : ctIdArray) {
 				E di = eMap.get(ctid); //default "E" element, we need to emulate as if it is set in a.i with a.v = di.tag2 ... ;)
-				recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
+				if (di != null) {
+					recordSurveyData(ctSurvey, di, di.getTag2(), eMap, session);
+				} else {
+					ctSurvey.addError(SurveyMeta.GENERAL, MessageFormat.format(Messages.SurveyCTDataBuilder_Error_DefaultValue, ctid));
+				}
 			}
 		} else if (ScreensUtil.RESULT_ID.equals(n)) {
 			ctSurvey.setId(v);

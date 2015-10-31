@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.cybertracker.survey.importer;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -213,7 +215,15 @@ public class SurveySelectorDialog extends TitleAreaDialog {
 			List<Survey> surveys = s.createCriteria(Survey.class)
 					.add(Restrictions.eq("surveyDesign", surveyDesign)) //$NON-NLS-1$
 					.list();
-    		return surveys;
+
+			Collections.sort(surveys, new Comparator<Survey>() {
+				@Override
+				public int compare(Survey s1, Survey s2) {
+					return s1.getId().compareTo(s2.getId());
+				}
+			});
+
+			return surveys;
     	} finally {
     		s.close();
     	}
