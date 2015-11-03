@@ -44,8 +44,9 @@ import org.wcs.smart.ca.Employee.SmartUserLevel;
 import org.wcs.smart.ca.in.CaImporter;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.ConservationAreaInfo;
+import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.UserNamePasswordDialog;
@@ -64,10 +65,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class DownloadCaEngine {
 	
-	private ConservationAreaInfo info;
+	private ConservationAreaProxy info;
 	private SmartConnect connect;
 	
-	public DownloadCaEngine(ConservationAreaInfo info, SmartConnect connect){
+	public DownloadCaEngine(ConservationAreaProxy info, SmartConnect connect){
 		this.info = info;
 		this.connect = connect;
 	}
@@ -94,8 +95,9 @@ public class DownloadCaEngine {
 		WorkItemStatus status = null ;
 		while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
 			Long current = System.nanoTime();
-			if ( (current - start) > connect.getServer().getWaitProcessingTime()* 1000000) throw new Exception("Timed out waiting for export to process.");
-			Thread.sleep(connect.getServer().getRetryWaitTime());
+			
+			if ( (current - start) > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception("Timed out waiting for export to process.");
+			Thread.sleep(connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME));
 			try{
 				status = connect.getWorkItemStatus(statusUrl);
 			}catch (Exception ex){

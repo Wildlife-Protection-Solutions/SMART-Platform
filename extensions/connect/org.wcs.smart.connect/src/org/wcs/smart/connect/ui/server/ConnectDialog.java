@@ -45,7 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -198,12 +198,8 @@ public class ConnectDialog extends TitleAreaDialog {
 		Session s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			cs = (ConnectServer)s.createCriteria(ConnectServer.class)
-					.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-					.uniqueResult();
-			
-			user = (ConnectUser) s.get(ConnectUser.class, SmartDB.getCurrentEmployee().getUuid());
-			
+			cs = ConnectHibernateManager.getConnectServer(s);
+			user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);			
 			s.getTransaction().commit();
 		}finally{
 			s.close();
@@ -302,7 +298,8 @@ public class ConnectDialog extends TitleAreaDialog {
 						String newPassword = null;
 						if (savePass){
 							newPassword = ConnectPlugIn.encryptPassword(pass);
-						
+						}
+						if (ConnectDialog.this.user != null || savePass){
 							if (!strequals(existingPassword, newPassword == null ? null : pass)){
 								Session s = HibernateManager.openSession();
 								try{
@@ -326,6 +323,7 @@ public class ConnectDialog extends TitleAreaDialog {
 								}
 							}
 						}
+						
 					}catch (Exception ex){
 						ConnectPlugIn.displayLog("Unable to save password." + "\n" + ex.getMessage(), ex);
 					}

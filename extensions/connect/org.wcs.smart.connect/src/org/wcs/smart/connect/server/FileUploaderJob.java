@@ -32,6 +32,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.api.model.WorkItemStatus.Status;
+import org.wcs.smart.connect.model.ConnectServerOption;
 
 /**
  * Job for uploading a file to a SMART connect URL.
@@ -67,9 +68,9 @@ public abstract class FileUploaderJob extends Job {
 			if (checkServerStatus(serverStatus, monitor)){
 				return ;
 			}
-			int cnt = 0;
-			long waitTime = connect.getServer().getRetryWaitTime();
-			while(cnt < connect.getServer().getMaxRetryUpload()){
+			int cnt = 0;			
+			long waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+			while(cnt < connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)){
 				//upload file
 				try{
 					cnt++;
@@ -88,7 +89,7 @@ public abstract class FileUploaderJob extends Job {
 				waitTime = waitTime * 2;
 			}
 			//if we are here we have tried max_retry times and the file has still not been uploaded
-			throw new Exception(MessageFormat.format("Upload reached max tries of {0}.  Please validate server connection and try again.", connect.getServer().getMaxRetryUpload()));
+			throw new Exception(MessageFormat.format("Upload reached max tries of {0}.  Please validate server connection and try again.", connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)));
 		}catch(Exception ex){
 			serverStatus.setMessage(ex.getMessage());
 			onError(serverStatus);
@@ -130,7 +131,7 @@ public abstract class FileUploaderJob extends Job {
 				//we waited 5 minutes and we do not know how to proceed
 				throw new Exception(
 						MessageFormat.format(
-								"Server unable to process file after {0} minutes.  Check status on SMART Connect", connect.getServer().getWaitProcessingTime() / (1000 *60.0) ));
+								"Server unable to process file after {0} minutes.  Check status on SMART Connect", connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) / (1000 *60.0) ));
 			}
 			return true;
 			
@@ -153,8 +154,8 @@ public abstract class FileUploaderJob extends Job {
 		
 		Long startTime = System.nanoTime();
 		Long currentTime = System.nanoTime();
-		long waitTime = connect.getServer().getRetryWaitTime();
-		while( (currentTime - startTime)  < connect.getServer().getWaitProcessingTime() * 1000000){
+		long waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+		while( (currentTime - startTime)  < connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l){
 			Thread.sleep(waitTime);
 			try{
 				WorkItemStatus serverStatus = connect.getWorkItemStatus(url);

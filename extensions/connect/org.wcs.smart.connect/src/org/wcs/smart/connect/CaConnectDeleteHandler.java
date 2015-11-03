@@ -74,6 +74,11 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 		//Sync History
 		SyncHistoryManager.INSTANCE.deleteAll(session, ca);
 		
+		//ConnectServerOptions
+		q = session.createQuery("delete from ConnectServerOption op where op.id.server in (SELECT op2.id.server FROM ConnectServerOption op2 WHERE op2.id.server.conservationArea = :ca)"); //$NON-NLS-1$
+		q.setParameter("ca", ca); //$NON-NLS-1$
+		q.executeUpdate();
+				
 		//ConnectServer
 		q = session.createQuery("delete from ConnectServer where conservationArea = :ca"); //$NON-NLS-1$
 		q.setParameter("ca", ca); //$NON-NLS-1$

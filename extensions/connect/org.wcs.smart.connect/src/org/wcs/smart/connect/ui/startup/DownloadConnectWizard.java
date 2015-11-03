@@ -13,7 +13,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.ConservationAreaInfo;
+import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.server.DownloadCaEngine;
 import org.wcs.smart.connect.ui.server.configure.ConnectServerWizard;
@@ -23,12 +23,12 @@ import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
 
 public class DownloadConnectWizard extends ConnectServerWizard implements IPageChangingListener{
 
-	protected CaListPage page4;
+	protected CaListPage page5;
 	
 	public DownloadConnectWizard(){
-		super();
+		super(false);
 		setWindowTitle("Download from SMART Connect Server");
-		addPage(page4 = new CaListPage());
+		addPage(page5 = new CaListPage());
 		setNeedsProgressMonitor(true);
 		
 	}
@@ -48,7 +48,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 			}
 		};
 		server.setServerUrl(url);
-		server.initalizeOptions();
+		server.getOptions().size();
 		((ServerOptionsWizardPage)getPage(ServerOptionsWizardPage.NAME)).updateServer(server);
 		if (!certificateFile.trim().isEmpty()){
 			server.setCertificateFileName(certificateFile);
@@ -59,7 +59,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 	
 	@Override
 	public boolean performFinish() {
-		ConservationAreaInfo info = page4.getSelection();
+		ConservationAreaProxy info = page5.getSelection();
 
 		if (info == null) return false;
 	
@@ -101,7 +101,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (event.getCurrentPage() == page3 && event.getTargetPage() == page4){
+		if (event.getCurrentPage() == page5 && event.getTargetPage() == page5){
 			final ConnectServer temp = createServer();
 			final String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 			final String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
@@ -114,7 +114,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 							InterruptedException {
 						monitor.beginTask("Loading Conservation Areas", 2);
 						monitor.worked(1);
-						page4.initList(temp, user, pass);
+						page5.initList(temp, user, pass);
 						monitor.done();
 					}
 				});
@@ -123,8 +123,8 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 			}
 			
 		}
-		if (event.getCurrentPage() == page4 && event.getTargetPage() == page3){
-			page4.clearList();
+		if (event.getCurrentPage() == page5 && event.getTargetPage() == page5){
+			page5.clearList();
 		}
 	}
 }

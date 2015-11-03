@@ -41,7 +41,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.ConservationAreaInfo;
+import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
@@ -87,7 +87,7 @@ public class UploadCaEngine {
 			
 			ConnectServer server = connect.getServer();
 			
-			ConservationAreaInfo serverInfo = connect.getCaInfo(server.getConservationArea().getUuid());
+			ConservationAreaProxy serverInfo = connect.getCaInfo(server.getConservationArea().getUuid());
 			monitor.worked(1);
 			
 			monitor.subTask("Configuring upload");
@@ -100,11 +100,11 @@ public class UploadCaEngine {
 		
 				//check status
 				if (serverInfo != null){
-					if (serverInfo.getStatus() == ConservationAreaInfo.Status.DATA){
+					if (serverInfo.getStatus() == ConservationAreaProxy.Status.DATA){
 						throw new Exception("This conservation area already exists on the server.  You cannot upload to the server again without removing it from the server first.");
 					}
 					
-					if (serverInfo.getStatus() == ConservationAreaInfo.Status.UPLOADING){
+					if (serverInfo.getStatus() == ConservationAreaProxy.Status.UPLOADING){
 						//somebody is uploading data;  is it us (check versions)?
 						if (localStatus == null 
 								|| !(localStatus.getVersion().equals(serverInfo.getVersion()))){
@@ -132,7 +132,7 @@ public class UploadCaEngine {
 				
 				//create db records
 				if (serverInfo == null || 
-						(serverInfo != null && serverInfo.getStatus() == ConservationAreaInfo.Status.NODATA)){
+						(serverInfo != null && serverInfo.getStatus() == ConservationAreaProxy.Status.NODATA)){
 					//update ca to server (new ca will be created if required; otherwise we update existing)
 					if (localStatus != null){
 						s.delete(localStatus);

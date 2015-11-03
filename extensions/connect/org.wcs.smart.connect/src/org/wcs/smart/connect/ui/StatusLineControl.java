@@ -10,19 +10,20 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.ConnectStatusManager;
+import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
+import org.wcs.smart.connect.IConnectStatusListener;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -31,6 +32,13 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 	private Label localStatus;
 	private Label serverStatus;
 	
+	private IConnectStatusListener serverListener = new IConnectStatusListener() {
+		
+		@Override
+		public void statusModified(ServerStatus status, String message) {
+			updateServerStatus(status, message);
+		}
+	};
 	public StatusLineControl() {
 		WorkbenchJob job = new WorkbenchJob("wait") {
 			
@@ -58,6 +66,8 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 			}
 		};
 		job.schedule();
+		
+		ConnectStatusManager.INSTANCE.addListener(serverListener);
 	}
 	
 
@@ -67,18 +77,42 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		Composite status = new Composite(parent, SWT.NONE);
 		status.setLayout(new GridLayout(2, true));
 
-		
 		serverStatus = new Label(status, SWT.NONE);
 		serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
 		
 		localStatus = new Label(status, SWT.NONE);
 		localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
 		
-		
 		updateLocalChanges.schedule();
 		return status;
 	}
 
+	private void updateServerStatus(ConnectStatusManager.ServerStatus status, String message){
+		Display.getDefault().asyncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				if (status == ServerStatus.CHANGES){
+					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_CHANGES_ICON));
+				}else if (status == ServerStatus.UPTODATE){
+					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_OK_ICON));
+				}else if (status == ServerStatus.CONNECTING){
+					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_PROCESSING_ICON));
+				}else if (status == ServerStatus.DOWNLOADING){
+					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_PROCESSING_ICON));
+				}else if (status == ServerStatus.ERROR){
+					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
+				}
+				if (message == null){
+					serverStatus.setToolTipText("");
+				}else{
+					serverStatus.setToolTipText(message);
+				}
+			}
+			
+		});
+		
+	}
 	
 	private Job updateLocalChanges = new Job("update local changes status"){
 

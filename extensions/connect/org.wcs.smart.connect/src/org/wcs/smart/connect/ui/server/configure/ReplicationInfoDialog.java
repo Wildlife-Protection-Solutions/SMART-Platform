@@ -40,12 +40,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
-import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
-import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
@@ -169,7 +168,7 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 					return super.getText(element);
 				}
 			});
-			vcol.getColumn().setWidth(col.size);
+			vcol.getColumn().setWidth(col.getSize());
 		}
 		
 		initControls();
@@ -190,9 +189,7 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 			}else{
 				lblEnabled.setText("Disabled");
 			}
-			ConnectServer server = (ConnectServer)session.createCriteria(ConnectServer.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.uniqueResult();
+			ConnectServer server = ConnectHibernateManager.getConnectServer(session);
 			
 			if (server == null){
 				return;

@@ -58,6 +58,14 @@ public enum ChangeLogTableManager {
 		query.executeUpdate();
 	}
 	
+	/**
+	 * Determines in the change log table contains a given change
+	 * log item.
+	 * 
+	 * @param s
+	 * @param item
+	 * @return
+	 */
 	public boolean constains(Session s, ChangeLogItem item){
 		ChangeLogItem litem = (ChangeLogItem) s.get(ChangeLogItem.class, item.getUuid());
 		if (litem == null) return false;

@@ -25,11 +25,12 @@ import java.nio.file.Path;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
@@ -52,11 +53,8 @@ public class DownloadChangeLogEngine {
 	
 	private ConnectServerStatus serverInfo = null;
 	
-	private EPartService pService;
-	
-	public DownloadChangeLogEngine(SmartConnect connect, EPartService pService){
+	public DownloadChangeLogEngine(SmartConnect connect){
 		this.connect = connect;
-		this.pService = pService;
 	}
 	
 	/**
@@ -80,6 +78,8 @@ public class DownloadChangeLogEngine {
 		}
 
 		try{
+			setServerStatus(ServerStatus.CONNECTING, "downloading changes from connect");
+			
 			Session session = HibernateManager.openSession();
 			try{
 				if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
@@ -106,7 +106,7 @@ public class DownloadChangeLogEngine {
 			if (serverInfo == null){
 				throw new Exception("SMART Connect server not found.");
 			}
-			
+			setServerStatus(ServerStatus.DOWNLOADING, "downloading changes from connect");
 			final DownloadChangeLogJob downloadJob = new DownloadChangeLogJob(connect, serverInfo, record);
 			downloadJob.addJobChangeListener(new JobChangeAdapter() {
 				@Override
@@ -139,6 +139,7 @@ public class DownloadChangeLogEngine {
 			}catch (Exception ex2){
 				ConnectPlugIn.log("Could not set download record status to error: " + ex2.getMessage(), ex2);
 			}
+			setServerStatus(ServerStatus.ERROR, "error uploading to server");
 			throw ex;
 		}
 	}
@@ -146,6 +147,7 @@ public class DownloadChangeLogEngine {
 	/**
 	 * Called at the end of the process once the file has been
 	 * downloaded and applied.
+	 * 
 	 */
 	protected void processComplete(){
 		//save status and unlock db
@@ -153,6 +155,13 @@ public class DownloadChangeLogEngine {
 			saveStatusRecord();
 		}finally{
 			SmartConnect.UPLOAD_LOCK.release();
+		}
+		
+		if (record.getStatus() == Status.DONE ||
+				record.getStatus() == Status.NODATA){
+			setServerStatus(ServerStatus.UPTODATE, "local database up-to-date");
+		}else{
+			setServerStatus(ServerStatus.ERROR, record.getErrorString());
 		}
 	}
 	private void saveStatusRecord(){
@@ -167,7 +176,7 @@ public class DownloadChangeLogEngine {
 	}
 	
 	private void afterDownload(Path changeLogFile){
-		ApplyChangeLogJob job = new ApplyChangeLogJob(changeLogFile, serverInfo, record, pService);
+		ApplyChangeLogJob job = new ApplyChangeLogJob(changeLogFile, serverInfo, record);
 		job.addJobChangeListener(new JobChangeAdapter() {
 			@Override
 			public void done(IJobChangeEvent event) {
@@ -178,5 +187,8 @@ public class DownloadChangeLogEngine {
 		job.schedule();
 	}
 	
+	private void setServerStatus(ConnectStatusManager.ServerStatus status, String message){
+		ConnectStatusManager.INSTANCE.statusModified(status, message);
+	}
 	
 }

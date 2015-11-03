@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.ui.server.configure;
 
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerOption;
 
 /**
  * Label provider for server options.
@@ -38,7 +39,7 @@ public enum ServerOptionLabelProvider {
 	 * @param option
 	 * @return
 	 */
-	public String getOptionLabel(ConnectServer.Option option){
+	public String getOptionLabel(ConnectServerOption.Option option){
 		switch(option){
 		case MAX_PROCESSING_WAIT_TIME:
 			return "Server Processing Wait Time (sec)";
@@ -48,19 +49,27 @@ public enum ServerOptionLabelProvider {
 			return "Upload Retry Count";
 		case RETY_WAIT_TIME:
 			return "Retry Wait Time (milli sec)";
+		case SYNC_AUTOMATICALLY:
+			return "Periodically Check Connect Server For Changes";
+		case SYNC_PROMPT_PASSWORD:
+			return "Prompt for Connect username and password if credentials not saved";
+		case SYNC_DOWNLOAD:
+			return "Automatically download changes and apply";
+		case SYNC_AUTO_UPLOAD:
+			return "Automatically upload changes after download";
 		default:
 			break;
 		}
 		return "ERROR";
 	}
-	
+
 	/**
 	 * The gui tooltip for the server options.
 	 * 
 	 * @param option
 	 * @return
 	 */
-	public String getOptionTooltip(ConnectServer.Option option){
+	public String getOptionTooltip(ConnectServerOption.Option option){
 		switch(option){
 		case MAX_PROCESSING_WAIT_TIME:
 			return "The length of time to wait for processing to finish on server before failing.";
@@ -70,7 +79,14 @@ public enum ServerOptionLabelProvider {
 			return "The number of times to rety uploading files before failing"; 
 		case RETY_WAIT_TIME:
 			return "The number of milli seconds to wait between retrying";
-			
+		case SYNC_AUTOMATICALLY:
+			return "connect to the server in the background and check for changes";
+		case SYNC_PROMPT_PASSWORD:
+			return "if not selected and cannot communicate with Connect the change check will fail with not user message";
+		case SYNC_DOWNLOAD:
+			return "will automatically download changes in the background and prompt the user when ready to apply the changes";
+		case SYNC_AUTO_UPLOAD:
+			return "will automatically upload any local changes to the server once the download is complete";
 		default:
 			break;
 		
@@ -87,12 +103,15 @@ public enum ServerOptionLabelProvider {
 	 * @param server
 	 * @return
 	 */
-	public String getValueInDisplayUnits(ConnectServer.Option option, ConnectServer server){
-		String value = server.getOption(option);
-		if (value == null){
+	public String getValueInDisplayUnits(ConnectServerOption.Option option, ConnectServer server){
+		String value = null;
+		if (server.getOptions() == null || server.getOptions().get(option) == null){
 			value = option.getDefaultValueAsString();
+		}else{
+			value = server.getOptions().get(option).getValue();
 		}
-		if (option == ConnectServer.Option.MAX_PROCESSING_WAIT_TIME){
+		
+		if (option == ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME){
 			value = String.valueOf(Long.parseLong(value) / 1000);
 		}
 		return value;

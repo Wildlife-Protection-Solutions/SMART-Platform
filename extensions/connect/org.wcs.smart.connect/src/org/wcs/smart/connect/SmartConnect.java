@@ -73,9 +73,10 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.api.ConnectClient;
-import org.wcs.smart.connect.api.model.ConservationAreaInfo;
+import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -318,7 +319,7 @@ public class SmartConnect {
 	 * @param caUuid the conservation area UUID
 	 * @return ConservationAreaInfo or null if not found
 	 */
-	public ConservationAreaInfo getCaInfo(UUID caUuid) throws Exception{
+	public ConservationAreaProxy getCaInfo(UUID caUuid) throws Exception{
 		createClient();
 		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
@@ -336,7 +337,7 @@ public class SmartConnect {
 	 * 
 	 * @return List of ConservationAreaInfo 
 	 */
-	public List<ConservationAreaInfo> getConservationAreas() throws Exception{
+	public List<ConservationAreaProxy> getConservationAreas() throws Exception{
 		createClient();
 		ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
@@ -431,9 +432,9 @@ public class SmartConnect {
 		
 		Long size = null;
 		
-		long waitTime = server.getRetryWaitTime();
+		long waitTime = server.getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
 		//first request; this one gives us the requested size
-		while(size == null && tryCount < server.getMaxRetryDownload()){
+		while(size == null && tryCount < server.getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_DOWNLOAD )){
 			Response r = null;
 			try{
 				createClient();
@@ -465,7 +466,7 @@ public class SmartConnect {
 		}
 		
 		//try a maximum of 10 times
-		while(tryCount < server.getMaxRetryDownload()){
+		while(tryCount < server.getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_DOWNLOAD)){
 			downloadRequest(filestore, url, size);
 			
 			if (Files.size(filestore) > size){
@@ -548,7 +549,6 @@ public class SmartConnect {
 	 * @param f the file to upload
 	 * @param startbyte the start position in the file 
 	 */
-	//TODO: look into socket exceptions
 	public void uploadFile(String url, Path f, long startByte) throws Exception{
         createClient();
         

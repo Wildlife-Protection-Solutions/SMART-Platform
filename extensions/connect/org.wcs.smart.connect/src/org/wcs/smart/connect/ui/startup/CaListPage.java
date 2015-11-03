@@ -17,7 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
-import org.wcs.smart.connect.api.model.ConservationAreaInfo;
+import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.ConnectServer;
 
 public class CaListPage extends WizardPage implements ISelectionChangedListener{
@@ -43,8 +43,8 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 		cmbList.setContentProvider(ArrayContentProvider.getInstance());
 		cmbList.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
-				if (element instanceof ConservationAreaInfo){
-					return ((ConservationAreaInfo) element).getLabel();
+				if (element instanceof ConservationAreaProxy){
+					return ((ConservationAreaProxy) element).getLabel();
 				}
 				return super.getText(element);
 			}
@@ -62,7 +62,7 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 		try{
 			SmartConnect connect = SmartConnect.findInstance(temp, username, password);		
 			setErrorMessage(null);
-			final List<ConservationAreaInfo> data = connect.getConservationAreas();
+			final List<ConservationAreaProxy> data = connect.getConservationAreas();
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
@@ -95,11 +95,11 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 		return getSelection() != null;
 	}
 	
-	public ConservationAreaInfo getSelection(){
+	public ConservationAreaProxy getSelection(){
 		if (cmbList.getSelection().isEmpty() ) return null;
 		Object x = ((IStructuredSelection)cmbList.getSelection()).getFirstElement();
-		if (x instanceof ConservationAreaInfo){
-			return (ConservationAreaInfo)x ;
+		if (x instanceof ConservationAreaProxy){
+			return (ConservationAreaProxy)x ;
 		}
 		return null;
 	}

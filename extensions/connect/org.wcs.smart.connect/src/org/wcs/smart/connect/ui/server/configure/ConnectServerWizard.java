@@ -21,7 +21,9 @@
  */
 package org.wcs.smart.connect.ui.server.configure;
 
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.wizard.Wizard;
@@ -29,6 +31,7 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -41,26 +44,35 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class ConnectServerWizard extends Wizard {
 
-	protected ServerWizardPage page1;
-	protected UserWizardPage page3;
-	protected ServerOptionsWizardPage page2;
+	protected ServerWizardPage page1 = null;
+	protected ServerOptionsWizardPage page2 = null;
+	protected AutoOptionsWizardPage page3 = null;
+	protected UserWizardPage page4 = null; 
+	
 	
 	public ConnectServerWizard(){
+		this(true);
+	}
+	
+	public ConnectServerWizard(boolean includeAutoOptionsPage){
 		super();
 		
 		setWindowTitle("Configure SMART Connect Server");
 		
 		addPage(page1 = new ServerWizardPage());
 		addPage(page2 = new ServerOptionsWizardPage());
-		addPage(page3 = new UserWizardPage());
+		if (includeAutoOptionsPage){
+			addPage(page3 = new AutoOptionsWizardPage());
+		}
+		addPage(page4 = new UserWizardPage());
 	}
-
+	
 	@Override
 	public boolean performFinish() {
 		String url = page1.getServerName();
-		String username = page3.getUsername();
-		String password = page3.getPassword();
-		boolean savePassword = page3.getSavePassword();
+		String username = page4.getUsername();
+		String password = page4.getPassword();
+		boolean savePassword = page4.getSavePassword();
 		String certificateFile = page1.getCertificateFile();
 		
 		String error = null;
@@ -68,8 +80,12 @@ public class ConnectServerWizard extends Wizard {
 		ConnectServer server = new ConnectServer();
 		server.setConservationArea(SmartDB.getCurrentConservationArea());
 		server.setServerUrl(url);
-		server.initalizeOptions();
+		server.setOptions(new HashMap<ConnectServerOption.Option, ConnectServerOption>());
+		
 		page2.updateServer(server);
+		if (page3 != null){
+			page3.updateServer(server);
+		}
 		
 		if (!certificateFile.trim().isEmpty()){
 			try{
@@ -83,9 +99,11 @@ public class ConnectServerWizard extends Wizard {
 		SmartConnect cs = SmartConnect.findInstance(server, username, password);
 		error = cs.validateUser();
 		
-		
 		if (error != null){
-			//TODO on error; remove copied certificate file
+			try{
+				//try to delete certificate file
+				Files.deleteIfExists(server.getLocalCertificateFile());
+			}catch (Exception ex){}
 			MessageDialog.openError(getShell(), "Error", error);
 			return false;
 		}
