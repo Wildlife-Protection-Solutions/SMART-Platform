@@ -232,5 +232,19 @@
             class="org.wcs.smart.connect.replication.DerbyStartUpRunner">
       </StartUpRunner>
    </extension>
+   <extension
+         id="id2"
+         point="org.eclipse.e4.workbench.model">
+      <processor
+            apply="always"
+            beforefragment="false"
+            class="org.wcs.smart.connect.ui.StatusLineConfigProcessor">
+      </processor>
+      <processor
+            apply="always"
+            beforefragment="false"
+            class="org.wcs.smart.connect.server.replication.SyncOnStartupProcessor">
+      </processor>
+   </extension>
 
 </plugin>

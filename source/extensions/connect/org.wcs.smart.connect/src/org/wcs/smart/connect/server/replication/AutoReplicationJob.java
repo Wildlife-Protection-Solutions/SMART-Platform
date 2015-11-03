@@ -229,6 +229,6 @@ public class AutoReplicationJob extends Job {
 	}
 	
 	private void setServerStatus(ConnectStatusManager.ServerStatus status, String message){
-		ConnectStatusManager.INSTANCE.statusModified(status, message);
+		ConnectStatusManager.INSTANCE.serverStatusModified(status, message);
 	}
 }

@@ -56,6 +56,8 @@ public class AutoOptionsPanel extends Composite {
 	
 	private boolean isEditable = true;
 	
+	private Button btnSyncStartUp;
+	private Button btnSyncShutDown;
 	private Button btnAutoCheck;
 	private Button btnPrompt;
 	private Button btnUpload;
@@ -77,6 +79,14 @@ public class AutoOptionsPanel extends Composite {
 	
 	protected void createControl(){
 		setLayout(new GridLayout());
+		
+		btnSyncStartUp = new Button(this, SWT.CHECK);
+		btnSyncStartUp.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.SYNC_ON_STARTUP));
+		btnSyncStartUp.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.SYNC_ON_STARTUP));
+		
+		btnSyncShutDown = new Button(this, SWT.CHECK);
+		btnSyncShutDown.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.SYNC_ON_SHUTDOWN));
+		btnSyncShutDown.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.SYNC_ON_SHUTDOWN));
 		
 		btnAutoCheck = new Button(this, SWT.CHECK);
 		btnAutoCheck.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.SYNC_AUTOMATICALLY));
@@ -140,6 +150,8 @@ public class AutoOptionsPanel extends Composite {
 			btnAutoCheck.addSelectionListener(ml);
 			btnDownload.addSelectionListener(ml);
 		}else{
+			btnSyncShutDown.setEnabled(false);
+			btnSyncStartUp.setEnabled(false);
 			btnAutoCheck.setEnabled(false);
 			btnDownload.setEnabled(false);
 			btnUpload.setEnabled(false);
@@ -174,6 +186,8 @@ public class AutoOptionsPanel extends Composite {
 	
 	protected void updateEnabled(){
 		boolean enabled = btnAutoCheck.getSelection();
+		btnSyncShutDown.setEnabled(true);
+		btnSyncStartUp.setEnabled(true);
 		
 		lblMinutes.setEnabled(enabled);
 		txtMinutes.setEnabled(enabled);
@@ -194,6 +208,8 @@ public class AutoOptionsPanel extends Composite {
 
 	public void initValues(ConnectServer server){
 		if (server == null){
+			btnSyncShutDown.setSelection(ConnectServerOption.Option.SYNC_ON_SHUTDOWN.getDefaultValueAsBoolean());
+			btnSyncStartUp.setSelection(ConnectServerOption.Option.SYNC_ON_STARTUP.getDefaultValueAsBoolean());
 			btnAutoCheck.setSelection(ConnectServerOption.Option.SYNC_AUTOMATICALLY.getDefaultValueAsBoolean());
 			btnDownload.setSelection(ConnectServerOption.Option.SYNC_DOWNLOAD.getDefaultValueAsBoolean());
 			btnUpload.setSelection(ConnectServerOption.Option.SYNC_AUTO_UPLOAD.getDefaultValueAsBoolean());
@@ -203,6 +219,8 @@ public class AutoOptionsPanel extends Composite {
 			return;
 		}
 		
+		btnSyncShutDown.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_ON_SHUTDOWN));
+		btnSyncStartUp.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_ON_STARTUP));
 		btnAutoCheck.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY));
 		btnDownload.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_DOWNLOAD));
 		btnUpload.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTO_UPLOAD));
@@ -212,6 +230,8 @@ public class AutoOptionsPanel extends Composite {
 	}
 	
 	public void updateServer(ConnectServer server){
+		server.setOption(ConnectServerOption.Option.SYNC_ON_SHUTDOWN, ((Boolean)btnSyncShutDown.getSelection()).toString());
+		server.setOption(ConnectServerOption.Option.SYNC_ON_STARTUP, ((Boolean)btnSyncStartUp.getSelection()).toString());
 		server.setOption(ConnectServerOption.Option.SYNC_AUTOMATICALLY, ((Boolean)btnAutoCheck.getSelection()).toString());
 		server.setOption(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD, ((Boolean)btnPrompt.getSelection()).toString());
 		server.setOption(ConnectServerOption.Option.SYNC_DOWNLOAD, ((Boolean)btnDownload.getSelection()).toString());
