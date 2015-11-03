@@ -2316,12 +2316,20 @@ create table smart.connect_server(
 uuid UUID not null,
 ca_uuid UUID,
 url varchar(2064),
-options varchar(32600),
 certificate varchar(32000),
 PRIMARY KEY (uuid));
 
 alter table smart.connect_server add constraint server_ca_uuid_fk foreign key (ca_uuid) 
 references smart.conservation_area (uuid) on update restrict on delete cascade DEFERRABLE;
+
+CREATE TABLE smart.connect_server_option(
+server_uuid UUID not null, 
+option_key varchar(32), 
+value varchar(2048), 
+primary key (server_uuid, option_key));
+
+ALTER TABLE smart.connect_server_option ADD CONSTRAINT cnt_svr_opt_server_fk FOREIGN KEY (server_uuid) 
+REFERENCES smart.connect_server (uuid)   ON UPDATE restrict ON DELETE cascade DEFERRABLE ;
 
 
 create table smart.connect_account(

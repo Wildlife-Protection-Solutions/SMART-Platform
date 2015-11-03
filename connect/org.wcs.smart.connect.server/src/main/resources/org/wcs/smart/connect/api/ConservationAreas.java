@@ -76,6 +76,7 @@ import org.wcs.smart.connect.hibernate.HibernateSessionFactoryListener;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConservationAreaInfo.Status;
+import org.wcs.smart.connect.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
@@ -162,17 +163,19 @@ public class ConservationAreas extends HttpServlet{
 	@SuppressWarnings("unchecked")
 	@GET
     @Path("/")
-    public List<ConservationAreaInfo> getConservationAreas(){
+    public List<ConservationAreaProxy> getConservationAreas(){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			List<ConservationAreaInfo> conservationAreas = new ArrayList<ConservationAreaInfo>();
+			List<ConservationAreaProxy> conservationAreas = new ArrayList<ConservationAreaProxy>();
 			List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
 			for (ConservationAreaInfo ca : db){
 				//check to determine if ca is accessable by current user
 				try{
 					validateRead(ca, s);
-					conservationAreas.add(ca);
+					ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
+					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
+					conservationAreas.add(proxy);
 				}catch(SmartConnectException ex){
 					//not valid; ignore
 				}
@@ -480,7 +483,9 @@ public class ConservationAreas extends HttpServlet{
 			if (info == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
-			return Response.ok().entity(info).build();
+			ConservationAreaProxy proxy = new ConservationAreaProxy(info);
+			proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, info.getUuid()));
+			return Response.ok().entity(proxy).build();
 		}catch (SmartConnectException ex){
 			throw ex;
 		}catch (Exception ex){
