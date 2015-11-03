@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.hibernate;
 
-import java.sql.DriverManager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,6 +81,7 @@ public class SmartHibernateManager {
 	 */
 	private static Semaphore thisLock = new Semaphore(1);
 	
+	private static final Object sessionFactoryLock = new Object();
 	/**
 	 * Sets the database connection parameters.
 	 * @param dbLocation the derby database location
@@ -99,43 +99,46 @@ public class SmartHibernateManager {
 	public static void setUserName(String username, String password){
 		userName = username;
 		passWord = password;
-		if (sessionFactory != null){
-			try{
-				sessionFactory.close();
-			}catch (Exception ex){
-				ex.printStackTrace();
+		synchronized (sessionFactoryLock) {
+			if (sessionFactory != null){
+				try{
+					sessionFactory.close();
+				}catch (Exception ex){
+					ex.printStackTrace();
+				}
 			}
+			sessionFactory = null;	
 		}
-		sessionFactory = null;
 	}
 	
 	/**
 	 * Creates a new session factory.
 	 * 
 	 */
-	private static synchronized final void createSessionFactory(){
-		
-		if (sessionFactory == null){
-			Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
-			
-			config.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
-			config.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
-			config.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+	private static final void createSessionFactory(){
+		synchronized (sessionFactoryLock) {
+			if (sessionFactory == null){
+				Configuration config = new Configuration().configure(Thread.currentThread().getContextClassLoader().getResource("hibernate.cfg.xml")); //$NON-NLS-1$
+				
+				config.setProperty("hibernate.connection.username", userName); //$NON-NLS-1$
+				config.setProperty("hibernate.connection.password", passWord); //$NON-NLS-1$
+				config.setProperty("hibernate.connection.url", "jdbc:derby:" + databaseLocation + ";create=false"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
-			//add mapping classes
-			for (Class<?> c: getMappings()){
-				config.addAnnotatedClass(c);
+				//add mapping classes
+				for (Class<?> c: getMappings()){
+					config.addAnnotatedClass(c);
+				}
+				
+				ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
+				sessionFactory = config.buildSessionFactory(service);
+				
+				if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
+					//fail
+					throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
+				}
+				sessionFactory.getStatistics().setStatisticsEnabled(true);
+				
 			}
-			
-			ServiceRegistry service = new ServiceRegistryBuilder().applySettings(config.getProperties()).buildServiceRegistry();
-			sessionFactory = config.buildSessionFactory(service);
-			
-			if (!((SessionFactoryImplementor)sessionFactory).getDialect().supportsSequences()){
-				//fail
-				throw new IllegalStateException("You can't use this database - it does not support sequences"); //$NON-NLS-1$
-			}
-			sessionFactory.getStatistics().setStatisticsEnabled(true);
-			
 		}
 	}
 	
@@ -217,7 +220,7 @@ public class SmartHibernateManager {
 	 * Users are required to close the session when they are done with it.
 	 * @return
 	 */
-	protected synchronized static Session openSession(){
+	protected static Session openSession(){
 		return openSession(null);
 	}
 	
@@ -230,7 +233,7 @@ public class SmartHibernateManager {
 	 * @param interceptor a session interceptor
 	 * @return
 	 */
-	protected synchronized static Session openSession(Interceptor interceptor){
+	protected static Session openSession(Interceptor interceptor){
 		//ensure the database is not locked then acquire session
 		try {
 			thisLock.acquire();
@@ -277,10 +280,12 @@ public class SmartHibernateManager {
 	 * Closes the current session factory.
 	 */
 	protected static void endSessionFactory(){
-		if (sessionFactory != null){
-			sessionFactory.close();
+		synchronized (sessionFactoryLock) {
+			if (sessionFactory != null){
+				sessionFactory.close();
+			}
+			sessionFactory = null;	
 		}
-		sessionFactory = null;
 	}
 	
 	
