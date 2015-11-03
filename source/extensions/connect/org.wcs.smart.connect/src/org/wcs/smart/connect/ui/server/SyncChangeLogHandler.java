@@ -30,11 +30,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
-import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
 
 /**
  * Download change log handler for manually downloading 
@@ -43,80 +41,72 @@ import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
  * @author Emily
  *
  */
-public class DownloadChangeLogHandler {
+public class SyncChangeLogHandler {
 
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
-//		(new AutoReplicationJob()).schedule();
 		DownloadChangeLogDialog dialog = new DownloadChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
 			downloadChangeLog(activeShell, dialog.getConnection());
 		}
 	}
 
-	/**
+	/*
 	 * download change log and apply
-	 * @param activeShell
-	 * @param pService
-	 * @param connect
-	 * @param events
 	 */
-	public void downloadChangeLog(final Shell activeShell, final SmartConnect connect) {
-		MessageDialog
-				.openInformation(
-						activeShell,
-						"Download",
-						"SMART will download changes in the background.  Once download, if there are changes to apply, you will be prompted before changes are applied.");
-		
-		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(connect) {
-			protected void processComplete() {
-				super.processComplete();
-				displayStatus(record);
-			}			
-		};
-		try {
-			engine.downloadInstall();
-		} catch (Exception ex) {
-			ConnectPlugIn.displayLog(ex.getMessage(), ex);
-		}
-	}
-	
-
-	/* 
-	 * displays status when complete
-	 * 
-	 */
-	protected void displayStatus(final ConnectSyncHistoryRecord record) {
-		Display.getDefault().syncExec(new Runnable() {
-				@Override
-				public void run() {
-					String title = "Download";
-					String message = "";
-					boolean error = false;
-					if(record.getStatus() == Status.DONE) {
-						message = "Download and apply completed successfully.";
-					}else if(record.getStatus() == Status.NODATA) {
-						message = "Local database up-to-date. Nothing to apply.";
-					}else {
-						title = "Download Error";
-						message = "Error: " + record.getErrorString();
-						error=true;
-					}
-					if (error){
-						MessageDialog.openError(Display.getDefault().getActiveShell(), title, message);	
-					}else{
-						MessageDialog.openInformation(Display.getDefault().getActiveShell(), title, message);
-					}
-					
+	private void downloadChangeLog(final Shell activeShell, final SmartConnect connect) {
+		DownloadChangeLogHandler downhandler = new DownloadChangeLogHandler(){
+			protected void displayStatus(final ConnectSyncHistoryRecord record) {
+				if (record.getStatus() == Status.DONE ||
+						record.getStatus() == Status.NODATA){
+					//upload
+					uploadChangeLog(activeShell, connect);
+				}else{
+					super.displayStatus(record);
 				}
-
-		});
+			}
+		};
+		downhandler.downloadChangeLog(activeShell, connect);
+	
 	}
 	
+	/*
+	 * upload change log and apply
+	 */
+	private void uploadChangeLog(final Shell activeShell, final SmartConnect connect) {
+		
+		activeShell.getDisplay().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				UploadChangeLogHandler uphandler = new UploadChangeLogHandler(){
+					protected void displayStatus(final ConnectSyncHistoryRecord record) {
+						if (record.getStatus() == Status.DONE ||
+								record.getStatus() == Status.NODATA){
+							Display.getDefault().syncExec(new Runnable(){
+
+								@Override
+								public void run() {
+									MessageDialog.openInformation(activeShell, "SMART Connect - Sync Completed", "Sync with SMART Connect complete.  All changes have been download from and uploaded to the server.");
+								}
+								
+							});
+						}else{
+							super.displayStatus(record);
+						}
+					}
+				};
+				uphandler.uploadChangeLog(activeShell, connect);		
+			}
+			
+		});
+		
+	}
+
 	
-	public static class DownloadChangeLogHandlerWrapper extends DIHandler<DownloadChangeLogHandler>{
-		public DownloadChangeLogHandlerWrapper() {
-			super(DownloadChangeLogHandler.class);
+	
+	public static class SyncChangeLogHandlerWrapper extends DIHandler<SyncChangeLogHandler>{
+		public SyncChangeLogHandlerWrapper() {
+			super(SyncChangeLogHandler.class);
 		}
 		
 	}

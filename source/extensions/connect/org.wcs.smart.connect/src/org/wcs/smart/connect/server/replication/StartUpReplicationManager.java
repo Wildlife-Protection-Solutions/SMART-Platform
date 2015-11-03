@@ -19,23 +19,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.internal;
+package org.wcs.smart.connect.server.replication;
 
 import org.hibernate.Session;
-import org.wcs.smart.ca.Employee;
-import org.wcs.smart.ca.IEmployeeListener;
 import org.wcs.smart.connect.ConnectHibernateManager;
-import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
 
-public class EmployeeDeleteHandler implements IEmployeeListener {
+/**
+ * Manager to manage auto replication.  This is
+ * run on startup and enables auto 
+ * replication is required.
+ * 
+ * @author Emily
+ *
+ */
+public enum StartUpReplicationManager {
 
-	@Override
-	public void beforeDelete(Employee e, Session s) {
-		ConnectUser cu = ConnectHibernateManager.getConnectUser(e, s);
-		if (cu != null){
-			s.delete(cu);
+	INSTANCE;
+	
+	public void onStartUp(){
+		Session s = HibernateManager.openSession();
+		try{
+			ConnectServer cs = ConnectHibernateManager.getConnectServer(s);
+			if (cs == null) return;
+			
+			if (cs.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY)){
+				//start auto sync job
+				int delay = cs.getOptionAsInt(ConnectServerOption.Option.SYNC_MINUTE);
+				enableAutoReplication(delay);
+			}
+		}finally{
+			s.close();
 		}
 	}
-
+	
+	/**
+	 * Starts the background auto replication job after the given
+	 * delay.
+	 * @param delayMinutes delay in mintues
+	 */
+	public void enableAutoReplication(int delayMinutes){
+		long delaysec = delayMinutes * 60 * 1000l;
+		AutoReplicationJob autoReplication = new AutoReplicationJob();
+		autoReplication.schedule(delaysec);
+	}
 }

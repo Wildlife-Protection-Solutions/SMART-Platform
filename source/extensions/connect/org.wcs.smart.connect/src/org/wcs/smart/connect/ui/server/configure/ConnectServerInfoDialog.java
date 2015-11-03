@@ -24,7 +24,6 @@ package org.wcs.smart.connect.ui.server.configure;
 import java.lang.reflect.InvocationTargetException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -55,13 +54,15 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.CaConnectDeleteHandler;
+import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.model.ConnectServer.Option;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -87,7 +88,9 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 	private Button btnShowReplication;
 	private TableViewer tblUsers;
 		
-	private HashMap<Option, Label> optionCntrls;
+//	private HashMap<Option, Label> optionCntrls;
+	private ServerOptionsPanel optionPnl;
+	private AutoOptionsPanel autoPnl;
 	/**
 	 * Default constructor
 	 */
@@ -115,7 +118,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		
 		Group g = new Group(main, SWT.FLAT );
 		g.setText("Connect Server");
-		g.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		g.setLayout(new GridLayout(3, false));
 		
 		Label lblServer = new Label(g, SWT.NONE);
@@ -127,18 +130,10 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		
 
 		Composite btnPanel = new Composite(g, SWT.NONE);
-		btnPanel.setLayout(new GridLayout());
+		btnPanel.setLayout(new GridLayout(2, true));
 		btnPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 2));
 		
-		btnSet = new Button(btnPanel, SWT.PUSH);
-		btnSet.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		((GridData)btnSet.getLayoutData()).widthHint = 50;
-		btnSet.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				setServer();
-			}
-		});
+		
 		
 		btnEditServer = new Button(btnPanel, SWT.PUSH);
 		btnEditServer.setText("Edit");
@@ -149,31 +144,99 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				editServer();
 			}
 		});
+		btnEditServer.setToolTipText("edit server and configuration options");
 		
-		Composite c = new Composite(g, SWT.FLAT );
-		c.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		btnSet = new Button(btnPanel, SWT.PUSH);
+		btnSet.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)btnSet.getLayoutData()).widthHint = 50;
+		btnSet.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				setServer();
+			}
+		});
+		btnSet.setToolTipText("clears all Connect and replication information");
 		
-		c.setLayout(new GridLayout(4, false));
-		((GridLayout)c.getLayout()).marginWidth = 0;
-		((GridLayout)c.getLayout()).marginHeight = 7;
+		TabFolder tabConfig = new TabFolder(g, SWT.NONE);
+		tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,3,1));
 		
-		optionCntrls = new HashMap<ConnectServer.Option, Label>();
-		for (ConnectServer.Option op : ConnectServer.Option.values()){
-			Label l = new Label(c, SWT.NONE);
-			l.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(op) + ":");
-			l.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(op));
+		TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
+		ti.setText("User Accounts");
+		ti.setControl(createUserAccountsTab(tabConfig));
+		
+		ti = new TabItem(tabConfig, SWT.DEFAULT);
+		ti.setText("Automatic Sync Options");
+		ti.setControl(autoPnl = new AutoOptionsPanel(tabConfig, false));
+		
+		ti = new TabItem(tabConfig, SWT.DEFAULT);
+		ti.setText("Connection Options");
+		ti.setControl(optionPnl = new ServerOptionsPanel(tabConfig, false));
+		
+		
+		btnShowReplication = new Button(main, SWT.PUSH);
+		btnShowReplication.setText("View Replication Information");
+		btnShowReplication.addSelectionListener(new SelectionAdapter() {
 			
-			Label lblValue = new Label(c, SWT.NONE);
-			optionCntrls.put(op, lblValue);
-			lblValue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				ReplicationInfoDialog dialog = new ReplicationInfoDialog(getShell());
+				dialog.open();
+			}
+		});
+		
+		initControls();
+		
+		setTitle("SMART Connect Configuration");
+		getShell().setText("SMART Connect Configuration");
+		setMessage("Configure your connection to a SMART Connect Server here.");
+		
+		return main;
+	}
+	
+	private void initControls(){
+
+		Session session = HibernateManager.openSession();
+		try{
+			ConnectServer server = ConnectHibernateManager.getConnectServer(session);
+			
+			if (server == null){
+				toUpdate = null;
+				txtServer.setText("<Not Set>");
+				btnSet.setText("Set");
+				btnEditServer.setEnabled(false);
+				btnAdd.setEnabled(false);
+				tblUsers.setInput(new Object[]{});
+				tblUsers.getTable().setEnabled(false);
+				
+				optionPnl.initValues(null);
+				autoPnl.initValues(null);
+			}else{
+				toUpdate = server;
+				txtServer.setText(server.getServerUrl());
+				btnSet.setText("Re-Set");
+				btnEditServer.setEnabled(true);
+				
+				
+				btnAdd.setEnabled(true);
+				List<?> users= session.createCriteria(ConnectUser.class)
+						.add(Restrictions.eq("server", toUpdate))
+						.list();
+				tblUsers.setInput(users);
+				tblUsers.getTable().setEnabled(true);
+				
+				optionPnl.initValues(server);
+				autoPnl.initValues(server);
+			}
+		}finally{
+			session.close();
 		}
+	}
+	
+	private Composite createUserAccountsTab(Composite parent){
+		Composite main = new Composite(parent, SWT.NONE);
+		main.setLayout(new GridLayout(2, false));
 		
-		g = new Group(main, SWT.FLAT );
-		g.setText("User Accounts");
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		g.setLayout(new GridLayout(2, false));
-		
-		Composite tableComposite = new Composite(g, SWT.NONE);
+		Composite tableComposite = new Composite(main, SWT.NONE);
 		tableComposite.setLayoutData(new GridData(SWT.FILL ,SWT.FILL, true, true, 1, 1));
 		TableColumnLayout layout = new TableColumnLayout();
 		tableComposite.setLayout( layout );
@@ -221,7 +284,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 		});
 		
-		Composite btnComp = new Composite(g, SWT.NONE);
+		Composite btnComp = new Composite(main, SWT.NONE);
 		btnComp.setLayout(new GridLayout());
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
@@ -260,71 +323,9 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				btnDelete.setEnabled(!tblUsers.getSelection().isEmpty());
 			}
 		});
-
-		btnShowReplication = new Button(main, SWT.PUSH);
-		btnShowReplication.setText("View Replication Information");
-		btnShowReplication.addSelectionListener(new SelectionAdapter() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				ReplicationInfoDialog dialog = new ReplicationInfoDialog(getShell());
-				dialog.open();
-			}
-		});
-		
-		initControls();
-		
-		setTitle("SMART Connect Configuration");
-		getShell().setText("SMART Connect Configuration");
-		setMessage("Configure your connection to a SMART Connect Server here.");
 		
 		return main;
 	}
-	
-	private void initControls(){
-
-		Session session = HibernateManager.openSession();
-		try{
-			ConnectServer server = (ConnectServer)session.createCriteria(ConnectServer.class)
-				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea()))
-				.uniqueResult();
-			
-			if (server == null){
-				toUpdate = null;
-				txtServer.setText("<Not Set>");
-				btnSet.setText("Set");
-				btnEditServer.setEnabled(false);
-				btnAdd.setEnabled(false);
-				tblUsers.setInput(new Object[]{});
-				tblUsers.getTable().setEnabled(false);
-				
-				for (Label l : optionCntrls.values()){
-					l.setText("N/A");
-				}
-			}else{
-				toUpdate = server;
-				txtServer.setText(server.getServerUrl());
-				btnSet.setText("Re-Set");
-				btnEditServer.setEnabled(true);
-				
-				
-				btnAdd.setEnabled(true);
-				List<?> users= session.createCriteria(ConnectUser.class)
-						.add(Restrictions.eq("server", toUpdate))
-						.list();
-				tblUsers.setInput(users);
-				tblUsers.getTable().setEnabled(true);
-				
-				for (Option o : ConnectServer.Option.values()){
-					String value = ServerOptionLabelProvider.INSTANCE.getValueInDisplayUnits(o, toUpdate);
-					optionCntrls.get(o).setText(value);
-				}
-			}
-		}finally{
-			session.close();
-		}
-	}
-	
 	private void setServer(){
 		if (toUpdate != null){
 			//we need to display a warning that all user and replication information will be lost

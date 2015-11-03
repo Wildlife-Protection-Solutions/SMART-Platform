@@ -36,7 +36,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.wcs.smart.connect.api.model.ConservationAreaInfo;
+import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 
 /**
@@ -61,12 +61,12 @@ public interface ConnectClient {
 	
 	@GET
     @Path("/" + CA_PATH )
-    public List<ConservationAreaInfo> getConservationAreas();
+    public List<ConservationAreaProxy> getConservationAreas();
 	
 	
 	@GET
     @Path("/" + CA_PATH + "/{cauuid}")
-    public ConservationAreaInfo getConservationArea(@PathParam("cauuid") String caUuid);
+    public ConservationAreaProxy getConservationArea(@PathParam("cauuid") String caUuid);
 
 	@GET
     @Path("/" + CA_PATH + "/{cauuid}")

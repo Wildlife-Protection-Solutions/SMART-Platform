@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.server.replication;
 
 import java.nio.file.Path;
@@ -8,6 +29,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
@@ -15,6 +37,13 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * This job downloads a change package from SMART
+ * Connect.  It does not apply the file.
+ * 
+ * @author Emily
+ *
+ */
 public class DownloadChangeLogJob extends Job {
 
 	private SmartConnect connect;
@@ -35,8 +64,7 @@ public class DownloadChangeLogJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		//TODO: progress monitor
-		monitor.beginTask("Downloading change log", 1);
+		monitor.beginTask("Downloading change log", 3);
 		try{
 			/* request ca */
 			monitor.subTask("Initializing download");
@@ -51,8 +79,8 @@ public class DownloadChangeLogJob extends Job {
 			while(status == null || (status.getStatus() == WorkItemStatus.Status.PROCESSING || 
 					status.getStatus() == WorkItemStatus.Status.PROCESSING)){
 				Long current = System.nanoTime();
-				if ( current - start > connect.getServer().getWaitProcessingTime() * 1000000) throw new Exception("Timed out waiting for export to process.");
-				Thread.sleep(connect.getServer().getRetryWaitTime());
+				if ( current - start > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception("Timed out waiting for export to process.");
+				Thread.sleep(connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME));
 				try{
 					status = connect.getWorkItemStatus(statusUrl);
 				}catch (Exception ex){
@@ -73,8 +101,8 @@ public class DownloadChangeLogJob extends Job {
 			monitor.done();
 		}catch (Exception ex){
 			record.setStatus(Status.ERROR);
+			record.setErrorString("Error downloading file:" + ex.getMessage());
 			ConnectPlugIn.log(ex.getMessage(), ex);
-			//TODO: this error is never display to user
 		}
 		return org.eclipse.core.runtime.Status.OK_STATUS;
 	}

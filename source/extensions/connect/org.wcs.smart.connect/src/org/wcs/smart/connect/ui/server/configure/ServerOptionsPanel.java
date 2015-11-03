@@ -37,7 +37,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.model.ConnectServer.Option;
+import org.wcs.smart.connect.model.ConnectServerOption;
 
 /**
  * Composite for inputting server options.
@@ -47,14 +47,28 @@ import org.wcs.smart.connect.model.ConnectServer.Option;
  */
 public class ServerOptionsPanel extends Composite {
 
+	private static ConnectServerOption.Option[] OPTION_KEYS = new ConnectServerOption.Option[]{
+		ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME,
+		ConnectServerOption.Option.MAX_RETRY_DOWNLOAD,
+		ConnectServerOption.Option.MAX_RETRY_UPLOAD,
+		ConnectServerOption.Option.RETY_WAIT_TIME,
+	};
+	
 	private static final String CD_KEY = "cd"; //$NON-NLS-1$
 	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
 	
-	private HashMap<Option, Text> optionCntrls;
+	private HashMap<ConnectServerOption.Option, Text> optionCntrls;
 	private Collection<ModifyListener> listeners;
 	
+	private boolean isEditable = true;
+	
 	public ServerOptionsPanel(Composite parent) {
+		this(parent, true);
+	}
+	
+	public ServerOptionsPanel(Composite parent, boolean isEditable) {
 		super(parent, SWT.NONE);
+		this.isEditable = isEditable;
 		listeners = new ArrayList<ModifyListener>();
 		createControl();
 	}
@@ -79,8 +93,8 @@ public class ServerOptionsPanel extends Composite {
 				fireChange(e);
 			}
 		};
-		optionCntrls = new HashMap<ConnectServer.Option, Text>();
-		for (ConnectServer.Option op : ConnectServer.Option.values()){
+		optionCntrls = new HashMap<ConnectServerOption.Option, Text>();
+		for (ConnectServerOption.Option op : OPTION_KEYS){
 			Label l = new Label(this, SWT.NONE);
 			l.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(op) +":");
 			l.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(op));
@@ -90,6 +104,9 @@ public class ServerOptionsPanel extends Composite {
 			((GridData)txt.getLayoutData()).widthHint = 60;
 			txt.setData(VALID_KEY, false);
 			
+			if (!isEditable){
+				txt.setEnabled(false);
+			}
 			ControlDecoration cd = createControlDecoration(txt);
 			txt.setData(CD_KEY, cd);
 			
@@ -125,18 +142,25 @@ public class ServerOptionsPanel extends Composite {
 	}
 	
 	public void initValues(ConnectServer server){
-		for (ConnectServer.Option op : ConnectServer.Option.values()){
+		if (server == null){
+			for (Text l : optionCntrls.values()){
+				l.setText("N/A");
+				((ControlDecoration)l.getData(CD_KEY)).hide();	
+			}
+			return;
+		}
+		for (ConnectServerOption.Option op : OPTION_KEYS){
 			String value = ServerOptionLabelProvider.INSTANCE.getValueInDisplayUnits(op, server);
 			optionCntrls.get(op).setText(value);
 		}
 	}
 	
 	public void updateServer(ConnectServer server){
-		for (ConnectServer.Option op : ConnectServer.Option.values()){
+		for (ConnectServerOption.Option op : OPTION_KEYS){
 			Text ctr = optionCntrls.get(op);
 			
 			Long l = Long.parseLong(ctr.getText());
-			if (op == ConnectServer.Option.MAX_PROCESSING_WAIT_TIME){
+			if (op == ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME){
 				//convert seconds to milliseconds
 				l = l * 1000;
 			}

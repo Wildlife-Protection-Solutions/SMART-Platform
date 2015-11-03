@@ -37,11 +37,13 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
 import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
 
 /**
- * Upload change log handler.
+ * Upload change log handler for manually uploading change log.
  * 
  * @author Emily
  *
@@ -56,36 +58,65 @@ public class UploadChangeLogHandler {
 		}
 	}
 
+	/*
+	 * uploads change log to server
+	 */
 	public void uploadChangeLog(Shell activeShell, final SmartConnect connect){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
 					
-					@Override
-					public void run(IProgressMonitor monitor) throws InvocationTargetException,
-							InterruptedException {
-						UploadChangeLogEngine engine = new UploadChangeLogEngine(connect);
-						
-						try{
-							engine.createUpload(monitor);
-						}catch (final NothingToUpdateException ex){
-							Display.getDefault().syncExec(new Runnable(){
-								@Override
-								public void run() {
-									MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Upload Changes", ex.getMessage());
-								}
-								
-							});
-						}catch (Exception ex){
-							ConnectPlugIn.displayLog(ex.getMessage(), ex);
+				@Override
+				public void run(IProgressMonitor monitor) throws InvocationTargetException,
+						InterruptedException {
+			
+					UploadChangeLogEngine engine = new UploadChangeLogEngine(connect){
+						protected void processComplete(){
+							super.processComplete();
+							displayStatus(record);
 						}
+					};
+						
+					try{
+						engine.createUpload(monitor);
+					}catch (final NothingToUpdateException ex){
+						ConnectSyncHistoryRecord uptodate = new ConnectSyncHistoryRecord();
+						uptodate.setStatus(Status.NODATA);
+						displayStatus(uptodate);
+					}catch (Exception ex){
+						ConnectPlugIn.displayLog(ex.getMessage(), ex);
 					}
-				});
+				}
+			});
 		} catch (InvocationTargetException | InterruptedException e) {
 			ConnectPlugIn.displayLog(e.getMessage(), e);
 		}
 	}
 
+	/*
+	 * displays upload status once complete
+	 */
+	protected void displayStatus(final ConnectSyncHistoryRecord record){
+		Display.getDefault().syncExec(new Runnable(){
+			@Override
+			public void run() {
+				if (record.getStatus() == ConnectSyncHistoryRecord.Status.DONE){
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
+						"SMART Connect Sync Upload", 
+						"Sync upload to SMART Connect complete.");
+				}else if (record.getStatus() == ConnectSyncHistoryRecord.Status.ERROR){
+					MessageDialog.openError(Display.getDefault().getActiveShell(), 
+							"SMART Connect Sync Upload", 
+							"An error occurred uploading changes to SMART Connect: "  + (record.getErrorString() == null ? "" : "\n\n" + record.getErrorString()));
+				}else if (record.getStatus() == ConnectSyncHistoryRecord.Status.NODATA){
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
+							"SMART Connect Sync Upload", 
+							"Server up-to-date.  There are no local changes to upload to the server.");
+				}
+			}});
+		
+	}
+	
 	public static class UploadChangeLogHandlerWrapper extends DIHandler<UploadChangeLogHandler>{
 		public UploadChangeLogHandlerWrapper() {
 			super(UploadChangeLogHandler.class);

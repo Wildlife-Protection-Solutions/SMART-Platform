@@ -31,8 +31,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
@@ -53,7 +51,10 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class UploadChangeLogEngine {
 
+	private NothingToUpdateException nothingtoUpdate = new NothingToUpdateException("Server up-to-date.  There are no local changes to upload to the server.");
+	
 	private SmartConnect connect;
+	protected ConnectSyncHistoryRecord record;
 	
 	public UploadChangeLogEngine(SmartConnect connect){
 		this.connect = connect;
@@ -63,53 +64,57 @@ public class UploadChangeLogEngine {
 	 * Creates an upload package and starts a job
 	 * to upload the package to the server.
 	 * 
+	 * Configured to run in either a progress monitor dialog
+	 * or a background job.
+	 * 
 	 * @param monitor
 	 * @throws Exception
 	 */
 	public void createUpload(IProgressMonitor monitor) throws Exception{
+		
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
+		if (SmartDB.isMultipleAnalysis()) throw new Exception("Cross-ca analysis can not be syncronized with server.");
+	
+		
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							"Error", "Another process is already uploading changes to SMART Connect.  You must wait until that process is completed to upload change log.");		
-				}
-			});	
-			return;
+			throw new Exception("Another process is already uploading changes to SMART Connect.  You must wait until that process is completed to upload change log.");
 		}
 		
 		try{
+			long currentRevisionNo = -1;
 			Session session = HibernateManager.openSession();
 			try{
 				if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
 					throw new Exception("Replication not enabled.  Cannot upload changes from server.");
 				}
+				currentRevisionNo = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, ca);
 			}finally{
 				session.close();
 			}
 
 			monitor.beginTask("Creating sync package", 3);
-			//check to ensure 
-			ConservationArea ca = SmartDB.getCurrentConservationArea();
-			if (SmartDB.isMultipleAnalysis()) throw new Exception("Cross-ca analysis can not be syncronized with server.");
-		
+
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.UPLOAD);
-			ConnectSyncHistoryRecord current = null;
+			if (previous.getEndRevision() >= currentRevisionNo){
+				throw nothingtoUpdate;
+			}
+			
+			record = null;
 			
 			if (previous == null || previous.getStatus() == Status.DONE ){
 				//start a new upload session
 			
-				current = SyncHistoryManager.INSTANCE.create(ca, connect.getServer(), Type.UPLOAD);
+				record = SyncHistoryManager.INSTANCE.create(ca, connect.getServer(), Type.UPLOAD);
 				long startRevision = -1;
 				if (previous != null ){
 					startRevision = previous.getEndRevision();
 				}
 				
-				current.setStartRevision(startRevision);
+				record.setStartRevision(startRevision);
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
-					s.saveOrUpdate(current);
+					s.saveOrUpdate(record);
 					s.getTransaction().commit();
 				}finally{
 					s.close();
@@ -117,55 +122,47 @@ public class UploadChangeLogEngine {
 			}else if (previous != null && previous.getStatus() == Status.ACTIVE){
 				//we know that another one is not currently running because of
 				//the upload lock
-				current = previous;
+				record = previous;
 			}
 			
 			monitor.worked(1);
 			 
 			//package changes
-			if (current.getStatusUrl() == null){
+			if (record.getStatusUrl() == null){
 				//upload has not started 
-				if (!Files.exists(FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), current.getChangeLogZipFile() + ".zip"))){
+				if (!Files.exists(FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile() + ".zip"))){
 					//package does not exist; we need to create it
-					ChangeLogPackager packer = new ChangeLogPackager(current);
+					ChangeLogPackager packer = new ChangeLogPackager(record);
 					packer.createPackage(new SubProgressMonitor(monitor, 1));
-					if(current.getStartRevision() == packer.getLastRevision()){
-						//nothing to upload
-						current.setStatus(Status.DONE);
-					}else{
-						//update sync record revision
-						current.setEndRevision(packer.getLastRevision());
-					}
-					
+					record.setEndRevision(packer.getLastRevision());
+
 					//throw exception if necessary
-					if(current.getStartRevision().longValue() == packer.getLastRevision()){
-						current.setStatus(Status.NODATA);
-						saveRecord(current);	
-						
+					if(record.getStartRevision().longValue() == packer.getLastRevision()){
+						record.setStatus(Status.NODATA);
+						saveRecord(record);
 						//delete file
 						try{
-							Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), current.getChangeLogZipFile());
+							Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile());
 							Files.deleteIfExists(p);
 						}catch (IOException ex){
 							ConnectPlugIn.log("Could not delete ca uploader export file.", ex);
 						}		
-						throw new NothingToUpdateException("Conservation up to date. Nothing to sync");
+						throw nothingtoUpdate;
 					}
 					
 					//save record
-					saveRecord(current);
-
+					saveRecord(record);
 				}
 			}
 			
 			monitor.worked(1);
 			
 			//upload package to server
-			UploadChangeLogJob upload = new UploadChangeLogJob(current, connect);
+			UploadChangeLogJob upload = new UploadChangeLogJob(record, connect);
 			upload.addJobChangeListener(new JobChangeAdapter() {
 				@Override
 				public void done(IJobChangeEvent event) {
-					SmartConnect.UPLOAD_LOCK.release();
+					processComplete();
 				}
 			});
 			upload.schedule();
@@ -173,6 +170,15 @@ public class UploadChangeLogEngine {
 			SmartConnect.UPLOAD_LOCK.release();
 			throw ex;
 		}
+	}
+	
+
+	/**
+	 * Called at the end of the process once the file has been
+	 * downloaded and applied.
+	 */
+	protected void processComplete(){
+		SmartConnect.UPLOAD_LOCK.release();
 	}
 	
 	private void saveRecord(ConnectSyncHistoryRecord current){

@@ -34,9 +34,13 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerOption;
+import org.wcs.smart.connect.server.replication.StartUpReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -48,7 +52,8 @@ import org.wcs.smart.hibernate.HibernateManager;
 public class EditConnectServerInfoDialog extends TitleAreaDialog{
 
 	private ServerPanel serverpnl;
-	private ServerOptionsPanel options;
+	private AutoOptionsPanel autoPnl;
+	private ServerOptionsPanel optionsPnl;
 	private ConnectServer server;
 	
 	public EditConnectServerInfoDialog(Shell parentShell, ConnectServer server) {
@@ -58,7 +63,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	}
 
 	protected void okPressed() {
-		//TODO:: validate the server actually exists??? 
+		boolean isAutoReplicationPrev = server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY);
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
@@ -79,9 +84,17 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 					return;
 				}
 			}
-			options.updateServer(server);
+			optionsPnl.updateServer(server);
+			autoPnl.updateServer(server);
 			
 			s.getTransaction().commit();
+			
+			boolean isAutoReplication = server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY);
+			if (!isAutoReplicationPrev && isAutoReplication){
+				//auto replication state has been updated; we need to intiaite auto replication
+				int delay = server.getOptionAsInt(ConnectServerOption.Option.SYNC_MINUTE);
+				StartUpReplicationManager.INSTANCE.enableAutoReplication(delay);
+			}
 		}catch (Exception ex){
 			ConnectPlugIn.displayLog("Could not update connect server information." + "\n\n" + ex.getMessage(), ex);
 			return;
@@ -98,7 +111,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
-		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		ModifyListener validateListener = new ModifyListener() {
 			@Override
@@ -108,22 +121,29 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		};
 		Group g = new Group(main, SWT.NONE);
 		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		g.setText("Server Configuration");
 		serverpnl = new ServerPanel(g);
 		serverpnl.addChangeListener(validateListener);
 		serverpnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
-		g = new Group(main, SWT.NONE);
-		g.setLayout(new GridLayout());
-		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		g.setText("Connection Options");
-		options = new ServerOptionsPanel(g);
-		options.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
-		options.addChangeListener(validateListener);
+		TabFolder tabConfig = new TabFolder(g, SWT.NONE);
+		tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
+		ti.setText("Automatic Sync Options");
+		ti.setControl(autoPnl = new AutoOptionsPanel(tabConfig));
+		
+		ti = new TabItem(tabConfig, SWT.DEFAULT);
+		ti.setText("Connection Options");
+		ti.setControl(optionsPnl = new ServerOptionsPanel(tabConfig));
+		
+		optionsPnl.addChangeListener(validateListener);
+		autoPnl.addChangeListener(validateListener);
 		
 		serverpnl.initValues(server);
-		options.initValues(server);
+		optionsPnl.initValues(server);
+		autoPnl.initValues(server);
 		
 		setTitle("Update SMART Connect Server Configuration");
 		getShell().setText("Update SMART Connect Configurations");
@@ -137,14 +157,22 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 			getButton(IDialogConstants.OK_ID).setEnabled(value);
 		}
 	}
+	
 	private void validate(){
 		setErrorMessage(null);
-		if (!options.isValid()){
+		if (!optionsPnl.isValid()){
+			setErrorMessage("connection option error");
+			enableOk(false);
+			return;
+		}
+		if (!autoPnl.isValid()){
+			setErrorMessage("automatic sync option error");
 			enableOk(false);
 			return;
 		}
 		
 		if (!serverpnl.isValid()){
+			setErrorMessage("server url error");
 			enableOk(false);
 			return;
 		}

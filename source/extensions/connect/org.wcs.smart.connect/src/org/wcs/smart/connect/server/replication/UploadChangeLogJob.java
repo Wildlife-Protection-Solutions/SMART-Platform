@@ -26,8 +26,6 @@ import java.nio.file.FileSystems;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -84,35 +82,14 @@ public class UploadChangeLogJob extends FileUploaderJob {
 		} catch (Exception e) {
 			ConnectPlugIn.log(e.getMessage(), e);
 			return Status.OK_STATUS;
-		}
-		
+		}		
 		return Status.OK_STATUS;
 	}
 
-	private void displayDone(final String msg){
-		Display.getDefault().syncExec(new Runnable(){
-
-			@Override
-			public void run() {
-				if (item.getStatus() == ConnectSyncHistoryRecord.Status.DONE){
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
-						"SMART Connect Sync Upload", 
-						"Sync upload to SMART Connect complete."  + (msg == null ? "" : "\n\n" + msg));
-				}else if (item.getStatus() == ConnectSyncHistoryRecord.Status.ERROR){
-					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							"SMART Connect Sync Upload", 
-							"An error occurred uploading changes to SMART Connect."  + (msg == null ? "" : "\n\n" + msg));
-				}
-			}});
-	}
-	
-	
-	
 	@Override
 	protected void onUploadComplete(WorkItemStatus upstatus) {
 		deleteLocalFile();
 	}
-
 	
 	@Override
 	protected void onProcessingComplete(WorkItemStatus upstatus) {
@@ -139,7 +116,6 @@ public class UploadChangeLogJob extends FileUploaderJob {
 		saveHistoryRecord();
 		
 		deleteLocalFile();
-		displayDone(null);
 		
 		super.connect.close();
 	}
@@ -149,11 +125,9 @@ public class UploadChangeLogJob extends FileUploaderJob {
 		item.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
 		saveHistoryRecord();
 		deleteLocalFile();
-		String msg = null;
 		if (upstatus != null){
-			msg = upstatus.getMessage();
+			item.setErrorString(upstatus.getMessage());
 		}
-		displayDone(msg);
 		
 		super.connect.close();
 	}

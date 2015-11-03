@@ -38,9 +38,7 @@ import org.hibernate.annotations.Type;
  * @author Emily
  *
  */
-@Entity
-@Table(name = "connect.ca_info")
-public class ConservationAreaInfo {
+public class ConservationAreaProxy {
 
 	public enum Status{
 		UPLOADING,
@@ -48,21 +46,28 @@ public class ConservationAreaInfo {
 		NODATA
 	}
 	
-	private UUID version;
-	private String label;
 	private UUID caUuid;
+	private UUID version;
+	private Long revision;
+	private String label;
 	private Status status;
 	
-	public ConservationAreaInfo(){
+	public ConservationAreaProxy(){
+	}
+	
+	
+	public void setRevision(Long revision){
+		this.revision = revision;
+	}
+	
+	public Long getRevision(){
+		return this.revision;
 	}
 	
 	/**
 	 * 
 	 * @return the uuid for the list element
 	 */
-	@Id
-	@Type(type = "pg-uuid")
-	@Column(name="ca_uuid")
 	public UUID getUuid() {
 		return caUuid;
 	}
@@ -71,8 +76,6 @@ public class ConservationAreaInfo {
 		this.caUuid = uuid;
 	}
 	
-	@Column(name="version")
-	@Type(type = "pg-uuid")
 	public UUID getVersion(){
 		return this.version;
 	}
@@ -80,7 +83,6 @@ public class ConservationAreaInfo {
 		this.version = version;
 	}
 	
-	@Column(name="label")
 	public String getLabel(){
 		return this.label;
 	}
@@ -88,8 +90,6 @@ public class ConservationAreaInfo {
 		this.label = label;
 	}
 	
-	@Column(name="status")
-	@Enumerated(EnumType.STRING)
 	public Status getStatus(){
 		return this.status;
 	}

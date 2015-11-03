@@ -95,8 +95,10 @@ public class AddConnectJob extends Job {
 	@SuppressWarnings("nls")
 	private void createTables(Session session){
 		final String[] sql = new String[]{
-			"CREATE TABLE SMART.CONNECT_SERVER(uuid char(16) for bit data not null, ca_uuid char(16) for bit data, url varchar(2064), options varchar(32600), certificate varchar(32000), PRIMARY KEY (uuid))",
+			"CREATE TABLE SMART.CONNECT_SERVER(uuid char(16) for bit data not null, ca_uuid char(16) for bit data, url varchar(2064), certificate varchar(32000), PRIMARY KEY (uuid))",
+			"CREATE TABLE smart.connect_server_option(server_uuid char(16) for bit data not null, option_key varchar(32), value varchar(2048), PRIMARY KEY (server_uuid, option_key))",
 			"ALTER TABLE smart.connect_server ADD CONSTRAINT server_ca_uuid_fk foreign key (ca_uuid) REFERENCES smart.conservation_area (uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",
+			"ALTER TABLE smart.connect_server_option ADD CONSTRAINT cnt_svr_opt_server_fk FOREIGN KEY (server_uuid) REFERENCES smart.connect_server (uuid)   ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",
 			"CREATE TABLE smart.connect_account( employee_uuid char(16) for bit data not null, connect_uuid char(16) for bit data not null, connect_user varchar(32), connect_pass varchar(1024), primary key(employee_uuid, connect_uuid))",
 			"ALTER TABLE smart.connect_account ADD CONSTRAINT connect_employee_uuid_fk foreign key (employee_uuid) REFERENCES smart.employee (uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",
 			"ALTER TABLE smart.connect_account ADD CONSTRAINT connect_connect_uuid_fk foreign key (connect_uuid) REFERENCES smart.connect_server (uuid) ON UPDATE restrict ON DELETE restrict DEFERRABLE INITIALLY IMMEDIATE",			
@@ -129,6 +131,10 @@ public class AddConnectJob extends Job {
 			"GRANT SELECT ON SMART.CONNECT_SERVER TO DATAENTRY",
 			"GRANT ALL PRIVILEGES ON SMART.CONNECT_SERVER TO MANAGER",
 
+			"GRANT SELECT ON SMART.CONNECT_SERVER_OPTION TO ANALYST",
+			"GRANT SELECT ON SMART.CONNECT_SERVER_OPTION TO DATAENTRY",
+			"GRANT ALL PRIVILEGES ON SMART.CONNECT_SERVER_OPTION TO MANAGER",
+			
 			"GRANT SELECT ON SMART.connect_account TO ANALYST",
 			"GRANT SELECT ON SMART.connect_account TO DATAENTRY",
 			"GRANT ALL PRIVILEGES  ON SMART.connect_account TO MANAGER",

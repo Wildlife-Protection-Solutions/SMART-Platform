@@ -24,6 +24,10 @@
             ca_property=".conservationArea"
             class="org.wcs.smart.connect.model.ChangeLogItem">
       </class>
+      <class
+            ca_property=".id.server.conservationArea"
+            class="org.wcs.smart.connect.model.ConnectServerOption">
+      </class>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
@@ -37,11 +41,15 @@
       </command>
       <command
             id="org.wcs.smart.connect.server.changelog.up"
-            name="Upload Changes To Connect">
+            name="Upload Changes to Connect">
       </command>
       <command
             id="org.wcs.smart.connect.server.changelog.down"
-            name="Download Changes From Connect">
+            name="Download Changes from Connect">
+      </command>
+      <command
+            id="org.wcs.smart.connect.server.changelog.sync"
+            name="Sync All Changes to/from Connect">
       </command>
    </extension>
    <extension
@@ -52,6 +60,14 @@
          <menu
                id="org.wcs.smart.connect.menu"
                label="Connect">
+            <command
+                  commandId="org.wcs.smart.connect.server.changelog.sync"
+                  style="push">
+            </command>
+            <separator
+                  name="org.wcs.smart.connect.separator2"
+                  visible="true">
+            </separator>
             <command
                   commandId="org.wcs.smart.connect.server.changelog.up"
                   style="push">
@@ -124,6 +140,16 @@
             </test>
          </enabledWhen>
       </handler>
+      <handler
+            class="org.wcs.smart.connect.ui.server.SyncChangeLogHandler$SyncChangeLogHandlerWrapper"
+            commandId="org.wcs.smart.connect.server.changelog.sync">
+         <enabledWhen>
+            <test
+                  property="org.wcs.smart.connect.replication.isEnabled"
+                  value="true">
+            </test>
+         </enabledWhen>
+      </handler>
    </extension>
    <extension
          point="org.wcs.smart.ca.login">
@@ -178,6 +204,10 @@
       <image
             commandId="org.wcs.smart.connect.server.exportca"
             icon="images/icons/obj16/server_ca_upload.png">
+      </image>
+      <image
+            commandId="org.wcs.smart.connect.server.changelog.sync"
+            icon="images/icons/obj16/server_sync.png">
       </image>
    </extension>
    <extension
