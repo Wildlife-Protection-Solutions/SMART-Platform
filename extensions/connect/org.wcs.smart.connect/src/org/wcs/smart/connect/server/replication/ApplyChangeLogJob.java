@@ -203,8 +203,9 @@ public class ApplyChangeLogJob extends Job {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Applying Updates", 2);
+					monitor.beginTask("Applying Updates", 4);
 					try{
+						monitor.worked(1);
 						monitor.subTask("updating database");
 						applyFile();					
 						record.setStatus(Status.DONE);

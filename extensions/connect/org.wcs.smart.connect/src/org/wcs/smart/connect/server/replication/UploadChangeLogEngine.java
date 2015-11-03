@@ -35,6 +35,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
@@ -179,6 +180,7 @@ public class UploadChangeLogEngine {
 	 */
 	protected void processComplete(){
 		SmartConnect.UPLOAD_LOCK.release();
+		ConnectStatusManager.INSTANCE.localStatusModified(null, null);
 	}
 	
 	private void saveRecord(ConnectSyncHistoryRecord current){

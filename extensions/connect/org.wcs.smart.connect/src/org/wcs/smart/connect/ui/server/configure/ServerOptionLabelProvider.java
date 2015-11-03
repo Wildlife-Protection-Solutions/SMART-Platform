@@ -57,6 +57,10 @@ public enum ServerOptionLabelProvider {
 			return "Automatically download changes and apply";
 		case SYNC_AUTO_UPLOAD:
 			return "Automatically upload changes after download";
+		case SYNC_ON_STARTUP:
+			return "Prompt to sync on startup";
+		case SYNC_ON_SHUTDOWN:
+			return "Prompt to sync on shutdown";
 		default:
 			break;
 		}
@@ -87,9 +91,12 @@ public enum ServerOptionLabelProvider {
 			return "will automatically download changes in the background and prompt the user when ready to apply the changes";
 		case SYNC_AUTO_UPLOAD:
 			return "will automatically upload any local changes to the server once the download is complete";
+		case SYNC_ON_STARTUP:
+			return "prompts the user to sync all changes on login";
+		case SYNC_ON_SHUTDOWN:
+			return "prompts the user to sync all changes on shutdown";
 		default:
 			break;
-		
 		}
 		return "ERROR";
 	}

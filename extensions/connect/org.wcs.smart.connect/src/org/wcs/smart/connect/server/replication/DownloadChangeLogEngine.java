@@ -188,7 +188,7 @@ public class DownloadChangeLogEngine {
 	}
 	
 	private void setServerStatus(ConnectStatusManager.ServerStatus status, String message){
-		ConnectStatusManager.INSTANCE.statusModified(status, message);
+		ConnectStatusManager.INSTANCE.serverStatusModified(status, message);
 	}
 	
 }

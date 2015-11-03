@@ -1,24 +1,41 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.ui;
 
+import java.text.DateFormat;
+import java.text.MessageFormat;
+import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
-import org.eclipse.e4.core.contexts.IEclipseContext;
-import org.eclipse.e4.ui.model.application.MApplication;
-import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
-import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
-import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
-import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
@@ -27,6 +44,13 @@ import org.wcs.smart.connect.IConnectStatusListener;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 
+/**
+ * Status control that is displayed in the status bar
+ * that informs the user of the status of the replication 
+ * 
+ * @author Emily
+ *
+ */
 public class StatusLineControl extends WorkbenchWindowControlContribution {
 
 	private Label localStatus;
@@ -39,41 +63,22 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 			updateServerStatus(status, message);
 		}
 	};
-	public StatusLineControl() {
-		WorkbenchJob job = new WorkbenchJob("wait") {
-			
-			@Override
-			public IStatus runInUIThread(IProgressMonitor monitor) {
-				IEclipseContext ctx = (IEclipseContext) PlatformUI.getWorkbench()
-						.getService(IEclipseContext.class);
-				EModelService modelService = ctx.get(EModelService.class);
-				
-//				//this gets hidden by some visibility changes events that I don't have control over;
-//				//so instead we ensure it is visible here.
-				MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", ctx.get(MApplication.class)); //$NON-NLS-1$
-				
-				MTrimElement toMove = null;
-				for (MTrimElement trim : statusBar.getChildren()){
-					if (trim.getElementId().equals("org.wcs.smart.connect.status")){
-						toMove = trim;
-					}
-				}
-				if (toMove != null){
-					statusBar.getChildren().remove(toMove);
-					statusBar.getChildren().add(toMove);
-				}
-				return Status.OK_STATUS;
-			}
-		};
-		job.schedule();
-		
-		ConnectStatusManager.INSTANCE.addListener(serverListener);
-	}
 	
+	private IConnectStatusListener localListener = new IConnectStatusListener() {
+		
+		@Override
+		public void statusModified(ServerStatus status, String message) {
+			updateLocalStatus(status, message);
+		}
+	};
+	
+	public StatusLineControl() {	
+		ConnectStatusManager.INSTANCE.addServerStatusListener(serverListener);
+		ConnectStatusManager.INSTANCE.addLocalStatusListener(localListener);
+	}
 
 	@Override
 	protected Control createControl(Composite parent) {
-		
 		Composite status = new Composite(parent, SWT.NONE);
 		status.setLayout(new GridLayout(2, true));
 
@@ -89,7 +94,6 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 
 	private void updateServerStatus(ConnectStatusManager.ServerStatus status, String message){
 		Display.getDefault().asyncExec(new Runnable(){
-
 			@Override
 			public void run() {
 				if (status == ServerStatus.CHANGES){
@@ -106,62 +110,85 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 				if (message == null){
 					serverStatus.setToolTipText("");
 				}else{
-					serverStatus.setToolTipText(message);
+					serverStatus.setToolTipText(formatMessage(message));
 				}
 			}
-			
 		});
-		
 	}
 	
-	private Job updateLocalChanges = new Job("update local changes status"){
+	private String formatMessage(String message){
+		if (message != null) message = MessageFormat.format( "({0}) {1}", DateFormat.getTimeInstance().format(new Date()), message);
+		return message;
+	}
+	
+	private String formatLocalMessage(ConnectStatusManager.ServerStatus status, String message){
+		if (message == null){
+			if (status == ServerStatus.CHANGES){
+				message = "There are local changes that need to be uploaded to server.";	
+			}else if (status == ServerStatus.UPTODATE){
+				message = "All local changes have been applied to the server.";	
+			}else{
+				message = "Error determining state of local database. ";
+			}
+		}
+		return formatMessage(message);
+	}
+	
+	private void updateLocalStatus(ConnectStatusManager.ServerStatus status, String message){
+		if (status == null){
+			updateLocalChanges.schedule(0);
+			return;
+		}
+		
+		Display.getDefault().asyncExec(new Runnable(){
+			@Override
+			public void run() {
+				if (status == ServerStatus.CHANGES){
+					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_CHANGES_ICON));
+				}else if (status == ServerStatus.UPTODATE){
+					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_OK_ICON));
+				}else if (status == ServerStatus.CONNECTING){
+					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_PROCESSING_ICON));
+				}else if (status == ServerStatus.DOWNLOADING){
+					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_PROCESSING_ICON));
+				}else if (status == ServerStatus.ERROR){
+					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
+				}
+				String tooltip = formatLocalMessage(status, message);
+				if (tooltip == null) tooltip = "";
+				localStatus.setToolTipText(tooltip);
+			}
+		});
+	}
+	
+	private Job updateLocalChanges = new Job("update local database replication state"){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
-			String message = "Connect server not configured.";
-			Boolean hasChanges = null;
+			String message = null;
+			ServerStatus status = ServerStatus.ERROR;
+					
 			if (DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
 				Session session = HibernateManager.openSession();
 				try{
-					hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
-					if (hasChanges == null){
-						message = "Error determining local changes state.";
-					}else if (hasChanges){
-						message = "There are local changes that need to be uploaded to server.";
-					}else{
-						message = "All local changes have been applied to the server.";
+					Boolean hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
+					if (hasChanges != null){
+						if (hasChanges){
+							status = ServerStatus.CHANGES;
+						}else{
+							status = ServerStatus.UPTODATE;
+						}
 					}
 				}finally{
 					session.close();
 				}
+			}else{
+				message = "Connect server not configured.";
 			}
-			
-			final String lmessage = message;
-			final Boolean lhasChanges = hasChanges;
-			
-			
-			Display.getDefault().syncExec(new Runnable(){
-				@Override
-				public void run() {
-//					Shell active = Display.getDefault().getActiveShell();
-//					if ((active.getStyle() & SWT.APPLICATION_MODAL) == SWT.APPLICATION_MODAL){
-//						System.out.println("wait");
-//					}
-//					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "TEST", "TEST");
-					if (lhasChanges == null){
-						localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
-					}else if (lhasChanges){
-						localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_CHANGES_ICON));
-					}else{
-						localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_OK_ICON));
-					}
-					localStatus.setToolTipText(lmessage);
-				}
-				
-				
-			});
+			updateLocalStatus(status, message);
+
 			//schedule every 30 seconds
-			schedule(30 * 1000);
+			schedule(ConnectStatusManager.CHECK_LOCAL_STATUS);
 			return Status.OK_STATUS;
 		}	
 	};

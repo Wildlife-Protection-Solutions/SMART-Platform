@@ -7,6 +7,8 @@ public enum ConnectStatusManager {
 
 	INSTANCE;
 	
+	public static final int CHECK_LOCAL_STATUS = 15 * 1000; //15 seconds
+	
 	public enum ServerStatus{
 		ERROR, 
 		CONNECTING,
@@ -15,20 +17,41 @@ public enum ConnectStatusManager {
 		UPTODATE
 	}
 	
-	private List<IConnectStatusListener> listeners = new ArrayList<IConnectStatusListener>();
-	
-	public void addListener(IConnectStatusListener listener){
-		this.listeners.add(listener);
+	private List<IConnectStatusListener> serverListeners = new ArrayList<IConnectStatusListener>();
+	private List<IConnectStatusListener> localListeners = new ArrayList<IConnectStatusListener>();
+		
+	public void addServerStatusListener(IConnectStatusListener listener){
+		this.serverListeners.add(listener);
 	}
 	
-	public void removeListener(IConnectStatusListener listener){
-		this.listeners.remove(listener);
+	public void removeServerStatusListener(IConnectStatusListener listener){
+		this.serverListeners.remove(listener);
 	}
 	
-	public void statusModified(ServerStatus newStatus, String statusMessage){
-		for (IConnectStatusListener l : listeners){
+	public void serverStatusModified(ServerStatus newStatus, String statusMessage){
+		for (IConnectStatusListener l : serverListeners){
 			l.statusModified(newStatus, statusMessage);
 		}
 	}
 	
+	public void addLocalStatusListener(IConnectStatusListener listener){
+		this.localListeners.add(listener);
+	}
+	
+	public void removeLocalStatusListener(IConnectStatusListener listener){
+		this.localListeners.remove(listener);
+	}
+	
+	/**
+	 * Fire this event when you know that the local status is changed and
+	 * should be updated.  ServerStatus can be null the current status
+	 * is not known.  In this case the database will be queried for the current
+	 * status.
+	 * 
+	 */
+	public void localStatusModified(ServerStatus newStatus, String statusMessage){
+		for (IConnectStatusListener l : localListeners){
+			l.statusModified(newStatus, statusMessage);
+		}
+	}
 }
