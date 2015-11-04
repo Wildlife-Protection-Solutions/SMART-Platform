@@ -45,16 +45,16 @@ public class SyncChangeLogHandler {
 
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
-		DownloadChangeLogDialog dialog = new DownloadChangeLogDialog(activeShell);
+		SyncChangeLogDialog dialog = new SyncChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
-			downloadChangeLog(activeShell, dialog.getConnection());
+			syncChangeLog(activeShell, dialog.getConnection());
 		}
 	}
 
 	/*
 	 * download change log and apply
 	 */
-	private void downloadChangeLog(final Shell activeShell, final SmartConnect connect) {
+	private void syncChangeLog(final Shell activeShell, final SmartConnect connect) {
 		DownloadChangeLogHandler downhandler = new DownloadChangeLogHandler(){
 			protected void displayStatus(final ConnectSyncHistoryRecord record) {
 				if (record.getStatus() == Status.DONE ||
