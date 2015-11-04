@@ -65,8 +65,10 @@ public class ConnectServerOption {
 		SYNC_PROMPT_PASSWORD(Boolean.FALSE),
 		SYNC_DOWNLOAD(Boolean.FALSE),
 		SYNC_AUTO_UPLOAD(Boolean.FALSE),
-		SYNC_ON_STARTUP(Boolean.FALSE),
-		SYNC_ON_SHUTDOWN(Boolean.FALSE);
+		DOWNLOAD_ON_STARTUP(Boolean.FALSE),
+		UPLOAD_ON_STARTUP(Boolean.TRUE),
+		DOWNLOAD_ON_SHUTDOWN(Boolean.FALSE),
+		UPLOAD_ON_SHUTDOWN(Boolean.TRUE);
 		
 		Object defaultValue;
 		
