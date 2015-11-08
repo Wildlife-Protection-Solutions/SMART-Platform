@@ -185,7 +185,7 @@ public class MappingValidator {
 			errors.add("No 'Date' found in mapping. Mapping must contain a date field.");
 		}
 		if (!objectId) {
-			errors.add("No 'Object ID' found in mapping. Mapping must contain at least one object id field.");
+			errors.add("No 'Patrol/Mission ID' found in mapping. Mapping must contain at least one Patrol/Mission ID field.");
 		}
 		return errors;
 	}

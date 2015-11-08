@@ -73,6 +73,7 @@ public class SmartAttributeEditingSupport extends EditingSupport {
 			List<String> items = tempMap.get(ctType);
 			if (items == null) {
 				items = new ArrayList<String>();
+				items.add(null); //this will allow to clear a value
 				tempMap.put(ctType, items);
 			}
 			items.add(a.getKey());
