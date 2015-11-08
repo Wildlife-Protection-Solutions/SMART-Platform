@@ -87,6 +87,9 @@ public abstract class AbstractCsvExtractor {
 	public String[] getUniqueIds(SmartMapping mapping) {
 		List<String> result = new ArrayList<>();
 		for (MappedAttribute a : mapping.getMappedAttribute()) {
+			if (a == null || a.getType() == null) {
+				continue;
+			}
 			switch (a.getType()) {
 			case META_OBJECT_ID:
 				result.add(a.getI());
