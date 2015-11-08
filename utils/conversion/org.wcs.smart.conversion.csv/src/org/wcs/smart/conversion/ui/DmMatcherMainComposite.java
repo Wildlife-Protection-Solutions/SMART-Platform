@@ -299,7 +299,7 @@ public class DmMatcherMainComposite extends Composite {
 			}
 		});
 
-		col = createTableViewerColumn("Type", 100);
+		col = createTableViewerColumn("Type", 120);
 		col.setLabelProvider(new Ct2AttributeTypeLabelProvider());
 		col.setEditingSupport(new Ct2AttributeTypeTableEditor(viewer));
 

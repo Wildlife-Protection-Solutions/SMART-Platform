@@ -65,7 +65,7 @@ public class SmartCategoryLabelProvider extends LangColumnLabelProvider {
 	}
 
 	private String getName(CategoryType c) {
-		if (c == null)
+		if (c == null || c == DmTreeContentProvider.NO_TYPE_CATEGORY)
 			return "--default--";
 		String langCode = getLanguageCode();
 		for (NameType nameType : c.getNames()) {

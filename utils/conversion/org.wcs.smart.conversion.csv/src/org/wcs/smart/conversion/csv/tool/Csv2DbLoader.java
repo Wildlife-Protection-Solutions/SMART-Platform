@@ -49,7 +49,7 @@ public class Csv2DbLoader {
 		parseFile(file, c);
 	}
 
-	private void cleanDb(Connection c) throws SQLException {
+	public void cleanDb(Connection c) throws SQLException {
 		c.createStatement().executeUpdate("TRUNCATE TABLE CSV_TO_SMART.ATTRIBUTES"); //$NON-NLS-1$
 		try {
 			c.createStatement().executeUpdate("DROP TABLE CSV_TO_SMART.CSV"); //$NON-NLS-1$

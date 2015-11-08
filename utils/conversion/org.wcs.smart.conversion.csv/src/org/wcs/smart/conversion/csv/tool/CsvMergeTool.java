@@ -52,7 +52,7 @@ public class CsvMergeTool {
 
 	private char DELIMETER = ',';
 	
-	public List<String> merge(File file, Connection c) throws SQLException, UnsupportedEncodingException, FileNotFoundException, IOException {
+	public CsvMergeResult merge(File file, Connection c) throws SQLException, UnsupportedEncodingException, FileNotFoundException, IOException {
 		List<String> messages = new ArrayList<String>();
 		
 		try(CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(file), "UTF-8"), DELIMETER)) { //$NON-NLS-1$
@@ -82,7 +82,7 @@ public class CsvMergeTool {
 				c.commit();
 				c.setAutoCommit(autoCommit);
 				messages.add("Merge process was aborted by user.");
-				return messages;
+				return new CsvMergeResult(false, messages);
 			}
 
 			boolean isCreateOption = dialog.isCreateOption();
@@ -199,7 +199,7 @@ public class CsvMergeTool {
 			}
 		}
 		
-		return messages;
+		return new CsvMergeResult(true, messages);
 	}
 
 	private PreparedStatement getFetchMatchIdStatement(Connection c, List<String> uniqueColumns, Map<String, Integer> n2Column) throws SQLException {
@@ -239,4 +239,32 @@ public class CsvMergeTool {
 		}
 		return c.prepareStatement("update csv_to_smart.csv set " + sbUpdate + " where id=?"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
+
+	/**
+	 * Class that represents a result of a merge operation.
+	 * 
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	public static final class CsvMergeResult {
+
+		private boolean completed = false;
+		private List<String> messages;
+
+		public CsvMergeResult(boolean completed, List<String> messages) {
+			super();
+			this.completed = completed;
+			this.messages = messages;
+		}
+
+		public boolean isCompleted() {
+			return completed;
+		}
+
+		public List<String> getMessages() {
+			return messages;
+		}
+		
+	}
+	
 }

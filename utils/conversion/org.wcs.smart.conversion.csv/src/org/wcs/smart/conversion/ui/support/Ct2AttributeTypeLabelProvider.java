@@ -56,7 +56,7 @@ public class Ct2AttributeTypeLabelProvider extends ColumnLabelProvider {
 			case META_MEMBERS: return "Members";
 			case META_MANDATE: return "Mandate";					
 			case META_COMMENT: return "Comment";	
-			case META_OBJECT_ID: return "Object ID";
+			case META_OBJECT_ID: return "Patrol/Mission ID";
 			case TRANSECT_ID: return "Transect ID";
 			case TRANSECT_START_LAT: return "Transect start latitude";
 			case TRANSECT_START_LON: return "Transect start longitude";

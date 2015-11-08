@@ -49,9 +49,9 @@ public class Csv2SmartMatcher {
 	    GridData gridData = new GridData(SWT.LEFT,SWT.TOP, false, false);
 	    shell.setLayoutData(gridData);
 		
-		Image img = new Image(display, ClassLoader.getSystemResourceAsStream("csvsmart16.gif"));
+		Image img = new Image(display, ClassLoader.getSystemResourceAsStream("csvsmart16.gif")); //$NON-NLS-1$
 	    shell.setImage(img);
-		shell.setText("CSV to SMART - Conversion Tool (Version 0.4)");
+		shell.setText("CSV to SMART - Conversion Tool (Version 0.5)");
 		new CsvMatcherDialog(shell);
 
 		shell.pack();

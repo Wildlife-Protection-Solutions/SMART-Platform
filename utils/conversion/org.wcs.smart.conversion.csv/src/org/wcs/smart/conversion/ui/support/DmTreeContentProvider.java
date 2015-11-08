@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.conversion.ui.support;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -39,6 +40,8 @@ public class DmTreeContentProvider implements ITreeContentProvider {
 	private boolean active;
 
 	private DataModelLookup lookup;
+	
+	public static final CategoryType NO_TYPE_CATEGORY = new NoCategoryType();
 
 	/**
 	 * @param active <code>true</code> if only active elements to be included; otherwise <code>false</code> includes all
@@ -61,7 +64,9 @@ public class DmTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput instanceof List){
-			this.rootNodes = (List<CategoryType>) newInput;
+			this.rootNodes = new ArrayList<CategoryType>();
+			rootNodes.add(NO_TYPE_CATEGORY);
+			this.rootNodes.addAll((List<CategoryType>) newInput);
 		}
 	}
 
@@ -118,4 +123,11 @@ public class DmTreeContentProvider implements ITreeContentProvider {
 		return children.length > 0;
 	}
 	
+	/**
+	 * Class used to represent "--default--" category if category dropdown.
+	 * 
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	public static final class NoCategoryType extends CategoryType {}
 }

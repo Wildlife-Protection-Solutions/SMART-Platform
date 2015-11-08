@@ -44,10 +44,12 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.conversion.csv.handler.ProcessingActionHandler;
 import org.wcs.smart.conversion.csv.tool.Csv2DbLoader;
 import org.wcs.smart.conversion.csv.tool.CsvExportTool;
 import org.wcs.smart.conversion.csv.tool.CsvMergeTool;
+import org.wcs.smart.conversion.csv.tool.CsvMergeTool.CsvMergeResult;
 import org.wcs.smart.conversion.csv.tool.MatchFileBuilder;
 import org.wcs.smart.conversion.model.SmartMapping;
 import org.wcs.smart.conversion.tool.MatchSession;
@@ -71,6 +73,7 @@ public class CsvMatcherDialog extends Composite {
 	private XmlFileComposite xmlMapping;
 	
 	private Button btnMergeCsv;
+	private Button btnClearDb;
 	private Button btnExportCsv;
 	private Button btnGenMap;
 	private Button btnEditMap;
@@ -79,6 +82,8 @@ public class CsvMatcherDialog extends Composite {
 	private Button btnGenPatrol;
 	private Button btnGenMission;
 
+	private Text txtInfo;
+	
 	private ProcessingActionHandler handler;
 	
 	public CsvMatcherDialog(Shell shell) {
@@ -109,9 +114,16 @@ public class CsvMatcherDialog extends Composite {
 		
 		dbLabel = new Label(dataGroup, SWT.NONE);
 		
-		Button btnLoadCsv = new Button(dataGroup, SWT.PUSH);
+		Composite btnCmp = new Composite(dataGroup, SWT.NONE);
+		btnCmp.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		GridLayout gridLayout = new GridLayout(3, false);
+		gridLayout.horizontalSpacing = gridLayout.marginWidth = 0;
+		gridLayout.marginLeft = 5;
+		btnCmp.setLayout(gridLayout);
+		
+		Button btnLoadCsv = new Button(btnCmp, SWT.PUSH);
 		btnLoadCsv.setText("Load data from CSV");
-		btnLoadCsv.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnLoadCsv.setLayoutData(new GridData(SWT.NONE, SWT.TOP, false, true));
 		btnLoadCsv.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
@@ -119,15 +131,31 @@ public class CsvMatcherDialog extends Composite {
 			}
 		});
 
-		btnMergeCsv = new Button(dataGroup, SWT.PUSH);
+		btnMergeCsv = new Button(btnCmp, SWT.PUSH);
 		btnMergeCsv.setText("Merge database with CSV");
-		btnMergeCsv.setLayoutData(new GridData(SWT.END, SWT.TOP, true, true));
+		btnMergeCsv.setLayoutData(new GridData(SWT.NONE, SWT.TOP, false, true));
 		btnMergeCsv.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
 				mergeCsv();
 			}
 		});
+
+		btnClearDb = new Button(btnCmp, SWT.PUSH);
+		btnClearDb.setText("Clear database");
+		btnClearDb.setLayoutData(new GridData(SWT.NONE, SWT.TOP, false, true));
+		btnClearDb.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent arg0) {
+				clearDb();
+			}
+		});
+
+    	txtInfo = new Text(dataGroup, SWT.MULTI | SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
+    	txtInfo.setEditable(false);
+    	GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+    	gd.heightHint = 80;
+    	txtInfo.setLayoutData(gd);
 		
 		btnExportCsv = new Button(dataGroup, SWT.PUSH);
 		btnExportCsv.setText("Export database to CSV");
@@ -217,6 +245,22 @@ public class CsvMatcherDialog extends Composite {
 		updateState();
 	}
 
+	protected void clearDb() {
+		if (MessageDialog.openConfirm(getShell(), "Clear database", "Do you really want to remove all the records from the database?")) {
+			try {
+				Connection c = ConnectionUtil.getConnection();
+				Csv2DbLoader loader = new Csv2DbLoader();
+				loader.cleanDb(c);
+				updateState();
+				txtInfo.setText(""); //$NON-NLS-1$
+				MessageDialog.openInformation(getShell(), "Info", "Database is successfully reset");
+			} catch (Exception e) {
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while clearing the database. See console or log for more details.\n" + e.toString());
+				e.printStackTrace();
+			}
+		}
+	}
+
 	protected void loadCsv() {
 		FileDialog dlg = new FileDialog(getShell(), SWT.OPEN);
 		dlg.setFilterNames(new String[] {"CSV file"});
@@ -228,6 +272,7 @@ public class CsvMatcherDialog extends Composite {
 				Csv2DbLoader loader = new Csv2DbLoader();
 				loader.load(new File(fn), c);
 				updateState();
+				txtInfo.setText(MessageFormat.format("Loaded data from {0}", fn));
 				MessageDialog.openInformation(getShell(), "Info", "Data from CSV loaded successfully");
 			} catch (Exception e) {
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while loading file. See console or log for more details.\n" + e.toString());
@@ -245,10 +290,14 @@ public class CsvMatcherDialog extends Composite {
 			try {
 				Connection c = ConnectionUtil.getConnection();
 				CsvMergeTool  mergeTool = new CsvMergeTool();
-				List<String> messages = mergeTool.merge(new File(fn), c);
-				ReportDialog report = new ReportDialog(getShell(), "Merge results", MessageFormat.format("{0} message(s) reported during merge:", messages.size()), messages);
-				report.open();
-				updateState();
+				CsvMergeResult result = mergeTool.merge(new File(fn), c);
+				if (result.isCompleted()) {
+					List<String> messages = result.getMessages();
+					ReportDialog report = new ReportDialog(getShell(), "Merge results", MessageFormat.format("{0} message(s) reported during merge:", messages.size()), messages);
+					report.open();
+					updateState();
+					txtInfo.setText(txtInfo.getText() + "\r\n" + MessageFormat.format("Merged with data from {0}", fn));
+				}
 			} catch (Exception e) {
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
 				e.printStackTrace();
