@@ -24,8 +24,8 @@ package org.wcs.smart.conversion.ui;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -111,11 +111,16 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 			if (attrRs.next()) {
 				String valuesSql = "select distinct a"+attrRs.getString(1)+" from CSV_TO_SMART.CSV"; //$NON-NLS-1$ //$NON-NLS-2$
 				ResultSet valRs = connection.createStatement().executeQuery(valuesSql);
-				String values = "Raw values for \"" + Ct2AttributeTypeUtil.getN(attribute) + "\":"; //$NON-NLS-1$ //$NON-NLS-2$
-				while (valRs.next()) {
-					values += "\n" + valRs.getString(1); //$NON-NLS-1$
+				String values = ""; //$NON-NLS-1$
+				if (valRs.next()) {
+					values = valRs.getString(1);
+					while (valRs.next()) {
+						values += "\n" + valRs.getString(1); //$NON-NLS-1$
+					}
 				}
-				MessageDialog.openInformation(getShell(), "Raw values", values);
+				String message = MessageFormat.format("Raw values for ''{0}'':", Ct2AttributeTypeUtil.getN(attribute));
+				ReportDialog rawValuesReport = new ReportDialog(getShell(), "Raw values", message, values);
+				rawValuesReport.open();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
