@@ -380,7 +380,7 @@ public class MissionBuilder extends AbstractBuilder {
 		mission.setEndDate(xmlEndDate);
 
 		SurveyType survey = new SurveyType();
-		survey.setId(id);
+		survey.setId(getParam("surveyKey", id)); //$NON-NLS-1$
 		survey.setStartDate(xmlStartDate);
 		survey.setEndDate(xmlEndDate);
 		survey.setSurveyDesignKeyId(surveyDesignKey);
