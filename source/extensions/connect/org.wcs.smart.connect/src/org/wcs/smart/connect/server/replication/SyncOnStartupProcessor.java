@@ -86,9 +86,14 @@ public class SyncOnStartupProcessor {
 				onShutDown();
 			}	
 		});
+
 	}
 
 	private void onStartUp( ){
+		
+		CleanUpReplicationJob job = new CleanUpReplicationJob();
+		job.schedule();
+		
 		ConnectServer cs = null;
 		Session s = HibernateManager.openSession();
 		try{

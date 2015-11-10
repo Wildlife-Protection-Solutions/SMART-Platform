@@ -22,6 +22,8 @@
 package org.wcs.smart.connect.server.replication;
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
+import java.util.Date;
 
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
@@ -88,7 +90,12 @@ public class DownloadChangeLogEngine {
 			}finally{
 				session.close();
 			}
-
+			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.DOWNLOAD);
+			if (previous != null && 
+					previous.getDatetime().getTime() < ((new Date()).getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 *1000l)){
+				throw new Exception(MessageFormat.format("Last download of changes was longer than {0} days ago.  Replication is no longer supported.  You must redownload the Conservation Area from the server.", DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
+			}
+			
 			//create sync history record for database
 			record = SyncHistoryManager.INSTANCE.create(connect.getServer().getConservationArea(), connect.getServer(), ConnectSyncHistoryRecord.Type.DOWNLOAD);
 			
@@ -139,6 +146,9 @@ public class DownloadChangeLogEngine {
 			}catch (Exception ex2){
 				ConnectPlugIn.log("Could not set download record status to error: " + ex2.getMessage(), ex2);
 			}
+			
+			SmartConnect.UPLOAD_LOCK.release();
+			
 			setServerStatus(ServerStatus.ERROR, "error uploading to server");
 			throw ex;
 		}

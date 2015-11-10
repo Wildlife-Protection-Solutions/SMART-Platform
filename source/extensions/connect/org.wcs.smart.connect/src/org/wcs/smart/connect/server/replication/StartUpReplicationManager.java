@@ -21,30 +21,11 @@
  */
 package org.wcs.smart.connect.server.replication;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.e4.core.contexts.ContextInjectionFactory;
-import org.eclipse.e4.core.contexts.EclipseContextFactory;
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.ui.IWindowListener;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchListener;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.internal.contexts.ContextManagerFactory;
-import org.eclipse.ui.progress.WorkbenchJob;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectHibernateManager;
-import org.wcs.smart.connect.ConnectPlugIn;
-import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
-
-import com.sun.jna.Platform;
 
 /**
  * Manager to manage auto replication.  This is
@@ -84,18 +65,4 @@ public enum StartUpReplicationManager {
 		AutoReplicationJob autoReplication = new AutoReplicationJob();
 		autoReplication.schedule(delaysec);
 	}
-	
-//	private WorkbenchJob syncStartup = new WorkbenchJob("Sync On Startup") {
-//		
-//		@Override
-//		public IStatus runInUIThread(IProgressMonitor monitor) {
-//			if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), 
-//					"SMART Connect - Sync Changes", 
-//					"Do you want to sync all changes with SMART Connect?")){
-//				//initiate sync now
-//				System.out.println("sync now");
-//			}
-//			return Status.OK_STATUS;
-//		}
-//	};
 }

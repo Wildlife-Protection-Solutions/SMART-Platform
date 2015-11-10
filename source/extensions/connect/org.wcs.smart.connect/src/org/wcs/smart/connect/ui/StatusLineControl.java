@@ -96,6 +96,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
+				if (serverStatus.isDisposed()) return;
 				if (status == ServerStatus.CHANGES){
 					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_CHANGES_ICON));
 				}else if (status == ServerStatus.UPTODATE){
@@ -143,6 +144,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		Display.getDefault().asyncExec(new Runnable(){
 			@Override
 			public void run() {
+				if (localStatus.isDisposed()) return;
 				if (status == ServerStatus.CHANGES){
 					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_CHANGES_ICON));
 				}else if (status == ServerStatus.UPTODATE){
@@ -165,6 +167,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
+			
 			String message = null;
 			ServerStatus status = ServerStatus.ERROR;
 					

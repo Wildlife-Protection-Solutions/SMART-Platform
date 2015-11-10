@@ -57,6 +57,22 @@ public enum ChangeLogTableManager {
 		query.setBinary(0, UuidUtils.uuidToByte(ca.getUuid()));
 		query.executeUpdate();
 	}
+
+	/**
+	 * Deletes all change log items associated with the given
+	 * conservation area that have a revision number less than
+	 * or equals to the revision number.
+	 * 
+	 * @param s
+	 * @param ca
+	 * @param maxRevision
+	 */
+	public void deleteRecords(Session s, ConservationArea ca, long maxRevision){
+		Query query = s.createQuery("DELETE FROM ChangeLogItem WHERE conservationArea = :ca and revision <= :maxRevision");
+		query.setBinary("ca", UuidUtils.uuidToByte(ca.getUuid()));
+		query.setLong("maxRevision", maxRevision);
+		query.executeUpdate();
+	}
 	
 	/**
 	 * Determines in the change log table contains a given change
@@ -71,7 +87,7 @@ public enum ChangeLogTableManager {
 		if (litem == null) return false;
 		return true;
 	}
-	
+		
 	/**
 	 * Insert item into table.
 	 * @param s
@@ -136,6 +152,7 @@ public enum ChangeLogTableManager {
 	 * @param startRevision exclusive revision to start at (returns everything > startRevision)
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<ChangeLogItem> getAll(Session s, ConservationArea ca, long startRevision){
 		String tableName = ((AbstractEntityPersister)s.getSessionFactory().getClassMetadata(ChangeLogItem.class)).getTableName();
 		

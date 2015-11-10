@@ -165,7 +165,8 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 
 	@Override
 	protected void saveItem(ChangeLogItem item, Session s) throws Exception {
-		ChangeLogTableManager.INSTANCE.addItem(s, item);
+		//it is not necessary to save this change;  there is no way we can download it twice
+		//ChangeLogTableManager.INSTANCE.addItem(s, item);
 	}
 	
 	@Override

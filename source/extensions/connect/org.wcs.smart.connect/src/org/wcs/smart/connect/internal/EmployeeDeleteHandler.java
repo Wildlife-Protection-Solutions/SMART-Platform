@@ -26,8 +26,14 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.IEmployeeListener;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.model.ConnectUser;
-import org.wcs.smart.hibernate.HibernateManager;
 
+/**
+ * Delete any connect users associated with an employee when
+ * the employee is removed.
+ * 
+ * @author Emily
+ *
+ */
 public class EmployeeDeleteHandler implements IEmployeeListener {
 
 	@Override

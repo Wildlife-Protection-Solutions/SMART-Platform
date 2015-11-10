@@ -23,15 +23,6 @@ package org.wcs.smart.connect.api.model;
 
 import java.util.UUID;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Id;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.Type;
-
 /**
  * Simple Connect conservation area info object.
  * 

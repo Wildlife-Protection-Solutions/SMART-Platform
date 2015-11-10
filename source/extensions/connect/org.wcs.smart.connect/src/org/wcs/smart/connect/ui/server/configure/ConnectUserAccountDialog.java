@@ -178,8 +178,8 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 	}
 	
 	Job loadUsers = new Job("load users"){
-
 		@Override
+		@SuppressWarnings("unchecked")
 		protected IStatus run(IProgressMonitor monitor) {
 			List<Employee> e = null;
 			Session s = HibernateManager.openSession();

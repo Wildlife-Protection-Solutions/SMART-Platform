@@ -26,7 +26,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -52,14 +51,28 @@ public enum DerbyReplicationManager {
 	DerbyReplicationManager(){		
 	}
 
+	/**
+	 * Maximum delay in days between replications.  If longer than this period
+	 * has occurred you will no longer be able to replicate changes.  This is
+	 * also used for cleaning up the change log table and sync history table.
+	 */
+	public static final long REPLICATION_MAXTIME_DAYS = 180;
+	
+	/**
+	 * The database property to identify if logging should occur.  Used
+	 * by the triggers to determine if changes should be logged.
+	 */
 	public static final String LOGGING_DB_PROPERTY = "org.wcs.smart.isLogging";
-
+	
+	
 	private Thread fileStoreReplication;
 	private FileStoreWatcher watcher;
 	
 	private Boolean enabledState = null;
 	
 	private List<IReplicationEventListener> listeners = new ArrayList<IReplicationEventListener>();
+
+	
 	
 	public void addListener(IReplicationEventListener listener){
 		listeners.add(listener);
