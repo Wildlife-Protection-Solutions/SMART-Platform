@@ -65,7 +65,9 @@ public class SmartPolicy extends Policy {
 		setVisibleInstalledIUQuery(new UserVisibleRootQuery());
 		setRepositoryPreferencePageId("org.wcs.smart.p2.ui.SitesPreferencePage"); //$NON-NLS-1$		
 		setRepositoryPreferencePageName(Messages.SmartPolicy_PreferencePageName);
-		setRepositoriesVisible(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN);
+		if (SmartDB.getCurrentEmployee() != null){
+			setRepositoriesVisible(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN);
+		}
 		Activator.getDefault().updateWithPreferences(this);
 	}
 
