@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.wcs.smart.connect.api.ConnectRESTApplication;
 import org.wcs.smart.connect.api.ConservationAreas;
-import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.model.ConservationAreaProxy;
 
 /**
  * Conservation area servlet.
@@ -53,7 +53,7 @@ public class CaServlet extends HttpServlet {
 		ConservationAreas cas = new ConservationAreas();
 		cas.configure(request.getServletContext(), null, response, request);
 		
-		List<ConservationAreaInfo> info = cas.getConservationAreas();
+		List<ConservationAreaProxy> info = cas.getConservationAreas();
 		
 		request.setAttribute("cas", info); //$NON-NLS-1$
 		
