@@ -66,6 +66,7 @@ public enum DerbyMetadataPackager {
 		MetadataPackager.INSTANCE.writeMetadata(file, metadata);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public HashMap<String, String> getLocalPluginVersions(Session session){
 		HashMap<String, String> plugins = new HashMap<String, String>();
 		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL);

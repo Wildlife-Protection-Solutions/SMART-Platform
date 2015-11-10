@@ -205,6 +205,7 @@ public class LoginHandler implements ILoginHandler {
 	 * 
 	 * All other files/directories will be removed.
 	 */
+	@SuppressWarnings("unchecked")
 	private void cleanUpFilestore(){
 		final List<Path> filesToKeep = new ArrayList<Path>();
 		

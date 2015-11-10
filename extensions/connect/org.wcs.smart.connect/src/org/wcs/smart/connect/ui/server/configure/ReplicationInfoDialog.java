@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.connect.ui.server.configure;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -170,7 +171,8 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 			});
 			vcol.getColumn().setWidth(col.getSize());
 		}
-		
+		l = new Label(main ,SWT.NONE);
+		l.setText(MessageFormat.format("Replication history is cleaned to remove records older than {0} days.", DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
 		initControls();
 		
 		setTitle("SMART Replication Details");

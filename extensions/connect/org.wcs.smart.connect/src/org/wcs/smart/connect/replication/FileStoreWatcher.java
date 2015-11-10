@@ -145,6 +145,7 @@ public class FileStoreWatcher implements Runnable{
     	}
     }
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		for (;;) {

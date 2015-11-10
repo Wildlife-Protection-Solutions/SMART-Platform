@@ -24,6 +24,7 @@ package org.wcs.smart.connect.server.replication;
 import java.util.Date;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -31,6 +32,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
+import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -52,6 +54,24 @@ public enum SyncHistoryManager {
 	public void deleteAll(Session s, ConservationArea ca){
 		String hsql = "DELETE FROM ConnectSyncHistoryRecord WHERE conservationArea = :ca";
 		s.createQuery(hsql).setParameter("ca", ca).executeUpdate();
+	}
+	
+	/**
+	 * Deletes all sync history records from the database
+	 * of the given type that occur on or before the given
+	 * date.
+	 * 
+	 * @param s
+	 * @param ca
+	 * @param type
+	 * @param endDate
+	 */
+	public void deleteRecords(Session s, ConservationArea ca, Type type, Date endDate){
+		Query query = s.createQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime");
+		query.setParameter("ca", ca);
+		query.setParameter("type", type);
+		query.setParameter("datetime", endDate);
+		query.executeUpdate();
 	}
 	
 	/**
@@ -111,6 +131,7 @@ public enum SyncHistoryManager {
 	 * @param type
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	public List<ConnectSyncHistoryRecord> getActiveSyncRecords(ConservationArea ca,
 			ConnectSyncHistoryRecord.Type type){
 		

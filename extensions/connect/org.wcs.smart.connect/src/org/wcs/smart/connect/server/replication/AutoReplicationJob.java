@@ -72,7 +72,6 @@ public class AutoReplicationJob extends Job {
 	}
 
 	private IStatus runInternal(IProgressMonitor monitor){
-		System.out.println("AUTO REPLICATING");
 		reschedule = true;
 		monitor.beginTask("Auto updating Connect server status", 3);
 		setServerStatus(ConnectStatusManager.ServerStatus.CONNECTING, null);

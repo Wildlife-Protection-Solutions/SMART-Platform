@@ -47,7 +47,6 @@ public class DownloadChangeLogHandler {
 
 	@Execute
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
-//		(new AutoReplicationJob()).schedule();
 		DownloadChangeLogDialog dialog = new DownloadChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
 			downloadChangeLog(activeShell, dialog.getConnection());

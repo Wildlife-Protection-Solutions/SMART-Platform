@@ -26,6 +26,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.MessageFormat;
+import java.util.Date;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -96,10 +98,14 @@ public class UploadChangeLogEngine {
 			monitor.beginTask("Creating sync package", 3);
 
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.UPLOAD);
-			if (previous.getEndRevision() >= currentRevisionNo){
+			if ((previous == null && currentRevisionNo == -1) ||
+				(previous != null && previous.getEndRevision() >= currentRevisionNo)){
 				throw nothingtoUpdate;
 			}
-			
+			if (previous != null && 
+					previous.getDatetime().getTime() < ((new Date()).getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 *1000l)){
+				throw new Exception(MessageFormat.format("Last upload of changes was longer than {0} days ago.  Replication is no longer supported.  You must redownload the Conservation Area from the server.", DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
+			}
 			record = null;
 			
 			if (previous == null || previous.getStatus() == Status.DONE ){
