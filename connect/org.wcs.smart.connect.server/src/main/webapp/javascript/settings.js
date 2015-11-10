@@ -9,7 +9,7 @@ var allActions = null;
 
 /* configure events on html elements */
 window.onload = function(){
-	//add new user
+	//add new style   ---  NOT USING STYLES NOW, might go back to it eventually...
 //	document.querySelector("btnNewStyle").onclick=clearAndShowNewStyleDialog;
 //	if(numStyles > 0){
 //		document.getElementById("btnNewStyle").style.display = "none";
@@ -435,19 +435,22 @@ function createTypeTable(){
  		var color = types[i].color;
  		var fillColor = types[i].fillColor;
  		var opacity = types[i].opacity;
+ 		
+
+ 		
  		var row = tableCreateRowTDs(parent,
  				[label, color, fillColor, opacity, null], 
  				"white typerow");
  		row.id = "typerow" + i;
  		row.dataset.uuid = types[i].uuid;
  	
- 		row.childNodes[1].style.backgroundColor = color;
- 		if(color == "#000000"){
- 			row.childNodes[1].style.color = "#ffffff";
+ 		row.childNodes[1].style.backgroundColor = '#' + color;
+ 		if(color == "000000"){
+ 			row.childNodes[1].style.color = "ffffff";
  		}
- 		row.childNodes[2].style.backgroundColor = fillColor;
+ 		row.childNodes[2].style.backgroundColor = '#' + fillColor;
  		row.childNodes[2].style.opacity = opacity;
- 		row.childNodes[3].style.backgroundColor = fillColor;
+ 		row.childNodes[3].style.backgroundColor = '#' + fillColor;
  		row.childNodes[3].style.opacity = opacity;
  		
  		var updateicon = document.createElement("a");
@@ -469,6 +472,8 @@ function createTypeTable(){
 function updateType(){
 	var uuid = this.parentElement.parentElement.getAttribute('data-uuid');
 	document.getElementById("alerttypesform").uuid.value = uuid;
+	
+
 	
 	hideInfo();
 	hideError();
@@ -495,6 +500,9 @@ function showCurrentType() {
 	form.type_color.value = r.color;
 	form.type_fillcolor.value = r.fillColor;
 	form.type_opacity.value = r.opacity;
+	
+	document.getElementById("type_color").style.backgroundColor = '#' + r.color;
+	document.getElementById("type_fillcolor").style.backgroundColor ='#' + r.fillColor;
 	
 	document.getElementById("updateTypeButton").classList.remove("hide");
 	document.getElementById("updateTypeButton").classList.add("show");

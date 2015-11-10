@@ -408,7 +408,7 @@ function createAlertTable(){
 	try{
 		var geojson = JSON.parse(this.responseText);
 	 	var alerts = geojson.features;
-	 	if(typeof alerts === "undefined"){
+	 	if(typeof alerts === "undefined" || alerts.length == 0){
 		 	var newRow = parent.insertRow(-1);
 	 		newRow.style.backgroundColor = "#F00";
 	 		newRow.className = "alertrow";

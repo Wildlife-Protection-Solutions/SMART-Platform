@@ -4,6 +4,7 @@
 <html>
 <head>
 <%@include file="includes.jsp" %>
+<script src="${pageContext.request.contextPath}/javascript/jscolor.min.js"></script>
 <script type="text/javascript" >
 	var numStyles=${numstyles};
 </script>
@@ -41,10 +42,12 @@
 <div class="overflow settingsTable">
 	<div class="block" style="text-align:left"><b><fmt:message key="settings.styleheader" /></b> <button class="button top-spacer" id="btnNewType"><fmt:message key="settings.addnewstyle" /></button>
 	</div>
+	<form name=styleform>
 	<table id="typetable">
 		<tr class="table-type-row smart-table-header"><th><fmt:message key="settings.alerttype" /></th><th><fmt:message key="settings.outlinecolor" /></th><th><fmt:message key="settings.fillcolor" /></th><th><fmt:message key="settings.opacity" /></th><th><fmt:message key="actions" /></th>
 		</tr>
 	</table>
+	</form>
 </div>
 
 <div class="overflow settingsTable">
@@ -230,10 +233,10 @@
      		
      		
      		<label class="top-spacer block"><fmt:message key="settings.typeedit.outlinecolorlabel" /></label>
-			<input class="type_field" type=text name="type_color" value="" maxlength="16"/>
+			<input id="type_color" class="type_field jscolor" type=text name="type_color" value="" maxlength="16"/>
     
       		<label class="top-spacer block"><fmt:message key="settings.typeedit.fillcolorlabel" /></label>
-			<input class="type_field" type=text name="type_fillcolor" value="" maxlength="16"/>
+			<input id="type_fillcolor" class="type_field jscolor" type=text name="type_fillcolor" value="" maxlength="16"/>
     
       		<label class="top-spacer block"><fmt:message key="settings.typeedit.opactiylabel" /></label>
 			<input class="type_field" type=text name="type_opacity" value="" maxlength="8"/>
