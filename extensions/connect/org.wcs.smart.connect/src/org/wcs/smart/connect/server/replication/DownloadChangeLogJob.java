@@ -22,10 +22,13 @@
 package org.wcs.smart.connect.server.replication;
 
 import java.nio.file.Path;
+import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
@@ -62,6 +65,7 @@ public class DownloadChangeLogJob extends Job {
 		this.serverInfo = serverInfo;
 	}
 
+
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		monitor.beginTask("Downloading change log", 3);
@@ -96,9 +100,17 @@ public class DownloadChangeLogJob extends Job {
 			JsonNode nd = (new ObjectMapper()).readTree(message);
 			String downloadUrl = nd.get("file_url").asText();
 			if (monitor.isCanceled()) return cancelled();
-			downloadFile = connect.downloadFileFromUrl(downloadUrl);
+			Integer promptSize = null;
+			if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
+				promptSize = connect.getServer().getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE);
+			}
+			downloadFile = connect.downloadFileFromUrl(downloadUrl,promptSize);
 			monitor.worked(1);
 			monitor.done();
+		}catch (PackageToLargeException ex){
+			record.setStatus(Status.ERROR);
+			record.setErrorString(ex.getMessage());
+			ConnectPlugIn.log(ex.getMessage(), ex);
 		}catch (Exception ex){
 			record.setStatus(Status.ERROR);
 			record.setErrorString("Error downloading file:" + ex.getMessage());

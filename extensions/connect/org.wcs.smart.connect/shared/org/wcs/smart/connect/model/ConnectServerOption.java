@@ -68,7 +68,9 @@ public class ConnectServerOption {
 		DOWNLOAD_ON_STARTUP(Boolean.FALSE),
 		UPLOAD_ON_STARTUP(Boolean.TRUE),
 		DOWNLOAD_ON_SHUTDOWN(Boolean.FALSE),
-		UPLOAD_ON_SHUTDOWN(Boolean.TRUE);
+		UPLOAD_ON_SHUTDOWN(Boolean.TRUE),
+		PACKAGE_PROMPT(Boolean.FALSE),
+		PACKAGE_PROMPT_SIZE(20);
 		
 		Object defaultValue;
 		
@@ -83,6 +85,12 @@ public class ConnectServerOption {
 		public Boolean getDefaultValueAsBoolean(){
 			if (defaultValue instanceof Boolean){
 				return (Boolean) this.defaultValue;
+			}
+			return null;
+		}
+		public Integer getDefaultValueAsInt(){
+			if (defaultValue instanceof Integer){
+				return (Integer) this.defaultValue;
 			}
 			return null;
 		}

@@ -33,12 +33,15 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
@@ -73,7 +76,7 @@ public class UploadChangeLogEngine {
 	 * @param monitor
 	 * @throws Exception
 	 */
-	public void createUpload(IProgressMonitor monitor) throws Exception{
+	public void createUpload(IProgressMonitor monitor) throws NothingToUpdateException, PackageToLargeException, Exception{
 		
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		if (SmartDB.isMultipleAnalysis()) throw new Exception("Cross-ca analysis can not be syncronized with server.");
@@ -148,15 +151,41 @@ public class UploadChangeLogEngine {
 						record.setStatus(Status.NODATA);
 						saveRecord(record);
 						//delete file
-						try{
-							Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile());
-							Files.deleteIfExists(p);
-						}catch (IOException ex){
-							ConnectPlugIn.log("Could not delete ca uploader export file.", ex);
-						}		
+						deletePackageFile();
 						throw nothingtoUpdate;
 					}
 					
+					//check package size
+					if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
+						long sizeInBytes = Files.size(Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile()));
+						long maxSizeInBytes = connect.getServer().getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE) * 1000000l;
+						
+						if (sizeInBytes > maxSizeInBytes){
+							//prompt to continue
+							final boolean[] cont = new boolean[]{false};
+							Display.getDefault().syncExec(new Runnable(){
+
+								@Override
+								public void run() {
+									// TODO Auto-generated method stub
+									cont[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+											"Upload Change Log", 
+											MessageFormat.format("The change log package to upload ({0} MB) is greater than {1} MB.  Do you wish to continue?", sizeInBytes / 1000000.0, maxSizeInBytes/1000000.0));		
+								}
+								
+								
+							});
+							if (!cont[0]){
+								//end
+								record.setStatus(Status.ERROR);
+								saveRecord(record);
+								//delete file
+								deletePackageFile();
+								throw new PackageToLargeException("Upload cancelled by user.  Upload package too big.");
+							}
+							
+						}
+					}
 					//save record
 					saveRecord(record);
 				}
@@ -179,7 +208,14 @@ public class UploadChangeLogEngine {
 		}
 	}
 	
-
+	private void deletePackageFile(){
+		try{
+			Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile());
+			Files.deleteIfExists(p);
+		}catch (IOException ex){
+			ConnectPlugIn.log("Could not delete ca uploader export file.", ex);
+		}		
+	}
 	/**
 	 * Called at the end of the process once the file has been
 	 * downloaded and applied.

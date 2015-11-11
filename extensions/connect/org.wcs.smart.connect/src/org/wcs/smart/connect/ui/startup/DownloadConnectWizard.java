@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -15,6 +16,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.server.DownloadCaEngine;
 import org.wcs.smart.connect.ui.server.configure.ConnectServerWizard;
 import org.wcs.smart.connect.ui.server.configure.ServerOptionsWizardPage;
@@ -48,7 +50,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 			}
 		};
 		server.setServerUrl(url);
-		server.getOptions().size();
+		server.setOptions(new HashMap<ConnectServerOption.Option, ConnectServerOption>());
 		((ServerOptionsWizardPage)getPage(ServerOptionsWizardPage.NAME)).updateServer(server);
 		if (!certificateFile.trim().isEmpty()){
 			server.setCertificateFileName(certificateFile);
@@ -101,7 +103,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 
 	@Override
 	public void handlePageChanging(PageChangingEvent event) {
-		if (event.getCurrentPage() == page5 && event.getTargetPage() == page5){
+		if (event.getCurrentPage() == page4 && event.getTargetPage() == page5){
 			final ConnectServer temp = createServer();
 			final String user = ((UserWizardPage)getPage(UserWizardPage.NAME)).getUsername();
 			final String pass = ((UserWizardPage)getPage(UserWizardPage.NAME)).getPassword();
@@ -123,7 +125,7 @@ public class DownloadConnectWizard extends ConnectServerWizard implements IPageC
 			}
 			
 		}
-		if (event.getCurrentPage() == page5 && event.getTargetPage() == page5){
+		if (event.getCurrentPage() == page5 && event.getTargetPage() == page4){
 			page5.clearList();
 		}
 	}

@@ -67,6 +67,7 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 				@Override
 				public void run() {
 					cmbList.setInput(data);		
+					cmbList.refresh();
 				}
 			});
 		}catch(Exception ex){

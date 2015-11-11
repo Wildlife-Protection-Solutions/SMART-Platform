@@ -67,6 +67,8 @@ import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
@@ -78,6 +80,7 @@ import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
+import org.wcs.smart.connect.server.replication.PackageToLargeException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -410,15 +413,36 @@ public class SmartConnect {
 		}
 	}
 	
+	private boolean promptToDownload(final Long actualSize, final Long checkSize){
+		final boolean[] cont = new boolean[]{false};
+		Display.getDefault().syncExec(new Runnable(){
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				cont[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+						"Download File", 
+						MessageFormat.format("The file to download ({0} MB) is greater than {1} MB.  Do you wish to continue?", actualSize / 1000000.0, checkSize/1000000.0));		
+			}
+			
+			
+		});
+		return cont[0];
+	}
+	
 	/**
 	 * Downloads a file from a given URL.  This will try multiple
 	 * times to download.
+	 * Provides the option for prompting before continuing with download if
+	 * download package size is large.
 	 *  
 	 * @param url the URL to download from
+	 * @param promptDownloadSizeMb prompt the user to continue if the download
+	 * file size is larger than this size.  Can be null if should never prompt. 
 	 * @return the downloaded file
 	 * @throws Exception
 	 */
-	public Path downloadFileFromUrl(String url) throws Exception{
+	public Path downloadFileFromUrl(String url, Integer promptDownloadSizeMb) throws PackageToLargeException, Exception{
 		createClient();
 		int tryCount = 0;
 		
@@ -444,6 +468,13 @@ public class SmartConnect {
 				if (r.getStatus() == HttpURLConnection.HTTP_OK){
 					size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
 					
+					if (promptDownloadSizeMb != null &&
+							size > promptDownloadSizeMb * 1000000 ){
+						//prompt to download before continuing
+						if (!promptToDownload(size, promptDownloadSizeMb * 1000000l)){
+							throw new PackageToLargeException("User cancelled download.  Download file size too big.");
+						}
+					}
 					//parse target
 					try(InputStream is = r.readEntity(InputStream.class)){
 						Files.copy(is, filestore);
@@ -455,6 +486,9 @@ public class SmartConnect {
 						return filestore;
 					}
 				}
+			}catch (PackageToLargeException ex){
+				//we do not want to try again
+				throw ex;
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
 			}finally{
