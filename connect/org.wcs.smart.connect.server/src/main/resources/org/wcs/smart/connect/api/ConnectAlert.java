@@ -471,7 +471,7 @@ public class ConnectAlert extends HttpServlet {
     
     private String validateUserGeneratedId(String userGenId) {
     	Session s = HibernateManager.getSession(context);
-		Alert a = new Alert();
+		Alert a = null;
 		s.beginTransaction();
 		try{
 	    	a = HibernateManager.getAlertByUserId(s, userGenId);
@@ -487,7 +487,7 @@ public class ConnectAlert extends HttpServlet {
     
     private String validateCa(UUID caUuid) {
     	Session s = HibernateManager.getSession(context);
-		ConservationAreaInfo ca = new ConservationAreaInfo();
+		ConservationAreaInfo ca = null;
 		s.beginTransaction();
 		try{
 	    	ca = HibernateManager.getConservationAreaInfo(s, caUuid);
@@ -501,7 +501,7 @@ public class ConnectAlert extends HttpServlet {
 		return null;
 	}
     private UUID getCreatorUuid() {
-    	SmartUser user;
+    	SmartUser user = null;
     	
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

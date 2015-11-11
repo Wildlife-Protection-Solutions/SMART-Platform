@@ -442,11 +442,12 @@ public class ConservationAreas extends HttpServlet{
 			item.setStatus(WorkItem.Status.PROCESSING);
 			item.setTotalBytes(-1);
 			item.setType(WorkItem.Type.DOWN_SYNC);
-			
 			s.save(item);
 
 			s.getTransaction().commit();
 		}catch (Exception ex){
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
+			
 			logger.log(Level.SEVERE, "Unable to start conservation area change log download. " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to create package", ex);
 		}
