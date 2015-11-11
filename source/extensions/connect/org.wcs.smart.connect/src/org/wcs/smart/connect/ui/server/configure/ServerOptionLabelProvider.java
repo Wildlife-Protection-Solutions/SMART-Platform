@@ -65,6 +65,10 @@ public enum ServerOptionLabelProvider {
 			return "Prompt to download changes on shutdown";
 		case UPLOAD_ON_SHUTDOWN:
 			return "Upload changes after download";
+		case PACKAGE_PROMPT:
+			return "Prompt to confirm upload/download of package if package larger than";
+		case PACKAGE_PROMPT_SIZE:
+			return "MB";
 		default:
 			break;
 		}
@@ -103,6 +107,10 @@ public enum ServerOptionLabelProvider {
 			return "prompt to download and apply changes on shutdown";
 		case UPLOAD_ON_SHUTDOWN:
 			return "upload local changes after downloading changes";
+		case PACKAGE_PROMPT:
+			return "prompts user to confirm upload/download for large packages";
+		case PACKAGE_PROMPT_SIZE:
+			return "metabytes";
 		default:
 			break;
 		}

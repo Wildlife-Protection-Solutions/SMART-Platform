@@ -65,9 +65,10 @@ public class AutoOptionsPanel extends Composite {
 	private Button btnPrompt;
 	private Button btnUpload;
 	private Button btnDownload;
-	private Label lblMinutes, lblMinutes2;
-	private Text txtMinutes;
-	private ControlDecoration cdMinutes;
+	private Button btnPackageSize;
+	private Label lblMinutes, lblMinutes2, lblPackageSize;
+	private Text txtMinutes, txtPackageSize;
+	private ControlDecoration cdMinutes, cdPackageSize;
 	
 	public AutoOptionsPanel(Composite parent) {
 		this(parent, true);
@@ -140,7 +141,10 @@ public class AutoOptionsPanel extends Composite {
 			@Override
 			public void modifyText(ModifyEvent e) {
 				try{
-					Integer.parseInt(txtMinutes.getText());
+					int x = Integer.parseInt(txtMinutes.getText());
+					if (x < 0){
+						throw new Exception("Value must be greater than 0");
+					}
 					cdMinutes.hide();
 				}catch (Exception ex){
 					cdMinutes.show();
@@ -168,6 +172,43 @@ public class AutoOptionsPanel extends Composite {
 		btnUpload.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)btnUpload.getLayoutData()).horizontalIndent = 20;
 		
+		Group g4 = new Group(this, SWT.DEFAULT);
+		g4.setText("Package Options");
+		g4.setLayout(new GridLayout(3, false));
+		g4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		
+		btnPackageSize = new Button(g4, SWT.CHECK);
+		btnPackageSize.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.PACKAGE_PROMPT));
+		btnPackageSize.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.PACKAGE_PROMPT));
+		btnPackageSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)btnPackageSize.getLayoutData()).horizontalIndent = 0;
+		
+		txtPackageSize = new Text(g4, SWT.BORDER);
+		txtPackageSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)txtPackageSize.getLayoutData()).widthHint = 50;
+		cdPackageSize = createControlDecoration(txtPackageSize);
+		cdPackageSize.setDescriptionText("Invalid package size.  Must be a valid integer.");
+		txtPackageSize.addModifyListener(new ModifyListener(){
+			@Override
+			public void modifyText(ModifyEvent e) {
+				try{
+					int x = Integer.parseInt(txtPackageSize.getText());
+					if (x < 0){
+						throw new Exception("Value must be greater than 0");
+					}
+					cdPackageSize.hide();
+				}catch (Exception ex){
+					cdPackageSize.show();
+				}
+				fireChange(e);
+			}
+			
+		});
+		
+		lblPackageSize = new Label(g4, SWT.NONE);
+		lblPackageSize.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(Option.PACKAGE_PROMPT_SIZE));
+		lblPackageSize.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(Option.PACKAGE_PROMPT_SIZE));
+		
 		if (isEditable){
 			SelectionListener ml = new SelectionAdapter() {
 				@Override
@@ -179,6 +220,7 @@ public class AutoOptionsPanel extends Composite {
 			btnDownload.addSelectionListener(ml);
 			btnDownShutDown.addSelectionListener(ml);
 			btnDownStartUp.addSelectionListener(ml);
+			btnPackageSize.addSelectionListener(ml);
 		}else{
 			btnDownShutDown.setEnabled(false);
 			btnDownStartUp.setEnabled(false);
@@ -191,11 +233,14 @@ public class AutoOptionsPanel extends Composite {
 			txtMinutes.setEnabled(false);
 			lblMinutes.setEnabled(false);
 			lblMinutes2.setEnabled(false);
+			lblPackageSize.setEnabled(false);
+			txtPackageSize.setEnabled(false);
+			btnPackageSize.setEnabled(false);
 		}
 	}
 	
 	public boolean isValid(){
-		return !cdMinutes.isVisible();
+		return !cdMinutes.isVisible() && !cdPackageSize.isVisible();
 	}
 	
 	private void fireChange(ModifyEvent e){
@@ -217,6 +262,8 @@ public class AutoOptionsPanel extends Composite {
 	}
 	
 	protected void updateEnabled(){
+		if (!isEditable) return;
+		
 		boolean enabled = btnAutoCheck.getSelection();
 		
 		lblMinutes.setEnabled(enabled);
@@ -247,6 +294,7 @@ public class AutoOptionsPanel extends Composite {
 		}else{
 			btnUploadStartUp.setEnabled(false);
 		}
+		txtPackageSize.setEnabled(btnPackageSize.getSelection());
 	}
 	
 
@@ -261,6 +309,10 @@ public class AutoOptionsPanel extends Composite {
 			btnUpload.setSelection(ConnectServerOption.Option.SYNC_AUTO_UPLOAD.getDefaultValueAsBoolean());
 			btnPrompt.setSelection(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD.getDefaultValueAsBoolean());
 			txtMinutes.setText(ConnectServerOption.Option.SYNC_MINUTE.getDefaultValueAsString());
+			
+			btnPackageSize.setSelection(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD.getDefaultValueAsBoolean());
+			txtPackageSize.setText(String.valueOf(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE.getDefaultValueAsInt()));
+
 			updateEnabled();
 			return;
 		}
@@ -274,7 +326,10 @@ public class AutoOptionsPanel extends Composite {
 		btnUpload.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTO_UPLOAD));
 		btnPrompt.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD));
 		txtMinutes.setText(String.valueOf(server.getOptionAsInt(ConnectServerOption.Option.SYNC_MINUTE)));
-		if (isEditable) updateEnabled();
+		btnPackageSize.setSelection(server.getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT));
+		txtPackageSize.setText(String.valueOf(server.getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE)));
+		
+		updateEnabled();
 	}
 	
 	public void updateServer(ConnectServer server){
@@ -286,10 +341,23 @@ public class AutoOptionsPanel extends Composite {
 		server.setOption(ConnectServerOption.Option.SYNC_PROMPT_PASSWORD, ((Boolean)btnPrompt.getSelection()).toString());
 		server.setOption(ConnectServerOption.Option.SYNC_DOWNLOAD, ((Boolean)btnDownload.getSelection()).toString());
 		server.setOption(ConnectServerOption.Option.SYNC_AUTO_UPLOAD, ((Boolean)btnUpload.getSelection()).toString());
-	
+		server.setOption(ConnectServerOption.Option.PACKAGE_PROMPT, ((Boolean)btnPackageSize.getSelection()).toString());
+
+		int packageSize = ConnectServerOption.Option.PACKAGE_PROMPT_SIZE.getDefaultValueAsInt();
+		try{
+			int tmp = Integer.parseInt(txtPackageSize.getText());
+			if (tmp >= 0) packageSize = tmp;
+		}catch(Exception ex){
+			
+		}
+		server.setOption(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE, String.valueOf(packageSize));
+		
 		String minutes = ConnectServerOption.Option.SYNC_MINUTE.getDefaultValueAsString();
 		try{
-			minutes = String.valueOf(Integer.parseInt(txtMinutes.getText()));
+			int tmp = Integer.parseInt(txtMinutes.getText());
+			if (tmp >= 0){
+				minutes = String.valueOf(tmp);
+			}
 		}catch(Exception ex){
 			
 		}
