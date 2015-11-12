@@ -169,6 +169,10 @@ public class MappingValidator {
 		List<String> errors = new ArrayList<>();
 		
 		for (MappedAttribute a : ct2Smart.getMappedAttribute()) {
+			if (a.getType() == null) {
+				errors.add(MessageFormat.format("Type is not set for attribute ''{0}''.", a.getI()));
+				continue;
+			}
 			switch (a.getType()) {
 			case META_OBJECT_ID:
 				objectId = true;
