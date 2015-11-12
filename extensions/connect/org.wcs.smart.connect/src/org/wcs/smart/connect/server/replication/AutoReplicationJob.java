@@ -57,7 +57,7 @@ public class AutoReplicationJob extends Job {
 	private boolean reschedule = true;
 	
 	public AutoReplicationJob() {
-		super("Backgound Replication Mananger");
+		super("backgound replication executor");
 	}
 
 	@Override

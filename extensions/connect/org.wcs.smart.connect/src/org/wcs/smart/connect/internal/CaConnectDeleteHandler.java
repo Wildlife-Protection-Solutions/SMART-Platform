@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect;
+package org.wcs.smart.connect.internal;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,7 +33,6 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.DeleteConservationAreaHandler;
 import org.wcs.smart.ca.ICaDeleteHandler;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
-import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 
@@ -55,8 +54,6 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
 		monitor.subTask("Deleting SMART Connect details");
-		
-		DerbyReplicationManager.INSTANCE.disableReplication(session);
 		
 		//SMART Connect Users
 		Query q = session.createQuery("delete from ConnectUser cu where cu in (SELECT cu2.uuid FROM ConnectUser cu2 where cu2.server.conservationArea = :ca)"); //$NON-NLS-1$

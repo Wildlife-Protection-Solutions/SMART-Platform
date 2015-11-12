@@ -88,6 +88,9 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		localStatus = new Label(status, SWT.NONE);
 		localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
 		
+		updateServerStatus(ServerStatus.ERROR, "Unknown State");
+		updateLocalStatus(ServerStatus.ERROR, "Unknown State");
+		
 		updateLocalChanges.schedule();
 		return status;
 	}
@@ -163,7 +166,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		});
 	}
 	
-	private Job updateLocalChanges = new Job("update local database replication state"){
+	private Job updateLocalChanges = new Job("local database replication state updater"){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
