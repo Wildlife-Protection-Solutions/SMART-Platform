@@ -30,6 +30,8 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.wcs.smart.ca.ConservationAreaManager;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
+import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
+import org.wcs.smart.connect.internal.CaReplicationDeleteHandler;
 import org.wcs.smart.connect.internal.EmployeeDeleteHandler;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;
@@ -70,6 +72,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	 * @see org.eclipse.ui.plugin.AbstractUIPlugin#start(org.osgi.framework.BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
+		ConservationAreaManager.getInstance().addDeleteHandler(new CaReplicationDeleteHandler(), CaReplicationDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addDeleteHandler(new CaConnectDeleteHandler(), CaConnectDeleteHandler.EXECUTE_ORDER);
 		ConservationAreaManager.getInstance().addEmployeeListener(employeeDelete);
 		ChangeLogInstaller.INSTANCE.setEnabled(true);
