@@ -146,7 +146,7 @@ public class ConservationAreaManager {
 		ArrayList<Integer> items = new ArrayList<Integer> ();
 		items.addAll(deleteListeners.keySet());
 		Collections.sort(items);
-		for(int i = items.size() -1; i >= 0; i --){
+		for(int i = items.size() - 1; i >= 0; i --){
 			ArrayList<ICaDeleteHandler> listeners = deleteListeners.get(items.get(i));
 			for (ICaDeleteHandler listener : listeners){
 				listener.beforeDelete(ca, session, monitor);
@@ -164,11 +164,9 @@ public class ConservationAreaManager {
 	 * </p>
 	 * 
 	 * @param listener
-	 * @param deleteOrder  a number greater than 0
+	 * @param deleteOrder 
 	 */
 	public void addDeleteHandler(ICaDeleteHandler listener, int deleteOrder){
-		assert deleteOrder > 0;
-		
 		ArrayList<ICaDeleteHandler> listeners = deleteListeners.get(deleteOrder);
 		if (listeners == null){
 			listeners = new ArrayList<ICaDeleteHandler>();
@@ -176,7 +174,6 @@ public class ConservationAreaManager {
 		}
 		listeners.add(listener);
 	}
-	
 	
 	
 	/**
