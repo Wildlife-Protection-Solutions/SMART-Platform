@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.conversion.ui.support;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +33,8 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
 
 public class AttributeTreeContentProvider implements ITreeContentProvider {
 
+	public static final TreeNodeType NO_TREE_NODE = new NoTreeNodeType();
+	
 	private List<TreeNodeType> rootNodes;
 	private boolean active;
 
@@ -57,9 +60,12 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 	@Override
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		if (newInput instanceof List){
-			this.rootNodes = (List<TreeNodeType>) newInput;
+			List<TreeNodeType> input = (List<TreeNodeType>) newInput;
+			this.rootNodes = new ArrayList<TreeNodeType>();
+			rootNodes.add(NO_TREE_NODE);
+			this.rootNodes.addAll(input);
 			parentLookup = new HashMap<TreeNodeType, TreeNodeType>();
-			mapParent(parentLookup, null, rootNodes);
+			mapParent(parentLookup, null, input);
 		}
 	}
 
@@ -122,5 +128,13 @@ public class AttributeTreeContentProvider implements ITreeContentProvider {
 		}
 		return children.length > 0;
 	}
+
+	/**
+	 * Class used to represent missing tree node in tree attribute value dropdown.
+	 * 
+	 * @author elitvin
+	 * @since 4.0.0
+	 */
+	public static final class NoTreeNodeType extends TreeNodeType {}
 	
 }

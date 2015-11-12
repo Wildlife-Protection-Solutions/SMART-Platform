@@ -124,7 +124,7 @@ public class DmTreeContentProvider implements ITreeContentProvider {
 	}
 	
 	/**
-	 * Class used to represent "--default--" category if category dropdown.
+	 * Class used to represent "--default--" category in category dropdown.
 	 * 
 	 * @author elitvin
 	 * @since 4.0.0
