@@ -24,6 +24,7 @@ package org.wcs.smart.conversion.ui.support;
 import org.wcs.smart.conversion.lookup.AttributeTreeKeyLookup;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.ExtraAttribute;
+import org.wcs.smart.conversion.ui.support.AttributeTreeContentProvider.NoTreeNodeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.AttributeType;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
 import org.wcs.smart.internal.ca.datamodel.xml.generate.NameType;
@@ -97,6 +98,8 @@ public class SmartAttributeValueLabelProvider extends LangColumnLabelProvider {
 	private String getName(TreeNodeType node) {
 		if (node == null)
 			return "?"; //TODO: empty string?
+		if (node instanceof NoTreeNodeType)
+			return "--empty--"; //TODO: empty string?
 		String langCode = getLanguageCode();
 		for (NameType nameType : node.getNames()) {
 			if (langCode.equals(nameType.getLanguageCode()))
