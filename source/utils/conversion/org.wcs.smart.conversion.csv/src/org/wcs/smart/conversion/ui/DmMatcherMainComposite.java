@@ -54,11 +54,14 @@ import org.wcs.smart.conversion.csv.handler.ProcessingActionHandler;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.MappedAttribute;
 import org.wcs.smart.conversion.model.MappedAttributeType;
+import org.wcs.smart.conversion.model.Param;
 import org.wcs.smart.conversion.model.SmartMapping;
 import org.wcs.smart.conversion.tool.CleanMappingTool;
 import org.wcs.smart.conversion.tool.MatchSession;
 import org.wcs.smart.conversion.ui.support.Ct2AttributeTypeLabelProvider;
 import org.wcs.smart.conversion.ui.support.Ct2AttributeTypeTableEditor;
+import org.wcs.smart.conversion.ui.support.ParamEditingSupport;
+import org.wcs.smart.conversion.ui.support.ParamsContentProvider;
 import org.wcs.smart.conversion.ui.support.SmartAttributeEditingSupport;
 import org.wcs.smart.conversion.ui.support.SmartAttributeLabelProvider;
 import org.wcs.smart.conversion.ui.support.SmartCategoryEditingSupport;
@@ -73,10 +76,13 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
  * @since 3.0.0
  */
 public class DmMatcherMainComposite extends Composite {
+	
+	private static final int TABLE_HEIGHT_HINT = 350;
 
 	private MatchSession session;
 	
 	private TableViewer viewer;
+	private TableViewer paramsViewer;
 	private Combo langSelector;
 	private DataModelLookup dmLookup;
 	
@@ -201,9 +207,21 @@ public class DmMatcherMainComposite extends Composite {
 				languageChanged();
 			}
 		});
+
+		//language selector
+		final Composite tablesCmp = new Composite(main, SWT.NONE);
+		GridLayout tablesGd = new GridLayout(2, false);
+		tablesGd.marginBottom = 0;
+		tablesGd.marginHeight = 0;
+		tablesGd.marginLeft = 0;
+		tablesGd.marginRight = 0;
+		tablesGd.marginTop = 0;
+		tablesGd.marginWidth = 0;
+		tablesCmp.setLayout(tablesGd);
+		tablesCmp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		//attributes table
-		viewer = new TableViewer(main, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		viewer = new TableViewer(tablesCmp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createColumns();
 
 		// make lines and header visible
@@ -215,9 +233,9 @@ public class DmMatcherMainComposite extends Composite {
 		viewer.setInput(session.getSmartMapping().getMappedAttribute());
 
 		// define layout for the viewer
-		GridData tgridData = new GridData(SWT.FILL, SWT.FILL, true, true, 3, 0);
-		//tgridData.widthHint = 510;
-		tgridData.heightHint = 350;
+		GridData tgridData = new GridData(SWT.FILL, SWT.FILL, true, true);
+		tgridData.widthHint = 510;
+		tgridData.heightHint = TABLE_HEIGHT_HINT;
 		viewer.getControl().setLayoutData(tgridData);
 
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -227,6 +245,26 @@ public class DmMatcherMainComposite extends Composite {
 			}
 		});
 
+		//params table
+		List<Param> paramList = session.getSmartMapping().getParam();
+		paramsViewer = new TableViewer(tablesCmp, SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		createParamColumns(paramList);
+
+		// make lines and header visible
+		final Table paramTable = paramsViewer.getTable();
+		paramTable.setHeaderVisible(true);
+		paramTable.setLinesVisible(true); 
+
+		ParamsContentProvider paramsContentProvider = new ParamsContentProvider(paramList);
+		paramsViewer.setContentProvider(paramsContentProvider);
+		paramsViewer.setInput(paramList);
+
+		// define layout for the paramsViewer
+		GridData pgridData = new GridData(SWT.END, SWT.FILL, false, true);
+		pgridData.heightHint = TABLE_HEIGHT_HINT;
+		pgridData.widthHint = 210;
+		paramsViewer.getControl().setLayoutData(pgridData);
+		
 		innerPanel = new Composite(main, SWT.NONE);
 		innerPanel.setLayout(new StackLayout());
 		innerPanel.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -327,4 +365,33 @@ public class DmMatcherMainComposite extends Composite {
 		return viewerColumn;
 	}
 
+	private void createParamColumns(List<Param> paramList) {
+		TableViewerColumn col = createParamViewerColumn("Parameter Name", 105);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Param a = (Param) element;
+				return a.getKey();
+			}
+		});
+
+		col = createParamViewerColumn("Parameter Value", 105);
+		col.setLabelProvider(new ColumnLabelProvider() {
+			@Override
+			public String getText(Object element) {
+				Param a = (Param) element;
+				return a.getVal();
+			}
+		});
+		col.setEditingSupport(new ParamEditingSupport(paramsViewer, paramList));
+	}
+	
+	private TableViewerColumn createParamViewerColumn(String title, int bound) {
+		final TableViewerColumn viewerColumn = new TableViewerColumn(paramsViewer, SWT.NONE);
+		final TableColumn column = viewerColumn.getColumn();
+		column.setText(title);
+		column.setWidth(bound);
+		column.setResizable(true);
+		return viewerColumn;
+	}
 }
