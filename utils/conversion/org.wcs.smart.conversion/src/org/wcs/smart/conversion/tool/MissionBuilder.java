@@ -74,6 +74,9 @@ import com.vividsolutions.jts.io.WKBWriter;
  */
 public class MissionBuilder extends AbstractBuilder {
 
+	public static final String SURVEY_DESIGN_KEY = "surveyDesignKey"; //$NON-NLS-1$
+	public static final String SURVEY_KEY = "surveyKey"; //$NON-NLS-1$
+	
 	private TeamMembersParser membersParser = new TeamMembersParser();
 
 	public MissionBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
@@ -82,7 +85,7 @@ public class MissionBuilder extends AbstractBuilder {
 	
 	public MissionType createMission(List<TagS> sList, String id) throws DatatypeConfigurationException, ParseException {
 		
-		String surveyDesignKey = getParam("surveyDesignKey", "csvimport"); //$NON-NLS-1$ //$NON-NLS-2$
+		String surveyDesignKey = getParam(SURVEY_DESIGN_KEY, "csvimport"); //$NON-NLS-1$
 		
 		MissionType mission = new MissionType();
 		mission.setId(id);
@@ -380,7 +383,7 @@ public class MissionBuilder extends AbstractBuilder {
 		mission.setEndDate(xmlEndDate);
 
 		SurveyType survey = new SurveyType();
-		survey.setId(getParam("surveyKey", id)); //$NON-NLS-1$
+		survey.setId(getParam(SURVEY_KEY, id));
 		survey.setStartDate(xmlStartDate);
 		survey.setEndDate(xmlEndDate);
 		survey.setSurveyDesignKeyId(surveyDesignKey);
