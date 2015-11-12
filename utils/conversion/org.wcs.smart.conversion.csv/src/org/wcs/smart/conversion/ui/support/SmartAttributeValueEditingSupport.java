@@ -21,6 +21,7 @@
  */
 package org.wcs.smart.conversion.ui.support;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.viewers.CellEditor;
@@ -43,7 +44,7 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.TreeNodeType;
  */
 public class SmartAttributeValueEditingSupport extends EditingSupport {
 
-	private static final String[] BOOL_ITEMS = new String[] {"False", "True"};
+	private static final String[] BOOL_ITEMS = new String[] {"", "False", "True"}; //NOTE: same values ("False", "True") are used in generation logic
 
 	private DataModelLookup lookup;
 	private SmartAttributeValueLabelProvider labelProvider;
@@ -94,9 +95,10 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 		String type = a.getType();
 		if ("LIST".equals(type)) { //$NON-NLS-1$
 			List<ListNode> values = a.getValues();
-			String[] items = new String[values.size()];
+			String[] items = new String[values.size()+1];
+			items[0] = ""; //$NON-NLS-1$ //first row is empty selection in dropdown 
 			for (int i = 0; i < values.size(); i++) {
-				items[i] = labelProvider.getText(values.get(i));
+				items[i+1] = labelProvider.getText(values.get(i));
 			}
 			cbEditor.setItems(items);
 			return cbEditor;
@@ -138,7 +140,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 			List<ListNode> values = a.getValues();
 			for (int i = 0; i < values.size(); i++) {
 				if (valueKey.equals(values.get(i).getKey()))
-					return i;
+					return i+1; //NOTE: +1 because first item is empty selection
 			}
 			return 0;
 			
@@ -152,7 +154,8 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 			return valueKey != null ? valueKey : ""; //$NON-NLS-1$
 			
 		} else if ("BOOLEAN".equals(type)) { //$NON-NLS-1$
-			return BOOL_ITEMS[1].equals(valueKey) ? 1 : 0;
+			int index = Arrays.asList(BOOL_ITEMS).indexOf(valueKey);
+			return index > 0 ? index : 0;
 		}
 		return null;
 	}
@@ -171,7 +174,7 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 		String type = a.getType();
 		if ("LIST".equals(type)) { //$NON-NLS-1$
 			Integer i = (Integer) editorValue;
-			return a.getValues().get(i).getKey();
+			return i>0 ? a.getValues().get(i-1).getKey() : null; //NOTE: first item is empty selection => 0 -> empty; (i-1) -> real data
 			
 		} else if ("TREE".equals(type)) { //$NON-NLS-1$
 			TreeNodeType nt = (TreeNodeType) editorValue;
@@ -190,6 +193,6 @@ public class SmartAttributeValueEditingSupport extends EditingSupport {
 			return BOOL_ITEMS[i];
 		}
 		return null;
-		
 	}
+	
 }
