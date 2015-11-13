@@ -49,7 +49,7 @@ public class Ct2AttributeTypeTableEditor extends EditingSupport {
 		for (int i = 0; i < types.length; i++) {
 			items[i] = labelProvider.getText(types[i]);
 		}
-		editor = new ComboBoxCellEditor(viewer.getTable(), items, SWT.DROP_DOWN);
+		editor = new ComboBoxCellEditor(viewer.getTable(), items, SWT.DROP_DOWN | SWT.READ_ONLY);
 	}
 
 	@Override

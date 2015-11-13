@@ -46,7 +46,7 @@ public class ExtraAttributeEditingSupport extends EditingSupport {
 		this.labelProvider = labelProvider;
 		this.attributes = new ArrayList<AttributeType>(attributes.size());
 		this.attributes.addAll(attributes);
-		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN);
+		editor = new ComboBoxCellEditor(((TableViewer)viewer).getTable(), new String[0], SWT.DROP_DOWN | SWT.READ_ONLY);
 	}
 
 	@Override
