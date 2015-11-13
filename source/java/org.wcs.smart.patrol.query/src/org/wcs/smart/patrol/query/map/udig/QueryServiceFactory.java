@@ -47,8 +47,8 @@ public class QueryServiceFactory {
 		
 		if (query instanceof SimpleQuery){
 			return new QueryService((SimpleQuery)query);
-		}else if (query.getTypeKey().equals(PatrolGriddedQuery.class) ){
-//		}else if (query instanceof PatrolGriddedQuery ){
+//		}else if (query.getTypeKey().equals(PatrolGriddedQuery.class) ){
+		}else if (query instanceof PatrolGriddedQuery ){
 			return new RasterService((PatrolGriddedQuery)query);
 		}
 		return null;
