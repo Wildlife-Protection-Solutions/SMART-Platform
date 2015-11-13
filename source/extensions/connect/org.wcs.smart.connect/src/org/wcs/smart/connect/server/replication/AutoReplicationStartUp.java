@@ -35,7 +35,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  * @author Emily
  *
  */
-public enum StartUpReplicationManager {
+public enum AutoReplicationStartUp {
 
 	INSTANCE;
 	
