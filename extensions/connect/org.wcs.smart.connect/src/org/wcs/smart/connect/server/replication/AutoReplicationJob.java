@@ -32,12 +32,14 @@ import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectServerOption.Option;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectUser;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.ui.server.DownloadChangeLogDialog;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -76,6 +78,10 @@ public class AutoReplicationJob extends Job {
 		monitor.beginTask("Auto updating Connect server status", 3);
 		setServerStatus(ConnectStatusManager.ServerStatus.CONNECTING, null);
 		
+		if (!DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
+			setServerStatus(ServerStatus.ERROR, "Replication not enabled");
+			return Status.OK_STATUS;
+		}
 		monitor.subTask("loading server information");
 		Session s = HibernateManager.openSession();
 		ConnectServer server = null;
@@ -141,7 +147,10 @@ public class AutoReplicationJob extends Job {
 			return Status.OK_STATUS;
 		}
 		monitor.worked(1);
-		
+		if (caInfo == null){
+			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "conservation area does not exist on server");
+			return Status.OK_STATUS;
+		}
 		if (!caInfo.getVersion().equals(serverStatus.getVersion())){
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "base versions do not match");
 			return Status.OK_STATUS;
