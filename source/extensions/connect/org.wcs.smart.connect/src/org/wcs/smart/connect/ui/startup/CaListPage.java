@@ -1,5 +1,6 @@
 package org.wcs.smart.connect.ui.startup;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.viewers.ArrayContentProvider;
@@ -18,6 +19,7 @@ import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
+import org.wcs.smart.connect.api.model.ConservationAreaProxy.Status;
 import org.wcs.smart.connect.model.ConnectServer;
 
 public class CaListPage extends WizardPage implements ISelectionChangedListener{
@@ -63,10 +65,16 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 			SmartConnect connect = SmartConnect.findInstance(temp, username, password);		
 			setErrorMessage(null);
 			final List<ConservationAreaProxy> data = connect.getConservationAreas();
+			final List<ConservationAreaProxy> dataca = new ArrayList<ConservationAreaProxy>();
+			for (ConservationAreaProxy p : data){
+				if (p.getStatus() == Status.DATA){
+					dataca.add(p);
+				}
+			}
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					cmbList.setInput(data);		
+					cmbList.setInput(dataca);		
 					cmbList.refresh();
 				}
 			});
