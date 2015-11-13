@@ -59,6 +59,11 @@ public class PatrolImporter extends AbstractPatrolImporter {
 		for (String warning : ctPatrol.getWarnings()) {
 			addWarning(warning);
 		}
+
+		if (ctPatrol.getPatrolType() == null) {
+			if(!fixPatrolTypeError(ctPatrol))
+				return null;
+		}
 		
 		if (ctPatrol.getPatrolTransportType() == null) {
 			if(!fixTransportError(ctPatrol))

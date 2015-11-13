@@ -116,9 +116,13 @@ public class Messages extends NLS {
 	public static String PatrolSelectorDialog_AddAsPatrol;
 	public static String PatrolSelectorDialog_Message;
 	public static String PatrolSelectorDialog_Title;
+	public static String PatrolTypeSelectorDialog_Message;
+	public static String PatrolTypeSelectorDialog_PatrolType;
+	public static String PatrolTypeSelectorDialog_Title;
 	public static String SmartImporter_ImportErrorDialogTitle;
 	public static String SmartImporter_LeaderTitle;
 	public static String SmartImporter_NoEmployeesErrorMessage;
+	public static String SmartImporter_PatrolType_Load_Error;
 	public static String SmartImporter_PilotTitle;
 	public static String SmartImporter_SelectLeaderMessage;
 	public static String SmartImporter_SelectPilotTitle;

@@ -66,6 +66,11 @@ public class PatrolLegImporter extends AbstractPatrolImporter {
 	public boolean importData(Patrol patrol, CyberTrackerPatrol ctPatrol) {
 		clearWarning();
 
+		if (ctPatrol.getPatrolType() == null) {
+			if(!fixPatrolTypeError(ctPatrol))
+				return false;
+		}
+		
 		if (ctPatrol.getPatrolTransportType() == null) {
 			if(!fixTransportError(ctPatrol))
 				return false;
