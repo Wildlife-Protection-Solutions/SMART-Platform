@@ -40,7 +40,7 @@ import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
-import org.wcs.smart.connect.server.replication.StartUpReplicationManager;
+import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -93,7 +93,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 			if (!isAutoReplicationPrev && isAutoReplication){
 				//auto replication state has been updated; we need to intiaite auto replication
 				int delay = server.getOptionAsInt(ConnectServerOption.Option.SYNC_MINUTE);
-				StartUpReplicationManager.INSTANCE.enableAutoReplication(delay);
+				AutoReplicationStartUp.INSTANCE.enableAutoReplication(delay);
 			}
 		}catch (Exception ex){
 			ConnectPlugIn.displayLog("Could not update connect server information." + "\n\n" + ex.getMessage(), ex);

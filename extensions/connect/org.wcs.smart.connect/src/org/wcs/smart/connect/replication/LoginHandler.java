@@ -52,7 +52,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.server.UploadCaEngine;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
-import org.wcs.smart.connect.server.replication.StartUpReplicationManager;
+import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
@@ -134,7 +134,7 @@ public class LoginHandler implements ILoginHandler {
 		cleanUpFilestore();
 		
 		//configure auto startup
-		StartUpReplicationManager.INSTANCE.onStartUp();
+		AutoReplicationStartUp.INSTANCE.onStartUp();
 	}
 
 	/*

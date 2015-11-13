@@ -35,6 +35,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.ActiveShellExpression;
 import org.hibernate.Session;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -45,6 +46,7 @@ import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
+import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
 import org.wcs.smart.connect.ui.server.DownloadChangeLogDialog;
 import org.wcs.smart.connect.ui.server.DownloadChangeLogHandler;
@@ -94,6 +96,10 @@ public class SyncOnStartupProcessor {
 		CleanUpReplicationJob job = new CleanUpReplicationJob();
 		job.schedule();
 		
+		if (!DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
+			return;
+		}
+		
 		ConnectServer cs = null;
 		Session s = HibernateManager.openSession();
 		try{
@@ -108,19 +114,20 @@ public class SyncOnStartupProcessor {
 		}
 		boolean upload = cs.getOptionAsBoolean(ConnectServerOption.Option.UPLOAD_ON_STARTUP);
 	
-		if (promptSync(upload)){
+		Shell activeShell = Display.getDefault().getActiveShell();
+		if (promptSync(upload, activeShell)){
 			//initiate sync now
 			if (!upload){
 				//download only
-				(new DownloadChangeLogHandler()).execute(Display.getDefault().getActiveShell());
+				(new DownloadChangeLogHandler()).execute(activeShell);
 			}else{
 				//sync
-				(new SyncChangeLogHandler()).execute(Display.getDefault().getActiveShell());
+				(new SyncChangeLogHandler()).execute(activeShell);
 			}
 		}
 	}
 
-	private boolean promptSync(boolean upload){
+	private boolean promptSync(boolean upload, Shell activeShell){
 		String title = "SMART Connect - Sync Changes";
 		String message = "Do you want to sync all changes with SMART Connect now?";
 		if (!upload){
@@ -128,12 +135,17 @@ public class SyncOnStartupProcessor {
 			message = "Do you want to download changes from SMART Connect now?";
 		}
 				
-		if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), title,message)){
+		if (MessageDialog.openQuestion(activeShell, title,message)){
 			return true;
 		}
 		return false;
 	}
 	private void onShutDown(){
+		if (!DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
+			return;
+		}
+		
+		
 		ConnectServer cs = null;
 		Session s = HibernateManager.openSession();
 		try{
@@ -149,8 +161,9 @@ public class SyncOnStartupProcessor {
 		}
 		
 		boolean upload = cs.getOptionAsBoolean(ConnectServerOption.Option.UPLOAD_ON_SHUTDOWN);
-		if (promptSync(upload)){
-			runDownloadSync(upload, Display.getDefault().getActiveShell());
+		Shell activeShell = Display.getDefault().getActiveShell();
+		if (promptSync(upload, activeShell)){
+			runDownloadSync(upload, activeShell);
 		}
 	}
 	
