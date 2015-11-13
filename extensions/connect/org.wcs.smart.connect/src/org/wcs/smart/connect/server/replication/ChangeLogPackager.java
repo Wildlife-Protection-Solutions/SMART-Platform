@@ -41,6 +41,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyMetadataPackager;
@@ -113,7 +114,11 @@ public class ChangeLogPackager {
 			zipPackage(new SubProgressMonitor(monitor, 1));
 		}finally{
 			monitor.done();
-			cleanUp();
+			try{
+				cleanUp();
+			}catch (IOException ex){
+				ConnectPlugIn.log(ex.getMessage(), ex);
+			}
 		}
 	}
 	
