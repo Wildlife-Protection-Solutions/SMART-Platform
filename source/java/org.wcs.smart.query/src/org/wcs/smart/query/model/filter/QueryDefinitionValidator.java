@@ -23,7 +23,6 @@ package org.wcs.smart.query.model.filter;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -103,7 +102,7 @@ public class QueryDefinitionValidator {
 		if (vv.ex != null){
 			throw vv.ex;
 		}
-		return Collections.emptyList();
+		return new ArrayList<String>();
 	}
 	
 
@@ -119,7 +118,7 @@ public class QueryDefinitionValidator {
 		if (vv.ex != null){
 			throw vv.ex;
 		}
-		return Collections.emptyList();
+		return new ArrayList<String>();
 	}
 		
 	
