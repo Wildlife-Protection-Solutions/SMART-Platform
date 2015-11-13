@@ -22,6 +22,7 @@
 package org.wcs.smart.ui.internal.ca.properties;
 
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -308,7 +309,7 @@ public class AgencyRankPropertyPage extends AbstractPropertyJHeaderDialog{
 	private void resetAgencyList() {
 		Session s = getSession();
 		s.beginTransaction();
-		List<Agency> lst = Collections.<Agency>emptyList();
+		List<Agency> lst = new ArrayList<Agency>();
 		try{
 			lst = HibernateManager.getAgencies(currentCa,s );
 		}finally{
