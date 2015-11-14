@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.uploader.sync;
 
 import java.nio.file.Files;
@@ -15,7 +36,7 @@ import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.IUploadItemProcessor;
 
-public class SyncUploadCaProcessor  implements IUploadItemProcessor {
+public class SyncUploadCaProcessor implements IUploadItemProcessor {
 	
 	private final Logger logger = Logger.getLogger(SyncUploadCaProcessor.class.getName());
 	
@@ -36,6 +57,8 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 			item.setStatus(org.wcs.smart.connect.model.WorkItem.Status.ERROR);
 			item.setMessage(MessageFormat.format("Error processing item {0}: {1}.", item.getUuid().toString(), ex.getMessage()));
 			session.getTransaction().commit();
+			
+			cleanUp(item);
 			
 			return;
 		}
@@ -79,6 +102,15 @@ public class SyncUploadCaProcessor  implements IUploadItemProcessor {
 			}catch (Exception ex){
 				logger.log(Level.SEVERE, "Could not release database lock after applying upload changes. " + item.getUuid());
 			}
+			cleanUp(item);
+		}
+	}
+	
+	private void cleanUp(WorkItem item){
+		try{
+			Files.deleteIfExists(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()).toPath());
+		}catch (Exception ex){
+			logger.log(Level.WARNING, "Could not delete ca upload file.", ex);
 		}
 	}
 

@@ -53,7 +53,7 @@ import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
-import org.wcs.smart.connect.hibernate.HibernateSessionFactoryListener;
+import org.wcs.smart.connect.hibernate.ConnectStartupContextListener;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.UploadStatus;
 import org.wcs.smart.connect.model.WorkItem;
@@ -195,7 +195,7 @@ public class Uploader extends HttpServlet {
 			}
 
 			//start background processor
-			ExecutorService executor = (ExecutorService) context.getAttribute(HibernateSessionFactoryListener.EXECUTOR_KEY);
+			ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
 			executor.execute(new UploaderProcessor(item, HibernateManager.getSessionFactory(context)));
 		}else if (newFileSize > item.getTotalBytes()){
 			s = HibernateManager.getSession(context);

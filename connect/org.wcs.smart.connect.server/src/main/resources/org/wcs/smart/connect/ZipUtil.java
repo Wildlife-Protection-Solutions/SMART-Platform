@@ -178,15 +178,15 @@ public class ZipUtil {
 				}
 
 				
-				try (FileOutputStream fos = new FileOutputStream(destinationFile)) {
+				try (FileOutputStream fos = new FileOutputStream(destinationFile);
+					InputStream entryContent = archiveFile.getInputStream(zipEntry)) {
 					int n;
-					InputStream entryContent = archiveFile
-							.getInputStream(zipEntry);
 					while ((n = entryContent.read(buf)) != -1) {
 						if (n > 0) {
 							fos.write(buf, 0, n);
 						}
 					}
+					
 				}
 			}
 		} catch (IOException e) {

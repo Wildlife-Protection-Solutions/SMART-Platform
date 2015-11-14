@@ -23,11 +23,7 @@ package org.wcs.smart.connect.downloader.ca;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,6 +49,7 @@ import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.ICaDataExportEngine;
+
 /**
  * Derby implementation of a ICaDataExportEngine
  * 

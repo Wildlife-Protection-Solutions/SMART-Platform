@@ -8,7 +8,9 @@
             url="jdbc:postgresql://localhost:5432/connect"
             maxActive="20"
             maxIdle="10"
-            factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"/>
+            factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+            validationQuery="SELECT 1"
+            testOnBorrow="true"/>
            
 	<Realm className="org.apache.catalina.realm.LockOutRealm">
 		<Realm className="org.apache.catalina.realm.DataSourceRealm"
@@ -24,5 +26,27 @@
   	<!-- SMART Filestore Location -->
   	<Environment name="filestorelocation" value="/smart/filestore" type="java.lang.String" override="false"/>
   	
-  	<Environment name="number_background_threads" value="4" type="java.lang.Integer" override="false"/>
+  	<!-- Number of background threads available for processing requests -->
+	<Environment name="number_background_threads" value="4" type="java.lang.Integer" override="false"/>
+	
+	<!-- The number of hours to wait between running the cleanup task -->
+	<!-- Set to -1 to never run cleanup (not recommended) -->
+	<Environment name="cleanup_task_interval_hours" value="24" type="java.lang.Integer" override="false"/>
+	
+	<!--  number of hours that download packages will be kept in the file and -->
+	<!--  make available to users (default 24 hours) --> 
+	<Environment name="sync_download_hours_available" value="24" type="java.lang.Integer" override="false"/>
+	
+	<!--  number of days to keep records in the work_item table -->
+	<!--  Once and item has finished processing, -->
+	<!--  this table only tracks history and does not affect other areas of the software -->
+	<!--  default 180 days; set to -1 to keep forever -->
+	<Environment name="work_item_history_days_available" value="180" type="java.lang.Integer" override="false"/>
+	
+	<!--  number of days to keep conservation area exports -->
+	<!--  when a user download a conservation area from connect, an -->
+	<!--  export is created.  These exports are saved and reused if  -->
+	<!--  no changes have uploaded to connect since the last download  -->
+	<!--  default 180 days; set to -1 to keep forever -->
+	<Environment name="ca_export_days_available" value="180" type="java.lang.Integer" override="false"/>
 </Context>

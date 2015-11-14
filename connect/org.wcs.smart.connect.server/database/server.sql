@@ -325,3 +325,4 @@ CREATE TABLE connect.change_log(
 );
 ALTER TABLE connect.change_log ADD CONSTRAINT connect_changelog_ca_uuid_fk foreign key (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE restrict ON DELETE cascade;
 CREATE INDEX connect_change_log_uuid_idx on connect.change_log (uuid);
+CREATE INDEX connect_change_log_ca_uuid_idx on connect.change_log (ca_uuid);

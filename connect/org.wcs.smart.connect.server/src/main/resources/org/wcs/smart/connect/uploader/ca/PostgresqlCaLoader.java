@@ -45,6 +45,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
@@ -70,6 +72,8 @@ import au.com.bytecode.opencsv.CSVWriter;
  */
 public class PostgresqlCaLoader {
 
+	private final Logger logger = Logger.getLogger(PostgresqlCaLoader.class.getName());
+	
 	/**
 	 * The name of the directory where the database data is stored
 	 */
@@ -95,7 +99,11 @@ public class PostgresqlCaLoader {
 			validatePluginVersions(ca);
 			processFilestore(tempDir, ca);
 		}finally{
-			tempDir.delete();
+			try{
+				FileUtils.forceDelete(tempDir);
+			}catch (Exception ex){
+				logger.log(Level.WARNING, "Unable to delete temporary directory.", ex);
+			}
 		}
 	}
 	
@@ -318,7 +326,9 @@ public class PostgresqlCaLoader {
 					if (colsToModified.size() > 0){
 						fixHexData(dataFile, colsToModified);
 					}
-					copy.copyIn(query.toString(), new InputStreamReader(new FileInputStream(dataFile), "UTF-8"));
+					try(InputStreamReader reader = new InputStreamReader(new FileInputStream(dataFile), "UTF-8")){
+						copy.copyIn(query.toString(), reader);
+					}
 				}catch(Exception ex){
 					throw new SQLException(ex);
 				}

@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -69,10 +68,9 @@ import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.downloader.ca.CaExporterJob;
 import org.wcs.smart.connect.downloader.sync.CaChangeLogPackageJob;
-import org.wcs.smart.connect.downloader.sync.ChangeLogPackager;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.hibernate.ConnectStartupContextListener;
 import org.wcs.smart.connect.hibernate.HibernateManager;
-import org.wcs.smart.connect.hibernate.HibernateSessionFactoryListener;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConservationAreaInfo.Status;
@@ -390,7 +388,7 @@ public class ConservationAreas extends HttpServlet{
 					+ URLEncoder.encode(uca.toString(), ConnectRESTApplication.UTF8)
 					+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString();
 	
-			ExecutorService executor = (ExecutorService) context.getAttribute(HibernateSessionFactoryListener.EXECUTOR_KEY);
+			ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
 			executor.execute(new CaExporterJob(info, item, finishurl, HibernateManager.getSessionFactory(context)));
 				
 			String url = item.getStatusURL(request);
@@ -461,7 +459,7 @@ public class ConservationAreas extends HttpServlet{
 				+ "?data=" + DATA_PARAM_PACKAGE_VALUE + "&version=" + item.getUuid().toString();
 
 			CaChangeLogPackageJob job = new CaChangeLogPackageJob(info, item, finishurl, lrevision, s.getSessionFactory());
-			ExecutorService executor = (ExecutorService) context.getAttribute(HibernateSessionFactoryListener.EXECUTOR_KEY);
+			ExecutorService executor = (ExecutorService) context.getAttribute(ConnectStartupContextListener.EXECUTOR_KEY);
 			executor.execute(job);
 		
 			String url = item.getStatusURL(request);

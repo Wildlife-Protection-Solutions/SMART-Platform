@@ -23,6 +23,8 @@ package org.wcs.smart.connect.hibernate;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,6 +37,7 @@ import org.hibernate.annotations.common.reflection.MetadataProviderInjector;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.service.ServiceRegistryBuilder;
+import org.wcs.smart.connect.apache.CleanUpJob;
 import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertFilterDefault;
@@ -55,9 +58,9 @@ import org.wcs.smart.connect.model.WorkItem;
  *
  */
 @WebListener
-public class HibernateSessionFactoryListener implements ServletContextListener{
+public class ConnectStartupContextListener implements ServletContextListener{
 
-	private final Logger logger = Logger.getLogger(HibernateSessionFactoryListener.class.getName());
+	private final Logger logger = Logger.getLogger(ConnectStartupContextListener.class.getName());
 	
 	public static final String EXECUTOR_KEY = "threadExecutor"; //$NON-NLS-1$
 	
@@ -121,8 +124,23 @@ public class HibernateSessionFactoryListener implements ServletContextListener{
 		}catch(Exception ex){
 			logger.log(Level.WARNING, "Could not read variable " + EnvironmentVariables.Variable.NUM_BACK_THREADS.key + " from context.xml.", ex);
 		}
-		ExecutorService scheduler = Executors.newFixedThreadPool(numthreads);
+		ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(numthreads);
 		sce.getServletContext().setAttribute(EXECUTOR_KEY, scheduler);
+		
+		initCleanUpJob(sf, scheduler);
+	}
+	
+	private void initCleanUpJob(SessionFactory sf, ScheduledExecutorService scheduler){
+		Integer cleanUpSchedule = 24;
+		try{
+			cleanUpSchedule = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL);
+		}catch (Exception ex){
+			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL.key, ex);
+		}
+		if (cleanUpSchedule >= 0){
+			CleanUpJob job = new CleanUpJob(sf);
+			scheduler.scheduleWithFixedDelay(job, 0, cleanUpSchedule, TimeUnit.HOURS);
+		}
 	}
 
 }

@@ -27,12 +27,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-
-import jdk.nashorn.internal.ir.annotations.Ignore;
 
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;

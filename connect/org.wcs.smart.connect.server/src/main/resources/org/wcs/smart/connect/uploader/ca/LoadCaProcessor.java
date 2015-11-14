@@ -96,6 +96,16 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 				logger.log(Level.SEVERE, ex2.getMessage(), ex2);
 				session.getTransaction().rollback();
 			}
+		}finally{
+			cleanUp(item);
+		}
+	}
+	
+	private void cleanUp(WorkItem item){
+		try{
+			Files.deleteIfExists(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()).toPath());
+		}catch (Exception ex){
+			logger.log(Level.WARNING, "Could not delete ca upload file.", ex);
 		}
 	}
 
