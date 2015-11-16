@@ -26,6 +26,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -67,6 +69,8 @@ import org.wcs.smart.conversion.util.FileUtil;
  */
 public class CategoryMapComposite extends Composite implements ILanguageChangedListener {
 
+	private static final Logger logger = LogManager.getLogger(ValueMapComposite.class); 
+	
 	private TableViewer viewer;
 	private DataModelLookup lookup;
 	private SmartCategoryLabelProvider catLabelProvider;
@@ -86,7 +90,8 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 		try {
 			catMapBuilder = new CategoryMapBuilder(ConnectionUtil.getConnection());
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Error creating categories map.", e); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), "Error", "Error creating categories map. See log for details.");
 		}
 		
 		GridLayout gd = new GridLayout(1, false);
@@ -163,7 +168,8 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 				matcher.match(newCats, oldCats);
 				ct2Smart.getMappedCategory().addAll(newCats);
 			} catch (SQLException e) {
-				e.printStackTrace();
+				logger.error("Error setting input categories map control.", e); //$NON-NLS-1$
+				MessageDialog.openError(getShell(), "Error", "Error setting input categories map control. See log for details.");
 			}
 			rebuildColumns();
 		}
@@ -259,8 +265,8 @@ public class CategoryMapComposite extends Composite implements ILanguageChangedL
 //				input.getMappedCategory().addAll(newCats);
 				MessageDialog.openInformation(getShell(), "External import", "Matching category mappings are imported from extarnal mapping.");
 			} catch (Exception e) {
-				MessageDialog.openError(getShell(), "Error", "Error importing external category mapping data");
-				e.printStackTrace();
+				logger.error("Error importing external category mapping data.", e); //$NON-NLS-1$
+				MessageDialog.openError(getShell(), "Error", "Error importing external category mapping data.");
 			}
 			rebuildColumns();
 			viewer.setInput(input.getMappedCategory());

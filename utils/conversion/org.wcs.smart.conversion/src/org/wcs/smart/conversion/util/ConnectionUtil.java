@@ -25,6 +25,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
@@ -33,6 +35,8 @@ import org.eclipse.swt.widgets.Display;
  * @since 3.0.0
  */
 public class ConnectionUtil {
+
+	private static final Logger logger = LogManager.getLogger(ConnectionUtil.class); 
 
 	private static Connection connection;
 
@@ -49,7 +53,8 @@ public class ConnectionUtil {
 			Connection conn = DriverManager.getConnection(dbURL, "smart_admin", "smart_derby"); //$NON-NLS-1$ //$NON-NLS-2$
 			return conn;
 		} catch (Exception ex) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not connect to database. See console or log for details.");
+			logger.error("Could not connect to database.", ex); //$NON-NLS-1$
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Could not connect to database. See log for details.");
 			throw new RuntimeException("Could not connect to database: " + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	}
@@ -59,8 +64,8 @@ public class ConnectionUtil {
 			try {
 				connection.close();
 			} catch (SQLException e) {
+				logger.error("Error while closing database connection.", e); //$NON-NLS-1$
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while closing database connection. See console for details.");
-				e.printStackTrace();
 			}
 		}
 	}

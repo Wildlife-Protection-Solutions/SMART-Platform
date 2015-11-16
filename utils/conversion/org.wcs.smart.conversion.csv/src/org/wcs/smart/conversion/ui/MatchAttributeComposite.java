@@ -26,6 +26,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -33,6 +36,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
@@ -48,6 +52,8 @@ import org.wcs.smart.conversion.util.Ct2AttributeTypeUtil;
  */
 public class MatchAttributeComposite extends Composite implements ILanguageChangedListener {
 
+	private static final Logger logger = LogManager.getLogger(MatchAttributeComposite.class); 
+	
 	private MappedAttribute attribute;
 	
 	private Label typeLabel;
@@ -123,10 +129,9 @@ public class MatchAttributeComposite extends Composite implements ILanguageChang
 				rawValuesReport.open();
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Error fetching raw values.", e); //$NON-NLS-1$
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error fetching raw values. See log for details.");
 		}
-
-		
 		
 	}
 

@@ -21,6 +21,8 @@
  */
 package org.wcs.smart.conversion.csv;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -39,32 +41,39 @@ import org.wcs.smart.conversion.util.ConnectionUtil;
  */
 public class Csv2SmartMatcher {
 
+	private static final Logger logger = LogManager.getLogger(Csv2SmartMatcher.class); 
+	
 	public static void main(String[] args) {
-		Display display = new Display();
-		Shell shell = new Shell(display);
-		
-		GridLayout layout = new GridLayout(1, true);
-		shell.setLayout(layout);
-	    
-	    GridData gridData = new GridData(SWT.LEFT,SWT.TOP, false, false);
-	    shell.setLayoutData(gridData);
-		
-		Image img = new Image(display, ClassLoader.getSystemResourceAsStream("csvsmart16.gif")); //$NON-NLS-1$
-	    shell.setImage(img);
-		shell.setText("CSV to SMART - Conversion Tool (Version 0.5)");
-		new CsvMatcherDialog(shell);
+		try {
+			Display display = new Display();
+			Shell shell = new Shell(display);
+			
+			GridLayout layout = new GridLayout(1, true);
+			shell.setLayout(layout);
+		    
+		    GridData gridData = new GridData(SWT.LEFT,SWT.TOP, false, false);
+		    shell.setLayoutData(gridData);
+			
+			Image img = new Image(display, ClassLoader.getSystemResourceAsStream("csvsmart16.gif")); //$NON-NLS-1$
+		    shell.setImage(img);
+			shell.setText("CSV to SMART - Conversion Tool (Version 0.5)");
+			new CsvMatcherDialog(shell);
 
-		shell.pack();
-		
-		Point size = shell.computeSize(-1, -1);
-        shell.setBounds(120, 50, (int)(size.x*1.5), size.y);    
-        
-		shell.open();
-		
-		while (!shell.isDisposed ()) {
-			if (!display.readAndDispatch ()) display.sleep ();
+			shell.pack();
+			
+			Point size = shell.computeSize(-1, -1);
+	        shell.setBounds(120, 50, (int)(size.x*1.5), size.y);    
+	        
+			shell.open();
+			
+			while (!shell.isDisposed ()) {
+				if (!display.readAndDispatch ()) display.sleep ();
+			}
+			display.dispose();
+			ConnectionUtil.closeConnection();
+		} catch (Exception e) {
+			logger.error("Error occured.", e); //$NON-NLS-1$
 		}
-		display.dispose();
-		ConnectionUtil.closeConnection();
+		
 	}
 }

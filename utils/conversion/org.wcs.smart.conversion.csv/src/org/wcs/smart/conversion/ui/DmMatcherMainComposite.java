@@ -28,6 +28,8 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -76,6 +78,8 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.LanguageType;
  * @since 3.0.0
  */
 public class DmMatcherMainComposite extends Composite {
+
+	private static final Logger logger = LogManager.getLogger(DmMatcherMainComposite.class); 
 	
 	private static final int TABLE_HEIGHT_HINT = 350;
 
@@ -293,8 +297,8 @@ public class DmMatcherMainComposite extends Composite {
 				cleanTool.clean(smartMapping);
 				FileUtil.write(new File(fn), smartMapping);
 			} catch (Exception e) {
+				logger.error("Error while saving mapping.", e); //$NON-NLS-1$
 				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. Failed to save mapping. See console for details.");
-				e.printStackTrace();
 			}
 		}
 	}

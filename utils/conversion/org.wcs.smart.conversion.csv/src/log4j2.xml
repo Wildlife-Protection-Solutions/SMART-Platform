@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<properties>
+		<property name="logPath">log</property>
+		
+		<property name="nameTrace">trace</property>
+		<property name="nameWarn">warn</property>
+		<property name="nameError">error</property>
+		
+		<property name="pattern">%msg%n</property>
+
+ 		<property name="patternProblem">%d{yyyy-MM-dd HH:mm:ss.SSS} | %-5.5p | (%F:%L) | %msg%n</property>
+		<!-- It will look like that: 2013-04-03 07:37:51.993 | WARN | My app is logging stuff -->
+
+<!-- 		<property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} | %-5.5p | %-10.10t | (%F:%L) | %msg%n</property> -->
+		<!-- It will look like that: 2013-04-03 07:37:51.993 | WARN | main | (ClassName.java:27) | My app is logging stuff -->
+	</properties>
+	<appenders>
+		<console name="console" target="SYSTEM_OUT">
+			<patternLayout pattern="${patternProblem}" />
+		</console>
+ 
+		<file name="fileTrace" fileName="${logPath}/${nameTrace}.log">
+			<patternLayout pattern="${patternProblem}" />
+		</file>
+
+		<file name="fileWarn" fileName="${logPath}/${nameWarn}.log">
+			<patternLayout pattern="${patternProblem}" />
+		</file>
+		<file name="fileError" fileName="${logPath}/${nameError}.log">
+			<patternLayout pattern="${patternProblem}" />
+		</file>
+
+	</appenders>
+	<loggers>
+		<root level="trace"> <!-- We log everything -->
+			<appender-ref ref="console" level="trace"/>
+ 
+ 			<appender-ref ref="fileTrace" level="debug"/>
+ 			<appender-ref ref="fileWarn"  level="warn"/>
+ 			<appender-ref ref="fileError" level="error"/>
+		
+		</root>
+
+	</loggers>
+</configuration>
