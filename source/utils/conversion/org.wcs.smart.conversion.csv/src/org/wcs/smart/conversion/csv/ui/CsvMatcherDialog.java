@@ -31,6 +31,8 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -65,6 +67,8 @@ import org.wcs.smart.conversion.util.FileUtil;
  * @since 3.2.0
  */
 public class CsvMatcherDialog extends Composite {
+
+	private static final Logger logger = LogManager.getLogger(CsvMatcherDialog.class); 
 	
 	private Label dbLabel;
 	private int dbRecordsCount = 0;
@@ -255,8 +259,8 @@ public class CsvMatcherDialog extends Composite {
 				txtInfo.setText(""); //$NON-NLS-1$
 				MessageDialog.openInformation(getShell(), "Info", "Database is successfully reset");
 			} catch (Exception e) {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while clearing the database. See console or log for more details.\n" + e.toString());
-				e.printStackTrace();
+				logger.error("Error while clearing the database.", e); //$NON-NLS-1$
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while clearing the database. See log for more details.\n" + e.toString());
 			}
 		}
 	}
@@ -275,8 +279,8 @@ public class CsvMatcherDialog extends Composite {
 				txtInfo.setText(MessageFormat.format("Loaded data from {0}", fn));
 				MessageDialog.openInformation(getShell(), "Info", "Data from CSV loaded successfully");
 			} catch (Exception e) {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while loading file. See console or log for more details.\n" + e.toString());
-				e.printStackTrace();
+				logger.error("Error loading CSV file.", e); //$NON-NLS-1$
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while loading file. See log for more details.\n" + e.toString());
 			}
 		}
 	}
@@ -299,8 +303,8 @@ public class CsvMatcherDialog extends Composite {
 					txtInfo.setText(txtInfo.getText() + "\r\n" + MessageFormat.format("Merged with data from {0}", fn));
 				}
 			} catch (Exception e) {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
-				e.printStackTrace();
+				logger.error("Error occured during merge operation.", e); //$NON-NLS-1$
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured during merge operation. See log for details.");
 			}
 		}
 	}
@@ -317,8 +321,8 @@ public class CsvMatcherDialog extends Composite {
 				exportTool.export(new File(fn), c);
 				MessageDialog.openInformation(getShell(), "Info", "Data exported successfully");
 			} catch (Exception e) {
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
-				e.printStackTrace();
+				logger.error("Error occured during csv export.", e); //$NON-NLS-1$
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured during csv export. See log for details.");
 			}
 		}
 	}
@@ -341,13 +345,13 @@ public class CsvMatcherDialog extends Composite {
 				try {
 					FileUtil.write(new File(fn), csv2Smart);
 				} catch (Exception e) {
-					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
-					e.printStackTrace();
+					logger.error("Error occured while writing data to file.", e); //$NON-NLS-1$
+					MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured while writing data to file. See log for details.");
 				}
 			}
 		} catch (Exception e) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
-			e.printStackTrace();
+			logger.error("Error occured while creating mapping.", e); //$NON-NLS-1$
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured while creating mapping. See log for details.");
 		}
 	}
 
@@ -361,8 +365,8 @@ public class CsvMatcherDialog extends Composite {
 			MatcherDialog dialog = new MatcherDialog(getShell(), session);
 			dialog.open();
 		} catch (JAXBException | IOException e) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
-			e.printStackTrace();
+			logger.error("Error while editing mapping.", e); //$NON-NLS-1$
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while editing mapping. See log for details.");
 		}
 	}
 	
@@ -374,7 +378,7 @@ public class CsvMatcherDialog extends Composite {
 				return rs.getInt(1);
 			}
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.error("Failed to get db row count.", e); //$NON-NLS-1$
 		} 
 		return 0;
 	}

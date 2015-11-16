@@ -31,6 +31,8 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -52,6 +54,8 @@ import org.wcs.smart.conversion.ui.ReportDialog;
  * @since 3.2.0
  */
 public abstract class ProcessingActionHandler {
+
+	private static final Logger logger = LogManager.getLogger(ProcessingActionHandler.class); 
 	
 	private Shell shell;
 	
@@ -82,8 +86,8 @@ public abstract class ProcessingActionHandler {
 				report.open();
 			}
 		} catch (JAXBException | IOException e) {
-			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. See console or log for details.");
-			e.printStackTrace();
+			logger.error("Error during mapping validation.", e); //$NON-NLS-1$
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error during mapping validation. See log for details.");
 		}
 	}
 

@@ -35,7 +35,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wcs.smart.conversion.csv.lookup.AttributeLookup;
+import org.wcs.smart.conversion.csv.ui.CsvMatcherDialog;
 import org.wcs.smart.conversion.lookup.AttributeTreeKeyLookup;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup.Ct2AttributeValuePair;
@@ -58,6 +61,8 @@ import org.wcs.smart.internal.ca.datamodel.xml.generate.ListNode;
  * @since 3.0.0
  */
 public class MappingValidator {
+	
+	private static final Logger logger = LogManager.getLogger(CsvMatcherDialog.class); 
 	
 	public List<String> validate(SmartMapping ct2Smart, DataModelLookup lookup) {
 		List<String> errors = new ArrayList<String>();
@@ -212,6 +217,7 @@ public class MappingValidator {
 		try {
 			Connection c = ConnectionUtil.getConnection();
 			//get ids for category attributes
+			logger.debug("get ids for category attributes"); //$NON-NLS-1$
 			HashMap<String, String> n2Col = new HashMap<String, String>();
 			PreparedStatement ps = c.prepareStatement("select id, n from csv_to_smart.attributes"); //$NON-NLS-1$
 			ResultSet rs = ps.executeQuery();
@@ -222,6 +228,7 @@ public class MappingValidator {
 			rs.close();
 			
 			//extract all possible set of category attribute values
+			logger.debug("extract all possible set of category attribute values"); //$NON-NLS-1$
 			StringBuilder sb = new StringBuilder();
 			for (MappedAttribute attr : categoryAttributes) {
 				String col = n2Col.get(attr.getI());
@@ -240,7 +247,9 @@ public class MappingValidator {
 			
 			Ct2SmartLookup lookup = new Ct2SmartLookup(ct2Smart);
 			List<Ct2AttributeValuePair> pairs = new ArrayList<>();
-			ps = c.prepareStatement("select distinct "+sb+" from csv_to_smart.csv"); //$NON-NLS-1$ //$NON-NLS-2$
+			String sql = "select distinct "+sb+" from csv_to_smart.csv";  //$NON-NLS-1$ //$NON-NLS-2$
+			logger.debug("run SQL: " + sql); //$NON-NLS-1$
+			ps = c.prepareStatement(sql);
 			rs = ps.executeQuery();
 			while (rs.next()) {
 				pairs.clear();
@@ -261,7 +270,7 @@ public class MappingValidator {
 			rs.close();
 		} catch (Exception e) {
 			errors.add("Unable to validate that all category mappings present due to SQLException. See console or log for details");
-			e.printStackTrace();
+			logger.error("Unable to validate that all category mappings present", e); //$NON-NLS-1$
 		}
 		return errors;
 	}
@@ -283,7 +292,7 @@ public class MappingValidator {
 			}
 		} catch (SQLException e) {
 			errors.add("Unable to validate that all attributes are mapped due to SQLException. See console or log for details");
-			e.printStackTrace();
+			logger.error("Unable to validate that all attributes are mapped", e); //$NON-NLS-1$
 		}
 		return errors;
 	}
@@ -312,7 +321,9 @@ public class MappingValidator {
 			try {
 				Integer colId = aLookup.getColumn(cta.getI());
 				if (colId != null) {
-					PreparedStatement pst = c.prepareStatement("select count (distinct a"+colId+") from csv_to_smart.csv where a"+colId+ " is not null and a"+colId+" <> ''" + catClause); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					String sql = "select count (distinct a"+colId+") from csv_to_smart.csv where a"+colId+ " is not null and a"+colId+" <> ''" + catClause; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+					logger.debug("run SQL: " + sql); //$NON-NLS-1$
+					PreparedStatement pst = c.prepareStatement(sql);
 					for (int i = 0; i < catClauseValues.size(); i++) {
 						pst.setString(i+1, catClauseValues.get(i));
 					}
@@ -323,10 +334,10 @@ public class MappingValidator {
 					}
 					rs.close();
 				} else {
-					System.out.println(MessageFormat.format("WARN: Mapping file contains attribute i=''{0}'' that do not present in database", cta.getI()));
+					logger.warn(MessageFormat.format("WARN: Mapping file contains attribute i=''{0}'' that do not present in database", cta.getI()));
 				}
 			} catch (SQLException e) {
-				e.printStackTrace();
+				logger.error("Error getting required attributes during validation", e); //$NON-NLS-1$
 			}
 		}
 		return rqAttrsMap;

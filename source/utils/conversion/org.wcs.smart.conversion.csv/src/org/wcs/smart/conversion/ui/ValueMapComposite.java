@@ -31,6 +31,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
@@ -59,6 +61,8 @@ import org.wcs.smart.conversion.util.Ct2AttributeTypeUtil;
 import au.com.bytecode.opencsv.CSVWriter;
 
 public class ValueMapComposite extends Composite implements ILanguageChangedListener {
+	
+	private static final Logger logger = LogManager.getLogger(ValueMapComposite.class); 
 
 	private TableViewer viewer;
 	private DataModelLookup lookup;
@@ -153,8 +157,9 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 						writer.close();
 					}
 				} catch (IOException e) {
-					e.printStackTrace();
+					logger.error("Error closing writer.", e); //$NON-NLS-1$
 				}
+				logger.error("Error exporting CSV.", ex); //$NON-NLS-1$
 				ex.printStackTrace();
 			}
 		}
@@ -164,15 +169,18 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		List<MappedAttributeValue> valuesBackup = new ArrayList<MappedAttributeValue>(attribute.getMappedAttributeValue());
 		attribute.getMappedAttributeValue().clear();
 		try {
-			ResultSet attrRs = connection.createStatement().executeQuery("select id, n from CSV_TO_SMART.ATTRIBUTES where n = '" + attribute.getI() + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+			String sql = "select id, n from CSV_TO_SMART.ATTRIBUTES where n = '" + attribute.getI() + "'";  //$NON-NLS-1$ //$NON-NLS-2$
+			logger.debug("run SQL:" + sql); //$NON-NLS-1$
+			ResultSet attrRs = connection.createStatement().executeQuery(sql);
 			if (attrRs.next()) {
 				String valuesSql = "select distinct a"+attrRs.getString(1)+" from CSV_TO_SMART.CSV"; //$NON-NLS-1$ //$NON-NLS-2$
+				logger.debug("run SQL:" + valuesSql); //$NON-NLS-1$
 				ResultSet valRs = connection.createStatement().executeQuery(valuesSql);
 				while (valRs.next()) {
 					MappedAttributeValue ctAttrValue = new MappedAttributeValue();
 					ctAttrValue.setI(valRs.getString(1));
 //					ctAttrValue.setN(s);
-					ctAttrValue.setMapTo("");
+					ctAttrValue.setMapTo(""); //$NON-NLS-1$
 					attribute.getMappedAttributeValue().add(ctAttrValue);
 				}
 				MessageDialog.openInformation(getShell(), "Reload values", "Values sucessfully reloaded.");
@@ -180,8 +188,8 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 		} catch (SQLException e) {
 			attribute.getMappedAttributeValue().clear();
 			attribute.getMappedAttributeValue().addAll(valuesBackup);
-			e.printStackTrace();
-			MessageDialog.openError(getShell(), "Reload values", "Failed to reloaded attribute values. See console or log for details.");
+			logger.error("Failed to reloaded attribute values.", e); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), "Reload values", "Failed to reloaded attribute values. See log for details.");
 		}
 		setInput(attribute);
 	}
