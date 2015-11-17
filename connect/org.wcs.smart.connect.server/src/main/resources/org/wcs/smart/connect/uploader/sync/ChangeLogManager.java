@@ -23,14 +23,18 @@ package org.wcs.smart.connect.uploader.sync;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
+import javax.ws.rs.core.Response.Status;
 
 import org.hibernate.SQLQuery;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.type.PostgresUUIDType;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 
@@ -38,6 +42,48 @@ public enum ChangeLogManager {
 	INSTANCE;
 	
 	private static final String CHANGE_LOG_TABLE = "connect.change_log";
+	private static final String CHANGE_LOG_INFO = "connect.change_log_info";
+	
+	/**
+	 * Delete all change log item with a revision 
+	 * less than or equal to maxrevision and update the change
+	 * log info table.
+	 * 
+	 * @param s
+	 * @param maxRevision a value greater than 0; representing the revisions to delete (inclusive)
+	 * @return
+	 */
+	public void deleteItems(Session s, Long maxRevision){
+		if (maxRevision < 0) return;
+		
+		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE revision <= :maxrevision";
+		SQLQuery q = s.createSQLQuery(sql);
+		q.setParameter("maxrevision", maxRevision);
+		q.executeUpdate();
+		
+		sql = "UPDATE " + CHANGE_LOG_INFO + " SET last_delete_revision = :maxrevision";
+		q = s.createSQLQuery(sql);
+		q.setParameter("maxrevision",  maxRevision);
+		q.executeUpdate();
+	}
+	
+	/**
+	 * find the maximum revision number that is older than the given date
+	 *  
+	 * @param s
+	 * @param maxDate
+	 * @return
+	 */
+	public long getLastRevision(Session s, Date maxDate){
+		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE datetime < :maxdate";
+		SQLQuery q = s.createSQLQuery(sql);
+		q.setParameter("maxdate", maxDate);
+		BigInteger revision = (BigInteger) q.uniqueResult();
+		if (revision == null){
+			return -1;
+		}
+		return revision.longValue();
+	}
 	
 	public long getLastRevision(Session s, UUID ca){
 		String sql = "SELECT max(revision) FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :ca";
@@ -83,7 +129,29 @@ public enum ChangeLogManager {
 		
 	}
 	
+	/**
+	 * Finds all items in the change log table that occur for a given conservation
+	 * area after the given start revision.  If there is a chance that items have been removed
+	 * then this will thrown an exception.
+	 * To determine if items may have been removed, it looks at the last revision cleaned up
+	 * from the system in the change_log_info table and compares it to the request revision.  If
+	 * it's greater then the requested version than there is a chance items have been removed. 
+	 * @param session
+	 * @param caUuid
+	 * @param startRevision
+	 * @return
+	 */
 	public List<ChangeLogItem> getItems(Session session, UUID caUuid, long startRevision){
+		//first check that the start revision is after the last clean up revision
+		
+		String sql = "SELECT last_delete_revision FROM " +  CHANGE_LOG_INFO;
+		Long lastDeleteRevision = ((BigInteger) session.createSQLQuery(sql).uniqueResult()).longValue();
+		
+		if (startRevision < lastDeleteRevision ){
+			//some change log items were removed so we cannot sync this class
+			throw new SmartConnectException(Status.NOT_FOUND, "The change log table on server has been cleaned up since your last request.  You must re-download the entire conservation area from SMART Connect to reestablish replication.");
+		}
+		
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT a.uuid, a.revision, a.action, a.filename, a.tablename, ");
 		query.append("a.key1_fieldname, a.key1, a.key2_fieldname, a.key2_str, a.key2_uuid, a.ca_uuid "); 

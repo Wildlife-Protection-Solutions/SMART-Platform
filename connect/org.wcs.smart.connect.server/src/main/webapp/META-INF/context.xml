@@ -52,4 +52,11 @@
 	<!--  no changes have uploaded to connect since the last download  -->
 	<!--  default 180 days; set to -1 to keep forever -->
 	<Environment name="ca_export_days_available" value="180" type="java.lang.Integer" override="false"/>
+	
+	<!--  number of days to keep items in the change log table -->
+	<!--  once removed if a client requests an old item the  -->
+	<!--  system will fail.  So this should be set to somthing substantially longer -->
+	<!--  than how often clients will request changes. -->
+	<!--  default 180 days; set to -1 to keep forever -->
+	<Environment name="changelog_cleanup_days" value="180" type="java.lang.Integer" override="false"/>
 </Context>

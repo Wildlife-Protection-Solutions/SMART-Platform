@@ -40,7 +40,8 @@ public enum EnvironmentVariables {
 		CLEANUP_TASK_INTERVAL("cleanup_task_interval_hours"),
 		SYNC_DOWNLOAD_AVAILABLE("sync_download_hours_available"),
 		WORK_HISTORY_ITEM_AVAILABLE("work_item_history_days_available"),
-		CA_EXPORT_AVAILABLE("ca_export_days_available");
+		CA_EXPORT_AVAILABLE("ca_export_days_available"),
+		CHANGELOG_CLEAN_UP_DAYS("changelog_cleanup_days");
 		
 		public String key;
 		

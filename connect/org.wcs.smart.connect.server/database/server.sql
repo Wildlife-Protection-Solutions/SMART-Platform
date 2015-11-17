@@ -306,6 +306,12 @@ COMMENT ON TABLE connect.user_roles IS 'A list of webserver roles supported by e
 COMMENT ON COLUMN connect.user_roles.username IS 'The unique username.';
 COMMENT ON COLUMN connect.user_roles.role IS 'The webserver role.';
 
+CREATE TABLE connect.change_log_info(
+	last_delete_revision BIGINT
+)
+INSERT INTO connect.change_log_info values (-1);
+COMMENT ON TABLE connect.change_log_info IS 'Information about the change log table.';
+COMMENT ON COLUMN connect.change_log_info.last_delete_revision IS 'The last revision to be removed as part of the clean up process.';
 
 
 CREATE TABLE connect.change_log(
@@ -320,9 +326,23 @@ CREATE TABLE connect.change_log(
 	key2_fieldname varchar(256),
 	key2_str varchar(256),
 	key2_uuid UUID,
-
+	datetime timestamp default now(),
 	primary key (revision)
 );
 ALTER TABLE connect.change_log ADD CONSTRAINT connect_changelog_ca_uuid_fk foreign key (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE restrict ON DELETE cascade;
 CREATE INDEX connect_change_log_uuid_idx on connect.change_log (uuid);
 CREATE INDEX connect_change_log_ca_uuid_idx on connect.change_log (ca_uuid);
+
+COMMENT ON TABLE connect.change_log IS 'Change log items.';
+COMMENT ON COLUMN connect.change_log.uuid IS 'A unique identifier for each change log item.';
+COMMENT ON COLUMN connect.change_log.revision IS 'The server defined revision number.';
+COMMENT ON COLUMN connect.change_log.action IS 'Change log action.';
+COMMENT ON COLUMN connect.change_log.filename IS 'The filename, if a datastore action.';
+COMMENT ON COLUMN connect.change_log.tablename IS 'The tablename if a database action.';
+COMMENT ON COLUMN connect.change_log.ca_uuid IS 'The conservation area uuid.';
+COMMENT ON COLUMN connect.change_log.key1_fieldname IS 'The first unique key field name (required if database action).';
+COMMENT ON COLUMN connect.change_log.key1 IS 'The first unique key uuid value (required if database action).';
+COMMENT ON COLUMN connect.change_log.key2_fieldname IS 'The second unique key field name (optional, only required for composite primary keys).';
+COMMENT ON COLUMN connect.change_log.key2_str IS 'The second unique key uuid value (optional).';
+COMMENT ON COLUMN connect.change_log.key2_uuid IS 'The second unique key string value (optional)';
+COMMENT ON COLUMN connect.change_log.datetime IS 'The server managed datetime the action is added to the table.';

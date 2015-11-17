@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.connect.ZipUtil;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.changelog.ChangeLogItemSerializer;
@@ -154,7 +155,7 @@ public class ChangeLogPackager {
 		
 	}
 	
-	private List<ChangeLogItem> getChangeLogItems(){
+	private List<ChangeLogItem> getChangeLogItems() throws SmartConnectException{
 		return ChangeLogManager.INSTANCE.getItems(session, caUuid, startRevision);
 	}
 }

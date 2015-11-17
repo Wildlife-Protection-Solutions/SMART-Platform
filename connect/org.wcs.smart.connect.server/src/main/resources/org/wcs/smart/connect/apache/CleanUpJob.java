@@ -39,6 +39,7 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
+import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 
 /**
  * Remove items from filestore.
@@ -54,6 +55,7 @@ public class CleanUpJob implements Runnable {
 	
 	private Integer syncDownloadAvailableHrs = null;
 	private Integer caExportAvailableDays = null;
+	private Integer changeLogCleanUpDays = null;
 	
 	public CleanUpJob(SessionFactory sessionFactory){
 		this.sessionFactory = sessionFactory;
@@ -62,22 +64,26 @@ public class CleanUpJob implements Runnable {
 	@Override
 	public void run() {
 		logger.log(Level.FINEST, "Running cleanup job: " + (new Date()).toString());
-		try{
-			syncDownloadAvailableHrs = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE);
-		}catch (Exception ex){
-			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE.key, ex);
-		}
-		try{
-			caExportAvailableDays = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE);
-		}catch (Exception ex){
-			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE.key, ex);
-		}
+		
+		syncDownloadAvailableHrs = getEnvironmentVariable(EnvironmentVariables.Variable.SYNC_DOWNLOAD_AVAILABLE);
+		caExportAvailableDays = getEnvironmentVariable(EnvironmentVariables.Variable.CA_EXPORT_AVAILABLE);
+		changeLogCleanUpDays = getEnvironmentVariable(EnvironmentVariables.Variable.CHANGELOG_CLEAN_UP_DAYS);
+		
 		try{
 			cleanUp();
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Error running cleanup task:" + ex.getMessage(), ex);
+		}		
+	}
+	
+	private Integer getEnvironmentVariable(EnvironmentVariables.Variable variable){
+		Integer value = null;
+		try{
+			value = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVairable(variable);
+		}catch (Exception ex){
+			logger.log(Level.WARNING, "Value not found for environment variable:" + variable, ex);
 		}
-		
+		return value;
 	}
 	
 	private void cleanUp(){
@@ -119,6 +125,9 @@ public class CleanUpJob implements Runnable {
 			
 			//delete any work items
 			cleanUpWorkItems(s);
+			
+			//clean up change log items
+			cleanUpChangeLog(s);
 		}finally{
 			s.close();
 		}
@@ -243,5 +252,24 @@ public class CleanUpJob implements Runnable {
 		return false;
 	}
 
+	
+	/**
+	 * Clean up items in the change log table.
+	 * @param session
+	 */
+	private void cleanUpChangeLog(Session session){
+		if (changeLogCleanUpDays == null || changeLogCleanUpDays <= 0) return;
+		
+		Date lastDate = new Date((new Date()).getTime() - changeLogCleanUpDays * 24l * 60 *60 *1000);
+		session.beginTransaction();
+		try{
+			Long maxRevision = ChangeLogManager.INSTANCE.getLastRevision(session, lastDate);
+			ChangeLogManager.INSTANCE.deleteItems(session, maxRevision);
+			session.getTransaction().commit();
+		}catch (Exception ex){
+			logger.log(Level.SEVERE, "Could not clean up change log.", ex.getMessage());
+			session.getTransaction().rollback();
+		}
+	}
 
 }
