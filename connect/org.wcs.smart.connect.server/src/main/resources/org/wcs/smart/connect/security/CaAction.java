@@ -88,7 +88,7 @@ public class CaAction implements ISmartConnectAction{
 		ConservationAreaInfo info = (ConservationAreaInfo) s.createCriteria(ConservationAreaInfo.class)
 				.add(Restrictions.eq("uuid", resource)) //$NON-NLS-1$
 				.uniqueResult();
-		if (info == null) return null;
+		if (info == null) return resource.toString();
 		return info.getLabel();
 	}
 

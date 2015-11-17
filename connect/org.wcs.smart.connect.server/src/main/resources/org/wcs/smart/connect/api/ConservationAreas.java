@@ -76,6 +76,7 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.ConservationAreaInfo.Status;
 import org.wcs.smart.connect.model.ConservationAreaProxy;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.security.CaAction;
@@ -636,8 +637,17 @@ public class ConservationAreas extends HttpServlet{
 			q.executeUpdate();
 			
 			caUuidToDelete = serverDelete.getUuid();
-			
 			if (deleteAll){
+				//TODO: delete query actions associated with resource
+//				q = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT= :ca");
+//				q.setParameter("ca", serverDelete.getUuid());
+//				q.executeUpdate();
+				
+				//delete actions associated with resource
+				q = s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca");
+				q.setParameter("ca", serverDelete.getUuid());
+				q.executeUpdate();
+				
 				//delete server only data
 				s.delete(serverDelete);
 			}else{
@@ -714,6 +724,30 @@ public class ConservationAreas extends HttpServlet{
 				ca.setLabel(Messages.getString("ConservationAreas.UnknownLbl", SmartUtils.getRequestLocale(request))); //$NON-NLS-1$
 				ca.setVersion(version);
 				s.save(ca);
+				
+				//configure default permissions for user
+				SmartUser user = HibernateManager.getUser(s, request.getUserPrincipal().getName());
+				if (user != null){
+					//delete
+					SmartUserAction newaction = new SmartUserAction();
+					newaction.setAction(CaAction.DELETECA_KEY);
+					newaction.setUsername(user.getUsername());
+					newaction.setResource(ca.getUuid());
+					s.save(newaction);
+					//view
+					newaction = new SmartUserAction();
+					newaction.setAction(CaAction.VIEWCA_KEY);
+					newaction.setUsername(user.getUsername());
+					newaction.setResource(ca.getUuid());
+					s.save(newaction);
+					//update
+					newaction = new SmartUserAction();
+					newaction.setAction(CaAction.UPDATECA_KEY);
+					newaction.setUsername(user.getUsername());
+					newaction.setResource(ca.getUuid());
+					s.save(newaction);
+				}
+				
 			}else{
 				validateUpdate(ca.getUuid(), s);
 				if (ca.getStatus() == Status.NODATA){
