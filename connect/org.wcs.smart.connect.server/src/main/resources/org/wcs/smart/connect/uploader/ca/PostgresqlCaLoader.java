@@ -27,10 +27,8 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -209,11 +207,21 @@ public class PostgresqlCaLoader {
 		}	
 	}
 	
+	/**
+	 * Validate the plugin versions in the connect server with the versions in the conesrvation
+	 * area plugin version table.
+	 * 
+	 * @param info
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	private void validatePluginVersions(ConservationAreaInfo info) throws Exception{
 		List<CaPluginVersion> caPlugins = session.createCriteria(CaPluginVersion.class)
 				.add(Restrictions.eq("id.conservationAreaUuid", info.getUuid())).list();
 		
-		List<ConnectPluginVersion>  connectVersions = (List<ConnectPluginVersion>)session.createCriteria(ConnectPluginVersion.class).list();
+		List<ConnectPluginVersion>  connectVersions = (List<ConnectPluginVersion>)session
+				.createCriteria(ConnectPluginVersion.class)
+				.list();
 		HashMap<String, String> connect = new HashMap<String, String>();
 		for (ConnectPluginVersion v : connectVersions){
 			connect.put(v.getPluginId(), v.getVersion());
@@ -234,8 +242,8 @@ public class PostgresqlCaLoader {
 			sb.deleteCharAt(sb.length()-1);
 			throw new Exception("Connect does not support the following plugin versions: " + sb.toString());
 		}
-		
 	}
+	
 	/**
 	 * Scans the directory/database for all table definition 
 	 * files (*.def).
@@ -304,7 +312,7 @@ public class PostgresqlCaLoader {
 		query.append("(" + columns + ") "); //$NON-NLS-1$ //$NON-NLS-2$
 		query.append("FROM STDIN " ); //columns //$NON-NLS-1$
 		query.append("WITH (FORMAT CSV, HEADER FALSE, ENCODING 'UTF-8')"); //column indexes //$NON-NLS-1$
-		System.out.println(dataFile.toString());
+		
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
@@ -337,6 +345,9 @@ public class PostgresqlCaLoader {
 		});
 	}
 	
+	/*
+	 * converts derby hex values to postgresql hex values
+	 */
 	private void fixHexData(File dataFile, List<Integer> colsToModify ) throws Exception{
 		Path tempFile = FileSystems.getDefault().getPath(dataFile.getAbsolutePath() + ".temp");
 		

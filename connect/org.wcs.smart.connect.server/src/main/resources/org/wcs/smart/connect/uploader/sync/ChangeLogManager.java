@@ -38,6 +38,13 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 
+/**
+ * Postgresql specific manager for interacting with the
+ * change log table.
+ * 
+ * @author Emily
+ *
+ */
 public enum ChangeLogManager {
 	INSTANCE;
 	
@@ -95,6 +102,14 @@ public enum ChangeLogManager {
 		return ((BigInteger)rev).longValueExact();
 	}
 	
+	/**
+	 * Determines if the change log table contains an item with the
+	 * smart uuid.
+	 * 
+	 * @param s
+	 * @param item the item to search for 
+	 * @return <code>true</code> if item exists, <code>false</code> otherwise
+	 */
 	public boolean constains(Session s, ChangeLogItem item){
 		SQLQuery query = s.createSQLQuery("SELECT count(*) from " + CHANGE_LOG_TABLE + " WHERE uuid = ?");
 		query.setParameter(0, item.getUuid(), PostgresUUIDType.INSTANCE);
@@ -105,6 +120,11 @@ public enum ChangeLogManager {
 		return false;
 	}
 	
+	/**
+	 * Inserts a new item into the change log table.
+	 * @param s
+	 * @param item
+	 */
 	public void insertItem(Session s, ChangeLogItem item){
 		StringBuilder sb = new StringBuilder();
 		sb.append(" INSERT INTO ");

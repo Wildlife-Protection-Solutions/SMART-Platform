@@ -68,7 +68,7 @@ public class SmartConnectException extends RuntimeException {
 	}
 	
 	public SmartConnectException(Response.Status responseCode){
-		this(responseCode, null, null);
+		this(responseCode, responseCode.getReasonPhrase(), null);
 	}
 	
 	/**

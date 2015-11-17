@@ -40,6 +40,7 @@ public enum ActionManager {
 		actions.add(new AdminAccountAction());
 		actions.add(new UserAccountsAction());
 		actions.add(new CaAction());
+		actions.add(new AlertAction());
 	}
 	
 	public ISmartConnectAction findAction(String key){

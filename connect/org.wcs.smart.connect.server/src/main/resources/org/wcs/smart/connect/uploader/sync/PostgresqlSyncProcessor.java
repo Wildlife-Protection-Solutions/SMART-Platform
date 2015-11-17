@@ -36,6 +36,14 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 
+/**
+ * A postgresql specific processor for processing a change
+ * log file.  This unzips the change log package, validates the
+ * metadata, applies the changes and returns. 
+ *  
+ * @author Emily
+ *
+ */
 public class PostgresqlSyncProcessor {
 	
 	private Path zipFile;

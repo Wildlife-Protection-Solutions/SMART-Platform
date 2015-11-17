@@ -129,11 +129,11 @@ public class ConservationAreas extends HttpServlet{
 	/*
 	 * Ensures the current user has read access.
 	 */
-	private void validateRead(ConservationAreaInfo info, Session s){
+	private void validateRead(UUID cauuid, Session s){
 		if (!SecurityManager.INSTANCE.canAccess(s, 
 				request.getUserPrincipal().getName(), 
 				CaAction.VIEWCA_KEY,
-				info.getUuid())){
+				cauuid)){
 			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to view ca."); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
@@ -148,6 +148,33 @@ public class ConservationAreas extends HttpServlet{
 				CaAction.DELETECA_KEY,
 				cauuid)){
 			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to delete ca."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+		}
+	}
+	
+	/*
+	 * Ensures the current user can create/add a ca to the database
+	 */
+	private void validateAdd(Session s){
+		if (!SecurityManager.INSTANCE.canAccess(s, 
+				request.getUserPrincipal().getName(), 
+				CaAction.ADDCA_KEY,
+				null)){
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to add a ca."); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
+		}
+	}
+	
+	
+	/*
+	 * Ensures the current user can update the give ca
+	 */
+	private void validateUpdate(UUID cauuid, Session s){
+		if (!SecurityManager.INSTANCE.canAccess(s, 
+				request.getUserPrincipal().getName(), 
+				CaAction.UPDATECA_KEY,
+				cauuid)){
+			logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to update the ca."); //$NON-NLS-1$ //$NON-NLS-2$
 			throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 		}
 	}
@@ -170,7 +197,7 @@ public class ConservationAreas extends HttpServlet{
 			for (ConservationAreaInfo ca : db){
 				//check to determine if ca is accessable by current user
 				try{
-					validateRead(ca, s);
+					validateRead(ca.getUuid(), s);
 					ConservationAreaProxy proxy = new ConservationAreaProxy(ca);
 					proxy.setRevision(ChangeLogManager.INSTANCE.getLastRevision(s, ca.getUuid()));
 					conservationAreas.add(proxy);
@@ -190,9 +217,12 @@ public class ConservationAreas extends HttpServlet{
 	}
 
 	/**
-	 * Gets a conservation area.  This function returns different information depending on parameters
-	 * provided.  If no paramaneters are provided it returns a json object
-	 * with information about the conservation area.  If data, version, and revision
+	 * Gets a conservation area.  
+	 * This function returns different information depending on parameters
+	 * provided:
+	 *  If no paramaneters are provided it returns a json object
+	 * with information about the conservation area.  
+	 * If data, version, and revision
 	 * are provided with a value of "changelog" for data then a zip file is
 	 * returned containing the change log.  In data is provided with a value of 
 	 * "all" then a url is returned that represents the status of the ca download
@@ -206,7 +236,7 @@ public class ConservationAreas extends HttpServlet{
     		@QueryParam("data") String data,
     		@QueryParam("version") String version,
     		@QueryParam("revision") String revision){
-		
+		//user validatation is done inside the various functions
 		if (data == null){
 			return getConservationAreaInfo(caUuid);
 		}else if (data != null){
@@ -228,6 +258,11 @@ public class ConservationAreas extends HttpServlet{
 		return null;
 	}
 	
+	/**
+	 * Gets the download file for the ca.  Ensures the user has read permissions to the ca.
+	 * @param statusUuid
+	 * @return
+	 */
 	private Response getExportFile(String statusUuid){
 		UUID uuid = null;
 		try{
@@ -245,8 +280,15 @@ public class ConservationAreas extends HttpServlet{
 			if (item == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "Download package not found.");
 			}
+			validateRead(item.getConservationAreaInfo().getUuid(), s);
 			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
+			throw ex;
 		}catch (Exception ex){
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
+			logger.log(Level.SEVERE, "Unable to get download file." + ex.getMessage(), ex);
+			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to get download file.", ex); 
 		}
 	
 		if (item.getType() != WorkItem.Type.DOWN_CA &&
@@ -338,7 +380,7 @@ public class ConservationAreas extends HttpServlet{
 	 * Initiates the process to build a conservation area extract
 	 * and returns the location of a status url where the status
 	 * can be retrieved and when complete the download url.
-	 * 
+	 * Validate the user has read ca permission
 	 * @param caUuid
 	 * @return
 	 */
@@ -356,6 +398,7 @@ public class ConservationAreas extends HttpServlet{
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			validateRead(uca, s);
 			info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uca);
 			if (info == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found.");	
@@ -374,7 +417,11 @@ public class ConservationAreas extends HttpServlet{
 			s.save(item);
 
 			s.getTransaction().commit();
+		}catch(SmartConnectException ex){
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
+			throw ex;
 		}catch (Exception ex){
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
 			logger.log(Level.SEVERE, "Unable to start download conservation area process. " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to create package", ex);
 		}
@@ -402,6 +449,14 @@ public class ConservationAreas extends HttpServlet{
 		}
 	}
 	
+	/**
+	 * Validates the user has read permission to the given ca then initiates
+	 * the building change log process.
+	 * @param caUuid
+	 * @param version
+	 * @param revision
+	 * @return
+	 */
 	private Response buildChangeLog(String caUuid, String version, String revision) {
 		
 		UUID uca = null;
@@ -422,6 +477,7 @@ public class ConservationAreas extends HttpServlet{
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
+			validateRead(uca, s);
 			info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, uca);
 			if (info == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found.");	
@@ -443,12 +499,15 @@ public class ConservationAreas extends HttpServlet{
 			s.save(item);
 
 			s.getTransaction().commit();
+		}catch (SmartConnectException ex){
+			if (s.getTransaction().isActive()) s.getTransaction().rollback();
+			throw ex;
 		}catch (Exception ex){
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
-			
 			logger.log(Level.SEVERE, "Unable to start conservation area change log download. " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, "Unable to create package", ex);
 		}
+		
 		try{
 			String finishurl = 	request.getScheme() + "://" + request.getServerName()  //$NON-NLS-1$
 				+ ":" + request.getServerPort()  //$NON-NLS-1$
@@ -467,6 +526,7 @@ public class ConservationAreas extends HttpServlet{
 				.status(Response.Status.ACCEPTED)
 				.header(HttpHeaders.LOCATION, url)
 				.entity("{\"location\": \"" + url + "\"}").build();
+		
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Unable to start conservation area change log package process. " + ex.getMessage(), ex);
 			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, "Unable to create package", ex);
@@ -478,7 +538,18 @@ public class ConservationAreas extends HttpServlet{
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			ConservationAreaInfo info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, UUID.fromString(caUuid));
+			UUID cuuid = UUID.fromString(caUuid);
+			try {
+				validateRead(cuuid, s);
+			}catch (Exception ex){
+				try{
+					validateAdd(s);
+				}catch (Exception e2){
+					throw ex;
+				}
+			}
+			
+			ConservationAreaInfo info = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, cuuid);
 			if (info == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND);
 			}
@@ -636,6 +707,7 @@ public class ConservationAreas extends HttpServlet{
 			}
 			
 			if (ca == null){
+				validateAdd(s);
 				ca = new ConservationAreaInfo();
 				ca.setUuid(uuid);
 				ca.setStatus(Status.UPLOADING);
@@ -643,6 +715,7 @@ public class ConservationAreas extends HttpServlet{
 				ca.setVersion(version);
 				s.save(ca);
 			}else{
+				validateUpdate(ca.getUuid(), s);
 				if (ca.getStatus() == Status.NODATA){
 					//we can upload data
 					ca.setVersion(version);
@@ -710,7 +783,7 @@ public class ConservationAreas extends HttpServlet{
 			if (ca == null){
 				throw new SmartConnectException(Response.Status.NOT_FOUND, "Conservation area not found on server.");
 			}
-
+			validateUpdate(ca.getUuid(), s);
 			
 			String lengthHeader = headers.getRequestHeader("X-Upload-Content-Length").get(0); //$NON-NLS-1$
 			if (lengthHeader == null){

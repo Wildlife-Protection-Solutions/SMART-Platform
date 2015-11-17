@@ -33,13 +33,24 @@ import org.wcs.smart.connect.replication.metadata.MetadataPackager;
 import org.wcs.smart.connect.replication.metadata.PackageMetadata;
 
 /**
- * Metadata packager for postgresql
+ * Metadata packager for postgresql.
  * 
  * @author Emily
  *
  */
 public class PostgresqlMetadataCreator {
 	
+	/**
+	 * Generates a metadata package file for the given conservation
+	 * area and revision.
+	 * 
+	 * @param session database session
+	 * @param caUuid conservation area id
+	 * @param file file to write to 
+	 * @param revision the revision number to write to the metadata packagee
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
 	public static void generateMetadata(Session session, 
 			UUID caUuid, Path file, long revision) throws Exception{
 		

@@ -202,8 +202,8 @@ public class ConnectUserAction extends HttpServlet {
     @Path("/{username}/{action}/{resource}")
     public void deleteUserActions(@PathParam("username") String username,
     		@PathParam("action") String action,
-    		@PathParam("resource") String resource
-    		){
+    		@PathParam("resource") String resource){
+		
 		validateUser();
 		
 		Session s = HibernateManager.getSession(context);
@@ -215,8 +215,12 @@ public class ConnectUserAction extends HttpServlet {
 					.add(Restrictions.eq("action", action)) //$NON-NLS-1$
 					.list();
 			
+			
 			for(SmartUserAction a : actions){
-				s.delete(a);
+				if ((resource == null && a.getResource() == null) ||
+					(a.getResource() != null && a.getResource().toString().equals(resource))){		
+					s.delete(a);
+				}
 			}
 			s.flush();
 			

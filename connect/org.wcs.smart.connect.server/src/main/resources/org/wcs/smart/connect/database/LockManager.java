@@ -34,6 +34,7 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 public enum LockManager {
 
 	INSTANCE;
+	
 	public void lockDatabase(Session session, ConservationAreaInfo info) throws Exception{
 		Integer lockKey = info.getLockKey();
 		session.createSQLQuery("SELECT cast(pg_advisory_lock(" + lockKey + ") as varchar)").list();

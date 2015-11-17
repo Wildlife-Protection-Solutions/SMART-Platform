@@ -43,6 +43,7 @@ public class CaAction implements ISmartConnectAction{
 	public static final String VIEWCA_KEY = "viewca"; //$NON-NLS-1$
 	public static final String DELETECA_KEY = "deleteca"; //$NON-NLS-1$
 	public static final String UPDATECA_KEY = "updateca"; //$NON-NLS-1$
+	public static final String ADDCA_KEY = "addca"; //$NON-NLS-1$
 	
 	@Override
 	public String getActionName(String actionKey, Locale l) {
@@ -52,17 +53,22 @@ public class CaAction implements ISmartConnectAction{
 			return Messages.getString("CaAction.DeleteCaPermission", l); //$NON-NLS-1$
 		}else if (actionKey.equals(UPDATECA_KEY)){
 			return Messages.getString("CaAction.UpdateCaPermission", l); //$NON-NLS-1$
+		}else if (actionKey.equals(ADDCA_KEY)){
+			return Messages.getString("CaAction.AddCaPermission", l); //$NON-NLS-1$
 		}
 		return null;
 	}
 
 	@Override
 	public String[] getActionKeys() {
-		return new String[]{VIEWCA_KEY, DELETECA_KEY, UPDATECA_KEY};
+		return new String[]{ADDCA_KEY, VIEWCA_KEY, UPDATECA_KEY, DELETECA_KEY};
 	}
 
 	@Override
 	public List<ResourceOption> getResourceOptions(String actionKey, Session s, Locale l) {
+		if (actionKey.equals(ADDCA_KEY)){
+			return null;
+		}
 		List<ResourceOption> ops = new ArrayList<ResourceOption>();
 		ResourceOption ro = new ResourceOption(Messages.getString("CaAction.AllCas", l), null); //$NON-NLS-1$
 		ops.add(ro);

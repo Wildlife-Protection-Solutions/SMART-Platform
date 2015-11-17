@@ -48,6 +48,13 @@ public enum ItemProcessManager {
 	};
 	
 	
+	/**
+	 * Processes a work item 
+	 * 
+	 * @param item
+	 * @param session
+	 * @throws Exception
+	 */
 	public void processItem(WorkItem item, Session session) throws Exception{
 		//update status
 		session.beginTransaction();
@@ -68,6 +75,11 @@ public enum ItemProcessManager {
 		}
 	}
 	
+	/**
+	 * Find the processor for a given item
+	 * @param item
+	 * @return
+	 */
 	private IUploadItemProcessor findProcessor(WorkItem item){
 		for (IUploadItemProcessor p : processors){
 			if (p.getSupportedType().equals(item.getType())){

@@ -110,18 +110,32 @@ public class HibernateManager {
 					.list();
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<StyleConfiguration> getStyleConfigurations(Session session) {
 		return (List<StyleConfiguration>)session
 				.createCriteria(StyleConfiguration.class)
 				.list();
 	}
 
+	/**
+	 * 
+	 * @param session
+	 * @return a list of conservation areas in the system
+	 */
+	@SuppressWarnings("unchecked")
 	public static List<ConservationAreaInfo> getConservationAreaInfos(Session session) {
 		return (List<ConservationAreaInfo>)session
 				.createCriteria(ConservationAreaInfo.class)
 				.list();
 	}
 
+	/**
+	 * 
+	 * @param session
+	 * @param caUuid
+	 * @return a specific conservation area 
+	 */
+	@SuppressWarnings("unchecked")
 	public static ConservationAreaInfo getConservationAreaInfo(Session session, UUID caUuid) {
 		return (ConservationAreaInfo)session
 				.createCriteria(ConservationAreaInfo.class)
@@ -129,6 +143,7 @@ public class HibernateManager {
 				.uniqueResult();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static List<AlertType> getAlertTypes(Session session) {
 		return (List<AlertType>)session
 				.createCriteria(AlertType.class)
@@ -136,6 +151,7 @@ public class HibernateManager {
 				.list();
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<Alert> getAlerts(Session session) {
 		return (List<Alert>)session
 				.createCriteria(Alert.class)
@@ -166,6 +182,7 @@ public class HibernateManager {
 		return a;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<Alert> getAlertsByCa(Session session, UUID caUuid) {
 		return (List<Alert>)session
 				.createCriteria(Alert.class)
@@ -173,6 +190,7 @@ public class HibernateManager {
 				.list();
 	}
 	
+	@SuppressWarnings("unchecked")
 	public static List<MapLayer> getMapLayers(Session session) {
 		return (List<MapLayer>)session
 				.createCriteria(MapLayer.class)
@@ -196,6 +214,7 @@ public class HibernateManager {
 		return m;
 	}
 
+	@SuppressWarnings("unchecked")
 	public static List<AlertFilterDefault> getAlertFilterDefaults(Session session) {
 		return (List<AlertFilterDefault>)session
 				.createCriteria(AlertFilterDefault.class)

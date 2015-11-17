@@ -39,6 +39,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -104,7 +105,19 @@ public class ConnectUser extends HttpServlet {
 	
 	@GET
     @Path("/{username}")
-    public SmartUser getUser(@PathParam("username") String username){
+    public SmartUser getUser(@PathParam("username") String username, @QueryParam("validate") String validateOnly){
+		Boolean validate = false;
+		if (validateOnly != null){
+			try{
+				validate = Boolean.valueOf(validateOnly);
+			}catch (Exception ex){
+				throw new SmartConnectException(Response.Status.BAD_REQUEST, "Invalid validate parameter.");
+			}
+		}
+		if (validate){
+			return null;
+		}
+		
 		validateUser();
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();

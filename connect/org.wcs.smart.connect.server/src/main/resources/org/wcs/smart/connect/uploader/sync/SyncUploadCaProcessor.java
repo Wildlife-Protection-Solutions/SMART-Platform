@@ -36,6 +36,14 @@ import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.uploader.IUploadItemProcessor;
 
+/**
+ * Processing for processing uploaded change logs.
+ * This locks the database for the given conservation area, applies
+ * the change log, then unlocks the database.
+ * 
+ * @author Emily
+ *
+ */
 public class SyncUploadCaProcessor implements IUploadItemProcessor {
 	
 	private final Logger logger = Logger.getLogger(SyncUploadCaProcessor.class.getName());
