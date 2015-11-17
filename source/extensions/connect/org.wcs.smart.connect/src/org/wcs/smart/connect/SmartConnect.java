@@ -258,7 +258,7 @@ public class SmartConnect {
 			ResteasyWebTarget target = client.target(server.getServerUrl() + API_URL);
 		
 			ConnectClient simple = target.proxy(ConnectClient.class);
-			simple.getUser(username);
+			simple.getUser(username, Boolean.TRUE.toString());
 			return null;
 		}catch(Throwable t){
 			return processException(t);
@@ -603,7 +603,7 @@ public class SmartConnect {
 		if (ex instanceof NotFoundException){
 			msg = MessageFormat.format("Could not connect to ({0}).", new Object[]{server.getServerUrl()});
 		}else if (ex instanceof NotAuthorizedException){
-			msg = "Invalid SMART Connect username or password.";
+			msg = "Invalid username or password, or user not permitted to perform operation.";
 		}else if (ex.getCause() instanceof javax.net.ssl.SSLHandshakeException){
 			msg = "Could not connect to server: " + ex.getCause().getMessage();
 		}else{

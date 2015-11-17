@@ -57,7 +57,7 @@ public interface ConnectClient {
 	@GET
     @Path("/" + USER_PATH + "/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
-    String getUser(@PathParam("username") String username);
+    String getUser(@PathParam("username") String username, @QueryParam("validate") String validateOnly);
 	
 	@GET
     @Path("/" + CA_PATH )

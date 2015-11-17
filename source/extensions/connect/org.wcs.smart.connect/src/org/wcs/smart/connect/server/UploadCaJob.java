@@ -125,10 +125,10 @@ public class UploadCaJob extends FileUploaderJob {
 
 
 	@Override
-	protected void onError(WorkItemStatus upstatus) {
+	protected void onError(String errorMessage) {
 		this.status.setStatus(ConnectServerStatus.Status.ERROR);
 		saveStatus();
-		displayComplete(upstatus == null ? "Local error uploading file." : upstatus.getMessage());	
+		displayComplete(errorMessage == null ? "Local error uploading file." : errorMessage);	
 		
 		//error disable and cleanup replication details
 		Session s = HibernateManager.openSession();

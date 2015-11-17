@@ -74,6 +74,9 @@ public class CaListPage extends WizardPage implements ISelectionChangedListener{
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
+					if (dataca.isEmpty()){
+						setErrorMessage("No Conservation Areas found on server that you have permission to view.");
+					}
 					cmbList.setInput(dataca);		
 					cmbList.refresh();
 				}
