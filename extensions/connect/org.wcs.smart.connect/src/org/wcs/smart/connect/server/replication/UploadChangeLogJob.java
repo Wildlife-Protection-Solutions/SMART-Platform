@@ -69,7 +69,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 			url = connect.getSyncUploadUrl(item.getConservationArea().getUuid(), file);
 		}catch (Exception ex){
 			ConnectPlugIn.log(ex.getMessage(), ex);
-			onError(null);
+			onError(ex.getMessage());
 			return Status.OK_STATUS;
 		}
 		
@@ -121,12 +121,12 @@ public class UploadChangeLogJob extends FileUploaderJob {
 	}
 
 	@Override
-	protected void onError(WorkItemStatus upstatus) {
+	protected void onError(String errorMessage) {
 		item.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
 		saveHistoryRecord();
 		deleteLocalFile();
-		if (upstatus != null){
-			item.setErrorString(upstatus.getMessage());
+		if (errorMessage != null){
+			item.setErrorString(errorMessage);
 		}
 		
 		super.connect.close();

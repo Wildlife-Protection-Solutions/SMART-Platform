@@ -92,7 +92,7 @@ public abstract class FileUploaderJob extends Job {
 			throw new Exception(MessageFormat.format("Upload reached max tries of {0}.  Please validate server connection and try again.", connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)));
 		}catch(Exception ex){
 			serverStatus.setMessage(ex.getMessage());
-			onError(serverStatus);
+			onError(serverStatus.getMessage());
 			throw ex;
 		}
 	}
@@ -136,7 +136,7 @@ public abstract class FileUploaderJob extends Job {
 			return true;
 			
 		}else if (serverStatus.getStatus() == Status.ERROR){
-			onError(serverStatus);
+			onError(serverStatus.getMessage());
 			//we are done; something went wrong but we do not know what
 			return true;
 		}
@@ -164,7 +164,7 @@ public abstract class FileUploaderJob extends Job {
 					onProcessingComplete(serverStatus);
 					return true;
 				}else if (serverStatus.getStatus() == Status.ERROR){
-					onError(serverStatus);
+					onError(serverStatus.getMessage());
 					return true;
 				}
 			}catch (Exception ex){
@@ -195,5 +195,5 @@ public abstract class FileUploaderJob extends Job {
 	 * 
 	 * @param status
 	 */
-	protected abstract void onError(WorkItemStatus status);
+	protected abstract void onError(String errorMessage);
 }
