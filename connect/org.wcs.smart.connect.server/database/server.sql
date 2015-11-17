@@ -306,14 +306,6 @@ COMMENT ON TABLE connect.user_roles IS 'A list of webserver roles supported by e
 COMMENT ON COLUMN connect.user_roles.username IS 'The unique username.';
 COMMENT ON COLUMN connect.user_roles.role IS 'The webserver role.';
 
-CREATE TABLE connect.change_log_info(
-	last_delete_revision BIGINT
-)
-INSERT INTO connect.change_log_info values (-1);
-COMMENT ON TABLE connect.change_log_info IS 'Information about the change log table.';
-COMMENT ON COLUMN connect.change_log_info.last_delete_revision IS 'The last revision to be removed as part of the clean up process.';
-
-
 CREATE TABLE connect.change_log(
 	uuid UUID,
 	revision BIGSERIAL,

@@ -36,6 +36,8 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.api.Uploader;
 import org.wcs.smart.connect.datastore.DataStoreManager;
+import org.wcs.smart.connect.hibernate.HibernateManager;
+import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Status;
 import org.wcs.smart.connect.model.WorkItem.Type;
@@ -263,8 +265,10 @@ public class CleanUpJob implements Runnable {
 		Date lastDate = new Date((new Date()).getTime() - changeLogCleanUpDays * 24l * 60 *60 *1000);
 		session.beginTransaction();
 		try{
-			Long maxRevision = ChangeLogManager.INSTANCE.getLastRevision(session, lastDate);
-			ChangeLogManager.INSTANCE.deleteItems(session, maxRevision);
+			for (ConservationAreaInfo ca : HibernateManager.getConservationAreaInfos(session)){
+				Long maxRevision = ChangeLogManager.INSTANCE.getLastRevision(session, lastDate, ca.getUuid());
+				ChangeLogManager.INSTANCE.deleteItems(session, maxRevision, ca.getUuid());
+			}
 			session.getTransaction().commit();
 		}catch (Exception ex){
 			logger.log(Level.SEVERE, "Could not clean up change log.", ex.getMessage());
