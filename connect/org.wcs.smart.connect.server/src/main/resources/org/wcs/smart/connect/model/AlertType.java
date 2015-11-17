@@ -25,12 +25,22 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+
+/*
+ * An AlertType entity
+ * 
+ * Users can define new alertTypes with the attributes in this class.
+ *
+ * @Author Jeff
+ */
+
+
 @Entity
 @Table(name = "connect.alert_types")
 public class AlertType extends ConnectUuidItem{
 	private String key;
 	private String label;
-	private String color;
+	private String color; 
 	private String fillColor;
 	private String opacity;
 	

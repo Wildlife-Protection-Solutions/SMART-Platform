@@ -51,6 +51,14 @@ import org.wcs.smart.connect.model.AlertFilterDefault;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
+/**
+ * Smart Connect REST API for default filters used on the alert/operations map.
+ * allows users to get and set what the defaults are, only one default is allowed for  
+ * all users and cas across a single Connect instance, although the database is designed to allow for more eventually.
+ * 
+ * @author Jeff
+ *
+ */
 
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlertFilterDefault.PATH)
 

@@ -30,6 +30,11 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.Type;
 
+/*
+ * An Alert entity
+ *
+ * @Author Jeff
+ */
 @Entity
 @Table(name = "connect.alerts")
 public class Alert extends ConnectUuidItem{

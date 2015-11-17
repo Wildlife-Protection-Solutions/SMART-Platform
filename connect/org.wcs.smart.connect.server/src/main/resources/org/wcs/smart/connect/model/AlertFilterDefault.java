@@ -25,6 +25,13 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/*
+ * An AlertFilterDefault entity
+ *
+ * Holds all values for a set of default values that specify what defaults are to be used in an Alert map.
+ *
+ * @Author Jeff
+ */
 
 @Entity
 @Table(name = "connect.alert_filter_defaults")

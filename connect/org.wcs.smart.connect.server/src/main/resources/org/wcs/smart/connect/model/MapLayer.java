@@ -25,6 +25,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/*
+ * An MapLayer entity
+ *
+ * A map layer, contain information about how to render this layer, can be a WMS, Mapbox or GISCloud layer.
+ * token: used only for 
+ *
+ * @Author Jeff
+ */
+
 @Entity
 @Table(name = "connect.map_layers")
 public class MapLayer extends ConnectUuidItem{

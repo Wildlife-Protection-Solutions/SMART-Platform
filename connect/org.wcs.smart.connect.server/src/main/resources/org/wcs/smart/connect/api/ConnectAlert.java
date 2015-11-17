@@ -64,8 +64,17 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
-@Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlert.PATH)
 
+/**
+ * Smart Connect REST API for Alerts and alert types.
+ * 'getAllAlerts' returns geojson so it can be drawn directly on maps
+ * 
+ * @author Jeff
+ *
+ */
+
+
+@Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectAlert.PATH)
 @Consumes({ MediaType.APPLICATION_JSON})
 @Produces({ MediaType.APPLICATION_JSON })
 public class ConnectAlert extends HttpServlet {
@@ -233,7 +242,11 @@ public class ConnectAlert extends HttpServlet {
 		return toDelete;
     }
 	
-	
+	/*
+	 * Main function used by the alert map to take all filters and provide matching filters in GeoJSON so it can be directly drawn on the map.
+	 * 
+	 * all the parameters are strings because it was easier to send all the values from a HTML form that way, they are converted in the AlertFilter Class
+	 */
 	@GET
     @Path("")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)

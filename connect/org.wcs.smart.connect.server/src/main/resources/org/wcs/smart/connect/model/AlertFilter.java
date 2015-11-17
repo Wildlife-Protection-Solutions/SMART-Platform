@@ -38,6 +38,13 @@ import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 
+
+/*
+ * AlertFilter is an object that hold all the filter information for specifying exactly what alerts the user is looking for.
+ * 
+ * The constructor takes string filters from the HTML form that typically provides them, then converts to proper types for each filter.
+ */
+
 public class AlertFilter {
 	private ArrayList<Integer> levelFilter;
 	private List<UUID> typeUuidFilter;
@@ -137,12 +144,14 @@ public class AlertFilter {
 	
 	public List<Alert> getAlerts(Session session){
 		Criteria c = session.createCriteria(Alert.class);
+		List<Alert> emptyList = new ArrayList<Alert>();
+		
 		
 		//level
 		if(levelFilter != null){
 			Disjunction or = Restrictions.disjunction();
 			if(levelFilter.size() == 0){
-				or.add(Restrictions.eq("level", -99999));
+				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
 			for(int x=0; x < levelFilter.size();x++){
 				or.add(Restrictions.eq("level", levelFilter.get(x)));
@@ -155,7 +164,8 @@ public class AlertFilter {
 		if(typeUuidFilter != null){
 			Disjunction or = Restrictions.disjunction();
 			if(typeUuidFilter.size() == 0){
-				or.add(Restrictions.eq("typeUuid", UUID.fromString("99999999-9999-9999-9999-999999999999")) );
+				return emptyList; //if you have no options selected, your result will always be no alerts.				
+
 			}
 			for(int x=0; x < typeUuidFilter.size();x++){
 				or.add(Restrictions.eq("typeUuid", typeUuidFilter.get(x) ));
@@ -166,7 +176,7 @@ public class AlertFilter {
 		if(statusFilter != null){
 			Disjunction or = Restrictions.disjunction();
 			if(statusFilter.size() == 0){
-				or.add(Restrictions.eq("status", "showNoRows"));
+				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
 			for(int x=0; x < statusFilter.size();x++){
 				or.add(Restrictions.eq("status", statusFilter.get(x) ));
@@ -178,7 +188,7 @@ public class AlertFilter {
 		if(caUuidFilter != null){
 			Disjunction or = Restrictions.disjunction();
 			if(caUuidFilter.size() == 0){
-				or.add(Restrictions.eq("caUuid", UUID.fromString("99999999-9999-9999-9999-999999999999")) );
+				return emptyList; //if you have no options selected, your result will always be no alerts.
 			}
 			for(int x=0; x < caUuidFilter.size();x++){
 				or.add(Restrictions.eq("caUuid", caUuidFilter.get(x) ));

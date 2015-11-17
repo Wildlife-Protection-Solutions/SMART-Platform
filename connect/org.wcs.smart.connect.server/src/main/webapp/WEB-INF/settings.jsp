@@ -54,11 +54,13 @@
 	<div class="block" style="text-align:left"><b><fmt:message key="settings.defaultsheader" /></b>
 	</div>
 	<table id="defaultstable">
-	<form id="filter-form" name="filter-form" onsubmit="return false;">
-	<input id="filter_uuid" type="hidden" name="uuid" />
+
+		<tr class="table-defaults-row smart-table-header"><th>
+			<form id="filter-form" name="filter-form" onsubmit="return false;">
+			<input id="filter_uuid" type="hidden" name="uuid" />
 		
 		
-		<tr class="table-defaults-row smart-table-header"><th><fmt:message key="settings.datetime" /></th><th><fmt:message key="settings.alerttypes" /></th><th><fmt:message key="settings.alertstatus" /></th><th><fmt:message key="settings.alertlevel" /></th><th><fmt:message key="settings.castoinclude" /></th><th><fmt:message key="settings.textfilter" /></th><th style="width:14em"><fmt:message key="actions" /></th>
+		<fmt:message key="settings.datetime" /></th><th><fmt:message key="settings.alerttypes" /></th><th><fmt:message key="settings.alertstatus" /></th><th><fmt:message key="settings.alertlevel" /></th><th><fmt:message key="settings.castoinclude" /></th><th><fmt:message key="settings.textfilter" /></th><th style="width:14em"><fmt:message key="actions" /></th>
 		</tr>
 		<tr class="smart-table-rowon">
 		<td>
@@ -112,25 +114,21 @@
 		<td>
 			<fmt:message key="alert.filters.text" /><br>
 			<input id='filterText' class='updateChange' style='width:7em' name="textFilter" type="text"></input>
-			</p> 
-
-			
 		</td>
 		<td>
-			<font class="defaultLabel"><fmt:message key="settings.refresh" /> </font> <input id='secondsRefresh' class='updateChange' style='width:3.5em' 'name="secondsRefresh" type="number" min=5></input><br>
-			<font class="defaultLabel"><fmt:message key="settings.startingzoom" /></font> <input id='startingZoom' class='updateChange' style='width:3.5em' 'name="startingZoom" type="number" min=1 max=12></input> <br>
-			<font class="defaultLabel"><fmt:message key="settings.startinglong" /></font> <input id='startingLong' class='updateChange' style='width:3.5em' 'name="startingLat" type="text" ></input> <br>
-			<font class="defaultLabel"><fmt:message key="settings.startinglat" /></font> <input id='startingLat' class='updateChange' style='width:3.5em' 'name="startingLong" type="text" ></input> <br>
-			
-			</p> 
+			<font class="defaultLabel"><fmt:message key="settings.refresh" /> </font> <input id='secondsRefresh' class='updateChange' style='width:3.5em' name="secondsRefresh" type="number" min=5></input><br>
+			<font class="defaultLabel"><fmt:message key="settings.startingzoom" /></font> <input id='startingZoom' class='updateChange' style='width:3.5em' name="startingZoom" type="number" min=1 max=12></input> <br>
+			<font class="defaultLabel"><fmt:message key="settings.startinglong" /></font> <input id='startingLong' class='updateChange' style='width:3.5em' name="startingLat" type="text" ></input> <br>
+			<font class="defaultLabel"><fmt:message key="settings.startinglat" /></font> <input id='startingLat' class='updateChange' style='width:3.5em' name="startingLong" type="text" ></input> <br>
 
 		<button class="button top-spacer" id="btnUpdateDefaults"><fmt:message key="settings.savedefaults" /></button>
 <!-- 		<button class="button top-spacer" id="btnResetDefaults">Reload Defaults</button> -->
 
+		</form>
 		</td>
 		</tr>
 	</table>
-	</form>
+
 </div>
   
 <!-- <div class="top-spacer"  style="margin-left: -20px" > -->
@@ -156,7 +154,6 @@
 
 </div>
 
-</div>
 <%@include file="footer.jsp" %>
 
 

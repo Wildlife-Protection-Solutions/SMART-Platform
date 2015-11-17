@@ -127,7 +127,7 @@
 	</div>
 	
 	<div id="filter-controls">
-			<a id="filter-link" onClick="hideShowFilters()"><image id="filter-button"/><fmt:message key="alert.showfilters" /></a>
+			<a id="filter-link" onClick="hideShowFilters()"><img id="filter-button"/><fmt:message key="alert.showfilters" /></a>
 
 			<form id="filter-form" name="filter-form" onsubmit="return false;">
 			<input id="sortBy" type="hidden" name="sortBy" value="userGeneratedId"/>

@@ -53,6 +53,20 @@ import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
+
+/**
+ * Smart Connect REST API for Alert/operations map saved layers.
+ * 
+ * Users can add new layers using this api to configure their Connect basemap.
+ * The connect web page also uses this api when loading to get all the information
+ * for layers it is supposed to draw.
+ * 
+ * Currently this is setup to have only a single configuration across each Connect instance. 
+ * 
+ * @author Jeff
+ *
+ */
+
 @Path(ConnectRESTApplication.PATH_SEPERATOR + ConnectMapLayers.PATH)
 
 @Consumes({ MediaType.APPLICATION_JSON})

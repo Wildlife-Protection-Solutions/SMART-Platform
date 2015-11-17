@@ -32,7 +32,9 @@ import org.hibernate.engine.spi.SessionImplementor;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
  
 /**
+ * AlertStatusType entity
  * 
+ *  Needed to get JSON conversions to work in RESTEasy APIs 
  *
  */
 public class AlertStatusType extends GenericEnumType<String, AlertStatusEnum> {

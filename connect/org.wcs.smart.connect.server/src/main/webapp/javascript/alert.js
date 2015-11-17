@@ -686,7 +686,8 @@ function updateRealtimeLayer(updatedUrl){
 
 
 //----------------------------------------------------------------------------
-//javascript client-side filtering.
+//javascript client-side filtering. -Might need to go back to this in future or have some combination. For now it is all server-side
+//(we don't really want to send 1000 alerts every request, then filter out past 24hrs or only active ones etc.)
 
 //function eventFilter(feature, layer){
 //	if(applyFilter("filterImportance",feature.properties.level)
