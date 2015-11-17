@@ -94,18 +94,23 @@ public class DownloadChangeLogJob extends Job {
 			}
 			monitor.worked(1);
 			
-			/* download file */
-			monitor.subTask("Downloading Upload Package");
-			String message = status.getMessage();
-			JsonNode nd = (new ObjectMapper()).readTree(message);
-			String downloadUrl = nd.get("file_url").asText();
-			if (monitor.isCanceled()) return cancelled();
-			Integer promptSize = null;
-			if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
-				promptSize = connect.getServer().getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE);
+			if (status.getStatus() == WorkItemStatus.Status.ERROR){
+				record.setStatus(Status.ERROR);
+				record.setErrorString(SmartConnect.parseErrorMessage(status.getMessage()));
+			}else{
+				/* download file */
+				monitor.subTask("Downloading Upload Package");
+				String message = status.getMessage();
+				JsonNode nd = (new ObjectMapper()).readTree(message);
+				String downloadUrl = nd.get("file_url").asText();
+				if (monitor.isCanceled()) return cancelled();
+				Integer promptSize = null;
+				if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
+					promptSize = connect.getServer().getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE);
+				}
+				downloadFile = connect.downloadFileFromUrl(downloadUrl,promptSize);
+				monitor.worked(1);
 			}
-			downloadFile = connect.downloadFileFromUrl(downloadUrl,promptSize);
-			monitor.worked(1);
 			monitor.done();
 		}catch (PackageToLargeException ex){
 			record.setStatus(Status.ERROR);
