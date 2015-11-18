@@ -29,6 +29,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
@@ -41,6 +43,8 @@ import au.com.bytecode.opencsv.CSVReader;
  * @since 3.2.0
  */
 public class Csv2DbLoader {
+
+	private static final Logger logger = LogManager.getLogger(Csv2DbLoader.class); 
 	
 	private char DELIMETER = ',';
 
@@ -54,7 +58,7 @@ public class Csv2DbLoader {
 		try {
 			c.createStatement().executeUpdate("DROP TABLE CSV_TO_SMART.CSV"); //$NON-NLS-1$
 		} catch (SQLException e) {
-			System.out.println("Drop CSV table is not required"); //$NON-NLS-1$
+			logger.info("Drop CSV table is not required"); //$NON-NLS-1$
 			//ignore, table doesn't exist
 		}
 		c.createStatement().executeUpdate("create table csv_to_smart.csv (id integer not null, primary key (id))"); //$NON-NLS-1$

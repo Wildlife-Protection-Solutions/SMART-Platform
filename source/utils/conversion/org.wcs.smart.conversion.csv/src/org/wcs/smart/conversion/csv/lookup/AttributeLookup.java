@@ -23,11 +23,18 @@ package org.wcs.smart.conversion.csv.lookup;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.wcs.smart.conversion.csv.tool.AbstractCsvExtractor;
+
 public class AttributeLookup {
 	
+	private static final Logger logger = LogManager.getLogger(AttributeLookup.class); 
+
 	private Map<String, Integer> i2Column;
 	
 	public AttributeLookup(Connection c)  {
@@ -39,9 +46,9 @@ public class AttributeLookup {
 				i2Column.put(rs.getString(1), rs.getInt(2));
 			}
 			rs.close();
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			i2Column = null;
-			e.printStackTrace();
+			logger.error("Failed to create attributes lookup.", e);
 		}
 	}
 

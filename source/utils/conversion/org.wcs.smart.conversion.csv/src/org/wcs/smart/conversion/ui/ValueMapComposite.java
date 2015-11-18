@@ -160,7 +160,6 @@ public class ValueMapComposite extends Composite implements ILanguageChangedList
 					logger.error("Error closing writer.", e); //$NON-NLS-1$
 				}
 				logger.error("Error exporting CSV.", ex); //$NON-NLS-1$
-				ex.printStackTrace();
 			}
 		}
 	}
