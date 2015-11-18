@@ -294,7 +294,7 @@ public class LoginHandler implements ILoginHandler {
 				
 				s.beginTransaction();
 				for (ConnectSyncHistoryRecord r : allActive){
-					if (r != record){
+					if (!r.equals(record)){
 						r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
 						s.saveOrUpdate(r);
 					}

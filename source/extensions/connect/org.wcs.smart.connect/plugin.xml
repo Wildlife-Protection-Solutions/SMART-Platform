@@ -83,11 +83,41 @@
             <command
                   commandId="org.wcs.smart.connect.server.exportca"
                   style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <command
                   commandId="org.wcs.smart.connect.configuration.show"
                   style="push"
                   tooltip="configure the smart connect server for this conservation area">
+               <visibleWhen
+                     checkEnabled="false">
+                  <or>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="admin">
+                     </test>
+                     <test
+                           forcePluginActivation="true"
+                           property="org.wcs.smart.smartAdminUser"
+                           value="manager">
+                     </test>
+                  </or>
+               </visibleWhen>
             </command>
             <visibleWhen
                   checkEnabled="false">
