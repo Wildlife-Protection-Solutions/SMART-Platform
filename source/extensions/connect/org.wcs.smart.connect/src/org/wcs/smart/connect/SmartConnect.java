@@ -23,15 +23,10 @@ package org.wcs.smart.connect;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.nio.channels.Channel;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -61,7 +56,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.conn.ClientConnectionManager;
@@ -80,8 +74,10 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.wcs.smart.SmartContext;
-import org.wcs.smart.connect.IOUtils.CopyProgressMonitor;
 import org.wcs.smart.connect.api.ConnectClient;
+import org.wcs.smart.connect.api.io.CopyProgressMonitor;
+import org.wcs.smart.connect.api.io.IOUtils;
+import org.wcs.smart.connect.api.io.ProgressInputStream;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.model.ConnectServer;
@@ -423,10 +419,8 @@ public class SmartConnect {
 	private boolean promptToDownload(final Long actualSize, final Long checkSize){
 		final boolean[] cont = new boolean[]{false};
 		Display.getDefault().syncExec(new Runnable(){
-
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				cont[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
 						"Download File", 
 						MessageFormat.format("The file to download ({0} MB) is greater than {1} MB.  Do you wish to continue?", actualSize / 1000000.0, checkSize/1000000.0));		
@@ -465,7 +459,7 @@ public class SmartConnect {
 		Long size = null;
 		
 		long waitTime = server.getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
-		org.wcs.smart.connect.IOUtils.CopyProgressMonitor copyMonitor = null;
+		CopyProgressMonitor copyMonitor = null;
 		//first request; this one gives us the requested size
 		while(size == null && tryCount < server.getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_DOWNLOAD )){
 			Response r = null;
@@ -476,8 +470,7 @@ public class SmartConnect {
 			
 				if (r.getStatus() == HttpURLConnection.HTTP_OK){
 					size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
-					monitor.beginTask("Downloading file", 100);
-					copyMonitor = new org.wcs.smart.connect.IOUtils.CopyProgressMonitor(monitor, size);
+					copyMonitor = new CopyProgressMonitor(monitor, size);
 					if (promptDownloadSizeMb != null &&
 							size > promptDownloadSizeMb * 1000000 ){
 						//prompt to download before continuing
@@ -488,7 +481,7 @@ public class SmartConnect {
 					//parse target
 					try(InputStream is = r.readEntity(InputStream.class);
 							OutputStream out = Files.newOutputStream(filestore)){
-						org.wcs.smart.connect.IOUtils.copy(is, out, size, copyMonitor);
+						IOUtils.copy(is, out, copyMonitor);
 					}
 					
 					if (Files.size(filestore) > size){
@@ -559,7 +552,7 @@ public class SmartConnect {
 				//parse target
 				try(InputStream is = r.readEntity(InputStream.class);
 						OutputStream out = Files.newOutputStream(p, StandardOpenOption.CREATE, StandardOpenOption.APPEND)){
-					org.wcs.smart.connect.IOUtils.copy(is, out, (start-end), monitor);
+					IOUtils.copy(is, out, monitor);
 				}
 			}
 		}catch (InterruptedException ex){
@@ -604,7 +597,7 @@ public class SmartConnect {
 	 * @param f the file to upload
 	 * @param startbyte the start position in the file 
 	 */
-	public void uploadFile(String url, Path f, long startByte) throws Exception{
+	public void uploadFile(String url, Path f, long startByte, CopyProgressMonitor monitor) throws Exception{
         createClient();
         
 		//ensure we do not retry, retrying is a problem as it
@@ -613,7 +606,7 @@ public class SmartConnect {
         ((AbstractHttpClient )lclient).setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
         
         ConnectClient service =  client.target(url).proxy(ConnectClient.class);
-		try(InputStream fis = Files.newInputStream(f)){
+		try(InputStream fis = new ProgressInputStream(Files.newInputStream(f), monitor)){
 			fis.skip(startByte);
 			service.updateFile(fis);
 		}

@@ -76,7 +76,6 @@ public interface ConnectClient {
     @Path("/" + CA_PATH + "/{cauuid}")
     public Response downloadChangeLog(@PathParam("cauuid") String caUuid, @QueryParam("data") String data, @QueryParam("version") String version, @QueryParam("revision") String revision);
 	
-	
 	@GET
 	@Path("/" + UPLOAD_PATH + "/{uploaduuid}")
 	@Produces({ MediaType.APPLICATION_JSON })
