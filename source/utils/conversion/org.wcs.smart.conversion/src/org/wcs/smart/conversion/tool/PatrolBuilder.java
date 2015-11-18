@@ -141,7 +141,7 @@ public class PatrolBuilder extends AbstractBuilder {
 				MappedAttribute cta = getLookup().findAttribute(a.getI());
 				if (cta == null || cta.getType() == null) {
 					//attribute is unmapped; treat the same as ignore
-					System.out.println("Warning: No mapping for attribute: " + a.getN());
+					log(Level.WARN, "No mapping for attribute: " + a.getN());
 					continue;
 				}
 				WaypointObservationType obs;
@@ -175,7 +175,7 @@ public class PatrolBuilder extends AbstractBuilder {
 								obs.getAttributes().add(obsAttr);
 							}
 						} catch (NumberFormatException e) {
-							System.err.println(MessageFormat.format("Failed to convert to double. Attribute: {0} value: {1} mission_id: {2}. Attribute skipped.", a.getN(), a.getV(), patrol.getId()));
+							log(Level.ERROR, MessageFormat.format("Failed to convert to double. Attribute: {0} value: {1} mission_id: {2}. Attribute skipped.", a.getN(), a.getV(), patrol.getId()));
 							//throw e;
 						}
 						break;
@@ -228,14 +228,14 @@ public class PatrolBuilder extends AbstractBuilder {
 						if (!a.isEmptyV()) {
 							wp.setX(Double.valueOf(a.getV()));
 						} else {
-							System.out.println(MessageFormat.format("WARN: Empty logitude in patrol {0} waypint {1}", patrol.getId(), wp.getId()));
+							log(Level.WARN, MessageFormat.format("Empty logitude in patrol {0} waypint {1}", patrol.getId(), wp.getId()));
 						}
 						break;
 					case WP_LAT:
 						if (!a.isEmptyV()) {
 							wp.setY(Double.valueOf(a.getV()));
 						} else {
-							System.out.println(MessageFormat.format("WARN: Empty latitude in patrol {0} waypint {1}", patrol.getId(), wp.getId()));
+							log(Level.WARN, MessageFormat.format("Empty latitude in patrol {0} waypint {1}", patrol.getId(), wp.getId()));
 						}
 						break;
 					case META_MANDATE: {
@@ -251,7 +251,7 @@ public class PatrolBuilder extends AbstractBuilder {
 							mandate.setLanguageCode(getLanguageCode());
 							mandate.setValue(v);
 						} else if (!v.equals(mandate.getValue())) {
-							System.out.println("WARN: Two different mandates in one patrol (" + patrol.getId() + "): " + mandate.getValue() + " and " + v);
+							log(Level.WARN, "Two different mandates in one patrol (" + patrol.getId() + "): " + mandate.getValue() + " and " + v);
 						}
 						break;
 					}
@@ -284,7 +284,7 @@ public class PatrolBuilder extends AbstractBuilder {
 					case TRANSECT_START_LON:
 					case TRANSECT_END_LAT:
 					case TRANSECT_END_LON:
-						System.out.println("WARN: Transect mapping presents in patrol generation, patrols do not have transects");
+						log(Level.WARN, "Transect mapping presents in patrol generation, patrols do not have transects");
 						break;
 					case IGNORE:
 					case META_OBJECT_ID:
@@ -313,16 +313,16 @@ public class PatrolBuilder extends AbstractBuilder {
 					} else {
 						//attr duplicates prevAttr
 						if (isSameValue(attr, prevAttr)) {
-							System.out.println(MessageFormat.format("INFO: Duplicate attributes in patrol {0} waypoint {1} with key ''{2}''. Values (item, double, string): {3}, {4}, {5}. Duplicate was dropped out.", patrol.getId(), wp.getId(), attr.getAttributeKey(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							log(Level.INFO, MessageFormat.format("Duplicate attributes in patrol {0} waypoint {1} with key ''{2}''. Values (item, double, string): {3}, {4}, {5}. Duplicate was dropped out.", patrol.getId(), wp.getId(), attr.getAttributeKey(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 							duplicates.add(attr);
 						} else if (isDetailedKeyValue(attr, prevAttr)) {
-							System.out.println(MessageFormat.format("INFO: Similar attributes in patrol {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Only more detailed value will be used.", patrol.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							log(Level.INFO, MessageFormat.format("Similar attributes in patrol {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Only more detailed value will be used.", patrol.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 							duplicates.add(attr);
 							if (attr.getItemKey().length() > prevAttr.getItemKey().length()) {
 								prevAttr.setItemKey(attr.getItemKey());
 							}
 						} else {
-							System.out.println(MessageFormat.format("WARN: Two diffent attributes in patrol {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Warning will appear on import", patrol.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							log(Level.WARN, MessageFormat.format("Two diffent attributes in patrol {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Warning will appear on import", patrol.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 						}
 						
 					}
@@ -335,7 +335,7 @@ public class PatrolBuilder extends AbstractBuilder {
 				legDay.getWaypoints().add(wp);
 				addTimeRecord(legDay, xmlTime);
 			} else {
-				System.out.println(MessageFormat.format("WARN: No date is defined for one of the rows for patrol {0}. Data will be skipped.", patrol.getId()));
+				log(Level.WARN, MessageFormat.format("No date is defined for one of the rows for patrol {0}. Data will be skipped.", patrol.getId()));
 			}
 			
 		}
@@ -350,7 +350,7 @@ public class PatrolBuilder extends AbstractBuilder {
 					continue;
 				
 				if (track != null) {
-					System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
+					log(Level.INFO, MessageFormat.format("Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
 					Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(legDay.getDate(), wp.getTime()));
 					if (c != null) {
 						if (wp.getX() == null)
@@ -362,14 +362,14 @@ public class PatrolBuilder extends AbstractBuilder {
 
 				if (wp.getX() == null || wp.getY() == null) {
 					if (i > 0) {
-						System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Using previous waypoint coordinates.", patrol.getId(), wp.getId()));
+						log(Level.INFO, MessageFormat.format("Coordinate problem in patrol {0} waypoint {1}. Using previous waypoint coordinates.", patrol.getId(), wp.getId()));
 						WaypointType prevWp = waypoints.get(i-1);
 						if (wp.getX() == null)
 							wp.setX(prevWp.getX());
 						if (wp.getY() == null)
 							wp.setY(prevWp.getY());
 					} else {
-						System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Checking if there are any waypoints with coordinates in this patrol.", patrol.getId(), wp.getId()));
+						log(Level.INFO, MessageFormat.format("Coordinate problem in patrol {0} waypoint {1}. Checking if there are any waypoints with coordinates in this patrol.", patrol.getId(), wp.getId()));
 						for (int j = i+1; j < waypoints.size(); j++) {
 							WaypointType nextWp = waypoints.get(j);
 							if (nextWp.getX() != null && nextWp.getY() != null) {
@@ -380,7 +380,7 @@ public class PatrolBuilder extends AbstractBuilder {
 							}
 						}
 						if (wp.getX() == null || wp.getY() == null) {
-							System.err.println(MessageFormat.format("ERROR: Coordinate problem in patrol {0} waypoint {1}. Importing this patrol will cause error in SMART.", patrol.getId(), wp.getId()));
+							log(Level.ERROR, MessageFormat.format("Coordinate problem in patrol {0} waypoint {1}. Importing this patrol will cause error in SMART.", patrol.getId(), wp.getId()));
 							patrol.setId("[ERROR-xy]"+patrol.getId());
 							break;
 						}			
@@ -418,7 +418,7 @@ public class PatrolBuilder extends AbstractBuilder {
 		leg.setEndDate(xmlEndDate);
 
 		if (!isValidDateRange(xmlStartDate, xmlEndDate)) {
-			System.out.println(MessageFormat.format("WARN: Patrol {0} lasts longer than {1} days.", patrol.getId(), MAX_DURATION));
+			log(Level.WARN, MessageFormat.format("Patrol {0} lasts longer than {1} days.", patrol.getId(), MAX_DURATION));
 		}
 		
 		return patrol;
@@ -510,7 +510,7 @@ public class PatrolBuilder extends AbstractBuilder {
 		obsAttr.setAttributeKey(ea.getAttributeKey());
 		AttributeType dmAttr = getDmLookup().getAttribute(ea.getAttributeKey());
 		if (dmAttr == null) {
-			System.err.println("ERROR: Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
+			log(Level.ERROR, "Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
 			return null;
 		}
 		String type = dmAttr.getType();
@@ -528,7 +528,7 @@ public class PatrolBuilder extends AbstractBuilder {
 				try {
 					obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
 				} catch (NumberFormatException e) {
-					System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
+					log(Level.ERROR, "Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
 					return null;
 				}
 				break;
@@ -538,7 +538,7 @@ public class PatrolBuilder extends AbstractBuilder {
 				break;
 	
 			default:
-				System.err.println("ERROR: Unsupported type for extra attribute:" + type);
+				log(Level.ERROR, "Unsupported type for extra attribute:" + type);
 				return null;
 		}
 
@@ -580,7 +580,7 @@ public class PatrolBuilder extends AbstractBuilder {
 				for (Iterator<WaypointType> i = legDay.getWaypoints().iterator(); i.hasNext();) {
 					WaypointType wp = i.next();
 					if (wp.getObservations().isEmpty()) {
-						System.out.println(MessageFormat.format("INFO: Patrol ''{0}'' waypoint ''{1}'' was removed from generated xml because no observation data recorded for this waypoint.", p.getId(), wp.getId()));
+						log(Level.INFO, MessageFormat.format("Patrol ''{0}'' waypoint ''{1}'' was removed from generated xml because no observation data recorded for this waypoint.", p.getId(), wp.getId()));
 						i.remove();
 					}
 				}

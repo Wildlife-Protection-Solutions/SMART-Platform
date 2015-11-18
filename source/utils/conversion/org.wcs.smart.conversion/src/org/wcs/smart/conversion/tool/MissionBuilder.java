@@ -123,7 +123,7 @@ public class MissionBuilder extends AbstractBuilder {
 				MappedAttribute cta = getLookup().findAttribute(a.getI());
 				if (cta == null || cta.getType() == null) {
 					//attribute is unmapped; treat the same as ignore
-					System.out.println("Warning: No mapping for attribute: " + a.getN());
+					log(Level.WARN, "No mapping for attribute: " + a.getN());
 					continue;
 				}
 				WaypointObservationType obs;
@@ -157,7 +157,7 @@ public class MissionBuilder extends AbstractBuilder {
 								obs.getAttributes().add(obsAttr);
 							}
 						} catch (NumberFormatException e) {
-							System.err.println(MessageFormat.format("Failed to convert to double. Attribute: {0}  value: {1} mission_id: {2}. Attribute skipped.", a.getN(), a.getV(), mission.getId()));
+							log(Level.ERROR, MessageFormat.format("Failed to convert to double. Attribute: {0}  value: {1} mission_id: {2}. Attribute skipped.", a.getN(), a.getV(), mission.getId()));
 							//throw e;
 						}
 						break;
@@ -211,18 +211,18 @@ public class MissionBuilder extends AbstractBuilder {
 						if (!a.isEmptyV()) {
 							wp.setX(Double.valueOf(a.getV()));
 						} else {
-							System.out.println(MessageFormat.format("WARN: Empty logitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
+							log(Level.WARN, MessageFormat.format("Empty logitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
 						}
 						break;
 					case WP_LAT:
 						if (!a.isEmptyV()) {
 							wp.setY(Double.valueOf(a.getV()));
 						} else {
-							System.out.println(MessageFormat.format("WARN: Empty latitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
+							log(Level.WARN, MessageFormat.format("Empty latitude in mission {0} waypint {1}", mission.getId(), wp.getId()));
 						}
 						break;
 					case META_MANDATE: {
-						System.out.println("WARN: Mandate mapping presents in mission generation, missions do not have mandate");
+						log(Level.WARN, "Mandate mapping presents in mission generation, missions do not have mandate");
 						break;
 					}
 					case META_MEMBERS:
@@ -283,16 +283,16 @@ public class MissionBuilder extends AbstractBuilder {
 					} else {
 						//attr duplicates prevAttr
 						if (isSameValue(attr, prevAttr)) {
-							System.out.println(MessageFormat.format("INFO: Duplicate attributes in mission {0} waypoint {1} with key ''{2}''. Values (item, double, string): {3}, {4}, {5}. Duplicate was dropped out.", mission.getId(), wp.getId(), attr.getAttributeKey(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							log(Level.INFO, MessageFormat.format("Duplicate attributes in mission {0} waypoint {1} with key ''{2}''. Values (item, double, string): {3}, {4}, {5}. Duplicate was dropped out.", mission.getId(), wp.getId(), attr.getAttributeKey(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 							duplicates.add(attr);
 						} else if (isDetailedKeyValue(attr, prevAttr)) {
-							System.out.println(MessageFormat.format("INFO: Similar attributes in mission {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Only more detailed value will be used.", mission.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							log(Level.INFO, MessageFormat.format("Similar attributes in mission {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Only more detailed value will be used.", mission.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 							duplicates.add(attr);
 							if (attr.getItemKey().length() > prevAttr.getItemKey().length()) {
 								prevAttr.setItemKey(attr.getItemKey());
 							}
 						} else {
-							System.out.println(MessageFormat.format("WARN: Two diffent attributes in mission {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Warning will appear on import", mission.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
+							log(Level.WARN, MessageFormat.format("Two diffent attributes in mission {0} waypoint {1} with key ''{2}''. Values1 (item, double, string): {3}, {4}, {5}. Values2 (item, double, string): {6}, {7}, {8}. Warning will appear on import", mission.getId(), wp.getId(), attr.getAttributeKey(), prevAttr.getItemKey(), prevAttr.getDValue(), prevAttr.getSValue(), attr.getItemKey(), attr.getDValue(), attr.getSValue()));
 						}
 						
 					}
@@ -306,7 +306,7 @@ public class MissionBuilder extends AbstractBuilder {
 				misDay.getSurveyWaypoints().add(wpType);
 				addTimeRecord(misDay, xmlTime);
 			} else {
-				System.out.println(MessageFormat.format("WARN: No date is defined for one of the rows for mission {0}. Data will be skipped.", mission.getId()));
+				log(Level.WARN, MessageFormat.format("No date is defined for one of the rows for mission {0}. Data will be skipped.", mission.getId()));
 			}
 			
 		}
@@ -321,7 +321,7 @@ public class MissionBuilder extends AbstractBuilder {
 					continue;
 				
 //				if (track != null) {
-//					System.out.println(MessageFormat.format("INFO: Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
+//					log(Level.INFO, MessageFormat.format("Coordinate problem in patrol {0} waypoint {1}. Intepolating coordinates from track.", patrol.getId(), wp.getId()));
 //					Coordinate c = CoordinateUtil.interpolate(line, SmartUtil.combine(wpDate, wpTime));
 //					if (c != null) {
 //						if (wp.getX() == null)
@@ -333,14 +333,14 @@ public class MissionBuilder extends AbstractBuilder {
 
 				if (wp.getX() == null || wp.getY() == null) {
 					if (i > 0) {
-						System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Using previous waypoint coordinates.", mission.getId(), wp.getId()));
+						log(Level.INFO, MessageFormat.format("Coordinate problem in mission {0} waypoint {1}. Using previous waypoint coordinates.", mission.getId(), wp.getId()));
 						WaypointType prevWp = waypoints.get(i-1).getWaypoints();
 						if (wp.getX() == null)
 							wp.setX(prevWp.getX());
 						if (wp.getY() == null)
 							wp.setY(prevWp.getY());
 					} else {
-						System.out.println(MessageFormat.format("INFO: Coordinate problem in mission {0} waypoint {1}. Checking if there are any waypoints with coordinates in this mission.", mission.getId(), wp.getId()));
+						log(Level.INFO, MessageFormat.format("Coordinate problem in mission {0} waypoint {1}. Checking if there are any waypoints with coordinates in this mission.", mission.getId(), wp.getId()));
 						for (int j = i+1; j < waypoints.size(); j++) {
 							WaypointType nextWp = waypoints.get(j).getWaypoints();
 							if (nextWp.getX() != null && nextWp.getY() != null) {
@@ -351,7 +351,7 @@ public class MissionBuilder extends AbstractBuilder {
 							}
 						}
 						if (wp.getX() == null || wp.getY() == null) {
-							System.err.println(MessageFormat.format("ERROR: Coordinate problem in mission {0} waypoint {1}. Importing this mission will cause error in SMART.", mission.getId(), wp.getId()));
+							log(Level.ERROR, MessageFormat.format("Coordinate problem in mission {0} waypoint {1}. Importing this mission will cause error in SMART.", mission.getId(), wp.getId()));
 							mission.setId("[ERROR-xy]"+mission.getId());
 							break;
 						}			
@@ -360,7 +360,7 @@ public class MissionBuilder extends AbstractBuilder {
 
 				
 				if (wp.getDateTime() == null) {
-					System.out.println(MessageFormat.format("WARN: No date/time data present in mission {0} waypoint {1}. Date {2}  and time 00:00 will be used.", mission.getId(), wp.getId(), misDay.getDate()));
+					log(Level.WARN, MessageFormat.format("No date/time data present in mission {0} waypoint {1}. Date {2}  and time 00:00 will be used.", mission.getId(), wp.getId(), misDay.getDate()));
 					wp.setDateTime(misDay.getDate());
 				}
 
@@ -399,7 +399,7 @@ public class MissionBuilder extends AbstractBuilder {
 		mission.setSurvey(survey);
 
 		if (!isValidDateRange(xmlStartDate, xmlEndDate)) {
-			System.out.println(MessageFormat.format("WARN: Mission {0} lasts longer than {1} days.", mission.getId(), MAX_DURATION));
+			log(Level.WARN, MessageFormat.format("Mission {0} lasts longer than {1} days.", mission.getId(), MAX_DURATION));
 		}
 
 		return mission;
@@ -465,7 +465,7 @@ public class MissionBuilder extends AbstractBuilder {
 		obsAttr.setAttributeKey(ea.getAttributeKey());
 		AttributeType dmAttr = getDmLookup().getAttribute(ea.getAttributeKey());
 		if (dmAttr == null) {
-			System.err.println("ERROR: Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
+			log(Level.ERROR, "Extra attribute was not added. No attribute found in datamodel with key: " + ea.getAttributeKey());
 			return null;
 		}
 		String type = dmAttr.getType();
@@ -483,7 +483,7 @@ public class MissionBuilder extends AbstractBuilder {
 				try {
 					obsAttr.setDValue(Double.valueOf(ea.getValueKey()));
 				} catch (NumberFormatException e) {
-					System.err.println("ERROR: Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
+					log(Level.ERROR, "Failed to convert extra attribute value to double. DM key: " + ea.getAttributeKey());
 					return null;
 				}
 				break;
@@ -493,7 +493,7 @@ public class MissionBuilder extends AbstractBuilder {
 				break;
 	
 			default:
-				System.err.println("ERROR: Unsupported type for extra attribute:" + type);
+				log(Level.ERROR, "Unsupported type for extra attribute:" + type);
 				return null;
 		}
 
@@ -566,7 +566,7 @@ public class MissionBuilder extends AbstractBuilder {
 			for (Iterator<SurveyWaypointsType> i = misDay.getSurveyWaypoints().iterator(); i.hasNext();) {
 				WaypointType wp = i.next().getWaypoints();
 				if (wp.getObservations().isEmpty()) {
-					System.out.println(MessageFormat.format("INFO: Mission ''{0}'' waypoint ''{1}'' was removed from generated xml because no observation data recorded for this waypoint.", mission.getId(), wp.getId()));
+					log(Level.INFO, MessageFormat.format("Mission ''{0}'' waypoint ''{1}'' was removed from generated xml because no observation data recorded for this waypoint.", mission.getId(), wp.getId()));
 					i.remove();
 				}
 			}

@@ -22,11 +22,19 @@
 package org.wcs.smart.conversion.csv.tool;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.swt.widgets.Display;
+import org.wcs.smart.conversion.csv.handler.ProcessingActionHandler;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.tag.TagS;
 import org.wcs.smart.conversion.tool.MatchSession;
@@ -40,30 +48,45 @@ import org.wcs.smart.er.xml.model.missions.MissionType;
  */
 public class CsvMissionExtractor extends AbstractCsvExtractor {
 
+	private static final Logger logger = LogManager.getLogger(ProcessingActionHandler.class); 
+
 	public CsvMissionExtractor(Connection c) throws SQLException {
 		super(c);
 	}
 
 	public void extract(String folder, MatchSession session, DataModelLookup dmLookup) throws Exception {
 		MissionBuilder builder = new MissionBuilder(session, dmLookup);
-		
-		String[] uniqueId = getUniqueIds(session.getSmartMapping());
-		String[] columnNames = getCsvColumns(uniqueId);
-		String[] uniqueValues = new String[uniqueId.length];
-		ResultSet rs = getUniqueGroups(columnNames);
-		while (rs.next()) {
-			for (int i = 0; i < uniqueValues.length; i++) {
-				uniqueValues[i] = rs.getString(i+1);
-			}
-			List<TagS> sList = extractS(columnNames, uniqueValues);
-//			List<TagT> tList = extractT(uniqueValues[2], uniqueValues[0]);
-			String id = buildId(uniqueValues);
-			MissionType mission = builder.createMission(sList, id);
-			builder.buildTracksFromWp(mission);
-			builder.removeEmptyWayoints(mission);
-			
-			FileUtil.write(new File(folder + "\\" + mission.getId() + ".xml"), mission); //$NON-NLS-1$ //$NON-NLS-2$
+		try {
+			PrintStream inf = new PrintStream(new FileOutputStream(folder + "\\warnings.log")); //$NON-NLS-1$
+			PrintStream err = new PrintStream(new FileOutputStream(folder + "\\errors.log")); //$NON-NLS-1$
+			builder.setExtraOutputs(err, inf);
+		} catch (FileNotFoundException e) {
+			logger.error("Unable to create files for logging in selected folder.", e); //$NON-NLS-1$
+			builder.clearExtraOutputs();
+			MessageDialog.openError(Display.getDefault().getActiveShell(), "Mission generation", "Unable to create files for logging in selected folder.");
 		}
-		rs.close();
+
+		try {
+			String[] uniqueId = getUniqueIds(session.getSmartMapping());
+			String[] columnNames = getCsvColumns(uniqueId);
+			String[] uniqueValues = new String[uniqueId.length];
+			ResultSet rs = getUniqueGroups(columnNames);
+			while (rs.next()) {
+				for (int i = 0; i < uniqueValues.length; i++) {
+					uniqueValues[i] = rs.getString(i+1);
+				}
+				List<TagS> sList = extractS(columnNames, uniqueValues);
+//				List<TagT> tList = extractT(uniqueValues[2], uniqueValues[0]);
+				String id = buildId(uniqueValues);
+				MissionType mission = builder.createMission(sList, id);
+				builder.buildTracksFromWp(mission);
+				builder.removeEmptyWayoints(mission);
+				
+				FileUtil.write(new File(folder + "\\" + mission.getId() + ".xml"), mission); //$NON-NLS-1$ //$NON-NLS-2$
+			}
+			rs.close();
+		} finally {
+			builder.clearExtraOutputs();
+		}
 	}
 }
