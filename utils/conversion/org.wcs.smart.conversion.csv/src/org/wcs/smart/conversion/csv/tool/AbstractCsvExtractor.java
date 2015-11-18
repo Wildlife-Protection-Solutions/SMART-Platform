@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
@@ -49,6 +51,8 @@ import org.wcs.smart.conversion.tool.MatchSession;
  */
 public abstract class AbstractCsvExtractor {
 
+	private static final Logger logger = LogManager.getLogger(AbstractCsvExtractor.class); 
+	
 	private Connection c;
 	private Map<String, TagE> col2Attr;
 	private Map<String, String> n2Col;
@@ -122,6 +126,7 @@ public abstract class AbstractCsvExtractor {
 				sql.append(", "); //$NON-NLS-1$
 		}
 		sql.append(" from csv_to_smart.csv"); //$NON-NLS-1$
+		logger.debug("run SQL:" + sql.toString()); //$NON-NLS-1$
 		return c.createStatement().executeQuery(sql.toString());
 	}
 	
@@ -132,6 +137,7 @@ public abstract class AbstractCsvExtractor {
 			if (i+1 < columns.length)
 				sql.append(" and "); //$NON-NLS-1$
 		}
+		logger.debug("run SQL:" + sql.toString()); //$NON-NLS-1$
 		PreparedStatement ps = c.prepareStatement(sql.toString());
 		for (int i = 0; i < columns.length; i++) {
 			ps.setString(i+1, v[i]);

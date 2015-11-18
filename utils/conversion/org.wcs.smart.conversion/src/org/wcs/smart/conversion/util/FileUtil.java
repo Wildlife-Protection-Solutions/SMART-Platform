@@ -103,7 +103,7 @@ public class FileUtil {
 		//because that manager uses classes which require hibernate and
 		//we don't have to have to include hibernate in our build
 		//this.smartDataModel = XmlSmartDataModelManager.readDataModel(is);
-		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.internal.ca.datamodel.xml.generate");
+		JAXBContext context = JAXBContext.newInstance("org.wcs.smart.internal.ca.datamodel.xml.generate"); //$NON-NLS-1$
 		Unmarshaller un = context.createUnmarshaller();	
 		Object o = un.unmarshal(is);
 		return (DataModel) o;

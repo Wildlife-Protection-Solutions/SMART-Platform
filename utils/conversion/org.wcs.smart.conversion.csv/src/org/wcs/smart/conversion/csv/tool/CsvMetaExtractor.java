@@ -34,6 +34,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wcs.smart.conversion.model.MappedAttribute;
 import org.wcs.smart.conversion.model.MappedAttributeType;
 import org.wcs.smart.conversion.model.SmartMapping;
@@ -49,6 +51,8 @@ import au.com.bytecode.opencsv.CSVWriter;
  * @since 3.0.0
  */
 public class CsvMetaExtractor {
+
+	private static final Logger logger = LogManager.getLogger(CsvMetaExtractor.class); 
 	
 	private Connection c;
 	private SmartMapping mapping;
@@ -82,8 +86,7 @@ public class CsvMetaExtractor {
 						}
 					}
 				} catch (SQLException e) {
-					System.err.println("Error extracting employees i=" + cta.getI());
-					e.printStackTrace();
+					logger.error("Error extracting employees i=" + cta.getI(), e); //$NON-NLS-1$
 					return false;
 				}
 			}
@@ -111,7 +114,7 @@ public class CsvMetaExtractor {
 			}
 			writer.close();
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			logger.error("Error writing employees to file.", ex); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -136,8 +139,7 @@ public class CsvMetaExtractor {
 						}
 					}
 				} catch (SQLException e) {
-					System.err.println("Error extracting mandates i=" + cta.getI());
-					e.printStackTrace();
+					logger.error("Error extracting mandates i=" + cta.getI(), e); //$NON-NLS-1$
 					return false;
 				}
 			}
@@ -155,7 +157,7 @@ public class CsvMetaExtractor {
 			}
 			writer.close();
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			logger.error("Error writing mandates to file.", ex); //$NON-NLS-1$
 			return false;
 		}
 		return true;
@@ -182,7 +184,7 @@ public class CsvMetaExtractor {
 			case TRANSECT_END_LON: {
 				try {
 					if (attributes.contains(type)) {
-						System.out.println(MessageFormat.format("WARN: More than one mapping present for {0}. Column {1} will be ignored.", type, cta.getI()));
+						logger.warn(MessageFormat.format("More than one mapping present for {0}. Column {1} will be ignored.", type, cta.getI())); //$NON-NLS-1$
 						break;
 					}
 					attributes.add(type);
@@ -194,8 +196,7 @@ public class CsvMetaExtractor {
 						ids.add(id);
 					}
 				} catch (SQLException e) {
-					System.err.println("Error extracting transects i=" + cta.getI());
-					e.printStackTrace();
+					logger.error("Error extracting transects i=" + cta.getI(), e); //$NON-NLS-1$
 					return false;
 				}
 				break;
@@ -209,8 +210,8 @@ public class CsvMetaExtractor {
 		if (ids.size() != 5 ) {
 			//not enough transact information to export.  we need all five  fields
 			//no transects to export
-			System.out.println("WARN: Transect fields not mapped, transects will not be exported.");
-			return true;
+			logger.error("Transect fields not mapped, transects will not be exported."); //$NON-NLS-1$
+			return false;
 		}
 		
 		try {
@@ -221,7 +222,9 @@ public class CsvMetaExtractor {
 				}
 				whatClause.append("a").append(id); //$NON-NLS-1$
 			}
-			ResultSet dataSet = c.createStatement().executeQuery("select distinct "+whatClause+" from csv_to_smart.CSV"); //$NON-NLS-1$ //$NON-NLS-2$
+			String sql = "select distinct "+whatClause+" from csv_to_smart.CSV"; //$NON-NLS-1$ //$NON-NLS-2$
+			ResultSet dataSet = c.createStatement().executeQuery(sql);
+			logger.debug("run SQL: " + sql); //$NON-NLS-1$
 			while (dataSet.next()) {
 				String[] data = new String[outSize];
 				for (int i = 0; i < outSize; i++) {
@@ -230,8 +233,7 @@ public class CsvMetaExtractor {
 				transectData.add(data);
 			}
 		} catch (SQLException e) {
-			System.err.println("Error extracting distinct transects data");
-			e.printStackTrace();
+			logger.error("Error extracting distinct transects data", e); //$NON-NLS-1$
 			return false;
 		}
 
@@ -248,7 +250,7 @@ public class CsvMetaExtractor {
 			}
 			writer.close();
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			logger.error("Error writing transects to file", ex); //$NON-NLS-1$
 			return false;
 		}
 		return true;

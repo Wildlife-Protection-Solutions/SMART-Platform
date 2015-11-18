@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wcs.smart.conversion.model.MappedAttribute;
 import org.wcs.smart.conversion.model.MappedAttributeType;
 import org.wcs.smart.conversion.model.MappedAttributeValue;
@@ -42,6 +44,8 @@ import org.wcs.smart.conversion.model.SmartMapping;
  * @since 3.2.0
  */
 public class MatchFileBuilder {
+
+	private static final Logger logger = LogManager.getLogger(MatchFileBuilder.class); 
 
 	private static final Map<String, MappedAttributeType> KNOWN_ATTRIBUTES;
 	static {
@@ -113,11 +117,12 @@ public class MatchFileBuilder {
 	}
 
 	public SmartMapping create(Connection c) throws SQLException {
+		logger.info("Mapping generation started"); //$NON-NLS-1$
 		ResultSet attrRs = c.createStatement().executeQuery("select n, id from CSV_TO_SMART.ATTRIBUTES"); //$NON-NLS-1$
 		SmartMapping csv2Smart = new SmartMapping();
 		while (attrRs.next()) {
 			String attrName = attrRs.getString(1);
-			System.out.println("Processing: " + attrName);
+			logger.info("Processing attribute: " + attrName); //$NON-NLS-1$
 			MappedAttribute ctAttr = new MappedAttribute();
 			ctAttr.setI(attrName);
 //			ctAttr.setN(attrName);

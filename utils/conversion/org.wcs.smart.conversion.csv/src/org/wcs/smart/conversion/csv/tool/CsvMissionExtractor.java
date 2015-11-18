@@ -55,7 +55,6 @@ public class CsvMissionExtractor extends AbstractCsvExtractor {
 			for (int i = 0; i < uniqueValues.length; i++) {
 				uniqueValues[i] = rs.getString(i+1);
 			}
-//			System.out.println("Extracting mission for: " + sb);
 			List<TagS> sList = extractS(columnNames, uniqueValues);
 //			List<TagT> tList = extractT(uniqueValues[2], uniqueValues[0]);
 			String id = buildId(uniqueValues);
