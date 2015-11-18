@@ -40,6 +40,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeConstants;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.logging.log4j.Level;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.model.ExtraAttribute;
 import org.wcs.smart.conversion.model.MappedAttribute;
@@ -187,15 +188,23 @@ public class MissionBuilder extends AbstractBuilder {
 						break;
 					}
 					case WP_DATE: {
-						Date wpDate = getDateTimeParser().parseDate(a.getV());
-						xmlDate = SmartUtil.toXmlDate(wpDate);
-						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(xmlDate, xmlTime)));
+						try {
+							Date wpDate = getDateTimeParser().parseDate(a.getV());
+							xmlDate = SmartUtil.toXmlDate(wpDate);
+							wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(xmlDate, xmlTime)));
+						} catch (Exception e) {
+							log(Level.ERROR, "Unknown date format.", e);
+						}
 						break;
 					}
 					case WP_TIME: {
-						Time wpTime = getDateTimeParser().parseTime(a.getV());
-						xmlTime = SmartUtil.toXmlTime(wpTime);
-						wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(xmlDate, xmlTime)));
+						try {
+							Time wpTime = getDateTimeParser().parseTime(a.getV());
+							xmlTime = SmartUtil.toXmlTime(wpTime);
+							wp.setDateTime(SmartUtil.toXmlDateTime(SmartUtil.combine(xmlDate, xmlTime)));
+						} catch (Exception e) {
+							log(Level.ERROR, "Unknown time format.", e);
+						}
 						break;
 					}
 					case WP_LON:

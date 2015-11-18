@@ -28,6 +28,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Converts string to date.
  * 
@@ -35,6 +38,9 @@ import java.util.Locale;
  * @since 3.2.0
  */
 public class DateTimeParser {
+	
+	private static final Logger logger = LogManager.getLogger(DateTimeParser.class); 
+	
 
 	private static final DateFormat df_dot = new SimpleDateFormat("dd.MM.yyyy"); //$NON-NLS-1$
 	private static final DateFormat df_ct = new SimpleDateFormat("MM/dd/yyyy"); //$NON-NLS-1$
@@ -53,8 +59,8 @@ public class DateTimeParser {
 		} else if (dateStr.matches("[0-9]{1,2}\\.[a-zA-Z]+\\.[0-9]{2}")) { //$NON-NLS-1$
 			return df_dot_text.parse(dateStr);
 		}
-		System.err.println("Cannot parse date: " + dateStr);
-		throw new ParseException(dateStr, 0);
+		logger.error("Cannot parse date: " + dateStr); //$NON-NLS-1$
+		throw new ParseException("Cannot parse date: " + dateStr, 0); //$NON-NLS-1$
 	}
 	
 	public Time parseTime(String timeStr) throws ParseException {
@@ -67,7 +73,7 @@ public class DateTimeParser {
 			}
 			return Time.valueOf(timeStr);
 		} catch (Exception e) {
-			System.err.println("Cannot parse time: " + timeStr);
+			logger.error("Cannot parse time: " + timeStr); //$NON-NLS-1$
 			throw e;
 		}
 	}

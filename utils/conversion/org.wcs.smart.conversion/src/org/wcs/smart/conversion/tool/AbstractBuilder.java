@@ -21,6 +21,9 @@
  */
 package org.wcs.smart.conversion.tool;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -31,6 +34,9 @@ import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup;
 import org.wcs.smart.conversion.lookup.Ct2SmartLookup.Ct2AttributeValuePair;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
@@ -50,6 +56,8 @@ import org.wcs.smart.conversion.tag.TagS;
  */
 public abstract class AbstractBuilder {
 
+	private static final Logger logger = LogManager.getLogger(AbstractBuilder.class); 
+	
 	private static final String LANGUAGE_CODE = "en"; //$NON-NLS-1$
 	
 	public static final int MAX_DURATION = 40;
@@ -60,10 +68,16 @@ public abstract class AbstractBuilder {
 	private DateTimeParser dateTimeParser = new DateTimeParser();
 	private Map<String, String> params;
 
+	private PrintStream errOut;
+	private PrintStream infOut;
+
+	
 	public AbstractBuilder(MatchSession session, DataModelLookup dmLookup) throws SQLException {
 		this.dmLookup = dmLookup;
 		lookup = new Ct2SmartLookup(session.getSmartMapping());
 		params = extractParams(session.getSmartMapping());
+		log(Level.ERROR, "test error");
+		log(Level.WARN, "test warn");
 	}
 
 	protected Ct2SmartLookup getLookup() {
@@ -108,9 +122,31 @@ public abstract class AbstractBuilder {
 		}
 		MappedCategory c = lookup.findCategory(data);
 		if (c == null) {
-			System.err.println(MessageFormat.format("ERROR: Because no category mapping is specified for items {0} it is imposible to fetch category for row {1}", Arrays.toString(data.toArray()), s));
+			log(Level.ERROR, MessageFormat.format("Because no category mapping is specified for items {0} it is imposible to fetch category for row {1}", Arrays.toString(data.toArray()), s));
 		}
 		return c;
+	}
+
+	protected void log(Level level, String message, Throwable e) {
+		logger.log(level, message, e);
+		logExtra(level, message);
+	}
+	
+	protected void log(Level level, String message) {
+		logger.log(level, message);
+		logExtra(level, message);
+	}
+	
+	private void logExtra(Level level, String message) {
+		if (Level.ERROR.equals(level)) {
+			if (errOut != null) {
+				errOut.println(level.toString() + ": " + message); //$NON-NLS-1$
+			}
+		} else {
+			if (infOut != null) {
+				infOut.println(level.toString() + ": " + message); //$NON-NLS-1$
+			}
+		}
 	}
 
 	protected boolean isSame(Object o1, Object o2) {
@@ -134,5 +170,31 @@ public abstract class AbstractBuilder {
 		long diff = Math.abs(to.toGregorianCalendar().getTime().getTime() - from.toGregorianCalendar().getTime().getTime());
 		diff = diff / (1000 * 60 * 60 * 24); //now diff is in days
 		return diff < MAX_DURATION;
+	}
+
+	public void setExtraOutputs(PrintStream errOut, PrintStream infOut) {
+		this.errOut = errOut;
+		this.infOut = infOut;
+	}
+
+	public void clearExtraOutputs() {
+		flushAndClose(errOut);
+		errOut = null;
+		flushAndClose(infOut);
+		infOut = null;
+	}
+
+	private void flushAndClose(OutputStream stream) {
+		if (stream == null) return;
+		try {
+			stream.flush();
+		} catch (IOException e1) {
+			logger.error("Error flushing output stream.", e1); //$NON-NLS-1$
+		}
+		try {
+			stream.close();
+		} catch (IOException e2) {
+			logger.error("Error flushing output stream.", e2); //$NON-NLS-1$
+		}
 	}
 }

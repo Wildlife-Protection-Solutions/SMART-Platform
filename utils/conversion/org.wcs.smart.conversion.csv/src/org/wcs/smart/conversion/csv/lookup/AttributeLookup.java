@@ -29,7 +29,6 @@ import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.wcs.smart.conversion.csv.tool.AbstractCsvExtractor;
 
 public class AttributeLookup {
 	
@@ -48,7 +47,7 @@ public class AttributeLookup {
 			rs.close();
 		} catch (SQLException e) {
 			i2Column = null;
-			logger.error("Failed to create attributes lookup.", e);
+			logger.error("Failed to create attributes lookup.", e); //$NON-NLS-1$
 		}
 	}
 
