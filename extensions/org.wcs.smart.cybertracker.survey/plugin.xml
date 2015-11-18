@@ -28,6 +28,23 @@
                commandId="org.wcs.smart.cybertracker.survey.export"
                label="%command.cybertracker.survey.export.label"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <or>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="admin">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="manager">
+                  </test>
+                  <test
+                        property="org.wcs.smart.smartAdminUser"
+                        value="dataentry">
+                  </test>
+               </or>
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
