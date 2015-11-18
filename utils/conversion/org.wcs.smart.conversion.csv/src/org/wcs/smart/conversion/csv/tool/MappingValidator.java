@@ -87,20 +87,22 @@ public class MappingValidator {
 				continue;
 			}
 			
-			Set<String> valueKeysSet = buildValueKeysSet(a);
-			for (MappedAttributeValue ctv : cta.getMappedAttributeValue()) {
-				if (Boolean.TRUE.equals(ctv.isIgnore())) {
-					continue;
-				}
-				String vkey = ctv.getMapTo();
-				if (vkey == null || vkey.isEmpty()) {
-					errors.add(MessageFormat.format("No mapping is specified for attribute value \"{0}\" in attribute \"{1}\"", Ct2AttributeTypeUtil.getN(ctv), Ct2AttributeTypeUtil.getN(cta)));
-					continue;
-				}
-				
-				if (!valueKeysSet.contains(vkey)) {
-					errors.add(MessageFormat.format("Attribute value \"{0}\" in attribute \"{1}\" has mapped to key \"{2}\" which does not exist in datamodel", Ct2AttributeTypeUtil.getN(ctv), Ct2AttributeTypeUtil.getN(cta), vkey));
-					continue;
+			if (Ct2AttributeTypeUtil.canHaveValues(cta.getType())) {
+				Set<String> valueKeysSet = buildValueKeysSet(a);
+				for (MappedAttributeValue ctv : cta.getMappedAttributeValue()) {
+					if (Boolean.TRUE.equals(ctv.isIgnore())) {
+						continue;
+					}
+					String vkey = ctv.getMapTo();
+					if (vkey == null || vkey.isEmpty()) {
+						errors.add(MessageFormat.format("No mapping is specified for attribute value \"{0}\" in attribute \"{1}\"", Ct2AttributeTypeUtil.getN(ctv), Ct2AttributeTypeUtil.getN(cta)));
+						continue;
+					}
+					
+					if (!valueKeysSet.contains(vkey)) {
+						errors.add(MessageFormat.format("Attribute value \"{0}\" in attribute \"{1}\" has mapped to key \"{2}\" which does not exist in datamodel", Ct2AttributeTypeUtil.getN(ctv), Ct2AttributeTypeUtil.getN(cta), vkey));
+						continue;
+					}
 				}
 			}
 			
@@ -175,7 +177,7 @@ public class MappingValidator {
 		
 		for (MappedAttribute a : ct2Smart.getMappedAttribute()) {
 			if (a.getType() == null) {
-				errors.add(MessageFormat.format("Type is not set for attribute ''{0}''.", a.getI()));
+				errors.add(MessageFormat.format("Type is not set for attribute ''{0}''.", Ct2AttributeTypeUtil.getN(a)));
 				continue;
 			}
 			switch (a.getType()) {

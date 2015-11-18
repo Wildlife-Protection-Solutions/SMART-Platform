@@ -41,6 +41,17 @@ public class Ct2AttributeTypeUtil {
 				return false;
 		}
 	}
+
+	public static final boolean canHaveValues(MappedAttributeType type) {
+		if (type == null) return false;
+		switch (type) {
+			case REF:
+			case REF_BOOL:
+				return true;
+			default:
+				return false;
+		}
+	}
 	
 	public static String getN(MappedAttribute a) {
 		return a.getN() != null ? a.getN() : a.getI();
