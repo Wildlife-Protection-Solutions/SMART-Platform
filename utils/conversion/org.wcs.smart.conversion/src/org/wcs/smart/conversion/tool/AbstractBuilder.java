@@ -76,8 +76,6 @@ public abstract class AbstractBuilder {
 		this.dmLookup = dmLookup;
 		lookup = new Ct2SmartLookup(session.getSmartMapping());
 		params = extractParams(session.getSmartMapping());
-		log(Level.ERROR, "test error");
-		log(Level.WARN, "test warn");
 	}
 
 	protected Ct2SmartLookup getLookup() {

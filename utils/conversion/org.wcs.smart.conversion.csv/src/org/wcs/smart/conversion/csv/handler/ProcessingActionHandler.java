@@ -22,10 +22,7 @@
 package org.wcs.smart.conversion.csv.handler;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -44,7 +41,6 @@ import org.wcs.smart.conversion.csv.tool.CsvPatrolExtractor;
 import org.wcs.smart.conversion.csv.tool.MappingValidator;
 import org.wcs.smart.conversion.lookup.DataModelLookup;
 import org.wcs.smart.conversion.tool.MatchSession;
-import org.wcs.smart.conversion.ui.MultiOutputStream;
 import org.wcs.smart.conversion.ui.ReportDialog;
 
 /**
@@ -98,45 +94,17 @@ public abstract class ProcessingActionHandler {
 		String f = dd.open();
 		if (f != null) {
 			lastDir = f;
-			PrintStream originalOut = System.out;
-			PrintStream originalErr = System.err;
-
-			FileOutputStream fout = null;
-			FileOutputStream ferr = null;
 			try {
-				fout = new FileOutputStream(f + "\\warnings.log");
-				ferr = new FileOutputStream(f + "\\errors.log");
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				MessageDialog.openError(getShell(), "Mission generation", "Unable to create files for logging.");
-			}
-
-			try {
-				
-				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
-				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
-				
-				System.setOut(new PrintStream(multiOut));
-				System.setErr(new PrintStream(multiErr));
-
 				MatchSession session = createMatchSession();
 
 				DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
 				
 				CsvMissionExtractor exporter = new CsvMissionExtractor(session.getConnection());
 				exporter.extract(f, session, dmLookup);
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				flushAndClose(fout);
-				flushAndClose(ferr);
 				MessageDialog.openInformation(getShell(), "Mission generation", "Mission generation sucessfully completed.");
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				flushAndClose(fout);
-				flushAndClose(ferr);
-				MessageDialog.openError(getShell(), "Mission generation", "Errors occured while mission generation. See console or log for details.");
+				logger.error("Error occured while mission generation.", e);
+				MessageDialog.openError(getShell(), "Mission generation", "Error occured while mission generation. See log for details.");
 			}
 		}
 	}
@@ -148,45 +116,17 @@ public abstract class ProcessingActionHandler {
 		String f = dd.open();
 		if (f != null) {
 			lastDir = f;
-			PrintStream originalOut = System.out;
-			PrintStream originalErr = System.err;
-
-			FileOutputStream fout = null;
-			FileOutputStream ferr = null;
 			try {
-				fout = new FileOutputStream(f + "\\warnings.log");
-				ferr = new FileOutputStream(f + "\\errors.log");
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				MessageDialog.openError(getShell(), "Patrol generation", "Unable to create files for logging.");
-			}
-
-			try {
-				
-				MultiOutputStream multiOut = new MultiOutputStream(System.out, fout);
-				MultiOutputStream multiErr = new MultiOutputStream(System.err, ferr);
-				
-				System.setOut(new PrintStream(multiOut));
-				System.setErr(new PrintStream(multiErr));
-
 				MatchSession session = createMatchSession();
 
 				DataModelLookup dmLookup = new DataModelLookup(session.getDataModel());
 				
 				CsvPatrolExtractor exporter = new CsvPatrolExtractor(session.getConnection());
 				exporter.extract(f, session, dmLookup);
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				flushAndClose(fout);
-				flushAndClose(ferr);
 				MessageDialog.openInformation(getShell(), "Patrol generation", "Patrol generation sucessfully completed.");
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.setOut(originalOut);
-				System.setErr(originalErr);
-				flushAndClose(fout);
-				flushAndClose(ferr);
-				MessageDialog.openError(getShell(), "Patrol generation", "Errors occured while patrol generation. See console or log for details.");
+				logger.error("Error occured while patrol generation.", e);
+				MessageDialog.openError(getShell(), "Patrol generation", "Error occured while patrol generation. See log for details.");
 			}
 		}
 	}
@@ -212,23 +152,9 @@ public abstract class ProcessingActionHandler {
 					MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation. See console for details.");
 				}
 			} catch (Exception e) {
-				MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation session creation. See console for details.");
-				e.printStackTrace();
+				logger.error("Error occured while metadata generation.", e);
+				MessageDialog.openError(getShell(), "Metadata generation", "Error occured while metadata generation. See log for details.");
 			}
-		}
-	}
-
-	private void flushAndClose(FileOutputStream stream) {
-		if (stream == null) return;
-		try {
-			stream.flush();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		try {
-			stream.close();
-		} catch (IOException e2) {
-			e2.printStackTrace();
 		}
 	}
 
