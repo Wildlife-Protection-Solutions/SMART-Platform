@@ -35,6 +35,7 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Download change log handler for manually downloading 
@@ -67,7 +68,7 @@ public class DownloadChangeLogHandler {
 						"Download",
 						"SMART will download changes in the background.  Once download, if there are changes to apply, you will be prompted before changes are applied.");
 		
-		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(connect) {
+		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(SmartDB.getCurrentConservationArea(), connect) {
 			protected void processComplete() {
 				super.processComplete();
 				displayStatus(record);

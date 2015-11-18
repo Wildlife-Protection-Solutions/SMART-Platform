@@ -359,7 +359,7 @@ public class ApplyChangeLogJob extends Job {
 	}
 	
 	private void applyChangeLog(Path changelogFilestore, Session session) throws Exception{
-		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changeLogFile, changelogFilestore);
+		DerbyChangeLogDeserializer processor = new DerbyChangeLogDeserializer(changeLogFile, changelogFilestore, record.getConservationArea());
 		processor.processFile(session);
 	}
 	
@@ -370,15 +370,17 @@ public class ApplyChangeLogJob extends Job {
 	 * application must restart or ask user to re-enter credentials.
 	 */
 	private boolean checkUser(){
+		if (SmartDB.getCurrentEmployee() == null) return true;
+		final Employee currentEmployee = SmartDB.getCurrentEmployee();
 		Session s = HibernateManager.openSession();
 		try{
 			final Employee afterDownload = (Employee) s.createCriteria(Employee.class)
-				.add(Restrictions.eq("uuid", SmartDB.getCurrentEmployee().getUuid()))
+				.add(Restrictions.eq("uuid", currentEmployee.getUuid()))
 				.uniqueResult();
 			final boolean[] cont = new boolean[]{true};
 			if (afterDownload == null ||
 					afterDownload.getSmartUserLevel() == null ||
-					!afterDownload.getSmartUserLevel().equals(SmartDB.getCurrentEmployee().getSmartUserLevel())){
+					!afterDownload.getSmartUserLevel().equals(currentEmployee.getSmartUserLevel())){
 				//current employee no longer exists; 
 				//or no longer a smart user
 				//or user level has changed
@@ -397,8 +399,8 @@ public class ApplyChangeLogJob extends Job {
 			//ensure usernames & passwords are the same
 			//we are comparing the hashed values here; not the unhashed values
 			//this is the best we can do but will not be perfect
-			if (!afterDownload.getSmartUserId().equals(SmartDB.getCurrentEmployee().getSmartUserId()) ||
-				!afterDownload.getSmartPassword().equals(SmartDB.getCurrentEmployee().getSmartPassword())){
+			if (!afterDownload.getSmartUserId().equals(currentEmployee.getSmartUserId()) ||
+				!afterDownload.getSmartPassword().equals(currentEmployee.getSmartPassword())){
 				//the username or password are different we need to prompt for the new password
 				//if they cannot provide the necessary info, we need to logout
 				Display.getDefault().syncExec(new Runnable(){
@@ -441,10 +443,11 @@ public class ApplyChangeLogJob extends Job {
 						}
 	
 						//update configuration to use new employee
-						ConservationAreaConfiguration cc = new ConservationAreaConfiguration(Collections.singleton(SmartDB.getCurrentConservationArea()), 
+						ConservationAreaConfiguration cc = new ConservationAreaConfiguration(
+								Collections.singleton(currentEmployee.getConservationArea()), 
 								Collections.singleton(afterDownload), s);
 						SmartDB.setConservationAreaConfiguration(afterDownload, 
-								password, SmartDB.getCurrentConservationArea(), cc);
+								password, currentEmployee.getConservationArea(), cc);
 					}
 				});
 			}

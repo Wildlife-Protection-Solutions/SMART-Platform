@@ -25,7 +25,9 @@ import java.nio.file.Path;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
+import org.geotools.util.SubProgressListener;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
@@ -105,11 +107,14 @@ public class DownloadChangeLogJob extends Job {
 				if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
 					promptSize = connect.getServer().getOptionAsInt(ConnectServerOption.Option.PACKAGE_PROMPT_SIZE);
 				}
-				downloadFile = connect.downloadFileFromUrl(downloadUrl,promptSize);
-				monitor.worked(1);
+				downloadFile = connect.downloadFileFromUrl(downloadUrl, promptSize, new SubProgressMonitor(monitor, 1));
 			}
 			monitor.done();
 		}catch (PackageToLargeException ex){
+			record.setStatus(Status.ERROR);
+			record.setErrorString(ex.getMessage());
+			ConnectPlugIn.log(ex.getMessage(), ex);
+		}catch (InterruptedException  ex){
 			record.setStatus(Status.ERROR);
 			record.setErrorString(ex.getMessage());
 			ConnectPlugIn.log(ex.getMessage(), ex);
@@ -123,6 +128,7 @@ public class DownloadChangeLogJob extends Job {
 	
 	private IStatus cancelled(){
 		record.setStatus(Status.ERROR);
+		record.setErrorString("Cancelled by user.");
 		return org.eclipse.core.runtime.Status.CANCEL_STATUS;
 	}
 

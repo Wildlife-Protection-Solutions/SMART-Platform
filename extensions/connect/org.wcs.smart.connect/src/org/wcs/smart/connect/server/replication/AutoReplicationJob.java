@@ -183,7 +183,7 @@ public class AutoReplicationJob extends Job {
 	}
 	
 	private void downloadChangeLog(final boolean uploadOnComplete){
-		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(smartConnect){
+		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(SmartDB.getCurrentConservationArea(), smartConnect){
 			protected void processComplete(){
 				super.processComplete();
 
@@ -209,7 +209,7 @@ public class AutoReplicationJob extends Job {
 		Job j = new Job("package change log") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				UploadChangeLogEngine engine = new UploadChangeLogEngine(smartConnect){
+				UploadChangeLogEngine engine = new UploadChangeLogEngine(SmartDB.getCurrentConservationArea(), smartConnect){
 					protected void processComplete(){
 						super.processComplete();
 						reschedule();

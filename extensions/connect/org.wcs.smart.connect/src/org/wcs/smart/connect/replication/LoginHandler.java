@@ -43,6 +43,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ILoginHandler;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServerStatus;
@@ -50,9 +51,9 @@ import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.server.UploadCaEngine;
+import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
-import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
 import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
 import org.wcs.smart.connect.ui.server.ConnectDialog;
@@ -285,12 +286,13 @@ public class LoginHandler implements ILoginHandler {
 	 */
 	private void processUploadSync(){
 		ConnectSyncHistoryRecord record = null;
+		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		try{
-			List<ConnectSyncHistoryRecord> allActive = SyncHistoryManager.INSTANCE.getActiveSyncRecords(SmartDB.getCurrentConservationArea(), Type.UPLOAD);
+			List<ConnectSyncHistoryRecord> allActive = SyncHistoryManager.INSTANCE.getActiveSyncRecords(ca, Type.UPLOAD);
 			
 			Session s = HibernateManager.openSession();
 			try{
-				record = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(s, SmartDB.getCurrentConservationArea(),Type.UPLOAD);
+				record = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(s, ca,Type.UPLOAD);
 				
 				s.beginTransaction();
 				for (ConnectSyncHistoryRecord r : allActive){
@@ -333,7 +335,7 @@ public class LoginHandler implements ILoginHandler {
 					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could finish.  The job will resume and you will be notified when complete.");
 					SmartConnect connect = getSmartConnect();
 					if (connect != null){
-						UploadChangeLogEngine e = new UploadChangeLogEngine(connect);
+						UploadChangeLogEngine e = new UploadChangeLogEngine(ca, connect);
 						try{
 							e.createUpload(new NullProgressMonitor());
 						}catch (NothingToUpdateException ex){

@@ -53,6 +53,7 @@ import org.wcs.smart.connect.ui.server.DownloadChangeLogHandler;
 import org.wcs.smart.connect.ui.server.SyncChangeLogDialog;
 import org.wcs.smart.connect.ui.server.SyncChangeLogHandler;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * On startup sync processor.  Adds the required startup and
@@ -224,14 +225,14 @@ public class SyncOnStartupProcessor {
 				monitor.beginTask("Downloading and applygin changes from SMART Connect", 3);
 			}
 			
-			DownloadChangeLogEngine engine = new DownloadChangeLogEngine(connect) {
+			DownloadChangeLogEngine engine = new DownloadChangeLogEngine(SmartDB.getCurrentConservationArea(), connect) {
 				protected void processComplete() {
 					super.processComplete();
 					if (upload && (record.getStatus() == Status.DONE || 
 							record.getStatus() == Status.NODATA)){
 
 						//upload
-						UploadChangeLogEngine engine = new UploadChangeLogEngine(connect){
+						UploadChangeLogEngine engine = new UploadChangeLogEngine(SmartDB.getCurrentConservationArea(), connect){
 							protected void processComplete(){
 								super.processComplete();
 								unlock();

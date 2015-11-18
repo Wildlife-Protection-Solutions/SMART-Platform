@@ -47,7 +47,6 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Engine to upload the a change log file to the server.
@@ -61,9 +60,11 @@ public class UploadChangeLogEngine {
 	
 	private SmartConnect connect;
 	protected ConnectSyncHistoryRecord record;
+	private ConservationArea ca;
 	
-	public UploadChangeLogEngine(SmartConnect connect){
+	public UploadChangeLogEngine(ConservationArea ca, SmartConnect connect){
 		this.connect = connect;
+		this.ca = ca;
 	}
 	
 	/**
@@ -77,10 +78,8 @@ public class UploadChangeLogEngine {
 	 * @throws Exception
 	 */
 	public void createUpload(IProgressMonitor monitor) throws NothingToUpdateException, PackageToLargeException, Exception{
-		
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		if (SmartDB.isMultipleAnalysis()) throw new Exception("Cross-ca analysis can not be syncronized with server.");
 	
+		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)) throw new Exception("Cross-ca analysis can not be syncronized with server.");
 		
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			throw new Exception("Another process is already uploading changes to SMART Connect.  You must wait until that process is completed to upload change log.");
