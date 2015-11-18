@@ -32,6 +32,7 @@ import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -187,7 +188,7 @@ public class ConnectServerOption {
 			
 		}
 		
-		@ManyToOne(cascade = {CascadeType.ALL})
+		@ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
 		//@JoinColumn(name="server_uuid")
 		//@Column(name="server_uuid")
 		public ConnectServer getServer() {
