@@ -55,6 +55,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	private AutoOptionsPanel autoPnl;
 	private ServerOptionsPanel optionsPnl;
 	private ConnectServer server;
+	private boolean changesMade = false;
 	
 	public EditConnectServerInfoDialog(Shell parentShell, ConnectServer server) {
 		super(parentShell);
@@ -67,10 +68,9 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		Session s = HibernateManager.openSession();
 		s.beginTransaction();
 		try{
-			s.saveOrUpdate(server);
+			server = (ConnectServer) s.merge(server);
 			
 			server.setServerUrl(serverpnl.getServerUrl());
-			
 			if (serverpnl.getCertificateFile() != null){
 				String certificateFile = serverpnl.getCertificateFile();
 				if (certificateFile.trim().isEmpty()){
@@ -84,6 +84,8 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 					return;
 				}
 			}
+			
+			
 			optionsPnl.updateServer(server);
 			autoPnl.updateServer(server);
 			
@@ -104,7 +106,11 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		super.okPressed();
 	}
 	
-	
+	@Override
+	protected void createButtonsForButtonBar(Composite parent){
+		super.createButtonsForButtonBar(parent);
+		getButton(OK).setEnabled(false);
+	}
 	@Override
 	protected Control createDialogArea(Composite parent) {
 		parent = (Composite) super.createDialogArea(parent);
@@ -116,6 +122,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		ModifyListener validateListener = new ModifyListener() {
 			@Override
 			public void modifyText(ModifyEvent e) {
+				changesMade = true;
 				validate();
 			}
 		};
@@ -124,7 +131,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		g.setText("Server Configuration");
 		serverpnl = new ServerPanel(g);
-		serverpnl.addChangeListener(validateListener);
+		
 		serverpnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		TabFolder tabConfig = new TabFolder(g, SWT.NONE);
@@ -138,12 +145,15 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		ti.setText("Connection Options");
 		ti.setControl(optionsPnl = new ServerOptionsPanel(tabConfig));
 		
-		optionsPnl.addChangeListener(validateListener);
-		autoPnl.addChangeListener(validateListener);
-		
 		serverpnl.initValues(server);
 		optionsPnl.initValues(server);
 		autoPnl.initValues(server);
+		
+		serverpnl.addChangeListener(validateListener);
+		optionsPnl.addChangeListener(validateListener);
+		autoPnl.addChangeListener(validateListener);
+		
+		validate();
 		
 		setTitle("Update SMART Connect Server Configuration");
 		getShell().setText("Update SMART Connect Configurations");
@@ -154,7 +164,11 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	
 	private void enableOk(boolean value){
 		if (getButton(IDialogConstants.OK_ID) != null){
-			getButton(IDialogConstants.OK_ID).setEnabled(value);
+			if (changesMade){
+				getButton(IDialogConstants.OK_ID).setEnabled(value);
+			}else{
+				getButton(IDialogConstants.OK_ID).setEnabled(false);
+			}
 		}
 	}
 	

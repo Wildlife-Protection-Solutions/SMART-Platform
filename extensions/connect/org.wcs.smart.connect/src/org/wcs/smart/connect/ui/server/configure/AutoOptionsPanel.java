@@ -214,6 +214,7 @@ public class AutoOptionsPanel extends Composite {
 				@Override
 				public void widgetSelected(SelectionEvent e) {
 					updateEnabled();
+					fireChange(null);
 				}
 			};
 			btnAutoCheck.addSelectionListener(ml);
@@ -221,6 +222,17 @@ public class AutoOptionsPanel extends Composite {
 			btnDownShutDown.addSelectionListener(ml);
 			btnDownStartUp.addSelectionListener(ml);
 			btnPackageSize.addSelectionListener(ml);
+			
+			ml = new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					fireChange(null);
+				}
+			};
+			btnPrompt.addSelectionListener(ml);
+			btnUpload.addSelectionListener(ml);
+			btnUploadShutDown.addSelectionListener(ml);
+			btnUploadStartUp.addSelectionListener(ml);
 		}else{
 			btnDownShutDown.setEnabled(false);
 			btnDownStartUp.setEnabled(false);
