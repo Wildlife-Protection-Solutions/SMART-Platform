@@ -298,7 +298,7 @@ public class DmMatcherMainComposite extends Composite {
 				FileUtil.write(new File(fn), smartMapping);
 			} catch (Exception e) {
 				logger.error("Error while saving mapping.", e); //$NON-NLS-1$
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. Failed to save mapping. See console for details.");
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error occured. Failed to save mapping. See log for details.");
 			}
 		}
 	}

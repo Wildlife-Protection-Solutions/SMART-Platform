@@ -271,7 +271,7 @@ public class MappingValidator {
 			}
 			rs.close();
 		} catch (Exception e) {
-			errors.add("Unable to validate that all category mappings present due to SQLException. See console or log for details");
+			errors.add("Unable to validate that all category mappings present due to SQLException. See log for details");
 			logger.error("Unable to validate that all category mappings present", e); //$NON-NLS-1$
 		}
 		return errors;
@@ -293,7 +293,7 @@ public class MappingValidator {
 				}
 			}
 		} catch (SQLException e) {
-			errors.add("Unable to validate that all attributes are mapped due to SQLException. See console or log for details");
+			errors.add("Unable to validate that all attributes are mapped due to SQLException. See log for details");
 			logger.error("Unable to validate that all attributes are mapped", e); //$NON-NLS-1$
 		}
 		return errors;

@@ -149,7 +149,7 @@ public abstract class ProcessingActionHandler {
 				if (isOk) {
 					MessageDialog.openInformation(getShell(), "Metadata generation", "Metadata generation sucessfully completed.");
 				} else {
-					MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation. See console for details.");
+					MessageDialog.openError(getShell(), "Metadata generation", "Errors occured while metadata generation. See log for details.");
 				}
 			} catch (Exception e) {
 				logger.error("Error occured while metadata generation.", e);

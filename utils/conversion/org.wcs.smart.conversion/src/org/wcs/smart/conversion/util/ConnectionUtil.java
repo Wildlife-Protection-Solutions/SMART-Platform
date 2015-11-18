@@ -65,7 +65,7 @@ public class ConnectionUtil {
 				connection.close();
 			} catch (SQLException e) {
 				logger.error("Error while closing database connection.", e); //$NON-NLS-1$
-				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while closing database connection. See console for details.");
+				MessageDialog.openError(Display.getDefault().getActiveShell(), "Error", "Error while closing database connection. See log for details.");
 			}
 		}
 	}
