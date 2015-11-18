@@ -31,14 +31,13 @@ import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
-import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
+import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Engine to download a change log file from the server and
@@ -50,13 +49,16 @@ import org.wcs.smart.hibernate.SmartDB;
 public class DownloadChangeLogEngine {
 	
 	private SmartConnect connect;
+	private ConservationArea ca;
 	
 	protected ConnectSyncHistoryRecord record = null;
 	
 	private ConnectServerStatus serverInfo = null;
 	
-	public DownloadChangeLogEngine(SmartConnect connect){
+	public DownloadChangeLogEngine(ConservationArea ca, SmartConnect connect){
+		this.ca = ca;
 		this.connect = connect;
+		
 	}
 	
 	/**
@@ -69,8 +71,7 @@ public class DownloadChangeLogEngine {
 	public void downloadInstall() throws Exception{
 
 		/* the ca info */
-		ConservationArea ca = SmartDB.getCurrentConservationArea();
-		if (SmartDB.isMultipleAnalysis()){
+		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			throw new Exception("Cross-ca analysis can not be syncronized with server.");
 		}
 		

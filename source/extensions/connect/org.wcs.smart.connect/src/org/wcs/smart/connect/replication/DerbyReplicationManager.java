@@ -136,20 +136,6 @@ public enum DerbyReplicationManager {
 			public void execute(Connection connection) throws SQLException {
 				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "null") + ")");
 			}});
-//		if (isEnabled){
-//			//configure revision 
-//			String sql = "SELECT max(revision) FROM ChangeLogItem WHERE conservationArea = :ca";
-//			Long seqstart = (Long)session.createQuery(sql)
-//					.setParameter("ca", SmartDB.getCurrentConservationArea().getUuid())
-//					.uniqueResult();
-//			if (seqstart == null){
-//				seqstart = 0l;
-//			}
-//			seqstart++;
-//			//TODO: only smart_admin user can execute this statement
-//			sql = "ALTER TABLE smart.connect_change_log ALTER COLUMN revision RESTART WITH " + seqstart;
-//			session.createSQLQuery(sql).executeUpdate();
-//		}
 	}
 	
 	/**

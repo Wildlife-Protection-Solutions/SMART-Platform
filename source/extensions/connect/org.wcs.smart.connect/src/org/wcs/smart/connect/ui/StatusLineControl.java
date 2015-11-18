@@ -91,6 +91,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		updateServerStatus(ServerStatus.ERROR, "Unknown State");
 		updateLocalStatus(ServerStatus.ERROR, "Unknown State");
 		
+		updateLocalChanges.setSystem(true);
 		updateLocalChanges.schedule();
 		return status;
 	}

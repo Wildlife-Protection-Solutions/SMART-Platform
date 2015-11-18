@@ -23,10 +23,15 @@ package org.wcs.smart.connect;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.channels.Channel;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -67,6 +72,7 @@ import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.jboss.resteasy.client.jaxrs.ResteasyClient;
@@ -74,6 +80,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient4Engine;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.connect.IOUtils.CopyProgressMonitor;
 import org.wcs.smart.connect.api.ConnectClient;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
@@ -438,11 +445,12 @@ public class SmartConnect {
 	 *  
 	 * @param url the URL to download from
 	 * @param promptDownloadSizeMb prompt the user to continue if the download
-	 * file size is larger than this size.  Can be null if should never prompt. 
+	 * file size is larger than this size.  Can be null if should never prompt.
+	 * @param monitor subprogress monitor used to cancel download and update progress 
 	 * @return the downloaded file
 	 * @throws Exception
 	 */
-	public Path downloadFileFromUrl(String url, Integer promptDownloadSizeMb) throws PackageToLargeException, Exception{
+	public Path downloadFileFromUrl(String url, Integer promptDownloadSizeMb, IProgressMonitor monitor) throws PackageToLargeException, InterruptedException, Exception{
 		createClient();
 		int tryCount = 0;
 		
@@ -457,6 +465,7 @@ public class SmartConnect {
 		Long size = null;
 		
 		long waitTime = server.getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+		org.wcs.smart.connect.IOUtils.CopyProgressMonitor copyMonitor = null;
 		//first request; this one gives us the requested size
 		while(size == null && tryCount < server.getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_DOWNLOAD )){
 			Response r = null;
@@ -467,7 +476,8 @@ public class SmartConnect {
 			
 				if (r.getStatus() == HttpURLConnection.HTTP_OK){
 					size = Long.valueOf(r.getHeaderString(HttpHeaders.CONTENT_LENGTH));
-					
+					monitor.beginTask("Downloading file", 100);
+					copyMonitor = new org.wcs.smart.connect.IOUtils.CopyProgressMonitor(monitor, size);
 					if (promptDownloadSizeMb != null &&
 							size > promptDownloadSizeMb * 1000000 ){
 						//prompt to download before continuing
@@ -476,19 +486,24 @@ public class SmartConnect {
 						}
 					}
 					//parse target
-					try(InputStream is = r.readEntity(InputStream.class)){
-						Files.copy(is, filestore);
+					try(InputStream is = r.readEntity(InputStream.class);
+							OutputStream out = Files.newOutputStream(filestore)){
+						org.wcs.smart.connect.IOUtils.copy(is, out, size, copyMonitor);
 					}
+					
 					if (Files.size(filestore) > size){
 						throw new Exception("Downloaded file size greater than expected file size.");
 					}
 					if (Files.size(filestore) == size){
+						monitor.done();
 						return filestore;
 					}
 				}
 			}catch (PackageToLargeException ex){
 				//we do not want to try again
 				throw ex;
+			}catch (InterruptedException ex){
+				throw ex;	//user cancelled do not try again
 			}catch (Exception ex){
 				ConnectPlugIn.log(ex.getMessage(), ex);
 			}finally{
@@ -501,12 +516,13 @@ public class SmartConnect {
 		
 		//try a maximum of 10 times
 		while(tryCount < server.getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_DOWNLOAD)){
-			downloadRequest(filestore, url, size);
+			downloadRequest(filestore, url, size, copyMonitor);
 			
 			if (Files.size(filestore) > size){
 				throw new Exception("Downloaded file size greater than expected file size.");
 			}
 			if (Files.size(filestore) == size){
+				monitor.done();
 				return filestore;
 			}
 			tryCount++;
@@ -515,6 +531,7 @@ public class SmartConnect {
 		}
 		throw new Exception("Failed to download conservation export from server.");
 	}
+
 	
 	/**
 	 * Attempts to download the file provided at the URL to the path.  This will
@@ -524,7 +541,7 @@ public class SmartConnect {
 	 * @param maxLength total download filesize
 	 * @throws Exception
 	 */
-	private void downloadRequest(Path p, String url, long maxLength) throws Exception{
+	private void downloadRequest(Path p, String url, long maxLength, CopyProgressMonitor monitor) throws InterruptedException{
 		ResteasyWebTarget target = client.target(url);
 		Response r = null;
 		try {
@@ -538,11 +555,15 @@ public class SmartConnect {
 			
 			r = target.request().get();
 			if (r.getStatus() == HttpURLConnection.HTTP_OK){
+				
+				//parse target
 				try(InputStream is = r.readEntity(InputStream.class);
 						OutputStream out = Files.newOutputStream(p, StandardOpenOption.CREATE, StandardOpenOption.APPEND)){
-					IOUtils.copyLarge(is, out);
+					org.wcs.smart.connect.IOUtils.copy(is, out, (start-end), monitor);
 				}
 			}
+		}catch (InterruptedException ex){
+			throw ex;
 		}catch (Exception ex){
 			ConnectPlugIn.log(ex.getMessage(), ex);
 		}finally{

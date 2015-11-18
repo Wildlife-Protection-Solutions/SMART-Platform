@@ -40,6 +40,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
@@ -47,7 +48,6 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.connect.replication.changelog.ChangeLogDeserializer;
 import org.wcs.smart.connect.replication.changelog.ConflictException;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.util.UuidUtils;
 
 /**
@@ -57,8 +57,11 @@ import org.wcs.smart.util.UuidUtils;
 public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 
 	private Long lastUploadRevision = null;
-	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir) {
+	private ConservationArea ca;
+	
+	public DerbyChangeLogDeserializer(Path changeLogFile, Path changeLogFilestoreDir, ConservationArea ca) {
 		super(changeLogFile, changeLogFilestoreDir);
+		this.ca = ca;
 	}
 
 	/**
@@ -68,7 +71,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	public void processFile(final Session session) throws Exception{
 		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();
 		
-		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, SmartDB.getCurrentConservationArea(), Type.UPLOAD);
+		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, ca, Type.UPLOAD);
 		lastUploadRevision = lastUpload == null ? -1 : lastUpload.getEndRevision();
 		
 		super.processFile(session);
@@ -185,11 +188,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		}else if (item.getKey2String() != null){
 			ps.setString(2, item.getKey2String());
 		}
-		int up = ps.executeUpdate();
-		//not a valid check as item may been previously removed
-		//if (up != 1){
-		//	throw new SQLException("Invalid number of row deleted.");
-		//}
+		ps.executeUpdate();
 	}
 	
 	@Override

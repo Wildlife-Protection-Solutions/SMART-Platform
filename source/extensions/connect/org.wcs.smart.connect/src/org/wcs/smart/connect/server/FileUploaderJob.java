@@ -61,7 +61,7 @@ public abstract class FileUploaderJob extends Job {
 	}
 	
 	
-	protected void uploadFile( IProgressMonitor monitor) throws Exception{
+	protected void uploadFile(IProgressMonitor monitor) throws Exception{
 		// get current status
 		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 		try{
@@ -87,6 +87,7 @@ public abstract class FileUploaderJob extends Job {
 				
 				Thread.sleep(waitTime);
 				waitTime = waitTime * 2;
+				if (monitor.isCanceled()) throw new Exception("Upload cancelled by user.");
 			}
 			//if we are here we have tried max_retry times and the file has still not been uploaded
 			throw new Exception(MessageFormat.format("Upload reached max tries of {0}.  Please validate server connection and try again.", connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)));

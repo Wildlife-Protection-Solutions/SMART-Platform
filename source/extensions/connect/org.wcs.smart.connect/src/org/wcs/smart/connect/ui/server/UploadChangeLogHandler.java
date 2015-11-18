@@ -41,6 +41,7 @@ import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
 import org.wcs.smart.connect.server.replication.UploadChangeLogEngine;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Upload change log handler for manually uploading change log.
@@ -70,7 +71,7 @@ public class UploadChangeLogHandler {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 			
-					UploadChangeLogEngine engine = new UploadChangeLogEngine(connect){
+					UploadChangeLogEngine engine = new UploadChangeLogEngine(SmartDB.getCurrentConservationArea(), connect){
 						protected void processComplete(){
 							super.processComplete();
 							displayStatus(record);
