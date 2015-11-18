@@ -27,9 +27,11 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.api.io.CopyProgressMonitor;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.api.model.WorkItemStatus.Status;
 import org.wcs.smart.connect.model.ConnectServerOption;
@@ -62,6 +64,7 @@ public abstract class FileUploaderJob extends Job {
 	
 	
 	protected void uploadFile(IProgressMonitor monitor) throws Exception{
+		monitor.beginTask("Uploading file.", 1);
 		// get current status
 		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 		try{
@@ -70,12 +73,16 @@ public abstract class FileUploaderJob extends Job {
 			}
 			int cnt = 0;			
 			long waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
+			
+			monitor.subTask("uploading files");
+			CopyProgressMonitor copyMonitor = new CopyProgressMonitor(new SubProgressMonitor(monitor,1), Files.size(file));
 			while(cnt < connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)){
 				//upload file
 				try{
 					cnt++;
 					connect.uploadFile(url, file, 
-							serverStatus.getCurrentSize());
+							serverStatus.getCurrentSize(),
+							copyMonitor);
 				}catch (Exception ex){
 					ConnectPlugIn.log(ex.getMessage(), ex);
 				}
@@ -95,6 +102,8 @@ public abstract class FileUploaderJob extends Job {
 			serverStatus.setMessage(ex.getMessage());
 			onError(serverStatus.getMessage());
 			throw ex;
+		}finally{
+			monitor.done();
 		}
 	}
 	
@@ -116,7 +125,7 @@ public abstract class FileUploaderJob extends Job {
 	protected boolean checkServerStatus(WorkItemStatus serverStatus,
 			IProgressMonitor monitor) throws Exception{
 		monitor.subTask("Checking server status");
-		
+	
 		if (serverStatus.getStatus() == Status.COMPLETE){
 			onUploadComplete(serverStatus);
 			onProcessingComplete(serverStatus);
