@@ -59,5 +59,6 @@ labels_en= {
 "ca.confirmdeleteca": "Are you sure you want to delete the conservation area ",
 "ca.errordeletingca": "Error deleting conservation area ",
 "ca.refreshingcas": "Refreshing Conservation Area Table...",
+"query.refreshingqueries": "Refreshing Queries Table...",
 "":""
 }
