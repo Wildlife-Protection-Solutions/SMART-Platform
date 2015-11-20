@@ -94,7 +94,7 @@ public abstract class FileUploaderJob extends Job {
 				}
 				Thread.sleep(waitTime);
 				//TODO: this gets really slow really fast
-				waitTime = waitTime * 2;
+//				waitTime = waitTime * 2;
 				if (monitor.isCanceled()) throw new Exception("Upload cancelled by user.");
 			}
 			//if we are here we have tried max_retry times and the file has still not been uploaded

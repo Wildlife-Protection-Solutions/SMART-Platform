@@ -90,7 +90,8 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 	
 		cmbList = CheckboxTableViewer.newCheckList(outer, SWT.BORDER);
 		cmbList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)cmbList.getTable().getLayoutData()).heightHint = 250;
+		((GridData)cmbList.getControl().getLayoutData()).heightHint = 200;
+		((GridData)cmbList.getControl().getLayoutData()).widthHint = 100;
 		cmbList.setContentProvider(ArrayContentProvider.getInstance());
 		cmbList.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
