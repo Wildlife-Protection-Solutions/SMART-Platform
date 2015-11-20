@@ -64,7 +64,7 @@ public abstract class FileUploaderJob extends Job {
 	
 	
 	protected void uploadFile(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Uploading file.", 1);
+		monitor.beginTask("Uploading file.", 4);
 		// get current status
 		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 		try{
@@ -75,7 +75,8 @@ public abstract class FileUploaderJob extends Job {
 			long waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
 			
 			monitor.subTask("uploading files");
-			CopyProgressMonitor copyMonitor = new CopyProgressMonitor(new SubProgressMonitor(monitor,1), Files.size(file));
+			CopyProgressMonitor copyMonitor = new CopyProgressMonitor(new SubProgressMonitor(monitor,3), Files.size(file));
+			
 			while(cnt < connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)){
 				//upload file
 				try{
@@ -91,8 +92,8 @@ public abstract class FileUploaderJob extends Job {
 				if (checkServerStatus(serverStatus, monitor)){
 					return ;
 				}
-				
 				Thread.sleep(waitTime);
+				//TODO: this gets really slow really fast
 				waitTime = waitTime * 2;
 				if (monitor.isCanceled()) throw new Exception("Upload cancelled by user.");
 			}

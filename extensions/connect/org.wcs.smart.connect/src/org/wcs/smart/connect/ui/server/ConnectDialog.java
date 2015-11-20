@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Session;
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
@@ -78,13 +79,20 @@ public class ConnectDialog extends TitleAreaDialog {
 	private SmartConnect connect;
 	private boolean hideConfigure;
 	
+	private Employee e;
+	
 	public ConnectDialog(Shell parentShell) {
-		this(parentShell, false);
+		this(parentShell, false, SmartDB.getCurrentEmployee());
 	}
 
 	public ConnectDialog(Shell parentShell, boolean hideConfigure) {
+		this(parentShell, hideConfigure, SmartDB.getCurrentEmployee());
+	}
+	
+	public ConnectDialog(Shell parentShell, boolean hideConfigure, Employee e){
 		super(parentShell);
 		this.hideConfigure = hideConfigure;
+		this.e = e;
 	}
 	
 	@Override
@@ -199,7 +207,7 @@ public class ConnectDialog extends TitleAreaDialog {
 		try{
 			s.beginTransaction();
 			cs = ConnectHibernateManager.getConnectServer(s);
-			user = ConnectHibernateManager.getConnectUser(SmartDB.getCurrentEmployee(), s);			
+			user = ConnectHibernateManager.getConnectUser(e, s);			
 			s.getTransaction().commit();
 		}finally{
 			s.close();
@@ -308,7 +316,7 @@ public class ConnectDialog extends TitleAreaDialog {
 										ConnectUser newuser = new ConnectUser();
 										newuser.setConnectUsername(user);
 										newuser.setServer(cs);
-										newuser.setSmartUser(SmartDB.getCurrentEmployee());
+										newuser.setSmartUser(e);
 										ConnectDialog.this.user = newuser;
 										s.save(newuser);
 									}

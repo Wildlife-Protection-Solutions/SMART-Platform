@@ -119,7 +119,7 @@ public class SmartConnect {
 	 * 
 	 * @param server the connect server
 	 * @param username the connect username
-	 * @param password the connect password
+	 * @param password the connect password plaintext
 	 * 
 	 * @return
 	 */

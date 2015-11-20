@@ -35,6 +35,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -55,14 +56,14 @@ public class UploadChangeLogHandler {
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 		UploadChangeLogDialog dialog = new UploadChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
-			uploadChangeLog(activeShell, dialog.getConnection());
+			uploadChangeLog(activeShell, dialog.getConnection(), SmartDB.getCurrentConservationArea());
 		}
 	}
 
 	/*
 	 * uploads change log to server
 	 */
-	public void uploadChangeLog(Shell activeShell, final SmartConnect connect){
+	public void uploadChangeLog(Shell activeShell, final SmartConnect connect, final ConservationArea ca){
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(activeShell);
 		try {
 			pmd.run(true, false, new IRunnableWithProgress() {
@@ -71,7 +72,7 @@ public class UploadChangeLogHandler {
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
 			
-					UploadChangeLogEngine engine = new UploadChangeLogEngine(SmartDB.getCurrentConservationArea(), connect){
+					UploadChangeLogEngine engine = new UploadChangeLogEngine(ca, connect){
 						protected void processComplete(){
 							super.processComplete();
 							displayStatus(record);

@@ -89,7 +89,7 @@ public class UploadChangeLogEngine {
 			Long currentRevisionNo = -1l;
 			Session session = HibernateManager.openSession();
 			try{
-				if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
+				if (!DerbyReplicationManager.INSTANCE.canReplicate(session, ca)){
 					throw new Exception("Replication not enabled.  Cannot upload changes from server.");
 				}
 				currentRevisionNo = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, ca);

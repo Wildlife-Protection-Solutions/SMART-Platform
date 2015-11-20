@@ -25,12 +25,12 @@ import org.wcs.smart.connect.ui.server.configure.UserWizardPage;
 
 public class DownloadConnectWizard extends ConnectServerWizard implements IPageChangingListener{
 
-	protected CaListPage page5;
+	protected ConnectCaListPage page5;
 	
 	public DownloadConnectWizard(){
 		super(false);
 		setWindowTitle("Download from SMART Connect Server");
-		addPage(page5 = new CaListPage());
+		addPage(page5 = new ConnectCaListPage());
 		setNeedsProgressMonitor(true);
 		
 	}

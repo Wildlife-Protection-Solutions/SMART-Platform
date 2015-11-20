@@ -42,12 +42,11 @@ public class PackageMetadata {
 	private HashMap<String, String> pluginVersions;
 	
 	public PackageMetadata(){
-		this(null, null, null, null, null, new HashMap<String, String>());
+		this(null, null, null, null, new HashMap<String, String>());
 		
 	}
 	
-	public PackageMetadata(Path output,
-			UUID caUuid,
+	public PackageMetadata(UUID caUuid,
 			UUID version,
 			Long clientRevision,
 			Long serverRevision,

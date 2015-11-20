@@ -109,14 +109,10 @@ public class LoginHandler implements ILoginHandler {
 		s = HibernateManager.openSession();
 		try{
 			s.beginTransaction();
-			status = (ConnectServerStatus)s.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
-			if (status == null){
-				return;
-			}
-			if (status.getStatus() == ConnectServerStatus.Status.UPLOAD ||
-				status.getStatus() == ConnectServerStatus.Status.DONE ){
+			
+			if (DerbyReplicationManager.INSTANCE.canReplicate(s, SmartDB.getCurrentConservationArea())){
 				DerbyReplicationManager.INSTANCE.enableReplication(s);
-			}else if (status.getStatus() == ConnectServerStatus.Status.ERROR){
+			}else{
 				//delete any replication records or sync history records
 				ChangeLogTableManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
 				SyncHistoryManager.INSTANCE.deleteAll(s, SmartDB.getCurrentConservationArea());
@@ -128,8 +124,9 @@ public class LoginHandler implements ILoginHandler {
 		
 		//process any upload sync tasks
 		processUploadSync();
+		
 		//cleanup download sync tasks
-		cleanUpDownloadEvents(status);
+		SyncHistoryManager.INSTANCE.errorActiveDownloadRecords(SmartDB.getCurrentConservationArea());
 
 		//cleanupfilestore
 		cleanUpFilestore();
@@ -261,26 +258,7 @@ public class LoginHandler implements ILoginHandler {
 		
 	}
 	
-	/*
-	 * Any active download sync events are set to error
-	 * 
-	 * @param status
-	 */
-	private void cleanUpDownloadEvents(ConnectServerStatus status){
-		List<ConnectSyncHistoryRecord> items = SyncHistoryManager.INSTANCE.getActiveSyncRecords(SmartDB.getCurrentConservationArea(), Type.DOWNLOAD);
 
-		Session s = HibernateManager.openSession();
-		try{
-			s.beginTransaction();
-			for (ConnectSyncHistoryRecord r : items){
-				r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
-				s.saveOrUpdate(r);
-			}
-			s.getTransaction().commit();
-		}finally{
-			s.close();
-		}
-	}
 	/*
 	 * checks for ca any upload sync events which may not have completed
 	 */

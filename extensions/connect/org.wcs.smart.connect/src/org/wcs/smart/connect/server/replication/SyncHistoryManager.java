@@ -30,10 +30,12 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ConnectServer;
+import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Tools for managing the sync history table.
@@ -72,6 +74,46 @@ public enum SyncHistoryManager {
 		query.setParameter("type", type);
 		query.setParameter("datetime", endDate);
 		query.executeUpdate();
+	}
+	
+	/**
+	 * Sets any active download records to a status of Error 
+	 * for the given conservation area.
+	 */
+	public void errorActiveDownloadRecords(ConservationArea ca){
+		List<ConnectSyncHistoryRecord> items = SyncHistoryManager.INSTANCE.getActiveSyncRecords(ca, Type.DOWNLOAD);
+
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			for (ConnectSyncHistoryRecord r : items){
+				r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+				s.saveOrUpdate(r);
+			}
+			s.getTransaction().commit();
+		}finally{
+			s.close();
+		}
+	}
+	
+	/**
+	 * Sets any active upload records to a status of Error 
+	 * for the given conservation area.
+	 */
+	public void errorActiveUploadRecords(ConservationArea ca){
+		List<ConnectSyncHistoryRecord> items = SyncHistoryManager.INSTANCE.getActiveSyncRecords(ca, Type.UPLOAD);
+
+		Session s = HibernateManager.openSession();
+		try{
+			s.beginTransaction();
+			for (ConnectSyncHistoryRecord r : items){
+				r.setStatus(ConnectSyncHistoryRecord.Status.ERROR);
+				s.saveOrUpdate(r);
+			}
+			s.getTransaction().commit();
+		}finally{
+			s.close();
+		}
 	}
 	
 	/**
