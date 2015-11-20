@@ -241,8 +241,7 @@ public abstract class XmlMultiExportDialog extends TitleAreaDialog implements IU
 				}
 				if (e.keyCode == SWT.SPACE){
 					IStructuredSelection selection = ((IStructuredSelection)tableViewer.getSelection());
-					selection.getFirstElement();
-					boolean value = tableViewer.getChecked(   selection.getFirstElement() );
+					boolean value = tableViewer.getChecked( selection.getFirstElement() );
 					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
 						Object tp = (Object) iterator.next();
 						tableViewer.setChecked(tp, !value);
