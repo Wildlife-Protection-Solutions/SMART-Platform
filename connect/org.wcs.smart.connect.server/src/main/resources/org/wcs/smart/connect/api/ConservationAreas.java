@@ -635,6 +635,9 @@ public class ConservationAreas extends HttpServlet{
 			q = s.createQuery("DELETE FROM CaPluginVersion WHERE id.conservationAreaUuid = :ca");
 			q.setParameter("ca", serverDelete.getUuid());
 			q.executeUpdate();
+
+			//delete change log data
+			ChangeLogManager.INSTANCE.deleteItems(s, serverDelete.getUuid());
 			
 			caUuidToDelete = serverDelete.getUuid();
 			if (deleteAll){

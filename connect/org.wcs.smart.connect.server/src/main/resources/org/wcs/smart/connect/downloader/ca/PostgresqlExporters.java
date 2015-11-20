@@ -40,6 +40,7 @@ import org.wcs.smart.connect.datastore.DataStoreManager;
 import org.wcs.smart.connect.hibernate.SmartTable;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
+import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
 import org.wcs.smart.util.UuidUtils;
 
 public class PostgresqlExporters {
@@ -100,13 +101,15 @@ public class PostgresqlExporters {
 	
 	private void exportServerStatus(ICaDataExportEngine exportEngine) throws Exception {
 		
+		long lastRevision = ChangeLogManager.INSTANCE.getLastRevision(exportEngine.getSession(), exportEngine.getConservationArea().getUuid());
 		String tableName = "smart.connect_status";
 		exportEngine.writeTableDefinitionFile(tableName, ConnectServerStatus.class.getSimpleName(), new String[]{"CA_UUID", "CONNECT_UUID", "VERSION", "SERVER_REVISION", "STATUS", "UPLOADURL", "LOCALFILE"});
 		
 		String filename = tableName + "." + ConnectServerStatus.class.getSimpleName();
 		StringBuilder sb = new StringBuilder();
 		sb.append("SELECT a.ca_uuid, b.uuid, a.version, ");
-		sb.append(" case when c.max_revision is null then -1 else c.max_revision end, 'DONE', null, null ");
+		sb.append(lastRevision);
+		sb.append(" , 'DONE', null, null ");
 		sb.append("FROM connect.ca_info a, smart.connect_server b left join ");
 		sb.append(" (SELECT max(revision) as max_revision, ca_uuid as ca_uuid FROM connect.change_log WHERE ca_uuid = '" + exportEngine.getConservationArea().getUuid().toString() + "' GROUP BY ca_uuid) c");
 		sb.append(" on b.ca_uuid = c.ca_uuid ");

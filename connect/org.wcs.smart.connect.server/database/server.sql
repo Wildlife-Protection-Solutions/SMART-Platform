@@ -338,3 +338,14 @@ COMMENT ON COLUMN connect.change_log.key2_fieldname IS 'The second unique key fi
 COMMENT ON COLUMN connect.change_log.key2_str IS 'The second unique key uuid value (optional).';
 COMMENT ON COLUMN connect.change_log.key2_uuid IS 'The second unique key string value (optional)';
 COMMENT ON COLUMN connect.change_log.datetime IS 'The server managed datetime the action is added to the table.';
+
+
+CREATE TABLE connect.change_log_history(
+	ca_uuid UUID,
+	last_delete_revision BIGINT,
+	primary key (ca_uuid)
+);
+ALTER TABLE connect.change_log_history ADD CONSTRAINT connect_changelog_history_ca_uuid_fk foreign key (ca_uuid) REFERENCES connect.ca_info(ca_uuid) ON UPDATE restrict ON DELETE cascade;
+COMMENT ON TABLE connect.change_log_history IS 'Tracks history infor about the change log table, in particular the last removed records for each conservation area';
+COMMENT ON COLUMN connect.change_log_history.ca_uuid IS 'The conservation area unique identifier.';
+COMMENT ON COLUMN connect.change_log_history.last_delete_revision IS 'The last deleted revision number.';

@@ -163,9 +163,11 @@ public class CaExporterJob implements Runnable {
 			Files.createDirectories(tempDir);
 		}
 		try{
+			//export ca
 			ICaDataExportEngine engine = new PostgresqlCaDataExportEngine(tempDir.toFile(), ca, session);
 			(new PostgresqlExporters()).exportAll(engine);
 			
+			//zip
 			ZipUtil.createZip(tempDir.toFile().listFiles(), destFile.toFile());
 		}finally{
 			FileUtils.deleteDirectory(tempDir.toFile());

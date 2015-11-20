@@ -49,13 +49,13 @@ public enum ChangeLogManager {
 	INSTANCE;
 	
 	private static final String CHANGE_LOG_TABLE = "connect.change_log";
+	private static final String CHANGE_LOG_INFO_TABLE = "connect.change_log_history";
 	
 	/**
 	 * Delete all change log items with a revision 
-	 * less than the maxrevision for the given conservation area.  
-	 * This ensures there is always
-	 * one record per CA in the change log table.  If the
-	 * change log table is empty of a CA we have never cleaned up anything.
+	 * less than or equal to the maxrevision for the given conservation area.  
+	 * Inserts a record into the change_log_history table to track
+	 * the last deleted revision
 	 * 
 	 * @param s
 	 * @param maxRevision a value greater than 0; representing the revisions to delete (inclusive)
@@ -63,14 +63,60 @@ public enum ChangeLogManager {
 	 */
 	public void deleteItems(Session s, Long maxRevision, UUID caUuid){
 		if (maxRevision < 0) return;
-		
-		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE revision < :maxrevision and ca_uuid = :cauuid";
+		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE revision <= :maxrevision and ca_uuid = :cauuid";
 		SQLQuery q = s.createSQLQuery(sql);
 		q.setParameter("maxrevision", maxRevision);
 		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
 		q.executeUpdate();
+		
+		q = s.createSQLQuery("SELECT count(*) FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid");
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		Long cnt = ((BigInteger) q.uniqueResult()).longValue();
+		
+		if (cnt == 0){
+			q = s.createSQLQuery("INSERT INTO " + CHANGE_LOG_INFO_TABLE + " (ca_uuid, last_delete_revision) VALUES (:cauuid, :revision)");
+		}else{
+			q = s.createSQLQuery("UPDATE " + CHANGE_LOG_INFO_TABLE + " SET last_delete_revision = :revision WHERE ca_uuid = :cauuid");
+		}
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q.setParameter("revision", maxRevision);
+		q.executeUpdate();
 	}
 	
+	/**
+	 * The last delete revision from the change log history table.  This will
+	 * return -1 if there is no record in the history table.
+	 * @param s
+	 * @param caUuid
+	 * @return
+	 */
+	private Long getLastDeleteRevision(Session s, UUID caUuid){
+		SQLQuery q = s.createSQLQuery("SELECT last_delete_revision FROM " + CHANGE_LOG_INFO_TABLE + " where ca_uuid = :cauuid");
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		BigInteger value = (BigInteger)q.uniqueResult();
+		if (value == null){
+			return -1l;
+		}
+		return value.longValue();
+	}
+	/**
+	 * Delete all change log items for the given conservation area.  
+	 * 
+	 * @param s
+	 * @param maxRevision a value greater than 0; representing the revisions to delete (inclusive)
+	 * @return
+	 */
+	public void deleteItems(Session s, UUID caUuid){
+		String sql = "DELETE FROM " + CHANGE_LOG_TABLE + " WHERE ca_uuid = :cauuid";
+		SQLQuery q = s.createSQLQuery(sql);
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q.executeUpdate();
+		
+		sql = "DELETE FROM " + CHANGE_LOG_INFO_TABLE + " WHERE ca_uuid = :cauuid";
+		q = s.createSQLQuery(sql);
+		q.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE);
+		q.executeUpdate();
+	}
 	/**
 	 * Find the maximum revision number that is older than the given date for a 
 	 * given conservation area
@@ -97,7 +143,9 @@ public enum ChangeLogManager {
 		q.setParameter("ca", ca, PostgresUUIDType.INSTANCE);
 		Object rev = q.uniqueResult();
 		if (rev == null){
-			return -1;
+			//there is nothing in the change log; check the history
+			//as this will have the last revision item
+			return getLastDeleteRevision(s, ca);
 		}
 		return ((BigInteger)rev).longValueExact();
 	}
@@ -161,18 +209,10 @@ public enum ChangeLogManager {
 	 * @return
 	 */
 	public List<ChangeLogItem> getItems(Session session, UUID caUuid, long startRevision){
+
 		//first check that the start revision is after the last clean up revision
-		
-		String sql = "SELECT min(revision) FROM " +  CHANGE_LOG_TABLE + " WHERE ca_uuid = :cauuid";
-		BigInteger lastDeleteRevision = (BigInteger)session.createSQLQuery(sql)
-				.setParameter("cauuid", caUuid, PostgresUUIDType.INSTANCE)
-				.uniqueResult();
-		Long lastDelete = -1l;
-		if (lastDeleteRevision != null){
-			lastDelete = lastDeleteRevision.longValue();
-		}
-		if (startRevision < lastDelete){
-			//some change log items were removed so we cannot sync this class
+		if (startRevision < getLastDeleteRevision(session, caUuid)){
+//			//some change log items were removed so we cannot sync this class
 			throw new SmartConnectException(Status.NOT_FOUND, "The change log table on server has been cleaned up since your last request.  You must re-download the entire conservation area from SMART Connect to reestablish replication.");
 		}
 		
