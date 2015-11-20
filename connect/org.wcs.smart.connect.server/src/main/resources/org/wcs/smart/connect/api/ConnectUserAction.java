@@ -105,8 +105,7 @@ public class ConnectUserAction extends HttpServlet {
     @Path("/")
     public List<SmartActionsProxy> getActions(){
 		validateUser();
-		
-		Session s = HibernateManager.getSession(context);
+		Session s = HibernateManager.getSession(context, request.getLocale());
 		s.beginTransaction();
 		try{
 			List<SmartActionsProxy> actionResources = new ArrayList<SmartActionsProxy>();

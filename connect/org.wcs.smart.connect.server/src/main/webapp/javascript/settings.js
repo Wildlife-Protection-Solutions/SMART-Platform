@@ -204,14 +204,14 @@ function createLayerTable(){
 
  		var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
- 		updateicon.title="update layer";
+ 		updateicon.title= i18n("settings.updatelayer");
  		updateicon.onclick = updateLayer;
  		updateicon.href="";
  		row.childNodes[7].appendChild(updateicon);
 
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
- 		deleteicon.title="delete layer";
+ 		deleteicon.title= i18n("settings.deletelayer");
  		deleteicon.onclick = deleteLayer;
  		deleteicon.href="";
  		row.childNodes[7].appendChild(deleteicon);
@@ -455,14 +455,14 @@ function createTypeTable(){
  		
  		var updateicon = document.createElement("a");
  		updateicon.className="update-icon";
- 		updateicon.title="update type";
+ 		updateicon.title= i18n("settings.updatetype");
  		updateicon.onclick = updateType;
  		updateicon.href="";
  		row.childNodes[4].appendChild(updateicon);
 
  		var deleteicon = document.createElement("a");
  		deleteicon.className="delete-icon";
- 		deleteicon.title="delete Alert Type";
+ 		deleteicon.title= i18n("settings.deletetype");
  		deleteicon.onclick = deleteType;
  		deleteicon.href="";
  		row.childNodes[4].appendChild(deleteicon);

@@ -25,17 +25,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
@@ -47,12 +52,16 @@ import org.apache.commons.io.FileUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.SmartUtils;
+import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.query.engine.patrol.CsvExporter;
+import org.wcs.smart.connect.security.QueryAction;
+import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
@@ -68,14 +77,16 @@ import org.wcs.smart.util.UuidUtils;
 
 /**
  * SMART Connect Query REST API
- * @author Emily
+ * @author Emily, Jeff
+ * 
  *
  */
 @Path(ConnectRESTApplication.PATH_SEPERATOR + QueryApi.PATH)
 public class QueryApi extends HttpServlet{
 	
 	private static final long serialVersionUID = 1L;
-
+	private final Logger logger = Logger.getLogger(ConnectAlert.class.getName());
+	
 	public static final String PATH = "query"; //$NON-NLS-1$
 
 	@Context private ServletContext context; 
@@ -107,7 +118,7 @@ public class QueryApi extends HttpServlet{
 			try{
 				startDate = SmartUtils.parseDate(start);
 			}catch (Exception ex){
-				return createErrorResponse(Status.BAD_REQUEST, "Could not parse start date.  Must be on form yyyy-MM-dd H:m:s");
+				return createErrorResponse(Status.BAD_REQUEST, "Could not parse start date.  Must be of form yyyy-MM-dd H:m:s");
 			}
 		}
 		
@@ -115,7 +126,7 @@ public class QueryApi extends HttpServlet{
 			try{
 				endDate = SmartUtils.parseDate(end);
 			}catch (Exception ex){
-				return createErrorResponse(Status.BAD_REQUEST, "Could not parse end date.  Must be on form yyyy-MM-dd H:m:s");
+				return createErrorResponse(Status.BAD_REQUEST, "Could not parse end date.  Must be of form yyyy-MM-dd H:m:s");
 			}
 		}
 		
@@ -220,6 +231,48 @@ public class QueryApi extends HttpServlet{
 		}
 		
 	}
+	
+	
+	/*
+	 * returns all Queries the user is able to view 
+	 */
+	
+	@GET
+    @Path("")
+	@Produces({ MediaType.APPLICATION_JSON })
+    public List<QueryProxy> getAllQueriesForUser( @QueryParam(value="username") String username){
+		List<QueryProxy> allowed = new ArrayList();
+		
+		
+
+		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
+		s.beginTransaction();
+		try{
+			//Check if they access to All Queries, if so it's simple, return them all
+			if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, null)){
+				 return QueryManager.INSTANCE.getQueries(s, request.getLocale());
+			}
+			
+			//short circuit check for access to > 0 queries, if not, return nothing. 
+			if (!SecurityManager.INSTANCE.canAccessAtLeastOneResouce(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY)){
+				 return allowed;
+			}
+			
+			//Get all Queries and check each one for specific permission to this user.
+			List<QueryProxy> all = QueryManager.INSTANCE.getQueries(s, request.getLocale());
+			for (QueryProxy q : all){
+				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getUuid())){
+					allowed.add(q);
+				}
+			}
+		}finally{
+			s.getTransaction().commit();
+		}
+		
+		return allowed; 
+	}
+	
+	
 	
 	private Response createErrorResponse(Status code, String message){
 		String error = MessageFormat.format("\"status\": {0}, \"error:\": \"" + message + "\"", code.getStatusCode(), message);

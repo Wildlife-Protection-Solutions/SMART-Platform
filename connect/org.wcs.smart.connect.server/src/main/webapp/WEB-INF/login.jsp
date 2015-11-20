@@ -37,11 +37,11 @@ function login(){
    <form  style="width:200px;" action="${logintarget}" method="POST" id="loginform" onsubmit="return login();">
    <div id="error" class="errorsection" style="display: ${loginerror == null ? "none" : "block"}">${loginerror}</div>
    <label class="top-spacer block">Username:</label>
-   <input type="text" name="j_username" class="block formtext" value="smart"/>
+   <input type="text" name="j_username" class="block formtext" value="smart" tabindex="1"/>
    <label class="top-spacer block">Password:</label>
-   <input type="password" name="j_password" class="formtext" value="smart"/>
-   <a href="/login" class="block link_small">Forgot Password?</a>
-   <input class="button block top-spacer" type="submit" value="Login" style="width: 100px"/>
+   <input type="password" name="j_password" class="formtext" value="smart" tabindex="2"/>
+   <a href="/login" class="block link_small" tabindex="4">Forgot Password?</a>
+   <input class="button block top-spacer" type="submit" value="Login" style="width: 100px" tabindex="3"/>
   </form>
 </div>
 </div>

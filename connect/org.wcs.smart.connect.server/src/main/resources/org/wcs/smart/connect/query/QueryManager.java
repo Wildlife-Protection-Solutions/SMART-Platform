@@ -143,16 +143,19 @@ public enum QueryManager {
 	 * 
 	 * @param session
 	 * @param l
+	 * @param includeMyQueries  - by default we don't include shared queries, i.e. "My Queries" as they should not be shown most of the time. 
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<QueryProxy> getQueries(Session session, final Locale l){
+	public List<QueryProxy> getQueries(Session session, final Locale l, Boolean includeMyQueries){
 		List<QueryProxy> proxies = new ArrayList<QueryProxy>();
 		for (Class<? extends Query> q : queryClasses){
 			List<Query> queries = session.createCriteria(q).list();
 			for (Query qq : queries){
-				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), qq.getConservationArea().getId(), qq.getId());
-				proxies.add(proxy);
+				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), qq.getConservationArea().getId(), qq.getId(), qq.getIsShared());
+				if(qq.getIsShared() || includeMyQueries){
+					proxies.add(proxy);
+				}
 			}
 		}
 		Collections.sort(proxies, new Comparator<QueryProxy>() {
@@ -169,6 +172,13 @@ public enum QueryManager {
 			}
 		});
 		return proxies;
+	}
+	
+	/*
+	 * If no third parameter is given, assume false.
+	 */
+	public List<QueryProxy> getQueries(Session session, final Locale l){
+		return getQueries(session, l, false);
 	}
 	
 	/**

@@ -43,7 +43,10 @@ public enum SecurityManager {
 	public boolean canAccess(Session s, String username, String action, UUID resource){
 		Criterion r = null;
 		if (resource == null){
-			r = Restrictions.eq("action", action); //$NON-NLS-1$
+			r = Restrictions.and(
+					Restrictions.eq("action", action), //$NON-NLS-1$
+					Restrictions.isNull("resource")); //$NON-NLS-1$
+
 		}else{
 			r = Restrictions.and(
 					Restrictions.eq("action", action), //$NON-NLS-1$
@@ -70,4 +73,24 @@ public enum SecurityManager {
 	public boolean canAccess(Session s, String username, String action){
 		return canAccess(s, username, action, null);
 	}
+	
+	public boolean canAccessAtLeastOneResouce(Session s, String username, String action){
+		Criterion r = null;
+		r = Restrictions.eq("action", action); //$NON-NLS-1$
+
+		Criteria c = s.createCriteria(SmartUserAction.class);
+				c.add(Restrictions.eq("username", username)) //$NON-NLS-1$
+				.add(Restrictions.or(
+						Restrictions.eq("action", AdminAccountAction.KEY), //$NON-NLS-1$
+						r))
+				.setProjection(Projections.rowCount());
+
+		Long cnt = (Long) c.uniqueResult();
+		if (cnt == 0){
+			return false;
+		}else{
+			return true;
+		}
+	}
+
 }

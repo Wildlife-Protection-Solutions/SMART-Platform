@@ -45,6 +45,10 @@ labels_en= {
 "settings.errordeletingtype": "Error Updating Type;  ",
 "settings.defaultfiltersupdates": "Default Filters Updated",
 "settings.errorupdaingdefaultfilters": "Error Updating Filter Defaults;  ",
+"settings.updatelayer":"Update Layer",
+"settings.deletelayer":"Delete Layer",
+"settings.updatetype":"Update Type",
+"settings.deletetype":"Delete Alert Type",
 "users.couldnotloaduser": "Could not load user details: ",
 "users.usernamelabel": "Username: ",
 "users.emaillabel": "Email: ",
@@ -60,5 +64,6 @@ labels_en= {
 "ca.errordeletingca": "Error deleting conservation area ",
 "ca.refreshingcas": "Refreshing Conservation Area Table...",
 "query.refreshingqueries": "Refreshing Queries Table...",
+"query.runquery":"Run Query",
 "":""
 }

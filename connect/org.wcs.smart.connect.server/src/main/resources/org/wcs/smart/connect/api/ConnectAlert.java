@@ -53,11 +53,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
+import org.wcs.smart.connect.filter.AlertFilter;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
-import org.wcs.smart.connect.model.AlertFilter;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.SmartUser;
@@ -245,7 +245,8 @@ public class ConnectAlert extends HttpServlet {
 	/*
 	 * Main function used by the alert map to take all filters and provide matching filters in GeoJSON so it can be directly drawn on the map.
 	 * 
-	 * all the parameters are strings because it was easier to send all the values from a HTML form that way, they are converted in the AlertFilter Class
+	 * all the parameters are strings because it was easier to send all the values from a HTML form (tick boxes)that way since you can send multiple comma-separated values
+	 * they are converted in the AlertFilter Class into proper Lists
 	 */
 	@GET
     @Path("")

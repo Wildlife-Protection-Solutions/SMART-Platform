@@ -41,7 +41,6 @@ import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.model.Alert;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
-import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.StyleConfiguration;
 @WebServlet(ConnectRESTApplication.SERVLET_PATH + "settings")
 @MultipartConfig(fileSizeThreshold=1024*1024,maxFileSize=1024*1024*5, maxRequestSize=1024*1024*5*5)
@@ -55,7 +54,6 @@ public class SettingsServlet extends HttpServlet{
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		
 		List<StyleConfiguration> styles = null;
-		List<MapLayer> layers = null;
 		List<ConservationAreaInfo> cas = null;
 		List<AlertType> alertTypes = null;
 		
@@ -89,7 +87,6 @@ public class SettingsServlet extends HttpServlet{
 
 	     style.setStyleId(request.getParameter("style_id"));
 	     Part filePart = request.getPart("bg_image"); 
-	     String fileName = filePart.getSubmittedFileName();
 	     byte[] bg_image_bytes = null;
 	     try(InputStream fileContent = filePart.getInputStream()){
 	    	 bg_image_bytes = IOUtils.toByteArray(fileContent);
@@ -120,13 +117,4 @@ public class SettingsServlet extends HttpServlet{
 	    
 	 }
 	 
-	 private static String getFileName(Part part) {
-		    for (String cd : part.getHeader("content-disposition").split(";")) {
-		        if (cd.trim().startsWith("filename")) {
-		            String fileName = cd.substring(cd.indexOf('=') + 1).trim().replace("\"", "");
-		            return fileName.substring(fileName.lastIndexOf('/') + 1).substring(fileName.lastIndexOf('\\') + 1); // MSIE fix.
-		        }
-		    }
-		    return null;
-	}
 }

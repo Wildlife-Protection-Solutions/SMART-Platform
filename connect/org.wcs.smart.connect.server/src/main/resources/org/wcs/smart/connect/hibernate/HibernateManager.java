@@ -135,7 +135,6 @@ public class HibernateManager {
 	 * @param caUuid
 	 * @return a specific conservation area 
 	 */
-	@SuppressWarnings("unchecked")
 	public static ConservationAreaInfo getConservationAreaInfo(Session session, UUID caUuid) {
 		return (ConservationAreaInfo)session
 				.createCriteria(ConservationAreaInfo.class)

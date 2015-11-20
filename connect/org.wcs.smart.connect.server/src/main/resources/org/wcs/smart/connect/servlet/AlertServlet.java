@@ -40,8 +40,18 @@ import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SmartUser;
 
+/*
+ * AlertServlet - Alerts/Map page in Connect provides information used to load the page: users, cas, maplayers etc.
+ * Much more information is requested with ajax/resteasy API once the page is loaded. 
+ */
+
 @WebServlet("/connect/alert")
 public class AlertServlet extends HttpServlet{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
@@ -50,7 +60,6 @@ public class AlertServlet extends HttpServlet{
 		List<SmartUser> users = null;
 		List<ConservationAreaInfo> cas = null;
 		List<AlertType> alertTypes = null;
-		List<Alert> alerts = null;
 		List<MapLayer> mapLayers = null;
 		List<AlertFilterDefault> defaults = null;
 		
