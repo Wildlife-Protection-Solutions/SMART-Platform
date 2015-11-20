@@ -312,9 +312,15 @@ public class ApplyChangeLogJob extends Job {
 		Path filestoreDir = tempDirectory.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			
 		boolean replicationEnabled = DerbyReplicationManager.INSTANCE.getLocalReplicationState();
-		//lock database
-		Session session = HibernateManager.lockDatabase();
-		try{
+		
+		//gets the current user; for resetting after applying changes
+		SmartDB.DbUser currentUser = SmartDB.DbUser.ADMIN;
+		if (SmartDB.getCurrentEmployee() != null){
+			currentUser = SmartDB.getCurrentUser();
+		}
+		
+		Session session = HibernateManager.lockDatabase(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+		try{	
 			session.beginTransaction();
 			
 			//if not logged into a ca the replication won't be enabled
@@ -351,8 +357,9 @@ public class ApplyChangeLogJob extends Job {
 			}
 			throw ex;
 		}finally{
-			HibernateManager.unlockDatabase();
 			session.close();
+			
+			HibernateManager.unlockDatabase(currentUser.getUserName(), currentUser.getPassword());
 			
 			if (replicationEnabled){
 				//re-enable replication if it was previously enabled
@@ -374,7 +381,7 @@ public class ApplyChangeLogJob extends Job {
 					session.close();
 				}
 			}
-		}	
+		}
 	}
 	
 	private void applyChangeLog(Path changelogFilestore, Session session) throws Exception{
