@@ -27,10 +27,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.Job;
-import org.geotools.util.SubProgressListener;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -57,7 +57,7 @@ public class DownloadChangeLogJob extends Job {
 	public DownloadChangeLogJob(SmartConnect connect, 
 			ConnectServerStatus serverInfo,
 			ConnectSyncHistoryRecord record) {
-		super("Download Connect Changelog");
+		super(Messages.DownloadChangeLogJob_JobName);
 		
 		this.connect = connect;
 		this.record = record;
@@ -67,28 +67,28 @@ public class DownloadChangeLogJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
-		monitor.beginTask("Downloading change log", 3);
+		monitor.beginTask(Messages.DownloadChangeLogJob_DownloadTaskName, 3);
 		try{
 			/* request ca */
-			monitor.subTask("Initializing download");
+			monitor.subTask(Messages.DownloadChangeLogJob_InitDownloadSubtax);
 			String statusUrl = connect.startChangeLogDownload(serverInfo.getUuid(), serverInfo.getVersion(), serverInfo.getServerRevision());
 			monitor.worked(1);
 			if (monitor.isCanceled()) return cancelled();
 			
 			/* wait for ca export to be created */
-			monitor.subTask("Waiting for CONNECT server to create package");
+			monitor.subTask(Messages.DownloadChangeLogJob_WaitTaskName);
 			Long start = System.nanoTime();
 			WorkItemStatus status = null ;
 			int waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
 			while(status == null || (status.getStatus() == WorkItemStatus.Status.PROCESSING || 
 					status.getStatus() == WorkItemStatus.Status.PROCESSING)){
 				Long current = System.nanoTime();
-				if ( current - start > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception("Timed out waiting for export to process.");
+				if ( current - start > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception(Messages.DownloadChangeLogJob_Timeout);
 				Thread.sleep(waitTime);
 				try{
 					status = connect.getWorkItemStatus(statusUrl);
 				}catch (Exception ex){
-					ConnectPlugIn.log("Error requesting ca update download status.", ex);
+					ConnectPlugIn.log("Error requesting ca update download status.", ex); //$NON-NLS-1$
 				}
 				if (monitor.isCanceled()) return cancelled();
 			}
@@ -99,10 +99,10 @@ public class DownloadChangeLogJob extends Job {
 				record.setErrorString(SmartConnect.parseErrorMessage(status.getMessage()));
 			}else{
 				/* download file */
-				monitor.subTask("Downloading Upload Package");
+				monitor.subTask(Messages.DownloadChangeLogJob_DownloadSubTas);
 				String message = status.getMessage();
 				JsonNode nd = (new ObjectMapper()).readTree(message);
-				String downloadUrl = nd.get("file_url").asText();
+				String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
 				if (monitor.isCanceled()) return cancelled();
 				Integer promptSize = null;
 				if (connect.getServer().getOptionAsBoolean(ConnectServerOption.Option.PACKAGE_PROMPT)){
@@ -121,7 +121,7 @@ public class DownloadChangeLogJob extends Job {
 			ConnectPlugIn.log(ex.getMessage(), ex);
 		}catch (Exception ex){
 			record.setStatus(Status.ERROR);
-			record.setErrorString("Error downloading file:" + ex.getMessage());
+			record.setErrorString(Messages.DownloadChangeLogJob_DownloadError + ex.getMessage());
 			ConnectPlugIn.log(ex.getMessage(), ex);
 		}
 		return org.eclipse.core.runtime.Status.OK_STATUS;
@@ -129,7 +129,7 @@ public class DownloadChangeLogJob extends Job {
 	
 	private IStatus cancelled(){
 		record.setStatus(Status.ERROR);
-		record.setErrorString("Cancelled by user.");
+		record.setErrorString(Messages.DownloadChangeLogJob_Cancelled);
 		return org.eclipse.core.runtime.Status.CANCEL_STATUS;
 	}
 

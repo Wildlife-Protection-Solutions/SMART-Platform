@@ -45,6 +45,7 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -77,7 +78,7 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 	protected void okPressed() {
 		String username = txtUser.getText().trim();
 		if (username.isEmpty()){
-			MessageDialog.openError(getParentShell(), "Error", "Invalid username.");
+			MessageDialog.openError(getParentShell(), Messages.ConnectUserAccountDialog_ErrorDialog, Messages.ConnectUserAccountDialog_InvalidUsername);
 			return;
 		}
 
@@ -101,7 +102,7 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			ConnectPlugIn.displayLog("Could not update user accounts:" + ex.getMessage(), ex);
+			ConnectPlugIn.displayLog(Messages.ConnectUserAccountDialog_UpdateError + ex.getMessage(), ex);
 			return;
 		}finally{
 			s.close();
@@ -123,7 +124,7 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(inner, SWT.NONE);
-		l.setText("Connect Username:");
+		l.setText(Messages.ConnectUserAccountDialog_UsernameLabel);
 	
 		txtUser = new Text(inner, SWT.BORDER);
 		txtUser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -132,18 +133,18 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			inner.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			l = new Label(inner, SWT.NONE);
-			l.setText("SMART Desktop Accounts:");
+			l.setText(Messages.ConnectUserAccountDialog_DesktopAccountLabel);
 			l.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 			lstUsers = CheckboxTableViewer.newCheckList(inner, SWT.BORDER | SWT.V_SCROLL);
 			lstUsers.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			lstUsers.setContentProvider(ArrayContentProvider.getInstance());
-			lstUsers.setInput(new String[]{"Loading"});
+			lstUsers.setInput(new String[]{Messages.ConnectUserAccountDialog_LoadingLabel});
 			lstUsers.setLabelProvider(new LabelProvider(){
 				@Override
 				public String getText(Object element){
 					if (element instanceof Employee){
 						Employee e = (Employee) element;
-						return e.getSmartUserId() + " (" + SmartLabelProvider.getShortLabel(e) + ")";
+						return e.getSmartUserId() + " (" + SmartLabelProvider.getShortLabel(e) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 					}
 					return super.getText(element);
 				}
@@ -153,20 +154,20 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			loadUsers.schedule();
 		}
 		
-		setTitle("Update SMART Connect Accounts");
-		getShell().setText("Update SMART Connect Accounts");
+		setTitle(Messages.ConnectUserAccountDialog_Title);
+		getShell().setText(Messages.ConnectUserAccountDialog_ShellTitle);
 		if (toUpdate != null){
 			StringBuilder sb = new StringBuilder();
-			sb.append("Update the connect username/password for the following desktop accounts: ");
+			sb.append(Messages.ConnectUserAccountDialog_Message);
 			for (ConnectUser u : toUpdate){
-				sb.append(u.getSmartUser().getSmartUserId() + ", ");
+				sb.append(u.getSmartUser().getSmartUserId() + ", "); //$NON-NLS-1$
 			}
 			sb.deleteCharAt(sb.length() - 1);
 			sb.deleteCharAt(sb.length() - 1);
 			setMessage(sb.toString());
 			
 		}else{
-			setMessage("Link SMART Desktop accounts to a SMART Connect Account.");
+			setMessage(Messages.ConnectUserAccountDialog_LinkMessage);
 		}
 		
 		return outer;
@@ -177,7 +178,7 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 		return true;
 	}
 	
-	Job loadUsers = new Job("load users"){
+	Job loadUsers = new Job(Messages.ConnectUserAccountDialog_loadusersjobname){
 		@Override
 		@SuppressWarnings("unchecked")
 		protected IStatus run(IProgressMonitor monitor) {
@@ -185,13 +186,14 @@ public class ConnectUserAccountDialog extends TitleAreaDialog{
 			Session s = HibernateManager.openSession();
 			s.beginTransaction();
 			try{
-				String q = "FROM Employee e WHERE e.conservationArea = :ca and smartUserId is not null and e.uuid not in (SELECT uuid FROM ConnectUser)";
+				String q = "FROM Employee e WHERE e.conservationArea = :ca and smartUserId is not null and e.uuid not in (SELECT uuid FROM ConnectUser)"; //$NON-NLS-1$
 				Query query = s.createQuery(q);
-				query.setParameter("ca", SmartDB.getCurrentConservationArea());
+				query.setParameter("ca", SmartDB.getCurrentConservationArea()); //$NON-NLS-1$
 				e = query.list();
 				s.getTransaction().commit();
 			}catch (Exception ex){
-				ConnectPlugIn.log("Could not load SMART Desktop user:" + ex.getMessage(), ex);
+				if (s.getTransaction().isActive()) s.getTransaction().rollback();
+				ConnectPlugIn.log("Could not load SMART Desktop user:" + ex.getMessage(), ex); //$NON-NLS-1$
 				return Status.OK_STATUS;
 			}finally{
 				s.close();

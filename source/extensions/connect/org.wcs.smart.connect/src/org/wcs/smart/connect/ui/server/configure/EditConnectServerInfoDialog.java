@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.server.replication.AutoReplicationStartUp;
@@ -80,7 +81,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 				try{
 					server.setCertificateFile(certificateFile == null ?  null : Paths.get(certificateFile));
 				}catch (Exception ex){
-					ConnectPlugIn.displayLog("Could not copy certificate file to filestore." + "\n\n" + ex.getMessage(), ex);
+					ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_CertificationError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 					return;
 				}
 			}
@@ -98,7 +99,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 				AutoReplicationStartUp.INSTANCE.enableAutoReplication(delay);
 			}
 		}catch (Exception ex){
-			ConnectPlugIn.displayLog("Could not update connect server information." + "\n\n" + ex.getMessage(), ex);
+			ConnectPlugIn.displayLog(Messages.EditConnectServerInfoDialog_ServerError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			return;
 		}finally{
 			s.close();
@@ -129,7 +130,7 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		Group g = new Group(main, SWT.NONE);
 		g.setLayout(new GridLayout());
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		g.setText("Server Configuration");
+		g.setText(Messages.EditConnectServerInfoDialog_ConfigLabel);
 		serverpnl = new ServerPanel(g);
 		
 		serverpnl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -138,11 +139,11 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText("Automatic Sync Options");
+		ti.setText(Messages.EditConnectServerInfoDialog_AutoLabel);
 		ti.setControl(autoPnl = new AutoOptionsPanel(tabConfig));
 		
 		ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText("Connection Options");
+		ti.setText(Messages.EditConnectServerInfoDialog_ConnectLabel);
 		ti.setControl(optionsPnl = new ServerOptionsPanel(tabConfig));
 		
 		serverpnl.initValues(server);
@@ -155,9 +156,9 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 		
 		validate();
 		
-		setTitle("Update SMART Connect Server Configuration");
-		getShell().setText("Update SMART Connect Configurations");
-		setMessage("Updates the details used to connect to a SMART Connect Server.");
+		setTitle(Messages.EditConnectServerInfoDialog_Title);
+		getShell().setText(Messages.EditConnectServerInfoDialog_Shell);
+		setMessage(Messages.EditConnectServerInfoDialog_Message);
 		
 		return main;
 	}
@@ -175,18 +176,18 @@ public class EditConnectServerInfoDialog extends TitleAreaDialog{
 	private void validate(){
 		setErrorMessage(null);
 		if (!optionsPnl.isValid()){
-			setErrorMessage("connection option error");
+			setErrorMessage(Messages.EditConnectServerInfoDialog_connectError);
 			enableOk(false);
 			return;
 		}
 		if (!autoPnl.isValid()){
-			setErrorMessage("automatic sync option error");
+			setErrorMessage(Messages.EditConnectServerInfoDialog_autoError);
 			enableOk(false);
 			return;
 		}
 		
 		if (!serverpnl.isValid()){
-			setErrorMessage("server url error");
+			setErrorMessage(Messages.EditConnectServerInfoDialog_serverError);
 			enableOk(false);
 			return;
 		}

@@ -26,6 +26,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.model.application.ui.basic.MPart;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService.PartState;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -53,6 +55,7 @@ import org.wcs.smart.LogoutHandler;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
@@ -91,7 +94,7 @@ public class ApplyChangeLogJob extends Job {
 	public ApplyChangeLogJob(Path changeLogPackageFile, 
 			ConnectServerStatus serverInfo, 
 			ConnectSyncHistoryRecord record){
-		super("Applying Change Log File");
+		super(Messages.ApplyChangeLogJob_JobName);
 		
 		this.record = record;
 		this.changeLogPackageFile = changeLogPackageFile;
@@ -103,9 +106,9 @@ public class ApplyChangeLogJob extends Job {
 	protected IStatus run(IProgressMonitor monitor) {
 		boolean isLoggedIn = SmartDB.getCurrentEmployee() != null;
 		
-		monitor.beginTask("Applying change to local database.", 3);
+		monitor.beginTask(Messages.ApplyChangeLogJob_TaskName, 3);
 		try{
-			monitor.subTask("validating change package");
+			monitor.subTask(Messages.ApplyChangeLogJob_validateSubTask);
 			//1. check file for updates; if nothing set status to nodata and end
 			try{
 				unpackValidateFile();
@@ -115,7 +118,7 @@ public class ApplyChangeLogJob extends Job {
 			}
 			monitor.worked(1);
 
-			monitor.subTask("saving current work");
+			monitor.subTask(Messages.ApplyChangeLogJob_SaveSubTask);
 			// wait for all shells to close
 			final boolean[] closed = new boolean[]{false};
 
@@ -173,9 +176,9 @@ public class ApplyChangeLogJob extends Job {
 			parent = parent.getCause();
 		}
 		if (constraint != null){
-			record.setErrorString("Unable to apply changes from server due to constraint violation.  This is likely a result of another user creating the same key for an object (ex. same data model category or patrol team key). You will need to delete your item and redownload updates or delete your conservation area and download a fresh copy from SMART Connect." + "\n\n" + constraint.getMessage());   
+			record.setErrorString(Messages.ApplyChangeLogJob_ConstraintError + "\n\n" + constraint.getMessage());    //$NON-NLS-1$
 		}
-		record.setErrorString("Unable to apply changes from server:" + "\n\n" + ex.getMessage());
+		record.setErrorString(Messages.ApplyChangeLogJob_UnknownError + "\n\n" + ex.getMessage()); //$NON-NLS-1$
 	}
 	
 	//must be called from the UI thread
@@ -184,10 +187,10 @@ public class ApplyChangeLogJob extends Job {
 		if (isLoggedIn){
 			//prompt to apply changes
 			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
-					"SMART Connect - Apply Changes", 
-					"Changes have been downloaded and are ready to apply. Do you want to apply the changes now?")){
+					Messages.ApplyChangeLogJob_ApplyTitle, 
+					Messages.ApplyChangeLogJob_ApplyMessage)){
 				record.setStatus(Status.ERROR);
-				record.setErrorString("User cancelled.");
+				record.setErrorString(Messages.ApplyChangeLogJob_Cancelled);
 				return false;
 			}
 			
@@ -198,7 +201,7 @@ public class ApplyChangeLogJob extends Job {
 			
 			if (pService.getDirtyParts().size() > 0){
 				record.setStatus(Status.ERROR);
-				record.setErrorString("All dirty parts must be saved before you can download from the server.");
+				record.setErrorString(Messages.ApplyChangeLogJob_DirtyPartsNotClosedError);
 				return false;
 			}
 		}
@@ -211,22 +214,22 @@ public class ApplyChangeLogJob extends Job {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Applying Updates", 4);
+					monitor.beginTask(Messages.ApplyChangeLogJob_ApplyTaskName, 4);
 					try{
 						monitor.worked(1);
-						monitor.subTask("updating database");
+						monitor.subTask(Messages.ApplyChangeLogJob_UploadDbSubtask);
 						applyFile();					
 						record.setStatus(Status.DONE);
 						monitor.worked(1);
 						
 						if (isLoggedIn){
-							monitor.subTask("validating user");
+							monitor.subTask(Messages.ApplyChangeLogJob_ValidateUserSubTask);
 							if (!checkUser()){
 								return;
 							}
 							monitor.worked(1);
 							
-							monitor.subTask("refreshing ui");
+							monitor.subTask(Messages.ApplyChangeLogJob_RefreshUiSubTask);
 							refreshUi(fpServer);
 							monitor.worked(1);
 						}
@@ -240,7 +243,7 @@ public class ApplyChangeLogJob extends Job {
 			
 		}catch (Exception ex){
 			record.setStatus(Status.ERROR);
-			record.setErrorString("Error applying update: " + ex.getMessage());
+			record.setErrorString(Messages.ApplyChangeLogJob_ApplyError + ex.getMessage());
 			return false;
 		}
 		return true;
@@ -251,13 +254,13 @@ public class ApplyChangeLogJob extends Job {
 		try{
 			Files.delete(changeLogPackageFile);
 		}catch (Exception ex){
-			ConnectPlugIn.log("Error cleaning up changelog file." + ex.getMessage(), ex);
+			ConnectPlugIn.log("Error cleaning up changelog file." + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 
 		try{
 			FileUtils.deleteDirectory(tempDirectory.toFile());
 		}catch (Exception ex){
-			ConnectPlugIn.log("Error cleaning up changelog directory." + ex.getMessage(), ex);
+			ConnectPlugIn.log("Error cleaning up changelog directory." + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	}
 	
@@ -279,28 +282,28 @@ public class ApplyChangeLogJob extends Job {
 			}
 		}
 		if (metadataFile == null){
-			throw new Exception("Invalid sync package, no metadata file provided.");
+			throw new Exception(Messages.ApplyChangeLogJob_NoMetadataError);
 		}
 		if (changeLogFile == null){
-			throw new Exception("Invalid sync package, no change log file provided.");
+			throw new Exception(Messages.ApplyChangeLogJob_NoChangeLogError);
 		}
 		//check metadata
 		metadata = MetadataPackager.INSTANCE.readMetadata(metadataFile);
 		//check ca
 		if (!serverInfo.getUuid().equals(metadata.getConservationArea())){
-			throw new Exception("Conservation area uuids do not match");
+			throw new Exception(Messages.ApplyChangeLogJob_CaIdError);
 		}
 		//check version
 		if (!serverInfo.getVersion().equals(metadata.getVersion())){
-			throw new Exception("Conservation area versions do not match");
+			throw new Exception(Messages.ApplyChangeLogJob_CaVersionError);
 		}
 			
 		//check revision
 		if (metadata.getServerRevision().longValue() == serverInfo.getServerRevision().longValue()){
-			throw new NothingToUpdateException("Local copy is up to date.");
+			throw new NothingToUpdateException(Messages.ApplyChangeLogJob_UpToDate);
 		}
 		if (metadata.getServerRevision().longValue() <= serverInfo.getServerRevision().longValue() ){
-			throw new Exception("Invalid server revision (the local server revision is less than or equal to the package server revision).  Cannot apply change log package");
+			throw new Exception(Messages.ApplyChangeLogJob_RevisionError);
 		}
 		
 	}
@@ -338,10 +341,12 @@ public class ApplyChangeLogJob extends Job {
 				String version = metadata.getPluginVersion(pluginid);
 				String dbVersion = localPlugins.get(pluginid);
 				if (dbVersion == null){
-					throw new Exception("The connect server has plugin " + pluginid + " installed.  The local SMART Desktop does not.  You must install this plugin before you can apply connect server change log package.");
+					throw new Exception(
+							MessageFormat.format(Messages.ApplyChangeLogJob_PluginError1, pluginid));
 				}
 				if (!version.equals(dbVersion)){
-					throw new Exception("The connect server has different version for plugin " + pluginid + ". (client: " + dbVersion + " / server:" + version + ".  Versions must be the same to apply connect server change log.");
+					throw new Exception(
+							MessageFormat.format(Messages.ApplyChangeLogJob_PluginError2, pluginid, dbVersion, version));
 				}
 			}
 			//apply change log
@@ -371,7 +376,7 @@ public class ApplyChangeLogJob extends Job {
 				}catch(Exception ex){
 					//replication could not be re-enabled.  This needs to kill the
 					//application and restart
-					ConnectPlugIn.displayLog("Replication could not be enabled after applying changes.  This application will restart.", ex);
+					ConnectPlugIn.displayLog(Messages.ApplyChangeLogJob_ReenableReplicationError, ex);
 					Display.getDefault().syncExec(new Runnable(){
 						@Override
 						public void run() {
@@ -401,7 +406,7 @@ public class ApplyChangeLogJob extends Job {
 		Session s = HibernateManager.openSession();
 		try{
 			final Employee afterDownload = (Employee) s.createCriteria(Employee.class)
-				.add(Restrictions.eq("uuid", currentEmployee.getUuid()))
+				.add(Restrictions.eq("uuid", currentEmployee.getUuid())) //$NON-NLS-1$
 				.uniqueResult();
 			final boolean[] cont = new boolean[]{true};
 			if (afterDownload == null ||
@@ -414,7 +419,7 @@ public class ApplyChangeLogJob extends Job {
 				Display.getDefault().syncExec(new Runnable(){
 					@Override
 					public void run() {
-						MessageDialog.openError(Display.getDefault().getActiveShell(), "SMART Connect - Restart", "Your SMART user account has been removed or modified.  The system will restart and you must log back in.");
+						MessageDialog.openError(Display.getDefault().getActiveShell(), Messages.ApplyChangeLogJob_RestartDialogTitle, Messages.ApplyChangeLogJob_RestartDialogMessage);
 						(new LogoutHandler()).execute();
 						cont[0] = false;
 					}
@@ -437,7 +442,7 @@ public class ApplyChangeLogJob extends Job {
 						String password = null;
 						while(!ok){
 							UserNamePasswordDialog dialog = new UserNamePasswordDialog(Display.getCurrent().getActiveShell(), 
-								"SMART Connect - User Credentials", "Your SMART account was changed, you need to re-enter your credentials before you can continue", "OK");
+								Messages.ApplyChangeLogJob_UserDialogTitle, Messages.ApplyChangeLogJob_UserDialogMessage, IDialogConstants.OK_LABEL);
 							if (dialog.open() == Window.CANCEL){
 								//logout
 								(new LogoutHandler()).execute();
@@ -453,7 +458,7 @@ public class ApplyChangeLogJob extends Job {
 									Employee validated = HibernateManager.validateUser(username, password, afterDownload.getConservationArea());
 									if(validated == null || 
 										!validated.getUuid().equals(afterDownload.getUuid())){
-										error = "Invalid username/password.";
+										error = Messages.ApplyChangeLogJob_InvalidUserPassword;
 									}
 								}catch (Exception ex){
 									ConnectPlugIn.log(ex.getMessage(), ex);
@@ -461,7 +466,7 @@ public class ApplyChangeLogJob extends Job {
 								}
 								
 								if (error != null){
-									MessageDialog.openError(Display.getCurrent().getActiveShell(), "Login Error", error);
+									MessageDialog.openError(Display.getCurrent().getActiveShell(), Messages.ApplyChangeLogJob_LogInError, error);
 								}else{
 									ok = true;
 								}

@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.api.io;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.wcs.smart.connect.internal.Messages;
 
 /**
  * Progress monitor used for controlling the progress of copying a file.
@@ -41,7 +42,7 @@ public class CopyProgressMonitor {
 	 * @param totalSize total number of bytes to copy
 	 */
 	public CopyProgressMonitor(IProgressMonitor wrapper, long totalSize){
-		wrapper.beginTask("Coping file", 100);
+		wrapper.beginTask(Messages.CopyProgressMonitor_TaskName, 100);
 		this.wrapper = wrapper;
 		this.totalSize = totalSize;
 		this.totalCount = 0;

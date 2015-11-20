@@ -62,12 +62,14 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.SmartLabelProvider;
+import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
  * Connect server info dialog for displaying server details.
@@ -117,15 +119,15 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Group g = new Group(main, SWT.FLAT );
-		g.setText("Connect Server");
+		g.setText(Messages.ConnectServerInfoDialog_ServerLabel);
 		g.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		g.setLayout(new GridLayout(3, false));
 		
 		Label lblServer = new Label(g, SWT.NONE);
-		lblServer.setText("URL:");
+		lblServer.setText(Messages.ConnectServerInfoDialog_urlLabel);
 		
 		txtServer = new Label(g, SWT.NONE);
-		txtServer.setText("<Server URL>");
+		txtServer.setText(Messages.ConnectServerInfoDialog_urlText);
 		txtServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		
 
@@ -136,7 +138,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		
 		
 		btnEditServer = new Button(btnPanel, SWT.PUSH);
-		btnEditServer.setText("Edit");
+		btnEditServer.setText(Messages.ConnectServerInfoDialog_editButton);
 		btnEditServer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		btnEditServer.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -144,7 +146,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				editServer();
 			}
 		});
-		btnEditServer.setToolTipText("edit server and configuration options");
+		btnEditServer.setToolTipText(Messages.ConnectServerInfoDialog_editTooltip);
 		
 		btnSet = new Button(btnPanel, SWT.PUSH);
 		btnSet.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -155,26 +157,26 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				setServer();
 			}
 		});
-		btnSet.setToolTipText("clears all Connect and replication information");
+		btnSet.setToolTipText(Messages.ConnectServerInfoDialog_resetTooltip);
 		
 		TabFolder tabConfig = new TabFolder(g, SWT.NONE);
 		tabConfig.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true,3,1));
 		
 		TabItem ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText("User Accounts");
+		ti.setText(Messages.ConnectServerInfoDialog_UserAccountTab);
 		ti.setControl(createUserAccountsTab(tabConfig));
 		
 		ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText("Automatic Sync Options");
+		ti.setText(Messages.ConnectServerInfoDialog_AutoTab);
 		ti.setControl(autoPnl = new AutoOptionsPanel(tabConfig, false));
 		
 		ti = new TabItem(tabConfig, SWT.DEFAULT);
-		ti.setText("Connection Options");
+		ti.setText(Messages.ConnectServerInfoDialog_ConnectTab);
 		ti.setControl(optionPnl = new ServerOptionsPanel(tabConfig, false));
 		
 		
 		btnShowReplication = new Button(main, SWT.PUSH);
-		btnShowReplication.setText("View Replication Information");
+		btnShowReplication.setText(Messages.ConnectServerInfoDialog_ReplicationBtn);
 		btnShowReplication.addSelectionListener(new SelectionAdapter() {
 			
 			@Override
@@ -186,9 +188,9 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		
 		initControls();
 		
-		setTitle("SMART Connect Configuration");
-		getShell().setText("SMART Connect Configuration");
-		setMessage("Configure your connection to a SMART Connect Server here.");
+		setTitle(Messages.ConnectServerInfoDialog_Title);
+		getShell().setText(Messages.ConnectServerInfoDialog_ShellTitle);
+		setMessage(Messages.ConnectServerInfoDialog_Message);
 		
 		return main;
 	}
@@ -202,8 +204,8 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			
 			if (server == null){
 				toUpdate = null;
-				txtServer.setText("<Not Set>");
-				btnSet.setText("Set");
+				txtServer.setText(Messages.ConnectServerInfoDialog_NotSet);
+				btnSet.setText(Messages.ConnectServerInfoDialog_SetButton);
 				btnEditServer.setEnabled(false);
 				btnAdd.setEnabled(false);
 				tblUsers.setInput(new Object[]{});
@@ -214,13 +216,13 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}else{
 				toUpdate = server;
 				txtServer.setText(server.getServerUrl());
-				btnSet.setText("Re-Set");
+				btnSet.setText(Messages.ConnectServerInfoDialog_ResetButton);
 				btnEditServer.setEnabled(true);
 				
 				
 				btnAdd.setEnabled(true);
 				List<?> users= session.createCriteria(ConnectUser.class)
-						.add(Restrictions.eq("server", toUpdate))
+						.add(Restrictions.eq("server", toUpdate)) //$NON-NLS-1$
 						.list();
 				tblUsers.setInput(users);
 				tblUsers.getTable().setEnabled(true);
@@ -249,7 +251,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		tblUsers.getTable().setLinesVisible(true);
 		
 		TableViewerColumn colSmartUser = new TableViewerColumn(tblUsers, SWT.DEFAULT);
-		colSmartUser.getColumn().setText("SMART User ID");
+		colSmartUser.getColumn().setText(Messages.ConnectServerInfoDialog_SmartUserIdColumnLabel);
 		
 		layout.setColumnData(colSmartUser.getColumn(), new ColumnWeightData(20, 100, true));
 		colSmartUser.setLabelProvider(new ColumnLabelProvider(){
@@ -262,7 +264,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 		});
 		TableViewerColumn colSmartName = new TableViewerColumn(tblUsers, SWT.DEFAULT);
-		colSmartName.getColumn().setText("SMART Name");
+		colSmartName.getColumn().setText(Messages.ConnectServerInfoDialog_SmartNameColumnLabel);
 		layout.setColumnData(colSmartName.getColumn(), new ColumnWeightData(40, 100, true));
 		colSmartName.setLabelProvider(new ColumnLabelProvider(){
 			@Override
@@ -274,7 +276,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 		});
 		TableViewerColumn colConnectUser = new TableViewerColumn(tblUsers, SWT.DEFAULT);
-		colConnectUser.getColumn().setText("Connect Username");
+		colConnectUser.getColumn().setText(Messages.ConnectServerInfoDialog_ConnectUsernameColumnLabel);
 		layout.setColumnData(colConnectUser.getColumn(), new ColumnWeightData(30, 100, true));
 		colConnectUser.setLabelProvider(new ColumnLabelProvider(){
 			@Override
@@ -291,7 +293,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		btnComp.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		
 		btnEdit = new Button(btnComp, SWT.PUSH);
-		btnEdit.setText("Edit...");
+		btnEdit.setText(Messages.ConnectServerInfoDialog_EditBnt);
 		btnEdit.setEnabled(false);
 		btnEdit.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -300,7 +302,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 		});
 		btnAdd = new Button(btnComp, SWT.PUSH);
-		btnAdd.setText("Add...");
+		btnAdd.setText(Messages.ConnectServerInfoDialog_AddBtn);
 		btnAdd.addSelectionListener(new SelectionAdapter(){
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -308,7 +310,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 		});
 		btnDelete = new Button(btnComp, SWT.PUSH);
-		btnDelete.setText("Delete");
+		btnDelete.setText(DialogConstants.DELETE_BUTTON_TEXT);
 		btnDelete.setEnabled(false);
 		btnDelete.addSelectionListener(new SelectionAdapter(){
 			@Override
@@ -332,8 +334,8 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		if (toUpdate != null){
 			//we need to display a warning that all user and replication information will be lost
 			MessageDialog md = new MessageDialog(
-					getShell(), "ReSet Server", null, 
-					"Resetting the SMART Connect Server will delete all current server configuration.  You will no longer be able to sync changes.  Only do this if you want to upload the Conservation Area to a new SMART Connect server.  If you just want to modify this information cancel this dialog and use the Edit button instead.\n\nAre you sure you want to continue?",
+					getShell(), Messages.ConnectServerInfoDialog_ResetDialogTitle, null, 
+					Messages.ConnectServerInfoDialog_ResetDialogMessage,
 					MessageDialog.WARNING, 
 					new String[]{IDialogConstants.YES_LABEL, IDialogConstants.CANCEL_LABEL}, 1);
 			if (md.open() == 1){
@@ -365,13 +367,13 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			@Override
 			public void run(IProgressMonitor monitor) throws InvocationTargetException,
 					InterruptedException {
-				monitor.beginTask("Deleting Existing Server Configuration", 7);
+				monitor.beginTask(Messages.ConnectServerInfoDialog_DeleteServerTaskName, 7);
 				
 				Session s = HibernateManager.openSession();
 				try{
 					s.beginTransaction();
 					
-					monitor.subTask("Disable replication");
+					monitor.subTask(Messages.ConnectServerInfoDialog_DisableSubTasName);
 					DerbyReplicationManager.INSTANCE.disableReplication(s);
 					monitor.worked(1);
 					if (monitor.isCanceled()) return;
@@ -383,7 +385,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 					toUpdate = null;
 				}catch (Exception ex){
 					ret[0] = false;
-					ConnectPlugIn.displayLog("Could not remove current server configurations." + "\n\n" + ex.getMessage(), ex);				
+					ConnectPlugIn.displayLog(Messages.ConnectServerInfoDialog_DeleteError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				}finally{
 					if (s.getTransaction().isActive()){
 						s.getTransaction().rollback();
@@ -395,7 +397,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 		});
 		}catch(Exception ex){
-			ConnectPlugIn.displayLog("Could not remove current server configurations." + "\n\n" + ex.getMessage(), ex);
+			ConnectPlugIn.displayLog(Messages.ConnectServerInfoDialog_DeleteError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			ret[0] = false;
 		}
 		return ret[0];
@@ -448,7 +450,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 		if (toUpdate == null) return;
 		if (users.size() == 0) return;
 		
-		if (!MessageDialog.openConfirm(getShell(), "Confirm", MessageFormat.format("Are you sure you want to delete the {0} selected account references?", users.size()))){
+		if (!MessageDialog.openConfirm(getShell(), Messages.ConnectServerInfoDialog_ConfirmTitle, MessageFormat.format(Messages.ConnectServerInfoDialog_ConfirmMessage, users.size()))){
 			return;
 		}
 		
@@ -460,7 +462,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			ConnectPlugIn.displayLog("Error deleting account information: " +ex.getMessage(), ex);
+			ConnectPlugIn.displayLog(Messages.ConnectServerInfoDialog_AccountDeleteError +ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}

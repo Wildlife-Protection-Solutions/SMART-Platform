@@ -31,6 +31,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.hibernate.SmartDB;
 
 /**
@@ -41,7 +42,7 @@ import org.wcs.smart.hibernate.SmartDB;
  */
 public class UserWizardPage extends WizardPage implements ModifyListener{
 
-	public static final String NAME = "USER";
+	public static final String NAME = "USER"; //$NON-NLS-1$
 	
 	private Text txtUser;
 	private Text txtPass;
@@ -62,13 +63,13 @@ public class UserWizardPage extends WizardPage implements ModifyListener{
 		inner.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(inner, SWT.NONE);
-		l.setText("Connect Username:");
+		l.setText(Messages.UserWizardPage_usernamelabel);
 	
 		txtUser = new Text(inner, SWT.BORDER);
 		txtUser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = new Label(inner, SWT.NONE);
-		l.setText("Connect Password:");
+		l.setText(Messages.UserWizardPage_passwordlabel);
 		
 		txtPass = new Text(inner, SWT.BORDER | SWT.PASSWORD);
 		txtPass.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -76,14 +77,14 @@ public class UserWizardPage extends WizardPage implements ModifyListener{
 		if (SmartDB.getCurrentEmployee() != null){
 			new Label(inner, SWT.NONE);
 			btnSavePass = new Button(inner, SWT.CHECK);
-			btnSavePass.setText("Save Password");
+			btnSavePass.setText(Messages.UserWizardPage_passwordbutton);
 		}
 		
 		txtPass.addModifyListener(this);
 		txtUser.addModifyListener(this);
 		
-		setTitle("SMART Connect User Account");
-		setMessage("Enter your SMART Connect credentials.  These should be different from your SMART Desktop username/password.");
+		setTitle(Messages.UserWizardPage_title);
+		setMessage(Messages.UserWizardPage_message);
 		setControl(outer);
 	}
 

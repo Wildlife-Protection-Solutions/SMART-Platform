@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.updatesite.OnInstallAction;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.upgrade.IDatabaseUpgrader;
@@ -51,7 +52,7 @@ public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 		Session s = HibernateManager.openSession();
 		try{
 			Map<String, String> versions = UpgradeEngine.getVersions(s);
-			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy
+			if (versions == null) throw new IllegalStateException("Database versions not found."); //shouldn't happy //$NON-NLS-1$
 			currentPluginVersion = versions.get(ConnectPlugIn.PLUGIN_ID);
 		}finally{
 			s.close();
@@ -60,7 +61,7 @@ public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 		if (currentPluginVersion == null) {
 			//Entity doesn't present in this configuration
 			//we need to perform install database support for the plug-in
-			monitor.subTask("Installing Connect PlugIn database tables.");
+			monitor.subTask(Messages.ConnectDatabaseUpgrader_TaskName);
 			OnInstallAction install = new OnInstallAction();
 			install.execute(null);
 		
@@ -72,7 +73,7 @@ public class ConnectDatabaseUpgrader implements IDatabaseUpgrader {
 				s.getTransaction().commit();
 			}catch (final Throwable t){
 				if (s.getTransaction().isActive()) s.getTransaction().rollback();
-				final String msg = MessageFormat.format("Error upgrading the connect plugin database tables from version {0} to version {1}.", new Object[]{currentPluginVersion, ConnectPlugIn.DB_VERSION}) + " \n\n" + t.getMessage();
+				final String msg = MessageFormat.format(Messages.ConnectDatabaseUpgrader_UpgradeError, new Object[]{currentPluginVersion, ConnectPlugIn.DB_VERSION}) + " \n\n" + t.getMessage(); //$NON-NLS-1$
 				Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {

@@ -56,7 +56,7 @@ public class CaReplicationDeleteHandler implements ICaDeleteHandler {
 
 	@Override
 	public void beforeDelete(ConservationArea ca, final Session session, IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Disable Replication");
+		monitor.subTask(Messages.CaReplicationDeleteHandler_TaskName);
 		
 		//register a listener to re-enable replication if
 		//the delete cannot be committed.
@@ -71,7 +71,7 @@ public class CaReplicationDeleteHandler implements ICaDeleteHandler {
 					//transaction not committed we need to re-enable replication
 					
 					resetException = null;
-					Job restart = new Job("reset replication state") {
+					Job restart = new Job(Messages.CaReplicationDeleteHandler_JobName) {
 						@Override
 						protected IStatus run(IProgressMonitor monitor) {
 							//run in job to get a new session as cannot reuse the existing one
@@ -95,7 +95,7 @@ public class CaReplicationDeleteHandler implements ICaDeleteHandler {
 						resetException = ex;
 					}
 					if (resetException != null){
-						ConnectPlugIn.displayLog("Error deleting Conservation Area.  Connect replication could not be re-enabled. The application will restart.", resetException);
+						ConnectPlugIn.displayLog(Messages.CaReplicationDeleteHandler_DeleteError, resetException);
 						//restart
 						Display.getDefault().syncExec(new Runnable(){
 							@Override

@@ -34,6 +34,7 @@ import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectServerOption.Option;
@@ -77,7 +78,7 @@ public class AutoReplicationJob extends Job {
 	 * These can be created and run on demand.
 	 */
 	public AutoReplicationJob(boolean statusOnly) {
-		super("backgound replication executor");
+		super(Messages.AutoReplicationJob_jobname);
 		this.statusOnly = statusOnly;
 	}
 
@@ -95,14 +96,14 @@ public class AutoReplicationJob extends Job {
 
 	private IStatus runInternal(IProgressMonitor monitor){
 		reschedule = true;
-		monitor.beginTask("Auto updating Connect server status", 3);
+		monitor.beginTask(Messages.AutoReplicationJob_TaskName, 3);
 		setServerStatus(ConnectStatusManager.ServerStatus.CONNECTING, null);
 		
 		if (!DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
-			setServerStatus(ServerStatus.ERROR, "Replication not enabled");
+			setServerStatus(ServerStatus.ERROR, Messages.AutoReplicationJob_ReplicationNoEnabledError);
 			return Status.OK_STATUS;
 		}
-		monitor.subTask("loading server information");
+		monitor.subTask(Messages.AutoReplicationJob_ServerSubTaskName);
 		Session s = HibernateManager.openSession();
 		ConnectServer server = null;
 		ConnectUser user = null;
@@ -116,19 +117,19 @@ public class AutoReplicationJob extends Job {
 		}
 		if (server != null) millisecondsToRepeat = server.getOptionAsInt(Option.SYNC_MINUTE) * 60 * 1000l;
 		if (server == null || serverStatus == null){
-			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "Connect server not configured.");
+			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_ServerError);
 			return Status.OK_STATUS;
 		}
 		
 		if (!statusOnly && !server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY)){
 			reschedule = false;
-			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "Auto updates not configured.");
+			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_AutoConfigError);
 			return Status.OK_STATUS;
 		}
 		
 		if (!statusOnly && (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null)){
 			if (!server.getOptionAsBoolean(Option.SYNC_PROMPT_PASSWORD)){
-				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "Could not connect, user credentials not provided and configuration not set to prompt.");
+				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_NoCredentialsError);
 				return Status.OK_STATUS;
 			}
 			//prompt user
@@ -143,42 +144,42 @@ public class AutoReplicationJob extends Job {
 				}	
 			});
 			if (smartConnect == null){
-				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "Could not connect, user credentials not valid.");
+				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_InvalidCredentialsError);
 				return Status.OK_STATUS;
 			}
 		}else{
 			try {
 				smartConnect = SmartConnect.findInstance(server, user.getConnectUsername(), ConnectPlugIn.decryptPassword(user));
 			} catch (Exception e) {
-				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "Could not connect, user credentials not valid.");
+				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_InvalidCredentialsError);
 				return Status.OK_STATUS;
 			}
 		}
 		monitor.worked(1);
 		
 		//connect to server and determine if there are changes
-		monitor.subTask("getting server state");
+		monitor.subTask(Messages.AutoReplicationJob_LoadingServerSubTask);
 		ConservationAreaProxy caInfo = null;
 		try{
 			caInfo = smartConnect.getCaInfo(server.getConservationArea().getUuid());
 		}catch (Exception ex){
 			ConnectPlugIn.log(ex.getMessage(), ex);
-			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "unable to communicate with server");
+			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_CommunicationError);
 			return Status.OK_STATUS;
 		}
 		monitor.worked(1);
 		if (caInfo == null){
-			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "conservation area does not exist on server");
+			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_CaDoesNotExistError);
 			return Status.OK_STATUS;
 		}
 		if (!caInfo.getVersion().equals(serverStatus.getVersion())){
-			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "base versions do not match");
+			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, Messages.AutoReplicationJob_VersionsDoNoMatchError);
 			return Status.OK_STATUS;
 		}
 		
 		boolean needsToDownload = false;
 		if (caInfo.getRevision() <= serverStatus.getServerRevision()){
-			setServerStatus(ConnectStatusManager.ServerStatus.UPTODATE, "local copy up to date");
+			setServerStatus(ConnectStatusManager.ServerStatus.UPTODATE, Messages.AutoReplicationJob_UpToDateError);
 		}else{
 			setServerStatus(ConnectStatusManager.ServerStatus.CHANGES, null);
 			needsToDownload = true;
@@ -193,10 +194,10 @@ public class AutoReplicationJob extends Job {
 		
 		final boolean upload = server.getOptionAsBoolean(Option.SYNC_AUTO_UPLOAD);
 		if (needsToDownload){
-			monitor.subTask("initiating download process");
+			monitor.subTask(Messages.AutoReplicationJob_downloadSubTaskName);
 			downloadChangeLog(upload);
 		}else if (!needsToDownload && upload){
-			monitor.subTask("initiating upload process");
+			monitor.subTask(Messages.AutoReplicationJob_uploadSubTaskName);
 			uploadChangeLog();
 		}
 		monitor.done();
@@ -220,14 +221,14 @@ public class AutoReplicationJob extends Job {
 			engine.downloadInstall();
 			reschedule = false;	//we will reschedule after this process is completed
 		}catch(Exception ex){
-			ConnectPlugIn.displayLog("Auto Download Changes from Connect Error: " + ex.getMessage(), ex);
+			ConnectPlugIn.displayLog(Messages.AutoReplicationJob_AutoDownloadError + ex.getMessage(), ex);
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, ex.getMessage());
 		}
 	}
 	
 	private void uploadChangeLog(){
 		reschedule = false;	//we will reschedule after this process is completed
-		Job j = new Job("package change log") {
+		Job j = new Job(Messages.AutoReplicationJob_packJobName) {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				UploadChangeLogEngine engine = new UploadChangeLogEngine(SmartDB.getCurrentConservationArea(), smartConnect){
@@ -242,7 +243,7 @@ public class AutoReplicationJob extends Job {
 					reschedule();
 				}catch (Exception ex){
 					reschedule();
-					ConnectPlugIn.displayLog("Auto Upload Changes to Connect Error: " + ex.getMessage(), ex);
+					ConnectPlugIn.displayLog(Messages.AutoReplicationJob_AutoUploadError + ex.getMessage(), ex);
 				}
 				return Status.OK_STATUS;
 			}

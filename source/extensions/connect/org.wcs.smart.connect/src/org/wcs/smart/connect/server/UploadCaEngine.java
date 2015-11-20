@@ -22,6 +22,7 @@
 package org.wcs.smart.connect.server;
 
 import java.io.File;
+import java.text.MessageFormat;
 import java.util.Properties;
 import java.util.UUID;
 
@@ -42,6 +43,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.export.CaExporter;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
@@ -76,21 +78,21 @@ public class UploadCaEngine {
 				@Override
 				public void run() {
 					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							"Error", "Another process is already communicating with SMART Connect. You must wait until that process is completed to upload conservation area.");		
+							Messages.UploadCaEngine_ErrorDialogTitle, Messages.UploadCaEngine_AlreadyProcessing);		
 				}
 			});	
 			return;
 		}
 		try{
-			monitor.beginTask("Uploading Conservation Area to SMART Connect", 3);
-			monitor.subTask("Connecting to SMART Connect");
+			monitor.beginTask(Messages.UploadCaEngine_TaskName, 3);
+			monitor.subTask(Messages.UploadCaEngine_ConnectSubtaskName);
 			
 			ConnectServer server = connect.getServer();
 			
 			ConservationAreaProxy serverInfo = connect.getCaInfo(server.getConservationArea().getUuid());
 			monitor.worked(1);
 			
-			monitor.subTask("Configuring upload");
+			monitor.subTask(Messages.UploadCaEngine_ConfigureSubtask);
 			ConnectServerStatus localStatus = null;
 			Session s = HibernateManager.openSession();
 	
@@ -101,29 +103,29 @@ public class UploadCaEngine {
 				//check status
 				if (serverInfo != null){
 					if (serverInfo.getStatus() == ConservationAreaProxy.Status.DATA){
-						throw new Exception("This conservation area already exists on the server.  You cannot upload to the server again without removing it from the server first.");
+						throw new Exception(Messages.UploadCaEngine_CaAlreadyExists);
 					}
 					
 					if (serverInfo.getStatus() == ConservationAreaProxy.Status.UPLOADING){
 						//somebody is uploading data;  is it us (check versions)?
 						if (localStatus == null 
 								|| !(localStatus.getVersion().equals(serverInfo.getVersion()))){
-							throw new Exception("Another desktop client is currently uploading this ConservationArea to the server.  You cannot upload your data at the same time.");
+							throw new Exception(Messages.UploadCaEngine_AlreadyUploading);
 						}
 						//continue using local file
 						if (localStatus != null){
 							if (localStatus.getStatus() == Status.ERROR || 
 									localStatus.getStatus() == Status.BACKUP){
 								//clear this file because we want to start over
-								throw new Exception("Conservation Area is already being processed on the server.  You may need to delete the conservation area from the connect server then try again.");
+								throw new Exception(Messages.UploadCaEngine_7);
 							}
 							if (localStatus.getLocalFile() == null){
 								//we have a problem because we do not have a local file to upload anymore
-								throw new Exception("Could not resume upload as local file could not be found.");
+								throw new Exception(Messages.UploadCaEngine_FileNotFound);
 							}else{
 								File f = new File(SmartContext.INSTANCE.getFilestoreLocation(), localStatus.getLocalFile());
 								if (!f.exists()){
-									throw new Exception("Could not resume upload as local file no longer exists.");	
+									throw new Exception(Messages.UploadCaEngine_FileDeleted);	
 								}
 							}
 						}
@@ -152,7 +154,7 @@ public class UploadCaEngine {
 				monitor.worked(1);
 				
 			}catch(Exception ex){
-				throw new Exception("Failed to configure upload.\n\nTo resolve you may need to to log into SMART Connect, delete the conservation area data and try again.\n\n" + ex.getMessage(), ex);
+				throw new Exception(Messages.UploadCaEngine_ConfigureError + ex.getMessage(), ex);
 			}finally{
 				s.close();
 			}
@@ -160,7 +162,7 @@ public class UploadCaEngine {
 			//create export package
 			try{
 				if (localStatus.getUploadUrl() == null){
-					monitor.subTask("Exporting conservation area for upload.");
+					monitor.subTask(Messages.UploadCaEngine_ExportCaSubtaskName);
 					packageCa(localStatus.getLocalFile(), new SubProgressMonitor(monitor, 1));
 					
 					localStatus.setStatus(Status.UPLOAD);
@@ -190,13 +192,13 @@ public class UploadCaEngine {
 					monitor.worked(1);
 				}
 			}catch(Exception ex){
-				throw new Exception("Failed to configure upload.\n\nTo resolve you may need to to log into SMART Connect, delete the conservation area data and try again.\n\n" + ex.getMessage(), ex);
+				throw new Exception(Messages.UploadCaEngine_ConfigureError + ex.getMessage(), ex);
 			}
 			
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					MessageDialog.openInformation(Display.getDefault().getActiveShell(), "Upload", "SMART will now upload the data to connect in the background.  You will be notified with the upload is complete.");		
+					MessageDialog.openInformation(Display.getDefault().getActiveShell(), Messages.UploadCaEngine_UploadDialogTitle, Messages.UploadCaEngine_BackgroundProcess);		
 				}
 				
 			});
@@ -209,7 +211,7 @@ public class UploadCaEngine {
 				s.getTransaction().commit();
 			}catch(Exception ex){
 				//this should fail
-				throw new Exception("Failed to enable replication.  Cannot upload to SMART Connect. " + ex.getMessage(), ex);
+				throw new Exception(Messages.UploadCaEngine_EnableFailed + ex.getMessage(), ex);
 			}
 			
 			UploadCaJob job = new UploadCaJob(connect, localStatus);
@@ -232,14 +234,15 @@ public class UploadCaEngine {
 	 * Re-acquires a lock and continues and upload job that was terminated early.  Will not re-create upload package.
 	 */
 	public void continueUpload(SmartConnect connect, ConnectServerStatus localStatus){
-		if (localStatus.getStatus() != ConnectServerStatus.Status.UPLOAD) throw new IllegalStateException("Cannot resume a conservation area upload whose status is not uploading");
+		if (localStatus.getStatus() != ConnectServerStatus.Status.UPLOAD) throw new IllegalStateException(
+				MessageFormat.format(Messages.UploadCaEngine_StatusFailed, ConnectServerStatus.Status.UPLOAD.name()));
 
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
 					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							"Error", "Another process is already communicating with SMART Connect. You must wait until that process is completed to upload conservation area.");		
+							Messages.UploadCaEngine_ErrorDialogTitle, Messages.UploadCaEngine_AlreadyProcessing);		
 				}
 			});	
 			return;
@@ -264,7 +267,7 @@ public class UploadCaEngine {
 	 * @return
 	 */
 	private String getExportFilename(ConservationArea ca){
-		return ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + File.separator + "sc_" +UuidUtils.uuidToString(ca.getUuid())+ "_" + System.nanoTime() + ".zip";
+		return ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR + File.separator + "sc_" +UuidUtils.uuidToString(ca.getUuid())+ "_" + System.nanoTime() + ".zip"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 
 	/**
@@ -313,7 +316,7 @@ public class UploadCaEngine {
 	 * 
 	 */
 	private void packageCa(String filename, IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Packaging conservation area for upload.", 1);
+		monitor.beginTask(Messages.UploadCaEngine_packingTaskName, 1);
 		
 		File f = new File(SmartContext.INSTANCE.getFilestoreLocation(), filename);
 		if (!f.getParentFile().exists()){

@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.net.ssl.X509TrustManager;
 
+import org.wcs.smart.connect.internal.Messages;
+
 /* 
  * see: http://stackoverflow.com/questions/1793979/registering-multiple-keystores-in-jvm
  * http://codyaray.com/2013/04/java-ssl-with-multiple-keystores
@@ -31,7 +33,7 @@ public class CompositeX509TrustManager implements X509TrustManager {
 				//failed; check the next one
 			}
 		}
-		throw new CertificateException("No trust managers trust this certificate.");
+		throw new CertificateException(Messages.CompositeX509TrustManager_SshError);
 	}
 
 	@Override
@@ -45,7 +47,7 @@ public class CompositeX509TrustManager implements X509TrustManager {
 				//failed; check the next one
 			}
 		}
-		throw new CertificateException("No trust managers trust this certificate.");
+		throw new CertificateException(Messages.CompositeX509TrustManager_SshError);
 	}
 
 	@Override

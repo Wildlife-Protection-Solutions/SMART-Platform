@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.wcs.smart.connect.internal.Messages;
+
 public class IOUtils {
 
 	 /**
@@ -58,7 +60,7 @@ public class IOUtils {
             output.write(buffer, 0, n);
             count += n;
             
-            if (monitor.isCanceled()) throw new InterruptedException("Download cancelled by user.");
+            if (monitor.isCanceled()) throw new InterruptedException(Messages.IOUtils_DownloadCancelled);
             monitor.addToCopiedCount(n);
         }
         return count;

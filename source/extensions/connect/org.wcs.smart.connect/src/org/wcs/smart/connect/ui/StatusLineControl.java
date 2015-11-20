@@ -45,6 +45,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
 import org.wcs.smart.connect.IConnectStatusListener;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.AutoReplicationJob;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -96,7 +97,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		//refresh now menu
 		Menu refreshMenu = new Menu(parent.getShell(), SWT.POP_UP);
 		MenuItem refreshNow = new MenuItem(refreshMenu, SWT.PUSH);
-		refreshNow.setText("Refresh Status Now");
+		refreshNow.setText(Messages.StatusLineControl_RefreshNowMneuItem);
 		refreshNow.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.REFRESH_ICON));
 		refreshNow.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -111,8 +112,8 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 		serverStatus.setMenu(refreshMenu);
 		localStatus.setMenu(refreshMenu);
 		
-		updateServerStatus(ServerStatus.ERROR, "Unknown State");
-		updateLocalStatus(ServerStatus.ERROR, "Unknown State");
+		updateServerStatus(ServerStatus.ERROR, Messages.StatusLineControl_UnknownState);
+		updateLocalStatus(ServerStatus.ERROR, Messages.StatusLineControl_UnknownState);
 		
 		updateLocalChanges.setSystem(true);
 		updateLocalChanges.schedule();
@@ -136,7 +137,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 					serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
 				}
 				if (message == null){
-					serverStatus.setToolTipText("");
+					serverStatus.setToolTipText(""); //$NON-NLS-1$
 				}else{
 					serverStatus.setToolTipText(formatMessage(message));
 				}
@@ -145,18 +146,18 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 	}
 	
 	private String formatMessage(String message){
-		if (message != null) message = MessageFormat.format( "({0}) {1}", DateFormat.getTimeInstance().format(new Date()), message);
+		if (message != null) message = MessageFormat.format( Messages.StatusLineControl_MessageFormatDateString, DateFormat.getTimeInstance().format(new Date()), message);
 		return message;
 	}
 	
 	private String formatLocalMessage(ConnectStatusManager.ServerStatus status, String message){
 		if (message == null){
 			if (status == ServerStatus.CHANGES){
-				message = "There are local changes that need to be uploaded to server.";	
+				message = Messages.StatusLineControl_LocalChanges;	
 			}else if (status == ServerStatus.UPTODATE){
-				message = "All local changes have been applied to the server.";	
+				message = Messages.StatusLineControl_NoLocalChanges;	
 			}else{
-				message = "Error determining state of local database. ";
+				message = Messages.StatusLineControl_LocalError;
 			}
 		}
 		return formatMessage(message);
@@ -184,13 +185,13 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 					localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
 				}
 				String tooltip = formatLocalMessage(status, message);
-				if (tooltip == null) tooltip = "";
+				if (tooltip == null) tooltip = ""; //$NON-NLS-1$
 				localStatus.setToolTipText(tooltip);
 			}
 		});
 	}
 	
-	private Job updateLocalChanges = new Job("local database replication state updater"){
+	private Job updateLocalChanges = new Job(Messages.StatusLineControl_jobName){
 
 		@Override
 		protected IStatus run(IProgressMonitor monitor) {
@@ -213,7 +214,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 					session.close();
 				}
 			}else{
-				message = "Connect server not configured.";
+				message = Messages.StatusLineControl_ServernotFound;
 			}
 			updateLocalStatus(status, message);
 

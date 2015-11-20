@@ -41,6 +41,7 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Action;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
@@ -69,7 +70,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	 */
 	@Override
 	public void processFile(final Session session) throws Exception{
-		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate();
+		session.createSQLQuery("SET CONSTRAINTS ALL DEFERRED").executeUpdate(); //$NON-NLS-1$
 		
 		ConnectSyncHistoryRecord lastUpload = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(session, ca, Type.UPLOAD);
 		lastUploadRevision = lastUpload == null ? -1 : lastUpload.getEndRevision();
@@ -94,27 +95,27 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		 * Conflict checking 
 		 */
 		Criteria c = session.createCriteria(ChangeLogItem.class);
-		c.add(Restrictions.eq("tableName", it.getTableName()));
-		c.add(Restrictions.eq("conservationArea", it.getConservationArea()));
+		c.add(Restrictions.eq("tableName", it.getTableName())); //$NON-NLS-1$
+		c.add(Restrictions.eq("conservationArea", it.getConservationArea())); //$NON-NLS-1$
 		if (it.getFieldName1() != null){
-			c.add(Restrictions.eq("fieldName1", it.getFieldName1()));
-			c.add(Restrictions.eq("key1", it.getKey1()));
+			c.add(Restrictions.eq("fieldName1", it.getFieldName1())); //$NON-NLS-1$
+			c.add(Restrictions.eq("key1", it.getKey1())); //$NON-NLS-1$
 		}
 		if (it.getFieldName2() != null){
-			c.add(Restrictions.eq("fieldName2", it.getFieldName2()));
+			c.add(Restrictions.eq("fieldName2", it.getFieldName2())); //$NON-NLS-1$
 			if (it.getKey2() != null){
-				c.add(Restrictions.eq("key2", it.getKey2()));
-				c.add(Restrictions.isNull("key2String"));
+				c.add(Restrictions.eq("key2", it.getKey2())); //$NON-NLS-1$
+				c.add(Restrictions.isNull("key2String")); //$NON-NLS-1$
 			}else if (it.getKey2String() != null){
-				c.add(Restrictions.eq("key2String", it.getKey2String()));
-				c.add(Restrictions.isNull("key2"));
+				c.add(Restrictions.eq("key2String", it.getKey2String())); //$NON-NLS-1$
+				c.add(Restrictions.isNull("key2")); //$NON-NLS-1$
 			}else{
 				//this case should not happen
-				throw new IllegalStateException("Invalid change log record.  Second key table provide but value not set");
+				throw new IllegalStateException("Invalid change log record.  Second key table provide but value not set"); //$NON-NLS-1$
 			}
 		}
-		c.add(Restrictions.gt("revision", lastUploadRevision));
-		c.add(Restrictions.eq("source", Source.LOCAL));
+		c.add(Restrictions.gt("revision", lastUploadRevision)); //$NON-NLS-1$
+		c.add(Restrictions.eq("source", Source.LOCAL)); //$NON-NLS-1$
 
 		c.setProjection(Projections.rowCount());
 		Long cnt = (Long) c.uniqueResult();
@@ -176,10 +177,10 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	protected void processDataDelete(ChangeLogItem item, Connection c) throws SQLException{
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("DELETE FROM " + item.getTableName());
-		sb.append(" WHERE " + item.getFieldName1() + " = ?");
+		sb.append("DELETE FROM " + item.getTableName()); //$NON-NLS-1$
+		sb.append(" WHERE " + item.getFieldName1() + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (item.getFieldName2() != null){
-			sb.append(" AND " + item.getFieldName2()  + " = ?");
+			sb.append(" AND " + item.getFieldName2()  + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		ps.setBytes(1, UuidUtils.uuidToByte(item.getKey1()));
@@ -194,22 +195,22 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 	@Override
 	protected void processDataUpdate(ChangeLogItem item, HashMap<String, Object> data, Connection c) throws ClassNotFoundException, IOException, SQLException{
 		StringBuilder sb = new StringBuilder();
-		sb.append("UPDATE " + item.getTableName());
-		sb.append(" SET ");
+		sb.append("UPDATE " + item.getTableName()); //$NON-NLS-1$
+		sb.append(" SET "); //$NON-NLS-1$
 		
 		List<Object> params = new ArrayList<Object>();
 		for(Entry<String, Object> dataitem : data.entrySet()){
 			String colName = dataitem.getKey();
 			Object obj = dataitem.getValue();	
-			sb.append(colName + " = ?, ");
+			sb.append(colName + " = ?, "); //$NON-NLS-1$
 			params.add(obj);
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		sb.deleteCharAt(sb.length() - 1);
 		
-		sb.append(" WHERE " + item.getFieldName1() + " = ?");
+		sb.append(" WHERE " + item.getFieldName1() + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		if (item.getFieldName2() != null){
-			sb.append(" AND " + item.getFieldName2()  + " = ?");
+			sb.append(" AND " + item.getFieldName2()  + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		for (int i = 1; i <= params.size(); i ++){
@@ -228,32 +229,32 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		
 		int cnt = ps.executeUpdate();
 		if (cnt != 1){
-			throw new SQLException("Invalid number of rows updated.");
+			throw new SQLException(Messages.DerbyChangeLogDeserializer_InvalidNumberOfRows);
 		}
 	}
 	
 	@Override
 	protected void processDataInsert(ChangeLogItem item, HashMap<String, Object> data, Connection c) throws ClassNotFoundException, IOException, SQLException{
 		StringBuilder sb = new StringBuilder();
-		sb.append("INSERT INTO " + item.getTableName() + "(");
+		sb.append("INSERT INTO " + item.getTableName() + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
 		StringBuilder values = new StringBuilder();
-		values.append("VALUES(");
+		values.append("VALUES("); //$NON-NLS-1$
 		
 		List<Object> params = new ArrayList<Object>();
 		for(Entry<String, Object> dataitem : data.entrySet()){
 			String colName = dataitem.getKey();
 			Object obj = dataitem.getValue();	
-			sb.append(colName + ",");
-			values.append("?,");
+			sb.append(colName + ","); //$NON-NLS-1$
+			values.append("?,"); //$NON-NLS-1$
 			params.add(obj);
 		}
 		sb.deleteCharAt(sb.length() - 1);
 		values.deleteCharAt(values.length() - 1);
 		
-		sb.append(") ");
+		sb.append(") "); //$NON-NLS-1$
 		sb.append(values.toString());
-		sb.append(")");
+		sb.append(")"); //$NON-NLS-1$
 		PreparedStatement ps = c.prepareStatement(sb.toString() );
 		for (int i = 1; i <= params.size(); i ++){
 			if (params.get(i-1) instanceof UUID){
@@ -264,7 +265,7 @@ public class DerbyChangeLogDeserializer extends ChangeLogDeserializer{
 		}
 		int cnt = ps.executeUpdate();
 		if (cnt != 1){
-			throw new SQLException("Invalid number of rows updated.");
+			throw new SQLException(Messages.DerbyChangeLogDeserializer_InvalidNumberOfRows);
 		}
 	}
 }

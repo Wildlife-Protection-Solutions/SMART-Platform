@@ -93,20 +93,20 @@ public abstract class ChangeLogItemSerializer {
 		
 		if (item.getFieldName2() != null 
 				&& (item.getKey2() == null && item.getKey2String() == null)){
-			throw new SQLException("Primary key values not set for key 2");
+			throw new SQLException("Primary key values not set for key 2"); //$NON-NLS-1$
 		}
 		if (item.getKey1() == null){
-			throw new SQLException("Pirmary key values not set for key 1");
+			throw new SQLException("Pirmary key values not set for key 1"); //$NON-NLS-1$
 		}
 		
 		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT * FROM ");
+		sb.append("SELECT * FROM "); //$NON-NLS-1$
 		sb.append(item.getTableName());
-		sb.append(" WHERE ");
-		sb.append(item.getFieldName1() + " = ? ");
+		sb.append(" WHERE "); //$NON-NLS-1$
+		sb.append(item.getFieldName1() + " = ? "); //$NON-NLS-1$
 		if (item.getFieldName2() != null){
-			sb.append(" AND ");
-			sb.append(item.getFieldName2() + " = ? " );
+			sb.append(" AND "); //$NON-NLS-1$
+			sb.append(item.getFieldName2() + " = ? " ); //$NON-NLS-1$
 		}
 		PreparedStatement ps = c.prepareStatement(sb.toString());
 		UUID key1 = item.getKey1();
@@ -163,7 +163,7 @@ public abstract class ChangeLogItemSerializer {
 				}else if (data instanceof byte[]){
 					stream.writeObject( UuidUtils.byteToUUID((byte[])data) );
 				}else{
-					throw new IllegalStateException("Invalid representation of UUID.");
+					throw new IllegalStateException("Invalid representation of UUID."); //$NON-NLS-1$
 				}
 			}else if (type == Types.CLOB){
 				Clob clob = rs.getClob(i);

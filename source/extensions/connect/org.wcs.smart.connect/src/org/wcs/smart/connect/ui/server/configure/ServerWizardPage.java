@@ -28,6 +28,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 
 /**
@@ -38,7 +39,7 @@ import org.wcs.smart.connect.model.ConnectServer;
  */
 public class ServerWizardPage extends WizardPage implements ModifyListener {
 
-	public static final String NAME = "SERVER";
+	public static final String NAME = "SERVER"; //$NON-NLS-1$
 	
 	private ServerPanel panel;
 	
@@ -56,8 +57,8 @@ public class ServerWizardPage extends WizardPage implements ModifyListener {
 		panel.addChangeListener(this);
 		panel.initValues(new ConnectServer());
 		
-		setTitle("SMART Connect Server");
-		setMessage("Enter the URL to the SMART Connect Server.  (example: https://www.smartconnect.org/server/)");
+		setTitle(Messages.ServerWizardPage_Title);
+		setMessage(Messages.ServerWizardPage_Message);
 		
 		setControl(outer);
 		

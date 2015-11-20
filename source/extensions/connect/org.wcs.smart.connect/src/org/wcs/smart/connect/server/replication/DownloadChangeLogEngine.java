@@ -33,6 +33,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
@@ -72,21 +73,21 @@ public class DownloadChangeLogEngine {
 
 		/* the ca info */
 		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			throw new Exception("Cross-ca analysis can not be syncronized with server.");
+			throw new Exception(Messages.DownloadChangeLogEngine_CCAAError);
 		}
 		
 		//acquire lock
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
-			throw new Exception("Another process is already uploading or downloading changes to SMART Connect.  You must wait until that process is completed to download a change log.");		
+			throw new Exception(Messages.DownloadChangeLogEngine_AlreadyProcessingError);		
 		}
 
 		try{
-			setServerStatus(ServerStatus.CONNECTING, "downloading changes from connect");
+			setServerStatus(ServerStatus.CONNECTING, Messages.DownloadChangeLogEngine_statusLineValue);
 			
 			Session session = HibernateManager.openSession();
 			try{
 				if (!DerbyReplicationManager.INSTANCE.canReplicate(session, ca)){
-					throw new Exception("Replication not enabled.  Cannot download changes from server.");
+					throw new Exception(Messages.DownloadChangeLogEngine_ReplicationNotEnabledError);
 				}
 			}finally{
 				session.close();
@@ -94,7 +95,7 @@ public class DownloadChangeLogEngine {
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.DOWNLOAD);
 			if (previous != null && 
 					previous.getDatetime().getTime() < ((new Date()).getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 *1000l)){
-				throw new Exception(MessageFormat.format("Last download of changes was longer than {0} days ago.  Replication is no longer supported.  You must redownload the Conservation Area from the server.", DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
+				throw new Exception(MessageFormat.format(Messages.DownloadChangeLogEngine_TooOldError, DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
 			}
 			
 			//create sync history record for database
@@ -112,9 +113,9 @@ public class DownloadChangeLogEngine {
 			}
 			
 			if (serverInfo == null){
-				throw new Exception("SMART Connect server not found.");
+				throw new Exception(Messages.DownloadChangeLogEngine_ServerNotFoundError);
 			}
-			setServerStatus(ServerStatus.DOWNLOADING, "downloading changes from connect");
+			setServerStatus(ServerStatus.DOWNLOADING, Messages.DownloadChangeLogEngine_statusLineValue);
 			final DownloadChangeLogJob downloadJob = new DownloadChangeLogJob(connect, serverInfo, record);
 			downloadJob.addJobChangeListener(new JobChangeAdapter() {
 				@Override
@@ -145,12 +146,12 @@ public class DownloadChangeLogEngine {
 					}
 				}
 			}catch (Exception ex2){
-				ConnectPlugIn.log("Could not set download record status to error: " + ex2.getMessage(), ex2);
+				ConnectPlugIn.log(Messages.DownloadChangeLogEngine_DownloadError + ex2.getMessage(), ex2);
 			}
 			
 			SmartConnect.UPLOAD_LOCK.release();
 			
-			setServerStatus(ServerStatus.ERROR, "error uploading to server");
+			setServerStatus(ServerStatus.ERROR, Messages.DownloadChangeLogEngine_statusLineValueError);
 			throw ex;
 		}
 	}
@@ -170,7 +171,7 @@ public class DownloadChangeLogEngine {
 		
 		if (record.getStatus() == Status.DONE ||
 				record.getStatus() == Status.NODATA){
-			setServerStatus(ServerStatus.UPTODATE, "local database up-to-date");
+			setServerStatus(ServerStatus.UPTODATE, Messages.DownloadChangeLogEngine_statusLineValueUpToDate);
 		}else{
 			setServerStatus(ServerStatus.ERROR, record.getErrorString());
 		}

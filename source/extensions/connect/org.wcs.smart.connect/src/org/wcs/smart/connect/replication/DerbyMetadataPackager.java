@@ -28,6 +28,7 @@ import java.util.List;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.replication.metadata.MetadataPackager;
@@ -51,7 +52,7 @@ public enum DerbyMetadataPackager {
 		
 		ConnectServerStatus status = (ConnectServerStatus) session.get(ConnectServerStatus.class, ca.getUuid());
 		if (status == null){
-			 throw new Exception("Could not determine server status.");
+			 throw new Exception(Messages.DerbyMetadataPackager_ServerStatusError);
 		}
 		
 		PackageMetadata metadata = new PackageMetadata();
@@ -69,7 +70,7 @@ public enum DerbyMetadataPackager {
 	@SuppressWarnings("unchecked")
 	public HashMap<String, String> getLocalPluginVersions(Session session){
 		HashMap<String, String> plugins = new HashMap<String, String>();
-		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL);
+		SQLQuery q = session.createSQLQuery("SELECT version, plugin_id FROM " + SmartDB.PLUGIN_VERSION_TBL); //$NON-NLS-1$
 		List<Object[]> plugin = q.list();
 		for (Object[] version : plugin){
 			plugins.put((String)version[1], (String)version[0]);

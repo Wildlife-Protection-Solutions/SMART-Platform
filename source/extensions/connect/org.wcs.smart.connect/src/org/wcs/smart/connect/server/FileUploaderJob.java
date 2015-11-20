@@ -34,6 +34,7 @@ import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.io.CopyProgressMonitor;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
 import org.wcs.smart.connect.api.model.WorkItemStatus.Status;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerOption;
 
 /**
@@ -64,7 +65,7 @@ public abstract class FileUploaderJob extends Job {
 	
 	
 	protected void uploadFile(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Uploading file.", 4);
+		monitor.beginTask(Messages.FileUploaderJob_TaskName, 4);
 		// get current status
 		WorkItemStatus serverStatus = connect.getWorkItemStatus(url);
 		try{
@@ -74,7 +75,7 @@ public abstract class FileUploaderJob extends Job {
 			int cnt = 0;			
 			long waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
 			
-			monitor.subTask("uploading files");
+			monitor.subTask(Messages.FileUploaderJob_subTaskName);
 			CopyProgressMonitor copyMonitor = new CopyProgressMonitor(new SubProgressMonitor(monitor,3), Files.size(file));
 			
 			while(cnt < connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)){
@@ -93,10 +94,10 @@ public abstract class FileUploaderJob extends Job {
 					return ;
 				}
 				Thread.sleep(waitTime);
-				if (monitor.isCanceled()) throw new Exception("Upload cancelled by user.");
+				if (monitor.isCanceled()) throw new Exception(Messages.FileUploaderJob_Cancelled);
 			}
 			//if we are here we have tried max_retry times and the file has still not been uploaded
-			throw new Exception(MessageFormat.format("Upload reached max tries of {0}.  Please validate server connection and try again.", connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)));
+			throw new Exception(MessageFormat.format(Messages.FileUploaderJob_ToManyTried, connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_RETRY_UPLOAD)));
 		}catch(Exception ex){
 			serverStatus.setMessage(ex.getMessage());
 			onError(serverStatus.getMessage());
@@ -114,7 +115,7 @@ public abstract class FileUploaderJob extends Job {
 		try{
 			Files.deleteIfExists(file);
 		}catch (IOException ex){
-			ConnectPlugIn.log("Could not delete ca uploader export file.", ex);
+			ConnectPlugIn.log("Could not delete ca uploader export file.", ex); //$NON-NLS-1$
 		}
 	}
 	
@@ -123,7 +124,7 @@ public abstract class FileUploaderJob extends Job {
 	 */
 	protected boolean checkServerStatus(WorkItemStatus serverStatus,
 			IProgressMonitor monitor) throws Exception{
-		monitor.subTask("Checking server status");
+		monitor.subTask(Messages.FileUploaderJob_StatusCheckSubTaskName);
 	
 		if (serverStatus.getStatus() == Status.COMPLETE){
 			onUploadComplete(serverStatus);
@@ -140,7 +141,7 @@ public abstract class FileUploaderJob extends Job {
 				//we waited 5 minutes and we do not know how to proceed
 				throw new Exception(
 						MessageFormat.format(
-								"Server unable to process file after {0} minutes.  Check status on SMART Connect", connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) / (1000 *60.0) ));
+								Messages.FileUploaderJob_ToLong, connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) / (1000 *60.0) ));
 			}
 			return true;
 			
@@ -159,7 +160,7 @@ public abstract class FileUploaderJob extends Job {
 	protected boolean waitProcessing(IProgressMonitor monitor) throws Exception{
 		
 		//wait for processing 
-		monitor.subTask("Waiting for Server to complete processing...");
+		monitor.subTask(Messages.FileUploaderJob_Waiting);
 		
 		Long startTime = System.nanoTime();
 		Long currentTime = System.nanoTime();

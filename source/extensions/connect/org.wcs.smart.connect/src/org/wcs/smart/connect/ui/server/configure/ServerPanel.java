@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 
 /**
@@ -53,7 +54,7 @@ import org.wcs.smart.connect.model.ConnectServer;
  */
 public class ServerPanel extends Composite implements ModifyListener {
 
-	private static final String USE_EXISTING = "<use provided>";
+	private static final String USE_EXISTING = Messages.ServerPanel_UseExistingCert;
 	private static final String CD_KEY = "cd"; //$NON-NLS-1$
 	private static final String VALID_KEY = "valid"; //$NON-NLS-1$
 	
@@ -73,7 +74,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 		setLayout(new GridLayout(3, false));
 		
 		Label l = new Label(this, SWT.NONE);
-		l.setText("Server URL:");
+		l.setText(Messages.ServerPanel_UrlLabel);
 		
 		txtServer = new Text(this, SWT.BORDER);
 		txtServer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -83,7 +84,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 		txtServer.setData(VALID_KEY, false);
 		
 		l = new Label(this, SWT.NONE);
-		l.setText("Certificate*:");
+		l.setText(Messages.ServerPanel_CertificateLabel);
 		
 		txtCertificate = new Text(this, SWT.BORDER);
 		txtCertificate.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
@@ -94,14 +95,14 @@ public class ServerPanel extends Composite implements ModifyListener {
 		txtCertificate.setData(CD_KEY, cd);
 		
 		Button btnSelect = new Button(this, SWT.PUSH);
-		btnSelect.setText("...");
+		btnSelect.setText("..."); //$NON-NLS-1$
 		btnSelect.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				FileDialog fd = new FileDialog(getShell());
 				fd.setText(txtCertificate.getText());
-				fd.setFilterExtensions(new String[]{"*.pem;*.cer;*.crt;*.def;*.p7b;*.p7c;*.p12;*.pfx", "*.*"});
-				fd.setFilterNames(new String[]{"Certificate (*.pem;*.cer;*.crt;*.def;*.p7b;*.p7c;*.p12;*.pfx)", "All Files (*.*)"});
+				fd.setFilterExtensions(new String[]{"*.pem;*.cer;*.crt;*.def;*.p7b;*.p7c;*.p12;*.pfx", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
+				fd.setFilterNames(new String[]{Messages.ServerPanel_CertificateFilterName, Messages.ServerPanel_AllFiles});
 				
 				String f = fd.open();
 				if (f != null){
@@ -111,7 +112,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 		});
 		
 		l = new Label(this, SWT.WRAP);
-		l.setText("*Leave this field blank if your connect server certificate is signed by a valid certificate authority.  If self signed you need to get the certificate for the server and select the certificate file here.");
+		l.setText(Messages.ServerPanel_CertificateMessage);
 		l.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 3, 1));
 		((GridData)l.getLayoutData()).widthHint = 300;
 		
@@ -138,7 +139,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 			ControlDecoration scd = (ControlDecoration) txtServer.getData(CD_KEY);
 			if (txtServer.getText().isEmpty()){
 				scd.show();
-				scd.setDescriptionText("Server is required.");
+				scd.setDescriptionText(Messages.ServerPanel_ServerRequired);
 				txtServer.setData(VALID_KEY, false);
 			}else{
 				scd.hide();
@@ -162,7 +163,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 						err = true;
 					}
 					if (err){
-						ccd.setDescriptionText("Certificate file not valid");
+						ccd.setDescriptionText(Messages.ServerPanel_InvalidCertificate);
 						txtCertificate.setData(VALID_KEY, false);
 						ccd.show();
 					}
@@ -191,7 +192,7 @@ public class ServerPanel extends Composite implements ModifyListener {
 		if (server.getCertificateFileName() != null){
 			txtCertificate.setText(USE_EXISTING);
 		}else{
-			txtCertificate.setText("");
+			txtCertificate.setText(""); //$NON-NLS-1$
 		}
 	}
 	

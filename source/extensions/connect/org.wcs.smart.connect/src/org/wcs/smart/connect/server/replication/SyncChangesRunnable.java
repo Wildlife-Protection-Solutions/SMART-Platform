@@ -28,6 +28,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 
@@ -83,9 +84,9 @@ public class SyncChangesRunnable implements IRunnableWithProgress{
 			InterruptedException {
 		
 		if (upload){
-			monitor.beginTask("Syncing changes with SMART Connect", 3);
+			monitor.beginTask(Messages.SyncChangesRunnable_SyncTaskName, 3);
 		}else{
-			monitor.beginTask("Downloading and applygin changes from SMART Connect", 3);
+			monitor.beginTask(Messages.SyncChangesRunnable_DownloadTaskName, 3);
 		}
 		
 		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(ca, connect) {
@@ -153,26 +154,26 @@ public class SyncChangesRunnable implements IRunnableWithProgress{
 			return thrownException.getMessage();
 		}
 		if (downloadRecord == null){
-			return "Downloading changes from Connect not completed: Unknown error";
+			return Messages.SyncChangesRunnable_UnknownError;
 		}
 		if (downloadRecord.getStatus() == Status.ACTIVE){
-			return "Downloading changes from Connect not completed: Download still active.";
+			return Messages.SyncChangesRunnable_DownloadStillWorking;
 		}
 		if (downloadRecord.getStatus() == Status.ERROR){
-			return "Downloading changes from Connect not completed:" + downloadRecord.getErrorString();
+			return Messages.SyncChangesRunnable_DownloadError + downloadRecord.getErrorString();
 		}
 		//download is either ok or nodata which are all fine; lets check upload
 		if (!upload){
 			return null;
 		}
 		if (uploadRecord == null){
-			return "Uploading changes to Connect not completed:  Unknown error";
+			return Messages.SyncChangesRunnable_UploadUnknownError;
 		}
 		if (uploadRecord.getStatus() == Status.ACTIVE){
-			return "Uploading changes from Connect not completed: Upload still active.";
+			return Messages.SyncChangesRunnable_UploadStillActive;
 		}
 		if (uploadRecord.getStatus() == Status.ERROR){
-			return "Uploading changes from Connect not completed:" + uploadRecord.getErrorString();
+			return Messages.SyncChangesRunnable_UploadError + uploadRecord.getErrorString();
 		}
 		//upload is either ok or nodata which are all file; return null;
 		return null;

@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectServerOption.Option;
@@ -85,7 +86,7 @@ public class AutoOptionsPanel extends Composite {
 		setLayout(new GridLayout());
 		
 		Group g1 = new Group(this, SWT.DEFAULT);
-		g1.setText("Start Up Options");
+		g1.setText(Messages.AutoOptionsPanel_StartUpOptionLabel);
 		g1.setLayout(new GridLayout());
 		g1.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -100,7 +101,7 @@ public class AutoOptionsPanel extends Composite {
 		((GridData)btnUploadStartUp.getLayoutData()).horizontalIndent = 10;
 		
 		Group g2 = new Group(this, SWT.DEFAULT);
-		g2.setText("Shut Down Options");
+		g2.setText(Messages.AutoOptionsPanel_ShutdownOpLabel);
 		g2.setLayout(new GridLayout());
 		g2.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -115,7 +116,7 @@ public class AutoOptionsPanel extends Composite {
 		((GridData)btnUploadShutDown.getLayoutData()).horizontalIndent = 10;
 		
 		Group g3 = new Group(this, SWT.DEFAULT);
-		g3.setText("Automatic Replication Options");
+		g3.setText(Messages.AutoOptionsPanel_AutoOpLabel);
 		g3.setLayout(new GridLayout());
 		g3.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -126,24 +127,24 @@ public class AutoOptionsPanel extends Composite {
 		Composite minComp = new Composite(g3, SWT.NONE);
 		minComp.setLayout(new GridLayout(3, false));
 		lblMinutes = new Label(minComp, SWT.NONE);
-		lblMinutes.setText("Check for changes every");
+		lblMinutes.setText(Messages.AutoOptionsPanel_CheckChangesLabel);
 		txtMinutes = new Text(minComp, SWT.BORDER);
-		txtMinutes.setText("0000");
+		txtMinutes.setText("0000"); //$NON-NLS-1$
 		txtMinutes.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)txtMinutes.getLayoutData()).widthHint = 50;
 		lblMinutes2 = new Label(minComp, SWT.NONE);
-		lblMinutes2.setText("minutes");
+		lblMinutes2.setText(Messages.AutoOptionsPanel_MinutesLabel);
 		minComp.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)minComp.getLayoutData()).horizontalIndent = 10;
 		cdMinutes = createControlDecoration(txtMinutes);
-		cdMinutes.setDescriptionText("Invalid minutes.  Must be a valid integer.");
+		cdMinutes.setDescriptionText(Messages.AutoOptionsPanel_InvalidMinutes);
 		txtMinutes.addModifyListener(new ModifyListener(){
 			@Override
 			public void modifyText(ModifyEvent e) {
 				try{
 					int x = Integer.parseInt(txtMinutes.getText());
 					if (x < 0){
-						throw new Exception("Value must be greater than 0");
+						throw new Exception(Messages.AutoOptionsPanel_InvalidMinutes2);
 					}
 					cdMinutes.hide();
 				}catch (Exception ex){
@@ -173,7 +174,7 @@ public class AutoOptionsPanel extends Composite {
 		((GridData)btnUpload.getLayoutData()).horizontalIndent = 20;
 		
 		Group g4 = new Group(this, SWT.DEFAULT);
-		g4.setText("Package Options");
+		g4.setText(Messages.AutoOptionsPanel_PackageOpLable);
 		g4.setLayout(new GridLayout(3, false));
 		g4.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
@@ -187,14 +188,14 @@ public class AutoOptionsPanel extends Composite {
 		txtPackageSize.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 		((GridData)txtPackageSize.getLayoutData()).widthHint = 50;
 		cdPackageSize = createControlDecoration(txtPackageSize);
-		cdPackageSize.setDescriptionText("Invalid package size.  Must be a valid integer.");
+		cdPackageSize.setDescriptionText(Messages.AutoOptionsPanel_InvalidSize);
 		txtPackageSize.addModifyListener(new ModifyListener(){
 			@Override
 			public void modifyText(ModifyEvent e) {
 				try{
 					int x = Integer.parseInt(txtPackageSize.getText());
 					if (x < 0){
-						throw new Exception("Value must be greater than 0");
+						throw new Exception(Messages.AutoOptionsPanel_InvalidSize2);
 					}
 					cdPackageSize.hide();
 				}catch (Exception ex){

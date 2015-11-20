@@ -33,6 +33,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -49,7 +50,7 @@ import org.wcs.smart.hibernate.SmartDB;
 public class CleanUpReplicationJob extends Job{
 
 	public CleanUpReplicationJob(){
-		super("clean up replication history");
+		super(Messages.CleanUpReplicationJob_jobname);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -67,11 +68,11 @@ public class CleanUpReplicationJob extends Job{
 			//identifying when last executed to prevent users from
 			//syncing really old databases
 			List<ConnectSyncHistoryRecord> lastUploads = (List<ConnectSyncHistoryRecord>) s.createCriteria(ConnectSyncHistoryRecord.class)
-					.add(Restrictions.eq("conservationArea", ca))
-					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD))
-					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.DONE))
-					.add(Restrictions.lt("datetime", lastHour))
-					.addOrder(Order.desc("datetime"))
+					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD)) //$NON-NLS-1$
+					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.DONE)) //$NON-NLS-1$
+					.add(Restrictions.lt("datetime", lastHour)) //$NON-NLS-1$
+					.addOrder(Order.desc("datetime")) //$NON-NLS-1$
 					.setMaxResults(2)
 					.list();
 			
@@ -85,11 +86,11 @@ public class CleanUpReplicationJob extends Job{
 			}
 			
 			List<ConnectSyncHistoryRecord> lastDownloads = (List<ConnectSyncHistoryRecord>) s.createCriteria(ConnectSyncHistoryRecord.class)
-					.add(Restrictions.eq("conservationArea", ca))
-					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.DOWNLOAD))
-					.add(Restrictions.in("status", new ConnectSyncHistoryRecord.Status[]{ConnectSyncHistoryRecord.Status.DONE, ConnectSyncHistoryRecord.Status.NODATA}))
-					.add(Restrictions.lt("datetime", lastHour))
-					.addOrder(Order.desc("datetime"))
+					.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.DOWNLOAD)) //$NON-NLS-1$
+					.add(Restrictions.in("status", new ConnectSyncHistoryRecord.Status[]{ConnectSyncHistoryRecord.Status.DONE, ConnectSyncHistoryRecord.Status.NODATA})) //$NON-NLS-1$
+					.add(Restrictions.lt("datetime", lastHour)) //$NON-NLS-1$
+					.addOrder(Order.desc("datetime")) //$NON-NLS-1$
 					.setMaxResults(2)
 					.list();
 			if (lastDownloads.size() == 2){
@@ -98,7 +99,7 @@ public class CleanUpReplicationJob extends Job{
 			}
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			ConnectPlugIn.log("Unable to cleanup change log table", ex);
+			ConnectPlugIn.log("Unable to cleanup change log table", ex); //$NON-NLS-1$
 			
 			if (s.getTransaction().isActive()) s.getTransaction().rollback();
 			

@@ -41,6 +41,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
@@ -56,7 +57,7 @@ import org.wcs.smart.hibernate.HibernateManager;
  */
 public class UploadChangeLogEngine {
 
-	private NothingToUpdateException nothingtoUpdate = new NothingToUpdateException("Server up-to-date.  There are no local changes to upload to the server.");
+	private NothingToUpdateException nothingtoUpdate = new NothingToUpdateException(Messages.UploadChangeLogEngine_NothingtoDo);
 	
 	private SmartConnect connect;
 	protected ConnectSyncHistoryRecord record;
@@ -79,10 +80,10 @@ public class UploadChangeLogEngine {
 	 */
 	public void createUpload(IProgressMonitor monitor) throws NothingToUpdateException, PackageToLargeException, Exception{
 	
-		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)) throw new Exception("Cross-ca analysis can not be syncronized with server.");
+		if (ca.getUuid().equals(ConservationArea.MULTIPLE_CA)) throw new Exception(Messages.UploadChangeLogEngine_CCAAError);
 		
 		if (!SmartConnect.UPLOAD_LOCK.tryAcquire()){
-			throw new Exception("Another process is already uploading changes to SMART Connect.  You must wait until that process is completed to upload change log.");
+			throw new Exception(Messages.UploadChangeLogEngine_AlreadyProcessing);
 		}
 		
 		try{
@@ -90,7 +91,7 @@ public class UploadChangeLogEngine {
 			Session session = HibernateManager.openSession();
 			try{
 				if (!DerbyReplicationManager.INSTANCE.canReplicate(session, ca)){
-					throw new Exception("Replication not enabled.  Cannot upload changes from server.");
+					throw new Exception(Messages.UploadChangeLogEngine_ReplicationNotEnabled);
 				}
 				currentRevisionNo = ChangeLogTableManager.INSTANCE.getMaxLocalRevision(session, ca);
 				if (currentRevisionNo == null){
@@ -100,7 +101,7 @@ public class UploadChangeLogEngine {
 				session.close();
 			}
 
-			monitor.beginTask("Creating sync package", 3);
+			monitor.beginTask(Messages.UploadChangeLogEngine_TaskName, 3);
 
 			ConnectSyncHistoryRecord previous = SyncHistoryManager.INSTANCE.getLastNonErrorSyncRecord(ca, ConnectSyncHistoryRecord.Type.UPLOAD);
 			if ((previous == null && currentRevisionNo == -1) ||
@@ -109,7 +110,7 @@ public class UploadChangeLogEngine {
 			}
 			if (previous != null && 
 					previous.getDatetime().getTime() < ((new Date()).getTime() - DerbyReplicationManager.REPLICATION_MAXTIME_DAYS * 24 * 60 * 60 *1000l)){
-				throw new Exception(MessageFormat.format("Last upload of changes was longer than {0} days ago.  Replication is no longer supported.  You must redownload the Conservation Area from the server.", DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
+				throw new Exception(MessageFormat.format(Messages.UploadChangeLogEngine_TooOld, DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
 			}
 			record = null;
 			
@@ -142,7 +143,7 @@ public class UploadChangeLogEngine {
 			//package changes
 			if (record.getStatusUrl() == null){
 				//upload has not started 
-				if (!Files.exists(FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile() + ".zip"))){
+				if (!Files.exists(FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile() + ".zip"))){ //$NON-NLS-1$
 					//package does not exist; we need to create it
 					ChangeLogPackager packer = new ChangeLogPackager(record);
 					packer.createPackage(new SubProgressMonitor(monitor, 1));
@@ -171,8 +172,8 @@ public class UploadChangeLogEngine {
 								public void run() {
 									// TODO Auto-generated method stub
 									cont[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
-											"Upload Change Log", 
-											MessageFormat.format("The change log package to upload ({0} MB) is greater than {1} MB.  Do you wish to continue?", sizeInBytes / 1000000.0, maxSizeInBytes/1000000.0));		
+											Messages.UploadChangeLogEngine_UploadSizeDialogTitle, 
+											MessageFormat.format(Messages.UploadChangeLogEngine_UploadSizeDialogMessage, sizeInBytes / 1000000.0, maxSizeInBytes/1000000.0));		
 								}
 								
 								
@@ -183,7 +184,7 @@ public class UploadChangeLogEngine {
 								saveRecord(record);
 								//delete file
 								deletePackageFile();
-								throw new PackageToLargeException("Upload cancelled by user.  Upload package too big.");
+								throw new PackageToLargeException(Messages.UploadChangeLogEngine_UploadToBig);
 							}
 							
 						}
@@ -215,7 +216,7 @@ public class UploadChangeLogEngine {
 			Path p = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), record.getChangeLogZipFile());
 			Files.deleteIfExists(p);
 		}catch (IOException ex){
-			ConnectPlugIn.log("Could not delete ca uploader export file.", ex);
+			ConnectPlugIn.log("Could not delete ca uploader export file.", ex); //$NON-NLS-1$
 		}		
 	}
 	/**

@@ -24,6 +24,7 @@ package org.wcs.smart.connect.ui.server;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.connect.internal.Messages;
 
 /**
  * Export Conservation Area to SMART Connect server UI Dialog.
@@ -39,9 +40,9 @@ public class UploadCaDialog extends ConnectDialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle("Export Conservation Area to CONNECT");
-		getShell().setText("Export Conservation Area to CONNECT");
-		setMessage("Export the entire conservation area to a SMART Connect instance.");
+		setTitle(Messages.UploadCaDialog_Title);
+		getShell().setText(Messages.UploadCaDialog_ShellTitle);
+		setMessage(Messages.UploadCaDialog_Message);
 		
 		return super.createDialogArea(parent);
 	}

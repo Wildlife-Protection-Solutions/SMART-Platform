@@ -32,6 +32,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
@@ -49,7 +50,7 @@ public class UploadCaJob extends FileUploaderJob {
 	private ConnectServerStatus status;
 	
 	public UploadCaJob(SmartConnect connect, ConnectServerStatus status){
-		super(status.getUploadUrl(), FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), status.getLocalFile()), connect, "Upload Conservation Area To SMART Connect");
+		super(status.getUploadUrl(), FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), status.getLocalFile()), connect, Messages.UploadCaJob_JobName);
 	
 		this.status = status;
 	}
@@ -59,7 +60,7 @@ public class UploadCaJob extends FileUploaderJob {
 		try{
 			super.uploadFile(monitor);
 		}catch (Exception ex){
-			ConnectPlugIn.log("Error uploading conservation area to connect.", ex);
+			ConnectPlugIn.log("Error uploading conservation area to connect.", ex); //$NON-NLS-1$
 		}
 		return org.eclipse.core.runtime.Status.OK_STATUS;
 
@@ -72,14 +73,14 @@ public class UploadCaJob extends FileUploaderJob {
 			public void run() {
 				if (status.getStatus() == org.wcs.smart.connect.model.ConnectServerStatus.Status.DONE){
 					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
-						"SMART Connect Upload", 
-						"Upload to SMART Connect complete." +
-						(msg != null ? "\n" + msg : ""));
+						Messages.UploadCaJob_InfoDialogTitle, 
+						Messages.UploadCaJob_InfoComplete +
+						(msg != null ? "\n" + msg : "")); //$NON-NLS-1$ //$NON-NLS-2$
 				}else if (status.getStatus() == org.wcs.smart.connect.model.ConnectServerStatus.Status.ERROR){
 					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							"SMART Connect Upload", 
-							"An error occurred uploading Conservation Area to SMART Connect." +
-							(msg != null ? "\n" + msg : ""));
+							Messages.UploadCaJob_InfoDialogTitle, 
+							Messages.UploadCaJob_InfoError +
+							(msg != null ? "\n" + msg : "")); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}});
 	}
@@ -119,7 +120,7 @@ public class UploadCaJob extends FileUploaderJob {
 			
 			displayComplete(null);
 		}catch (Exception ex){
-			ConnectPlugIn.displayLog("Replication could not be enabled.  SMART must be restarted to prevent future replication errors.", ex);
+			ConnectPlugIn.displayLog(Messages.UploadCaJob_ReplicationNotEnabled, ex);
 		}
 	}
 
@@ -128,7 +129,7 @@ public class UploadCaJob extends FileUploaderJob {
 	protected void onError(String errorMessage) {
 		this.status.setStatus(ConnectServerStatus.Status.ERROR);
 		saveStatus();
-		displayComplete(errorMessage == null ? "Local error uploading file." : errorMessage);	
+		displayComplete(errorMessage == null ? Messages.UploadCaJob_UnknownError : errorMessage);	
 		
 		//error disable and cleanup replication details
 		Session s = HibernateManager.openSession();
@@ -142,7 +143,7 @@ public class UploadCaJob extends FileUploaderJob {
 			
 			s.getTransaction().commit();
 		}catch (Exception ex){
-			ConnectPlugIn.displayLog("Replication could not be disabled.  SMART must be restarted to prevent future replication errors.", ex);
+			ConnectPlugIn.displayLog(Messages.UploadCaJob_ReplicationNotReenabled, ex);
 		}finally{
 			s.close();
 		}

@@ -42,6 +42,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.connect.ConnectHibernateManager;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -66,12 +67,12 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 	private TableViewer syncHistory;
 	
 	private enum SyncHistoryColumn{
-		DATETIME("Date/Time", 150),
-		TYPE("Type", 85),
-		STATUS("Status", 55),
-		STARTREVISION("Start Revision", 85),
-		ENDREVISION("End Revision", 85),
-		STATUSURL("Status URL", 300);
+		DATETIME(Messages.ReplicationInfoDialog_datetime_columnname, 150),
+		TYPE(Messages.ReplicationInfoDialog_type_columnname, 85),
+		STATUS(Messages.ReplicationInfoDialog_status_columnname, 55),
+		STARTREVISION(Messages.ReplicationInfoDialog_start_columnname, 85),
+		ENDREVISION(Messages.ReplicationInfoDialog_end_columnname, 85),
+		STATUSURL(Messages.ReplicationInfoDialog_url_columnname, 300);
 		
 		private String name;
 		private int size;
@@ -126,27 +127,27 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		Group g = new Group(main, SWT.FLAT );
-		g.setText("Replication Information");
+		g.setText(Messages.ReplicationInfoDialog_replicationInfoLabel);
 		g.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		g.setLayout(new GridLayout(2, false));
 		
 		Label l = new Label(g, SWT.NONE);
-		l.setText("Replication State:");
+		l.setText(Messages.ReplicationInfoDialog_StateLabel);
 		lblEnabled = new Label(g, SWT.NONE);
 		lblEnabled .setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
 		
 		l = new Label(g, SWT.NONE);
-		l.setText("Server Version:");
+		l.setText(Messages.ReplicationInfoDialog_VersionLabel);
 		lblServerVersion = new Label(g, SWT.NONE);
 		lblServerVersion.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
 		
 		l = new Label(g, SWT.NONE);
-		l.setText("Last Server Revision:");
+		l.setText(Messages.ReplicationInfoDialog_RevisionLabel);
 		lblServerRevision = new Label(g, SWT.NONE);
 		lblServerRevision.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
 		
 		l = new Label(g, SWT.NONE);
-		l.setText("Local Changes:");
+		l.setText(Messages.ReplicationInfoDialog_ChangeLable);
 		lblLocalChanges = new Label(g, SWT.NONE);
 		lblLocalChanges.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false,1,1));
 		
@@ -172,12 +173,12 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 			vcol.getColumn().setWidth(col.getSize());
 		}
 		l = new Label(main ,SWT.NONE);
-		l.setText(MessageFormat.format("Replication history is cleaned to remove records older than {0} days.", DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
+		l.setText(MessageFormat.format(Messages.ReplicationInfoDialog_HistoryLabel, DerbyReplicationManager.REPLICATION_MAXTIME_DAYS));
 		initControls();
 		
-		setTitle("SMART Replication Details");
-		getShell().setText("SMART Replication Details");
-		setMessage("Details on replication history.");
+		setTitle(Messages.ReplicationInfoDialog_Title);
+		getShell().setText(Messages.ReplicationInfoDialog_ShellTitle);
+		setMessage(Messages.ReplicationInfoDialog_Message);
 		
 		return main;
 	}
@@ -187,9 +188,9 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 		Session session = HibernateManager.openSession();
 		try{
 			if (DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
-				lblEnabled.setText("Enabled");
+				lblEnabled.setText(Messages.ReplicationInfoDialog_EnabledState);
 			}else{
-				lblEnabled.setText("Disabled");
+				lblEnabled.setText(Messages.ReplicationInfoDialog_DisabledState);
 			}
 			ConnectServer server = ConnectHibernateManager.getConnectServer(session);
 			
@@ -198,24 +199,24 @@ public class ReplicationInfoDialog extends TitleAreaDialog {
 			}
 			ConnectServerStatus status = (ConnectServerStatus) session.get(ConnectServerStatus.class, SmartDB.getCurrentConservationArea().getUuid());
 			if (status == null){
-				lblLocalChanges.setText("unknown");
-				lblServerVersion.setText("unknown");
-				lblServerRevision.setText("unknown");
+				lblLocalChanges.setText(Messages.ReplicationInfoDialog_UnknownLabel);
+				lblServerVersion.setText(Messages.ReplicationInfoDialog_UnknownLabel);
+				lblServerRevision.setText(Messages.ReplicationInfoDialog_UnknownLabel);
 			}else{
 				lblServerVersion.setText( UuidUtils.uuidToString(status.getVersion()));
 				lblServerRevision.setText( status.getServerRevision().toString() );
 					
 				Boolean hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
 				if (hasChanges == null){
-					lblLocalChanges.setText("Error");
+					lblLocalChanges.setText(Messages.ReplicationInfoDialog_ErrorLabel);
 				}else if (hasChanges){
-					lblLocalChanges.setText("Yes");
+					lblLocalChanges.setText(Messages.ReplicationInfoDialog_Yes);
 				}else{
-					lblLocalChanges.setText("No");
+					lblLocalChanges.setText(Messages.ReplicationInfoDialog_No);
 				}	
 			}
 			
-			List<?> input = session.createCriteria(ConnectSyncHistoryRecord.class).add(Restrictions.eq("conservationArea", server.getConservationArea())).list();
+			List<?> input = session.createCriteria(ConnectSyncHistoryRecord.class).add(Restrictions.eq("conservationArea", server.getConservationArea())).list(); //$NON-NLS-1$
 			syncHistory.setInput(input);
 		
 			

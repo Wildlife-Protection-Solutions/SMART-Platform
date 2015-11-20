@@ -46,6 +46,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectServerStatus.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -147,7 +148,7 @@ public class LoginHandler implements ILoginHandler {
 		
 		
 		if (status.getStatus() == ConnectServerStatus.Status.BACKUP){
-			MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Export To Connect", "SMART was terminated before the export to SMART Conenct to be initiated.  You will need to re-export to SMART Connect if you want to upload your conservation area.");
+			MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.LoginHandler_ExportCaDialogTitle, Messages.LoginHandler_ExportCaDialogMessage);
 			
 			Session s = HibernateManager.openSession();
 			try{
@@ -162,14 +163,14 @@ public class LoginHandler implements ILoginHandler {
 				
 		}else if (status.getStatus() == ConnectServerStatus.Status.UPLOAD){
 			boolean cont = false;
-			if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), "Export To Connect", 
-					"SMART was terminated before the export to SMART Conenct was completed.  Do you want resume the upload process?")){
+			if (MessageDialog.openQuestion(Display.getDefault().getActiveShell(), Messages.LoginHandler_ExportCaDialogTitle, 
+					Messages.LoginHandler_ExportCaDialogMessageResume)){
 				
 				SmartConnect connect = getSmartConnect();
 				if (connect != null){
 					//need to continue upload
 					cont = true;
-					WorkbenchJob wj = new WorkbenchJob("resume upload job") {
+					WorkbenchJob wj = new WorkbenchJob(Messages.LoginHandler_resumejobname) {
 						@Override
 						public IStatus runInUIThread(IProgressMonitor monitor) {
 							(new UploadCaEngine()).continueUpload(connect, status);
@@ -211,7 +212,7 @@ public class LoginHandler implements ILoginHandler {
 		
 		try{
 			List<ConnectServerStatus> toKeep = s.createCriteria(ConnectServerStatus.class)
-					.add(Restrictions.eq("status", ConnectServerStatus.Status.UPLOAD))
+					.add(Restrictions.eq("status", ConnectServerStatus.Status.UPLOAD)) //$NON-NLS-1$
 					.list();
 			for(ConnectServerStatus server : toKeep){
 				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), server.getLocalFile());
@@ -219,8 +220,8 @@ public class LoginHandler implements ILoginHandler {
 			}
 			
 			List<ConnectSyncHistoryRecord> upToKeep = s.createCriteria(ConnectSyncHistoryRecord.class)
-					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.ACTIVE))
-					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD))
+					.add(Restrictions.eq("status", ConnectSyncHistoryRecord.Status.ACTIVE)) //$NON-NLS-1$
+					.add(Restrictions.eq("type", ConnectSyncHistoryRecord.Type.UPLOAD)) //$NON-NLS-1$
 					.list();
 			for (ConnectSyncHistoryRecord syn : upToKeep){
 				Path fileToKeep = Paths.get(SmartContext.INSTANCE.getFilestoreLocation(), syn.getChangeLogZipFile());
@@ -248,12 +249,12 @@ public class LoginHandler implements ILoginHandler {
 						Files.delete(p);
 					}
 				}catch (Exception ex){
-					ConnectPlugIn.log("Unable to delete file while cleaning up connect filestore directory. " + p.toString(), ex);
+					ConnectPlugIn.log(Messages.LoginHandler_FileDeleteError + p.toString(), ex);
 				}
 			}
 			
 		}catch (Exception ex){
-			ConnectPlugIn.log("Unable to delete files while cleaning up connect filestore directory. ", ex);
+			ConnectPlugIn.log(Messages.LoginHandler_FilesDeleteError, ex);
 		}
 		
 	}
@@ -296,7 +297,7 @@ public class LoginHandler implements ILoginHandler {
 				if (record.getStatusUrl() == null){
 					//never got a url from the server
 					//lets warn user; set status to error and return
-					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could be initiated.  You must manually resync changes.");
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.LoginHandler_SyncDialogTitle, Messages.LoginHandler_SyncDialogMessage);
 					
 					s = HibernateManager.openSession();
 					s.beginTransaction();
@@ -310,7 +311,7 @@ public class LoginHandler implements ILoginHandler {
 					return;
 				}else{	
 					//continue job waiting for
-					MessageDialog.openWarning(Display.getDefault().getActiveShell(), "Sync With Connect", "SMART was terminated before upload sync with connect could finish.  The job will resume and you will be notified when complete.");
+					MessageDialog.openWarning(Display.getDefault().getActiveShell(), Messages.LoginHandler_SyncDialogTitle, Messages.LoginHandler_SyncDialogTitleResume);
 					SmartConnect connect = getSmartConnect();
 					if (connect != null){
 						UploadChangeLogEngine e = new UploadChangeLogEngine(ca, connect);
@@ -333,15 +334,15 @@ public class LoginHandler implements ILoginHandler {
 				}
 			}
 		}catch (Exception ex){
-			ConnectPlugIn.log("Error continuing connect sync upload", ex);
+			ConnectPlugIn.log(Messages.LoginHandler_SyncContinueError, ex);
 		}
 	}
 	
 	
 	
 	private SmartConnect getSmartConnect(){
-		final String title = "SMART Connect";
-		final String message = "Confirm SMART Connect credentials";
+		final String title = Messages.LoginHandler_ConnectDialogTitle;
+		final String message = Messages.LoginHandler_ConnectDialogMessage;
 				
 		ConnectDialog cd = new ConnectDialog(Display.getDefault().getActiveShell(), true){
 			@Override

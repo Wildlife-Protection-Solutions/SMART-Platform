@@ -30,12 +30,10 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.model.ConnectServer;
-import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Type;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Tools for managing the sync history table.
@@ -54,8 +52,8 @@ public enum SyncHistoryManager {
 	 * @param ca
 	 */
 	public void deleteAll(Session s, ConservationArea ca){
-		String hsql = "DELETE FROM ConnectSyncHistoryRecord WHERE conservationArea = :ca";
-		s.createQuery(hsql).setParameter("ca", ca).executeUpdate();
+		String hsql = "DELETE FROM ConnectSyncHistoryRecord WHERE conservationArea = :ca"; //$NON-NLS-1$
+		s.createQuery(hsql).setParameter("ca", ca).executeUpdate(); //$NON-NLS-1$
 	}
 	
 	/**
@@ -69,10 +67,10 @@ public enum SyncHistoryManager {
 	 * @param endDate
 	 */
 	public void deleteRecords(Session s, ConservationArea ca, Type type, Date endDate){
-		Query query = s.createQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime");
-		query.setParameter("ca", ca);
-		query.setParameter("type", type);
-		query.setParameter("datetime", endDate);
+		Query query = s.createQuery("DELETE FROM ConnectSyncHistoryRecord WHERE type = :type and conservationArea = :ca and datetime <= :datetime"); //$NON-NLS-1$
+		query.setParameter("ca", ca); //$NON-NLS-1$
+		query.setParameter("type", type); //$NON-NLS-1$
+		query.setParameter("datetime", endDate); //$NON-NLS-1$
 		query.executeUpdate();
 	}
 	
@@ -180,9 +178,9 @@ public enum SyncHistoryManager {
 		Session session = HibernateManager.openSession();
 		try{
 			return session.createCriteria(ConnectSyncHistoryRecord.class)
-				.add(Restrictions.eq("conservationArea", ca))
-				.add(Restrictions.eq("type", type))
-				.add(Restrictions.eq("status", Status.ACTIVE))
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
+				.add(Restrictions.eq("status", Status.ACTIVE)) //$NON-NLS-1$
 				.list();
 		}finally{
 			session.close();
@@ -200,10 +198,10 @@ public enum SyncHistoryManager {
 			ConnectSyncHistoryRecord.Type type){
 		
 		ConnectSyncHistoryRecord record = (ConnectSyncHistoryRecord) session.createCriteria(ConnectSyncHistoryRecord.class)
-				.add(Restrictions.eq("conservationArea", ca))
-				.add(Restrictions.eq("type", type))
-				.add(Restrictions.in("status", new Object[]{Status.ACTIVE, Status.DONE}))
-				.addOrder(Order.desc("endRevision"))
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.eq("type", type)) //$NON-NLS-1$
+				.add(Restrictions.in("status", new Object[]{Status.ACTIVE, Status.DONE})) //$NON-NLS-1$
+				.addOrder(Order.desc("endRevision")) //$NON-NLS-1$
 				.setMaxResults(1).uniqueResult();
 		if (record != null) record.getServer().getConservationArea().getUuid();
 		return record;

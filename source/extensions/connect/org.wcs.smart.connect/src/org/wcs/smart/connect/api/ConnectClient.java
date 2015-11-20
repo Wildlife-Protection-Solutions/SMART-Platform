@@ -47,12 +47,12 @@ import org.wcs.smart.connect.api.model.WorkItemStatus;
  */
 public interface ConnectClient {
 	
-	public static final String USER_PATH = "connectuser";
-	public static final String CA_PATH = "conservationarea";
-	public static final String UPLOAD_PATH = "uploader";
+	public static final String USER_PATH = "connectuser"; //$NON-NLS-1$
+	public static final String CA_PATH = "conservationarea"; //$NON-NLS-1$
+	public static final String UPLOAD_PATH = "uploader"; //$NON-NLS-1$
 	
-	public static final String DATA_PARAM_ALL = "all";
-	public static final String DATA_PARAM_PACKAGE = "changelog";
+	public static final String DATA_PARAM_ALL = "all"; //$NON-NLS-1$
+	public static final String DATA_PARAM_PACKAGE = "changelog"; //$NON-NLS-1$
 		
 	@GET
     @Path("/" + USER_PATH + "/{username}")

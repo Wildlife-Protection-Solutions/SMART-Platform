@@ -42,6 +42,7 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.replication.DerbyMetadataPackager;
@@ -105,7 +106,7 @@ public class ChangeLogPackager {
 	 * @throws Exception
 	 */
 	public void createPackage(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Creating change log package", 3);
+		monitor.beginTask(Messages.ChangeLogPackager_TaskName, 3);
 		try{
 			packageMetadata();
 			monitor.worked(1);
