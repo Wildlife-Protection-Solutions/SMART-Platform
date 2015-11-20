@@ -93,11 +93,12 @@ public class DownloadCaEngine {
 		monitor.subTask("Waiting for Conservation Area Export");
 		Long start = System.nanoTime();
 		WorkItemStatus status = null ;
+		int waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
 		while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
 			Long current = System.nanoTime();
 			
 			if ( (current - start) > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception("Timed out waiting for export to process.");
-			Thread.sleep(connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME));
+			Thread.sleep(waitTime);
 			try{
 				status = connect.getWorkItemStatus(statusUrl);
 			}catch (Exception ex){
