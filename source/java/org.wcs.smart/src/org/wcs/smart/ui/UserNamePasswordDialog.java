@@ -54,16 +54,25 @@ public class UserNamePasswordDialog extends Dialog{
 	private String dialogTitle;
 	private String confirmationMessage;
 	private String okText;
+	private String cancelText;
 	
 	public UserNamePasswordDialog(Shell parentShell, 
 			String dialogTitle, 
 			String confirmationMessage,
-			String okText) {
+			String okText, String cancelText) {
 		super(parentShell);
 	
 		this.dialogTitle = dialogTitle;
 		this.confirmationMessage = confirmationMessage;
 		this.okText = okText;
+		this.cancelText = cancelText;
+	}
+	
+	public UserNamePasswordDialog(Shell parentShell, 
+			String dialogTitle, 
+			String confirmationMessage,
+			String okText) {
+		this(parentShell, dialogTitle, confirmationMessage, okText, IDialogConstants.CANCEL_LABEL);
 	}
 
 	@Override
@@ -131,7 +140,7 @@ public class UserNamePasswordDialog extends Dialog{
 		createButton(parent, IDialogConstants.OK_ID, okText,
 				true);
 		createButton(parent, IDialogConstants.CANCEL_ID,
-				IDialogConstants.CANCEL_LABEL, false);
+				cancelText, false);
 	}
 	
 	/** 
