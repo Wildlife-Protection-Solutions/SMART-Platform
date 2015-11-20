@@ -504,7 +504,6 @@ public class SmartConnect {
 			}
 			tryCount ++;
 			Thread.sleep(waitTime);
-			waitTime = waitTime*2;
 		}
 		
 		//try a maximum of 10 times

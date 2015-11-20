@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2012 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.ui.startup;
 
 import java.lang.reflect.InvocationTargetException;
@@ -29,10 +50,12 @@ import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.ui.UserNamePasswordDialog;
 
+/**
+ * Wizard for syncing multiple conservation areas at once
+ */
 public class SyncMultipleCaWizard extends Wizard {
 
 	protected LocalCaListPage page1 = null; 
-	protected UsernamePasswordWizardPage page2 = null;
 	
 	private List<String> errors;
 	
@@ -208,7 +231,7 @@ public class SyncMultipleCaWizard extends Wizard {
 								MessageFormat.format("Invalid SMART Connect username/password for Conservation Area {0}.  Re-enter username/password or skip", ca.getNameLabel()),
 								IDialogConstants.OK_LABEL,
 								IDialogConstants.SKIP_LABEL);
-						if (userPassDialog.OK == Window.OK){
+						if (userPassDialog.open() == Window.OK){
 							values[0] = userPassDialog.getUserName();
 							values[1] = userPassDialog.getPassword();
 						}		
@@ -228,20 +251,22 @@ public class SyncMultipleCaWizard extends Wizard {
 			}
 			if (cu == null) continue;
 				
-			details.add( new CaUserDetails(ca, server, e, cu, connectPassword) );
+			details.add( new CaUserDetails(ca, server, cu, connectPassword) );
 		}
 		return details;
 	}
+	
+	/*
+	 * map ca to connect user details
+	 */
 	private class CaUserDetails{
 		private ConservationArea ca;
-		private Employee desktopUser;
 		private ConnectUser connectUser;
 		private ConnectServer server;
 		private String connectPassword;
 		
-		public CaUserDetails(ConservationArea ca, ConnectServer server, Employee desktop, ConnectUser cu, String connectPassword){
+		public CaUserDetails(ConservationArea ca, ConnectServer server, ConnectUser cu, String connectPassword){
 			this.ca = ca;
-			this.desktopUser = desktop;
 			this.server = server;
 			this.connectUser = cu;
 			this.connectPassword = connectPassword;
