@@ -31,15 +31,21 @@ import java.util.List;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
@@ -88,7 +94,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		l = new Label(outer, SWT.NONE);
 		l.setText("Conservation Areas:");
 	
-		cmbList = CheckboxTableViewer.newCheckList(outer, SWT.BORDER);
+		cmbList = CheckboxTableViewer.newCheckList(outer, SWT.BORDER | SWT.MULTI);
 		cmbList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)cmbList.getControl().getLayoutData()).heightHint = 200;
 		((GridData)cmbList.getControl().getLayoutData()).widthHint = 100;
@@ -103,7 +109,48 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		});
 		cmbList.setInput(new String[]{"Loading..."});
 		cmbList.addSelectionChangedListener(this);
+		cmbList.getTable().addKeyListener(new KeyAdapter() {
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				if (cmbList.getSelection().isEmpty()){
+					return;
+				}
+				if (e.keyCode == SWT.SPACE){
+					IStructuredSelection selection = ((IStructuredSelection)cmbList.getSelection());
+					boolean value = cmbList.getChecked(selection.getFirstElement() );
+					for (Iterator<?> iterator = selection.iterator(); iterator.hasNext();) {
+						Object tp = (Object) iterator.next();
+						cmbList.setChecked(tp, !value);
+					}
+					e.doit = false;			
+				}
+			}
+		});
+
+		Composite links = new Composite(outer, SWT.NONE);
+		GridLayout gl = new GridLayout(2, false);
+		gl.marginWidth = 0;
+		gl.marginHeight = 0;
+		links.setLayout(gl);
 		
+		Link selectAll = new Link(links, SWT.NONE);
+		selectAll.setText("<a>" + "Select All" + "</a>");
+		selectAll.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				cmbList.setAllChecked(true);
+			}
+		});
+		 
+		Link selectNone = new Link(links, SWT.NONE);
+		selectNone.setText("<a>" + "De-Select All" + "</a>");
+		selectNone.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				cmbList.setAllChecked(false);
+			}
+		});
 		initList();
 		
 		setTitle("Conservation Area");

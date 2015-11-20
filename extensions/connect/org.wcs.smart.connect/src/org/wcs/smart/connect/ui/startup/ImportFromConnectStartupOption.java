@@ -8,7 +8,7 @@ public class ImportFromConnectStartupOption implements IAdvancedStartupOption {
 	public static final int ORDER = 40;
 	@Override
 	public String getLabel() {
-		return "Download a Conservation Area from a SMART Connect Instance";
+		return "Download a Conservation Area from SMART Connect";
 	}
 
 	@Override

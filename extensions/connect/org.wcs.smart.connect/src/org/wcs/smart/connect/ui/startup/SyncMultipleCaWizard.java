@@ -73,7 +73,7 @@ public class SyncMultipleCaWizard extends Wizard {
 		final List<ConservationArea> allCas = page1.getSelection();
 		final String username = page1.getUsername();
 		final String password = page1.getPassword();
-		
+		final int[] okCnt = new int[]{0};
 		errors = new ArrayList<String>();
 		
 		if (allCas.isEmpty()) return true;
@@ -92,10 +92,17 @@ public class SyncMultipleCaWizard extends Wizard {
 						
 						HibernateManager.endSessionFactory(true);
 						HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
+						
 						try{
 							for (CaUserDetails cainfo : details){
+								if (monitor.isCanceled()){
+									errors.add("SYNC CANCELLED");
+									break;
+								}
 								monitor.subTask(cainfo.ca.getNameLabel());
-								syncCa(cainfo, monitor);
+								if (syncCa(cainfo, monitor)){
+									okCnt[0] ++;
+								}
 							}
 						}finally{
 							HibernateManager.endSessionFactory(true);
@@ -112,17 +119,25 @@ public class SyncMultipleCaWizard extends Wizard {
 			ConnectPlugIn.log(e.getMessage(), e);
 			return false;
 		} 
+		errors.add(0, MessageFormat.format("{0} of {1} Conservation Areas synced successfully.", okCnt[0], allCas.size()));
 		if (errors.size() > 0){
 			WarningDialog wd = new WarningDialog(activeShell, "Sync Warnings", "The following errors were generated while replicating Conservation Area data", errors);
 			wd.open();
 		}else{
 			MessageDialog.openInformation(activeShell, "Complete", "Sync Complete. {0} Conservation areas sync'd.");
 		}
-		return false;
+		return true;
 		
 	}
 	
-	private void syncCa(CaUserDetails details, IProgressMonitor monitor) {
+	/**
+	 * Returns true if completed okay, false if error.  Adds to error log.
+	 *  
+	 * @param details
+	 * @param monitor
+	 * @return
+	 */
+	private boolean syncCa(CaUserDetails details, IProgressMonitor monitor) {
 		try {
 			SmartConnect connect = SmartConnect.findInstance(details.server, 
 					details.connectUser.getConnectUsername(),
@@ -138,14 +153,17 @@ public class SyncMultipleCaWizard extends Wizard {
 			
 			String status = runnable.getStatus();
 			if (status != null){
-				errors.add(MessageFormat.format("{0} - ERROR - {1}.", details.ca.getNameLabel(), status));	
+				errors.add(MessageFormat.format("{0} - ERROR - {1}.", details.ca.getNameLabel(), status));
+				return false;
 			}else{
 				errors.add(MessageFormat.format("{0} - COMPLETE.", details.ca.getNameLabel()));
+				return true;
 			}
 			
 		} catch (Exception e) {
 			ConnectPlugIn.log(e.getMessage(), e);
 			errors.add(MessageFormat.format("{0} - ERROR - {1}.", details.ca.getNameLabel(), e.getMessage()));
+			return false;
 		}
 	}
 	

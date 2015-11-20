@@ -135,8 +135,9 @@ public class DownloadCaEngine {
 	
 	/**
 	 * To be executed before downloading and importing
-	 * Conservation Area engine. This ensure the Conservation Area
-	 * does not already exist.
+	 * Conservation Area engine. This ensures the Conservation Area
+	 * does not already exist on the desktop and gives the user
+	 * the options of deleting if it does exist
 	 * 
 	 * @param activeShell
 	 * @return true if download install process should continue, false if we should stop
@@ -198,6 +199,8 @@ public class DownloadCaEngine {
 			if (smartUser == null){
 				return false;
 			}
+
+			//we don't revert back here; that will be done after download complete
 			HibernateManager.endSessionFactory(true);
 			HibernateManager.setUserName(SmartDB.DbUser.ADMIN.getUserName(), SmartDB.DbUser.ADMIN.getPassword());
 			
