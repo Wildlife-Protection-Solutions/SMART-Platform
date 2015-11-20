@@ -103,6 +103,7 @@ public class SmartConnect {
 	private String password;
 	private ConnectServer server;
 	private ResteasyClient client;
+	private Certificate currentCertificate;
 
 	/**
 	 * Lock to ensure only one upload or download change log 
@@ -131,10 +132,16 @@ public class SmartConnect {
 			if (lastConnect.server.equals(server) 
 					&& lastConnect.username.equals(username) 
 					&& lastConnect.password.equals(password)){
-				if (strEquals(lastConnect.server.getCertificateFileName(), server.getCertificateFileName())){
-					lastConnect.server = server;
-					return lastConnect;
-				}
+				//compare certifications; cannot simply compare the filename
+				//as the same filename is used for all certificates
+				try(InputStream is = new BufferedInputStream(Files.newInputStream(server.getLocalCertificateFile()))){
+					Certificate temp = CertificateFactory.getInstance("X.509").generateCertificate(is);
+					if (temp.equals(lastConnect.currentCertificate)){
+						return lastConnect;
+					}
+				}catch (Exception ex){
+					ConnectPlugIn.log(ex.getMessage(), ex);
+				}	
 			}
 		}
 		if (lastConnect != null){
@@ -218,12 +225,12 @@ public class SmartConnect {
 		keyStore.load(null, null);
 		Path certpath = server.getLocalCertificateFile();
 		try(InputStream is = new BufferedInputStream(Files.newInputStream(certpath))){
-			Certificate cr = CertificateFactory.getInstance("X.509").generateCertificate(is);
+			currentCertificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
 			String key = "smart-";
 			if (server.getConservationArea() != null){
 				key += server.getConservationArea().getUuid().toString();
 			}
-			keyStore.setCertificateEntry(key, cr);
+			keyStore.setCertificateEntry(key, currentCertificate);
 		}
 		TrustManagerFactory factory = TrustManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		factory.init(keyStore);
