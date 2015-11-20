@@ -168,10 +168,11 @@ public class SmartHibernateManager {
 	 * Locks the database by waiting for active sessions
 	 * to complete or closing them automatically and preventing
 	 * any other sessions from being granted.  MUST call unlock 
-	 * database when complete.
+	 * database when complete.  Once locked it closes the session
+	 * factory and opens a new session using the given username and password.
 	 * @return
 	 */
-	public static Session lockDatabase() throws Exception{
+	public static Session lockDatabase(String username, String password) throws Exception{
 		//acquire lock
 		thisLock.acquire();
 		
@@ -201,19 +202,30 @@ public class SmartHibernateManager {
 			}
 		}
 		
+		
 		//ensure all sessions are closed
 		SmartHibernateManager.endSessionFactory();
+		if (username != null){
+			setUserName(username, password);
+		}
 		
 		//open new session
 		return openSessionOnly(null);
 	}
 	
 	/**
-	 * Unlocks the database allowing other 
-	 * sessions to be granted.
+	 * Unlocks the database, reconnecting using the provided username
+	 * and password.  Must be called after lockDatabase.
+	 * 
+	 * @param username the username to connect to the database after unlocking
+	 * @param password the password to connect after unlocking 
 	 */
-	public static void unlockDatabase(){
+	public static void unlockDatabase(String username, String password){
 		thisLock.release();
+		if (username != null){
+			SmartHibernateManager.endSessionFactory();
+			setUserName(username, password);
+		}
 	}
 	
 	/**
