@@ -37,7 +37,9 @@ import java.nio.file.WatchService;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
@@ -61,16 +63,29 @@ public class FileStoreWatcher implements Runnable{
 
     private final WatchService watcher;
     private final Map<WatchKey,Path> keys;
+    private final Set<Path> ignorePaths;
 	
     public FileStoreWatcher() throws IOException{
     	keys = Collections.synchronizedMap(new HashMap<WatchKey, Path>());
     	watcher = FileSystems.getDefault().newWatchService();
+    	ignorePaths = new HashSet<Path>();
     }
 	
+    /**
+     * Adds a path to ignore. Can be a specific file to ignore
+     * or a directory. Needs to be called before register() as it
+     * will not deregister directories, if added after.
+     * 
+     */
+    public void addIgnorePath(Path ignorePath){
+    	ignorePaths.add(ignorePath);
+    }
+    
     /**
      * Register the given directory with the WatchService
      */
     private void registerDirectory(Path dir) throws IOException {
+    	if (ignorePaths.contains(dir)) return;
         WatchKey key = dir.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
         keys.put(key, dir);
     }
@@ -104,6 +119,7 @@ public class FileStoreWatcher implements Runnable{
 
     
     private void processEvent(Path p, Kind<?> kind){
+    	if (ignorePaths.contains(p)) return;
     	
     	Path relativePath = FileSystems.getDefault()
     			.getPath(SmartContext.INSTANCE.getFilestoreLocation())

@@ -34,6 +34,7 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
@@ -96,6 +97,8 @@ public enum DerbyReplicationManager {
 
 		//file watch for changes to file store
 		watcher = new FileStoreWatcher();
+		//ignore certificate files
+		watcher.addIgnorePath(ConnectServer.getDefaultCertificateFileName(SmartDB.getCurrentConservationArea()));
 		watcher.register( FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation()) );
 		//run filestore watcher in new thread (background)		
 		fileStoreReplication = new Thread(watcher);

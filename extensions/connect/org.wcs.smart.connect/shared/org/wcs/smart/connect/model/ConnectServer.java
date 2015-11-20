@@ -49,6 +49,16 @@ import org.wcs.smart.ca.UuidItem;
 @Table(name="smart.connect_server")
 public class ConnectServer extends UuidItem{
 
+	/**
+	 * The certificate file path for any connect server if it is defined.
+	 * @param ca the conservation area
+	 * @return certificate file path
+	 */
+	public static final Path getDefaultCertificateFileName(ConservationArea ca){
+		return Paths.get(ca.getFileDataStoreLocation(),
+				ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR, SSH_CERTIFICATE_FILENAME);
+	}
+	
 	private static final String SSH_CERTIFICATE_FILENAME = "certificate.crt"; //$NON-NLS-1$
 	
 	private ConservationArea ca;
@@ -118,9 +128,7 @@ public class ConnectServer extends UuidItem{
 			return;
 		}
 		
-		Path copyToFile = Paths.get(getConservationArea().getFileDataStoreLocation(),
-				ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR, SSH_CERTIFICATE_FILENAME);
-		
+		Path copyToFile =getDefaultCertificateFileName(getConservationArea());		
 		Path copyFrom = newFile;
 
 		Files.createDirectories(copyToFile.getParent());
