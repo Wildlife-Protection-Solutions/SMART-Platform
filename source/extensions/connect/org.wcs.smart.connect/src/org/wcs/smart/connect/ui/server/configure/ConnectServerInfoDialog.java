@@ -196,6 +196,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 	private void initControls(){
 
 		Session session = HibernateManager.openSession();
+		session.beginTransaction();
 		try{
 			ConnectServer server = ConnectHibernateManager.getConnectServer(session);
 			
@@ -228,6 +229,7 @@ public class ConnectServerInfoDialog extends TitleAreaDialog {
 				autoPnl.initValues(server);
 			}
 		}finally{
+			session.getTransaction().rollback();
 			session.close();
 		}
 	}

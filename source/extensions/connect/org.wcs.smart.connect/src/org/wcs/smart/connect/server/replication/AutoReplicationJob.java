@@ -46,8 +46,7 @@ import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Job to manage auto replication of data to/from the smart
- * connect server.  Only one instance of this job should
- * be created/run.
+ * connect server. 
  * 
  * @author Emily
  *
@@ -58,16 +57,37 @@ public class AutoReplicationJob extends Job {
 	private Long millisecondsToRepeat = -1l;
 	private boolean reschedule = true;
 	
+	private boolean statusOnly;
+	
+	/**
+	 * Creates a new auto replication job that will run at
+	 * the configured reschedule period.
+	 * 
+	 * Only one instance of this type of job should be created.
+	 */
 	public AutoReplicationJob() {
-		super("backgound replication executor");
+		this(false);
 	}
 
+	/**
+	 * Creates a new auto replication job that runs once and 
+	 * only updates the local status.
+	 * This is not rescheduled nor does it update any data
+	 * 
+	 * These can be created and run on demand.
+	 */
+	public AutoReplicationJob(boolean statusOnly) {
+		super("backgound replication executor");
+		this.statusOnly = statusOnly;
+	}
+
+	
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
 		try{
 			return runInternal(monitor);
 		}finally{
-			if (reschedule){
+			if (!statusOnly && reschedule){
 				reschedule();
 			}
 		}
@@ -100,13 +120,13 @@ public class AutoReplicationJob extends Job {
 			return Status.OK_STATUS;
 		}
 		
-		if (!server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY)){
+		if (!statusOnly && !server.getOptionAsBoolean(ConnectServerOption.Option.SYNC_AUTOMATICALLY)){
 			reschedule = false;
 			setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "Auto updates not configured.");
 			return Status.OK_STATUS;
 		}
 		
-		if (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null){
+		if (!statusOnly && (user == null || user.getConnectPassword() == null || user.getConnectUsername() == null)){
 			if (!server.getOptionAsBoolean(Option.SYNC_PROMPT_PASSWORD)){
 				setServerStatus(ConnectStatusManager.ServerStatus.ERROR, "Could not connect, user credentials not provided and configuration not set to prompt.");
 				return Status.OK_STATUS;
@@ -164,6 +184,7 @@ public class AutoReplicationJob extends Job {
 			needsToDownload = true;
 		}
 		
+		if (statusOnly) return Status.OK_STATUS;
 		
 		//if auto download then lets start that process if not already started
 		if (!server.getOptionAsBoolean(Option.SYNC_DOWNLOAD)){

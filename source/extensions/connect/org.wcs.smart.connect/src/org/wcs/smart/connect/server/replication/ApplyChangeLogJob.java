@@ -101,6 +101,8 @@ public class ApplyChangeLogJob extends Job {
 
 	@Override
 	protected IStatus run(IProgressMonitor monitor) {
+		boolean isLoggedIn = SmartDB.getCurrentEmployee() != null;
+		
 		monitor.beginTask("Applying change to local database.", 3);
 		try{
 			monitor.subTask("validating change package");
@@ -122,18 +124,21 @@ public class ApplyChangeLogJob extends Job {
 					@Override
 					public void run() {
 						closed[0] = true;
-						for (Shell s : Display.getDefault().getShells()){
-							if ((s.getStyle() & SWT.APPLICATION_MODAL) == SWT.APPLICATION_MODAL ||
-								(s.getStyle() & SWT.SYSTEM_MODAL) == SWT.SYSTEM_MODAL ||
-								(s.getStyle() & SWT.PRIMARY_MODAL) == SWT.PRIMARY_MODAL){
-								closed[0] = false;
+						if (isLoggedIn){
+							//otherwise we are running from login screen and we don't care about dialogs
+							for (Shell s : Display.getDefault().getShells()){
+								if ((s.getStyle() & SWT.APPLICATION_MODAL) == SWT.APPLICATION_MODAL ||
+										(s.getStyle() & SWT.SYSTEM_MODAL) == SWT.SYSTEM_MODAL ||
+										(s.getStyle() & SWT.PRIMARY_MODAL) == SWT.PRIMARY_MODAL){
+									closed[0] = false;
+								}
 							}
 						}
 
 						eventBroker = (IEventBroker) PlatformUI.getWorkbench().getService(IEventBroker.class);
 						
 						if (closed[0]){
-							promptToApplyAndApply();
+							promptToApplyAndApply(isLoggedIn);
 						}
 					}
 				});
@@ -174,29 +179,32 @@ public class ApplyChangeLogJob extends Job {
 	}
 	
 	//must be called from the UI thread
-	private boolean promptToApplyAndApply(){
-		//prompt to apply changes
-		if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
-				"SMART Connect - Apply Changes", 
-				"Changes have been downloaded and are ready to apply. Do you want to apply the changes now?")){
-			record.setStatus(Status.ERROR);
-			record.setErrorString("User cancelled.");
-			return false;
-		}
-		
-		final EPartService pService = (EPartService) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(EPartService.class);
-		
-		//if yes then saved all closed editors
-		pService.saveAll(true);
-		
-		if (pService.getDirtyParts().size() > 0){
-			record.setStatus(Status.ERROR);
-			record.setErrorString("All dirty parts must be saved before you can download from the server.");
-			return false;
+	private boolean promptToApplyAndApply(final boolean isLoggedIn){
+		EPartService pService = null;
+		if (isLoggedIn){
+			//prompt to apply changes
+			if (!MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
+					"SMART Connect - Apply Changes", 
+					"Changes have been downloaded and are ready to apply. Do you want to apply the changes now?")){
+				record.setStatus(Status.ERROR);
+				record.setErrorString("User cancelled.");
+				return false;
+			}
+			
+			pService = (EPartService) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(EPartService.class);
+			
+			//if yes then saved all closed editors
+			pService.saveAll(true);
+			
+			if (pService.getDirtyParts().size() > 0){
+				record.setStatus(Status.ERROR);
+				record.setErrorString("All dirty parts must be saved before you can download from the server.");
+				return false;
+			}
 		}
 		
 		ProgressMonitorDialog pmd = new ProgressMonitorDialog(Display.getDefault().getActiveShell());
-		
+		final EPartService fpServer = pService;
 		try{
 			pmd.run(true, false, new IRunnableWithProgress() {
 				
@@ -211,15 +219,17 @@ public class ApplyChangeLogJob extends Job {
 						record.setStatus(Status.DONE);
 						monitor.worked(1);
 						
-						monitor.subTask("validating user");
-						if (!checkUser()){
-							return;
+						if (isLoggedIn){
+							monitor.subTask("validating user");
+							if (!checkUser()){
+								return;
+							}
+							monitor.worked(1);
+							
+							monitor.subTask("refreshing ui");
+							refreshUi(fpServer);
+							monitor.worked(1);
 						}
-						monitor.worked(1);
-						
-						monitor.subTask("refreshing ui");
-						refreshUi(pService);
-						monitor.worked(1);
 						
 						monitor.done();
 					}catch (Exception ex){
@@ -301,13 +311,19 @@ public class ApplyChangeLogJob extends Job {
 		
 		Path filestoreDir = tempDirectory.resolve(ConnectSyncHistoryRecord.PACKAGE_FILESTORE_DIR);
 			
+		boolean replicationEnabled = DerbyReplicationManager.INSTANCE.getLocalReplicationState();
 		//lock database
 		Session session = HibernateManager.lockDatabase();
 		try{
 			session.beginTransaction();
 			
-			// disable replication in db so we don't log items twice
-			DerbyReplicationManager.INSTANCE.disableReplication(session);
+			//if not logged into a ca the replication won't be enabled
+			//and we do not want to re-enable it when complete
+			replicationEnabled = DerbyReplicationManager.INSTANCE.isReplicationEnabled(session);
+			if (replicationEnabled){
+				// disable replication in db so we don't log items twice
+				DerbyReplicationManager.INSTANCE.disableReplication(session);
+			}
 			
 			//check plugin versions
 			HashMap<String, String> localPlugins = DerbyMetadataPackager.INSTANCE.getLocalPluginVersions(session);
@@ -338,22 +354,25 @@ public class ApplyChangeLogJob extends Job {
 			HibernateManager.unlockDatabase();
 			session.close();
 			
-			session = HibernateManager.openSession();
-			try{
-				session.beginTransaction();
-				DerbyReplicationManager.INSTANCE.enableReplication(session);
-				session.getTransaction().commit();
-			}catch(Exception ex){
-				//replication could not be re-enabled.  This needs to kill the
-				//application and restart
-				ConnectPlugIn.displayLog("Replication could not be enabled after applying changes.  This application will restart.", ex);
-				Display.getDefault().syncExec(new Runnable(){
-					@Override
-					public void run() {
-						PlatformUI.getWorkbench().restart();
-					}});
-			}finally{
-				session.close();
+			if (replicationEnabled){
+				//re-enable replication if it was previously enabled
+				session = HibernateManager.openSession();
+				try{
+					session.beginTransaction();
+					DerbyReplicationManager.INSTANCE.enableReplication(session);
+					session.getTransaction().commit();
+				}catch(Exception ex){
+					//replication could not be re-enabled.  This needs to kill the
+					//application and restart
+					ConnectPlugIn.displayLog("Replication could not be enabled after applying changes.  This application will restart.", ex);
+					Display.getDefault().syncExec(new Runnable(){
+						@Override
+						public void run() {
+							PlatformUI.getWorkbench().restart();
+						}});
+				}finally{
+					session.close();
+				}
 			}
 		}	
 	}

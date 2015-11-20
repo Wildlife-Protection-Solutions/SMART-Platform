@@ -30,11 +30,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.ui.menus.WorkbenchWindowControlContribution;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
@@ -42,6 +46,7 @@ import org.wcs.smart.connect.ConnectStatusManager;
 import org.wcs.smart.connect.ConnectStatusManager.ServerStatus;
 import org.wcs.smart.connect.IConnectStatusListener;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
+import org.wcs.smart.connect.server.replication.AutoReplicationJob;
 import org.wcs.smart.hibernate.HibernateManager;
 
 /**
@@ -55,7 +60,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 
 	private Label localStatus;
 	private Label serverStatus;
-	
+	private AutoReplicationJob updateServerNowJob = new AutoReplicationJob(true);
 	private IConnectStatusListener serverListener = new IConnectStatusListener() {
 		
 		@Override
@@ -81,12 +86,30 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 	protected Control createControl(Composite parent) {
 		Composite status = new Composite(parent, SWT.NONE);
 		status.setLayout(new GridLayout(2, true));
-
+		
 		serverStatus = new Label(status, SWT.NONE);
 		serverStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.SERVER_ERROR_ICON));
 		
 		localStatus = new Label(status, SWT.NONE);
 		localStatus.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.LOCAL_ERROR_ICON));
+
+		//refresh now menu
+		Menu refreshMenu = new Menu(parent.getShell(), SWT.POP_UP);
+		MenuItem refreshNow = new MenuItem(refreshMenu, SWT.PUSH);
+		refreshNow.setText("Refresh Status Now");
+		refreshNow.setImage(ConnectPlugIn.getDefault().getImageRegistry().get(ConnectPlugIn.REFRESH_ICON));
+		refreshNow.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateLocalChanges.cancel();
+				updateServerNowJob.cancel();
+				updateLocalChanges.schedule();
+				updateServerNowJob.schedule();
+			}
+		});
+		status.setMenu(refreshMenu);
+		serverStatus.setMenu(refreshMenu);
+		localStatus.setMenu(refreshMenu);
 		
 		updateServerStatus(ServerStatus.ERROR, "Unknown State");
 		updateLocalStatus(ServerStatus.ERROR, "Unknown State");

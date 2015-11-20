@@ -30,9 +30,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
+import org.wcs.smart.hibernate.SmartDB;
 
 /**
  * Download change log handler for manually downloading 
@@ -47,33 +49,33 @@ public class SyncChangeLogHandler {
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 		SyncChangeLogDialog dialog = new SyncChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
-			syncChangeLog(activeShell, dialog.getConnection());
+			syncChangeLog(activeShell, dialog.getConnection(), SmartDB.getCurrentConservationArea());
 		}
 	}
 
 	/*
 	 * download change log and apply
 	 */
-	private void syncChangeLog(final Shell activeShell, final SmartConnect connect) {
+	public void syncChangeLog(final Shell activeShell, final SmartConnect connect, ConservationArea ca) {
 		DownloadChangeLogHandler downhandler = new DownloadChangeLogHandler(){
 			protected void displayStatus(final ConnectSyncHistoryRecord record) {
 				if (record.getStatus() == Status.DONE ||
 						record.getStatus() == Status.NODATA){
 					//upload
-					uploadChangeLog(activeShell, connect);
+					uploadChangeLog(activeShell, connect, ca);
 				}else{
 					super.displayStatus(record);
 				}
 			}
 		};
-		downhandler.downloadChangeLog(activeShell, connect);
+		downhandler.downloadChangeLog(activeShell, connect, ca);
 	
 	}
 	
 	/*
 	 * upload change log and apply
 	 */
-	private void uploadChangeLog(final Shell activeShell, final SmartConnect connect) {
+	private void uploadChangeLog(final Shell activeShell, final SmartConnect connect, final ConservationArea ca) {
 		
 		activeShell.getDisplay().syncExec(new Runnable(){
 			@Override
@@ -95,7 +97,7 @@ public class SyncChangeLogHandler {
 						}
 					}
 				};
-				uphandler.uploadChangeLog(activeShell, connect);		
+				uphandler.uploadChangeLog(activeShell, connect, ca);		
 			}
 			
 		});

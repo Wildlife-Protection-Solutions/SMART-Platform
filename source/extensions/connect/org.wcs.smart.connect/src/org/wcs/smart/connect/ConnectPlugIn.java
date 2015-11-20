@@ -60,6 +60,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	public static final String SERVER_ERROR_ICON = "org.wcs.smart.connect.server.icon";
 	public static final String SERVER_PROCESSING_ICON = "org.wcs.smart.connect.server.processing";
 	public static final String SERVER_OK_ICON = "org.wcs.smart.connect.server.ok";
+	public static final String REFRESH_ICON = "org.wcs.smart.connect.refresh";
 	
 	/**
 	 * The constructor
@@ -145,6 +146,16 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 		String key = SmartDB.getPlainTextPassword();
 		return PasswordAesManager.getInstance().decryptPassword(user.getConnectPassword(), key);
 	}
+	
+	public static String decryptPassword(ConnectUser user, String passwordKey) throws Exception{
+		if (user.getConnectPassword() == null){
+			return null;
+		}
+		if (user.getConnectPassword().isEmpty()){
+			return user.getConnectPassword();
+		}
+		return PasswordAesManager.getInstance().decryptPassword(user.getConnectPassword(), passwordKey);
+	}
 
 	/**
 	 * Encrypt a password.
@@ -169,5 +180,6 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 		reg.put(SERVER_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_error.png"));
 		reg.put(SERVER_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_ok.png"));
 		reg.put(SERVER_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_processing.png"));
+		reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png"));
     }
 }

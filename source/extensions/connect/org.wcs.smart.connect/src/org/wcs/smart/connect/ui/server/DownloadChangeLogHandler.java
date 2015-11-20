@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -50,25 +51,26 @@ public class DownloadChangeLogHandler {
 	public void execute(@Named(IServiceConstants.ACTIVE_SHELL) Shell activeShell) {
 		DownloadChangeLogDialog dialog = new DownloadChangeLogDialog(activeShell);
 		if (dialog.open() == Window.OK){
-			downloadChangeLog(activeShell, dialog.getConnection());
+			downloadChangeLog(activeShell, dialog.getConnection(), SmartDB.getCurrentConservationArea());
 		}
 	}
 
 	/**
-	 * download change log and apply
+	 * Prompts the user with a message informing user download will happen in background then
+	 * starts the download process.
 	 * @param activeShell
 	 * @param pService
 	 * @param connect
 	 * @param events
 	 */
-	public void downloadChangeLog(final Shell activeShell, final SmartConnect connect) {
+	public void downloadChangeLog(final Shell activeShell, final SmartConnect connect, ConservationArea ca) {
 		MessageDialog
 				.openInformation(
 						activeShell,
 						"Download",
 						"SMART will download changes in the background.  Once download, if there are changes to apply, you will be prompted before changes are applied.");
 		
-		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(SmartDB.getCurrentConservationArea(), connect) {
+		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(ca, connect) {
 			protected void processComplete() {
 				super.processComplete();
 				displayStatus(record);

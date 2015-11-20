@@ -85,7 +85,7 @@ public class DownloadChangeLogEngine {
 			
 			Session session = HibernateManager.openSession();
 			try{
-				if (!DerbyReplicationManager.INSTANCE.isReplicationEnabled(session)){
+				if (!DerbyReplicationManager.INSTANCE.canReplicate(session, ca)){
 					throw new Exception("Replication not enabled.  Cannot download changes from server.");
 				}
 			}finally{

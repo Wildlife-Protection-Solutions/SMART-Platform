@@ -32,7 +32,9 @@ import org.hibernate.Session;
 import org.hibernate.jdbc.ReturningWork;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.SmartContext;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
 import org.wcs.smart.connect.server.replication.SyncHistoryManager;
@@ -136,6 +138,26 @@ public enum DerbyReplicationManager {
 			public void execute(Connection connection) throws SQLException {
 				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "null") + ")");
 			}});
+	}
+	/**
+	 * Determines if replication can be enabled for a given
+	 * conservation area.  This gets the conservation area status and ensures it
+	 * is either done or processing.  If no status or backup or error status returns false.
+	 * @return
+	 */
+	public boolean canReplicate(Session session, ConservationArea ca){
+		
+		ConnectServerStatus status = (ConnectServerStatus)session
+				.get(ConnectServerStatus.class, ca.getUuid());
+		if (status == null){
+			return false;
+		}
+		if (status.getStatus() == ConnectServerStatus.Status.UPLOAD ||
+			status.getStatus() == ConnectServerStatus.Status.DONE ){
+			return true;
+		}
+		//ERROR or BACKUP
+		return false;
 	}
 	
 	/**
