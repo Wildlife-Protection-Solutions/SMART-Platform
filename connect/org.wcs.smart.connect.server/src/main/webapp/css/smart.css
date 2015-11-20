@@ -246,6 +246,16 @@ h2{
 	display: block;
 }
 
+
+.run-icon{
+	background-image: url("run.png");
+	width:16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	display: block;
+}
+
+
 .download-icon{
 	background-image: url("download.png");
 	width:16px;
@@ -253,6 +263,7 @@ h2{
 	background-repeat: no-repeat;
 	display: block;
 }
+
 
 .update-icon{
 	background-image: url("edit.png");
