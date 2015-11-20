@@ -136,7 +136,8 @@ public class Messages extends NLS {
 	public static String PatrolQueryOptions_TotalPersonHours;
 	public static String PatrolQueryOptions_ValueOpDistance;
 	public static String PatrolQueryOptions_ValueOpNumberDays;
-	public static String PatrolQueryOptions_ValueOpNumberHours;
+	public static String PatrolQueryOptions_ValueOpNumberActivePatrolHours;
+	public static String PatrolQueryOptions_ValueOpNumberPatrolHours;
 	public static String PatrolQueryOptions_ValueOpNumberNights;
 	public static String PatrolQueryOptions_ValueOpNumEmployees;
 	public static String PatrolQueryOptions_ValueOpNumPatrols;

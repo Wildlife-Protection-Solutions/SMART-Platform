@@ -576,7 +576,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 			fromSql.append( tablePrefix(PatrolLegMember.class));
 			fromSql.append(".patrol_leg_uuid " ); //$NON-NLS-1$ 
 		}
-		if (option == PatrolValueOption.NUM_HOURS ||
+		if (option == PatrolValueOption.NUM_FIELDHOURS ||
+			  option == PatrolValueOption.NUM_PATROLHOURS ||
 			  option == PatrolValueOption.NUM_HOURS_TOTAL ||
 			  option == PatrolValueOption.MAN_HOURS ||
 			  option == PatrolValueOption.MAN_HOURS_TOTAL  ||
@@ -1370,7 +1371,13 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 		case DISTANCE:
 		case DISTANCE_TOTAL:
 			return "sum(distance)"; //$NON-NLS-1$
-		case NUM_HOURS:
+		case NUM_PATROLHOURS:
+			if (!hasAreaGroupBy) {
+				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )))"; //$NON-NLS-1$
+			}else{
+				return "sum(hours)"; //$NON-NLS-1$
+			}
+		case NUM_FIELDHOURS:
 		case NUM_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return "sum(({fn timestampdiff(SQL_TSI_SECOND, pld_start_time, pld_end_time)} / ( 3600.0 )) - (case when pld_rest_minutes is null then 0 else pld_rest_minutes end / 60.0))"; //$NON-NLS-1$
@@ -1424,7 +1431,8 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 				valueSql.append(") / 1000.0 as distance "); //$NON-NLS-1$
 				return valueSql.toString();
 			}
-		case NUM_HOURS:
+		case NUM_PATROLHOURS:
+		case NUM_FIELDHOURS:
 		case NUM_HOURS_TOTAL:
 			if (!hasAreaGroupBy){
 				return tablePrefix(PatrolLegDay.class) + ".start_time as pld_start_time," + //$NON-NLS-1$

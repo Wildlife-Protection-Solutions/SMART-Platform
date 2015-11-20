@@ -105,7 +105,8 @@ public class PatrolQueryOptions {
 	public final static PatrolValueOption[] SUMMARY_ENCOUNTER_RATE_OPTIONS = {
 		PatrolValueOption.DISTANCE,
 		PatrolValueOption.DISTANCE_TOTAL,
-		PatrolValueOption.NUM_HOURS,
+		PatrolValueOption.NUM_FIELDHOURS,
+		PatrolValueOption.NUM_PATROLHOURS,
 		PatrolValueOption.NUM_HOURS_TOTAL,
 		PatrolValueOption.NUM_DAYS,
 		PatrolValueOption.NUM_DAYS_TOTAL,
@@ -137,7 +138,8 @@ public class PatrolQueryOptions {
 		PatrolValueOption.NUM_DAYS,
 		PatrolValueOption.NUM_NIGHTS,
 		PatrolValueOption.DISTANCE,
-		PatrolValueOption.NUM_HOURS,
+		PatrolValueOption.NUM_FIELDHOURS,
+		PatrolValueOption.NUM_PATROLHOURS,
 		PatrolValueOption.NUM_MEMBERS,
 		PatrolValueOption.MAN_HOURS,
 		PatrolValueOption.MAN_DAYS

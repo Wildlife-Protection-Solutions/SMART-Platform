@@ -729,11 +729,12 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 	
 	public enum PatrolLegDayColumn{
 		LEG(Messages.PatrolSummaryEditor_LegId_ColumnName, 1, true),
-		DAY(Messages.PatrolSummaryEditor_LegDay_ColumnName, 2, false),
+		DAY(Messages.PatrolSummaryEditor_LegDay_ColumnName, 1, false),
 		START(Messages.PatrolSummaryEditor_LegStart_ColumnName, 1, false),
 		END(Messages.PatrolSummaryEditor_LegEnd_ColumnName, 1, false),
 		DISTANCE(Messages.PatrolSummaryEditor_LegDistance_ColumnName, 1, false),
-		HOURS(Messages.PatrolSummaryEditor_LegHours_ColumnName, 1, false),
+		TOTALPATROLHOURS(Messages.PatrolSummaryEditor_LegTotalPatrolHours_ColumnName, 1, false),
+		TOTALHOURSINFIELD(Messages.PatrolSummaryEditor_LegTotalActivePatrolHours_ColumnName, 1, false),
 		TRANSPORT(Messages.PatrolSummaryEditor_LegTransport_ColumnName, 1, true),
 		LEADER(Messages.PatrolSummaryEditor_LegLeader_ColumnName, 1, true),
 		PILOT(Messages.PatrolSummaryEditor_LegPilot_ColumnName, 1, true);
@@ -779,9 +780,11 @@ class PatrolLegDayLabelProvider extends ColumnLabelProvider{
 				}else{
 					return ""; //$NON-NLS-1$
 				}
-			}else if (column == PatrolLegDayColumn.HOURS){
-				double hrs = ((PatrolLegDay) element).getHoursWorked();
-//				return PatrolEditor.REST_TIME_FORMATTER.format(hrs);
+			}else if (column == PatrolLegDayColumn.TOTALPATROLHOURS){
+				double hrs = ((PatrolLegDay) element).getPatrolHoursWorked();
+				return PatrolEditor.formatTimeRange(hrs);
+			}else if (column == PatrolLegDayColumn.TOTALHOURSINFIELD){
+				double hrs = ((PatrolLegDay) element).getFieldHoursWorked();
 				return PatrolEditor.formatTimeRange(hrs);
 			}else if (column == PatrolLegDayColumn.LEG){
 				return ((PatrolLegDay)element).getPatrolLeg().getId();
