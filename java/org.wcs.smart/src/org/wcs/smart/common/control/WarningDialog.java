@@ -67,7 +67,7 @@ public class WarningDialog extends MessageDialog {
     	Text txtWarnings = new Text(parent, SWT.MULTI | SWT.V_SCROLL | SWT.BORDER | SWT.H_SCROLL);
     	txtWarnings.setEditable(false);
     	txtWarnings.setBackground(Display.getDefault().getSystemColor(SWT.COLOR_WHITE));
-    	GridData gd = new GridData(SWT.FILL, SWT.FILL, true, false);
+    	GridData gd = new GridData(SWT.FILL, SWT.FILL, true, true);
     	gd.heightHint = 200;
     	gd.widthHint = 200;
     	txtWarnings.setLayoutData(gd);
@@ -81,4 +81,8 @@ public class WarningDialog extends MessageDialog {
         return txtWarnings;
     }
 
+    @Override
+    public boolean isResizable(){
+    	return true;
+    }
 }
