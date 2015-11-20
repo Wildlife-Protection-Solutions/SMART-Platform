@@ -42,6 +42,7 @@ import java.util.concurrent.Semaphore;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -134,13 +135,17 @@ public class SmartConnect {
 					&& lastConnect.password.equals(password)){
 				//compare certifications; cannot simply compare the filename
 				//as the same filename is used for all certificates
-				try(InputStream is = new BufferedInputStream(Files.newInputStream(server.getLocalCertificateFile()))){
-					Certificate temp = CertificateFactory.getInstance("X.509").generateCertificate(is);
-					if (temp.equals(lastConnect.currentCertificate)){
-						return lastConnect;
+				if (lastConnect.server.getCertificateFileName() == null && server.getCertificateFileName() == null){
+					return lastConnect;
+				}else if (lastConnect.currentCertificate != null && server.getCertificateFileName() != null){
+					try(InputStream is = new BufferedInputStream(Files.newInputStream(server.getLocalCertificateFile()))){
+						Certificate temp = CertificateFactory.getInstance("X.509").generateCertificate(is);
+						if (temp.equals(lastConnect.currentCertificate)){
+							return lastConnect;
+						}
+					}catch (Exception ex){
+						ConnectPlugIn.log(ex.getMessage(), ex);
 					}
-				}catch (Exception ex){
-					ConnectPlugIn.log(ex.getMessage(), ex);
 				}	
 			}
 		}
@@ -151,11 +156,6 @@ public class SmartConnect {
 		return lastConnect;
 	}
 	
-	private static boolean strEquals(String s1, String s2){
-		if (s1 == null && s2 == null) return true;
-		if (s1 != null && s2 != null) return s1.equalsIgnoreCase(s2);
-		return false;
-	}
 	/**
 	 * Close all open Smart Connect instances
 	 */
@@ -207,6 +207,7 @@ public class SmartConnect {
 	}
 	
 	private X509TrustManager getTrustManager() throws Exception{
+		this.currentCertificate = null;
 		//get default jvm trust manager
 		if (server.getCertificateFileName() == null){
 			//use the default jvm trust manager
@@ -625,6 +626,8 @@ public class SmartConnect {
 		}else if (ex instanceof NotAuthorizedException){
 			msg = "Invalid username or password, or user not permitted to perform operation.";
 		}else if (ex.getCause() instanceof javax.net.ssl.SSLHandshakeException){
+			msg = "Could not connect to server: " + ex.getCause().getMessage();
+		}else if (ex.getCause() instanceof SSLException){
 			msg = "Could not connect to server: " + ex.getCause().getMessage();
 		}else{
 			msg = "Could not connect to server: " + ex.getMessage();

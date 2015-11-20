@@ -10,7 +10,7 @@ public class SyncMultiStartupOption implements IAdvancedStartupOption {
 	
 	@Override
 	public String getLabel() {
-		return "Sync multiple Conservation Areas";
+		return "Sync multiple Conservation Areas with SMART Connect";
 	}
 
 	@Override
