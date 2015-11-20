@@ -92,7 +92,8 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 
 	private Composite fCompositeLogin = null;
 	
-	private Text txtUserName = null;
+	// bug https://www.assembla.com/spaces/smart-cs/tickets/54#/activity/ticket:
+	private Combo cmbUserName = null;
 	private Text txtPassword  = null;
 	
 	private Button btnOk  = null;
@@ -151,13 +152,21 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		//run the startup script which initializes the splash screen elements
 		startup();
 
-		//auto-login for testing
-		txtUserName.setText("smart"); //$NON-NLS-1$
+		UserLoginInfo[] userInfos = UserLoginInfo.readAllFromStore();
+		if (userInfos.length > 0) {
+			for (UserLoginInfo u : userInfos)
+				cmbUserName.add(u.getUsername());
+			cmbUserName.select(0);
+			txtPassword.setFocus();
+		} else {
+			//TODO: remove smart/smart before build
+			cmbUserName.setText("smart"); //$NON-NLS-1$
+			cmbUserName.setFocus();
+		}
+		//TODO: remove smart/smart before build
 		txtPassword.setText("smart"); //$NON-NLS-1$
-		//handleButtonOKWidgetSelected();
-
-		doEventLoop();
 		
+		doEventLoop();
 	}
 	
 	/**
@@ -170,7 +179,6 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 				splash.getDisplay().sleep();
 			}
 		}
-//		newFont.dispose();
 	}
 
 	/**
@@ -209,7 +217,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			}
 
 		};
-		txtUserName.addModifyListener(validator);
+		cmbUserName.addModifyListener(validator);
 		txtPassword.addModifyListener(validator);
 	}
 
@@ -224,7 +232,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			}
 		}
 		if (ok){
-			ok = txtUserName.isEnabled() && (txtUserName.getText().length() > 0 && txtPassword.getText().length() > 0);
+			ok = cmbUserName.isEnabled() && (cmbUserName.getText().length() > 0 && txtPassword.getText().length() > 0);
 		}
 		btnOk.setEnabled(ok);
 	}
@@ -248,7 +256,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		enableControls(false);
 		try {
 			ConservationArea ca = (ConservationArea) ((IStructuredSelection) cmvConservationArea.getSelection()).getFirstElement();
-			String username = txtUserName.getText();
+			String username = cmbUserName.getText();
 			String password = txtPassword.getText();
 
 			progressLabel.setText(Messages.InteractiveSplashHandler_Progress_ValidatingUser);
@@ -256,6 +264,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			if ((username.length() > 0) && (password.length() > 0)) {
 				if (SmartStartUp.login(ca, username, password)) {
 					fAuthenticated = true;
+					new UserLoginInfo(username).writeToStore();
 				} else {
 					progressLabel.setText(Messages.InteractiveSplashHandler_Error_AuthenticationFailure);
 				}
@@ -351,9 +360,10 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		lblUserName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblUserName.setText(Messages.InteractiveSplashHandler_Username_Label);
 
-		txtUserName = new Text(fCompositeLogin, SWT.BORDER);
-		txtUserName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
-		widgets.add(txtUserName);
+		// bug https://www.assembla.com/spaces/smart-cs/tickets/54#/activity/ticket:
+		cmbUserName = new Combo(fCompositeLogin, SWT.NONE);
+		cmbUserName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
+		widgets.add(cmbUserName);
 		
 
 		Label lblPassword = new Label(fCompositeLogin, SWT.NONE);
@@ -403,7 +413,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(btnOk);
 		widgets.add(btnCancel);
 	
-		fCompositeLogin.setTabList(new Control[]{cmvConservationArea.getControl(),txtUserName, txtPassword, composite_1, lblAdvanced});
+		fCompositeLogin.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, composite_1, lblAdvanced});
 		composite_1.setTabList(new Control[]{btnOk, btnCancel});
 		enableControls(false);
 		
