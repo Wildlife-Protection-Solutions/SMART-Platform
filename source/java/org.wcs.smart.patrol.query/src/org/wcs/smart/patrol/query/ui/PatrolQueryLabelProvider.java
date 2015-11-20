@@ -81,8 +81,9 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_PATROLS: return Messages.PatrolQueryOptions_ValueOpNumPatrols; 
 				case NUM_DAYS: return Messages.PatrolQueryOptions_ValueOpNumberDays;    
 				case NUM_NIGHTS: return Messages.PatrolQueryOptions_ValueOpNumberNights;
-				case DISTANCE: return Messages.PatrolQueryOptions_ValueOpDistance;      
-				case NUM_HOURS: return Messages.PatrolQueryOptions_ValueOpNumberHours;  
+				case DISTANCE: return Messages.PatrolQueryOptions_ValueOpDistance;    
+				case NUM_PATROLHOURS: return Messages.PatrolQueryOptions_ValueOpNumberPatrolHours;
+				case NUM_FIELDHOURS: return Messages.PatrolQueryOptions_ValueOpNumberActivePatrolHours;  
 				case NUM_MEMBERS: return Messages.PatrolQueryOptions_ValueOpNumEmployees;
 				case MAN_HOURS: return Messages.PatrolQueryOptions_ValueOpPersonHrs;    
 				case MAN_DAYS: return Messages.PatrolQueryOptions_ValueOpPersonDays;    
@@ -136,7 +137,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 			case DISTANCE:
 			case DISTANCE_TOTAL:
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_DISTANCE_ICON);
-			case NUM_HOURS:
+			case NUM_PATROLHOURS:
+			case NUM_FIELDHOURS:
 			case NUM_HOURS_TOTAL:
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON);
 			case NUM_MEMBERS:

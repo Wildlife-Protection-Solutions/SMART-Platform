@@ -311,7 +311,8 @@ public class Messages extends NLS {
 	public static String PatrolLegDayInputComposite_SetTrackLabel;
 	public static String PatrolLegDayInputComposite_StartTimeLabel;
 	public static String PatrolLegDayInputComposite_Time_ColumnHeader;
-	public static String PatrolLegDayInputComposite_TotalHoursPatrolled_Label;
+	public static String PatrolLegDayInputComposite_TotalPatrolHours_Label;
+	public static String PatrolLegDayInputComposite_TotalActivePatrolHours_Label;
 	public static String PatrolLegDayInputComposite_ViewTrackLabel;
 	public static String PatrolLegDayInputComposite_WaypointID_ColumnHeader;
 	public static String PatrolLegLeaderChangeDialog_DateChange_Label;
@@ -438,7 +439,8 @@ public class Messages extends NLS {
 	public static String PatrolSummaryEditor_LegDay_ColumnName;
 	public static String PatrolSummaryEditor_LegDistance_ColumnName;
 	public static String PatrolSummaryEditor_LegEnd_ColumnName;
-	public static String PatrolSummaryEditor_LegHours_ColumnName;
+	public static String PatrolSummaryEditor_LegTotalPatrolHours_ColumnName;
+	public static String PatrolSummaryEditor_LegTotalActivePatrolHours_ColumnName;
 	public static String PatrolSummaryEditor_LegId_ColumnName;
 	public static String PatrolSummaryEditor_LegLeader_ColumnName;
 	public static String PatrolSummaryEditor_LegPilot_ColumnName;

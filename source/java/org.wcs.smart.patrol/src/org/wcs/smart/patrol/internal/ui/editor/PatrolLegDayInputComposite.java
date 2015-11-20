@@ -89,6 +89,7 @@ import org.hibernate.Session;
 import org.locationtech.udig.project.ui.ApplicationGIS;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Projection;
 import org.wcs.smart.common.celleditor.DoubleCellEditor;
 import org.wcs.smart.common.celleditor.IntegerCellEditor;
 import org.wcs.smart.common.celleditor.TimeCellEditor;
@@ -129,7 +130,8 @@ public class PatrolLegDayInputComposite {
 	private DateTime dtStartTime;
 	private DateTime dtEndTime;
 	private Text restMinutes;
-	private Label lblTotalHours;
+	private Label lblTotalPatrolHours;
+	private Label lblTotalFieldHours;
 
 	private TableViewer observationTable;
 	
@@ -202,7 +204,11 @@ public class PatrolLegDayInputComposite {
 	public PatrolLegDayInputComposite(PatrolDayEditor editor, ObservationOptions observationOptions) {
 		this.editor = editor;
 		try{
-			this.tempCrs = ReprojectUtils.stringToCrs(observationOptions.getViewProjection().getDefinition());
+			if (observationOptions != null) {
+				Projection projection = observationOptions.getViewProjection();
+				if (projection != null)
+					this.tempCrs = ReprojectUtils.stringToCrs(projection.getDefinition());
+			}
 		}catch (Exception ex){
 			SmartPatrolPlugIn.log(ex.getMessage(), ex);
 		}
@@ -237,7 +243,8 @@ public class PatrolLegDayInputComposite {
 			restMinutes.setText(String.valueOf(data.getRestMinutes()));
 		}
 
-		this.lblTotalHours.setText(String.valueOf(data.getHoursWorked()));
+		this.lblTotalPatrolHours.setText(String.valueOf(data.getPatrolHoursWorked()));
+		this.lblTotalFieldHours.setText(String.valueOf(data.getFieldHoursWorked()));
 
 		if (data.getWaypoints() == null){
 			data.setWaypoints(new ArrayList<PatrolWaypoint>());
@@ -401,17 +408,21 @@ public class PatrolLegDayInputComposite {
 		c.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		((GridLayout)c.getLayout()).marginWidth = 0;
 		((GridLayout)c.getLayout()).marginHeight = 0;
-		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalHoursPatrolled_Label);
-		lblTotalHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
-		okayFont = lblTotalHours.getFont();
+		
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalPatrolHours_Label);
+		lblTotalPatrolHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
+		toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_TotalActivePatrolHours_Label);
+		lblTotalFieldHours = toolkit.createLabel(c, Messages.PatrolLegDayInputComposite_InvalidTotalHoursPatrolled);
+		okayFont = lblTotalFieldHours.getFont();
 		
 		FontData fd = okayFont.getFontData()[0];
 		fd.setStyle(SWT.BOLD);
-		errorFont = new Font(lblTotalHours.getDisplay(), fd);
+		errorFont = new Font(lblTotalFieldHours.getDisplay(), fd);
 		
 		gd = new GridData(SWT.FILL, SWT.CENTER, true, false);
 		gd.widthHint = 30;
-		lblTotalHours.setLayoutData(gd);
+		lblTotalPatrolHours.setLayoutData(gd);
+		lblTotalFieldHours.setLayoutData(gd);
 
 		Composite trackComp = toolkit.createComposite(mainComposite);
 		trackComp.setLayout(new GridLayout(4, false));
@@ -698,21 +709,32 @@ public class PatrolLegDayInputComposite {
 	}
 	
 	private void updateTotalHours(){
-		double d = Double.parseDouble(this.restMinutes.getText());
-		double time = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime() - d * 60 * 1000;
-		time = time / (1000 * 60 * 60);
-		//lblTotalHours.setText(PatrolEditor.REST_TIME_FORMATTER.format(time));
-		lblTotalHours.setText(PatrolEditor.formatTimeRange(time));
-		if (time < 0){
-			lblTotalHours.setFont(errorFont);
-			lblTotalHours.setForeground(lblTotalHours.getDisplay().getSystemColor(SWT.COLOR_RED));
-			lblTotalHours.setToolTipText(Messages.PatrolLegDayInputComposite_Error_StartTimeError_Tooltip);
+		double totalTime = SmartUtils.getTime(dtEndTime).getTime() - SmartUtils.getTime(dtStartTime).getTime();
+		double restMinutes = Double.parseDouble(this.restMinutes.getText());
+		double totalPatrolHoursTime = totalTime / (1000 * 60 * 60);
+		lblTotalPatrolHours.setText(PatrolEditor.formatTimeRange(totalPatrolHoursTime));
+		if (totalPatrolHoursTime < 0){
+			lblTotalPatrolHours.setFont(errorFont);
+			lblTotalPatrolHours.setForeground(lblTotalFieldHours.getDisplay().getSystemColor(SWT.COLOR_RED));
+			lblTotalPatrolHours.setToolTipText(Messages.PatrolLegDayInputComposite_Error_StartTimeError_Tooltip);
 		}else{
-			lblTotalHours.setFont(okayFont);
-			lblTotalHours.setForeground(lblTotalHours.getDisplay().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
-			lblTotalHours.setToolTipText(null);
+			lblTotalPatrolHours.setFont(okayFont);
+			lblTotalPatrolHours.setForeground(lblTotalFieldHours.getDisplay().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+			lblTotalPatrolHours.setToolTipText(null);
 		}
+		double totalFieldHoursTime = totalTime - restMinutes * 60 * 1000;
+		totalFieldHoursTime = totalFieldHoursTime / (1000 * 60 * 60);
 		
+		lblTotalFieldHours.setText(PatrolEditor.formatTimeRange(totalFieldHoursTime));
+		if (totalFieldHoursTime < 0){
+			lblTotalFieldHours.setFont(errorFont);
+			lblTotalFieldHours.setForeground(lblTotalFieldHours.getDisplay().getSystemColor(SWT.COLOR_RED));
+			lblTotalFieldHours.setToolTipText(Messages.PatrolLegDayInputComposite_Error_StartTimeError_Tooltip);
+		}else{
+			lblTotalFieldHours.setFont(okayFont);
+			lblTotalFieldHours.setForeground(lblTotalFieldHours.getDisplay().getSystemColor(SWT.COLOR_WIDGET_FOREGROUND));
+			lblTotalFieldHours.setToolTipText(null);
+		 }
 	}
 	
 	public void updateDistance(){

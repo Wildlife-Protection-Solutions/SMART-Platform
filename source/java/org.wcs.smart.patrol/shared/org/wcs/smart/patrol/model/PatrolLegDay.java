@@ -154,11 +154,26 @@ public class PatrolLegDay extends UuidItem {
 	}
 	
 	@Transient
-	public double getHoursWorked(){
+	public double getPatrolHoursWorked(){
 		if (startTime == null || endTime == null){
 			return 0;
 		}
+		// As per comment on 1177
+		// https://www.assembla.com/spaces/smart-cs/tickets/1177-provide-the-option-of-including-(not-subtracting)-rest-time-when-calculating-patrol-and-mission-e---?comment=814666483#comment:814666483
+		// do not subtract rest time for patrol hours worked
+		double time = getLengthSeconds() / (60*60);
+		return time;
+	}
 		
+	
+	@Transient
+	public double getFieldHoursWorked(){
+		if (startTime == null || endTime == null){
+			return 0;
+		}
+		// As per comment on 1177
+		// https://www.assembla.com/spaces/smart-cs/tickets/1177-provide-the-option-of-including-(not-subtracting)-rest-time-when-calculating-patrol-and-mission-e---?comment=814666483#comment:814666483
+		// subtract rest time for field hours worked
 		double time = getLengthSeconds();
 		if (restMinutes != null){
 			time = time - restMinutes * 60;
