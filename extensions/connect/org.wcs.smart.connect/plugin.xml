@@ -279,5 +279,12 @@
             class="org.wcs.smart.connect.server.replication.SyncOnStartupProcessor">
       </processor>
    </extension>
+   <extension
+         point="org.wcs.smart.ca.templateCloner">
+      <templateCloner
+            class="org.wcs.smart.connect.CloneConnect"
+            id="org.wcs.smart.connect.CloneConnectConservationArea">
+      </templateCloner>
+   </extension>
 
 </plugin>

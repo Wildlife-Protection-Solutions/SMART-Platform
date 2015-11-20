@@ -69,7 +69,7 @@ public class ConnectCaListPage extends WizardPage implements ISelectionChangedLi
 	
 		cmbList = new ListViewer(outer);
 		cmbList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-		((GridData)cmbList.getList().getLayoutData()).heightHint = 250;
+		((GridData)cmbList.getList().getLayoutData()).heightHint = 100;
 		cmbList.setContentProvider(ArrayContentProvider.getInstance());
 		cmbList.setLabelProvider(new LabelProvider(){
 			public String getText(Object element){
