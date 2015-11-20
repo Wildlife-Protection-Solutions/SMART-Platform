@@ -33,6 +33,7 @@ import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.internal.CaConnectDeleteHandler;
 import org.wcs.smart.connect.internal.CaReplicationDeleteHandler;
 import org.wcs.smart.connect.internal.EmployeeDeleteHandler;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -45,22 +46,22 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	// The plug-in ID
 	public static final String PLUGIN_ID = "org.wcs.smart.connect"; //$NON-NLS-1$
 
-	public static final String DB_VERSION_1 = "1.0";
+	public static final String DB_VERSION_1 = "1.0"; //$NON-NLS-1$
 	public static final String DB_VERSION = DB_VERSION_1; //current version
 	
 	// The shared instance
 	private static ConnectPlugIn plugin;
 	private EmployeeDeleteHandler employeeDelete = new EmployeeDeleteHandler();
 	
-	public static final String LOCAL_CHANGES_ICON = "org.wcs.smart.connect.local.changes";
-	public static final String LOCAL_ERROR_ICON = "org.wcs.smart.connect.local.error";
-	public static final String LOCAL_OK_ICON = "org.wcs.smart.connect.local.ok";
-	public static final String LOCAL_PROCESSING_ICON = "org.wcs.smart.connect.server.processing";
-	public static final String SERVER_CHANGES_ICON = "org.wcs.smart.connect.server.changes";
-	public static final String SERVER_ERROR_ICON = "org.wcs.smart.connect.server.icon";
-	public static final String SERVER_PROCESSING_ICON = "org.wcs.smart.connect.server.processing";
-	public static final String SERVER_OK_ICON = "org.wcs.smart.connect.server.ok";
-	public static final String REFRESH_ICON = "org.wcs.smart.connect.refresh";
+	public static final String LOCAL_CHANGES_ICON = "org.wcs.smart.connect.local.changes"; //$NON-NLS-1$
+	public static final String LOCAL_ERROR_ICON = "org.wcs.smart.connect.local.error"; //$NON-NLS-1$
+	public static final String LOCAL_OK_ICON = "org.wcs.smart.connect.local.ok"; //$NON-NLS-1$
+	public static final String LOCAL_PROCESSING_ICON = "org.wcs.smart.connect.server.processing"; //$NON-NLS-1$
+	public static final String SERVER_CHANGES_ICON = "org.wcs.smart.connect.server.changes"; //$NON-NLS-1$
+	public static final String SERVER_ERROR_ICON = "org.wcs.smart.connect.server.icon"; //$NON-NLS-1$
+	public static final String SERVER_PROCESSING_ICON = "org.wcs.smart.connect.server.processing"; //$NON-NLS-1$
+	public static final String SERVER_OK_ICON = "org.wcs.smart.connect.server.ok"; //$NON-NLS-1$
+	public static final String REFRESH_ICON = "org.wcs.smart.connect.refresh"; //$NON-NLS-1$
 	
 	/**
 	 * The constructor
@@ -115,7 +116,7 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 			@Override
 			public void run() {
 				MessageDialog.openError(Display.getDefault().getActiveShell(),
-						"Error", message);
+						Messages.ConnectPlugIn_ErrorDialogTitle, message);
 			}
 		});
 	}
@@ -171,15 +172,15 @@ public class ConnectPlugIn extends AbstractUIPlugin {
 	
     protected void initializeImageRegistry(ImageRegistry reg) {
         // spec'ed to do nothing
-    	reg.put(LOCAL_CHANGES_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_changes.png"));
-    	reg.put(LOCAL_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_error.png"));
-    	reg.put(LOCAL_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_ok.png"));
-    	reg.put(LOCAL_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_processing.png"));  
+    	reg.put(LOCAL_CHANGES_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_changes.png")); //$NON-NLS-1$
+    	reg.put(LOCAL_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_error.png")); //$NON-NLS-1$
+    	reg.put(LOCAL_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_ok.png")); //$NON-NLS-1$
+    	reg.put(LOCAL_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/local_processing.png"));   //$NON-NLS-1$
     
-	    reg.put(SERVER_CHANGES_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_changes.png"));
-		reg.put(SERVER_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_error.png"));
-		reg.put(SERVER_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_ok.png"));
-		reg.put(SERVER_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_processing.png"));
-		reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png"));
+	    reg.put(SERVER_CHANGES_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_changes.png")); //$NON-NLS-1$
+		reg.put(SERVER_ERROR_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_error.png")); //$NON-NLS-1$
+		reg.put(SERVER_OK_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_ok.png")); //$NON-NLS-1$
+		reg.put(SERVER_PROCESSING_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/server_processing.png")); //$NON-NLS-1$
+		reg.put(REFRESH_ICON, imageDescriptorFromPlugin(PLUGIN_ID, "images/icons/obj16/refresh.png")); //$NON-NLS-1$
     }
 }

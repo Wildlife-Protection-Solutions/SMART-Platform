@@ -28,6 +28,7 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 
 /**
@@ -39,7 +40,7 @@ import org.wcs.smart.connect.model.ConnectServer;
  */
 public class AutoOptionsWizardPage extends WizardPage  {
 
-	public static final String NAME = "AUTOSYNC_OPTIONS";
+	public static final String NAME = "AUTOSYNC_OPTIONS"; //$NON-NLS-1$
 	
 	private AutoOptionsPanel pnl;
 	
@@ -58,8 +59,8 @@ public class AutoOptionsWizardPage extends WizardPage  {
 		
 		pnl = new AutoOptionsPanel(inner);
 		
-		setTitle("SMART Connect Server Options");
-		setMessage("Options for connecting to connect server.");
+		setTitle(Messages.AutoOptionsWizardPage_Title);
+		setMessage(Messages.AutoOptionsWizardPage_Message);
 		
 		setControl(outer);
 	

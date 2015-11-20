@@ -30,6 +30,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.hibernate.Session;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectUser;
@@ -57,7 +58,7 @@ public class ConnectServerWizard extends Wizard {
 	public ConnectServerWizard(boolean includeAutoOptionsPage){
 		super();
 		
-		setWindowTitle("Configure SMART Connect Server");
+		setWindowTitle(Messages.ConnectServerWizard_WizardTitle);
 		
 		addPage(page1 = new ServerWizardPage());
 		addPage(page2 = new ServerOptionsWizardPage());
@@ -91,7 +92,7 @@ public class ConnectServerWizard extends Wizard {
 			try{
 				server.setCertificateFile(Paths.get(certificateFile));
 			}catch (Exception ex){
-				ConnectPlugIn.displayLog("Could not copy certificate file to filestore." + "\n\n" + ex.getMessage(), ex);
+				ConnectPlugIn.displayLog(Messages.ConnectServerWizard_CertificateError + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 				return false;
 			}
 		}
@@ -104,7 +105,7 @@ public class ConnectServerWizard extends Wizard {
 				//try to delete certificate file
 				Files.deleteIfExists(server.getLocalCertificateFile());
 			}catch (Exception ex){}
-			MessageDialog.openError(getShell(), "Error", error);
+			MessageDialog.openError(getShell(), Messages.ConnectServerWizard_ErrorDialog, error);
 			return false;
 		}
 		
@@ -115,7 +116,7 @@ public class ConnectServerWizard extends Wizard {
 			try{
 				encryptedPass = ConnectPlugIn.encryptPassword(password);
 			}catch (Exception ex){
-				ConnectPlugIn.log("Error encrypting password." + ex.getMessage(), ex);
+				ConnectPlugIn.log(Messages.ConnectServerWizard_EncryptPasswordError + ex.getMessage(), ex);
 			}
 			user.setConnectPassword(encryptedPass);
 		}
@@ -130,7 +131,7 @@ public class ConnectServerWizard extends Wizard {
 			s.save(user);
 			s.getTransaction().commit();
 		}catch (Exception ex){			
-			ConnectPlugIn.displayLog("Could not save connect server information." + ex.getMessage(), ex);
+			ConnectPlugIn.displayLog(Messages.ConnectServerWizard_SaveError + ex.getMessage(), ex);
 		}finally{
 			s.close();
 		}

@@ -24,6 +24,7 @@ package org.wcs.smart.connect.ui.server;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.wcs.smart.connect.internal.Messages;
 
 /**
  * Dialog for downloading change log.
@@ -40,9 +41,9 @@ public class SyncChangeLogDialog extends ConnectDialog {
 
 	@Override
 	protected Control createDialogArea(Composite parent) {
-		setTitle("Sync changes with CONNECT");
-		getShell().setText("Sync changes with CONNECT");
-		setMessage("Download then upload  all changes from CONNECT, the upload any local changes to CONNECT.");
+		setTitle(Messages.SyncChangeLogDialog_Title);
+		getShell().setText(Messages.SyncChangeLogDialog_ShellTitle);
+		setMessage(Messages.SyncChangeLogDialog_Message);
 		
 		return super.createDialogArea(parent);
 	}	

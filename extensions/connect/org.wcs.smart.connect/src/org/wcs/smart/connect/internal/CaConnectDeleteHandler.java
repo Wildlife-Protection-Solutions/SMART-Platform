@@ -53,7 +53,7 @@ public class CaConnectDeleteHandler implements ICaDeleteHandler {
 
 	@Override
 	public void beforeDelete(ConservationArea ca, Session session, IProgressMonitor monitor) throws Exception {
-		monitor.subTask("Deleting SMART Connect details");
+		monitor.subTask(Messages.CaConnectDeleteHandler_TaskName);
 		
 		//SMART Connect Users
 		Query q = session.createQuery("delete from ConnectUser cu where cu in (SELECT cu2.uuid FROM ConnectUser cu2 where cu2.server.conservationArea = :ca)"); //$NON-NLS-1$

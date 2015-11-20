@@ -81,6 +81,7 @@ import org.wcs.smart.connect.api.io.IOUtils;
 import org.wcs.smart.connect.api.io.ProgressInputStream;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
@@ -98,7 +99,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class SmartConnect {
 
-	public final static String API_URL = "/api";
+	public final static String API_URL = "/api"; //$NON-NLS-1$
 	
 	private String username;
 	private String password;
@@ -139,7 +140,7 @@ public class SmartConnect {
 					return lastConnect;
 				}else if (lastConnect.currentCertificate != null && server.getCertificateFileName() != null){
 					try(InputStream is = new BufferedInputStream(Files.newInputStream(server.getLocalCertificateFile()))){
-						Certificate temp = CertificateFactory.getInstance("X.509").generateCertificate(is);
+						Certificate temp = CertificateFactory.getInstance("X.509").generateCertificate(is); //$NON-NLS-1$
 						if (temp.equals(lastConnect.currentCertificate)){
 							return lastConnect;
 						}
@@ -189,7 +190,7 @@ public class SmartConnect {
 		
 			SchemeRegistry registry = new SchemeRegistry();
 			SSLSocketFactory factory = new SSLSocketFactory(ctx);
-			registry.register(new Scheme("https", 443, factory));
+			registry.register(new Scheme("https", 443, factory)); //$NON-NLS-1$
 			
 			ClientConnectionManager cm = new PoolingClientConnectionManager(registry);
 			HttpClient httpClient = new DefaultHttpClient(cm);
@@ -218,7 +219,7 @@ public class SmartConnect {
 					return (X509TrustManager) t;
 				}
 			}
-			throw new RuntimeException("Could not find SSH TrustFactory");
+			throw new RuntimeException(Messages.SmartConnect_SshError1);
 		}
 
 		//build a trust manager using the locally provided certificate
@@ -226,8 +227,8 @@ public class SmartConnect {
 		keyStore.load(null, null);
 		Path certpath = server.getLocalCertificateFile();
 		try(InputStream is = new BufferedInputStream(Files.newInputStream(certpath))){
-			currentCertificate = CertificateFactory.getInstance("X.509").generateCertificate(is);
-			String key = "smart-";
+			currentCertificate = CertificateFactory.getInstance("X.509").generateCertificate(is); //$NON-NLS-1$
+			String key = "smart-"; //$NON-NLS-1$
 			if (server.getConservationArea() != null){
 				key += server.getConservationArea().getUuid().toString();
 			}
@@ -240,7 +241,7 @@ public class SmartConnect {
 				return (X509TrustManager) t;
 			}
 		}
-		throw new RuntimeException("Could not find SSH TrustFactory for self signed certificate");
+		throw new RuntimeException(Messages.SmartConnect_SshError2);
 	}
 	
 	
@@ -430,8 +431,8 @@ public class SmartConnect {
 			@Override
 			public void run() {
 				cont[0] = MessageDialog.openQuestion(Display.getDefault().getActiveShell(),
-						"Download File", 
-						MessageFormat.format("The file to download ({0} MB) is greater than {1} MB.  Do you wish to continue?", actualSize / 1000000.0, checkSize/1000000.0));		
+						Messages.SmartConnect_DialogTitle, 
+						MessageFormat.format(Messages.SmartConnect_SizeConfirmMessage, actualSize / 1000000.0, checkSize/1000000.0));		
 			}
 			
 			
@@ -460,7 +461,7 @@ public class SmartConnect {
 		Path filestore = FileSystems.getDefault()
 			.getPath(SmartContext.INSTANCE.getFilestoreLocation())
 			.resolve(ConnectSyncHistoryRecord.CONNECT_FILESTORE_DIR)
-			.resolve(System.nanoTime() + ".temp");
+			.resolve(System.nanoTime() + ".temp"); //$NON-NLS-1$
 		//create necessary dirs
 		Files.createDirectories(filestore.getParent());
 		
@@ -483,7 +484,7 @@ public class SmartConnect {
 							size > promptDownloadSizeMb * 1000000 ){
 						//prompt to download before continuing
 						if (!promptToDownload(size, promptDownloadSizeMb * 1000000l)){
-							throw new PackageToLargeException("User cancelled download.  Download file size too big.");
+							throw new PackageToLargeException(Messages.SmartConnect_UserCanceledError);
 						}
 					}
 					//parse target
@@ -493,7 +494,7 @@ public class SmartConnect {
 					}
 					
 					if (Files.size(filestore) > size){
-						throw new Exception("Downloaded file size greater than expected file size.");
+						throw new Exception(Messages.SmartConnect_FileToLargeError);
 					}
 					if (Files.size(filestore) == size){
 						monitor.done();
@@ -519,7 +520,7 @@ public class SmartConnect {
 			downloadRequest(filestore, url, size, copyMonitor);
 			
 			if (Files.size(filestore) > size){
-				throw new Exception("Downloaded file size greater than expected file size.");
+				throw new Exception(Messages.SmartConnect_FileToLargeError);
 			}
 			if (Files.size(filestore) == size){
 				monitor.done();
@@ -529,7 +530,7 @@ public class SmartConnect {
 			Thread.sleep(waitTime);
 			waitTime = waitTime*2;
 		}
-		throw new Exception("Failed to download conservation export from server.");
+		throw new Exception(Messages.SmartConnect_DownloadFailed);
 	}
 
 	
@@ -550,7 +551,7 @@ public class SmartConnect {
 			
 			Builder requestBuilder = target.request();
 			if (start != 0){
-				requestBuilder.header("Range", "bytes=" + start + "-" + end);
+				requestBuilder.header("Range", "bytes=" + start + "-" + end); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			
 			r = target.request().get();
@@ -622,15 +623,15 @@ public class SmartConnect {
 	private String processException (Throwable ex){
 		String msg = null;
 		if (ex instanceof NotFoundException){
-			msg = MessageFormat.format("Could not connect to ({0}).", new Object[]{server.getServerUrl()});
+			msg = MessageFormat.format(Messages.SmartConnect_ConnectionError, new Object[]{server.getServerUrl()});
 		}else if (ex instanceof NotAuthorizedException){
-			msg = "Invalid username or password, or user not permitted to perform operation.";
+			msg = Messages.SmartConnect_InvalidUserNameError;
 		}else if (ex.getCause() instanceof javax.net.ssl.SSLHandshakeException){
-			msg = "Could not connect to server: " + ex.getCause().getMessage();
+			msg = Messages.SmartConnect_GeneralError + ex.getCause().getMessage();
 		}else if (ex.getCause() instanceof SSLException){
-			msg = "Could not connect to server: " + ex.getCause().getMessage();
+			msg = Messages.SmartConnect_GeneralError + ex.getCause().getMessage();
 		}else{
-			msg = "Could not connect to server: " + ex.getMessage();
+			msg = Messages.SmartConnect_GeneralError + ex.getMessage();
 		}
 		ConnectPlugIn.log(msg, ex);
 		return msg;
@@ -653,9 +654,9 @@ public class SmartConnect {
 
 	    @Override
 	    public void filter(ClientRequestContext requestContext) throws IOException {
-	        String token = username + ":" + password;
+	        String token = username + ":" + password; //$NON-NLS-1$
 	        String base64Token = Base64.encodeBase64String(token.getBytes(StandardCharsets.UTF_8));
-	        requestContext.getHeaders().add("Authorization", "Basic " + base64Token);
+	        requestContext.getHeaders().add("Authorization", "Basic " + base64Token); //$NON-NLS-1$ //$NON-NLS-2$
 	    }
 	}
 	
@@ -667,7 +668,7 @@ public class SmartConnect {
 	 */
 	public static String parseErrorMessage(String json){
 		try{
-			return (new ObjectMapper()).readTree(json).get("error").textValue();
+			return (new ObjectMapper()).readTree(json).get("error").textValue(); //$NON-NLS-1$
 		}catch (Exception ex){
 			return null;
 		}

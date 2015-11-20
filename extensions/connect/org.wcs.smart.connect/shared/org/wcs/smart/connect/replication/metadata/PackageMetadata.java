@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.connect.replication.metadata;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.UUID;
 

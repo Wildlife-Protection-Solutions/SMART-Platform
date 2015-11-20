@@ -46,6 +46,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
@@ -81,47 +82,47 @@ public class DownloadCaEngine {
 	 * @throws Exception
 	 */
 	public boolean downloadImport(IProgressMonitor monitor) throws Exception{
-		monitor.beginTask("Download & Install Conservation Area", 4);
+		monitor.beginTask(Messages.DownloadCaEngine_TaskName, 4);
 		
 		/* request ca */
-		monitor.subTask("Initializing Conservation Area Download");
+		monitor.subTask(Messages.DownloadCaEngine_InitSubtaskName);
 		String statusUrl = connect.startConservationAreaDownload(info.getUuid());
 		monitor.worked(1);
 		if (monitor.isCanceled()) return false;
 		
 		/* wait for ca export to be created */
-		monitor.subTask("Waiting for Conservation Area Export");
+		monitor.subTask(Messages.DownloadCaEngine_WaitSubTaskName);
 		Long start = System.nanoTime();
 		WorkItemStatus status = null ;
 		int waitTime = connect.getServer().getOptionAsInt(ConnectServerOption.Option.RETY_WAIT_TIME);
 		while(status == null || status.getStatus() == WorkItemStatus.Status.PROCESSING){
 			Long current = System.nanoTime();
 			
-			if ( (current - start) > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception("Timed out waiting for export to process.");
+			if ( (current - start) > connect.getServer().getOptionAsInt(ConnectServerOption.Option.MAX_PROCESSING_WAIT_TIME) * 1000000l) throw new Exception(Messages.DownloadCaEngine_Timeout);
 			Thread.sleep(waitTime);
 			try{
 				status = connect.getWorkItemStatus(statusUrl);
 			}catch (Exception ex){
-				ConnectPlugIn.log("Error requesting ca download status.", ex);
+				ConnectPlugIn.log("Error requesting ca download status.", ex); //$NON-NLS-1$
 			}
 			if (monitor.isCanceled()) return false;
 		}
 		monitor.worked(1);
 		
 		if (status.getStatus() == WorkItemStatus.Status.ERROR){
-			throw new Exception("Error downloading Conservation Area package:\n\n" + SmartConnect.parseErrorMessage(status.getMessage()));
+			throw new Exception(Messages.DownloadCaEngine_CaDownloadError + SmartConnect.parseErrorMessage(status.getMessage()));
 		}
 
 		/* download file */
-		monitor.subTask("Downloading Conservation Area Export");
+		monitor.subTask(Messages.DownloadCaEngine_DownloadSubtaskName);
 		String message = status.getMessage();
 		JsonNode nd = (new ObjectMapper()).readTree(message);
-		String downloadUrl = nd.get("file_url").asText();
+		String downloadUrl = nd.get("file_url").asText(); //$NON-NLS-1$
 		if (monitor.isCanceled()) return false;
 		Path p = connect.downloadFileFromUrl(downloadUrl, null, new SubProgressMonitor(monitor, 1));
 		
 		/* import file */
-		monitor.subTask("Installing Conservation Area");
+		monitor.subTask(Messages.DownloadCaEngine_InstallSubtaskName);
 		try{
 			if (monitor.isCanceled()) return false;
 			CaImporter.importCa(p.toFile(), new SubProgressMonitor(monitor, 1));
@@ -151,8 +152,8 @@ public class DownloadCaEngine {
 			
 			desktopCa = (ConservationArea)s.get(ConservationArea.class, info.getUuid());
 			if (desktopCa != null){
-				if (!MessageDialog.openQuestion(activeShell, "Import Conservation Area", 
-						MessageFormat.format("The conservation area {0} already exists in your local database.  Do you want to delete it and replace it with the one from the SMART Connect Server?", desktopCa.getNameLabel()))){
+				if (!MessageDialog.openQuestion(activeShell, Messages.DownloadCaEngine_ImportCaDialogTitle, 
+						MessageFormat.format(Messages.DownloadCaEngine_ImportCaDialogMessage, desktopCa.getNameLabel()))){
 					//user does not want to override
 					return false;
 				}
@@ -161,9 +162,9 @@ public class DownloadCaEngine {
 			int cnt = 0;
 			while (desktopCa != null && cnt < 3){
 				UserNamePasswordDialog dialog = new UserNamePasswordDialog(activeShell,
-						"Delete Conservation Area ",
-						"Enter your username and password for the Conservation Area to confirm that you want to delete this conservation area.",
-						"Delete");
+						Messages.DownloadCaEngine_DeleteConfirmTitle,
+						Messages.DownloadCaEngine_DeleteConfirmMessage,
+						Messages.DownloadCaEngine_DeleteConfirmButtonLabel);
 				if (dialog.open() == Window.CANCEL){
 					return false;
 				}
@@ -172,16 +173,16 @@ public class DownloadCaEngine {
 				String password = dialog.getPassword();
 				
 				smartUser = (Employee)s.createCriteria(Employee.class)
-						.add(Restrictions.eq("conservationArea", desktopCa))
-						.add(Restrictions.eq("smartUserId", userName))
+						.add(Restrictions.eq("conservationArea", desktopCa)) //$NON-NLS-1$
+						.add(Restrictions.eq("smartUserId", userName)) //$NON-NLS-1$
 						.uniqueResult();
 				if (smartUser != null &&  HibernateManager.validatePassword(password, smartUser)){
 					break;
 				}else if (smartUser != null && smartUser.getSmartUserLevel() != SmartUserLevel.ADMIN){
-					MessageDialog.openError(activeShell, "Error", "Admin permissions required to delete a conservation area.");
+					MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidPermission);
 					return false;
 				}
-				MessageDialog.openError(activeShell, "Error", "Invalid username/password.");
+				MessageDialog.openError(activeShell, Messages.DownloadCaEngine_ErrorDialogTitle, Messages.DownloadCaEngine_InvalidUser);
 				cnt++;
 			}
 			if (cnt >= 3){
@@ -214,17 +215,17 @@ public class DownloadCaEngine {
 					@Override
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 						DisplayAccess.accessDisplayDuringStartup();
-						monitor.setTaskName("Deleting Conservation Area");
+						monitor.setTaskName(Messages.DownloadCaEngine_DeleteTaskName);
 						try{
 							ConservationAreaManager.getInstance().deleteConservationArea(fdesktopCa, monitor, false);
 						}catch (final Exception ex){
 							cont[0] = false;
-							SmartPlugIn.displayLog("Failed to delete conservation area.", ex);	
+							SmartPlugIn.displayLog(Messages.DownloadCaEngine_CaDataError, ex);	
 						}		
 					}
 				});
 			}catch (Exception ex){
-				SmartPlugIn.displayLog( "Failed to delete conservation area.", ex);
+				SmartPlugIn.displayLog( Messages.DownloadCaEngine_CaDataError, ex);
 				return false;
 			}
 			if (!cont[0]) return false;

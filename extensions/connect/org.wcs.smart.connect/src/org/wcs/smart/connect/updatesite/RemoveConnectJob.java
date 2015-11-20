@@ -30,6 +30,7 @@ import org.hibernate.Session;
 import org.wcs.smart.SmartPlugIn;
 import org.wcs.smart.changetracking.ChangeLogInstaller;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
 import org.wcs.smart.hibernate.DerbyHibernateExtensions;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -52,7 +53,7 @@ public class RemoveConnectJob extends Job {
 	};
 	
 	public RemoveConnectJob() {
-		super("Remove connect plugin database tables.");
+		super(Messages.RemoveConnectJob_jobName);
 	}
 
 	@Override
@@ -78,7 +79,7 @@ public class RemoveConnectJob extends Job {
 					session.createSQLQuery("DROP TABLE SMART."+ TABLES[i]).executeUpdate(); //$NON-NLS-1$
 				}
 			}
-			session.createSQLQuery("DROP FUNCTION smart.uuid").executeUpdate();
+			session.createSQLQuery("DROP FUNCTION smart.uuid").executeUpdate(); //$NON-NLS-1$
 			
 			//clear version
 			HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, null, session);
@@ -87,10 +88,10 @@ public class RemoveConnectJob extends Job {
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					SmartPlugIn.displayLog("Error un-installing connect module.  Could not remove database tables.  Please contact your system administrator.", e);
+					SmartPlugIn.displayLog(Messages.RemoveConnectJob_UninstallError, e);
 				}
 			});
-			return new Status(IStatus.ERROR, ConnectPlugIn.PLUGIN_ID, 1, "Error uninstalling connect plugin. " + e.getLocalizedMessage(), e); 
+			return new Status(IStatus.ERROR, ConnectPlugIn.PLUGIN_ID, 1, Messages.RemoveConnectJob_UninstallError2 + e.getLocalizedMessage(), e); 
 		} finally {
 			if (session.getTransaction().isActive()) {
 				session.getTransaction().rollback();

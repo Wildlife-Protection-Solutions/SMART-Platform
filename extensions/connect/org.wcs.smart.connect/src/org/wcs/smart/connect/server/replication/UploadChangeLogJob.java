@@ -31,6 +31,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.WorkItemStatus;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServerStatus;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.server.FileUploaderJob;
@@ -54,7 +55,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 	public UploadChangeLogJob(ConnectSyncHistoryRecord item, 
 			SmartConnect connect) {
 		super(null, FileSystems.getDefault().getPath(SmartContext.INSTANCE.getFilestoreLocation(), item.getChangeLogZipFile()),
-				connect, "Upload changes to SMART Connect");
+				connect, Messages.UploadChangeLogJob_JobName);
 		this.item = item;
 	}
 
@@ -96,7 +97,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 		try{
 			String message = upstatus.getMessage();
 			JsonNode nd = (new ObjectMapper()).readTree(message);
-			long serverRevision = nd.get("server_revision").asLong();
+			long serverRevision = nd.get("server_revision").asLong(); //$NON-NLS-1$
 			
 			Session s = HibernateManager.openSession();
 			try{
@@ -109,7 +110,7 @@ public class UploadChangeLogJob extends FileUploaderJob {
 			}
 
 		}catch (Exception ex){
-			ConnectPlugIn.log("Could not parse server revision for upload sync response.  This will cause user to require download before they can upload again." + ex.getMessage(), ex);
+			ConnectPlugIn.log(Messages.UploadChangeLogJob_ParseError + ex.getMessage(), ex);
 		}
 		
 		item.setStatus(ConnectSyncHistoryRecord.Status.DONE);

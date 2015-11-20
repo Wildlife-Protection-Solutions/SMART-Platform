@@ -49,6 +49,7 @@ import org.wcs.smart.ca.Employee;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.ui.server.configure.ShowServerConfigurationHandler;
@@ -119,18 +120,18 @@ public class ConnectDialog extends TitleAreaDialog {
 		main.setLayout(new GridLayout(3, false));
 		main.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		Label l = new Label(main, SWT.NONE);
-		l.setText("Server:");
+		l.setText(Messages.ConnectDialog_ServerLabel);
 		
 		lblServer = new Label(main, SWT.NONE);
 		lblServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		cdServer = createControlDecoration(lblServer);
-		cdServer.setDescriptionText("Connect server not configured.");
+		cdServer.setDescriptionText(Messages.ConnectDialog_ServerNotConfiguredError);
 		
 		if (hideConfigure){
 			lblServer.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1));
 		}else{
 			Button btnConfigure = new Button(main, SWT.PUSH);
-			btnConfigure.setText("Configure...");
+			btnConfigure.setText(Messages.ConnectDialog_ConfigureLabel);
 			btnConfigure.addSelectionListener(new SelectionAdapter(){
 				@Override
 				public void widgetSelected(SelectionEvent e) {
@@ -140,25 +141,25 @@ public class ConnectDialog extends TitleAreaDialog {
 			});
 		}
 		l = new Label(main, SWT.NONE);
-		l.setText("Username:");
+		l.setText(Messages.ConnectDialog_UsernameLabel);
 		
 		txtUser = new Text(main, SWT.BORDER);
 		txtUser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
 		cdUser = createControlDecoration(txtUser);
-		cdUser.setDescriptionText("User required.");
+		cdUser.setDescriptionText(Messages.ConnectDialog_UsernameRequired);
 		
 		l = new Label(main, SWT.NONE);
-		l.setText("Password:");
+		l.setText(Messages.ConnectDialog_Password);
 		
 		txtPassword = new Text(main, SWT.BORDER | SWT.PASSWORD);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,2,1));
 		cdPassword = createControlDecoration(txtPassword);
-		cdPassword.setDescriptionText("Password required.");
+		cdPassword.setDescriptionText(Messages.ConnectDialog_PasswordRequired);
 		
 		new Label(main, SWT.NONE);
 		chSavePassword = new Button(main, SWT.CHECK);
-		chSavePassword.setText("Save Password");
-		chSavePassword.setToolTipText("Selecting will save the password to the database, unselecting will clear the password");
+		chSavePassword.setText(Messages.ConnectDialog_SaveText);
+		chSavePassword.setToolTipText(Messages.ConnectDialog_SaveToolTip);
 		chSavePassword.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
 		initData();
@@ -213,24 +214,24 @@ public class ConnectDialog extends TitleAreaDialog {
 			s.close();
 		}
 		
-		lblServer.setText("");
-		txtUser.setText("");
-		txtPassword.setText("");
+		lblServer.setText(""); //$NON-NLS-1$
+		txtUser.setText(""); //$NON-NLS-1$
+		txtPassword.setText(""); //$NON-NLS-1$
 		
 		if (cs != null){
 			lblServer.setText(cs.getServerUrl());
 		}
 		if (user != null){
 			txtUser.setText(user.getConnectUsername());
-			String decryptPass = "";
+			String decryptPass = ""; //$NON-NLS-1$
 			try{
 				decryptPass  = ConnectPlugIn.decryptPassword(user);
 			}catch (Exception ex){
-				ConnectPlugIn.log("Error decrypting password." + ex.getMessage(), ex);
+				ConnectPlugIn.log(Messages.ConnectDialog_DecryptError + ex.getMessage(), ex);
 			}
 			if (decryptPass == null){
-				txtPassword.setText("");
-				txtPassword.setData("");
+				txtPassword.setText(""); //$NON-NLS-1$
+				txtPassword.setData(""); //$NON-NLS-1$
 				chSavePassword.setSelection(false);
 			}else{
 				txtPassword.setText(decryptPass);
@@ -266,19 +267,19 @@ public class ConnectDialog extends TitleAreaDialog {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Connecting to SMART Connect", 2);
+					monitor.beginTask(Messages.ConnectDialog_ConnectingTask, 2);
 					monitor.worked(1);
 					
 					if (server.isEmpty()){
-						msgerror[0] = "Connect server required.  Use configure button to setup the connect server.";
+						msgerror[0] = Messages.ConnectDialog_ServerRequiredError;
 						return;
 					}
 					if (user.isEmpty()){
-						msgerror[0] = "Connect user name required.";
+						msgerror[0] = Messages.ConnectDialog_UserRequiredError;
 						return;
 					}
 					if (pass.isEmpty()){
-						msgerror[0] = "Connect password required.";
+						msgerror[0] = Messages.ConnectDialog_PasswordRequiredError;
 						return;
 					}
 					
@@ -301,7 +302,7 @@ public class ConnectDialog extends TitleAreaDialog {
 						try{
 							existingPassword = ConnectPlugIn.decryptPassword(ConnectDialog.this.user);
 						}catch (Exception ex){
-							existingPassword = "";
+							existingPassword = ""; //$NON-NLS-1$
 						}
 						String newPassword = null;
 						if (savePass){
@@ -333,7 +334,7 @@ public class ConnectDialog extends TitleAreaDialog {
 						}
 						
 					}catch (Exception ex){
-						ConnectPlugIn.displayLog("Unable to save password." + "\n" + ex.getMessage(), ex);
+						ConnectPlugIn.displayLog(Messages.ConnectDialog_SavePasswordError + "\n" + ex.getMessage(), ex); //$NON-NLS-1$
 					}
 					
 					
@@ -347,7 +348,7 @@ public class ConnectDialog extends TitleAreaDialog {
 		}
 		
 		if (msgerror[0] != null){
-			MessageDialog.openError(getShell(), "Error", msgerror[0]);
+			MessageDialog.openError(getShell(), Messages.ConnectDialog_ErrorDialogTitle, msgerror[0]);
 			return;
 		}
 		super.okPressed();

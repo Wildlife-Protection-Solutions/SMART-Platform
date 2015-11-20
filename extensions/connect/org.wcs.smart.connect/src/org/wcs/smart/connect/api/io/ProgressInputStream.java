@@ -24,6 +24,8 @@ package org.wcs.smart.connect.api.io;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.wcs.smart.connect.internal.Messages;
+
 /**
  * Wrapper around an input stream that checks the canceled state
  * of a progress monitor and throws and exception if the monitor
@@ -35,7 +37,7 @@ import java.io.InputStream;
  */
 public class ProgressInputStream extends InputStream{
 
-	private static final IOException CANCELLED_EXCEPTION = new IOException("User canceled", new InterruptedException());
+	private static final IOException CANCELLED_EXCEPTION = new IOException(Messages.ProgressInputStream_UserCancelled, new InterruptedException());
 	public InputStream wrapper;
 	public CopyProgressMonitor monitor; 
 	

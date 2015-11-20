@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.hibernate.SmartDB;
@@ -88,7 +89,7 @@ public class SyncChangeLogHandler {
 
 								@Override
 								public void run() {
-									MessageDialog.openInformation(activeShell, "SMART Connect - Sync Completed", "Sync with SMART Connect complete.  All changes have been download from and uploaded to the server.");
+									MessageDialog.openInformation(activeShell, Messages.SyncChangeLogHandler_DialogTitle, Messages.SyncChangeLogHandler_DialogMessage);
 								}
 								
 							});

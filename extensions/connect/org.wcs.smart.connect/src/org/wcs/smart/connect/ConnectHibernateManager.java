@@ -56,7 +56,7 @@ public class ConnectHibernateManager {
 	 */
 	public static ConnectServer getConnectServer(Session session, ConservationArea ca){
 		ConnectServer server = (ConnectServer) session.createCriteria(ConnectServer.class)
-				.add(Restrictions.eq("conservationArea", ca))
+				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
 				.uniqueResult();
 		return server;
 	}

@@ -41,6 +41,7 @@ import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy;
 import org.wcs.smart.connect.api.model.ConservationAreaProxy.Status;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 
 /**
@@ -54,7 +55,7 @@ public class ConnectCaListPage extends WizardPage implements ISelectionChangedLi
 	private ListViewer cmbList;
 	
 	public ConnectCaListPage(){
-		super("CALIST");
+		super("CALIST"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -65,7 +66,7 @@ public class ConnectCaListPage extends WizardPage implements ISelectionChangedLi
 		
 		
 		Label l = new Label(outer, SWT.NONE);
-		l.setText("SMART Connect Conservation Areas:");
+		l.setText(Messages.ConnectCaListPage_CaLabel);
 	
 		cmbList = new ListViewer(outer);
 		cmbList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -79,12 +80,12 @@ public class ConnectCaListPage extends WizardPage implements ISelectionChangedLi
 				return super.getText(element);
 			}
 		});
-		cmbList.setInput(new String[]{"Loading..."});
+		cmbList.setInput(new String[]{Messages.ConnectCaListPage_LoadingLabel});
 		cmbList.addSelectionChangedListener(this);
 		
 		
-		setTitle("Conservation Area");
-		setMessage("Select the Conservation Area to download and import.");
+		setTitle(Messages.ConnectCaListPage_Title);
+		setMessage(Messages.ConnectCaListPage_Message);
 		setControl(outer);
 	}
 
@@ -103,7 +104,7 @@ public class ConnectCaListPage extends WizardPage implements ISelectionChangedLi
 				@Override
 				public void run() {
 					if (dataca.isEmpty()){
-						setErrorMessage("No Conservation Areas found on server that you have permission to view.");
+						setErrorMessage(Messages.ConnectCaListPage_NoCa);
 					}
 					cmbList.setInput(dataca);		
 					cmbList.refresh();
@@ -113,19 +114,19 @@ public class ConnectCaListPage extends WizardPage implements ISelectionChangedLi
 			Display.getDefault().syncExec(new Runnable(){
 				@Override
 				public void run() {
-					cmbList.setInput(new String[]{"Error"});
-					setErrorMessage("Could not connect to server.  Ensure the url, certificate file, username and password are valid.");
+					cmbList.setInput(new String[]{Messages.ConnectCaListPage_ErrorLabel});
+					setErrorMessage(Messages.ConnectCaListPage_CouldNotConnect1);
 				}
 			});
 			
-			ConnectPlugIn.log("Could not connect to server.  Ensure the url, username and password are valid." + "\n\n" + ex.getMessage(), ex);
+			ConnectPlugIn.log(Messages.ConnectCaListPage_CouldNotConnect2 + "\n\n" + ex.getMessage(), ex); //$NON-NLS-1$
 			
 		}
 		
 	}
 	
 	public void clearList(){
-		cmbList.setInput(new String[]{"Loading..."});
+		cmbList.setInput(new String[]{Messages.ConnectCaListPage_LoadingLabel});
 	}
 	
 	public boolean isPageComplete(){

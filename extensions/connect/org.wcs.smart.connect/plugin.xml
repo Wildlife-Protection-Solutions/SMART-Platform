@@ -4,18 +4,15 @@
    <extension
          point="org.wcs.smart.hibernate.mapping">
       <class
-            class="org.wcs.smart.connect.model.ConnectServer"
-            include_ca_export="true">
+            class="org.wcs.smart.connect.model.ConnectServer">
       </class>
       <class
             ca_property=".server.conservationArea"
-            class="org.wcs.smart.connect.model.ConnectUser"
-            include_ca_export="true">
+            class="org.wcs.smart.connect.model.ConnectUser">
       </class>
       <class
             ca_property=".uuid"
-            class="org.wcs.smart.connect.model.ConnectServerStatus"
-            include_ca_export="false">
+            class="org.wcs.smart.connect.model.ConnectServerStatus">
       </class>
       <class
             class="org.wcs.smart.connect.model.ConnectSyncHistoryRecord">
@@ -33,23 +30,23 @@
          point="org.eclipse.ui.commands">
       <command
             id="org.wcs.smart.connect.configuration.show"
-            name="Server Configuration...">
+            name="%configure.command.name">
       </command>
       <command
             id="org.wcs.smart.connect.server.exportca"
-            name="Upload Conservation Area to Connect">
+            name="%uploadca.command.name">
       </command>
       <command
             id="org.wcs.smart.connect.server.changelog.up"
-            name="Upload Changes to Connect">
+            name="%uploadsync.command.name">
       </command>
       <command
             id="org.wcs.smart.connect.server.changelog.down"
-            name="Download Changes from Connect">
+            name="%downloadsync.command.name">
       </command>
       <command
             id="org.wcs.smart.connect.server.changelog.sync"
-            name="Sync All Changes to/from Connect">
+            name="%syncall.command.name">
       </command>
    </extension>
    <extension
@@ -59,7 +56,8 @@
             locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.report">
          <menu
                id="org.wcs.smart.connect.menu"
-               label="Connect">
+               label="%connect.menu.label"
+               mnemonic="%connect.menu.mnemonic">
             <command
                   commandId="org.wcs.smart.connect.server.changelog.sync"
                   style="push">
@@ -102,7 +100,7 @@
             <command
                   commandId="org.wcs.smart.connect.configuration.show"
                   style="push"
-                  tooltip="configure the smart connect server for this conservation area">
+                  tooltip="%configure.command.tooltip">
                <visibleWhen
                      checkEnabled="false">
                   <or>

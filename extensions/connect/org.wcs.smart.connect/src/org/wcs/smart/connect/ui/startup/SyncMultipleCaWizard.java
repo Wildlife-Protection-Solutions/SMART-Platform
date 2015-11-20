@@ -29,7 +29,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
@@ -42,6 +41,7 @@ import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.server.replication.SyncChangesRunnable;
@@ -61,7 +61,7 @@ public class SyncMultipleCaWizard extends Wizard {
 	
 	public SyncMultipleCaWizard(){
 		super();
-		setWindowTitle("Sync Multiple Conservation Areas");
+		setWindowTitle(Messages.SyncMultipleCaWizard_Title);
 		addPage(page1 = new LocalCaListPage());
 		super.setNeedsProgressMonitor(true);
 	}
@@ -83,9 +83,9 @@ public class SyncMultipleCaWizard extends Wizard {
 				@Override
 				public void run(IProgressMonitor monitor) throws InvocationTargetException,
 						InterruptedException {
-					monitor.beginTask("Syncing conservation areas", allCas.size() + 1);
+					monitor.beginTask(Messages.SyncMultipleCaWizard_SyncTaskName, allCas.size() + 1);
 					try{
-						monitor.subTask("Validating username / passwords");
+						monitor.subTask(Messages.SyncMultipleCaWizard_ValidateSubtaskName);
 						
 						List<CaUserDetails> details = validateCaUsers(activeShell, allCas, username, password);
 						monitor.worked(1 + (allCas.size() - details.size()));
@@ -96,7 +96,7 @@ public class SyncMultipleCaWizard extends Wizard {
 						try{
 							for (CaUserDetails cainfo : details){
 								if (monitor.isCanceled()){
-									errors.add("SYNC CANCELLED");
+									errors.add(Messages.SyncMultipleCaWizard_Cancelled);
 									break;
 								}
 								monitor.subTask(cainfo.ca.getNameLabel());
@@ -115,17 +115,14 @@ public class SyncMultipleCaWizard extends Wizard {
 				}
 			});
 		} catch (Exception e) {
-			errors.add(MessageFormat.format("Error Processing Conservation Areas - {0}.", e.getMessage()));
+			errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_CaError, e.getMessage()));
 			ConnectPlugIn.log(e.getMessage(), e);
 			return false;
 		} 
-		errors.add(0, MessageFormat.format("{0} of {1} Conservation Areas synced successfully.", okCnt[0], allCas.size()));
-		if (errors.size() > 0){
-			WarningDialog wd = new WarningDialog(activeShell, "Sync Warnings", "The following errors were generated while replicating Conservation Area data", errors);
-			wd.open();
-		}else{
-			MessageDialog.openInformation(activeShell, "Complete", "Sync Complete. {0} Conservation areas sync'd.");
-		}
+
+		errors.add(0, MessageFormat.format(Messages.SyncMultipleCaWizard_CompleteMessage, okCnt[0], allCas.size()));
+		WarningDialog wd = new WarningDialog(activeShell, Messages.SyncMultipleCaWizard_WarningsDialogTitle, Messages.SyncMultipleCaWizard_WarningsDialogMessage, errors);
+		wd.open();
 		return true;
 		
 	}
@@ -153,16 +150,16 @@ public class SyncMultipleCaWizard extends Wizard {
 			
 			String status = runnable.getStatus();
 			if (status != null){
-				errors.add(MessageFormat.format("{0} - ERROR - {1}.", details.ca.getNameLabel(), status));
+				errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_CaError1, details.ca.getNameLabel(), status));
 				return false;
 			}else{
-				errors.add(MessageFormat.format("{0} - COMPLETE.", details.ca.getNameLabel()));
+				errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_CaComplete, details.ca.getNameLabel()));
 				return true;
 			}
 			
 		} catch (Exception e) {
 			ConnectPlugIn.log(e.getMessage(), e);
-			errors.add(MessageFormat.format("{0} - ERROR - {1}.", details.ca.getNameLabel(), e.getMessage()));
+			errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_CaError1, details.ca.getNameLabel(), e.getMessage()));
 			return false;
 		}
 	}
@@ -189,8 +186,8 @@ public class SyncMultipleCaWizard extends Wizard {
 						@Override
 						public void run() {
 							UserNamePasswordDialog userPassDialog = new UserNamePasswordDialog(activeShell, 
-									"Username/Password",
-									MessageFormat.format("Invalid desktop username/password for Conservation Area {0}.  Re-enter username/password or skip", ca.getNameLabel()),
+									Messages.SyncMultipleCaWizard_UserpassDialogTitle,
+									MessageFormat.format(Messages.SyncMultipleCaWizard_UserpassDialogMessage, ca.getNameLabel()),
 									IDialogConstants.OK_LABEL,
 									IDialogConstants.SKIP_LABEL);
 							if (userPassDialog.open() == Window.OK){
@@ -208,7 +205,7 @@ public class SyncMultipleCaWizard extends Wizard {
 				}
 			}
 			if (e == null){
-				errors.add(MessageFormat.format("{0} - SKIPPED - Valid desktop account not provided.", ca.getNameLabel()));
+				errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_SkippedDesktopInvalid, ca.getNameLabel()));
 				continue;
 			}
 			
@@ -223,7 +220,7 @@ public class SyncMultipleCaWizard extends Wizard {
 				s.close();
 			}
 			if (server == null){
-				errors.add(MessageFormat.format("{0} - SKIPPED - No connect server found.", ca.getNameLabel()));
+				errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_SkippedServerInvalid, ca.getNameLabel()));
 				continue;
 			}
 			if (cu != null && cu.getConnectPassword() != null){
@@ -245,8 +242,8 @@ public class SyncMultipleCaWizard extends Wizard {
 					public void run() {
 						// TODO Auto-generated method stub
 						UserNamePasswordDialog userPassDialog = new UserNamePasswordDialog(activeShell, 
-								"Username/Password",
-								MessageFormat.format("Invalid SMART Connect username/password for Conservation Area {0}.  Re-enter username/password or skip", ca.getNameLabel()),
+								Messages.SyncMultipleCaWizard_UserpassDialogTitle,
+								MessageFormat.format(Messages.SyncMultipleCaWizard_ConnectUserpassDialogMessage, ca.getNameLabel()),
 								IDialogConstants.OK_LABEL,
 								IDialogConstants.SKIP_LABEL);
 						if (userPassDialog.open() == Window.OK){
@@ -257,7 +254,7 @@ public class SyncMultipleCaWizard extends Wizard {
 					
 				});
 				if (values[0] == null){
-					errors.add(MessageFormat.format("{0} - SKIPPED - No valid Connect user account found.", ca.getNameLabel()));
+					errors.add(MessageFormat.format(Messages.SyncMultipleCaWizard_SkippedServerAccountInvalid, ca.getNameLabel()));
 					break;
 				}
 				cu = new ConnectUser();

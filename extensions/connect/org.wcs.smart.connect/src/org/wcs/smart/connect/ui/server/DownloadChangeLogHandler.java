@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.server.replication.DownloadChangeLogEngine;
@@ -67,8 +68,8 @@ public class DownloadChangeLogHandler {
 		MessageDialog
 				.openInformation(
 						activeShell,
-						"Download",
-						"SMART will download changes in the background.  Once download, if there are changes to apply, you will be prompted before changes are applied.");
+						Messages.DownloadChangeLogHandler_DialogTitle,
+						Messages.DownloadChangeLogHandler_BackgroundProcessMessage);
 		
 		DownloadChangeLogEngine engine = new DownloadChangeLogEngine(ca, connect) {
 			protected void processComplete() {
@@ -92,16 +93,16 @@ public class DownloadChangeLogHandler {
 		Display.getDefault().syncExec(new Runnable() {
 				@Override
 				public void run() {
-					String title = "Download";
-					String message = "";
+					String title = Messages.DownloadChangeLogHandler_DialogTitle;
+					String message = ""; //$NON-NLS-1$
 					boolean error = false;
 					if(record.getStatus() == Status.DONE) {
-						message = "Download and apply completed successfully.";
+						message = Messages.DownloadChangeLogHandler_SuccessMessage;
 					}else if(record.getStatus() == Status.NODATA) {
-						message = "Local database up-to-date. Nothing to apply.";
+						message = Messages.DownloadChangeLogHandler_NothingToDoMessage;
 					}else {
-						title = "Download Error";
-						message = "Error: " + record.getErrorString();
+						title = Messages.DownloadChangeLogHandler_ErrorDialogTitle;
+						message = Messages.DownloadChangeLogHandler_ErrorMessage + record.getErrorString();
 						error=true;
 					}
 					if (error){

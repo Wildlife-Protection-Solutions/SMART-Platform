@@ -38,6 +38,7 @@ import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectHibernateManager;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 import org.wcs.smart.connect.replication.DerbyReplicationManager;
@@ -123,11 +124,11 @@ public class SyncOnStartupProcessor {
 	}
 
 	private boolean promptSync(boolean upload, Shell activeShell){
-		String title = "SMART Connect - Sync Changes";
-		String message = "Do you want to sync all changes with SMART Connect now?";
+		String title = Messages.SyncOnStartupProcessor_Title;
+		String message = Messages.SyncOnStartupProcessor_Message;
 		if (!upload){
-			title = "SMART Connect - Download Change";
-			message = "Do you want to download changes from SMART Connect now?";
+			title = Messages.SyncOnStartupProcessor_DownTitle;
+			message = Messages.SyncOnStartupProcessor_DownMessage;
 		}
 				
 		if (MessageDialog.openQuestion(activeShell, title,message)){

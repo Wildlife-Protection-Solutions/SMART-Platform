@@ -38,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.SmartConnect;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord;
 import org.wcs.smart.connect.model.ConnectSyncHistoryRecord.Status;
 import org.wcs.smart.connect.server.replication.NothingToUpdateException;
@@ -104,16 +105,16 @@ public class UploadChangeLogHandler {
 			public void run() {
 				if (record.getStatus() == ConnectSyncHistoryRecord.Status.DONE){
 					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
-						"SMART Connect Sync Upload", 
-						"Sync upload to SMART Connect complete.");
+						Messages.UploadChangeLogHandler_Title, 
+						Messages.UploadChangeLogHandler_CompleteMessage);
 				}else if (record.getStatus() == ConnectSyncHistoryRecord.Status.ERROR){
 					MessageDialog.openError(Display.getDefault().getActiveShell(), 
-							"SMART Connect Sync Upload", 
-							"An error occurred uploading changes to SMART Connect: "  + (record.getErrorString() == null ? "" : "\n\n" + record.getErrorString()));
+							Messages.UploadChangeLogHandler_Title, 
+							Messages.UploadChangeLogHandler_ErrorMessage  + (record.getErrorString() == null ? "" : "\n\n" + record.getErrorString()));  //$NON-NLS-1$//$NON-NLS-2$
 				}else if (record.getStatus() == ConnectSyncHistoryRecord.Status.NODATA){
 					MessageDialog.openInformation(Display.getDefault().getActiveShell(), 
-							"SMART Connect Sync Upload", 
-							"Server up-to-date.  There are no local changes to upload to the server.");
+							Messages.UploadChangeLogHandler_Title, 
+							Messages.UploadChangeLogHandler_NothingToDo);
 				}
 			}});
 		

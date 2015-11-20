@@ -51,6 +51,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.hibernate.HibernateManager;
 
@@ -67,7 +68,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 	private Text txtPassword;
 	
 	public LocalCaListPage(){
-		super("CALIST");
+		super("CALIST"); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -82,17 +83,17 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		((GridLayout)inner.getLayout()).marginWidth = 0;
 		
 		Label l = new Label(inner, SWT.NONE);
-		l.setText("Desktop Username:");
+		l.setText(Messages.LocalCaListPage_UsernameLabel);
 		txtUsername = new Text(inner, SWT.BORDER);
 		txtUsername.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 				
 		l = new Label(inner, SWT.NONE);
-		l.setText("Desktop Password:");
+		l.setText(Messages.LocalCaListPage_PasswordLabel);
 		txtPassword = new Text(inner, SWT.PASSWORD | SWT.BORDER);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
 		
 		l = new Label(outer, SWT.NONE);
-		l.setText("Conservation Areas:");
+		l.setText(Messages.LocalCaListPage_CaLabel);
 	
 		cmbList = CheckboxTableViewer.newCheckList(outer, SWT.BORDER | SWT.MULTI);
 		cmbList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
@@ -107,7 +108,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 				return super.getText(element);
 			}
 		});
-		cmbList.setInput(new String[]{"Loading..."});
+		cmbList.setInput(new String[]{Messages.LocalCaListPage_Loading});
 		cmbList.addSelectionChangedListener(this);
 		cmbList.getTable().addKeyListener(new KeyAdapter() {
 			
@@ -135,7 +136,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		links.setLayout(gl);
 		
 		Link selectAll = new Link(links, SWT.NONE);
-		selectAll.setText("<a>" + "Select All" + "</a>");
+		selectAll.setText("<a>" + Messages.LocalCaListPage_selectall + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		selectAll.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -144,7 +145,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		});
 		 
 		Link selectNone = new Link(links, SWT.NONE);
-		selectNone.setText("<a>" + "De-Select All" + "</a>");
+		selectNone.setText("<a>" + Messages.LocalCaListPage_deselectall + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		selectNone.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
@@ -153,8 +154,8 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		});
 		initList();
 		
-		setTitle("Conservation Area");
-		setMessage("Enter you desktop credentials and select the Conservation Areas you want to sync. ");
+		setTitle(Messages.LocalCaListPage_Title);
+		setMessage(Messages.LocalCaListPage_Message);
 		setControl(outer);
 	}
 	
@@ -166,6 +167,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 		return txtPassword.getText();
 	}
 
+	@SuppressWarnings("unchecked")
 	public void initList(){
 		final List<ConservationArea> ca = new ArrayList<ConservationArea>();
 		
@@ -180,7 +182,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 			}
 		}catch (Exception ex){
 			ConnectPlugIn.log(ex.getMessage(), ex);
-			setErrorMessage("Error loading conservation areas: " + ex.getMessage());
+			setErrorMessage(Messages.LocalCaListPage_CaLoadError + ex.getMessage());
 			return;
 		}finally{
 			s.close();
@@ -196,7 +198,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 			@Override
 			public void run() {
 				if (ca.isEmpty()){
-					setErrorMessage("No conservation areas with connect servers configured were found.");
+					setErrorMessage(Messages.LocalCaListPage_NoCaFound);
 				}
 				cmbList.setInput(ca);
 				cmbList.refresh();
@@ -206,7 +208,7 @@ public class LocalCaListPage extends WizardPage implements ISelectionChangedList
 	}
 	
 	public void clearList(){
-		cmbList.setInput(new String[]{"Loading..."});
+		cmbList.setInput(new String[]{Messages.LocalCaListPage_Loading});
 	}
 	
 	public boolean isPageComplete(){

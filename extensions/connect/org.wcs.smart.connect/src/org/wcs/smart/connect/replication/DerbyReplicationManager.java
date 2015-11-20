@@ -65,7 +65,7 @@ public enum DerbyReplicationManager {
 	 * The database property to identify if logging should occur.  Used
 	 * by the triggers to determine if changes should be logged.
 	 */
-	public static final String LOGGING_DB_PROPERTY = "org.wcs.smart.isLogging";
+	public static final String LOGGING_DB_PROPERTY = "org.wcs.smart.isLogging"; //$NON-NLS-1$
 	
 	
 	private Thread fileStoreReplication;
@@ -139,7 +139,7 @@ public enum DerbyReplicationManager {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection connection) throws SQLException {
-				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "null") + ")");
+				connection.createStatement().execute("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY('" + LOGGING_DB_PROPERTY + "', " + (isEnabled ? "true" : "null") + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			}});
 	}
 	/**
@@ -185,7 +185,7 @@ public enum DerbyReplicationManager {
 		return session.doReturningWork(new ReturningWork<Boolean>() {
 			@Override
 			public Boolean execute(Connection connection) throws SQLException {
-				String sql = "values syscs_util.syscs_get_database_property( '" + LOGGING_DB_PROPERTY + "' )";
+				String sql = "values syscs_util.syscs_get_database_property( '" + LOGGING_DB_PROPERTY + "' )"; //$NON-NLS-1$ //$NON-NLS-2$
 				
 				ResultSet rs = connection.createStatement().executeQuery(sql);
 				if (rs.next()){

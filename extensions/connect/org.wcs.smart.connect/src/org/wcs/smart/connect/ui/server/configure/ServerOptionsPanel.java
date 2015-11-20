@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectServerOption;
 
@@ -88,7 +89,7 @@ public class ServerOptionsPanel extends Composite {
 					//invalid number
 					txt.setData(VALID_KEY, false);
 					((ControlDecoration)txt.getData(CD_KEY)).show();
-					((ControlDecoration)txt.getData(CD_KEY)).setDescriptionText("Invalid number.  Must be an integer.");
+					((ControlDecoration)txt.getData(CD_KEY)).setDescriptionText(Messages.ServerOptionsPanel_InvalidNumber);
 				}
 				fireChange(e);
 			}
@@ -96,7 +97,7 @@ public class ServerOptionsPanel extends Composite {
 		optionCntrls = new HashMap<ConnectServerOption.Option, Text>();
 		for (ConnectServerOption.Option op : OPTION_KEYS){
 			Label l = new Label(this, SWT.NONE);
-			l.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(op) +":");
+			l.setText(ServerOptionLabelProvider.INSTANCE.getOptionLabel(op) +":"); //$NON-NLS-1$
 			l.setToolTipText(ServerOptionLabelProvider.INSTANCE.getOptionTooltip(op));
 			
 			Text txt = new Text(this, SWT.BORDER);
@@ -144,7 +145,7 @@ public class ServerOptionsPanel extends Composite {
 	public void initValues(ConnectServer server){
 		if (server == null){
 			for (Text l : optionCntrls.values()){
-				l.setText("N/A");
+				l.setText(Messages.ServerOptionsPanel_NotApplicable);
 				((ControlDecoration)l.getData(CD_KEY)).hide();	
 			}
 			return;

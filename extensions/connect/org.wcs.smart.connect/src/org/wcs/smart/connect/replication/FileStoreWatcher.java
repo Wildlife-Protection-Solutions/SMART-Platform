@@ -45,6 +45,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.ConnectPlugIn;
+import org.wcs.smart.connect.internal.Messages;
 import org.wcs.smart.connect.model.ChangeLogItem;
 import org.wcs.smart.connect.model.ChangeLogItem.Source;
 import org.wcs.smart.connect.server.replication.ChangeLogTableManager;
@@ -179,7 +180,7 @@ public class FileStoreWatcher implements Runnable{
 
 			Path dir = keys.get(key);
 			if (dir == null) {
-				ConnectPlugIn.log("Watchkey not recongized!", null);
+				ConnectPlugIn.log(Messages.FileStoreWatcher_Error, null);
 				continue;
 			}
 
@@ -188,7 +189,7 @@ public class FileStoreWatcher implements Runnable{
 
 				// TODO: - provide example of how OVERFLOW event is handled
 				if (kind == StandardWatchEventKinds.OVERFLOW) {
-					ConnectPlugIn.log("OVERFLOW FILE SYSTEM EVENTS", null);
+					ConnectPlugIn.log(Messages.FileStoreWatcher_Overflow, null);
 					continue;
 				}
 
@@ -211,7 +212,7 @@ public class FileStoreWatcher implements Runnable{
 				try {
 					processEvent(child, kind);
 				} catch (Throwable t) {
-					ConnectPlugIn.log("Error processing filestore event", t);
+					ConnectPlugIn.log(Messages.FileStoreWatcher_Error2, t);
 				}
 			}
 
