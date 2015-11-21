@@ -242,6 +242,13 @@ h2{
 	margin-top: 10px;
 }
 
+.download-icon{
+    background-image: url("download.png");
+    width:16px;
+    height: 16px;
+    background-repeat: no-repeat;
+    display: block;
+} 
 
 .run-icon{
 	background-image: url("run.png");
@@ -377,6 +384,7 @@ div.scrollable {
 	display:inline-block;
 	text-align: right;
 }
+
 
 
 /*----------------------------------------------------------------------*/
