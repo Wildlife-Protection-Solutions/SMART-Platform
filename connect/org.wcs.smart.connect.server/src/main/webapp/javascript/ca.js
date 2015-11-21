@@ -84,7 +84,7 @@ function confirmdeleteca(){
 	var cauuid = this.dataset.cauuid;
 	var status = this.dataset.status;
 	
-	if (status == 'DATA'){
+	if (status == 'DATA' || status == 'UPLOADING'){
 		document.querySelector("#deleteform > div#confirmtype").style.display = 'block';
 		document.querySelector("#deleteform > * > input[name=caoption][value=desktop]").checked = true;
 	}else{

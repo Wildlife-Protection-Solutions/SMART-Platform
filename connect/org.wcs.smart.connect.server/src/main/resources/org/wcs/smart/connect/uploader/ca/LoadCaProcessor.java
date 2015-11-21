@@ -60,6 +60,14 @@ public class LoadCaProcessor implements IUploadItemProcessor {
 
 			ConservationAreaInfo info = (ConservationAreaInfo) session.get(ConservationAreaInfo.class, item.getConservationAreaInfo().getUuid());
 			
+			if (info.getStatus() != ConservationAreaInfo.Status.UPLOADING){
+				if (info.getStatus() == ConservationAreaInfo.Status.NODATA){
+					throw new Exception("Conservation Area deleted from server before Conservation Area import completed.  You need to re-export the Conservation Area to SMART Connect.");	
+				}
+				//this shouldn't happen - somebody else has loaded data
+				throw new Exception("Another process has loaded data for this Conservation Area already.  Cannot duplicate data.");				
+			}
+			
 			//load data
 			PostgresqlCaLoader ldr = new PostgresqlCaLoader(session);
 			ldr.importData(DataStoreManager.INSTANCE.getFile(item.getLocalFilename()), info);
