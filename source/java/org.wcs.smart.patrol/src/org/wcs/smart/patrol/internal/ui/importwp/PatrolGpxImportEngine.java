@@ -60,6 +60,9 @@ public class PatrolGpxImportEngine extends GpxImportEngine {
 			if (option == ImportOption.ALL){
 				tracks = PatrolGPSDataImport.convertTracks(waypoints, patrol.getLegs());
 				message = MessageFormat.format(Messages.GpxImportEngine_ImportMultiTrack, new Object[]{tracks.size()});
+				if (tracks.size() == 0){
+					message += "\n" + Messages.PatrolGpxImportEngine_NotracksFound; //$NON-NLS-1$
+				}
 			}else{
 				Track track = PatrolGPSDataImport.convertToTrack(waypoints);
 				tracks.put(currentLeg, track);

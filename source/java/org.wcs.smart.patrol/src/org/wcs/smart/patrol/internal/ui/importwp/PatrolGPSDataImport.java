@@ -132,7 +132,7 @@ public class PatrolGPSDataImport {
 			}
 			if (addedWaypoints.size() == 0){
 				//nothing imported; not date matched
-				message = MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{ImportType.WAYPOINT.guiName, ImportType.WAYPOINT.guiName});
+				message = MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new  Object[]{ImportType.WAYPOINT.guiName.toLowerCase(), ImportType.WAYPOINT.guiName.toLowerCase()});
 			}else{
 				if (patrol.getLegs().size() == 1){
 					//only one leg; so this is the number of dates
@@ -394,6 +394,8 @@ public class PatrolGPSDataImport {
 	 * @return track
 	 */
 	public static Track convertToTrack(List<Waypoint> coordinates){
+		if (coordinates.isEmpty()) return null;
+		if (coordinates.size() == 1) throw new RuntimeException("Multiple points required to generate a track.  Only a single point found.");
 		LineString track = GPSDataImport.convertToLineString(coordinates, Track.ZTIMEZONE);
 		Track t = new Track();
 		t.setLineString(track);
