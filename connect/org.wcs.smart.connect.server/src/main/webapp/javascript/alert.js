@@ -1,4 +1,4 @@
-var ALERT_URL = "../api/connectalert/";
+var ALERT_URL = "../api/co9nnectalert/";
 //var ALERT_URL = "../api/connectalertbrokenonpurposetoTest/";
 var FILTER_URL = "../api/connectalertfilterdefault/";
 var interval = 7000; //# of milli-seconds between map refresh on the alert layer,
@@ -577,12 +577,13 @@ function getFilteredUrl(base){
 	var dateSelect = document.getElementById("filterDate").value;
 	hideError();	
 	if(dateSelect == -1){//custom dates
-		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();
+		var from = new Date(document.getElementById('datePickerFrom').value.substring(4)).getTime();//substring(4) drops the "Wed " from the field, which isnt' a valid date string.
 		var to = new Date(document.getElementById('datePickerTo').value.substring(4)).getTime() + 86399999; //use end of the day, since it is the "to" date.
+
 		if(isNaN(to) || isNaN(from) || from > to){
 			displayError(i18n("alert.invalidcustomdates"));
 		}else{
-			filteredUrl += "&startDateFilter=" + from;  //substring(4) drops the "Wed " from the field, which isnt' a valid date string. 
+			filteredUrl += "&startDateFilter=" + from;  
 			filteredUrl += "&endDateFilter=" + to 
 		}
 	}else if(dateSelect == -99){//all-time

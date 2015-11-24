@@ -111,6 +111,9 @@ public class QueryApi extends HttpServlet{
 			@QueryParam("end_date") String end,
 			@QueryParam("date_filter") String filter,
 			@QueryParam("delimiter") String delimiter){
+
+		UUID uuid = UuidUtils.stringToUuid(queryUuid);
+		
 		
 		Date startDate = null;
 		Date endDate = null;
@@ -153,12 +156,17 @@ public class QueryApi extends HttpServlet{
 			((CustomDateFilter)dfilter).setDates(startDate, endDate);
 		}
 		DateFilter df = new DateFilter(dateField, dfilter);
+
 		
-		UUID uuid = UuidUtils.stringToUuid(queryUuid);
-		Session s = HibernateManager.getSession(context, request.getLocale());
+		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();
 		Query query = null;
 		try{
+			//check for permission to this query for this user.
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid)){
+				return createErrorResponse(Status.BAD_REQUEST, "You do not have permissions to access this Query.");
+			}
+
 			query = QueryManager.INSTANCE.findQuery(uuid, s);
 
 			if (query == null){

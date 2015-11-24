@@ -51,14 +51,8 @@ public class QueryServlet extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Session session = HibernateManager.getSession(request.getServletContext(), request.getLocale());
-		session.beginTransaction();
-		try{
-			List<QueryProxy> allQueries = QueryManager.INSTANCE.getQueries(session, request.getLocale());
-			request.setAttribute("allqueries", allQueries);
-		}finally{
-			session.getTransaction().commit();
-		}
+		
+		request.setAttribute("search", request.getParameter("search")); //$NON-NLS-1$
 		request.getRequestDispatcher("/WEB-INF/query.jsp").forward(request, response); //$NON-NLS-1$
 	}
 

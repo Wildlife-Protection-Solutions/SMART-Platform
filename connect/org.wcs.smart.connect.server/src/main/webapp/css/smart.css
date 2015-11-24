@@ -385,7 +385,9 @@ div.scrollable {
 	text-align: right;
 }
 
-
+.small{
+	font-size:0.9em;
+}
 
 /*----------------------------------------------------------------------*/
 /* Tabbed Alerts page styles*/
