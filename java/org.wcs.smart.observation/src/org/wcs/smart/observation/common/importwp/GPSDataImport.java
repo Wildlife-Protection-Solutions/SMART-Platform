@@ -480,6 +480,9 @@ public class GPSDataImport {
 		Collections.sort(coordinates, new Comparator<Waypoint>() {
 			@Override
 			public int compare(Waypoint o1, Waypoint o2) {
+				if (o1.getDateTime() == null || o2.getDateTime() == null){
+					throw new RuntimeException("Some of the track points do not have date/times associated with them.  All track points need a date/time to import into SMART");
+				}
 				return o1.getDateTime().compareTo(o2.getDateTime());
 			}
 		});
