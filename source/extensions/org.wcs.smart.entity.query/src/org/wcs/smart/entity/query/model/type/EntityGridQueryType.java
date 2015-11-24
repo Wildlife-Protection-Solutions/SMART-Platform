@@ -128,7 +128,7 @@ public class EntityGridQueryType implements IQueryType {
 					DropItem[] items = super.generateDropItem(source, queryItemPanelId);
 					
 					if (source instanceof Area){
-						items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.TRACK) };				
+						items = new DropItem[]{ createAreaDropItem((Area)source, AreaFilter.AreaFilterGeometryType.WAYPOINT) };				
 					}
 					return items;					
 				}
