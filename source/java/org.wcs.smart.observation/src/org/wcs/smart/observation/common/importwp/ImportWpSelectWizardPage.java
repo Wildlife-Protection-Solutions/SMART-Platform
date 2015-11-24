@@ -174,7 +174,7 @@ public class ImportWpSelectWizardPage extends WizardPage implements IImportWizar
 		}
 		if (initialWaypoints == null || initialWaypoints.size() == 0){
 			String type = ((ImportGpsDataWizard)getWizard()).getType().guiName;
-			setErrorMessage(MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new Object[]{type, type}));
+			setErrorMessage(MessageFormat.format(Messages.ImportGpsDataWizard_GPS_WarningNoneFound, new Object[]{type.toLowerCase(), type.toLowerCase()}));
 			((ImportGpsDataWizard)getWizard()).setCanFinish(false);
 		}else{
 			setErrorMessage(null);
