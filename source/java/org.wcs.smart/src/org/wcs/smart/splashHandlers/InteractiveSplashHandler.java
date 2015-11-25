@@ -25,6 +25,7 @@ package org.wcs.smart.splashHandlers;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -303,15 +304,34 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 	 */
 	private void createUI() {
 		
-		fCompositeLogin = new Composite(getSplash(), SWT.BORDER);
+		fCompositeLogin = new Composite(getSplash(), SWT.NONE);
+		
 		GridLayout layout = new GridLayout(F_COLUMN_COUNT, false);
-		layout.marginLeft = 135;
-		layout.marginRight = 5;
-		layout.marginTop = 90;
 		fCompositeLogin.setLayout(layout);		
+
+		Composite left = new Composite(fCompositeLogin, SWT.NONE);
+		left.setLayout(new GridLayout());
+		left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridLayout)left.getLayout()).marginWidth = 0;
+		((GridLayout)left.getLayout()).marginHeight = 0;
+		((GridData)left.getLayoutData()).widthHint = 135;
+		
+		Label lblLang = new Label(left, SWT.NONE);
+		lblLang.setText(Locale.getDefault().getDisplayName());
+		lblLang.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, true, true));
+		
+		Composite right = new Composite(fCompositeLogin, SWT.NONE);
+		right.setLayout(new GridLayout(2, false));
+		((GridLayout)right.getLayout()).marginWidth = 0;
+		((GridLayout)right.getLayout()).marginHeight = 0;
+		right.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		
+		Label lblSpacer = new Label(right, SWT.NONE);
+		lblSpacer.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		((GridData)lblSpacer.getLayoutData()).heightHint = 90;
 		
 		//version label
-		Label lblVersion = new Label(fCompositeLogin, SWT.RIGHT);
+		Label lblVersion = new Label(right, SWT.RIGHT);
 		lblVersion.setText(MessageFormat.format(Messages.InteractiveSplashHandler_VersionLabel, new Object[]{System.getProperty("org.wcs.smart.version")})); //$NON-NLS-1$
 		lblVersion.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, true, false, 2, 1));
 		final Color blue = new Color(lblVersion.getDisplay(), 50, 74,115);
@@ -332,23 +352,22 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 			}
 		});
 		
-		Composite spanner = new Composite(fCompositeLogin, SWT.NONE);
+		Composite spanner = new Composite(right, SWT.NONE);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		data.horizontalSpan = F_COLUMN_COUNT;
 		spanner.setLayoutData(data);
 
-		
-		progressLabel = new Label(fCompositeLogin, SWT.RIGHT);
+		progressLabel = new Label(right, SWT.RIGHT);
 		progressLabel.setText("Progress Label"); //$NON-NLS-1$
 		data = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
 		progressLabel.setLayoutData(data);
 		progressLabel.setVisible(true);// false
 		
-		Label lblLabel = new Label(fCompositeLogin, SWT.NONE);
+		Label lblLabel = new Label(right, SWT.NONE);
 		lblLabel.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblLabel.setText(Messages.InteractiveSplashHandler_Ca_Label);
 		
-		Combo cmbConservationArea = new Combo(fCompositeLogin, SWT.DROP_DOWN | SWT.READ_ONLY);
+		Combo cmbConservationArea = new Combo(right, SWT.DROP_DOWN | SWT.READ_ONLY);
 		cmbConservationArea.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false, 1, 1));
 		widgets.add(cmbConservationArea);
 		
@@ -356,21 +375,21 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		cmvConservationArea.setContentProvider(ArrayContentProvider.getInstance());
 		cmvConservationArea.setLabelProvider(new ConservationAreaLabelProvider());		
 		
-		Label lblUserName = new Label(fCompositeLogin, SWT.NONE);
+		Label lblUserName = new Label(right, SWT.NONE);
 		lblUserName.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblUserName.setText(Messages.InteractiveSplashHandler_Username_Label);
 
 		// bug https://www.assembla.com/spaces/smart-cs/tickets/54#/activity/ticket:
-		cmbUserName = new Combo(fCompositeLogin, SWT.NONE);
+		cmbUserName = new Combo(right, SWT.NONE);
 		cmbUserName.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		widgets.add(cmbUserName);
 		
 
-		Label lblPassword = new Label(fCompositeLogin, SWT.NONE);
+		Label lblPassword = new Label(right, SWT.NONE);
 		lblPassword.setLayoutData(new GridData(SWT.RIGHT, SWT.CENTER, false, false, 1, 1));
 		lblPassword.setText(Messages.InteractiveSplashHandler_Password_Label);
 
-		txtPassword = new Text(fCompositeLogin, SWT.PASSWORD | SWT.BORDER);
+		txtPassword = new Text(right, SWT.PASSWORD | SWT.BORDER);
 		txtPassword.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 1, 1));
 		txtPassword.addKeyListener(new KeyAdapter() {
 			@Override
@@ -383,17 +402,17 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(txtPassword);
 
 		
-		lblAdvanced = new Link(fCompositeLogin, SWT.NONE);
+		lblAdvanced = new Link(right, SWT.NONE);
 		lblAdvanced.setText("<a>" + Messages.InteractiveSplashHandler_Advanced_Label + "</a>"); //$NON-NLS-1$ //$NON-NLS-2$
 		data = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 2, 1);
 		lblAdvanced.setLayoutData(data);
 		lblAdvanced.setVisible(true);// false
 		widgets.add(lblAdvanced);
 		
-		Label label = new Label(fCompositeLogin, SWT.NONE);
+		Label label = new Label(right, SWT.NONE);
 		label.setVisible(false);
 		
-		Composite composite_1 = new Composite(fCompositeLogin, SWT.NONE);
+		Composite composite_1 = new Composite(right, SWT.NONE);
 		GridLayout gl = new GridLayout(2, true);
 		gl.marginLeft = 40;
 		gl.marginRight = 0;
@@ -413,7 +432,7 @@ public class InteractiveSplashHandler extends AbstractSplashHandler {
 		widgets.add(btnOk);
 		widgets.add(btnCancel);
 	
-		fCompositeLogin.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, composite_1, lblAdvanced});
+		right.setTabList(new Control[]{cmvConservationArea.getControl(),cmbUserName, txtPassword, composite_1, lblAdvanced});
 		composite_1.setTabList(new Control[]{btnOk, btnCancel});
 		enableControls(false);
 		
