@@ -27,10 +27,12 @@ public enum PatrolValueOption {
 	NUM_MEMBERS("nummembers", PatrolLegMember.class), //$NON-NLS-1$
 	MAN_HOURS("manhours", PatrolLegDay.class), //$NON-NLS-1$
 	MAN_DAYS("mandays", Patrol.class), //$NON-NLS-1$
+	
 	NUM_PATROLS_TOTAL("totalnumpatrols", Patrol.class),  //$NON-NLS-1$
 	NUM_DAYS_TOTAL("totalnumdays", Patrol.class),  //$NON-NLS-1$
 	DISTANCE_TOTAL("totaldistance", Track.class),  //$NON-NLS-1$
-	NUM_HOURS_TOTAL("totalnumhours", PatrolLegDay.class),  //$NON-NLS-1$
+	NUM_FIELDHOURS_TOTAL("totalnumhours", PatrolLegDay.class),  //$NON-NLS-1$
+	NUM_PATROLHOURS_TOTAL("totalpatrolhours", PatrolLegDay.class),  //$NON-NLS-1$
 	MAN_HOURS_TOTAL("totalmanhours", PatrolLegDay.class),  //$NON-NLS-1$
 	MAN_DAYS_TOTAL("totalmandays", Patrol.class);  //$NON-NLS-1$
 

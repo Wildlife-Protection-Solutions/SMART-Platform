@@ -77,7 +77,6 @@ public class PatrolOptionData implements IPatrolOptionData{
 	 * @param keys
 	 * @return
 	 */
-//	@Override
 	public List<ListItem> getValues(Session session, String[] keys){
 		List<ListItem> results = new ArrayList<ListItem>();
 		PatrolQueryOptionType type = option.getType();

@@ -173,7 +173,7 @@ TOKEN :
 {
     < PATROL_VALUE_ITEM : ( "patrol:" < AGG > ":" < PATROL_VALUE_KEY > ) >
 |  	 < PATROL_VALUE_KEY  : ( "numpatrols" | "numdays" | "numnights" | "distance" | "numhours" | "numpatrolhours" | "nummembers" | "manhours" | "mandays") >
-|  	 < PATROL_VALUE_ENCOUNTERRATE_KEY  : "patrol:" < AGG > ":" ( "totalnumpatrols" | "totalnumdays" | "totaldistance" | "totalnumhours" | "totalmanhours" | "totalmandays") >
+|  	 < PATROL_VALUE_ENCOUNTERRATE_KEY  : "patrol:" < AGG > ":" ( "totalnumpatrols" | "totalnumdays" | "totaldistance" | "totalnumhours" | "totalpatrolhours" | "totalmanhours" | "totalmandays") >
 |    < SUM_CAT_VALUE_KEY : "category:sum:" ("obs" | "wp") ":" ( < DM_KEY > | "") >
 |    < SUM_ATTRIBUTE_VALUE_KEY : "attribute:n:" < AGG > ":" < DM_KEY > >
 |    < SUM_CAT_ATT_VALUE_KEY : "category:" < DM_KEY > ":" < SUM_ATTRIBUTE_VALUE_KEY > > 
