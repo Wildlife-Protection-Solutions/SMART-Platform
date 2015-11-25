@@ -90,8 +90,9 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_PATROLS_TOTAL: return Messages.PatrolQueryOptions_TotalNumPatrols;
 				case NUM_DAYS_TOTAL: return Messages.PatrolQueryOptions_TotalNumDays;   
 				case DISTANCE_TOTAL: return Messages.PatrolQueryOptions_TotalDistance;  
-				case NUM_HOURS_TOTAL: return Messages.PatrolQueryOptions_TotalNumHours; 
-				case MAN_HOURS_TOTAL: return Messages.PatrolQueryOptions_TotalPersonHours;
+				case NUM_PATROLHOURS_TOTAL: return Messages.PatrolQueryOptions_TotalNumHours1;
+				case NUM_FIELDHOURS_TOTAL: return "Total Number of Active Patrol Hours";
+				case MAN_HOURS_TOTAL: return Messages.PatrolQueryOptions_TotalPersonHours1;
 				case MAN_DAYS_TOTAL: return Messages.PatrolQueryOptions_TotalPersonDays;
 			}
 		}
@@ -139,7 +140,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_DISTANCE_ICON);
 			case NUM_PATROLHOURS:
 			case NUM_FIELDHOURS:
-			case NUM_HOURS_TOTAL:
+			case NUM_FIELDHOURS_TOTAL:
+			case NUM_PATROLHOURS_TOTAL:
 				return QueryPlugIn.getDefault().getImageRegistry().get(QueryPlugIn.VALUE_NUM_HOURS_ICON);
 			case NUM_MEMBERS:
 				return PatrolQueryPlugIn.getDefault().getImageRegistry().get(PatrolQueryPlugIn.VALUE_NUM_EMPLOYEES_ICON);

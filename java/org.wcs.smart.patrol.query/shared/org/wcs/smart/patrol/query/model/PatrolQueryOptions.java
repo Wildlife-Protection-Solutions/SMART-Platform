@@ -106,8 +106,9 @@ public class PatrolQueryOptions {
 		PatrolValueOption.DISTANCE,
 		PatrolValueOption.DISTANCE_TOTAL,
 		PatrolValueOption.NUM_FIELDHOURS,
+		PatrolValueOption.NUM_FIELDHOURS_TOTAL,
 		PatrolValueOption.NUM_PATROLHOURS,
-		PatrolValueOption.NUM_HOURS_TOTAL,
+		PatrolValueOption.NUM_PATROLHOURS_TOTAL,
 		PatrolValueOption.NUM_DAYS,
 		PatrolValueOption.NUM_DAYS_TOTAL,
 		PatrolValueOption.MAN_DAYS,
@@ -158,7 +159,8 @@ public class PatrolQueryOptions {
 		if ((option == PatrolValueOption.NUM_PATROLS_TOTAL)
 			|| 	(option == PatrolValueOption.NUM_DAYS_TOTAL)
 			|| 	(option == PatrolValueOption.DISTANCE_TOTAL)
-			|| 	(option == PatrolValueOption.NUM_HOURS_TOTAL)
+			|| 	(option == PatrolValueOption.NUM_PATROLHOURS_TOTAL)
+			|| 	(option == PatrolValueOption.NUM_FIELDHOURS_TOTAL)
 			|| 	(option == PatrolValueOption.MAN_HOURS_TOTAL)
 			|| 	(option == PatrolValueOption.MAN_DAYS_TOTAL)){
 			return false;
