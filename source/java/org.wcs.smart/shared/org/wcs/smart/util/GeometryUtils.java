@@ -267,15 +267,21 @@ public class GeometryUtils {
 					//outside envelop
 					continue;
 				}
-				if (pg.containsProperly(geomFactory.createLineString(new Coordinate[]{c1, c2}))){
+				LineString temp = geomFactory.createLineString(new Coordinate[]{c1, c2});
+				if (pg.containsProperly(temp)){
 					//entirely contained within
 					value += (c2.z - c1.z);
-				}else{
-					//part in and part out so linearly interpolate
-					double l1 = c2.distance(c1);
-					double l2 = pg.getGeometry().intersection(geomFactory.createLineString(new Coordinate[]{c1, c2})).getLength();
+				}else if (pg.intersects(temp)){
 					double time = c2.z - c1.z;
-					value += time * (l2 / l1);
+					double l1 = c2.distance(c1);
+					if (l1 == 0){
+						//the points are the same and intersect the polygon to include the entire length of time
+						value += time;
+					}else{
+						//compute the intersection
+						double l2 = pg.getGeometry().intersection(temp).getLength();
+						value += time * (l2 / l1);
+					}
 				}
 			}
 		}
