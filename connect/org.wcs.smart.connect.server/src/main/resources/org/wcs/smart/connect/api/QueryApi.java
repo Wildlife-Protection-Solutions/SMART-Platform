@@ -269,6 +269,12 @@ public class QueryApi extends HttpServlet{
 			//Get all Queries and check each one for specific permission to this user.
 			List<QueryProxy> all = QueryManager.INSTANCE.getQueries(s, request.getLocale());
 			for (QueryProxy q : all){
+				//Do they have access to all queries from this CA? if yes then add it.
+				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getCaUuid())){
+					allowed.add(q);
+				}
+				
+				//Do they have specific permission to this query? if yes then add it.
 				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, q.getUuid())){
 					allowed.add(q);
 				}

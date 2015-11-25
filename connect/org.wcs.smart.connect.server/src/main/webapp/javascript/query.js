@@ -1,7 +1,8 @@
 var QUERYURL = "../api/query/";
 var CAURL = "../api/conservationarea/";
 var queries;
-var to; //timeout to slow autosearch a bit
+var lastSorted;
+var to; //timeout to slow auto-search a bit. It is cleared each time another character/change is typed so we don't fire too many updates too fast.
 
 
 /* configure events on html elements */
@@ -82,6 +83,12 @@ function queryCallback(){
 }
 
 function sortTable(sortColumn){
+	if(lastSorted == sortColumn){
+		sortColumn = "-" + sortColumn;
+		lastSorted = ""; //set it to nothing, so if clicked a 3rd time it sorts in ascending order again.
+	}else{
+		lastSorted = sortColumn; 
+	}
  	queries.sort(dynamicSort(sortColumn));
  	createQueryTable();
 }
@@ -153,6 +160,9 @@ function isIn(text){
 	return false;
 }
 
+
+//provides a custom sorting function,  
+//param - property: the name of the key to sort on, "-" in the first character means sort descending 
 function dynamicSort(property) {
     var sortOrder = 1;
     if(property[0] === "-") {

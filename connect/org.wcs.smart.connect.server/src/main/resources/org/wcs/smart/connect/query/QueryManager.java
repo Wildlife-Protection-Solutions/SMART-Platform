@@ -152,7 +152,7 @@ public enum QueryManager {
 		for (Class<? extends Query> q : queryClasses){
 			List<Query> queries = session.createCriteria(q).list();
 			for (Query qq : queries){
-				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), qq.getConservationArea().getId(), qq.getId(), qq.getIsShared());
+				QueryProxy proxy = new QueryProxy(qq.getUuid(), qq.getName(), q.getSimpleName(), qq.getConservationArea().getId(), qq.getId(), qq.getIsShared(), qq.getConservationArea().getUuid());
 				if(qq.getIsShared() || includeMyQueries){
 					proxies.add(proxy);
 				}
@@ -163,12 +163,16 @@ public enum QueryManager {
 			@Override
 			public int compare(QueryProxy o1, QueryProxy o2) {
 				Collator textCompare = Collator.getInstance(l);
-				int r = textCompare.compare(o1.getConservationArea(), o2.getConservationArea());
-				if (r != 0) return r;
-				r = textCompare.compare(o1.getType(), o2.getType());
-				if (r != 0) return r;
-				r = textCompare.compare(o1.getName(), o2.getName());
-				return r;
+//This is the method to sort by CA, then type, then name.
+//				int r = textCompare.compare(o1.getConservationArea(), o2.getConservationArea());
+//				if (r != 0) return r;
+//				r = textCompare.compare(o1.getType(), o2.getType());
+//				if (r != 0) return r;
+//				r = textCompare.compare(o1.getName(), o2.getName());
+//				return r;
+				
+				//I want to sort by Name only for the user's security page. 
+				return textCompare.compare(o1.getName(), o2.getName());
 			}
 		});
 		return proxies;

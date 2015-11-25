@@ -24,14 +24,18 @@ package org.wcs.smart.connect.security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.Language;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
+import org.wcs.smart.query.model.Query;
 
 /**
  * Query actions.  This actions controls which users can view/run Queries
@@ -64,9 +68,17 @@ public class QueryAction implements ISmartConnectAction{
 		ResourceOption ro = new ResourceOption(Messages.getString("QueryAction.AllQueries", l), null); //$NON-NLS-1$
 		ops.add(ro);
 		
+		//Get all CAs and add an "All Queries from XYZ" option for each
+		List<ConservationAreaInfo> db = s.createCriteria(ConservationAreaInfo.class).list();
+		for (ConservationAreaInfo ca : db){
+			ResourceOption r = new ResourceOption(Messages.getString("QueryAction.AllQueriesfromCA", l)+ ca.getLabel(), ca.getUuid()); //$NON-NLS-1$
+			ops.add(r);
+		}
+		
+		
 		List<QueryProxy> info = QueryManager.INSTANCE.getQueries(s, l);
 		for (QueryProxy i : info){
-			ro = new ResourceOption(i.getName(), i.getUuid());
+			ro = new ResourceOption(i.getName() + "[" + i.getConservationArea() +"]", i.getUuid());
 			ops.add(ro);
 		}
 		
@@ -76,11 +88,16 @@ public class QueryAction implements ISmartConnectAction{
 	@Override
 	public String getResourceName(UUID resource, Session s, Locale l) {
 		if (resource == null) return Messages.getString("QueryAction.AllQueries", l); //$NON-NLS-1$
-		QueryProxy info = (QueryProxy) s.createCriteria(QueryProxy.class)
-				.add(Restrictions.eq("uuid", resource)) //$NON-NLS-1$
-				.uniqueResult();
-		if (info == null) return resource.toString();
-		return info.getName();
+		
+		
+		//Check if the resource is a CA UUIID
+		ConservationAreaInfo cainfo = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, resource);
+		if(cainfo != null){
+			return cainfo.getLabel();
+		}
+		Query q = QueryManager.INSTANCE.findQuery(resource, s); 
+		if (q == null) return resource.toString();
+		return q.getName() + "[" + q.getConservationArea().getId() +"]";
 	}
 
 }

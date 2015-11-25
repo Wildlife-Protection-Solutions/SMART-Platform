@@ -26,19 +26,23 @@ import java.util.UUID;
 public class QueryProxy {
 
 	private UUID uuid;
+	private UUID caUuid;
 	private String name;
 	private String type;
 	private String conservationAreaName;
 	private String id;
 	private Boolean isShared;
 	
-	public QueryProxy(UUID uuid, String name, String type, String caName, String id, Boolean isShared){
+	public QueryProxy(UUID uuid, String name, String type, String caName, String id, Boolean isShared, UUID caUuid){
 		this.uuid = uuid;
 		this.name = name;
 		this.type = type;
 		this.conservationAreaName = caName;
 		this.id = id;
+		this.setCaUuid(caUuid);
 	}
+	
+	
 	public UUID getUuid() {
 		return uuid;
 	}
@@ -75,6 +79,14 @@ public class QueryProxy {
 	}
 	public void setIsShared(Boolean isShared) {
 		this.isShared = isShared;
+	}
+
+
+	public UUID getCaUuid() {
+		return caUuid;
+	}
+	public void setCaUuid(UUID caUuid) {
+		this.caUuid = caUuid;
 	}
 	
 	

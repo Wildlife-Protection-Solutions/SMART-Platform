@@ -125,6 +125,7 @@ function setUserActions(){
 	ddactions.setAttribute("onchange", "updateActionResourceDropDown(); return false;");
 	
 	var ddresources = document.createElement("select");
+	ddresources.style.maxWidth = "24em";
 	ddresources.id = "actionResourceKey";
 	row.childNodes[1].appendChild(ddresources);
 	

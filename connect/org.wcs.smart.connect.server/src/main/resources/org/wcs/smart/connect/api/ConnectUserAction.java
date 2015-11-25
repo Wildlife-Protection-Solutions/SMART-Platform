@@ -145,7 +145,7 @@ public class ConnectUserAction extends HttpServlet {
     public List<SmartUserActionProxy> getUserActions(@PathParam("username") String username){
 		validateUser();
 		
-		Session s = HibernateManager.getSession(context);
+		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
 		s.beginTransaction();
 		try{
 			@SuppressWarnings("unchecked")
