@@ -108,7 +108,7 @@ public class PsqlObservationEngine extends AbstractQueryEngine {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, true, true);
 					
-					populateTemporaryTableExtra(c, session);
+					populateTemporaryTableExtra(c, caFilter.getConservationAreaFilterIds().size() > 1, session);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -229,7 +229,7 @@ public class PsqlObservationEngine extends AbstractQueryEngine {
 		}
 	}
 	
-	private void populateTemporaryTableExtra(Connection c, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
@@ -312,9 +312,7 @@ public class PsqlObservationEngine extends AbstractQueryEngine {
 		}
 		
 		//ca information
-//		if (SmartDB.isMultipleAnalysis()){
-		//TODO:
-		if (false){
+		if (isMultipleCa){
 			//ca id and names are only used for cross-ca analysis
 			sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$

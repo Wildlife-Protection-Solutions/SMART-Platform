@@ -46,6 +46,10 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		return PatrolQuery.KEY.equals(querytype);
 	}
 	
+	public Session getCurrentSession(){
+		return session;
+	}
+	
 	public String getDataQuery(){
 		StringBuilder fields = new StringBuilder();
 		fields.append("ca_id,ca_name, r_p_ca_uuid, r_p_uuid,");

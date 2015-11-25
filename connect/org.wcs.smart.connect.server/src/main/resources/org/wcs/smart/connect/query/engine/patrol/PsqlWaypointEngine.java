@@ -130,7 +130,7 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 							cafilter, 
 							false, true);
 					
-					populateTemporaryTableExtra(c, session);
+					populateTemporaryTableExtra(c, cafilter.getConservationAreaFilterIds().size() > 1, session);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -188,7 +188,7 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 		}
 	}
 	
-	private void populateTemporaryTableExtra(Connection c, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
@@ -253,29 +253,26 @@ public class PsqlWaypointEngine extends AbstractQueryEngine {
 			leaderSt.executeBatch();
 		}
 
-		//ca information
-		//TODO:
-//		if (SmartDB.isMultipleAnalysis()){
-//			//ca id and names are only used for cross-ca analysis
-//			monitor.subTask(Messages.DerbyObservationEngine_Progress_CaInfo);
-//			sql = new StringBuilder();
-//			sql.append("UPDATE "); //$NON-NLS-1$
-//			sql.append(queryDataTable);
-//			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-//			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-//			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-//			QueryPlugIn.logSql(sql.toString());
-//			c.createStatement().executeUpdate(sql.toString());
-//			
-//			sql = new StringBuilder();
-//			sql.append("UPDATE "); //$NON-NLS-1$
-//			sql.append(queryDataTable);
-//			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-//			sql.append(DerbyPatrolQueryEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-//			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-//			QueryPlugIn.logSql(sql.toString());
-//			c.createStatement().executeUpdate(sql.toString());
-//		}
+		if (isMultipleCa){
+			//ca id and names are only used for cross-ca analysis
+			sql = new StringBuilder();
+			sql.append("UPDATE "); //$NON-NLS-1$
+			sql.append(queryDataTable);
+			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
+			sql.append(PsqlPatrolEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
+			logger.finest(sql.toString());
+			c.createStatement().executeUpdate(sql.toString());
+			
+			sql = new StringBuilder();
+			sql.append("UPDATE "); //$NON-NLS-1$
+			sql.append(queryDataTable);
+			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
+			sql.append(PsqlPatrolEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
+			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
+			logger.finest(sql.toString());
+			c.createStatement().executeUpdate(sql.toString());
+		}
 	
 	}
 

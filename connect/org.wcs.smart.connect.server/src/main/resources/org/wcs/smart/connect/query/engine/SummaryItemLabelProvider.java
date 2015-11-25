@@ -48,6 +48,7 @@ import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.NamedItem;
+import org.wcs.smart.ca.NamedKeyItem;
 import org.wcs.smart.ca.datamodel.Aggregation;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
@@ -76,11 +77,15 @@ import org.wcs.smart.intelligence.query.IntelligencePatrolGroupBy;
 import org.wcs.smart.observation.model.IWaypointSource;
 import org.wcs.smart.observation.query.model.filter.WaypointSourceGroupBy;
 import org.wcs.smart.patrol.model.Patrol;
+import org.wcs.smart.patrol.model.PatrolMandate;
+import org.wcs.smart.patrol.model.PatrolTransportType;
 import org.wcs.smart.patrol.model.PatrolType;
+import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
@@ -113,12 +118,12 @@ public class SummaryItemLabelProvider {
 	
 	private Locale l;
 	private Session s;
-	private ConservationArea ca;
+	private ConservationAreaFilter caFilter;
 	
-	public SummaryItemLabelProvider(Locale l ,Session s, ConservationArea ca){
+	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter){
 		this.l = l;
 		this.s = s;
-		this.ca = ca;
+		this.caFilter = caFilter;
 	}
 	public String getName(IValueItem item){
 		
@@ -160,18 +165,19 @@ public class SummaryItemLabelProvider {
 	private Attribute getAttribute(String key){
 		return (Attribute) s.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", key))
-				.add(Restrictions.eq("conservationArea", ca))
+				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 				.uniqueResult();
 	}
 	
 	private Category getCategory(String catHkey){
 		return (Category) s.createCriteria(Category.class)
 				.add(Restrictions.eq("hkey", catHkey))
-				.add(Restrictions.eq("conservationArea", ca))
+				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 				.uniqueResult();
 	}
 	
 	private AttributeListItem getAttributeListIem(String key, Attribute a){
+		//TODO: support ccaa queries 
 		return (AttributeListItem) s.createCriteria(AttributeListItem.class)
 				.add(Restrictions.eq("keyId", key))
 				.add(Restrictions.eq("attribute", a))
@@ -179,6 +185,7 @@ public class SummaryItemLabelProvider {
 	}
 	
 	private AttributeTreeNode getAttributeTreeItem(String hkey, Attribute a){
+		//TODO: support ccaa queries
 		return (AttributeTreeNode) s.createCriteria(AttributeTreeNode.class)
 				.add(Restrictions.eq("hkey", hkey))
 				.add(Restrictions.eq("attribute", a))
@@ -332,7 +339,7 @@ public class SummaryItemLabelProvider {
 			
 			List<Area> matching = s
 					.createCriteria(Area.class)
-					.add(Restrictions.eq("conservationArea", ca))
+					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 					.add(Restrictions.in("keyId", filterkeys)) //$NON-NLS-1$
 					.add(Restrictions.eq("type", areaType)).list(); //$NON-NLS-1$
 			
@@ -352,7 +359,7 @@ public class SummaryItemLabelProvider {
 		}else{
 			List<Area> matching = s
 					.createCriteria(Area.class)
-					.add(Restrictions.eq("conservationArea", ca))
+					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 					.add(Restrictions.eq("type", areaType)).list(); //$NON-NLS-1$
 			
 			for (Area a : matching){
@@ -439,8 +446,8 @@ public class SummaryItemLabelProvider {
 				}
 			}
 		}else{
-			Query q = s.createQuery("FROM Category WHERE conservationArea = :ca and  (length(hkey) - length(replace(hkey, '.', ''))) - 1 = :level");
-			q.setParameter("ca", ca);
+			Query q = s.createQuery("FROM Category WHERE conservationArea.uuid in (:ca) and  (length(hkey) - length(replace(hkey, '.', ''))) - 1 = :level");
+			q.setParameterList("ca", caFilter.getConservationAreaFilterIds());
 			q.setParameter("level", item.getTreeLevel());
 			List<Category> cats = q.list();
 			for(Category child : cats){
@@ -502,9 +509,9 @@ public class SummaryItemLabelProvider {
 		} else {
 			if (dateFilter.getDates() == null) {
 				// all daytes
-				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
+				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
 				Query q = s.createQuery(hql);
-				q.setParameterList("ca", Collections.singleton(ca)); //$NON-NLS-1$
+				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
@@ -546,9 +553,9 @@ public class SummaryItemLabelProvider {
 		} else {
 			if (dateFilter.getDates() == null) {
 				// all daytes
-				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
+				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
 				Query q = s.createQuery(hql);
-				q.setParameterList("ca", Collections.singleton(ca)); //$NON-NLS-1$
+				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
@@ -598,9 +605,9 @@ public class SummaryItemLabelProvider {
 		} else {
 			if (dateFilter.getDates() == null) {
 				// all daytes
-				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea  IN(:ca)"; //$NON-NLS-1$
+				String hql = "SELECT min(dateTime) from Waypoint WHERE conservationArea.uuid IN (:ca)"; //$NON-NLS-1$
 				Query q = s.createQuery(hql);
-				q.setParameterList("ca", Collections.singleton(ca)); //$NON-NLS-1$
+				q.setParameterList("ca", caFilter.getConservationAreaFilterIds()); //$NON-NLS-1$
 
 				List<?> data = q.list();
 				if (data != null && data.size() >= 1 && data.get(0) != null) {
@@ -642,7 +649,7 @@ public class SummaryItemLabelProvider {
 		//get children categories
 		List<ListItem> items = new ArrayList<ListItem>();
 		EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class)
-				.add(Restrictions.eq("entityType.conservationArea", ca))
+				.add(Restrictions.in("entityType.conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 				.add(Restrictions.eq("keyId", item.getEntityAttributeKey()))
 				.add(Restrictions.eq("entityType.keyId", item.getEntityAttributeKey()))
 				.uniqueResult();
@@ -695,7 +702,7 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(MissionAttributeGroupBy item){
 		MissionAttribute ma = (MissionAttribute) s.createCriteria(MissionAttribute.class)
 				.add(Restrictions.eq("keyId", item.getAttributeKey())) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 				.uniqueResult();
 		if (ma == null){
 			logger.warning(MessageFormat.format("Mission attribute not found {0}.", item.getAttributeKey()));;
@@ -746,7 +753,7 @@ public class SummaryItemLabelProvider {
 			}		
 		}else{
 			List<Employee> es = s.createCriteria(Employee.class)
-					.add(Restrictions.eq("conservationArea", ca))
+					.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds()))
 					.list();
 			Collections.sort(es, new Comparator<Employee>() {
 				@Override
@@ -776,16 +783,25 @@ public class SummaryItemLabelProvider {
 					uuidkeys[i] = UuidUtils.stringToUuid(keys[i]);
 				}
 				c = c.add(Restrictions.in("uuid", uuidkeys)); //$NON-NLS-1$
+			}else{
+				//ca filter
+				if (item.getOption() == PatrolQueryOption.RANK){
+					c.add(Restrictions.in("agency.conservationArea", caFilter.getConservationAreaFilterIds()));
+				}else if (item.getOption() == PatrolQueryOption.CONSERVATION_AREA){
+					c.add(Restrictions.in("uuid", caFilter.getConservationAreaFilterIds()));
+				}else{
+					c.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()));
+				}
 			}
 			Collection<?> data = c.list();
-			
+			List<UUID> caUuids = caFilter.getConservationAreaFilterIds();
 			for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 				Object object = (Object) iterator.next();
 				if (object instanceof NamedItem){
 					results.add(new ListItem(((NamedItem) object).getUuid(), ((NamedItem) object).getName()));
 				}else if (object instanceof Employee){
 					Employee e = (Employee)object;
-					if (e.getConservationArea().equals(ca)){
+					if (caUuids.contains(e.getConservationArea().getUuid())){
 						results.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullName((Employee) e)));
 					}
 				}else if (object instanceof ConservationArea){
@@ -796,16 +812,24 @@ public class SummaryItemLabelProvider {
 				}
 			}
 		}else if (type == PatrolQueryOptionType.KEY){
-			Collection<?> data = null;
-			if (ca.equals(ConservationArea.MULTIPLE_CA)){
-				//TODO:
-//				if (option == PatrolQueryOption.TEAM_KEY){
-//					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getTeams(session);
-//				}else if (option == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
-//					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getTransportTypes(session);
-//				}else if (option == PatrolQueryOption.MANDATE_KEY){
-//					data = ((MultiCaPatrolQueryHibernateManagerImpl)PatrolQueryHibernateManager.getInstance()).getMandates(session);
-//				}
+			Class<?> queryClazz = null;
+			if (item.getOption() == PatrolQueryOption.TEAM_KEY){
+				queryClazz = Team.class;
+			}else if (item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_TYPE_KEY){
+				queryClazz = PatrolTransportType.class;
+			}else if (item.getOption() == PatrolQueryOption.MANDATE_KEY){
+				queryClazz = PatrolMandate.class;
+			}
+			if (queryClazz == null){
+				throw new UnsupportedOperationException("Patrol Query option not supported: " + item.getOption());	
+			}
+			List<ListItem> data = new ArrayList<ListItem>();
+			Criteria c = s.createCriteria(queryClazz)
+					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()));
+			for (Iterator<?> it = c.list().iterator(); it.hasNext();){
+				NamedKeyItem nkitem = (NamedKeyItem)it.next();
+				data.add(new ListItem(null, nkitem.getName(),nkitem.getKeyId()));
+					
 			}
 			if (data != null){
 				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
@@ -818,7 +842,7 @@ public class SummaryItemLabelProvider {
 		}else if (type == PatrolQueryOptionType.STRING){
 			if (item.getOption() == PatrolQueryOption.ID){
 				Criteria c = s.createCriteria(item.getOption().getSourceClass())
-						.add(Restrictions.eq("conservationArea", ca)); //$NON-NLS-1$
+						.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
 				if (keys != null){
 					c = c.add(Restrictions.in(item.getOption().getColumnName(), keys));
 				} 
@@ -846,7 +870,7 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(SamplingUnitAttributeGroupBy item){
 		SamplingUnitAttribute su = (SamplingUnitAttribute) s.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.eq("keyId", item.getAttributeKey())) //$NON-NLS-1$
-				.add(Restrictions.eq("conservationArea", ca)) //$NON-NLS-1$
+				.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 				.uniqueResult();
 		if (su == null){
 			logger.warning(MessageFormat.format("Sampling unit attribute not found {0}.", item.getAttributeKey()));

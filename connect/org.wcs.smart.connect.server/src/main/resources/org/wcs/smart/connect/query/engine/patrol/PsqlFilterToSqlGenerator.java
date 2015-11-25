@@ -52,6 +52,12 @@ import org.wcs.smart.er.query.filter.SamplingUnitFilter.Type;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.SurveyFilter;
 import org.wcs.smart.er.query.filter.TrackTypeFilter;
+import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackQuery;
+import org.wcs.smart.er.query.model.SurveyGriddedQuery;
+import org.wcs.smart.er.query.model.SurveyObservationQuery;
+import org.wcs.smart.er.query.model.SurveySummaryQuery;
+import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -62,9 +68,14 @@ import org.wcs.smart.patrol.model.PatrolLegDay;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
+import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
+import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
+import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
+import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
+import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
 import org.wcs.smart.query.common.engine.IQueryEngine;
@@ -197,18 +208,31 @@ public enum PsqlFilterToSqlGenerator {
 			sb.append( filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(")");  //$NON-NLS-1$
 		}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){
-			sb.append("smart.intersects(");  //$NON-NLS-1$
-			sb.append(engine.tablePrefix(Track.class) + ".geometry, ");  //$NON-NLS-1$
-			sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
-			sb.append(")");  //$NON-NLS-1$
+			if (engine.canExecute(PatrolObservationQuery.KEY) ||
+					engine.canExecute(PatrolGriddedQuery.KEY) ||
+					engine.canExecute(PatrolQuery.KEY) ||
+					engine.canExecute(PatrolSummaryQuery.KEY) ||
+					engine.canExecute(PatrolWaypointQuery.KEY)){
+				//For Patrol Queries use track
+				//user track table
+				sb.append("smart.intersects(");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Track.class) + ".geometry, ");  //$NON-NLS-1$
+				sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(")");  //$NON-NLS-1$
+			}else if (engine.canExecute(SurveyObservationQuery.KEY) ||
+					engine.canExecute(SurveyGriddedQuery.KEY) ||
+					engine.canExecute(MissionQuery.KEY) ||
+					engine.canExecute(MissionTrackQuery.KEY) ||
+					engine.canExecute(SurveySummaryQuery.KEY) ||
+					engine.canExecute(SurveyWaypointQuery.KEY)){
+				//survey queries use mission track table
+				sb.append("smart.intersects(");  //$NON-NLS-1$
+				sb.append(engine.tablePrefix(MissionTrack.class) + ".geometry, ");  //$NON-NLS-1$
+				sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(")");  //$NON-NLS-1$
+			}
 		}
-		//TODO:
-//	}else if (filter.getGeometryType() == AreaFilterGeometryType.TRACK){
-//		sb.append("smart.intersects(");  //$NON-NLS-1$
-//		sb.append(engine.tablePrefix(MissionTrack.class) + ".geometry, ");  //$NON-NLS-1$
-//		sb.append(filter.getType().name() + "_" + filter.getKey() + ".geom");  //$NON-NLS-1$ //$NON-NLS-2$
-//		sb.append(")");  //$NON-NLS-1$
-//		
+		
 		return sb.toString();
 	}
 	
@@ -331,16 +355,13 @@ public enum PsqlFilterToSqlGenerator {
 	public String asSql(ConservationAreaFilter filter, String caTablePrefix, IQueryEngine engine) throws SQLException{
 		ArrayList<UUID> localFilters = new ArrayList<UUID>();
 		if (filter.includeAll()){
-			//include all current conservation areas??
-			//TODO: 
-//			if (SmartDB.getConservationAreaConfiguration() != null){
-//				for (ConservationArea ca : SmartDB.getConservationAreaConfiguration().getConservationAreas()){
-//					localFilters.add(ca.getUuid());
-//				}
-//			}else{
-//				localFilters.add(SmartDB.getCurrentConservationArea().getUuid());
-//			}
+			//we don't want to include all conservation area here as 
+			//this may include conservation areas this user does not have access to view
+			
+			//for now we force the user to provide the conservation areas
+			throw new SQLException("Conservation Area filter not populated.  At least one conservation area must be provided in the Conservation Area filter.");
 		}else{
+			//TODO: this may include ca's the user does not have access to view
 			//include only selected conservation areas
 			localFilters.addAll(filter.getConservationAreaFilterIds());
 		}
@@ -461,13 +482,9 @@ public enum PsqlFilterToSqlGenerator {
 		}
 		throw new SQLException(MessageFormat.format("Operator {0} not supported.", new Object[]{op.getGuiValue()}));
 	}
-	
-	
-
-
 		
 	/*
-	 * not expression
+	 * extension filters
 	 */
 	protected String asSql(IExtensionFilter filter, IQueryEngine engine) throws SQLException{
 		//TODO:

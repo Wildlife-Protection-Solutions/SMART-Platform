@@ -1544,7 +1544,12 @@ public class PsqlSummaryEngine extends AbstractQueryEngine{
 			SummaryQueryResult results,
 			Locale l,
 			Session session) throws Exception{
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, query.getConservationArea()); 
+		
+		ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), Collections.singleton(query.getConservationArea()));
+		if(!query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+			cafilter.addConservationArea(query.getConservationArea());
+		}
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();

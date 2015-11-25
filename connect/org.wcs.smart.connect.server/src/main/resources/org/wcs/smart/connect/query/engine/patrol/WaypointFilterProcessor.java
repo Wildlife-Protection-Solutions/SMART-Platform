@@ -313,7 +313,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 		
 			// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
 		//QueryPlugIn.logSql(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
@@ -400,7 +400,7 @@ public class WaypointFilterProcessor implements IFilterProcessor{
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(colName);
-			sql.append("(wp_uuid char(16) for bit data)"); //$NON-NLS-1$
+			sql.append("(wp_uuid uuid)"); //$NON-NLS-1$
 			//QueryPlugIn.logSql(sql.toString());
 			c.createStatement().execute(sql.toString());
 
