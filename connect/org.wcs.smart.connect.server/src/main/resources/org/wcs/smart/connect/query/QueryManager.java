@@ -31,6 +31,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Projections;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsSummaryEngine;
@@ -41,6 +42,8 @@ import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
+import org.wcs.smart.connect.security.ActionManager;
+import org.wcs.smart.connect.security.ISmartConnectAction;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
@@ -238,5 +241,17 @@ public enum QueryManager {
 		org.hibernate.Query q = session.createQuery("SELECT max(length(hkey) - length(replace(hkey, '.', ''))) FROM Category WHERE conservationArea.uuid = :cauuid");
 		q.setParameter("cauuid", caUuid);
 		return ((Integer)q.uniqueResult() + 1);
+	}
+
+	public void RemoveAccessToQueriesFromCa(UUID uuid, Session s, Locale locale) {
+		List<UUID> list = null;
+		for (Class<? extends Query> q : queryClasses){
+			list = s.createCriteria(q).setProjection(Projections.property("uuid")).list();
+			if(list != null && list.size() > 0){
+				org.hibernate.Query q1 = s.createQuery("DELETE FROM SmartUserAction WHERE resource in (:list)");
+				q1.setParameterList("list", list);
+				q1.executeUpdate();
+			}
+		}
 	}
 }

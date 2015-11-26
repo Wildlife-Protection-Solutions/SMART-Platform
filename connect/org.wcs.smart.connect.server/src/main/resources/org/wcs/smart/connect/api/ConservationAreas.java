@@ -79,6 +79,8 @@ import org.wcs.smart.connect.model.SmartUser;
 import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
+import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;
@@ -604,7 +606,7 @@ public class ConservationAreas extends HttpServlet{
 		}
 		
 		UUID caUuidToDelete = null;
-		Session s = HibernateManager.getSession(context);
+		Session s = HibernateManager.getSession(context, SmartUtils.getRequestLocale(request));
 		s.beginTransaction();
 		try{
 			SmartUser su = HibernateManager.getUser(s, username);
@@ -625,6 +627,14 @@ public class ConservationAreas extends HttpServlet{
 			}
 			validateDelete(serverDelete.getUuid(), s);
 
+			
+			//need to do some of the (deleteall) work before the desktop data is gone
+			caUuidToDelete = serverDelete.getUuid();
+			if (deleteAll){
+				// delete query actions associated with any query from the CA being deleted
+				QueryManager.INSTANCE.RemoveAccessToQueriesFromCa(serverDelete.getUuid(), s, request.getLocale());
+			}
+			
 			//delete desktop data
 			String query = "DELETE FROM smart.conservation_area WHERE uuid = :uuid";
 			Query q = s.createSQLQuery(query);
@@ -641,10 +651,6 @@ public class ConservationAreas extends HttpServlet{
 			
 			caUuidToDelete = serverDelete.getUuid();
 			if (deleteAll){
-				//TODO: delete query actions associated with resource
-//				q = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT= :ca");
-//				q.setParameter("ca", serverDelete.getUuid());
-//				q.executeUpdate();
 				
 				//delete actions associated with resource
 				q = s.createQuery("DELETE FROM SmartUserAction WHERE resource = :ca");

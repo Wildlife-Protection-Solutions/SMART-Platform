@@ -93,7 +93,7 @@ public class QueryAction implements ISmartConnectAction{
 		//Check if the resource is a CA UUIID
 		ConservationAreaInfo cainfo = (ConservationAreaInfo) s.get(ConservationAreaInfo.class, resource);
 		if(cainfo != null){
-			return cainfo.getLabel();
+			return Messages.getString("QueryAction.AllQueriesfromCA",l) + cainfo.getLabel();
 		}
 		Query q = QueryManager.INSTANCE.findQuery(resource, s); 
 		if (q == null) return resource.toString();
