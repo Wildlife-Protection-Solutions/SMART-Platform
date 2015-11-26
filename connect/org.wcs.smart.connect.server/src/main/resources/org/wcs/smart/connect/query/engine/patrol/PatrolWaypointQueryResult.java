@@ -43,9 +43,9 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
  */
 public class PatrolWaypointQueryResult implements IDbTableResultSet {
 
-	private PsqlWaypointEngine engine;
+	private PsqlPatrolWaypointEngine engine;
 	
-	public PatrolWaypointQueryResult(PsqlWaypointEngine engine){
+	public PatrolWaypointQueryResult(PsqlPatrolWaypointEngine engine){
 		this.engine = engine;
 	}
 	

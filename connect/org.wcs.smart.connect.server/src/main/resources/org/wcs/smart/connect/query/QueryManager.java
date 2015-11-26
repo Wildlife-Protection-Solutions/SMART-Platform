@@ -32,11 +32,15 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
-import org.wcs.smart.connect.query.engine.patrol.PsqlGridEngine;
-import org.wcs.smart.connect.query.engine.patrol.PsqlObservationEngine;
+import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
+import org.wcs.smart.connect.query.engine.observation.PsqlObsSummaryEngine;
+import org.wcs.smart.connect.query.engine.observation.PsqlObsWaypointEngine;
+import org.wcs.smart.connect.query.engine.observation.PsqlObsObservationEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
-import org.wcs.smart.connect.query.engine.patrol.PsqlSummaryEngine;
-import org.wcs.smart.connect.query.engine.patrol.PsqlWaypointEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
@@ -105,11 +109,15 @@ public enum QueryManager {
 
 	
 	private static final AbstractQueryEngine[] engines = new AbstractQueryEngine[]{
-		new PsqlObservationEngine(),
-		new PsqlWaypointEngine(),
-		new PsqlGridEngine(),
-		new PsqlSummaryEngine(),
+		new PsqlPatrolObservationEngine(),
+		new PsqlPatrolWaypointEngine(),
+		new PsqlPatrolGridEngine(),
+		new PsqlPatrolSummaryEngine(),
 		new PsqlPatrolEngine(),
+		new PsqlObsObservationEngine(),
+		new PsqlObsWaypointEngine(),
+		new PsqlObsSummaryEngine(),
+		new PsqlObsGridEngine()
 	};
 	
 	private static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{

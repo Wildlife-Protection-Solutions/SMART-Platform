@@ -76,15 +76,18 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_DAYS: return "Number of Days";    
 				case NUM_NIGHTS: return "Number of Nights";
 				case DISTANCE: return "Distance (km)";      
-				case NUM_HOURS: return "Number of Hours";  
+				case NUM_FIELDHOURS: return "Number of Active Patrol Hours";
+				case NUM_PATROLHOURS: return "Number of Patrol Hours";  
 				case NUM_MEMBERS: return "Number of Employees";
-				case MAN_HOURS: return "Person - Hours";    
-				case MAN_DAYS: return "Person - Days";    
+				case MAN_HOURS: return "Person - Field Hours";    
+				case MAN_DAYS: return "Person - Days";
+				
 				case NUM_PATROLS_TOTAL: return "Total Number of Patrols";
 				case NUM_DAYS_TOTAL: return "Total Number of Days";   
 				case DISTANCE_TOTAL: return "Total Distance (km)";  
-				case NUM_HOURS_TOTAL: return "Total Number of Hours"; 
-				case MAN_HOURS_TOTAL: return "Total Person - Hours";
+				case NUM_FIELDHOURS_TOTAL: return "Total Number of ActiveHours";
+				case NUM_PATROLHOURS_TOTAL: return "Total Number of Patrol Hours";
+				case MAN_HOURS_TOTAL: return "Total Person - Field Hours";
 				case MAN_DAYS_TOTAL: return "Total Person - Days";
 			}
 		}
@@ -104,6 +107,8 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case PATROL_TRANSPORT_TYPE: return "Transport Type";
 				case PATROL_TRANSPORT_TYPE_KEY: return "Transport Type";
 				case CONSERVATION_AREA: return "Conservation Area";
+				case AGENCY: return "Agency";
+				case RANK: return "Rank";
 			}
 		}
 		if (item instanceof PatrolEndDateField){

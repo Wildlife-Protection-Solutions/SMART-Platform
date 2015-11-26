@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query.engine.patrol;
+package org.wcs.smart.connect.query.engine;
 
 import java.sql.SQLException;
 import java.text.MessageFormat;
@@ -29,7 +29,11 @@ import java.util.UUID;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
@@ -147,9 +151,17 @@ public enum PsqlFilterToSqlGenerator {
 		}else if (filter instanceof IExtensionFilter){
 			return asSql((IExtensionFilter)filter, engine);
 		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Patrol.class), engine);
-		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
+			if (engine instanceof PsqlPatrolObservationEngine ||
+					engine instanceof PsqlPatrolEngine ||
+					engine instanceof PsqlPatrolSummaryEngine ||
+					engine instanceof PsqlPatrolWaypointEngine ||
+					engine instanceof PsqlPatrolGridEngine){
+				//patrol baseed
+				return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Patrol.class), engine);
+			}else{
+				//waypoint based
+				return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
+			}
 		}else if (filter instanceof EntityAttributeFilter){
 			return asSql((EntityAttributeFilter)filter, engine);
 		}else if (filter instanceof WaypointSourceFilter){
@@ -236,6 +248,7 @@ public enum PsqlFilterToSqlGenerator {
 		return sb.toString();
 	}
 	
+
 	/*
 	 * Attribute filter
 	 */

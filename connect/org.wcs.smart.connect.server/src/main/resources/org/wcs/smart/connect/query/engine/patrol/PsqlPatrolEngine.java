@@ -30,6 +30,8 @@ import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 
 public class PsqlPatrolEngine extends AbstractQueryEngine{
@@ -116,10 +118,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				
 				try {
 					try{
-						ConservationAreaFilter cafilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), Collections.singleton(query.getConservationArea()));
-						if (!query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-							cafilter.addConservationArea(query.getConservationArea());
-						}
+						ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
 						filterer.processFilter(c, query.getFilter().getFilter(), dFilter, cafilter, false, false);
 					
 					}catch (Exception ex){
@@ -433,5 +432,15 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	@Override
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
+	}
+
+	@Override
+	protected IFilterProcessor getFilterProcessor(FilterType filterType,
+			String queryDataTable) {
+		if (filterType == IFilter.FilterType.OBSERVATION){
+			return new PatrolFilterProcessor(queryDataTable, this);
+		}else{
+			return new PatrolWaypointFilterProcessor(queryDataTable, this);
+		}
 	}
 }

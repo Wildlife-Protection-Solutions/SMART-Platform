@@ -25,6 +25,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.model.GridQueryColumn;
@@ -38,10 +39,10 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 
-	private PsqlGridEngine engine;
+	private AbstractQueryEngine engine;
 	private Collection<GridResultItem> items;
 	
-	public GridQueryResults(PsqlGridEngine engine, Collection<GridResultItem> items){
+	public GridQueryResults(AbstractQueryEngine engine, Collection<GridResultItem> items){
 		this.engine = engine;
 		this.items = items;
 	}

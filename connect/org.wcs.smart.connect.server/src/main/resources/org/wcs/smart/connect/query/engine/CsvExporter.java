@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query.engine.patrol;
+package org.wcs.smart.connect.query.engine;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -35,8 +35,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.connect.query.engine.IDbTableResultSet;
-import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;

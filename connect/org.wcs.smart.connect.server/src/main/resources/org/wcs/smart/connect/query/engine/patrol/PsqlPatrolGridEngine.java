@@ -55,6 +55,7 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -84,7 +85,9 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
+import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.QueryFilter;
+import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
@@ -95,8 +98,8 @@ import org.wcs.smart.query.model.summary.IValueItem.ValueType;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.io.WKBReader;
 
-public class PsqlGridEngine extends AbstractQueryEngine{
-	private final Logger logger = Logger.getLogger(PsqlGridEngine.class.getName());
+public class PsqlPatrolGridEngine extends AbstractQueryEngine{
+	private final Logger logger = Logger.getLogger(PsqlPatrolGridEngine.class.getName());
 	
 	private GridQueryResults result = null;
 	
@@ -153,7 +156,7 @@ public class PsqlGridEngine extends AbstractQueryEngine{
 						denominator = ((CombinedValueItem)valueItem).getPart2();
 					}
 					
-					ConservationAreaFilter caFilter = ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(), Collections.EMPTY_LIST);
+					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
 					
 					//get numerator results
 					Collection<GridResultItem> numeratorResults = getItems(gridDef, numerator, query.getQueryDefinition().getValueFilter(), caFilter, c, session, true);
@@ -204,7 +207,7 @@ public class PsqlGridEngine extends AbstractQueryEngine{
 						}
 					}
 //					myResults = new GridQueryResult(items.values());
-					result = new GridQueryResults(PsqlGridEngine.this, items.values());			
+					result = new GridQueryResults(PsqlPatrolGridEngine.this, items.values());			
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -257,7 +260,7 @@ public class PsqlGridEngine extends AbstractQueryEngine{
 				needsObservation = true;
 			}
 			
-			IFilterProcessor filterer = super.getFilterProcessor(filter.getFilterType(), dataTable);
+			IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable);
 			try{
 				filterer.processFilter(c, filter.getFilter(), dateFilter, caFilter, needsObservation, false);
 			}finally{
@@ -793,5 +796,14 @@ public class PsqlGridEngine extends AbstractQueryEngine{
 			public void execute(Connection c) throws SQLException {
 				dropTemporaryGridTable(c);
 			}});
+	}
+	@Override
+	protected IFilterProcessor getFilterProcessor(FilterType filterType,
+			String queryDataTable) {
+		if (filterType == IFilter.FilterType.OBSERVATION){
+			return new PatrolFilterProcessor(queryDataTable, this);
+		}else{
+			return new PatrolWaypointFilterProcessor(queryDataTable, this);
+		}
 	}
 }

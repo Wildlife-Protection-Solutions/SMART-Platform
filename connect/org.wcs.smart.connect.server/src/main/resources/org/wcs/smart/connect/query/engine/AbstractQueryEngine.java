@@ -45,8 +45,8 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.connect.query.engine.patrol.FilterProcessor;
-import org.wcs.smart.connect.query.engine.patrol.WaypointFilterProcessor;
+import org.wcs.smart.connect.query.engine.patrol.PatrolFilterProcessor;
+import org.wcs.smart.connect.query.engine.patrol.PatrolWaypointFilterProcessor;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -83,6 +83,8 @@ import org.wcs.smart.patrol.model.PatrolWaypoint;
 import org.wcs.smart.patrol.model.Team;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.query.common.engine.IQueryEngine;
+import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.util.UuidUtils;
 
@@ -301,9 +303,9 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		case TREE:
 			return "varchar(32672)"; ///hkey //$NON-NLS-1$
 		case NUMERIC:
-			return "double"; //$NON-NLS-1$
+			return "double precision"; //$NON-NLS-1$
 		case BOOLEAN:
-			return "double"; //$NON-NLS-1$
+			return "double precision"; //$NON-NLS-1$
 		case TEXT:
 			return "varchar(1024)"; //$NON-NLS-1$
 		case DATE:
@@ -429,11 +431,20 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @param queryDataTable
 	 * @return
 	 */
-	protected IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, String queryDataTable){
-		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new FilterProcessor(queryDataTable, this);
+	protected abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, 
+			String queryDataTable);
+	
+	public static ConservationAreaFilter parseConservationAreaFilter(Query query){
+		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+			//TODO: get all valid cas from the database
+			//and pass as second argument
+			return ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(),
+					Collections.singleton(query.getConservationArea()));
 		}else{
-			return new WaypointFilterProcessor(queryDataTable, this);
+			//we don't care 
+			return ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(),
+					Collections.singleton(query.getConservationArea()));
 		}
+		
 	}
 }
