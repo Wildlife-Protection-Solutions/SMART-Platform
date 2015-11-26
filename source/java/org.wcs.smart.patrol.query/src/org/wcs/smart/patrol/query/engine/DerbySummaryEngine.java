@@ -928,7 +928,6 @@ public class DerbySummaryEngine extends DerbyPatrolQueryEngine{
 						int hrs = mins / 60;
 						mins = mins % 60;
 						key += String.format("%d:%02d", hrs, mins); //$NON-NLS-1$
-						System.out.println(key);
 						break;
 					case KEY:
 						key += rs.getString(rsindex++);
