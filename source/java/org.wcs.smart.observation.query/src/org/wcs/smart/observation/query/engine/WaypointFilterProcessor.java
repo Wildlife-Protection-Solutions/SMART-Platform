@@ -35,6 +35,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
+import org.wcs.smart.observation.query.engine.visitor.AreaFilterVisitor;
 import org.wcs.smart.observation.query.internal.Messages;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.common.engine.IFilterProcessor;
