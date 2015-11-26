@@ -42,7 +42,8 @@ public class ConservationAreaFilter implements IFilter {
 	 * Parses a conservation area filter from
 	 * the string representation of the filter
 	 * 
-	 * @param caFilterAsString
+	 * @param caFilterAsString the string representation of the filter
+	 * @param validCas a list of all possible conservation areas 
 	 * @return
 	 */
 	public static ConservationAreaFilter parseFilter(String caFilterAsString, Collection<ConservationArea> validCas) {
