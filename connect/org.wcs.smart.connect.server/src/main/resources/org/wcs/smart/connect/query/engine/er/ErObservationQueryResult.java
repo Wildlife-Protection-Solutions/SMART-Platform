@@ -74,13 +74,13 @@ public class ErObservationQueryResult implements IDbTableResultSet {
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START.getKey())){
 			return rs.getDate("surveydesign_startdate");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY.getKey())){
-			return rs.getDate("survey_id");
+			return rs.getString("survey_id");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_START.getKey())){
 			return rs.getDate("survey_startdate");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_END.getKey())){
 			return rs.getDate("survey_enddate");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())){
-			return rs.getDate("samplingunit_id");
+			return rs.getString("samplingunit_id");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
 			return rs.getInt("wp_id");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
@@ -96,7 +96,7 @@ public class ErObservationQueryResult implements IDbTableResultSet {
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
 			return rs.getDouble("wp_comment");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
-			return rs.getDouble("ob_observer");
+			return rs.getString("ob_observer");
 		}else if (columnKey.startsWith("category:")){
 			String level = columnKey.split(":")[1];
 			return rs.getString("category_"+level);
@@ -118,7 +118,7 @@ public class ErObservationQueryResult implements IDbTableResultSet {
 	
 	private void attachObservations(UUID obUuid, Connection c) throws SQLException {
 		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
+		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.ca_uuid FROM "); //$NON-NLS-1$
 		attrSql.append(engine.getQueryDataTable());
 		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
 		attrSql.append(engine.getQueryDataTable()).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$

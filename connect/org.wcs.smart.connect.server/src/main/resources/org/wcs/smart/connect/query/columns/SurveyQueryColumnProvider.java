@@ -317,7 +317,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
-	public SurveyDesign getSurveyDesign(String key, Session s, ConservationAreaFilter caFilter){
+	public static SurveyDesign getSurveyDesign(String key, Session s, ConservationAreaFilter caFilter){
 		if (key == null) return null;
 		SurveyDesign sd = (SurveyDesign)s.createCriteria(SurveyDesign.class)
 			.add(Restrictions.eq("keyId", key))

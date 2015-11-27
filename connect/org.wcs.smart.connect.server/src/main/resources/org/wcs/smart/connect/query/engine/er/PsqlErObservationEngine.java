@@ -402,7 +402,7 @@ public class PsqlErObservationEngine extends AbstractQueryEngine {
 	}
 
 	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid char(16) for bit data, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
+		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid UUID, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 
@@ -438,7 +438,7 @@ public class PsqlErObservationEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(queryDataTable + linkedData.getPostfix());
-		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -490,7 +490,7 @@ public class PsqlErObservationEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(queryDataTable + linkedData.getPostfix());
-		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -608,37 +608,37 @@ public class PsqlErObservationEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		
-		sql.append("surveydesign_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("surveydesign_uuid UUID,"); //$NON-NLS-1$
 		sql.append("surveydesign_startdate date,"); //$NON-NLS-1$
 		sql.append("surveydesign_enddate date,"); //$NON-NLS-1$
 		
-		sql.append("survey_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("survey_uuid UUID,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
 		sql.append("survey_startdate date,"); //$NON-NLS-1$
 		sql.append("survey_enddate date,"); //$NON-NLS-1$
 		
-		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_uuid UUID,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
 		sql.append("mission_enddate timestamp,"); //$NON-NLS-1$
 		
-		sql.append("samplingunit_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("samplingunit_uuid UUID,"); //$NON-NLS-1$
 		sql.append("samplingunit_id varchar(128),"); //$NON-NLS-1$
 		
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
 		sql.append("wp_id integer,"); //$NON-NLS-1$
-		sql.append("wp_x double,"); //$NON-NLS-1$
-		sql.append("wp_y double,"); //$NON-NLS-1$
+		sql.append("wp_x double precision,"); //$NON-NLS-1$
+		sql.append("wp_y double precision,"); //$NON-NLS-1$
 		sql.append("wp_direction real,"); //$NON-NLS-1$
 		sql.append("wp_distance real,"); //$NON-NLS-1$
 		sql.append("wp_date timestamp,"); //$NON-NLS-1$
 		sql.append("wp_comment varchar(4096),"); //$NON-NLS-1$
 
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_observer_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_category_uuid char(16) for bit data"); //$NON-NLS-1$
+		sql.append("ob_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ob_observer_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ob_category_uuid UUID"); //$NON-NLS-1$
 		
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();

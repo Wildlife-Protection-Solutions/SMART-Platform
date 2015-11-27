@@ -235,7 +235,7 @@ public class PsqlErMissionTrackEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(queryDataTable + "_mlist"); //$NON-NLS-1$
-		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -288,7 +288,7 @@ public class PsqlErMissionTrackEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(queryDataTable + "_sulist"); //$NON-NLS-1$
-		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -373,31 +373,31 @@ public class PsqlErMissionTrackEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		
-		sql.append("surveydesign_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("surveydesign_uuid UUID,"); //$NON-NLS-1$
 		sql.append("surveydesign_startdate date,"); //$NON-NLS-1$
 		sql.append("surveydesign_enddate date,"); //$NON-NLS-1$
 		
-		sql.append("survey_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("survey_uuid UUID,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
 		sql.append("survey_startdate date,"); //$NON-NLS-1$
 		sql.append("survey_enddate date,"); //$NON-NLS-1$
 		
-		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_uuid UUID,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
 		sql.append("mission_enddate timestamp,"); //$NON-NLS-1$
 	
-		sql.append("missionday_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("missionday_uuid UUID,"); //$NON-NLS-1$
 		sql.append("missionday_date date,"); //$NON-NLS-1$
 		
-		sql.append("mission_trackuuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_trackuuid UUID,"); //$NON-NLS-1$
 		sql.append("mission_tracktype varchar(32),"); //$NON-NLS-1$
 		sql.append("mission_trackid varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_tracklength double,"); //$NON-NLS-1$
 		
-		sql.append("samplingunit_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("samplingunit_uuid UUID,"); //$NON-NLS-1$
 		sql.append("samplingunit_id varchar(128)"); //$NON-NLS-1$
 		
 		sql.append(")"); //$NON-NLS-1$

@@ -345,7 +345,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		
 		// -- build temporary table
 		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid char(16) for bit data)"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append("CREATE TABLE " + waypointTable + " (wp_uuid UUID)"); //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 		
@@ -439,7 +439,7 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 			sql = new StringBuilder();
 			sql.append("CREATE TABLE "); //$NON-NLS-1$
 			sql.append(colName);
-			sql.append("(wp_uuid char(16) for bit data)"); //$NON-NLS-1$
+			sql.append("(wp_uuid UUID)"); //$NON-NLS-1$
 			logger.finest(sql.toString());
 			c.createStatement().execute(sql.toString());
 
@@ -532,7 +532,6 @@ public class ErWaypointFilterProcessor implements IFilterProcessor{
 		if (catfilter != null){
 			String keyPart = catfilter.getCategoryKey();
 			String p1 = engine.addParameterValue(keyPart + "%");
-			String p2 = engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$
 			sql.append(" ( "); //$NON-NLS-1$
 			sql.append(prefix(Category.class));
 			sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$

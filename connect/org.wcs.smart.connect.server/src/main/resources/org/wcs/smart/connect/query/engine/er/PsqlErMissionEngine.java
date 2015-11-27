@@ -25,33 +25,46 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.ca.datamodel.AttributeListItem;
+import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionMember;
+import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.engine.visitors.SurveyHasObservationFilterVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.model.MissionQuery;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.IFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
+import org.wcs.smart.util.UuidUtils;
 
 /**
  * Query engine for executing lazy queries using derby.
@@ -109,9 +122,9 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				SurveyDesignFilter filter = null;
+				SurveyDesignFilter sdFilter = null;
 				if (query.getSurveyDesign() != null){
-					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+					sdFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
 				
 				
@@ -123,7 +136,7 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
-					filterer = getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
+					filterer = getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, sdFilter);
 					
 					SurveyHasObservationFilterVisitor vv = new SurveyHasObservationFilterVisitor();
 					boolean needsObservations = false;
@@ -136,7 +149,7 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 							caFilter, 
 							needsObservations, false);
 					
-					populateTemporaryTableExtra(c, session, query);
+					populateTemporaryTableExtra(c, session, query, sdFilter, caFilter);
 					
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -197,7 +210,9 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 	}
 
 	private void populateTemporaryTableExtra(Connection c, Session session, 
-			MissionQuery query) throws SQLException {
+			MissionQuery query,
+			SurveyDesignFilter sdFilter,
+			ConservationAreaFilter caFilter) throws SQLException {
 
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -281,14 +296,16 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 			}
 			leaderSt.executeBatch();
 		}
-		populateAdditionalMissionTable(c,session);
+		populateAdditionalMissionTable(c,sdFilter, caFilter, session);
 	}
 
-	private void populateAdditionalMissionTable(Connection c, Session session) throws SQLException {
+	private void populateAdditionalMissionTable(Connection c, SurveyDesignFilter sdFilter,
+			ConservationAreaFilter caFilter,
+			Session session) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(queryDataTable + "_mlist"); //$NON-NLS-1$
-		sql.append(" (uuid char(16) for bit data, value varchar(1024))"); //$NON-NLS-1$ 
+		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
@@ -335,6 +352,79 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 			}
 			statement.executeBatch();
 		}
+		
+		List<MissionAttribute> attributes = new ArrayList<MissionAttribute>();
+		if (sdFilter == null || sdFilter.getKey() == null){
+			//get all mission properties
+			attributes = session.createCriteria(MissionAttribute.class)
+				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds()))
+				.list();
+			//TODO: this will not support ccaa queries (attributes will not be merged);
+		}else{
+			//get mission properties for survey design only
+			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
+			for (MissionProperty mp : sd.getMissionProperties()){
+				attributes.add(mp.getAttribute());
+			}
+		}
+		for (MissionAttribute ma : attributes){
+			sql = new StringBuilder();
+			sql.append("ALTER TABLE ");
+			sql.append(queryDataTable);
+			sql.append(" ADD ma_" + ma.getKeyId());
+			if (ma.getType() == AttributeType.NUMERIC){
+				sql.append(" double precision");
+			}else{
+				sql.append(" varchar ");
+			}
+			logger.finest(sql.toString());
+			c.createStatement().execute(sql.toString());
+			
+			if (ma.getType() == AttributeType.TEXT ||
+					ma.getType() == AttributeType.NUMERIC){
+				StringBuilder attrSql = new StringBuilder();
+				attrSql.append("UPDATE ");
+				attrSql.append(queryDataTable);
+				attrSql.append(" SET ma_" + ma.getKeyId() );
+				attrSql.append(" = ");
+				if (ma.getType() == AttributeType.TEXT){
+					attrSql.append(" mpv.string_value ");	
+				}else if (ma.getType() == AttributeType.NUMERIC){
+					attrSql.append(" mpv.number_value");
+				}
+				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class));
+				attrSql.append(" WHERE ");
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'");
+				attrSql.append(" AND ");
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = ");
+				attrSql.append(queryDataTable + ".mission_uuid");
+				logger.finest(attrSql.toString());
+				c.createStatement().execute(attrSql.toString());
+				
+			}else if (ma.getType() == AttributeType.LIST){
+				//for each list item
+				for (MissionAttributeListItem ai : ma.getAttributeList()){
+					StringBuilder attrSql = new StringBuilder();
+					attrSql.append("UPDATE ");
+					attrSql.append(queryDataTable);
+					attrSql.append(" SET ma_" + ma.getKeyId() );
+					attrSql.append(" = ");
+					attrSql.append("'" + ai.getName() + "'");
+					attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class));
+					attrSql.append(" WHERE ");
+					attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'");
+					attrSql.append(" AND ");
+					attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = ");
+					attrSql.append(queryDataTable + ".mission_uuid");
+					attrSql.append(" AND ");
+					attrSql.append(tablePrefix(MissionPropertyValue.class) + ".list_element_uuid = '" + ai.getUuid().toString() +"'");
+					
+					logger.finest(attrSql.toString());
+					c.createStatement().execute(attrSql.toString());
+				}
+			}
+		}
+		
 	}
 	
 	@Override
@@ -364,18 +454,18 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		
-		sql.append("surveydesign_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("surveydesign_uuid UUID,"); //$NON-NLS-1$
 		sql.append("surveydesign_startdate date,"); //$NON-NLS-1$
 		sql.append("surveydesign_enddate date,"); //$NON-NLS-1$
 		
-		sql.append("survey_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("survey_uuid UUID,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
 		sql.append("survey_startdate date,"); //$NON-NLS-1$
 		sql.append("survey_enddate date,"); //$NON-NLS-1$
 		
-		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_uuid UUID,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_startdate timestamp,"); //$NON-NLS-1$
 		sql.append("mission_enddate timestamp"); //$NON-NLS-1$
@@ -384,6 +474,11 @@ public class PsqlErMissionEngine extends AbstractQueryEngine {
 		return sql.toString();
 	}
 
+	@Override
+	public void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
+		
+	}
+	
 	@Override
 	public void cleanUp(Session session) {
 		session.doWork(new Work(){

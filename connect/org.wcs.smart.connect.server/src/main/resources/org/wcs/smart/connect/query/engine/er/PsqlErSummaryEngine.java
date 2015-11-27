@@ -1535,34 +1535,34 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
 		
-		sql.append("ca_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("ca_uuid UUID,"); //$NON-NLS-1$
 		
-		sql.append("survey_design_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("survey_design_uuid UUID,"); //$NON-NLS-1$
 		sql.append("survey_design_start date,"); //$NON-NLS-1$
 		sql.append("survey_design_end date,"); //$NON-NLS-1$
 		
-		sql.append("survey_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("survey_uuid UUID,"); //$NON-NLS-1$
 		sql.append("survey_id varchar(128),"); //$NON-NLS-1$
 		sql.append("survey_start date,"); //$NON-NLS-1$
 		sql.append("survey_end date,"); //$NON-NLS-1$
 		
-		sql.append("mission_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_uuid UUID,"); //$NON-NLS-1$
 		sql.append("mission_id varchar(128),"); //$NON-NLS-1$
 		sql.append("mission_start timestamp,"); //$NON-NLS-1$
 		sql.append("mission_end timestamp,"); //$NON-NLS-1$
 		
-		sql.append("mission_day_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("mission_day_uuid UUID,"); //$NON-NLS-1$
 		sql.append("mission_day date,"); //$NON-NLS-1$
 		
-		sql.append("sampling_unit_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("sampling_unit_uuid UUID,"); //$NON-NLS-1$
 		sql.append("sampling_unit_id varchar(128),"); //$NON-NLS-1$
 		
-		sql.append("wp_mission_track_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_mission_track_uuid UUID,"); //$NON-NLS-1$
 		
-		sql.append("wp_uuid char(16) for bit data,"); //$NON-NLS-1$
+		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
 		sql.append("wp_datetime timestamp,"); //$NON-NLS-1$
-		sql.append("ob_uuid char(16) for bit data,"); //$NON-NLS-1$
-		sql.append("ob_observer_uuid char(16) for bit data"); //$NON-NLS-1$
+		sql.append("ob_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ob_observer_uuid UUID"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}

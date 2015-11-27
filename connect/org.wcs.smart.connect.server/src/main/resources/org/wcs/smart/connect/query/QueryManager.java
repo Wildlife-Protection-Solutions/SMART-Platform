@@ -37,6 +37,12 @@ import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityWaypointEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErGridEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErMissionEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErObservationEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErSummaryEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErWaypointEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsSummaryEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsWaypointEngine;
@@ -111,9 +117,7 @@ public enum QueryManager {
 		queryClasses.add(SurveyGriddedQuery.class);
 		queryClasses.add(MissionQuery.class);
 		queryClasses.add(MissionTrackQuery.class);
-		
 	}
-
 	
 	private static final AbstractQueryEngine[] engines = new AbstractQueryEngine[]{
 		new PsqlPatrolObservationEngine(),
@@ -128,7 +132,13 @@ public enum QueryManager {
 		new PsqlEntityGridEngine(),
 		new PsqlEntityObservationEngine(),
 		new PsqlEntitySummaryEngine(),
-		new PsqlEntityWaypointEngine()
+		new PsqlEntityWaypointEngine(),
+		new PsqlErGridEngine(),
+		new PsqlErMissionEngine(),
+		new PsqlErMissionTrackEngine(),
+		new PsqlErObservationEngine(),
+		new PsqlErSummaryEngine(),
+		new PsqlErWaypointEngine()
 	};
 	
 	private static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{

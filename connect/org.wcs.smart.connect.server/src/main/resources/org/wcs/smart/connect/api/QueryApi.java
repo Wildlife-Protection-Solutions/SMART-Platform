@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletContext;
@@ -232,7 +233,9 @@ public class QueryApi extends HttpServlet{
 			return rs;
 		}catch (Exception ex){
 			//TODO: log me
+			
 			String error = MessageFormat.format("Error executing query: {0}", ex.getMessage());
+			logger.log(Level.SEVERE, error, ex);
 			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, error);
 		}finally{
 			s.getTransaction().commit();

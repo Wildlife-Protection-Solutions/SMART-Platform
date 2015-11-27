@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.sql.Types;
 import java.text.DateFormat;
 import java.util.Date;
 
@@ -69,12 +70,20 @@ public class ErMissionQueryResult implements IDbTableResultSet {
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START.getKey())){
 			return rs.getDate("surveydesign_startdate");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY.getKey())){
-			return rs.getDate("survey_id");
+			return rs.getString("survey_id");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_START.getKey())){
 			return rs.getDate("survey_startdate");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_END.getKey())){
 			return rs.getDate("survey_enddate");
 		
+		}else if (columnKey.startsWith("missionatt")){
+			String key = columnKey.split(":")[1];
+			if (rs.getMetaData().getColumnType(rs.findColumn("ma_"+key)) == Types.VARCHAR){
+				return rs.getString("ma_" + key);
+			}else{
+				//assume double
+				return rs.getDouble("ma_"+ key);
+			}
 		}
 		//TODO: add mission attributes
 		return null;

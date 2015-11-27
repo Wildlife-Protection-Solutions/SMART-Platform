@@ -359,7 +359,7 @@ public enum PsqlFilterToSqlGenerator {
 		if (col != null){
 			return col + ".wp_uuid is not null "; //$NON-NLS-1$
 		}
-		return "( " + toSql(filter.getCategoryFilter(), engine) + asSql(Operator.AND) + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$	
+		return "( " + toSql(filter.getCategoryFilter(), engine) + " " + asSql(Operator.AND) + " " + toSql(filter.getAttributeFilter(), engine) + " )"; //$NON-NLS-1$ //$NON-NLS-2$	
 	}
 	
 	/*
@@ -671,9 +671,8 @@ public enum PsqlFilterToSqlGenerator {
 				return "( " + tableName + ".value " + asSql(filter.getOperator()) + " " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 			}
 		}else if (filter.getAttributeType() == AttributeType.TREE){
-			String p1 = engine.addParameterValue((String)filter.getValue());
-			String p2 = engine.addParameterValue(((String)filter.getValue()).substring(0,  ((String)filter.getValue()).length() -1) + "/"); //$NON-NLS-1$
-			return "( " + tableName + ".value >= " + p1 + " and " + tableName + ".value < " + p2 + ")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+			String p1 = engine.addParameterValue((String)filter.getValue() + "%");
+			return "( " + tableName + ".value like " + p1 + " )";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 		}
 		return "";  //$NON-NLS-1$
 	}
