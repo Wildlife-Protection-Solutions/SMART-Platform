@@ -33,6 +33,10 @@ import java.util.UUID;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
+import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
+import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
+import org.wcs.smart.connect.query.engine.entity.PsqlEntityWaypointEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsSummaryEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsWaypointEngine;
@@ -120,7 +124,11 @@ public enum QueryManager {
 		new PsqlObsObservationEngine(),
 		new PsqlObsWaypointEngine(),
 		new PsqlObsSummaryEngine(),
-		new PsqlObsGridEngine()
+		new PsqlObsGridEngine(),
+		new PsqlEntityGridEngine(),
+		new PsqlEntityObservationEngine(),
+		new PsqlEntitySummaryEngine(),
+		new PsqlEntityWaypointEngine()
 	};
 	
 	private static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{

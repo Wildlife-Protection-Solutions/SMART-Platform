@@ -159,32 +159,21 @@ public class CsvExporter {
 				new OutputStreamWriter(new FileOutputStream(f.getAbsoluteFile()), "UTF-8"), //$NON-NLS-1$ 
 				delimiter, '"',delimiter)){ 
 		
-			for (int i = 0; i < results.getColumnHeaders().size(); i ++){
+			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
 				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
 			
 				for (int j = 0; j < results.getRowHeaders().size(); j ++){
-					data[j] = ""; //$NON-NLS-1$
+					data[j] = ""; //$NON-NLS-1$	
 				}
 				for (int k = 0; k < results.getColumnHeaderValues()[i].length; k ++){
 					data[k + results.getRowHeaders().size()]= results.getColumnHeaderValues()[i][k].getName();
 				}
-				
 				writer.writeNext(data);
 			}
 			
-			//value headers
-			String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
-			for (int j = 0; j < results.getRowHeaders().size(); j ++){
-				data[j] = ""; //$NON-NLS-1$
-			}
-			for (int k = 0; k < results.getValueHeaders().size(); k ++){
-				data[k + results.getRowHeaders().size()]= results.getValueHeaders().get(k).getName();
-			}	
-			writer.writeNext(data);
-		
 			//row headers & data
 			for (int i = 0; i < results.getNumDataRows(); i ++){
-				data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
+				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];
 				for (int j = 0; j < results.getRowHeaders().size(); j++){
 					data[j] = results.getRowHeaderValues()[i][j].getName();
 				}

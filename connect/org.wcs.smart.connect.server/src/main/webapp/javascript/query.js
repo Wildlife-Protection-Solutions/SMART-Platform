@@ -117,7 +117,7 @@ function createQueryTable(){
  		if(selectedCa == 'allcas' || selectedCa == queries[i].conservationArea){
  		if(search == "" || isFoundInRow(queries[i]) ){
 	 		var row = tableCreateRow(parent, 
-	 				[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type, null], 
+	 				[queries[i].conservationArea, queries[i].id, queries[i].name, queries[i].type, null, null], 
 	 				"queryrow " + (i % 2 == 0 ? "smart-table-rowon" : "smart-table-rowoff"));
 	 		
 	 		row.dataset.queryuuid = queries[i].uuid;
@@ -129,6 +129,11 @@ function createQueryTable(){
 	 		runicon.title= i18n("query.runquery");
 	 		runicon.onclick = showQueryOptions;
 	 		row.childNodes[4].appendChild(runicon);
+	 		
+	 		var csvlink = document.createElement("a");
+	 		csvlink.href="../api/query/" + queries[i].uuid + "?format=csv&date_filter=waypointdate";
+	 		csvlink.innerHTML = "csv";
+	 		row.childNodes[5].appendChild(csvlink);
  		}
  		}
  	}

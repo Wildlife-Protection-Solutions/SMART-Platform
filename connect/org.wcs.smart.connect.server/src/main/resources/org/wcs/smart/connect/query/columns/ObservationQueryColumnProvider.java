@@ -22,34 +22,23 @@
 package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
 import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
-import org.wcs.smart.observation.query.model.columns.FixedQueryColumn.FixedColumns;
 import org.wcs.smart.observation.query.model.columns.IObservationQueryColumnProvider;
-import org.wcs.smart.observation.query.model.columns.ObservationAttributeQueryColumn;
-import org.wcs.smart.observation.query.model.columns.ObservationCategoryQueryColumn;
-import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Column provider implementation for all data queries.
@@ -99,26 +88,9 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 			}
 		}
 		
-		int ccnt = QueryManager.INSTANCE.getCategoryDepth(session, q.getConservationArea().getUuid());
-		for (int i = 0; i < ccnt; i ++){
-			keys.add(new ObservationCategoryQueryColumn("Category " + i, i));
+		for (QueryColumn cq : DataModelColumnProvider.getDataModelColumns(session, l, q)){
+			keys.add(cq);
 		}
-		
-		//attributes
-		List<Attribute> atts = session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", q.getConservationArea()))
-				.list();
-		List<QueryColumn> attributes = new ArrayList<QueryColumn>();
-		for (Attribute a : atts){
-			attributes.add(new ObservationAttributeQueryColumn(a.getName(), a.getKeyId(), a.getType()));
-		}
-		Collections.sort(attributes, new Comparator<QueryColumn>() {
-			@Override
-			public int compare(QueryColumn o1, QueryColumn o2) {
-				return Collator.getInstance(l).compare(o1.getName(), o2.getName());
-			}
-		});
-		keys.addAll(attributes);
 		
 		return keys.toArray(new QueryColumn[keys.size()]);
 	}
@@ -166,25 +138,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 	
 	public ObservationOptions getOptions(ConservationArea ca, Session s){
 		return (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
-		
 	}
-	
-//	@Override
-//	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-//	@Override
-//	public QueryColumn[] getQueryColumns(Query query) {
-//		String queryTypeKey = query.getTypeKey();
-//		if (queryTypeKey.equals(ObsObservationQuery.KEY)){
-//			return ObservationQueryColumnCache.getInstance().getObservationQueryColumns();
-//		}else if (queryTypeKey.equals(ObservationWaypointQuery.KEY)){
-//			return ObservationQueryColumnCache.getInstance().getWaypointQueryColumns();
-//		}else if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
-//			return ObservationQueryColumnCache.getInstance().getGridColumns();
-//		}
-//		return null;
-//	}
+
 
 }

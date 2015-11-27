@@ -1,25 +1,4 @@
-/*
- * Copyright (C) 2015 Wildlife Conservation Society
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of
- * this software and associated documentation files (the "Software"), to deal in
- * the Software without restriction, including without limitation the rights to
- * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is furnished to do
- * so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-package org.wcs.smart.connect.query.engine.observation;
+package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,20 +13,17 @@ import java.util.UUID;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
-import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
+import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
-/**
- * Result set of observation (all data) queries.
- * 
- * @author Emily
- *
- */
-public class ObsObservationQueryResult implements IDbTableResultSet {
 
-	private PsqlObsObservationEngine engine;
+public class ErObservationQueryResult implements IDbTableResultSet {
+
+	private PsqlErObservationEngine engine;
+	private HashMap<String, Object> attributeToValue;
+	private UUID obUuid;
 	
-	public ObsObservationQueryResult(PsqlObsObservationEngine engine){
+	public ErObservationQueryResult(PsqlErObservationEngine engine){
 		this.engine = engine;
 	}
 	
@@ -79,30 +55,48 @@ public class ObsObservationQueryResult implements IDbTableResultSet {
 	
 	public Object getValue(ResultSet rs, String columnKey, Connection c) throws SQLException{
 		
-		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
+		if (columnKey.equals(SurveyQueryColumn.FixedColumns.CA_ID.getKey())){
 			return rs.getString("ca_id");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.CA_NAME.getKey())){
 			return rs.getString("ca_name");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
-			return rs.getString("wp_id");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
-			return rs.getDate("wp_time");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
-			return rs.getTime("wp_time");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION.getKey())){
+			return rs.getString("mission_id");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_START.getKey())){
+			return rs.getDate("mission_startdate");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_END.getKey())){
+			return rs.getDate("mission_enddate");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.MISSION_LEADER.getKey())){
+			return rs.getString("mission_leader");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN.getKey())){
+			return rs.getString("surveydesign_name");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END.getKey())){
+			return rs.getDate("surveydesign_enddate");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START.getKey())){
+			return rs.getDate("surveydesign_startdate");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY.getKey())){
+			return rs.getDate("survey_id");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_START.getKey())){
+			return rs.getDate("survey_startdate");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_END.getKey())){
+			return rs.getDate("survey_enddate");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())){
+			return rs.getDate("samplingunit_id");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
+			return rs.getInt("wp_id");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
 			return rs.getDouble("wp_x");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
 			return rs.getDouble("wp_y");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
+			return rs.getDate("wp_date");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
 			return rs.getDouble("wp_direction");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE.getKey())){
-			return rs.getString("wp_source");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
 			return rs.getDouble("wp_distance");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
-			return rs.getString("wp_comment");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
-			return rs.getString("ob_observer");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
+			return rs.getDouble("wp_comment");
+		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
+			return rs.getDouble("ob_observer");
 		}else if (columnKey.startsWith("category:")){
 			String level = columnKey.split(":")[1];
 			return rs.getString("category_"+level);
@@ -118,13 +112,9 @@ public class ObsObservationQueryResult implements IDbTableResultSet {
 			return attributeToValue.get(key);
 		}
 			
-			
+		//TODO: add mission attributes
 		return null;
 	}
-	
-	
-	private HashMap<String, Object> attributeToValue;
-	private UUID obUuid;
 	
 	private void attachObservations(UUID obUuid, Connection c) throws SQLException {
 		StringBuilder attrSql = new StringBuilder();
@@ -164,6 +154,6 @@ public class ObsObservationQueryResult implements IDbTableResultSet {
 				continue;
 			}
 		}
-
 	}
 }
+

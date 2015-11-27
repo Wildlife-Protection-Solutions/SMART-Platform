@@ -4,7 +4,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -434,7 +433,6 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		return null;
 	}
 
-	@Override
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){

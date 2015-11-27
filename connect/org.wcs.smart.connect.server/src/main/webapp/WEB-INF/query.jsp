@@ -58,6 +58,7 @@
 		<div class="table-cell smart-table-cell"><a href="javascript:sortTable('type')"><fmt:message key="query.type" /></a></div>
 
 		<div class="table-cell smart-table-cell"></div>
+		<div class="table-cell smart-table-cell"></div>
 	</div>
 	</div>  
 </div>

@@ -19,17 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query.engine.observation;
+package org.wcs.smart.connect.query.engine.entity;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.UUID;
 
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
@@ -43,18 +40,17 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
  * @author Emily
  *
  */
-public class ObsObservationQueryResult implements IDbTableResultSet {
+public class EntityWaypointQueryResult implements IDbTableResultSet {
 
-	private PsqlObsObservationEngine engine;
+	private PsqlEntityWaypointEngine engine;
 	
-	public ObsObservationQueryResult(PsqlObsObservationEngine engine){
+	public EntityWaypointQueryResult(PsqlEntityWaypointEngine engine){
 		this.engine = engine;
 	}
 	
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
 		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable());
 	}
-
 	
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
 		Object v = getValue(rs, column.getKey(), c);
@@ -103,67 +99,8 @@ public class ObsObservationQueryResult implements IDbTableResultSet {
 			return rs.getString("wp_comment");
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
 			return rs.getString("ob_observer");
-		}else if (columnKey.startsWith("category:")){
-			String level = columnKey.split(":")[1];
-			return rs.getString("category_"+level);
-		}else if (columnKey.startsWith("attribute:")){
-			UUID obuuid = (UUID) rs.getObject("ob_uuid");
-			if (obuuid == null) return null;
-			if (!obuuid.equals(obUuid)){
-				attributeToValue = new HashMap<String, Object>();
-				obUuid = obuuid;
-				attachObservations(obuuid, c);
-			}
-			String key = columnKey.split(":")[1];
-			return attributeToValue.get(key);
 		}
-			
-			
 		return null;
 	}
-	
-	
-	private HashMap<String, Object> attributeToValue;
-	private UUID obUuid;
-	
-	private void attachObservations(UUID obUuid, Connection c) throws SQLException {
-		StringBuilder attrSql = new StringBuilder();
-		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable());
-		attrSql.append(" r left join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid left join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid left join "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable()).append("_list rl on wpoa.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
-		attrSql.append(engine.getQueryDataTable()).append("_tree rt on wpoa.tree_node_uuid = rt.UUID WHERE r.ob_uuid = ? "); //$NON-NLS-1$
-		
-		PreparedStatement ps = c.prepareStatement(attrSql.toString());
-		ps.setObject(1, obUuid);
-		ResultSet rs = ps.executeQuery();
-		while(rs.next()){
-			String key = rs.getString(2);
-			
-			//double
-			if (rs.getObject(3) != null){
-				attributeToValue.put(key,  rs.getDouble(3));
-				continue;
-			}
-			//string
-			String v = rs.getString(4);
-			if (v != null){
-				attributeToValue.put(key, v);
-				continue;
-			}
-			//list
-			v = rs.getString(5);
-			if (v != null){
-				attributeToValue.put(key, v);
-				continue;
-			}
-			//tree
-			v = rs.getString(6);
-			if (v != null){
-				attributeToValue.put(key,  v);
-				continue;
-			}
-		}
 
-	}
 }

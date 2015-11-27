@@ -36,7 +36,6 @@ import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -86,8 +85,8 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
@@ -797,7 +796,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 				dropTemporaryGridTable(c);
 			}});
 	}
-	@Override
+
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){

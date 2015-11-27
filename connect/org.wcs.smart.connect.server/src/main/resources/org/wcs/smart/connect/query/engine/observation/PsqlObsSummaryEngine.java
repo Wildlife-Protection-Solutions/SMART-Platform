@@ -60,13 +60,13 @@ import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.common.model.SummaryResultKey;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.AreaFilter;
+import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.DateFilter;
 import org.wcs.smart.query.model.filter.EmptyFilter;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.QueryFilter;
-import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
 import org.wcs.smart.query.model.filter.IFilter.FilterType;
+import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
@@ -77,7 +77,6 @@ import org.wcs.smart.query.model.summary.AttributeGroupBy;
 import org.wcs.smart.query.model.summary.AttributeValueItem;
 import org.wcs.smart.query.model.summary.CategoryGroupBy;
 import org.wcs.smart.query.model.summary.CategoryValueItem;
-import org.wcs.smart.query.model.summary.CombinedValueItem;
 import org.wcs.smart.query.model.summary.ConservationAreaGroupBy;
 import org.wcs.smart.query.model.summary.DateGroupBy;
 import org.wcs.smart.query.model.summary.GroupByPart;
@@ -109,8 +108,6 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 	private QueryFilter valueFilter;
 	private GroupByPart allGroupByParts;
 	private ValuePart valuePart;
-	
-	private boolean hasAreaFilter = false;
 	private Session session;
 	
 	private Locale l = Locale.getDefault();
@@ -215,11 +212,6 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 					if (ldef.getValueFilter() != null){
 						valueFilter = ldef.getValueFilter();
 					}
-					
-					//determine if has area filter
-					AreaFilterCollectorVisitor hasAreaFilterVisitor = new AreaFilterCollectorVisitor();
-					valueFilter.getFilter().accept(hasAreaFilterVisitor);
-					hasAreaFilter = hasAreaFilterVisitor.hasAreaFilter();
 					
 					if (!needsObservationValue){
 						HasObservationFilterVisitor visitor = new HasObservationFilterVisitor();
@@ -468,9 +460,8 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 			String p = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p); //$NON-NLS-1$
 			if (attributeItem.getCategoryKey() != null) {
-				String p1 = addParameterValue(attributeItem.getCategoryKey());
-				String p2 = addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
-				sql.append(" AND ( foo.cat_hkey >= " + p1 + " and  foo.cat_hkey < " + p2 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p1 = addParameterValue(attributeItem.getCategoryKey()+ "%");
+				sql.append(" AND ( foo.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			if (groupBySql.length() > 0) {
 				sql.append(" GROUP BY "); //$NON-NLS-1$
@@ -554,9 +545,9 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 			sql.append(".keyid = '"); //$NON-NLS-1$
 			sql.append(attributeItem.getAttributeKey() + "'"); //$NON-NLS-1$
 			if (attributeItem.getCategoryKey() != null){	
-				String p1 = addParameterValue(attributeItem.getCategoryKey());
-				String p2 = addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1) + "/"); //$NON-NLS-1$
-				sql.append("AND ( temp.cat_hkey >= " + p1 + " and temp.cat_hkey < " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				String p1 = addParameterValue(attributeItem.getCategoryKey()+ "%");
+				
+				sql.append("AND ( temp.cat_hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -633,22 +624,18 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(AttributeTreeNode.class));
 			sql.append(".uuid and ("); //$NON-NLS-1$
 			
-			String p1 = addParameterValue(attributeItem.getItemKey());
-			String p2 = addParameterValue(attributeItem.getItemKey().substring(0, attributeItem.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
+			String p1 = addParameterValue(attributeItem.getItemKey()+ "%");
 			sql.append(tablePrefix(AttributeTreeNode.class));
-			sql.append(".hkey >=  " + p1); //$NON-NLS-1$
-			sql.append(" and "); //$NON-NLS-1$
-			sql.append(tablePrefix(AttributeTreeNode.class));
-			sql.append(".hkey < " + p2 + " ) and "); //$NON-NLS-1$ //$NON-NLS-2$
+			sql.append(".hkey like  " + p1 + ")"); //$NON-NLS-1$
+			sql.append(" and "); //$NON-NLS-1$ //$NON-NLS-2$
 			sql.append(tablePrefix(Attribute.class));
 			p1 = addParameterValue(attributeItem.getAttributeKey());
 			sql.append(".keyid = " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			
 			if (attributeItem.getCategoryKey() != null){
-				p1 = addParameterValue(attributeItem.getCategoryKey());
-				p2 = addParameterValue(attributeItem.getCategoryKey().substring(0, attributeItem.getCategoryKey().length()-1) + "/"); //$NON-NLS-1$
-				sql.append("AND ( temp.cat_hkey >= " + p1 + " and temp.cat_hkey < " + p2 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(attributeItem.getCategoryKey()+ "%");
+				sql.append("AND ( temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			sql.append(") as foo "); //$NON-NLS-1$
 			if (groupBySql.length() > 0){
@@ -772,10 +759,8 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 		if (hkey == null){
 			sql.append(" cat_hkey is not null "); //$NON-NLS-1$
 		}else{
-			String p1 = addParameterValue(categoryItem.getCategoryHKey());
-			String p2 = addParameterValue(categoryItem.getCategoryHKey().substring(0, categoryItem.getCategoryHKey().length()-1) + "/"); //$NON-NLS-1$
-			sql.append(" ("); //$NON-NLS-1$
-			sql.append("cat_hkey >=  " + p1 + " and cat_hkey < " + p2 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String p1 = addParameterValue(categoryItem.getCategoryHKey()+ "%");
+			sql.append("( cat_hkey like  " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		}
 		sql.append(") foo"); //$NON-NLS-1$
 		
@@ -921,9 +906,8 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 			
 				String catkey = ((AttributeGroupBy)gb).getCategoryHkey();
 				if (catkey != null){
-					String p1 = addParameterValue(catkey);
-					String p2 = addParameterValue(catkey.substring(0, catkey.length() - 1) + "/"); //$NON-NLS-1$
-					fromSql.append(" and (temp.cat_hkey >= " + p1 + " and temp.cat_hkey < " + p2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					String p1 = addParameterValue(catkey+ "%");
+					fromSql.append(" and (temp.cat_hkey like " + p1 + " )"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				
 				fromSql.append(" JOIN "); //$NON-NLS-1$
@@ -1109,7 +1093,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 	public String getSurveySamplingUnitJoinFieldName() {
 		return null;
 	}
-	@Override
+
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){

@@ -29,9 +29,15 @@ import java.util.UUID;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.query.engine.er.PsqlErGridEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErMissionEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErObservationEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErSummaryEngine;
+import org.wcs.smart.connect.query.engine.er.PsqlErWaypointEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
-import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
@@ -158,8 +164,16 @@ public enum PsqlFilterToSqlGenerator {
 					engine instanceof PsqlPatrolGridEngine){
 				//patrol baseed
 				return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Patrol.class), engine);
+			}else if (engine instanceof PsqlErObservationEngine ||
+					engine instanceof PsqlErMissionTrackEngine ||
+					engine instanceof PsqlErSummaryEngine ||
+					engine instanceof PsqlErWaypointEngine ||
+					engine instanceof PsqlErGridEngine ||
+					engine instanceof PsqlErMissionEngine){
+				return asSql((ConservationAreaFilter)filter, engine.tablePrefix(SurveyDesign.class), engine);
 			}else{
 				//waypoint based
+				//observation and entity
 				return asSql((ConservationAreaFilter)filter, engine.tablePrefix(Waypoint.class), engine);
 			}
 		}else if (filter instanceof EntityAttributeFilter){
@@ -172,8 +186,6 @@ public enum PsqlFilterToSqlGenerator {
 			return asSql((MissionFilter)filter, engine);
 		}else if (filter instanceof MissionPropertyFilter){
 			return asSql((MissionPropertyFilter)filter, engine);
-		}else if (filter instanceof ConservationAreaFilter){
-			return asSql((ConservationAreaFilter)filter, engine.tablePrefix(SurveyDesign.class), engine);
 		}else if (filter instanceof SamplingUnitFilter){
 			return asSql((SamplingUnitFilter)filter, engine);
 		}else if (filter instanceof SamplingUnitAttributeFilter){

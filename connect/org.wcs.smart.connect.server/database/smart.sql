@@ -41,6 +41,8 @@ DECLARE
   ls geometry;
   p geometry;
   value double precision;
+  ctime double precision;
+  clength double precision;
   i integer;
   pnttemp geometry;
   pnttemp2 geometry;
@@ -64,15 +66,23 @@ BEGIN
 		ELSE
 			IF (ST_COVERS(p, lstemp)) THEN
 				value := value + st_z(pnttemp2) - st_z(pnttemp);
-			ELSE
-				--part in part out so linearly interpolate
-				value := value + ((st_z(pnttemp2) - st_z(pnttemp)) * (st_length(st_intersection(p, lstemp)) / st_distance(pnttemp, pnttemp2)));
+			ELSIF (ST_INTERSECTS(p, lstemp)) THEN
+				ctime := st_z(pnttemp2) - st_z(pnttemp);
+				clength := st_distance(pnttemp, pnttemp2);
+				IF (clength = 0) THEN
+					--points are the same and intersect so include the entire time
+					value := value + ctime;
+				ELSE
+					--part in part out so linearly interpolate
+					value := value + (ctime * (st_length(st_intersection(p, lstemp)) / clength));
+				END IF;
 			END IF;
 		END IF;
 	END LOOP;
 	RETURN value / 3600000.0;
 END;
 $$LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION smart.computeHours(geometry bytea, linestring bytea) RETURNS double precision AS $$
 DECLARE
   type varchar;

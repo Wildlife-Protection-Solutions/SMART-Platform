@@ -22,20 +22,14 @@
 package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Attribute;
-import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
@@ -43,8 +37,6 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
-import org.wcs.smart.patrol.query.model.observation.PatrolAttributeQueryColumn;
-import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
@@ -116,7 +108,6 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return keys.toArray(new QueryColumn[keys.size()]);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public QueryColumn[] getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
@@ -149,27 +140,9 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER,l));
 		
-		int ccnt = QueryManager.INSTANCE.getCategoryDepth(session, q.getConservationArea().getUuid());
-		for (int i = 0; i < ccnt; i ++){
-			keys.add(new PatrolCategoryQueryColumn("Category " + i, i));
+		for (QueryColumn qc : DataModelColumnProvider.getDataModelColumns(session, l, q)){
+			keys.add(qc);
 		}
-		
-		//attributes
-		List<Attribute> atts = session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", q.getConservationArea()))
-				.list();
-		List<QueryColumn> attributes = new ArrayList<QueryColumn>();
-		for (Attribute a : atts){
-			attributes.add(new PatrolAttributeQueryColumn(a.getName(), a.getKeyId(), a.getType()));
-		}
-		Collections.sort(attributes, new Comparator<QueryColumn>() {
-
-			@Override
-			public int compare(QueryColumn o1, QueryColumn o2) {
-				return Collator.getInstance(l).compare(o1.getName(), o2.getName());
-			}
-		});
-		keys.addAll(attributes);
 		
 		return keys.toArray(new QueryColumn[keys.size()]);
 	}

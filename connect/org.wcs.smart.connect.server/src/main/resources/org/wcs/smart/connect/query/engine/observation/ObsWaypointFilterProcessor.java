@@ -413,13 +413,10 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 			sql.append(" WHERE "); //$NON-NLS-1$
 			if (catfilter != null){
 				String keyPart = catfilter.getCategoryKey();
-				String p1 = engine.addParameterValue(keyPart);
-				String p2 = engine.addParameterValue(keyPart.substring(0,  keyPart.length() -1) + "/"); //$NON-NLS-1$
+				String p1 = engine.addParameterValue(keyPart+ "%");
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
-				sql.append(".hkey >= " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(prefix(Category.class));
-				sql.append(".hkey < " + p2 + " )"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			if (attfilter != null){
 				if (catfilter != null){
@@ -467,12 +464,8 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 				}else if (attfilter.getAttributeType() == AttributeType.TREE){
 					sql.append("("); //$NON-NLS-1$
 					sql.append(prefix(AttributeTreeNode.class));
-					String p1 = engine.addParameterValue(((String)attfilter.getValue()));
-					String p2 = engine.addParameterValue(((String)attfilter.getValue()).substring(0,  ((String)attfilter.getValue()).length() -1) + "/"); //$NON-NLS-1$
-					sql.append(".hkey >= " + p1 + " and " );  //$NON-NLS-1$ //$NON-NLS-2$ 
-					sql.append(prefix(AttributeTreeNode.class));
-					sql.append(".hkey < " + p2 + " ");  //$NON-NLS-1$ //$NON-NLS-2$  
-					sql.append(") ");  //$NON-NLS-1$
+					String p1 = engine.addParameterValue(((String)attfilter.getValue()) + "%");
+					sql.append(".hkey like " + p1 + " ) " );  //$NON-NLS-1$ //$NON-NLS-2$ 
 				}else if (attfilter.getAttributeType() == AttributeType.DATE){
 					String p1 = engine.addParameterValue(attfilter.getValue());
 					String p2 = engine.addParameterValue(attfilter.getValue2());

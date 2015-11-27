@@ -25,7 +25,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
@@ -365,7 +364,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 				dropTemporaryTables(c, true);		
 			}});	
 	}
-	@Override
+
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){

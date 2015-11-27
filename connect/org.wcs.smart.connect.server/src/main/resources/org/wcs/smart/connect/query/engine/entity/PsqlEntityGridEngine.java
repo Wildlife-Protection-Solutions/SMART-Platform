@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package org.wcs.smart.connect.query.engine.observation;
+package org.wcs.smart.connect.query.engine.entity;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -41,7 +41,7 @@ import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.patrol.GridQueryResults;
-import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
+import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -72,10 +72,8 @@ import org.wcs.smart.query.model.summary.IValueItem.ValueType;
  * @since 1.0.0
  */
 
-public class PsqlObsGridEngine extends AbstractQueryEngine{
-	
-	private Logger logger = Logger.getLogger(PsqlPatrolEngine.class.getName());
-	
+public class PsqlEntityGridEngine extends AbstractQueryEngine{
+	private Logger logger = Logger.getLogger(PsqlEntityGridEngine.class.getName());
 	
 	private GridQueryResults result = null;
 	
@@ -88,7 +86,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	
 	@Override
 	public boolean canExecute(String querytype) {
-		return ObservationGriddedQuery.KEY.equals(querytype);
+		return EntityGriddedQuery.KEY.equals(querytype);
 	}
 	
 	public Session getCurrentSession(){
@@ -108,7 +106,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	public IQueryResult executeQuery(
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
-
+		
 		this.query = (ObservationGriddedQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		
@@ -118,18 +116,20 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-
 				try {
 					Grid gridDef = new Grid(query.getGridOrigin().x, query.getGridOrigin().y, query.getGridSize(), query.getCoordinateReferenceSystem());
 					IValueItem valueItem = query.getQueryDefinition().getValuePart();				
+					
 					//get numerator results
 					Collection<GridResultItem> numeratorResults = getItems(gridDef, valueItem, query.getQueryDefinition().getValueFilter(), c, session, true);
+					
 					//combine with the patrol existance value
 					HashMap<String, GridResultItem> items = new HashMap<String, GridResultItem>();
 					for (GridResultItem it : numeratorResults){
 						items.put(it.getTileId(), it);
 					}
-					result = new GridQueryResults(PsqlObsGridEngine.this, items.values());
+
+					result = new GridQueryResults(PsqlEntityGridEngine.this, items.values());
 				}catch (Exception ex){
 					throw new SQLException(ex);
 				} finally {
@@ -138,6 +138,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				}
 				c.commit();
 			}
+
 		});
 		return result;
 
@@ -149,8 +150,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	 * 
 	 */
 	private Collection<GridResultItem> getItems(Grid gridDef, IValueItem value, 
-			QueryFilter filter, Connection c, Session session, 
-			boolean needsFilter) throws Exception{
+			QueryFilter filter, Connection c, Session session,  boolean needsFilter) throws Exception{	
 		if (needsFilter) {
 			try {
 				dropTemporaryGridTable(c);
@@ -172,7 +172,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				needsObservation = true;
 			}
 			
-			IFilterProcessor filterer = getFilterProcessor(filter.getFilterType(), dataTable);
+			IFilterProcessor filterer = null;
 			//create a date filter that caches the dates so the same
 			//dates are used for all parts of the query;
 			//otherwise different date filters will be computed
@@ -180,11 +180,16 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 			DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 			
 			try{
-				ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
-				filterer.processFilter(c, filter.getFilter(), dFilter, cafilter, needsObservation, false);
+				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query) ;
+				filterer = getFilterProcessor(filter.getFilterType(), dataTable);
+				filterer.processFilter(c, filter.getFilter(), dFilter, caFilter, 
+					needsObservation, false);
+			}catch (Exception ex){
+				throw new SQLException(ex);
 			}finally{
-				filterer.dropTemporaryTables(c);
+				if (filterer != null) filterer.dropTemporaryTables(c);
 			}
+
 		}
 		return getGridResults(c, session, gridDef, value);
 	}
@@ -205,7 +210,6 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 		String strAgg =""; //$NON-NLS-1$
 		ResultSet rs;
 
-		clearParameters();
 		if(value instanceof AttributeValueItem ){
 			AttributeValueItem tmp = (AttributeValueItem)value;
 				
@@ -220,6 +224,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				double minX = gridDef.getOriginX();
 				double minY = gridDef.getOriginY();
 				double size = gridDef.getCellSize();
+				clearParameters();
 				StringBuilder sql = new StringBuilder();
 
 				sql.append("SELECT " + strAgg + "(" + strAggValue + ") as value, tile_id"); //$NON-NLS-1$ //$NON-NLS-2$  //$NON-NLS-3$
@@ -237,18 +242,16 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 						sql.append(".wp_uuid as " + strAggValue);  //$NON-NLS-1$
 					}
 				}
-				String p1 = addParameterValue(gridDef.getCrs().toWKT());  
-				String p2 = addParameterValue(minX);
-				String p3 = addParameterValue(minY);
-				String p4 = addParameterValue(size);
-				
 				sql.append(", smart.computeTileId(");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
 				sql.append(".x,");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
-				sql.append(".y,");  //$NON-NLS-1$
-				sql.append(p1 + "," + p2 + "," + p3 + "," + p4 );  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
-				sql.append( ") as tile_id"); //$NON-NLS-1$ 
+				sql.append(".y,"); //$NON-NLS-1$
+				sql.append(addParameterValue(gridDef.getCrs().toWKT()) + ","); //$NON-NLS-1$
+				sql.append(addParameterValue(minX) + ","); //$NON-NLS-1$
+				sql.append(addParameterValue(minY) + ","); //$NON-NLS-1$
+				sql.append(addParameterValue(size));
+				sql.append(") as tile_id ");  //$NON-NLS-1$
 				sql.append(" FROM "); //$NON-NLS-1$
 				sql.append(tableNames.get(WaypointObservation.class));
 				sql.append( " as "); //$NON-NLS-1$
@@ -281,8 +284,8 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				sql.append(".attribute_uuid = "); //$NON-NLS-1$
 				sql.append(tablePrefix.get(Attribute.class));
 				sql.append(".uuid"); //$NON-NLS-1$
-				String param = addParameterValue(key);
-				sql.append(" AND keyid = " + param); //$NON-NLS-1$
+				String p1 = addParameterValue(key);
+				sql.append(" AND keyid = " + p1); //$NON-NLS-1$ 
 				
 				
 				sql.append(" JOIN "); //$NON-NLS-1$
@@ -296,6 +299,8 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				sql.append(".wp_uuid"); //$NON-NLS-1$
 				
 				if (tmp.getCategoryKey() != null){
+					String p2 = addParameterValue(tmp.getCategoryKey()+ "%");
+					
 					sql.append(" JOIN "); //$NON-NLS-1$
 					sql.append(tableNames.get(Category.class));
 					sql.append( " as "); //$NON-NLS-1$
@@ -305,8 +310,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 					sql.append(".category_uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(Category.class));
 					sql.append( ".uuid" ); //$NON-NLS-1$
-					p1 = addParameterValue(tmp.getCategoryKey() + "%");
-					sql.append(" AND Hkey like  " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					sql.append(" AND Hkey like " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				
 				if (tmp.getAttributeType() == AttributeType.LIST){
@@ -319,8 +323,9 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 					sql.append( tablePrefix.get(WaypointObservationAttribute.class));
 					sql.append(".list_element_uuid and "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(AttributeListItem.class));
-					p1 = addParameterValue(tmp.getItemKey());
-					sql.append(".keyid = " + p1); //$NON-NLS-1$ 
+					String p2 = addParameterValue(tmp.getItemKey()); 
+					sql.append(".keyid = " + p2); //$NON-NLS-1$
+					
 				}else if (tmp.getAttributeType() == AttributeType.TREE){
 					sql.append(" join "); //$NON-NLS-1$
 					sql.append(tableNames.get(AttributeTreeNode.class));
@@ -332,10 +337,9 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 					sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 					sql.append(".tree_node_uuid "); //$NON-NLS-1$
 					sql.append(" and ("); //$NON-NLS-1$
+					String p2 = addParameterValue(tmp.getItemKey()+ "%");
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					p1 = addParameterValue(tmp.getItemKey() + "%");
-					
-					sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
+					sql.append(".hkey like " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 				sql.append(") as foo group by tile_id"); //$NON-NLS-1$
@@ -344,7 +348,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 			}else if(value instanceof CategoryValueItem){
 				CategoryValueItem tmp = (CategoryValueItem)value;
 				strAgg = "count"; //$NON-NLS-1$
-				
+				clearParameters();
 				double minX = gridDef.getOriginX();
 				double minY = gridDef.getOriginY();
 				double size = gridDef.getCellSize();
@@ -358,15 +362,14 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				}else{
 					sql.append(dataTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
 				}
-				String p1 = addParameterValue(gridDef.getCrs().toWKT());  
+				String p1 = addParameterValue(gridDef.getCrs().toWKT());
 				String p2 = addParameterValue(minX);
 				String p3 = addParameterValue(minY);
 				String p4 = addParameterValue(size);
 				
-				sql.append("smart.computeTileId(" + tablePrefix.get(Waypoint.class)+ ".x,"); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(tablePrefix.get(Waypoint.class) + ".y,"); //$NON-NLS-1$
-				sql.append(p1 + ", " + p2 + ", " + p3 + ", " + p4); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				sql.append(") as tile_id"); //$NON-NLS-1$ 
+				sql.append("smart.computeTileId("); //$NON-NLS-1$
+				sql.append(tablePrefix.get(Waypoint.class)+ ".x,"); //$NON-NLS-1$
+				sql.append(tablePrefix.get(Waypoint.class) + ".y," + p1 + "," + p2 + "," + p3 + "," + p4 + ") as tile_id"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 				sql.append(" FROM " + tableNames.get(WaypointObservation.class) + " as " + tablePrefix.get(WaypointObservation.class)); //$NON-NLS-1$ //$NON-NLS-2$
 				sql.append(" JOIN " + dataTable  //$NON-NLS-1$
 						+ " on " + tablePrefix.get(WaypointObservation.class) //$NON-NLS-1$
@@ -380,9 +383,9 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 						+ ".uuid" //$NON-NLS-1$
 						+ " AND "); //$NON-NLS-1$
 				if (tmp.getCategoryHKey() != null){
-					p1 = addParameterValue(tmp.getCategoryHKey() + "%");
-
-					sql.append("hkey like " + p1 + "  AND hkey < " + p2 + " ");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					p1 = addParameterValue(tmp.getCategoryHKey()+ "%");
+					sql.append("hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					
 				}else{
 					sql.append(" hkey is not null "); //$NON-NLS-1$
 				}
@@ -399,7 +402,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				logger.finest(sql.toString());
 				rs = parseQueryString(c, sql.toString()).executeQuery();
 			}else{
-				throw new SQLException("Grid value not supported");		
+				throw new SQLException("Grid value not supported");	
 			}
 		
 			try {
@@ -446,8 +449,8 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
 		}else{
-			sql.append("cast(null as uuid),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as uuid)");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as UUID)");	//wpob_uuid //$NON-NLS-1$
 		}
 		return sql.toString();
 	}
@@ -456,8 +459,8 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
-		sql.append("ob_uuid uuid"); //$NON-NLS-1$
+		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
+		sql.append("ob_uuid UUID"); //$NON-NLS-1$
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
 	}
@@ -472,7 +475,6 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
-
 
 	@Override
 	public void cleanUp(Session session) {
@@ -491,9 +493,9 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new ObsFilterProcessor(queryDataTable, this);
+			return new PsqlEntityFilterProcessor(queryDataTable, this);
 		}else{
-			return new ObsWaypointFilterProcessor(queryDataTable, this);
+			return new PsqlEntityWaypointFilterProcessor(queryDataTable, this);
 		}
 	}
 	

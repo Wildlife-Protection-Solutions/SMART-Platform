@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query.engine.observation;
+package org.wcs.smart.connect.query.engine.entity;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
@@ -34,9 +35,9 @@ import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
+import org.wcs.smart.entity.query.model.EntityQueryResultItem;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
 import org.wcs.smart.observation.model.Waypoint;
-import org.wcs.smart.observation.query.model.ObservationQueryResultItem;
-import org.wcs.smart.observation.query.model.ObservationWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.Query;
@@ -55,18 +56,14 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlObsWaypointEngine extends AbstractQueryEngine {
-
-	private final Logger logger = Logger.getLogger(PsqlObsWaypointEngine.class.getName());
+public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
+	private final Logger logger = Logger.getLogger(PsqlEntityWaypointEngine.class.getName());
 	
 	private String queryDataTable;
+	private SimpleQuery query;
 	private Session session;
 	private Locale l = Locale.getDefault();
-	
-	@Override
-	public boolean canExecute(String querytype) {
-		return ObservationWaypointQuery.KEY.equals(querytype);
-	}
+
 	
 	public String getQueryDataTable(){
 		return this.queryDataTable;
@@ -79,6 +76,12 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	public Locale getLocale(){
 		return this.l;
 	}
+	
+	@Override
+	public boolean canExecute(String querytype) {
+		return EntityWaypointQuery.KEY.equals(querytype);
+	}
+	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -92,47 +95,49 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	public IQueryResult executeQuery(
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
-
-		final SimpleQuery query = (SimpleQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
-	
+		
+		query = (SimpleQuery) lquery;
+		this.l = (Locale) parameters.get(Locale.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
+		
 		if (query.getDateFilter() == null){
 			return null;
 		}
 		
 		queryDataTable = createTempTableName();
+
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
-				IFilterProcessor filterer;
-				try{
-					filterer = PsqlObsWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
-				}catch (Exception ex){
-					throw new SQLException(ex);
-				}
+
+				IFilterProcessor filterer = null;
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				try {		
-					ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
-					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
-							cafilter, false, true);
+				try {			
+					filterer = PsqlEntityWaypointEngine.this.getFilterProcessor(query.getFilter().getFilterType(), queryDataTable);
 					
-					populateTemporaryTableExtra(c, cafilter.getConservationAreaFilterIds().size() > 1, session);
+					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
+							caFilter, false, true);
+					
+					populateTemporaryTableExtra(c, caFilter.getConservationAreaFilterIds().size() > 1, session);
+
 				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
 
 				} finally {
-					filterer.dropTemporaryTables(c);
+					if (filterer != null) filterer.dropTemporaryTables(c);
 					dropTemporaryTables(c, false);
 				}
 				c.commit();
 			}
 
 		});
-		ObsWaypointQueryResult result = new ObsWaypointQueryResult(this);
+		EntityWaypointQueryResult result = new EntityWaypointQueryResult(this);
 		return result;
 	}
 
@@ -149,7 +154,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 		dropTable(c, queryDataTable);
 	}
 	
-	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, boolean isMultiple, Session session) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -160,12 +165,11 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 			logger.finest(sql);
 			c.createStatement().execute(sql);
 		}
-		
+
 		
 		//ca information
-		if (isMultipleCa){
+		if (isMultiple){
 			//ca id and names are only used for cross-ca analysis
-			
 			StringBuilder sql = new StringBuilder();
 			sql.append("UPDATE "); //$NON-NLS-1$
 			sql.append(queryDataTable);
@@ -207,8 +211,8 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	public String getTemporaryTableCreateClause(String tableName) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + "("); //$NON-NLS-1$ //$NON-NLS-2$
-		sql.append("p_ca_uuid uuid,"); //$NON-NLS-1$
-		sql.append("wp_uuid uuid,"); //$NON-NLS-1$
+		sql.append("p_ca_uuid UUID,"); //$NON-NLS-1$
+		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
 		sql.append("wp_source varchar(16),"); //$NON-NLS-1$
 		sql.append("wp_id integer,"); //$NON-NLS-1$
 		sql.append("wp_x double precision,"); //$NON-NLS-1$
@@ -221,8 +225,8 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 		return sql.toString();
 	}
 
-	protected ObservationQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		ObservationQueryResultItem it = new ObservationQueryResultItem();
+	protected EntityQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
+		EntityQueryResultItem it = new EntityQueryResultItem();
 		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
 		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
 		it.setSourceId(rs.getString("wp_source")); //$NON-NLS-1$
@@ -236,12 +240,6 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		
 		return it;
-	}
-	
-	
-	@Override
-	public void buildTemporaryTableIndexes(Connection c, String tableName)
-			throws SQLException {
 	}
 
 	@Override
@@ -261,9 +259,15 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	protected IFilterProcessor getFilterProcessor(FilterType filterType,
 			String queryDataTable) {
 		if (filterType == IFilter.FilterType.OBSERVATION){
-			return new ObsFilterProcessor(queryDataTable, this);
+			return new PsqlEntityFilterProcessor(queryDataTable, this);
 		}else{
-			return new ObsWaypointFilterProcessor(queryDataTable, this);
+			return new PsqlEntityWaypointFilterProcessor(queryDataTable, this);
 		}
 	}
+	
+	@Override
+	public void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
+		//do not build any indexes
+	}
+	
 }

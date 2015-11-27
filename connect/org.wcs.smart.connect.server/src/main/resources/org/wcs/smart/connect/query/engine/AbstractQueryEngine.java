@@ -23,6 +23,7 @@ package org.wcs.smart.connect.query.engine;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -45,8 +46,6 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
-import org.wcs.smart.connect.query.engine.patrol.PatrolFilterProcessor;
-import org.wcs.smart.connect.query.engine.patrol.PatrolWaypointFilterProcessor;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -424,15 +423,15 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	public abstract String getSurveySamplingUnitJoinFieldName();
 	
 	
-	/**
-	 * Creates the filter processor based on the query filter type
-	 * 
-	 * @param filterType
-	 * @param queryDataTable
-	 * @return
-	 */
-	protected abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, 
-			String queryDataTable);
+//	/**
+//	 * Creates the filter processor based on the query filter type
+//	 * 
+//	 * @param filterType
+//	 * @param queryDataTable
+//	 * @return
+//	 */
+//	protected abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, 
+//			String queryDataTable);
 	
 	public static ConservationAreaFilter parseConservationAreaFilter(Query query){
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
@@ -445,6 +444,45 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			return ConservationAreaFilter.parseFilter(query.getConservationAreaFilter(),
 					Collections.singleton(query.getConservationArea()));
 		}
+		
+	}
+	
+	public String getEntityDmAttributeKey(String entityKey, ConservationAreaFilter caFilter, Connection c){
+		String dmEntityTypeAttributeKey;
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT " + tablePrefix(Attribute.class) + ".keyid"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" FROM "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(EntityType.class));
+		sql.append(" join "); //$NON-NLS-1$
+		sql.append(tableNamePrefix(Attribute.class));
+		sql.append(" on "); //$NON-NLS-1$
+		sql.append(tablePrefix(EntityType.class) + ".dm_attribute_uuid = "); //$NON-NLS-1$
+		sql.append(tablePrefix(Attribute.class) + ".uuid "); //$NON-NLS-1$
+		sql.append(" WHERE "); //$NON-NLS-1$
+		sql.append(tablePrefix(EntityType.class));
+		sql.append(".keyid = '" + entityKey + "'"); //$NON-NLS-1$ //$NON-NLS-2$
+		sql.append(" AND "); //$NON-NLS-1$
+		sql.append(tablePrefix(EntityType.class));
+		sql.append(".ca_uuid IN (");
+		for (UUID uuid : caFilter.getConservationAreaFilterIds()){
+			sql.append("'" + uuid.toString() + "',");
+		}
+		sql.deleteCharAt(sql.length() - 1);
+		sql.append(")");
+		try{
+			logger.finest(sql.toString());
+			ResultSet rs = c.createStatement().executeQuery(sql.toString());
+			if (rs.next()){
+				dmEntityTypeAttributeKey = rs.getString(1);
+			}else{
+				throw new RuntimeException(MessageFormat.format("Entity not found for entity attribute key {0}.", new Object[]{entityKey}));
+			}
+			rs.close();
+		}catch (Exception ex){
+			throw new RuntimeException(ex);
+		}
+		
+		return dmEntityTypeAttributeKey;
 		
 	}
 }

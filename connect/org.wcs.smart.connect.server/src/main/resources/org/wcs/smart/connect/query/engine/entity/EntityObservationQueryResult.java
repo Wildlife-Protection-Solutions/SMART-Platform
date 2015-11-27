@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query.engine.observation;
+package org.wcs.smart.connect.query.engine.entity;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,11 +43,11 @@ import org.wcs.smart.query.model.QueryColumn.ColumnType;
  * @author Emily
  *
  */
-public class ObsObservationQueryResult implements IDbTableResultSet {
+public class EntityObservationQueryResult implements IDbTableResultSet {
 
-	private PsqlObsObservationEngine engine;
+	private PsqlEntityObservationEngine engine;
 	
-	public ObsObservationQueryResult(PsqlObsObservationEngine engine){
+	public EntityObservationQueryResult(PsqlEntityObservationEngine engine){
 		this.engine = engine;
 	}
 	

@@ -21,10 +21,22 @@
  */
 package org.wcs.smart.connect.query.columns;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
+import org.wcs.smart.entity.query.model.EntityGriddedQuery;
+import org.wcs.smart.entity.query.model.EntityObservationQuery;
+import org.wcs.smart.entity.query.model.EntityWaypointQuery;
+import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
+import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -36,36 +48,96 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 
+	private static Logger logger = Logger.getLogger(EntityQueryColumnProvider.class.getName());
+	
 	@Override
 	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
-		// TODO Auto-generated method stub
+		try{
+			String queryTypeKey = query.getTypeKey();
+			if (queryTypeKey.equals(EntityObservationQuery.KEY)){
+				return getObservationQueryColumns(query, l, session);
+			}else if (queryTypeKey.equals(EntityWaypointQuery.KEY)){
+				return getWaypointQueryColumns(query, l, session);
+			}else if (queryTypeKey.equals(EntityGriddedQuery.KEY)){
+				return getGriddedQueryColumns(query, l, session);
+			}
+		}catch (SQLException ex){
+			logger.log(Level.SEVERE, "Error determining query columns.", ex);
+			return null;
+		}
 		return null;
 	}
 
-//	@Override
-//	public QueryColumn[] getQueryColumns(Query query) {
-//		String queryTypeKey = query.getTypeKey();
-//		if (queryTypeKey.equals(EntityObservationQuery.KEY)){
-//			QueryColumn[] col = EntityQueryColumnCache.getInstance().getObservationQueryColumns();
-//			List<QueryColumn> all = new ArrayList<QueryColumn>();
-//			for (QueryColumn c : col){
-//				all.add(c);
-//			}
-//			try{
-//				all.addAll(processEntityTypes( ((EntityObservationQuery)query).getFilter() ));
-//			}catch(Exception ex){
-//				EntityQueryPlugIn.log(ex.getMessage(), ex);
-//			}
-//			return all.toArray(new QueryColumn[all.size()]);
-//		}
-//		if (queryTypeKey.equals(EntityWaypointQuery.KEY)){
-//			return EntityQueryColumnCache.getInstance().getWaypointQueryColumns();
-//		}
-//		if (queryTypeKey.equals(EntityGriddedQuery.KEY)){
-//			return EntityQueryColumnCache.getInstance().getGridColumns();
-//		}
-//		return null;
-//	}
+	public QueryColumn[] getObservationQueryColumns(Query query, Locale l,  Session s) throws SQLException {
+		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+			FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+			boolean add = true;
+			if (item == FixedQueryColumn.FixedColumns.CA_ID
+					|| item == FixedQueryColumn.FixedColumns.CA_NAME) {
+				add = query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
+			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) {
+				add = trackDistanceDirection(query.getConservationArea(), s);
+			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+				add = trackObserver(query.getConservationArea(), s);
+			}
+			if (add) {
+				cols.add(new FixedQueryColumn(item, Locale.getDefault()));
+			}
+		}
+
+		for (QueryColumn q : DataModelColumnProvider.getDataModelColumns(s, l, query)){
+			cols.add(q);
+		}
+
+		return cols.toArray(new QueryColumn[cols.size()]);
+	}
+	
+	public QueryColumn[] getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
+		List<QueryColumn> cols = new ArrayList<QueryColumn>();
+		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
+			cols.add(new GridQueryColumn(t,l));
+		}
+		return cols.toArray(new QueryColumn[cols.size()]);
+	}
+	
+	public QueryColumn[] getWaypointQueryColumns(Query query, Locale l,  Session s) throws SQLException {
+		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
+		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
+			FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
+			boolean add = true;
+			if (item == FixedQueryColumn.FixedColumns.CA_ID
+					|| item == FixedQueryColumn.FixedColumns.CA_NAME) {
+				add = query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
+			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION
+					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) {
+				add = trackDistanceDirection(query.getConservationArea(), s);
+			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
+				add = trackObserver(query.getConservationArea(), s);
+			}
+			if (add) {
+				cols.add(new FixedQueryColumn(item, Locale.getDefault()));
+			}
+		}
+		return cols.toArray(new QueryColumn[cols.size()]);
+	}
+	
+	public boolean trackDistanceDirection(ConservationArea ca, Session s){
+		ObservationOptions op = getOptions(ca, s);
+		if (op == null) return true;
+		return op.getTrackDistanceDirection();
+	}
+	
+	public boolean trackObserver(ConservationArea ca, Session s){
+		ObservationOptions op = getOptions(ca, s);
+		if (op == null) return true;
+		return op.getTrackObserver();
+	}
+	
+	public ObservationOptions getOptions(ConservationArea ca, Session s){
+		return (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
+	}
 //
 //	
 //	private List<QueryColumn> processEntityTypes(QueryFilter filter){
