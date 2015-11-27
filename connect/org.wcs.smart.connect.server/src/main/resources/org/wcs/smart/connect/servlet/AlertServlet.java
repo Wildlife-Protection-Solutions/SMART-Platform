@@ -39,6 +39,8 @@ import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.MapLayer;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.security.AlertAction;
+import org.wcs.smart.connect.security.SecurityManager;
 
 /*
  * AlertServlet - Alerts/Map page in Connect provides information used to load the page: users, cas, maplayers etc.
@@ -62,6 +64,8 @@ public class AlertServlet extends HttpServlet{
 		List<AlertType> alertTypes = null;
 		List<MapLayer> mapLayers = null;
 		List<AlertFilterDefault> defaults = null;
+		boolean canUpdate = false;
+		boolean canDelete = false;
 		
 		Session session = HibernateManager.getSession(request.getServletContext());
 		session.beginTransaction();
@@ -71,6 +75,8 @@ public class AlertServlet extends HttpServlet{
 			alertTypes = HibernateManager.getAlertTypes(session);
 			mapLayers = HibernateManager.getMapLayers(session);
 			defaults = HibernateManager.getAlertFilterDefaults(session);
+			canUpdate = SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.UPDATE_ALL_KEY);
+			canDelete = SecurityManager.INSTANCE.canAccess(session, request.getUserPrincipal().getName(), AlertAction.DELETE_ALL_KEY);
 		}finally{
 			session.getTransaction().rollback();
 		}
@@ -82,6 +88,9 @@ public class AlertServlet extends HttpServlet{
 		request.setAttribute("startingZoom", defaults.get(0).getStartingZoomLevel()); //$NON-NLS-1$
 		request.setAttribute("startingLong", defaults.get(0).getStartingLong()); //$NON-NLS-1$
 		request.setAttribute("startingLat", defaults.get(0).getStartingLat()); //$NON-NLS-1$
+		
+		request.setAttribute("canupdate", canUpdate); //$NON-NLS-1$
+		request.setAttribute("candelete", canDelete); //$NON-NLS-1$
 		
 		List<String>status = new ArrayList<String>();
 		for (Alert.AlertStatusEnum x : Alert.AlertStatusEnum.values()) {

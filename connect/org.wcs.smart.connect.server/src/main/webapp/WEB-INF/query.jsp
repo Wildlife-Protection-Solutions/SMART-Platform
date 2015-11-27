@@ -37,7 +37,7 @@
 <input type=text name="textsearch" id="textsearch" maxlength=30 oninput="searchChanged()"/>
 
 <label><fmt:message key="query.inca" /></label>
-<select id="caselect" oninput="searchChanged()" style="max-width:24em">
+<select id="caselect" onchange="searchChanged()" style="max-width:24em">
 <option value="allcas"><fmt:message key="query.allcas" /></option>
 </select>
 

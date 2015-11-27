@@ -1,4 +1,4 @@
-var ALERT_URL = "../api/co9nnectalert/";
+var ALERT_URL = "../api/connectalert/";
 //var ALERT_URL = "../api/connectalertbrokenonpurposetoTest/";
 var FILTER_URL = "../api/connectalertfilterdefault/";
 var interval = 7000; //# of milli-seconds between map refresh on the alert layer,
@@ -336,11 +336,10 @@ function alertDeleted() {
 	if (this.status == 200  && this.status != 201 ) {
 		var r = JSON.parse(this.response);
 		displayInfo(i18n("alert.deletealertwith") + r.uuid);
+		refreshAlerts();
 	} else {
-		displayError(parseError(i18n("alert.deletealertwith") + this.uuid));
+		displayError(parseError(i18n("alert.deletealertwith") + " : " + this.statusText));
 	}
-	refreshAlerts();
-	
 }
 
 /* reload alert table */
@@ -430,20 +429,22 @@ function createAlertTable(){
 		 		row.id = "alertRow" + i;
 		 		row.dataset.uuid = alerts[i].properties.uuid;
 	
-		 		//update goes first, shows second, since it floats right in the css...
-		 		var updateicon = document.createElement("a");
-		 		updateicon.className="update-icon";
-		 		updateicon.title="update alert";
-		 		updateicon.onclick = updateAlert;
-		 		updateicon.href="";
-		 		row.childNodes[7].appendChild(updateicon);
-		 		
-		 		var deleteicon = document.createElement("a");
-		 		deleteicon.className="delete-icon";
-		 		deleteicon.title="delete alert";
-		 		deleteicon.onclick = deleteAlert;
-		 		deleteicon.href="";
-		 		row.childNodes[7].appendChild(deleteicon);
+		 		if(canupdate){
+		 			var updateicon = document.createElement("a");
+			 		updateicon.className="update-icon";
+			 		updateicon.title="update alert";
+			 		updateicon.onclick = updateAlert;
+			 		updateicon.href="";
+			 		row.childNodes[7].appendChild(updateicon);
+		 		}
+		 		if(candelete){
+			 		var deleteicon = document.createElement("a");
+			 		deleteicon.className="delete-icon";
+			 		deleteicon.title="delete alert";
+			 		deleteicon.onclick = deleteAlert;
+			 		deleteicon.href="";
+			 		row.childNodes[7].appendChild(deleteicon);
+		 		}
 		 	}
 	 	}
 	}catch(err) {
@@ -538,12 +539,13 @@ function AlertUpdated(){
 	if (this.status == 200 ) {
 		var r = JSON.parse(this.response);
 		displayInfo("Alert with UUID " + r.uuid + " Updated.");
+		refreshAlerts();
 	} else {
 		displayError(parseError(i18n("alert.errorupdating") + this.statusText + "; " + this.responseText));
 	}
 	
 	closeDialog('updateAlertDialog');
-	refreshAlerts();
+
 }
 
 function hideShowFilters(){

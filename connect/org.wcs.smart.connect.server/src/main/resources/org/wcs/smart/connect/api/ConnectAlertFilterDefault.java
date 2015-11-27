@@ -48,6 +48,7 @@ import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.AlertFilterDefault;
+import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -76,11 +77,18 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 
-	private void validateUser(){
+	/*
+	 * Validates the current user has the permission to the provided action
+	 * 1 parameter - the action type to test for permission
+	 * 
+	 * The CanAccess function automatically returns yes for users that have Admin rights
+	 * You can also pass in AdminAccountAction.KEY to this function, even though it is a bit redundant  
+	 */
+	private void validateUser(String key){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.KEY)){
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), key)){
 				logger.info("User " + request.getUserPrincipal().getName() + " does not have alert management permissions."); //$NON-NLS-1$ //$NON-NLS-2$
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
@@ -92,7 +100,7 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 	@GET
     @Path("")
     public List<AlertFilterDefault> getAlertFilterDefaults(){
-		validateUser();
+		validateUser(AlertAction.VIEW_ALL_KEY);
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -105,7 +113,7 @@ public class ConnectAlertFilterDefault extends HttpServlet {
 	@PUT
     @Path("/{uuid}")
     public AlertFilterDefault updateAlertFilterDefault(@PathParam("uuid") UUID uuid, AlertFilterDefault newDefault) {
-    	validateUser();
+    	validateUser(AdminAccountAction.KEY);
     	
     	AlertFilterDefault toUpdate = null;
     	Session s = HibernateManager.getSession(context);

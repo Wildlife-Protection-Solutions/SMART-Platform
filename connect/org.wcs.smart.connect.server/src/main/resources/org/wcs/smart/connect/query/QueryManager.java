@@ -44,16 +44,14 @@ import org.wcs.smart.connect.query.engine.er.PsqlErObservationEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErSummaryEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErWaypointEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
+import org.wcs.smart.connect.query.engine.observation.PsqlObsObservationEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsSummaryEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsWaypointEngine;
-import org.wcs.smart.connect.query.engine.observation.PsqlObsObservationEngine;
+import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolGridEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolObservationEngine;
-import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolSummaryEngine;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolWaypointEngine;
-import org.wcs.smart.connect.security.ActionManager;
-import org.wcs.smart.connect.security.ISmartConnectAction;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
@@ -261,6 +259,7 @@ public enum QueryManager {
 		return ((Integer)q.uniqueResult() + 1);
 	}
 
+	@SuppressWarnings("unchecked")
 	public void RemoveAccessToQueriesFromCa(UUID uuid, Session s, Locale locale) {
 		List<UUID> list = null;
 		for (Class<? extends Query> q : queryClasses){

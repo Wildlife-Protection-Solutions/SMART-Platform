@@ -58,7 +58,7 @@ labels_en= {
 "alert.confirmdeleteuser": "Are you sure you want to delete the user ",
 "alert.errordeletingaccount": "Error deleting account ",
 "alert.errordeletingaction": "Error deleting action ",
-"alert.erroraddingaction": "Error adding action " ,
+"alert.erroraddingaction": "Error adding action for user: " ,
 "users.errorcreatinguser": "Error creating account",
 "ca.confirmdeleteca": "Are you sure you want to delete the conservation area ",
 "ca.errordeletingca": "Error deleting conservation area ",

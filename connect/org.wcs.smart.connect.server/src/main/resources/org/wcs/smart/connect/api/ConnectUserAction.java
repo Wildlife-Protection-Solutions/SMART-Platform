@@ -45,6 +45,7 @@ import javax.ws.rs.core.Response;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.ConstraintViolationException;
 import org.wcs.smart.connect.SmartUtils;
 import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
@@ -281,8 +282,13 @@ public class ConnectUserAction extends HttpServlet {
 		}catch (Exception ex){
 			s.getTransaction().rollback();
 			logger.log(Level.SEVERE, ex.getMessage(), ex);
-			throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
-					Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			if(ex instanceof ConstraintViolationException){
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+						Messages.getString("ConnectUserAction.UserAddErrorDuplicate", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			}else{
+				throw new SmartConnectException(Response.Status.INTERNAL_SERVER_ERROR, 
+						Messages.getString("ConnectUserAction.UserAddError", SmartUtils.getRequestLocale(request)), ex); //$NON-NLS-1$
+			}
 		}
 	}
 }

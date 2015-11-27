@@ -38,6 +38,8 @@
 	var startingZoom = ${startingZoom};
 	var startingLong = ${startingLong};
 	var startingLat = ${startingLat};
+	var canupdate = ${canupdate};
+	var candelete = ${candelete};
 	
 	
 	<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>

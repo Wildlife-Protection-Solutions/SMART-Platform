@@ -9,19 +9,28 @@ import org.wcs.smart.connect.i18n.Messages;
 
 public class AlertAction implements ISmartConnectAction{
 
-	public static final String KEY = "alerts"; //$NON-NLS-1$
+	public static final String VIEW_ALL_KEY = "viewalerts"; //$NON-NLS-1$
+	public static final String CREATE_ALERTS_KEY = "createalerts"; //$NON-NLS-1$
+	public static final String UPDATE_ALL_KEY = "updatealerts"; //$NON-NLS-1$
+	public static final String DELETE_ALL_KEY = "deletealerts"; //$NON-NLS-1$
 	
 	@Override
 	public String getActionName(String actionKey, Locale l) {
-		if (actionKey.equals(KEY)){
-			return Messages.getString("AlertsAction.AlertsPermissions", l); //$NON-NLS-1$
+		if (actionKey.equals(VIEW_ALL_KEY)){
+			return Messages.getString("AlertsAction.ViewAlertsPermissions", l); //$NON-NLS-1$
+		}else if(actionKey.equals(CREATE_ALERTS_KEY)){
+			return Messages.getString("AlertsAction.CreateAlertsPermissions", l); //$NON-NLS-1$
+		}else if(actionKey.equals(UPDATE_ALL_KEY)){
+			return Messages.getString("AlertsAction.UpdateAlertsPermissions", l); //$NON-NLS-1$
+		}else if(actionKey.equals(DELETE_ALL_KEY)){
+			return Messages.getString("AlertsAction.DeleteAlertsPermissions", l); //$NON-NLS-1$
 		}
 		return null;
 	}
 
 	@Override
 	public String[] getActionKeys() {
-		return new String[]{KEY};
+		return new String[]{VIEW_ALL_KEY, CREATE_ALERTS_KEY, UPDATE_ALL_KEY, DELETE_ALL_KEY};
 	}
 
 	@Override

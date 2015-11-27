@@ -80,7 +80,6 @@ import org.wcs.smart.connect.model.SmartUserAction;
 import org.wcs.smart.connect.model.WorkItem;
 import org.wcs.smart.connect.model.WorkItem.Type;
 import org.wcs.smart.connect.query.QueryManager;
-import org.wcs.smart.connect.query.QueryProxy;
 import org.wcs.smart.connect.security.CaAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.connect.uploader.sync.ChangeLogManager;

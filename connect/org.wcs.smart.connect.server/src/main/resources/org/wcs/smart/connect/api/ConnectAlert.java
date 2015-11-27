@@ -61,6 +61,7 @@ import org.wcs.smart.connect.model.Alert.AlertStatusEnum;
 import org.wcs.smart.connect.model.AlertType;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.model.SmartUser;
+import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
 
@@ -87,12 +88,20 @@ public class ConnectAlert extends HttpServlet {
 	@Context private HttpServletResponse response;
 	@Context private HttpServletRequest request;
 
-	private void validateUser(){
+	
+	/*
+	 * Validates the current user has the permission to the provided action
+	 * 1 parameter - the action type to test for permission
+	 * 
+	 * The CanAccess function automatically returns yes for users that have Admin rights
+	 * You can also pass in AdminAccountAction.KEY to this function, even though it is a bit redundant  
+	 */
+	private void validateUser(String key){
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AlertAction.KEY)){
-				logger.info("User " + request.getUserPrincipal().getName() + " does not have alert management permissions."); //$NON-NLS-1$ //$NON-NLS-2$
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), key)){
+				logger.info("User " + request.getUserPrincipal().getName() + " does not have permissions for this request."); //$NON-NLS-1$ //$NON-NLS-2$
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}
 		}finally{
@@ -103,7 +112,7 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("/alertTypes/")
     public List<AlertType> getAlertTypes(){
-		validateUser();
+		validateUser(AlertAction.VIEW_ALL_KEY);
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -116,7 +125,7 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("/alertTypes/{uuid}")
     public AlertType getAlertType(@PathParam("uuid") UUID uuid){
-		validateUser();
+		validateUser(AlertAction.VIEW_ALL_KEY);
 
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -135,7 +144,7 @@ public class ConnectAlert extends HttpServlet {
 	@PUT
     @Path("/alertTypes/{uuid}")
     public AlertType updateAlertType(@PathParam("uuid") UUID uuid, AlertType newAlertType) {
-    	validateUser();
+    	validateUser(AdminAccountAction.KEY);
     	
     	AlertType toUpdate = null;
     	Session s = HibernateManager.getSession(context);
@@ -181,7 +190,7 @@ public class ConnectAlert extends HttpServlet {
 	@POST
     @Path("/alertTypes/{label}")
     public AlertType addAlertType(@PathParam("label") String label, AlertType newAlertType) {
-		validateUser();
+		validateUser(AdminAccountAction.KEY);
 			
 		AlertType a = new AlertType();
 
@@ -216,7 +225,7 @@ public class ConnectAlert extends HttpServlet {
 	@DELETE
     @Path("/alertTypes/{uuid}")
     public AlertType removeAlertType(@PathParam("uuid") UUID uuid) {
-    	validateUser();
+    	validateUser(AdminAccountAction.KEY);
     	AlertType toDelete = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -261,6 +270,8 @@ public class ConnectAlert extends HttpServlet {
     			@QueryParam(value="sortBy") String sortBy,
     			@QueryParam(value="sortAscending") Boolean sortAscending
     			){
+		validateUser(AlertAction.VIEW_ALL_KEY);
+		
 		AlertFilter af;
 		try{
 			af = new AlertFilter(levelFilter, typeUuidFilter, statusFilter, caUuidFilter, startDateFilter, endDateFilter, textSearchFilter, sortBy, sortAscending);
@@ -268,7 +279,7 @@ public class ConnectAlert extends HttpServlet {
 			throw e;
 		}
 		
-		validateUser();
+
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -282,7 +293,7 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("/{alertUuid}")
     public Alert getAlert(@PathParam("alertUuid") UUID alertUuid){
-		validateUser();
+		validateUser(AlertAction.VIEW_ALL_KEY);
 
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -302,7 +313,7 @@ public class ConnectAlert extends HttpServlet {
 	@GET
     @Path("/ca/{caUuid}")
     public List<Alert> getAlertsByCa(@PathParam("caUuid") UUID caUuid){
-		validateUser();
+		validateUser(AlertAction.VIEW_ALL_KEY);
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
@@ -321,10 +332,10 @@ public class ConnectAlert extends HttpServlet {
 	@POST
     @Path("/{usergenid}")
     public Alert addAlert(@PathParam("usergenid") String userGenId, Alert newAlert) {
-		validateUser();
+		validateUser(AlertAction.CREATE_ALERTS_KEY);
 			
 		//validate usergenid, is it unique?
-		String err = validateUserGeneratedId(userGenId);
+		String err = validateGeneratedId(userGenId);
 		if (err != null){
 			throw new SmartConnectException(Response.Status.BAD_REQUEST, err);
 		}
@@ -385,7 +396,7 @@ public class ConnectAlert extends HttpServlet {
 	@PUT
     @Path("/{usergenid}")
     public Alert updateAlert(@PathParam("usergenid") String oldAlertId, Alert newAlert) {
-    	validateUser();
+    	validateUser(AlertAction.UPDATE_ALL_KEY);
     	validateAlertValues(newAlert);
     	
     	Alert toUpdate = null;
@@ -458,7 +469,7 @@ public class ConnectAlert extends HttpServlet {
     @DELETE
     @Path("/{alertUuid}")
     public Alert removeAlert(@PathParam("alertUuid") UUID alertUuid) {
-    	validateUser();
+    	validateUser(AlertAction.DELETE_ALL_KEY);
     	Alert toDelete = null;
     	Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
@@ -503,7 +514,7 @@ public class ConnectAlert extends HttpServlet {
 		return null;
 	}
     
-    private String validateUserGeneratedId(String userGenId) {
+    private String validateGeneratedId(String userGenId) {
     	Session s = HibernateManager.getSession(context);
 		Alert a = null;
 		s.beginTransaction();
