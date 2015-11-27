@@ -36,8 +36,8 @@ import org.wcs.smart.query.model.summary.IGroupBy;
 public class HasObservationGroupByVisitor implements IGroupByVisitor {
 
 
-	private boolean hasCategory = false;
-	private boolean hasAttribute = false;
+	protected boolean hasCategory = false;
+	protected boolean hasAttribute = false;
 	
 	@Override
 	public void visit(IGroupBy item) {

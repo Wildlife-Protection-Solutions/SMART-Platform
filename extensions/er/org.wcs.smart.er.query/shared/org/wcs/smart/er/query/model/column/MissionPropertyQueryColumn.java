@@ -19,52 +19,69 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.columns;
+package org.wcs.smart.er.query.model.column;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.er.model.MissionAttribute;
+import org.wcs.smart.er.query.model.MissionTrackResultItem;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
- * Column that represents a data model attribute.
+ * Mission property query column.
  * 
  * @author Emily
  *
  */
-public class SurveyAttributeQueryColumn extends AttributeQueryColumn {
-
-	public SurveyAttributeQueryColumn(String name, String attributeId, AttributeType type) {
-		super(name, attributeId, type);
-	}
-
+public class MissionPropertyQueryColumn extends QueryColumn {
+	
+	private static final String KEY_PREFIX = "missionatt"; //$NON-NLS-1$
+	
 	/**
-	 * Creates a new column with the given column type.
-	 * @param name
-	 * @param key the query column full key of the form "attribute:<ATTRIBUTEID>"
-	 * @param type
+	 * Creates a new query column based on the mission attribute.
+	 * 
+	 * @param mp
 	 */
-	public SurveyAttributeQueryColumn(String name, String key, ColumnType type){
+	public MissionPropertyQueryColumn(String name, MissionAttribute mp){
+		super(name, KEY_PREFIX + ":" + mp.getKeyId(), null); //$NON-NLS-1$ 
+		if (mp.getType() == AttributeType.NUMERIC){
+			super.setType(ColumnType.NUMBER);
+		}else if (mp.getType() == AttributeType.TEXT){
+			super.setType(ColumnType.STRING);
+		}else if (mp.getType() == AttributeType.LIST){
+			super.setType(ColumnType.STRING);
+		}
+	}
+	
+	/**
+	 * Creates a new query column with the given attribute.
+	 * 
+	 * @param name column name
+	 * @param key column key
+	 * @param type column type
+	 */
+	protected MissionPropertyQueryColumn(String name, String key, ColumnType type){
 		super(name, key, type);
-		this.attributeKey = key.split(":")[1]; //$NON-NLS-1$
 	}
 	
 	@Override
 	public Object getValue(IResultItem item) {
 		if (item instanceof SurveyQueryResultItem){
-			Object x = ((SurveyQueryResultItem)item).getAttributeValue(attributeKey);
-			if (x != null && getType() == QueryColumn.ColumnType.BOOLEAN){
-				return Boolean.valueOf((Double)x >= 0.5);
-			}
-			return x;
+			SurveyQueryResultItem i = (SurveyQueryResultItem) item;			
+			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
+			return i.getMissionPropertyValue(attributeKey);
+		}else if (item instanceof MissionTrackResultItem){
+			MissionTrackResultItem i = (MissionTrackResultItem) item;			
+			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
+			return i.getMissionPropertyValue(attributeKey);
 		}
 		return null;
 	}
 
 	@Override
 	public QueryColumn clone() {
-		return new SurveyAttributeQueryColumn(getName(), getKey(), getType());
+		return new MissionPropertyQueryColumn(getName(), getKey(), getType());
 	}
 
 }

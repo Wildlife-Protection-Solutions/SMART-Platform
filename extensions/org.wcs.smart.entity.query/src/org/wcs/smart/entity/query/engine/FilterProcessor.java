@@ -32,6 +32,8 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.entity.query.engine.visitor.AreaFilterVisitor;
+import org.wcs.smart.entity.query.engine.visitor.HasObservationFilterVisitor;
 import org.wcs.smart.entity.query.internal.Messages;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;

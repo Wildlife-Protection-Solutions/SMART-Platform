@@ -47,6 +47,10 @@ import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
+import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
+import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
+import org.wcs.smart.er.query.model.column.SurveyAttributeQueryColumn;
+import org.wcs.smart.er.query.model.column.SurveyCategoryQueryColumn;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -151,14 +155,14 @@ public class SurveyQueryColumnManager {
 						List<MissionAttribute> all = s.createCriteria(MissionAttribute.class)
 								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 						for (MissionAttribute ma : all){
-							cols.add(new MissionPropertyQueryColumn(ma));
+							cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
 						}
 						
 						List<SamplingUnitAttribute> su = s.createCriteria(SamplingUnitAttribute.class)
 								.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 								.list();
 						for (SamplingUnitAttribute sua : su){
-							cols.add(new SamplingUnitAttributeQueryColumn(sua));
+							cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
 						}
 						
 					}finally{
@@ -181,7 +185,7 @@ public class SurveyQueryColumnManager {
 					try{
 						SurveyDesign sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 						for (MissionProperty mp : sd2.getMissionProperties()){
-							cols.add(new MissionPropertyQueryColumn(mp.getAttribute()));
+							cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
 						}
 						
 						@SuppressWarnings("unchecked")
@@ -189,7 +193,7 @@ public class SurveyQueryColumnManager {
 								.add(Restrictions.eq("id.surveyDesign", sd2)) //$NON-NLS-1$
 								.list();
 						for (SurveyDesignSamplingUnitAttribute a : atts){
-							cols.add(new SamplingUnitAttributeQueryColumn(a.getSamplingUnitAttribute()));
+							cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute()), a.getSamplingUnitAttribute()));
 						}
 					}finally{
 						s.close();
@@ -262,26 +266,26 @@ public class SurveyQueryColumnManager {
 						List<MissionAttribute> all = s.createCriteria(MissionAttribute.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 						for (MissionAttribute ma : all){
-							cols.add(new MissionPropertyQueryColumn(ma));
+							cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
 						}
 					
 						List<SamplingUnitAttribute> su = s.createCriteria(SamplingUnitAttribute.class)
 							.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
 							.list();
 						for (SamplingUnitAttribute sua : su){
-							cols.add(new SamplingUnitAttributeQueryColumn(sua));
+							cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
 						}
 					}else{
 						SurveyDesign sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 						for (MissionProperty mp : sd2.getMissionProperties()){
-							cols.add(new MissionPropertyQueryColumn(mp.getAttribute()));
+							cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
 						}
 						
 						List<SurveyDesignSamplingUnitAttribute> atts = s.createCriteria(SurveyDesignSamplingUnitAttribute.class)
 								.add(Restrictions.eq("id.surveyDesign", sd2)) //$NON-NLS-1$
 								.list();
 						for (SurveyDesignSamplingUnitAttribute a : atts){
-							cols.add(new SamplingUnitAttributeQueryColumn(a.getSamplingUnitAttribute()));
+							cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute()), a.getSamplingUnitAttribute()));
 						}
 					}
 					
@@ -480,12 +484,12 @@ public class SurveyQueryColumnManager {
 					List<MissionAttribute> all = s.createCriteria(MissionAttribute.class)
 						.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())).list(); //$NON-NLS-1$
 					for (MissionAttribute ma : all){
-						columns.add(new MissionPropertyQueryColumn(ma));
+						columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
 					}
 				}else{
 					SurveyDesign sd2 = (SurveyDesign) s.load(SurveyDesign.class, sd.getUuid());
 					for (MissionProperty mp : sd2.getMissionProperties()){
-						columns.add(new MissionPropertyQueryColumn(mp.getAttribute()));
+						columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
 					}
 				}
 				s.getTransaction().rollback();
@@ -495,5 +499,13 @@ public class SurveyQueryColumnManager {
 			return Status.OK_STATUS;
 		}
 		
+	}
+	
+	private String getMissionPropertyColumnName(MissionAttribute ma){
+		return Messages.MissionPropertyQueryColumn_MissionPropertyColumnLabel + "|" + ma.getName();
+	}
+	
+	private String getSamplingUnitAttributeColumnName(SamplingUnitAttribute sua){
+		return Messages.SamplingUnitAttributeQueryColumn_SuLabel + "|" + sua.getName();
 	}
 }

@@ -19,50 +19,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.query.engine;
+package org.wcs.smart.er.query.model.column;
 
-import org.wcs.smart.query.model.filter.IValueVisitor;
-import org.wcs.smart.query.model.summary.AttributeValueItem;
-import org.wcs.smart.query.model.summary.CategoryValueItem;
-import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.er.query.model.SurveyQueryResultItem;
+import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.model.CategoryQueryColumn;
+import org.wcs.smart.query.model.QueryColumn;
 
 /**
- * Determines if a value item has a category or attribute value.
+ * Data model query column for survey queries.
  * 
  * @author Emily
  *
  */
-public class HasObservationValueVisitor implements IValueVisitor{
+public class SurveyCategoryQueryColumn extends CategoryQueryColumn {
 
-	private boolean hasCategory = false;
-	private boolean hasAttribute = false;
-	
+	public SurveyCategoryQueryColumn(String name, int level) {
+		super(name, level);
+	}
+
 	@Override
-	public void visit(IValueItem item) {
-		if (hasCategory && hasAttribute) return;
-		if (item instanceof CategoryValueItem){
-			hasCategory = true;
-		}else if (item instanceof AttributeValueItem){
-			hasAttribute = true;
-			if (((AttributeValueItem) item).getCategoryKey() != null){
-				hasCategory = true;
+	public Object getValue(IResultItem item) {
+		if (item instanceof SurveyQueryResultItem){
+			String[] items = ((SurveyQueryResultItem) item).getCategories();
+			if (items == null){
+				return ""; //$NON-NLS-1$
+			}
+			if (level < items.length){
+				return items[level];
+			}else{
+				return ""; //$NON-NLS-1$
 			}
 		}
-	}
-	
-	/**
-	 * 
-	 * @return true if value has category
-	 */
-	public boolean hasCategory(){
-		return this.hasCategory;
+		return null;
 	}
 
-	/**
-	 * 
-	 * @return true if value has attribute
-	 */
-	public boolean hasAttribute(){
-		return this.hasAttribute;
+	@Override
+	public QueryColumn clone() {
+		return new SurveyCategoryQueryColumn(getName(), level);
 	}
+
 }

@@ -19,44 +19,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.engine;
+package org.wcs.smart.er.query.engine.visitors;
 
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Set;
 
-import org.wcs.smart.query.common.engine.IValueComputer;
-import org.wcs.smart.query.common.model.Grid;
-import org.wcs.smart.query.common.model.Tile;
-
-import com.vividsolutions.jts.geom.LineString;
+import org.wcs.smart.er.query.filter.MissionPropertyFilter;
+import org.wcs.smart.query.model.filter.AttributeInfo;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Computes the number of missions or surveys in a cell.
+ * Finds all mission property filters and combines them
+ * into a set of AttributeInfo classes.
  * 
- * @author egouge
+ * @author Emily
  *
  */
-public class SurveyCntValueComputer implements IValueComputer<HashSet<Object>> {
+public class MissionPropertyFilterCollectorVisitor implements IFilterVisitor{
 
+	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
+
+	@Override
+	public void visit(IFilter filter) {
+		if (filter instanceof MissionPropertyFilter){
+			MissionPropertyFilter f = (MissionPropertyFilter) filter;
+			AttributeInfo in = new AttributeInfo(f.getAttributeKey(),f.getAttributeType());
+			if (!filters.contains(in)){
+				filters.add(in);
+			}
+			
+		}
+	}
 	
 	/**
-	 * @see org.wcs.smart.query.common.engine.IValueComputer#computeValue(java.lang.Object, org.org.wcs.smart.query.common.model.Tile, org.org.wcs.smart.query.common.model.Grid, com.vividsolutions.jts.geom.LineString)
 	 * 
-	 * @return a hashset that contains the hashcode patrol_uuid represented by the linestring
-	 * being processed
+	 * @return list of attribute filters found
 	 */
-	public HashSet<Object> computeValue(HashSet<Object> existingValue, Tile t, 
-			Grid gridDef, LineString ls) {
-		if (existingValue != null){
-			return existingValue;
-		}
-		HashSet<Object> values = new HashSet<Object>();
-		if (ls.getUserData() instanceof byte[]){
-			values.add(Arrays.hashCode( ((byte[])ls.getUserData())));	
-		}else{
-			//this should never happen
-			return null;
-		}
-		return values;
+	public Set<AttributeInfo> getAttributeInfo(){
+		return this.filters;
 	}
 }
+

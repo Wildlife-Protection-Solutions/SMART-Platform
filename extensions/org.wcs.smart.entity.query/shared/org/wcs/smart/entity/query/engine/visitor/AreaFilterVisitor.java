@@ -19,13 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.engine;
+package org.wcs.smart.entity.query.engine.visitor;
 
 import java.util.HashSet;
 
 import org.wcs.smart.ca.Area;
-import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.MissionTrack;
+import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.IFilter;
@@ -43,7 +42,6 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	private HashSet<String> addedTableNames = new HashSet<String>();
 	private StringBuilder sql;
 	private IQueryEngine engine;
-	private HashSet<Class<?>> usedTables;
 	
 	/**
 	 * Creates a new visitor
@@ -52,11 +50,9 @@ public class AreaFilterVisitor implements IFilterVisitor{
 	 * @param usedTables list of tables already added to sql (Track.class)
 	 * only needs to be added once
 	 */
-	public AreaFilterVisitor(StringBuilder sql, IQueryEngine engine,
-			HashSet<Class<?>> usedTables){
+	public AreaFilterVisitor(StringBuilder sql, IQueryEngine engine){
 		this.sql = sql;
 		this.engine = engine;
-		this.usedTables = usedTables;
 	}
 	
 	
@@ -67,6 +63,7 @@ public class AreaFilterVisitor implements IFilterVisitor{
 			String areaTableName = ff.getType().name() + "_" + ff.getKey(); //$NON-NLS-1$
 			if (!addedTableNames.contains(areaTableName)) {
 				addedTableNames.add(areaTableName);
+				
 				String p1 = engine.addParameterValue(ff.getType().name());
 				String p2 = engine.addParameterValue(ff.getKey());
 				
@@ -75,22 +72,9 @@ public class AreaFilterVisitor implements IFilterVisitor{
 				sql.append(" as "); //$NON-NLS-1$
 				sql.append( areaTableName);
 				sql.append(" on "); //$NON-NLS-1$
-				sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append( areaTableName +".ca_uuid = " + engine.tablePrefix(Waypoint.class) + ".ca_uuid and "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append( areaTableName +".area_type = " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$ 
 				sql.append(areaTableName + ".keyid = " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				if (ff.getGeometryType() == AreaFilter.AreaFilterGeometryType.TRACK && 
-						!usedTables.contains(MissionTrack.class)){
-
-					//add join to track geom
-					sql.append(" left join "); //$NON-NLS-1$ 
-					sql.append(engine.tableNamePrefix(MissionTrack.class));
-					sql.append(" ON "); //$NON-NLS-1$ 
-					sql.append(engine.tablePrefix(MissionTrack.class));
-					sql.append(".mission_uuid = "); //$NON-NLS-1$ 
-					sql.append(engine.tablePrefix(Mission.class));
-					sql.append(".uuid" ); //$NON-NLS-1$ 
-					usedTables.add(MissionTrack.class);
-				}
 			}
 		}
 	}

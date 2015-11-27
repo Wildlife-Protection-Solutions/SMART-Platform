@@ -40,6 +40,7 @@ import org.wcs.smart.er.model.MissionTrack;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.ERQueryPlugIn;
+import org.wcs.smart.er.query.engine.visitors.SurveyHasObservationFilterVisitor;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.internal.Messages;
 import org.wcs.smart.er.query.model.MissionQuery;

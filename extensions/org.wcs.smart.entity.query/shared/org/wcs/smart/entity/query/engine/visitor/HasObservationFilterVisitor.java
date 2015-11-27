@@ -19,13 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.entity.query.engine;
+package org.wcs.smart.entity.query.engine.visitor;
 
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
-import org.wcs.smart.query.model.filter.AttributeFilter;
-import org.wcs.smart.query.model.filter.CategoryFilter;
 import org.wcs.smart.query.model.filter.IFilter;
-import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
  * Determines if an observation filter (category or attribute filter)
@@ -34,44 +31,14 @@ import org.wcs.smart.query.model.filter.IFilterVisitor;
  * @author Emily
  *
  */
-public class HasObservationFilterVisitor implements IFilterVisitor{
+public class HasObservationFilterVisitor extends org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor{
 
-	private boolean hasCategory = false;
-	private boolean hasAttribute = false;
-	
-	
 	@Override
 	public void visit(IFilter filter) {
-		if (hasCategory && hasAttribute) return;
-		if (filter instanceof AttributeFilter ||
-				filter instanceof EntityAttributeFilter){
+		super.visit(filter);
+		if (filter instanceof EntityAttributeFilter){
 			hasAttribute = true;
-		}else if (filter instanceof CategoryFilter){
-			hasCategory = true;
 		}
 	}
 	
-	/**
-	 * 
-	 * @return true if the filter contains a category filter
-	 */
-	public boolean hasCategoryFilter(){
-		return this.hasCategory;
-	}
-
-	/**
-	 * 
-	 * @return ture if filter contains an attribute filter
-	 */
-	public boolean hasAttributeFilter(){
-		return this.hasAttribute;
-	}
-	
-	/**
-	 * clears the state of the visitor so it can be re-used
-	 */
-	public void clear(){
-		hasCategory = false;
-		hasAttribute = false;
-	}
 }

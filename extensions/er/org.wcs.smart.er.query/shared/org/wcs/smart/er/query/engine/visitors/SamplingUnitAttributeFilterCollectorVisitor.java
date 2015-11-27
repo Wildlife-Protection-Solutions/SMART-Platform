@@ -19,58 +19,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.engine;
+package org.wcs.smart.er.query.engine.visitors;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
-import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
-import org.wcs.smart.query.common.engine.visitors.HasObservationFilterVisitor;
+import org.wcs.smart.query.model.filter.AttributeInfo;
 import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Has observation filter visitor for survey visitors.
+ * Finds all sampling unit attribute filters and combines them
+ * into a set of AttributeInfo classes.  Only one per sampling unit 
+ * attribute is created.
  * 
  * @author Emily
  *
  */
-public class SurveyHasObservationFilterVisitor extends HasObservationFilterVisitor {
+public class SamplingUnitAttributeFilterCollectorVisitor implements IFilterVisitor{
 
-	private boolean hasSu = false;
-
+	private HashSet<AttributeInfo> filters = new HashSet<AttributeInfo>();
+	private SamplingUnitFilter.Source source = null;
+	
 	@Override
 	public void visit(IFilter filter) {
-		super.visit(filter);
-		if (super.hasAttributeFilter() || super.hasCategoryFilter() || hasSu)
-			return;
-		if (filter instanceof SamplingUnitFilter) {
-			if (((SamplingUnitFilter) filter).getSource() == Source.OBSERVATION) {
-				hasSu = true;
+		if (filter instanceof SamplingUnitAttributeFilter){
+			SamplingUnitAttributeFilter f = (SamplingUnitAttributeFilter) filter;
+			AttributeInfo in = new AttributeInfo(f.getSamplingUnitAttributeKey(), f.getAttributeType());
+			if (!filters.contains(in)){
+				filters.add(in);
 			}
-		} else if (filter instanceof SamplingUnitAttributeFilter) {
-			if (((SamplingUnitAttributeFilter) filter).getSource() == Source.OBSERVATION) {
-				hasSu = true;
-			}
+			source = f.getSource();
 		}
-	}
-
-	/**
-	 * 
-	 * @return true if has sampling unit observation filter
-	 */
-	public boolean hasSamplingUnitObservationFilter() {
-		return hasSu;
 	}
 	
 	/**
-	 * True if filter has category, attribute, observer or sampling unit observation
-	 * filter.
 	 * 
-	 * @return true if the filter filters on any observeration related item
+	 * @return list of attribute filters found
 	 */
-	public boolean hasObservationFilter(){
-		return hasCategoryFilter() || 
-				hasAttributeFilter() || 
-				hasObserverFilter() || 
-				hasSamplingUnitObservationFilter();
+	public Set<AttributeInfo> getAttributeInfo(){
+		return this.filters;
+	}
+	
+	/**
+	 * The sampling unit source
+	 * @return
+	 */
+	public SamplingUnitFilter.Source getSource(){
+		return this.source;
 	}
 }
+
