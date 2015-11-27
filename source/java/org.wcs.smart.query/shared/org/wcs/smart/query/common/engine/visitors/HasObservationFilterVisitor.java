@@ -36,13 +36,13 @@ import org.wcs.smart.query.model.filter.ObserverFilter;
  */
 public class HasObservationFilterVisitor implements IFilterVisitor{
 
-	private boolean hasCategory = false;
-	private boolean hasAttribute = false;
-	private boolean hasObserver = false;
+	protected boolean hasCategory = false;
+	protected boolean hasAttribute = false;
+	protected boolean hasObserver = false;
 	
 	@Override
 	public void visit(IFilter filter) {
-		if (hasCategory && hasAttribute) return;
+		if (hasCategory && hasAttribute && hasObserver) return;
 		if (filter instanceof AttributeFilter){
 			hasAttribute = true;
 		}else if (filter instanceof CategoryFilter){

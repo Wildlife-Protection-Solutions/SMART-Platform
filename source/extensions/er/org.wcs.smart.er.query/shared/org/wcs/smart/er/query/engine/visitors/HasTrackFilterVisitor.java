@@ -19,44 +19,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.columns;
+package org.wcs.smart.er.query.engine.visitors;
 
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
-import org.wcs.smart.query.common.engine.IResultItem;
-import org.wcs.smart.query.model.CategoryQueryColumn;
-import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.er.query.filter.SamplingUnitAttributeFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SamplingUnitFilter.Source;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
- * Data model query column for survey queries.
+ * Has track filter visitor.  Determines if a filter
+ * requires the track to execute the query.
  * 
  * @author Emily
  *
  */
-public class SurveyCategoryQueryColumn extends CategoryQueryColumn {
-
-	public SurveyCategoryQueryColumn(String name, int level) {
-		super(name, level);
-	}
+public class HasTrackFilterVisitor implements IFilterVisitor{
+	private boolean hasTrack = false;
 
 	@Override
-	public Object getValue(IResultItem item) {
-		if (item instanceof SurveyQueryResultItem){
-			String[] items = ((SurveyQueryResultItem) item).getCategories();
-			if (items == null){
-				return ""; //$NON-NLS-1$
+	public void visit(IFilter filter) {
+		if (hasTrack)
+			return;
+		if (filter instanceof SamplingUnitFilter) {
+			if (((SamplingUnitFilter) filter).getSource() == Source.TRACK) {
+				hasTrack = true;
 			}
-			if (level < items.length){
-				return items[level];
-			}else{
-				return ""; //$NON-NLS-1$
+		} else if (filter instanceof SamplingUnitAttributeFilter) {
+			if (((SamplingUnitAttributeFilter) filter).getSource() == Source.TRACK) {
+				hasTrack = true;
 			}
 		}
-		return null;
 	}
-
-	@Override
-	public QueryColumn clone() {
-		return new SurveyCategoryQueryColumn(getName(), level);
+	
+	public boolean hasTrack(){
+		return this.hasTrack;
 	}
-
 }

@@ -19,39 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.ui.columns;
+package org.wcs.smart.er.query.model.column;
 
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
-import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.query.internal.Messages;
-import org.wcs.smart.er.query.model.MissionTrackResultItem;
+import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
 
 /**
- * Mission property query column.
+ * Sampling unit attribute query column.
  * 
  * @author Emily
  *
  */
-public class MissionPropertyQueryColumn extends QueryColumn {
+public class SamplingUnitAttributeQueryColumn  extends QueryColumn {
 	
-	private static final String KEY_PREFIX = "missionatt"; //$NON-NLS-1$
+	private static final String KEY_PREFIX = "suatt"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new query column based on the mission attribute.
 	 * 
 	 * @param mp
 	 */
-	public MissionPropertyQueryColumn(MissionAttribute mp){
-		super(Messages.MissionPropertyQueryColumn_MissionPropertyColumnLabel + "|" + mp.getName(), KEY_PREFIX + ":" + mp.getKeyId(), null); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		if (mp.getType() == AttributeType.NUMERIC){
+	public SamplingUnitAttributeQueryColumn(String name, SamplingUnitAttribute sua){
+		super(name, KEY_PREFIX + ":" + sua.getKeyId(), null);  //$NON-NLS-1$
+		if (sua.getType() == AttributeType.NUMERIC){
 			super.setType(ColumnType.NUMBER);
-		}else if (mp.getType() == AttributeType.TEXT){
+		}else if (sua.getType() == AttributeType.TEXT){
 			super.setType(ColumnType.STRING);
-		}else if (mp.getType() == AttributeType.LIST){
+		}else if (sua.getType() == AttributeType.LIST){
 			super.setType(ColumnType.STRING);
 		}
 	}
@@ -63,7 +60,7 @@ public class MissionPropertyQueryColumn extends QueryColumn {
 	 * @param key column key
 	 * @param type column type
 	 */
-	protected MissionPropertyQueryColumn(String name, String key, ColumnType type){
+	protected SamplingUnitAttributeQueryColumn(String name, String key, ColumnType type){
 		super(name, key, type);
 	}
 	
@@ -72,18 +69,18 @@ public class MissionPropertyQueryColumn extends QueryColumn {
 		if (item instanceof SurveyQueryResultItem){
 			SurveyQueryResultItem i = (SurveyQueryResultItem) item;			
 			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
-			return i.getMissionPropertyValue(attributeKey);
-		}else if (item instanceof MissionTrackResultItem){
-			MissionTrackResultItem i = (MissionTrackResultItem) item;			
-			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
-			return i.getMissionPropertyValue(attributeKey);
+			return i.getSamplingUnitAttributeValue(attributeKey);
+//		}else if (item instanceof MissionTrackResultItem){
+//			MissionTrackResultItem i = (MissionTrackResultItem) item;			
+//			String attributeKey = getKey().split(":")[1]; //$NON-NLS-1$
+//			return i.getSamplingUnitAttributeValue(attributeKey);
 		}
 		return null;
 	}
 
 	@Override
 	public QueryColumn clone() {
-		return new MissionPropertyQueryColumn(getName(), getKey(), getType());
+		return new SamplingUnitAttributeQueryColumn(getName(), getKey(), getType());
 	}
 
 }

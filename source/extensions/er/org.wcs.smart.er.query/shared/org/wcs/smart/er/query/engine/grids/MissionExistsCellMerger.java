@@ -19,50 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.query.common.engine.visitors;
+package org.wcs.smart.er.query.engine.grids;
 
-import org.wcs.smart.query.model.filter.IValueVisitor;
-import org.wcs.smart.query.model.summary.AttributeValueItem;
-import org.wcs.smart.query.model.summary.CategoryValueItem;
-import org.wcs.smart.query.model.summary.IValueItem;
+import org.wcs.smart.query.common.engine.ICellMerger;
 
 /**
- * Determines if a value item has a category or attribute value.
+ * Merges two boolean returning 1 if
+ * it either one is false.
  * 
  * @author Emily
  *
  */
-public class HasObservationValueVisitor implements IValueVisitor{
+public class MissionExistsCellMerger implements ICellMerger<Boolean> {
 
-	protected boolean hasCategory = false;
-	protected boolean hasAttribute = false;
-	
 	@Override
-	public void visit(IValueItem item) {
-		if (hasCategory && hasAttribute) return;
-		if (item instanceof CategoryValueItem){
-			hasCategory = true;
-		}else if (item instanceof AttributeValueItem){
-			hasAttribute = true;
-			if (((AttributeValueItem) item).getCategoryKey() != null){
-				hasCategory = true;
-			}
-		}		
-	}
-	
-	/**
-	 * 
-	 * @return true if value has category
-	 */
-	public boolean hasCategory(){
-		return this.hasCategory;
+	public Boolean mergeCell(Boolean v1, Boolean v2) {
+		if (v1 == null ) return v2;
+		if (v2 == null ) return v1;
+		return v1 || v2;
 	}
 
-	/**
-	 * 
-	 * @return true if value has attribute
-	 */
-	public boolean hasAttribute(){
-		return this.hasAttribute;
+	@Override
+	public Double getFinalValue(Boolean value) {
+		if (value) return 1.0;
+		return 0.0;
 	}
+
 }

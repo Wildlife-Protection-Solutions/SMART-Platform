@@ -19,30 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.er.query.engine;
+package org.wcs.smart.entity.query.engine.visitor;
 
-import org.wcs.smart.query.common.engine.ICellMerger;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
+import org.wcs.smart.query.model.summary.IGroupBy;
 
 /**
- * Merges two boolean returning 1 if
- * it either one is false.
+ * Visitor for group bys that determine if categories or attributes
+ * are used in any group by clause.
  * 
  * @author Emily
  *
  */
-public class MissionExistsCellMerger implements ICellMerger<Boolean> {
+public class HasObservationGroupByVisitor extends org.wcs.smart.query.common.engine.visitors.HasObservationGroupByVisitor{
 
 	@Override
-	public Boolean mergeCell(Boolean v1, Boolean v2) {
-		if (v1 == null ) return v2;
-		if (v2 == null ) return v1;
-		return v1 || v2;
+	public void visit(IGroupBy item) {
+		super.visit(item);
+		if (item instanceof  EntityAttributeGroupBy){
+			hasAttribute = true;
+		}
 	}
-
-	@Override
-	public Double getFinalValue(Boolean value) {
-		if (value) return 1.0;
-		return 0.0;
-	}
-
 }
