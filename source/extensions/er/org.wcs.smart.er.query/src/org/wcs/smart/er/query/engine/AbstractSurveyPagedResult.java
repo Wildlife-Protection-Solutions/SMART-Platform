@@ -558,7 +558,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 		
 		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			while(rs.next()){
-				byte[] muuid = rs.getBytes(1);
+				UUID muuid = UuidUtils.byteToUUID(rs.getBytes(1));
 				String key = rs.getString(2);
 				Double dvalue = rs.getDouble(3);
 				String svalue = rs.getString(4);
@@ -573,7 +573,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 								it.addMissionPropertyValue(key,  svalue);
 							}else if (rs.getObject(5) != null){
 								it.addMissionPropertyValue(key, 
-									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, rs.getBytes(5))).getName());
+									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, UuidUtils.byteToUUID(rs.getBytes(5)))).getName());
 							}
 						}
 					}else if (irt instanceof MissionTrackResultItem){
@@ -585,7 +585,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 								it.addMissionPropertyValue(key,  svalue);
 							}else if (rs.getObject(5) != null){
 								it.addMissionPropertyValue(key, 
-									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, rs.getBytes(5))).getName());
+									((MissionAttributeListItem)session.load(MissionAttributeListItem.class, UuidUtils.byteToUUID(rs.getBytes(5)))).getName());
 							}
 						}
 					}
