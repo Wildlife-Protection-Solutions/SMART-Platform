@@ -213,8 +213,11 @@ public class SurveyScreensUtil extends ScreensUtil {
 		nodeIds.add(createPreDatamodelNodes(container, elements, dmRootId, trackObserver, memberIds, membersFilter));
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_NewSamplingUnit);
-		nodeIds.add(createSamplingUnitNodes(container, elements, id, ctElemIds));
+		CyberTrackerId suId = createSamplingUnitNodes(container, elements, id, ctElemIds);
+		nodeIds.add(suId);
 		
+		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSamplingUnitOption);
+		nodeIds.add(createEndSamplingUnitNodes(container, elements, suId, ctProps));
 		
 		nextTaskOptions.add(Messages.SurveyScreensUtil_EndSurvey);
 		nodeIds.add(createEndTripNodes(container, startId, Messages.SurveyScreensUtil_EndSurveyMessage));
@@ -263,6 +266,20 @@ public class SurveyScreensUtil extends ScreensUtil {
 		control2.setTranslateMajorScreenId(nextTaskId.getNodeId());
 		control2.setTakeGPS("False"); //$NON-NLS-1$
 		return id;
+	}
+
+	private CyberTrackerId createEndSamplingUnitNodes(MetaExportResult container, Elements elements, CyberTrackerId suId, CyberTrackerProperties ctProps) {
+		CyberTrackerId startSuId = new CyberTrackerId();
+		List<CyberTrackerId> resScrIds = ElementsUtil.addCustomElements(elements, Messages.SurveyScreensUtil_StartSamplingUnitOption);
+		List<String> resScrValues = getCtUtil().listItemIds(resScrIds);
+		String resScrTrElements = getCtUtil().translateElements(resScrIds);
+		StringBuilder resScrLinks = new StringBuilder();
+		// "Start New Sampling Unit" leads to "Select Sampling Unit" screen
+		resScrLinks.append(resScrIds.get(0).getItemTranslatedId()).append(suId.getNodeTranslatedId());
+		Node startSuNode = getScreensFactory().createNodeRadio(startSuId.getNodeId(), Messages.SurveyScreensUtil_EndSamplingUnitScreenTitle, resScrValues, resScrTrElements, resScrLinks.toString(), null);
+		addGpsConfiguration(startSuNode, ctProps, 0);
+		container.screenNodes.add(startSuNode);
+		return startSuId;
 	}
 	
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {

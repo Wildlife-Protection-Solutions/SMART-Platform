@@ -435,11 +435,14 @@ public class MissionImporter extends AbstractSmartImporter {
 							addWarning(MessageFormat.format(Messages.MissionImporter_Warn_NoSamplingUnit, e.getN()));
 						}
 					}
-					if ((su == null && currentSamplingUnit != null) || (su != null && !su.equals(currentSamplingUnit))) {
-						//this is not the same sampling unit
-						currentSamplingUnit = su;
-						suTimeDataContainer.add(currentSamplingUnit, wp.getDateTime()); //time must be already calculated
-					}
+//					if ((su == null && currentSamplingUnit != null) || (su != null && !su.equals(currentSamplingUnit))) {
+//						//this is not the same sampling unit
+//						currentSamplingUnit = su;
+//						suTimeDataContainer.add(currentSamplingUnit, wp.getDateTime()); //time must be already calculated
+//					}
+					//start new track for sampling unit even if user selected the same sampling unit as it was before! this is done after #1542
+					currentSamplingUnit = su;
+					suTimeDataContainer.add(currentSamplingUnit, wp.getDateTime()); //time must be already calculated
 					return null; //special case: we don't add waypoint when record SamplingUnit change
 				}
 			}
