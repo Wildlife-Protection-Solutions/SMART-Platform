@@ -56,6 +56,8 @@ public class Messages extends NLS {
 	public static String SurveyCTImportEditorContent_UnableToImport;
 	public static String SurveyScreensUtil_BeginSurvey;
 	public static String SurveyScreensUtil_Comments;
+	public static String SurveyScreensUtil_EndSamplingUnitOption;
+	public static String SurveyScreensUtil_EndSamplingUnitScreenTitle;
 	public static String SurveyScreensUtil_EndSurvey;
 	public static String SurveyScreensUtil_EndSurveyMessage;
 	public static String SurveyScreensUtil_Error_InvalidMissionPropertyType;
@@ -71,6 +73,7 @@ public class Messages extends NLS {
 	public static String SurveyScreensUtil_ResumeSurvey;
 	public static String SurveyScreensUtil_SamplingUnit;
 	public static String SurveyScreensUtil_StartSamplingUnit;
+	public static String SurveyScreensUtil_StartSamplingUnitOption;
 	public static String SurveyScreensUtil_StartSurvey;
 	public static String SurveyScreensUtil_StartSurveyTitle;
 	public static String SurveySelectorDialog_AddToSurvey;
