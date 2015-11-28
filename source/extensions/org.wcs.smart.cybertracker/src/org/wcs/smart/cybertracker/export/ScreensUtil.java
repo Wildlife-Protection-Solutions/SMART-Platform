@@ -404,6 +404,14 @@ public class ScreensUtil {
 		ScreensObjectFactory.addControlToNode(node, stateControl);
 	}
 
+	public CyberTrackerUtil getCtUtil() {
+		return ctUtil;
+	}
+	
+	public ScreensObjectFactory getScreensFactory() {
+		return screensFactory;
+	}
+	
 	protected class PauseNodesLabels {
 		public String resumeScreenTitle = "Paused"; //$NON-NLS-1$
 		public String resumeOption = "Resume"; //$NON-NLS-1$
