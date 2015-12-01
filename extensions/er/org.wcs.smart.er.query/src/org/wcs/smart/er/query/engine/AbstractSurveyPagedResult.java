@@ -623,7 +623,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 
 		try(ResultSet rs = c.createStatement().executeQuery(attrSql.toString())) {
 			while(rs.next()){
-				byte[] muuid = rs.getBytes(1);
+				UUID muuid = UuidUtils.byteToUUID(rs.getBytes(1));
 				String key = rs.getString(2);
 				Double dvalue = rs.getDouble(3);
 				String svalue = rs.getString(4);
@@ -637,7 +637,7 @@ public abstract class AbstractSurveyPagedResult  extends AbstractPagedQueryResul
 						}else if (svalue != null){
 							it.addSamplingUnitAttributeValue(key,  svalue);
 						}else if (rs.getObject(5) != null){
-							String value = ((SamplingUnitAttributeListItem)session.load(SamplingUnitAttributeListItem.class, rs.getBytes(5))).getName();
+							String value = ((SamplingUnitAttributeListItem)session.load(SamplingUnitAttributeListItem.class,  UuidUtils.byteToUUID(rs.getBytes(5)))).getName();
 							it.addSamplingUnitAttributeValue(key, value);
 						}
 					}
