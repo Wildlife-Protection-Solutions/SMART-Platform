@@ -86,8 +86,10 @@ import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -1204,10 +1206,23 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 					groupBySql.append("pld_patrol_day_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("trim(cast(month(pld_patrol_day) as char(2))) || '/' || cast(year(pld_patrol_day) as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("trim(cast(date_part('month', pld_patrol_day) as char(2))) "); //$NON-NLS-1$
+					groupByInnerSql.append(" || '/' || cast(date_part('year',pld_patrol_day) as char(4)) "); //$NON-NLS-1$
+					groupByInnerSql.append("as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append( itemcnt); 
+					
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("YEAR(pld_patrol_day) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+					groupByInnerSql.append("date_part('year',pld_patrol_day) as datePart_" + itemcnt); //$NON-NLS-1$
+					
+				}else if (op.getClass().equals(StartHourGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("pld_uuid,floor((date_part('hour', pld_start_time) * 60 + date_part('minute', pld_start_time)) / 30.0)* 30 as datePart_" + itemcnt); //$NON-NLS-1$
+				}else if (op.getClass().equals(EndHourGroupBy.class)){
+					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
+					groupByInnerSql.append("pld_uuid,floor((date_part('hour', pld_end_time) * 60 + date_part('minute', pld_end_time)) / 30.0)* 30 as datePart_" + itemcnt); //$NON-NLS-1$
 				}
 			}else if (gb instanceof CategoryGroupBy){
 				CategoryGroupBy op = ((CategoryGroupBy)gb);
@@ -1634,6 +1649,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix(PatrolLeg.class) + ".end_date, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegDay.class) + ".uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegDay.class) + ".patrol_day, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class) + ".start_time, "); //$NON-NLS-1$
+		sql.append(tablePrefix(PatrolLegDay.class) + ".end_time, "); //$NON-NLS-1$
 		
 		if (includeObservations){
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
@@ -1669,6 +1686,8 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 		sql.append("pl_end_date date,"); //$NON-NLS-1$
 		sql.append("pld_uuid UUID,"); //$NON-NLS-1$
 		sql.append("pld_patrol_day date,"); //$NON-NLS-1$
+		sql.append("pld_start_time time,"); //$NON-NLS-1$
+		sql.append("pld_end_time time,"); //$NON-NLS-1$
 		sql.append("wp_uuid UUID,"); //$NON-NLS-1$
 		sql.append("ob_uuid UUID,"); //$NON-NLS-1$
 		sql.append("plm_leader UUID,"); //$NON-NLS-1$

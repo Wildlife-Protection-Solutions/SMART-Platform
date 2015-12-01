@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
@@ -89,8 +90,10 @@ import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -247,7 +250,11 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 					try{
 						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false);
 					}finally{
-						filterer.dropTemporaryTables(c);
+						try{
+							filterer.dropTemporaryTables(c);
+						}catch (Exception ex){
+							logger.log(Level.WARNING, ex.getMessage(), ex);
+						}
 					}
 
 					addCategoryHkey(valueTable, allGroupBy, query.getQueryDefinition().getValuePart(), c);
@@ -273,6 +280,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 							caFilter);
 					sumResults.setData(data);
 				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
@@ -502,7 +510,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 				valueSql.append(tablePrefix(MissionDay.class) + ".end_time as md_end_time, "); //$NON-NLS-1$
 				valueSql.append(tablePrefix(MissionDay.class) + ".rest_minutes as md_rest"); //$NON-NLS-1$
 				
-				valueAggSql.append("sum (({fn timestampdiff(SQL_TSI_SECOND, md_start_time, md_end_time) } / (3600.0)) - (md_rest / 60.0))"); //$NON-NLS-1$
+				valueAggSql.append("sum ( (EXTRACT(EPOCH FROM  md_end_time - md_start_time) / ( 3600.0 )) - (md_rest / 60.0))"); //$NON-NLS-1$
 				
 			}else{
 				StringBuilder append = new StringBuilder();
@@ -545,7 +553,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 				valueSql.append(tablePrefix(MissionDay.class) + ".rest_minutes as md_rest, "); //$NON-NLS-1$
 				valueSql.append(tablePrefix(MissionMember.class) + ".employee_uuid as md_member "); //$NON-NLS-1$
 				
-				valueAggSql.append("sum (({fn timestampdiff(SQL_TSI_SECOND, md_start_time, md_end_time) } / (3600.0)) - (md_rest / 60.0))"); //$NON-NLS-1$
+				valueAggSql.append("sum ( (EXTRACT(EPOCH FROM  md_end_time - md_start_time) / ( 3600.0 )) - (md_rest / 60.0))"); //$NON-NLS-1$
 				
 			}else{                                                                                                   
 				StringBuilder append = new StringBuilder();
@@ -884,19 +892,19 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
 				IGroupBy gb = groupBy.getGroupBys().get(i);
 				
-				String key = gb.getKeyPart() ;
+				String key = gb.getKeyPart() + ":"; ;
 				switch (gb.getType()) {
 					case STRING:
-						key += ":" + rs.getString(rsindex++); //$NON-NLS-1$
+						key +=  rs.getString(rsindex++); //$NON-NLS-1$
 						break;
 					case BYTE:
-						key += UuidUtils.uuidToString((UUID)rs.getObject(rsindex++));
+						key +=  UuidUtils.uuidToString((UUID)rs.getObject(rsindex++));
 						break;
 					case DATE:
-						key += ":" + rs.getDate(rsindex++).toString(); //$NON-NLS-1$
+						key +=  rs.getDate(rsindex++).toString(); //$NON-NLS-1$
 						break;
 					case KEY:
-						key += ":" + rs.getString(rsindex++); //$NON-NLS-1$
+						key +=  rs.getString(rsindex++); //$NON-NLS-1$
 						break;
 					case TIME:
 						int mins = rs.getInt(rsindex++);
@@ -1333,9 +1341,18 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 				if (op.getClass().equals(DayDateGroupBy.class)){
 					groupByInnerSql.append(groupByString + " as datePart_" + itemcnt); //$NON-NLS-1$
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
-					groupByInnerSql.append("trim(cast(month(" + groupByString + ") as char(2))) || '/' || cast(year(" + groupByString + ") as char(4)) as datePart_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					groupByInnerSql.append("trim(cast(date_part('month', "); //$NON-NLS-1$
+					groupByInnerSql.append(groupByString);
+					groupByInnerSql.append(") as char(2))) || '/' || cast(date_part('year',"); //$NON-NLS-1$
+					groupByInnerSql.append(groupByString);
+					groupByInnerSql.append(") as char(4)) as datePart_"); //$NON-NLS-1$
+					groupByInnerSql.append( itemcnt); 
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
-					groupByInnerSql.append("YEAR(" + groupByString + ") as datePart_" + itemcnt); //$NON-NLS-1$ //$NON-NLS-2$
+					
+					groupByInnerSql.append("date_part('year',"); //$NON-NLS-1$
+					groupByInnerSql.append(groupByString);
+					groupByInnerSql.append(") as datePart_" + itemcnt); //$NON-NLS-1$
+				
 				}
 				groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 				
@@ -1438,6 +1455,8 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			Session session) throws Exception{
 		
 		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+		SurveyDesignFilter sdFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
+		
 		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter); 
 
 		// value headers
@@ -1456,7 +1475,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = summary.getNames(item);
+			List<ListItem> items = summary.getNames(item, sdFilter);
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);
@@ -1519,13 +1538,13 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".employee_uuid "); //$NON-NLS-1$
 		}else{
-			sql.append("cast(null as char for bit data),");	//su_uuid //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	//su_uuid //$NON-NLS-1$
 			sql.append("cast(null as char),");	//suid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//trackuuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	//trackuuid //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	//wp_uuid //$NON-NLS-1$
 			sql.append("cast(null as timestamp),");	//wp_datetime //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wpuuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data)");	//employee_uuid  //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	//wpuuid //$NON-NLS-1$
+			sql.append("cast(null as UUID)");	//employee_uuid  //$NON-NLS-1$
 		}
 		return sql.toString();
 	}

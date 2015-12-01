@@ -652,7 +652,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
 				IGroupBy gb = groupBy.getGroupBys().get(i);
 				
-				String key = gb.getKeyPart() + ":"; //$NON-NLS-1$
+				String key = gb.getKeyPart(); //$NON-NLS-1$
 				switch (gb.getType()) {
 					case STRING:
 						key += rs.getString(rsindex++);
@@ -836,16 +836,16 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 				}else if (op.getClass().equals(MonthDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
 					
-					groupByInnerSql.append("trim(cast(month("); //$NON-NLS-1$
+					groupByInnerSql.append("trim(cast(date_part('month', "); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
-					groupByInnerSql.append(".datetime) as char(2))) || '/' || cast(year("); //$NON-NLS-1$
+					groupByInnerSql.append(".datetime) as char(2))) || '/' || cast(date_part('year',"); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
 					groupByInnerSql.append(".datetime) as char(4)) as datePart_"); //$NON-NLS-1$
-					groupByInnerSql.append( itemcnt); 
+					groupByInnerSql.append( itemcnt);
 
 				}else if (op.getClass().equals(YearDateGroupBy.class)){
 					groupBySql.append("datePart_" + itemcnt); //$NON-NLS-1$
-					groupByInnerSql.append("YEAR("); //$NON-NLS-1$
+					groupByInnerSql.append("date_part('year',"); //$NON-NLS-1$
 					groupByInnerSql.append(tablePrefix(Waypoint.class));
 					groupByInnerSql.append(".datetime) as datePart_" + itemcnt); //$NON-NLS-1$
 				}

@@ -67,6 +67,7 @@ import org.wcs.smart.er.model.SamplingUnitAttribute;
 import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.query.filter.SamplingUnitFilter;
+import org.wcs.smart.er.query.filter.SurveyDesignFilter;
 import org.wcs.smart.er.query.filter.summary.MissionAttributeGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionIdGroupBy;
 import org.wcs.smart.er.query.filter.summary.MissionValueItem;
@@ -87,8 +88,10 @@ import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
+import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateFilter;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
+import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -282,7 +285,29 @@ public class SummaryItemLabelProvider {
 		return "";
 	}
 	
-	
+	public List<ListItem> getNames(IGroupBy item, SurveyDesignFilter sdFilter){
+		List<ListItem> results = null;
+		if (item instanceof MissionIdGroupBy){
+			results = getName((MissionIdGroupBy)item, sdFilter);
+		}else if (item instanceof SurveyIdGroupBy){
+			results = getName((SurveyIdGroupBy)item, sdFilter);
+		}else if (item instanceof SamplingUnitGroupBy){
+			//TODO:
+//			results = getName((SamplingUnitGroupBy)item, caFilter, sdFilter);
+		}
+		if (results != null){
+			Collections.sort(results, new Comparator<ListItem>() {
+				Collator c = Collator.getInstance(l);				
+				@Override
+				public int compare(ListItem o1, ListItem o2) {
+					return c.compare(o1.getName(), o2.getName());
+				}
+			});
+			return results;
+		}
+		
+		return getNames(item);
+	}
 	
 	public List<ListItem> getNames(IGroupBy item){
 		List<ListItem> results = null;
@@ -300,18 +325,12 @@ public class SummaryItemLabelProvider {
 			results = getName((EntityAttributeGroupBy)item);
 		}else if (item instanceof MissionAttributeGroupBy){
 			results = getName((MissionAttributeGroupBy)item);
-		}else if (item instanceof MissionIdGroupBy){
-			results = getName((MissionIdGroupBy)item);
 		}else if (item instanceof ObserverGroupBy){
 			results = getName((ObserverGroupBy)item);
 		}else if (item instanceof PatrolGroupBy){
 			results = getName((PatrolGroupBy)item);
 		}else if (item instanceof SamplingUnitAttributeGroupBy){
-			results = getName((SamplingUnitAttributeGroupBy)item);
-		}else if (item instanceof SamplingUnitGroupBy){
-			results = getName((SamplingUnitGroupBy)item);
-		}else if (item instanceof SurveyIdGroupBy){
-			results = getName((SurveyIdGroupBy)item);
+			results = getName((SamplingUnitAttributeGroupBy)item);	
 		}else if (item instanceof WaypointSourceGroupBy){
 			results = getName((WaypointSourceGroupBy)item);
 		}else if (item instanceof IntelligencePatrolGroupBy){
@@ -496,6 +515,10 @@ public class SummaryItemLabelProvider {
 			return getMonthItems(item.getDateFilter());
 		} else if (item.getOption() instanceof YearDateGroupBy) {
 			return getYearItems(item.getDateFilter());
+		} else if (item.getOption() instanceof StartHourGroupBy){
+			return getHourItems();
+		} else if (item.getOption() instanceof EndHourGroupBy){
+			return getHourItems();
 		}
 		return null;
 	}
@@ -543,6 +566,20 @@ public class SummaryItemLabelProvider {
 		return items;
 	}
 
+	public List<ListItem> getHourItems() {
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		for (int i = 0 ; i < 48; i ++){
+			String key = String.valueOf(i/2);
+			if (i % 2 == 0){
+				key += ":00"; //$NON-NLS-1$
+			}else{
+				key += ":30"; //$NON-NLS-1$
+			}
+			items.add(new ListItem(null, key, key ));
+		}
+		return items;
+		
+	}
 	private List<ListItem> getMonthItems(IDateFilter dateFilter) {
 
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
@@ -702,7 +739,7 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(MissionAttributeGroupBy item){
 		MissionAttribute ma = (MissionAttribute) s.createCriteria(MissionAttribute.class)
 				.add(Restrictions.eq("keyId", item.getAttributeKey())) //$NON-NLS-1$
-				.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
+				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 				.uniqueResult();
 		if (ma == null){
 			logger.warning(MessageFormat.format("Mission attribute not found {0}.", item.getAttributeKey()));;
@@ -725,7 +762,7 @@ public class SummaryItemLabelProvider {
 		return allItems;
 	}
 	
-	private List<ListItem> getName(MissionIdGroupBy item){
+	private List<ListItem> getName(MissionIdGroupBy item, SurveyDesignFilter sdFilter){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null && items.length > 0){
@@ -738,6 +775,23 @@ public class SummaryItemLabelProvider {
 					allItems.add(new ListItem(UuidUtils.stringToUuid(it), it));
 				}
 				
+			}
+		}else{
+			//load all missions
+			Query missionQuery = null;
+			if (sdFilter.getKey() != null){
+				String hql = "SELECT m From Mission m where m.survey.surveyDesign.keyId = :sd and m.survey.surveyDesign.conservationArea.uuid in (:uuids)";
+				missionQuery = s.createQuery(hql)
+						.setString("sd", sdFilter.getKey())
+						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
+			}else{
+				String hql = "SELECT m From Mission m where m.survey.surveyDesign.conservationArea.uuid in (:uuids)";
+				missionQuery = s.createQuery(hql)
+						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
+			}
+			List<Mission> ms = missionQuery.list();
+			for(Mission m : ms){
+				allItems.add(new ListItem(m.getUuid(), m.getId()));
 			}
 		}
 		return allItems;
@@ -753,7 +807,7 @@ public class SummaryItemLabelProvider {
 			}		
 		}else{
 			List<Employee> es = s.createCriteria(Employee.class)
-					.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds()))
+					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 					.list();
 			Collections.sort(es, new Comparator<Employee>() {
 				@Override
@@ -786,7 +840,7 @@ public class SummaryItemLabelProvider {
 			}else{
 				//ca filter
 				if (item.getOption() == PatrolQueryOption.RANK){
-					c.add(Restrictions.in("agency.conservationArea", caFilter.getConservationAreaFilterIds()));
+					c.add(Restrictions.in("agency.conservationArea.uuid", caFilter.getConservationAreaFilterIds()));
 				}else if (item.getOption() == PatrolQueryOption.CONSERVATION_AREA){
 					c.add(Restrictions.in("uuid", caFilter.getConservationAreaFilterIds()));
 				}else{
@@ -870,7 +924,7 @@ public class SummaryItemLabelProvider {
 	private List<ListItem> getName(SamplingUnitAttributeGroupBy item){
 		SamplingUnitAttribute su = (SamplingUnitAttribute) s.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.eq("keyId", item.getAttributeKey())) //$NON-NLS-1$
-				.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
+				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 				.uniqueResult();
 		if (su == null){
 			logger.warning(MessageFormat.format("Sampling unit attribute not found {0}.", item.getAttributeKey()));
@@ -918,7 +972,7 @@ public class SummaryItemLabelProvider {
 		return listItems;
 	}
 	
-	private List<ListItem> getName(SurveyIdGroupBy item){
+	private List<ListItem> getName(SurveyIdGroupBy item, SurveyDesignFilter sdFilter){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null){
@@ -930,6 +984,23 @@ public class SummaryItemLabelProvider {
 					logger.warning(MessageFormat.format("Survey not found {0}", it));
 					allItems.add(new ListItem(UuidUtils.stringToUuid(it), it));
 				}
+			}
+		}else{
+			//load all surveys
+			Query surveyQuery = null;
+			if (sdFilter.getKey() != null){
+				String hql = "SELECT s From Survey s where s.surveyDesign.keyId = :sd and s.surveyDesign.conservationArea.uuid in (:uuids)";
+				surveyQuery = s.createQuery(hql)
+						.setString("sd", sdFilter.getKey())
+						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
+			}else{
+				String hql = "SELECT s From Survey s where s.surveyDesign.conservationArea.uuid in (:uuids)";
+				surveyQuery = s.createQuery(hql)
+						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
+			}
+			List<Survey> ms = surveyQuery.list();
+			for(Survey m : ms){
+				allItems.add(new ListItem(m.getUuid(), m.getId()));
 			}
 		}
 		return allItems;

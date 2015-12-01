@@ -22,26 +22,20 @@
 package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Label;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
-import org.wcs.smart.er.model.MissionMember;
-import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnit;
-import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
@@ -65,10 +59,8 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @author elitvin
  * @since 1.0.0
  */
-public class PsqlErWaypointEngine extends AbstractQueryEngine {
+public class PsqlErWaypointEngine extends PsqlErEngine {
 
-	private final Logger logger = Logger.getLogger(PsqlErWaypointEngine.class.getName());
-	
 	private String queryDataTable;
 	private Session session;
 	private Locale l;
@@ -135,7 +127,7 @@ public class PsqlErWaypointEngine extends AbstractQueryEngine {
 							caFilter, 
 							true, true);
 					
-					populateTemporaryTableExtra(c, session);
+					populateTemporaryTableExtra(c, session, caFilter, filter);
 
 					//setting result size
 					
@@ -170,141 +162,10 @@ public class PsqlErWaypointEngine extends AbstractQueryEngine {
 		dropTable(c, queryDataTable + "_sulist"); //$NON-NLS-1$
 	}
 
-	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT ca_uuid, " + uuidColumn + " FROM " + queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		logger.finest(sql);
-		
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			PreparedStatement statement = c.prepareStatement("UPDATE " + queryDataTable + " SET " + nameColumn + " = ? where " + uuidColumn + " = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			int count = 0;
-			while (rs.next()) {
-				UUID ca_uuid = (UUID) rs.getObject(1);
-				UUID uuid = (UUID) rs.getObject(2);
-				if (uuid == null || ca_uuid == null)
-					continue;
-				String name = getName(uuid, ca_uuid, session);
-				statement.setString(1, name);
-				statement.setObject(2, uuid);
-				statement.addBatch();
-				count ++;
-				if (count > 100){
-					statement.executeBatch();
-					count = 0;
-				}				
-			}
-			statement.executeBatch();
-			
-		}
-	}
 	
-	private void populateAdditionalMissionTable(Connection c, Session session) throws SQLException {
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(queryDataTable + "_mlist"); //$NON-NLS-1$
-		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql.toString());
-
-		sql = new StringBuilder();
-		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
-		sql.append(tableNamePrefix(MissionPropertyValue.class));
-		sql.append(" inner join "); //$NON-NLS-1$
-		sql.append(queryDataTable);
-		sql.append(" r on r.mission_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append(".mission_uuid WHERE "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(" is not null "); //$NON-NLS-1$
-		
-		
-		
-		StringBuilder sql2 = new StringBuilder();
-		sql2.append("INSERT INTO "); //$NON-NLS-1$
-		sql2.append( queryDataTable + "_mlist"); //$NON-NLS-1$
-		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		logger.finest(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2.toString());
-		logger.finest(sql.toString());
-		
-		int count = 0;
-		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
-			while (rs.next()) {
-				UUID uuid = (UUID)rs.getObject(1);
-				if (uuid != null) {
-//					byte[] cauuid = rs.getBytes(2);
-//					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid));
-					String value = Label.getDescription(uuid, session);
-					statement.setObject(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		} 
-	}
-	
-	private void populateAdditionalSuTable(Connection c, Session session) throws SQLException {
-		StringBuilder sql = new StringBuilder();
-		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(queryDataTable + "_sulist"); //$NON-NLS-1$
-		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
-		logger.finest(sql.toString());
-		c.createStatement().execute(sql.toString());
-
-		sql = new StringBuilder();
-		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
-		sql.append(tableNamePrefix(SamplingUnitAttributeValue.class));
-		sql.append(" inner join "); //$NON-NLS-1$
-		sql.append(queryDataTable);
-		sql.append(" r on r.samplingunit_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".su_attribute_uuid WHERE "); //$NON-NLS-1$
-		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".list_element_uuid"); //$NON-NLS-1$
-		sql.append(" is not null "); //$NON-NLS-1$
-				
-		StringBuilder sql2 = new StringBuilder();
-		sql2.append("INSERT INTO "); //$NON-NLS-1$
-		sql2.append( queryDataTable + "_sulist"); //$NON-NLS-1$
-		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		logger.finest(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2.toString());
-		
-		int count = 0;
-		logger.finest(sql.toString());
-		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
-			while (rs.next()) {
-				UUID uuid = (UUID)rs.getObject(1);
-				if (uuid != null) {
-//					byte[] cauuid = rs.getBytes(2);
-//					String value = SmartLabelProvider.getDescription(UuidUtils.byteToUUID(uuid), UuidUtils.byteToUUID(cauuid));
-					String value = Label.getDescription(uuid, session);
-					statement.setObject(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
-	}
-	private void populateTemporaryTableExtra(Connection c, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, Session session,
+			ConservationAreaFilter caFilter,
+			SurveyDesignFilter sdFilter) throws SQLException {
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
 				{"ca_name","varchar(256)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -318,77 +179,33 @@ public class PsqlErWaypointEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 
-		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		//survey design
+		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", queryDataTable, c, session);  //$NON-NLS-1$//$NON-NLS-2$
 
 		//ca information
-		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
-			//ca id and names are only used for cross-ca analysis
-			StringBuilder sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-			
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-		}
+		populateCaDetails(c, queryDataTable, query);
+
 		
 		// mission leader
-		StringBuilder sql = new StringBuilder();
-		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionMember.class));
-		sql.append(".employee_uuid, "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionMember.class));
-		sql.append(".mission_uuid "); //$NON-NLS-1$
-		sql.append(" FROM "); //$NON-NLS-1$
-		sql.append(queryDataTable);
-		sql.append(" a join "); //$NON-NLS-1$
-		sql.append(tableNamePrefix(MissionMember.class));
-		sql.append(" on a.mission_uuid = "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionMember.class));
-		sql.append(".mission_uuid"); //$NON-NLS-1$
-		sql.append(" WHERE "); //$NON-NLS-1$
-		sql.append(tablePrefix(MissionMember.class));
-		sql.append(".is_leader"); //$NON-NLS-1$
+		populateMissionLeader(c, session, queryDataTable);
 
-		
-		String updateSql = "UPDATE " + queryDataTable + " SET "; //$NON-NLS-1$ //$NON-NLS-2$
-		updateSql += "mission_leader = ? where mission_uuid = ?"; //$NON-NLS-1$
-		logger.finest(updateSql);
-		PreparedStatement leaderSt = c.prepareStatement(updateSql);
-
-		int cnt = 0;
-		logger.finest(sql.toString());
-		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
-			while (rs.next()) {
-				UUID uuid = (UUID)rs.getObject(1);
-				String name = getEmployeeName(uuid, session);
-
-				if (name != null) {
-					leaderSt.setString(1, name);
-					leaderSt.setObject(2, (UUID)rs.getObject(2));
-					leaderSt.addBatch();
-
-					cnt++;
-					if (cnt >= 100) {
-						leaderSt.executeBatch();
-						cnt = 0;
-					}
-				}
+		//mission attributes
+		WpoaLinkedData mListData = new WpoaLinkedData("_mlist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
+			@Override
+			public String getLabel(Session session, UUID cauuid, UUID uuid) {
+				return Label.getDescription(uuid, session);
 			}
-			leaderSt.executeBatch();
-		}
-		populateAdditionalMissionTable(c, session);
-		populateAdditionalSuTable(c, session);
+		};
+		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, mListData);
+		
+		//sampling unit attributes
+		WpoaLinkedData suListData = new WpoaLinkedData("_sulist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
+			@Override
+			public String getLabel(Session session, UUID cauuid, UUID uuid) {
+				return Label.getDescription(uuid, session);
+			}
+		};
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, suListData);
 
 	}
 
@@ -496,6 +313,10 @@ public class PsqlErWaypointEngine extends AbstractQueryEngine {
 		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
 		
 		return it;
+	}
+	
+	@Override
+	public void buildTemporaryTableIndexes(Connection c, String tableName) throws SQLException{
 	}
 	
 	@Override

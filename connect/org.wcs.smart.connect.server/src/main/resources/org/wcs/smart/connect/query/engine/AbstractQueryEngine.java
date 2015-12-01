@@ -95,7 +95,8 @@ import org.wcs.smart.util.UuidUtils;
  *
  */
 public abstract class AbstractQueryEngine implements IQueryEngine {
-	private final Logger logger = Logger.getLogger(AbstractQueryEngine.class.getName());
+	
+	protected final Logger logger = Logger.getLogger(AbstractQueryEngine.class.getName());
 	
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
 	public HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();

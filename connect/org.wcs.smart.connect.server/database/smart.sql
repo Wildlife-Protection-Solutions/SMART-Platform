@@ -23,7 +23,7 @@ $$LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION smart.distanceInMeter(geom bytea) RETURNS DOUBLE PRECISION AS $$
 BEGIN
-	RETURN ST_Length2D_Spheroid(st_geomfromwkb(geom), 'SPHEROID["WGS 84",6378137,298.257223563]');
+	RETURN ST_Length_Spheroid(st_force2d(st_geomfromwkb(geom)), 'SPHEROID["WGS 84",6378137,298.257223563]');
 
 END;
 $$LANGUAGE plpgsql;
