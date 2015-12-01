@@ -201,6 +201,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 					
 			if (DerbyReplicationManager.INSTANCE.getLocalReplicationState()){
 				Session session = HibernateManager.openSession();
+				session.beginTransaction();
 				try{
 					Boolean hasChanges = DerbyReplicationManager.INSTANCE.hasLocalChanges(session);
 					if (hasChanges != null){
@@ -211,6 +212,7 @@ public class StatusLineControl extends WorkbenchWindowControlContribution {
 						}
 					}
 				}finally{
+					session.getTransaction().rollback();
 					session.close();
 				}
 			}else{

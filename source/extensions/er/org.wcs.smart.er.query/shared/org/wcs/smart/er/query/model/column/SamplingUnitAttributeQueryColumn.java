@@ -35,7 +35,7 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class SamplingUnitAttributeQueryColumn  extends QueryColumn {
 	
-	private static final String KEY_PREFIX = "suatt"; //$NON-NLS-1$
+	public static final String KEY_PREFIX = "suatt"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new query column based on the mission attribute.
