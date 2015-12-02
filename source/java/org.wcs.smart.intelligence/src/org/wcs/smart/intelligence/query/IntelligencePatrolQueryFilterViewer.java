@@ -58,7 +58,7 @@ public class IntelligencePatrolQueryFilterViewer implements IExtensionFilterView
 		}
 		
 		IntelligencePatrolQueryFilter qFilter = (IntelligencePatrolQueryFilter)filter;
-		String prefix = engine.tablePrefix(intelligenceOption.getPatrolAttributeClass());
+		String prefix = engine.tablePrefix(qFilter.getPatrolQueryOption().getPatrolAttributeClass());
 		String v = SharedUtils.stripQuotes((String)qFilter.getValue());
 		//if v is empty this means that this is "Any Plan" case
 		String intelPart = !qFilter.isAnyIntelligence() ? " AND p2i.intelligence_uuid = x'" + v + "'" : "";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
