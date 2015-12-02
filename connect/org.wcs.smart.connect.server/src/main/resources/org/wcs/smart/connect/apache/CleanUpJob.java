@@ -81,7 +81,7 @@ public class CleanUpJob implements Runnable {
 	private Integer getEnvironmentVariable(EnvironmentVariables.Variable variable){
 		Integer value = null;
 		try{
-			value = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVairable(variable);
+			value = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVariable(variable);
 		}catch (Exception ex){
 			logger.log(Level.WARNING, "Value not found for environment variable:" + variable, ex);
 		}
@@ -141,7 +141,7 @@ public class CleanUpJob implements Runnable {
 	private void cleanUpWorkItems(Session s){
 		Integer days = null;
 		try{
-			days = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE);
+			days = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE);
 		}catch (Exception ex){
 			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.WORK_HISTORY_ITEM_AVAILABLE.key, ex);
 		}

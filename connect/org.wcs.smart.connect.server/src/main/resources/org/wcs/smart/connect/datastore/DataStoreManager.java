@@ -53,7 +53,7 @@ public enum DataStoreManager {
 	 * @throws NamingException 
 	 */
 	public void initDatastore() throws NamingException{
-		datastoreLocation = (String)EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.DATASTORE_LOCATION);
+		datastoreLocation = (String)EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.DATASTORE_LOCATION);
 	}
 	
 	/**

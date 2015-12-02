@@ -120,7 +120,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 		//start executor for running background jobs
 		int numthreads = 1;
 		try{
-			numthreads = (Integer) EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.NUM_BACK_THREADS);
+			numthreads = (Integer) EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.NUM_BACK_THREADS);
 		}catch(Exception ex){
 			logger.log(Level.WARNING, "Could not read variable " + EnvironmentVariables.Variable.NUM_BACK_THREADS.key + " from context.xml.", ex);
 		}
@@ -133,7 +133,7 @@ public class ConnectStartupContextListener implements ServletContextListener{
 	private void initCleanUpJob(SessionFactory sf, ScheduledExecutorService scheduler){
 		Integer cleanUpSchedule = 24;
 		try{
-			cleanUpSchedule = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVairable(EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL);
+			cleanUpSchedule = (Integer)EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL);
 		}catch (Exception ex){
 			logger.log(Level.WARNING, "Value not found for environment variable:" + EnvironmentVariables.Variable.CLEANUP_TASK_INTERVAL.key, ex);
 		}

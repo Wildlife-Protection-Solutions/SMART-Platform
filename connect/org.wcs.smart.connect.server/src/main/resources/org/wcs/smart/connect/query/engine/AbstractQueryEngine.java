@@ -38,6 +38,8 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.naming.NamingException;
+
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -50,6 +52,7 @@ import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
+import org.wcs.smart.connect.apache.EnvironmentVariables;
 import org.wcs.smart.entity.model.Entity;
 import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.model.EntityAttributeValue;
@@ -514,16 +517,18 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * 
 	 * @param crs
 	 * @return
+	 * @throws NamingException 
 	 */
-	public Integer findPostgresqlProjectionSrid(CoordinateReferenceSystem crs){
+	public Integer findPostgresqlProjectionSrid(CoordinateReferenceSystem crs) throws NamingException{
 		//try to parse the epsg code and match to one from the database
+		String spatialRefSys = (String) EnvironmentVariables.INSTANCE.getEnvironmentVariable(EnvironmentVariables.Variable.SPATIAL_REF_SYS_TABLE);
 		try{
 			String crsid = CRS.lookupIdentifier(crs,  true );
 			if (crsid.contains(":")){
 				String auth = crsid.split(":")[0];
 				int code = Integer.parseInt(crsid.split(":")[1]);
 				
-				org.hibernate.Query q = session.createSQLQuery("SELECT srid, srtext FROM public.spatial_ref_sys WHERE auth_name = :auth and auth_srid = :srid");
+				org.hibernate.Query q = session.createSQLQuery("SELECT srid, srtext FROM " + spatialRefSys + " WHERE auth_name = :auth and auth_srid = :srid");
 				q.setString("auth", auth);
 				q.setInteger("srid", code);
 				Object[] data = (Object[]) q.uniqueResult();
@@ -538,7 +543,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			logger.log(Level.FINEST, ex.getMessage(), ex);
 		}
 		//if above fails, lets search entire list for match
-		List<Object[]> choices = session.createSQLQuery("SELECT srid, srtext from public.spatial_ref_sys").list();
+		List<Object[]> choices = session.createSQLQuery("SELECT srid, srtext from " + spatialRefSys).list();
 		for (Object[] data : choices){
 			try{
 				CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);

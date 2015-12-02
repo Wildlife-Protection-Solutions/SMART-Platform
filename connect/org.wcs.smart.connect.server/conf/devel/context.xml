@@ -26,6 +26,9 @@
   	<!-- SMART Filestore Location -->
   	<Environment name="filestorelocation" value="/smart/filestore" type="java.lang.String" override="false"/>
   	
+  	<!-- Postgis spatial ref system table name -->
+  	<Environment name="spatial_ref_sys_table" value="public.spatial_ref_sys" type="java.lang.String" override="false"/>
+  	
   	<!-- Number of background threads available for processing requests -->
 	<Environment name="number_background_threads" value="4" type="java.lang.Integer" override="false"/>
 	
