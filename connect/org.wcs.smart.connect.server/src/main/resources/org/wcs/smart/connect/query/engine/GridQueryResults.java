@@ -19,14 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package org.wcs.smart.connect.query.engine.patrol;
+package org.wcs.smart.connect.query.engine;
 
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 
-import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
-import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
@@ -56,26 +54,14 @@ public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 	@Override
 	public String getValueAsString(GridResultItem item, QueryColumn column)
 			throws SQLException {
-		Object v = getValue(item, column.getKey());
-		if (v == null) return "";
-		if (v instanceof Number){
-			return ((Number)v).toString();
+		if (column instanceof GridQueryColumn){
+			Object v = ((GridQueryColumn)column).getValue(item);
+			if (v == null) return "";
+			if (v instanceof Number){
+				return ((Number)v).toString();
+			}
+			return v.toString();
 		}
-		return "";
+		throw new SQLException("Invalid column for gridded query." + column.getKey());
 	}
-
-	@Override
-	public Object getValue(GridResultItem item, String columnKey)
-			throws SQLException {
-		if (columnKey.equals(GridQueryColumn.GridColumns.TILE_X)){
-			return item.getTileX();
-		}else if (columnKey.equals(GridQueryColumn.GridColumns.TILE_Y)){
-			return item.getTileY();
-		}else if (columnKey.equals(GridQueryColumn.GridColumns.VALUE)){
-			return item.getValue();
-		}
-		return null;
-	}
-	
-
 }

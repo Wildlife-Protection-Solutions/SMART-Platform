@@ -36,6 +36,8 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.GridResultItem;
+import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
@@ -103,6 +105,39 @@ public class CsvExporter {
 				}
 			}			
 		});
+	}
+	
+	/**
+	 * Exports simple queries whose results and represented by a database table.
+	 * 
+	 * @param query
+	 * @param results
+	 * @param session
+	 */
+	public void exportResults(GriddedQuery query, IMemoryTableResultSet<GridResultItem> results, Session session) throws Exception{
+	
+		try (CSVWriter writer = new CSVWriter(new OutputStreamWriter(
+				new FileOutputStream(f.getAbsolutePath()), "utf-8"), delimiter)) {
+
+			List<QueryColumn> cols = query.getQueryColumns(l, session);
+
+			String[] data = new String[cols.size()];
+			for (int i = 0; i < cols.size(); i++) {
+				data[i] = cols.get(i).getName();
+			}
+			writer.writeNext(data);
+
+			for (Iterator<GridResultItem> iterator = results.getIterator(); iterator
+					.hasNext();) {
+				GridResultItem item = (GridResultItem) iterator.next();
+
+				data = new String[cols.size()];
+				for (int i = 0; i < cols.size(); i++) {
+					data[i] = results.getValueAsString(item, cols.get(i));
+				}
+				writer.writeNext(data);
+			}
+		}
 	}
 	
 	/**

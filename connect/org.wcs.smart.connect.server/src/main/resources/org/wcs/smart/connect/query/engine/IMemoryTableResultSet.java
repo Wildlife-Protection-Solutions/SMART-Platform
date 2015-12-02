@@ -40,6 +40,4 @@ public interface IMemoryTableResultSet<T extends IResultItem> extends IQueryResu
 	public Iterator<T> getIterator() throws SQLException;
 		
 	public String getValueAsString(T item, QueryColumn column) throws SQLException;
-
-	public Object getValue(T item, String columnKey) throws SQLException;
 }

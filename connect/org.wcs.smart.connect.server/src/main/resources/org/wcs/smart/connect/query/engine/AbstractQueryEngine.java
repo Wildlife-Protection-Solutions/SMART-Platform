@@ -30,13 +30,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -502,6 +506,51 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		}
 		
 		return dmEntityTypeAttributeKey;
+	}
+	
+	/**
+	 * Finds the srid from the spatial_ref_sys table that matches
+	 * the given crs.  Will return null if none found.
+	 * 
+	 * @param crs
+	 * @return
+	 */
+	public Integer findPostgresqlProjectionSrid(CoordinateReferenceSystem crs){
+		//try to parse the epsg code and match to one from the database
+		try{
+			String crsid = CRS.lookupIdentifier(crs,  true );
+			if (crsid.contains(":")){
+				String auth = crsid.split(":")[0];
+				int code = Integer.parseInt(crsid.split(":")[1]);
+				
+				org.hibernate.Query q = session.createSQLQuery("SELECT srid, srtext FROM public.spatial_ref_sys WHERE auth_name = :auth and auth_srid = :srid");
+				q.setString("auth", auth);
+				q.setInteger("srid", code);
+				Object[] data = (Object[]) q.uniqueResult();
+				if (data != null){
+					CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
+					if (CRS.equalsIgnoreMetadata(crs, c)){
+						return (Integer)data[0];
+					}
+				}
+			}
+		}catch (Exception ex){
+			logger.log(Level.FINEST, ex.getMessage(), ex);
+		}
+		//if above fails, lets search entire list for match
+		List<Object[]> choices = session.createSQLQuery("SELECT srid, srtext from public.spatial_ref_sys").list();
+		for (Object[] data : choices){
+			try{
+				CoordinateReferenceSystem c = CRS.parseWKT((String)data[1]);
+				if (CRS.equalsIgnoreMetadata(crs, c)){
+					return (Integer)data[0];
+				}
+			}catch (Exception ex){
+				logger.log(Level.FINEST, ex.getMessage(), ex);
+			}
+			
+		}
+		return null;
 		
 	}
 }

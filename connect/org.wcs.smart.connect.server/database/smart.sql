@@ -35,6 +35,18 @@ BEGIN
 END;
 $$LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION smart.computeTileId(x double precision, y double precision, srid integer, originX double precision, originY double precision, gridSize double precision) RETURNS VARCHAR AS $$
+DECLARE 
+  pnt geometry;
+  tx integer;
+  ty integer;
+BEGIN
+	pnt := st_transform(st_setsrid(st_makepoint(x,y), 4326), srid);
+	tx := floor ( (st_x(pnt) - originX ) / gridSize) + 1;
+	ty := floor ( (st_y(pnt) - originY ) / gridSize) + 1;
+	RETURN tx || '_' || ty;
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION smart.computeHoursPoly(polygon bytea, linestring bytea) RETURNS double precision AS $$
 DECLARE

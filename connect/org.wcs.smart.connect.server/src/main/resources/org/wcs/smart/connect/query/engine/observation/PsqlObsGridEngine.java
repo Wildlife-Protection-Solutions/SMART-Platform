@@ -30,18 +30,21 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
-import org.wcs.smart.connect.query.engine.patrol.GridQueryResults;
 import org.wcs.smart.connect.query.engine.patrol.PsqlPatrolEngine;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -83,7 +86,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	
 	private String dataTable;
 	private String gridTable;
-	
+	private Integer pgSrid;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -111,6 +114,16 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
+		pgSrid = null;
+		try{
+			pgSrid = findPostgresqlProjectionSrid(query.getCoordinateReferenceSystem());
+		}catch (Exception ex){
+			throw new SQLException(ex);
+		}
+		if (pgSrid == null){
+			throw new SQLException("Projection not supported on connect.  You must add the projection to the connect database.");
+		}
+		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -127,6 +140,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 					}
 					result = new GridQueryResults(PsqlObsGridEngine.this, items.values());
 				}catch (Exception ex){
+					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
@@ -233,7 +247,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 						sql.append(".wp_uuid as " + strAggValue);  //$NON-NLS-1$
 					}
 				}
-				String p1 = addParameterValue(gridDef.getCrs().toWKT());  
+				String p1 = addParameterValue(pgSrid);  
 				String p2 = addParameterValue(minX);
 				String p3 = addParameterValue(minY);
 				String p4 = addParameterValue(size);
@@ -354,7 +368,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				}else{
 					sql.append(dataTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
 				}
-				String p1 = addParameterValue(gridDef.getCrs().toWKT());  
+				String p1 = addParameterValue(pgSrid);  
 				String p2 = addParameterValue(minX);
 				String p3 = addParameterValue(minY);
 				String p4 = addParameterValue(size);
@@ -378,7 +392,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 				if (tmp.getCategoryHKey() != null){
 					p1 = addParameterValue(tmp.getCategoryHKey() + "%");
 
-					sql.append("hkey like " + p1 + "  AND hkey < " + p2 + " ");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					sql.append("hkey like " + p1 + " ");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}else{
 					sql.append(" hkey is not null "); //$NON-NLS-1$
 				}

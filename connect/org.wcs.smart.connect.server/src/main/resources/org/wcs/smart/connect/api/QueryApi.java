@@ -64,6 +64,7 @@ import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
 import org.wcs.smart.query.common.engine.IQueryResult;
+import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.common.model.SummaryQuery;
@@ -202,7 +203,7 @@ public class QueryApi extends HttpServlet{
 						exporter.exportResults((SimpleQuery)query, (IDbTableResultSet)result, s);
 					}else if (result instanceof IMemoryTableResultSet
 						&& query instanceof GriddedQuery){
-						exporter.exportResults((SimpleQuery)query, (IDbTableResultSet)result, s);
+						exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<GridResultItem>)result, s);
 					}else if (result instanceof SummaryQueryResult
 						&& query instanceof SummaryQuery){
 						exporter.exportResults((SummaryQuery)query, (SummaryQueryResult)result, s);

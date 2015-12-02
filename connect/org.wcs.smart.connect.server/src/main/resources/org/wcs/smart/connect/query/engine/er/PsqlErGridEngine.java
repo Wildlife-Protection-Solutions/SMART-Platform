@@ -53,9 +53,9 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
-import org.wcs.smart.connect.query.engine.patrol.GridQueryResults;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionDay;
 import org.wcs.smart.er.model.MissionTrack;
@@ -113,7 +113,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 	
 	private String dataTable;
 	private String gridTable;
-	
+	private Integer pgSrid;
 	private boolean hasTrackFilter = false;
 	
 	
@@ -143,6 +143,16 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
+		pgSrid = null;
+		try{
+			pgSrid = findPostgresqlProjectionSrid(query.getCoordinateReferenceSystem());
+		}catch (Exception ex){
+			throw new SQLException(ex);
+		}
+		if (pgSrid == null){
+			throw new SQLException("Projection not supported on connect.  You must add the projection to the connect database.");
+		}
+		
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -225,8 +235,12 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 					logger.log(Level.SEVERE,ex.getMessage(),ex);
 					throw new SQLException(ex.getMessage(), ex);
 				} finally {
-					// ensure temporary tables get dropped
-					dropTemporaryGridTable(c);
+					try{
+						// ensure temporary tables get dropped
+						dropTemporaryGridTable(c);
+					}catch (Exception ex){
+						logger.log(Level.SEVERE,ex.getMessage(),ex);	
+					}
 				}
 				c.commit();
 			}
@@ -351,7 +365,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 					sql.append(".wp_uuid as " + strAggValue);  //$NON-NLS-1$
 				}
 			}
-			String p1 = addParameterValue(gridDef.getCrs().toWKT());
+			String p1 = addParameterValue(pgSrid);
 			String p2 = addParameterValue(minX);
 			String p3 = addParameterValue(minY);
 			String p4 = addParameterValue(size);
@@ -416,9 +430,9 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 				sql.append(".category_uuid = "); //$NON-NLS-1$
 				sql.append( tablePrefix.get(Category.class));
 				sql.append( ".uuid" ); //$NON-NLS-1$
-				p1 = addParameterValue(tmp.getCategoryKey());
-				p2 = addParameterValue(tmp.getCategoryKey().substring(0, tmp.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
-				sql.append(" AND Hkey >= " + p1 + " and hkey < " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				
+				p1 = addParameterValue(tmp.getCategoryKey() + "%");
+				sql.append(" AND Hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}
 			
 			if (tmp.getAttributeType() == AttributeType.LIST){
@@ -445,12 +459,9 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 				sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 				sql.append(".tree_node_uuid "); //$NON-NLS-1$
 				sql.append(" and ("); //$NON-NLS-1$
-				p1 = addParameterValue(tmp.getItemKey());
-				p2 = addParameterValue(tmp.getItemKey().substring(0, tmp.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
+				p1 = addParameterValue(tmp.getItemKey() + "%");
 				sql.append(tablePrefix.get(AttributeTreeNode.class));
-				sql.append(".hkey >= " + p1 + " and "); //$NON-NLS-1$ //$NON-NLS-2$
-				sql.append(tablePrefix.get(AttributeTreeNode.class));
-				sql.append(".hkey < " + p2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			sql.append(") as foo group by tile_id"); //$NON-NLS-1$
 			
@@ -471,7 +482,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			}else{
 				sql.append(dataTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
 			}
-			String p1 = addParameterValue(gridDef.getCrs().toWKT());
+			String p1 = addParameterValue(pgSrid);
 			String p2 = addParameterValue(gridDef.getOriginX());
 			String p3 = addParameterValue(gridDef.getOriginY());
 			String p4 = addParameterValue(gridDef.getCellSize());
@@ -491,9 +502,8 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 					+ ".uuid" //$NON-NLS-1$
 					+ " AND "); //$NON-NLS-1$
 			if (tmp.getCategoryHKey() != null){
-				p1 = addParameterValue(tmp.getCategoryHKey());
-				p2 = addParameterValue(tmp.getCategoryHKey().substring(0, tmp.getCategoryHKey().length() - 1) + "/"); //$NON-NLS-1$
-				sql.append(" Hkey >= " + p1 + " and hkey < " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				p1 = addParameterValue(tmp.getCategoryHKey() + "%");
+				sql.append(" hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			}else{
 				sql.append(" hkey is not null "); //$NON-NLS-1$
 			}
@@ -660,7 +670,7 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		if (hasTrackFilter){
 			sql.append(tablePrefix(MissionTrack.class) + ".uuid, "); //$NON-NLS-1$
 		}else{
-			sql.append("cast(null as char for bit data),");	 //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	 //$NON-NLS-1$
 		}
 		
 		
@@ -671,11 +681,11 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(Waypoint.class) + ".datetime, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid "); //$NON-NLS-1$
 		}else{
-			sql.append("cast(null as char for bit data),");	 //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	 //$NON-NLS-1$
 			sql.append("cast(null as varchar(128)),");	 //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	 //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	 //$NON-NLS-1$
 			sql.append("cast(null as timestamp),");	 //$NON-NLS-1$
-			sql.append("cast(null as char for bit data)");	 //$NON-NLS-1$
+			sql.append("cast(null as UUID)");	 //$NON-NLS-1$
 		}
 		return sql.toString();
 	}
@@ -802,14 +812,15 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
 			while(rs.next()){
 				byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
-				Object[] data = null;
-				if (dataField != null){
-					data = new Object[dataField.length];
-					for (int i = 0; i < dataField.length; i++){
-						data[i] = rs.getObject("dataField_"+i); //$NON-NLS-1$
-					}
-				}
 				if (bytes != null){
+					Object[] data = null;
+					if (dataField != null){
+						data = new Object[dataField.length];
+						for (int i = 0; i < dataField.length; i++){
+							data[i] = rs.getObject("dataField_"+i); //$NON-NLS-1$
+						}
+					}
+					
 					WKBReader reader = new WKBReader();
 					LineString ls = (LineString) reader.read(bytes);
 					if (data != null){

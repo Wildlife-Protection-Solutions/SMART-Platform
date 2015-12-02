@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
@@ -40,8 +41,8 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
-import org.wcs.smart.connect.query.engine.patrol.GridQueryResults;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
@@ -78,10 +79,11 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 	
 	private GridQueryResults result = null;
 	
-	private ObservationGriddedQuery query;
+	private EntityGriddedQuery query;
 	
 	private String dataTable;
 	private String gridTable;
+	private Integer pgSrid;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -103,13 +105,22 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 		
-		this.query = (ObservationGriddedQuery) lquery;
+		this.query = (EntityGriddedQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale) parameters.get(Locale.class.getName());
 		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 
+		pgSrid = null;
+		try{
+			pgSrid = findPostgresqlProjectionSrid(query.getCoordinateReferenceSystem());
+		}catch (Exception ex){
+			throw new SQLException(ex);
+		}
+		if (pgSrid == null){
+			throw new SQLException("Projection not supported on connect.  You must add the projection to the connect database.");
+		}
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -128,6 +139,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 
 					result = new GridQueryResults(PsqlEntityGridEngine.this, items.values());
 				}catch (Exception ex){
+					logger.log(Level.SEVERE,  ex.getMessage(), ex);
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
@@ -244,7 +256,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 				sql.append(".x,");  //$NON-NLS-1$
 				sql.append( tablePrefix.get(Waypoint.class));
 				sql.append(".y,"); //$NON-NLS-1$
-				sql.append(addParameterValue(gridDef.getCrs().toWKT()) + ","); //$NON-NLS-1$
+				sql.append(addParameterValue(pgSrid) + ","); //$NON-NLS-1$
 				sql.append(addParameterValue(minX) + ","); //$NON-NLS-1$
 				sql.append(addParameterValue(minY) + ","); //$NON-NLS-1$
 				sql.append(addParameterValue(size));
@@ -296,7 +308,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 				sql.append(".wp_uuid"); //$NON-NLS-1$
 				
 				if (tmp.getCategoryKey() != null){
-					String p2 = addParameterValue(tmp.getCategoryKey()+ "%");
+					
 					
 					sql.append(" JOIN "); //$NON-NLS-1$
 					sql.append(tableNames.get(Category.class));
@@ -307,6 +319,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 					sql.append(".category_uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(Category.class));
 					sql.append( ".uuid" ); //$NON-NLS-1$
+					String p2 = addParameterValue(tmp.getCategoryKey() + "%") ;
 					sql.append(" AND Hkey like " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 				}
 				
@@ -334,7 +347,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 					sql.append(tablePrefix.get(WaypointObservationAttribute.class));
 					sql.append(".tree_node_uuid "); //$NON-NLS-1$
 					sql.append(" and ("); //$NON-NLS-1$
-					String p2 = addParameterValue(tmp.getItemKey()+ "%");
+					String p2 = addParameterValue(tmp.getItemKey() + "%") ;
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
 					sql.append(".hkey like " + p2 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
@@ -359,7 +372,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 				}else{
 					sql.append(dataTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
 				}
-				String p1 = addParameterValue(gridDef.getCrs().toWKT());
+				String p1 = addParameterValue(pgSrid);
 				String p2 = addParameterValue(minX);
 				String p3 = addParameterValue(minY);
 				String p4 = addParameterValue(size);

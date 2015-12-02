@@ -53,6 +53,7 @@ import org.wcs.smart.ca.datamodel.AttributeListItem;
 import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.connect.query.engine.GridQueryResults;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.connect.query.engine.PsqlFilterToSqlGenerator;
 import org.wcs.smart.observation.model.Waypoint;
@@ -107,6 +108,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 	
 	private String dataTable;
 	private String gridTable;
+	private Integer pgSrid;
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -133,7 +135,16 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
-
+		
+		pgSrid = null;
+		try{
+			pgSrid = findPostgresqlProjectionSrid(query.getCoordinateReferenceSystem());
+		}catch (Exception ex){
+			throw new SQLException(ex);
+		}
+		if (pgSrid == null){
+			throw new SQLException("Projection not supported on connect.  You must add the projection to the connect database.");
+		}
 		 
 		session.doWork(new Work() {
 			@Override
@@ -211,7 +222,11 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
-					dropTemporaryGridTable(c);
+					try{
+						dropTemporaryGridTable(c);
+					}catch (Exception ex){
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
+					}
 				}
 				c.commit();
 			}
@@ -319,7 +334,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 						sql.append(".wp_uuid as " + strAggValue);  //$NON-NLS-1$
 					}
 				}
-				String p1 = addParameterValue(gridDef.getCrs().toWKT());
+				String p1 = addParameterValue(pgSrid);
 				String p2 = addParameterValue(minX);
 				String p3 = addParameterValue(minY);
 				String p4 = addParameterValue(size);
@@ -384,10 +399,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 					sql.append(".category_uuid = "); //$NON-NLS-1$
 					sql.append( tablePrefix.get(Category.class));
 					sql.append( ".uuid" ); //$NON-NLS-1$
-					p1 = addParameterValue(tmp.getCategoryKey());
-					p2 = addParameterValue(tmp.getCategoryKey().substring(0, tmp.getCategoryKey().length() - 1) + "/"); //$NON-NLS-1$
-					sql.append(" AND Hkey >= " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
-					sql.append(" AND Hkey < " + p2 + " "); //$NON-NLS-1$ //$NON-NLS-2$
+					p1 = addParameterValue(tmp.getCategoryKey() + "%");
+					sql.append(" AND Hkey like " + p1 + " "); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				
 				if (tmp.getAttributeType() == AttributeType.LIST){
@@ -415,12 +428,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 					sql.append(".tree_node_uuid "); //$NON-NLS-1$
 					sql.append(" and ("); //$NON-NLS-1$
 					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					p1 = addParameterValue(tmp.getItemKey());
-					p2 = addParameterValue(tmp.getItemKey().substring(0, tmp.getItemKey().length() -1 ) + "/"); //$NON-NLS-1$
-					sql.append(".hkey >= " + p1); //$NON-NLS-1$
-					sql.append(" and "); //$NON-NLS-1$
-					sql.append(tablePrefix.get(AttributeTreeNode.class));
-					sql.append(".hkey < " + p2 + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+					p1 = addParameterValue(tmp.getItemKey() + "%");
+					sql.append(".hkey like " + p1 + ")"); //$NON-NLS-1$
 					
 				}
 
@@ -444,7 +453,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 				}else{
 					sql.append(dataTable + ".wp_uuid as localkey, "); //$NON-NLS-1$
 				}
-				String p1 = addParameterValue(gridDef.getCrs().toWKT());
+				String p1 = addParameterValue(pgSrid);
 				String p2 = addParameterValue(minX);
 				String p3 = addParameterValue(minY);
 				String p4 = addParameterValue(size);
@@ -464,11 +473,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 						+ ".uuid" //$NON-NLS-1$
 						+ " AND "); //$NON-NLS-1$
 				if (tmp.getCategoryHKey() != null){
-					p1 = addParameterValue(tmp.getCategoryHKey());
-					p2 = addParameterValue(tmp.getCategoryHKey().substring(0,  tmp.getCategoryHKey().length()-1) +"/"); //$NON-NLS-1$
-					
-					sql.append("hkey >= " + p1); //$NON-NLS-1$
-					sql.append(" AND hkey < " + p2); //$NON-NLS-1$
+					p1 = addParameterValue(tmp.getCategoryHKey() + "%");
+					sql.append("hkey like " + p1 + " "); //$NON-NLS-1$
 				}else{
 					sql.append(" hkey is not null "); //$NON-NLS-1$
 				}
@@ -482,7 +488,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 				sql.append(" group by "); //$NON-NLS-1$
 				sql.append("tile_id"); //$NON-NLS-1$
 				
-				//QueryPlugIn.logSql(sql.toString());
+				logger.finest(sql.toString());
 				rs = parseQueryString(c, sql.toString()).executeQuery();
 				
 			}else{
@@ -582,7 +588,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix.get(Track.class) + ".patrol_leg_day_uuid = "); //$NON-NLS-1$
 		sql.append("tmp.pld_uuid"); //$NON-NLS-1$
 
-		//QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())){
 			while(rs.next()){
 				byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
@@ -660,8 +666,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		}
 		sql.append( " and "); //$NON-NLS-1$
 		sql.append(PsqlFilterToSqlGenerator.INSTANCE.toSql(caFilter, this));
-		
-		//QueryPlugIn.logSql(sql.toString());		
+			
+		logger.finest(sql.toString());
 		try(ResultSet rs = parseQueryString(c, sql.toString()).executeQuery();){
 			while(rs.next()){
 				byte[] bytes = rs.getBytes("geom"); //$NON-NLS-1$
@@ -729,8 +735,8 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			sql.append(tablePrefix(Waypoint.class) + ".uuid, "); //$NON-NLS-1$
 			sql.append(tablePrefix(WaypointObservation.class) + ".uuid, "); //$NON-NLS-1$
 		}else{
-			sql.append("cast(null as char for bit data),");	//wp_uuid //$NON-NLS-1$
-			sql.append("cast(null as char for bit data),");	//wpob_uuid //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	//wp_uuid //$NON-NLS-1$
+			sql.append("cast(null as UUID),");	//wpob_uuid //$NON-NLS-1$
 		}
 		sql.append(tablePrefix(PatrolLegMember.class) + "_leader.employee_uuid, "); //$NON-NLS-1$
 		sql.append(tablePrefix(PatrolLegMember.class) + "_pilot.employee_uuid "); //$NON-NLS-1$
@@ -774,7 +780,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE INDEX " + tableName + "_wp_uuid_idx on " +  tableName + "(wp_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-		//QueryPlugIn.logSql(sql.toString());
+		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 	}
 
