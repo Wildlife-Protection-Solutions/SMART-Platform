@@ -58,6 +58,7 @@ labels_en= {
 "alert.confirmdeleteuser": "Are you sure you want to delete the user ",
 "alert.errordeletingaccount": "Error deleting account ",
 "alert.errordeletingaction": "Error deleting action ",
+"alert.toomanyalerts": "Too many alerts were found in the database, please refine one or more of the date/type/status/CA filters to reduce the number of alerts to display.",
 "alert.erroraddingaction": "Error adding action for user: " ,
 "users.errorcreatinguser": "Error creating account",
 "ca.confirmdeleteca": "Are you sure you want to delete the conservation area ",

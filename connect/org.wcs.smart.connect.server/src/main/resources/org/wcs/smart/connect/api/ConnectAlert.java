@@ -83,6 +83,8 @@ public class ConnectAlert extends HttpServlet {
 	private final Logger logger = Logger.getLogger(ConnectAlert.class.getName());
 	
 	public static final String PATH = "connectalert"; //$NON-NLS-1$
+	
+	public static final int MAX_ALERTS_TO_RETURN = 1000; //return an error if the request results in > than this many alerts to return.
 
 	@Context private ServletContext context;
 	@Context private HttpServletResponse response;
@@ -268,7 +270,8 @@ public class ConnectAlert extends HttpServlet {
     			@QueryParam(value="endDateFilter") String endDateFilter,
     			@QueryParam(value="textSearchFilter") String textSearchFilter,
     			@QueryParam(value="sortBy") String sortBy,
-    			@QueryParam(value="sortAscending") Boolean sortAscending
+    			@QueryParam(value="sortAscending") Boolean sortAscending,
+    			@QueryParam(value="maxAlertOverride") String maxAlertOverride
     			){
 		validateUser(AlertAction.VIEW_ALL_KEY);
 		
@@ -284,7 +287,19 @@ public class ConnectAlert extends HttpServlet {
 		s.beginTransaction();
 		try{
 			List<Alert> list = af.getAlerts(s);
+			int maxAlerts=MAX_ALERTS_TO_RETURN;
+			if(maxAlertOverride != null && Integer.parseInt(maxAlertOverride) > 0){
+				maxAlerts = Integer.parseInt(maxAlertOverride) ;	
+			}
+			if(list.size() > maxAlerts){
+				logger.info("Too many alerts match the query. " + list.size() + " > (max)" + maxAlerts ); //$NON-NLS-1$ //$NON-NLS-2$
+				throw new SmartConnectException(Response.Status.NOT_ACCEPTABLE);
+			}
 			return convertToGeoJson(s, list).toString();
+		} catch (NumberFormatException e) {
+			throw new SmartConnectException(Response.Status.BAD_REQUEST + Messages.getString("ConnectAlert.InvalidMaxAlerts",SmartUtils.getRequestLocale(request)));
+		}catch (Exception e){
+			throw e;
 		}finally{
 			s.getTransaction().commit();
 		}

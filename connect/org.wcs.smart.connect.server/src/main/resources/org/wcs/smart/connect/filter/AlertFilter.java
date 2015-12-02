@@ -205,7 +205,7 @@ public class AlertFilter {
 			c.add(Restrictions.lt("date", endDateFilter));
 		}
 		if(textSearchFilter != null){
-			c.add(Restrictions.or(Restrictions.ilike("userGeneratedId", textSearchFilter, MatchMode.ANYWHERE), Restrictions.like("description", textSearchFilter, MatchMode.ANYWHERE)) );
+			c.add(Restrictions.or(Restrictions.ilike("userGeneratedId", textSearchFilter, MatchMode.ANYWHERE), Restrictions.ilike("description", textSearchFilter, MatchMode.ANYWHERE)) );
 		}
 
 		if(sortAscending){

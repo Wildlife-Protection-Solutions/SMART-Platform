@@ -1,8 +1,8 @@
 var ALERT_URL = "../api/connectalert/";
-//var ALERT_URL = "../api/connectalertbrokenonpurposetoTest/";
 var FILTER_URL = "../api/connectalertfilterdefault/";
 var interval = 7000; //# of milli-seconds between map refresh on the alert layer,
 					//overridden by the defaults once they load
+var MAX_ALERTS = 1000; //override value to be sent to the api. The server by default also has a 1000 alert limit, so this is repetitive, but easily to modify than the server API limit. 
 var realtime;
 var map;
 var layerControl;  
@@ -241,8 +241,8 @@ function showError(error) {
 }
 
 function settab(tab){
-	hideInfo();
-	hideError();
+//	hideInfo();
+//	hideError();
 
 	remove_all_tab_classes();
 	switch(tab){
@@ -382,6 +382,9 @@ function createAlertTable(){
 		}else if (this.status == 404){
 			msg += i18n("alert.invalidurl");
 			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
+		}else if (this.status == 406){
+			msg += i18n("alert.toomanyalerts");
+			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
 		}else if (this.status == 500){
 			msg += i18n("alert.servererror");
 			document.getElementById("map-info-box").innerHTML = "Error trying to update. <a href='javascript:refreshAlerts()'>update now</a>";
@@ -389,7 +392,7 @@ function createAlertTable(){
 		
 		
 		try {
-			msg = JSON.parse(this.responseText).error
+			msg += JSON.parse(this.responseText).error
 		} catch (err) {
 		}
 		displayError(msg);
@@ -575,6 +578,8 @@ function getFilteredUrl(base){
 	filteredUrl += "&textSearchFilter=" +  document.getElementById("filterText").value;
 	
 	
+
+	
 	
 	var dateSelect = document.getElementById("filterDate").value;
 	hideError();	
@@ -600,6 +605,7 @@ function getFilteredUrl(base){
 	}
 
 	filteredUrl += "&sortBy=" + document.getElementById('sortBy').value + "&sortAscending=" + document.getElementById('sortAscending').value;
+	filteredUrl += "&maxAlertOverride=" + MAX_ALERTS;
 	return filteredUrl;
 }
 
