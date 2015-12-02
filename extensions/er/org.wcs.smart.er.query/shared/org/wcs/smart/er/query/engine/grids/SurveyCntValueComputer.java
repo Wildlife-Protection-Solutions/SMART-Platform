@@ -23,6 +23,7 @@ package org.wcs.smart.er.query.engine.grids;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.UUID;
 
 import org.wcs.smart.query.common.engine.IValueComputer;
 import org.wcs.smart.query.common.model.Grid;
@@ -52,7 +53,9 @@ public class SurveyCntValueComputer implements IValueComputer<HashSet<Object>> {
 		}
 		HashSet<Object> values = new HashSet<Object>();
 		if (ls.getUserData() instanceof byte[]){
-			values.add(Arrays.hashCode( ((byte[])ls.getUserData())));	
+			values.add(Arrays.hashCode( ((byte[])ls.getUserData())));
+		}else if (ls.getUserData() instanceof UUID){
+			values.add((UUID)ls.getUserData());
 		}else{
 			//this should never happen
 			return null;
