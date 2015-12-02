@@ -175,27 +175,23 @@ public class PatrolFilterSqlGenerator extends DerbyFilterToSqlGenerator{
 		if (option.isEmployeeItem()){
 			if (option == PatrolQueryOption.AGENCY ||
 					option == PatrolQueryOption.RANK){
-				try {
-					String field = option == PatrolQueryOption.AGENCY ? "agency_uuid" : "rank_uuid"; //$NON-NLS-1$ //$NON-NLS-2$
-					
-					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(SharedUtils.stripQuotes(filter.getValue())));
-					StringBuilder sb = new StringBuilder();
-					sb.append(engine.tablePrefix(PatrolLeg.class));
-					sb.append(".uuid IN (SELECT patrol_leg_uuid FROM "); //$NON-NLS-1$
-					sb.append(engine.tableNamePrefix(PatrolLegMember.class));
-					sb.append(","); //$NON-NLS-1$
-					sb.append(engine.tableNamePrefix(Employee.class));
-					sb.append(" WHERE "); //$NON-NLS-1$
-					sb.append(engine.tablePrefix(PatrolLegMember.class));
-					sb.append(".employee_uuid = "); //$NON-NLS-1$
-					sb.append(engine.tablePrefix(Employee.class));
-					sb.append(".uuid AND e." + field + " = "); //$NON-NLS-1$ //$NON-NLS-2$
-					sb.append(p1);
-					sb.append(")"); //$NON-NLS-1$
-					return sb.toString();
-				} catch (Exception e) {
-					throw new SQLException(e);
-				}
+
+				String field = option == PatrolQueryOption.AGENCY ? "agency_uuid" : "rank_uuid"; //$NON-NLS-1$ //$NON-NLS-2$					
+				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(SharedUtils.stripQuotes(filter.getValue())));
+				StringBuilder sb = new StringBuilder();
+				sb.append(engine.tablePrefix(PatrolLeg.class));
+				sb.append(".uuid IN (SELECT patrol_leg_uuid FROM "); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(PatrolLegMember.class));
+				sb.append(","); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(Employee.class));
+				sb.append(" WHERE "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(PatrolLegMember.class));
+				sb.append(".employee_uuid = "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Employee.class));
+				sb.append(".uuid AND e." + field + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(p1);
+				sb.append(")"); //$NON-NLS-1$
+				return sb.toString();
 			}else{
 				String prefix = engine.tablePrefix(PatrolLeg.class);
 				String x = prefix + ".uuid IN ( select patrol_leg_uuid from " //$NON-NLS-1$

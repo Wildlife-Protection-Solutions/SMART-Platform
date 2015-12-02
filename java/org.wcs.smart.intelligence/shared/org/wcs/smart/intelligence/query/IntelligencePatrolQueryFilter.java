@@ -50,6 +50,10 @@ public class IntelligencePatrolQueryFilter implements IExtensionFilter {
 		this.value = value;
 	}
 
+	public IPatrolQueryOption getPatrolQueryOption(){
+		return this.option;
+	}
+	
 	@Override
 	public String asString() {
 		return "patrol:" + option.getKey() + " " + op.asSmartValue() + " " + value; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

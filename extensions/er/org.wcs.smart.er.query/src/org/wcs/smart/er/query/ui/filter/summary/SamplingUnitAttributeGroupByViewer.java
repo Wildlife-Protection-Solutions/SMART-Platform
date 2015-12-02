@@ -79,7 +79,7 @@ public class SamplingUnitAttributeGroupByViewer extends AbstractGroupByViewer<Sa
 	}
 	
 	private SamplingUnitAttribute getSamplingUnitAttribute(Session session) throws Exception{
-		String attributeKey = groupBy.getKeyPart();
+		String attributeKey = groupBy.getAttributeKey();
 		List<?> items = session.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.eq("keyId", attributeKey)) //$NON-NLS-1$
 				.add(Restrictions.eq("conservationArea", SmartDB.getCurrentConservationArea())) //$NON-NLS-1$
