@@ -58,12 +58,9 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	private final Logger logger = Logger.getLogger(PsqlPatrolWaypointEngine.class.getName());
 	
 	private String queryDataTable;
-	private Session session;
-	private Locale l = Locale.getDefault();
 	
 	public PsqlPatrolWaypointEngine(){
 	}
-
 
 	public String getQueryDataTable(){
 		return this.queryDataTable;
@@ -73,14 +70,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	public boolean canExecute(String querytype) {
 		return PatrolWaypointQuery.KEY.equals(querytype);
 	}
-	
-	public Session getCurrentConnection() {
-		return session;
-	}
-	
-	public Locale getLocale(){
-		return this.l;
-	}
+
 	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
@@ -98,7 +88,8 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 
 		final SimpleQuery query = (SimpleQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		l = (Locale)parameters.get(Locale.class.getName());
+		locale = (Locale)parameters.get(Locale.class.getName());
+		
 		if (query.getDateFilter() == null){
 			return null;
 		}

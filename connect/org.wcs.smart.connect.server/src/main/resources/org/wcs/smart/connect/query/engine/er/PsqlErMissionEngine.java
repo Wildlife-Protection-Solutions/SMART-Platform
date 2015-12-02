@@ -63,8 +63,6 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 	
 	private String queryDataTable;
 	private MissionQuery query;
-	private Session session;
-	private Locale l = Locale.getDefault();
 	
 	public String getQueryDataTable(){
 		return queryDataTable;
@@ -75,9 +73,6 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 		return MissionQuery.KEY.equals(querytype);
 	}
 	
-	public Locale getLocale(){
-		return this.l;
-	}
 	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
@@ -95,7 +90,7 @@ public class PsqlErMissionEngine extends PsqlErEngine {
 
 		query = (MissionQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		this.l = (Locale) parameters.get(Locale.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		
 		if (query.getDateFilter() == null){
 			return null;

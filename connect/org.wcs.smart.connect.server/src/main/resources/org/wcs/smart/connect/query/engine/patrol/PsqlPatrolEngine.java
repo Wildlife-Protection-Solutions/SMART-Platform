@@ -39,16 +39,10 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 	
 	private String filterTable;
 	private String queryDataTable;
-	private Session session;
-	private Locale l = Locale.getDefault();
 	
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolQuery.KEY.equals(querytype);
-	}
-	
-	public Session getCurrentSession(){
-		return session;
 	}
 	
 	public String getDataQuery(){
@@ -57,7 +51,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		fields.append("r_p_id,r_p_start_date,r_p_end_date,r_p_station_uuid,");
 		fields.append("r_p_team_uuid,r_p_objective,r_p_mandate_uuid,r_p_type,");
 		fields.append("r_p_is_armed,r_pl_transport_uuid,r_pl_id,r_pl_start_date,");
-		fields.append("r_pl_end_date,r_plm_leader,r_plm_pilot,r_pl_uuid,r_pld_uuid,");
+		fields.append("r_pl_end_date,r_plm_leader,r_plm_pilot,r_pl_uuid,");
 		fields.append("p_station,p_team,p_mandate,p_transporttype,p_leader,p_pilot");
 		
 		StringBuilder sb = new StringBuilder();
@@ -71,10 +65,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		 
 		return sb.toString();
 	}
-	
-	public Locale getLocale(){
-		return this.l;
-	}
+
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -91,7 +82,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 
 		final SimpleQuery query = (SimpleQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		l = (Locale)parameters.get(Locale.class.getName());
+		locale = (Locale)parameters.get(Locale.class.getName());
 		
 		if (query.getDateFilter() == null){
 			return null;

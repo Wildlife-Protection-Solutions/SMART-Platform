@@ -62,23 +62,13 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 	private final Logger logger = Logger.getLogger(PsqlErMissionTrackEngine.class.getName());
 	
 	private String queryDataTable;
-	private Session session;
-	private Locale l;
 	private MissionTrackQuery query;
 	
 	@Override
 	public boolean canExecute(String querytype) {
 		return MissionTrackQuery.KEY.equals(querytype);
 	}
-	
-	public Locale getLocale(){
-		return this.l;
-	}
-	
-	public Session getSession(){
-		return this.session;
-	}
-	
+
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
@@ -99,7 +89,7 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 
 		query = (MissionTrackQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		this.l = (Locale) parameters.get(Locale.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		
 		if (query.getDateFilter() == null){
 			return null;

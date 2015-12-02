@@ -62,8 +62,6 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 public class PsqlErWaypointEngine extends PsqlErEngine {
 
 	private String queryDataTable;
-	private Session session;
-	private Locale l;
 	private SurveyWaypointQuery query;
 	
 	@Override
@@ -74,14 +72,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
-	
-	public Locale getLocale(){
-		return this.l;
-	}
-	
-	public Session getSession(){
-		return session;
-	}
+
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -98,7 +89,7 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 
 		query = (SurveyWaypointQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		this.l = (Locale) parameters.get(Locale.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 
 		if (query.getDateFilter() == null){
 			return null;

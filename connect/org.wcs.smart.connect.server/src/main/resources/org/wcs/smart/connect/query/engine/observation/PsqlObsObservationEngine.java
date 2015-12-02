@@ -67,20 +67,9 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 	
 	private String queryDataTable;
 	private SimpleQuery query;
-	private Session session;
-	private Locale l = Locale.getDefault();
 
-	
 	public String getQueryDataTable(){
 		return this.queryDataTable;
-	}
-	
-	public Session getCurrentConnection() {
-		return session;
-	}
-	
-	public Locale getLocale(){
-		return this.l;
 	}
 	
 	@Override
@@ -102,7 +91,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 		this.query = (SimpleQuery) lquery;
-		this.l = (Locale) parameters.get(Locale.class.getName());
+		this.locale = (Locale) parameters.get(Locale.class.getName());
 		final Session session = (Session) parameters.get(Session.class.getName());
 		
 		if (query.getDateFilter() == null){
@@ -179,7 +168,7 @@ public class PsqlObsObservationEngine extends AbstractQueryEngine {
 				UUID uuid = (UUID) rs.getObject(1);
 				if (uuid == null)
 					continue;
-				String[] names = getCategoryLabels(uuid, l, session);
+				String[] names = getCategoryLabels(uuid, locale, session);
 				int count = names.length;
 				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
 				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement

@@ -67,27 +67,22 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 	
 	private String queryDataTable;
 	private SimpleQuery query;
-	private Locale l = Locale.getDefault();
-	
+
 	public PsqlPatrolObservationEngine(){
 	}
 	
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
-	
-	public Locale getLocale(){
-		return this.l;
-	}
+
 	
 	@Override
 	public IQueryResult executeQuery(Query lquery, HashMap<String, Object> params) throws SQLException {
 		this.query = (SimpleQuery) lquery;
-		this.l = (Locale) params.get(Locale.class.getName());
-		queryDataTable = createTempTableName();
+		locale = (Locale) params.get(Locale.class.getName());
+		session = (Session) params.get(Session.class.getName());
 		
-		Session session = (Session) params.get(Session.class.getName());
-
+		queryDataTable = createTempTableName();
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
@@ -197,7 +192,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 				UUID uuid = (UUID) rs.getObject(1);
 				if (uuid == null)
 					continue;
-				String[] names = getCategoryLabels(uuid, l, session);
+				String[] names = getCategoryLabels(uuid, locale, session);
 				int count = names.length;
 				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
 				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement

@@ -26,6 +26,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.UUID;
 
+import org.wcs.smart.ca.Employee;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.Category;
@@ -68,6 +69,7 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.intelligence.query.IntelligencePatrolQueryFilter;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
 import org.wcs.smart.observation.model.WaypointObservationAttribute;
@@ -75,6 +77,7 @@ import org.wcs.smart.observation.query.model.filter.WaypointSourceFilter;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
+import org.wcs.smart.patrol.model.PatrolLegMember;
 import org.wcs.smart.patrol.model.Track;
 import org.wcs.smart.patrol.query.ext.IExtensionFilter;
 import org.wcs.smart.patrol.query.model.PatrolEndDateField;
@@ -88,6 +91,7 @@ import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolFilter;
 import org.wcs.smart.patrol.query.parser.internal.filter.PatrolUuidFilter;
+import org.wcs.smart.plan.query.PlanPatrolQueryFilter;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.filter.AreaFilter;
 import org.wcs.smart.query.model.filter.AreaFilter.AreaFilterGeometryType;
@@ -512,12 +516,39 @@ public enum PsqlFilterToSqlGenerator {
 	 * extension filters
 	 */
 	protected String asSql(IExtensionFilter filter, IQueryEngine engine) throws SQLException{
-		//TODO:
-//		for (IExtensionFilterViewer contrib: PatrolContributionFinder.getFilterUiContributions()){
-//			if (contrib.getFilterClass().isAssignableFrom(filter.getClass())){
-//				return contrib.asSql(engine, ((IPatrolQueryEngine)engine).getCurrentConnection(), filter);
-//			}
-//		}
+		if (filter instanceof IntelligencePatrolQueryFilter){
+			IntelligencePatrolQueryFilter qFilter = (IntelligencePatrolQueryFilter)filter;
+			String prefix = engine.tablePrefix(qFilter.getPatrolQueryOption().getPatrolAttributeClass());
+			String v = SharedUtils.stripQuotes((String)qFilter.getValue());
+			//if v is empty this means that this is "Any Plan" case
+			
+			String intelPart = "";
+			if (!qFilter.isAnyIntelligence()){
+				String param = engine.addParameterValue(UuidUtils.stringToUuid(v));
+				intelPart = !qFilter.isAnyIntelligence() ? " AND p2i.intelligence_uuid = " + param  : "";  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+			}
+			String sql = "EXISTS (SELECT * FROM smart.patrol_intelligence p2i WHERE p2i.patrol_uuid = " + prefix + ".uuid" + intelPart + ")"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return sql;
+		}else if (filter instanceof PlanPatrolQueryFilter){
+			PlanPatrolQueryFilter qfilter = (PlanPatrolQueryFilter)filter;
+			
+			String prefix = engine.tablePrefix(qfilter.getOption().getPatrolAttributeClass());
+			String v = SharedUtils.stripQuotes((String)qfilter.getValue());
+			String planSqlPart = ""; //$NON-NLS-1$
+			if (!qfilter.isAnyPlan()) {
+				StringBuilder sb = new StringBuilder();
+				sb.append("AND pa2pl.plan_uuid IN (");
+				sb.append("WITH RECURSIVE childpatrols(uuid) AS (");
+				sb.append("SELECT uuid FROM smart.plan WHERE uuid = ");
+				String p = engine.addParameterValue(UuidUtils.stringToUuid(v));
+				sb.append(p);
+				sb.append("	UNION ALL SELECT p.uuid FROM childpatrols cp, smart.plan p WHERE cp.uuid = p.parent_uuid )");
+				sb.append(" SELECT uuid FROM childpatrols )");
+				planSqlPart = sb.toString();
+			}
+			String sql = "EXISTS (SELECT * FROM smart.patrol_plan pa2pl WHERE pa2pl.patrol_uuid = "+prefix+".uuid "+planSqlPart+")";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			return sql;
+		}
 		throw new IllegalStateException(MessageFormat.format("Filter {0} not supported.", filter.asString()));	
 	}
 	/*
@@ -526,25 +557,47 @@ public enum PsqlFilterToSqlGenerator {
 	protected String asSql(PatrolFilter filter, IQueryEngine engine) throws SQLException{
 		PatrolQueryOption option = filter.getPatrolOption();
 		if (option.isEmployeeItem()){
-			String prefix = engine.tablePrefix(PatrolLeg.class);
-			String x = prefix + ".uuid IN ( select patrol_leg_uuid from smart.patrol_leg_members "  //$NON-NLS-1$
-					+ " where "; //$NON-NLS-1$
-			if (option == PatrolQueryOption.LEADER) {
-				x += " is_leader  AND "; //$NON-NLS-1$
-			} else if (option == PatrolQueryOption.PILOT) {
-				x += " is_pilot AND "; //$NON-NLS-1$
+			if (option == PatrolQueryOption.AGENCY || 
+					option == PatrolQueryOption.RANK){
+				String field = option == PatrolQueryOption.AGENCY ? "agency_uuid" : "rank_uuid"; //$NON-NLS-1$ //$NON-NLS-2$
+				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(SharedUtils.stripQuotes(filter.getValue())));
+				StringBuilder sb = new StringBuilder();
+				sb.append(engine.tablePrefix(PatrolLeg.class));
+				sb.append(".uuid IN (SELECT patrol_leg_uuid FROM "); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(PatrolLegMember.class));
+				sb.append(","); //$NON-NLS-1$
+				sb.append(engine.tableNamePrefix(Employee.class));
+				sb.append(" WHERE "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(PatrolLegMember.class));
+				sb.append(".employee_uuid = "); //$NON-NLS-1$
+				sb.append(engine.tablePrefix(Employee.class));
+				sb.append(".uuid AND e." + field + " = "); //$NON-NLS-1$ //$NON-NLS-2$
+				sb.append(p1);
+				sb.append(")"); //$NON-NLS-1$
+				return sb.toString();
+				
+			}else{
+				String prefix = engine.tablePrefix(PatrolLeg.class);
+				String x = prefix + ".uuid IN ( select patrol_leg_uuid from smart.patrol_leg_members "  //$NON-NLS-1$
+						+ " where "; //$NON-NLS-1$
+				if (option == PatrolQueryOption.LEADER) {
+					x += " is_leader  AND "; //$NON-NLS-1$
+				} else if (option == PatrolQueryOption.PILOT) {
+					x += " is_pilot AND "; //$NON-NLS-1$
+				}
+				String value2 = SharedUtils.stripQuotes((String)filter.getValue());
+				try {
+					String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
+					x += " employee_uuid = " + p1 + ")"; //$NON-NLS-1$ //$NON-NLS-2$
+				} catch (Exception e) {
+					throw new SQLException(e);
+				}	 
+				return x;			
 			}
-			
-			String value2 = SharedUtils.stripQuotes((String)filter.getValue());
-			try {
-				String p1 = engine.addParameterValue(UuidUtils.stringToUuid(value2));
-				x += " employee_uuid = " + p1 + ")"; //$NON-NLS-1$ //$NON-NLS-2$
-			} catch (Exception e) {
-				throw new SQLException(e);
-			}
-			 
-			return x;			
-		}		
+		}	
+		
+		
+		
 		String prefix = engine.tablePrefix(option.getPatrolAttributeClass());
 		if (prefix == null){
 			throw new SQLException(MessageFormat.format(

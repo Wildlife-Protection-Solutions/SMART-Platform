@@ -132,17 +132,10 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 	private ValuePart valuePart;
 	
 	private boolean hasAreaFilter = false;
-	private Session session;
-	
-	private Locale l = Locale.getDefault();
 	
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolSummaryQuery.KEY.equals(querytype);
-	}
-
-	public Session getCurrentConnection() {
-		return session;
 	}
 	
 	/**
@@ -181,7 +174,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 
 		final PatrolSummaryQuery query = (PatrolSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		l = (Locale)parameters.get(Locale.class.getName());
+		locale = (Locale)parameters.get(Locale.class.getName());
 		
 		SumQueryDefinition def = null;
 		try{
@@ -214,7 +207,7 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 				
 				try {
 					try{
-						getHeaderInfo(query, sumResults, l, session);
+						getHeaderInfo(query, sumResults, locale, session);
 					}catch (Exception ex){
 						throw new SQLException(ex);
 					}

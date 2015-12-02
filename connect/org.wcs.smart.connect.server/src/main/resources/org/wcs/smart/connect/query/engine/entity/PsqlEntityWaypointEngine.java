@@ -57,26 +57,16 @@ import org.wcs.smart.query.model.filter.date.CachingDateFilter;
  * @since 1.0.0
  */
 public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
+	
 	private final Logger logger = Logger.getLogger(PsqlEntityWaypointEngine.class.getName());
 	
 	private String queryDataTable;
 	private SimpleQuery query;
-	private Session session;
-	private Locale l = Locale.getDefault();
 
-	
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
-	
-	public Session getCurrentConnection() {
-		return session;
-	}
-	
-	public Locale getLocale(){
-		return this.l;
-	}
-	
+
 	@Override
 	public boolean canExecute(String querytype) {
 		return EntityWaypointQuery.KEY.equals(querytype);
@@ -97,7 +87,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 			HashMap<String, Object> parameters) throws SQLException{
 		
 		query = (SimpleQuery) lquery;
-		this.l = (Locale) parameters.get(Locale.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		session = (Session) parameters.get(Session.class.getName());
 		
 		if (query.getDateFilter() == null){

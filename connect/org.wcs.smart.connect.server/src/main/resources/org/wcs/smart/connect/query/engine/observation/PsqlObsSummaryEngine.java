@@ -108,19 +108,12 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 	private QueryFilter valueFilter;
 	private GroupByPart allGroupByParts;
 	private ValuePart valuePart;
-	private Session session;
-	
-	private Locale l = Locale.getDefault();
 	
 	@Override
 	public boolean canExecute(String querytype) {
 		return ObservationSummaryQuery.KEY.equals(querytype);
 	}
 
-
-	public Session getCurrentConnection() {
-		return session;
-	}
 	/**
 	 * Executes the given summary query.
 	 * 
@@ -158,7 +151,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 	
 		final ObservationSummaryQuery query = (ObservationSummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		l = (Locale)parameters.get(Locale.class.getName());
+		locale = (Locale)parameters.get(Locale.class.getName());
 		
 		SumQueryDefinition def = null;
 		try{
@@ -190,7 +183,7 @@ public class PsqlObsSummaryEngine extends AbstractQueryEngine{
 			public void execute(Connection c) throws SQLException {
 				try {
 					try{
-						getHeaderInfo(query, sumResults, l, session);
+						getHeaderInfo(query, sumResults, locale, session);
 					}catch (Exception ex){
 						throw new SQLException(ex);
 					}

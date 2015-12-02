@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
@@ -82,16 +83,11 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 	private String dataTable;
 	private String gridTable;
 	
-	private Session session;
-	
 	@Override
 	public boolean canExecute(String querytype) {
 		return EntityGriddedQuery.KEY.equals(querytype);
 	}
-	
-	public Session getCurrentSession(){
-		return session;
-	}
+
 	
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
@@ -109,6 +105,7 @@ public class PsqlEntityGridEngine extends AbstractQueryEngine{
 		
 		this.query = (ObservationGriddedQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();

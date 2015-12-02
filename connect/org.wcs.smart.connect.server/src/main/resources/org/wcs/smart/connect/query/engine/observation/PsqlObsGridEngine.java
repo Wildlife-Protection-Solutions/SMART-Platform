@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
@@ -76,7 +77,6 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	
 	private Logger logger = Logger.getLogger(PsqlPatrolEngine.class.getName());
 	
-	
 	private GridQueryResults result = null;
 	
 	private ObservationGriddedQuery query;
@@ -84,15 +84,10 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 	private String dataTable;
 	private String gridTable;
 	
-	private Session session;
 	
 	@Override
 	public boolean canExecute(String querytype) {
 		return ObservationGriddedQuery.KEY.equals(querytype);
-	}
-	
-	public Session getCurrentSession(){
-		return session;
 	}
 	
 	/**
@@ -111,6 +106,7 @@ public class PsqlObsGridEngine extends AbstractQueryEngine{
 
 		this.query = (ObservationGriddedQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();

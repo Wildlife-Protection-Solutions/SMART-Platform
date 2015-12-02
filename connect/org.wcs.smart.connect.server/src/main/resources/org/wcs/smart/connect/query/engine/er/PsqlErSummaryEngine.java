@@ -121,15 +121,12 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 	private final Logger logger = Logger.getLogger(PsqlErSummaryEngine.class.getName());
 	
 	private SummaryQueryResult sumResults = null;
-	HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
+	private HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults = new HashMap<String, HashMap<SummaryResultKey, Double>>();
 	
 	private String rateTable;
 	private String valueTable;
 	
 	private HashSet<Class<?>> usedTables;
-	
-	private Session session;
-	private Locale l = Locale.getDefault();
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -173,7 +170,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 
 		final SurveySummaryQuery query = (SurveySummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		l = (Locale)parameters.get(Locale.class.getName());
+		locale = (Locale)parameters.get(Locale.class.getName());
 		
 		valueTable = createTempTableName();
 		rateTable = createTempTableName();
@@ -189,7 +186,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 					if (query.getSurveyDesign() != null){
 						surveyFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 					}
-					getHeaderInfo(query, sumResults, surveyFilter, l, session);
+					getHeaderInfo(query, sumResults, surveyFilter, locale, session);
 
 					boolean needsObservationValue = false;
 					boolean needsObservationRate = false;
@@ -1457,7 +1454,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 		ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesignFilter sdFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 		
-		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter); 
+		SummaryItemLabelProvider summary = new SummaryItemLabelProvider(l, session, cafilter, sdFilter); 
 
 		// value headers
 		ValuePart vp = query.getQueryDefinition().getValuePart();
@@ -1475,7 +1472,7 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			if (item instanceof DateGroupBy){
 				((DateGroupBy) item).setDateFilter(dFilter.getDateFilterOption());
 			}
-			List<ListItem> items = summary.getNames(item, sdFilter);
+			List<ListItem> items = summary.getNames(item);
 			SummaryHeader[] rowHeader = new SummaryHeader[items.size()];
 			for (int i = 0; i < items.size(); i ++){
 				ListItem it = items.get(i);

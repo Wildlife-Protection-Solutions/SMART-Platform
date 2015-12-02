@@ -108,8 +108,6 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 	private String dataTable;
 	private String gridTable;
 	
-	private Session session;
-	
 	@Override
 	public boolean canExecute(String querytype) {
 		return PatrolGriddedQuery.KEY.equals(querytype);
@@ -131,6 +129,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 
 		this.query = (PatrolGriddedQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();

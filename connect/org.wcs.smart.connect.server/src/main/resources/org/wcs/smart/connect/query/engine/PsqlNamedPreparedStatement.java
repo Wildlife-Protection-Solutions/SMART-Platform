@@ -44,5 +44,6 @@ public class PsqlNamedPreparedStatement extends NamedPreparedStatement{
         for(int i: getIndexes(name)) {
        		statement.setObject(i, value);
         }
+        
     }
 }

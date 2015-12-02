@@ -122,12 +122,18 @@ public class SummaryItemLabelProvider {
 	private Locale l;
 	private Session s;
 	private ConservationAreaFilter caFilter;
+	private SurveyDesignFilter sdFilter;
 	
-	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter){
+	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter, SurveyDesignFilter sdFilter){
 		this.l = l;
 		this.s = s;
+		this.sdFilter = sdFilter;
 		this.caFilter = caFilter;
 	}
+	public SummaryItemLabelProvider(Locale l ,Session s, ConservationAreaFilter caFilter){
+		this(l, s, caFilter, null);
+	}
+	
 	public String getName(IValueItem item){
 		
 		if (item instanceof PatrolValueItem){
@@ -285,29 +291,6 @@ public class SummaryItemLabelProvider {
 		return "";
 	}
 	
-	public List<ListItem> getNames(IGroupBy item, SurveyDesignFilter sdFilter){
-		List<ListItem> results = null;
-		if (item instanceof MissionIdGroupBy){
-			results = getName((MissionIdGroupBy)item, sdFilter);
-		}else if (item instanceof SurveyIdGroupBy){
-			results = getName((SurveyIdGroupBy)item, sdFilter);
-		}else if (item instanceof SamplingUnitGroupBy){
-			//TODO:
-//			results = getName((SamplingUnitGroupBy)item, caFilter, sdFilter);
-		}
-		if (results != null){
-			Collections.sort(results, new Comparator<ListItem>() {
-				Collator c = Collator.getInstance(l);				
-				@Override
-				public int compare(ListItem o1, ListItem o2) {
-					return c.compare(o1.getName(), o2.getName());
-				}
-			});
-			return results;
-		}
-		
-		return getNames(item);
-	}
 	
 	public List<ListItem> getNames(IGroupBy item){
 		List<ListItem> results = null;
@@ -335,16 +318,22 @@ public class SummaryItemLabelProvider {
 			results = getName((WaypointSourceGroupBy)item);
 		}else if (item instanceof IntelligencePatrolGroupBy){
 			results = getName((IntelligencePatrolGroupBy)item);
+		}else if (item instanceof MissionIdGroupBy){
+			results = getName((MissionIdGroupBy)item);
+		}else if (item instanceof SurveyIdGroupBy){
+			results = getName((SurveyIdGroupBy)item);
+		}else if (item instanceof SamplingUnitGroupBy){
+			results = getName((SamplingUnitGroupBy)item);
 		}
-		if (results != null){
-			Collections.sort(results, new Comparator<ListItem>() {
-				Collator c = Collator.getInstance(l);				
-				@Override
-				public int compare(ListItem o1, ListItem o2) {
-					return c.compare(o1.getName(), o2.getName());
-				}
-			});
-		}
+//		if (results != null){
+//			Collections.sort(results, new Comparator<ListItem>() {
+//				Collator c = Collator.getInstance(l);				
+//				@Override
+//				public int compare(ListItem o1, ListItem o2) {
+//					return c.compare(o1.getName(), o2.getName());
+//				}
+//			});
+//		}
 		return results;
 	}
 	
@@ -762,7 +751,7 @@ public class SummaryItemLabelProvider {
 		return allItems;
 	}
 	
-	private List<ListItem> getName(MissionIdGroupBy item, SurveyDesignFilter sdFilter){
+	private List<ListItem> getName(MissionIdGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null && items.length > 0){
@@ -780,18 +769,18 @@ public class SummaryItemLabelProvider {
 			//load all missions
 			Query missionQuery = null;
 			if (sdFilter.getKey() != null){
-				String hql = "SELECT m From Mission m where m.survey.surveyDesign.keyId = :sd and m.survey.surveyDesign.conservationArea.uuid in (:uuids)";
+				String hql = "SELECT m.uuid, m.id From Mission m where m.survey.surveyDesign.keyId = :sd and m.survey.surveyDesign.conservationArea.uuid in (:uuids)";
 				missionQuery = s.createQuery(hql)
 						.setString("sd", sdFilter.getKey())
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
 			}else{
-				String hql = "SELECT m From Mission m where m.survey.surveyDesign.conservationArea.uuid in (:uuids)";
+				String hql = "SELECT m.uuid, m.id From Mission m where m.survey.surveyDesign.conservationArea.uuid in (:uuids)";
 				missionQuery = s.createQuery(hql)
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
 			}
-			List<Mission> ms = missionQuery.list();
-			for(Mission m : ms){
-				allItems.add(new ListItem(m.getUuid(), m.getId()));
+			List<Object[]> ms = missionQuery.list();
+			for(Object[] m : ms){
+				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
 		}
 		return allItems;
@@ -966,13 +955,25 @@ public class SummaryItemLabelProvider {
 					}
 			}
 		}else{
+			if (sdFilter.getKey() == null) return null;
+			
 			//all sampling units for associated design
-			return null;
+//			List<SamplingUnit> sus = s
+//					.createQuery("SELECT su FROM SamplingUnit su ")//WHERE su.surveyDesign.keyId = :keyId")
+//					//.setString("keyId", sdFilter.getKey())
+//					.list();
+			List<Object[]> sus = s.createQuery("SELECT su.uuid, su.id FROM SamplingUnit su WHERE su.surveyDesign.keyId = :keyId")
+					.setString("keyId", sdFilter.getKey())
+					.list();
+			for (Object[] su : sus){
+				listItems.add(new ListItem((UUID)su[0], (String)su[1]));
+			}
+			listItems.add(new ListItem(null, "None"));
 		}
 		return listItems;
 	}
 	
-	private List<ListItem> getName(SurveyIdGroupBy item, SurveyDesignFilter sdFilter){
+	private List<ListItem> getName(SurveyIdGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();
 		if (items != null){
@@ -989,18 +990,18 @@ public class SummaryItemLabelProvider {
 			//load all surveys
 			Query surveyQuery = null;
 			if (sdFilter.getKey() != null){
-				String hql = "SELECT s From Survey s where s.surveyDesign.keyId = :sd and s.surveyDesign.conservationArea.uuid in (:uuids)";
+				String hql = "SELECT s.uuid, s.id From Survey s where s.surveyDesign.keyId = :sd and s.surveyDesign.conservationArea.uuid in (:uuids)";
 				surveyQuery = s.createQuery(hql)
 						.setString("sd", sdFilter.getKey())
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
 			}else{
-				String hql = "SELECT s From Survey s where s.surveyDesign.conservationArea.uuid in (:uuids)";
+				String hql = "SELECT s.uuid, s.id From Survey s where s.surveyDesign.conservationArea.uuid in (:uuids)";
 				surveyQuery = s.createQuery(hql)
 						.setParameterList("uuids", caFilter.getConservationAreaFilterIds());
 			}
-			List<Survey> ms = surveyQuery.list();
-			for(Survey m : ms){
-				allItems.add(new ListItem(m.getUuid(), m.getId()));
+			List<Object[]> ms = surveyQuery.list();
+			for(Object[] m : ms){
+				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
 		}
 		return allItems;

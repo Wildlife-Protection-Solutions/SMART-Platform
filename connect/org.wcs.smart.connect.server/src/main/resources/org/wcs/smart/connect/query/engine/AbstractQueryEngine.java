@@ -100,7 +100,8 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	
 	protected Map<String, Object> currentParameters = new HashMap<String, Object>();
 	public HashMap<IFilter, String> filterTables = new HashMap<IFilter, String>();
-	
+	protected Session session;
+	protected Locale locale = Locale.getDefault();
 	/**
 	 * Maps database tables to a prefix to use in the query.
 	 */
@@ -116,6 +117,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tablePrefix.put(AttributeTreeNode.class, "atn"); //$NON-NLS-1$
 		tablePrefix.put(AttributeListItem.class, "ali"); //$NON-NLS-1$
 		tablePrefix.put(Area.class, "ar"); //$NON-NLS-1$
+		tablePrefix.put(Employee.class, "e"); //$NON-NLS-1$
 		
 		tablePrefix.put(Patrol.class, "p"); //$NON-NLS-1$
 		tablePrefix.put(PatrolLeg.class, "pl"); //$NON-NLS-1$
@@ -150,7 +152,6 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		
 		tablePrefix.put(Intelligence.class, "i"); //$NON-NLS-1$
 		tablePrefix.put(Informant.class, "ii"); //$NON-NLS-1$
-		tablePrefix.put(Patrol.class, "p"); //$NON-NLS-1$
 		tablePrefix.put(IntelligenceSource.class, "iis"); //$NON-NLS-1$
 		tablePrefix.put(IntelligencePoint.class, "iip"); //$NON-NLS-1$
 		tablePrefix.put(Label.class, "lbl"); //$NON-NLS-1$
@@ -172,6 +173,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(AttributeTreeNode.class, "smart.dm_attribute_tree"); //$NON-NLS-1$
 		tableNames.put(AttributeListItem.class, "smart.dm_attribute_list"); //$NON-NLS-1$
 		tableNames.put(Area.class, "smart.area_geometries"); //$NON-NLS-1$
+		tableNames.put(Employee.class, "smart.employee"); //$NON-NLS-1$
 		
 		tableNames.put(Patrol.class, "smart.patrol"); //$NON-NLS-1$
 		tableNames.put(PatrolLeg.class, "smart.patrol_leg"); //$NON-NLS-1$
@@ -211,7 +213,23 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		tableNames.put(IntelligencePoint.class, "smart.intelligence_point"); //$NON-NLS-1$
 		tableNames.put(Label.class, "smart.i18n_label"); //$NON-NLS-1$
 	}
-		
+	
+	/**
+	 * 
+	 * @return the active session if set; null otherwise
+	 */
+	public Session getCurrentSession(){
+		return this.session;
+	}
+	
+	/**
+	 * 
+	 * @return the requested locale or the default locale if not set
+	 */
+	public Locale getLocale(){
+		return this.locale;
+	}
+	
 	/**
 	 * Drop the created temporary tables.
 	 * 

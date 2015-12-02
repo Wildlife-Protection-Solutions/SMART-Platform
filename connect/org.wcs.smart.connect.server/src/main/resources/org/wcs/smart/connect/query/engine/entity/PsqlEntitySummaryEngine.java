@@ -103,10 +103,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 	private HashMap<String, HashMap<SummaryResultKey, Double>> cachedValueToResults;
 	
 	private String valueWaypointTable;
-
-	private Session session;
 	
-	private Locale l = Locale.getDefault();
 	
 	@Override
 	public boolean canExecute(String querytype) {
@@ -149,7 +146,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 		
 		final EntitySummaryQuery query = (EntitySummaryQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		l = (Locale)parameters.get(Locale.class.getName());
+		locale = (Locale)parameters.get(Locale.class.getName());
 
 		SumQueryDefinition def = null;
 		try{
@@ -184,7 +181,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 					
 					try{
-						getHeaderInfo(query, sumResults, l, session);
+						getHeaderInfo(query, sumResults, locale, session);
 					}catch (Exception ex){
 						throw new SQLException(ex);
 					}

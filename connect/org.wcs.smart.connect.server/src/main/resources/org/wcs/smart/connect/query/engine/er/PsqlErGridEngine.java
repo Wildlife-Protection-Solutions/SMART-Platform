@@ -115,7 +115,6 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 	private String gridTable;
 	
 	private boolean hasTrackFilter = false;
-	private Session session;
 	
 	
 	@Override
@@ -139,7 +138,8 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 
 		this.query = (SurveyGriddedQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-
+		locale = (Locale) parameters.get(Locale.class.getName());
+		
 		dataTable = createTempTableName();
 		gridTable = createTempTableName();
 

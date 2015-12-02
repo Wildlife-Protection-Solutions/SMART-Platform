@@ -60,9 +60,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	private final Logger logger = Logger.getLogger(PsqlObsWaypointEngine.class.getName());
 	
 	private String queryDataTable;
-	private Session session;
-	private Locale l = Locale.getDefault();
-	
+
 	@Override
 	public boolean canExecute(String querytype) {
 		return ObservationWaypointQuery.KEY.equals(querytype);
@@ -71,14 +69,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
-	
-	public Session getCurrentConnection() {
-		return session;
-	}
-	
-	public Locale getLocale(){
-		return this.l;
-	}
+
 	/**
 	 * Runs the given patrol query and retrieves the results from the database.
 	 * 
@@ -94,7 +85,8 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 			HashMap<String, Object> parameters) throws SQLException{
 
 		final SimpleQuery query = (SimpleQuery) lquery;
-		final Session session = (Session) parameters.get(Session.class.getName());
+		session = (Session) parameters.get(Session.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 	
 		if (query.getDateFilter() == null){
 			return null;

@@ -68,23 +68,12 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 	private final Logger logger = Logger.getLogger(PsqlErObservationEngine.class.getName());
 	
 	private String queryDataTable;
-	private Session session;
-	private Locale l;
 	private SurveyObservationQuery query;
-	
-	public Locale getLocale(){
-		return this.l;
-	}
-	
-	public Session getSession(){
-		return this.session;
-	}
 	
 	public String getQueryDataTable(){
 		return this.queryDataTable;
 	}
-	
-	
+
 	@Override
 	public boolean canExecute(String querytype) {
 		return SurveyObservationQuery.KEY.equals(querytype);
@@ -106,7 +95,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 
 		query = (SurveyObservationQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
-		this.l = (Locale) parameters.get(Locale.class.getName());
+		locale = (Locale) parameters.get(Locale.class.getName());
 
 		if (query.getDateFilter() == null){
 			return null;
@@ -192,7 +181,7 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 				UUID uuid = (UUID) rs.getObject(1);
 				if (uuid == null)
 					continue;
-				String[] names = getCategoryLabels(uuid,l, session);
+				String[] names = getCategoryLabels(uuid,locale, session);
 				int count = names.length;
 				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
 				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement
