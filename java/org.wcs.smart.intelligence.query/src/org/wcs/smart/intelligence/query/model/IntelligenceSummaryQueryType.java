@@ -102,12 +102,7 @@ public class IntelligenceSummaryQueryType implements IQueryType {
 		IPath path = new Path("src/org/wcs/smart/intelligence/query/model/summary.html"); //$NON-NLS-1$
 		return QueryPlugIn.findHelpURL(path, IntelligenceQueryPlugIn.getDefault().getBundle());
 	}
-	
-	
-	public static final String FOLLOW_KEY = "follow"; //$NON-NLS-1$
-	public static final String NOT_FOLLOW_KEY = "notfollow"; //$NON-NLS-1$
-	public static final String NUMBER_KEY = "intellcnt"; //$NON-NLS-1$
-	
+
 	/**
 	 * Creates the template for the results.  These queries
 	 * have on value (Number of Intelligence) grouped into either
@@ -119,12 +114,12 @@ public class IntelligenceSummaryQueryType implements IQueryType {
 		SummaryQueryResult results = new SummaryQueryResult();
 		
 		results.addValueHeader(
-				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NumberRecordShortName, Messages.SummaryIntelligenceQueryEngine_NumberRecordLongName, NUMBER_KEY, true));
+				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NumberRecordShortName, Messages.SummaryIntelligenceQueryEngine_NumberRecordLongName, IntelligenceSummaryQuery.NUMBER_KEY, true));
 		
 		results.addRowHeader(
-				new SummaryHeader[]{new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderShortName, FOLLOW_KEY, false), 
-				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NotFollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_NoFollowedUpHeaderShortName, NOT_FOLLOW_KEY, false)}); 
-
+				new SummaryHeader[]{new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_FollowedUpHeaderShortName, IntelligenceSummaryQuery.FOLLOW_KEY, false), 
+				new SummaryHeader(Messages.SummaryIntelligenceQueryEngine_NotFollowedUpHeaderLongName, Messages.SummaryIntelligenceQueryEngine_NoFollowedUpHeaderShortName, IntelligenceSummaryQuery.NOT_FOLLOW_KEY, false)}); 
+	
 		return results;
 	}
 	

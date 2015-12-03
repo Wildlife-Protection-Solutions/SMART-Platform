@@ -41,8 +41,14 @@ import org.wcs.smart.query.model.filter.DateFilter;
 @Table(name="smart.intel_summary_query")
 public class IntelligenceSummaryQuery extends Query {
 	
-	protected DateFilter dateFilter;
+	public static final String NUMBER_KEY = "intellcnt"; //$NON-NLS-1$
+	public static final String NOT_FOLLOW_KEY = "notfollow"; //$NON-NLS-1$
+	public static final String FOLLOW_KEY = "follow"; //$NON-NLS-1$
+	
 	public static final String KEY = "intelligencesummary"; //$NON-NLS-1$
+	
+	protected DateFilter dateFilter;
+	
 	
 	public IntelligenceSummaryQuery(){
 	}

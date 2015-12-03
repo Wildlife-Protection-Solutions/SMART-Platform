@@ -107,10 +107,10 @@ public class SummaryIntelligenceQueryEngine implements IQueryEngine {
 			
 			HashMap<SummaryResultKey, Double> data = new HashMap<SummaryResultKey, Double>();
 		
-			SummaryResultKey key = new SummaryResultKey(IntelligenceSummaryQueryType.NUMBER_KEY, new String[]{IntelligenceSummaryQueryType.FOLLOW_KEY}); 
+			SummaryResultKey key = new SummaryResultKey(IntelligenceSummaryQuery.NUMBER_KEY, new String[]{IntelligenceSummaryQuery.FOLLOW_KEY}); 
 			data.put(key, followedUpOn.doubleValue());
 		
-			key = new SummaryResultKey(IntelligenceSummaryQueryType.NUMBER_KEY, new String[]{IntelligenceSummaryQueryType.NOT_FOLLOW_KEY}); 
+			key = new SummaryResultKey(IntelligenceSummaryQuery.NUMBER_KEY, new String[]{IntelligenceSummaryQuery.NOT_FOLLOW_KEY}); 
 			data.put(key, notFollowedUpOn.doubleValue());
 		
 			results.setData(data);
