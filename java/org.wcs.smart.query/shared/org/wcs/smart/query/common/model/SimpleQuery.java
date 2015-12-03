@@ -180,7 +180,7 @@ public abstract class SimpleQuery extends StyledQuery {
 
 	
 	/**
-	 * Returns a list of columns that are visible in the output table.
+	 * Returns a comma delimited list of columns that are visible in the output table.
 	 * @return a list of visible column
 	 */
 	@Column(name = "column_filter")

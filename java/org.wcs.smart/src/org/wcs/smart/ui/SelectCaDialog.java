@@ -137,6 +137,7 @@ public class SelectCaDialog extends TitleAreaDialog {
 		caList.setContentProvider(ArrayContentProvider.getInstance());
 		caList.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		((GridData)caList.getControl().getLayoutData()).heightHint = 250;
+		((GridData)caList.getControl().getLayoutData()).widthHint = 400;
 		caList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -175,8 +176,7 @@ public class SelectCaDialog extends TitleAreaDialog {
 		
 		try {
 			List<ConservationArea> cas = HibernateManager
-					.findConservationAreas(SmartDB.getCurrentEmployee().getSmartUserId(), 
-							SmartDB.getCurrentEmployee().getSmartPassword());
+					.findConservationAreas(SmartDB.getCurrentEmployee().getSmartUserId(),  SmartDB.getPlainTextPassword());
 			caList.setInput(cas);
 		} catch (Exception e) {
 			SmartPlugIn.log(e.getMessage(), e);

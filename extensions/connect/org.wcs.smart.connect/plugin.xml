@@ -134,6 +134,13 @@
             <control
                   class="org.wcs.smart.connect.ui.StatusLineControl"
                   id="org.wcs.smart.connect.status.control">
+               <visibleWhen
+                     checkEnabled="true">
+                  <test
+                        forcePluginActivation="true"
+                        property="org.wcs.smart.caSingle">
+                  </test>
+               </visibleWhen>
             </control>
          </toolbar>
       </menuContribution>
