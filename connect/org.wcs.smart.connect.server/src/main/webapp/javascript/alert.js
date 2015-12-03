@@ -169,7 +169,7 @@ window.onload = function(){
 
 
 
-//creates a new user
+//creates a new alert
 function createNewAlert() {
 	var cauuid = document.querySelector("select[name=alert_ca]").value;
 	var alerttypeuuid = document.querySelector("select[name=alert_type]").value;
