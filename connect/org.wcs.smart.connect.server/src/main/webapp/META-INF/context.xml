@@ -5,7 +5,7 @@
             username="smart"
             password="smart"
             driverClassName="org.postgresql.Driver"
-            url="jdbc:postgresql://192.168.50.131:5432/connectjeff"
+            url="jdbc:postgresql://192.168.50.131:5432/connectemily"
             maxActive="20"
             maxIdle="10"
             factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"/>
@@ -23,7 +23,7 @@
   	<!-- environment variables -->
   	<!-- SMART Filestore Location -->
   	<Environment name="filestorelocation" value="C:\\temp\\connect_datastore\\" type="java.lang.String" override="false"/>
-  	
+  	<Environment name="spatial_ref_sys_table" value="public.spatial_ref_sys" type="java.lang.String" override="false"/>
   	<Environment name="number_background_threads" value="5" type="java.lang.Integer" override="false"/>
   	<Environment name="work_item_history_days_available" value="5" type="java.lang.Integer" override="false"/>
   	<Environment name="changelog_cleanup_days" value="5" type="java.lang.Integer" override="false"/>

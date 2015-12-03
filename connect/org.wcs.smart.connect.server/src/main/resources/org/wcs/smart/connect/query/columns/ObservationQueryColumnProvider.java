@@ -68,7 +68,6 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	public QueryColumn[] getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {

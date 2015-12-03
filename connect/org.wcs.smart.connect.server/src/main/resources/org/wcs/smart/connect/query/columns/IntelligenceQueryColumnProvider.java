@@ -21,10 +21,19 @@
  */
 package org.wcs.smart.connect.query.columns;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.intelligence.query.IIntelligenceQueryColumnProvider;
+import org.wcs.smart.intelligence.query.model.FixedQueryColumn;
+import org.wcs.smart.intelligence.query.model.FixedQueryColumn.FixedColumns;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
@@ -36,18 +45,35 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class IntelligenceQueryColumnProvider implements
 		IIntelligenceQueryColumnProvider {
+	
+	private static Logger logger = Logger.getLogger(IntelligenceQueryColumnProvider.class.getName());
+	
 	@Override
 	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
-		// TODO Auto-generated method stub
+		try{
+			String queryTypeKey = query.getTypeKey();
+			if (queryTypeKey.equals(IntelligenceRecordQuery.KEY)){
+				return getRecordColumns(query, l, session);
+			}
+		}catch (SQLException ex){
+			logger.log(Level.SEVERE, "Error determining query columns.", ex);
+			return null;
+		}
 		return null;
 	}
-//	@Override
-//	public QueryColumn[] getQueryColumns(Query query) {
-//		if (query.getTypeKey().equals(IntelligenceRecordQuery.KEY)){
-//			return IntelligenceQueryColumnCache.getInstance().getIntelligenceRecordQueryColumns();
-//		}
-//		
-//		return null;
-//	}
+
+	public QueryColumn[] getRecordColumns(Query q, Locale l, Session session) throws SQLException{
+		List<QueryColumn> cols = new ArrayList<QueryColumn>();
+		for (FixedQueryColumn.FixedColumns col : FixedQueryColumn.FixedColumns.values()){
+			if (col == FixedColumns.CA_ID || col == FixedColumns.CA_NAME){
+				if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
+					cols.add(new FixedQueryColumn(col, l));		
+				}
+			}else{
+				cols.add(new FixedQueryColumn(col, l));
+			}
+		}
+		return cols.toArray(new QueryColumn[cols.size()]);
+	}
 
 }

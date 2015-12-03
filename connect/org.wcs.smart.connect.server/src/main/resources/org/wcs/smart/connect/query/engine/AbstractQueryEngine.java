@@ -543,6 +543,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 			logger.log(Level.FINEST, ex.getMessage(), ex);
 		}
 		//if above fails, lets search entire list for match
+		@SuppressWarnings("unchecked")
 		List<Object[]> choices = session.createSQLQuery("SELECT srid, srtext from " + spatialRefSys).list();
 		for (Object[] data : choices){
 			try{

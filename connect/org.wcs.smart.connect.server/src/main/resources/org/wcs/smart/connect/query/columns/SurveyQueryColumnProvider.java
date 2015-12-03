@@ -93,6 +93,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public  QueryColumn[] getMissionQueryColumns(Query query, Locale l, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
@@ -135,6 +136,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public  QueryColumn[] getMissionTrackQueryColumns(Query query, Locale l, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
@@ -184,6 +186,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public QueryColumn[] getObservationQueryColumns(Query query, Locale l, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
@@ -240,7 +243,6 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 			for (MissionProperty mp : sd.getMissionProperties()){
 				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
 			}
-			@SuppressWarnings("unchecked")
 			List<SurveyDesignSamplingUnitAttribute> atts = session
 				.createCriteria(SurveyDesignSamplingUnitAttribute.class)
 				.add(Restrictions.eq("id.surveyDesign", sd)) //$NON-NLS-1$
@@ -258,6 +260,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols.toArray(new QueryColumn[cols.size()]);
 	}
 	
+	@SuppressWarnings("unchecked")
 	public QueryColumn[] getWaypointQueryColumns(Query query, Locale l, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);

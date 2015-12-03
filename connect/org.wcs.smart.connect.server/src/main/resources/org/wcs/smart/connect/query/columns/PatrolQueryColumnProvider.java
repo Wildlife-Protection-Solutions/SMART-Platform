@@ -138,7 +138,9 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE,l));
 		}
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT,l));
-		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER,l));
+		if (trackObserver(q.getConservationArea(), session)){
+			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER,l));
+		}
 		
 		for (QueryColumn qc : DataModelColumnProvider.getDataModelColumns(session, l, q)){
 			keys.add(qc);
@@ -194,6 +196,11 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		ObservationOptions op = getOptions(ca, s);
 		if (op == null) return true;
 		return op.getTrackDistanceDirection();
+	}
+	public boolean trackObserver(ConservationArea ca, Session s){
+		ObservationOptions op = getOptions(ca, s);
+		if (op == null) return true;
+		return op.getTrackObserver();
 	}
 	
 	public ObservationOptions getOptions(ConservationArea ca, Session s){

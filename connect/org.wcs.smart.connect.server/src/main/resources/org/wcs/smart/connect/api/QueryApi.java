@@ -63,6 +63,8 @@ import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
+import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -176,7 +178,7 @@ public class QueryApi extends HttpServlet{
 				return Response.status(Status.NOT_FOUND).build();
 			}
 		
-			AbstractQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
+			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 			if(engine == null){
 				String error = MessageFormat.format("No query engine for query type {1}.", query.getTypeKey());
 				return createErrorResponse(Status.NOT_IMPLEMENTED, error);
@@ -204,17 +206,18 @@ public class QueryApi extends HttpServlet{
 					}else if (result instanceof IMemoryTableResultSet
 						&& query instanceof GriddedQuery){
 						exporter.exportResults((GriddedQuery)query, (IMemoryTableResultSet<GridResultItem>)result, s);
-					}else if (result instanceof SummaryQueryResult
-						&& query instanceof SummaryQuery){
-						exporter.exportResults((SummaryQuery)query, (SummaryQueryResult)result, s);
+					}else if (result instanceof SummaryQueryResult){
+						exporter.exportResults(query, (SummaryQueryResult)result, s);
 					}
 				}else{
 					return createErrorResponse(Status.NOT_IMPLEMENTED, "Query export not implemented for select query type and format.");
 				}
 			}finally{
-				engine.cleanUp(s);
+				if (engine instanceof AbstractQueryEngine){
+					((AbstractQueryEngine)engine).cleanUp(s);
+				}
 			}
-			
+			//TODO: if file not found then fail; do not attemp to write output
 			StreamingOutput stream = new StreamingOutput() {
 			      @Override
 			      public void write(OutputStream output) throws IOException {

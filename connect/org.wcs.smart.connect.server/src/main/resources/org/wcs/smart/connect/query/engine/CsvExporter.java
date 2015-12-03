@@ -39,8 +39,8 @@ import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
+import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -186,7 +186,7 @@ public class CsvExporter {
 	 * @param session
 	 * @throws SQLException
 	 */
-	public void exportResults(SummaryQuery query, 
+	public void exportResults(Query query, 
 			SummaryQueryResult results, 
 			Session session) throws SQLException{
 		

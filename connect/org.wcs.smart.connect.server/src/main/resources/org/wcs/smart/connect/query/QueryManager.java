@@ -32,7 +32,6 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
-import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;
@@ -43,6 +42,8 @@ import org.wcs.smart.connect.query.engine.er.PsqlErMissionTrackEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErObservationEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErSummaryEngine;
 import org.wcs.smart.connect.query.engine.er.PsqlErWaypointEngine;
+import org.wcs.smart.connect.query.engine.intelligence.PsqlRecordQueryIntelligenceEngine;
+import org.wcs.smart.connect.query.engine.intelligence.PsqlSummaryIntelligenceQueryEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsGridEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsObservationEngine;
 import org.wcs.smart.connect.query.engine.observation.PsqlObsSummaryEngine;
@@ -65,6 +66,8 @@ import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyObservationQuery;
 import org.wcs.smart.er.query.model.SurveySummaryQuery;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
+import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
+import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.intelligence.query.model.RecievedDateFilter;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
@@ -77,6 +80,7 @@ import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolStartDateField;
 import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
+import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
@@ -115,9 +119,12 @@ public enum QueryManager {
 		queryClasses.add(SurveyGriddedQuery.class);
 		queryClasses.add(MissionQuery.class);
 		queryClasses.add(MissionTrackQuery.class);
+		
+		queryClasses.add(IntelligenceRecordQuery.class);
+		queryClasses.add(IntelligenceSummaryQuery.class);
 	}
 	
-	private static final AbstractQueryEngine[] engines = new AbstractQueryEngine[]{
+	private static final IQueryEngine[] engines = new IQueryEngine[]{
 		new PsqlPatrolObservationEngine(),
 		new PsqlPatrolWaypointEngine(),
 		new PsqlPatrolGridEngine(),
@@ -136,7 +143,9 @@ public enum QueryManager {
 		new PsqlErMissionTrackEngine(),
 		new PsqlErObservationEngine(),
 		new PsqlErSummaryEngine(),
-		new PsqlErWaypointEngine()
+		new PsqlErWaypointEngine(),
+		new PsqlRecordQueryIntelligenceEngine(),
+		new PsqlSummaryIntelligenceQueryEngine()
 	};
 	
 	private static IDateFieldFilter[] dateFields = new IDateFieldFilter[]{
@@ -220,8 +229,8 @@ public enum QueryManager {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 */
-	public AbstractQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
-		for (AbstractQueryEngine e : engines){
+	public IQueryEngine findQueryEngine(Query query) throws InstantiationException, IllegalAccessException{
+		for (IQueryEngine e : engines){
 			if (e.canExecute(query.getTypeKey())){
 				return e.getClass().newInstance();
 			}

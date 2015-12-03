@@ -3,8 +3,10 @@ see "article.tabs" below to change height of maps/tabs/etc on the alerts page.
 */
 
 html {
-  font-family: 'Crimson Text', Georgia, Times, serif;
-  font-size: 1em;
+  font-size: 80%;
+  font-family: "Open Sans", Helvetica, Arial, sans-serif;
+  background-image: url("smart2.png");
+  background-size: cover;
 }
 
 body {
@@ -56,17 +58,14 @@ h2{
 }
 
 #mainheader{
-	border: 0px solid black;
+	border: 1px solid black;
 	padding: 10px 5px 10px 5px;
-	text-align: center;
-	line-height: 130px;
-	color: black;
-
-	background-image: url(../css/header.jpg);
-	
-	font-family: 'Allerta', Helvetica, Arial, sans-serif;
-	font-size: 60px;
-    height: 155px;
+	background-color:#3A4469;
+	color: white;
+	font-weight: bold;
+	font-size: 1.3em;
+	border-radius: 0px;
+	border: 1px solid white;
 }
 .pageheader{
 	border-bottom: 1px solid black;
@@ -164,8 +163,8 @@ h2{
     padding: 10px 10px;
     min-width:150px;
     border-radius: 3px;
-    background: rgb(255, 255, 255); /* the fallback without opacity*/
-    background: rgba(255, 255, 255, 0.35);
+    
+     background: #F1F2F5;
 	display: table-cell;   
 }
 
@@ -252,6 +251,14 @@ h2{
 
 .run-icon{
 	background-image: url("run.png");
+	width:16px;
+	height: 16px;
+	background-repeat: no-repeat;
+	display: block;
+}
+
+.download-icon{
+	background-image: url("download.png");
 	width:16px;
 	height: 16px;
 	background-repeat: no-repeat;
@@ -421,7 +428,7 @@ article.tabs section h2{
 	position: absolute;
 	font-size: 1em;
 	font-weight: bold;
-	width: 11em;
+	width: 13em;
 	height: 1.8em;
 	top: -1.8em;
 	left: 10px;
@@ -434,11 +441,11 @@ article.tabs section h2{
 }
 
 article.tabs section:nth-child(2) h2{
-	left: 12.5em;
+	left: 14em;
 }
 
 article.tabs section:nth-child(3) h2{
-	left: 24.2em;
+	left: 27.3em;
 }
 
 article.tabs section h2 a{
