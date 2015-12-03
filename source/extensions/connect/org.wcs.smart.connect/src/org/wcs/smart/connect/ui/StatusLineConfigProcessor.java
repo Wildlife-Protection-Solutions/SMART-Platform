@@ -68,7 +68,7 @@ public class StatusLineConfigProcessor {
 		MTrimBar statusBar = (MTrimBar) modelService.find("org.eclipse.ui.trim.status", app); //$NON-NLS-1$
 		MTrimElement toMove = null;
 		for (MTrimElement trim : statusBar.getChildren()){
-			if (trim.getElementId().equals("org.wcs.smart.connect.status")){ //$NON-NLS-1$
+			if (trim.getElementId().equals("org.wcs.smart.connect.status") && trim.isVisible()){ //$NON-NLS-1$
 				toMove = trim;
 			}
 		}

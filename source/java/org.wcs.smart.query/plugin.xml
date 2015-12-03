@@ -263,20 +263,6 @@
                commandId="org.eclipse.ui.file.save"
                label="%querydefview.toolbar.save.command.label"
                tooltip="%querydefview.toolbar.save.command.tooltip">
-            <visibleWhen
-                  checkEnabled="false">
-               <with
-                     variable="activeWorkbenchWindow.activePerspective">
-                  <or>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.single">
-                     </equals>
-                     <equals
-                           value="org.wcs.smart.query.persepectives.multi">
-                     </equals>
-                  </or>
-               </with>
-            </visibleWhen>
          </command>
          <command
                commandId="org.wcs.smart.query.querydef.clear"

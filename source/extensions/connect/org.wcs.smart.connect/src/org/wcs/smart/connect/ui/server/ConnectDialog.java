@@ -100,7 +100,7 @@ public class ConnectDialog extends TitleAreaDialog {
 	public void createButtonsForButtonBar(Composite parent){
 		super.createButtonsForButtonBar(parent);
 		validate();
-		
+		getButton(OK).setFocus();
 	}
 	
 	protected ControlDecoration createControlDecoration(Control widget){
