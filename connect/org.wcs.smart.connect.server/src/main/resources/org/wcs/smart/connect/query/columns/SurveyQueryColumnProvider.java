@@ -63,18 +63,23 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 	private static Logger logger = Logger.getLogger(SurveyQueryColumnProvider.class.getName());
 	@Override
 	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+		List<QueryColumn> cols = null;
 		try{
 			String queryTypeKey = query.getTypeKey();
 			if (queryTypeKey.equals(SurveyObservationQuery.KEY)){
-				return getObservationQueryColumns(query, l, session);
+				cols = getObservationQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(SurveyWaypointQuery.KEY)){
-				return getWaypointQueryColumns(query, l, session);
+				cols = getWaypointQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(SurveyGriddedQuery.KEY)){
-				return getGriddedQueryColumns(query, l, session);
+				cols = getGriddedQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(MissionQuery.KEY)){
-				return getMissionQueryColumns(query, l, session);
+				cols = getMissionQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(MissionTrackQuery.KEY)){
-				return getMissionTrackQueryColumns(query, l, session);
+				cols = getMissionTrackQueryColumns(query, l, session);
+			}
+			if (cols != null){
+				QueryColumnUtils.filterQueryColumns(cols, query);
+				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){
 			logger.log(Level.SEVERE, "Error determining query columns.", ex);
@@ -84,17 +89,16 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 	}
 	
 	
-	public QueryColumn[] getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
-	
+	public List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
 			cols.add(new GridQueryColumn(t,l));
 		}
-		return cols.toArray(new QueryColumn[cols.size()]);
+		return cols;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public  QueryColumn[] getMissionQueryColumns(Query query, Locale l, Session session) {
+	public List<QueryColumn> getMissionQueryColumns(Query query, Locale l, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -133,11 +137,11 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, Locale.getDefault()));
 	
 		
-		return cols.toArray(new QueryColumn[cols.size()]);
+		return cols;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public  QueryColumn[] getMissionTrackQueryColumns(Query query, Locale l, Session session) {
+	public  List<QueryColumn> getMissionTrackQueryColumns(Query query, Locale l, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -183,11 +187,11 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_START, Locale.getDefault()));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_END, Locale.getDefault()));
 		
-		return cols.toArray(new QueryColumn[cols.size()]);
+		return cols;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public QueryColumn[] getObservationQueryColumns(Query query, Locale l, Session session) throws SQLException{
+	public List<QueryColumn> getObservationQueryColumns(Query query, Locale l, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -253,15 +257,15 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		}
 		
 		//data model columns
-		for (QueryColumn q : DataModelColumnProvider.getDataModelColumns(session, l, query)){
+		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(session, l, query)){
 			cols.add(q);
 		}
 		
-		return cols.toArray(new QueryColumn[cols.size()]);
+		return cols;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public QueryColumn[] getWaypointQueryColumns(Query query, Locale l, Session session) throws SQLException{
+	public List<QueryColumn> getWaypointQueryColumns(Query query, Locale l, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -317,7 +321,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 			}
 		}
 		
-		return cols.toArray(new QueryColumn[cols.size()]);
+		return cols;
 	}
 	
 	public static SurveyDesign getSurveyDesign(String key, Session s, ConservationAreaFilter caFilter){

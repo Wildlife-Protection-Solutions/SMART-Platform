@@ -131,16 +131,16 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					sql.append(tablePrefix(ConservationArea.class) + ".id,"); //$NON-NLS-1$
 					sql.append(tablePrefix(ConservationArea.class) + ".name,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".uuid,"); //$NON-NLS-1$
-					sql.append("'',");	//name //$NON-NLS-1$
+					sql.append("null,");	//name //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".received_date,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".from_date,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".to_date,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".source_uuid,"); //$NON-NLS-1$
-					sql.append("'',");	//source //$NON-NLS-1$
+					sql.append("null,");	//source //$NON-NLS-1$
 					sql.append(tablePrefix(Patrol.class) + ".id,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Informant.class) + ".id,"); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".description,"); //$NON-NLS-1$
-					sql.append("''");	//locations //$NON-NLS-1$
+					sql.append("null");	//locations //$NON-NLS-1$
 					sql.append(" FROM ");//$NON-NLS-1$
 					sql.append(tableNamePrefix(Intelligence.class));
 					sql.append(" LEFT JOIN "); //$NON-NLS-1$
@@ -163,7 +163,6 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					sql.append(" ON "); //$NON-NLS-1$
 					sql.append(tablePrefix(Intelligence.class) + ".patrol_uuid = " + tablePrefix(Patrol.class) + ".uuid"); //$NON-NLS-1$ //$NON-NLS-2$
 	
-					
 					sql.append(" WHERE "); //$NON-NLS-1$
 					
 					List<Object> parameterValues = new ArrayList<Object>();
@@ -225,44 +224,22 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 						}
 					}
 					
-//					s = "SELECT uuid, ca_uuid, code FROM smart.language WHERE ca_uuid in (select distinct ca_uuid FROM " + queryDataTable + ") order by ca_uuid, code, uuid"; //$NON-NLS-1$
-//					logger.finest(s);
-//					try( ResultSet rs = c.createStatement().executeQuery(s)){
-//						try(PreparedStatement ps = c.prepareStatement("UPDATE " + queryDataTable + " SET intel_source = ? where intel_sourceuuid = ?")){ //$NON-NLS-1$ //$NON-NLS-2$
-//							UUID lastCa = null;
-//							while(rs.next()){
-//								UUID cuuid = (UUID) rs.getObject(2);
-//								UUID lUuid = null; 
-//								if (lastCa != null || !lastCa.equals(cuuid)){
-//									//use lUuid to update
-//								}else{
-//									UUID luuid = (UUID) rs.getObject(1);
-//								
-//									String code = rs.getString(3);
-//								
-//								
-//								String name = getSourceName(uuid, session);
-//						
-//								ps.setString(1, name);
-//								ps.setObject(2, uuid);
-//								ps.executeUpdate();
-//							}
-//						}
-//					}
-//					
-					/* set the intelligence record name */
-					//TODO: sort this out
-//					s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a where " 
-//					+ queryDataTable+ ".intel_uuid = a.element_uuid and a.language_uuid = x'" 
-//							+ UuidUtils.uuidToString(SmartDB.getCurrentLanguage().getUuid()) + "')"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-//					logger.finest(s);
-//					c.createStatement().executeUpdate(s);
+					//match language and country
+					String key1 = (locale.getLanguage() + "_" + locale.getCountry()).toUpperCase();
+					String query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "'";
+					logger.finest(query);
+					c.createStatement().executeUpdate(query);
+					
+					//match country
+					key1 = (locale.getLanguage()).toUpperCase();
+					query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "' AND intel_name is null";
+					logger.finest(query);
+					c.createStatement().executeUpdate(query);
 
 					//update name to default language 
 					s = "UPDATE " + queryDataTable + " SET intel_name = (SELECT a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid where " + queryDataTable+ ".intel_uuid = a.element_uuid and b.isdefault) WHERE intel_name is null"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					logger.finest(s);
 					c.createStatement().executeUpdate(s);
-					
 				
 					c.commit();
 				}catch (Exception ex){

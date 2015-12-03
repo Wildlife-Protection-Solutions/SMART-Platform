@@ -26,15 +26,20 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.connect.query.QueryManager;
+import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
@@ -45,8 +50,77 @@ import org.wcs.smart.query.model.QueryColumn;
  * @author Emily
  *
  */
-public class DataModelColumnProvider {
+public class QueryColumnUtils {
 
+	/**
+	 * Loads the observation options from the database for a given 
+	 * conservation area.
+	 * 
+	 * @param ca
+	 * @param s
+	 * @return
+	 */
+	public static ObservationOptions getOptions(ConservationArea ca, Session s){
+		return (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
+	}
+
+	/**
+	 * Determines if a given observation options tracks the distance
+	 * and direction.  Will return true if op is null.
+	 * @param op
+	 * @return
+	 */
+	public static boolean trackDistanceDirection(ObservationOptions op){
+		if (op == null) return true;
+		return op.getTrackDistanceDirection();
+	}
+
+	/**
+	 * Determines if a given observation options tracks the observer.
+	 * Will return true if op is null.
+	 * @param op
+	 * @return
+	 */
+	public static boolean trackObserver(ObservationOptions op){
+		if (op == null) return true;
+		return op.getTrackObserver();
+	}
+	
+	/**
+	 * Removes columns from the list that are not visible in the query.
+	 * This function updates the columns list.
+	 * 
+	 * @param columns
+	 * @param query
+	 */
+	public static void filterQueryColumns(List<QueryColumn> columns, Query query){
+		if (query instanceof SimpleQuery){
+			SimpleQuery sq = (SimpleQuery)query;
+			
+			if (sq.getVisibleColumns() != null){
+				HashSet<String> keys = new HashSet<String>();
+				String[] bits = sq.getVisibleColumns().split(",");
+				for (String key : bits){
+					keys.add(key);
+				}
+				for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
+					QueryColumn column = (QueryColumn) iterator.next();
+					if (!keys.contains(column.getKey())){
+						iterator.remove();
+					}	
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Gets all data model columns for a given locale
+	 * @param session
+	 * @param l
+	 * @param q
+	 * @return
+	 * @throws SQLException
+	 */
 	//TODO: CCAA queries
 	@SuppressWarnings("unchecked")
 	public static List<QueryColumn> getDataModelColumns(Session session, Locale l, Query q) throws SQLException{

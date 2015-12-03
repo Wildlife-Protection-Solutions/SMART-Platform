@@ -52,14 +52,19 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 	
 	@Override
 	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+		List<QueryColumn> cols = null;
 		try{
 			String queryTypeKey = query.getTypeKey();
 			if (queryTypeKey.equals(ObsObservationQuery.KEY)){
-				return getObservationQueryColumns(query, l, session);
+				cols = getObservationQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(ObservationWaypointQuery.KEY)){
-				return getWaypointQueryColumns(query, l, session);
+				cols = getWaypointQueryColumns(query, l, session);
 			}else if (queryTypeKey.equals(ObservationGriddedQuery.KEY)){
-				return getGriddedQueryColumns(query, l, session);
+				cols = getGriddedQueryColumns(query, l, session);
+			}
+			if (cols != null){
+				QueryColumnUtils.filterQueryColumns(cols, query);
+				return cols.toArray(new QueryColumn[cols.size()]);
 			}
 		}catch (SQLException ex){
 			logger.log(Level.SEVERE, "Error determining query columns.", ex);
@@ -68,7 +73,8 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		return null;
 	}
 
-	public QueryColumn[] getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	public List<QueryColumn> getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
+		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 			FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
@@ -78,23 +84,24 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
 				item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
-				add = trackDistanceDirection(q.getConservationArea(), session);
+				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-				add = trackObserver(q.getConservationArea(), session);
+				add = QueryColumnUtils.trackObserver(ops);
 			}
 			if (add){
 				keys.add(new FixedQueryColumn(item, Locale.getDefault()));
 			}
 		}
 		
-		for (QueryColumn cq : DataModelColumnProvider.getDataModelColumns(session, l, q)){
+		for (QueryColumn cq : QueryColumnUtils.getDataModelColumns(session, l, q)){
 			keys.add(cq);
 		}
 		
-		return keys.toArray(new QueryColumn[keys.size()]);
+		return keys;
 	}
 	
-	public QueryColumn[] getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	public List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
+		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
 			FixedQueryColumn.FixedColumns item = FixedQueryColumn.FixedColumns.values()[i];
@@ -104,40 +111,23 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				add = q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION ||  
 				item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
-				add = trackDistanceDirection(q.getConservationArea(), session);
+				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-				add = trackObserver(q.getConservationArea(), session);
+				add = QueryColumnUtils.trackObserver(ops);
 			}
 			if (add){
 				keys.add(new FixedQueryColumn(item, Locale.getDefault()));
 			}
 		}
-		return keys.toArray(new QueryColumn[keys.size()]);
+		return keys;
 	}
 	
-	public QueryColumn[] getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	public List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
 			cols.add(new GridQueryColumn(t,l));
 		}
-		return cols.toArray(new QueryColumn[cols.size()]);
+		return cols;
 	}
-	
-	public boolean trackDistanceDirection(ConservationArea ca, Session s){
-		ObservationOptions op = getOptions(ca, s);
-		if (op == null) return true;
-		return op.getTrackDistanceDirection();
-	}
-	
-	public boolean trackObserver(ConservationArea ca, Session s){
-		ObservationOptions op = getOptions(ca, s);
-		if (op == null) return true;
-		return op.getTrackObserver();
-	}
-	
-	public ObservationOptions getOptions(ConservationArea ca, Session s){
-		return (ObservationOptions) s.get(ObservationOptions.class, ca.getUuid());
-	}
-
 
 }

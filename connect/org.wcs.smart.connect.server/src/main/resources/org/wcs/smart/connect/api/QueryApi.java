@@ -24,6 +24,8 @@ package org.wcs.smart.connect.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -231,7 +233,7 @@ public class QueryApi extends HttpServlet{
 			    };
 			
 			//return accepted
-			Response rs = Response.ok(stream, MediaType.TEXT_PLAIN)
+			Response rs = Response.ok(stream, MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name())
 		            .build();
 			//f.delete();
 			return rs;
