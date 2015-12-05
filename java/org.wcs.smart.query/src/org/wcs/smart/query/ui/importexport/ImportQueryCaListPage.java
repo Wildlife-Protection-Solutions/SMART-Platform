@@ -215,7 +215,7 @@ public class ImportQueryCaListPage extends WizardPage {
 		chQueries.setLabelProvider(new QueryListLabelProvider());
 		chQueries.setContentProvider(new QueryListContentProvider(true));
 		chQueries.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
+		
 		chQueries.setCheckStateProvider(new ICheckStateProvider() {
 			public boolean isGrayed(Object element) {
 				return false;

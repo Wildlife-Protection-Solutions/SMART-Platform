@@ -75,6 +75,7 @@ public class ImportQueryCaPage extends WizardPage {
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		cmbViewer.setLabelProvider(new ConservationAreaLabelProvider());
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 200;
 		
 		Session session = HibernateManager.openSession();
 		try{

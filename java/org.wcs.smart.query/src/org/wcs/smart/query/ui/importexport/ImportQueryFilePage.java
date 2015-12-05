@@ -91,6 +91,7 @@ public class ImportQueryFilePage extends WizardPage {
 		lstFiles.setInput(files);
 		lstFiles.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
+		
 		Composite buttons = new Composite(main, SWT.NONE);
 		buttons.setLayout(new GridLayout());
 		buttons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));

@@ -424,7 +424,7 @@ public class DerbyPagedObservationResult extends AbstractPagedQueryResultSet imp
 					for (IResultItem rii : result){
 						EntityQueryResultItem it = (EntityQueryResultItem) rii;
 						if (it.getObservationUuid() != null &&
-							it.getObservationUuid().equals(obuuid )) {
+							it.getObservationUuid().equals(UuidUtils.byteToUUID(obuuid ))) {
 							it.addEntityAttribute(entityKey, entityAttributeKey, value);
 						}
 					}
