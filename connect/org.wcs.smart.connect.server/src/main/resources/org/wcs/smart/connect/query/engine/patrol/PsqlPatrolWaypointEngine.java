@@ -58,6 +58,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	private final Logger logger = Logger.getLogger(PsqlPatrolWaypointEngine.class.getName());
 	
 	private String queryDataTable;
+	private SimpleQuery query;
 	
 	public PsqlPatrolWaypointEngine(){
 	}
@@ -86,7 +87,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 
-		final SimpleQuery query = (SimpleQuery) lquery;
+		query = (SimpleQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale)parameters.get(Locale.class.getName());
 		
@@ -148,36 +149,8 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 		dropTable(c, queryDataTable);
 	}
 
-	private void populateTemporaryTableNameObjExtra(String uuidColumn, 
-			String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		logger.finest(sql);
-		
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			int count = 0;
-			while (rs.next()) {
-				UUID ca_uuid = (UUID)rs.getObject(1);
-				UUID uuid = (UUID)rs.getObject(2);
-				if (uuid == null || ca_uuid == null)
-					continue;
-				String name = getName(uuid, ca_uuid, session);
-				statement.setString(1, name);
-				statement.setObject(2, uuid);
-				statement.addBatch();
-				count ++;
-				if (count > 100){
-					statement.executeBatch();
-					count = 0;
-				}				
-			}
-			statement.executeBatch();
-			
-		}
-	}
 	
 	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
-		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
 				{"p_team","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
@@ -193,14 +166,12 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			logger.finest(sql);
 			c.createStatement().execute(sql);
 		}
-		populateTemporaryTableNameObjExtra("p_station_uuid", "p_station", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-
-		populateTemporaryTableNameObjExtra("p_team_uuid", "p_team", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-
-		populateTemporaryTableNameObjExtra("p_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-
-		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-
+		updateLabel(c, queryDataTable, "p_station_uuid", "p_station");
+		updateLabel(c, queryDataTable, "p_team_uuid", "p_team");
+		updateLabel(c, queryDataTable, "p_mandate_uuid", "p_mandate");
+		updateLabel(c, queryDataTable, "pl_transport_uuid", "p_transporttype");
+		
+		//leader & pilot
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
@@ -241,26 +212,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 			leaderSt.executeBatch();
 		}
 
-		if (isMultipleCa){
-			//ca id and names are only used for cross-ca analysis
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-			
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-		}
+		populateCaDetails(c, queryDataTable, "p_ca_uuid",query);
 	
 	}
 

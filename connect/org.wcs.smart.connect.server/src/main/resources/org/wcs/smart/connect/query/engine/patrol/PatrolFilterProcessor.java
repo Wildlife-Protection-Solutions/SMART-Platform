@@ -513,7 +513,7 @@ public class PatrolFilterProcessor implements IFilterProcessor {
 				sql = new StringBuilder();
 				sql.append("DROP TABLE " + attributeTempTable); //$NON-NLS-1$
 				logger.finest(sql.toString());
-			//	c.createStatement().execute(sql.toString());
+				c.createStatement().execute(sql.toString());
 			}
 		}
 		

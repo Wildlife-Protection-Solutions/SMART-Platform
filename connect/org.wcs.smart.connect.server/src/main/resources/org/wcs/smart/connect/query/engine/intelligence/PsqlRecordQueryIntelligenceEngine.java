@@ -225,13 +225,13 @@ public class PsqlRecordQueryIntelligenceEngine extends AbstractQueryEngine {
 					}
 					
 					//match language and country
-					String key1 = (locale.getLanguage() + "_" + locale.getCountry()).toUpperCase();
+					String key1 = locale.toString().toUpperCase();
 					String query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "'";
 					logger.finest(query);
 					c.createStatement().executeUpdate(query);
 					
-					//match country
-					key1 = (locale.getLanguage()).toUpperCase();
+					//match language
+					key1 = locale.getLanguage().toUpperCase();
 					query = "UPDATE " + queryDataTable + " SET intel_name = a.value from smart.i18n_label a join smart.language b on a.language_uuid = b.uuid WHERE " + queryDataTable + ".intel_uuid = a.element_uuid AND upper(b.code) = '" + key1 + "' AND intel_name is null";
 					logger.finest(query);
 					c.createStatement().executeUpdate(query);

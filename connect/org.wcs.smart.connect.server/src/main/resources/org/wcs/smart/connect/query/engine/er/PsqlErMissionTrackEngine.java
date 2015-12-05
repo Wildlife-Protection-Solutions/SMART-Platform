@@ -163,19 +163,13 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 			c.createStatement().execute(sql);
 		}
 		//survey design name
-		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", queryDataTable, c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "surveydesign_uuid", "surveydesign_name");
 
 		//ca information
-		populateCaDetails(c, queryDataTable, query);
+		populateCaDetails(c, queryDataTable, "ca_uuid", query);
 		
 		//mission attributes
-		WpoaLinkedData mListData = new WpoaLinkedData("_mlist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-			}
-		};
-		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, mListData);
+		populateAdditionalMissionTable(c,session, sdFilter, caFilter, queryDataTable, queryDataTable +"_mlist", "list_element_uuid");
 	}
 
 	@Override

@@ -57,7 +57,7 @@ public class ErMissionTrackQueryResult implements IDbTableResultSet {
 
 	
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		Object v = getValue(rs, column.getKey(), c);
+		Object v = getValue(rs, column, c);
 		if (v == null) return "";
 		if (v instanceof String){
 			return (String)v;
@@ -77,7 +77,9 @@ public class ErMissionTrackQueryResult implements IDbTableResultSet {
 		return v.toString();
 	}
 	
-	public Object getValue(ResultSet rs, String columnKey, Connection c) throws SQLException{
+	@Override
+	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
+		String columnKey = column.getKey();
 		
 		if (columnKey.equals(SurveyQueryColumn.FixedColumns.CA_ID.getKey())){
 			return rs.getString("ca_id");

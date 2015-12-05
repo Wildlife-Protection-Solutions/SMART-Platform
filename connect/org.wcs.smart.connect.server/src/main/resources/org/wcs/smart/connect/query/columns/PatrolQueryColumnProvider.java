@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.patrol.query.model.IPatrolQueryColumnProvider;
 import org.wcs.smart.patrol.query.model.PatrolGriddedQuery;
@@ -147,7 +148,8 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER,l));
 		}
 		
-		for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, q)){
+		//TODO: do not recreate cafilter
+		for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(qc);
 		}
 		

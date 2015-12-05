@@ -104,7 +104,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
 
 		// survey columns 
-		if (query.getConservationArea().equals(ConservationArea.MULTIPLE_CA)){
+		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
 		}
@@ -147,7 +147,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
 
 		// survey columns 
-		if (query.getConservationArea().equals(ConservationArea.MULTIPLE_CA)){
+		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
 		}
@@ -197,7 +197,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
 
 		// survey columns 
-		if (query.getConservationArea().equals(ConservationArea.MULTIPLE_CA)){
+		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
 		}
@@ -257,7 +257,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		}
 		
 		//data model columns
-		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(session, l, query)){
+		//TODO: do not recreate cafilter
+		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(query))){
 			cols.add(q);
 		}
 		
@@ -271,7 +272,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
 		
 		// survey columns 
-		if (query.getConservationArea().equals(ConservationArea.MULTIPLE_CA)){
+		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_ID, Locale.getDefault()));
 			cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.CA_NAME, Locale.getDefault()));
 		}

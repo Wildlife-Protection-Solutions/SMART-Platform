@@ -31,23 +31,18 @@ import java.util.UUID;
 
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.columns.SurveyQueryColumnProvider;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.er.model.MissionAttribute;
-import org.wcs.smart.er.model.MissionAttributeListItem;
 import org.wcs.smart.er.model.MissionMember;
 import org.wcs.smart.er.model.MissionProperty;
 import org.wcs.smart.er.model.MissionPropertyValue;
 import org.wcs.smart.er.model.SamplingUnitAttribute;
-import org.wcs.smart.er.model.SamplingUnitAttributeListItem;
 import org.wcs.smart.er.model.SamplingUnitAttributeValue;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.model.SurveyDesignSamplingUnitAttribute;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
-import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 /**
@@ -105,47 +100,25 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 			leaderSt.executeBatch();
 		}
 	}
-	protected void populateCaDetails(Connection c, String queryDataTable, Query query) throws SQLException{
-		if (query.getConservationArea().equals(ConservationArea.MULTIPLE_CA)){
-			//ca id and names are only used for cross-ca analysis
-			StringBuilder sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-			
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-		}
 
-	}
 	protected void populateAdditionalMissionTable(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
 			String queryDataTable,
-			WpoaLinkedData linkedData) throws SQLException {
+			String tableName, String obsAttUuidColumn) throws SQLException {
 		
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(queryDataTable + linkedData.getPostfix());
+		sql.append(tableName);
 		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
 		sql = new StringBuilder();
-		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("INSERT INTO " + tableName + " SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
 		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(MissionPropertyValue.class));
 		sql.append(" inner join "); //$NON-NLS-1$
@@ -154,38 +127,13 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		sql.append(tablePrefix(MissionPropertyValue.class));
 		sql.append(".mission_uuid WHERE "); //$NON-NLS-1$
 		sql.append(tablePrefix(MissionPropertyValue.class));
-		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
 		sql.append(" is not null "); //$NON-NLS-1$
 
-		StringBuilder sql2 = new StringBuilder();
-		sql2.append("INSERT INTO "); //$NON-NLS-1$
-		sql2.append( queryDataTable + linkedData.getPostfix());
-		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		logger.finest(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2.toString());
-		int count = 0;
 		logger.finest(sql.toString());
-		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
-			while (rs.next()) {
-				UUID uuid = (UUID)rs.getObject(1);
-				if (uuid != null) {
-//					byte[] cauuid = rs.getBytes(2);
-//					String value = linkedData.getLabel(session, UuidUtils.byteToUUID(cauuid), UuidUtils.byteToUUID(uuid));
-					String value = Label.getDescription(uuid, session);
-					statement.setObject(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
+		c.createStatement().execute(sql.toString());
+		updateLabel(c, tableName, "uuid", "value");
 		
-
 		List<MissionAttribute> attributes = new ArrayList<MissionAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
 			//get all mission properties
@@ -235,26 +183,24 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				c.createStatement().execute(attrSql.toString());
 				
 			}else if (ma.getType() == AttributeType.LIST){
-				//for each list item
-				for (MissionAttributeListItem ai : ma.getAttributeList()){
-					StringBuilder attrSql = new StringBuilder();
-					attrSql.append("UPDATE ");
-					attrSql.append(queryDataTable);
-					attrSql.append(" SET ma_" + ma.getKeyId() );
-					attrSql.append(" = ");
-					attrSql.append("'" + ai.getName() + "'");
-					attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class));
-					attrSql.append(" WHERE ");
-					attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'");
-					attrSql.append(" AND ");
-					attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = ");
-					attrSql.append(queryDataTable + ".mission_uuid");
-					attrSql.append(" AND ");
-					attrSql.append(tablePrefix(MissionPropertyValue.class) + ".list_element_uuid = '" + ai.getUuid().toString() +"'");
-					
-					logger.finest(attrSql.toString());
-					c.createStatement().execute(attrSql.toString());
-				}
+				StringBuilder attrSql = new StringBuilder();
+				attrSql.append("UPDATE ");
+				attrSql.append(queryDataTable);
+				attrSql.append(" SET ma_" + ma.getKeyId() );
+				attrSql.append(" = tmp.value");
+				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class));
+				attrSql.append(", " + tableName + " tmp ");
+				attrSql.append(" WHERE ");
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_attribute_uuid = '" + ma.getUuid().toString() + "'");
+				attrSql.append(" AND ");
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + ".mission_uuid = ");
+				attrSql.append(queryDataTable + ".mission_uuid");
+				attrSql.append(" AND ");
+				attrSql.append(tablePrefix(MissionPropertyValue.class) + "." + obsAttUuidColumn + " = ");
+				attrSql.append(" tmp.uuid");
+				
+				logger.finest(attrSql.toString());
+				c.createStatement().execute(attrSql.toString());
 			}
 		}
 	}
@@ -263,54 +209,32 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
 			String queryDataTable,
-			WpoaLinkedData linkedData) throws SQLException {
+			String tableName, String obsAttUuidColumn) throws SQLException {
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
-		sql.append(queryDataTable + linkedData.getPostfix());
+		sql.append(tableName);
 		sql.append(" (uuid UUID, value varchar(1024))"); //$NON-NLS-1$ 
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql.toString());
 
 		sql = new StringBuilder();
-		sql.append("SELECT DISTINCT "); //$NON-NLS-1$
+		sql.append("INSERT INTO " + tableName + "(uuid) SELECT DISTINCT "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
-		sql.append(", r.ca_uuid FROM "); //$NON-NLS-1$
+		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
+		sql.append(" FROM "); //$NON-NLS-1$
 		sql.append(tableNamePrefix(SamplingUnitAttributeValue.class));
 		sql.append(" inner join "); //$NON-NLS-1$
 		sql.append(queryDataTable);
 		sql.append(" r on r.samplingunit_uuid = "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append(".su_attribute_uuid WHERE "); //$NON-NLS-1$
+		sql.append(".su_uuid WHERE "); //$NON-NLS-1$
 		sql.append(tablePrefix(SamplingUnitAttributeValue.class));
-		sql.append("." + linkedData.getUuidColumn()); //$NON-NLS-1$
+		sql.append("." + obsAttUuidColumn); //$NON-NLS-1$
 		sql.append(" is not null "); //$NON-NLS-1$
 		
-		StringBuilder sql2 = new StringBuilder();
-		sql2.append("INSERT INTO "); //$NON-NLS-1$
-		sql2.append( queryDataTable + linkedData.getPostfix());
-		sql2.append(" VALUES (?, ?)"); //$NON-NLS-1$ 
-		logger.finest(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2.toString());
-		int count = 0;
 		logger.finest(sql.toString());
-		try(ResultSet rs = c.createStatement().executeQuery(sql.toString())) {
-			while (rs.next()) {
-				UUID uuid = (UUID)rs.getObject(1);
-				if (uuid != null) {
-					String value = Label.getDescription(uuid, session);
-					statement.setObject(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
+		c.createStatement().execute(sql.toString());
+		updateLabel(c, tableName, "uuid", "value");
 		
 		List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
@@ -361,119 +285,45 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				c.createStatement().execute(attrSql.toString());
 				
 			}else if (su.getType() == AttributeType.LIST){
-				//for each list item
-				for (SamplingUnitAttributeListItem ai : su.getAttributeList()){
-					StringBuilder attrSql = new StringBuilder();
-					attrSql.append("UPDATE ");
-					attrSql.append(queryDataTable);
-					attrSql.append(" SET su_" + su.getKeyId() );
-					attrSql.append(" = ");
-					attrSql.append("'" + ai.getName() + "'");
-					attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class));
-					attrSql.append(" WHERE ");
-					attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'");
-					attrSql.append(" AND ");
-					attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = ");
-					attrSql.append(queryDataTable + ".samplingunit_uuid");
-					attrSql.append(" AND ");
-					attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".list_element_uuid = '" + ai.getUuid().toString() +"'");
-					
-					logger.finest(attrSql.toString());
-					c.createStatement().execute(attrSql.toString());
-				}
+				StringBuilder attrSql = new StringBuilder();
+				attrSql.append("UPDATE ");
+				attrSql.append(queryDataTable);
+				attrSql.append(" SET su_" + su.getKeyId() );
+				attrSql.append(" = tmp.value");
+				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class));
+				attrSql.append(", " + tableName + " tmp ");
+				attrSql.append(" WHERE ");
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_attribute_uuid = '" + su.getUuid().toString() + "'");
+				attrSql.append(" AND ");
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + ".su_uuid = ");
+				attrSql.append(queryDataTable + ".samplingunit_uuid");
+				attrSql.append(" AND ");
+				attrSql.append(tablePrefix(SamplingUnitAttributeValue.class) + "." + obsAttUuidColumn + " = ");
+				attrSql.append(" tmp.uuid");
+				
+				logger.finest(attrSql.toString());
+				c.createStatement().execute(attrSql.toString());
 			}
 		}
 	}
 	
 	protected void populateAdditionalWpoaTable(Connection c, Session session,
 			String queryDataTable,
-			WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid UUID, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
+			String tableName, String obsAttUuidColumn) throws SQLException {
+		String sql = "CREATE TABLE " + tableName + " (uuid UUID, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 
-		sql = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql = "INSERT INTO " + tableName + "(uuid) SELECT DISTINCT wpoa."+obsAttUuidColumn
+				+" FROM smart.wp_observation_attributes wpoa inner join "
+				+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
 		
-		String sql2 = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		logger.finest(sql2.toString());
-		PreparedStatement statement = c.prepareStatement(sql2);
-		int count = 0;
 		logger.finest(sql.toString());
-		try(ResultSet rs = c.createStatement().executeQuery(sql)){
-			while (rs.next()) {
-				UUID uuid = (UUID)rs.getObject(1);
-				if (uuid != null) {
-					UUID cauuid = (UUID)rs.getObject(2);
-					String value = linkedData.getLabel(session, cauuid, uuid);
-					statement.setObject(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
+		c.createStatement().execute(sql);
+		updateLabel(c, tableName, "uuid", "value");
+		
 	}
 	
-	protected void populateTemporaryTableNameObjExtra(String uuidColumn, 
-			String nameColumn, String queryDataTable,
-			Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		logger.finest(sql);
-		
-		try (ResultSet rs = c.createStatement().executeQuery(sql)){
-			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			int count = 0;
-			while (rs.next()) {
-				UUID ca_uuid = (UUID)rs.getObject(1);
-				UUID uuid = (UUID)rs.getObject(2);
-				if (uuid == null || ca_uuid == null)
-					continue;
-				String name = getName(uuid, ca_uuid, session);
-				statement.setString(1, name);
-				statement.setObject(2, uuid);
-				statement.addBatch();
-				count ++;
-				if (count > 100){
-					statement.executeBatch();
-					count = 0;
-				}				
-			}
-			statement.executeBatch();
-			
-		}
-	}
 	
-	/**
-	 * Wrapper class for populating linked data (additional columns)
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	protected abstract class WpoaLinkedData {
-		private String postfix;
-		private String uuidColumn;
-
-		public WpoaLinkedData(String postfix, String uuidColumn) {
-			super();
-			this.postfix = postfix;
-			this.uuidColumn = uuidColumn;
-		}
-
-		public String getPostfix() {
-			return postfix;
-		}
-
-		public String getUuidColumn() {
-			return uuidColumn;
-		}
-		
-		public abstract String getLabel(Session session, UUID cauuid, UUID keyuuid);
-	}
-
 }

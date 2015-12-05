@@ -32,7 +32,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.entity.query.model.EntityQueryResultItem;
@@ -113,7 +112,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, false, true);
 					
-					populateTemporaryTableExtra(c, caFilter.getConservationAreaFilterIds().size() > 1, session);
+					populateTemporaryTableExtra(c, session);
 
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
@@ -144,7 +143,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 		dropTable(c, queryDataTable);
 	}
 	
-	private void populateTemporaryTableExtra(Connection c, boolean isMultiple, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, Session session) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -156,28 +155,7 @@ public class PsqlEntityWaypointEngine extends AbstractQueryEngine {
 			c.createStatement().execute(sql);
 		}
 
-		
-		//ca information
-		if (isMultiple){
-			//ca id and names are only used for cross-ca analysis
-			StringBuilder sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-			
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-		}
+		populateCaDetails(c, queryDataTable,"p_ca_uuid", query);
 	}
 
 	@Override

@@ -82,6 +82,7 @@ import org.wcs.smart.patrol.query.model.PatrolSummaryQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.IDateFieldFilter;
 import org.wcs.smart.query.model.filter.date.WaypointDateField;
 
@@ -253,7 +254,7 @@ public enum QueryManager {
 	}
 	
 	/**
-	 * Determines the maximum category depth for a given conservation area.
+	 * Determines the maximum category depth for a set of conservation areas
 	 * abc. = 1
 	 * abc.def. = 2
 	 * 
@@ -262,22 +263,28 @@ public enum QueryManager {
 	 * @return
 	 * @throws SQLException
 	 */
-	public int getCategoryDepth(Session session, UUID caUuid) throws SQLException{
-		org.hibernate.Query q = session.createQuery("SELECT max(length(hkey) - length(replace(hkey, '.', ''))) FROM Category WHERE conservationArea.uuid = :cauuid");
-		q.setParameter("cauuid", caUuid);
-		return ((Integer)q.uniqueResult() + 1);
+	public int getCategoryDepth(Session session, ConservationAreaFilter caFilter) throws SQLException{
+		org.hibernate.Query q = session.createQuery("Select hkey, length(hkey) - length(replace(hkey, '.', '')) as hkey_length, count(*) FROM  Category WHERE conservationArea.uuid IN (:cauuids) group by hkey having count(*) = :cnt order by length(hkey) - length(replace(hkey, '.', '')) desc");
+		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
+		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size()));
+		q.setMaxResults(1);
+		Object[] x = (Object[])q.uniqueResult();
+		return (Integer)x[1];
 	}
 
-	@SuppressWarnings("unchecked")
-	public void RemoveAccessToQueriesFromCa(UUID uuid, Session s, Locale locale) {
-		List<UUID> list = null;
+	/**
+	 * Deletes from the smartuseraction table and record that
+	 * references a query in the given Conservation Area.
+	 * 
+	 * @param caUuid
+	 * @param s
+	 * @throws SQLException
+	 */
+	public void removeAccessToQueriesFromCa(UUID caUuid, Session s) throws SQLException{
 		for (Class<? extends Query> q : queryClasses){
-			list = s.createCriteria(q).setProjection(Projections.property("uuid")).list();
-			if(list != null && list.size() > 0){
-				org.hibernate.Query q1 = s.createQuery("DELETE FROM SmartUserAction WHERE resource in (:list)");
-				q1.setParameterList("list", list);
-				q1.executeUpdate();
-			}
+			org.hibernate.Query delete = s.createQuery("DELETE FROM SmartUserAction WHERE resource IN (SELECT uuid FROM " + q.getSimpleName() + " WHERE conservationArea.uuid = :ca)");
+			delete.setParameter("ca", caUuid);
+			delete.executeUpdate();
 		}
 	}
 }

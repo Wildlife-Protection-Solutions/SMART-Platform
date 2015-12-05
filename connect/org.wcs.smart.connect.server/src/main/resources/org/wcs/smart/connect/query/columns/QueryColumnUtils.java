@@ -32,17 +32,17 @@ import java.util.List;
 import java.util.Locale;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.datamodel.Attribute;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.observation.model.ObservationOptions;
-import org.wcs.smart.patrol.query.model.observation.PatrolCategoryQueryColumn;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 
 /**
  * Provides data model columns for a given conservation 
@@ -121,23 +121,50 @@ public class QueryColumnUtils {
 	 * @return
 	 * @throws SQLException
 	 */
-	//TODO: CCAA queries
 	@SuppressWarnings("unchecked")
-	public static List<QueryColumn> getDataModelColumns(Session session, Locale l, Query q) throws SQLException{
+	public static List<QueryColumn> getDataModelColumns(Session session, Locale l, ConservationAreaFilter caFilter) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
-		int ccnt = QueryManager.INSTANCE.getCategoryDepth(session, q.getConservationArea().getUuid());
+		int ccnt = QueryManager.INSTANCE.getCategoryDepth(session, caFilter);
 		for (int i = 0; i < ccnt; i ++){
-			keys.add(new PatrolCategoryQueryColumn("Category " + i, i));
+			keys.add(new CategoryQueryColumn("Category " + i, i){
+				@Override
+				public Object getValue(IResultItem item) {
+					return null;
+				}
+
+				@Override
+				public QueryColumn clone() {
+					return null;
+				}});
 		}
 		
 		//attributes
-		List<Attribute> atts = session.createCriteria(Attribute.class)
-				.add(Restrictions.eq("conservationArea", q.getConservationArea()))
-				.list();
-		List<QueryColumn> attributes = new ArrayList<QueryColumn>();
-		for (Attribute a : atts){
-			attributes.add(new AttributeQueryColumn(a.getName(), a.getKeyId(), a.getType()) {
+		//I want all attributes that are shared across all conservationAreas
+		String query = "SELECT keyId, type  FROM Attribute WHERE conservationArea.uuid in (:cauuids) group by keyId, type HAVING count(*) = :cnt order by keyId asc";
+		org.hibernate.Query attquery = session.createQuery(query);
+		attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
+		attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size()));
+		
+		//this gets the attribute name based on the requested locale name query 
+		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end ";
+		String allLocal = l.toString().toUpperCase();
+		String local = l.getLanguage().toUpperCase();
+		org.hibernate.Query nameQuery = session.createQuery(nameQueryHql);
+		
+		List<Object[]> attributes = attquery.list();
+		List<QueryColumn> attributeColumns = new ArrayList<QueryColumn>();
+		for (Object[] attribute : attributes){
+			String keyid = (String) attribute[0];
+			AttributeType atype = (AttributeType) attribute[1];
+			
+			nameQuery.setParameter("attributeKey", keyid);
+			nameQuery.setParameter("code1", allLocal);
+			nameQuery.setParameter("code2", local);
+			nameQuery.setMaxResults(1);
+			String name = (String) nameQuery.uniqueResult();
+			
+			attributeColumns.add(new AttributeQueryColumn(name, keyid, atype) {
 				
 				@Override
 				public Object getValue(IResultItem arg0) {
@@ -150,14 +177,14 @@ public class QueryColumnUtils {
 				}
 			});
 		}
-		
-		Collections.sort(attributes, new Comparator<QueryColumn>() {
+
+		Collections.sort(attributeColumns, new Comparator<QueryColumn>() {
 			@Override
 			public int compare(QueryColumn o1, QueryColumn o2) {
 				return Collator.getInstance(l).compare(o1.getName(), o2.getName());
 			}
 		});
-		keys.addAll(attributes);
+		keys.addAll(attributeColumns);
 		return keys;
 	}
 }

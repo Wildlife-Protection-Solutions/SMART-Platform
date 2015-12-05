@@ -179,7 +179,9 @@ public class QueryApi extends HttpServlet{
 				//query not found
 				return Response.status(Status.NOT_FOUND).build();
 			}
-		
+			//TODO: remove this maybe; this ensures we will not modify the original query
+			query = query.clone(query.getOwner());
+			
 			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 			if(engine == null){
 				String error = MessageFormat.format("No query engine for query type {1}.", query.getTypeKey());

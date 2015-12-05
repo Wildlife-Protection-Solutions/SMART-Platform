@@ -31,7 +31,6 @@ import java.util.logging.Level;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
@@ -170,33 +169,20 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 			c.createStatement().execute(sql);
 		}
 
-		//survey design
-		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", queryDataTable, c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		//survey design name
+		updateLabel(c, queryDataTable, "surveydesign_uuid", "surveydesign_name");
 
 		//ca information
-		populateCaDetails(c, queryDataTable, query);
-
+		populateCaDetails(c, queryDataTable,"ca_uuid", query);
 		
 		// mission leader
 		populateMissionLeader(c, session, queryDataTable);
 
 		//mission attributes
-		WpoaLinkedData mListData = new WpoaLinkedData("_mlist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-			}
-		};
-		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, mListData);
+		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_mlist", "list_element_uuid");
 		
 		//sampling unit attributes
-		WpoaLinkedData suListData = new WpoaLinkedData("_sulist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-			}
-		};
-		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, suListData);
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid");
 
 	}
 

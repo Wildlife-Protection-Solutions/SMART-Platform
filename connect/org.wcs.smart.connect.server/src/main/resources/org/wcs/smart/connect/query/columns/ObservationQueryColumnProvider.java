@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.observation.model.ObservationOptions;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
 import org.wcs.smart.observation.query.model.ObservationGriddedQuery;
@@ -93,7 +94,8 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 			}
 		}
 		
-		for (QueryColumn cq : QueryColumnUtils.getDataModelColumns(session, l, q)){
+		//TODO: do not recreate cafilter
+		for (QueryColumn cq : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(cq);
 		}
 		
@@ -113,7 +115,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 				item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE){
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			}else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-				add = QueryColumnUtils.trackObserver(ops);
+				add = false;
 			}
 			if (add){
 				keys.add(new FixedQueryColumn(item, Locale.getDefault()));

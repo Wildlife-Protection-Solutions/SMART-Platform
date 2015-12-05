@@ -31,7 +31,6 @@ import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
@@ -60,7 +59,8 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 	private final Logger logger = Logger.getLogger(PsqlObsWaypointEngine.class.getName());
 	
 	private String queryDataTable;
-
+	private SimpleQuery query;
+	
 	@Override
 	public boolean canExecute(String querytype) {
 		return ObservationWaypointQuery.KEY.equals(querytype);
@@ -84,7 +84,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 			Query lquery,
 			HashMap<String, Object> parameters) throws SQLException{
 
-		final SimpleQuery query = (SimpleQuery) lquery;
+		query = (SimpleQuery) lquery;
 		session = (Session) parameters.get(Session.class.getName());
 		locale = (Locale) parameters.get(Locale.class.getName());
 	
@@ -112,7 +112,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							cafilter, false, true);
 					
-					populateTemporaryTableExtra(c, cafilter.getConservationAreaFilterIds().size() > 1, session);
+					populateTemporaryTableExtra(c, session);
 				}catch (Exception ex){
 					throw new SQLException(ex);
 
@@ -141,7 +141,7 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 		dropTable(c, queryDataTable);
 	}
 	
-	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c, Session session) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"ca_id","varchar(8)"}, //$NON-NLS-1$ //$NON-NLS-2$
@@ -152,30 +152,8 @@ public class PsqlObsWaypointEngine extends AbstractQueryEngine {
 			logger.finest(sql);
 			c.createStatement().execute(sql);
 		}
-		
-		
 		//ca information
-		if (isMultipleCa){
-			//ca id and names are only used for cross-ca analysis
-			
-			StringBuilder sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-			
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-		}
+		populateCaDetails(c, queryDataTable, "p_ca_uuid",query);
 	}
 
 	@Override

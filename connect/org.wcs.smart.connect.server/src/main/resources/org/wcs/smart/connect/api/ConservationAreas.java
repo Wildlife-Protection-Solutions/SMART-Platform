@@ -631,7 +631,7 @@ public class ConservationAreas extends HttpServlet{
 			caUuidToDelete = serverDelete.getUuid();
 			if (deleteAll){
 				// delete query actions associated with any query from the CA being deleted
-				QueryManager.INSTANCE.RemoveAccessToQueriesFromCa(serverDelete.getUuid(), s, request.getLocale());
+				QueryManager.INSTANCE.removeAccessToQueriesFromCa(serverDelete.getUuid(), s);
 			}
 			
 			//delete desktop data

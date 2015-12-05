@@ -44,6 +44,7 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.EntityType;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -86,6 +87,7 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
@@ -175,6 +177,7 @@ public class SummaryItemLabelProvider {
 		return (Attribute) s.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", key))
 				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
+				.setMaxResults(1)
 				.uniqueResult();
 	}
 	
@@ -182,22 +185,29 @@ public class SummaryItemLabelProvider {
 		return (Category) s.createCriteria(Category.class)
 				.add(Restrictions.eq("hkey", catHkey))
 				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
+				.setMaxResults(1)
 				.uniqueResult();
 	}
 	
-	private AttributeListItem getAttributeListIem(String key, Attribute a){
+	private AttributeListItem getAttributeListIem(String key, String attributeKey){
 		//TODO: support ccaa queries 
 		return (AttributeListItem) s.createCriteria(AttributeListItem.class)
 				.add(Restrictions.eq("keyId", key))
-				.add(Restrictions.eq("attribute", a))
+				.createCriteria("attribute", "a")
+				.add(Restrictions.eq("a.keyId", attributeKey))
+				.add(Restrictions.in("a.conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
+				.setMaxResults(1)
 				.uniqueResult();
 	}
 	
-	private AttributeTreeNode getAttributeTreeItem(String hkey, Attribute a){
+	private AttributeTreeNode getAttributeTreeItem(String hkey, String attributeKey){
 		//TODO: support ccaa queries
 		return (AttributeTreeNode) s.createCriteria(AttributeTreeNode.class)
 				.add(Restrictions.eq("hkey", hkey))
-				.add(Restrictions.eq("attribute", a))
+				.createCriteria("attribute", "a")
+				.add(Restrictions.eq("a.keyId", attributeKey))
+				.add(Restrictions.in("a.conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
+				.setMaxResults(1)
 				.uniqueResult();
 	}
 	
@@ -213,9 +223,9 @@ public class SummaryItemLabelProvider {
 				return catHkey;
 			}
 			if (full){
-				return c.getFullCategoryName();
+				return getLabel(item.getType()) + " " + c.getFullCategoryName();
 			}else{
-				return c.getName();
+				return getLabel(item.getType()) + " " + c.getName();
 			}
 		}catch (Exception ex){
 			logger.log(Level.WARNING, MessageFormat.format("Category not found {0}", catHkey), ex);
@@ -235,7 +245,7 @@ public class SummaryItemLabelProvider {
 		}
 		String itemName = null;
 		if (att.getType() == AttributeType.LIST){
-			AttributeListItem it = getAttributeListIem(itemKey, att);
+			AttributeListItem it = getAttributeListIem(itemKey, attributeKey);
 			if (it == null){
 				logger.log(Level.WARNING, MessageFormat.format("Attribute list item with key {0} not found for attribute {1}.", itemKey, attributeKey));
 				itemName = itemKey;
@@ -243,7 +253,7 @@ public class SummaryItemLabelProvider {
 				itemName = it.getName();
 			}
 		}else if (att.getType() == AttributeType.TREE){
-			AttributeTreeNode it = getAttributeTreeItem(itemKey, att);
+			AttributeTreeNode it = getAttributeTreeItem(itemKey, attributeKey);
 			if (it == null){
 				logger.log(Level.WARNING, MessageFormat.format("Attribute tree node with key {0} not found for attribute {1}.", itemKey, attributeKey));
 				itemName = itemKey;
@@ -379,58 +389,74 @@ public class SummaryItemLabelProvider {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private List<AttributeTreeNode> getTreeNodes(Attribute att, int level){
-		Query q = s.createQuery(" FROM AttributeTreeNode WHERE attribute =:att AND (length(hkey) - length(replace(hkey, '.', '')))-1 = :level");
-		q.setParameter("att", att);
+	private List<String> getTreeNodes(String attributeKey, int level){
+		Query q = s.createQuery("SELECT a.hkey FROM AttributeTreeNode a join a.attribute b " +
+				"WHERE b.keyId = :att AND (length(a.hkey) - length(replace(a.hkey, '.', '')))-1 = :level" +
+				" AND b.conservationArea.uuid IN (:cauuids) " +
+				" GROUP BY a.hkey HAVING count(*) = :cnt ");
+				
+		q.setParameter("att", attributeKey);
 		q.setParameter("level", level);
+		q.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size()));
+		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
 		return q.list();
 	}
 	
 	private List<ListItem> getName(AttributeGroupBy item){
 		String[]  filterHkeys = item.getFilterKeys();
-		//get children categories
-		Attribute att = getAttribute(item.getAttributeKey());
-		
-		if (att == null){
-			return null;
-		}
 		
 		List<ListItem> items = new ArrayList<ListItem>();
-		if (att.getType() == AttributeType.LIST){
+		if (item.getAttributeType() == AttributeType.LIST){
 			if (filterHkeys != null) {
-				for (AttributeListItem it : att.getActiveListItems()) {
-					for (String key : filterHkeys){
-						if (key.equals(it.getKeyId())){
-							items.add(new ListItem(null, it.getName(), it.getKeyId()));
-							break;
-						}
-					}
-				}
-			}else{				
-				for (AttributeListItem it : att.getActiveListItems()) {
-					if (it.getIsActive()){
-						items.add(new ListItem(null, it.getName(), it.getKeyId()));
-					}
-				}
-			}
-		}else if (att.getType() == AttributeType.TREE){
-			List<AttributeTreeNode> nodes = getTreeNodes(att, item.getTreeLevel());
-			if (filterHkeys == null){
-				//get all attribute nodes with given hkey length
-				for(AttributeTreeNode child : nodes){
-					if (child.getIsActive()){
-						items.add(new ListItem(null, child.getName(), child.getHkey()));
-					}
+				for (String key : filterHkeys){
+					AttributeListItem it = getAttributeListIem(key, item.getAttributeKey());
+					items.add(new ListItem(null, it.getName(), it.getKeyId()));
 				}
 			}else{
-				HashSet<String> keys = new HashSet<String>();
-				for (int i = 0; i < filterHkeys.length; i ++){
-					keys.add(filterHkeys[i]);
+				//we want list items that are shared with all conservation areas
+				String query = "SELECT ali.keyId FROM AttributeListItem ali join ali.attribute a WHERE a.conservationArea.uuid in (:cauuids) and a.keyId = :attributeKey group by ali.keyId HAVING count(*) = :cnt ";
+				org.hibernate.Query attquery = s.createQuery(query);
+				attquery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
+				attquery.setParameter("attributeKey", item.getAttributeKey());
+				attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size()));
+				
+				//this gets the attribute name based on the requested locale name query 
+				String nameQueryHql = "SELECT a.value FROM Label a, AttributeListItem c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end ";
+				String allLocal = l.toString().toUpperCase();
+				String local = l.getLanguage().toUpperCase();
+				org.hibernate.Query nameQuery = s.createQuery(nameQueryHql);
+				
+				List<String> listitems = attquery.list();
+				for (String li: listitems){
+					nameQuery.setParameter("attributeKey", li);
+					nameQuery.setParameter("code1", allLocal);
+					nameQuery.setParameter("code2", local);
+					nameQuery.setMaxResults(1);
+					String name = (String) nameQuery.uniqueResult();
+					
+					items.add(new ListItem(null, name, li));
 				}
-				for(AttributeTreeNode child : nodes){
-					if (keys.contains(child.getHkey())){
-						items.add(new ListItem(null, child.getName(), child.getHkey()));	
-					}
+			}
+		}else if (item.getAttributeType() == AttributeType.TREE){
+			if (filterHkeys != null){
+				for (String key : filterHkeys){
+					AttributeTreeNode it = getAttributeTreeItem(key, item.getAttributeKey());
+					items.add(new ListItem(null, it.getName(), it.getHkey()));
+				}
+			}else{
+				List<String> nodes = getTreeNodes(item.getAttributeKey(), item.getTreeLevel());
+				String nameQueryHql = "SELECT a.value FROM Label a, AttributeTreeNode c where a.id.element = c.uuid and c.hkey = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end ";
+				String allLocal = l.toString().toUpperCase();
+				String local = l.getLanguage().toUpperCase();
+				org.hibernate.Query nameQuery = s.createQuery(nameQueryHql);
+				for (String hkey : nodes){
+					nameQuery.setParameter("attributeKey", hkey);
+					nameQuery.setParameter("code1", allLocal);
+					nameQuery.setParameter("code2", local);
+					nameQuery.setMaxResults(1);
+					String name = (String) nameQuery.uniqueResult();
+					
+					items.add(new ListItem(null, name, hkey));
 				}
 			}
 		}
@@ -672,57 +698,29 @@ public class SummaryItemLabelProvider {
 	}
 	
 	private List<ListItem> getName(EntityAttributeGroupBy item){
-		//get children categories
-		List<ListItem> items = new ArrayList<ListItem>();
+		ArrayList<ListItem> items = new ArrayList<ListItem>();
+		
 		EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class)
-				.add(Restrictions.in("entityType.conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
+				.createCriteria("entityType", "et")
+				.add(Restrictions.in("et.conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 				.add(Restrictions.eq("keyId", item.getEntityAttributeKey()))
-				.add(Restrictions.eq("entityType.keyId", item.getEntityAttributeKey()))
+				.add(Restrictions.eq("et.keyId", item.getEntityAttributeKey()))
+				.setMaxResults(1)
 				.uniqueResult();
 				
 		if (ea == null){
 			logger.severe(MessageFormat.format("Entity attribute not found {0}.", item.getEntityAttributeKey()));
 			return items;
 		}
-						
-		Attribute att = ea.getDmAttribute();
-		if (att.getType() == AttributeType.LIST){
-			String[] filterHkeys = item.getFilterKeys();
-			if (filterHkeys != null) {
-				for (AttributeListItem it : att.getAttributeList()) {
-					for (int i = 0; i < filterHkeys.length; i++) {
-						if (filterHkeys[i].equals(it.getKeyId())) {
-							items.add(new ListItem(null, it.getName() + " [" + ea.getEntityType().getName()  + "]", it.getKeyId()));
-							break;
-						}
-					}
-				}
-			}else{
-				for (AttributeListItem it : att.getActiveListItems()) {
-					items.add(new ListItem(null, it.getName() + " [" + ea.getEntityType().getName()  + "]", it.getKeyId())); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-		}else if (att.getType() == AttributeType.TREE){
-			String[] filterHkeys = item.getFilterKeys();
-			List<AttributeTreeNode> nodes = getTreeNodes(att, item.getTreeLevel());
-			if (filterHkeys == null){
-				//get all attribute nodes with given hkey length
-				for(AttributeTreeNode child : nodes){
-					items.add(new ListItem(null, child.getName() + " [" + ea.getEntityType().getName()  + "]", child.getHkey())); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}else{
-				HashSet<String> keys = new HashSet<String>();
-				for (int i = 0; i < filterHkeys.length; i ++){
-					keys.add(filterHkeys[i]);
-				}
-				for(AttributeTreeNode child : nodes){
-					if (keys.contains(child.getHkey())){
-						items.add(new ListItem(null, child.getName() + " [" + ea.getEntityType().getName()  + "]", child.getHkey()));	 //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				}
-			}
+		
+		AttributeGroupBy ag = AttributeGroupBy.createAttributeGroupBy(ea.getDmAttribute().getKeyId());
+		List<ListItem> aitems = getName(ag);
+		
+		for (ListItem i : aitems){
+			items.add(new ListItem(null, i.getName() + " [" + ea.getEntityType().getName() + "]", i.getKey()));
 		}
 		return items;
+		
 	}
 	
 	private List<ListItem> getName(MissionAttributeGroupBy item){
@@ -885,7 +883,7 @@ public class SummaryItemLabelProvider {
 		}else if (type == PatrolQueryOptionType.STRING){
 			if (item.getOption() == PatrolQueryOption.ID){
 				Criteria c = s.createCriteria(item.getOption().getSourceClass())
-						.add(Restrictions.in("conservationArea", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
+						.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())); //$NON-NLS-1$
 				if (keys != null){
 					c = c.add(Restrictions.in(item.getOption().getColumnName(), keys));
 				} 

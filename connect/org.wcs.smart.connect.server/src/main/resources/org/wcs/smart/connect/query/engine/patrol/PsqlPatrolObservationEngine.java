@@ -27,7 +27,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -35,12 +34,11 @@ import java.util.logging.Logger;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
 import org.wcs.smart.ca.ConservationArea;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.observation.model.WaypointObservation;
+import org.wcs.smart.observation.model.WaypointObservationAttribute;
 import org.wcs.smart.patrol.model.Patrol;
 import org.wcs.smart.patrol.model.PatrolLeg;
 import org.wcs.smart.patrol.model.PatrolLegDay;
@@ -100,7 +98,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, true, true);
 					
-					populateTemporaryTableExtra(c, caFilter.getConservationAreaFilterIds().size() > 1, session);
+					populateTemporaryTableExtra(c, caFilter, session);
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
 					throw new SQLException(ex);
@@ -141,87 +139,9 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		dropTable(c, queryDataTable + "_TREE"); //$NON-NLS-1$
 	}
 
-	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		logger.info(sql);
-		
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			int count = 0;
-			while (rs.next()) {
-				UUID ca_uuid = (UUID)rs.getObject(1);
-				UUID uuid = (UUID)rs.getObject(2);
-				if (uuid == null || ca_uuid == null)
-					continue;
-				String name = getName(uuid, ca_uuid, session);
-				statement.setString(1, name);
-				statement.setObject(2, uuid);
-				statement.addBatch();
-				count ++;
-				if (count > 100){
-					statement.executeBatch();
-					count = 0;
-				}				
-			}
-			statement.executeBatch();
-			
-		}
-	}
-
-	
-	private void populateTemporaryTableCategory(Connection c, Session session) throws SQLException {
-		
-		// add data model category columns
-		int categoryCount = QueryManager.INSTANCE.getCategoryDepth(session, query.getConservationArea().getUuid());
-		if (categoryCount < 0){
-			return;			//nothing to update
-		}
-		
-		for (int i = 0; i <= categoryCount; i++) {
-			String sql = "ALTER TABLE "+queryDataTable+" ADD category_"+i+" varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			logger.finest(sql);
-			c.createStatement().execute(sql);
-		}
-		
-		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
-		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
-		logger.finest(sql);
-		
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			while (rs.next()) {
-				UUID uuid = (UUID) rs.getObject(1);
-				if (uuid == null)
-					continue;
-				String[] names = getCategoryLabels(uuid, locale, session);
-				int count = names.length;
-				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
-				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement
-				if (statement == null) {
-					//that means that we didn't create update statement for this number of columns to update -> create one
-					StringBuilder colunms = new StringBuilder();
-					for (int j = 0; j < depth; j++) {
-						if (j > 0){
-							colunms.append(", "); //$NON-NLS-1$
-						}
-						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					sql = "UPDATE "+queryDataTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					logger.finest(sql);
-					statement = c.prepareStatement(sql);
-					
-					num2Statement.put(count, statement);
-				}
-				
-				for (int i = 0; i <  depth; i++) {
-					statement.setString(i+1, names[i]);
-				}
-				statement.setObject( depth+1, uuid);
-				statement.executeUpdate();
-			}
-		}
-	}
-	
-	private void populateTemporaryTableExtra(Connection c, boolean isMultipleCa, Session session) throws SQLException {
+	private void populateTemporaryTableExtra(Connection c,
+			ConservationAreaFilter caFilter,
+			Session session) throws SQLException {
 		//NOTE: does 50 worked for monitor in total
 		String[][] columnsToAdd = new String[][]{
 				{"p_station","varchar(1024)"},  //$NON-NLS-1$ //$NON-NLS-2$
@@ -242,12 +162,12 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		}
 		
 		
-		populateTemporaryTableNameObjExtra("p_station_uuid", "p_station", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "p_station_uuid", "p_station");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "p_team_uuid", "p_team");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "p_mandate_uuid", "p_mandate");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "pl_transport_uuid", "p_transporttype");  //$NON-NLS-1$//$NON-NLS-2$
 		
-		populateTemporaryTableNameObjExtra("p_team_uuid", "p_team", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		populateTemporaryTableNameObjExtra("p_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		populateTemporaryTableNameObjExtra("pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		
+		//leader & pilot
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT plm_leader FROM "); //$NON-NLS-1$
 		sql.append(queryDataTable);
@@ -304,110 +224,28 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		}
 		
 		//ca information
-		if (isMultipleCa){
-			//ca id and names are only used for cross-ca analysis
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_id = (select id FROM "); //$NON-NLS-1$
-			sql.append(PsqlPatrolObservationEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)"); //$NON-NLS-1$ //$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-			
-			sql = new StringBuilder();
-			sql.append("UPDATE "); //$NON-NLS-1$
-			sql.append(queryDataTable);
-			sql.append(" SET ca_name = (select name FROM "); //$NON-NLS-1$
-			sql.append(PsqlPatrolObservationEngine.tableNames.get(ConservationArea.class) + " a "); //$NON-NLS-1$
-			sql.append("WHERE a.uuid = " + queryDataTable + ".p_ca_uuid)");  //$NON-NLS-1$//$NON-NLS-2$
-			logger.finest(sql.toString());
-			c.createStatement().executeUpdate(sql.toString());
-		}
+		populateCaDetails(c, queryDataTable,"p_ca_uuid", query);
 				
 		//populating categories
-		populateTemporaryTableCategory(c, session);
-
-		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-				//return QueryDataModelManager.getInstance().getAttributeListItemLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, listData);
-
-		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-//				return QueryDataModelManager.getInstance().getAttributeTreeNodeLabel(session, cauuid, uuid);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, treeData);
-		
+		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
+		populateAdditionalWpoaTable(c, queryDataTable + "_list", "list_element_uuid");
+		populateAdditionalWpoaTable(c, queryDataTable + "_tree", "tree_node_uuid");		
 	}
 
-	
-	
-	private void populateAdditionalWpoaTable(Connection c, Session session, WpoaLinkedData linkedData) throws SQLException {
-		String sql = "CREATE TABLE " + queryDataTable + linkedData.getPostfix() + " (uuid uuid, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
+	private void populateAdditionalWpoaTable(Connection c, String tableName, String obsAttUuidColumn) throws SQLException {
+		String sql = "CREATE TABLE " + tableName + " (uuid uuid, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 
-		String sql2 = "SELECT DISTINCT wpoa."+linkedData.getUuidColumn()+", r.P_CA_UUID FROM smart.wp_observation_attributes wpoa inner join "+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		sql = "INSERT INTO " + tableName + " (uuid) SELECT DISTINCT wpoa." + obsAttUuidColumn //$NON-NLS-1$
+				+" FROM "  //$NON-NLS-1$
+				+ tableNamePrefix(WaypointObservationAttribute.class) + " inner join " //$NON-NLS-1$
+				+ queryDataTable + " r on " //$NON-NLS-1$
+				+ tablePrefix(WaypointObservationAttribute.class) + ".OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$
 		logger.finest(sql.toString());
+		c.createStatement().execute(sql);
 		
-		sql = "INSERT INTO "+queryDataTable+linkedData.getPostfix()+" VALUES (?, ?)"; //$NON-NLS-1$ //$NON-NLS-2$
-		logger.finest(sql.toString());
-		PreparedStatement statement = c.prepareStatement(sql);
-		int count = 0;
-		try(ResultSet rs = c.createStatement().executeQuery(sql2)){
-			while (rs.next()) {
-				UUID uuid = (UUID) rs.getObject(1);
-				if (uuid != null) {
-					UUID cauuid = (UUID)rs.getObject(2);
-					String value = linkedData.getLabel(session, cauuid, uuid);
-					statement.setObject(1, uuid);
-					statement.setString(2, value);
-					statement.addBatch();
-					count++;
-					if (count >= 100){
-						statement.executeBatch();
-						count = 0;
-					}
-				}
-			}
-			statement.executeBatch();
-		}
-	}
-
-	
-	/**
-	 * Wrapper class for populating linked data (additional columns)
-	 * 
-	 * @author elitvin
-	 * @since 1.0.0
-	 */
-	private abstract class WpoaLinkedData {
-		private String postfix;
-		private String uuidColumn;
-
-		public WpoaLinkedData(String postfix, String uuidColumn) {
-			super();
-			this.postfix = postfix;
-			this.uuidColumn = uuidColumn;
-		}
-
-		public String getPostfix() {
-			return postfix;
-		}
-
-		public String getUuidColumn() {
-			return uuidColumn;
-		}
-		
-		public abstract String getLabel(Session session, UUID cauuid, UUID keyuuid);
+		updateLabel(c, tableName, "uuid", "value");
 	}
 
 	@Override

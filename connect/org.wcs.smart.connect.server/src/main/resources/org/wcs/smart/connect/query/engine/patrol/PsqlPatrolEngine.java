@@ -171,10 +171,10 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 			c.createStatement().executeUpdate(sql);
 		}
 		
-		populateTemporaryTableNameObjExtra("r_p_station_uuid", "p_station", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		populateTemporaryTableNameObjExtra("r_p_team_uuid", "p_team", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		populateTemporaryTableNameObjExtra("r_p_mandate_uuid", "p_mandate", c, session);  //$NON-NLS-1$//$NON-NLS-2$
-		populateTemporaryTableNameObjExtra("r_pl_transport_uuid", "p_transporttype", c, session);  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "r_p_station_uuid", "p_station");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "r_p_team_uuid", "p_team");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "r_p_mandate_uuid", "p_mandate");  //$NON-NLS-1$//$NON-NLS-2$
+		updateLabel(c, queryDataTable, "r_pl_transport_uuid", "p_transporttype");  //$NON-NLS-1$//$NON-NLS-2$
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT DISTINCT r_plm_leader FROM "); //$NON-NLS-1$
@@ -220,34 +220,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 			leaderSt.executeBatch();
 		}	
 	}
-	
-	
-	private void populateTemporaryTableNameObjExtra(String uuidColumn, String nameColumn, Connection c, Session session) throws SQLException {
-		String sql = "SELECT DISTINCT r_p_ca_uuid, "+uuidColumn+" FROM "+queryDataTable;  //$NON-NLS-1$//$NON-NLS-2$
-		logger.info(sql);
-		
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			PreparedStatement statement = c.prepareStatement("UPDATE "+ queryDataTable +" SET "+nameColumn+" = ? where "+uuidColumn+" = ?"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			int count = 0;
-			while (rs.next()) {
-				UUID ca_uuid = (UUID)rs.getObject(1);
-				UUID uuid = (UUID)rs.getObject(2);
-				if (uuid == null || ca_uuid == null)
-					continue;
-				String name = getName(uuid, ca_uuid, session);
-				statement.setString(1, name);
-				statement.setObject(2, uuid);
-				statement.addBatch();
-				count ++;
-				if (count > 100){
-					statement.executeBatch();
-					count = 0;
-				}				
-			}
-			statement.executeBatch();
-			
-		}
-	}
+
 	
 	/**
 	 * Build select clause 

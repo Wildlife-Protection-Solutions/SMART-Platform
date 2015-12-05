@@ -34,7 +34,10 @@ import java.util.UUID;
 import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
-import org.wcs.smart.observation.query.model.columns.FixedQueryColumn;
+import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
+import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
+import org.wcs.smart.query.model.AttributeQueryColumn;
+import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 /**
@@ -57,7 +60,7 @@ public class EntityObservationQueryResult implements IDbTableResultSet {
 
 	
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		Object v = getValue(rs, column.getKey(), c);
+		Object v = getValue(rs, column, c);
 		if (v == null) return "";
 		if (v instanceof String){
 			return (String)v;
@@ -77,45 +80,58 @@ public class EntityObservationQueryResult implements IDbTableResultSet {
 		return v.toString();
 	}
 	
-	public Object getValue(ResultSet rs, String columnKey, Connection c) throws SQLException{
-		
-		if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
-			return rs.getString("ca_id");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
-			return rs.getString("ca_name");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
-			return rs.getString("wp_id");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
-			return rs.getDate("wp_time");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
-			return rs.getTime("wp_time");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
-			return rs.getDouble("wp_x");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
-			return rs.getDouble("wp_y");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
-			return rs.getDouble("wp_direction");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE.getKey())){
-			return rs.getString("wp_source");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
-			return rs.getDouble("wp_distance");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
-			return rs.getString("wp_comment");
-		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
-			return rs.getString("ob_observer");
-		}else if (columnKey.startsWith("category:")){
-			String level = columnKey.split(":")[1];
-			return rs.getString("category_"+level);
-		}else if (columnKey.startsWith("attribute:")){
-			UUID obuuid = (UUID) rs.getObject("ob_uuid");
-			if (obuuid == null) return null;
-			if (!obuuid.equals(obUuid)){
-				attributeToValue = new HashMap<String, Object>();
-				obUuid = obuuid;
-				attachObservations(obuuid, c);
+	public Object getValue(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
+		String columnKey = column.getKey();
+		if (column instanceof FixedQueryColumn){
+			if (column.equals(FixedQueryColumn.FixedColumns.CA_ID.getKey())){
+				return rs.getString("ca_id");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.CA_NAME.getKey())){
+				return rs.getString("ca_name");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_ID.getKey())){
+				return rs.getString("wp_id");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DATE.getKey())){
+				return rs.getDate("wp_time");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
+				return rs.getTime("wp_time");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_X.getKey())){
+				return rs.getDouble("wp_x");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_Y.getKey())){
+				return rs.getDouble("wp_y");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
+				return rs.getDouble("wp_direction");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE.getKey())){
+				return rs.getString("wp_source");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
+				return rs.getDouble("wp_distance");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
+				return rs.getString("wp_comment");
+			}else if (columnKey.equals(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
+				return rs.getString("ob_observer");
 			}
-			String key = columnKey.split(":")[1];
-			return attributeToValue.get(key);
+		}else if (column instanceof CategoryQueryColumn){
+			if (columnKey.startsWith("category:")){
+				String level = columnKey.split(":")[1];
+				return rs.getString("category_"+level);
+			}
+		}else if (column instanceof AttributeQueryColumn){
+			if (columnKey.startsWith("attribute:")){
+				UUID obuuid = (UUID) rs.getObject("ob_uuid");
+				if (obuuid == null) return null;
+				if (!obuuid.equals(obUuid)){
+					attributeToValue = new HashMap<String, Object>();
+					entityAttributeValues = new HashMap<String, Object>();
+					obUuid = obuuid;
+					attachObservations(obuuid, c);
+					attachEntityAttributes(obuuid, c);
+				}
+				String key = columnKey.split(":")[1];
+				return attributeToValue.get(key);
+			}
+		}else if (column instanceof EntityAttributeQueryColumn){
+			String[] parts = columnKey.split(":");
+			String ekey = parts[0];
+			String eakey = parts[1];
+			return entityAttributeValues.get(ekey +":" + eakey);
 		}
 			
 			
@@ -124,8 +140,64 @@ public class EntityObservationQueryResult implements IDbTableResultSet {
 	
 	
 	private HashMap<String, Object> attributeToValue;
+	private HashMap<String, Object> entityAttributeValues;
 	private UUID obUuid;
 	
+	private void attachEntityAttributes(UUID obUuid, Connection c) throws SQLException{
+		if (engine.getEntityTypes().size() > 0){
+			//attach entities
+				StringBuilder sql = new StringBuilder();
+				sql.append("SELECT r.ob_uuid, a.keyid as entitykey, ea.keyid as entityattributekey, eav.number_value, eav.string_value, rl.value as list_value, rt.value as tree_value "); //$NON-NLS-1$
+				sql.append(" FROM "); //$NON-NLS-1$
+				sql.append(engine.getQueryDataTable());
+				sql.append(" r join smart.wp_observation_attributes wpoa on r.ob_uuid = wpoa.observation_uuid join smart.entity_type a on a.dm_attribute_uuid = wpoa.attribute_uuid "); //$NON-NLS-1$
+				sql.append(" join smart.entity e on e.attribute_list_item_uuid = wpoa.list_element_uuid "); //$NON-NLS-1$
+				sql.append(" join smart.entity_attribute_value eav on eav.entity_uuid = e.uuid "); //$NON-NLS-1$
+				sql.append(" join smart.entity_attribute ea on ea.uuid = eav.entity_attribute_uuid left join "); //$NON-NLS-1$
+				sql.append(engine.getQueryDataTable());
+				sql.append("_list rl on eav.list_element_uuid = rl.uuid left join "); //$NON-NLS-1$
+				sql.append(engine.getQueryDataTable());
+				sql.append("_tree rt on eav.tree_node_uuid = rt.UUID "); //$NON-NLS-1$	
+			
+				sql.append("WHERE r.ob_uuid = ? "); //$NON-NLS-1$
+				
+				sql.append(" AND "); //$NON-NLS-1$
+				sql.append("a.keyid in ("); //$NON-NLS-1$
+				for (String et : engine.getEntityTypes()){
+					sql.append("'" + et + "',");  //$NON-NLS-1$//$NON-NLS-2$
+				}
+				sql.deleteCharAt(sql.length() - 1);
+				sql.append(")"); //$NON-NLS-1$
+				
+				PreparedStatement ps = c.prepareStatement(sql.toString());
+				ps.setObject(1, obUuid);
+				
+				try(ResultSet rs = ps.executeQuery()){
+					while(rs.next()){
+//						UUID obuuid = (UUID) rs.getObject(1);
+						String entityKey = rs.getString(2);
+						String entityAttributeKey = rs.getString(3);
+						Object value = null;
+						if (rs.getObject(4) != null){
+							//number value
+							value = rs.getDouble(4);
+						}else if (rs.getObject(5) != null){
+							//string
+							value = rs.getString(5);
+						}else if (rs.getObject(6) != null){
+							//list string
+							value = rs.getString(6);
+						}else if (rs.getObject(7) != null){
+							//tree string
+							value = rs.getString(7);
+						}
+						String key = entityKey +":" + entityAttributeKey;
+						entityAttributeValues.put(key, value);
+					}
+				}
+				
+			}
+	}
 	private void attachObservations(UUID obUuid, Connection c) throws SQLException {
 		StringBuilder attrSql = new StringBuilder();
 		attrSql.append("SELECT r.ob_uuid, a.keyid, wpoa.number_value, wpoa.string_value, rl.value as list_value, rt.value as tree_value, r.p_ca_uuid FROM "); //$NON-NLS-1$

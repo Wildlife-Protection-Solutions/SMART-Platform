@@ -157,59 +157,6 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		dropTable(c, queryDataTable + "_MLIST"); //$NON-NLS-1$
 	}
 
-
-
-	
-	private void populateTemporaryTableCategory(Connection c, Session session) throws SQLException {
-		// add data model category columns
-		int categoryCount = QueryManager.INSTANCE.getCategoryDepth(session, query.getConservationArea().getUuid());
-		if (categoryCount < 0){
-			return;			//nothing to update
-		}
-		
-		for (int i = 0; i <= categoryCount; i++) {
-			String sql = "ALTER TABLE "+queryDataTable+" ADD category_"+i+" varchar(1024)"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			logger.finest(sql);
-			c.createStatement().execute(sql);
-		}
-		
-		Map<Integer, PreparedStatement> num2Statement = new HashMap<Integer, PreparedStatement>();
-		String sql = "SELECT DISTINCT OB_CATEGORY_UUID FROM "+queryDataTable;  //$NON-NLS-1$
-		logger.finest(sql);
-		try(ResultSet rs = c.createStatement().executeQuery(sql)) {
-			while (rs.next()) {
-				UUID uuid = (UUID) rs.getObject(1);
-				if (uuid == null)
-					continue;
-				String[] names = getCategoryLabels(uuid,locale, session);
-				int count = names.length;
-				int depth = Math.min(categoryCount + 1, count);	//the full category name may be longer than the number of columns in cross-ca analysis 
-				PreparedStatement statement = num2Statement.get(count); //try to reuse already created prepare statement
-				if (statement == null) {
-					//that means that we didn't create update statement for this number of columns to update -> create one
-					StringBuilder colunms = new StringBuilder();
-					for (int j = 0; j < depth; j++) {
-						if (j > 0){
-							colunms.append(", "); //$NON-NLS-1$
-						}
-						colunms.append("category_").append(j).append("=?"); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-					sql = "UPDATE "+queryDataTable+" SET "+colunms.toString()+" where OB_CATEGORY_UUID = ?"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					logger.finest(sql);
-					statement = c.prepareStatement(sql);
-					
-					num2Statement.put(count, statement);
-				}
-				
-				for (int i = 0; i <  depth; i++) {
-					statement.setString(i+1, names[i]);
-				}
-				statement.setObject( depth+1, uuid);
-				statement.executeUpdate();
-			}
-		}
-	}
-	
 	private void populateTemporaryTableExtra(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
@@ -228,10 +175,11 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 			logger.finest(sql);
 			c.createStatement().execute(sql);
 		}
-		populateTemporaryTableNameObjExtra("surveydesign_uuid", "surveydesign_name", queryDataTable, c, session);  //$NON-NLS-1$//$NON-NLS-2$
-
+		//survey design name
+		updateLabel(c, queryDataTable, "surveydesign_uuid", "surveydesign_name");
+		
 		//ca information
-		populateCaDetails(c, queryDataTable, query);
+		populateCaDetails(c, queryDataTable, "ca_uuid", query);
 
 		//add observers
 		StringBuilder sqla = new StringBuilder();
@@ -266,43 +214,19 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		populateMissionLeader(c, session, queryDataTable);
 		
 		//populating categories
-		populateTemporaryTableCategory(c, session);
+		populateTemporaryTableCategory(c, session, caFilter, queryDataTable);
 
 		//waypoint observation list attributes
-		WpoaLinkedData listData = new WpoaLinkedData("_list", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, queryDataTable, listData);
+		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable +"_list", "list_element_uuid");
 
 		//waypoint observation tree attributes
-		WpoaLinkedData treeData = new WpoaLinkedData("_tree", "tree_node_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-			}
-		};
-		populateAdditionalWpoaTable(c, session, queryDataTable, treeData);
+		populateAdditionalWpoaTable(c, session, queryDataTable, queryDataTable+ "_tree", "tree_node_uuid");
 
 		//mission attributes
-		WpoaLinkedData mListData = new WpoaLinkedData("_mlist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-			}
-		};
-		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, mListData);
+		populateAdditionalMissionTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_mlist", "list_element_uuid");
 		
 		//sampling unit attributes
-		WpoaLinkedData suListData = new WpoaLinkedData("_sulist", "list_element_uuid") { //$NON-NLS-1$ //$NON-NLS-2$
-			@Override
-			public String getLabel(Session session, UUID cauuid, UUID uuid) {
-				return Label.getDescription(uuid, session);
-			}
-		};
-		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, suListData);
+		populateAdditionalSuTable(c, session, sdFilter, caFilter, queryDataTable, queryDataTable + "_sulist", "list_element_uuid");
 	}
 
 

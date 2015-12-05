@@ -23,22 +23,34 @@ package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
+import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
+import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.query.IEntityQueryColumnProvider;
 import org.wcs.smart.entity.query.model.EntityGriddedQuery;
 import org.wcs.smart.entity.query.model.EntityObservationQuery;
 import org.wcs.smart.entity.query.model.EntityWaypointQuery;
+import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
+import org.wcs.smart.entity.query.parser.internal.EntityAttributeFilter;
 import org.wcs.smart.observation.model.ObservationOptions;
+import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
+import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.model.filter.IFilter;
+import org.wcs.smart.query.model.filter.IFilterVisitor;
 
 /**
  * Query column provider implementation for entity queries.
@@ -94,9 +106,52 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			}
 		}
 
-		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(s, l, query)){
+		//TODO: do not recreate cafilter
+		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(s, l, caFilter)){
 			cols.add(q);
 		}
+		
+		//add entity attributes for any entity types included in filter
+		try{
+			Set<String> entityTypes = new HashSet<String>();
+		
+			((SimpleQuery)query).getFilter().getFilter().accept(new IFilterVisitor() {			
+				@Override
+				public void visit(IFilter filter) {
+					if (filter instanceof EntityAttributeFilter){
+						entityTypes.add(((EntityAttributeFilter) filter).getEntityKey());
+					}
+				}
+			});
+			
+			if (entityTypes.size() > 0){
+				String hql = "SELECT a.keyId as att_key, b.keyId as entity_key, c.type FROM EntityAttribute a join a.entityType b join a.dmAttribute c "
+						+ "WHERE b.conservationArea.uuid IN (:cauuids) and b.keyId in (:entitytypes)";
+				org.hibernate.Query hq = s.createQuery(hql);
+				hq.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
+				hq.setParameterList("entitytypes", entityTypes);
+				
+				List<Object[]> attributes = hq.list();
+				for (Object[] att : attributes){
+					String attributeKey = (String) att[0];
+					String entityType = (String) att[1];
+					AttributeType type = (AttributeType) att[2];
+					
+					//find attribute name for entity attribute; this is complicated as it may be defined or it may be the attribute
+					//we also need to support cross-ca 
+					EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class).add(Restrictions.eq("keyId", attributeKey))
+							.createCriteria("entityType", "et")
+							.add(Restrictions.eq("et.keyId", entityType))
+							.uniqueResult();
+					cols.add(new EntityAttributeQueryColumn(ea.getName(), entityType, attributeKey, type));
+					
+				}
+			}
+		}catch (Exception ex){
+			logger.log(Level.WARNING, ex.getMessage(), ex);
+		}
+		
 		
 		return cols;
 	}
@@ -122,7 +177,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 					|| item == FixedQueryColumn.FixedColumns.WAYPOINT_DISTANCE) {
 				add = QueryColumnUtils.trackDistanceDirection(ops);
 			} else if (item == FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER){
-				add = QueryColumnUtils.trackObserver(ops);
+				add = false;
 			}
 			if (add) {
 				cols.add(new FixedQueryColumn(item, Locale.getDefault()));

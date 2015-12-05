@@ -40,5 +40,5 @@ public interface IDbTableResultSet extends IQueryResult {
 		
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException;
 
-	public Object getValue(ResultSet rs, String columnKey, Connection c) throws SQLException;
+	public Object getValue(ResultSet rs, QueryColumn columnKey, Connection c) throws SQLException;
 }
