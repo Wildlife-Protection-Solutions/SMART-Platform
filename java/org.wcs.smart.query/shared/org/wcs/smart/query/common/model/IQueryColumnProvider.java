@@ -35,9 +35,11 @@ import org.wcs.smart.query.model.QueryColumn;
 public interface IQueryColumnProvider {
 
 	/**
-	 * Get default columns for query.
+	 * Get columns for query.
 	 * 
-	 * @param queryTypeKey
+	 * @param query the query to get columns for
+	 * @param l the locale for the column names
+	 * @param session current db session
 	 * @return
 	 */
 	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session);

@@ -139,12 +139,7 @@ public abstract class Query extends NamedItem {
 	}
 	
 	/**
-	 * @return the state of the query
-	 */
-	
-	
-	/**
-	 * @return the conservation area filter
+	 * @return the conservation area filter as stored in the database
 	 */
 	@Column(name="ca_filter")
 	public String getConservationAreaFilter(){
