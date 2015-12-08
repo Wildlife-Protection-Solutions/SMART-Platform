@@ -216,25 +216,25 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 						}
 					}
 //					myResults = new GridQueryResult(items.values());
-					result = new GridQueryResults(PsqlPatrolGridEngine.this, items.values());			
+					result = new GridQueryResults(PsqlPatrolGridEngine.this, items.values());
+					c.commit();
 				}catch (Exception ex){
+					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					if (ex instanceof SQLException) throw (SQLException)ex;
 					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
 					try{
 						dropTemporaryGridTable(c);
+						c.commit();
 					}catch (Exception ex){
+						c.rollback();
 						logger.log(Level.SEVERE, ex.getMessage(), ex);
 					}
-				}
-				c.commit();
+				}	
 			}
 		});
-//		myResults.setResultsMetadata(GridQueryResultMetadata.computeMetadata(myResults.getData()));
-//		return myResults;
-		
-		
 		return result;
 
 	}
@@ -799,6 +799,7 @@ public class PsqlPatrolGridEngine extends AbstractQueryEngine{
 			@Override
 			public void execute(Connection c) throws SQLException {
 				dropTemporaryGridTable(c);
+				c.commit();
 			}});
 	}
 

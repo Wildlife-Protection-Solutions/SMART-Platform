@@ -119,15 +119,22 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 							false, true);
 					
 					populateTemporaryTableExtra(c, cafilter.getConservationAreaFilterIds().size() > 1, session);
+					c.commit();
 				}catch (Exception ex){
+					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					if (ex instanceof SQLException) throw (SQLException)ex;
 					throw new SQLException(ex);
 
 				} finally {
-					filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, false);
+					try{
+						if (filterer != null) filterer.dropTemporaryTables(c);
+						c.commit();
+					}catch (Exception ex){
+						c.rollback();
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
+					}
 				}
-				c.commit();
 			}
 
 		});
@@ -141,10 +148,7 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
-
+	private void dropTemporaryTables(Connection c) throws SQLException {
 		dropTable(c, queryDataTable);
 	}
 
@@ -303,7 +307,8 @@ public class PsqlPatrolWaypointEngine extends AbstractQueryEngine {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c, true);		
+				dropTemporaryTables(c);
+				c.commit();
 			}});	
 	}
 

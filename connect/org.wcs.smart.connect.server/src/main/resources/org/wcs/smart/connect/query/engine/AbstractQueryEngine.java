@@ -454,9 +454,9 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 	 * @return
 	 */
 	public static ConservationAreaFilter parseConservationAreaFilter(Query query){
-		ConservationArea caTemp = new ConservationArea();
-		caTemp.setUuid(ConservationArea.MULTIPLE_CA);
-		query.setConservationArea(caTemp);
+//		ConservationArea caTemp = new ConservationArea();
+//		caTemp.setUuid(ConservationArea.MULTIPLE_CA);
+//		query.setConservationArea(caTemp);
 		
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			//TODO: get all valid cas from the database

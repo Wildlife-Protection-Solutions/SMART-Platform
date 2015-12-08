@@ -98,20 +98,26 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 							caFilter, true, true);
 					
 					populateTemporaryTableExtra(c, caFilter, session);
+					c.commit();
 				}catch (Exception ex){
+					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					if (ex instanceof SQLException) throw (SQLException)ex;
 					throw new SQLException(ex);
 				} finally {
-					if (filterer != null) filterer.dropTemporaryTables(c);
-					dropTemporaryTables(c, false);
-				}
-				c.commit();
+					// ensure temporary tables get dropped
+					try{
+						if (filterer != null) filterer.dropTemporaryTables(c);
+						c.commit();
+					}catch (Exception ex){
+						c.rollback();
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
+					}
+				}	
 			}
-
 		});
 		
-		PatrolObservationQueryResult results = new PatrolObservationQueryResult(this);
-		return results;
+		return new PatrolObservationQueryResult(this);
 	}
 
 	@Override
@@ -119,7 +125,8 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {
-				dropTemporaryTables(c, true);		
+				dropTemporaryTables(c);
+				c.commit();
 			}});
 		
 	}
@@ -129,9 +136,7 @@ public class PsqlPatrolObservationEngine extends AbstractQueryEngine {
 	 * @param c connection 
 	 * @throws SQLException
 	 */
-	private void dropTemporaryTables(Connection c, boolean fullDrop) throws SQLException {
-		if (!fullDrop)
-			return;
+	private void dropTemporaryTables(Connection c) throws SQLException {
 		//original table
 		dropTable(c, queryDataTable);
 		dropTable(c, queryDataTable + "_LIST"); //$NON-NLS-1$

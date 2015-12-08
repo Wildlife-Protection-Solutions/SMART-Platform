@@ -261,11 +261,18 @@ public class PsqlPatrolSummaryEngine extends AbstractQueryEngine{
 					sumResults.setData(data);
 					
 				}catch (Exception ex){
+					c.rollback();
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					if (ex instanceof SQLException) throw (SQLException)ex;
 					throw new SQLException(ex);
 				} finally {
-					// ensure temporary tables get dropped
-					dropTemporaryTables(c);
+					try{
+						dropTemporaryTables(c);
+						c.commit();
+					}catch (Exception ex){
+						c.rollback();
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
+					}
 				}
 				c.commit();
 			}

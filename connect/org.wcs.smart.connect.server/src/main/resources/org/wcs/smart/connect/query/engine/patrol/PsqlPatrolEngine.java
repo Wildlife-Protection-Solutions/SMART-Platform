@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Wildlife Conservation Society
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ * of the Software, and to permit persons to whom the Software is furnished to do
+ * so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package org.wcs.smart.connect.query.engine.patrol;
 
 import java.sql.Connection;
@@ -93,6 +114,7 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				
 				IFilterProcessor filterer = null;
 				try{
 					filterer = getFilterProcessor(query.getFilter().getFilterType(), filterTable);
@@ -107,21 +129,27 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 				
 				try {
-					try{
-						ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
-						filterer.processFilter(c, query.getFilter().getFilter(), dFilter, cafilter, false, false);
-					
-					}catch (Exception ex){
-						throw new SQLException (ex);
-					}
+					ConservationAreaFilter cafilter = AbstractQueryEngine.parseConservationAreaFilter(lquery);
+					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, cafilter, false, false);
 					getResults(c, session);
+					
+					c.commit();
 				}catch (Exception ex){
 					logger.log(Level.SEVERE, ex.getMessage(), ex);
+					c.rollback();
+					if (ex instanceof SQLException) throw (SQLException)ex;
+					throw new SQLException(ex);
 				} finally {
 					// ensure temporary tables get dropped
-					filterer.dropTemporaryTables(c);
+					try{
+						filterer.dropTemporaryTables(c);
+						dropTable(c, filterTable);
+						c.commit();
+					}catch (Exception ex){
+						c.rollback();
+						logger.log(Level.SEVERE, ex.getMessage(), ex);
+					}
 				}
-				c.commit();
 			}
 		});
 		return new PatrolQueryResult(this);
@@ -382,12 +410,13 @@ public class PsqlPatrolEngine extends AbstractQueryEngine{
 		c.createStatement().execute(sql.toString());
 	}
 
-		@Override
+	@Override
 	public void cleanUp(Session session) {
 		session.doWork(new Work(){
 			@Override
 			public void execute(Connection c) throws SQLException {
 				dropTable(c, queryDataTable);
+				c.commit();
 			}});
 		
 	}
