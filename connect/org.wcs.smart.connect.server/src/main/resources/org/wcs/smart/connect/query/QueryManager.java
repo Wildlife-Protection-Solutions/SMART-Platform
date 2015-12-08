@@ -31,7 +31,6 @@ import java.util.Locale;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Projections;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityGridEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntityObservationEngine;
 import org.wcs.smart.connect.query.engine.entity.PsqlEntitySummaryEngine;

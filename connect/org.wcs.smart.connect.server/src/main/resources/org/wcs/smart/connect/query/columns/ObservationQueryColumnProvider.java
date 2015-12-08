@@ -94,7 +94,6 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 			}
 		}
 		
-		//TODO: do not recreate cafilter
 		for (QueryColumn cq : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(cq);
 		}

@@ -33,10 +33,8 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.wcs.smart.ca.datamodel.Attribute;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.ca.datamodel.AttributeListItem;

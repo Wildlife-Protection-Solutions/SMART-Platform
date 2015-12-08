@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,6 +54,13 @@ import org.wcs.smart.query.model.filter.ConservationAreaFilter;
  *
  */
 public abstract class PsqlErEngine extends AbstractQueryEngine{
+	
+	//maps a mission attribute key to a database table column
+	//postgresql does not support column names that are 
+	//as long as our maximum key length so we cannot use
+	//the keyid as the column id
+	private HashMap<String, String> missionColumnMap = null;
+	private HashMap<String, String> suColumnMap = null;
 	
 	protected void populateMissionLeader(Connection c, Session session, String queryDataTable) throws SQLException{
 		StringBuilder sql = new StringBuilder();
@@ -101,12 +109,20 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		}
 	}
 
+	public String getMissionAttributeColumnName(String missionAttributeKey){
+		return missionColumnMap.get(missionAttributeKey);
+	}
+	
+	public String getSamplingUnitAttributeColumnName(String missionAttributeKey){
+		return suColumnMap.get(missionAttributeKey);
+	}
+	
 	protected void populateAdditionalMissionTable(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
 			String queryDataTable,
 			String tableName, String obsAttUuidColumn) throws SQLException {
-		
+		missionColumnMap = new HashMap<String, String>();
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
@@ -134,13 +150,13 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		c.createStatement().execute(sql.toString());
 		updateLabel(c, tableName, "uuid", "value");
 		
+		//TODO: add support of CCAA queries
 		List<MissionAttribute> attributes = new ArrayList<MissionAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
 			//get all mission properties
 			attributes = session.createCriteria(MissionAttribute.class)
 				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds()))
 				.list();
-			//TODO: this will not support ccaa queries (attributes will not be merged);
 		}else{
 			//get mission properties for survey design only
 			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
@@ -148,11 +164,17 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				attributes.add(mp.getAttribute());
 			}
 		}
+
+		int cnt = 0;
 		for (MissionAttribute ma : attributes){
+			cnt++;
+			String columnName = "ma_" + cnt;
+			missionColumnMap.put(ma.getKeyId(), columnName);
+			
 			sql = new StringBuilder();
 			sql.append("ALTER TABLE ");
 			sql.append(queryDataTable);
-			sql.append(" ADD ma_" + ma.getKeyId());
+			sql.append(" ADD " + columnName);
 			if (ma.getType() == AttributeType.NUMERIC){
 				sql.append(" double precision");
 			}else{
@@ -166,7 +188,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				StringBuilder attrSql = new StringBuilder();
 				attrSql.append("UPDATE ");
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET ma_" + ma.getKeyId() );
+				attrSql.append(" SET " + columnName );
 				attrSql.append(" = ");
 				if (ma.getType() == AttributeType.TEXT){
 					attrSql.append(" mpv.string_value ");	
@@ -186,7 +208,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				StringBuilder attrSql = new StringBuilder();
 				attrSql.append("UPDATE ");
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET ma_" + ma.getKeyId() );
+				attrSql.append(" SET  " + columnName );
 				attrSql.append(" = tmp.value");
 				attrSql.append(" FROM " + tableNamePrefix(MissionPropertyValue.class));
 				attrSql.append(", " + tableName + " tmp ");
@@ -210,6 +232,8 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 			ConservationAreaFilter caFilter,
 			String queryDataTable,
 			String tableName, String obsAttUuidColumn) throws SQLException {
+		suColumnMap = new HashMap<String, String>();
+		
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE "); //$NON-NLS-1$
 		sql.append(tableName);
@@ -236,25 +260,28 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		c.createStatement().execute(sql.toString());
 		updateLabel(c, tableName, "uuid", "value");
 		
+		//TODO: add support of CCAA queries
 		List<SamplingUnitAttribute> attributes = new ArrayList<SamplingUnitAttribute>();
 		if (sdFilter == null || sdFilter.getKey() == null){
-			//get all mission properties
 			attributes = session.createCriteria(SamplingUnitAttribute.class)
 				.add(Restrictions.in ("conservationArea.uuid" ,caFilter.getConservationAreaFilterIds()))
 				.list();
-			//TODO: this will not support ccaa queries (attributes will not be merged);
 		}else{
-			//get mission properties for survey design only
 			SurveyDesign sd = SurveyQueryColumnProvider.getSurveyDesign(sdFilter.getKey(), session, caFilter);
 			for (SurveyDesignSamplingUnitAttribute susd : sd.getSamplingUnitAttributes()){
 				attributes.add(susd.getSamplingUnitAttribute());
 			}
 		}
+		int cnt = 0;
 		for (SamplingUnitAttribute su : attributes){
+			cnt++;
+			String columnName = "su_" + cnt;
+			suColumnMap.put(su.getKeyId(), columnName);
+			
 			sql = new StringBuilder();
 			sql.append("ALTER TABLE ");
 			sql.append(queryDataTable);
-			sql.append(" ADD su_" + su.getKeyId());
+			sql.append(" ADD " + columnName );
 			if (su.getType() == AttributeType.NUMERIC){
 				sql.append(" double precision");
 			}else{
@@ -268,7 +295,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				StringBuilder attrSql = new StringBuilder();
 				attrSql.append("UPDATE ");
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET su_" + su.getKeyId() );
+				attrSql.append(" SET " + columnName );
 				attrSql.append(" = ");
 				if (su.getType() == AttributeType.TEXT){
 					attrSql.append(" suav.string_value ");	
@@ -288,7 +315,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				StringBuilder attrSql = new StringBuilder();
 				attrSql.append("UPDATE ");
 				attrSql.append(queryDataTable);
-				attrSql.append(" SET su_" + su.getKeyId() );
+				attrSql.append(" SET " + columnName );
 				attrSql.append(" = tmp.value");
 				attrSql.append(" FROM " + tableNamePrefix(SamplingUnitAttributeValue.class));
 				attrSql.append(", " + tableName + " tmp ");
@@ -310,6 +337,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 	protected void populateAdditionalWpoaTable(Connection c, Session session,
 			String queryDataTable,
 			String tableName, String obsAttUuidColumn) throws SQLException {
+	
 		String sql = "CREATE TABLE " + tableName + " (uuid UUID, value varchar(1024))"; //$NON-NLS-1$ //$NON-NLS-2$
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
@@ -318,12 +346,9 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 				+" FROM smart.wp_observation_attributes wpoa inner join "
 				+queryDataTable+" r on wpoa.OBSERVATION_UUID = r.OB_UUID"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		
-		
 		logger.finest(sql.toString());
 		c.createStatement().execute(sql);
 		updateLabel(c, tableName, "uuid", "value");
 		
 	}
-	
-	
 }

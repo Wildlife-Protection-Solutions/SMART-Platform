@@ -156,12 +156,15 @@ public class PsqlErGridEngine extends AbstractQueryEngine{
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+				if (caFilter.getConservationAreaFilterIds().size() > 1){
+					throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+				}
+				
 				SurveyDesignFilter dsFilter = null;
 				if (query.getSurveyDesign() != null){
 					dsFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
-				
-				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 				
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;

@@ -35,7 +35,7 @@ import org.wcs.smart.query.model.QueryColumn;
  *
  */
 public interface IDbTableResultSet extends IQueryResult {
-	
+		
 	public ResultSet getQueryResultSet(Connection c) throws SQLException;
 		
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException;

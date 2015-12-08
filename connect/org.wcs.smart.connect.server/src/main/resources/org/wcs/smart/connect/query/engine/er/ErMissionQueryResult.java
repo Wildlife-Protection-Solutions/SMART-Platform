@@ -33,6 +33,7 @@ import org.wcs.smart.ICoreLabelProvider;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
+import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
@@ -52,7 +53,6 @@ public class ErMissionQueryResult implements IDbTableResultSet {
 	public ResultSet getQueryResultSet(Connection c) throws SQLException{
 		return c.createStatement().executeQuery("SELECT * FROM " + engine.getQueryDataTable());
 	}
-
 	
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
 		Object v = getValue(rs, column, c);
@@ -102,13 +102,14 @@ public class ErMissionQueryResult implements IDbTableResultSet {
 			return rs.getDate("survey_startdate");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SURVEY_END.getKey())){
 			return rs.getDate("survey_enddate");
-		}else if (columnKey.startsWith("missionatt")){
+		}else if (columnKey.startsWith(MissionPropertyQueryColumn.KEY_PREFIX)){
 			String key = columnKey.split(":")[1];
-			if (rs.getMetaData().getColumnType(rs.findColumn("ma_"+key)) == Types.VARCHAR){
-				return rs.getString("ma_" + key);
+			String columnName = engine.getMissionAttributeColumnName(key);
+			if (rs.getMetaData().getColumnType(rs.findColumn(columnName)) == Types.VARCHAR){
+				return rs.getString(columnName);
 			}else{
 				//assume double
-				return rs.getDouble("ma_"+ key);
+				return rs.getDouble(columnName);
 			}
 		}
 		return null;

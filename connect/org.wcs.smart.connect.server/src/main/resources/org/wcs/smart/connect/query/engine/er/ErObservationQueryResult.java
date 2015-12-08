@@ -145,19 +145,21 @@ public class ErObservationQueryResult implements IDbTableResultSet {
 			return attributeToValue.get(key);
 		}else if (columnKey.startsWith(MissionPropertyQueryColumn.KEY_PREFIX)){
 			String key = columnKey.split(":")[1];
-			if (rs.getMetaData().getColumnType(rs.findColumn("ma_"+key)) == Types.VARCHAR){
-				return rs.getString("ma_" + key);
+			String columnName = engine.getMissionAttributeColumnName(key);
+			if (rs.getMetaData().getColumnType(rs.findColumn(columnName)) == Types.VARCHAR){
+				return rs.getString(columnName);
 			}else{
 				//assume double
-				return rs.getDouble("ma_"+ key);
+				return rs.getDouble(columnName);
 			}
 		}else if (columnKey.startsWith(SamplingUnitAttributeQueryColumn.KEY_PREFIX)){
 			String key = columnKey.split(":")[1];
-			if (rs.getMetaData().getColumnType(rs.findColumn("su_"+key)) == Types.VARCHAR){
-				return rs.getString("su_" + key);
+			String columnName = engine.getSamplingUnitAttributeColumnName(key);
+			if (rs.getMetaData().getColumnType(rs.findColumn(columnName)) == Types.VARCHAR){
+				return rs.getString(columnName);
 			}else{
 				//assume double
-				return rs.getDouble("su_"+ key);
+				return rs.getDouble(columnName);
 			}
 		}
 		return null;

@@ -34,6 +34,7 @@ import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.model.MissionTrack.TrackType;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
+import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
@@ -115,13 +116,14 @@ public class ErMissionTrackQueryResult implements IDbTableResultSet {
 			return rs.getDouble("mission_tracklength");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.SAMPLING_UNIT.getKey())){
 			return rs.getString("samplingunit_id");
-		}else if (columnKey.startsWith("missionatt")){
+		}else if (columnKey.startsWith(MissionPropertyQueryColumn.KEY_PREFIX)){
 			String key = columnKey.split(":")[1];
-			if (rs.getMetaData().getColumnType(rs.findColumn("ma_"+key)) == Types.VARCHAR){
-				return rs.getString("ma_" + key);
+			String columnName = engine.getMissionAttributeColumnName(key);
+			if (rs.getMetaData().getColumnType(rs.findColumn(columnName)) == Types.VARCHAR){
+				return rs.getString(columnName);
 			}else{
 				//assume double
-				return rs.getDouble("ma_"+ key);
+				return rs.getDouble(columnName);
 			}
 		}
 		return null;

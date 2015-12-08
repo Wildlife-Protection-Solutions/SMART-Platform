@@ -471,7 +471,13 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 					String p1 = engine.addParameterValue(attfilter.getValue());
 					String p2 = engine.addParameterValue(attfilter.getValue2());
 					
+					//order of execution in where in postgresql is not determined
+					//so it will try to parse all string values as dates and fail
+					//so here we check the attribute type before parsing the string value.
+
 					sql.append("("); //$NON-NLS-1$
+					sql.append(" CASE WHEN ");
+					sql.append(prefix(Attribute.class) + ".att_type = 'DATE' THEN");
 					sql.append(" DATE ("); //$NON-NLS-1$
 					sql.append(prefix(WaypointObservationAttribute.class));
 					sql.append(".string_value ) "); //$NON-NLS-1$
@@ -479,13 +485,7 @@ public class ObsWaypointFilterProcessor implements IFilterProcessor{
 					sql.append(" cast(" + p1 + " as date)"); //$NON-NLS-1$ //$NON-NLS-2$
 					sql.append(PsqlFilterToSqlGenerator.asSql(Operator.AND));
 					sql.append(" cast(" + p2 + " as date)"); //$NON-NLS-1$ //$NON-NLS-2$
-					sql.append(") "); //$NON-NLS-1$
-					
-					//TODO: postgresql does not quick fail; so this fails because it tries to parse a whole bunch of date strings which is should not do
-					//this probably needs to be re-written
-					//SELECT distinct wpo.wp_uuid FROM query_temp_289191535165062 join smart.wp_observation wpo on query_temp_289191535165062.wp_uuid = wpo.wp_uuid join smart.wp_observation_attributes wpoa on wpo
-					//		.uuid = wpoa.observation_uuid  join smart.dm_attribute a on a.uuid = wpoa.attribute_uuid  WHERE a.keyid='dateofbirth' AND ( DATE (wpoa.string_value ) between cast('2008-12-29' as date) and cast('2015-01-22'
-					//		 as date));
+					sql.append(" ELSE FALSE END ) "); //$NON-NLS-1$					
 				}
 			}
 			c.commit();

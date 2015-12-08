@@ -23,15 +23,14 @@ package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.Label;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
@@ -99,20 +98,23 @@ public class PsqlErMissionTrackEngine extends PsqlErEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+				if (caFilter.getConservationAreaFilterIds().size() > 1){
+					throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+				}
+				
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
 				}
 				IFilterProcessor filterer = new ErFilterProcessorMission(queryDataTable, PsqlErMissionTrackEngine.this, filter);
-				
-				
+
 				//create a date filter that caches the dates so the same
 				//dates are used for all parts of the query;
 				//otherwise different date filters will be computed
 				//for different parts of the queries
 				DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
-				try {
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+				try {	
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, false, false);
 					

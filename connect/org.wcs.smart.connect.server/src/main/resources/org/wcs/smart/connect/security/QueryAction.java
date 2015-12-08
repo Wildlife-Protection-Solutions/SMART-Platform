@@ -24,13 +24,9 @@ package org.wcs.smart.connect.security;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.ca.Language;
 import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.model.ConservationAreaInfo;
 import org.wcs.smart.connect.query.QueryManager;

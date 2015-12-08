@@ -25,17 +25,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.hibernate.Session;
 import org.hibernate.jdbc.Work;
-import org.wcs.smart.ca.Label;
-import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.engine.AbstractQueryEngine;
 import org.wcs.smart.connect.query.engine.IFilterProcessor;
 import org.wcs.smart.er.model.Mission;
@@ -105,6 +103,11 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 		session.doWork(new Work() {
 			@Override
 			public void execute(Connection c) throws SQLException {
+				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+				if (caFilter.getConservationAreaFilterIds().size() > 1){
+					throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+				}
+				
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
@@ -119,7 +122,6 @@ public class PsqlErObservationEngine extends PsqlErEngine {
 				
 				try {
 					filterer = getFilterProcessor(query.getFilter().getFilterType(), queryDataTable, filter);
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 					filterer.processFilter(c, query.getFilter().getFilter(), dFilter, 
 							caFilter, 
 							true, true);

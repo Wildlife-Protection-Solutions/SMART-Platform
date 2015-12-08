@@ -444,22 +444,20 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 
 	public abstract String getSurveySamplingUnitJoinFieldName();
 	
-	
-//	/**
-//	 * Creates the filter processor based on the query filter type
-//	 * 
-//	 * @param filterType
-//	 * @param queryDataTable
-//	 * @return
-//	 */
-//	protected abstract IFilterProcessor getFilterProcessor(IFilter.FilterType filterType, 
-//			String queryDataTable);
-	
+	/**
+	 * Parses the conservation area filter based on the query conservation
+	 * area string and the query uuid.  For ConservationArea based queries this
+	 * will ignore the query conservation area string and return only the ca the query
+	 * belongs to.  
+	 * 
+	 * @param query
+	 * @return
+	 */
 	public static ConservationAreaFilter parseConservationAreaFilter(Query query){
 		ConservationArea caTemp = new ConservationArea();
 		caTemp.setUuid(ConservationArea.MULTIPLE_CA);
 		query.setConservationArea(caTemp);
-//		
+		
 		if (query.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
 			//TODO: get all valid cas from the database
 			//and pass as second argument

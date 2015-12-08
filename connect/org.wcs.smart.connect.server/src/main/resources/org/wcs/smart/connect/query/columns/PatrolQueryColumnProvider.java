@@ -148,7 +148,6 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 			keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.WAYPOINT_OBSERVER,l));
 		}
 		
-		//TODO: do not recreate cafilter
 		for (QueryColumn qc : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(q))){
 			keys.add(qc);
 		}

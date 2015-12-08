@@ -44,7 +44,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.type.EntityType;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -87,7 +86,6 @@ import org.wcs.smart.patrol.query.model.PatrolQueryOption;
 import org.wcs.smart.patrol.query.model.PatrolQueryOptionType;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolGroupBy;
 import org.wcs.smart.patrol.query.parser.internal.summary.PatrolValueItem;
-import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
 import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
@@ -137,7 +135,6 @@ public class SummaryItemLabelProvider {
 	}
 	
 	public String getName(IValueItem item){
-		
 		if (item instanceof PatrolValueItem){
 			return ((PatrolValueItem) item).getPatrolValueOption().getGuiName(l);
 		}else if (item instanceof MissionValueItem){
@@ -146,10 +143,8 @@ public class SummaryItemLabelProvider {
 			CombinedValueItem citem = (CombinedValueItem)item;
 			return getName(citem.getPart1()) + " " + PER_LABEL + " " +  getName(citem.getPart2());
 		}else if (item instanceof CategoryValueItem){
-			//TODO: support for CCAA
 			return getName((CategoryValueItem)item, false);
 		}else if (item instanceof  AttributeValueItem){
-			//TODO: support for CCAA
 			return getName((AttributeValueItem)item, false);
 		}
 		return MessageFormat.format("Value item {0} not supported", item.asString());
@@ -164,16 +159,16 @@ public class SummaryItemLabelProvider {
 			CombinedValueItem citem = (CombinedValueItem)item;
 			return getFullName(citem.getPart1()) + " " + PER_LABEL + " " +  getName(citem.getPart2());
 		}else if (item instanceof CategoryValueItem){
-			//TODO: support for CCAA
 			getName((CategoryValueItem)item, true);
 		}else if (item instanceof  AttributeValueItem){
-			//TODO: support for CCAA
 			return getName((AttributeValueItem)item, true);
 		}
 		return MessageFormat.format("Value item {0} not supported", item.asString());
 	}
 	
 	private Attribute getAttribute(String key){
+		//find an attribute with the given key in 
+		//any of the conservation areas
 		return (Attribute) s.createCriteria(Attribute.class)
 				.add(Restrictions.eq("keyId", key))
 				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
@@ -182,6 +177,8 @@ public class SummaryItemLabelProvider {
 	}
 	
 	private Category getCategory(String catHkey){
+		//find a category with the given given
+		//in any of the conservation areas
 		return (Category) s.createCriteria(Category.class)
 				.add(Restrictions.eq("hkey", catHkey))
 				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
@@ -190,7 +187,8 @@ public class SummaryItemLabelProvider {
 	}
 	
 	private AttributeListItem getAttributeListIem(String key, String attributeKey){
-		//TODO: support ccaa queries 
+		//find the first attribute list item with the given key for one
+		//of the conservation areas; we just pick one
 		return (AttributeListItem) s.createCriteria(AttributeListItem.class)
 				.add(Restrictions.eq("keyId", key))
 				.createCriteria("attribute", "a")
@@ -201,7 +199,8 @@ public class SummaryItemLabelProvider {
 	}
 	
 	private AttributeTreeNode getAttributeTreeItem(String hkey, String attributeKey){
-		//TODO: support ccaa queries
+		//find the first attribute tree node with the given key for one
+		//of the conservation areas; we just pick one
 		return (AttributeTreeNode) s.createCriteria(AttributeTreeNode.class)
 				.add(Restrictions.eq("hkey", hkey))
 				.createCriteria("attribute", "a")
@@ -783,6 +782,7 @@ public class SummaryItemLabelProvider {
 		}
 		return allItems;
 	}
+	
 	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(ObserverGroupBy item){
 		String[] filterkeys = item.getFilterKeys();
@@ -956,10 +956,6 @@ public class SummaryItemLabelProvider {
 			if (sdFilter.getKey() == null) return null;
 			
 			//all sampling units for associated design
-//			List<SamplingUnit> sus = s
-//					.createQuery("SELECT su FROM SamplingUnit su ")//WHERE su.surveyDesign.keyId = :keyId")
-//					//.setString("keyId", sdFilter.getKey())
-//					.list();
 			List<Object[]> sus = s.createQuery("SELECT su.uuid, su.id FROM SamplingUnit su WHERE su.surveyDesign.keyId = :keyId")
 					.setString("keyId", sdFilter.getKey())
 					.list();

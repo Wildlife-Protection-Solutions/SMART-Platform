@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine.er;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,10 +91,8 @@ import org.wcs.smart.query.model.filter.IFilter.FilterType;
 import org.wcs.smart.query.model.filter.QueryFilter;
 import org.wcs.smart.query.model.filter.date.CachingDateFilter;
 import org.wcs.smart.query.model.filter.date.DayDateGroupBy;
-import org.wcs.smart.query.model.filter.date.EndHourGroupBy;
 import org.wcs.smart.query.model.filter.date.IDateGroupBy;
 import org.wcs.smart.query.model.filter.date.MonthDateGroupBy;
-import org.wcs.smart.query.model.filter.date.StartHourGroupBy;
 import org.wcs.smart.query.model.filter.date.YearDateGroupBy;
 import org.wcs.smart.query.model.summary.AreaGroupBy;
 import org.wcs.smart.query.model.summary.AttributeGroupBy;
@@ -182,6 +181,11 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 			@Override
 			public void execute(Connection c) throws SQLException {		
 				try {
+					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+					if (caFilter.getConservationAreaFilterIds().size() > 1){
+						throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+					}
+					
 					SurveyDesignFilter surveyFilter = null;
 					if (query.getSurveyDesign() != null){
 						surveyFilter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());
@@ -242,7 +246,6 @@ public class PsqlErSummaryEngine extends AbstractQueryEngine{
 					//for different parts of the queries
 					DateFilter dFilter = new DateFilter(query.getDateFilter().getDateFieldOption(), new CachingDateFilter(query.getDateFilter().getDateFilterOption()));				
 					
-					ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 					IFilterProcessor filterer = PsqlErSummaryEngine.this.getFilterProcessor(valueFilter.getFilterType(), valueTable, surveyFilter);
 					try{
 						filterer.processFilter(c, valueFilter.getFilter(), dFilter, caFilter, needsObservationValue, false);

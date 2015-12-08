@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.engine.er;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
@@ -100,6 +101,9 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 			@Override
 			public void execute(Connection c) throws SQLException {
 				ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
+				if (caFilter.getConservationAreaFilterIds().size() > 1){
+					throw new SQLException(MessageFormat.format("Query type ({0}) not supported for cross Conservation Area queries. ", query.getTypeKey()));
+				}
 				SurveyDesignFilter filter = null;
 				if (query.getSurveyDesign() != null){
 					filter = SurveyDesignFilter.createStringFilter(query.getSurveyDesign());

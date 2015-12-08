@@ -24,8 +24,8 @@ package org.wcs.smart.connect.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,7 +39,6 @@ import java.util.logging.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -52,10 +51,10 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.FileUtils;
+import org.hibernate.JDBCException;
 import org.hibernate.Session;
 import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.SmartUtils;
-import org.wcs.smart.connect.exceptions.SmartConnectException;
 import org.wcs.smart.connect.hibernate.HibernateManager;
 import org.wcs.smart.connect.query.QueryManager;
 import org.wcs.smart.connect.query.QueryProxy;
@@ -65,13 +64,11 @@ import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.connect.query.engine.IMemoryTableResultSet;
 import org.wcs.smart.connect.security.QueryAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.query.common.engine.IQueryEngine;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridResultItem;
 import org.wcs.smart.query.common.model.GriddedQuery;
 import org.wcs.smart.query.common.model.SimpleQuery;
-import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.DateFilter;
@@ -181,7 +178,7 @@ public class QueryApi extends HttpServlet{
 			}
 			//TODO: remove this maybe; this ensures we will not modify the original query
 			query = query.clone(query.getOwner());
-			
+						
 			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 			if(engine == null){
 				String error = MessageFormat.format("No query engine for query type {1}.", query.getTypeKey());
@@ -237,14 +234,14 @@ public class QueryApi extends HttpServlet{
 			//return accepted
 			Response rs = Response.ok(stream, MediaType.TEXT_PLAIN + "; charset=" + StandardCharsets.UTF_8.name())
 		            .build();
-			//f.delete();
 			return rs;
 		}catch (Exception ex){
-			//TODO: log me
-			
-			String error = MessageFormat.format("Error executing query: {0}", ex.getMessage());
+			String error = ex.getMessage();
+			if (ex instanceof JDBCException && ex.getCause() instanceof SQLException){
+				error = ex.getCause().getMessage();
+			}
 			logger.log(Level.SEVERE, error, ex);
-			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, error);
+			return createErrorResponse(Status.INTERNAL_SERVER_ERROR, MessageFormat.format("Error executing query: {0}", error));
 		}finally{
 			s.getTransaction().commit();
 		}

@@ -64,6 +64,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 	
 	@Override
 	public QueryColumn[] getQueryColumns(Query query, Locale l, Session session) {
+		
 		List<QueryColumn> cols = null;
 		try{
 			String queryTypeKey = query.getTypeKey();
@@ -106,7 +107,6 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			}
 		}
 
-		//TODO: do not recreate cafilter
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(s, l, caFilter)){
 			cols.add(q);

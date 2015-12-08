@@ -228,14 +228,13 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 				
 		//mission property columns
 		if (sd == null){
-			//TODO: this won't work for ccaa queries; need to merge returned rows by key
+			//TODO: support CCAA Queries
 			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
 					.add(Restrictions.in("conservationArea.uuid",caFilter.getConservationAreaFilterIds()))
 					.list(); //$NON-NLS-1$
 			for (MissionAttribute ma : all){
 				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
 			}
-			//TODO: same as above won't work for ccaa queries
 			List<SamplingUnitAttribute> su = session.createCriteria(SamplingUnitAttribute.class)
 					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
 					.list();
@@ -243,7 +242,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 				cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
 			}
 		}else{
-			//TODO: won't work for ccaa queries
+			//TODO: support CCAA Queries
 			for (MissionProperty mp : sd.getMissionProperties()){
 				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
 			}
@@ -257,7 +256,6 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		}
 		
 		//data model columns
-		//TODO: do not recreate cafilter
 		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(query))){
 			cols.add(q);
 		}
