@@ -323,12 +323,27 @@ public abstract class AbstractSmartImporter {
 		}
 		case BOOLEAN:
 		{
-			E eBool = eMap.get(av);
+			/*
+			 * av will be CT_id in case of regular data or getBooleanValue().toString() in case of default value
+			 * see CyberTrackerConfExporter.recordDefaultValue(CmAttribute cmAttr)
+			 */
 			Double value = null;
-			if (ElementsUtil.BOOL_TRUE.equals(eBool.getTag0())) {
+			if (Boolean.TRUE.toString().equals(av)) {
 				value = 1.0;
-			} else if (ElementsUtil.BOOL_FALSE.equals(eBool.getTag0())) {
+			} else if (Boolean.FALSE.toString().equals(av)) {
 				value = 0.0;
+			} else {
+				//this is a regular data
+				E eBool = eMap.get(av);
+				if (eBool == null) {
+					addWarning(MessageFormat.format(Messages.SmartImporter_Warn_BooleanValueProblem, av, e.getN()));
+					return null;
+				}
+				if (ElementsUtil.BOOL_TRUE.equals(eBool.getTag0())) {
+					value = 1.0;
+				} else if (ElementsUtil.BOOL_FALSE.equals(eBool.getTag0())) {
+					value = 0.0;
+				}
 			}
 			wpoa.setNumberValue(value);
 			break;
