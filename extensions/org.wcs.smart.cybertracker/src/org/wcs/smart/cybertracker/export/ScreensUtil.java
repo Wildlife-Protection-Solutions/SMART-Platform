@@ -74,14 +74,6 @@ public class ScreensUtil {
 	private ScreensObjectFactory screensFactory;
 	private CyberTrackerUtil ctUtil;
 	
-	protected class StartScreenLabels {
-		public StartScreenLabels() {}
-		
-		public String startItemLabel;
-		public String beginTitle;
-		public String beginItemLabel;
-	}
-	
 	protected ScreensUtil(CyberTrackerUtil ctUtil) {
 		this.ctUtil = ctUtil;
 		this.screensFactory = ctUtil.getScreensFactory();
@@ -102,15 +94,18 @@ public class ScreensUtil {
 		ElementsUtil.addElementsItem(elements, RESULT_DATATYPE, id.getItemId(), datatype);
 	}
 	
-	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, StartScreenLabels labels) {
-		List<CyberTrackerId> ids = ElementsUtil.addCustomElements(elements, labels.startItemLabel, Messages.PatrolScreens_ExitCyberTracker);
+	protected CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, StartScreensContent content) {
+		List<CyberTrackerId> ids = new ArrayList<CyberTrackerId>();
+		ids.add(content.getStartScreenItemId());
+		ids.addAll(ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_ExitCyberTracker));
 		Node nodeMain = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_Start_Title, ids, null, true);
 		container.screenNodes.add(nodeMain);
 		addGpsConfiguration(nodeMain, ctProps, 0);
 		addBatteryControl(nodeMain);
 
-		List<CyberTrackerId> idsBegin = ElementsUtil.addCustomElements(elements, labels.beginTitle);
-		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), labels.beginItemLabel, idsBegin, null, true);
+		List<CyberTrackerId> idsBegin = new ArrayList<CyberTrackerId>();
+		idsBegin.add(content.getBeginScreenItemId());
+		Node nodeBegin = ctUtil.createRadioNode(ids.get(0).getNodeId(), content.getBeginScreenName(), idsBegin, null, true);
 		Control beginControl2 = ScreensObjectFactory.getNavigationControl(nodeBegin);
 		beginControl2.setShowGPS(ICyberTrackerConstants.STR_TRUE);
 		container.screenNodes.add(nodeBegin);

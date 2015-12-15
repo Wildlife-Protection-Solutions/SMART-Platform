@@ -41,6 +41,7 @@ import org.wcs.smart.cybertracker.export.ElementsUtil;
 import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
+import org.wcs.smart.cybertracker.export.StartScreensContent;
 import org.wcs.smart.cybertracker.survey.internal.Messages;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
 import org.wcs.smart.cybertracker.model.elements.Elements;
@@ -283,11 +284,8 @@ public class SurveyScreensUtil extends ScreensUtil {
 	}
 	
 	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
-		StartScreenLabels labels = new StartScreenLabels();
-		labels.startItemLabel = Messages.SurveyScreensUtil_StartSurvey;
-		labels.beginTitle = Messages.SurveyScreensUtil_StartSurveyTitle;
-		labels.beginItemLabel = Messages.SurveyScreensUtil_BeginSurvey;
-		return addStartScreen(id, container, elements, ctProps, labels);
+		StartScreensContent content = StartScreensContent.create(elements, Messages.SurveyScreensUtil_StartSurvey, Messages.SurveyScreensUtil_StartSurveyTitle, Messages.SurveyScreensUtil_BeginSurvey);
+		return addStartScreen(id, container, elements, ctProps, content);
 	}
 
 	private List<CyberTrackerId> suToCtIds(Elements elements, List<SamplingUnit> items) {
