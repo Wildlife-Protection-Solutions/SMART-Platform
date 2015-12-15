@@ -238,6 +238,7 @@ public class Messages extends NLS {
 	public static String SightsMultiObsUtil_SigleGpsGroup_NoGps;
 	public static String SightsMultiObsUtil_UnknownCategory;
 	public static String SmartImporter_Warn_AttributeTag0_Missing;
+	public static String SmartImporter_Warn_BooleanValueProblem;
 	public static String SmartImporter_Warn_CannotParseDate;
 	public static String SmartImporter_Warn_CategoryTag0_Missing;
 	public static String SmartImporter_Warn_ElementNotDefined;
