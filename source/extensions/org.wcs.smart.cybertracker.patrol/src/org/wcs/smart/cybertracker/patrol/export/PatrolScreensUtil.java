@@ -43,11 +43,15 @@ import org.wcs.smart.cybertracker.export.MetaExportResult;
 import org.wcs.smart.cybertracker.export.MetaExportResult.IdNamePair;
 import org.wcs.smart.cybertracker.export.ScreensObjectFactory;
 import org.wcs.smart.cybertracker.export.ScreensUtil;
-import org.wcs.smart.cybertracker.patrol.internal.Messages;
+import org.wcs.smart.cybertracker.export.StartScreensContent;
 import org.wcs.smart.cybertracker.model.CyberTrackerProperties;
+import org.wcs.smart.cybertracker.model.ICyberTrackerConstants;
 import org.wcs.smart.cybertracker.model.elements.Elements;
+import org.wcs.smart.cybertracker.model.elements.GpsSightingAccuracy;
+import org.wcs.smart.cybertracker.model.elements.GpsWaypointAccuracy;
 import org.wcs.smart.cybertracker.model.screens.Controls.Control;
 import org.wcs.smart.cybertracker.model.screens.Node;
+import org.wcs.smart.cybertracker.patrol.internal.Messages;
 import org.wcs.smart.dataentry.model.ScreenOption;
 import org.wcs.smart.dataentry.model.ScreenOptionUuid;
 import org.wcs.smart.hibernate.HibernateManager;
@@ -71,7 +75,6 @@ import org.wcs.smart.util.UuidUtils;
  * @since 1.0.0
  */
 public class PatrolScreensUtil extends ScreensUtil {
-	//TODO: DO NOT USE Messages from main plugin!!!!!!!!!!!!!!!!
 	
 	private static final String GLOBAL_PATROL_TYPE = "GLOBAL_PATROL_TYPE"; //$NON-NLS-1$
 
@@ -111,7 +114,8 @@ public class PatrolScreensUtil extends ScreensUtil {
 		ConservationArea ca = SmartDB.getCurrentConservationArea();
 		Map<PatrolScreenOptionMeta, ScreenOption> screenOptions = PatrolHibernateManager.getScreenOptions(ca, session);
 		CyberTrackerProperties ctProps = CyberTrackerHibernateManager.getProperties(session);
-		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps);
+		ScreenOption so_type = screenOptions.get(PatrolScreenOptionMeta.TYPE);
+		CyberTrackerId id = addStartScreen(startId, result, elements, ctProps, so_type);
 		//patrol type & transport
 		List<PatrolType> patrolTypes = PatrolHibernateManager.getActivePatrolTypes(ca, session);
 		String errorMsg = validatePatrolTypes(patrolTypes);
@@ -324,12 +328,30 @@ public class PatrolScreensUtil extends ScreensUtil {
 		}
 	}
 	
-	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps) {
-		StartScreenLabels labels = new StartScreenLabels();
-		labels.startItemLabel = Messages.PatrolScreens_StartPatrol;
-		labels.beginTitle = Messages.PatrolScreens_Begin_Title;
-		labels.beginItemLabel = Messages.PatrolScreens_Begin;
-		return addStartScreen(id, container, elements, ctProps, labels);
+	private CyberTrackerId addStartScreen(CyberTrackerId id, MetaExportResult container, Elements elements, CyberTrackerProperties ctProps, ScreenOption so_type) {
+		CyberTrackerId elId = null;
+		if (so_type != null  && !so_type.isVisible() && so_type.getStringValue() != null) {
+			//patrol type is configured as a default value, but we still need to force speed limitation
+			//that is why we add this limitation here - for "Begin Patrol" screen option
+			int maxSpeed = getMaxSpeed(PatrolType.Type.valueOf(so_type.getStringValue()));
+			elId = addElementsGpsAccuracyItem(elements, Messages.PatrolScreens_Begin, null, 49, maxSpeed);
+		} else {
+			elId = ElementsUtil.addCustomElements(elements, Messages.PatrolScreens_Begin).get(0);
+		}
+		StartScreensContent content = StartScreensContent.create(elements, Messages.PatrolScreens_StartPatrol, Messages.PatrolScreens_Begin_Title, elId);
+		return addStartScreen(id, container, elements, ctProps, content);
+	}
+
+	private int getMaxSpeed(PatrolType.Type type) {
+		//TODO: remove this hardcode!!!
+		if (type == null)
+			return 10000;
+		switch (type) {
+		case GROUND: return 120;
+		case MARINE: return 70;
+		case AIR: return 500;
+		}
+		return 10000;
 	}
 
 	private String validatePatrolTypes(List<PatrolType> pTypes) {
@@ -374,13 +396,16 @@ public class PatrolScreensUtil extends ScreensUtil {
 	private CyberTrackerId addTypeTransportNodes(CyberTrackerId id, MetaExportResult container, Elements elements, List<PatrolType> pTypes, Map<PatrolScreenOptionMeta, ScreenOption> screenOptions, Session session) {
 		ScreenOption typeOption = screenOptions.get(PatrolScreenOptionMeta.TYPE);
 		if (typeOption == null || typeOption.isVisible()) {
+			List<CyberTrackerId> typeIds = new ArrayList<CyberTrackerId>();
 			List<String> types = new ArrayList<String>();
-			List<String> tag0Types = new ArrayList<String>();
 			for (PatrolType patrolType : pTypes) {
-				types.add(patrolType.getType().getGuiName(Locale.getDefault()));
-				tag0Types.add(patrolType.getType().name());
+				Type type = patrolType.getType();
+				final String name = type.getGuiName(Locale.getDefault());
+				final String tag0 = type.name();
+				types.add(name);
+				//TODO: remove hardcode!!!
+				typeIds.add(addElementsGpsAccuracyItem(elements, name, tag0, 49, getMaxSpeed(type)));
 			}
-			List<CyberTrackerId> typeIds = ElementsUtil.addCustomElements(elements, types, tag0Types);
 			String resultTypeElemId = createResultElement(RESULT_PATROL_TYPE, elements);
 			Node node = ctUtil.createRadioNode(id.getNodeId(), Messages.PatrolScreens_PatrolType, typeIds, resultTypeElemId, true);
 			Control control7 = ScreensObjectFactory.getRadioMainControl(node);
@@ -399,7 +424,11 @@ public class PatrolScreensUtil extends ScreensUtil {
 			}
 			return nextId;
 		} else {
-			Type value = typeOption.getStringValue() != null ? PatrolType.Type.valueOf(typeOption.getStringValue()) : PatrolType.Type.GROUND;
+			Type value = typeOption.getStringValue() != null ? PatrolType.Type.valueOf(typeOption.getStringValue()) : null;
+			if (value == null) {
+				CyberTrackerPlugIn.displayError(Messages.CyberTrackerExportHandler_ErrDialog_Title, Messages.PatrolScreensUtil_Error_Meta_Type, null);
+				return null;
+			}
 			String elId = (new CyberTrackerId()).getItemId();
 			ElementsUtil.addElementsItem(elements, "", elId, value.name()); //$NON-NLS-1$
 			container.defaultValues.add(createDefaultResultElement(RESULT_PATROL_TYPE, elements, elId));
@@ -452,4 +481,26 @@ public class PatrolScreensUtil extends ScreensUtil {
 		return result;
 	}
 	
+	public static CyberTrackerId addElementsGpsAccuracyItem(Elements elements, String name, String tag0, Integer dop, Integer maxSpeed) {
+		CyberTrackerId elemId = new CyberTrackerId();
+		
+		GpsSightingAccuracy gsa = new GpsSightingAccuracy();
+		gsa.setDilutionOfPrecision(dop);
+		gsa.setMaximumSpeed(maxSpeed);
+		
+		GpsWaypointAccuracy gwa = new GpsWaypointAccuracy();
+		gwa.setDilutionOfPrecision(dop);
+		gwa.setMaximumSpeed(maxSpeed);
+
+		Elements.List.Items.Item item = new Elements.List.Items.Item();
+		item.setName(name);
+		item.setId(elemId.getItemId());
+		item.setTag0(tag0);
+		item.setGpsAccuracyEnabled(ICyberTrackerConstants.STR_TRUE);
+		item.setGpsSightingAccuracy(gsa);
+		item.setGpsWaypointAccuracy(gwa);
+		elements.getList().getItems().getItem().add(item);
+		return elemId;
+	}
+
 }
