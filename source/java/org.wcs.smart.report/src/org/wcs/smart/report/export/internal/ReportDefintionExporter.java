@@ -41,9 +41,9 @@ import org.eclipse.birt.report.model.api.OdaDataSetHandle;
 import org.eclipse.birt.report.model.api.ReportDesignHandle;
 import org.eclipse.birt.report.model.api.SessionHandle;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.wcs.smart.ca.Label;
-import org.wcs.smart.common.filter.NullSmartProgressMonitor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryTypeManager;
@@ -201,7 +201,7 @@ public class ReportDefintionExporter implements IReportExporter {
 		
 		File tmpFile = File.createTempFile(UuidUtils.uuidToString(query.getUuid()), QUERYFILE_EXTENSION);
 		try{
-			definitionExporter.export(query, null, tmpFile, null, new NullSmartProgressMonitor());
+			definitionExporter.export(query, null, tmpFile, null, new NullProgressMonitor());
 			addFile(tmpFile, UuidUtils.uuidToString(query.getUuid()) + QUERYFILE_EXTENSION, zipOut);
 		}finally{
 			tmpFile.delete();
