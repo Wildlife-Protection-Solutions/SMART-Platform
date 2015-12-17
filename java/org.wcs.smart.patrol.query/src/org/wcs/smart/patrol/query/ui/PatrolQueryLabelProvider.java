@@ -91,7 +91,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_DAYS_TOTAL: return Messages.PatrolQueryOptions_TotalNumDays;   
 				case DISTANCE_TOTAL: return Messages.PatrolQueryOptions_TotalDistance;  
 				case NUM_PATROLHOURS_TOTAL: return Messages.PatrolQueryOptions_TotalNumHours1;
-				case NUM_FIELDHOURS_TOTAL: return "Total Number of Active Patrol Hours";
+				case NUM_FIELDHOURS_TOTAL: return Messages.PatrolQueryLabelProvider_TotalActivePatrolHours;
 				case MAN_HOURS_TOTAL: return Messages.PatrolQueryOptions_TotalPersonHours1;
 				case MAN_DAYS_TOTAL: return Messages.PatrolQueryOptions_TotalPersonDays;
 			}

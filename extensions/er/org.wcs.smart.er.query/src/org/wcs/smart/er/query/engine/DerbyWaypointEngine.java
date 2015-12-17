@@ -496,8 +496,8 @@ public class DerbyWaypointEngine extends DerbySurveyQueryEngine {
 		
 		it.setMissionUuid(UuidUtils.byteToUUID(rs.getBytes("mission_uuid"))); //$NON-NLS-1$
 		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionEnd(rs.getDate("mission_startdate")); //$NON-NLS-1$
-		it.setMissionStart(rs.getDate("mission_enddate")); //$NON-NLS-1$
+		it.setMissionStart(rs.getDate("mission_startdate")); //$NON-NLS-1$
+		it.setMissionEnd(rs.getDate("mission_enddate")); //$NON-NLS-1$
 		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
 		
 		it.setSamplingUnitUuid(UuidUtils.byteToUUID(rs.getBytes("samplingunit_uuid"))); //$NON-NLS-1$

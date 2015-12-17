@@ -14,6 +14,7 @@ Require-Bundle: org.eclipse.ui,
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: org.wcs.smart.intelligence.query,
+ org.wcs.smart.intelligence.query.export;x-friends:="org.wcs.smart.connect.query.test",
  org.wcs.smart.intelligence.query.map.udig,
  org.wcs.smart.intelligence.query.model
 Bundle-Vendor: org.wcs.smart

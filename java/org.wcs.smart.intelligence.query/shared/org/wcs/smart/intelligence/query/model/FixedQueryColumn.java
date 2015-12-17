@@ -21,8 +21,6 @@
  */
 package org.wcs.smart.intelligence.query.model;
 
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.Locale;
 
 import org.wcs.smart.SmartContext;
@@ -112,18 +110,6 @@ public class FixedQueryColumn extends QueryColumn {
 			}
 		}
 		return null; 
-	}
-	
-	public String getValueAsString(IResultItem queryResultItem) {
-		Object x = getValue(queryResultItem);
-		if (x == null){
-			return ""; //$NON-NLS-1$
-		}else if (x instanceof String){
-			return (String)x;
-		}else if (x instanceof Date){
-			return DateFormat.getDateInstance().format((Date)x); 
-		}
-		return x.toString();
 	}
 
 	/**

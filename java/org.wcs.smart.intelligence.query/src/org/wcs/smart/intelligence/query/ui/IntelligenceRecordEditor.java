@@ -66,22 +66,23 @@ public class IntelligenceRecordEditor extends QueryResultsEditor {
 	@Override
 	protected CellLabelProvider getColumnLabelProvider(QueryColumn column) {
 		if (column instanceof FixedQueryColumn){
-			return new FixedColumnLableProvider((FixedQueryColumn)column);
+			return new FixedColumnLableProvider((QueryColumn)column);
 		}
 		return null;
 	}
 
 	public class FixedColumnLableProvider extends ColumnLabelProvider{
 
-		private FixedQueryColumn col;
-		public FixedColumnLableProvider(FixedQueryColumn col){
+		private QueryColumn col;
+		
+		public FixedColumnLableProvider(QueryColumn col){
 			this.col = col;
 		}
 		
 		@Override
 		public String getText(Object element) {
 			if (element instanceof IResultItem){
-				return col.getValueAsString((IResultItem)element);
+				return  col.getValueAsString(col.getValue((IResultItem)element));
 			}
 			return super.getText(element);
 		}
