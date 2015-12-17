@@ -24,7 +24,7 @@ package org.wcs.smart.query.importexport;
 import java.io.File;
 import java.util.HashMap;
 
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.model.Query;
 
@@ -83,5 +83,5 @@ public interface IQueryExporter {
 	 * @throws Exception an exception if an error occurs
 	 * while exporting
 	 */
-	void export (Query query, IQueryResult results, File file, HashMap<String, Object> parameters, ISmartProgressMonitor monitor) throws Exception;
+	void export (Query query, IQueryResult results, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception;
 }

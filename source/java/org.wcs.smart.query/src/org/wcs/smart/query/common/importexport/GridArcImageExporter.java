@@ -25,11 +25,11 @@ import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.gce.arcgrid.ArcGridWriter;
 import org.geotools.gce.geotiff.GeoTiffFormat;
 import org.opengis.coverage.grid.GridCoverage;
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.GridQueryResult;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -69,7 +69,7 @@ public class GridArcImageExporter implements IQueryExporter {
 
 	@Override
 	public void export(Query query, IQueryResult result, File file,
-			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
+			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		
 		File sourceFile = ((GridQueryResult)result).getRasterFile();

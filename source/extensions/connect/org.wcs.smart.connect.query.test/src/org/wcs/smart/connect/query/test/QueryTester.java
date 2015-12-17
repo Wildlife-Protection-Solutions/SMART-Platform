@@ -9,13 +9,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.UUID;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
-import org.wcs.smart.common.filter.NullSmartProgressMonitor;
 import org.wcs.smart.connect.model.ConnectServer;
 import org.wcs.smart.connect.model.ConnectUser;
 import org.wcs.smart.connect.model.PasswordAesManager;
@@ -271,7 +269,7 @@ public class QueryTester {
 			return;
 		}
 		
-		ex.export(query,  desktop, f, new HashMap<String, Object>(), new NullSmartProgressMonitor());
+		ex.export(query,  desktop, f, new HashMap<String, Object>(), new NullProgressMonitor());
 		compareCsv(f, server);
 		f.delete();
 		
@@ -288,7 +286,7 @@ public class QueryTester {
 			return;
 		}
 		
-		ex.export(query,  desktop, f, new HashMap<String, Object>(), new NullSmartProgressMonitor());
+		ex.export(query,  desktop, f, new HashMap<String, Object>(), new NullProgressMonitor());
 		compareCsv(f, server);
 		f.delete();
 		
@@ -304,7 +302,7 @@ public class QueryTester {
 			return;
 		}
 		
-		ex.export(query,  desktop, f, new HashMap<String, Object>(), new NullSmartProgressMonitor());
+		ex.export(query,  desktop, f, new HashMap<String, Object>(), new NullProgressMonitor());
 		compareCsv(f, server);
 		f.delete();
 		

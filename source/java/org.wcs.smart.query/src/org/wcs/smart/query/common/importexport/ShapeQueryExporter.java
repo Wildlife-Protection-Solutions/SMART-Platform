@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.DefaultTransaction;
@@ -39,7 +40,6 @@ import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.locationtech.udig.catalog.URLUtils;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -150,7 +150,7 @@ public abstract class ShapeQueryExporter extends SimpleQueryExporter implements 
 	
 
 	@Override
-	public void export(Query query, IQueryResult results, File file, HashMap<String, Object> parameters, ISmartProgressMonitor monitor) throws Exception {
+	public void export(Query query, IQueryResult results, File file, HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 		this.query = ((SimpleQuery)query);
 		
 		if (results instanceof IPagedQueryResultSet){
