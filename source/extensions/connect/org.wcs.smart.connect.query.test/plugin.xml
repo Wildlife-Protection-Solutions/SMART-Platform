@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            allPopups="false"
+            locationURI="menu:org.eclipse.ui.main.menu?after=org.wcs.smart.report">
+         <menu
+               label="Connect Tests">
+            <command
+                  commandId="org.wcs.smart.connect.query.test.querytester"
+                  label="Test Queries"
+                  style="push">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            id="org.wcs.smart.connect.query.test.querytester"
+            name="Test Queries">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.handlers">
+      <handler
+            class="org.wcs.smart.connect.query.test.QueryTestHandler"
+            commandId="org.wcs.smart.connect.query.test.querytester">
+      </handler>
+   </extension>
+
+</plugin>
