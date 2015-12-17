@@ -49,11 +49,13 @@ import org.eclipse.jface.viewers.ColumnViewerEditorActivationStrategy;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerEditor;
 import org.eclipse.jface.viewers.TreeViewerFocusCellManager;
+import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.Transfer;
@@ -62,6 +64,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.ui.dialogs.FilteredTree;
+import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.menus.IMenuService;
 import org.osgi.service.event.Event;
 import org.wcs.smart.SmartPlugIn;
@@ -177,7 +181,40 @@ public class QueryListView {
 		gl.marginWidth = 0;
 		main.setLayout(gl);
 		
-		queryList = new TreeViewer(main, SWT.MULTI );
+		/* left data tree */
+		PatternFilter patternFilter = new PatternFilter(){			
+			protected boolean isChildMatch(Viewer viewer, Object element) {
+				Object parent = ((ITreeContentProvider)((TreeViewer)viewer).getContentProvider()).getParent(element);
+				if (parent != null) {
+					return (isLeafMatch(viewer, parent) ? true : isChildMatch(viewer, parent));
+				}
+				return false;
+			}
+
+			@Override
+			protected boolean isLeafMatch(Viewer viewer, Object element) {
+				if (element instanceof QueryEditorInput){
+					QueryEditorInput check = (QueryEditorInput)element;
+					if (wordMatches(check.getId()) || wordMatches(check.getName()) || wordMatches(check.getType().getGuiName())){
+						return true;
+					}
+				}
+				return isChildMatch(viewer, element);
+			}
+			
+		};
+		final FilteredTree tree = new FilteredTree(main, SWT.MULTI, patternFilter, true){
+			@Override
+		    protected void updateToolbar(boolean visible) {
+		        super.updateToolbar(visible);
+		        if (getFilterString() == null || getFilterString().isEmpty()){
+		        	treeViewer.expandToLevel(2);
+		        }
+		    }
+		};
+		tree.setBackground(tree.getViewer().getControl().getBackground());
+		
+		queryList = tree.getViewer();
 		queryList.getTree().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		queryList.setContentProvider(new QueryListContentProvider(true));
 		queryList.setLabelProvider(new QueryListLabelProvider());
