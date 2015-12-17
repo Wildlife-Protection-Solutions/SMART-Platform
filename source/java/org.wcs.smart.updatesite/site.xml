@@ -243,6 +243,12 @@
    <feature url="features/org.wcs.smart.er.feature.nl.mn_3.3.0.jar" id="org.wcs.smart.er.feature.nl.mn" version="3.3.0">
       <category name="ecologicalrecords"/>
    </feature>
+   <feature url="features/org.wcs.smart.cybertracker.patrol.feature_3.3.1.jar" id="org.wcs.smart.cybertracker.patrol.feature" version="3.3.1">
+      <category name="cybertracker"/>
+   </feature>
+   <feature url="features/org.wcs.smart.cybertracker.survey.feature_3.3.1.jar" id="org.wcs.smart.cybertracker.survey.feature" version="3.3.1">
+      <category name="cybertracker"/>
+   </feature>
    <category-def name="cybertracker" label="SMART CyberTracker Plug-in">
       <description>
          SMART-CyberTracker plug-in provides compatablitily with CybetTracker application. Using this plug-in you will be able to create and deploy CyberTracker applications based on your Data Model or Configurable Model. Plugin also provides the ability to work directly with handheld devices while exporting/importing data doing all the interaction with CyberTracker in background.
