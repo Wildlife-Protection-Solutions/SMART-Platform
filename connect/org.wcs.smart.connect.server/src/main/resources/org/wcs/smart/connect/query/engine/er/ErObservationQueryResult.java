@@ -25,21 +25,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.sql.Types;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.er.query.model.column.SamplingUnitAttributeQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Survey observation query results.

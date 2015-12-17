@@ -74,7 +74,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		return null;
 	}
 
-	public List<QueryColumn> getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -101,7 +101,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		return keys;
 	}
 	
-	public List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -123,7 +123,7 @@ public class ObservationQueryColumnProvider implements IObservationQueryColumnPr
 		return keys;
 	}
 	
-	public List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
 			cols.add(new GridQueryColumn(t,l));

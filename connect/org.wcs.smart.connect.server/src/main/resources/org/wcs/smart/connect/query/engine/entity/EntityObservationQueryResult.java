@@ -25,21 +25,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.entity.query.model.columns.EntityAttributeQueryColumn;
 import org.wcs.smart.entity.query.model.columns.FixedQueryColumn;
 import org.wcs.smart.query.model.AttributeQueryColumn;
 import org.wcs.smart.query.model.CategoryQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 /**
  * Result set of observation (all data) queries.
  * 

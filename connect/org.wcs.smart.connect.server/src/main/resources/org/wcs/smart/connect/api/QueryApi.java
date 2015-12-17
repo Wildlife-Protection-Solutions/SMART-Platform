@@ -257,9 +257,7 @@ public class QueryApi extends HttpServlet{
     @Path("")
 	@Produces({ MediaType.APPLICATION_JSON })
     public List<QueryProxy> getAllQueriesForUser( @QueryParam(value="username") String username){
-		List<QueryProxy> allowed = new ArrayList();
-		
-		
+		List<QueryProxy> allowed = new ArrayList<QueryProxy>();
 
 		Session s = HibernateManager.getSession(request.getServletContext(), request.getLocale());
 		s.beginTransaction();

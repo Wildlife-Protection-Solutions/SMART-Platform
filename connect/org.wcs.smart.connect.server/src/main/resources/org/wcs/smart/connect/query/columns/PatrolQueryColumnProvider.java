@@ -38,11 +38,9 @@ import org.wcs.smart.patrol.query.model.PatrolObservationQuery;
 import org.wcs.smart.patrol.query.model.PatrolQuery;
 import org.wcs.smart.patrol.query.model.PatrolWaypointQuery;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
-import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.GridQueryColumn;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Query column implementation for patrol queries.
@@ -78,7 +76,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return null;
 	}
 
-	public List<QueryColumn> getPatrolQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getPatrolQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		
 		if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
@@ -114,7 +112,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return keys;
 	}
 	
-	public List<QueryColumn> getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getObservationQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
@@ -155,7 +153,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return keys;
 	}
 	
-	public List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getWaypointQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> keys = new ArrayList<QueryColumn>();
 		ObservationOptions ops = QueryColumnUtils.getOptions(q.getConservationArea(), session);
 		if (q.getConservationArea().getUuid().equals(ConservationArea.MULTIPLE_CA)){
@@ -189,8 +187,7 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		return keys;
 	}
 	
-	public List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
-	
+	private List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
 			cols.add(new GridQueryColumn(t,l));

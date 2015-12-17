@@ -117,6 +117,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		return suColumnMap.get(missionAttributeKey);
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected void populateAdditionalMissionTable(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,
@@ -227,6 +228,7 @@ public abstract class PsqlErEngine extends AbstractQueryEngine{
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected void populateAdditionalSuTable(Connection c, Session session,
 			SurveyDesignFilter sdFilter,
 			ConservationAreaFilter caFilter,

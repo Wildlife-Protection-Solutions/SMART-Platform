@@ -241,7 +241,7 @@ public class ConservationAreas extends HttpServlet{
 		//user validatation is done inside the various functions
 		if (data == null){
 			return getConservationAreaInfo(caUuid);
-		}else if (data != null){
+		}else {
 			if (data.equalsIgnoreCase(DATA_PARAM_CHANGELOG_VALUE)){
 				if (version != null && revision != null){
 					return buildChangeLog(caUuid, version, revision);
@@ -256,8 +256,6 @@ public class ConservationAreas extends HttpServlet{
 				throw new SmartConnectException(Response.Status.BAD_REQUEST, MessageFormat.format("Bad request.  '{0}' not a valid value for data parameter.  Must be one of {{1} or {2}}.", data, DATA_PARAM_ALL_VALUE, DATA_PARAM_CHANGELOG_VALUE));			
 			}
 		}
-		//required for compile??
-		return null;
 	}
 	
 	/**

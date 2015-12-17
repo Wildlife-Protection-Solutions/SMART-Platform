@@ -402,6 +402,7 @@ public class SummaryItemLabelProvider {
 		return q.list();
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(AttributeGroupBy item){
 		String[]  filterHkeys = item.getFilterKeys();
 		
@@ -749,6 +750,7 @@ public class SummaryItemLabelProvider {
 		return allItems;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(MissionIdGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();
@@ -941,6 +943,7 @@ public class SummaryItemLabelProvider {
 		}
 		return allItems;
 	}
+	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(SamplingUnitGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> listItems = new ArrayList<ListItem>();
@@ -976,6 +979,7 @@ public class SummaryItemLabelProvider {
 		return listItems;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<ListItem> getName(SurveyIdGroupBy item){
 		String[] items = item.getRawItems();
 		List<ListItem> allItems = new ArrayList<ListItem>();

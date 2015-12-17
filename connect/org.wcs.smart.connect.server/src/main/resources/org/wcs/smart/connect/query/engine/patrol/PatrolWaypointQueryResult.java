@@ -24,16 +24,10 @@ package org.wcs.smart.connect.query.engine.patrol;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
-import java.text.DateFormat;
-import java.util.Date;
 
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.patrol.query.model.observation.FixedQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Result set of patrol waypoint queries.

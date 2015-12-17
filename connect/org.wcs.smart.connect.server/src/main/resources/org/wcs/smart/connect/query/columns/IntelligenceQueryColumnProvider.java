@@ -62,7 +62,7 @@ public class IntelligenceQueryColumnProvider implements
 		return null;
 	}
 
-	public QueryColumn[] getRecordColumns(Query q, Locale l, Session session) throws SQLException{
+	private QueryColumn[] getRecordColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (FixedQueryColumn.FixedColumns col : FixedQueryColumn.FixedColumns.values()){
 			if (col == FixedColumns.CA_ID || col == FixedColumns.CA_NAME){

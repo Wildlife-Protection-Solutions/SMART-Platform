@@ -37,11 +37,11 @@ import org.wcs.smart.query.model.QueryColumn;
  */
 public class GridQueryResults implements IMemoryTableResultSet<GridResultItem> {
 
-	private AbstractQueryEngine engine;
+//	private AbstractQueryEngine engine;
 	private Collection<GridResultItem> items;
 	
 	public GridQueryResults(AbstractQueryEngine engine, Collection<GridResultItem> items){
-		this.engine = engine;
+//		this.engine = engine;
 		this.items = items;
 	}
 

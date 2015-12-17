@@ -22,10 +22,7 @@
 package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -92,7 +89,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 	}
 	
 	
-	public List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
 			cols.add(new GridQueryColumn(t,l));
@@ -100,6 +97,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private List<MissionPropertyQueryColumn> getMissionPropertyColumns(Session session, Locale l, ConservationAreaFilter caFilter, SurveyDesign sd){
 		List<MissionPropertyQueryColumn> columns = new ArrayList<MissionPropertyQueryColumn>();
 		if (sd == null){
@@ -116,6 +114,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		QueryColumnUtils.sortByName(columns, l);
 		return columns;
 	}
+	
+	@SuppressWarnings("unchecked")
 	private List<SamplingUnitAttributeQueryColumn> getSamplingUnitAttributeColumns(Session session, Locale l, ConservationAreaFilter caFilter, SurveyDesign sd){
 		List<SamplingUnitAttributeQueryColumn> columns = new ArrayList<SamplingUnitAttributeQueryColumn>();
 		if (sd == null){
@@ -137,8 +137,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return columns;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<QueryColumn> getMissionQueryColumns(Query query, Locale l, Session session) {
+	private List<QueryColumn> getMissionQueryColumns(Query query, Locale l, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -169,8 +168,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public  List<QueryColumn> getMissionTrackQueryColumns(Query query, Locale l, Session session) {
+	private List<QueryColumn> getMissionTrackQueryColumns(Query query, Locale l, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -208,8 +206,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<QueryColumn> getObservationQueryColumns(Query query, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getObservationQueryColumns(Query query, Locale l, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);
@@ -256,8 +253,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public List<QueryColumn> getWaypointQueryColumns(Query query, Locale l, Session session) throws SQLException{
+	private List<QueryColumn> getWaypointQueryColumns(Query query, Locale l, Session session) throws SQLException{
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		ConservationAreaFilter caFilter = AbstractQueryEngine.parseConservationAreaFilter(query);
 		SurveyDesign sd = getSurveyDesign(((ISurveyQuery)query).getSurveyDesign(), session, caFilter);

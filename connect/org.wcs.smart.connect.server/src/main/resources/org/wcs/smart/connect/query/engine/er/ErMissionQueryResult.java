@@ -24,18 +24,12 @@ package org.wcs.smart.connect.query.engine.er;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.sql.Types;
-import java.text.DateFormat;
-import java.util.Date;
 
-import org.wcs.smart.ICoreLabelProvider;
-import org.wcs.smart.SmartContext;
 import org.wcs.smart.connect.query.engine.IDbTableResultSet;
 import org.wcs.smart.er.query.model.SurveyQueryColumn;
 import org.wcs.smart.er.query.model.column.MissionPropertyQueryColumn;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
 
 /**
  * Survey Mission Query Results

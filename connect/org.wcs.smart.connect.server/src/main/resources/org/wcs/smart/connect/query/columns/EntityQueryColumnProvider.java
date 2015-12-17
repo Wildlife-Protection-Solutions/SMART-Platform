@@ -22,10 +22,7 @@
 package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -90,7 +87,8 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 		return null;
 	}
 
-	public List<QueryColumn> getObservationQueryColumns(Query query, Locale l,  Session s) throws SQLException {
+	@SuppressWarnings("unchecked")
+	private List<QueryColumn> getObservationQueryColumns(Query query, Locale l,  Session s) throws SQLException {
 		ObservationOptions ops = QueryColumnUtils.getOptions(query.getConservationArea(), s);
 		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
@@ -163,7 +161,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 		return cols;
 	}
 	
-	public List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
+	private  List<QueryColumn> getGriddedQueryColumns(Query q, Locale l, Session session) throws SQLException{
 		List<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (GridQueryColumn.GridColumns t : GridQueryColumn.GridColumns.values()){
 			cols.add(new GridQueryColumn(t,l));
@@ -171,7 +169,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 		return cols;
 	}
 	
-	public List<QueryColumn> getWaypointQueryColumns(Query query, Locale l,  Session s) throws SQLException {
+	private  List<QueryColumn> getWaypointQueryColumns(Query query, Locale l,  Session s) throws SQLException {
 		ObservationOptions ops = QueryColumnUtils.getOptions(query.getConservationArea(), s);
 		ArrayList<QueryColumn> cols = new ArrayList<QueryColumn>();
 		for (int i = 0; i < FixedQueryColumn.FixedColumns.values().length; i++) {
