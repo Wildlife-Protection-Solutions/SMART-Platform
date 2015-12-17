@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.hibernate.Session;
-import org.wcs.smart.common.filter.SmartProgressMonitor;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.IQueryHibernateManager;
@@ -176,7 +175,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 					try{
 						outputFile = File.createTempFile(qi.getId(), ".xml"); //$NON-NLS-1$
 						HashMap<String, Object> params = new HashMap<String, Object>();
-						def.export(query, null, outputFile, params, new SmartProgressMonitor(monitor));
+						def.export(query, null, outputFile, params, monitor);
 						
 						Query q = importQuery(outputFile, qf);
 						if (q != null){

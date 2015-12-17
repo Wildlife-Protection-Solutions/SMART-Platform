@@ -26,7 +26,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.internal.Messages;
@@ -54,7 +54,7 @@ public abstract class SimpleQueryExporter {
 	 * 
 	 * @return <code>true</code> if export successful, <code>false</code> otherwise
 	 */
-	protected boolean export(ISmartProgressMonitor monitor) throws Exception{
+	protected boolean export(IProgressMonitor monitor) throws Exception{
 		if (data == null) {
 			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);
 		}

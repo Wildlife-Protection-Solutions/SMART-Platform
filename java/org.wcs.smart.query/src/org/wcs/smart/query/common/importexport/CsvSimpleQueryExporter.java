@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.engine.IResultItem;
@@ -142,7 +142,7 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 	@SuppressWarnings("unchecked")
 	@Override
 	public void export(Query query, IQueryResult result, File file,
-			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
+			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		if (parameters.get(DELIMITER_KEY) != null){
 			try{

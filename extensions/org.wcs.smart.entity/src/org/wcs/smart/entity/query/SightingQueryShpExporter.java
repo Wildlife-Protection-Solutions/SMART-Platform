@@ -24,9 +24,9 @@ package org.wcs.smart.entity.query;
 import java.io.File;
 import java.util.HashMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
 import org.wcs.smart.entity.map.EntityQueryDataSource;
 import org.wcs.smart.entity.map.EntityQueryDataSourceFeatureReader;
 import org.wcs.smart.query.common.engine.IPagedQueryResultSet;
@@ -65,7 +65,7 @@ public class SightingQueryShpExporter extends ShapeQueryExporter {
 	 */
 	@Override
 	public void export(Query query, IQueryResult results, File file, 
-			HashMap<String, Object> parameters, ISmartProgressMonitor monitor) throws Exception {
+			HashMap<String, Object> parameters, IProgressMonitor monitor) throws Exception {
 	
 		this.query = ((EntitySightingQuery)query);
 		super.setData((IPagedQueryResultSet)results, 

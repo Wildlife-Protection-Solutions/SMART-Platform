@@ -27,7 +27,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.intelligence.query.internal.Messages;
 import org.wcs.smart.intelligence.query.model.IntelligenceSummaryQuery;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -73,7 +73,7 @@ public class IntelligenceSummaryCsvExporter implements ICsvQueryExporter {
 	@Override
 	public void export (Query query, IQueryResult result, 
 			File file, HashMap<String, Object> parameters, 
-			ISmartProgressMonitor monitor) throws Exception{
+			IProgressMonitor monitor) throws Exception{
 	
 		if (result == null){
 			throw new Exception(Messages.IntelligenceSummaryCsvExporter_MustRunQuery);

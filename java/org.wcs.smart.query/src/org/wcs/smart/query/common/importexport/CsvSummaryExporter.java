@@ -27,7 +27,7 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
-import org.wcs.smart.common.filter.ISmartProgressMonitor;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.wcs.smart.query.common.engine.IQueryResult;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.common.model.SummaryQueryResult;
@@ -80,7 +80,7 @@ public class CsvSummaryExporter implements ICsvQueryExporter {
 	 */
 	@Override
 	public void export(Query query, IQueryResult result, File file,
-			HashMap<String, Object> parameters, ISmartProgressMonitor monitor)
+			HashMap<String, Object> parameters, IProgressMonitor monitor)
 			throws Exception {
 		SummaryQuery sumQuery = (SummaryQuery)query;
 		SummaryQueryResult results = (SummaryQueryResult) sumQuery.getCachedResults();
