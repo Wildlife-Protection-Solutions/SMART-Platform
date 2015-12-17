@@ -49,12 +49,7 @@ public class GridColumnLabelProvider extends ColumnLabelProvider {
 	 */
 	public String getText(Object element) {
 		if (element instanceof GridResultItem) {
-			Object value = column.getValue((GridResultItem) element);
-			if (value == null) {
-				return ""; //$NON-NLS-1$
-			} else {
-				return value.toString();
-			}
+			return column.getValueAsString(column.getValue((GridResultItem) element));
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
 	}

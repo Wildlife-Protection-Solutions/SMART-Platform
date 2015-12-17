@@ -8,5 +8,6 @@ package org.wcs.smart.patrol.query.model;
 public enum PatrolQueryOptionType{
 	BOOLEAN, 
 	UUID, 
-	STRING,KEY
+	STRING,
+	KEY
 }

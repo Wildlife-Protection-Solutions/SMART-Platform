@@ -21,6 +21,12 @@
  */
 package org.wcs.smart.query.model;
 
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.query.common.engine.IResultItem;
 
 
@@ -152,12 +158,62 @@ public abstract class QueryColumn implements Cloneable{
 	
 	/**
 	 * @param item
+	 * 
 	 * @return for a given query result item returns
 	 * the object associated with this column
 	 */
 	public abstract Object getValue(IResultItem item) ;
+
+	/**
+	 * @param item
+	 * 
+	 * @return for a given query result item returns
+	 * the string representation of the object associated 
+	 * with this column
+	 */
+	public String getValueAsString(Object value){
+		if (value == null) return ""; //$NON-NLS-1$
+		if (type == ColumnType.BOOLEAN) {
+			if (value instanceof Double){
+				if ((Double)value < 0.5){
+					//false
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());	
+				}else{
+					//true
+					return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());	
+				}
+			}
+			if ((Boolean) value) {
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.TRUE, Locale.getDefault());
+			} else {
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, Locale.getDefault());
+			}
+		} else if (type == ColumnType.DATE) {
+			return DateFormat.getDateInstance().format((Date) value);
+		} else if (type == ColumnType.TIME) {
+			return DateFormat.getTimeInstance().format((Date) value);
+		} else if (type == ColumnType.STRING ||
+				type == ColumnType.TIME_STR) {
+			return (String) value;
+		} else if (type == ColumnType.INTEGER) {
+			return String.valueOf((Integer) value);
+		} else if (type == ColumnType.LONG) {
+			return String.valueOf((Long) value);
+		} else if (type == ColumnType.NUMBER) {
+			if (value instanceof Double) {
+				return String.valueOf((Double) value);
+			} else if (value instanceof Float) {
+				return String.valueOf((Float) value);
+			} else if (value instanceof Integer) {
+				return String.valueOf((Integer) value);
+			}
+		}
+		return ""; //$NON-NLS-1$
+
+	}
 	
-	/** Clones the object
+	/** 
+	 * Clones the object
 	 * @see java.lang.Object#clone()
 	 */
 	public abstract QueryColumn clone();

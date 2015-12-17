@@ -54,7 +54,7 @@ public abstract class SimpleQueryExporter {
 	 * 
 	 * @return <code>true</code> if export successful, <code>false</code> otherwise
 	 */
-	public boolean export(ISmartProgressMonitor monitor) throws Exception{
+	protected boolean export(ISmartProgressMonitor monitor) throws Exception{
 		if (data == null) {
 			throw new Exception(Messages.SimpleQueryExporter_Error_QueryNotRun);
 		}
@@ -115,7 +115,7 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	public void setData(Collection<? extends IResultItem> data, List<QueryColumn> queryColumns, File outputFile ) {
+	protected void setData(Collection<? extends IResultItem> data, List<QueryColumn> queryColumns, File outputFile ) {
 		this.data = data != null ? data.iterator() : null;
 		dataSize = data != null ? data.size() : 0;
 		this.queryColumns = queryColumns;
@@ -128,7 +128,7 @@ public abstract class SimpleQueryExporter {
 	 * @param queryColumns the columns to export
 	 * @param outputFile the file to export to
 	 */
-	public void setData(IPagedQueryResultSet derbyResult, List<QueryColumn> queryColumns, File outputFile ) {
+	protected void setData(IPagedQueryResultSet derbyResult, List<QueryColumn> queryColumns, File outputFile ) {
 		this.data = derbyResult != null ? derbyResult.iterator(IPagedQueryResultSet.MAP_PAGE_SIZE) : null;
 		this.dataSize = derbyResult != null ? derbyResult.getItemCount() : 0;
 		this.queryColumns = queryColumns;

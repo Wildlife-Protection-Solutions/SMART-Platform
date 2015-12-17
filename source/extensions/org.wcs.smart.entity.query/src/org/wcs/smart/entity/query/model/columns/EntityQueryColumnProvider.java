@@ -21,7 +21,10 @@
  */
 package org.wcs.smart.entity.query.model.columns;
 
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -101,13 +104,22 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 			protected IStatus run(IProgressMonitor monitor) {
 				Session session = HibernateManager.openSession();
 				try{
+					List<EntityAttributeQueryColumn> cols = new ArrayList<EntityAttributeQueryColumn>();
 					for (String entityType : entityTypes){
 						EntityType et = EntityHibernateManager.getEntityType(entityType, session);
 						for (EntityAttribute ea : et.getAttributes()){
 							EntityAttributeQueryColumn newcol = new EntityAttributeQueryColumn("[" + et.getName() + "]" + ea.getName(), et.getKeyId(), ea.getKeyId(), ea.getDmAttribute().getType()); //$NON-NLS-1$ //$NON-NLS-2$
-							queryColumns.add(newcol);
+							cols.add(newcol);
 						}
 					}
+					Collections.sort(cols, new Comparator<EntityAttributeQueryColumn>() {
+						@Override
+						public int compare(EntityAttributeQueryColumn o1,
+								EntityAttributeQueryColumn o2) {
+							return Collator.getInstance().compare(o1.getName(), o2.getName());
+						}
+					});
+					queryColumns.addAll(cols);
 				}catch (Exception ex){
 					EntityQueryPlugIn.log(ex.getMessage(), ex);
 				}finally{

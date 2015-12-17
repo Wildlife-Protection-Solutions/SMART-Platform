@@ -21,14 +21,9 @@
  */
 package org.wcs.smart.er.query.ui.columns;
 
-import java.text.DateFormat;
-import java.util.Date;
-
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.wcs.smart.query.common.engine.IResultItem;
 import org.wcs.smart.query.model.QueryColumn;
-import org.wcs.smart.query.model.QueryColumn.ColumnType;
-import org.wcs.smart.ui.SmartLabelProvider;
 
 /**
  * Class represents one of the fixed table columns that do not change from
@@ -61,40 +56,9 @@ public class FixedColumnLabelProvider extends ColumnLabelProvider {
 	 */
 	public String getText(Object element) {
 		if (element instanceof IResultItem) {
-			return asString(column.getValue((IResultItem) element),
-					column.getType());
+			return column.getValueAsString(column.getValue((IResultItem) element));
 		}
 		return element == null ? "" : element.toString();//$NON-NLS-1$
 	}
 
-	private static String asString(Object value, ColumnType type) {
-		if (value == null) return ""; //$NON-NLS-1$
-		if (type == ColumnType.BOOLEAN) {
-			if ((Boolean) value) {
-				return SmartLabelProvider.BOOLEAN_TRUE_LABEL;
-			} else {
-				return SmartLabelProvider.BOOLEAN_FALSE_LABEL;
-			}
-		} else if (type == ColumnType.DATE) {
-			return DateFormat.getDateInstance().format((Date) value);
-		} else if (type == ColumnType.TIME) {
-			return DateFormat.getTimeInstance().format((Date) value);
-		} else if (type == ColumnType.STRING) {
-			return (String) value;
-		} else if (type == ColumnType.INTEGER) {
-			return String.valueOf((Integer) value);
-		} else if (type == ColumnType.LONG) {
-			return String.valueOf((Long) value);
-		} else if (type == ColumnType.NUMBER) {
-			if (value instanceof Double) {
-				return String.valueOf((Double) value);
-			} else if (value instanceof Float) {
-				return String.valueOf((Float) value);
-			} else if (value instanceof Integer) {
-				return String.valueOf((Integer) value);
-			}
-		}
-		return ""; //$NON-NLS-1$
-
-	}
 }

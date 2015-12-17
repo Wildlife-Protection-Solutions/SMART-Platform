@@ -26,6 +26,9 @@ import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import org.wcs.smart.common.filter.ISmartProgressMonitor;
@@ -40,6 +43,7 @@ import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.IMemoryQuery;
 import org.wcs.smart.query.model.IPagedQuery;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryColumn;
 import org.wcs.smart.util.SharedUtils;
 
 import au.com.bytecode.opencsv.CSVWriter;
@@ -96,12 +100,8 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 		
 		String data[] = new String[queryColumns.size()]; 
 		for (int i = 0; i < data.length; i ++){
-			Object temp = queryColumns.get(i).getValue(row);
-			if(temp != null){
-				data[i] = temp.toString();
-			}else{
-				data[i] = ""; //$NON-NLS-1$
-			}
+			QueryColumn qc = queryColumns.get(i);
+			data[i] = qc.getValueAsString(qc.getValue(row));
 		}
 		writer.writeNext(data);
 	}
@@ -149,15 +149,34 @@ public class CsvSimpleQueryExporter extends SimpleQueryExporter implements ICsvQ
 				this.delimiter = (Character) parameters.get(DELIMITER_KEY);
 			}catch(Exception ex){}
 		}
-		if (result instanceof IPagedQueryResultSet){
-			super.setData((IPagedQueryResultSet)result, ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
-		}else if (result instanceof MemoryQueryResult){
-			super.setData( ((MemoryQueryResult)result).getData(), 
-					((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
-		}else if (result instanceof GridQueryResult){
-			super.setData( ((GridQueryResult)result).getData(), 
-					((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null), file);
+		// filter columns 
+		//in SMART this returns all possible query columns; we only want to include visible query columns
+		List<QueryColumn> columns = ((SimpleQuery)query).getQueryColumns(Locale.getDefault(), null);
+		
+		if (((SimpleQuery)query).getVisibleColumns() != null){
+			HashSet<String> columnKeys = new HashSet<String>();
+		
+			String[] keys = ((SimpleQuery)query).getVisibleColumns().split(",");
+			for (String key : keys){
+				columnKeys.add(key);
+			}
+			for (Iterator<QueryColumn> iterator = columns.iterator(); iterator.hasNext();) {
+				QueryColumn column = (QueryColumn) iterator.next();
+				if (!columnKeys.contains(column.getKey())){
+					iterator.remove();
+				}
+			}
 		}
+		
+		//set data
+		if (result instanceof IPagedQueryResultSet){
+			super.setData((IPagedQueryResultSet)result, columns, file);
+		}else if (result instanceof MemoryQueryResult){
+			super.setData( ((MemoryQueryResult<IResultItem>)result).getData(), columns, file);
+		}else if (result instanceof GridQueryResult){
+			super.setData( ((GridQueryResult)result).getData(), columns, file);
+		}
+		//export
 		super.export(monitor);		
 	}
 }
