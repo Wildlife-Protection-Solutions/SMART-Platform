@@ -192,7 +192,7 @@ public class CsvExporter {
 		
 		try(CSVWriter writer = new CSVWriter(
 				new OutputStreamWriter(new FileOutputStream(f.getAbsoluteFile()), "UTF-8"), //$NON-NLS-1$ 
-				delimiter, '"',delimiter)){ 
+				delimiter, '"',"\n")){ 
 		
 			for (int i = 0; i < results.getColumnHeaderValues().length; i ++){
 				String[] data = new String[results.getNumDataColumns() + results.getRowHeaders().size()];

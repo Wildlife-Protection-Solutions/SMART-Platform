@@ -24,6 +24,7 @@ package org.wcs.smart.connect.query.columns;
 import java.sql.SQLException;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -127,7 +128,7 @@ public class QueryColumnUtils {
 		
 		int ccnt = QueryManager.INSTANCE.getCategoryDepth(session, caFilter);
 		for (int i = 0; i < ccnt; i ++){
-			keys.add(new CategoryQueryColumn("Category " + i, i){
+			keys.add(new CategoryQueryColumn("Observation Category " + i, i){
 				@Override
 				public Object getValue(IResultItem item) {
 					return null;
@@ -147,7 +148,7 @@ public class QueryColumnUtils {
 		attquery.setParameter("cnt", new Long(caFilter.getConservationAreaFilterIds().size()));
 		
 		//this gets the attribute name based on the requested locale name query 
-		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end ";
+		String nameQueryHql = "SELECT a.value FROM Label a, Attribute c where c.conservationArea.uuid in (:cauuids) AND a.id.element = c.uuid and c.keyId = :attributeKey ORDER By case when upper(a.id.language.code) = :code1 then 1 else case when upper(a.id.language.code) = :code2 then 2 else case when a.id.language.default = true then 3 else 4 end end end ";
 		String allLocal = l.toString().toUpperCase();
 		String local = l.getLanguage().toUpperCase();
 		org.hibernate.Query nameQuery = session.createQuery(nameQueryHql);
@@ -161,6 +162,7 @@ public class QueryColumnUtils {
 			nameQuery.setParameter("attributeKey", keyid);
 			nameQuery.setParameter("code1", allLocal);
 			nameQuery.setParameter("code2", local);
+			nameQuery.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
 			nameQuery.setMaxResults(1);
 			String name = (String) nameQuery.uniqueResult();
 			
@@ -177,14 +179,17 @@ public class QueryColumnUtils {
 				}
 			});
 		}
-
-		Collections.sort(attributeColumns, new Comparator<QueryColumn>() {
+		sortByName(attributeColumns, l);
+		keys.addAll(attributeColumns);
+		return keys;
+	}
+	
+	public static void sortByName(List<? extends QueryColumn> columns, Locale l){
+		Collections.sort(columns, new Comparator<QueryColumn>() {
 			@Override
 			public int compare(QueryColumn o1, QueryColumn o2) {
 				return Collator.getInstance(l).compare(o1.getName(), o2.getName());
 			}
 		});
-		keys.addAll(attributeColumns);
-		return keys;
 	}
 }

@@ -649,7 +649,7 @@ public class PsqlEntitySummaryEngine extends AbstractQueryEngine{
 			for (int i = 0; i < groupBy.getGroupBys().size(); i ++){
 				IGroupBy gb = groupBy.getGroupBys().get(i);
 				
-				String key = gb.getKeyPart(); //$NON-NLS-1$
+				String key = gb.getKeyPart() + ":"; //$NON-NLS-1$
 				switch (gb.getType()) {
 					case STRING:
 						key += rs.getString(rsindex++);

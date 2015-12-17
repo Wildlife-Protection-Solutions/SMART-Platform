@@ -46,10 +46,10 @@ public class SurveyQueryLabelProvider implements ISurveyQueryLabelProvider {
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN){ return "Survey Design";}
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START){ return "Survey Design Start Date";}
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_END){ return "Survey Design End Date";}
-		if (item == SurveyQueryColumn.FixedColumns.SURVEY){ return "Survey ID";}
+		if (item == SurveyQueryColumn.FixedColumns.SURVEY){ return "Survey Id";}
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY_START){ return "Survey Start Date";}
 		if (item == SurveyQueryColumn.FixedColumns.SURVEY_END){ return "Survey End Date";}
-		if (item == SurveyQueryColumn.FixedColumns.MISSION){ return "Mission ID";}
+		if (item == SurveyQueryColumn.FixedColumns.MISSION){ return "Mission Id";}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_START){ return "Mission Start Date";}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_END){ return "Mission End Date";}
 		if (item == SurveyQueryColumn.FixedColumns.MISSION_LEADER){ return "Mission Leader";}

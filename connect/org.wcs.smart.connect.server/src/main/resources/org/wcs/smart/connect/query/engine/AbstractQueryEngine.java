@@ -43,6 +43,8 @@ import javax.naming.NamingException;
 import org.geotools.referencing.CRS;
 import org.hibernate.Session;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.wcs.smart.ICoreLabelProvider;
+import org.wcs.smart.SmartContext;
 import org.wcs.smart.ca.Area;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Employee;
@@ -303,7 +305,7 @@ public abstract class AbstractQueryEngine implements IQueryEngine {
 		if (uuid != null){
 			Employee x = (Employee) session.load(Employee.class, uuid);
 			if (x != null) {
-				return MessageFormat.format("{0} {1} [{2}]", x.getGivenName(), x.getFamilyName(), x.getId());
+				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(x, locale);
 			}
 		}
 		return null;

@@ -38,7 +38,7 @@ public class EntityQueryLabelProvider implements IEntityQueryLabelProvider {
 	public String getLabel(Object item, Locale l) {
 		if (item == FixedQueryColumn.FixedColumns.CA_ID) return "Conservation Area ID";
 		if (item == FixedQueryColumn.FixedColumns.CA_NAME) return "Conservation Area Name";
-		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE) return "Waypoint Source";
+		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_SOURCE) return "Source";
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_ID) return "Waypoint ID";
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_DATE) return "Waypoint Date";
 		if (item == FixedQueryColumn.FixedColumns.WAYPOINT_TIME) return "Waypoint Time";

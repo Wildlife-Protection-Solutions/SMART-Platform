@@ -95,21 +95,21 @@ public class PatrolQueryColumnProvider implements IPatrolQueryColumnProvider {
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_MANDATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_ARMED,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_ID,l));
-		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE,l));
-		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_LEADER,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_PILOT,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE,l));
+		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE,l));
 		keys.add(new FixedQueryColumn(FixedQueryColumn.FixedColumns.TRANSPORT_TYPE,l));
-		keys.add(new QueryColumn("Patrol Track", "track",ColumnType.STRING){
-			@Override
-			public QueryColumn clone() {
-				return null;
-			}
-
-			@Override
-			public Object getValue(IResultItem arg0) {
-				return null;
-			}});
+//		keys.add(new QueryColumn("Patrol Track", "track",ColumnType.STRING){
+//			@Override
+//			public QueryColumn clone() {
+//				return null;
+//			}
+//
+//			@Override
+//			public Object getValue(IResultItem arg0) {
+//				return null;
+//			}});
 		
 		return keys;
 	}

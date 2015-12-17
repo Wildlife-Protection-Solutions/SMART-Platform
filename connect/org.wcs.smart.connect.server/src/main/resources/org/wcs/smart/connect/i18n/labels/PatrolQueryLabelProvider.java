@@ -85,7 +85,7 @@ public class PatrolQueryLabelProvider implements IQueryPatrolLabelProvider {
 				case NUM_PATROLS_TOTAL: return "Total Number of Patrols";
 				case NUM_DAYS_TOTAL: return "Total Number of Days";   
 				case DISTANCE_TOTAL: return "Total Distance (km)";  
-				case NUM_FIELDHOURS_TOTAL: return "Total Number of ActiveHours";
+				case NUM_FIELDHOURS_TOTAL: return "Total Number of Active Patrol Hours";
 				case NUM_PATROLHOURS_TOTAL: return "Total Number of Patrol Hours";
 				case MAN_HOURS_TOTAL: return "Total Person - Field Hours";
 				case MAN_DAYS_TOTAL: return "Total Person - Days";

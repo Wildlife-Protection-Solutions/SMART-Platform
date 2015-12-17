@@ -41,7 +41,7 @@ public class ObservationQueryLabelProvider implements
 			switch((FixedQueryColumn.FixedColumns)key){
 				case CA_ID:return "Conservation Area ID";
 				case CA_NAME: return "Conservation Area Name";
-				case WAYPOINT_SOURCE: return "Waypoint Source";
+				case WAYPOINT_SOURCE: return "Source";
 				case WAYPOINT_ID: return "Waypoint ID";
 				case WAYPOINT_DATE: return "Waypoint Date";
 				case WAYPOINT_TIME: return "Waypoint Time";

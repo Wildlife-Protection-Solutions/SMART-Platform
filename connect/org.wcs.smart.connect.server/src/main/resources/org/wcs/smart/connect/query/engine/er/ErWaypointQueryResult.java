@@ -58,24 +58,7 @@ public class ErWaypointQueryResult implements IDbTableResultSet {
 
 	@Override
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		Object v = getValue(rs, column, c);
-		if (v == null) return "";
-		if (v instanceof String){
-			return (String)v;
-		}
-		if(v instanceof Time){
-			return DateFormat.getTimeInstance(DateFormat.DEFAULT, engine.getLocale()).format((Time)v);
-		}else if (v instanceof Date){
-			return DateFormat.getDateInstance(DateFormat.DEFAULT, engine.getLocale()).format((Date)v);
-		}else if (v instanceof Double){
-			Double d = (Double)v;
-			if (column.getType() == ColumnType.BOOLEAN){
-				if (d < 0.5) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE,engine.getLocale());
-				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, engine.getLocale());
-			}
-			return Double.toString((Double)v);
-		}
-		return v.toString();
+		return column.getValueAsString(getValue(rs, column, c));
 	}
 	
 	@Override
@@ -118,9 +101,13 @@ public class ErWaypointQueryResult implements IDbTableResultSet {
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_TIME.getKey())){
 			return rs.getTime("wp_date");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DIRECTION.getKey())){
-			return rs.getDouble("wp_direction");
+			Object x = rs.getObject("wp_direction");
+			if (x == null) return null;
+			return (Double)x;
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_DISTANCE.getKey())){
-			return rs.getDouble("wp_distance");
+			Object x = rs.getObject("wp_distance");
+			if (x == null) return null;
+			return (Double)x;
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT.getKey())){
 			return rs.getString("wp_comment");
 		}else if (columnKey.equals(SurveyQueryColumn.FixedColumns.WAYPOINT_OBSERVER.getKey())){
@@ -132,7 +119,9 @@ public class ErWaypointQueryResult implements IDbTableResultSet {
 				return rs.getString(columnName);
 			}else{
 				//assume double
-				return rs.getDouble(columnName);
+				Object x = rs.getObject(columnName);
+				if (x == null) return null;
+				return (Double)x;
 			}
 		}else if (columnKey.startsWith(SamplingUnitAttributeQueryColumn.KEY_PREFIX)){
 			String key = columnKey.split(":")[1];
@@ -141,7 +130,9 @@ public class ErWaypointQueryResult implements IDbTableResultSet {
 				return rs.getString(columnName);
 			}else{
 				//assume double
-				return rs.getDouble(columnName);
+				Object x = rs.getObject(columnName);
+				if (x == null) return null;
+				return (Double)x;
 			}
 		}
 		return null;

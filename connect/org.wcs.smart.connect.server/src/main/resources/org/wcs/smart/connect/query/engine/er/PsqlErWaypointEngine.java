@@ -22,12 +22,10 @@
 package org.wcs.smart.connect.query.engine.er;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.logging.Level;
 
 import org.hibernate.Session;
@@ -39,7 +37,6 @@ import org.wcs.smart.er.model.SamplingUnit;
 import org.wcs.smart.er.model.Survey;
 import org.wcs.smart.er.model.SurveyDesign;
 import org.wcs.smart.er.query.filter.SurveyDesignFilter;
-import org.wcs.smart.er.query.model.SurveyQueryResultItem;
 import org.wcs.smart.er.query.model.SurveyWaypointQuery;
 import org.wcs.smart.observation.model.Waypoint;
 import org.wcs.smart.query.common.engine.IQueryResult;
@@ -259,41 +256,6 @@ public class PsqlErWaypointEngine extends PsqlErEngine {
 		
 		sql.append(")"); //$NON-NLS-1$
 		return sql.toString();
-	}
-
-	protected SurveyQueryResultItem asQueryResultItem(ResultSet rs, Session session) throws SQLException{
-		SurveyQueryResultItem it = new SurveyQueryResultItem();
-
-		it.setConservationAreaId(rs.getString("ca_id")); //$NON-NLS-1$
-		it.setConservationAreaName(rs.getString("ca_name")); //$NON-NLS-1$
-		
-		it.setSurveyDesign(rs.getString("surveydesign_name")); //$NON-NLS-1$
-		it.setSurveyDesignEnd(rs.getDate("surveydesign_enddate")); //$NON-NLS-1$
-		it.setSurveyDesignStart(rs.getDate("surveydesign_startdate")); //$NON-NLS-1$
-		
-		it.setSurveyId(rs.getString("survey_id")); //$NON-NLS-1$
-		it.setSurveyStart(rs.getDate("survey_startdate")); //$NON-NLS-1$
-		it.setSurveyEnd(rs.getDate("survey_enddate")); //$NON-NLS-1$
-		
-		it.setMissionUuid((UUID)rs.getObject("mission_uuid")); //$NON-NLS-1$
-		it.setMissionId(rs.getString("mission_id")); //$NON-NLS-1$
-		it.setMissionEnd(rs.getDate("mission_startdate")); //$NON-NLS-1$
-		it.setMissionStart(rs.getDate("mission_enddate")); //$NON-NLS-1$
-		it.setMissionLeader(rs.getString("mission_leader")); //$NON-NLS-1$
-		
-		it.setSamplingUnitUuid((UUID)rs.getObject("samplingunit_uuid")); //$NON-NLS-1$
-		it.setSamplingUnitId(rs.getString("samplingunit_id")); //$NON-NLS-1$
-		
-		it.setWaypointUuid((UUID)rs.getObject("wp_uuid")); //$NON-NLS-1$
-		it.setWaypointId(rs.getInt("wp_id")); //$NON-NLS-1$
-		it.setWaypointX(rs.getDouble("wp_x")); //$NON-NLS-1$
-		it.setWaypointY(rs.getDouble("wp_y")); //$NON-NLS-1$
-		it.setWaypointDateTime(rs.getTimestamp("wp_date")); //$NON-NLS-1$
-		it.setWaypointDirection(rs.getObject("wp_direction") == null ? null : rs.getFloat("wp_direction")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointDistance(rs.getObject("wp_distance") == null ? null : rs.getFloat("wp_distance")); //$NON-NLS-1$ //$NON-NLS-2$
-		it.setWaypointComment(rs.getString("wp_comment")); //$NON-NLS-1$
-		
-		return it;
 	}
 	
 	@Override

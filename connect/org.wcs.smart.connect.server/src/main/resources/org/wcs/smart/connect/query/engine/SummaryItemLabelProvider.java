@@ -57,7 +57,6 @@ import org.wcs.smart.ca.datamodel.AttributeTreeNode;
 import org.wcs.smart.ca.datamodel.Category;
 import org.wcs.smart.connect.i18n.labels.SmartLabelProvider;
 import org.wcs.smart.connect.query.WaypointSourceEngine;
-import org.wcs.smart.entity.model.EntityAttribute;
 import org.wcs.smart.entity.query.parser.internal.EntityAttributeGroupBy;
 import org.wcs.smart.er.model.Mission;
 import org.wcs.smart.er.model.MissionAttribute;
@@ -189,9 +188,9 @@ public class SummaryItemLabelProvider {
 	private AttributeListItem getAttributeListIem(String key, String attributeKey){
 		//find the first attribute list item with the given key for one
 		//of the conservation areas; we just pick one
-		return (AttributeListItem) s.createCriteria(AttributeListItem.class)
-				.add(Restrictions.eq("keyId", key))
+		return (AttributeListItem) s.createCriteria(AttributeListItem.class, "li")
 				.createCriteria("attribute", "a")
+				.add(Restrictions.eq("li.keyId", key))
 				.add(Restrictions.eq("a.keyId", attributeKey))
 				.add(Restrictions.in("a.conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 				.setMaxResults(1)
@@ -269,7 +268,7 @@ public class SummaryItemLabelProvider {
 		name.append(" "); //$NON-NLS-1$
 		if (itemName != null){
 			name.append(itemName);
-			name.append(" [" + att.getName() + "] "); //$NON-NLS-1$ //$NON-NLS-2$
+//			name.append(" [" + att.getName() + "] "); //$NON-NLS-1$ //$NON-NLS-2$
 		}else{
 			name.append(att.getName());
 		}
@@ -334,16 +333,17 @@ public class SummaryItemLabelProvider {
 		}else if (item instanceof SamplingUnitGroupBy){
 			results = getName((SamplingUnitGroupBy)item);
 		}
-//		if (results != null){
-//			Collections.sort(results, new Comparator<ListItem>() {
-//				Collator c = Collator.getInstance(l);				
-//				@Override
-//				public int compare(ListItem o1, ListItem o2) {
-//					return c.compare(o1.getName(), o2.getName());
-//				}
-//			});
-//		}
 		return results;
+	}
+	
+	private void sortItems(List<ListItem> items){
+		Collections.sort(items, new Comparator<ListItem>() {
+			Collator c = Collator.getInstance(l);				
+			@Override
+			public int compare(ListItem o1, ListItem o2) {
+				return c.compare(o1.getName(), o2.getName());
+			}
+		});
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -382,6 +382,7 @@ public class SummaryItemLabelProvider {
 			for (Area a : matching){
 				items.add(new ListItem(null, a.getName(), a.getKeyId()));
 			}
+			sortItems(items);
 		}
 		
 		return items;
@@ -435,6 +436,7 @@ public class SummaryItemLabelProvider {
 					
 					items.add(new ListItem(null, name, li));
 				}
+				sortItems(items);
 			}
 		}else if (item.getAttributeType() == AttributeType.TREE){
 			if (filterHkeys != null){
@@ -457,6 +459,7 @@ public class SummaryItemLabelProvider {
 					
 					items.add(new ListItem(null, name, hkey));
 				}
+				sortItems(items);
 			}
 		}
 		return items;
@@ -486,6 +489,7 @@ public class SummaryItemLabelProvider {
 			for(Category child : cats){
 				items.add(new ListItem(null, child.getFullCategoryName(), child.getHkey()));
 			}
+			sortItems(items);
 		}
 		return items;
 	}
@@ -498,12 +502,7 @@ public class SummaryItemLabelProvider {
 		for (ConservationArea ca : cas){
 			items.add(new ListItem(ca.getUuid(), ca.getNameLabel()));
 		}
-		Collections.sort(items, new Comparator<ListItem>() {
-			@Override
-			public int compare(ListItem o1, ListItem o2) {
-				return Collator.getInstance(l).compare(o1.getName(), o2.getName());
-			}
-		});
+		sortItems(items);
 		
 		if (filterHkeys != null){
 			HashSet<String> lookup = new HashSet<String>();
@@ -698,25 +697,26 @@ public class SummaryItemLabelProvider {
 	
 	private List<ListItem> getName(EntityAttributeGroupBy item){
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
+
+		Query q = s.createQuery("SELECT et.name from EntityAttribute ea join ea.entityType et WHERE et.conservationArea.uuid in (:cauuids) and ea.keyId = :eaKey and et.keyId = :etKey");
+		q.setParameterList("cauuids", caFilter.getConservationAreaFilterIds());
+		q.setString("eaKey", item.getEntityAttributeKey());
+		q.setString("etKey", item.getEntityKey());
+		q.setMaxResults(1);
+		String entityTypeName = (String) q.uniqueResult();
 		
-		EntityAttribute ea = (EntityAttribute) s.createCriteria(EntityAttribute.class)
-				.createCriteria("entityType", "et")
-				.add(Restrictions.in("et.conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
-				.add(Restrictions.eq("keyId", item.getEntityAttributeKey()))
-				.add(Restrictions.eq("et.keyId", item.getEntityAttributeKey()))
-				.setMaxResults(1)
-				.uniqueResult();
-				
-		if (ea == null){
+		if (entityTypeName == null){
 			logger.severe(MessageFormat.format("Entity attribute not found {0}.", item.getEntityAttributeKey()));
 			return items;
 		}
-		
-		AttributeGroupBy ag = AttributeGroupBy.createAttributeGroupBy(ea.getDmAttribute().getKeyId());
+	
+		String key = item.asString();
+		String attributePart = key.substring(key.indexOf("attribute:"));
+		AttributeGroupBy ag = AttributeGroupBy.createAttributeGroupBy(attributePart);
 		List<ListItem> aitems = getName(ag);
 		
 		for (ListItem i : aitems){
-			items.add(new ListItem(null, i.getName() + " [" + ea.getEntityType().getName() + "]", i.getKey()));
+			items.add(new ListItem(null, i.getName() + " [" + entityTypeName + "]", i.getKey()));
 		}
 		return items;
 		
@@ -744,6 +744,7 @@ public class SummaryItemLabelProvider {
 			for (MissionAttributeListItem mli : ma.getAttributeList()){
 				allItems.add(new ListItem(null, mli.getName(), mli.getKeyId()));
 			}
+			sortItems(allItems);
 		}
 		return allItems;
 	}
@@ -760,7 +761,6 @@ public class SummaryItemLabelProvider {
 					logger.warning(MessageFormat.format("Mission not found", it));
 					allItems.add(new ListItem(UuidUtils.stringToUuid(it), it));
 				}
-				
 			}
 		}else{
 			//load all missions
@@ -779,6 +779,7 @@ public class SummaryItemLabelProvider {
 			for(Object[] m : ms){
 				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
+			sortItems(allItems);
 		}
 		return allItems;
 	}
@@ -796,16 +797,10 @@ public class SummaryItemLabelProvider {
 			List<Employee> es = s.createCriteria(Employee.class)
 					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
 					.list();
-			Collections.sort(es, new Comparator<Employee>() {
-				@Override
-				public int compare(Employee arg0, Employee arg1) {
-					return Collator.getInstance().compare(SmartLabelProvider.getFullName(arg0).toUpperCase(), 
-							SmartLabelProvider.getFullName(arg1).toUpperCase());
-				}
-			});
 			for (Employee e : es){
 				items.add(new ListItem(e.getUuid(), SmartLabelProvider.getFullName(e)));
 			}
+			sortItems(items);
 		}
 		return items;
 	}
@@ -814,10 +809,18 @@ public class SummaryItemLabelProvider {
 		PatrolQueryOptionType type = item.getOption().getType();
 		
 		String[] keys = item.getItems();
-		
+		boolean sort = keys == null;
 		
 		if (type == PatrolQueryOptionType.UUID){
 			Criteria c = s.createCriteria(item.getOption().getSourceClass());
+			if (item.getOption() == PatrolQueryOption.STATION 
+					|| item.getOption() == PatrolQueryOption.TEAM
+					|| item.getOption() == PatrolQueryOption.MANDATE
+					|| item.getOption() == PatrolQueryOption.PATROL_TRANSPORT_TYPE
+					|| item.getOption() == PatrolQueryOption.PATROL_TYPE){
+				c.add(Restrictions.eq("isActive", true));
+			}
+												
 			if (keys != null){
 				UUID[] uuidkeys = new UUID[keys.length];
 				for (int i = 0; i < keys.length; i++) {
@@ -866,13 +869,15 @@ public class SummaryItemLabelProvider {
 			}
 			List<ListItem> data = new ArrayList<ListItem>();
 			Criteria c = s.createCriteria(queryClazz)
-					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()));
+					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds()))
+					.add(Restrictions.eq("isActive", true));
+			
 			for (Iterator<?> it = c.list().iterator(); it.hasNext();){
 				NamedKeyItem nkitem = (NamedKeyItem)it.next();
-				data.add(new ListItem(null, nkitem.getName(),nkitem.getKeyId()));
-					
+				data.add(new ListItem(null, nkitem.getName(),nkitem.getKeyId()));					
 			}
-			if (data != null){
+			
+			if (data != null){	
 				for (Iterator<?> iterator = data.iterator(); iterator.hasNext();) {
 					ListItem it = (ListItem) iterator.next();
 					if (keys != null && Arrays.asList(keys).contains(it.getKey())){
@@ -906,6 +911,7 @@ public class SummaryItemLabelProvider {
 				}
 			}
 		}
+		if (sort) sortItems(results);
 		return results;
 	}
 	private List<ListItem> getName(SamplingUnitAttributeGroupBy item){
@@ -931,6 +937,7 @@ public class SummaryItemLabelProvider {
 			for (SamplingUnitAttributeListItem mli : su.getAttributeList()){
 				allItems.add(new ListItem(null, mli.getName(), mli.getKeyId()));
 			}
+			sortItems(allItems);
 		}
 		return allItems;
 	}
@@ -939,18 +946,18 @@ public class SummaryItemLabelProvider {
 		List<ListItem> listItems = new ArrayList<ListItem>();
 		if (items != null){
 			for (String it : items){
-					if (it.equals(SamplingUnitFilter.NONE_KEY)){
-						listItems.add(new ListItem(null, "None", null));
+				if (it.equals(SamplingUnitFilter.NONE_KEY)){
+					listItems.add(new ListItem(null, "None", null));
+				}else{
+					SamplingUnit su = (SamplingUnit) s.get(SamplingUnit.class,
+							UuidUtils.stringToUuid(it));
+					if (su != null){
+						listItems.add(new ListItem(su.getUuid(), su.getId()));
 					}else{
-						SamplingUnit su = (SamplingUnit) s.get(SamplingUnit.class,
-								UuidUtils.stringToUuid(it));
-						if (su != null){
-							listItems.add(new ListItem(su.getUuid(), su.getId()));
-						}else{
-							logger.warning(MessageFormat.format("SamplingUnit not found {0}", it));
-							listItems.add(new ListItem(UuidUtils.stringToUuid(it), it));
-						}
+						logger.warning(MessageFormat.format("SamplingUnit not found {0}", it));
+						listItems.add(new ListItem(UuidUtils.stringToUuid(it), it));
 					}
+				}
 			}
 		}else{
 			if (sdFilter.getKey() == null) return null;
@@ -962,7 +969,9 @@ public class SummaryItemLabelProvider {
 			for (Object[] su : sus){
 				listItems.add(new ListItem((UUID)su[0], (String)su[1]));
 			}
+			sortItems(listItems);
 			listItems.add(new ListItem(null, "None"));
+			
 		}
 		return listItems;
 	}
@@ -997,6 +1006,7 @@ public class SummaryItemLabelProvider {
 			for(Object[] m : ms){
 				allItems.add(new ListItem((UUID)m[0], (String)m[1]));
 			}
+			sortItems(allItems);
 		}
 		return allItems;
 	}
@@ -1008,6 +1018,7 @@ public class SummaryItemLabelProvider {
 			for(IWaypointSource src : WaypointSourceEngine.INSTANCE.getSupportedSources()){
 				items.add(new ListItem(null,src.getName(l), src.getKey()));
 			}
+			sortItems(items);
 		}else{
 			for (String k : keys){
 				IWaypointSource c = WaypointSourceEngine.INSTANCE.getSource(k);
@@ -1024,6 +1035,6 @@ public class SummaryItemLabelProvider {
 		ArrayList<ListItem> items = new ArrayList<ListItem>();
 		items.add(new ListItem(null, "Motivated", IntelligencePatrolGroupBy.Options.MOTIVATED.getKey())); 
 		items.add(new ListItem(null, "Not Motiviated", IntelligencePatrolGroupBy.Options.NOT_MOTIVATED.getKey()));
-				return items;
+		return items;
 	}
 }

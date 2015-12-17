@@ -22,7 +22,10 @@
 package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -133,6 +136,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 				hq.setParameterList("entitytypes", entityTypes);
 				
 				List<Object[]> attributes = hq.list();
+				List<EntityAttributeQueryColumn> entityAttributeColumns = new ArrayList<EntityAttributeQueryColumn>();
 				for (Object[] att : attributes){
 					String attributeKey = (String) att[0];
 					String entityType = (String) att[1];
@@ -144,10 +148,13 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 							.createCriteria("entityType", "et")
 							.add(Restrictions.eq("et.keyId", entityType))
 							.uniqueResult();
-					cols.add(new EntityAttributeQueryColumn(ea.getName(), entityType, attributeKey, type));
-					
+					entityAttributeColumns.add(new EntityAttributeQueryColumn("[" + ea.getEntityType().getName() + "]" + ea.getName(), entityType, attributeKey, type));
 				}
+				QueryColumnUtils.sortByName(entityAttributeColumns, l);
+				
+				cols.addAll(entityAttributeColumns);
 			}
+			
 		}catch (Exception ex){
 			logger.log(Level.WARNING, ex.getMessage(), ex);
 		}

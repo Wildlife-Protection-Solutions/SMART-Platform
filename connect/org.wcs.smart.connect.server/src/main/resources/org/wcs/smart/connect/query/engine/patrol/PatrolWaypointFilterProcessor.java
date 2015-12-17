@@ -478,7 +478,7 @@ public class PatrolWaypointFilterProcessor implements IFilterProcessor{
 				
 				sql.append(" ( "); //$NON-NLS-1$
 				sql.append(prefix(Category.class));
-				sql.append(".hkey like = " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
+				sql.append(".hkey like " + p1 + " ) "); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 			if (attfilter != null){
 				if (catfilter != null){

@@ -22,7 +22,10 @@
 package org.wcs.smart.connect.query.columns;
 
 import java.sql.SQLException;
+import java.text.Collator;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -97,6 +100,43 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		return cols;
 	}
 	
+	private List<MissionPropertyQueryColumn> getMissionPropertyColumns(Session session, Locale l, ConservationAreaFilter caFilter, SurveyDesign sd){
+		List<MissionPropertyQueryColumn> columns = new ArrayList<MissionPropertyQueryColumn>();
+		if (sd == null){
+			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
+				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())).list(); //$NON-NLS-1$
+			for (MissionAttribute ma : all){
+				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
+			}
+		}else{
+			for (MissionProperty mp : sd.getMissionProperties()){
+				columns.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
+			}
+		}
+		QueryColumnUtils.sortByName(columns, l);
+		return columns;
+	}
+	private List<SamplingUnitAttributeQueryColumn> getSamplingUnitAttributeColumns(Session session, Locale l, ConservationAreaFilter caFilter, SurveyDesign sd){
+		List<SamplingUnitAttributeQueryColumn> columns = new ArrayList<SamplingUnitAttributeQueryColumn>();
+		if (sd == null){
+			List<SamplingUnitAttribute> su = session.createCriteria(SamplingUnitAttribute.class)
+				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
+				.list();
+			for (SamplingUnitAttribute sua : su){
+				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
+			}
+		}else{
+			List<SurveyDesignSamplingUnitAttribute> atts = session.createCriteria(SurveyDesignSamplingUnitAttribute.class)
+				.add(Restrictions.eq("id.surveyDesign", sd)) //$NON-NLS-1$
+				.list();
+			for (SurveyDesignSamplingUnitAttribute a : atts){
+				columns.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute()), a.getSamplingUnitAttribute()));
+			}
+		}
+		QueryColumnUtils.sortByName(columns, l);
+		return columns;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public List<QueryColumn> getMissionQueryColumns(Query query, Locale l, Session session) {
 		final List<QueryColumn> cols = new ArrayList<QueryColumn>();
@@ -115,18 +155,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_LEADER, Locale.getDefault()));
 		
 		//mission property columns
-		if (sd == null){
-			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())).list(); //$NON-NLS-1$
-			for (MissionAttribute ma : all){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
-			}
-		}else{
-			SurveyDesign sd2 = (SurveyDesign) session.load(SurveyDesign.class, sd.getUuid());
-			for (MissionProperty mp : sd2.getMissionProperties()){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
-			}
-		}
+		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
 		
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, Locale.getDefault()));
@@ -167,18 +196,7 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.MISSION_END, Locale.getDefault()));
 		
 		//mission property columns
-		if (sd == null){
-			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())).list(); //$NON-NLS-1$
-			for (MissionAttribute ma : all){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
-			}
-		}else{
-			SurveyDesign sd2 = (SurveyDesign) session.load(SurveyDesign.class, sd.getUuid());
-			for (MissionProperty mp : sd2.getMissionProperties()){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
-			}
-		}
+		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
 				
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN, Locale.getDefault()));
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.SURVEY_DESIGN_START, Locale.getDefault()));
@@ -227,33 +245,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, Locale.getDefault()));
 				
 		//mission property columns
-		if (sd == null){
-			//TODO: support CCAA Queries
-			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
-					.add(Restrictions.in("conservationArea.uuid",caFilter.getConservationAreaFilterIds()))
-					.list(); //$NON-NLS-1$
-			for (MissionAttribute ma : all){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
-			}
-			List<SamplingUnitAttribute> su = session.createCriteria(SamplingUnitAttribute.class)
-					.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-					.list();
-			for (SamplingUnitAttribute sua : su){
-				cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
-			}
-		}else{
-			//TODO: support CCAA Queries
-			for (MissionProperty mp : sd.getMissionProperties()){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
-			}
-			List<SurveyDesignSamplingUnitAttribute> atts = session
-				.createCriteria(SurveyDesignSamplingUnitAttribute.class)
-				.add(Restrictions.eq("id.surveyDesign", sd)) //$NON-NLS-1$
-				.list();
-			for (SurveyDesignSamplingUnitAttribute a : atts){
-				cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute()), a.getSamplingUnitAttribute()));
-			}			
-		}
+		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
+		cols.addAll(getSamplingUnitAttributeColumns(session, l, caFilter, sd));
 		
 		//data model columns
 		for (QueryColumn q : QueryColumnUtils.getDataModelColumns(session, l, AbstractQueryEngine.parseConservationAreaFilter(query))){
@@ -296,29 +289,8 @@ public class SurveyQueryColumnProvider implements ISurveyQueryColumnProvider {
 		cols.add(new SurveyQueryColumn(SurveyQueryColumn.FixedColumns.WAYPOINT_COMMENT, Locale.getDefault()));
 						
 		//mission property columns
-		if (sd == null){
-			List<MissionAttribute> all = session.createCriteria(MissionAttribute.class)
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())).list(); //$NON-NLS-1$
-			for (MissionAttribute ma : all){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(ma), ma));
-			}
-			List<SamplingUnitAttribute> su = session.createCriteria(SamplingUnitAttribute.class)
-				.add(Restrictions.in("conservationArea.uuid", caFilter.getConservationAreaFilterIds())) //$NON-NLS-1$
-				.list();
-			for (SamplingUnitAttribute sua : su){
-				cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(sua), sua));
-			}
-		}else{
-			for (MissionProperty mp : sd.getMissionProperties()){
-				cols.add(new MissionPropertyQueryColumn(getMissionPropertyColumnName(mp.getAttribute()), mp.getAttribute()));
-			}
-			List<SurveyDesignSamplingUnitAttribute> atts = session.createCriteria(SurveyDesignSamplingUnitAttribute.class)
-				.add(Restrictions.eq("id.surveyDesign", sd)) //$NON-NLS-1$
-				.list();
-			for (SurveyDesignSamplingUnitAttribute a : atts){
-				cols.add(new SamplingUnitAttributeQueryColumn(getSamplingUnitAttributeColumnName(a.getSamplingUnitAttribute()), a.getSamplingUnitAttribute()));
-			}
-		}
+		cols.addAll(getMissionPropertyColumns(session, l, caFilter, sd));
+		cols.addAll(getSamplingUnitAttributeColumns(session, l, caFilter, sd));
 		
 		return cols;
 	}

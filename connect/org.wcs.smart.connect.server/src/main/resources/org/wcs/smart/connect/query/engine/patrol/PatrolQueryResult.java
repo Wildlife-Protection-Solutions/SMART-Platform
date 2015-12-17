@@ -55,24 +55,7 @@ public class PatrolQueryResult implements IDbTableResultSet {
 
 	@Override
 	public String getValueAsString(ResultSet rs, QueryColumn column, Connection c) throws SQLException{
-		Object v = getValue(rs, column, c);
-		if (v == null) return "";
-		if (v instanceof String){
-			return (String)v;
-		}
-		if(v instanceof Time){
-			return DateFormat.getTimeInstance(DateFormat.DEFAULT, engine.getLocale()).format((Time)v);
-		}else if (v instanceof Date){
-			return DateFormat.getDateInstance(DateFormat.DEFAULT, engine.getLocale()).format((Date)v);
-		}else if (v instanceof Double){
-			Double d = (Double)v;
-			if (column.getType() == ColumnType.BOOLEAN){
-				if (d < 0.5) return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE,engine.getLocale());
-				return SmartContext.INSTANCE.getClass(ICoreLabelProvider.class).getLabel(Boolean.FALSE, engine.getLocale());
-			}
-			return Double.toString((Double)v);
-		}
-		return v.toString();
+		return column.getValueAsString(getValue(rs, column, c));
 	}
 	
 	@Override
@@ -97,9 +80,9 @@ public class PatrolQueryResult implements IDbTableResultSet {
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_ID.getKey())){
 			return rs.getString("r_pl_id");
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_START_DATE.getKey())){
-			return rs.getString("r_pl_start_date");
+			return rs.getDate("r_pl_start_date");
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_LEG_END_DATE.getKey())){
-			return rs.getString("r_pl_end_date");
+			return rs.getDate("r_pl_end_date");
 			
 		}else if (columnKey.equals(FixedQueryColumn.FixedColumns.PATROL_STATION.getKey())){
 			return rs.getString("p_station");

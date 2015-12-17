@@ -46,12 +46,12 @@ public class SmartLabelProvider implements ICoreLabelProvider {
 				return "No";
 			}
 		}else if (value instanceof Employee){
-			getFullName((Employee) value);
+			return getFullName((Employee) value);
 		}
 		return null;
 	}
 	
 	public static String getFullName(Employee e){
-		return MessageFormat.format("{0} {1} [{2}]", e.getGivenName(), e.getFamilyName(), e.getId());
+		return MessageFormat.format("{0} {1}", e.getGivenName(), e.getFamilyName());
 	}
 }
