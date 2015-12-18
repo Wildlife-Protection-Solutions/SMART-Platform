@@ -118,7 +118,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 		try{
 			int width = (int) (getShell().getBounds().width * 0.8);
 			if (width < 500){
-				width = 500;
+				width = 575;
 			}
 			int height = (int) (getShell().getBounds().height * 0.6);
 			if (height < 350){
