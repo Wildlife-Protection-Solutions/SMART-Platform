@@ -116,7 +116,7 @@ public class PatrolLegsComposite extends PatrolItemComposite{
 	 */
 	public Point getInitialSize(){
 		try{
-			int width = (int) (getShell().getBounds().width * 0.6);
+			int width = (int) (getShell().getBounds().width * 0.8);
 			if (width < 500){
 				width = 500;
 			}
