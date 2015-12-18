@@ -49,13 +49,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ListSelectionDialog;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.wcs.smart.Localization;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.Language;
+import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.internal.Messages;
 import org.wcs.smart.ui.internal.ca.CaInfoComposite;
@@ -87,7 +90,12 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	 */
 	public CaPropertyPage(Shell parent) {
 		super(parent, Messages.CaPropertyPage_Dialog_Title);
-		this.ca = SmartDB.getCurrentConservationArea();
+		Session s = HibernateManager.openSession();
+		try{
+			this.ca = (ConservationArea) s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+		}finally{
+			s.close();
+		}
 	}
 
 
@@ -263,7 +271,7 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 	@Override
 	protected boolean performSave(){		
 		if (!caComposite.isSameSignature(ca) ) {
-			if (!MessageDialog.openQuestion(getShell(), Messages.CaPropertyPage_SaveWarning_Title, Messages.CaPropertyPage_SaveWarning_Message)) {
+			if (!MessageDialog.openQuestion(getShell(), Messages.CaPropertyPage_SaveWarning_Title, Messages.CaPropertyPage_SaveWarning_Message1)) {
 				return false;
 			}
 		}
@@ -279,6 +287,9 @@ public class CaPropertyPage extends AbstractPropertyJHeaderDialog{
 			session.saveOrUpdate(ca);
 			tx.commit();
 			setChangesMade(false);
+			
+			SmartWorkbenchWindowAdvisor.updateWorkbenchWindowTitle();
+//			PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setText("TEST");
 			return true;
 		}catch (RuntimeException ex){
 			tx.rollback();
