@@ -28,6 +28,7 @@ import java.util.Date;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.hibernate.Session;
+import org.wcs.smart.SmartWorkbenchWindowAdvisor;
 import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.connect.ConnectPlugIn;
 import org.wcs.smart.connect.ConnectStatusManager;
@@ -175,7 +176,9 @@ public class DownloadChangeLogEngine {
 		}else{
 			setServerStatus(ServerStatus.ERROR, record.getErrorString());
 		}
+		SmartWorkbenchWindowAdvisor.updateWorkbenchWindowTitle();
 	}
+	
 	private void saveStatusRecord(){
 		Session s = HibernateManager.openSession();
 		try{

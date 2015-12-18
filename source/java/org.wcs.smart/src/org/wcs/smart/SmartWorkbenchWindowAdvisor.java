@@ -21,6 +21,9 @@
  */
 package org.wcs.smart;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
@@ -28,7 +31,6 @@ import org.eclipse.e4.ui.model.application.MApplication;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimBar;
 import org.eclipse.e4.ui.model.application.ui.basic.MTrimElement;
 import org.eclipse.e4.ui.model.application.ui.menu.MToolControl;
-import org.eclipse.e4.ui.model.application.ui.menu.impl.ToolControlImpl;
 import org.eclipse.e4.ui.workbench.IPresentationEngine;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
@@ -44,12 +46,15 @@ import org.eclipse.ui.application.ActionBarAdvisor;
 import org.eclipse.ui.application.IActionBarConfigurer;
 import org.eclipse.ui.application.IWorkbenchWindowConfigurer;
 import org.eclipse.ui.application.WorkbenchWindowAdvisor;
+import org.eclipse.ui.progress.WorkbenchJob;
+import org.hibernate.Session;
 import org.locationtech.udig.project.ui.internal.LayersView;
 import org.locationtech.udig.project.ui.internal.MapPart;
 import org.locationtech.udig.project.ui.internal.tool.impl.ToolContextImpl;
 import org.locationtech.udig.tool.info.internal.InfoView2;
 import org.locationtech.udig.ui.UDIGDragDropUtilities;
 import org.wcs.smart.backup.AutoBackupEngine;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 
@@ -141,7 +146,7 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     public void postWindowOpen() {
     	getWindowConfigurer().getWorkbenchConfigurer().getWorkbench().addWorkbenchListener(shutdownListener);
         //assign title to window
-        getWindowConfigurer().getWindow().getShell().setText("SMART : " + SmartDB.getCurrentConservationArea().getNameLabel()); //$NON-NLS-1$
+    	updateWorkbenchWindowTitle();
 
         /* -- setup part listener for layer view legend */
     	partListener = new IPartListener2() {
@@ -247,4 +252,26 @@ public class SmartWorkbenchWindowAdvisor extends WorkbenchWindowAdvisor {
     	}
     }    
 
+    public static void updateWorkbenchWindowTitle(){
+    	WorkbenchJob job = new WorkbenchJob("refresh title") { //$NON-NLS-1$
+			
+			@Override
+			public IStatus runInUIThread(IProgressMonitor monitor) {
+				Session s = HibernateManager.openSession();
+				s.beginTransaction();
+				try{
+					ConservationArea ca = (ConservationArea) s.get(ConservationArea.class, SmartDB.getCurrentConservationArea().getUuid());
+					
+					PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell().setText("SMART: " + ca.getNameLabel());
+				}catch (Exception ex){
+					SmartPlugIn.log(ex.getMessage(), ex);
+				}finally{
+					s.close();
+				}
+				return Status.OK_STATUS;
+			}
+		};
+		job.setSystem(true);
+		job.schedule();
+    }
 }
