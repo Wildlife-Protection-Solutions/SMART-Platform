@@ -212,7 +212,8 @@ public class CsvCaImportDialog extends AbstractCsvDialog {
 				updateControlsState();
 			}
 		});
-
+		caViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)caViewer.getControl().getLayoutData()).widthHint = 150;
 		caViewer.setInput(areas.toArray());
 		caViewer.setSelection(new StructuredSelection(areas.get(0)));
 	}
