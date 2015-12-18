@@ -380,6 +380,9 @@ public class PatrolTypePropertyPage extends AbstractPropertyJHeaderDialog {
 								if (DataModelManager.INSTANCE.validateKey(t.getKeyId(), siblings) != null){
 									t.setKeyId(DataModelManager.INSTANCE.generateKey(t.findName(SmartDB.getCurrentConservationArea().getDefaultLanguage()), siblings));
 								}
+								if (type.getTransportTypes() == null){
+									type.setTransportTypes(new ArrayList<PatrolTransportType>());
+								}
 								type.getTransportTypes().add(t);
 							}
 						}
