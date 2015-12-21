@@ -32,6 +32,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+
+
+//TODO  this is a temporary API, the whole .java file should be deleted before we package a release.
+
+
 /**
  * SMART Connect testing REST API
  *  * @author Jeff

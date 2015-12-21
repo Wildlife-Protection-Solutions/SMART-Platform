@@ -165,20 +165,25 @@ public class QueryApi extends HttpServlet{
 		s.beginTransaction();
 		Query query = null;
 		try{
-			//check for permission to this query for this user.
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid)){
-				return createErrorResponse(Status.BAD_REQUEST, "You do not have permissions to access this Query.");
-			}
-
 			query = QueryManager.INSTANCE.findQuery(uuid, s);
 
 			if (query == null){
 				//query not found
 				return Response.status(Status.NOT_FOUND).build();
 			}
-			//TODO: remove this maybe; this ensures we will not modify the original query
 			query = query.clone(query.getOwner());
-						
+
+			
+			//check for permission to this query for this user.
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, uuid)){
+				if (SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), QueryAction.RUNQUERY_KEY, query.getConservationArea().getUuid())){
+					//access is OK since they have access to All Queries in this CA.
+				}else{
+					return createErrorResponse(Status.BAD_REQUEST, "You do not have permissions to access this Query.");
+				}
+			}
+	
+									
 			IQueryEngine engine = QueryManager.INSTANCE.findQueryEngine(query);
 			if(engine == null){
 				String error = MessageFormat.format("No query engine for query type {1}.", query.getTypeKey());
