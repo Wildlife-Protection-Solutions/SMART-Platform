@@ -29,6 +29,7 @@ public class Messages extends NLS {
 	public static String SmartLayersPage_Error_SettingMapProperty;
 	public static String SmartLayersPage_ErrorDialog_Title;
 	public static String SmartLayersPage_LayerName_ColumnHeader;
+	public static String SmartLayersPage_LoadingLbl;
 	public static String SmartLayersPage_MapBoundsLabel;
 	public static String SmartLayersPage_MapExtentsBoundsLabel;
 	public static String SmartLayersPage_MapLayerNameErrorLabel;

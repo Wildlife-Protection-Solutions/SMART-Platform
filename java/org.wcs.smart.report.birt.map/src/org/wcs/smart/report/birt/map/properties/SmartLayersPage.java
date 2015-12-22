@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.derby.impl.store.raw.data.SyncOnCommit;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -46,6 +47,8 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
@@ -92,6 +95,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 	private Composite contentpane;
 	private ComboViewer basemapCombo;
+	private boolean basemapListenerEnabled = false;
 	private TableViewer tblLayers ;
 	
 	private WritableList layerItems;
@@ -336,7 +340,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		basemapCombo = new ComboViewer(bm, SWT.READ_ONLY | SWT.DROP_DOWN);
 		basemapCombo.setLabelProvider(new BasemapLabelProvider());
 		basemapCombo.setContentProvider(ArrayContentProvider.getInstance());
-		basemapCombo.setInput(basemapCombo);
+		basemapCombo.setInput("Loading...");
 		basemapCombo.getCombo().setToolTipText(Messages.SmartLayersPage_basemaptooltipe);
 	
 		//toolkit.adapt(basemapCombo.getCombo());
@@ -344,32 +348,24 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		((GridData)basemapCombo.getControl().getLayoutData()).minimumWidth = 100;
 		((GridData)basemapCombo.getControl().getLayoutData()).widthHint = 200;
 		
-		Session session = HibernateManager.openSession();
-		session.beginTransaction();
-		List<BasemapDefinition> maps = null;
-		try {
-			maps = HibernateManager.getBasemaps(session);
-			
-			BasemapDefinition defaultdef = new BasemapDefinition();
-			defaultdef.setName(Messages.SmartLayersPage_DefaultBasemapLabel);
-			defaultdef.setUuid( DEFAULT_BASEMAP );
-			maps.add(defaultdef);
-			
-			BasemapDefinition nonedef = new BasemapDefinition();
-			nonedef.setName(Messages.SmartLayersPage_NoBasemapLabel);
-			maps.add(nonedef);
-		} finally {
-			if (session.getTransaction().isActive()) {
-				session.getTransaction().commit();
-			}
-			session.close();
-		}
-		
-		basemapCombo.setInput(maps.toArray());
 		basemapCombo.getControl().addListener(SWT.Modify, new Listener() {
 			@Override
 			public void handleEvent(Event event) {
-				updateModel(SmartMapItem.SMART_BASEMAP_PROP);		
+				if (basemapListenerEnabled){
+					updateModel(SmartMapItem.SMART_BASEMAP_PROP);
+				}
+			}
+		});
+		
+		
+		loadBasemaps();
+		basemapCombo.getControl().addFocusListener(new FocusListener() {
+			@Override
+			public void focusLost(FocusEvent e) {
+			}
+			@Override
+			public void focusGained(FocusEvent e) {
+				loadBasemaps();
 			}
 		});
 		
@@ -415,6 +411,53 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		});
 	}
 	
+	private synchronized void loadBasemaps(){
+		basemapListenerEnabled = false;
+		Session session = HibernateManager.openSession();
+		session.beginTransaction();
+		List<BasemapDefinition> maps = null;
+		try {
+			maps = HibernateManager.getBasemaps(session);
+			
+			BasemapDefinition defaultdef = new BasemapDefinition();
+			defaultdef.setName(Messages.SmartLayersPage_DefaultBasemapLabel);
+			defaultdef.setUuid( DEFAULT_BASEMAP );
+			
+			
+			BasemapDefinition nonedef = new BasemapDefinition();
+			nonedef.setName(Messages.SmartLayersPage_NoBasemapLabel);
+			
+			
+			Object selection = defaultdef;
+			if (mapItem != null){
+				String uuid = mapItem.getBasemapName();
+				
+				if (uuid == null){
+					selection = nonedef;
+				}else if (uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY)){
+					selection = defaultdef;
+				}else if (uuid != null){
+					for (BasemapDefinition def : maps){
+						if (UuidUtils.uuidToString(def.getUuid()).equals(uuid)){
+							selection = def;
+							break;
+						}
+					}
+				}
+			}
+			maps.add(defaultdef);
+			maps.add(nonedef);
+			basemapCombo.setInput(maps.toArray());
+			basemapCombo.setSelection(new StructuredSelection(selection));
+			
+		} finally {
+			if (session.getTransaction().isActive()) {
+				session.getTransaction().commit();
+			}
+			session.close();
+		}
+		basemapListenerEnabled = true;
+	}
 	private List<LayerDefinition> getSelectedLayers(){
 		List<LayerDefinition> selections = new ArrayList<LayerDefinition>();
 		for (@SuppressWarnings("unchecked")
@@ -428,6 +471,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 
 
 	private void updateModel(String prop) {
+		
 		// update the model
 		try {
 			if (prop.equals(SmartMapItem.SMART_LAYER_PROP)) {
@@ -589,20 +633,6 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 			return;
 		}
 		tblLayers.setInput(layerItems);
-		
-		String uuid = mapItem.getBasemapName();
-		Object[] data = (Object[]) basemapCombo.getInput();
-		Object selection = data[0];
-		for (int i = 0; i < data.length; i ++){
-			BasemapDefinition bm = (BasemapDefinition) data[i];
-			if ((uuid == null && bm.getUuid() == null) ||
-				(uuid != null && uuid.equals(SmartMapItem.DEFAULT_BASEMAP_KEY) && bm.getUuid().equals(DEFAULT_BASEMAP)) || 
-					UuidUtils.uuidToString(bm.getUuid()).equals(uuid)){
-				selection = data[i];
-				break;
-			}
-		}
-		basemapCombo.setSelection(new StructuredSelection(selection));
 		
 		if (mapItem.getMapBounds() == null){
 			txtBounds.setText(Messages.SmartLayersPage_MapExtentsBoundsLabel);
