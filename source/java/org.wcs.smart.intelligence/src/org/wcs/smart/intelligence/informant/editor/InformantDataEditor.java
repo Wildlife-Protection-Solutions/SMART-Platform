@@ -444,6 +444,8 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 		InformantAesManager.getInstance().clear();
 		viewer.refresh();
 		updateButtons();
+		
+		firePropertyChange(IWorkbenchPartConstants.PROP_DIRTY);
 	}
 
 	protected void performEdit() {
@@ -630,7 +632,7 @@ public class InformantDataEditor extends EditorPart implements ISaveablePart2 {
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// nothing
+		//do nothing
 	}
 
 	@Override
