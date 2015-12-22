@@ -121,8 +121,11 @@ public class PerspectiveEditorTracker implements EventHandler {
 		if (editorArea == null) return;
 		MPartStack pstack = null;
 		MPartSashContainerElement element = editorArea.getChildren().get(0);
-		if (element instanceof MPartSashContainer){
+		
+		int cnt = 0;
+		while(element != null && element instanceof MPartSashContainer && cnt < 15){
 			element = ((MPartSashContainer)element).getSelectedElement();
+			cnt++;
 		}
 		if (element instanceof MPartStack){
 			pstack = (MPartStack)element;
