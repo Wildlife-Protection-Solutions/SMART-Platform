@@ -197,9 +197,10 @@ public class ApplyChangeLogJob extends Job {
 			pService = (EPartService) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(EPartService.class);
 			
 			//if yes then saved all closed editors
-			pService.saveAll(true);
-			
-			if (pService.getDirtyParts().size() > 0){
+			if (!pService.saveAll(true)){
+				//cannot do this check as there may be parts that do not need saving; just closing
+				//informant editor for example
+//			if (pService.getDirtyParts().size() > 0){
 				record.setStatus(Status.ERROR);
 				record.setErrorString(Messages.ApplyChangeLogJob_DirtyPartsNotClosedError);
 				return false;
