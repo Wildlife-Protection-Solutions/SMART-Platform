@@ -133,6 +133,8 @@ public class InformantEditor extends AbstractPropertyJHeaderDialog {
 			
 			Text txt = new Text(main, SWT.BORDER);
 			txt.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+			txt.setTextLimit(5000);
+			((GridData)txt.getLayoutData()).widthHint = 400;
 			Object value = getInformant(informant,col.getKey());
 			if (value != null) {
 				txt.setText(value.toString());
