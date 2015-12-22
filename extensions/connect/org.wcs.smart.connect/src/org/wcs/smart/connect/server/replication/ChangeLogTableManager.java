@@ -104,24 +104,25 @@ public enum ChangeLogTableManager {
 		StringBuilder sb = new StringBuilder();
 		sb.append(" INSERT INTO "); //$NON-NLS-1$
 		sb.append(tableName);
-		sb.append(" (uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid, source)"); //$NON-NLS-1$
-		sb.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); //$NON-NLS-1$
+		sb.append(" (revision, uuid, action, filename, tablename, ca_uuid, key1_fieldname, key1, key2_fieldname, key2_str, key2_uuid, source)"); //$NON-NLS-1$
+		sb.append(" VALUES (smart.next_revision_id(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"); //$NON-NLS-1$
 		
 		SQLQuery query = s.createSQLQuery(sb.toString());
 		if (item.getUuid() == null){
 			item.setUuid( UuidUtils.byteToUUID(DerbyUtils.createUuid()));
 		}
-		query.setBinary(0, UuidUtils.uuidToByte(item.getUuid()));
-		query.setString(1, item.getAction().name());
-		query.setString(2, item.getFileName());
-		query.setString(3, item.getTableName());
-		query.setBinary(4, UuidUtils.uuidToByte(item.getConservationArea()));
-		query.setString(5, item.getFieldName1());
-		query.setBinary(6, item.getKey1() == null ? null : UuidUtils.uuidToByte(item.getKey1()));
-		query.setString(7, item.getFieldName2());
-		query.setString(8, item.getKey2String());
-		query.setBinary(9, item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2()));
-		query.setString(10, item.getSource().name());
+		query.setBinary(0, UuidUtils.uuidToByte(item.getConservationArea()));
+		query.setBinary(1, UuidUtils.uuidToByte(item.getUuid()));
+		query.setString(2, item.getAction().name());
+		query.setString(3, item.getFileName());
+		query.setString(4, item.getTableName());
+		query.setBinary(5, UuidUtils.uuidToByte(item.getConservationArea()));
+		query.setString(6, item.getFieldName1());
+		query.setBinary(7, item.getKey1() == null ? null : UuidUtils.uuidToByte(item.getKey1()));
+		query.setString(8, item.getFieldName2());
+		query.setString(9, item.getKey2String());
+		query.setBinary(10, item.getKey2() == null ? null : UuidUtils.uuidToByte(item.getKey2()));
+		query.setString(11, item.getSource().name());
 		query.executeUpdate();
 	}
 	
