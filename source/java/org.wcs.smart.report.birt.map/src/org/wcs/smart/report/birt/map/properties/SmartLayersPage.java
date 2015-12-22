@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
-import org.apache.derby.impl.store.raw.data.SyncOnCommit;
 import org.eclipse.birt.report.designer.internal.ui.views.attributes.section.SeperatorSection;
 import org.eclipse.birt.report.designer.ui.views.attributes.AttributesUtil;
 import org.eclipse.birt.report.model.api.ExtendedItemHandle;
@@ -340,7 +339,7 @@ public class SmartLayersPage extends AttributesUtil.PageWrapper {
 		basemapCombo = new ComboViewer(bm, SWT.READ_ONLY | SWT.DROP_DOWN);
 		basemapCombo.setLabelProvider(new BasemapLabelProvider());
 		basemapCombo.setContentProvider(ArrayContentProvider.getInstance());
-		basemapCombo.setInput("Loading...");
+		basemapCombo.setInput(Messages.SmartLayersPage_LoadingLbl);
 		basemapCombo.getCombo().setToolTipText(Messages.SmartLayersPage_basemaptooltipe);
 	
 		//toolkit.adapt(basemapCombo.getCombo());
