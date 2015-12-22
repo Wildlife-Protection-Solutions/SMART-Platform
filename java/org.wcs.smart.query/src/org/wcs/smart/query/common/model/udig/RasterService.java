@@ -277,9 +277,9 @@ public class RasterService extends AbstractRasterService {
 //						+ "&lt;sld:ColorMapEntry color=&quot;#FFFFFF&quot; opacity=&quot;1.0&quot; quantity=&quot;0&quot;/&gt; " //$NON-NLS-1$
 //						+ "&lt;sld:ColorMapEntry color=&quot;#FFECEC&quot; opacity=&quot;1.0&quot; quantity=&quot;0.0000001"; //$NON-NLS-1$
 //				}else{
-					sld +="&lt;sld:ColorMapEntry color=&quot;#FFECEC&quot; opacity=&quot;1.0&quot; quantity=&quot;" + minValue; //$NON-NLS-1$
+					sld +="&lt;sld:ColorMapEntry color=&quot;#FFECEC&quot; opacity=&quot;0.8&quot; quantity=&quot;" + minValue; //$NON-NLS-1$
 //				}
-				sld += "&quot;/&gt; &lt;sld:ColorMapEntry color=&quot;#FF0000&quot; opacity=&quot;1.0&quot; quantity=&quot;" //$NON-NLS-1$
+				sld += "&quot;/&gt; &lt;sld:ColorMapEntry color=&quot;#FF0000&quot; opacity=&quot;0.8&quot; quantity=&quot;" //$NON-NLS-1$
 						+ maxValue
 						+ "&quot;/&gt; &lt;/sld:ColorMap&gt; &lt;/sld:RasterSymbolizer&gt; &lt;/sld:Rule&gt; &lt;/sld:FeatureTypeStyle&gt; &lt;/sld:UserStyle&gt; &lt;/sld:UserLayer&gt;&lt;/sld:StyledLayerDescriptor&gt;</styleEntry>"; //$NON-NLS-1$
 				try {
