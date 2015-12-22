@@ -80,6 +80,7 @@ public class RemoveConnectJob extends Job {
 				}
 			}
 			session.createSQLQuery("DROP FUNCTION smart.uuid").executeUpdate(); //$NON-NLS-1$
+			session.createSQLQuery("DROP FUNCTION smart.next_revision_id").executeUpdate(); //$NON-NLS-1$
 			
 			//clear version
 			HibernateManager.setPlugInVersion(ConnectPlugIn.PLUGIN_ID, null, session);
