@@ -119,9 +119,10 @@ public class SyncMultipleCaWizard extends Wizard {
 			ConnectPlugIn.log(e.getMessage(), e);
 			return false;
 		} 
-
+		String message = Messages.SyncMultipleCaWizard_WarningsDialogMessage;
 		errors.add(0, MessageFormat.format(Messages.SyncMultipleCaWizard_CompleteMessage, okCnt[0], allCas.size()));
-		WarningDialog wd = new WarningDialog(activeShell, Messages.SyncMultipleCaWizard_WarningsDialogTitle, Messages.SyncMultipleCaWizard_WarningsDialogMessage, errors);
+		
+		WarningDialog wd = new WarningDialog(activeShell, Messages.SyncMultipleCaWizard_WarningsDialogTitle, message, errors);
 		wd.open();
 		return true;
 		
