@@ -58,7 +58,6 @@ import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.ISmartConnectAction;
 import org.wcs.smart.connect.security.ResourceOption;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.connect.security.UserAccountsAction;
 
 /**
  * SMART Connect REST API for configuring user permission and actions.
@@ -88,7 +87,7 @@ public class ConnectUserAction extends HttpServlet {
 		Session s = HibernateManager.getSession(context);
 		s.beginTransaction();
 		try{
-			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), UserAccountsAction.KEY)){
+			if (!SecurityManager.INSTANCE.canAccess(s, request.getUserPrincipal().getName(), AdminAccountAction.KEY)){
 				logger.info("User " + request.getUserPrincipal().getName() + " does not have permission to modify user acction details."); //$NON-NLS-1$ //$NON-NLS-2$
 				throw new SmartConnectException(Response.Status.UNAUTHORIZED);
 			}

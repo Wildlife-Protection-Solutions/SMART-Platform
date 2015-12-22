@@ -43,7 +43,6 @@ import org.wcs.smart.connect.i18n.Messages;
 import org.wcs.smart.connect.security.AdminAccountAction;
 import org.wcs.smart.connect.security.AlertAction;
 import org.wcs.smart.connect.security.SecurityManager;
-import org.wcs.smart.connect.security.UserAccountsAction;
 
 /**
  * Web filter to provide the menu items for each page in the web app.
@@ -57,7 +56,7 @@ public class MenuItemsFilter implements Filter {
 		CA("MenuItemsFilter.CaLabel", ConnectRESTApplication.SERVLET_PATH + "ca", null), //$NON-NLS-1$ //$NON-NLS-2$
 		//QUEUE("MenuItemsFilter.DataQueueLabel", ConnectRESTApplication.SERVLET_PATH + "dataqueue", null), //$NON-NLS-1$ //$NON-NLS-2$
 		ALERT("MenuItemsFilter.AlertLabel", ConnectRESTApplication.SERVLET_PATH + "alert", AlertAction.VIEW_ALL_KEY), //$NON-NLS-1$ //$NON-NLS-2$
-		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", UserAccountsAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
+		USERS("MenuItemsFilter.AccountsLabel", ConnectRESTApplication.SERVLET_PATH + "users", AdminAccountAction.KEY), //$NON-NLS-1$ //$NON-NLS-2$
 		QUERY("MenuItemsFilter.QueryLabel", ConnectRESTApplication.SERVLET_PATH + "query", null), //$NON-NLS-1$ //$NON-NLS-2$
 		SETTINGS("MenuItemsFilter.ConfigurationLabel", ConnectRESTApplication.SERVLET_PATH +"settings", AdminAccountAction.KEY);  //$NON-NLS-2$
 		

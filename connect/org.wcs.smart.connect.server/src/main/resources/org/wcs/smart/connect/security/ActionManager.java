@@ -38,7 +38,6 @@ public enum ActionManager {
 	private ActionManager(){
 		actions = new ArrayList<ISmartConnectAction>();
 		actions.add(new AdminAccountAction());
-		actions.add(new UserAccountsAction());
 		actions.add(new CaAction());
 		actions.add(new AlertAction());
 		actions.add(new QueryAction());
