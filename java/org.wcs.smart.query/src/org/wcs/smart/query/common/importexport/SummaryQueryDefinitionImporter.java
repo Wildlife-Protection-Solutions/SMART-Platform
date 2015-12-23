@@ -72,7 +72,7 @@ public abstract class SummaryQueryDefinitionImporter implements IQueryImporter{
 		
 		String langCode = xmlQuery.getLanguage();
 		SummaryQuery summaryQuery = createQuery();
-		QueryImportEngine.importNames(summaryQuery, xmlQuery, caImport);
+		QueryImportEngine.importNames(summaryQuery, xmlQuery, ca);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : xmlQuery.getUuiditem()){
