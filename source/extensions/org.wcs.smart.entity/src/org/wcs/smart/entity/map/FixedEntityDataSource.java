@@ -91,7 +91,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 	public String[] getTypeNames()  {
 		List<String> names = new ArrayList<String>();
 		try {
-			for (EntityType et : EntityHibernateManager.getActiveEntityTypes()){
+			for (EntityType et : EntityHibernateManager.getInstance().getActiveEntityTypes()){
 				if (et.getType() == EntityType.Type.FIXED){
 					names.add(et.getKeyId());
 				}
@@ -151,7 +151,7 @@ public class FixedEntityDataSource extends AbstractDataStore{
 			protected IStatus run(IProgressMonitor monitor) {
 				Session s = HibernateManager.openSession();
 				try{
-					EntityType entityType = EntityHibernateManager.getEntityType(entityTypeKey, s);
+					EntityType entityType = EntityHibernateManager.getInstance().getEntityType(entityTypeKey, s);
 					
 					sb.append("fid:String"); //$NON-NLS-1$
 					sb.append(",id:String"); //$NON-NLS-1$

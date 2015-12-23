@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
-import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.model.SummaryQuery;
 import org.wcs.smart.query.importexport.IQueryImporter;
 import org.wcs.smart.query.importexport.QueryImportEngine;
@@ -34,6 +34,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.summary.SumQueryDefinition;
+import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
@@ -66,19 +67,19 @@ public abstract class SummaryQueryDefinitionImporter implements IQueryImporter{
 	 * 
 	 */
 	@Override
-	public Query importQuery(QueryType qt) throws Exception{
+	public Query importQuery(QueryType xmlQuery, ConservationArea ca) throws Exception{
 		warnings.clear();
 		
-		String langCode = qt.getLanguage();
+		String langCode = xmlQuery.getLanguage();
 		SummaryQuery summaryQuery = createQuery();
-		QueryImportEngine.importNames(summaryQuery, qt);
+		QueryImportEngine.importNames(summaryQuery, xmlQuery);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
-		for (UuidItemType type : qt.getUuiditem()){
+		for (UuidItemType type : xmlQuery.getUuiditem()){
 			uuidLookup.put(type.getUuid(), type);
 		}
 		
-		for (QueryPart part : qt.getQueryPart()) {
+		for (QueryPart part : xmlQuery.getQueryPart()) {
 			
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
@@ -88,7 +89,7 @@ public abstract class SummaryQueryDefinitionImporter implements IQueryImporter{
 					session.beginTransaction();
 					try {
 						SumQueryDefinition sumDef = summaryQuery.getQueryDefinition();
-						validateQuery(sumDef, langCode, uuidLookup, session);					
+						validateQuery(ca, sumDef, langCode, uuidLookup, session);					
 						summaryQuery.setQuery(sumDef.asQuery(), sumDef);
 					} finally {
 						session.getTransaction().rollback();
@@ -99,10 +100,10 @@ public abstract class SummaryQueryDefinitionImporter implements IQueryImporter{
 		}
 		
 		
-		summaryQuery.setConservationArea(SmartDB.getCurrentConservationArea());
-		summaryQuery.setOwner(SmartDB.getCurrentEmployee());
+		summaryQuery.setConservationArea(ca);
+		summaryQuery.setOwner(ImportQueryUtil.findEmployee(ca));
 		
-		summaryQuery.setConservationAreaFilter((new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
+		summaryQuery.setConservationAreaFilter((new ConservationAreaFilter(true, ca)).asString());
 		
 		return summaryQuery;
 	}
@@ -119,7 +120,7 @@ public abstract class SummaryQueryDefinitionImporter implements IQueryImporter{
 	 * Validates the imported query definition.  Updates
 	 * warning array as required
 	 */
-	protected abstract void validateQuery(SumQueryDefinition sumDef, String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception;
+	protected abstract void validateQuery(ConservationArea caImport, SumQueryDefinition sumDef, String langCode, HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception;
 	
 	@Override
 	public abstract boolean canImport(IQueryType qt);

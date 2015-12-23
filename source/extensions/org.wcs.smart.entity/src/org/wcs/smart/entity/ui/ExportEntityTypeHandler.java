@@ -332,7 +332,7 @@ public class ExportEntityTypeHandler {
 					Session s = HibernateManager.openSession();
 					s.beginTransaction();
 					try{
-						items.addAll(EntityHibernateManager.getEntityTypes(s));
+						items.addAll(EntityHibernateManager.getInstance().getEntityTypes(s));
 						Collections.sort(items, new Comparator<EntityType>(){
 							@Override
 							public int compare(EntityType et1, EntityType et2) {

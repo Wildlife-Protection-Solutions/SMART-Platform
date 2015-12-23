@@ -62,7 +62,7 @@ public class ExportQueryHandler {
 		}
 		if (query == null) return;
 
-		ExportQueryWizard wizard = new ExportQueryWizard(query, null);
+		ExportQueryWizard wizard = new ExportQueryWizard(query);
 		WizardDialog wd = new WizardDialog(activeShell, wizard);
 		wd.open();
 	}

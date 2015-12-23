@@ -24,7 +24,7 @@ package org.wcs.smart.observation.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.observation.query.model.ObservationQueryFactory;
 import org.wcs.smart.observation.query.model.ObservationSummaryQuery;
 import org.wcs.smart.query.QueryDataModelManager;
@@ -50,11 +50,11 @@ public class ObsSummaryQueryDefinitionImporter extends SummaryQueryDefinitionImp
 	}
 
 	@Override
-	protected void validateQuery(SumQueryDefinition sumDef, String langCode,
+	protected void validateQuery(ConservationArea caImport, SumQueryDefinition sumDef, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session)
 			throws Exception {
 			
-		QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
+		QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getManager(caImport), caImport);
 		if (sumDef.getValueFilter() != null ){
 			warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));
 		}

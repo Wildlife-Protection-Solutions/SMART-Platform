@@ -113,7 +113,7 @@ public class EntityTypeListView implements IEntityTypeFilteringView{
 			
 			EntityTypeEditorInput[] input = null;
 			if (SmartDB.isMultipleAnalysis()){
-				List<EntityType> ets = EntityHibernateManager.getActiveEntityTypes();
+				List<EntityType> ets = EntityHibernateManager.getInstance().getActiveEntityTypes();
 				input = new EntityTypeEditorInput[ets.size()];
 				int i = 0;
 				for (EntityType et : ets){

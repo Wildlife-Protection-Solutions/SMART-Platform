@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.observation.query.model.ObsObservationQuery;
@@ -58,7 +59,7 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 	}
 
 	@Override
-	protected String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
+	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		QueryFilter queryFilter = null;
 		
 		try(InputStream is = new ByteArrayInputStream(queryDef.getBytes())){
@@ -70,7 +71,7 @@ public class ObsSimpleQueryDefinitionImporter extends SimpleQueryDefinitionImpor
 		Session session = HibernateManager.openSession();
 		session.beginTransaction();
 		try {
-			QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
+			QueryDefinitionValidator validator = new QueryDefinitionValidator(session, QueryDataModelManager.getManager(importCa), importCa);
 			
 			warnings.addAll(validator.validate(queryFilter.getFilter()));
 		} finally {

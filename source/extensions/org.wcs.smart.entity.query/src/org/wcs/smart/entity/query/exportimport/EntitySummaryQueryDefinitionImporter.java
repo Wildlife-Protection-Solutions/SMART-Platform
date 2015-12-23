@@ -24,6 +24,7 @@ package org.wcs.smart.entity.query.exportimport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.entity.query.model.EntityQueryFactory;
 import org.wcs.smart.entity.query.model.EntitySummaryQuery;
 import org.wcs.smart.query.common.importexport.SummaryQueryDefinitionImporter;
@@ -47,11 +48,11 @@ public class EntitySummaryQueryDefinitionImporter extends SummaryQueryDefinition
 	}
 
 	@Override
-	protected void validateQuery(SumQueryDefinition sumDef, String langCode,
+	protected void validateQuery(ConservationArea caImport, SumQueryDefinition sumDef, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session)
 			throws Exception {
 		
-		EntityQueryValidator validator = new EntityQueryValidator(session);
+		EntityQueryValidator validator = new EntityQueryValidator(caImport, session);
 		
 		if (sumDef.getValueFilter() != null ){
 			warnings.addAll(validator.validate(sumDef.getValueFilter().getFilter()));

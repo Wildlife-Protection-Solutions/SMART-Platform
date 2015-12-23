@@ -70,7 +70,8 @@ import org.wcs.smart.util.SmartUtils;
 
 public class EmployeeComposite extends Composite {
 
-	private static final String MODIFIED_KEY = "modified";
+	private static final String MODIFIED_KEY = "modified"; //$NON-NLS-1$
+	
 	/* ui components */
 	protected Text txtGivenName = null;
 	protected Text txtFamilyName = null;
@@ -663,6 +664,12 @@ public class EmployeeComposite extends Composite {
 		
 		if (cmbSmartUserLevel != null){
 			cmbSmartUserLevel.getCombo().setEnabled(enable);
+		}
+		if (txtSmartPassword != null){
+			txtSmartPassword.setEnabled(enable);
+		}
+		if (txtSmartPassword2 != null){
+			txtSmartPassword2.setEnabled(enable);
 		}
 		if (enable){
 			validate();

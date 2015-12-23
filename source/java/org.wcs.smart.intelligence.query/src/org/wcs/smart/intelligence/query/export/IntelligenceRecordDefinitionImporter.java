@@ -23,6 +23,7 @@ package org.wcs.smart.intelligence.query.export;
 
 import java.util.HashMap;
 
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.intelligence.query.IntelligenceQueryFactory;
 import org.wcs.smart.intelligence.query.model.IntelligenceRecordQuery;
 import org.wcs.smart.query.common.importexport.SimpleQueryDefinitionImporter;
@@ -40,7 +41,7 @@ public class IntelligenceRecordDefinitionImporter extends SimpleQueryDefinitionI
 
 	
 	@Override
-	protected String processDefinition(String queryDef, String langCode,
+	protected String processDefinition(ConservationArea importCa, String queryDef, String langCode,
 			HashMap<String, UuidItemType> uuidLookup) throws Exception {
 		return queryDef;
 	}

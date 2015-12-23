@@ -491,7 +491,7 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 	 * @throws Exception
 	 */
 	private EntityAttribute getEntityAttribute(String entityKey, String entityAttributeKey, Session session) throws Exception{
-		return EntityHibernateManager.getEntityAttribute(entityKey, entityAttributeKey, session);
+		return EntityHibernateManager.getInstance().getEntityAttribute(entityKey, entityAttributeKey, session);
 	}
 	
 	/**
@@ -501,6 +501,6 @@ public class EntityDropItemFactory extends BasicDropItemFactory implements IDrop
 	 * @throws Exception
 	 */
 	private EntityType getEntityType(String entityKey, Session session) throws Exception{
-		return EntityHibernateManager.getEntityType(entityKey, session);
+		return EntityHibernateManager.getInstance().getEntityType(entityKey, session);
 	}
 }

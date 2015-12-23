@@ -25,7 +25,8 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.wcs.smart.hibernate.SmartDB;
+import org.wcs.smart.ca.ConservationArea;
+//import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.QueryTypeManager;
 import org.wcs.smart.query.common.model.SimpleQuery;
 import org.wcs.smart.query.importexport.IQueryImporter;
@@ -35,6 +36,7 @@ import org.wcs.smart.query.model.IQueryType;
 import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
+import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
@@ -63,12 +65,13 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 	 * </p> 
 	 * 
 	 * @param file the query definition xml file to import
+	 * @param importCa the conservation area we are importing into
 	 * @return the imported query
 	 * @throws Exception if the file cannot be converted to a query.
 	 * 
 	 */
 	@Override
-	public Query importQuery(QueryType qt) throws Exception{
+	public Query importQuery(QueryType qt, ConservationArea importCa) throws Exception{
 		warnings.clear();
 		SimpleQuery wq;
 
@@ -98,7 +101,7 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("definition")) { //$NON-NLS-1$
 				if (part.getValue() != null && part.getValue().length() > 0) {
-					strQueryFilter = processDefinition(part.getValue(), langCode, uuidLookup);
+					strQueryFilter = processDefinition(importCa, part.getValue(), langCode, uuidLookup);
 				}
 			}else if (part.getKey().equals("columns")){ //$NON-NLS-1$
 				strColumnFilter = part.getValue();
@@ -109,10 +112,10 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 		
 		wq.setQueryFilter(strQueryFilter);
 		wq.setVisibleColumns(strColumnFilter);
-		wq.setConservationArea(SmartDB.getCurrentConservationArea());
-		wq.setOwner(SmartDB.getCurrentEmployee());
+		wq.setConservationArea(importCa);
+		wq.setOwner(ImportQueryUtil.findEmployee(importCa));
 		
-		wq.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
+		wq.setConservationAreaFilter( (new ConservationAreaFilter(true, importCa)).asString());
 		
 		if (wq instanceof StyledQuery && stylePart != null){
 			wq.setStyle(stylePart);
@@ -133,10 +136,12 @@ public abstract class SimpleQueryDefinitionImporter implements IQueryImporter {
 	 * Converts the query definition in the xml file
 	 * to the query definition.  Performs necessary validation
 	 * and updates warnings as required.
-	 * @param query
-	 * @param queryDef
+	 * @param importCa the conservation area we are importing into
+	 * @param queryDef the query definition part string
+	 * @param langcode the language code from the query
+	 * @param uuidLookup the list of uuid lookup items provided in the query definition file
 	 */
-	protected abstract String processDefinition(String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception;
+	protected abstract String processDefinition(ConservationArea importCa, String queryDef, String langCode, HashMap<String, UuidItemType> uuidLookup) throws Exception;
 
 	@Override
 	public abstract boolean canImport(IQueryType qt);

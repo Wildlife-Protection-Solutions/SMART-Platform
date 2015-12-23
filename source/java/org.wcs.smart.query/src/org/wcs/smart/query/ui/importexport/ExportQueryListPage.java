@@ -21,7 +21,6 @@
  */
 package org.wcs.smart.query.ui.importexport;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,24 +30,21 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 import org.wcs.smart.query.ui.querylist.QueryListLabelProvider;
 import org.wcs.smart.ui.properties.DialogConstants;
 
 /**
- * Wizard page to display a list of queries to export.
+ * Wizard page to display a list of queries to export. For
+ * exporting query definitions
  * 
  * @author Emily
  *
@@ -57,7 +53,6 @@ public class ExportQueryListPage extends WizardPage {
 
 	public static final String PAGE_NAME = "QueryListPage"; //$NON-NLS-1$
 	
-	private Text txtFile = null;
 	private TableViewer queryList;
 	private List<Object> queries;
 	
@@ -73,12 +68,6 @@ public class ExportQueryListPage extends WizardPage {
 	 * Initializes the values in the query wizard
 	 */
 	public void initValues(List<QueryEditorInput> initqueries){
-		String location = getWizard().getDialogSettings() != null ? getWizard().getDialogSettings().get(ExportQueryWizard.LAST_DIR_KEY) : null;
-		if (location == null){
-			location = System.getProperty("user.home"); //$NON-NLS-1$
-		}
-		txtFile.setText( location );
-		
 		if ( ((ExportQueryWizard)getWizard()).getQuery() != null){
 			if (!queries.contains(((ExportQueryWizard)getWizard()).getQuery())){
 				queries.add(((ExportQueryWizard)getWizard()).getQuery());
@@ -89,7 +78,6 @@ public class ExportQueryListPage extends WizardPage {
 		}
 		
 		queryList.refresh();
-		
 		validate();
 		
 	}
@@ -100,41 +88,8 @@ public class ExportQueryListPage extends WizardPage {
 	public void createControl(Composite parent) {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(2, false));
-		
+				
 		Label lbl = new Label(main, SWT.NONE);
-		lbl.setText(Messages.ExportQueryListPage_OutputFolderLabel);
-		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		
-		txtFile = new Text(main, SWT.BORDER);
-		txtFile.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
-		
-		txtFile.addModifyListener(new ModifyListener() {
-			@Override
-			public void modifyText(ModifyEvent e) {
-				validate();
-			}
-		});		
-		
-		Button btnBrowse = new Button(main, SWT.NONE);
-		btnBrowse.setText(Messages.ExportQueryLocationPage_BrowseButton);
-		btnBrowse.addSelectionListener(new SelectionAdapter() {
-			@Override
-			public void widgetSelected(SelectionEvent e) {
-				DirectoryDialog dd = new DirectoryDialog(getShell(), SWT.SAVE);
-				dd.setText(Messages.ExportQueryListPage_DirDialogText);
-				dd.setMessage(Messages.ExportQueryListPage_DirDialogMessage);
-				if (txtFile.getText().length() > 0) {
-					dd.setFilterPath(txtFile.getText());
-				}
-				String f = dd.open();
-				if (f != null) {
-					txtFile.setText(f);	
-					validate();
-				}
-			}
-		});
-		
-		lbl = new Label(main, SWT.NONE);
 		lbl.setText(Messages.ExportQueryListPage_QueriesLabel);
 		lbl.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
 		
@@ -190,24 +145,14 @@ public class ExportQueryListPage extends WizardPage {
 		setPageComplete(false);
 		setControl(main);
 	}
-
+	
 	private void validate(){
 		String error = null;
 		if (queries.size() == 0){
 			error = Messages.ExportQueryListPage_QueryRequired;
-		}else if (! new File(txtFile.getText()).exists()){
-			error = Messages.ExportQueryListPage_ValidOutputDirRequired;
 		}
-		
 		setErrorMessage(error);
 		setPageComplete(error == null);
-		
-	}
-	/**
-	 * @return the selected file
-	 */
-	public File getDirectory(){
-		return new File(txtFile.getText());
 	}
 	
 	/**

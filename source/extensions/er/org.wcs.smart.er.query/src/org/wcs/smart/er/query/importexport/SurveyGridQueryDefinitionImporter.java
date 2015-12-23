@@ -24,6 +24,7 @@ package org.wcs.smart.er.query.importexport;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.er.query.model.ISurveyQuery;
 import org.wcs.smart.er.query.model.SurveyGriddedQuery;
 import org.wcs.smart.er.query.model.SurveyQueryFactory;
@@ -54,10 +55,10 @@ public class SurveyGridQueryDefinitionImporter extends GriddedQueryDefinitionImp
 	}
 
 	@Override
-	protected void validateQuery(GridQueryDefinition def, String langCode,
+	protected void validateQuery(ConservationArea caImport, GridQueryDefinition def, String langCode,
 			HashMap<String, UuidItemType> uuidLookup, Session session) throws Exception {
 		
-		SurveyQueryValidator validator = new SurveyQueryValidator(uuidLookup, session);
+		SurveyQueryValidator validator = new SurveyQueryValidator(caImport, uuidLookup, session);
 		if (def.getValueFilter() != null){
 			warnings.addAll(validator.validate(def.getValueFilter().getFilter()));
 		}
@@ -72,8 +73,8 @@ public class SurveyGridQueryDefinitionImporter extends GriddedQueryDefinitionImp
 	}
 	
 	@Override
-	public Query importQuery(QueryType qt) throws Exception{
-		Query query = super.importQuery(qt);
+	public Query importQuery(QueryType qt, ConservationArea caImport) throws Exception{
+		Query query = super.importQuery(qt, caImport);
 		for (QueryPart part : qt.getQueryPart()) {
 			if (part.getKey().equals("surveyDesignFilter")){ //$NON-NLS-1$
 				((ISurveyQuery)query).setSurveyDesign(part.getValue());

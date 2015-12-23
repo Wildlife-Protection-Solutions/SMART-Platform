@@ -38,12 +38,12 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
 
 /**
- * Handler for the export query button.
+ * Handler for the export query definition button.
  * 
  * @author Emily
  * @since 1.0.0
  */
-public class ExportMultiQueryHandler {
+public class ExportQueryDefHandler {
 
 	@Execute
 	public void execute(MPart activePart, Shell activeShell, @Named(IServiceConstants.ACTIVE_SELECTION) Object thisSelection) {
@@ -61,14 +61,14 @@ public class ExportMultiQueryHandler {
 				}
 			}
 		}
-		ExportQueryWizard wizard = new ExportQueryWizard(null, selectedQueries);
+		ExportQueryWizard wizard = new ExportQueryWizard(selectedQueries);
 		WizardDialog wd = new WizardDialog(activeShell, wizard);
 		wd.open();
 	}
 
-	public static class ExportMultiQueryHandlerWrapper extends DIHandler<ExportMultiQueryHandler>{
-		public ExportMultiQueryHandlerWrapper(){
-			super(ExportMultiQueryHandler.class);
+	public static class ExportQueryDefHandlerWrapper extends DIHandler<ExportQueryDefHandler>{
+		public ExportQueryDefHandlerWrapper(){
+			super(ExportQueryDefHandler.class);
 		}
 	}
 }

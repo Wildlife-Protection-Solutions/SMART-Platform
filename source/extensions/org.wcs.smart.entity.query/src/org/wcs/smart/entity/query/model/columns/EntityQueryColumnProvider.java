@@ -106,7 +106,7 @@ public class EntityQueryColumnProvider implements IEntityQueryColumnProvider{
 				try{
 					List<EntityAttributeQueryColumn> cols = new ArrayList<EntityAttributeQueryColumn>();
 					for (String entityType : entityTypes){
-						EntityType et = EntityHibernateManager.getEntityType(entityType, session);
+						EntityType et = EntityHibernateManager.getInstance().getEntityType(entityType, session);
 						for (EntityAttribute ea : et.getAttributes()){
 							EntityAttributeQueryColumn newcol = new EntityAttributeQueryColumn("[" + et.getName() + "]" + ea.getName(), et.getKeyId(), ea.getKeyId(), ea.getDmAttribute().getType()); //$NON-NLS-1$ //$NON-NLS-2$
 							cols.add(newcol);

@@ -25,6 +25,7 @@ import java.text.MessageFormat;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.ca.datamodel.Attribute.AttributeType;
 import org.wcs.smart.entity.EntityHibernateManager;
 import org.wcs.smart.entity.model.EntityAttribute;
@@ -50,16 +51,25 @@ import org.wcs.smart.query.model.summary.IValueItem;
  */
 public class EntityQueryValidator extends QueryDefinitionValidator {
 
-	
+	private ConservationArea conservationArea;
 
 	/**
 	 * @param session database session
 	 * 
 	 */
 	public EntityQueryValidator( Session session ){
-		super(session, QueryDataModelManager.getInstance(), SmartDB.getCurrentConservationArea());
+		this(SmartDB.getCurrentConservationArea(), session);
 	}
 
+	/**
+	 * Creates an entity query validator for a given conservation area
+	 * @param session database session
+	 * 
+	 */
+	public EntityQueryValidator( ConservationArea ca, Session session ){
+		super(session, QueryDataModelManager.getManager(ca), ca);
+		this.conservationArea = ca;
+	}
 	
 	/**
 	 * Validates a filter item against the database.
@@ -122,7 +132,7 @@ public class EntityQueryValidator extends QueryDefinitionValidator {
 				}else if (filter instanceof EntityAttributeFilter){
 					EntityAttributeFilter item = (EntityAttributeFilter)filter;
 					validateEntity(item.getEntityKey());
-					EntityAttribute ea = EntityHibernateManager.getEntityAttribute(((EntityAttributeFilter) filter).getEntityKey(), ((EntityAttributeFilter) filter).getEntityAttributeKey(),session);
+					EntityAttribute ea = EntityHibernateManager.getInstance(conservationArea).getEntityAttribute(((EntityAttributeFilter) filter).getEntityKey(), ((EntityAttributeFilter) filter).getEntityAttributeKey(), session);
 					if (ea == null){
 						throw new Exception(MessageFormat.format(Messages.EntityQueryValidator_EntityAttributeNotFound, new Object[]{item.getEntityAttributeKey(), item.getEntityKey()}));
 					}
@@ -152,7 +162,7 @@ public class EntityQueryValidator extends QueryDefinitionValidator {
 					EntityAttributeGroupBy gb = (EntityAttributeGroupBy) filter;
 					validateEntity(gb.getEntityKey());
 					
-					EntityAttribute ea = EntityHibernateManager.getEntityAttribute(((EntityAttributeGroupBy) filter).getEntityKey(), ((EntityAttributeGroupBy) filter).getEntityAttributeKey(),session);
+					EntityAttribute ea = EntityHibernateManager.getInstance(conservationArea).getEntityAttribute(((EntityAttributeGroupBy) filter).getEntityKey(), ((EntityAttributeGroupBy) filter).getEntityAttributeKey(), session);
 					if (ea == null){
 						throw new Exception(MessageFormat.format(Messages.EntityQueryValidator_EntityAttributeNotFound, new Object[]{gb.getEntityAttributeKey(), gb.getEntityKey()}));
 					}
@@ -182,7 +192,7 @@ public class EntityQueryValidator extends QueryDefinitionValidator {
 	 * @throws Exception
 	 */
 	public void validateEntity(String entityTypeKey) throws Exception{
-		EntityType et = EntityHibernateManager.getEntityType(entityTypeKey, session);
+		EntityType et = EntityHibernateManager.getInstance(conservationArea).getEntityType(entityTypeKey, session);
 		if (et == null){
 			throw new Exception (MessageFormat.format(Messages.EntityQueryValidator_EntityTypeNotFound, new Object[]{entityTypeKey}));
 		}

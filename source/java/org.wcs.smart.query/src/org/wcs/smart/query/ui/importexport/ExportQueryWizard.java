@@ -23,10 +23,14 @@ package org.wcs.smart.query.ui.importexport;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -41,7 +45,12 @@ import org.eclipse.swt.widgets.Display;
 import org.hibernate.Session;
 import org.locationtech.udig.catalog.URLUtils;
 import org.wcs.smart.SmartPlugIn;
+import org.wcs.smart.ca.ConservationArea;
+import org.wcs.smart.ca.Employee;
+import org.wcs.smart.ca.Employee.SmartUserLevel;
+import org.wcs.smart.common.control.WarningDialog;
 import org.wcs.smart.hibernate.HibernateManager;
+import org.wcs.smart.query.IQueryHibernateManager;
 import org.wcs.smart.query.QueryHibernateManager;
 import org.wcs.smart.query.QueryPlugIn;
 import org.wcs.smart.query.importexport.ICsvQueryExporter;
@@ -49,7 +58,9 @@ import org.wcs.smart.query.importexport.IQueryExporter;
 import org.wcs.smart.query.importexport.QueryExportEngine;
 import org.wcs.smart.query.internal.Messages;
 import org.wcs.smart.query.model.Query;
+import org.wcs.smart.query.model.QueryFolder;
 import org.wcs.smart.query.ui.editor.QueryEditorInput;
+import org.wcs.smart.ui.SmartLabelProvider;
 import org.wcs.smart.util.SmartUtils;
 
 /**
@@ -70,17 +81,12 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	private ExportQueryTypePage page1;
 	private ExportQueryLocationPage page2;
 	private ExportQueryListPage page3;
+	private ExportQueryDefLocationPage page4;
 	
 	private boolean hasError = false;
 	private List<QueryEditorInput> initSelection = null;
 	
-	/**
-	 * Creates a new wizard.
-	 *
-	 * @param query the query to export (can be null)
-	 * @param initSelection collection of queries to export (can be null)  Only one of query or initSelection can be provided 
-	 */
-	public ExportQueryWizard(Query query, List<QueryEditorInput> initSelection) {
+	private ExportQueryWizard(Query query, List<QueryEditorInput> initSelection) {
 		this.query = query;
 		if (this.query != null){
 			setWindowTitle(Messages.ExportQueryWizard_Title1);	
@@ -95,7 +101,19 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	}
 	
 	/**
-	 * Creates a new wizard.
+	 * Creates a new wizard that will allow users to export
+	 * a set of query definitions.
+	 * 
+	 * @param initSelection
+	 */
+	public ExportQueryWizard(List<QueryEditorInput> initSelection) {
+		this(null, initSelection);
+		
+	}
+	
+	/**
+	 * Creates a new wizard that will allow users to export
+	 * query results from the given query.
 	 *
 	 * @param query the query to export
 	 */
@@ -109,7 +127,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
     public boolean canFinish() {
     	if (getContainer().getCurrentPage() == page2 && page2.isPageComplete()){
     		return true;
-    	}else if (getContainer().getCurrentPage() == page3 && page3.isPageComplete()){
+    	}else if (getContainer().getCurrentPage() == page4 && page4.isPageComplete()){
     		return true;
     	}
     	return false;
@@ -130,7 +148,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 		}
 		
 		page3 = new ExportQueryListPage();
+		page4 = new ExportQueryDefLocationPage();
 		super.addPage(page3);
+		super.addPage(page4);
 	}
 
 	@Override
@@ -183,7 +203,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 							}
 							
 							hasError = !exportSingleFile(exporter, monitor);
-						}else if (getContainer().getCurrentPage() == page3){
+						}else if (getContainer().getCurrentPage() == page4){
 							exportMultiDefs(monitor);
 						}
 					} catch (Exception e) {
@@ -256,22 +276,9 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 	 * Exports a single query to the selected format/file.
 	 */
 	private void exportMultiDefs(IProgressMonitor monitor) {
-		File outputDir = page3.getDirectory();
-		getDialogSettings().put(LAST_DIR_KEY, outputDir.toString());
+		File outputLocation = page4.getExportLocation();
+		List<ConservationArea> cas = page4.getConservationAreasToExport();
 		
-		if (!outputDir.exists()){
-			boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputDir.toString()}));
-			if (!create){
-				hasError = true;
-				return;
-			}else{
-				if (!SmartUtils.createDirectory(outputDir)){
-					hasError = true;
-					return;
-				}
-			}
-		}
-
 		HashMap<String, Object> ops = null;
 		try{
 			if (page2 != null){
@@ -286,11 +293,130 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 			return ;
 		}
 		
-		int exportedCnt = 0;
+		if (outputLocation != null){
+			getDialogSettings().put(LAST_DIR_KEY, outputLocation.toString());
+			
+			if (!outputLocation.exists()){
+				boolean create = MessageDialog.openQuestion(getShell(), Messages.ExportQueryWizard_DialogTitle, MessageFormat.format(Messages.ExportQueryWizard_DirectoryDoesNotExist, new Object[]{outputLocation.toString()}));
+				if (!create){
+					hasError = true;
+					return;
+				}else{
+					if (!SmartUtils.createDirectory(outputLocation)){
+						hasError = true;
+						return;
+					}
+				}
+			}
+		}else{
+			//exporting to ca; create a temp directory to work with
+			try{
+				outputLocation = Files.createTempDirectory("queryexports").toFile(); //$NON-NLS-1$
+			}catch (Exception ex){
+				QueryPlugIn.displayLog(ex.getMessage(), ex);
+				hasError = true;
+				return;
+			}
+		}
 		
+		monitor.beginTask(Messages.ExportQueryWizard_ExportProgress, page3.getQueries().size()  * (cas == null ? 1 : (cas.size() + 1)));
+		
+		HashMap<Query, File> exportedQueries = exportQueriesToFile(outputLocation, page3.getQueries(), ops, monitor);
+		
+		if (cas == null){
+			if (monitor.isCanceled()){
+				openInfo(MessageFormat.format(Messages.ExportQueryWizard_ExportCancelled, new Object[]{exportedQueries.size(), page3.getQueries().size()}));
+			}else{
+				openInfo(MessageFormat.format(Messages.ExportQueryWizard_ExportCompleted, new Object[]{exportedQueries.size(), page3.getQueries().size()}));
+			}
+		}else{
+			if (monitor.isCanceled()){
+				openInfo(MessageFormat.format(Messages.ExportQueryWizard_ExportCancelled, new Object[]{0, page3.getQueries().size()}));
+				hasError = true;
+				return;
+			}
+			
+			//import files into each conservation area
+			Object[] results = importQueries(cas, exportedQueries, monitor);
+			int cnt = (int) results[0];
+			List<String> error = (List<String>) results[1];
+			try{
+				FileUtils.deleteDirectory(outputLocation);
+			}catch(Exception ex){
+				QueryPlugIn.log(ex.getMessage(), ex);
+			}
+			if (monitor.isCanceled()){
+				openInfo(MessageFormat.format(Messages.ExportQueryWizard_Cancelled, new Object[]{cnt, exportedQueries.size() * cas.size()}));
+			}else{
+				if (error.size() == 0){
+					openInfo(MessageFormat.format(Messages.ExportQueryWizard_Complete, new Object[]{cnt, exportedQueries.size() * cas.size()}));
+				}else{
+					WarningDialog wd = new WarningDialog(getContainer().getShell(), 
+							EXPORT_DIALOGTITLE, 
+							MessageFormat.format(Messages.ExportQueryWizard_CompleteWError, new Object[]{cnt, exportedQueries.size() * cas.size()}), 
+							error);
+					wd.open();
+				}
+			}
+		}
+	}
+	private void openInfo(String message){
+		MessageDialog.openInformation(
+				getContainer().getShell(), EXPORT_DIALOGTITLE,
+				message);
+	}
+	
+	private Object[] importQueries(List<ConservationArea> cas, HashMap<Query, File> queriesToImport, IProgressMonitor monitor){
+		List<String> errors = new ArrayList<String>();
+		List<String> overview = new ArrayList<String>();
+		int ok = 0;
+		for (ConservationArea ca : cas){
+			//figure out what folder to import into
+			QueryFolder root = new QueryFolder();
+			root.setRootFolder(true);
+			Employee e = ImportQueryUtil.findEmployee(ca);
+			if (e.getSmartUserLevel() == SmartUserLevel.ADMIN || 
+					e.getSmartUserLevel() == SmartUserLevel.MANAGER ){
+				root.setUuid(IQueryHibernateManager.CA_QUERY_KEY);	
+			}else if (e.getSmartUserLevel() == SmartUserLevel.ANALYST){
+				//store in my queries folder
+				root.setUuid(IQueryHibernateManager.USER_QUERY_KEY);
+			}else if (e.getSmartUserLevel() == SmartUserLevel.DATA_ENTRY){
+				//data entry queries do not have access to import queries
+				errors.add(MessageFormat.format(Messages.ExportQueryWizard_UserError, ca.getNameLabel(), SmartLabelProvider.getFullLabel(e)));
+			}
+			
+			monitor.subTask(MessageFormat.format(Messages.ExportQueryWizard_ImportProgress, ca.getNameLabel()));
+			int lcnt = 0;
+			for (Entry<Query, File> key: queriesToImport.entrySet()){
+				try {
+					ImportQueryUtil.importQuery(key.getValue(), root, ca, getContainer().getShell());
+					ok++;
+					lcnt ++;
+				} catch (Exception e1) {
+					QueryPlugIn.log(e1.getMessage(), e1);
+					errors.add(MessageFormat.format(Messages.ExportQueryWizard_ImportError, key.getKey().getName(), ca.getNameLabel(), e1.getMessage()));
+				}
+				monitor.worked(1);
+				if (monitor.isCanceled()){ 
+					return new Object[]{ok, errors}; 
+				}
+			}			
+			overview.add(MessageFormat.format(Messages.ExportQueryWizard_ImportStatus, ca.getNameLabel(), lcnt, queriesToImport.size()));
+		}
+		errors.add(0, "\n"); //$NON-NLS-1$
+		for (String x : overview){
+			errors.add(0, x);
+		}
+		
+		return new Object[]{ok, errors};
+	}
+	
+	
+	private HashMap<Query, File> exportQueriesToFile(File outputLocation, List<Object> queries, HashMap<String, Object> ops, IProgressMonitor monitor){
 		boolean overwriteall = false;
-		monitor.beginTask(Messages.ExportQueryWizard_ExportProgress, page3.getQueries().size());
-		for (Object qi : page3.getQueries()){
+		HashMap<Query, File> exportedFiles = new HashMap<Query, File>();
+		for (Object qi : queries){
 			monitor.worked(1);
 			
 			Query query = null;
@@ -310,9 +436,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 					continue;
 				}
 			}
-			
-			
-		
+	
+			//find query definition exporter
 			IQueryExporter lexporter = null;
 			for (IQueryExporter exporter : QueryExportEngine.getQueryExports(query)){
 				if (exporter.getId().startsWith(IQueryExporter.QUERY_DEFINTION_EXPORTER_ID)){
@@ -320,12 +445,13 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 					break;
 				}
 			}
+			//to definition exporter found for query type
 			if (lexporter == null){
 				MessageDialog.openError(getShell(), Messages.ExportQueryWizard_ExporterNotFound, MessageFormat.format(Messages.ExportQueryWizard_ExporterNotFoundMsg, new Object[]{query.getName() + " [" + query.getId() + "]"})); //$NON-NLS-1$ //$NON-NLS-2$
 				continue;
 			}
 			
-			File outputFile = new File(outputDir, URLUtils.cleanFilename(query.getName()) +"_" + query.getId() + "." + lexporter.getDefaultExtension()); //$NON-NLS-1$ //$NON-NLS-2$
+			File outputFile = new File(outputLocation, URLUtils.cleanFilename(query.getName()) +"_" + query.getId() + "." + lexporter.getDefaultExtension()); //$NON-NLS-1$ //$NON-NLS-2$
 			if (!overwriteall && outputFile.exists()){
 				MessageDialog md = new MessageDialog(getShell(), Messages.ExportQueryWizard_OverwriteDialogTitle,
 						MessageDialog.getImage(Dialog.DLG_IMG_MESSAGE_INFO),
@@ -343,7 +469,7 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 
 			try{
 				lexporter.export(query, query.getCachedResults(), outputFile, ops, monitor);
-				exportedCnt++;
+				exportedFiles.put(query, outputFile);
 			}catch (Throwable ex){
 				MessageDialog.openError(getShell(), 
 						Messages.ExportQueryWizard_ExportFailed, 
@@ -355,18 +481,8 @@ public class ExportQueryWizard extends Wizard implements IPageChangingListener{
 				break;
 			}
 		}
-		
-		if (monitor.isCanceled()){
-			MessageDialog.openInformation(
-				Display.getDefault().getActiveShell(), EXPORT_DIALOGTITLE,
-				MessageFormat.format(Messages.ExportQueryWizard_ExportCancelled, new Object[]{exportedCnt, page3.getQueries().size()}));
-		}else{
-			MessageDialog.openInformation(
-					Display.getDefault().getActiveShell(), EXPORT_DIALOGTITLE,
-					MessageFormat.format(Messages.ExportQueryWizard_ExportCompleted, new Object[]{exportedCnt, page3.getQueries().size()}));
-		}
+		return exportedFiles;
 	}
-	
 	/**
 	 * @see org.eclipse.jface.dialogs.IPageChangingListener#handlePageChanging(org.eclipse.jface.dialogs.PageChangingEvent)
 	 */

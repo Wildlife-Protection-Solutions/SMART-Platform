@@ -257,7 +257,7 @@ public class ImportQueryWizard extends Wizard implements IPageChangingListener{
 	
 	private Query importQuery(File file, QueryFolder qf) throws Exception{
 		QueryImportEngine importer = new QueryImportEngine();
-		Query query = importer.importQuery(file);
+		Query query = importer.importQuery(file, SmartDB.getCurrentConservationArea());
 		
 		List<String> warnings = importer.getWarnings();
 		if (warnings.size() > 0){

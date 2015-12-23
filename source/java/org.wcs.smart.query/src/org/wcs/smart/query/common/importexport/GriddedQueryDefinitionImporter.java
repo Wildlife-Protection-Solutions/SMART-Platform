@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.hibernate.Session;
+import org.wcs.smart.ca.ConservationArea;
 import org.wcs.smart.hibernate.HibernateManager;
 import org.wcs.smart.hibernate.SmartDB;
 import org.wcs.smart.query.common.model.GriddedQuery;
@@ -35,6 +36,7 @@ import org.wcs.smart.query.model.Query;
 import org.wcs.smart.query.model.StyledQuery;
 import org.wcs.smart.query.model.filter.ConservationAreaFilter;
 import org.wcs.smart.query.model.summary.GridQueryDefinition;
+import org.wcs.smart.query.ui.importexport.ImportQueryUtil;
 import org.wcs.smart.query.xml.model.QueryPart;
 import org.wcs.smart.query.xml.model.QueryType;
 import org.wcs.smart.query.xml.model.UuidItemType;
@@ -67,7 +69,7 @@ public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 	 * 
 	 */
 	@Override
-	public Query importQuery(QueryType qt) throws Exception{
+	public Query importQuery(QueryType qt, ConservationArea caImport) throws Exception{
 		warnings.clear();
 		
 		String langCode = qt.getLanguage();
@@ -92,7 +94,7 @@ public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 					try {
 						GridQueryDefinition def = griddedQuery.getQueryDefinition();
 						
-						validateQuery(def, langCode, uuidLookup, session);
+						validateQuery(caImport, def, langCode, uuidLookup, session);
 						
 						griddedQuery.setQuery(def.asQuery(), def);
 					} finally {
@@ -106,9 +108,9 @@ public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 				stylePart = part.getValue();
 			}
 		}		
-		griddedQuery.setConservationArea(SmartDB.getCurrentConservationArea());
-		griddedQuery.setOwner(SmartDB.getCurrentEmployee());
-		griddedQuery.setConservationAreaFilter( (new ConservationAreaFilter(true, SmartDB.getCurrentConservationArea())).asString());
+		griddedQuery.setConservationArea(caImport);
+		griddedQuery.setOwner(ImportQueryUtil.findEmployee(caImport));
+		griddedQuery.setConservationAreaFilter( (new ConservationAreaFilter(true, caImport)).asString());
 		
 		if (griddedQuery instanceof StyledQuery && stylePart != null){
 			griddedQuery.setStyle(stylePart);
@@ -131,7 +133,7 @@ public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 	 * @param def
 	 * @return
 	 */
-	protected abstract void validateQuery(GridQueryDefinition def, String langCode, HashMap<String,UuidItemType> uuidLookup, Session session) throws Exception;
+	protected abstract void validateQuery(ConservationArea caImport, GridQueryDefinition def, String langCode, HashMap<String,UuidItemType> uuidLookup, Session session) throws Exception;
 
 	@Override
 	public abstract boolean canImport(IQueryType qt);

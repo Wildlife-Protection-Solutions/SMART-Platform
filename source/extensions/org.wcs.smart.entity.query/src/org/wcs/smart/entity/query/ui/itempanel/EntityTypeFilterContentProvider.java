@@ -108,7 +108,7 @@ public class EntityTypeFilterContentProvider implements ITreeContentProvider{
 
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
-				types = EntityHibernateManager.getActiveEntityTypes();
+				types = EntityHibernateManager.getInstance().getActiveEntityTypes();
 				
 				Display.getDefault().asyncExec(new Runnable() {
 					@Override

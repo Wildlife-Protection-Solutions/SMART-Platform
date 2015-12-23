@@ -46,7 +46,7 @@ public class DynamicSmartTables implements IDynamicSmartTables {
 	public List<SmartBirtTable> getTables() {
 		//find all entities
 		List<SmartBirtTable> tables = new ArrayList<SmartBirtTable>();
-		for (EntityType e : EntityHibernateManager.getEntityTypes(HibernateManager.openSession())){
+		for (EntityType e : EntityHibernateManager.getInstance().getEntityTypes(HibernateManager.openSession())){
 			SmartBirtTable table = new EntityTable(e);
 			tables.add(table);
 		}
