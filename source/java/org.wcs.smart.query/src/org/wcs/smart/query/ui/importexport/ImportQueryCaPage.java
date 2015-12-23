@@ -66,7 +66,7 @@ public class ImportQueryCaPage extends WizardPage {
 		
 		Composite top = new Composite(main, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));
-		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		top.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(top, SWT.NONE);
 		l.setText(Messages.ImportQueryCaPage_CaLabel);

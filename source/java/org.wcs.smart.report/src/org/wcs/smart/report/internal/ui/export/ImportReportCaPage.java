@@ -66,7 +66,7 @@ public class ImportReportCaPage extends WizardPage {
 		
 		Composite top = new Composite(main, SWT.NONE);
 		top.setLayout(new GridLayout(2, false));
-		top.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		top.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, true));
 		
 		Label l = new Label(top, SWT.NONE);
 		l.setText(Messages.ImportReportCaPage_CaLabel);
@@ -75,6 +75,7 @@ public class ImportReportCaPage extends WizardPage {
 		cmbViewer.setContentProvider(ArrayContentProvider.getInstance());
 		cmbViewer.setLabelProvider(new ConservationAreaLabelProvider());
 		cmbViewer.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		((GridData)cmbViewer.getControl().getLayoutData()).widthHint = 100;
 		
 		Session session = HibernateManager.openSession();
 		try{
