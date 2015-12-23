@@ -24,6 +24,7 @@ package org.wcs.smart.query.ui.importexport;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -58,11 +59,15 @@ public class ImportQuerySourcePage extends WizardPage {
 		Composite main = new Composite(parent, SWT.NONE);
 		main.setLayout(new GridLayout(1, false));
 
-		opFile = new Button(main, SWT.RADIO);
+		Composite inner = new Composite(main, SWT.NONE);
+		inner.setLayout(new GridLayout());
+		inner.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		
+		opFile = new Button(inner, SWT.RADIO);
 		opFile.setText(Messages.ImportQuerySourcePage_OpImportFile);
 		opFile.setSelection(true);
 		
-		opCa = new Button(main, SWT.RADIO);
+		opCa = new Button(inner, SWT.RADIO);
 		opCa.setText(Messages.ImportQuerySourcePage_OpImportCa);
 
 		

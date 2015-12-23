@@ -88,7 +88,7 @@ public class ImportReportFolderPage extends WizardPage {
 				(SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.MANAGER || SmartDB.getCurrentEmployee().getSmartUserLevel() == SmartUserLevel.ADMIN) ? RootType.ALL : RootType.USER_ONLY));
 		reportList.setLabelProvider(new ReportLabelProvider());
 		reportList.setInput(Messages.CreateReportDialog_LoadingLabel);
-		((GridData)reportList.getTree().getLayoutData()).heightHint = 300;
+		((GridData)reportList.getTree().getLayoutData()).heightHint = 100;
 
 		reportList.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override

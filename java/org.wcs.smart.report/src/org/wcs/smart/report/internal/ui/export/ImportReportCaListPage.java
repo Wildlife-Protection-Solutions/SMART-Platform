@@ -103,6 +103,7 @@ public class ImportReportCaListPage extends WizardPage {
 		chReports.setLabelProvider(new ReportLabelProvider());
 		chReports.getControl().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		chReports.setContentProvider(new ReportContentProvider());
+		((GridData)chReports.getControl().getLayoutData()).heightHint = 100;
 		
 		chReports.setCheckStateProvider(new ICheckStateProvider() {
 			public boolean isGrayed(Object element) {
