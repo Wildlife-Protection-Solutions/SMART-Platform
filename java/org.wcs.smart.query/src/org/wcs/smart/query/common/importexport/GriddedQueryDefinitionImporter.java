@@ -75,7 +75,7 @@ public abstract class GriddedQueryDefinitionImporter implements IQueryImporter{
 		String langCode = qt.getLanguage();
 		GriddedQuery griddedQuery = createQuery(qt.getQueryType());
 		
-		QueryImportEngine.importNames(griddedQuery, qt);
+		QueryImportEngine.importNames(griddedQuery, qt, caImport);
 		
 		HashMap<String, UuidItemType> uuidLookup = new HashMap<String, UuidItemType>();
 		for (UuidItemType type : qt.getUuiditem()){
