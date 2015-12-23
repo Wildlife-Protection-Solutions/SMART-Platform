@@ -186,7 +186,7 @@ public class ImportQueryCaListPage extends WizardPage {
 				}else{
 					//load any label
 					ll = (org.wcs.smart.ca.Label) session.createCriteria(org.wcs.smart.ca.Label.class)
-							.add(Restrictions.eq("id.element.uuid", item))
+							.add(Restrictions.eq("id.element.uuid", item)) //$NON-NLS-1$
 							.setMaxResults(1).uniqueResult();
 					if (ll != null){
 						return ll.getValue();
